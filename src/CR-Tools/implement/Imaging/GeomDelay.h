@@ -70,17 +70,30 @@ namespace CR { // Namespace CR -- begin
     \code
     static double delay (std::vector<double> const &antPosition,
 			 std::vector<double> const &skyPosition,
-			 bool const &farField=false);
+			 bool const &farField=false,
+                         double const &coneAngle=0);
     \endcode
-    Depending on the value of <tt>farField</tt> one of the following two
+    Depending on the value of <tt>farField</tt> and <tt>coneAngle</tt> one of the following three
     expressions is evaluated:
     <ul>
-      <li>Near-field:
+      <li>Near-field spherical beamforming (if coneAngle = 0, default):
       \f[ \tau_{j} = \frac{|\vec \rho|}{c} \left( \sqrt{1 + \frac{|\vec x_j|^2 -
         2 \langle \vec \rho , \vec x_j \rangle}{|\vec \rho|^2}} - 1 \right) \f]
-      <li>Far-field:
-      \f[ \tau_{j} = - \frac{1}{c} \frac{\langle \vec \rho , \vec x_j \rangle}{|\vec \rho|} \f]
+      <li>Conical beamforming (if coneAngle = 0, default):
+      \f[ \tau_{j} = \frac{|\vec \rho|}{c} \left( \sqrt{1 + \frac{|\vec x_j|^2 -
+        2 \langle \vec \rho , \vec x_j \rangle}{|\vec \rho|^2}} - 1 \right) \f]        
+      <li>Far-field (plane wave assumption, i.e. coneAngle = 0, respectively curvature radius = infinity):
+      \f[ \tau_{j} = - \frac{1}{c} (R \sin \alpha - z \cos \alpha \f]
+      with lateral distance \f[ R = \sqrt{|\vec x_j|^2 - z^2}\f]
+      and antenna height in shower coordinates \f[z = |\langle \vec \rho , \vec x_j \rangle|\f]
     </ul>
+    
+    \tau_{j} are the geometrical delays
+    \vec x_j are the antenna positions (at least conical beamforming requires, that the antenna positions are given relative to the shower core)
+    \vec \rho is the position of the source in the sky (for conical and far field beamforming just the direction matters, but not the distance)
+    c is the light speed
+    \alpha is the cone angle = angle between the shower plane and the conical wavefront
+    
     
     <h3>Example(s)</h3>
     
@@ -98,6 +111,8 @@ namespace CR { // Namespace CR -- begin
 
     //! Compute geometrical delay for far-field?
     bool farField_p;
+    //! Angle for conical beamforming
+    double coneAngle_p;
     //! Buffer the values of the delays?
     bool bufferDelays_p;
     
@@ -124,12 +139,14 @@ namespace CR { // Namespace CR -- begin
              no approximation is made and the full 3D geometry is taken into
 	     account.
       \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     GeomDelay (Matrix<double> const &antPositions,
 	       Matrix<double> const &skyPositions,
 	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
-	       bool const &bufferDelays=false);
+	       bool const &bufferDelays=false,
+               double const &coneAngle=0);
     
     /*!
       \brief Argumented constructor
@@ -147,6 +164,7 @@ namespace CR { // Namespace CR -- begin
              no approximation is made and the full 3D geometry is taken into
 	     account.
       \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     GeomDelay (Matrix<double> const &antPositions,
 	       CoordinateType::Types const &antCoord,
@@ -154,7 +172,8 @@ namespace CR { // Namespace CR -- begin
 	       CoordinateType::Types const &skyCoord,
 	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
-	       bool const &bufferDelays=false);
+	       bool const &bufferDelays=false,
+               double const &coneAngle=0);
     
     /*!
       \brief Argumented constructor
@@ -166,11 +185,13 @@ namespace CR { // Namespace CR -- begin
              no approximation is made and the full 3D geometry is taken into
 	     account.
       \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     GeomDelay (Vector<MVPosition> const &antPositions,
 	       Vector<MVPosition> const &skyPositions,
 	       bool const &farField=false,
-	       bool const &bufferDelays=false);
+	       bool const &bufferDelays=false,
+               double const &coneAngle=0);
     
     /*!
       \brief Copy constructor
@@ -296,6 +317,9 @@ namespace CR { // Namespace CR -- begin
       \brief Set the sky positions
 
       \param skyPositions -- [antenna,3] array with the sky positions.
+                             for conical beamforming, the sky position specifies
+                             the direction only: i.e., the distance of the position
+                             has no influence, but must be > 0.
       \param type         -- Coordinate type as which the sky positions are
              provided; if necessary conversion is performed internally.
       \param anglesInDegrees -- If the coordinates of the antenna positions
@@ -317,7 +341,16 @@ namespace CR { // Namespace CR -- begin
       \param skyPositions -- Array with the sky positions.
     */
     bool setSkyPositions (Vector<MVPosition> const &skyPositions);
+
+
+    /*!
+      \brief Set the cone angle to a value != 0 to switch from spherical to conical beamforming
+
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
+    */
+    void setConeAngle (double const &coneAngle);
     
+
     /*!
       \brief Get the name of the class
       
@@ -405,12 +438,14 @@ namespace CR { // Namespace CR -- begin
       \param antPosition -- 
       \param skyPosition -- 
       \param farField    -- Compute geometrical delay for far-field?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
 
       \return delay -- The value of the geometrical delay
     */
     static double delays (std::vector<double> const &antPosition,
 			  std::vector<double> const &skyPosition,
-			  bool const &farField=false);
+			  bool const &farField=false,
+                          double const &coneAngle=0);
     
     /*!
       \brief Compute the geometrical delay(s)
@@ -418,12 +453,14 @@ namespace CR { // Namespace CR -- begin
       \param antPosition -- 
       \param skyPosition -- 
       \param farField    -- Compute geometrical delay for far-field?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
 
       \return delay -- The value of the geometrical delay
     */
     static double delays (casa::Vector<double> const &antPosition,
 			  casa::Vector<double> const &skyPosition,
-			  bool const &farField=false);
+			  bool const &farField=false,
+                          double const &coneAngle=0);
     
     /*!
       \brief Compute the geometrical delay(s)
@@ -431,12 +468,14 @@ namespace CR { // Namespace CR -- begin
       \param antPositions -- Set of antenna positions
       \param skyPositions -- Set of sky positions
       \param farField     -- Compute geometrical delay for far-field?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
 
       \return delay -- The value of the geometrical delay
     */
     static Matrix<double> delays (casa::Matrix<double> const &antPositions,
 				  casa::Matrix<double> const &skyPositions,
-				  bool const &farField=false);
+				  bool const &farField=false,
+                                  double const &coneAngle=0);
 
     /*!
       \brief Compute the geometrical delay(s)
@@ -445,11 +484,13 @@ namespace CR { // Namespace CR -- begin
       \param antPositions -- Set of antenna positions
       \param skyPositions -- Set of sky positions
       \param farField     -- Compute geometrical delay for far-field?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     static void delays (Matrix<double> &delays,
 			casa::Matrix<double> const &antPositions,
 			casa::Matrix<double> const &skyPositions,
-			bool const &farField=false);
+			bool const &farField=false,
+                        double const &coneAngle=0);
     
   protected:
     
@@ -481,12 +522,14 @@ namespace CR { // Namespace CR -- begin
              no approximation is made and the full 3D geometry is taken into
 	     account.
       \param bufferDelays -- Buffer the values of the geometrical delays?
-    */
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
+   */
     void init (Matrix<double> const &antPositions,
 	       Matrix<double> const &skyPositions,
 	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
-	       bool const &bufferDelays=false);
+	       bool const &bufferDelays=false,
+               double const &coneAngle=0);
 
     /*!
       \brief Initialize internal parameters
@@ -502,6 +545,7 @@ namespace CR { // Namespace CR -- begin
              no approximation is made and the full 3D geometry is taken into
 	     account.
       \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     void init (Matrix<double> const &antPositions,
 	       CoordinateType::Types const &antCoord,
@@ -509,7 +553,8 @@ namespace CR { // Namespace CR -- begin
 	       CoordinateType::Types const &skyCoord,
 	       bool const &anglesInDegrees=true,
 	       bool const &farField=false,
-	       bool const &bufferDelays=false);
+	       bool const &bufferDelays=false,
+               double const &coneAngle=0);
 
     /*!
       \brief Initialize internal parameters
@@ -521,11 +566,13 @@ namespace CR { // Namespace CR -- begin
              no approximation is made and the full 3D geometry is taken into
 	     account.
       \param bufferDelays -- Buffer the values of the geometrical delays?
+      \param coneAngle -- Angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     void init (Vector<MVPosition> const &antPositions,
 	       Vector<MVPosition> const &skyPositions,
 	       bool const &farField=false,
-	       bool const &bufferDelays=false);
+	       bool const &bufferDelays=false,
+               double const &coneAngle=0);
     
   }; // Class GeomDelay -- end
   

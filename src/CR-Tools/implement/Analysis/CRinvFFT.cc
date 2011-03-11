@@ -60,6 +60,7 @@ namespace CR { // Namespace CR -- begin
     DirParams_p.define("Xpos",tmpval);
     DirParams_p.define("Ypos",tmpval);
     DirParams_p.define("Curvature",tmpval);
+    DirParams_p.define("coneAngle",tmpval); // default coneAngle = 0 means that spherical beamforming is used
     DirParams_p.define("Az",tmpval);
     tmpval=90.;
     DirParams_p.define("El",tmpval);
@@ -143,6 +144,22 @@ namespace CR { // Namespace CR -- begin
     return True;    
   }
 
+
+  //_____________________________________________________________________________
+  //                                                                 setConeAngle
+
+  Bool CRinvFFT::setConeAngle (Double coneAngle)
+  {
+    try {
+      DirParams_p.define("coneAngle",coneAngle);
+    } catch (AipsError x) {
+      cerr << "CRinvFFT::setConeAngle: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return True;    
+  }
+  
+  
   //_____________________________________________________________________________
   //                                                              GetAntPositions
 
@@ -266,10 +283,21 @@ namespace CR { // Namespace CR -- begin
       tmpvec.resize(3);
       tmpvec(0) = DirParams_p.asDouble("Az");
       tmpvec(1) = DirParams_p.asDouble("El");
-      tmpvec(2) = DirParams_p.asDouble("Curvature");
+      tmpvec(2) = DirParams_p.asDouble("Curvature"); 
+      
       // Container for the phase gradients
       Matrix<DComplex> phaseGradients;
       CR::GeomWeight geomWeight;
+      
+      // for conical beamforming is used, set curvature to large value
+      // although the curvature has no influence on the conical beamforming,
+      // it must not be 0 for technical reasons (normalization of the direction vector)
+      if (DirParams_p.asDouble("coneAngle")>0) {
+        tmpvec(2) = 1e5;
+        geomWeight.setConeAngle(DirParams_p.asDouble("coneAngle"));
+      } else {
+        geomWeight.setConeAngle(0);
+      }      
 //       geomWeight.showProgress(verbose); 
       geomWeight.setAntPositions(tmpAntPos,
 				 CR::CoordinateType::NorthEastHeight); 
@@ -277,6 +305,7 @@ namespace CR { // Namespace CR -- begin
 				 CR::CoordinateType::AzElRadius,
 				 True);
       geomWeight.setFrequencies(dr->frequencyValues());
+      // set angle between shower plane and conical wavefront (if 0, spherical beamforming is used instead of conical beamforming)
 
 #ifdef DEBUGGING_MESSAGES      
       geomWeight.summary();

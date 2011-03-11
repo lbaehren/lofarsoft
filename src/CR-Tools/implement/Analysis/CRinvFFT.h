@@ -163,13 +163,28 @@ namespace CR { // Namespace CR -- begin
 
       \param AZ - Azimuth (in degrees)
       \param EL - Elevation (in degrees)
-      \param Curvature - Curvature parameter (in m, default value: 0 == infinite)
+      \param Curvature - Curvature parameter:
+                         for spherical fit: radius of curvature in m,
+                         default value: 0 == infinite --> plane wavefront
+                         value is meaningless for conical beamforming (i.e., if coneAngle != 0)
+                                              
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
     Bool setDirection(Double AZ,
 		      Double EL,
 		      Double Curvature=0);
+
+    /*!
+      \brief Set the cone angle to switch from spherical to conical beamforming
+
+      \param coneAngle - Angle between shower plane and conical wavefront (in radians):
+                         default value 0 means that spherical beamforming is used (see above)                        
+                                              
+      
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool setConeAngle(Double coneAngle=0);
 
     /*!
       \brief Set the an additional dealy

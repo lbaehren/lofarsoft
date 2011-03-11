@@ -38,13 +38,15 @@ namespace CR { // Namespace CR -- begin
 			Matrix<double> const &skyPositions,
 			bool const &anglesInDegrees,
 			bool const &farField,
-			bool const &bufferDelays)
+			bool const &bufferDelays,
+                        double const &coneAngle)
   {
     init (antPositions,
 	  skyPositions,
 	  anglesInDegrees,
 	  farField,
-	  bufferDelays);
+	  bufferDelays,
+          coneAngle);
   }
   
   //_____________________________________________________________________________
@@ -56,7 +58,8 @@ namespace CR { // Namespace CR -- begin
 			CoordinateType::Types const &skyCoord,
 			bool const &anglesInDegrees,
 			bool const &farField,
-			bool const &bufferDelays)
+			bool const &bufferDelays,
+                        double const &coneAngle)
   {
     init (antPositions,
 	  antCoord,
@@ -64,7 +67,8 @@ namespace CR { // Namespace CR -- begin
 	  skyCoord,
 	  anglesInDegrees,
 	  farField,
-	  bufferDelays);
+	  bufferDelays,
+          coneAngle);
   }
   
   //_____________________________________________________________________________
@@ -73,12 +77,14 @@ namespace CR { // Namespace CR -- begin
   GeomDelay::GeomDelay (Vector<MVPosition> const &antPositions,
 			Vector<MVPosition> const &skyPositions,
 			bool const &farField,
-			bool const &bufferDelays)
+			bool const &bufferDelays,
+                        double const &coneAngle)
   {
     init (antPositions,
 	  skyPositions,
 	  farField,
-	  bufferDelays);
+	  bufferDelays,
+          coneAngle);
   }
   
   //_____________________________________________________________________________
@@ -128,6 +134,7 @@ namespace CR { // Namespace CR -- begin
   {
     farField_p     = other.farField_p;
     bufferDelays_p = other.bufferDelays_p;
+    coneAngle_p    = other.coneAngle_p;
 
     antPositions_p.resize(other.antPositions_p.shape());
     antPositions_p = other.antPositions_p;
@@ -171,7 +178,8 @@ namespace CR { // Namespace CR -- begin
 			Matrix<double> const &skyPositions,
 			bool const &anglesInDegrees,
 			bool const &farField,
-			bool const &bufferDelays)
+			bool const &bufferDelays,
+                        double const &coneAngle)
   {
     init (antPositions,
 	  CoordinateType::Cartesian,
@@ -179,7 +187,8 @@ namespace CR { // Namespace CR -- begin
 	  CoordinateType::Cartesian,
 	  anglesInDegrees,
 	  farField,
-	  bufferDelays);
+	  bufferDelays,
+          coneAngle);
   }
   
   //_____________________________________________________________________________
@@ -191,7 +200,8 @@ namespace CR { // Namespace CR -- begin
 			CoordinateType::Types const &skyCoord,
 			bool const &anglesInDegrees,
 			bool const &farField,
-			bool const &bufferDelays)
+			bool const &bufferDelays,
+                        double const &coneAngle)
   {
     // switch off buffering
     bufferDelays_p = false;
@@ -207,6 +217,7 @@ namespace CR { // Namespace CR -- begin
     // set control parameters
     farField_p     = farField;
     bufferDelays_p = bufferDelays;
+    coneAngle_p    = coneAngle;
 
     setDelays();
   }
@@ -217,7 +228,8 @@ namespace CR { // Namespace CR -- begin
   void GeomDelay::init (Vector<MVPosition> const &antPositions,
 			Vector<MVPosition> const &skyPositions,
 			bool const &farField,
-			bool const &bufferDelays)
+			bool const &bufferDelays,
+                        double const &coneAngle)
   {
     // switch off buffering
     bufferDelays_p = false;
@@ -229,6 +241,7 @@ namespace CR { // Namespace CR -- begin
     // set control parameters
     farField_p     = farField;
     bufferDelays_p = bufferDelays;
+    coneAngle_p    = coneAngle;
 
     setDelays();
   }
@@ -398,6 +411,17 @@ namespace CR { // Namespace CR -- begin
   }
 
   //_____________________________________________________________________________
+  //                                                              setConeAngle
+
+  void GeomDelay::setConeAngle (double const &coneAngle)
+  {
+    coneAngle_p = coneAngle;
+
+    // Update the values of the delays
+    setDelays();
+  }
+  
+  //_____________________________________________________________________________
   //                                                                     farField
   
   void GeomDelay::farField (bool const &farField)
@@ -419,6 +443,7 @@ namespace CR { // Namespace CR -- begin
     os << "[GeomDelay] Summary of internal parameters." << std::endl;
     os << "-- Far-field delay        = " << farField()         << std::endl;
     os << "-- Near-field delay       = " << nearField()        << std::endl;
+    os << "-- Cone angle             = " << coneAngle_p        << std::endl;
     os << "-- Buffer delay values    = " << bufferDelays_p     << std::endl;
     os << "-- nof. antenna positions = " << nofAntPositions()  << std::endl;
     os << "-- nof. sky positions     = " << nofSkyPositions()  << std::endl;
@@ -446,7 +471,8 @@ namespace CR { // Namespace CR -- begin
       delays (delays_p,
 	      antPositions_p,
 	      skyPositions_p,
-	      farField_p);
+	      farField_p,
+              coneAngle_p);
     }
   }
   
@@ -460,7 +486,8 @@ namespace CR { // Namespace CR -- begin
     } else {
       return delays (antPositions_p,
 		     skyPositions_p,
-		     farField_p);
+		     farField_p,
+                     coneAngle_p);
     }
   }
   
@@ -476,7 +503,8 @@ namespace CR { // Namespace CR -- begin
       delays (d,
 	      antPositions_p,
 	      skyPositions_p,
-	      farField_p);
+	      farField_p,
+              coneAngle_p);
     }
   }
   
@@ -485,7 +513,8 @@ namespace CR { // Namespace CR -- begin
   
   double GeomDelay::delays (std::vector<double> const &antPosition,
 			    std::vector<double> const &skyPosition,
-			    bool const &farField)
+			    bool const &farField,
+                            double const &coneAngle)
   {
     double delay = 0;
     
@@ -495,13 +524,20 @@ namespace CR { // Namespace CR -- begin
       delay = -(direction[0]*antPosition[0]
 		+direction[1]*antPosition[1]
 		+direction[2]*antPosition[2])/lightspeed;
-    }
-    else {
+    } else if (coneAngle == 0) {
       std::vector<double> diff (3);
       diff[0] = skyPosition[0]-antPosition[0];
       diff[1] = skyPosition[1]-antPosition[1];
       diff[2] = skyPosition[2]-antPosition[2];
       delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
+    } else {
+      std::vector<double> direction (3);
+      CR::normalize (direction,skyPosition);
+      double z =  (direction[0]*antPosition[0]
+                  +direction[1]*antPosition[1]
+                  +direction[2]*antPosition[2]); // antenna height in shower coordinates
+      double R =  sqrt (CR::L2Norm(antPosition)*CR::L2Norm(antPosition) - z*z); // lateral distance
+      delay = (R*sin(coneAngle) - z*cos(coneAngle))/lightspeed;
     }
     
     return delay;
@@ -512,20 +548,28 @@ namespace CR { // Namespace CR -- begin
   
   double GeomDelay::delays (casa::Vector<double> const &antPosition,
 			    casa::Vector<double> const &skyPosition,
-			    bool const &farField)  
+			    bool const &farField,
+                            double const &coneAngle)  
   {
     double delay = 0;
-    
+
     if (farField) {
       casa::Vector<double> direction (3);
       CR::normalize (direction,skyPosition);
       delay = -(direction(0)*antPosition(0)
 		+direction(1)*antPosition(1)
 		+direction(2)*antPosition(2))/lightspeed;
-    }
-    else {
+    } else if (coneAngle == 0) {
       casa::Vector<double> diff = skyPosition-antPosition;
       delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
+    } else {
+      casa::Vector<double> direction (3);
+      CR::normalize (direction,skyPosition);
+      double z =  (direction(0)*antPosition(0)
+                  +direction(1)*antPosition(1)
+                  +direction(2)*antPosition(2)); // antenna height in shower coordinates
+      double R =  sqrt (CR::L2Norm(antPosition)*CR::L2Norm(antPosition) - z*z); // lateral distance
+      delay = (R*sin(coneAngle) - z*cos(coneAngle))/lightspeed;
     }
     
     return delay;
@@ -536,7 +580,8 @@ namespace CR { // Namespace CR -- begin
   
   Matrix<double> GeomDelay::delays (casa::Matrix<double> const &antPositions,
 				    casa::Matrix<double> const &skyPositions,
-				    bool const &farField)
+				    bool const &farField,
+                                    double const &coneAngle)
   {
     unsigned int nofAnt = antPositions.nrow();
     unsigned int nofSky = skyPositions.nrow();
@@ -546,7 +591,8 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int sky(0); sky<nofSky; sky++) {
 	d(ant,sky) = delays (antPositions.row(ant),
 			     skyPositions.row(sky),
-			     farField);
+			     farField,
+                             coneAngle);
       }
     }
     
@@ -559,7 +605,8 @@ namespace CR { // Namespace CR -- begin
   void GeomDelay::delays (Matrix<double> &d,
 			  casa::Matrix<double> const &antPositions,
 			  casa::Matrix<double> const &skyPositions,
-			  bool const &farField)
+			  bool const &farField,
+                          double const &coneAngle)
   {
     unsigned int nofAnt = antPositions.nrow();
     unsigned int nofSky = skyPositions.nrow();
@@ -570,7 +617,8 @@ namespace CR { // Namespace CR -- begin
       for (unsigned int sky(0); sky<nofSky; sky++) {
 	d(ant,sky) = delays (antPositions.row(ant),
 			     skyPositions.row(sky),
-			     farField);
+			     farField,
+                             coneAngle);
       }
     }
   }
