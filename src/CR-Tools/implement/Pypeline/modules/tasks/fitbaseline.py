@@ -152,7 +152,7 @@ class FitBaseline(tasks.Task):
 	"clean_bins_y":{doc:"""Array holding the powers of the clean bins. (work vector)""",
 			default:lambda self:self.small_spectrum,workarray:True},
 	"xpowers":{doc:"Array holding the x-values and their powers for calculating the baseline fit.",
-		   default:lambda self:hArray(float,[self["nofAntennas"],self["nbins"],self["ncoeffs"]],name="Powers of Frequency"),
+		   default:lambda self:hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
 		   workarray:True},
 	"powers":{doc:"Array of integers, containing the powers to fit in the polynomial. (work vector)",
 		  default:lambda self:hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),workarray:True},

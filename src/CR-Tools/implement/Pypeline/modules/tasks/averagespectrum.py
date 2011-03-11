@@ -117,7 +117,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 
 	"blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),doc:"The size of a block being read in."},
 
-	"maxnantennas":{default:1,doc:"Maximum number of antennas to sum over,"},
+	"maxnantennas":{default:1,doc:"Maximum number of antennas to sum over (also used to allocate some vector sizes)."},
 
 	"maxchunks":{default:1,doc:"Maximum number of chunks of raw data to integrate spectrum over."},
 
@@ -142,8 +142,33 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 			       doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
 
 	"quality":{default:[],doc:"A list containing quality check information about every large chunk of data that was read in. Use Task.qplot(Entry#,flaggedblock=nn) to plot blocks in question.",export:False,output:True},
-	
+
+	"antennacharacteristics":{default:{},doc:"A dict with antenna IDs as key, containing quality information about every antenna.",export:False,output:True},
+
+	"mean_antenna":{default:lambda self: hArray(float,[self.maxnantennas], name="Mean per Antenna"),doc:"Mean value of time series per antenna.",output:True},
+
+	"rms_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="RMS per Antenna"),doc:"Rms value of time series per antenna.",output:True},
+
+	"npeaks_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="Number of Peaks per Antenna"),doc:"Number of peaks of time series per antenna.",output:True},
+
+	"mean":{default:0,doc:"Mean of mean time series values of all antennas.",output:True},
+
+	"mean_rms":{default:0,doc:"RMS of mean of mean time series values of all antennas.",output:True},
+
+	"npeaks":{default:0,doc:"Mean of number of peaks all antennas.",output:True},
+
+	"npeaks_rms":{default:0,doc:"RMS of npeaks over all antennas.",output:True},
+
+	"rms":{default:0,doc:"Mean of rms time series values of all antennas.",output:True},
+
+	"rms_rms":{default:0,doc:"RMS of rms of mean time series values of all antennas.",output:True},
+
+	"homogeneity_factor":{default:0,doc:"=1-(rms_rms/rms+ npeaks_rms/npeaks)/2 - this describes the homogeneity of the data processed. A homogeneity_factor=1 means that all antenna data were identical, a low factor should make one wonder if something went wrong.",output:True},
+
 	"spikeexcess":dict(default=20,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
+	"rmsfactor":dict(default=2,doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
+
+	"meanfactor":dict(default=3,doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
 
 	"start_frequency":{default:lambda ws:ws.freqs[0],
 			   doc:"Start frequency of spectrum",unit:"Hz"},
@@ -177,7 +202,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 		     doc:"Number of samples in raw antenna file",unit:"MBytes"},
 
 	"nantennas":{default:lambda ws:len(ws.antennas),
-		     doc:"The actual number of antennas averaged (set through maxantennas)."},
+		     doc:"The actual number of antennas available for calculation in the file (<maxnantennas)."},
 
 	"nantennas_start":{default:0,
 		     doc:"Start with the nth antenna in each file (see also natennas_stride). Can be used for selecting odd/even antennas."},
@@ -186,7 +211,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 		     doc:"List of antenna indices used as input from each filename.",output:True},
 
 	"nantennas_stride":{default:1,
-		     doc:"Take only every nth antenna (see also natennas_start). Use 2 to select odd/even."},
+		     doc:"Take only every nth antenna from antennas list (see also natennas_start). Use 2 to select odd/even."},
 
 	"nchunks_max":{default:lambda ws:float(ws.datafile.filesize)/ws.fullsize,
 		       doc:"Maximum number of spectral chunks to average"},
@@ -198,15 +223,17 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
     
 	"nspectraflagged":p_(lambda ws:0,"Number of spectra flagged and not used.",output=True),
 	
-	"antennas":p_(lambda ws:hArray(range(min(ws.datafile["nofAntennas"],ws.maxnantennas))),"Antennas to be used"),
+	"antennas":p_(lambda ws:hArray(range(min(ws.datafile["nofAntennas"],ws.maxnantennas))),"Antennas from which to select initially for the current file."),
 
-	"antennas_used":p_(lambda ws:set(),"A set of antenna names that were actually included in the average spectrum",output=True),
+	"antennas_used":p_(lambda ws:set(),"A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",output=True),
 
-	"antennaIDs":p_(lambda ws:ashArray(hArray(ws.datafile["AntennaIDs"])[ws.antennas]),"Antenna IDs used in calculation."),
+	"antennaIDs":p_(lambda ws:ashArray(hArray(ws.datafile["AntennaIDs"])[ws.antennas]),"Antenna IDs to be selected from for current file."),
+
+	"nantennas_total":p_(0,"Total number of antennas that were processed (flagged or not) in this run.",output=True),
 
 
         "delta_t":p_(lambda ws:ws.datafile["sampleInterval"]),
-        "fullsize_estimated":p_(lambda ws:1./ws.delta_nu/ws.delta_t),
+        "fullsize_estimated":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile.filesize)),
         "blocklen_section":p_(lambda ws:ws.blocklen/ws.stride),
         "nsubblocks":p_(lambda ws:ws.stride*ws.nblocks),
         "nblocks_section":p_(lambda ws:ws.nblocks/ws.stride),
@@ -290,10 +317,12 @@ class AverageSpectrum(tasks.Task):
 
     The quality information (RMS, MEAN, flagged blocks per antennas)
     is stored in a data 'quality database' in text and python form and
-    is also available as Task.quality.
+    is also available as Task.quality. (See also:
+    Task.antennacharacteristics, Task.mean, Task.mean_rms, Task.rms,
+    Task.rms_rms, Task.npeaks, Task.npeaks_rms, Task.homogeneity_factor)
     
-    Flagged blocks can be easily inspeced using the task method qplot
-    (for quality plot).
+    Flagged blocks can be easily inspeced using the task method
+    Task.qplot (qplot for quality plot).
 
     If you see an outputline like this, 
 
@@ -342,15 +371,17 @@ class AverageSpectrum(tasks.Task):
         #print "Time:",time.clock()-self.ws.t0,"s for set-up."
 
 	self.quality=[]
-        self.antennacharacteristics={}
+	self.antennas_used=set()
+	self.antennacharacteristics={}
 	self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
         self.dostride=(self.stride>1)
         self.nspectraflagged=0
         self.nspectraadded=0
 	self.count=0
 	self.nofAntennas=0
+	self.nantennas_total=0
 	self.power.getHeader("increment")[1]=self.delta_frequency
-	
+
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         clearfile=True 
@@ -388,7 +419,7 @@ class AverageSpectrum(tasks.Task):
 			    blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)            
 			    self.cdata[...].read(self.datafile,"Fx",blocks)
 			self.count=len(self.quality)
-			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,count=self.count))
+			self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count))
 			if not self.quality_db_filename=="":
 			    qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
 			mean+=self.quality[self.count]["mean"]
@@ -470,19 +501,32 @@ class AverageSpectrum(tasks.Task):
 		    else: #data not ok
 			self.nspectraflagged+=1
 			#print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
-		if self.nchunks>0:
-		    mean/=self.nchunks
-		    rms/=self.nchunks
-		    self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-		    l={"mean":mean,"rms":rms,"npeaks":npeaks}
-		    f=open(self.quality_db_filename+".py","a")
-		    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
-		    f.close()
-		else: l=""
+		mean/=self.nchunks
+		rms/=self.nchunks
+		self.mean_antenna[self.nantennas_total]=mean
+		self.rms_antenna[self.nantennas_total]=rms
+		self.npeaks_antenna[self.nantennas_total]=npeaks
+		self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
+		l={"mean":mean,"rms":rms,"npeaks":npeaks}
+		f=open(self.quality_db_filename+".py","a")
+		f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
+		f.close()
 		print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
+		self.nantennas_total+=1
 	    print "# End File",str(self.file_start_number)+":",fname
 	    self.file_start_number+=1
 	self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
+	self.mean=self.mean_antenna[:self.nantennas_total].mean().val()
+	self.mean_rms=self.mean_antenna[:self.nantennas_total].stddev(self.mean).val()
+	self.rms=self.rms_antenna[:self.nantennas_total].mean().val()
+	self.rms_rms=self.rms_antenna[:self.nantennas_total].stddev(self.rms).val()
+	self.npeaks=self.npeaks_antenna[:self.nantennas_total].mean().val()
+	self.npeaks_rms=self.npeaks_antenna[:self.nantennas_total].stddev(self.npeaks).val()
+	self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2.
+	print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
+	print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
+	print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
+	print "Quality factor =",self.homogeneity_factor * 100,"%"
         print "Finished - total time used:",time.clock()-self.t0,"s."
 	print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '184 - Mean=  3.98, RMS=...'"
         print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
