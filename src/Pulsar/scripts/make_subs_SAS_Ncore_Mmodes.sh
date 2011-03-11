@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.13
+VERSION=2.14
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -47,6 +47,7 @@ location=""
 COLLAPSE=""
 delete=0
 all=0
+all_orig=0
 all_pproc=0
 all_pproc_orig=0
 rfi=0
@@ -71,7 +72,7 @@ do
 	-del)  delete=1;;
 	-rfi)  rfi=1;;
 	-rfi_pproc)  rfi_pproc=1;;
-	-all)  all=1;;
+	-all)  all=1; all_orig=1;;
 	-all_pproc)  all_pproc=1; all_pproc_orig=1;;
 	-core) core=$2; shift;;
 	-incoh_only)  incoh_only=1;;
