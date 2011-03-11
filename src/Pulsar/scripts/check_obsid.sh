@@ -5,6 +5,8 @@
 # (be careful, though, only the suffix of ObsID is checked in the parset file name,
 # so, there maybe other "wrong" parset files found)
 #
+# Vlad Kondratiev (c)
+#
 
 if [ $# -eq 0 ]; then
  echo "Usage: $0 <ObsID>"
