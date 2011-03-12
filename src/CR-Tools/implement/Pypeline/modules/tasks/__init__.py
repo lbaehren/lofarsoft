@@ -26,7 +26,7 @@ tasks ('tload'), listing of available parameters ('tlist') inspecting
 of parameters ('tpars'), modifying them ('tpar par=value'), storing
 and retrieving of parameters ('tput'/'tget'), and execution of tasks
 ('go'). The task instance itself is retrieved with the function
-'task()' or simply with teh variable 'Task'.
+'task()' or simply with the variable 'Task'.
 
 (++) How to use tasks?
 
@@ -668,7 +668,7 @@ class Task(object):
 
         taskdb.close()
 
-    def reset(self,restorecallparameters=False,**args):
+    def reset(self,restorecallparameters=False,init=True,**args):
         """
         Usage:
 
@@ -680,10 +680,12 @@ class Task(object):
         task.reset(restorecallparameters=True,par1=val1,par2=val2,...)
         -> reset all parameters to their state at initialization, but
         keep the parameters provided during the last initialisation.
+
+	*init* = True - If False, don't force a re-run of the init routine.
         """
         self.ws.reset(restorecallparameters=restorecallparameters)
         self.ws.__init__(**args)
-        self.init()
+        self.callinit(forceinit=init)
 
     def update(self,forced=False,workarrays=True):
         """
@@ -1231,8 +1233,12 @@ class WorkSpace(object):
         pars=self.parameter_properties.items()
         pars.sort()
         for p,v in pars:
-            if hasattr(self,"_"+p): val=getattr(self,"_"+p)
-            else: val="'UNDEFINED'"
+            if hasattr(self,"_"+p):
+		val=getattr(self,"_"+p)
+            else:
+		val="'UNDEFINED'"
+	    if type(val) in hAllContainerTypes:
+		val=val.__repr__(8)
             if (v.has_key(positional)) and (v[positional]):
                 s+="# {0:s} = {1!r} - {2:s}\n".format(p,val,v[doc])
             if (v.has_key(export)) and (not v[export]):
@@ -1246,7 +1252,7 @@ class WorkSpace(object):
                         deps=" <- ["+", ".join(v[dependencies])+"]"
                     else:
                         deps=""
-                    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps+"\n").format(p,val,v[doc])
+		    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps+"\n").format(p,val,v[doc])
             elif noninputparameters:
                 if v.has_key(dependencies):
                     deps=" <- ["+", ".join(v[dependencies])+"]"

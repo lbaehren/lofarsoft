@@ -9,6 +9,18 @@ import glob
 #import pdb
 #pdb.set_trace()
 
+def root_filename(filename,extension=".PCR"):
+    """
+    Will return a filename without the ending ".pcr"
+
+    *extension* =".PCR" - extension to remove
+    """
+    splt=os.path.splitext(filename)
+    if splt[1].upper()==extension:
+	return splt[0]
+    else:
+	return filename
+
 def listfiles(unix_style_filter):
     """
     Usage:
@@ -85,7 +97,7 @@ def DataReader_getHeaderVariables(self):
     put it into attributes of the DataReader object.
     """
     self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample','frequencyValues']))
-    self.hdr={}
+    self.hdr={"filename":self.filename}
     for v in self.keywords:
         self.hdr[v]=self.get(v)     # hdr=header - This is probably a better way to store the keywords
         setattr(self,v,self.get(v)) # This should then become obsolete
@@ -98,7 +110,8 @@ def DataReader_getitem(self,*keys):
     Method to obtain header information from the DataReader.
     """
     keys0=keys[0]
-    if type(keys0)==tuple: return map(lambda k:hFileGetParameter(self,k),keys0)
+    if type(keys0)==tuple:
+	return map(lambda k:hFileGetParameter(self,k),keys0)
     if not type(keys0)==str:
         print "Error - DataReader(Py): keyword",keys0,"must be a string!"
         return
@@ -146,7 +159,8 @@ def DataReader_setitem(self,*keyval):
     if (type(key)==tuple):
         for k,v in zip(key,val):
             self.set(k,v)
-    else: self.set(key,val)
+    else:
+	self.set(key,val)
 
 def crfile(filename):
     """

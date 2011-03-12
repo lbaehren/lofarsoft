@@ -436,10 +436,28 @@ def hArray_getSlicedArray(self,indexlist):
 def hArray_setitem(self,dims,fill):
     """
     vec[n1,n2,..] = [0,1,2] -> set slice of array to input vector/value
+    vec[indexvector] = val -> set the elements with indices provided in indexvector to the respective values.
 
     """
-    if (type(fill)) in hAllListTypes: fill=hArray(fill)
-    hFill(hArray_getSlicedArray(self,dims),fill)
+    if type(fill) in hAllListTypes:
+	fill=hArray(fill)
+    if type(dims)==int:
+	hFill(hArray_getSlicedArray(self,dims),fill)
+    elif type(dims)==tuple:# (multi-d index)
+	if type(dims[-1])==int:
+	    hFill(hArray_getSlicedArray(self,dims),fill)
+	elif type(dims[-1]) in [list,IntVec]:
+	    hSet(hArray_getSlicedArray(self,dims[:-1]),hArray(dims[-1]),fill)
+	elif type(dims[-1]) == IntArray:
+	    hSet(hArray_getSlicedArray(self,dims[:-1]),dims[-1],fill)
+	else:
+	    print "Wrong type of index for array:",dims
+    elif type(dims) in [list,IntVec]:
+	self.set(hArray(dims),fill)
+    elif type(dims) == IntArray:
+	self.set(dims,fill)
+    else:
+	print "Wrong type of index for array:",dims
 
 def hArray_read(self,datafile,key,block=-1,antenna=-1):
     """
@@ -637,6 +655,18 @@ def hArray_setstate(self, state):
     self.resize(size)
     self.reshape(state[1])
     self.readRaw(state[2])
+
+def hArray_hasHeader(self,parameter_name=None):
+    """
+    Usage:
+
+    ary.hasHeader() -> return true if array has a header par
+    ary.getHeader('parameter_name') -> return true if array has a header par and a key word with name parameter_name
+    """
+    hasheader=hasattr(self,"par") and hasattr(self.par,"hdr")
+    if type(parameter_name)==str and hasheader:
+	hasheader=self.par.hdr.has_key(parameter_name)
+    return hasheader
 
 def hArray_setHeader(self,**kwargs):
     """
@@ -840,7 +870,7 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
             newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+k)
     return newdictionary
 
-def hArray_writeheader(self, filename,nblocks=1,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None):
+def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None):
     """
     Usage:
 
@@ -848,21 +878,24 @@ def hArray_writeheader(self, filename,nblocks=1,block=0,varname='',dim=None,bloc
 
     Write a header for an hArray binary data file, which was written with hWriteFileBinary.
 
-    filename - the filename where the data was dumped. The header
+    *filename* - the filename where the data was dumped. The header
     filename will have the ending".hdr", replacing a ".dat" ending if present.
 
-    nblocks - Allows one to specify that one has written the same
+    *nblocks* - Allows one to specify that one has written the same
     vector multiple times to the same file, so that the data file
     size is actually nblocks times the original hArray size.
 
-    blocks - Which block to write header for (usually only used when
+    *blocks* - Which block to write header for (usually only used when
     called from hArray_write)
 
-    dim - Specify a different dimension vector [dim1,dim2,dim3,
+    *dim* - Specify a different dimension vector [dim1,dim2,dim3,
     ....,dimn] under which the array should be restored. The user is
     responsible for consistency.
 
-    varname - you can store the original variable name in which the
+    *array* - if an array is specified and it contains nblocks and dim
+     as parameter, those values will be takent to write the header
+
+    *varname* - you can store the original variable name in which the
     hArray was stored.
 
 Example:
@@ -884,9 +917,15 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
         return
     f=open(os.path.join(fn,"header.hdr"),"wb")
     slicelength=self.getEnd()-self.getBegin()
+    if self and hasattr(self,"par"):
+	if hasattr(self.par,"nblocks") and not nblocks:
+	    nblocks=self.par.nblocks
+	if hasattr(self.par,"dim") and not dim:
+	    dim=self.par.dim
+    if not nblocks: nblocks=1
     arydim=self.getDim()
     if not slicelength==len(self): arydim=[slicelength]
-    if not dim == None: arydim=dim
+    if dim: arydim=dim
     f.write("# Header for hArray vector written on "+time.ctime()+"\n")
     f.write("ha_filename = '"+filename+"'\n")
     f.write("ha_type = "+typename(basetype(self))+"\n")
@@ -965,6 +1004,8 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
     par=pickle.loads(ha_parameters)
     par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
     ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
+    ary.par.nblocks=ha_nblocks
+    ary.par.dim=ha_dim
     if sum(dim)>0:
         if not os.path.exists(binfile):
             print "Error hArrayRead: data file ",binfile," does not exist!"
@@ -1050,6 +1091,7 @@ for v in hAllArrayTypes:
     setattr(v,"__getitem__",hArray_getitem)
     setattr(v,"__setitem__",hArray_setitem)
     setattr(v,"setUnit",hArray_setUnit)
+    setattr(v,"hasHeader",hArray_hasHeader)
     setattr(v,"getHeader",hArray_getHeader)
     setattr(v,"setHeader",hArray_setHeader)
 

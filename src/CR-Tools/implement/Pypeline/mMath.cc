@@ -2174,8 +2174,8 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   $PARDOCSTRING
   Usage:
   
-  vec.minrms(blocklen) -> minium rms (float)
-  hMinRMS(vec,blocklen) -> minium rms (float)
+  vec.minstddev(blocklen) -> minium rms (float)
+  hMinStdDevS(vec,blocklen) -> minium rms (float)
 
      Subdivide the input vector into smaller blocks of len "blocklen"
      and calculate for each block the standard deviation. The standard

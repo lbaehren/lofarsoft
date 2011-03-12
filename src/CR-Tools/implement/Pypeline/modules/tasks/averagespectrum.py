@@ -381,6 +381,7 @@ class AverageSpectrum(tasks.Task):
         self.nofAntennas=0
         self.nantennas_total=0
         self.power.getHeader("increment")[1]=self.delta_frequency
+	self.updateHeader(self.power,["nofAntennas","nspectraadded","filenames","antennas_used"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
@@ -478,7 +479,7 @@ class AverageSpectrum(tasks.Task):
                                         self.specT/=float(self.nspectraadded)
                                     self.power.spectralpower(self.specT)
                                 self.frequencies.fillrange((self.start_frequency+offset*self.delta_band)/10**6,self.delta_frequency/10**6)
-                                self.updateHeader(self.power,["nofAntennas","nspectraadded","filenames","antennas_used"],fftLength="speclen",blocksize="fullsize")
+                                self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraflagged","antennas_used"])
                                 self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)
                                 clearfile=False
                                 if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
