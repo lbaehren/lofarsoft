@@ -145,6 +145,7 @@ using CR::LopesEventIn;
   lateralTimeCut          = 15e-9
   calculateMeanValues     = false
   lateralTimeDistribution = false
+  conicalBeamforming      = false
   startEvent              = 0
   stopEvent               = 0
   \endverbatim
@@ -306,8 +307,11 @@ using CR::LopesEventIn;
     <li>\b rootfilemode     Status: <i>unfinished</i><br>
                             The only mode available at the moment is RECREATE. This means that an old root
                             file with the same name will be overwritten.<br>
-    <li>\b lateralTimeDistribution Status: <i>unfinished</i> - not tested, under development<br>
+    <li>\b lateralTimeDistribution Status: <i>unfinished</i> - under development<br>
                             Plots lateral distribution of pulse arrival times.<br>
+    <li>\b conicalBeamforming Status: <i>unfinished</i> - under development<br>
+                            Use conical beamforming in addition to spherical beamforming<br>
+                            If enabled, calculation of values at single antennas will be based on conical beamforming<br>
     <li>\b randomDelay      Status: <i>preliminary</i> - not tested, under development<br>
                             For timing uncertainty studies:<br>
                             adds additional random delay (in ns) to each antenna.<br>
@@ -351,7 +355,7 @@ using CR::LopesEventIn;
 */
 
 //! Version number YYYYMMDDxx (date + 2 digit counter)
-int call_pipeline_version  = 2011030400;
+int call_pipeline_version  = 2011031500;
 
 
 // --- Classes enhancing config file reading ---
@@ -927,6 +931,7 @@ void readConfigFile (const string &filename)
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
    config.addBool("lateralTimeDistribution", false);    // the lateral time distribution will not be generated
+   config.addBool("conicalBeamforming", false);         // use conical beamforming in addition to spherical beamforming
    config.addDouble("randomDelay", 0.);                 // random delay (in  ns), for timing uncertainty studies
    config.addUint("startRandomSeed", 0);                // random seed for root random number generator
    config.addUint("startEvent", 0);                     // event to start with (other events will be skipped)
@@ -1477,6 +1482,23 @@ int main (int argc, char *argv[])
   double epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;    // Epsilon at R=0 (necessary for the cut!)
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
   double dispersion_RMS_perc = 0, dispersion_Mean_perc = 0;
+  
+  // values for conical beamforming
+  double AzimuthCone=0, AzimuthCone_NS=0, AzimuthCone_VE=0;
+  double ElevationCone=0, ElevationCone_NS=0, ElevationCone_VE=0;
+  double coneAngle=0, coneAngle_NS=0, coneAngle_VE=0;
+  double CCheightCone=0, CCheightCone_NS=0, CCheightCone_VE=0;
+  double CCwidthCone=0, CCwidthCone_NS=0, CCwidthCone_VE=0;
+  double CCcenterCone=0, CCcenterCone_NS=0, CCcenterCone_VE=0;
+  double CCheight_errorCone=0, CCheight_errorCone_NS=0, CCheight_errorCone_VE=0;
+  bool CCconvergedCone=false, CCconvergedCone_NS=false, CCconvergedCone_VE=false;
+  double XheightCone=0, XheightCone_NS=0, XheightCone_VE=0;
+  double Xheight_errorCone=0, Xheight_errorCone_NS=0, Xheight_errorCone_VE=0;
+  bool XconvergedCone=false, XconvergedCone_NS=false, XconvergedCone_VE=false;
+  double rmsCCbeamCone=0, rmsCCbeamCone_NS=0, rmsCCbeamCone_VE=0;
+  double rmsXbeamCone=0, rmsXbeamCone_NS=0, rmsXbeamCone_VE=0;
+  double rmsPbeamCone=0, rmsPbeamCone_NS=0, rmsPbeamCone_VE=0;
+  double meandistCone=0, meandistCone_NS=0, meandistCone_VE=0;
 
   // values for lateral distribution of arrival times
   double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
@@ -1610,6 +1632,7 @@ int main (int argc, char *argv[])
              << "lateralTimeCut = 25e-9\n"
              << "calculateMeanValues = false\n"
              << "lateralTimeDistribution = false\n"
+             << "conicalBeamforming = false\n"
              << "randomDelay = 0\n"
              << "startRandomSeed = 1\n"
              << "startEvent = 0\n"
@@ -1765,6 +1788,24 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsPbeam",&rmsPbeam,"rmsPbeam/D");
         roottree->Branch("latMeanDistCC",&latMeanDistCC,"latMeanDistCC/D");
         roottree->Branch("NCCbeamAntennas",&NCCbeamAntennas,"NCCbeamAntennas/I");
+        // values for conical beamforming
+        if(config["conicalBeamforming"]->bValue()) {
+          roottree->Branch("AzCone",&AzimuthCone,"AzCone/D");
+          roottree->Branch("ElCone",&ElevationCone,"ElCone/D");
+          roottree->Branch("coneAngle",&coneAngle,"coneAngle/D");
+          roottree->Branch("CCheightCone",&CCheightCone,"CCheightCone/D");
+          roottree->Branch("CCwidthCone",&CCwidthCone,"CCwidthCone/D");
+          roottree->Branch("CCcenterCone",&CCcenterCone,"CCcenterCone/D");
+          roottree->Branch("CCheight_errorCone",&CCheight_errorCone,"CCheight_errorCone/D");
+          roottree->Branch("CCconvergedCone",&CCconvergedCone,"CCconvergedCone/B");
+          roottree->Branch("XheightCone",&XheightCone,"XheightCone/D");
+          roottree->Branch("Xheight_errorCone",&Xheight_errorCone,"Xheight_errorCone/D");
+          roottree->Branch("XconvergedCone",&XconvergedCone,"XconvergedCone/B");
+          roottree->Branch("rmsCCbeamCone",&rmsCCbeamCone,"rmsCCbeamCone/D");
+          roottree->Branch("rmsXbeamCone",&rmsXbeamCone,"rmsXbeamCone/D");
+          roottree->Branch("rmsPbeamCone",&rmsPbeamCone,"rmsPbeamCone/D");
+          roottree->Branch("meandistCCCone",&meandistCone,"meandistCCCone/D");
+        }
         if(config["CalculateMaxima"]->bValue()) {
           roottree->Branch("ratioDiffSign",&ratioDiffSign,"ratioDiffSign/D");
           roottree->Branch("ratioDiffSignEnv",&ratioDiffSignEnv,"ratioDiffSignEnv/D");
@@ -1821,6 +1862,24 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsPbeam_EW",&rmsPbeam,"rmsPbeam_EW/D");
         roottree->Branch("latMeanDistCC_EW",&latMeanDistCC,"latMeanDistCC_EW/D");
         roottree->Branch("NCCbeamAntennas_EW",&NCCbeamAntennas,"NCCbeamAntennas_EW/I");
+        // values for conical beamforming
+        if(config["conicalBeamforming"]->bValue()) {
+          roottree->Branch("AzCone_EW",&AzimuthCone,"AzCone_EW/D");
+          roottree->Branch("ElCone_EW",&ElevationCone,"ElCone_EW/D");
+          roottree->Branch("coneAngle_EW",&coneAngle,"coneAngle_EW/D");
+          roottree->Branch("CCheightCone_EW",&CCheightCone,"CCheightCone_EW/D");
+          roottree->Branch("CCwidthCone_EW",&CCwidthCone,"CCwidthCone_EW/D");
+          roottree->Branch("CCcenterCone_EW",&CCcenterCone,"CCcenterCone_EW/D");
+          roottree->Branch("CCheight_errorCone_EW",&CCheight_errorCone,"CCheight_errorCone_EW/D");
+          roottree->Branch("CCconvergedCone_EW",&CCconvergedCone,"CCconvergedCone_EW/B");
+          roottree->Branch("XheightCone_EW",&XheightCone,"XheightCone_EW/D");
+          roottree->Branch("Xheight_errorCone_EW",&Xheight_errorCone,"Xheight_errorCone_EW/D");
+          roottree->Branch("XconvergedCone_EW",&XconvergedCone,"XconvergedCone_EW/B");
+          roottree->Branch("rmsCCbeamCone_EW",&rmsCCbeamCone,"rmsCCbeamCone_EW/D");
+          roottree->Branch("rmsXbeamCone_EW",&rmsXbeamCone,"rmsXbeamCone_EW/D");
+          roottree->Branch("rmsPbeamCone_EW",&rmsPbeamCone,"rmsPbeamCone_EW/D");
+          roottree->Branch("meandistCCCone_EW",&meandistCone,"meandistCCCone_EW/D");
+        }
         if(config["CalculateMaxima"]->bValue()) {
           roottree->Branch("ratioDiffSign_EW",&ratioDiffSign,"ratioDiffSign_EW/D");
           roottree->Branch("ratioDiffSignEnv_EW",&ratioDiffSignEnv,"ratioDiffSignEnv_EW/D");
@@ -1878,6 +1937,24 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsPbeam_NS",&rmsPbeam_NS,"rmsPbeam_NS/D");
         roottree->Branch("latMeanDistCC_NS",&latMeanDistCC_NS,"latMeanDistCC_NS/D");
         roottree->Branch("NCCbeamAntennas_NS",&NCCbeamAntennas_NS,"NCCbeamAntennas_NS/I");
+        // values for conical beamforming
+        if(config["conicalBeamforming"]->bValue()) {
+          roottree->Branch("AzCone_NS",&AzimuthCone_NS,"AzCone_NS/D");
+          roottree->Branch("ElCone_NS",&ElevationCone_NS,"ElCone_NS/D");
+          roottree->Branch("coneAngle_NS",&coneAngle_NS,"coneAngle_NS/D");
+          roottree->Branch("CCheightCone_NS",&CCheightCone_NS,"CCheightCone_NS/D");
+          roottree->Branch("CCwidthCone_NS",&CCwidthCone_NS,"CCwidthCone_NS/D");
+          roottree->Branch("CCcenterCone_NS",&CCcenterCone_NS,"CCcenterCone_NS/D");
+          roottree->Branch("CCheight_errorCone_NS",&CCheight_errorCone_NS,"CCheight_errorCone_NS/D");
+          roottree->Branch("CCconvergedCone_NS",&CCconvergedCone_NS,"CCconvergedCone_NS/B");
+          roottree->Branch("XheightCone_NS",&XheightCone_NS,"XheightCone_NS/D");
+          roottree->Branch("Xheight_errorCone_NS",&Xheight_errorCone_NS,"Xheight_errorCone_NS/D");
+          roottree->Branch("XconvergedCone_NS",&XconvergedCone_NS,"XconvergedCone_NS/B");
+          roottree->Branch("rmsCCbeamCone_NS",&rmsCCbeamCone_NS,"rmsCCbeamCone_NS/D");
+          roottree->Branch("rmsXbeamCone_NS",&rmsXbeamCone_NS,"rmsXbeamCone_NS/D");
+          roottree->Branch("rmsPbeamCone_NS",&rmsPbeamCone_NS,"rmsPbeamCone_NS/D");
+          roottree->Branch("meandistCCCone_NS",&meandistCone_NS,"meandistCCCone_NS/D");
+        }
         if(config["CalculateMaxima"]->bValue()) {
           roottree->Branch("ratioDiffSign_NS",&ratioDiffSign_NS,"ratioDiffSign_NS/D");
           roottree->Branch("ratioDiffSignEnv_NS",&ratioDiffSignEnv_NS,"ratioDiffSignEnv_NS/D");
@@ -1934,6 +2011,24 @@ int main (int argc, char *argv[])
         roottree->Branch("rmsPbeam_VE",&rmsPbeam_VE,"rmsPbeam_Ve/D");
         roottree->Branch("latMeanDistCC_VE",&latMeanDistCC_VE,"latMeanDistCC_VE/D");
         roottree->Branch("NCCbeamAntennas_VE",&NCCbeamAntennas_VE,"NCCbeamAntennas_VE/I");
+        // values for conical beamforming
+        if(config["conicalBeamforming"]->bValue()) {
+          roottree->Branch("AzCone_VE",&AzimuthCone_VE,"AzCone_VE/D");
+          roottree->Branch("ElCone_VE",&ElevationCone_VE,"ElCone_VE/D");
+          roottree->Branch("coneAngle_VE",&coneAngle_VE,"coneAngle_VE/D");
+          roottree->Branch("CCheightCone_VE",&CCheightCone_VE,"CCheightCone_VE/D");
+          roottree->Branch("CCwidthCone_VE",&CCwidthCone_VE,"CCwidthCone_VE/D");
+          roottree->Branch("CCcenterCone_VE",&CCcenterCone_VE,"CCcenterCone_VE/D");
+          roottree->Branch("CCheight_errorCone_VE",&CCheight_errorCone_VE,"CCheight_errorCone_VE/D");
+          roottree->Branch("CCconvergedCone_VE",&CCconvergedCone_VE,"CCconvergedCone_VE/B");
+          roottree->Branch("XheightCone_VE",&XheightCone_VE,"XheightCone_VE/D");
+          roottree->Branch("Xheight_errorCone_VE",&Xheight_errorCone_VE,"Xheight_errorCone_VE/D");
+          roottree->Branch("XconvergedCone_VE",&XconvergedCone_VE,"XconvergedCone_VE/B");
+          roottree->Branch("rmsCCbeamCone_VE",&rmsCCbeamCone_VE,"rmsCCbeamCone_VE/D");
+          roottree->Branch("rmsXbeamCone_VE",&rmsXbeamCone_VE,"rmsXbeamCone_VE/D");
+          roottree->Branch("rmsPbeamCone_VE",&rmsPbeamCone_VE,"rmsPbeamCone_VE/D");
+          roottree->Branch("meandistCCCone_VE",&meandistCone_VE,"meandistCCCone_VE/D");
+        }  
         if(config["CalculateMaxima"]->bValue()) {
           roottree->Branch("ratioDiffSign_VE",&ratioDiffSign_VE,"ratioDiffSign_VE/D");
           roottree->Branch("ratioDiffSignEnv_VE",&ratioDiffSignEnv_VE,"ratioDiffSignEnv_VE/D");
@@ -2092,6 +2187,23 @@ int main (int argc, char *argv[])
       epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
 
+      // values for conical beamforming
+      AzimuthCone=0, AzimuthCone_NS=0, AzimuthCone_VE=0;
+      ElevationCone=0, ElevationCone_NS=0, ElevationCone_VE=0;
+      coneAngle=0, coneAngle_NS=0, coneAngle_VE=0;
+      CCheightCone=0, CCheightCone_NS=0, CCheightCone_VE=0;
+      CCwidthCone=0, CCwidthCone_NS=0, CCwidthCone_VE=0;
+      CCcenterCone=0, CCcenterCone_NS=0, CCcenterCone_VE=0;
+      CCheight_errorCone=0, CCheight_errorCone_NS=0, CCheight_errorCone_VE=0;
+      CCconvergedCone=false, CCconvergedCone_NS=false, CCconvergedCone_VE=false;
+      XheightCone=0, XheightCone_NS=0, XheightCone_VE=0;
+      Xheight_errorCone=0, Xheight_errorCone_NS=0, Xheight_errorCone_VE=0;
+      XconvergedCone=false, XconvergedCone_NS=false, XconvergedCone_VE=false;
+      rmsCCbeamCone=0, rmsCCbeamCone_NS=0, rmsCCbeamCone_VE=0;
+      rmsXbeamCone=0, rmsXbeamCone_NS=0, rmsXbeamCone_VE=0;
+      rmsPbeamCone=0, rmsPbeamCone_NS=0, rmsPbeamCone_VE=0;
+      meandistCone=0, meandistCone_NS=0, meandistCone_VE=0;
+  
       latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
       latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
       latTimeSphere1DChi2NDF_EW = 0, latTimeSphere1DChi2NDF_NS = 0, latTimeSphere1DChi2NDF_VE = 0;
@@ -2241,6 +2353,7 @@ int main (int argc, char *argv[])
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
                                                config["ignoreDistance"]->bValue(),
+                                               config["conicalBeamforming"]->bValue(),
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
 
@@ -2265,6 +2378,22 @@ int main (int argc, char *argv[])
             latMeanDistCC = results.asDouble("meandist");
             NCCbeamAntennas = results.asuInt("NCCbeamAntennas");
             gt = results.asuInt("Date");
+            // values for conical beamforming
+            AzimuthCone = results.asDouble("AzimuthCone");
+            ElevationCone = results.asDouble("ElevationCone");
+            coneAngle = results.asDouble("coneAngle");
+            CCheightCone = results.asDouble("CCheightCone");
+            CCwidthCone = results.asDouble("CCwidthCone");
+            CCcenterCone = results.asDouble("CCcenterCone");
+            CCheight_errorCone = results.asDouble("CCheight_errorCone");
+            CCconvergedCone = results.asBool("CCconvergedCone");
+            XheightCone = results.asDouble("XheightCone");
+            Xheight_errorCone = results.asDouble("Xheight_errorCone");
+            XconvergedCone = results.asBool("XconvergedCone");
+            rmsCCbeamCone = results.asDouble("rmsCCbeamCone");
+            rmsXbeamCone = results.asDouble("rmsXbeamCone");
+            rmsPbeamCone = results.asDouble("rmsPbeamCone");
+            meandistCone = results.asDouble("meandistCone");            
 
             // make a postscript with a summary of all plots
             // if summaryColumns = 0 the method does not create a summary.
@@ -2395,6 +2524,7 @@ int main (int argc, char *argv[])
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
                                                config["ignoreDistance"]->bValue(),
+                                               config["conicalBeamforming"]->bValue(),
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
 
@@ -2419,6 +2549,22 @@ int main (int argc, char *argv[])
             latMeanDistCC_NS = results.asDouble("meandist");
             NCCbeamAntennas_NS = results.asuInt("NCCbeamAntennas");
             gt = results.asuInt("Date");
+            // values for conical beamforming
+            AzimuthCone_NS = results.asDouble("AzimuthCone");
+            ElevationCone_NS = results.asDouble("ElevationCone");
+            coneAngle_NS = results.asDouble("coneAngle");
+            CCheightCone_NS = results.asDouble("CCheightCone");
+            CCwidthCone_NS = results.asDouble("CCwidthCone");
+            CCcenterCone_NS = results.asDouble("CCcenterCone");
+            CCheight_errorCone_NS = results.asDouble("CCheight_errorCone");
+            CCconvergedCone_NS = results.asBool("CCconvergedCone");
+            XheightCone_NS = results.asDouble("XheightCone");
+            Xheight_errorCone_NS = results.asDouble("Xheight_errorCone");
+            XconvergedCone_NS = results.asBool("XconvergedCone");
+            rmsCCbeamCone_NS = results.asDouble("rmsCCbeamCone");
+            rmsXbeamCone_NS = results.asDouble("rmsXbeamCone");
+            rmsPbeamCone_NS = results.asDouble("rmsPbeamCone");
+            meandistCone_NS = results.asDouble("meandistCone");            
 
             /* make a postscript with a summary of all plots
              if summaryColumns = 0 the method does not create a summary. */
@@ -2553,6 +2699,7 @@ int main (int argc, char *argv[])
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
                                                config["ignoreDistance"]->bValue(),
+                                               config["conicalBeamforming"]->bValue(),
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
 
@@ -2577,6 +2724,22 @@ int main (int argc, char *argv[])
             latMeanDistCC_VE = results.asDouble("meandist");
             NCCbeamAntennas_VE = results.asuInt("NCCbeamAntennas");
             gt = results.asuInt("Date");
+            // values for conical beamforming
+            AzimuthCone_VE = results.asDouble("AzimuthCone");
+            ElevationCone_VE = results.asDouble("ElevationCone");
+            coneAngle_VE = results.asDouble("coneAngle");
+            CCheightCone_VE = results.asDouble("CCheightCone");
+            CCwidthCone_VE = results.asDouble("CCwidthCone");
+            CCcenterCone_VE = results.asDouble("CCcenterCone");
+            CCheight_errorCone_VE = results.asDouble("CCheight_errorCone");
+            CCconvergedCone_VE = results.asBool("CCconvergedCone");
+            XheightCone_VE = results.asDouble("XheightCone");
+            Xheight_errorCone_VE = results.asDouble("Xheight_errorCone");
+            XconvergedCone_VE = results.asBool("XconvergedCone");
+            rmsCCbeamCone_VE = results.asDouble("rmsCCbeamCone");
+            rmsXbeamCone_VE = results.asDouble("rmsXbeamCone");
+            rmsPbeamCone_VE = results.asDouble("rmsPbeamCone");
+            meandistCone_VE = results.asDouble("meandistCone");            
 
             /* make a postscript with a summary of all plots
              if summaryColumns = 0 the method does not create a summary. */

@@ -159,14 +159,18 @@ namespace CR { // Namespace CR -- begin
                                          bool listCalcMaxima,
                                          bool printShowerCoordinates,
                                          bool ignoreDistance,
+                                         bool conicalBeamforming,
                                          double randomDelay,
                                          unsigned int randomSeed) {
     Record erg;
     try {
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Vector <Bool> AntennaSelection;
-      Record fiterg;
-      Double center;                // position of the cc-beam (set in doPositionFitting)
+      Record fiterg, coneErg, coneFiterg;       // for results of spherical and conical beamforming
+      Double center=0., centerCone=0.;                // position of the cc-beam (set in doPositionFitting)
+      // define new variables for azimuth and elevation, since they are changed during beamforming
+      Double SphereAz = Az, ConeAz = Az;
+      Double SphereEl = El, ConeEl = El;
 
       // define default values for return record, to prevent crash of call_pipeline
       // in the case of any error during RunPipeline
@@ -187,6 +191,23 @@ namespace CR { // Namespace CR -- begin
       erg.define("meandist",double(0));
       erg.define("Date",uInt(0));
       erg.define("NCCbeamAntennas",uInt(0));
+      
+      // add values for conical beamforming
+      erg.define("AzimuthCone",double(0));
+      erg.define("ElevationCone",double(0));
+      erg.define("coneAngle",double(0));
+      erg.define("CCheightCone",double(0));
+      erg.define("CCwidthCone",double(0));
+      erg.define("CCcenterCone",double(0));
+      erg.define("CCheight_errorCone",double(0));
+      erg.define("CCconvergedCone",false);
+      erg.define("XheightCone",double(0));
+      erg.define("Xheight_errorCone",double(0));
+      erg.define("XconvergedCone",false);
+      erg.define("rmsCCbeamCone",double(0));
+      erg.define("rmsXbeamCone",double(0));
+      erg.define("rmsPbeamCone",double(0));
+      erg.define("meandistCone",double(0));
 
 
       // store a copy of the input antenna selection for later use
@@ -267,16 +288,15 @@ namespace CR { // Namespace CR -- begin
       // store number of antennas used for CC beam
       erg.define("NCCbeamAntennas",uInt(ntrue(AntennaSelection)));
 
-
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
-      if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
+      if (! doPositionFitting(SphereAz, SphereEl, distance, center, XC, YC, RotatePos,
                               AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ){
         cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
         return erg;
       }
 
       // make gauss fit to CC-beam
-      if (! GaussFitData(Az, El, distance, center, AntennaSelection, evname, erg, fiterg, 
+      if (! GaussFitData(SphereAz, SphereEl, distance, center, AntennaSelection, evname, erg, fiterg, 
                          Polarization, verbose) ){
         cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
         return erg;
@@ -287,7 +307,8 @@ namespace CR { // Namespace CR -- begin
         cout << "\nBad reconstruction: Time of CC beam is outside of fit range!\n" << endl;
         fiterg.define("CCconverged", false);
         fiterg.define("Xconverged", false);
-      }    
+      }
+      
 
       // Generate plots
       if (generatePlots) {
@@ -311,49 +332,27 @@ namespace CR { // Namespace CR -- begin
         CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-all", beamformDR_p, AntennaSelection, false,
                                             getUpsamplingExponent(),false);
 
-        // Plot of upsampled antenna traces (seperated) 
-        if (SinglePlots)
-          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
-                                              getUpsamplingExponent(),false,true);
-                                              
-        // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
-        // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      
-        if (fiterg.asBool("CCconverged")) {
-          if (CalculateMaxima) {
-            calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
-                                                            false, fiterg.asDouble("CCcenter"), noiseMethod,
-                                                            fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
-            caculateNoiseInfluence();
-          }                                                
-          // user friendly list of calculated maxima
-          if (listCalcMaxima)
-            CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
-        }    
-      }
-
-      // Generate spectra
-      if (generateSpectra) {
-        if (SinglePlots)
-          CompleteBeamPipe_p->plotSpectra(PlotPrefix+"-spec", beamformDR_p, AntennaSelection, true);
-        else
-          CompleteBeamPipe_p->plotSpectra(PlotPrefix + "-spec-all", beamformDR_p, AntennaSelection, false);
-      }
-
-      // output of antnenna to core distances in shower coordinates, if requested
-      if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
-                                                         toShower(beamPipe_p->GetAntPositions(), Az, El),
-                                                         El, Az, XC, YC, beamformDR_p->headerRecord().asInt("Date"));
-      storeShowerCoordinates(erg);        // store shower coordinates in every case
-
-      // give out the names of the created plots
-      if (verbose) {
-        vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
-        cout <<"\nList of generated plots:\n";
-        for (unsigned int i = 0; i < plotlist.size(); i++) 
-          cout << plotlist[i] << "\n";
-        cout << endl;
-      }
-
+        // Plot of upsampled antenna traces (seperated), only if no conical beamforming will be done afterwards
+        if (!conicalBeamforming) {
+          if (SinglePlots)
+            CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
+                                                getUpsamplingExponent(),false,true);
+                                                
+          // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
+          // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      
+          if (fiterg.asBool("CCconverged")) {
+            if (CalculateMaxima) {
+              calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
+                                                              false, fiterg.asDouble("CCcenter"), noiseMethod,
+                                                              fiterg.asDouble("CCcenter") - 10.5e-6, fiterg.asDouble("CCcenter") - 0.5e-6);
+              caculateNoiseInfluence();
+            }                                                
+            // user friendly list of calculated maxima
+            if (listCalcMaxima)
+              CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
+          }    
+        }  
+      } // if (generatePlots)
 
       // calculate the rms values of p-, cc- and xbeam in the remote region
       if (remoteRange_p(1) != 0 ) {
@@ -387,16 +386,171 @@ namespace CR { // Namespace CR -- begin
         erg.define("rmsXbeam",rms(xbeam(remoteRegion)));
       }
 
+      
+      // if requested repeat beamforming for conical wavefront
+      // the distance of the source has no meaning, but must be != 0 for technical reasons
+      // thus a distance of 1e5 is used as default
+      if (conicalBeamforming) {
+        cout << "\nStarting conical beamforming...\n" << endl;
+        Double dummyDistance = 1e5;
+        
+        // set starting coneAngle (should have no effect, since simplex fit determines an independen starting value)
+        double coneAngle = 0.015;
+        CompleteBeamPipe_p->setConeAngle(coneAngle);
+        
+        if (! doConicalPositionFitting(ConeAz, ConeEl, coneAngle, centerCone, XC, YC, RotatePos,
+                                       AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ) {
+          cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doConicalPositionFitting()!" << endl;
+          return erg;
+        }
+
+        // make gauss fit to CC-beam
+        if (! GaussFitData(ConeAz, ConeEl, dummyDistance, centerCone, AntennaSelection, evname, coneErg, coneFiterg, 
+                          Polarization, verbose, coneAngle) ){
+          cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
+          return erg;
+        }
+        
+        // check if time of CC beam is within fit range
+        if ( (coneErg.asDouble("CCcenter") < fitStart()) || (coneErg.asDouble("CCcenter") > fitStop()) ) {
+          cout << "\nBad reconstruction (conical beamforming): Time of CC beam is outside of fit range!\n" << endl;
+          coneFiterg.define("CCconverged", false);
+          coneFiterg.define("Xconverged", false);
+        }
+        
+
+        // Generate plots
+        if (generatePlots) {
+          // Plot CC-beam; if fit has converged, then also plot the result of the fit
+          if (fiterg.asBool("CCconverged"))
+            CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CCcone", beamformDR_p, coneFiterg.asArrayDouble("Cgaussian"),
+                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
+          else
+            CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CCcone", beamformDR_p, Vector<Double>(),
+                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
+
+          // Plot X-beam; if fit has converged, then also plot the result of the fit
+          if (fiterg.asBool("Xconverged"))
+            CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-Xcone", beamformDR_p, coneFiterg.asArrayDouble("Xgaussian"),
+                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1) );
+          else
+            CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-Xcone", beamformDR_p, Vector<Double>(),
+                                          AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
+
+          // Plot of all antenna traces together
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-allcone", beamformDR_p, AntennaSelection, false,
+                                              getUpsamplingExponent(),false);
+
+          // Plot of upsampled antenna traces (seperated) 
+          if (SinglePlots)
+            CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
+                                                getUpsamplingExponent(),false,true);
+                                                
+          // calculate the maxima (only if CC-beam was reconstructed successfully and its time is ok):
+          // calculate noise as mean of local maxima of the envelope in time range of -10.5 to -0.5 µs before CC center)      
+          if (coneFiterg.asBool("CCconverged")) {
+            if (CalculateMaxima) {
+              calibPulses = CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),
+                                                              false, coneFiterg.asDouble("CCcenter"), noiseMethod,
+                                                              coneFiterg.asDouble("CCcenter") - 10.5e-6, coneFiterg.asDouble("CCcenter") - 0.5e-6);
+              caculateNoiseInfluence();
+            }                                                
+          }    
+        }
+        
+        // calculate the rms values of p-, cc- and xbeam in the remote region
+        if (remoteRange_p(1) != 0 ) {
+          Slice remoteRegion( remoteRange_p(0),(remoteRange_p(1) - remoteRange_p(0)) );
+          Vector<Double> ccbeamCone, xbeamCone, pbeamCone;
+
+          // get the beam data
+          ccbeamCone = CompleteBeamPipe_p->GetCCBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+          xbeamCone = CompleteBeamPipe_p->GetXBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+          pbeamCone = CompleteBeamPipe_p->GetPBeam(beamformDR_p, AntennaSelection, Polarization).copy();
+
+          // smooth the data
+          if (filterStrength_p > 0) {
+              StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
+            ccbeamCone = mf.filter(ccbeamCone);
+            pbeamCone = mf.filter(pbeamCone);
+            xbeamCone = mf.filter(xbeamCone);
+          }
+
+          // removing offset
+          double ccBeamOffset = mean(ccbeamCone(remoteRegion));
+          double pBeamOffset  = mean(pbeamCone(remoteRegion));
+          double xBeamOffset  = mean(xbeamCone(remoteRegion));
+          ccbeamCone -= ccBeamOffset;
+          pbeamCone  -= pBeamOffset;
+          xbeamCone  -= xBeamOffset;
+
+          // calculating rms values
+          erg.define("rmsCCbeamCone",rms(ccbeamCone(remoteRegion)));
+          erg.define("rmsPbeamCone",rms(pbeamCone(remoteRegion)));
+          erg.define("rmsXbeamCone",rms(xbeamCone(remoteRegion)));
+        }
+      
+        // copy results to general results record
+        erg.define("AzimuthCone",coneErg.asDouble("Azimuth"));
+        erg.define("ElevationCone",coneErg.asDouble("Elevation"));
+        erg.define("coneAngle",coneErg.asDouble("coneAngle"));
+        erg.define("CCheightCone",coneErg.asDouble("CCheight"));
+        erg.define("CCwidthCone",coneErg.asDouble("CCwidth"));
+        erg.define("CCcenterCone",coneErg.asDouble("CCcenter"));
+        erg.define("CCheight_errorCone",coneErg.asDouble("CCheight_error"));
+        erg.define("CCconvergedCone",coneErg.asBool("CCconverged"));
+        erg.define("XheightCone",coneErg.asDouble("Xheight"));
+        erg.define("Xheight_errorCone",coneErg.asDouble("Xheight_error"));
+        erg.define("XconvergedCone",coneErg.asBool("Xconverged"));
+        erg.define("meandistCone",coneErg.asDouble("meandist"));
+        
+      } // if (conicalBeamforming)      
+      
+      // Generate spectra
+      if (generateSpectra) {
+        if (SinglePlots)
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix+"-spec", beamformDR_p, AntennaSelection, true);
+        else
+          CompleteBeamPipe_p->plotSpectra(PlotPrefix + "-spec-all", beamformDR_p, AntennaSelection, false);
+      }
+
+      // output of antnenna to core distances in shower coordinates, if requested
+      if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
+                                                         toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"),
+                                                                  erg.asDouble("Elevation")),
+                                                         erg.asDouble("Elevation"), erg.asDouble("Azimuth"), XC, YC,
+                                                         beamformDR_p->headerRecord().asInt("Date"));
+      storeShowerCoordinates(erg);        // store shower coordinates in every case
+      
+
+      // give out the names of the created plots
+      if (verbose) {
+        vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
+        cout <<"\nList of generated plots:\n";
+        for (unsigned int i = 0; i < plotlist.size(); i++) 
+          cout << plotlist[i] << "\n";
+        cout << endl;
+      }
+
       // print resutls of reconstruction
-      cout << "\nRestuls of reconstruction:\n"
+      cout << "\nRestuls of reconstruction with spherical beamforming:\n"
            << "Azimuth = " << erg.asDouble("Azimuth") << " degree \t"
            << "Elevation = " << erg.asDouble("Elevation") << " degree\n"
            << "Radius of curvature (of CC-beam) = " << erg.asDouble("Distance") << " m\n"
            << "CC-beam = " << erg.asDouble("CCheight")*1e6 << " µV/m/MHz \t"
            << " X-beam = " << erg.asDouble("Xheight")*1e6  << " µV/m/MHz \n"
            << endl;
+           
+      if (conicalBeamforming)           
+        cout << "\nRestuls of reconstruction with conical beamforming:\n"
+            << "Azimuth = " << erg.asDouble("AzimuthCone") << " degree \t"
+            << "Elevation = " << erg.asDouble("ElevationCone") << " degree\n"
+            << "cone angle (rho) = " << erg.asDouble("coneAngle") << " rad\n"
+            << "CC-beam = " << erg.asDouble("CCheightCone")*1e6 << " µV/m/MHz \t"
+            << " X-beam = " << erg.asDouble("XheightCone")*1e6  << " µV/m/MHz \n"
+            << endl;
  
-      // check if reconstruction was good
+      // check if reconstruction was good (only for spherical beamforming)
       if ( (fiterg.asBool("CCconverged")) && (fiterg.asBool("Xconverged")) ) {
         // require that cc-time is inseide of fit range, and that x-beam and cc-beam are roughly at the same position
         if ( (erg.asDouble("CCcenter") < fitStart()) || (erg.asDouble("CCcenter") > fitStop()) ) {

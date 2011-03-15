@@ -523,7 +523,7 @@ namespace CR { // Namespace CR -- begin
 		    Bool doAutoFlagging=True);
 
     /*!
-      \brief Perform the direction fitting
+      \brief Perform the direction fitting (for spherical beamforming)
 
       \param Az             - value for the azimuth direction [in deg] (modified in place)
       \param El             - value for the elevation [in deg] (modified in place)
@@ -552,8 +552,39 @@ namespace CR { // Namespace CR -- begin
 			   Bool verbose=False,
 			   Bool distanceSearch=False);
     
+
+    /*!
+      \brief Perform the direction fitting for conical beamforming
+
+      \param Az             - value for the azimuth direction [in deg] (modified in place)
+      \param El             - value for the elevation [in deg] (modified in place)
+      \param coneAngle      - value for the coneAngle parameter [in rad] (modified in place)
+      \param center         - position in time of the peak [in s] (modified in place)
+      \param XC             - x-position of the shower center [in m]
+      \param YC             - y-position of the shower center [in m]
+      \param RotatePos      - rotate the XC/YC position (set to False if XC/YC already
+                              in LOPES coordinates)
+      \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
+      \param Polarization   - Polarization type to select only part of the antennas 
+                              ("": use stored setting;"ANY": ignore antenna polarization)
+      \param simplexFit     - fit the direction with a simple simplex fit
+      \param verbose        - produce verbose output on the commandline.
+      \param coneAngleSearch- if true, ignore the initial value of coneAngle and perform a 
+                              simple search for the best starting value.
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool doConicalPositionFitting(Double &Az, Double &El, Double &coneAngle, 
+                                  Double &center,
+                                  Double &XC, Double &YC, Bool RotatePos,
+                                  Vector<Bool> AntennaSelection,
+                                  String Polarization="",
+                                  Bool simplexFit=True,
+                                  Bool verbose=False,
+                                  Bool coneAngleSearch=False);
+                                  
    /*!
-      \brief Perform the direction fitting
+      \brief Make a gauss fit to the cc-beam
 
       \param Az               - value for the azimuth direction [in deg] (modified in place)
       \param El               - value for the elevation [in deg] (modified in place)
@@ -566,13 +597,15 @@ namespace CR { // Namespace CR -- begin
       \param Polarization     - Polarization type to select only part of the antennas 
                                 ("": use stored setting;"ANY": ignore antenna polarization)
       \param verbose          - produce verbose output on the commandline.
+      \param coneAngle        - angle for conical beamforming (default = 0 --> spherical beamforming)
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
    */
     Bool GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
 		      Vector<Bool> AntennaSelection, String evname, 
 		      Record &erg, Record &fiterg, 
-		      String Polarization="", Bool verbose=False);
+		      String Polarization="", Bool verbose=False,
+                      Double coneAngle=0);
 
    /*!
       \brief Generate the standard-plots
@@ -604,16 +637,30 @@ namespace CR { // Namespace CR -- begin
              gaussian) [in s]; modified in place
       \param AntennaSelection - Vector of bool to select only part of the antennas.
       \param distanceStep - difference in the distance of the inital points. 
+      \param coneAngle - angle rho for conical beamforming
+      \param angleStep - difference in the cone angle rho of the inital points. 
+      \param conicalBeamforming - do conical beamforming
 
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
+    
+    Bool SimplexFit (Double &Az,
+                     Double &El,
+                     Double &distance,
+                     Double &center,
+                     Vector<Bool> AntennaSelection,
+                     Double distanceStep);
+                     
     Bool SimplexFit (Double &Az,
 		     Double &El,
 		     Double &distance,
 		     Double &center,
 		     Vector<Bool> AntennaSelection,
-		     Double distanceStep);
+		     Double distanceStep,
+                     Double &coneAngle,
+                     Double angleStep,
+                     Bool conicalBeamforming = False);
 
     /*!
       \brief Evaluate a smallish grid around to find a good starting point for the simplenx fit
@@ -624,6 +671,7 @@ namespace CR { // Namespace CR -- begin
       \param distance - value for the distance parameter [in m]
       \param AntennaSelection - Vector of bool to select only part of the antennas.
       \param center* - position into which the center can be returned
+      \param coneAngle - angle for conical beamforming (default = 0 --> spherical beamforming)
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -631,7 +679,8 @@ namespace CR { // Namespace CR -- begin
 		      Double &El,
 		      Double &distance,
 		      Vector<Bool> AntennaSelection, 
-		      Double *centerp=NULL);
+		      Double *centerp=NULL,
+                      Double coneAngle=0);
 
     /*!
       \brief Convert positions from lab (Earth-bound) coordinates to air shower coordinates
@@ -648,7 +697,7 @@ namespace CR { // Namespace CR -- begin
 			    Double El);
 
     /*!
-      \brief Finds the distance with the maximal cc-beam in a given direction in the
+      \brief Finds the distance with the maximal x-beam in a given direction in the
              range from 2000 m to 15000 m
       
       \param Az               - value for the azimuth direction [in deg]
@@ -669,6 +718,29 @@ namespace CR { // Namespace CR -- begin
 		      Double *centerp=NULL,
 		      Bool rough=True,
 		      Bool verbose=False);
+
+    /*!
+      \brief Finds the cone angle with the maximal x-beam in a given direction in the
+             range form 0 to 0.1 rad
+      
+      \param Az               - value for the azimuth direction [in deg]
+      \param El               - value for the elevation [in deg]
+      \param coneAngle        - value for the cone angle rho [in rad]; modified in place
+      \param AntennaSelection - Vector of bool to select only part of the antennas.
+      \param center*          - position into which the center can be returned
+      \param rough            - if <tt>True</tt>, makes only a rough scan in steps of 0.005 rad, 
+                                otherwise in steps of 0.0005 rad.
+      \param verbose          - produce verbose output on the commandline.
+ 
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool findConeAngle(Double &Az,
+                       Double &El,
+                       Double &coneAngle,
+                       Vector<Bool> AntennaSelection, 
+                       Double *centerp=NULL,
+                       Bool rough=True,
+                       Bool verbose=False);
 
 
   protected: //this methods are protected to make them available in child class
@@ -691,12 +763,14 @@ namespace CR { // Namespace CR -- begin
       \param dist -- Value of the distance parameter
       \param AntennaSelection --
       \param centerp -- 
+      \param coneAngle  -- angle for conical beamforming (default = 0 --> spherical beamforming)
     */
     Double getHeight (Double az,
 		      Double el,
 		      Double dist,
 		      Vector<Bool> AntennaSelection,
-		      Double *centerp=NULL);
+		      Double *centerp=NULL,
+                      Double coneAngle=0);
 
     /*!
       \brief Alternative to getHeight to use in FitPosition
@@ -708,6 +782,7 @@ namespace CR { // Namespace CR -- begin
       \param beamheightp -- Pointer to return height of desired beam, multiplied with 1e6
       \param beamtype -- Type of beam to return, enum defined in CR::SkymapQuantity
       \param centerp -- 
+      \param coneAngle  -- angle for conical beamforming (default = 0 --> spherical beamforming)
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -717,7 +792,8 @@ namespace CR { // Namespace CR -- begin
                         Vector<Bool> AntennaSelection,
 		        Double *beamheightp,
 		        SkymapQuantity::Type beamtype=SkymapQuantity::TIME_CC,
-                        Double *centerp=NULL);
+                        Double *centerp=NULL,
+                        Double coneAngle=0);
 
   };
   

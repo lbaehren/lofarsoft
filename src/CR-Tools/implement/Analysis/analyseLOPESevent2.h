@@ -403,6 +403,7 @@ namespace CR { // Namespace CR -- begin
       \param listCalcMaxima      - output version of CalculateMax
       \param printShowerCoordinates - print the x,y and total distance between antenna and shower core in shower coordinates
       \param ignoreDistance      - ignores the given distance but tries to find it automatically 
+      \param conicalBeamforming  - use conical beamforming in addition to spherical beamforming
       \param randomDelay         - additional random delay, for timing uncertainty studies (use 0 for normal analysis)
       \param randomSeed          - seed for random number generator
 
@@ -437,6 +438,7 @@ namespace CR { // Namespace CR -- begin
                         bool listCalcMaxima=false,
                         bool printShowerCoordinates=false,
                         bool ignoreDistance=false,
+                        bool conicalBeamforming=false,
                         double randomDelay=0.,
                         unsigned int randomSeed=1);
 

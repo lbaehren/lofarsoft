@@ -425,13 +425,78 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   };
+
+
+  // ---------------------------------------------------------- doPositionFitting
+
+  Bool analyseLOPESevent::doConicalPositionFitting(Double &Az, Double &El, Double &coneAngle, 
+                                                   Double &center,
+                                                   Double &XC, Double &YC, Bool RotatePos,
+                                                   Vector<Bool> AntennaSelection, 
+                                                   String Polarization,
+                                                   Bool simplexFit,
+                                                   Bool verbose,
+                                                   Bool coneAngleSearch){
+    try {
+      Double dummyDistance = 1e5; // distance does not matter for conical beamforming
+      if (Polarization != ""){
+        Polarization_p = Polarization;
+      };
+      // Set shower position
+      if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
+        cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during setPhaseCenter()!" << endl;
+        return False;
+      };
+      //perform the position fitting
+      center=-1.8e-6;
+      if (simplexFit) {
+        if (coneAngleSearch) {
+          if (! findConeAngle(Az, El, coneAngle, AntennaSelection, &center, True, verbose) ){
+            cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during findDistance()!" << endl;
+            return False;
+          };
+        };
+        if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting evaluateGrid()." << endl;};
+        if (! evaluateGrid(Az, El, dummyDistance, AntennaSelection, &center, coneAngle) ){
+          cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during evaluateGrid()!" << endl;
+          return False;
+        };
+        if (coneAngleSearch) {
+          if (! findConeAngle(Az, El, coneAngle, AntennaSelection, &center, False, verbose) ){
+            cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during findDistance()!" << endl;
+            return False;
+          };
+        };
+        if (verbose) { cout << "analyseLOPESevent::doConicalPositionFitting: starting SimplexFit()." << endl;};
+
+        if (coneAngleSearch) {
+          if (! SimplexFit(Az, El, dummyDistance, center, AntennaSelection, 0., coneAngle, 0.001, True) ){
+            cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during SimplexFit()!" << endl;
+            return False;
+          };
+        } else {
+          if (! SimplexFit(Az, El, dummyDistance, center, AntennaSelection, 0., coneAngle, 0.002, True) ){
+            cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during SimplexFit()!" << endl;
+            return False;
+          };
+        };
+        beamPipe_p->setVerbosity(verbose);
+      };
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent::doConicalPositionFitting: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return True;
+  };
         
+
 
   // --------------------------------------------------------------- GaussFitData
   Bool analyseLOPESevent::GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
 				       Vector<Bool> AntennaSelection, String evname, 
 				       Record &erg, Record &fiterg,
-				       String Polarization, Bool verbose){
+				       String Polarization, Bool verbose,
+                                       Double coneAngle){
     try {      
       Vector<Double> ccBeam, xBeam,pBeam;
       Matrix<Double> TimeSeries;
@@ -440,9 +505,13 @@ namespace CR { // Namespace CR -- begin
 	Polarization_p = Polarization;
       };
       // Get the beam-formed data
-      if (! beamPipe_p->setDirection(Az, El, distance)){
-	cerr << "analyseLOPESevent::GaussFitData: " << "Error during setDirection()!" << endl;
+      if (! beamPipe_p->setConeAngle(coneAngle)){ //default coneAngle = 0 means spherical beamforming
+	cerr << "analyseLOPESevent::GaussFitData: " << "Error during setConeAngle()!" << endl;
 	return False;
+      };
+      if (! beamPipe_p->setDirection(Az, El, distance)){
+        cerr << "analyseLOPESevent::GaussFitData: " << "Error during setDirection()!" << endl;
+        return False;
       };
       if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, 
 				AntennaSelection, Polarization_p)){
@@ -529,6 +598,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("Azimuth",Az);
       erg.define("Elevation",El);
       erg.define("Distance",distance);
+      erg.define("coneAngle",coneAngle);
 
     } catch (AipsError x) {
       cerr << "analyseLOPESevent::GaussFitData: " << x.getMesg() << endl;
@@ -545,7 +615,7 @@ namespace CR { // Namespace CR -- begin
       if (Polarization != ""){
 	Polarization_p = Polarization;
       };
-      Int nsamples,i,j,nants,nselants;
+      Int nsamples=0,i=0,j=0,nants=0,nselants=0;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       
@@ -679,20 +749,38 @@ namespace CR { // Namespace CR -- begin
   };
 
 
+  // overload SimplexFit, to allow optional coneAngle argurment
+  // to switch between spherical and conical beamforming
+  
+  // for spherical beamforming (default):
+  Bool analyseLOPESevent::SimplexFit (Double &Az,
+                                      Double &El,
+                                      Double &distance,
+                                      Double &center, 
+                                      Vector<Bool> AntennaSelection,
+                                      Double distanceStep){
+    Double dummyConeAngle=0, dummyAngleStep=0;                                      
+    return SimplexFit(Az,El,distance,center,AntennaSelection,distanceStep,dummyConeAngle,dummyAngleStep, False);                                      
+  }                                      
 
+  // general call for conical or spherical beamforming
   Bool analyseLOPESevent::SimplexFit (Double &Az,
 				      Double &El,
 				      Double &distance,
 				      Double &center, 
 				      Vector<Bool> AntennaSelection,
-				      Double distanceStep){    
+				      Double distanceStep,
+                                      Double &coneAngle,
+                                      Double angleStep,
+                                      Bool conicalBeamforming){    
     try {
-      Int i,minpos,maxpos,niteration=0,oldminpos,nsameiter;
+      Int i=0,minpos=0,maxpos=0,niteration=0,oldminpos=0,nsameiter=0;
       Record erg;
-      Vector<Double> azs(4), els(4), dists(4), height(4,0.), cents(4);
-      Double newaz, newel, newdist, newheight, nnewheight, newcent, nnewcent;
-      Double meanaz, meanel, meandist, vecaz, vecel, vecdist;
+      Vector<Double> azs(4), els(4), dists(4), height(4,0.), cents(4), coneAngles(4);
+      Double newaz=0., newel=0., newdist=0., newheight=0., nnewheight=0., newcent=0., nnewcent=0., newconeAngle=0.;
+      Double meanaz=0., meanel=0., meandist=0., vecaz=0., vecel=0., vecdist=0., meanconeAngle=0., vecconeAngle=0.;
       Bool running=True;
+      Double dummyDistance=1e5; // dummy distance for conical beamforming, since distance has no effect, but must be != 0
 #define Xstop 3.
 #define CCstop 0.5
 
@@ -710,13 +798,17 @@ namespace CR { // Namespace CR -- begin
       beamPipe_p->setVerbosity(False);
 
       // set start values
-      azs = Az; els = El; dists = distance;
+      azs = Az; els = El; dists = distance; coneAngles = coneAngle;
       azs(1) += 1; els(2) += 1; 
       azs(3) -= 1; els(3) -= 1;      
       dists(2) -= distanceStep;dists(1) += distanceStep;dists(3) += distanceStep;
+      coneAngles(2) += angleStep; coneAngles(1) -= angleStep; coneAngles(3) -= angleStep;
       cents = center;
       for (i=0; i<4; i++){
-	getBeamHeight(azs(i), els(i), dists(i), AntennaSelection, &height(i), beamtype, &cents(i));
+        if (conicalBeamforming)
+          getBeamHeight(azs(i), els(i), dummyDistance, AntennaSelection, &height(i), beamtype, &cents(i), coneAngles(i));
+        else
+	  getBeamHeight(azs(i), els(i), dists(i), AntennaSelection, &height(i), beamtype, &cents(i));
       };
       minpos=0; nsameiter=0;oldminpos=0;
       while(running){ // the big loop
@@ -730,18 +822,20 @@ namespace CR { // Namespace CR -- begin
 	meanaz = meanel = meandist = 0.;
 	for (i=0; i<4; i++){
 	  if (i!=minpos){
-	    meanaz += azs(i); meanel += els(i); meandist += dists(i);
+	    meanaz += azs(i); meanel += els(i); meandist += dists(i); meanconeAngle += coneAngles(i);
 	  };
 	};
-	meanaz /= 3.; meanel /= 3.; meandist /= 3.;
+	meanaz /= 3.; meanel /= 3.; meandist /= 3.; meanconeAngle /= 3.;
 	vecaz = meanaz-azs(minpos); vecel = meanel-els(minpos); vecdist = meandist-dists(minpos);
+        vecconeAngle = meanconeAngle-coneAngles(minpos);
 	if (minpos == oldminpos){
 	  nsameiter++;
 	} else {
 	  nsameiter=0;
 	  oldminpos = minpos;
 	};
-	if ( (nsameiter==8) || ((abs(vecaz)<0.03) && (abs(vecel)<0.03) && (abs(vecdist)<1))) {
+	if ( (nsameiter==8) || ((abs(vecaz)<0.03) && (abs(vecel)<0.03) && 
+             ((!conicalBeamforming&&(abs(vecdist)<1)) || (conicalBeamforming&&(abs(vecconeAngle)<0.00001))) ) ) {
 	  // restart from close to best position
 	  maxpos=0;
 	  for (i=1; i<4; i++){
@@ -752,8 +846,12 @@ namespace CR { // Namespace CR -- begin
 	  azs(minpos) = azs(maxpos)+0.2;
 	  els(minpos) = els(maxpos)+0.2;
 	  dists(minpos) = dists(maxpos)+50;
+          coneAngles(minpos) = coneAngles(maxpos)+0.0001;
 	  cents(minpos) = cents(maxpos);
-	  getBeamHeight(azs(minpos),els(minpos),dists(minpos), AntennaSelection, &height(minpos), beamtype, &cents(minpos));
+          if (conicalBeamforming)
+	    getBeamHeight(azs(minpos),els(minpos),dummyDistance, AntennaSelection, &height(minpos), beamtype, &cents(minpos), coneAngles(minpos));
+          else  
+            getBeamHeight(azs(minpos),els(minpos),dists(minpos), AntennaSelection, &height(minpos), beamtype, &cents(minpos));
 	  continue;
 	};
 	if (nsameiter==16) {
@@ -763,17 +861,27 @@ namespace CR { // Namespace CR -- begin
 	//new point
 	newaz = azs(minpos) + 2.*vecaz;	newel = els(minpos) + 2.*vecel;
 	newdist = dists(minpos) + 2.*vecdist;
+        newconeAngle = coneAngles(minpos) + 2.*vecconeAngle;
 	newcent = cents(minpos);
-	getBeamHeight(newaz, newel, newdist, AntennaSelection,&newheight, beamtype, &newcent);
+        if (conicalBeamforming)       
+	  getBeamHeight(newaz, newel, dummyDistance, AntennaSelection,&newheight, beamtype, &newcent, newconeAngle);
+        else
+          getBeamHeight(newaz, newel, newdist, AntennaSelection,&newheight, beamtype, &newcent);
+        
 	if (newheight > max(height)) { //expand the simplex
 	  cout << " SimplexFit: expanding simplex"<<endl;
 	  newaz = azs(minpos) + 4.*vecaz; newel = els(minpos) + 4.*vecel;
 	  newdist = dists(minpos) + 4.*vecdist;
+          newconeAngle = coneAngles(minpos) + 4.*vecconeAngle;       
 	  nnewcent = cents(minpos);
-	  getBeamHeight(newaz, newel, newdist, AntennaSelection, &nnewheight, beamtype, &nnewcent);
+          if (conicalBeamforming)       
+            getBeamHeight(newaz, newel, dummyDistance, AntennaSelection, &nnewheight, beamtype, &nnewcent, newconeAngle);
+          else
+            getBeamHeight(newaz, newel, newdist, AntennaSelection, &nnewheight, beamtype, &nnewcent);
 	  if (newheight > nnewheight) {
 	    newaz = azs(minpos) + 2.*vecaz; newel = els(minpos) + 2.*vecel;
 	    newdist = dists(minpos) + 2.*vecdist;
+            newconeAngle = coneAngles(minpos) + 2.*vecconeAngle;
 	  } else {
 	    newheight = nnewheight;
 	    newcent = nnewcent;
@@ -784,11 +892,16 @@ namespace CR { // Namespace CR -- begin
 	    cout << " SimplexFit: reducing simplex"<<endl;
 	    newaz = azs(minpos) + 1.5*vecaz; newel = els(minpos) + 1.5*vecel;
 	    newdist = dists(minpos) + 1.5*vecdist;
+            newconeAngle = coneAngles(minpos) + 1.5*vecconeAngle;
 	    nnewcent = cents(minpos);
-	    getBeamHeight(newaz, newel, newdist, AntennaSelection, &nnewheight, beamtype, &nnewcent);
+            if (conicalBeamforming)       
+              getBeamHeight(newaz, newel, dummyDistance, AntennaSelection, &nnewheight, beamtype, &nnewcent, newconeAngle);
+            else
+              getBeamHeight(newaz, newel, newdist, AntennaSelection, &nnewheight, beamtype, &nnewcent);
 	    if (newheight > nnewheight) {
 	      newaz = azs(minpos) + 2.*vecaz; newel = els(minpos) + 2.*vecel;
 	      newdist = dists(minpos) + 2.*vecdist;
+              newconeAngle = coneAngles(minpos) + 2.*vecconeAngle;
 	    } else {
 	      newheight = nnewheight;
 	      newcent = nnewcent;
@@ -801,15 +914,20 @@ namespace CR { // Namespace CR -- begin
 	  if (newel>90.) { newel=180.-newel; continue;};
 	  if (newel<0.) { newel=-newel; continue;};
 	  if (newdist<0.) { newdist=-newdist; continue;};
+          if (newconeAngle<0.) { newconeAngle=-newconeAngle; continue;};
 	  clipping = False;
 	};
 	azs(minpos) = newaz; els(minpos) = newel; dists(minpos) = newdist; cents(minpos) = newcent;
+        coneAngles(minpos) = newconeAngle;
 	height(minpos)=newheight;
 	// generate output
 	printf("## %i ------------------------------- \n",niteration);
 	printf("  Azimuth:   %6.2f; %6.2f; %6.2f; %6.2f \n",azs(0),azs(1),azs(2),azs(3));
 	printf("  Elevation: %6.2f; %6.2f; %6.2f; %6.2f \n",els(0),els(1),els(2),els(3));
-	printf("  Distance:  %6.1f; %6.1f; %6.1f; %6.1f \n",dists(0),dists(1),dists(2),dists(3));
+        if (conicalBeamforming)
+	  printf("  Rho[rad]:  %6.4f; %6.4f; %6.4f; %6.4f \n",coneAngles(0),coneAngles(1),coneAngles(2),coneAngles(3));
+        else
+          printf("  Distance:  %6.1f; %6.1f; %6.1f; %6.1f \n",dists(0),dists(1),dists(2),dists(3));
 	printf("  Center:    %6.3f; %6.3f; %6.3f; %6.3f \n",cents(0)*1e6,cents(1)*1e6,cents(2)*1e6,cents(3)*1e6);
 	printf("  Height:    %6.3f; %6.3f; %6.3f; %6.3f \n",height(0),height(1),height(2),height(3));
 	// test convergence
@@ -817,20 +935,28 @@ namespace CR { // Namespace CR -- begin
 	meanaz *= cos(mean(els)*DEG2RAD);
 	meanaz = abs(meanaz*meanel);
 	meandist = max(dists)-min(dists);
+        meanconeAngle = max(coneAngles)-min(coneAngles);
 	
 	
 	// switching to ccbeam if convergence gets better
-	if ((beamtype == SkymapQuantity::TIME_X)&&(meanaz<0.01*Xstop)&&((meandist/mean(dists))<0.025*Xstop)) {
+	if ((beamtype == SkymapQuantity::TIME_X) && (meanaz<0.01*Xstop) &&
+            ((!conicalBeamforming&&((meandist/mean(dists))<0.025*Xstop)) ||  
+             (conicalBeamforming&&((meanconeAngle/mean(coneAngles))<0.025*Xstop))) ) {
 	  cout << "analyseLOPESevent:SimplexFit: Switching to fit to ccbeam." << endl;
 	  beamtype = SkymapQuantity::TIME_CC;
 	  // replacing xbeam fitresults with ccbeam fitresults
 	  for (i=0; i<4; i++){
-	    getBeamHeight(azs(i),els(i),dists(i), AntennaSelection, &height(i), beamtype, &cents(i) );
+            if (conicalBeamforming)       
+              getBeamHeight(azs(i),els(i),dummyDistance, AntennaSelection, &height(i), beamtype, &cents(i), coneAngles(i) );
+            else
+	      getBeamHeight(azs(i),els(i),dists(i), AntennaSelection, &height(i), beamtype, &cents(i) );
 	  };
 	};
 
 	// Stop fit if converged
-	if ((meanaz<0.01*CCstop)&&((meandist/mean(dists))<0.025*CCstop)) {
+	if ((meanaz<0.01*CCstop) && 
+            ((!conicalBeamforming&&((meandist/mean(dists))<0.025*CCstop)) ||
+             (conicalBeamforming &&((meanconeAngle/mean(coneAngles))<0.025*CCstop))) ) {
 	  running = False;
 	};
 	niteration++;
@@ -839,11 +965,11 @@ namespace CR { // Namespace CR -- begin
 	};
       }; // end of the big loop
       // calculate mean position
-      meanaz = meanel = meandist = 0.;
+      meanaz = meanel = meandist = meanconeAngle = 0.;
       for (i=0; i<4; i++){
-	meanaz += azs(i); meanel += els(i); meandist += dists(i);
+	meanaz += azs(i); meanel += els(i); meandist += dists(i); meanconeAngle += coneAngles(i);
       };
-      meanaz /= 4.; meanel /= 4.; meandist /= 4.;
+      meanaz /= 4.; meanel /= 4.; meandist /= 4.; meanconeAngle /= 4.;
       Bool clipping=True;
       while (clipping){
 	if (meanaz>360.) { meanaz-=360.; continue;};
@@ -853,7 +979,7 @@ namespace CR { // Namespace CR -- begin
 	if (meandist<0.) { meandist=-meandist; continue;};
 	clipping = False;
       };
-      Az = meanaz; El = meanel; distance = meandist; center = mean(cents);
+      Az = meanaz; El = meanel; distance = meandist; center = mean(cents); coneAngle = meanconeAngle;
 
     } catch (AipsError x) {
       cerr << "analyseLOPESevent:SimplexFit: " << x.getMesg() << endl;
@@ -870,11 +996,12 @@ namespace CR { // Namespace CR -- begin
 					Double &El,
 					Double &distance,
 					Vector<Bool> AntennaSelection,
-					Double *centerp){
+					Double *centerp,
+                                        Double coneAngle){
     try {
-      int estep,astep,arange,erange=3;
+      int estep=0,astep=0,arange=0,erange=3;
       Double maxaz=Az,maxel=El,maxheight=0.,maxcenter=-1.8e-6;
-      Double az_,el_,height_,center_;
+      Double az_=0.,el_=0.,height_=0.,center_=0.;
       Double stepfactor=1.;
 
       if (beamPipe_p == NULL){
@@ -896,7 +1023,7 @@ namespace CR { // Namespace CR -- begin
 	  if (el_>90.){ az_+= 180.; };
 	  center_ = 2e99;
 	  // use x-beam for evaluateGrid
-	  if ( getBeamHeight(az_, el_, distance, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_)) {
+	  if ( getBeamHeight(az_, el_, distance, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_, coneAngle)) {
 	    if (height_ > maxheight){
 	      maxaz = az_; maxel = el_; maxheight=height_; maxcenter=center_;
 	    };
@@ -927,7 +1054,8 @@ namespace CR { // Namespace CR -- begin
 				       Double el,
 				       Double dist, 
 				       Vector<Bool> AntennaSelection,
-				       Double *centerp){
+				       Double *centerp,
+                                       Double coneAngle){
     Double erg;
     try {
       Vector<Double> ccb,xb,pb;
@@ -943,6 +1071,7 @@ namespace CR { // Namespace CR -- begin
 	clipping = False;
       };
       beamPipe_p->setDirection(az, el, dist);
+      beamPipe_p->setConeAngle(coneAngle);
       beamPipe_p->GetTCXP(beamformDR_p, ts, ccb, xb, pb, AntennaSelection, Polarization_p);
       StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
       ccb = mf.filter(ccb);
@@ -991,7 +1120,8 @@ namespace CR { // Namespace CR -- begin
                                          Vector<Bool> AntennaSelection,
 				         Double *beamheightp,
 					 SkymapQuantity::Type beamtype,
-                                         Double *centerp){
+                                         Double *centerp,
+                                         Double coneAngle){
     Bool status = True;
     try {
       Vector<Double> ccb,xb,pb;
@@ -1007,6 +1137,7 @@ namespace CR { // Namespace CR -- begin
         clipping = False;
       };
       beamPipe_p->setDirection(az, el, dist);
+      beamPipe_p->setConeAngle(coneAngle);
       beamPipe_p->GetTCXP(beamformDR_p, ts, ccb, xb, pb, AntennaSelection, Polarization_p);
 
       // Apply mean filters to cc- and x-beam
@@ -1101,7 +1232,7 @@ namespace CR { // Namespace CR -- begin
 					Bool rough,
 					Bool verbose){
     try {
-      Double height_, maxheight=0., maxdist=2500., center_=-1.8e-6, maxcenter=0.;
+      Double height_=0., maxheight=0., maxdist=2500., center_=-1.8e-6, maxcenter=0.;
       for(int d=2000; d<=15000; ){
 	if (getBeamHeight(Az, El, d, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_)) {
 	  if (height_ > maxheight) {
@@ -1125,5 +1256,42 @@ namespace CR { // Namespace CR -- begin
     };
     return true;
   };
+  
+
+  Bool analyseLOPESevent::findConeAngle( Double &Az,
+                                         Double &El,
+                                         Double &coneAngle,
+                                         Vector<Bool> AntennaSelection, 
+                                         Double *centerp,
+                                         Bool rough,
+                                         Bool verbose){
+    try {
+      Double height_=0., maxheight=0., maxconeAngle=0., center_=-1.8e-6, maxcenter=0.;
+      Double dummyDistance = 1e5; // distance has no effect for conical beamforming
+      for(double rho=0; rho<=0.1; ){
+        if (getBeamHeight(Az, El, dummyDistance, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_, rho)) {
+          if (height_ > maxheight) {
+            maxheight = height_;
+            maxconeAngle = rho;
+            maxcenter = center_;
+          }
+        }
+
+        if (rough) rho+=0.005;
+        else rho+=0.0005;
+      }
+      coneAngle = maxconeAngle;
+      if (centerp != NULL) {
+        *centerp = maxcenter;
+      }
+      if (verbose)
+        cout << "findConeAngle: best coneAngle rho (xbeam): "<<coneAngle<<endl;
+    } catch (AipsError x) {
+        cerr << "analyseLOPESevent:findConeAngle: "<< x.getMesg() <<endl;
+        return false;
+    };
+    return true;
+  };
+  
 
 } // Namespace CR -- end
