@@ -17,6 +17,7 @@ import numpy as np
 import time
 import cPickle
 import re
+import subprocess
 
 # sorting type
 sortkind="obsid"  # four kinds of sorting currently: by start time ("time"), 
@@ -1445,6 +1446,22 @@ def get_condition (cond):
 	real_cond = real_cond + ", filtered_obsids)"
 	return real_cond
 
+# checking the internet (ssh) connection to lse nodes
+# if node does not respond, exclude it from the storage_nodes
+# in debug mode, we print message to stdout that this node is not responding
+# the list of available lse nodes is returned
+def check_connection (storage_nodes, is_debug):
+	up_nodes = []
+	for node in storage_nodes:
+		process=subprocess.Popen("ssh %s date" % (node), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		output, stderr = process.communicate()
+		status = process.poll()
+		if status == 0:
+			up_nodes = np.append(up_nodes, node)
+		if is_debug and status != 0:
+			print "%s is down" % (node)
+	return up_nodes
+
 ###################################################################################################################
 #          M A I N                                                                                                #
 ###################################################################################################################
@@ -1461,6 +1478,14 @@ if __name__ == "__main__":
 	# if only statistics is required, then switiching off all other keys
 	if is_stats:
 		is_rebuild = is_update = is_append = False	
+
+	# checking the internet (ssh) connection to lse nodes
+	# if node does not respond, exclude it from the storage_nodes
+	# in debug mode, we print message to stdout that this node is not responding
+	storage_nodes = check_connection (storage_nodes, is_debug)
+	if len(storage_nodes) == 0:
+		print "The connection to all lse nodes is down. Try again later"
+		sys.exit(1)
 
 	# list of subclusters
 	subclusters = np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes])
