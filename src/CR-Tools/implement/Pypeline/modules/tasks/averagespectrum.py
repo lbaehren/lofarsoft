@@ -170,6 +170,10 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 
         "meanfactor":dict(default=3,doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
 
+        "randomize_peaks":{default:True,doc:"Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."},
+
+        "peak_rmsfactor":dict(default=5,doc="At how many sigmas above the mean will a peak be randomized."),
+
         "start_frequency":{default:lambda ws:ws.freqs[0],
                            doc:"Start frequency of spectrum",unit:"Hz"},
 
@@ -315,11 +319,17 @@ class AverageSpectrum(tasks.Task):
     This spectrum can be read back and a baseline can be fitted with
     FitBaseline.
 
+    To avoid the spectrum being influenced by spikes in the time
+    series, those spikes can be replaced by random numbers, before the
+    FFT is taken (see 'randomize_peaks').
+
     The quality information (RMS, MEAN, flagged blocks per antennas)
     is stored in a data 'quality database' in text and python form and
     is also available as Task.quality. (See also:
     Task.antennacharacteristics, Task.mean, Task.mean_rms, Task.rms,
-    Task.rms_rms, Task.npeaks, Task.npeaks_rms, Task.homogeneity_factor)
+    Task.rms_rms, Task.npeaks, Task.npeaks_rms,
+    Task.homogeneity_factor - the latter is printend and is a useful
+    hint if something is wrong)
 
     Flagged blocks can be easily inspeced using the task method
     Task.qplot (qplot for quality plot).
@@ -332,7 +342,7 @@ class AverageSpectrum(tasks.Task):
     186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
     - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
 
-    this will tell you that Antenn 17011092 was worked on (the 92nd
+    this will tell you that Antenna 17011092 was worked on (the 92nd
     antenna in the data file) and the 186th chunk (block 514)
     contained some suspicious data (too many spikes). If you want to
     inspect this, you can call
@@ -420,7 +430,7 @@ class AverageSpectrum(tasks.Task):
                             blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)
                             self.cdata[...].read(self.datafile,"Fx",blocks)
                         self.count=len(self.quality)
-                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=True,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count))
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=False,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count))
                         if not self.quality_db_filename=="":
                             qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
                         mean+=self.quality[self.count]["mean"]
@@ -431,6 +441,10 @@ class AverageSpectrum(tasks.Task):
                             print " # Data flagged!"
                             break
                         #            print "Time:",time.clock()-self.t0,"s for reading."
+			if self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
+			    lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
+			    upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
+			    self.cdata.randomizepeaks(lower_limit,upper_limit)
                         if self.doublefft:
                             self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
                         else:

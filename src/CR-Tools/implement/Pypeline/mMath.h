@@ -46,13 +46,13 @@ enum hWEIGHTS {WEIGHTS_FLAT,WEIGHTS_LINEAR,WEIGHTS_GAUSSIAN};
 */
 
 template <class T, class S>
-  inline bool Between(T x, S lower, S upper) {return ((x > lower) && (x < upper));}
+  inline bool Between(T x, S lower, S upper) {return ((hfcast<S>(x) > lower) && (hfcast<S>(x) < upper));}
 template <class T,class S>
-  inline bool BetweenOrEqual(T x, S lower, S upper) {return ((x >= lower) && (x <= upper));}
+  inline bool BetweenOrEqual(T x, S lower, S upper) {return ((hfcast<S>(x) >= lower) && (hfcast<S>(x) <= upper));}
 template <class T,class S>
-  inline bool Outside(T x, S lower, S upper) {return ((x < lower) || (x > upper));}
+  inline bool Outside(T x, S lower, S upper) {return ((hfcast<S>(x) < lower) || (hfcast<S>(x) > upper));}
 template <class T,class S>
-  inline bool OutsideOrEqual(T x, S lower, S upper) {return ((x <= lower) || (x >= upper));}
+  inline bool OutsideOrEqual(T x, S lower, S upper) {return ((hfcast<S>(x) <= lower) || (hfcast<S>(x) >= upper));}
 
 extern vector<HNumber> hWeights(const HInteger wlen, const hWEIGHTS wtype);
 

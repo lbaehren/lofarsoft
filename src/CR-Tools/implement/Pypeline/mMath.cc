@@ -175,6 +175,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 //$DOCSTRING: Return the minimum value in a vector
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMin
@@ -202,6 +203,69 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: For each element in a vector replace its value by the maximum of the element value and an in input value
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMax
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(max_value)()("Maximum value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  vec.max(max_value) -> all values in vec are larger (or equal) than max_value
+
+  Example:
+  v=hArray(range(5))
+  v.max(3) -> 
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter, class T>
+void hMax(const Iter vec,const Iter vec_end, const T max_value)
+{
+  Iter it(vec);
+  IterValueType val(hfcast<IterValueType>(max_value));
+  while (it!=vec_end) {
+    if (*it < val) *it=val;
+    ++it;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: For each element in a vector replace its value by the minimum of the element value and an in input value
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMin
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(min_value)()("Minimum value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  vec.min(min_value) -> all values in vec are smaller (or equal) than min_value
+
+  Example:
+  v=hArray(range(5))
+  v.min(3) -> 
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter, class T>
+void hMin(const Iter vec,const Iter vec_end, const T min_value)
+{
+  Iter it(vec);
+  IterValueType val(hfcast<IterValueType>(min_value));
+  while (it!=vec_end) {
+    if (*it > val) *it=val;
+    ++it;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //$DOCSTRING: Return the position of the maximum value in a vector
@@ -1228,6 +1292,105 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end)
 
 //$ENDITERATE
 
+//$DOCSTRING: Set all values which are above or below a certain limit to random value between those limits
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRandomizePeaks
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(lower_limit)()("Lower limit.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(upper_limit)()("Upper limit.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Example:
+   c=hArray(float,[10],fill=range(10)) -> hArray(float, [10], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]) # len=10 slice=[0:10])
+   c.randomizepeaks(3,7) -> hArray(float, [10], fill=[3.87583674531, 3.18817846486, 5.71545886747, 3.0, 4.0, 5.0, 6.0, 7.0, 5.71718562335, 6.73877158376]) # len=10 slice=[0:10])
+
+See also: findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+          hRandomizePhase, hSetAmplitude
+*/
+template <class Iter,class T>
+HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
+			 const T lower_limit, const T upper_limit)
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  // Sanity check
+  if (vecin_end < vecin) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
+    return -1;
+  }
+
+  HNumber scale(abs(hfcast<HNumber>(upper_limit)-hfcast<HNumber>(lower_limit)));
+  scale /= RAND_MAX;
+
+  while (itin != vecin_end) {
+    if (Outside(*itin,lower_limit,upper_limit)) {
+      *itin=hfcast<IterValueType>(rand()*scale+hfcast<HNumber>(lower_limit));
+    }
+    ++itin;
+  };
+  return 0;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Randomize the phases of certain elements in a complec vector and set the amplitude. The elements are specified in an indexlist.(NOT QUITE CORRECT: SPECIFY PROPPER WEIGHTING TO RAND GENERATOR) 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRandomizePhase
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Vector in which to randomize the phase.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(indexlist)()("Index list containing the positions of the elements to be set, (e.g. [0,2,4,...] will set every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(amplitude)()("Amplitude to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  Usage:
+  
+  vec.randomizephase(indexlist,amplitude) -> elements in vec at positions provided in indexlist are set to a complex number with random phase and amplitude 'amplitude'
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Example:
+  c=hArray(complex,[10],fill=range(10)) -> hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (3+0j), (4+0j), (5+0j), (6+0j), (7+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+
+  c.randomizephase(hArray([1,3,5,7]),1.) -> hArray(complex, [10], fill=[0j, (0.661930692225-0.749565046337j), (2+0j), (-0.930855778945-0.365386807102j), (4+0j), (-0.893076729911+0.449904383721j), (6+0j), (0.0594003866703+0.998234238074j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+
+  c.abs() -> hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (1+0j), (4+0j), (1+0j), (6+0j), (1+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+
+See also: hSetAmplitude
+
+*/
+template <class Iter, class IterI, class T>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const T amplitude)
+{
+  // Sanity check
+  if (index >= index_end) return;
+
+  // Variables
+  Iter it;
+  IterI itidx(index);
+  HNumber amplitude_t=hfcast<HNumber>(amplitude);
+  HNumber real_part, imag_part, scale(2.0/RAND_MAX);
+  HInteger r;
+  while (itidx != index_end) {
+    it = vec + *itidx;
+    if ((it < vec_end) && (it >= vec)) {
+      r=rand();
+      real_part=(r*scale-1.0) * amplitude_t; // does this needs some arccos or so ...?
+      if (r % 2) imag_part=sqrt(pow(amplitude_t,2)-pow(real_part,2));
+      else imag_part=-sqrt(pow(amplitude_t,2)-pow(real_part,2));
+      *it=HComplex(real_part,imag_part);
+    };
+    ++itidx;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //$DOCSTRING: Set the amplitude of complex numbers to the values provided in a second vector
@@ -1803,7 +1966,6 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMeanAbs
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
@@ -1815,7 +1977,7 @@ template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   // Declaration of variables
-  HNumber mean=hSumAbs(vec,vec_end);
+  HNumber mean=hfcast<HNumber>(hSumAbs(vec,vec_end));
   HInteger len = vec_end - vec;
 
   // Sanity check
@@ -1824,7 +1986,6 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
     return 0.;
   }
 
-  // Vector operation
   mean /= len;
 
   return mean;

@@ -281,6 +281,19 @@ with an index list as last index
 - fitbaseline tasks can save results to file
 - added root_filename to datareader.py to get filename without ending pcr
 
+2011-03-14 Pypeline - rev 7302 - Heino Falcke
+hftools:
+- added hMin/Max(val): will perform a min/max(e_i,val) for all elements e_i
+- added hRandomizePhase -> to randomize phase of selected complex numbers and
+set amplitude to certain value
+- hMeanAbs now also for complex vectors
+- added hRandomizePeaks to replace peaks in a time series data set by
+random values
+- tasks will automatically return its own workspace (i.e. with all
+   parameters) - that gives best access to all input and output values
+- added testrfi4.py to demonstrate RFI cleaning of LOFAR station data
+- calcbaseline: will now create the inverse of the baseline (so you can
+just multiply, which in principe is the faster operation)
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------
@@ -295,3 +308,4 @@ is factor 2-3 faster in comparisons using 'in' ....
 
 -averagespectrums need to take nquistzone into account (use nyquistflip)
 
+- use shutils rmtree for hArray_write to remove old file directory

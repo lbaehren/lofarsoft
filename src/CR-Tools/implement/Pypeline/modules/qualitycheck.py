@@ -111,15 +111,16 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
 #    mean=datamean[datamean.minpos()]; rms=datarms[datarms.minpos()];
 #    mean=datamean.mean(); rms=datarms.mean();
     mean=datamean.median(); rms=datarms.median();
-    datamean -= mean;  datarms /= rms
     if normalize:
+	datamean -= mean
+	datarms /= rms
         dataarray -= mean
         dataarray /= rms
         lower_limit=Vector(float,nblocks,fill=-nsigma)
         upper_limit=Vector(float,nblocks,fill=nsigma)
     else:
-        lower_limit=datamean-datarms*nsigma;
-        upper_limit=datamean+datarms*nsigma;
+        lower_limit=Vector(float,nblocks,fill=datamean-datarms*nsigma)
+        upper_limit=Vector(float,nblocks,fill=datamean+datarms*nsigma)
     datanpeaks = dataarray[...].countoutside(lower_limit,upper_limit)
     npeaks=datanpeaks.sum(); peaksexcess=npeaks/npeaksexpected_full
     if verbose:

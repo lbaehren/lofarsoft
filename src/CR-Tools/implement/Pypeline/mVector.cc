@@ -149,9 +149,19 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fillvec, cons
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(val)()("Value to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
+  Usage:
+
+  vec.set(indexlist,val) -> set elements in vec at the positions given in indexlist to value 'val'
+  
   \brief $DOCSTRING
   $PARDOCSTRING
+  
 
+Example:
+  vec=hArray(range(10))
+  indx=hArray([2,4])
+  vec -> hArray(int, [10], fill=[0, 1, 99, 3, 99, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
+  
 See also: hFill, hCopy
 */
 template <class Iter, class IterI, class T>

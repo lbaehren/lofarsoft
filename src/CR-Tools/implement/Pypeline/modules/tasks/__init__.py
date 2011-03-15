@@ -552,12 +552,12 @@ class Task(object):
         """
         Usage:
 
-        task.run() -> (re)run the task with currently set parameters.
+        task() -> (re)run the task with currently set parameters.
 
         If called for the first time the initialization
         routine will be called.
 
-        task.run(x1,x2,...,par1=val1,par2=val2) -> rerun the task with
+        task(x1,x2,...,par1=val1,par2=val2) -> rerun the task with
         the positional parameters xN and the parameters parN set to
         the values provided and keeping the previous parameters the
         same
@@ -607,7 +607,10 @@ class Task(object):
         self.saveOutputFile()
         retval=self.run()
         self.saveOutputFile() # to store final values
-        return retval
+	if retval==None:
+	    return self.ws
+	else:
+	    return retval
 
     def __getitem__(self,par):
         """
@@ -834,7 +837,8 @@ class WorkSpace(object):
         for k,v in margs.items():
             if k in self.parameterlist:
                 self[k]=v
-            else: print "Warning ws.__call__: Parameter ",k,"not known."
+            else:
+		print "Warning ws.__call__: Parameter ",k,"not known."
         return self
     def __getitem__(self,par):
         """
