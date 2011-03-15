@@ -1482,10 +1482,12 @@ if __name__ == "__main__":
 	# checking the internet (ssh) connection to lse nodes
 	# if node does not respond, exclude it from the storage_nodes
 	# in debug mode, we print message to stdout that this node is not responding
-	storage_nodes = check_connection (storage_nodes, is_debug)
-	if len(storage_nodes) == 0:
-		print "The connection to all lse nodes is down. Try again later"
-		sys.exit(1)
+	# only checking connection if we do rebuild, update, or append
+	if is_rebuild or is_update or is_append:
+		storage_nodes = check_connection (storage_nodes, is_debug)
+		if len(storage_nodes) == 0:
+			print "The connection to all lse nodes is down. Try again later"
+			sys.exit(1)
 
 	# list of subclusters
 	subclusters = np.unique([cexec_nodes[s].split(":")[0] for s in storage_nodes])
