@@ -1,4 +1,6 @@
 pycrtools.template
+pycrtools.core
+pycrtools.core.hftools
 #pycrtools
 pycrtools.metadata
 pycrtools.grid

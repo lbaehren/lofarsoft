@@ -452,15 +452,15 @@ class DocumentationBlock():
 
         # Parameter description
         if (len(self.parameters()) > 0):
-            result += "Parameters:\\n"
+            result += "Parameters:\\n\\n"
             for par in self.parameters():
-                result += "*" + par[0] + "* " + par[1] + "\\n"
+                result += "*" + par[0] + "* " + par[1] + "\\n\\n"
 
-        # Examples
-        if (len(self.examples()) > 0):
-            result += "\\nExample:\\n"
-            for example in self.examples():
-                result += "  " + example.strip() + "\\n"
+        # Examples (disabled due to bugs in text)
+        # if (len(self.examples()) > 0):
+        #     result += "\\nExample:\\n"
+        #     for example in self.examples():
+        #         result += "  " + example.strip() + "\\n"
 
         return result
 
