@@ -681,23 +681,29 @@ class Task(object):
         self.ws[par]=value
 
 
-    def put(self,name=""):
+    def put(self,name="",delete=False):
         """
         Stores the input parameters in the workspace to the parameter
         database (see also 'tput').  This can be restored with
-        task.get() (or 'tget' from the command line).
+        Task.get() (or 'tget' from the command line).
 
-        task.get(name) will retrieve the parameters stored under name
+        Task.get(name) will retrieve the parameters stored under 'name'
+
+	*delete*=False - If True the database entry will be deleted.
+	
         """
         # # Open task database
         taskdb = shelve.open(dbfile)
 
+	if not name=="":
+	    name="_"+str(name)
 
-
-        taskdb[self.__taskname__+name] = self.ws.getInputParametersDict()
+	if delete:
+	    del taskdb[self.__taskname__+name]
+	else:
+	    taskdb[self.__taskname__+name] = self.ws.getInputParametersDict()
 
         taskdb.close()
-
 
     def get(self,name=""):
         """
@@ -707,17 +713,27 @@ class Task(object):
 
         task.put(name) will store the parameters under the keyword
         name and can be retrieved with put under this name.
+
+	If the name is not known a list of all known names is given.
         """
         # # Open task database
         taskdb = shelve.open(dbfile)
 
-        if self.__taskname__ in taskdb:
+	if not name=="":
+	    name="_"+str(name)
+
+        if self.__taskname__+name in taskdb:
             # Restoring from database
             args = taskdb[self.__taskname__+name]
             self.ws(**args)
-
+	    retval=True
+	else:
+	    print "Available parameter sets:\n-------------------------\n",", ".join(taskdb.keys()),"\n"
+	    retval=False
+	    
         taskdb.close()
-
+	return retval
+    
 
     def reset(self,restorecallparameters=False,init=True,**args):
         """

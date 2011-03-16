@@ -438,26 +438,45 @@ def hArray_setitem(self,dims,fill):
     vec[n1,n2,..] = [0,1,2] -> set slice of array to input vector/value
     vec[indexvector] = val -> set the elements with indices provided in indexvector to the respective values.
 
+    Examples:
+
+    a=hArray(range(9),dimensions=[3,3]) -> hArray(int, [3, 3], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
+
+    a[0]=11 -> hArray(int, [3, 3], fill=[11, 11, 11, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
+
+    a[0,1]=22 -> hArray(int, [3, 3], fill=[11, 22, 11, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
+
+    a[0,[0,2]]=33 -> hArray(int, [3, 3], fill=[33, 33, 33, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
+
+    a[0,[0,2]]=44 -> hArray(int, [3, 3], fill=[44, 33, 44, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
+
+    a[...]=[55,56,57] -> hArray(int, [3, 3], fill=[55, 56, 57, 55, 56, 57, 55, 56, 57]) # len=9 slice=[0:9])
+
+    a[...,0]=66 -> hArray(int, [3, 3], fill=[66, 56, 57, 66, 56, 57, 66, 56, 57]) # len=9 slice=[0:9])
+
+
     """
     if type(fill) in hAllListTypes:
-	fill=hArray(fill)
+        fill=hArray(fill)
     if type(dims)==int:
-	hFill(hArray_getSlicedArray(self,dims),fill)
+        hFill(hArray_getSlicedArray(self,dims),fill)
     elif type(dims)==tuple:# (multi-d index)
-	if type(dims[-1])==int:
-	    hFill(hArray_getSlicedArray(self,dims),fill)
-	elif type(dims[-1]) in [list,IntVec]:
-	    hSet(hArray_getSlicedArray(self,dims[:-1]),hArray(dims[-1]),fill)
-	elif type(dims[-1]) == IntArray:
-	    hSet(hArray_getSlicedArray(self,dims[:-1]),dims[-1],fill)
-	else:
-	    print "Wrong type of index for array:",dims
+        if type(dims[-1])==int:
+            hFill(hArray_getSlicedArray(self,dims),fill)
+        elif type(dims[-1]) in [list,IntVec]:
+            hSet(hArray_getSlicedArray(self,dims[:-1]),hArray(dims[-1]),fill)
+        elif type(dims[-1]) == IntArray:
+            hSet(hArray_getSlicedArray(self,dims[:-1]),dims[-1],fill)
+        else:
+            print "Wrong type of index for array:",dims
     elif type(dims) in [list,IntVec]:
-	self.set(hArray(dims),fill)
+        self.set(hArray(dims),fill)
     elif type(dims) == IntArray:
-	self.set(dims,fill)
+        self.set(dims,fill)
+    elif dims == Ellipsis:
+        hFill(hArray_getSlicedArray(self,dims),fill)
     else:
-	print "Wrong type of index for array:",dims
+        print "Wrong type of index for array:",dims
 
 def hArray_read(self,datafile,key,block=-1,antenna=-1):
     """

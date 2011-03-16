@@ -185,11 +185,14 @@ class tget_class(t_class):
     system data base on disk. See also 'tput'
 
     tget name -> Retrieve the parameters stored under the respective name
+
+    tget 0 (or any unknown name) -> show a list of all available parameter sets
     """
     def __call__(self,name=""):
-        tasks.task_instance.get(name)
-        tasks.task_instance.ws.update()
-        tpars(False,False)
+        found=tasks.task_instance.get(name)
+	if found:
+	    tasks.task_instance.ws.update()
+	    tpars(False,False)
 
 tget = tget_class()
 
@@ -222,9 +225,12 @@ class tput_class(t_class):
     system data base on disk. See also 'tget'
 
     tput name -> Store parameters stored under 'name' (retrieve with tget name)
+
+    *delete* - If True, delete the parameter set from data base.
+    
     """
-    def __call__(self,name=""):
-        tasks.task_instance.put(name)
+    def __call__(self,name="",delete=False):
+        tasks.task_instance.put(name=name,delete=delete)
 
 tput = tput_class()
 
