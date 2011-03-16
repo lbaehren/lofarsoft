@@ -20,18 +20,10 @@ from lpps_search import crawler
 from lpps_search import inf
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
-from lpps_search.util import MissingOptionException
-from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.sift import sift_accel_cands
 from lpps_search.sift import plot_p_histogram, plot_f_histogram
 
-# All the options that need to be specified for this module (either on the 
-# commandline or as keyword arguments to the main function) :
-REQUIRED_OPTIONS = ['canddir', 'subbdir', 'folddir', 'basename']
-OPTIONAL_OPTIONS = ['ncores']
-
-# -----------------------------------------------------------------------------
 
 def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern, 
         mask_filename = '' ):
@@ -107,19 +99,13 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
     args = [subband_globpattern]  
     return 'prepfold', options, args
 
-def main(*args, **kwargs):
+def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8):
     '''Importable version of the whole script.'''
-    # Check that all the required keyword arguments are present
-    for k in REQUIRED_OPTIONS:
-        if not kwargs.has_key(k):
-            raise MissingOptionException(k)
     # Check that the directories are available and that the output directory
     # is empty and writable.
-    cand_dir = os.path.abspath(kwargs['canddir'])
-    subb_dir = os.path.abspath(kwargs['subbdir'])
-    fold_dir = os.path.abspath(kwargs['folddir'])
-    n_cores = kwargs.get('ncores', 8)
-    basename = kwargs['basename']
+    cand_dir = os.path.abspath(canddir)
+    subb_dir = os.path.abspath(subbdir)
+    fold_dir = os.path.abspath(folddir)
 
     # TODO : add a check of whether the directories exist 
     if not os.access(fold_dir, os.F_OK | os.R_OK | os.W_OK):
@@ -150,7 +136,6 @@ def main(*args, **kwargs):
         plot_f_histogram(sifted_candidates,
             os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
     # using knowledge about the directory layout:
-    mask_filename = os.path.join(cand_dir, basename + '_rfifind.mask')
     subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')
     # construct all the folding commandlines
     folding_commands = [['cd %s' % os.path.join(fold_dir, 'CORE_%d' % i)] for i in range(n_cores)]

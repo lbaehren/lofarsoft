@@ -649,6 +649,8 @@ class SearchRun(object):
             subbdir=self.in_dir,
             canddir=self.work_dir,
             basename=self.basename,
+            mask_filename=rfifind_mask_file,
+            n_cores=n_cores
         )
         if not no_singlepulse:
             # Deal with single pulse search plotting
@@ -673,7 +675,7 @@ class SearchRun(object):
         for f in glob.glob(os.path.join(self.work_dir, '*.inf')):
             shutil.move(f, os.path.join(self.out_dir, 'INF'))
         # move all the search scripts/logs to the LOGS directory
-        for f in glob.glob(os.path.join(self.work_dir, '*.log.txt2')):
+        for f in glob.glob(os.path.join(self.work_dir, '*.log.txt')):
             shutil.move(f, os.path.join(self.out_dir, 'LOGS'))
         for f in glob.glob(os.path.join(self.work_dir, '*.sh')):
             shutil.move(f, os.path.join(self.out_dir, 'LOGS'))

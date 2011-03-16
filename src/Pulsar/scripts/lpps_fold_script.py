@@ -85,13 +85,18 @@ if __name__ == '__main__':
     for f in os.listdir(search_inf_dir): 
         shutil.copy(os.path.join(search_inf_dir, f), canddir)
     
+    # reconstruct path to rfifind produced mask file
+    rfifind_mask_file = os.path.join(search_out_dir, 'RFIFIND', 
+        options.basename + '_rfifind.mask')
+    
     # prepare the keyword arguments dictionary to give to the folding module
     kwargs = {
         'canddir' : canddir,
         'folddir' : folddir,
         'subbdir' : os.path.abspath(options.subbdir),
-        'ncores' : options.ncores,
+        'n_cores' : options.ncores,
         'basename' : options.basename,
+        'mask_filename' : rfifind_mask_file
     }
     main(**kwargs)
 
