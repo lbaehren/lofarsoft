@@ -36,7 +36,8 @@ class Op_wavelet_atrous(Op):
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Wavelet   ")
         if img.opts.atrous_do:
-          mylog.info("Decomposing gaussian residual image into a-trous wavelets")
+          mylog.info("Decomposing Gaussian residual image into a-trous wavelets")
+          print "Decomposing Gaussian residual image into a-trous wavelets : "
           dobdsm = img.opts.atrous_bdsm_do
           filter = {'tr':{'size':3,'vec':[1./4,1./2,1./4], 'name':'Triangle'}, 
                     'b3':{'size':5, 'vec':[1./16,1./4,3./8,1./4,1./16], 'name':'B3 spline'}}
@@ -88,10 +89,12 @@ class Op_wavelet_atrous(Op):
               b1 = b1*fwsig; b2 = b2*fwsig
               cdelt = [abs(img.header['cdelt1']), abs(img.header['cdelt2'])]
               wopts['beam'] = (sqrt(wid*wid+b1*b1)*cdelt[0], sqrt(wid*wid+b2*b2)*cdelt[1], 0.0)
-
+              if img.opts.show_progress == True:
+                  wopts['show_progress'] = True
               #all wrong beams
 
               wimg = Image(wopts)
+              wimg.wcs_obj = img.wcs_obj
               wimg.pixel_beam = (wopts['beam'][0]/fwsig/cdelt[0], wopts['beam'][1]/fwsig/cdelt[1], wopts['beam'][2])
               wimg.log = 'Wavelet.'
               self.FITS_simple(wimg, img, w, '.atrous.w'+`j`)
@@ -105,7 +108,8 @@ class Op_wavelet_atrous(Op):
               del wimg
 
           self.morphfilter_pyramid(img)
-
+          self.make_atrous_gaus_model(img)
+          
           pyfits.writeto(img.imagename + '.atrous.cJ.fits',im_new.transpose(), img.header, clobber=True)
           mylog.info('%s %s' % ('Wrote ', img.imagename + '.atrous.cJ.fits'))
 
@@ -214,7 +218,47 @@ class Op_wavelet_atrous(Op):
             pl.title('J = '+str(jj+1))
         pl.savefig(img.imagename+'.pybdsm.atrous.pyramidsrc.png')
 
+#######################################################################################################
 
+    def make_atrous_gaus_model(self, img):
+        import functions as func
+        
+        shape = img.ch0.shape
+        fimg = N.zeros(shape, dtype=float)
+        for i, atrgaus in enumerate(img.atrous_gaussians):
+            thresh = img.atrous_opts[i].fittedimage_clip
+            for g in atrgaus():
+                C1, C2 = g.centre_pix
+                isl = img.atrous_islands[i][g.island_id]
+                b = self.find_bbox(thresh*isl.rms, g)
+
+                bbox = N.s_[max(0, int(C1-b)):min(shape[0], int(C1+b+1)),
+                            max(0, int(C2-b)):min(shape[1], int(C2+b+1))]
+
+                x_ax, y_ax = N.mgrid[bbox]
+                fimg[bbox] += func.gaussian_fcn(g, x_ax, y_ax)
+
+        img.resid_gaus_atrous = img.ch0 - fimg - img.model_gaus
+        img.model_gaus_atrous = fimg + img.model_gaus
+
+    def find_bbox(self, thresh, g):
+        """Calculate bounding box for gaussian.
+
+        This function calculates size of the box for evaluating
+        gaussian, so that value of gaussian is smaller than threshold
+        outside of the box.
+
+        Parameters:
+        thres: threshold
+        g: Gaussian object
+        """
+        
+        from math import ceil, sqrt, log
+        A = g.peak_flux
+        S = g.size_pix[0]
+        return ceil(S*sqrt(-2*log(abs(thresh)/A)))
+
+        
 #######################################################################################################
 
 class Pyramid_source(object):

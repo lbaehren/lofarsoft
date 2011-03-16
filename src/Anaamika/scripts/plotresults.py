@@ -46,13 +46,19 @@ def plotresults(img):
     origin='lower'
     colours = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
     styles = ['-', '-.', '--']
+    if img.opts.atrous_do:
+        model_img = img.model_gaus_atrous
+        resid_img = img.resid_gaus_atrous
+    else:
+        model_img = img.model_gaus
+        resid_img = img.resid_gaus
     if img.opts.shapelet_do:
         tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Gaussian Model Image', 'Gaussian Residual Image', 'Shapelet Model Image', 'Shapelet Residual Image']  
-        images = [img.ch0, img.ch0, img.model_gaus, img.resid_gaus, img.model_shap, img.resid_shap]
+        images = [img.ch0, img.ch0, model_img, resid_img, img.model_shap, img.resid_shap]
         numy = 3
     else:
         tit = ['Original Image\n(arbitrary logarithmic scale)', 'Islands (hatched boundaries) and\nBest-fit Gaussians (ellipses)', 'Gaussian Model Image', 'Gaussian Residual Image']
-        images = [img.ch0, img.ch0, img.model_gaus, img.resid_gaus]
+        images = [img.ch0, img.ch0, model_img, resid_img]
         numy = 2
 
     fig = pl.figure(figsize=(10.0,10.0))
@@ -101,6 +107,13 @@ def plotresults(img):
                 for g in isl.gaul:
                     ellx, elly = func.drawellipse(g)
                     ax2.plot(ellx, elly, color = col, linestyle = style)
+          if hasattr(img, 'atrous_gaussians'):
+              for atrgaus in img.atrous_gaussians:
+                  for atrg in atrgaus():
+                      col = 'r'
+                      style = '-'
+                      ellx, elly = func.drawellipse(atrg)
+                      ax2.plot(ellx, elly, color = col, linestyle = style)
 
       if i == 1:
           ax2.imshow(N.transpose(im), origin=origin, interpolation='nearest',vmin=vmin, vmax=vmax, \
