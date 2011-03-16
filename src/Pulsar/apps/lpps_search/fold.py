@@ -36,7 +36,6 @@ OPTIONAL_OPTIONS = ['ncores']
 def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern, 
         mask_filename = '' ):
     '''Perform the pulsar fold.'''
-    mask_filename = '' 
     commands = []
     commands.append(get_command(
         *get_folding_command(cand_dir, basename, accel_cand, 
