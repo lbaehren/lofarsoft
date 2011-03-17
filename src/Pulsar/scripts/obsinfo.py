@@ -41,6 +41,9 @@ linkedhtmlstem=""   # filestem of linked html files if is_linkedhtml = True
 is_rebuild = False
 # if True then updates only the records in the dumpfile without checking if new obs appeared
 is_update = False
+# if True then deletes only obsids from db file from --obsids option, or ones that meet
+# --from and/or --to conditions
+is_delete = False
 # list of ObsIDs to be updated (only can be used with --update option)
 update_obsids = []
 # if True, then new obs (the ones not in the db) will be processed and added to db
@@ -1285,6 +1288,7 @@ def usage (prg):
           -u, --update               - update db file only, new observations in /data? won't be added\n\
                                        This option can be used together with --from and --to to update only some observations\n\
           -a, --append               - process only those obs (usually new ones) that are not in the database\n\
+          --delete                   - delete ObsIDs from db file listed in --obsids and/or meet --from, --to conditions\n\
           --obsids <ObsIDs>          - set the list of ObsIDs to be updated or accessed. This option can be used only with either\n\
                                        -u or without all of -r, -u, and -a. ObsIDs should be separated by comma with no spaces,\n\
                                        range symbol '-' is not allowed\n\
@@ -1321,7 +1325,7 @@ def parsecmd(prg, argv):
 
 	global dumpfile
 	try:
-		opts, args = getopt.getopt (argv, "hf:t:v:rua", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "append", "debug", "stats", "dbfile=", "norsync", "obsids=", "search=", "hostdir=", "basehrefdir=", "htmltitle=", "statevol-links"])
+		opts, args = getopt.getopt (argv, "hf:t:v:rua", ["help", "sort=", "from=", "html=", "to=", "lse=", "view=", "linkedhtml=", "rebuild", "update", "delete", "append", "debug", "stats", "dbfile=", "norsync", "obsids=", "search=", "hostdir=", "basehrefdir=", "htmltitle=", "statevol-links"])
 		for opt, arg in opts:
 			if opt in ("-h", "--help"):
 				usage(prg)
@@ -1374,6 +1378,9 @@ def parsecmd(prg, argv):
 			if opt in ("-u", "--update"):
 				global is_update
 				is_update = True
+			if opt in ("--delete"):
+				global is_delete
+				is_delete = True
 			if opt in ("-a", "--append"):
 				global is_append
 				is_append = True
@@ -1470,14 +1477,14 @@ if __name__ == "__main__":
 	# parsing command line
 	parsecmd (sys.argv[0].split("/")[-1], sys.argv[1:])
 
-	if (is_rebuild and is_update) or (is_rebuild and is_append) or (is_update and is_append):
-		print "Only one action can be done at a time: rebuild (-r), update (-u), or append (-a)"
-		print "To just access the db don't use any of -r, -u, or -a"
+	if (is_rebuild and is_update) or (is_rebuild and is_append) or (is_rebuild and is_delete) or (is_update and is_append) or (is_update and is_delete) or (is_append and is_delete):
+		print "Only one action can be done at a time: rebuild (-r), update (-u), append (-a), or delete (--delete)"
+		print "To just access the db don't use any of -r, -u, -a, or --delete"
 		sys.exit()
 
 	# if only statistics is required, then switiching off all other keys
 	if is_stats:
-		is_rebuild = is_update = is_append = False	
+		is_rebuild = is_update = is_append = is_delete = False	
 
 	# checking the internet (ssh) connection to lse nodes
 	# if node does not respond, exclude it from the storage_nodes
@@ -1639,6 +1646,25 @@ if __name__ == "__main__":
 			newobsids=np.append(newobsids, list(np.compress(np.array([obstable[r].subcluster for r in obsids]) == "sub?", obsids)))
 			newobsids = np.flipud(np.sort(np.unique(newobsids), kind='mergesort'))
 			obsids = newobsids
+
+	# removing selected ObsIDs from db file
+	if is_delete:
+		try:  # use try block in case some ObsIDs are not in the db file
+			if np.size(update_obsids) == 0:  # list of ObsIDs to delete is not specified
+				obsids = dbobsids
+				if is_from:
+					fromsecs=time.mktime(time.strptime(fromdate, "%Y-%m-%d"))
+					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) >= fromsecs, obsids))
+				if is_to:
+					tosecs=time.mktime(time.strptime(todate, "%Y-%m-%d")) + 86399
+					obsids=list(np.compress(np.array([obstable[r].seconds for r in obsids]) <= tosecs, obsids))
+				for id in obsids:
+					del obstable[id]
+				obsids = []
+			else: # removing specific ObsIDs from the --obsids list
+				for id in update_obsids:
+					del obstable[id]
+		except: pass
 
 	# Number of ObsIDs
 	Nobsids = np.size(obsids)
@@ -1874,7 +1900,7 @@ if __name__ == "__main__":
 			debugcounter += 1
 
 	# saving the database to disk
-	if is_rebuild or is_update or is_append:
+	if is_rebuild or is_update or is_append or is_delete:
 		# dump obs table to the file
 		dfdescr = open (dumpfile, "w")
 		cPickle.dump(obstable, dfdescr, True)
@@ -1895,7 +1921,7 @@ if __name__ == "__main__":
 	# copying to another list to keep the old one
 	obskeys = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
 
-	if np.size(update_obsids) != 0 and (not is_rebuild) and (not is_update) and (not is_append):
+	if np.size(update_obsids) != 0 and (not is_rebuild) and (not is_update) and (not is_append) and (not is_delete):
 		obskeys = update_obsids
 	else:
 		# if is_from and/or is_to are set, then we have to exclude those records
@@ -1955,7 +1981,7 @@ if __name__ == "__main__":
 	if is_append:
 		print "Number of new observations found in %s: %d" % (", ".join(storage_nodes), np.size(obsids))
 
-	if (is_rebuild or is_update or is_append) or np.size(update_obsids) == 0:
+	if (is_rebuild or is_update or is_append or is_delete) or np.size(update_obsids) == 0:
 		if is_from == True or is_to == True:
 			print "List only observations%s%s" % (is_from and " since " + fromdate or (is_to and " till " + todate or ""), 
                         	                              is_to and (is_from and " till " + todate or "") or "")
@@ -2036,7 +2062,7 @@ if __name__ == "__main__":
 			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), True)
 		else:
 			htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), False)
-		if (is_rebuild or is_update or is_append) or np.size(update_obsids) == 0:
+		if (is_rebuild or is_update or is_append or is_delete) or np.size(update_obsids) == 0:
 			htmlrep.datesrange()
 		htmlrep.header(viewtype, storage_nodes_string_html)
 		counter = 0
@@ -2064,7 +2090,7 @@ if __name__ == "__main__":
 				htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), True)
 			else:
 				htmlrep.obsnumber(storage_nodes, subclusters, np.size(obskeys), np.size(obsids), False)
-			if (is_rebuild or is_update or is_append) or np.size(update_obsids) == 0:
+			if (is_rebuild or is_update or is_append or is_delete) or np.size(update_obsids) == 0:
 				htmlrep.datesrange()
 			htmlrep.statistics(htmlstatfile)
 			htmlrep.linkedheader(viewtype, storage_nodes_string_html)
