@@ -970,11 +970,15 @@ namespace CR { // Namespace CR -- begin
         erg.define("latTime2D_sigConeRho",fitFuncCone2D->GetParError(0));
         erg.define("latTime2D_Conechi2NDF",fitFuncCone2D->GetChisquare()/double(fitFuncCone2D->GetNDF()));
         cout << "\nResults of cone fit (data)\n"
-             << "Rho   (1D) = " << fitFuncCone->GetParameter(0)*180./3.14159
+             << "Rho   (1D) = " << fitFuncCone->GetParameter(0)
+             << "\t +/- " << fitFuncCone->GetParError(0) << " rad "
+             << "\t = " << fitFuncCone->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncCone->GetParError(0)*180./3.14159 << " °\n"
              //<< "offset(1D) = " << fitFuncCone->GetParameter(1) << "\t +/- " << fitFuncCone->GetParError(1) << " ns\n"
              << "Chi^2 (1D) = " << fitFuncCone->GetChisquare() << "\t NDF " << fitFuncCone->GetNDF() << "\n"
-             << "Rho   (2D) = " << fitFuncCone2D->GetParameter(0)*180./3.14159
+             << "Rho   (2D) = " << fitFuncCone2D->GetParameter(0)
+             << "\t +/- " << fitFuncCone2D->GetParError(0) << " rad "
+             << "\t = " << fitFuncCone2D->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncCone2D->GetParError(0)*180./3.14159 << " °\n"
              //<< "offset(2D) = " << fitFuncCone2D->GetParameter(1) << "\t +/- " << fitFuncCone2D->GetParError(1) << " ns\n"
              << "Chi^2 (2D) = " << fitFuncCone2D->GetChisquare() << "\t NDF " << fitFuncCone2D->GetNDF() << "\n"
