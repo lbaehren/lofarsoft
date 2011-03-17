@@ -90,6 +90,24 @@ def multiply_list(l):
     """
     return reduce(lambda x,y:x*y,l)
 
+def asvec(self):
+    """
+    Return the argument as a vector, if possible, otherwise as list
+    """
+    typ=type(self)
+    if typ in hAllVectorTypes:
+        return self
+    elif typ in hBaseTypes:
+        return Vector([self])
+    elif typ==list:
+        return Vector(self)
+    elif typ in [set,tuple]:
+        return Vector(list(self))
+    elif typ in hAllArrayTypes:
+        return self.vec()
+    else:
+        return [self]
+        
 def hVector_list(self):
     """
     vec.list() -> [x1,x2,x3, ...]
@@ -150,6 +168,11 @@ def isVector(vec):
 
 #Some definitons to make pretty (and short) output of vectors
 def VecToString(self, maxlen=100):
+    """
+    see help of 'hPrettyString'
+    """
+    return hPrettyString(self,maxlen)
+    """
     if len(self) == 0:
         return "[]"
     elif len(self) <= maxlen:
@@ -161,9 +184,13 @@ def VecToString(self, maxlen=100):
         s = "[" + str(self[0]) + ", " + str(self[1]) + ", " + str(self[2]) + ", ..., " + str(self[-3]) + ", " + str(self[-2]) + ", " + str(self[-1]) + "]"
 
     return s
-
+"""
+        
 def hVector_repr(self,maxlen=100):
-    return "Vector("+typename(basetype(self))+", "+str(len(self))+", "+VecToString(self, maxlen)+")"
+    """
+    Returns a human readable string representation of the vector.
+    """
+    return "Vector("+typename(basetype(self))+", "+str(len(self))+", fill="+hPrettyString(self, maxlen)+")"
 
 #======================================================================
 #  Vector Methods/Attributes

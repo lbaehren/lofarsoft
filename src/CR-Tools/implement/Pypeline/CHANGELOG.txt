@@ -301,6 +301,16 @@ just multiply, which in principe is the faster operation)
 2011-03-16 Pypeline - rev 7321 - Heino Falcke
 - fixed hArray_setitem which had indentation errors 
 
+2011-03-16 Pypeline - rev 7321 - Heino Falcke
+-added compile script again to compile hftools
+- added hPrettyString to process a slice and and to print begin and
+end of a vector. Replaces internals of Python VecToString
+function. Old version was making copy of vector and crashed if memory
+was scarce.
+
+2011-03-16 Pypeline - rev 7331 - Heino Falcke
+- further fix of hArray_setitem bug
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

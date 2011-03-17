@@ -1,0 +1,4 @@
+#
+cd $LOFARSOFT/build/cr
+make
+make install

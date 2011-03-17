@@ -163,7 +163,7 @@ def hArray_repr(self, maxlen=100):
 
     # Compose string
 #    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+name+" # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> "+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+")"
-    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
+    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),self.getBegin(),self.getEnd(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
 
     return s
 
@@ -456,19 +456,18 @@ def hArray_setitem(self,dims,fill):
 
 
     """
+    import pdb; pdb.set_trace()
     if type(fill) in hAllListTypes:
         fill=hArray(fill)
     if type(dims)==int:
         hFill(hArray_getSlicedArray(self,dims),fill)
     elif type(dims)==tuple:# (multi-d index)
-        if type(dims[-1])==int:
-            hFill(hArray_getSlicedArray(self,dims),fill)
-        elif type(dims[-1]) in [list,IntVec]:
+        if type(dims[-1]) in [list,IntVec]:
             hSet(hArray_getSlicedArray(self,dims[:-1]),hArray(dims[-1]),fill)
         elif type(dims[-1]) == IntArray:
             hSet(hArray_getSlicedArray(self,dims[:-1]),dims[-1],fill)
         else:
-            print "Wrong type of index for array:",dims
+            hFill(hArray_getSlicedArray(self,dims),fill)
     elif type(dims) in [list,IntVec]:
         self.set(hArray(dims),fill)
     elif type(dims) == IntArray:

@@ -117,7 +117,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
 
         "blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),doc:"The size of a block being read in."},
 
-        "maxnantennas":{default:1,doc:"Maximum number of antennas to sum over (also used to allocate some vector sizes)."},
+        "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
 
         "maxchunks":{default:1,doc:"Maximum number of chunks of raw data to integrate spectrum over."},
 
@@ -498,7 +498,7 @@ class AverageSpectrum(tasks.Task):
                                 clearfile=False
                                 if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
-                                    print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
+                                    #print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
                                     plt.draw(); plt.show()
                         else: # do just a single FFT
                             if self.nspectraadded>1:
@@ -531,12 +531,12 @@ class AverageSpectrum(tasks.Task):
             print "# End File",str(self.file_start_number)+":",fname
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
-        self.mean=self.mean_antenna[:self.nantennas_total].mean().val()
-        self.mean_rms=self.mean_antenna[:self.nantennas_total].stddev(self.mean).val()
-        self.rms=self.rms_antenna[:self.nantennas_total].mean().val()
-        self.rms_rms=self.rms_antenna[:self.nantennas_total].stddev(self.rms).val()
-        self.npeaks=self.npeaks_antenna[:self.nantennas_total].mean().val()
-        self.npeaks_rms=self.npeaks_antenna[:self.nantennas_total].stddev(self.npeaks).val()
+        self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
+        self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
+        self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
+        self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
+        self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
+        self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
         self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2.
         print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
         print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"

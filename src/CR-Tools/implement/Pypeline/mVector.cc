@@ -261,7 +261,26 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 #define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output (all if negative).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hPrettyString(vec,3) -> [vec_0,vec_1,vec_3,...]
+  Usage:
+
+  hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
+
+In [1]: a=hArray(range(10))
+
+In [2]: hPrettyString(a.vec(),8)
+Out[2]: '[0,1,2,3,...,6,7,8,9]'
+
+In [3]: hPrettyString(a.vec(),10)
+Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
+
+In [4]: hPrettyString(a.vec(),12)
+Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
+
+In [5]: hPrettyString(a.vec(),1)
+Out[5]: '[0,...,9]'
+
+In [6]: hPrettyString(a.vec(),0)
+Out[6]: '[0,...,9]'
 
   \brief $DOCSTRING
   $PARDOCSTRING
@@ -269,24 +288,108 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 {
-  HString s=("[");
-  Iter it(vec), maxit;
-  if (maxlen>=0)
-    maxit=(vec+hfmin(maxlen,vec_end-vec));
-  else
-    maxit=vec_end;
-  if (vec<vec_end)
-    s+=hf2string(*it);
-  ++it;
-  while (it<maxit) {
-    s+=","+hf2string(*it);
-    ++it;
-  };
-  if ( it < vec_end ) s+=",...";
+  return hPrettyString(vec,vec_end,0,vec_end-vec,maxlen);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the contents of a slice of a vector (up to a maximum length) as a pretty string for printing
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPrettyString
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HString)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(start_slice)()("Start index.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(end_slice)()("End index).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(maxlen)()("Maximum length to output (all if negative).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
+
+  Examples:
+
+In [1]: a=hArray(range(10))
+
+In [2]: hPrettyString(a.vec(),0,10,8)
+Out[2]: '[0,1,2,3,...,6,7,8,9]'
+
+In [3]: hPrettyString(a.vec(),0,10,10)
+Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
+
+In [4]: hPrettyString(a.vec(),0,10,12)
+Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
+
+In [5]: hPrettyString(a.vec(),0,10,1)
+Out[5]: '[0,...,9]'
+
+In [6]: hPrettyString(a.vec(),0,10,0)
+Out[6]: '[0,...,9]'
+
+In [7]: hPrettyString(a.vec(),4,10,8)
+Out[7]: '[4,5,6,7,8,9]'
+
+In [8]: hPrettyString(a.vec(),4,10,4)
+Out[8]: '[4,5,...,8,9]'
+
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_slice, const HInteger end_slice, const HInteger maxlen)
+{
+  HString s("[");
+  HInteger l=max(maxlen/2,1);
+  if (maxlen<0) l=(vec_end-vec+1)/2;
+
+  Iter it, vec_start1, vec_end1, vec_start2, vec_end2;
+
+  if (start_slice>=0) vec_start1=vec+start_slice;
+  else vec_start1=vec_end+start_slice;
+
+  if (end_slice>=0) vec_end2=vec+end_slice;
+  else vec_end2=vec_end+end_slice;
+
+  vec_end1=vec_start1+l;
+  vec_start2=vec_end2-l;
+
+  if (vec_start1<vec) vec_start1=vec;
+  if (vec_start1>vec_end) vec_start1=vec_end;
+
+  if (vec_end1<vec) vec_end1=vec;
+  if (vec_end1>vec_end) vec_end1=vec_end;
+
+  if (vec_start2<vec_end1) vec_start2=vec_end1;
+  if (vec_start2>vec_end) vec_start2=vec_end;
+
+  if (vec_end2<vec_end1) vec_end2=vec_end1;
+  if (vec_end2>vec_end) vec_end2=vec_end;
+
+  it=vec_start1;
+
+  if (it<vec_end1) {
+      s+=hf2string(*it);
+      ++it;
+    };
+  
+    while(it<vec_end1) {
+      s+=","+hf2string(*it);
+      ++it;
+    };
+
+    if (it<vec_start2) s+=",...";
+    it=vec_start2;
+    
+    while (it<vec_end2) {
+      s+=","+hf2string(*it);
+      ++it;
+    };
+
   s+="]";
   return s;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Prints the contents of a vector (up to a maximum length) as a pretty string
 //$COPY_TO HFILE START --------------------------------------------------
