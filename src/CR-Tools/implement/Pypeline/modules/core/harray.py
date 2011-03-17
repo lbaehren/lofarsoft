@@ -456,7 +456,6 @@ def hArray_setitem(self,dims,fill):
 
 
     """
-    import pdb; pdb.set_trace()
     if type(fill) in hAllListTypes:
         fill=hArray(fill)
     if type(dims)==int:
