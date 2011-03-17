@@ -1,0 +1,42 @@
+#!/bin/ksh 
+
+# moves some files from _red (reduced) directory to _lta (long term archive) directory
+# such that the overview web page can still access them
+# then DELETES the _red directory
+dirs=$1
+
+for DIR in $dirs
+do
+  if [[ ! -d $DIR ]]
+  then
+     echo "Requested directory not found ($DIR);  skipping request"
+     continue
+  else
+     echo "Making a safe copy of $DIR"
+  fi
+  NEWDIR=`echo ${DIR}|sed 's/red/lta/'`
+  cd ${DIR}
+  # could remove -v later for less output
+  # -R keeps relative path names
+  echo "Performing rsync copy of files..."
+  rsyncfiles=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*_plots.tar.gz" -o -name "make*.out" -o -name "*parset" -o -name "*.log" -o -name "combined*" \)`
+  mkdir ../${NEWDIR}
+  echo rsync -avR $rsyncfiles ../${NEWDIR}
+  rsync -avR $rsyncfiles ../${NEWDIR}
+  cd ../${NEWDIR}
+  numtar=`find ./ -name "*tar.gz" -print | wc -l | awk '{print $1}'`
+  if (( $numtar > 0 ))
+  then
+        echo "At least one tar file has been copied into _lta location." 
+  else
+     echo ""
+     echo "***** WARNING: no tar file found;  delete not suggested!  ****"
+     echo ""
+  fi 
+
+  cd ..
+  chmod -R 775 $NEWDIR
+  echo "Will remove ${DIR} with the following command"
+  echo "     rm -R -I $DIR"   # make extra clear what's happening
+  rm -R -I $DIR 
+done
