@@ -1,0 +1,86 @@
+#! /usr/bin/tcsh
+
+# Grab an OBSID from the SARA grid
+# Author: Joeri van Leeuwen
+
+# set echo    # display each line after the variables and meta-characters have been substituted
+# set verbose # echo every line of your script before the variables have been evaluated
+
+# Print command line for log
+echo ""
+echo ""
+echo $0 $*
+date
+
+#default before options are read:
+set SSHHOST="lexar001"
+set SUFFIX=""
+
+# Read arguments. No suffix:
+if ($#argv == 2) then
+  set TYPE=$1
+  set OBSID=$2
+# With suffix or host
+else if ($#argv == 3) then
+  set TYPE=$1
+  set OBSID=$2
+  if ($3 =~ "lexar*") then
+    set SSHHOST=$3
+    echo "Using SSHHOST=${SSHHOST}"
+  else 
+    set SUFFIX=".$3"
+    echo "Setting SUFFIX=${SUFFIX}"
+  endif
+# With suffix and host
+else if ($#argv == 4) then
+  set TYPE=$1
+  set OBSID=$2
+  set SSHHOST=$3
+  set SUFFIX=".$4"
+# Or wrong number of arguments
+else
+    echo "Usage: $* raw|sub|meta|all OBSID [lexar001|lexar002] [suffix]"
+    echo "       Retrieves from SARA the raw/sub/meta/all data for OBSID"
+    echo "       Files names take optional suffix"
+    exit
+endif
+
+set OBSID=`echo $OBSID|sed 's/_red//'` # remove _red if input is directory listing
+set OBSID=`echo $OBSID|sed 's/_lta//'` # remove _lta if input is directory listing
+
+set JVLBIN="/home/leeuwen/bin"
+
+# What type of data
+switch ( ${TYPE} )
+  # Raw files, just get all data in OBSID dir on lse node
+  case raw:
+    set ARCHIVE="/home/leeuwen/grid/archived-at-sara.txt"
+    foreach FILENAME (`grep ${OBSID}.raw.lse0..${SUFFIX} ${ARCHIVE} | awk '{print $1}'`)
+      echo "Retrieving file: $FILENAME"
+      ${JVLBIN}/grid-pulsar-retrieve-file $FILENAME
+    end
+    breaksw
+  # Only get subbanded files from the archive _red directory
+  case sub:
+    echo "Retrieving file: ${OBSID}.sub${SUFFIX}"
+    ${JVLBIN}/grid-pulsar-retrieve-file ${OBSID}.sub${SUFFIX}
+    breaksw
+  case meta:
+    echo "Retrieving file: ${OBSID}.meta${SUFFIX}"
+    ${JVLBIN}/grid-pulsar-retrieve-file ${OBSID}.meta${SUFFIX}
+    breaksw
+  case all:
+    set ARCHIVE="/home/leeuwen/grid/archived-at-sara.txt"
+    foreach FILENAME (`grep ${OBSID}.raw.lse0..${SUFFIX} ${ARCHIVE} | awk '{print $1}'`)
+      echo "Retrieving file: $FILENAME"
+      ${JVLBIN}/grid-pulsar-retrieve-file $FILENAME
+    end
+    echo "Retrieving file: ${OBSID}.sub${SUFFIX}"
+    ${JVLBIN}/grid-pulsar-retrieve-file ${OBSID}.sub${SUFFIX}
+    echo "Retrieving file: ${OBSID}.meta${SUFFIX}"
+    ${JVLBIN}/grid-pulsar-retrieve-file ${OBSID}.meta${SUFFIX}
+    breaksw
+  default:
+    echo "Invalid input for data type. Valid options are (raw|sub|meta|all)."
+    exit
+endsw

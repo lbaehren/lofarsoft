@@ -1,0 +1,77 @@
+#! /usr/bin/tcsh
+
+# Grab a FILE from the SARA grid
+# Author: Joeri van Leeuwen
+
+# set echo    # display each line after the variables and meta-characters have been substituted
+# set verbose # echo every line of your script before the variables have been evaluated
+
+# Print command line for log
+echo $0 $*
+date
+
+#default before options are read:
+set SSHHOST="lexar001"
+set SUFFIX=""
+
+# Read arguments. No suffix:
+if ($#argv == 1) then
+  set FILENAME=$1
+# With suffix or host
+else if ($#argv == 2) then
+  set FILENAME=$1
+  set SSHHOST=$2
+  echo "Using SSHHOST=${SSHHOST}"
+# Or wrong number of arguments
+else
+    echo "Usage: $* FILENAME [lexar001|lexar002]"
+    echo "       Retrieves from SARA the file under FILENAME"
+    exit
+endif
+
+# Get all the grid variables
+set JVLBIN="/home/leeuwen/bin"
+source ${JVLBIN}/grid-pulsar-source
+
+# Set up SSH tunnel to lexar
+set SSHKEY="${HOME}/.ssh/grid-sshkey-limited"
+cp ${JVLBIN}/grid-sshkey-limited $SSHKEY
+chmod 600 $SSHKEY
+if (! -e "$SSHKEY") then
+  echo "ERROR: the sshkey ${SSHKEY} was not found. Please check with Joeri."
+  exit
+endif
+set SRMSSH="ssh -i ${SSHKEY} -l leeuwen -c arcfour $SSHHOST"
+
+# Make pipe, do transfer
+# echo "${SRMSSH} 'mkdir -p -m777 /tmp/psr; mkfifo $FILE'"
+#set echo
+${SRMSSH} "grid-pulsar-cmd-mkfifo $FILENAME"
+
+# Check if FIFO was made
+if ($status != 0) then
+  echo "ERROR: Could not ssh to create FIFO, exiting."
+  exit
+endif
+
+# Then tar the data to lexar, different wildcard options:
+${SRMSSH} "grid-pulsar-cmd-cat $FILENAME" | tar -Bxp &
+set REMOTECATPID=$!
+
+sleep 5
+${SRMSSH} "grid-pulsar-cmd-cp $FILENAME"
+
+# Check status
+if ($status != 0) then
+  echo "ERROR: code " $status "in grid copy command."
+  exit
+endif
+
+# set echo    # display each line after the variables and meta-characters have been substituted
+# set verbose # echo every line of your script before the variables have been evaluated
+
+# Make sure to kill cat, in case of error grid copy
+# sleep 5
+# kill $REMOTECATPID
+# ps aux|grep $REMOTECATPID
+
