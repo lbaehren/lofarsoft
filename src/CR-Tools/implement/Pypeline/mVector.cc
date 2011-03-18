@@ -339,7 +339,7 @@ template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_slice, const HInteger end_slice, const HInteger maxlen)
 {
   HString s("[");
-  HInteger l=max(maxlen/2,1);
+  HInteger l=hfmax(maxlen/2,1);
   if (maxlen<0) l=(vec_end-vec+1)/2;
 
   Iter it, vec_start1, vec_end1, vec_start2, vec_end2;
