@@ -89,7 +89,7 @@ value is one larger than he value in par1 in the workspace.
  file.
 """
 
-class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
+class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
     parameters = {
 
         "filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
@@ -132,7 +132,7 @@ class WorkSpace(tasks.WorkSpace("AverageSpectrum")):
         "tmpfilename":{default:"tmp",
                        doc:"Root filename for temporary data files."},
 
-        "filenames":{default:lambda ws:listfiles(ws.filefilter),
+        "filenames":{default:lambda ws:listFiles(ws.filefilter),
                     doc:"List of filenames of data file to read raw data from."},
 
         "spectrum_file":{default:lambda ws:(ws.filenames[0] if len(ws.filenames)>0 else "unknown")+".spec"+ws.tmpfileext,
@@ -391,7 +391,7 @@ class AverageSpectrum(tasks.Task):
         self.nofAntennas=0
         self.nantennas_total=0
         self.power.getHeader("increment")[1]=self.delta_frequency
-	self.updateHeader(self.power,["nofAntennas","nspectraadded","filenames","antennas_used"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
+        self.updateHeader(self.power,["nofAntennas","nspectraadded","filenames","antennas_used"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
@@ -441,10 +441,10 @@ class AverageSpectrum(tasks.Task):
                             print " # Data flagged!"
                             break
                         #            print "Time:",time.clock()-self.t0,"s for reading."
-			if self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
-			    lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
-			    upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
-			    self.cdata.randomizepeaks(lower_limit,upper_limit)
+                        if self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
+                            lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
+                            upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
+                            self.cdata.randomizepeaks(lower_limit,upper_limit)
                         if self.doublefft:
                             self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
                         else:
@@ -516,16 +516,16 @@ class AverageSpectrum(tasks.Task):
                     else: #data not ok
                         self.nspectraflagged+=1
                         #print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
-                mean/=self.nchunks
-                rms/=self.nchunks
-                self.mean_antenna[self.nantennas_total]=mean
-                self.rms_antenna[self.nantennas_total]=rms
-                self.npeaks_antenna[self.nantennas_total]=npeaks
-                self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-                l={"mean":mean,"rms":rms,"npeaks":npeaks}
-                f=open(self.quality_db_filename+".py","a")
-                f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
-                f.close()
+                    mean/=self.nchunks
+                    rms/=self.nchunks
+                    self.mean_antenna[self.nantennas_total]=mean
+                    self.rms_antenna[self.nantennas_total]=rms
+                    self.npeaks_antenna[self.nantennas_total]=npeaks
+                    self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
+                    l={"mean":mean,"rms":rms,"npeaks":npeaks}
+                    f=open(self.quality_db_filename+".py","a")
+                    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
+                    f.close()
                 print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
                 self.nantennas_total+=1
             print "# End File",str(self.file_start_number)+":",fname

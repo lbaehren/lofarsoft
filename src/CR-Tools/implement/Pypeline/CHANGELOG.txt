@@ -311,6 +311,21 @@ was scarce.
 2011-03-16 Pypeline - rev 7331 - Heino Falcke
 - further fix of hArray_setitem bug
 
+2011-03-18  Pypeline - rev 7336 - Heino Falcke
+- fixed some indentation errors ....
+- renamed listfiles to listFiles
+- added readParfiles to datareader.py - to return a dict from a
+parameter file
+- WorkSpace class definition now accepts a python parameterfile to set
+variables in a workspace. Useful to control a pipeline script, eg:
+ws=tasks.WorkSpace("MyPipeline",parfile="~/LOFAR/work/parameters.par")()
+and the ws.x, ws.y= ...
+- in workspace explicitly named paramers in call to workspace take
+precedence over parfile parameters
+- introduced pardict= keyword for WorkSpaces and Tasks which can
+contain parameters of multiple tasks
+
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

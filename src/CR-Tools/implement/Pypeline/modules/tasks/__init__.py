@@ -491,30 +491,22 @@ class TaskInit(type):
 
 class Task(object):
     """Base class from which all tasks should be derived.
+
+    *ws* - provide a workspace to initialize parameters
+    *parfile* - provide a (python) parameter file defining variables, to initialize parameters
+    *kwargs* - any parameter=value pair to set the value of the respective parameter in the workspace
     """
     __metaclass__ = TaskInit
-
 
     def __init__(self,ws=None,parfile=None,**kwargs):
 
         self.__modulename__=self.__module__.split(".")[-1]
         self.__taskname__=self.__class__.__taskname__
-#       config.task_name=self.__taskname__
-#       config.task_instance=self
         task_name=self.__taskname__
         task_instance=self
 
-        margs=kwargs.copy() #Reading parameters from a file
-        if type(parfile)==str:
-            if os.path.exists(parfile):
-                fargs={}
-                f=open(parfile)
-                exec f in fargs
-                del fargs["__builtins__"]
-                fargs.update(margs)
-                margs=fargs.copy()
-            else:
-                print "ERROR Task: Parameter file",parfile,"does not exist."
+        margs=readParfiles(parfile) #Reading parameters from a file
+        margs.update(**kwargs)
 
         if not hasattr(self,"WorkSpace"): #Create a Default WorkSpace class if it does not exist yet
             if hasattr(self,"parameters"):
@@ -544,8 +536,10 @@ class Task(object):
                             property_dict[p]={default:v}
             self.WorkSpace=WorkSpace(self.__taskname__,parameters=property_dict) # This creates the work space class that is used to create the actual ws instance
 
-        if ws==None: self.ws=self.WorkSpace(**margs) #create default workspace of this task
-        else: self.ws=ws(**margs) # or take the one which was provided already
+        if ws==None:
+            self.ws=self.WorkSpace(**margs) #create default workspace of this task
+        else:
+            self.ws=ws(**margs) # or take the one which was provided already
 
         #Add setter and getter functions for parameters to task class
         pp=set(self.ws.getParameterNames(self,all=True)).difference(set(dir(self)))
@@ -554,7 +548,6 @@ class Task(object):
 
         self._initialized=False
         self.ws.evalInputParameters()
-
 
     def callinit(self,forceinit=False):
         """
@@ -610,18 +603,20 @@ class Task(object):
 
         *parfile* = filename - read parameters from file
 
-        *ws* - replace workspace with a different Workspace and then
+        *pardict* - provide a dict with paramter value pairs or a
+         taskname and a paramter dict. Parameters from the top level
+         and in a dict with a taskname will be assigned. The dicts can
+         be nested.
+
+         *ws* - replace workspace with a different Workspace and then
          update parameters therein as provided in the file and the
          keywords.
-
+ 
          ws parameters will be overwritten by file parameter and they
          will be overwritten by keyword parameters (which thus have
          the highest priority).
         """
-        parfile=None; ws=None; init=False
-        if kwargs.has_key("parfile"):
-            parfile=kwargs["parfile"]
-            del kwargs["parfile"]
+        ws=None; init=False
         if kwargs.has_key("ws"):
             ws=kwargs["ws"]
             del kwargs["ws"]
@@ -635,8 +630,9 @@ class Task(object):
 
         self.callinit(forceinit=init) #Call initialization if not yet done
 
-        if not ws==None: self.ws=ws           # Updating WorkSpace
-        self.ws(parfile=parfile,**kwargs)
+        if not ws==None:
+            self.ws=ws           # Updating WorkSpace
+        self.ws(**kwargs)
 
         if len(self.ws._positionals) < len(args):
             print "Number of positional arguments provided (",len(args),") is larger than required number (",len(self.ws._positionals),"). Stopping."
@@ -818,8 +814,24 @@ class WorkSpaceType(type):
 #        cls.__taskname__ = name
 #        super(WorkSpaceType, cls).__init__(name, bases, dct)
 
-    def __call__(cls, taskname='Task',parameters={},**kwargs):
+    def __call__(cls, taskname='Task',parameters={},  parfile=None,**kwargs):
         """ Create a new instance.
+
+        *taskname* the name of the task for which the Workspace is
+        created (only for output)
+
+         *parameter* = a dict defining the parameters of the form
+         dict(par1={default:val1,doc:"Documentation"},...)
+         
+         *parfile* - if a string, then open filename and read in
+         workspace parameters from the file (which is a simple python
+         file defining variables, i.e. x=1, y=2,... etc.). The
+         parameters are then defined in the workspace with their
+         values as defaults.
+
+         *kwarg* - any keyword argument 'kwarg' can be added at will,
+         to define additional parameters and their default values.
+
         """
 #       print "Calling WorkSpaceClass"
 
@@ -829,10 +841,14 @@ class WorkSpaceType(type):
 #        obj=type(taskname+cls.name,cls.bases,cls.dct)
         obj=type(taskname+cls.__name__,cls.__bases__,cls.__dict__.copy())
 
+        for k,v in readParfiles(parfile).items():
+            parameters[k]={default:v}
+
         for k,v in kwargs.items():
             parameters[k]={default:v}
         obj.parameters = parameters
         obj.__taskname__=taskname
+
         return obj
 
 """
@@ -846,11 +862,28 @@ class WorkSpace(object):
     This class holds all parameters, scratch arrays and vectors used
     by the various tasks. Hence this is the basic workspace in the
     memory.
-    """
+
+    If 'ws' is the workspace the you can access parameters 'parname' in
+    the workspace as 'ws.parname' and set them with 'ws.parname=value'.
+
+    The 'ws.parname' se are actually getter and setter functions. The
+    actual value is stored in ws._parnanme and should not be accessed.
+
+    Every workspace actually creates its own new class, which contains
+    these getter and setter functions. The workspace is defined, e.g. by
+
+    *pardict* - provide a dict with paramter value pairs or a
+    taskname and a paramter dict. Parameters from the top level
+    and in a dict with a taskname will be assigned. The dicts can
+    be nested.
+
+    *parfile* - provide a filename from which to read parameters
+    in the form par1=val1, par2=val2,....
+
+     """
     __metaclass__ = WorkSpaceType
 
     def __init__(self,**args):
-#       pdb.set_trace()
         if not hasattr(self,"parameters"): self.parameters={}
         self.parameter_properties=self.parameters.copy()
         self.parameterlist=set(self.parameter_properties.keys())
@@ -863,8 +896,45 @@ class WorkSpace(object):
         self._known_methods=set()
         self._known_methods.update(set(dir(self)))
         self.addParameters(self.parameter_properties)
-        if len(args)>0: self(**args) # assign parameter values from the parameter list
+        self.evalInputParameters()
+        if len(args)>0:
+            self(**args) # assign parameter values from the parameter list
 
+    def setParFromDict(self,d,root=True, taskname=None, follow_tree=False):
+        """
+        Set parameters in the workspace from parameters in a dict. If
+        a taskname is provided and a key in the dict matches the
+        taskname and the value is a dict again, then also apply all
+        values in the dict. If follow_tree=True, then go recursively
+        through all dicts to see if there is one key with an
+        associated dict value that matches taskname.
+
+        The function will not complain if a parameter in the dict is
+        not known to the workspace. It will simply ignore it.
+        
+        *root* = True - This is the toplevel dict of global
+        parameters. Set all toplevel key,value pares as parameters in
+        the workspace. If False, only do so for a dict that is a
+        value of a key matching taskname.
+
+        *taskname* - Name of the task to search for in the recursive
+        search. Set parameters in workspace if a key has that name
+        and has a dict as value.
+
+        *follow_tree* = False - If True, recursively go through all
+        dicts on toplevel (and lower) which are not a parameter in
+        the workspace.
+
+        """
+        if root:
+            for k,v in d.items():
+                if (k in self.parameterlist): # This is a top-level, i.e. global parameter
+                    self[k]=v
+        for k,v in d.items():
+            if (k==taskname) and (type(v) == dict): # This is a parameter for the current task, stop going through tree
+                self.setParFromDict(v)
+            elif taskname and follow_tree and (type(v)==dict): # A taskname is provided and a dict, then go through the tree and search for the taskname 
+                self.setParFromDict(v,root=False,taskname=self.__taskname__,follow_tree=True)
 
     def reset(self,restorecallparameters=False):
         """
@@ -881,7 +951,7 @@ class WorkSpace(object):
         self.clearModifications()
 
 
-    def __call__(self,parfile=None,**args):
+    def __call__(self,pardict={},parfile=None,**args):
         """
         Usage:
 
@@ -890,25 +960,25 @@ class WorkSpace(object):
         The call function lets one assign and/or update known
         parameters simply by calling the workspace with the parameters
         as arguments.
-        """
 
-        margs=args.copy() #Reading parameters from a file
-        if type(parfile)==str:
-            if os.path.exists(parfile):
-                fargs={}
-                f=open(parfile)
-                exec f in fargs
-                del fargs["__builtins__"]
-                fargs.update(margs)
-                margs=fargs.copy()
-            else:
-                print "ERROR Task: Parameter file",parfile,"does not exist."
+        *pardict* - provide a dict with paramter value pairs or a
+         taskname and a paramter dict. Parameters from the top level
+         and in a dict with a taskname will be assigned. The dicts can
+         be nested.
+
+        *parfile* - provide a filename from which to read parameters
+         in the form par1=val1, par2=val2,....
+        """
+        self.setParFromDict(pardict,root=True, taskname=self.__taskname__, follow_tree=True)
+            
+        margs=readParfiles(parfile) #Reading parameters from a file
+        margs.update(**args)
 
         for k,v in margs.items():
             if k in self.parameterlist:
                 self[k]=v
             else:
-		print "Warning ws.__call__: Parameter ",k,"not known."
+                print "Warning ws.__call__: Parameter ",k,"not known."
         return self
 
 

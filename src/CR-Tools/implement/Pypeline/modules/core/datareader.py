@@ -21,13 +21,13 @@ def root_filename(filename,extension=".PCR"):
     else:
 	return filename
 
-def listfiles(unix_style_filter):
+def listFiles(unix_style_filter):
     """
     Usage:
 
-    listfiles(unix_style_filter) -> list of filenames
+    listFiles(unix_style_filter) -> list of filenames
 
-    listfiles takes a string or a list of strings as argument which
+    listFiles takes a string or a list of strings as argument which
     contain unix-style filename filters that can include
     '.','..','*','?','~','$HOME', and other environement variables.
 
@@ -36,7 +36,7 @@ def listfiles(unix_style_filter):
 
     Example:
 
-listfiles("$LOFARSOFT/*")
+listFiles("$LOFARSOFT/*")
 
  ['/Users/falcke/LOFAR/usg/asap_data.tar',
  '/Users/falcke/LOFAR/usg/build',
@@ -50,7 +50,7 @@ listfiles("$LOFARSOFT/*")
  '/Users/falcke/LOFAR/usg/release',
  '/Users/falcke/LOFAR/usg/src']
 
-listfiles(["$LOFARSOFT/*.txt","~/.ema*"])
+listFiles(["$LOFARSOFT/*.txt","~/.ema*"])
 
 ['/Users/falcke/LOFAR/usg/CMakeLists.txt',
  '/Users/falcke/.emacs',
@@ -62,6 +62,41 @@ listfiles(["$LOFARSOFT/*.txt","~/.ema*"])
         ll += glob.glob(os.path.expandvars(os.path.expanduser(l)))
     if ll.count("."): del ll[ll.index(".")]
     return ll
+
+def readParfiles(parfile):
+    """
+    Open one or multipe parameter (i.e. python) files and return all
+    values defined in there as a dict. If file does not exist or
+    parfile==None, simply return and empty dict.
+
+    The filename can contain environemnt variables, HOME, or pattern
+    matching (e.g., '*').
+
+    See also: listFiles
+    
+    Example:
+
+    File.par:
+    x=1
+    y=2
+
+    readFile("~/File.par") -> {"x":1,"y":2}
+    
+    """
+    pardict={}
+    if type(parfile)==str:
+        lf=listFiles(parfile)
+        if len(lf)>0:
+            for l in lf:
+                f=open(l,"r")
+                if f:
+                    exec f in globals(),pardict
+		else:
+		    print "Error: Opening parameter file",l,"failed."
+	else:
+            print "Error: parameter files",parfile,"not found."
+    return pardict
+
 
 #------------------------------------------------------------------------
 # cr DataReader Class

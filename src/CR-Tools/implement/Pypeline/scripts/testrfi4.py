@@ -1,6 +1,19 @@
 """
 execfile("/Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/scripts/testrfi4.py")
 """
+
+#Version with pardict
+pardict=dict(doplot=False,
+             AverageSpectrum=dict(delta_nu=2000,nantennas_start=0,nantennas_stride=2,filefilter='~/data/Pulses/*-0.h5',maxnantennas=1,maxnchunks=1),
+             FitBaseline=dict(ncoeffs=40,numax=85,numin=20,fittype="POLY",ApplyBaseline=dict(doplot=True))
+             )
+
+avspec=tasks.averagespectrum.AverageSpectrum(pardict=pardict); ws=avspec(); sp=ws.power
+fitb=tasks.fitbaseline.FitBaseline(pardict=pardict)(sp)
+calcb=tasks.fitbaseline.CalcBaseline()(sp,pardict=pardict)
+apply_baseline=tasks.fitbaseline.ApplyBaseline(pardict=pardict)(sp)
+
+#The same with 
 #First calculate average spectrum of even antennas in station, calculate baseline and identify RFI lines
 sp=tasks.averagespectrum.AverageSpectrum()(delta_nu=1000,nantennas_start=0,nantennas_stride=2,filefilter='~/data/Pulses/*-0.h5',maxnantennas=96).power 
 fitb=tasks.fitbaseline.FitBaseline()(sp,ncoeffs=40,numax=85,numin=20,fittype="POLY")
