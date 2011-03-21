@@ -81,7 +81,7 @@ def run_as_script(command_list, script_filename, log_filename):
     Run a list of commands as script, return subprocess.Popen instance.
     '''
     create_script(command_list, script_filename)
-    p = subprocess.Popen(script_filename + '>' + log_filename + '2>&1',
+    p = subprocess.Popen(script_filename + '>' + log_filename + ' 2>&1',
         shell=True)
 
     return p

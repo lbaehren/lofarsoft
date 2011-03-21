@@ -20,10 +20,12 @@ from lpps_search import crawler
 from lpps_search import inf
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
+from lpps_search.util import MissingOptionException
+from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.sift import sift_accel_cands
-from lpps_search.sift import plot_p_histogram, plot_f_histogram
-
+from lpps_search.sift import plot_p_histogram, plot_f_histogram, plot_p_dm
+import knownpulsar
 
 def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern, 
         mask_filename = '' ):
@@ -101,6 +103,7 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
 
 def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8):
     '''Importable version of the whole script.'''
+
     # Check that the directories are available and that the output directory
     # is empty and writable.
     cand_dir = os.path.abspath(canddir)
@@ -121,6 +124,7 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8):
         print 'In directory %s there are no candidate files.' % cand_dir
         assert len(sifted_candidates) > 0
     
+    bright_pulsars = knownpulsar.load_bright_pulsar_catalog()
     # Make histograms of candidate period and candidate frequency before and
     # after sifting.
     histogram_dir = os.path.join(fold_dir, 'CANIDATE_HISTOGRAMS')
@@ -130,13 +134,19 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8):
             os.path.join(histogram_dir, 'before_sifting_periods.pdf'))
         plot_f_histogram(unsifted_candidates,
             os.path.join(histogram_dir, 'before_sifting_frequencies.pdf'))
+        plot_p_dm(unsifted_candidates, bright_pulsars, 
+            os.path.join(histogram_dir, 'before.pdf'))
     if sifted_candidates: 
         plot_p_histogram(sifted_candidates, 
             os.path.join(histogram_dir, 'after_sifting_periods.pdf'))
         plot_f_histogram(sifted_candidates,
             os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
+        plot_p_dm(sifted_candidates, bright_pulsars, 
+            os.path.join(histogram_dir, 'after.pdf'))
+
     # using knowledge about the directory layout:
     subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')
+
     # construct all the folding commandlines
     folding_commands = [['cd %s' % os.path.join(fold_dir, 'CORE_%d' % i)] for i in range(n_cores)]
     for i, c in enumerate(sifted_candidates):

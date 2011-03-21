@@ -20,7 +20,8 @@ from matplotlib import pyplot
 # LOFAR PILOT PULSAR SURVEY imports
 from lpps_search import crawler
 from lpps_search import inf
-
+from lpps_search import knownpulsar
+import duplicates 
 
 def plot_p_histogram(candidates, full_path):
     l = [c.p for c in candidates]
@@ -37,6 +38,19 @@ def plot_f_histogram(candidates, full_path):
     pyplot.hist(l, 1000, histtype='step')
     pyplot.xlabel('Frequency (Hz)')
     pyplot.ylabel('Number of candidates')
+    pyplot.savefig(full_path)
+    pyplot.clf()
+
+def plot_p_dm(candidates, bright_pulsars, full_path):
+    c_dms = [c.DM for c in candidates]
+    c_ps = [c.p for c in candidates]
+    bp_dms = [bp.dm for bp in bright_pulsars]
+    bp_ps = [bp.p0 for bp in bright_pulsars]
+    pyplot.clf()
+    pyplot.scatter(bp_ps, bp_dms, marker='s')
+    pyplot.scatter(c_ps, c_dms, marker='x')
+    pyplot.xlabel('Period (s)')
+    pyplot.ylabel('Dispersion measure (cm^-3 pc)')
     pyplot.savefig(full_path)
     pyplot.clf()
 
@@ -83,10 +97,21 @@ def sift_accel_cands(cand_dir, basename):
         if accel_cands:
             accel_cands = sifting.remove_DM_problems(accel_cands, 2, dm_strs, 1.)
         if accel_cands:
-            accel_cands.sort(sifting.cmp_sigma)
-        # PRESTO seems to return None in stead of an empty list
-        if accel_cands == None: accel_cands = [] 
-        MAX_CANDIDATES = 10
-        sifted_accelcands.extend(accel_cands[:MAX_CANDIDATES])
+            accel_cands = sifting.remove_harmonics(accel_cands)
+        if accel_cands:
+            bpc = knownpulsar.load_bright_pulsar_catalog()
+            accel_cands = knownpulsar.remove_bright_pulsars(accel_cands, bpc)
+        if accel_cands:
+            accel_cands = duplicates.remove_duplicates(accel_cands)
+        sifted_accelcands.extend(accel_cands)
+    MAX_CANDIDATES = 10 * len(list(accel_cands_found_for.keys()))
+    sifted_accelcands = duplicates.remove_duplicates(sifted_accelcands)
+    
+    if sifted_accelcands:
+        sifted_accelcands.sort(sifting.cmp_sigma)
+    # PRESTO seems to return None in stead of an empty list
+    if sifted_accelcands == None: sifted_accelcands = []
+
+    sifted_accelcands = sifted_accelcands[:MAX_CANDIDATES]
     return unsifted_accelcands, sifted_accelcands 
 
