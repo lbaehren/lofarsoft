@@ -13,6 +13,7 @@ from pycrtools import datacheck as dc
 from pycrtools import rficlean as rf
 from pycrtools import pulsefit as pf
 from pycrtools import matching as match # possibly push this down to pulsefit?
+from pycrtools import tasks
 # import beamformer as bf
 
 antennaset = 'LBA_OUTER' # hack around missing info in data files
@@ -35,7 +36,7 @@ def writeDict(outfile, dict):
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
 
-def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionResult, filename, timestamp):
+def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionResult, filename, timestamp, sampleNumber):
     d = triggerFitResult
     az = str(d["az"])
     el = str(d["el"])
@@ -66,6 +67,7 @@ def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionRe
     outString += summedPulseHeight + ' ' + coherencyFactor + ' '
 
     outString += str(timestamp) + ' '
+    outString += str(sampleNumber) + ' '
     outString += filename
     outfile.write(outString + '\n')
 
@@ -73,10 +75,11 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
     outfile = open(outfilename, mode='a')
-    if not os.path.isfile(asciiFilename):
+    if not os.path.isfile(asciiFilename) or os.path.getsize(asciiFilename) < 10:
         asciiOutfile = open(asciiFilename, mode='a')
-        headerString = 'trig.az trig.el trig.mse odd.az odd.el odd.R odd.height even.az even.el even.R even.height avgCount maxCount summedHeight coherency time filename\n'
+        headerString = 'trig.az trig.el trig.mse odd.az odd.el odd.R odd.height even.az even.el even.R even.height avgCount maxCount summedHeight coherency time samplenumber filename\n'
         asciiOutfile.write(headerString)
+        asciiOutfile.flush() # so other threads will see it
     else:
         asciiOutfile = open(asciiFilename, mode='a') # hmm, duplicate code
 
@@ -105,16 +108,27 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
             continue
         qualityCheckResult = result
         fileTimestamp = crfile["TIME"][0]
+        fileSampleNumber = crfile["SAMPLE_NUMBER"][0]
         triggers = match.readtriggers(crfile)
+        #import pdb; pdb.set_trace()
         if len(triggers) == 0:
             writeDict(outfile, dict(success=False, reason="Trigger file couldn't be read"))
             continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
         result = pf.initialDirectionFit(crfile, cr_efield, fitType = 'linearFit')
+        writeDict(outfile, result)       
+        
+        #result = pf.triggerMessageFit(crfile, triggers, 'linearFit') 
+        triggerMessageFit = tasks.pulsefittask.triggerMessageFit() # MOVE
+        print 'DOING NEW TRIGGER MSG FIT TASK'
+        triggerMessageFit(datafile = crfile, triggers = triggers, fitType = 'linearFit')
+        result = triggerMessageFit.result
+        print result
+        print 'DONE'
         writeDict(outfile, result)
-        result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
-        writeDict(outfile, result)
+#        result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
+#        writeDict(outfile, result)
         if not result["success"]:
             continue
         triggerFitResult = result
@@ -130,7 +144,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
             print 'EROR!'
             print msg
         writeResultLine(asciiOutfile, qualityCheckResult, triggerFitResult, fullDirectionResult,
-                        crfile.files[0].filename, fileTimestamp)
+                        crfile.files[0].filename, fileTimestamp, fileSampleNumber)
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
 
@@ -144,23 +158,24 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
     # end for
     outfile.close()
     asciiOutfile.close()
-    return (bfEven, bfOdd)
+    #return (bfEven, bfOdd)
 
 # get list of files to process
+nthreads = 2
 if len(sys.argv) > 2:
     datafiles = sys.argv[1]
 #    triggerMessageFile = sys.argv[2]
-    print datafiles
-    print 'Too many options!'
+    nthreads = int(sys.argv[2])
+    print 'Using %d threads' % nthreads
 elif len(sys.argv) > 1:
     datafiles = sys.argv[1]
     print 'Taking default trigger message file (i.e. name constructed from date and station name in the hdf5 data file).'
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5'
-    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-441.h5'
+#    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-441.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-12*.h5'
 sortstring = 'sort -n --field-separator="-" --key=18'
 outfile = 'crPipelineResults.txt'
 outfileAscii = 'asciiPipelineResults.txt'
@@ -176,25 +191,25 @@ files = output.splitlines()
 nofiles = len(files)
 print "Number of files to process:", nofiles
 
-if nofiles > 10:
+if nofiles > nthreads:
     print '--- Spawning new processes for each file ---'
 
-    thisProcess = subprocess.Popen(['./crpipeline.py', files[0]])
-    thisProcess2 = subprocess.Popen(['./crpipeline.py', files[1]])
-    i = 2
+    processes = []
+    for i in range(nthreads):
+        thisProcess = subprocess.Popen(['./crpipeline.py', files[i]])
+        processes.append(thisProcess)
+    i = nthreads
+#    i = 2
     while i < nofiles:
         time.sleep(0.33)
-        if thisProcess.poll() != None:
-            print 'Going to do: %s' % files[i]
-            thisProcess = subprocess.Popen(['./crpipeline.py', files[i]])
-            i += 1
-        if thisProcess2.poll() != None:
-            print 'Going to do: %s' % files[i]
-            thisProcess2 = subprocess.Popen(['./crpipeline.py', files[i]])
-            i += 1
-
+        for k in range(nthreads):
+            if processes[k].poll() != None:
+                print 'Going to do: %s' % files[i]
+                processes[k] = subprocess.Popen(['./crpipeline.py', files[i]])
+                i += 1
+                
 else:
-    (bfEven, bfOdd) = runAnalysis(files, outfile, outfileAscii, doPlot = False)
+    runAnalysis(files, outfile, outfileAscii, doPlot = False)
 #fitergs = dict()
 
 
