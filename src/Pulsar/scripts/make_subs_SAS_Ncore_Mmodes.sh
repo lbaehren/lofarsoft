@@ -1,10 +1,10 @@
-#!/bin/ksh 
+#!/bin/ksh
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.15
+VERSION=2.16
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
@@ -103,6 +103,28 @@ then
    exit 1
 fi
 
+if [[ $PULSAR == "" ]]
+then 
+   echo ""
+   echo "Pulsar name is required as input with -p flag."
+   print "$USAGE" 
+   exit 1
+fi
+if [[ $OBSID == "" ]]
+then 
+   echo ""
+   echo "OBSID is required as input with -id flag."
+   print "$USAGE" 
+   exit 1
+fi
+if [[ $location == "" ]]
+then 
+   echo ""
+   echo "Output is required as input with -o flag."
+   print "$USAGE" 
+   exit 1
+fi
+
 # Print the basic information about input parameters to STDOUT at start of pipeline run
 echo "Running make_subs_SAS_Ncore_Mmodes.sh with the following input arguments:"
 echo "    OBSID = $OBSID"
@@ -144,22 +166,22 @@ fi
 
 if [ $incoh_redo -eq 1 ]
 then
-   echo "   Performing redo of Incoherentstokes processing" 
+   echo "    Performing redo of Incoherentstokes processing" 
 fi
 
 if [ $coh_redo -eq 1 ]
 then
-   echo "   Performing redo of Coherentstokes processing" 
+   echo "    Performing redo of Coherentstokes processing" 
 fi
 
 if [ $incoh_only -eq 1 ]
 then
-   echo "   Performing processing of Incoherentstokes data ONLY" 
+   echo "    Performing processing of Incoherentstokes data ONLY" 
 fi
 
 if [ $coh_only -eq 1 ]
 then
-   echo "   Performing processing of Coherentstokes data ONLY" 
+   echo "    Performing processing of Coherentstokes data ONLY" 
 fi
 
 if [ $coh_only -eq 1 ] && [ $incoh_only -eq 1 ]
@@ -394,7 +416,12 @@ then
         PULSAR_LIST=$PULSAR
 	    multi_fold=0
 	    array_multi_fold[0]=0
-	    nfolds=1
+	    if [[ $nofold == 1 ]]
+	    then 
+	       nfolds=0
+	    else
+	       nfolds=1
+        fi
 	    array_nfolds[0]=$nfolds
 	    PULSAR_ARRAY[0]=$PULSAR_LIST
 	    PULSAR_ARRAY_PRIMARY[0]=$PULSAR
@@ -406,7 +433,6 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 	while (( $beam_counter < $nrBeams ))
 	do
 		is_3c=`echo $PULSAR_input | grep -i 3C`
-		is_bj=`echo $PULSAR_input | egrep -i "B|J"`
 		if [[ $PULSAR_input == "position" ]]
 		then
 		    pi=$(echo "scale=10; 4*a(1)" | bc -l)
@@ -452,15 +478,12 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 		       PULSAR=`echo $matched_str | awk -v MAX=3 -F"," '{ for (i=1; i<=MAX; i++) printf "%s,", $i; printf "\n"; }' | sed 's/,,*$//g' | sed 's/,$//g'`
 		       PULSAR_LIST=$PULSAR
 		    fi
-		elif [[ $is_bj == "" ]]
-		then
-		    echo "   WARNING: Unble to process object '$PULSAR';  not a Pulsar name nor 3C object."
-		    echo "       Try using '-p position' to set off the pipeline using the target location."
-		    echo "   WARNING: Unble to process object '$PULSAR';  not a Pulsar name nor 3C object."    >> $log
-		    echo "       Try using '-p position' to set off the pipeline using the target location."   >> $log
-		    PULSAR="NONE"
-		    PULSAR_LIST="NONE"
-		    PULSAR_ARRAY[$beam_counter]="NONE"
+		else 
+		    echo "   Assuming input is a Pulsar name: $PULSAR_input"
+		    echo "   Assuming input is a Pulsar name: $PULSAR_input" >> $log
+		    PULSAR=$PULSAR_input
+		    PULSAR_LIST=$PULSAR_input
+		    PULSAR_ARRAY[$beam_counter]=$PULSAR_input
 		fi
 		
 		is_psr_list=`echo $PULSAR_LIST | grep ","`
@@ -469,7 +492,13 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 		   multi_fold=1
 		   array_multi_fold[$beam_counter]=1
 		   PULSAR=`echo $PULSAR_LIST | awk -F"," '{print $1}'`
-		   nfolds=`echo $PULSAR_LIST | awk -F"," '{print NF}'`
+		   if [[ $nofold == 1 ]]
+		   then 
+		      nfolds=0
+		   else
+		      nfolds=1
+		   fi
+#		   nfolds=`echo $PULSAR_LIST | awk -F"," '{print NF}'`
 		   array_nfolds[$beam_counter]=$nfolds
 		   PULSAR_LIST=`echo $PULSAR_LIST | sed 's/\,/ /g'`
 		   PULSAR_ARRAY[$beam_counter]=$PULSAR_LIST
@@ -478,7 +507,12 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 		   multi_fold=0
 		   array_multi_fold[$beam_counter]=0
 		   PULSAR=$PULSAR_LIST
-		   nfolds=1
+		   if [[ $nofold == 1 ]]
+		   then 
+		      nfolds=0
+		   else
+		      nfolds=1
+		   fi
 		   array_nfolds[$beam_counter]=$nfolds
 		   PULSAR_ARRAY[$beam_counter]=$PULSAR_LIST
 		   PULSAR_ARRAY_PRIMARY[$beam_counter]=$PULSAR
@@ -1710,7 +1744,7 @@ do
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
 		then 
-		    if [[ $PULSAR_LIST != "NONE" ]]
+		    if [[ $PULSAR_LIST != "NONE" ]] && [[ $nofold == 0 ]]
 		    then 
 				for fold_pulsar in $PULSAR_LIST
 				do
@@ -1719,6 +1753,16 @@ do
 					date
 					date >> $log
 		
+		            # check for Pulsar name in catalog
+		            in_catalog=`grep $fold_pulsar $LOFARSOFT/release/share/pulsar/data/PSR_catalog.txt`
+		            if [[ $in_catalog == "" ]]
+		            then 
+					   echo "WARNING: Pulsar $fold_pulsar not found in PSR_catalog.txt;  skipping folding."
+					   echo "WARNING: Pulsar $fold_pulsar not found in PSR_catalog.txt;  skipping folding." >> $log
+					   nofold=1
+		               continue
+		            fi
+		            
 				    if (( $flyseye == 0 ))
 				    then
 						for ii in $num_dir
@@ -1793,14 +1837,14 @@ do
 					    done
 					fi
 				done # finished loop over PULSAR_LIST
-			fi # end if [[ $PULSAR_LIST != "NONE" ]]
+			fi # end if [[ $PULSAR_LIST != "NONE" ]] && [[ $nofold == 0 ]]
 		else # nrBeams > 1
 			for ii in $num_dir
 		    do
                 PULSAR_LIST=${PULSAR_ARRAY[$ii]}
 				for fold_pulsar in $PULSAR_LIST
 				do
-				    if [[ $fold_pulsar == "NONE" ]]
+				    if [[ $fold_pulsar == "NONE" ]] || [[ $nofold == 1 ]]
 				    then
 				        break
 				    else 
@@ -1819,11 +1863,11 @@ do
 						prepfold_pid[$ii]=$!  
 						echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 						sleep 5
-					fi # end if [[ $fold_pulsar == "NONE" ]]
+					fi # end if [[ $fold_pulsar == "NONE" ]] || [[ $nofold == 1 ]]
 				done # folding over pulsars
 				for fold_pulsar in $PULSAR_LIST
 				do
-				    if [[ $fold_pulsar == "NONE" ]]
+				    if [[ $fold_pulsar == "NONE" ]] || [[ $nofold == 1 ]]
 				    then
 				        break
 				    else 
@@ -1837,7 +1881,7 @@ do
     fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]]
 
     # fold the RSPA location in non-multi-beam mode     
-    if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+    if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
     then
 	   #When the first folding task finishes, start the folding for the "all" directory
 	   if [ $all == 1 ] || [ $all_pproc == 1 ]
@@ -1883,13 +1927,13 @@ do
 			  (( index = $index + 1 ))
 		  done # end for fold_pulsar in $PULSAR_LIST
 	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
-	fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+	fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 
 		
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] 
 	then
 		#Make a cumulative plot of the profiles
-		if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+		if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 		then
 			for fold_pulsar in $PULSAR_LIST
 			do
@@ -1925,7 +1969,7 @@ do
 					done	
 				fi
 			done # end for fold_pulsar in $PULSAR_LIST
-        fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+        fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 	    echo cd ${location} >> $log
 	    cd ${location}
 		
@@ -2026,7 +2070,7 @@ do
 	      do
 	         echo "Waiting for RSP$ii subdyn to finish non-Fly's eye mode; pid = ${subdyn_pid[ii]}"
 	         wait ${subdyn_pid[ii]}
-	         echo "Exit status of subdyn in loop $ii is $?"
+	         echo "Exit status of subdyn for RSP$ii is $?"
 	      done
 	   else
 	      for ii in $num_dir
@@ -2037,7 +2081,7 @@ do
 			     kk=`echo "$ii * $counter" | bc`
 		         echo "Waiting for RSP$ii and $jjj subdyn to finish in Fly's eye mode pid ${subdyn_pid_[ii][kk]}"
 	             wait ${subdyn_pid_[ii][kk]}
-	             echo "Exit status of subdyn in loop $ii in beam $jjj is $?"
+	             echo "Exit status of subdyn for RSP$ii in beam $jjj is $?"
 			     counter=$(( $counter + 1 ))
 	         done
 	      done
