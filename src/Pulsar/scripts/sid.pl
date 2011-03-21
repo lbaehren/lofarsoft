@@ -28,6 +28,12 @@ if ($UTC eq "") {
  $UTC = &get_curtime();
 }
 
+# also checking if UTC is given in another format, namely YYYY-MM-DDTHH:MM:SS[.SSS]
+# if it's in different format, then redo it to usual format
+if ($UTC =~ /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.?\d*$/) {
+ $UTC = &time_reformat($UTC);
+}
+
 if ($lambda eq "") {
  &error ("Longitude is not defined!");
 } 
@@ -57,7 +63,7 @@ sub help {
  chomp $prg;
  print "$prg: calculates LST for a given UTC time and given longitude\n";
  print "Usage: $prg [options]\n";
- print "        -t   TIME   - UTC time in format \"DD.MM.YYYY hh:mm:ss.sss\"\n";
+ print "        -t   TIME   - UTC time in format \"DD.MM.YYYY hh:mm:ss.sss\" or \"YYYY-MM-DDThh:mm:ss.sss\"\n";
  print "                      if no time is pointed than current UTC time will be used\n";
  print "        -lon LAMBDA - longitude in degrees (default - LOFAR)\n";
  print "                      Western longitudes are negative!\n";
@@ -108,6 +114,16 @@ sub get_curtime {
  $hour = sprintf ("%02d", $hour);
  $day = sprintf ("%02d", $day);
  return "$day.$month.$year $hour:$min:$sec";
+}
+
+# converts the date/time from format YYYY-MM-DDTHH:MM:SS.SSS to "DD.MM.YYYY HH:MM:SS.SSS"
+sub time_reformat {
+ my ($tgiven) = @_;
+ $year = $tgiven; $year =~ s/^(\d{4})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.?\d*$/$1/;
+ $month = $tgiven; $month =~ s/^\d{4}-(\d{2})-\d{2}T\d{2}:\d{2}:\d{2}\.?\d*$/$1/;
+ $day = $tgiven; $day =~ s/^\d{4}-\d{2}-(\d{2})T\d{2}:\d{2}:\d{2}\.?\d*$/$1/;
+ $time = $tgiven; $time =~ s/^\d{4}-\d{2}-\d{2}T(\d{2}:\d{2}:\d{2}\.?\d*)$/$1/;
+ return "$day.$month.$year $time";
 }
 
 # gets time format string and leaves only 2 decimal digits of seconds
