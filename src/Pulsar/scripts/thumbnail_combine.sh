@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh 
 
 #find all the th.png files and convert them into a list to paste together using "montage".
 
@@ -22,7 +22,10 @@ find ./ -name "*.th.png" -print  > /tmp/$$_combine_col1.txt
 
 # find all the paths to the th.png files and print just the IS (incoherentstokes) or CS (stokes) 
 #   and RSP? location and the Pulsar name to the output file
- find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS/IS/g' -e  's/^.*_CS/CS/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' > /tmp/$$_combine_col2.txt
+
+
+find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS_/IS_/g' -e 's/^.*_CS_/CS_/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' -e 's/_beam_./\\n&\\n/g'  > /tmp/$$_combine_col2.txt
+
 paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt | awk '{print "-label \""$2"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
 rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
