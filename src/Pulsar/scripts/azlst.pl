@@ -22,6 +22,9 @@ $phi = 52.915111; # LOFAR
 $lambda = 6.869883; # LOFAR
 
 
+$is_never_set = 0;    # flag, if 1 then source never sets
+$is_never_rise = 0;   # flag, if 1 then source never rises
+$is_never_above = 0;  # flag, if 1 then source is never above this EL (no matter circumpolar or not)
 $ra = "";
 $dec = "";
 $EL = 30.;
@@ -58,49 +61,92 @@ if ($EL eq "") {
 
 $dec1 = &dec2rad ($dec);
 
+
 # zenith angle
 $ZA = 90. - $EL;
-# hour angle (absolute value) in rad
-# actually there are 2 values +- $HA
-$HA = &get_HA ($ZA, $dec1, $phi);
-$HAmin = -$HA;
-$HAmax = $HA;
-# in degrees (from South clockwise)
-$AZmin = &get_AZ ($dec1, $phi, $HAmin);
-$AZmax = &get_AZ ($dec1, $phi, $HAmax);
-
-
 $ZA = sprintf ("%.1f", $ZA);
 $EL = sprintf ("%.1f", $EL);
-
-$alphah = &time2hour($ra);
-$sidmin = `echo \"scale=20\n$alphah - ($HA / $rad / 15.)\" | bc -l`;
-$sidmax = `echo \"scale=20\n$alphah + ($HA / $rad / 15.)\" | bc -l`;
-if ($sidmin < 0.) { $sidmin += 24.; }
-if ($sidmax >= 24.) { $sidmax -= 24.; }
-$LSTmin = &hour2time ($sidmin);
-$LSTmax = &hour2time ($sidmax);
-
 
 print "\n";
 print "Source: RA = $ra  DEC = $dec\n";
 print "Site: LAT = $phi deg  LON = $lambda deg\n";
 print "\n";
 print "EL = $EL deg (ZA = $ZA deg)\n";
-printf ("AZ = [ %.1f ; %.1f ] deg\n", $AZmin, $AZmax);
-$hapres = $HA / $rad / 15.; 
-$hapres_label = "h";
-if (abs($hapres) < 1) { 
- $hapres *= 60.; 
- $hapres_label = "min"; 
- if (abs($hapres) < 1) {
-  $hapres *= 60.; 
-  $hapres_label = "sec"; 
- }
+
+# checking if the source is circumpolar or not (never set or rise) at this latitude and elevation
+# I'm using 0.001 as a tolerance to compare correctly two float values
+if (($phi >= 0. && $dec1/$rad >= 90. - $phi + $EL - 0.001) || ($phi < 0. && $dec1/$rad <= -(90. + $phi + $EL - 0.001))) {  # never sets
+  $is_never_set = 1;
+  # calculating the minimum EL of the source
+  if ($phi >= 0.) { $mEL = sprintf ("%.1f", $dec1/$rad + $phi - 90.); }
+   else { $mEL = sprintf ("%.1f", -1. * ($dec1/$rad + $phi) - 90.); }
 }
-printf ("HA =  +/- %.2f %s  [Duration = %.2f %s]\n", $hapres, $hapres_label, 2 * $hapres, $hapres_label);
-printf ("LST = [rise: %s] [set: %s]\n", $LSTmin, $LSTmax);
-print "\n";
+if (($phi >= 0. && $dec1/$rad < -(90. - $phi) + $EL + 0.001) || ($phi < 0. && $dec1/$rad > 90. + $phi - $EL - 0.001)) { # never rise
+  $is_never_rise = 1;
+  # calculating the maximum EL of the source
+  if ($phi >= 0.) { $mEL = sprintf ("%.1f", $dec1/$rad - $phi + 90.); }
+   else { $mEL = sprintf ("%.1f", $phi - $dec1/$rad + 90.); }
+}
+
+# getting the EL at transit to compare with given EL 
+$EL_transit = sprintf ("%.1f", 90. - &get_ZA ($dec1, $phi, 0.0));
+if ($EL >= $EL_transit - 0.001) {
+ $is_never_above = 1;
+}
+
+# Calculating the HA, AZ range and LST set and rise for sources
+# that are not circumpolar
+if ($is_never_set == 0 && $is_never_rise == 0 && $is_never_above == 0) {
+ # hour angle (absolute value) in rad
+ # actually there are 2 values +- $HA
+ $HA = &get_HA ($ZA, $dec1, $phi);
+ $HAmin = -$HA;
+ $HAmax = $HA;
+ # in degrees (from South clockwise)
+ $AZmin = &get_AZ ($dec1, $phi, $HAmin);
+ $AZmax = &get_AZ ($dec1, $phi, $HAmax);
+
+
+ $alphah = &time2hour($ra);
+ $sidmin = `echo \"scale=20\n$alphah - ($HA / $rad / 15.)\" | bc -l`;
+ $sidmax = `echo \"scale=20\n$alphah + ($HA / $rad / 15.)\" | bc -l`;
+ if ($sidmin < 0.) { $sidmin += 24.; }
+ if ($sidmax >= 24.) { $sidmax -= 24.; }
+ $LSTmin = &hour2time ($sidmin);
+ $LSTmax = &hour2time ($sidmax);
+
+ printf ("AZ = [ %.1f ; %.1f ] deg\n", $AZmin, $AZmax);
+ $hapres = $HA / $rad / 15.; 
+ $hapres_label = "h";
+ if (abs($hapres) < 1) { 
+  $hapres *= 60.; 
+  $hapres_label = "min"; 
+  if (abs($hapres) < 1) {
+   $hapres *= 60.; 
+   $hapres_label = "sec"; 
+  }
+ }
+ printf ("EL at transit = %.1f deg\n", $EL_transit);
+ printf ("HA =  +/- %.2f %s  [Duration = %.2f %s]\n", $hapres, $hapres_label, 2 * $hapres, $hapres_label);
+ printf ("LST = [rise: %s] [set: %s]\n", $LSTmin, $LSTmax);
+ print "\n";
+}
+
+# if source never sets
+if ($is_never_set == 1) {
+ print "Circumpolar source (never sets) at this LAT and EL\n";
+ print "The minimum EL = $mEL deg\n";
+}
+# if source never rises
+if ($is_never_rise == 1) {
+ print "Circumpolar source (never rises) at this LAT and EL\n";
+ print "The maximum EL = $mEL deg\n";
+}
+# if source is never above given EL
+if ($is_never_above == 1 && $is_never_rise == 0) {
+ print "The source is never above the given EL\n";
+ print "Tha maximum EL = $EL_transit deg\n";
+}
 
 
 
@@ -151,6 +197,15 @@ sub get_HA {
 
  $ha = acos ( (cos ($zen * $rad) - sin ($delta) * sin ($shirota * $rad)) / (cos ($delta) * cos ($shirota * $rad)) );
  return $ha;
+}
+
+# get zenith angle (in degrees)
+sub get_ZA {
+ my ($delta, $shirota, $hour_angle) = @_;
+
+ $zen = acos ( sin ($delta) * sin ($shirota * $rad) + cos ($delta) * cos ($shirota * $rad) * cos ($hour_angle) );
+ $zen /= $rad;
+ return $zen;
 }
 
 # get azimuth (in degrees, from South clockwise)
