@@ -4,13 +4,14 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.14
+VERSION=2.15
 
 #Check the usage
 USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
-"         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation\n"\
+"         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or\n"\
+"         specify the word 'NONE' (upper case) when you want to skip the folding step of the processing\n"\
 "         (i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) \n"\
 "         (i.e. up to 3 brights pulsars to fold at location of FOV: position \n"\
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
@@ -27,6 +28,7 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Out
 "      [-incoh_redo] ==> optional parameter to redo processing for Incoherentstokes (deletes previous incoh results!)\n"\
 "      [-coh_redo] ==> optional parameter to redo processing for Coherentstokes (deletes previous coh results!)\n"\
 "      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"\
+"      [-nofold] ==> optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible\n"\
 "      [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline\n"\
 "      [-test] ==> optional for testing: runs bf2presto and bypasses prepfold and rfi processing but echo's all commands\n"
 
@@ -60,6 +62,7 @@ coh_redo=0
 transpose=0
 help=0
 test=0
+nofold=0
 input_string=$*
 while [ $# -gt 0 ]
 do
@@ -81,6 +84,7 @@ do
 	-coh_redo)    coh_redo=1;;
 	-transpose)   transpose=1;;
 	-test)   test=1;;
+	-nofold)   nofold=1;;
 	-help)   help=1 
 	         cat $LOFARSOFT/release/share/pulsar/data/pulp_help.txt
 	         exit 1;;
@@ -167,6 +171,11 @@ fi
 if [ $transpose -eq 1 ]
 then
    echo "    Performing processing on BG/P TAB output data which were run through the 2nd transpose" 
+fi
+
+if [ $nofold -eq 1 ]
+then
+   echo "    Folding has been turned OFF for this pipeline run;  prepfold will be skipped." 
 fi
 
 #Check whether Output Processing Location already exists
@@ -363,7 +372,7 @@ then
     # find the pulsar list file
     if [[ -f ${location}/pulsars.list ]]
     then
-        num_pulsars=`wc -l ${location}/pulsars.list | awk '{print $1}'`
+       num_pulsars=`wc -l ${location}/pulsars.list | awk '{print $1}'`
 	   beam_counter=0
 	   PULSAR_ARRAY=""
 	   while (( $beam_counter < $num_pulsars ))
@@ -383,12 +392,12 @@ then
         echo "         Maybe an older pipeline run, trying to compensate for missing file." >> $log
         PULSAR=`find $location/. -name "*tar.gz" -print | sed 's/.*\///g' | sed 's/_.*//g'`
         PULSAR_LIST=$PULSAR
-	   multi_fold=0
-	   array_multi_fold[0]=0
-	   nfolds=1
-	   array_nfolds[0]=$nfolds
-	   PULSAR_ARRAY[0]=$PULSAR_LIST
-	   PULSAR_ARRAY_PRIMARY[0]=$PULSAR
+	    multi_fold=0
+	    array_multi_fold[0]=0
+	    nfolds=1
+	    array_nfolds[0]=$nfolds
+	    PULSAR_ARRAY[0]=$PULSAR_LIST
+	    PULSAR_ARRAY_PRIMARY[0]=$PULSAR
     fi
 else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 	beam_counter=0
@@ -721,6 +730,33 @@ do
 
 			all_list=`ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2`
 			ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2 > $master_list
+			
+			#check that CS raw data files are non-zero length
+		    if [[ $STOKES == "stokes" ]]
+		    then
+		       while read rawname
+		       do
+		          filesize=`/bin/ls -l $rawname | awk '{print $5}'`
+		          if (( $filesize == 0 ))
+		          then
+		             echo "ERROR: Input raw data ($rawname) are zero length;  unable to continue." >> $log
+		             echo "ERROR: Input raw data ($rawname) are zero length;  unable to continue." 
+		             echo "Changing permissions of files"
+
+					 echo "Changing permissions of files" >> $log
+					 date
+					 date >> $log
+					 echo chmod 774 -R . * >> $log
+					 chmod 774 -R . * 
+					 echo chgrp -R pulsar . * >> $log
+					 chgrp -R pulsar . * 
+
+		             exit 1
+		          fi
+		       done < $master_list
+		    fi
+
+
 #A2test			all_list=`cat /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list`
 #A2test			cp /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list $master_list
 	    fi
@@ -1952,17 +1988,29 @@ do
              else
                 loop_beams=$beams_init
              fi
-
+             
+             counter=0
 			 for jjj in $loop_beams
 			 do
-		         echo cd ${location}/${STOKES}/${jjj}/beam_${ii} >> $log
-		         cd ${location}/${STOKES}/${jjj}/beam_${ii}
+			     if [ $rfi_pproc == 0 ]
+			     then
+   		            echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
+		            cd ${location}/${STOKES}/RSP${ii}/${jjj}
+		         else
+		            echo cd ${location}/${STOKES}/${jjj}/beam_${ii}/ >> $log
+		            cd ${location}/${STOKES}/${jjj}/beam_${ii}/
+                 fi
+                 
 		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
 			     if [ $test == 0 ]
 			     then
+			        sleep 5
 		            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
 		         fi
-		         subdyn_pid[$ii][$jjj]=$!	
+			     kk=`echo "$ii * $counter" | bc`
+
+		         subdyn_pid[$ii][$kk]=$!	
+			     counter=$(( $counter + 1 ))
 	         done      
 
           fi
@@ -1976,16 +2024,21 @@ do
 	   then
 	      for ii in $num_dir
 	      do
-	         echo "Waiting for RSP$ii subdyn to finish"
+	         echo "Waiting for RSP$ii subdyn to finish non-Fly's eye mode; pid = ${subdyn_pid[ii]}"
 	         wait ${subdyn_pid[ii]}
+	         echo "Exit status of subdyn in loop $ii is $?"
 	      done
 	   else
 	      for ii in $num_dir
 	      do
+             counter=0
 			 for jjj in $loop_beams
 			 do
-		         echo "Waiting for RSP$ii and $jjj subdyn to finish"
-	             wait ${subdyn_pid_[ii][jjj]}
+			     kk=`echo "$ii * $counter" | bc`
+		         echo "Waiting for RSP$ii and $jjj subdyn to finish in Fly's eye mode pid ${subdyn_pid_[ii][kk]}"
+	             wait ${subdyn_pid_[ii][kk]}
+	             echo "Exit status of subdyn in loop $ii in beam $jjj is $?"
+			     counter=$(( $counter + 1 ))
 	         done
 	      done
        fi	   
@@ -2021,9 +2074,11 @@ do
 		      done
 		      
 		   else
-		   	  for jjj in $beams
+              counter=0
+		   	  for jjj in $loop_beams
 			  do
-	              rfi_file=$location/${STOKES}/${jjj}/${PULSAR_ARRAY_PRIMARY[$jjj]}_${OBSID}_sub0-${max_num}.rfirep
+			      kk=`echo "$ii * $counter" | bc`
+	              rfi_file=$location/${STOKES}/RSP${ii}/${PULSAR_ARRAY_PRIMARY[$counter]}_${OBSID}_sub0-${max_num}.rfirep
 			      if [ -f $rfi_file ]
 			      then
 			         rm $rfi_file
@@ -2038,7 +2093,7 @@ do
 			         offset=$(( $all_num * $CHAN / $core * $ii ))
 		             echo "RFI beam=$jjj, all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
 #			         cat $location/${STOKES}/${jjj}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
-			         cat $location/${STOKES}/${jjj}/beam_${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+			         cat $location/${STOKES}/RSP${ii}/${jjj}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
 			      done
 	
 		      done
@@ -2183,40 +2238,10 @@ echo "Combining all th.png files into one"
 echo "Combining all th.png files into one" >> $log
 date
 date >> $log
-
-#find all the th.png files and convert them into a list, then paste them together
-if [ -f combined.th.png ]
-then 
-   echo "WARNING: deleting previous version of results: combined.th.png"
-   echo "WARNING: deleting previous version of results: combined.th.png" >> $log
-   rm combined.th.png
-fi
-
-if [ -f combined.png ]
-then 
-   echo "WARNING: deleting previous version of results: combined.png"
-   echo "WARNING: deleting previous version of results: combined.png" >> $log
-   rm combined.png
-fi
-
-find ./ -name "*.th.png" -print  > combine_col1.txt
-find ./ -name "*.th.png" -print | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS/IS/g' -e  's/^.*_CS/CS/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' > combine_col2.txt
-paste combine_col1.txt combine_col2.txt | awk '{print "-label \""$2"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
-rm combine_col1.txt combine_col2.txt
-wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
-if [[ $wc_convert > 0 ]]
-then
-   chmod 777 combine_png.sh
-   cat combine_png.sh >> $log
-   ./combine_png.sh
-   convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png
-   echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)"
-   echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)" >> $log
-else
-   echo "No .th.png files were found to combine."
-   echo "No .th.png files were found to combine." >> $log
-fi
-
+#run the combine thumbnail script;  needs just the log file as input arg
+echo "running:  thumbnail_combine.sh $log"
+echo "running:  thumbnail_combine.sh $log" >> $log
+thumbnail_combine.sh $log
 	
 #Make a tarball of all the plots
 echo "Creating tar file of plots"
