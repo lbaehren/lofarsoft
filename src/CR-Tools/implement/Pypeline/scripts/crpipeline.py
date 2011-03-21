@@ -120,15 +120,15 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         writeDict(outfile, result)       
         
         #result = pf.triggerMessageFit(crfile, triggers, 'linearFit') 
-        triggerMessageFit = tasks.pulsefittask.triggerMessageFit() # MOVE
-        print 'DOING NEW TRIGGER MSG FIT TASK'
-        triggerMessageFit(datafile = crfile, triggers = triggers, fitType = 'linearFit')
-        result = triggerMessageFit.result
-        print result
-        print 'DONE'
-        writeDict(outfile, result)
-#        result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
+#        triggerMessageFit = tasks.pulsefittask.triggerMessageFit() # MOVE
+#        print 'DOING NEW TRIGGER MSG FIT TASK'
+#        triggerMessageFit(datafile = crfile, triggers = triggers, fitType = 'linearFit')
+#        result = triggerMessageFit.result
+#        print result
+#        print 'DONE'
 #        writeDict(outfile, result)
+        result = pf.triggerMessageFit(crfile, triggers, 'linearFit')
+        writeDict(outfile, result)
         if not result["success"]:
             continue
         triggerFitResult = result
