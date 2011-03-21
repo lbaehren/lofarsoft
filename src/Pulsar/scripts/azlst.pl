@@ -115,7 +115,8 @@ if ($is_never_set == 0 && $is_never_rise == 0 && $is_never_above == 0) {
  $LSTmin = &hour2time ($sidmin);
  $LSTmax = &hour2time ($sidmax);
 
- printf ("AZ = [ %.1f ; %.1f ] deg\n", $AZmin, $AZmax);
+ $is_always = ($phi >= 0. ? "   [always North]" : "   [always South]");
+ printf ("AZ = [ %.1f ; %.1f ] deg%s\n", $AZmin, $AZmax, abs($dec1/$rad)>=abs($phi) ? $is_always : "");
  $hapres = $HA / $rad / 15.; 
  $hapres_label = "h";
  if (abs($hapres) < 1) { 
@@ -134,6 +135,9 @@ if ($is_never_set == 0 && $is_never_rise == 0 && $is_never_above == 0) {
 
 # if source never sets
 if ($is_never_set == 1) {
+ if (abs($dec1/$rad)>=abs($phi)) {
+  printf ("AZ - always %s\n", $phi >= 0. ? "North" : "South");
+ }
  print "Circumpolar source (never sets) at this LAT and EL\n";
  print "The minimum EL = $mEL deg\n";
 }
@@ -208,7 +212,7 @@ sub get_ZA {
  return $zen;
 }
 
-# get azimuth (in degrees, from South clockwise)
+# get azimuth (in degrees, from North clockwise)
 sub get_AZ {
  my ($delta, $shirota, $hour_angle) = @_;
 

@@ -201,7 +201,7 @@ sub get_ZA {
  return $zen;
 }
 
-# get azimuth (in degrees, from South clockwise)
+# get azimuth (in degrees, from North clockwise)
 sub get_AZ {
  my ($delta, $shirota, $hour_angle) = @_;
 
