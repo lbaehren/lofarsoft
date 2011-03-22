@@ -248,6 +248,9 @@ if (NOT X11_INCLUDE_DIR)
     PATHS
     ${include_locations}
     )
+  if (X11_INCLUDE_DIR)
+    set (X11_X11_INCLUDE_PATH ${X11_INCLUDE_DIR})
+  endif (X11_INCLUDE_DIR)
 endif (NOT X11_INCLUDE_DIR)
 
 ##__________________________________________________________
