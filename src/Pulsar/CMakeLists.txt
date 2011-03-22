@@ -79,7 +79,6 @@ set (NO_DEFAULT_PATH YES)
 
 list (APPEND lib_locations      /home/joerivl/src/presto/deps)
 list (APPEND include_locations  /home/joerivl/src/presto/deps)
-list (APPEND _MPI_PREFIX_PATH   /opt/openmpi/1.3.2)
 
 find_program (tar_executable  tar  ${bin_locations} )
 find_program (gzip_executable gzip ${bin_locations} )
@@ -159,38 +158,7 @@ endif (NOT HAVE_GFORTRAN)
 ##__________________________________________________________
 ## MPI
 
-if (NOT MPI_FOUND)
-  include (FindMPI)
-endif (NOT MPI_FOUND)
-
-if (NOT MPI_COMPILER)
-  find_program (MPI_COMPILER
-    NAMES mpic++ mpicxx mpiCC mpicc
-    PATHS /opt/openmpi
-    PATH_SUFFIXES 1.3.2/bin bin 
-    )
-endif (NOT MPI_COMPILER)
-
-if (NOT MPI_INCLUDE_PATH)
-  find_path (MPI_INCLUDE_PATH mpi.h
-    PATHS /opt/openmpi
-    PATH_SUFFIXES 1.3.2/include include
-    )
-endif (NOT MPI_INCLUDE_PATH)
-
-if (NOT MPI_LIBRARY)
-  find_library (MPI_LIBRARY mpi
-    PATHS /opt/openmpi
-    PATH_SUFFIXES 1.3.2/lib lib
-    )
-endif (NOT MPI_LIBRARY)
-
-if (MPI_LIBRARY AND MPI_INCLUDE_PATH)
-  set (MPI_FOUND TRUE)
-else (MPI_LIBRARY AND MPI_INCLUDE_PATH)
-  set (MPI_FOUND FALSE)
-  message (WARNING "[PULSAR] Unable to find MPI library!")
-endif (MPI_LIBRARY AND MPI_INCLUDE_PATH)
+include (${PULSAR_SOURCE_DIR}/cmake/FindMPI.cmake)
 
 ##__________________________________________________________
 ## PYTHON 
