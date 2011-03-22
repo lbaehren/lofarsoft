@@ -75,6 +75,12 @@ endif (PULSAR_DEBUGGING_MESSAGES)
 
 set (NO_DEFAULT_PATH YES)
 
+## Additional locations
+
+list (APPEND lib_locations      /home/joerivl/src/presto/deps)
+list (APPEND include_locations  /home/joerivl/src/presto/deps)
+list (APPEND _MPI_PREFIX_PATH   /opt/openmpi/1.3.2)
+
 find_program (tar_executable  tar  ${bin_locations} )
 find_program (gzip_executable gzip ${bin_locations} )
 
@@ -157,20 +163,34 @@ if (NOT MPI_FOUND)
   include (FindMPI)
 endif (NOT MPI_FOUND)
 
+if (NOT MPI_COMPILER)
+  find_program (MPI_COMPILER
+    NAMES mpic++ mpicxx mpiCC mpicc
+    PATHS /opt/openmpi
+    PATH_SUFFIXES 1.3.2/bin bin 
+    )
+endif (NOT MPI_COMPILER)
+
+if (NOT MPI_INCLUDE_PATH)
+  find_path (MPI_INCLUDE_PATH mpi.h
+    PATHS /opt/openmpi
+    PATH_SUFFIXES 1.3.2/include include
+    )
+endif (NOT MPI_INCLUDE_PATH)
+
 if (NOT MPI_LIBRARY)
-  ## check additional paths
   find_library (MPI_LIBRARY mpi
     PATHS /opt/openmpi
     PATH_SUFFIXES 1.3.2/lib lib
     )
-  ## check result
-  if (MPI_LIBRARY AND MPI_INCLUDE_PATH)
-    set (MPI_FOUND TRUE)
-  else (MPI_LIBRARY AND MPI_INCLUDE_PATH)
-    set (MPI_FOUND FALSE)
-    message (WARNING "[PULSAR] Unable to find MPI library!")
-  endif (MPI_LIBRARY AND MPI_INCLUDE_PATH)
 endif (NOT MPI_LIBRARY)
+
+if (MPI_LIBRARY AND MPI_INCLUDE_PATH)
+  set (MPI_FOUND TRUE)
+else (MPI_LIBRARY AND MPI_INCLUDE_PATH)
+  set (MPI_FOUND FALSE)
+  message (WARNING "[PULSAR] Unable to find MPI library!")
+endif (MPI_LIBRARY AND MPI_INCLUDE_PATH)
 
 ##__________________________________________________________
 ## PYTHON 
@@ -190,6 +210,8 @@ list (APPEND lib_locations /usr/X11R7/lib)
 list (APPEND lib_locations /usr/openwin/lib)
 list (APPEND lib_locations /opt/local/lib)
 list (APPEND lib_locations /usr/X11/lib)
+list (APPEND lib_locations /usr/lib)
+list (APPEND lib_locations /usr/lib64)
 
 if (NOT HAVE_X11)
   include (FindX11)
@@ -221,6 +243,13 @@ if (NOT X11_X11_LIB)
   endif (libX11)
 endif (NOT X11_X11_LIB)
 
+if (NOT X11_INCLUDE_DIR)
+  find_path (X11_INCLUDE_DIR X11/xpm.h X11/Xutil.h
+    PATHS
+    ${include_locations}
+    )
+endif (NOT X11_INCLUDE_DIR)
+
 ##__________________________________________________________
 ## FFTW3 (not the same as FFTW3F)
 
@@ -229,6 +258,7 @@ if (NOT FFTW3_FOUND)
 endif (NOT FFTW3_FOUND)
 
 list (APPEND lib_locations /opt/local/lib)
+list (APPEND lib_locations /usr/lib64)
 
 if (NOT FFTW3_LIBRARIES)
   ## search for the library
@@ -268,13 +298,9 @@ else (HAVE_GLIB)
   message (SEND_ERROR "[PULSAR] Missing or incomplete installation of GLIB!")
 endif (HAVE_GLIB)
 
-if (HAVE_GFORTRAN)
-  include_directories (${GFORTRAN_INCLUDES})
-  add_definitions (-DHAVE_GFORTRAN)
-else (HAVE_GFORTRAN)
-##  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of GFORTRAN!")
-  message (STATUS "[PULSAR] Missing or incomplete installation of GFORTRAN!")
-endif (HAVE_GFORTRAN)
+if (NOT GFORTRAN_LIBRARY)
+  message (WARNING "[PULSAR] Missing or incomplete installation of GFORTRAN!")
+endif (NOT GFORTRAN_LIBRARY)
 
 if (GFORTRAN_EXECUTABLE)
   set (CMAKE_Fortran_COMPILER ${GFORTRAN_EXECUTABLE})
@@ -323,9 +349,11 @@ else (NUMERIC_INCLUDES)
   message (STATUS "[PULSAR] Unable to generate Python bindings; missing Numeric headers!")
 endif (NUMERIC_INCLUDES)
 
-if (X11_FOUND)
+if (X11_INCLUDE_DIR)
   include_directories (${X11_INCLUDE_DIR})
-endif (X11_FOUND)
+else (X11_INCLUDE_DIR)
+  message (STATUS "[PULSAR] Missig X11 include directory!")
+endif (X11_INCLUDE_DIR)
 
 if (HAVE_FFTW3)
   include_directories (${FFTW3_INCLUDES})
