@@ -86,7 +86,6 @@ find_program (gzip_executable gzip ${bin_locations} )
 ##__________________________________________________________
 ## System header files
 
-find_path (HAVE_LIBGEN_H     libgen.h      PATHS ${include_locations} )
 find_path (HAVE_STDINT_H     stdint.h      PATHS ${include_locations} )
 find_path (HAVE_STDLIB_H     stdlib.h      PATHS ${include_locations} )
 find_path (HAVE_STRING_H     string.h      PATHS ${include_locations} )
@@ -445,18 +444,27 @@ if (PULSAR_BUILD_TESTS)
   add_subdirectory (test)
 endif (PULSAR_BUILD_TESTS)
 
-## -----------------------------------------------------------------------------
-## Feedback
+## ==============================================================================
+##
+##  Configuration summary
+##
+## ==============================================================================
 
-if (PULSAR_VERBOSE_CONFIGURE)
-
-message (STATUS "==============================================================")
-message (STATUS "  PULSAR: Summary of configuration settings                   ")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " Enable test programs       = ${PULSAR_ENABLE_TESTING}")
-message (STATUS " Enable compiler warnings   = ${PULSAR_COMPILER_WARNINGS}")
-message (STATUS " Print debugging messages   = ${PULSAR_DEBUGGING_MESSAGES}")
-message (STATUS " Enable verbose configure   = ${PULSAR_VERBOSE_CONFIGURE}")
-message (STATUS "+------------------------------------------------------------+")
-
-endif (PULSAR_VERBOSE_CONFIGURE)
+message (STATUS "==============================================================" )
+message (STATUS "  PULSAR: Summary of configuration settings                   " )
+message (STATUS "+------------------------------------------------------------+" )
+message (STATUS " System configuration:"                                         )
+message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"             )
+message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"   )
+message (STATUS " Package configuration:"                                        )
+message (STATUS " .. Enable test programs         = ${PULSAR_ENABLE_TESTING}"    )
+message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}" )
+message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}")
+message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}" )
+message (STATUS " External dependencies:"                                        )
+message (STATUS " .. Have MPI                     = ${MPI_FOUND}"                )
+message (STATUS "    .. MPI compiler              = ${MPI_COMPILER}")
+message (STATUS "    .. MPI library               = ${MPI_LIBRARY}")
+message (STATUS "    .. MPI include path          = ${MPI_INCLUDE_PATH}")
+message (STATUS " .. Have FFTW3                   = ${HAVE_FFTW3}"               )
+message (STATUS "+------------------------------------------------------------+" )
