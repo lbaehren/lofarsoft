@@ -1,0 +1,12 @@
+
+/* Set to 1 if <sys/time.h> is available */
+#cmakedefine HAVE_SYS_TIME_H
+
+/* Set to 1 if <sys/utsname.h> is available */
+#cmakedefine HAVE_SYS_UTSNAME_H
+
+/* Set to 1 if <sys/sysinfo.h> is available */
+#cmakedefine HAVE_SYS_SYSINFO_H
+
+/* Set to 1 if <linux/version.h> is available */
+#cmakedefine HAVE_LINUX_VERSION_H
