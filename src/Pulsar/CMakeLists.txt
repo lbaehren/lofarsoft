@@ -139,6 +139,8 @@ if (NOT HAVE_PGPLOT)
   include (FindPGPLOT)
 endif (NOT HAVE_PGPLOT)
 
+
+
 ##__________________________________________________________
 ## GFortran library
 
@@ -152,6 +154,18 @@ endif (NOT HAVE_GFORTRAN)
 if (NOT MPI_FOUND)
   include (FindMPI)
 endif (NOT MPI_FOUND)
+
+if (NOT MPI_LIBRARY)
+  ## check additional paths
+  find_library (MPI_LIBRARY mpi
+    PATHS /opt/openmpi
+    PATH_SUFFIXES 1.3.2/lib lib
+    )
+  ## check result
+  if (NOT MPI_LIBRARY)
+    message (WARNING "[PULSAR] Unable to find MPI library!")
+  endif (NOT MPI_LIBRARY)
+endif (NOT MPI_LIBRARY)
 
 ##__________________________________________________________
 ## PYTHON 
