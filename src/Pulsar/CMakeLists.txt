@@ -164,9 +164,12 @@ if (NOT MPI_LIBRARY)
     PATH_SUFFIXES 1.3.2/lib lib
     )
   ## check result
-  if (NOT MPI_LIBRARY)
+  if (MPI_LIBRARY AND MPI_INCLUDE_PATH)
+    set (MPI_FOUND TRUE)
+  else (MPI_LIBRARY AND MPI_INCLUDE_PATH)
+    set (MPI_FOUND FALSE)
     message (WARNING "[PULSAR] Unable to find MPI library!")
-  endif (NOT MPI_LIBRARY)
+  endif (MPI_LIBRARY AND MPI_INCLUDE_PATH)
 endif (NOT MPI_LIBRARY)
 
 ##__________________________________________________________
@@ -448,8 +451,8 @@ endif (PULSAR_BUILD_TESTS)
 
 if (PULSAR_VERBOSE_CONFIGURE)
 
-message (STATUS "+============================================================+")
-message (STATUS "| PULSAR: Summary of configuration settings                  |")
+message (STATUS "==============================================================")
+message (STATUS "  PULSAR: Summary of configuration settings                   ")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " Enable test programs       = ${PULSAR_ENABLE_TESTING}")
 message (STATUS " Enable compiler warnings   = ${PULSAR_COMPILER_WARNINGS}")
