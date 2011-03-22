@@ -49,7 +49,7 @@ if (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
   
   set (ARMADILLO_VERSION "1.0.0")
   set (ARMADILLO_TAR_ARCHIVE "armadillo-${ARMADILLO_VERSION}.tar.gz")
-  set (ARMADILLO_URL "http://downloads.sourceforge.net/project/arma/${ARMADILLO_TAR_ARCHIVE}")
+  set (ARMADILLO_URL "http://downloads.sourceforge.net/project/arma/old_releases/${ARMADILLO_TAR_ARCHIVE}")
 
   ##__________________________________________________________________
   ## Build the project
