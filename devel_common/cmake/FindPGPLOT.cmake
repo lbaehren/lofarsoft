@@ -66,7 +66,7 @@ endif (PGPLOT_PGPLOT_LIBRARY)
 
 find_library (PGPLOT_CPGPLOT_LIBRARY
   NAMES cpgplot
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /home/joerivl/src/presto/deps
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )

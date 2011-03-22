@@ -139,7 +139,9 @@ if (NOT HAVE_PGPLOT)
   include (FindPGPLOT)
 endif (NOT HAVE_PGPLOT)
 
-
+if (NOT PGPLOT_CPGPLOT_LIBRARY)
+  message (WARNING "[PULSAR] Unable to find PGPlot c-library (clibpgplot)")
+endif (NOT PGPLOT_CPGPLOT_LIBRARY)
 
 ##__________________________________________________________
 ## GFortran library
