@@ -110,8 +110,12 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.liveMode = liveMode
         self.runningTime = runningTime
         
-        self.antennaPositions = readAntennaPositions(self.station, self.antennnaMode)
-        
+        self.antennaPositions = metadata.getRelativeAntennaPositions(self.station, self.antennaMode) # returns (96, 3) array
+        print self.antennaPositions
+        self.arrivalTimes = np.array([])
+        self.RCUs = np.array([], dtype=int)
+        self.timeWindow = 1.0e-6
+        self.firstTime = -1
         # This is ugly! constructor should always work!
         # commandline parameter checking should be done in option parser.
         
@@ -252,6 +256,32 @@ class ApplicationWindow(QtGui.QMainWindow):
         self.resetButtons()
         self.toolbar.setEnabled(True)
 
+    def coincidence(self, RCUs, times, nofChannels, timeWindow):
+        #import pdb; pdb.set_trace()
+        if len(times) < nofChannels:
+            return []
+        index = -1
+        for i in range(len(times) - nofChannels):
+            if times[i + nofChannels - 1] - times[i] < timeWindow:
+                #print '%f %f' % (times[i + nofChannels - 1], times[i])
+                print 'index = %d, length = %d' % (i, len(times))
+                index = i
+                break
+        if index >= 0:
+            startTime = times[index]
+            coincidenceIndices = np.argwhere((times >= startTime) & (times < (startTime + timeWindow))).ravel()
+            #print 'INDICES'
+            #print coincidenceIndices
+            coincTimes = times[coincidenceIndices]
+            coincRCUs = RCUs[coincidenceIndices]# times[index:index+32]
+            return (coincRCUs, coincTimes)
+        else:
+            return []
+    
+    def readAntennaPositions(stationName, antennaMode):
+        return metadata.getRelativeAntennaPositions(stationName, antennaMode)
+
+
     def readOutput(self):
         """Called when new data is available from forked process, reads data
         into buffer.
@@ -264,44 +294,75 @@ class ApplicationWindow(QtGui.QMainWindow):
         # This reads in the raw trigger data! For data processed by VHECRtest see led.py
         thisOutput = self.process.readAllStandardOutput()
         theseLines = str(thisOutput).splitlines()
+        #print theseLines
+        #print len(theseLines)
+        if len(theseLines) == 0:
+            return None
+        i = len(self.arrivalTimes)  
+        #print self.arrivalTimes
+        if (self.firstTime < 0) and (len(self.arrivalTimes) > 0) and (self.arrivalTimes[0] > 0):
+            self.firstTime = float(int(self.arrivalTimes[0]))
+            print 'FIRST TIME'
+            print self.firstTime
+        self.arrivalTimes = np.resize(self.arrivalTimes, len(theseLines) + len(self.arrivalTimes))
+        self.RCUs = np.resize(self.RCUs, len(self.arrivalTimes))
+
         
-        newTriggers = np.zeros(len(theseLines) + len(self.triggers), 2) # better 2 1-D arrays...?
-        print thisOutput
+        #print thisOutput
 #        for i in range(len(self.triggers)):
 #            newTriggers[i] = self.triggers[i] # this has to be done better...        
-        i = len(self.triggerTimes)
+        
         for line in theseLines:
             values = str(line).split()
             if len(values) < 5:
                 print 'Unexpected number of parameters: ', values
             else:
-                newTriggers[i][0] = values[0] # rcu number
-                newTriggers[i][1] = values[2] + float(values[3]) / 200.0e6 # trigger time in seconds with 5 ns resolution
-        self.triggers = np.concatenate(self.triggers, newTriggers)
-        arrivalTimes = self.triggers.T[1]
-        firstCoincidence = coincidence(arrivalTimes, self.nofChannels)
+                self.RCUs[i] = int(values[0])
+                self.arrivalTimes[i] = float(values[2]) - self.firstTime + float(values[3]) / 200.0e6 # trigger time in seconds with 5 ns resolution
+                if self.arrivalTimes[i] > 1e6:
+                    print '!!! %f' % self.arrivalTimes[i]
+                i += 1
+                
+#        print self.arrivalTimes[-1]
+#        print self.RCUs[-1]
+        sortingIndices = np.argsort(self.arrivalTimes) # default = ascending. Used to sort RCUs in the same order as arrival times.
+        self.arrivalTimes = self.arrivalTimes[sortingIndices]
+        self.RCUs = self.RCUs[sortingIndices]
+        
+#        self.triggers = np.concatenate(self.triggers, newTriggers)
+#        arrivalTimes = self.triggers.T[1]
+
+        firstCoincidence = self.coincidence(self.RCUs, self.arrivalTimes, self.nofChannels, self.timeWindow) # returns (RCUs, times)
         if len(firstCoincidence) > 0:
+            coincRCUs = firstCoincidence[0]
+            print 'COINC RCUs '
+            print coincRCUs
+            coincTimes = firstCoincidence[1]
+
+            #print firstCoincidence
             # fit direction
-            (az, el, mse) = srcfind.directionBruteForceSearch(self.antennaPositions, firstCoincidence)
+            antennasUsed = self.antennaPositions[coincRCUs].reshape(3*len(coincRCUs))
+            (az, el, mse) = srcfind.directionBruteForceSearch(antennasUsed, coincTimes)
             az *= 180.0 / np.pi
             el *= 180.0 / np.pi
             print 'Coincidence found: az = %3.2f, el = %3.2f, mse = %4.2f' % (az, el, mse)
-            if mse < 30.0: # get rid of hardcoded value?
+            
+            if mse < 30.0: # hardcoded value...
                 # plot the point in the display... see below.
                 if not self.timer.isActive():
                     print 'Start the timer'
-                    self.ctime = float(values[timeKey])*5e-6 # All times are in ms
+                    self.ctime = self.firstTime + float(coincTimes[0])*5e-6 # All times are in ms
                     self.timer.start(self.refresh)
 
                 # Store data (converting time to ms)
-                self.time[self.i] = float(values[timeKey])*5e-6 # BUGGY for non-matching time flow
+                self.time[self.i] = float(coincTimes[0])*5e-6 # BUGGY for non-matching time flow
                 #self.time[self.i] = self.ctime
                 self.ctime = self.time[self.i]
                 #print 'time is: ' + str(self.time[self.i])
-                self.phi[self.i] = float(values[phiKey]) + random.gauss(0.0, randomizationInDegrees)
+                self.phi[self.i] = float(az) + random.gauss(0.0, randomizationInDegrees)
                 #print self.phi[self.i]
                 if not self.distancePlot:
-                    self.theta[self.i] = float(values[thetaKey]) + random.gauss(0.0, randomizationInDegrees)
+                    self.theta[self.i] = float(90.0 - el) + random.gauss(0.0, randomizationInDegrees)
                 else:
                     self.theta[self.i] = float(values[distanceKey])
                 #print self.theta[self.i]
@@ -314,22 +375,12 @@ class ApplicationWindow(QtGui.QMainWindow):
                 print 'Point discarded, variance too high!'
         # now: look for more coincidences in this piece of data, or move on to the next and keep only end-boundary minus timeWindow
         # real-time code moves on to the next bit...
-    
-    def coincidence(times, nofChannels, timeWindow):
-        if len(triggers) < nofChannels:
-            return []
-        index = -1
-        for i in range(len(triggers) - nofChannels)
-            if times[i + nofChannels - 1] - times[i] < timeWindow:
-                index = i
-                break
-        if index >= 0:
-            return times[index:index+32] # improve by extending until timeWindow exhausted
-        else:
-            return []
-    
-    def readAntennaPositions(stationName, antennaMode):
-        return metadata.getRelativeAntennaPositions(stationName, antennaMode)
+        
+        # cut the times array to leave only the latest time minus one timeWindow
+        cutIndices = np.argwhere(self.arrivalTimes > (self.arrivalTimes[-1] - self.timeWindow)).ravel()
+        self.arrivalTimes = self.arrivalTimes[cutIndices]
+        self.RCUs = self.RCUs[cutIndices]
+      
     
     def resetButtons(self):
         """Reset buttons"""
