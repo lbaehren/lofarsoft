@@ -17,44 +17,48 @@ from harray import *
 
 def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,**plotargs):
     """
-    array[0].plot(self,xvalues=vec,xlabel='x',ylabel='y',title='Title',clf=True,logplot='xy') -> plot the array (loglog)
-
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
 
-    You can set the plotting parameters also as attributes to the .par
-    class of the array, e.g., 'array.par.xvalues=x_vector; array.plot()'
+    Usage::
+
+      >>> array[0].plot(self,xvalues=vec,xlabel='x',ylabel='y',title='Title',clf=True,logplot='xy')
+      -> plot the array (loglog)
+
+    You can set the plotting parameters also as attributes to the
+    ``par`` class of the array, e.g., ``array.par.xvalues=x_vector;
+    array.plot()``
 
     Parameters:
 
-    *xvalues* an array with corresponding x values, if 'None' numbers
-    from 0 to length of the array are used
+    ============ ============================================================
+    Parameter    Description
+    ============ ============================================================
+    *xvalues*    an array with corresponding *x* values, if ``None``
+                 numbers from 0 to length of the array are used.
+    *xlabel*     the *x*-axis label, if not specified, use the ``name``
+                 keyword of the ``xvalues`` array - units will be added
+                 automatically.
+    *ylabel*     the *y*-axis label, if not specified, use the ``name``
+                 keyword of the array - units will be added automatically.
+    *xlim*       tuple with minimum and maximum limits for the *x*-axis.
+    *ylim*       tuple with minimum and maximum limits for the *y*-axis.
+    *legend*     plots a legend, taking a tuple of strings for each
+                 plotted line as input, e.g. ``legend=('A','B',...)``.
+    *title*      the title for the plot
+    *clf*        if ``True`` (default) clear the screen beforehand
+                 (use ``False`` to compose plots with multiple lines
+                 from different arrays.
+    *logplot*    can be used to make loglog or semilog plots::
 
-    *xlabel* the x-axis label, if not specified, use the 'name' keyword
-    of the xvalues array - units will be added automatically
+                   'x' ->semilog in x
+                   'y' ->semilog in y
+                   'xy'->loglog plot
 
-    *ylabel* the y-axis label, if not specified, use the 'name' keyword
-    of the array - units will be added automatically
-
-    *xlim* tuple with minimum and maximum limits for the x-axis
-
-    *ylim* tuple with minimum and maximum limits for the y-axis
-
-    *legend* plots a legend, taking a tuple of strings for each plotted
-    line as input, e.g. legend=('A','B',...)
-
-    *title* a title for the plot
-
-    *clf* if True (default) clear the screen beforehand (use False to
-    compose plots with multiple lines from different arrays.
-
-    *logplot* can be used to make loglog or semilog plots:
-            'x' ->semilog in x
-            'y' ->semilog in y
-            'xy'->loglog plot
-
-    *plotarg1*=..., plotarg2=...: you can add any plotting paramter that is understood by .plot of scipy, e.g.
-     *color*='green', *linestyle*='dashed'
+    *plotarg1*   =..., plotarg2=...: you can add any plotting parameter
+                 that is understood by ``.plot`` of scipy, e.g.
+                 ``color='green``, ``linestyle='dashed``.
+    ============ ============================================================
     """
     if (xvalues==None):
         if hasattr(self.par,"xvalues"):
@@ -154,9 +158,12 @@ for v in hAllArrayTypes:
 
 def plotconst(xvalues,y):
     """
-    Usage:
+    Plot a constant line.
 
-    plotconst(xvalues,y).plot() -> will plot a constant line with y-value 'y' for the xvalues provided.
+    Usage::
+
+      >>> plotconst(xvalues,y).plot()
+      -> will plot a constant line with y-value 'y' for the xvalues provided.
 
     """
     return hArray([y,y],xvalues=hArray([xvalues.vec()[0],xvalues.vec()[-1]]))

@@ -22,66 +22,83 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     """
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
-    IntArray(), FloatArray(), ComplexArray(), StringArray()
+    IntArray(), FloatArray(), ComplexArray(), StringArray(), e.g.::
 
-    Usage:
+        >>> hArray(Type=float,dimensions=[n1,n2,n3...],
+                   fill=array/scalar,name="String",
+                   copy=array, properties=array, xvalues=array,
+                   units=("prefix","unit"), par={keyword==value,...})
+        FloatArray
 
-    hArray(Type=float,dimensions=[n1,n2,n3...],fill=array/scalar,name="String", copy=array, properties=array, xvalues=array,units=("prefix","unit"),par={keyword==value,...}) -> FloatArray
+    ``Array(Type)`` - will create an empty array of type ``Type``,
+    where ``Type`` is a basic Python type, i.e.  ``bool``, ``int``,
+    ``float``, ``complex``, ``str``.
 
-    Array(Type) -  will create an empty array of type "Type", where Type is
-    a basic Python type, i.e.  bool, int, float, complex, str.
+    ``Array([1,2,3,...])`` or ``Array((1,2,3,...))``
+      if a list or a tuple is provided as first argument then an array
+      is created of the type of the first element in the list or tuple
+      (here an integer) and filled with the contents of the list or
+      tuple.
 
-    Array([1,2,3,...]) or Array((1,2,3,...)) - if a list or a tuple is
-    provided as first argument then an array is created of the type of
-    the first element in the list or tuple (here an integer) and
-    filled with the contents of the list or tuple.
+    ``Array(vec)``
+      will create an array of the type of a vector and use the vector
+      as its underlying memory storage. To copy the value, use the
+      fill parameter described below.
 
-    Array(vec) - will create an array of the type of a vector and use
-    the vector as its underlying memory storage. To copy the value,
-    use the fill parameter described below.
+    ``Array(Type, dimensions)``
+      will create an array of type ``Type``, specifiying its
+      dimensions. Input for dimensions can be a list or a another
+      array (who's dimensions are copied).
 
-    Array(Type,dimensions) - will create an array of type "Type",
-    specifiying its dimensions. Input for dimensions can be a list or
-    a another array (who's dimensions are coopied).
+    ``Array(Type,dimensions,fill)``
+      same as above but fill the array with particular values. Input
+      can be a single value, a list, a vector, or another array.
 
-    Array(Type,dimensions,fill) - same as above but fill the array with
-    particular values. Input can be a single value, a list, a vector,
-    or another array.
+    ``Array()``
+      defaults to a float array.
 
-    Array() defaults to a float array.
+    Note, that dimensions and fill take precedence over the list and
+    tuple input. Hence if you create a array with
+    ``Array([1,2,3],dimension=[2])`` it will contain only
+    ``[1,2]``. ``Array([1,2,3],dimension=[2],fill=4)`` will give
+    ``[4,4]``.
 
-    Note, that dimensions and fill take precedence over the list and tuple
-    input. Hence if you create a array with Array([1,2,3],dimension=[2]) it
-    will contain only [1,2]. Array([1,2,3],dimension=[2],fill=4) will give
-    [4,4].
 
     Parameters:
-    ===========
 
-    dimensions = list or array: set the dimension of the array
-    specified as a list of integers, or an array from which to copy
-    the dimensions.
+    =========== ======================== =====================================================
+    Parameter   Default value            Description
+    =========== ======================== =====================================================
+    dimensions  list or arrays           set the dimension of the array specified
+                                         as a list of integers, or specified as a
+                                         list of integers, or an array from which
+                                         to copy the dimensions.
 
-    copy = array: make a copy of 'array' in terms of type, dimension,
-    fill, and parameter object.
+    copy        array                    make a copy of 'array' in terms of type,
+                                         dimension, fill, and parameter object.
 
-    properties = array: make a new object with the same properties of 'array' in terms of type, dimension,
-    and parameter object, but NOT copying the data.
+    properties  array                    make a new object with the same properties
+                                         of 'array' in terms of type, dimension,
+                                         and parameter object, but NOT copying the data.
 
-    xvalues = array: set the default x-axis values for plotting to array
-    (simply sets self.par.xvalues to array)
+    xvalues     array                    set the default x-axis values for plotting to
+                                         array (simply sets ``self.par.xvalues`` to
+                                         array).
 
-    units = (prefixstring,unitname) - will set the initial units of the
-    array accordingly, e.g. units=("M","Hz") states that the values
-    are provided in units of MHz.
+    units       (prefixstring,unitname)  will set the initial units of the array accordingly,
+                                         e.g. ``units=("M","Hz")`` states that the values
+                                         are provided in units of MHz.
 
-    par = dict of parameters: set additional (arbitrary)
-    parameter values that are stored in the .par attribute of the
-    array, and are used, e.g., by the plot method to use certain
-    defaults.
+    par         dict of parameters       set additional (arbitrary) parameter values that
+                                         are stored in the ``.par`` attribute of the array,
+                                         and are used, e.g., by the plot method to use
+                                         certain defaults.
 
-    header = a dict containing optional keywords and values that can
-    be taken over from a datafile
+    header                               a dict containing optional keywords and values that
+                                         can be taken over from a datafile.
+
+    =========== ======================== =====================================================
+
     """
     if type(copy) in hAllArrayTypes:
         if properties==None: properties=copy
@@ -682,7 +699,7 @@ def hArray_hasHeader(self,parameter_name=None):
     """
     hasheader=hasattr(self,"par") and hasattr(self.par,"hdr")
     if type(parameter_name)==str and hasheader:
-	hasheader=self.par.hdr.has_key(parameter_name)
+        hasheader=self.par.hdr.has_key(parameter_name)
     return hasheader
 
 def hArray_setHeader(self,**kwargs):
@@ -935,10 +952,10 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f=open(os.path.join(fn,"header.hdr"),"wb")
     slicelength=self.getEnd()-self.getBegin()
     if self and hasattr(self,"par"):
-	if hasattr(self.par,"nblocks") and not nblocks:
-	    nblocks=self.par.nblocks
-	if hasattr(self.par,"dim") and not dim:
-	    dim=self.par.dim
+        if hasattr(self.par,"nblocks") and not nblocks:
+            nblocks=self.par.nblocks
+        if hasattr(self.par,"dim") and not dim:
+            dim=self.par.dim
     if not nblocks: nblocks=1
     arydim=self.getDim()
     if not slicelength==len(self): arydim=[slicelength]
@@ -957,41 +974,52 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
 
 def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
     """
-    Usage:
+    Usage::
 
-    ary=hArrayRead("testdata.hdr") -> new hArray read from testdata.hdr and testdata.dat
+      >>> ary = hArrayRead("testdata.hdr")
+      New hArray read from testdata.hdr and testdata.dat
 
     Create and return a new hArray which contains data read from a
-    binary data file with hWriteFileBinary and which has a (.hdr)
-    header file written with hArray_writeheader.
+    binary data file with ``hWriteFileBinary`` and which has a
+    ``.hdr`` header file written with ``hArray_writeheader``.
 
-    *filename* - the filename of either the ".dat" file or the ".hdr" file (but both files need to be present). You can only give the
-    filename without the extension.
+    =============== ======== ===============================================
+    Parameter       Default  Description
+    =============== ======== ===============================================
+    filename                 the filename of either the ``.dat`` file
+                             or the ``.hdr`` file (but both files need
+                             to be present). You can only give the
+                             filename without the extension.
+    block           -1       Allows one to specify that one has written
+                             the same vector multiple times to the same
+                             file, so that the data file size is actually
+                             ``nblocks`` (see ``hArray_writeheader``)
+                             times the original ``hArray`` size. if
+                             ``block < 0`` then the entire file is being
+                             read and a big array is returned, otherwise
+                             only the block specified will be read and
+                             returned.
+    amalgateblocks  True     If ``True`` and multiple blocks were written
+                             to file, then the array read back will have
+                             the same number of dimensions as the original
+                             data set with just the first dimension being
+                             ``nblock`` times bigger. If set to ``False``,
+                             then an array with dimensions
+                             ``[nblocks,original dimensions ...]`` will be
+                             returned.
+    =============== ======== ===============================================
 
-    *block* = -1 - Allows one to specify that one has written the same vector
-    multiple times to the same file, so that the data file size is
-    actually nblocks (see hArray_writeheader) times the original
-    hArray size. if block<0 then the entire file is being read and a
-    big array is returned, otherwise only the block specified will be
-    read and returned.
+    Example::
 
-    *amalgateblocks*=True - If True and multiple blocks were written
-     to file, then the array read back will have the same number of
-     dimensions as the original data set with just the first dimension
-     being nblock times bigger. If set to False, then an array with
-     dimensions [nblocks,original dimensions ...] will be returned.
+      x=hArray([1.0,2.0,3,4],name="test")
+      x.write("test.dat")
+      y=hArrayRead("test")
+      y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
 
-Example:
-
-x=hArray([1.0,2.0,3,4],name="test")
-x.write("test.dat")
-y=hArrayRead("test")
-y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
-
-x.write("test.dat",nblocks=2)
-x.writefilebinary("test.dat",1*4)
-y=hArrayRead("test")
-y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0])
+      x.write("test.dat",nblocks=2)
+      x.writefilebinary("test.dat",1*4)
+      y=hArrayRead("test")
+      y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0])
 
     """
     fn=os.path.expandvars(os.path.expanduser(filename))
@@ -1034,16 +1062,19 @@ y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3
     return ary
 
 def ashArray(val):
-    """ashArray(val) -> hArray(val)
+    """Usage::
+
+      ashArray(val) -> hArray(val)
 
     Returns an hArray withe the argument val unless val is already an
     hArray. In this case return the argument unchanged.
 
-    Example:
+    Example::
 
-    ashArray(3) -> hArray(int, [1] # len=1, slice=[0:1], vec -> [3])
-    ashArray([3,4]) -> hArray(int, [2] # len=2, slice=[0:2], vec -> [3, 4])
-    x=ashArray([3,4]); ashArray(x) -> hArray(int, [2] # len=2, slice=[0:2], vec -> [3, 4])
+      ashArray(3) -> hArray(int, [1] # len=1, slice=[0:1], vec -> [3])
+      ashArray([3,4]) -> hArray(int, [2] # len=2, slice=[0:2], vec -> [3, 4])
+      x=ashArray([3,4]); ashArray(x) -> hArray(int, [2] # len=2, slice=[0:2], vec -> [3, 4])
+
     """
     if type(val) in hAllArrayTypes:
         return val
@@ -1053,19 +1084,22 @@ def ashArray(val):
         return hArray([val])
 
 def asList(val):
-    """
-    Usage:
+    """Usage::
 
-    asList(val) -> list(val) if val is not a list already
+      >>> asList(val)
+      list(val) if val is not a list already
 
     Returns its argument as a list, but leave it unchanged if it is
     already a list. Sets, vectors, arrays, etc. will be turned into
     list, strings will not.
 
-    Example:
+    Example::
 
-    asList(3) -> [3]
-    asList([3]) -> [3]
+      >>> asList(3)
+      [3]
+
+      >>> asList([3])
+      [3]
 
     """
     if type(val)==list:

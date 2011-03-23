@@ -30,7 +30,7 @@ inspecting of parameters (``tpars``), modifying them (``tpar
 par=value``), storing and retrieving of parameters
 (``tput``/``tget``), and execution of tasks (``go``). The task
 instance itself is retrieved with the function ``task()`` or simply
-with teh variable ``Task``.
+with the variable ``Task``.
 
 How to use tasks?
 =================
@@ -73,7 +73,7 @@ store the current input parameters to a system database on disk (in
 Here is an overview of interactive functions one can use at the
 command prompt in ipython:
 
-================================================== ======
+================================================== ==================================================================
 ``Task``                                           the currently loaded task instance
 ``Task.par (=value)``                              access or set a parameter (without updating)
 ``Task(par1,par2,...)``                            run the task with parameters ``par1,par2,...``
@@ -92,7 +92,7 @@ command prompt in ipython:
 ``tinit``                                          run the initialization routine again (without resetting
                                                    the parameters to default values)
 ``thelp``                                          print documentation of task module
-================================================== ======
+================================================== ==================================================================
 
 
 Using go, the input parameters in the workspace will be stored
@@ -1453,3 +1453,5 @@ class WorkSpace(object):
         if internals:  s+="#-----------------------Internal Parameters-----------------------------\n"+self.listInternalParameters()
         s += "#-----------------------------------------------------------------------\n"
         return s
+
+

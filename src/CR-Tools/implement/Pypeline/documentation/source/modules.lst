@@ -1,7 +1,15 @@
-pycrtools.template
-pycrtools.core
-pycrtools.core.hftools
-#pycrtools
+# pycrtools.template
+# pycrtools.core
+# -- Begin: New --
+# pycrtools.core.types
+pycrtools.core.htypes
+pycrtools.core.harray
+pycrtools.core.vector
+pycrtools.core.plot
+pycrtools.core.workspaces
+# -- End: New --
+# pycrtools.core.hftools
+# pycrtools
 pycrtools.metadata
 pycrtools.grid
 pycrtools.matching

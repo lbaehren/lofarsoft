@@ -336,11 +336,11 @@ class AverageSpectrum(tasks.Task):
 
     If you see an outputline like this,
 
-    # Start antenna = 92 (ID= 17011092) - 4 passes:
-    184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
-    185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
-    186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
-    - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
+      # Start antenna = 92 (ID= 17011092) - 4 passes:
+      184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
+      185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
+      186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
+      - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
 
     this will tell you that Antenna 17011092 was worked on (the 92nd
     antenna in the data file) and the 186th chunk (block 514)
@@ -364,7 +364,6 @@ class AverageSpectrum(tasks.Task):
     WorkSpace = WorkSpace
 
     def init(self):
-
         """
         Initialize the task
         """
@@ -600,6 +599,8 @@ class AverageSpectrum(tasks.Task):
         y.par.xvalues=datafile["Time"]
         y.par.xvalues.setUnit("mu","")
         y.plot(clf=not all)
+
+
 
 """
 class test1(tasks.Task):

@@ -473,7 +473,9 @@ class DocumentationBlock():
         """
         result = ""
 
-        result += "%s.__doc__ = \"\"\"%s\"\"\"" %(self.name(), self.getPyDocString())
+        # result += "from _hftools import %s\n" %(self.name())
+        # result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.name(), self.getPyDocString())
+        # result += "__all__.append(\'%s\')\n" %(self.name())
 
         return result
 

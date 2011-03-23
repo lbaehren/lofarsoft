@@ -1,4 +1,6 @@
-"""Types
+"""
+Types
+=====
 """
 
 from hftools import *

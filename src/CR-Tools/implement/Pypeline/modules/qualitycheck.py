@@ -6,14 +6,35 @@ import time
 #import pdb
 #pdb.set_trace()
 
-def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=-1,rmsfactor=2,meanfactor=3,spikyness=20,spikeexcess=20,refblock=None,blockoffset=0,antennaID=None,date=None,datafile=None,observatory=None,observatorymode=None,verbose=True,filename="",count=""):
+def CRQualityCheckAntenna(dataarray,
+                          qualitycriteria=None,
+                          normalize=False,
+                          nsigma=-1,
+                          rmsfactor=2,
+                          meanfactor=3,
+                          spikyness=20,
+                          spikeexcess=20,
+                          refblock=None,
+                          blockoffset=0,
+                          antennaID=None,
+                          date=None,
+                          datafile=None,
+                          observatory=None,
+                          observatorymode=None,
+                          verbose=True,
+                          filename="",
+                          count=""):
     """
-    Usage:
-    CRQualityCheckArray(dataarray,qualitycriteria=None,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=7,spikeexcess=7,refblock=None,verbose=True) -> list of antennas failing the qualitycriteria limits
-
     Do a basic quality check of raw time series data, looking for rms,
     mean and spikes and return a list of antennas which have failed
     the quality check and their statistical properties.
+
+    Usage::
+      >>> CRQualityCheckArray(dataarray,qualitycriteria=None,antennaID=0,
+                              nsigma=-1,rmsfactor=2,meanfactor=7,
+                              spikyness=7,spikeexcess=7,refblock=None,
+                              verbose=True)
+      -> list of antennas failing the qualitycriteria limits
 
     The data array is expected to be split into blocks (purely the
     dimension of the data array). The algorithm will then caclulate
@@ -21,14 +42,16 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
     a reference value. If blocks deviate too much from these values,
     they are being flagged and returned.
 
-    Example:
-    >> datafile=crfile(filename); nblocks=10
-    >> dataarray=hArray(float,[nblocks,datafile["blocksize"]])
-    >> datarray[...].read(datafile,"Fx",range(nblocks))
-    >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7),"spikeexcess":(-1,7)}
-    >> flaglist=CRQualityCheck(dataarray,qualitycriteria=qualitycriteria,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=20,spikeexcess=20,refblock=None,verbose=True)
+    Example::
+
+      >> datafile=crfile(filename); nblocks=10
+      >> dataarray=hArray(float,[nblocks,datafile["blocksize"]])
+      >> datarray[...].read(datafile,"Fx",range(nblocks))
+      >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7),"spikeexcess":(-1,7)}
+      >> flaglist=CRQualityCheck(dataarray,qualitycriteria=qualitycriteria,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=20,spikeexcess=20,refblock=None,verbose=True)
 
     Parameters:
+
 
     *dataarray* - an array containing the data with the dimensions
     [nblocks,blocksize].
@@ -112,8 +135,8 @@ def CRQualityCheckAntenna(dataarray,qualitycriteria=None,normalize=False,nsigma=
 #    mean=datamean.mean(); rms=datarms.mean();
     mean=datamean.median(); rms=datarms.median();
     if normalize:
-	datamean -= mean
-	datarms /= rms
+        datamean -= mean
+        datarms /= rms
         dataarray -= mean
         dataarray /= rms
         lower_limit=Vector(float,nblocks,fill=-nsigma)

@@ -190,9 +190,9 @@ class tget_class(t_class):
     """
     def __call__(self,name=""):
         found=tasks.task_instance.get(name)
-	if found:
-	    tasks.task_instance.ws.update()
-	    tpars(False,False)
+        if found:
+            tasks.task_instance.ws.update()
+            tpars(False,False)
 
 tget = tget_class()
 
@@ -227,7 +227,7 @@ class tput_class(t_class):
     tput name -> Store parameters stored under 'name' (retrieve with tget name)
 
     *delete* - If True, delete the parameter set from data base.
-    
+
     """
     def __call__(self,name="",delete=False):
         tasks.task_instance.put(name=name,delete=delete)

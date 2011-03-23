@@ -17,9 +17,10 @@ def root_filename(filename,extension=".PCR"):
     """
     splt=os.path.splitext(filename)
     if splt[1].upper()==extension:
-	return splt[0]
+        return splt[0]
     else:
-	return filename
+        return filename
+
 
 def listFiles(unix_style_filter):
     """
@@ -63,25 +64,28 @@ listFiles(["$LOFARSOFT/*.txt","~/.ema*"])
     if ll.count("."): del ll[ll.index(".")]
     return ll
 
+
 def readParfiles(parfile):
     """
     Open one or multipe parameter (i.e. python) files and return all
     values defined in there as a dict. If file does not exist or
-    parfile==None, simply return and empty dict.
+    ``parfile==None``, simply return and empty dict.
 
-    The filename can contain environemnt variables, HOME, or pattern
-    matching (e.g., '*').
+    The filename can contain environemnt variables, ``HOME``, or pattern
+    matching (e.g., ``*``).
 
     See also: listFiles
-    
-    Example:
 
-    File.par:
-    x=1
-    y=2
+    Example::
 
-    readFile("~/File.par") -> {"x":1,"y":2}
-    
+      File.par:
+      x=1
+      y=2
+
+      Python:
+      >>> readFile("~/File.par")
+      -> {"x":1,"y":2}
+
     """
     pardict={}
     if type(parfile)==str:
@@ -91,9 +95,9 @@ def readParfiles(parfile):
                 f=open(l,"r")
                 if f:
                     exec f in globals(),pardict
-		else:
-		    print "Error: Opening parameter file",l,"failed."
-	else:
+                else:
+                    print "Error: Opening parameter file",l,"failed."
+        else:
             print "Error: parameter files",parfile,"not found."
     return pardict
 
@@ -120,11 +124,13 @@ def DataReader_read(self,key,aryvec,block=-1,antenna=-1):
     hFileRead(self,key,aryvec,block,antenna)
     return self
 
+
 def DataReader_repr(self):
     if hasattr(self,"filename"):
         return "crfile('"+self.filename+"')"
     else:
         return "DataReaderObject(filename unknown)"
+
 
 def DataReader_getHeaderVariables(self):
     """
@@ -137,6 +143,7 @@ def DataReader_getHeaderVariables(self):
         self.hdr[v]=self.get(v)     # hdr=header - This is probably a better way to store the keywords
         setattr(self,v,self.get(v)) # This should then become obsolete
 
+
 def DataReader_getitem(self,*keys):
     """
     datafile["key"] -> value
@@ -146,7 +153,7 @@ def DataReader_getitem(self,*keys):
     """
     keys0=keys[0]
     if type(keys0)==tuple:
-	return map(lambda k:hFileGetParameter(self,k),keys0)
+        return map(lambda k:hFileGetParameter(self,k),keys0)
     if not type(keys0)==str:
         print "Error - DataReader(Py): keyword",keys0,"must be a string!"
         return
@@ -167,6 +174,7 @@ def DataReader_getitem(self,*keys):
     else:
         return hFileGetParameter(self,keys0)
 
+
 def DataReader_set(self,key,val):
     """
     datafile.set("key",value) -> set the appropriate header parameter
@@ -177,6 +185,7 @@ def DataReader_set(self,key,val):
     ok=hFileSetParameter(self,key,val)
     self.getHeaderVariables()
     return self
+
 
 def DataReader_setitem(self,*keyval):
     """
@@ -195,7 +204,8 @@ def DataReader_setitem(self,*keyval):
         for k,v in zip(key,val):
             self.set(k,v)
     else:
-	self.set(key,val)
+        self.set(key,val)
+
 
 def crfile(filename):
     """
@@ -209,6 +219,7 @@ def crfile(filename):
     cfile.filename=filename
     cfile.getHeaderVariables()
     return cfile
+
 
 #------------------------------------------------------------------------
 # Getting Metadata like Antenna positions or instrumental delays

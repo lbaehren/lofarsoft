@@ -15,6 +15,7 @@ class CRWorkSpace():
     This class holds the arrays and vectors used by the various
     analysis tasks. Hence this is the basic workspace in the memory.
     """
+
     def __init__(self,parent=None,modulename=None,**keywords):
         self.modules=[]
         if modulename==None:
@@ -37,11 +38,15 @@ class CRWorkSpace():
         self.auxparameters=[]
         if not hasattr(self,"locals"): self.locals=set()
         self.setParameters(**keywords)
+
+
     def __setitem__(self,par,val):
         """Sets the value of a parameter and make it local."""
         if par not in self.parameters+self.auxparameters: self.auxparameters.append(par)
         if not self.isLocal(par): self.locals.add(par)
         setattr(self,par,val)
+
+
     def __getitem__(self,par):
         """
         Retrieve a parameter value from the workspace. If it does not
@@ -62,14 +67,22 @@ class CRWorkSpace():
                 return val
         #else: Does not exist localy or globaly, so create local default
         return self.setParameterDefault(par)
+
+
     def isLocal(self,par):
         return (par in self.locals)
+
+
     def markLocal(self,par):
         if not self.isLocal(par): self.locals.add(par) # Make parameter local
+
+
     def markGlobal(self,par):
         if self.isLocal():
             self.locals.discard(par)
             self["par"]
+
+
     def setParameterDefault(self,par):
         """Assign a parameter its default value and make it local."""
         if hasattr(self,"default_"+par):
@@ -79,6 +92,8 @@ class CRWorkSpace():
         else: #no Defaults defined!
             val=None
         return val
+
+
     def setParameters(self,**keywords):
         """
         This method will set the parameters listed as arguments in the
@@ -86,6 +101,8 @@ class CRWorkSpace():
         """
         for k in keywords.keys(): self[k]=keywords[k]
         return self
+
+
     def __repr__(self,parentname=""):
         """
         Returns a readable summary of all parameters in the workspace.
@@ -99,6 +116,8 @@ class CRWorkSpace():
         for m in self.modules:
             s+=getattr(self,m).__repr__(parentname=myname+".")+"\n"
         return s
+
+
     def doc_parameters(self):
         s=""
         for par in self.parameters:
@@ -110,10 +129,14 @@ class CRWorkSpace():
                 s+=" - "+getattr(self,"__"+par+"__doc__")
             s+="\n"
         return s
+
+
     def help(self):
         print self.__doc__
         print "\nAvailable parameters:"
         print self.doc_parameters()
+
+
     def getModule(self,name):
         if self.name==name: return self
         for m in self.modules:
@@ -121,29 +144,46 @@ class CRWorkSpace():
             if not val==None: return val
         return None
 
+
+
 class CRAverageSpectrumWorkSpace(CRWorkSpace):
-    """Workspace for hCRAverageSpectrum. See also CRMainWorkSpace and CRWorkSpace."""
+    """
+    Workspace for mod::`hCRAverageSpectrum`. See also
+    ``CRMainWorkSpace`` and ``CRWorkSpace``.
+    """
+
     def __init__(self,parent=None,modulename=None,**keywords):
         self.parameters=["datafile","max_nblocks","nblocks"] # Create those parameters first and in this order
         CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
 #    def default_datafile(self):
 #        """DataReader object to read the data from."""
 #        return crfile(DEFAULTDATAFILE)
+
+
     def default_nblocks(self):
         """Number of blocks to average, take all blocks by default."""
         return min(self["datafile"]["filesize"]/self["datafile"]["blocksize"],self["max_nblocks"])
+
+
     def default_max_nblocks(self):
         """Absolute maximum number of blocks to average, irrespective of filesize."""
         return 100000
+
+
     def default_blocks(self):
         """List of blocks to process."""
         return range(self["nblocks"])
+
+
     def default_fx(self):
         """Array to hold the x-values of the raw time series data. (work vector)"""
         return self["datafile"]["emptyFx"]
+
+
     def default_fft(self):
         """Array to hold the FFTed x-values (i.e. complex spectrum) of the raw time series data. (work vector)"""
         return self["datafile"]["emptyFFT"]
+
 
 #Now add the new workspsace to the overall workspace list
 CRWorkSpaceList.append(CRAverageSpectrumWorkSpace)
@@ -152,103 +192,167 @@ CRWorkSpaceList[-1].name="AverageSpectrum"
 
 class CRFitBaselineWorkSpace(CRWorkSpace):
     """Workspace for hCRFitBaseline. See also CRMainWorkSpace and CRWorkSpace."""
+
     def __init__(self,parent=None,modulename=None,**keywords):
         self.parameters=["nbins","ncoeffs","polyorder","nofAntennas","freqs","spectrum"]
         self.locals=set(["nbins","polyorder","freqs","spectrum","rms","ratio","selected_bins"])
         CRWorkSpace.__init__(self,parent=parent,modulename=modulename,**keywords)
+
+
     def default_nbins(self):
         """The number of bins in the downsampled spectrum used to fit the baseline."""
         return 2**8
+
+
     def default_polyorder(self):
         """Order of the plyonomial to fit.  (output only)"""
         return self["ncoeffs"]-1
+
+
     def default_rmsfactor(self):
         """Factor above and below the RMS in each bin at which a bin is no longer considered."""
         return 2.0
+
+
     def default_fftLength(self):
         """Length of unbinned spectrum."""
         return 0
+
+
     def default_logfit(self):
         """Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards)."""
         return True
+
+
     def default_fittype(self):
         """Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default)."""
         return "BSPLINE"
+
+
     def default_nofAntennas(self):
         """Number of antennas held in memory."""
         return 1
+
+
     def default_ncoeffs(self):
         """Number of coefficients for the polynomial."""
         return 18
+
+
     def default_numin(self):
         """Minimum frequency of useable bandwidth. Negative if to be ignored."""
         return -1
+
+
     def default_numax(self):
         """Maximum frequency of useable bandwidth. Negative if to be ignored."""
         return -1
+
+
     def default_numin_i(self):
         """Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored."""
         return -1
+
+
     def default_numax_i(self):
         """Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored."""
         return -1
+
+
     def default_extendfit(self):
         """Extend the fit by this factor at both ends beyond numax and numin. The factor is relative to the unsued bandwidth."""
         return 0.1
+
+
     def default_freqs(self):
         """Array of frequency values of the downsampled spectrum. (work vector)"""
         return hArray(float,dimensions=[1,self["nbins"]],name="Frequency",units=("M","Hz"))
+
+
     def default_spectrum(self):
         """Array of power values holding the downsampled spectrum. (work vector)"""
         return hArray(float,[self["nofAntennas"],self["nbins"]],name="Binned Spectrum",units="a.u.",xvalues=self["freqs"],par=dict(logplot="y"))
+
+
     def default_rms(self):
         """Array of RMS values of the downsampled spectrum. (work vector)"""
         return hArray(properties=self["spectrum"], name="RMS of Spectrum")
+
+
     def default_chisquare(self):
         """Returns the chisquare of the baseline fit. (output only)"""
         return 0
+
+
     def default_weights(self):
         """Array of weight values for the fit. (work vector)"""
         return hArray(properties=self["spectrum"], name="Fit Weights")
+
+
     def default_ratio(self):
         """Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)"""
         return hArray(properties=self["spectrum"],name="RMS/Amplitude",par=dict(logplot=False))
+
+
     def default_powers(self):
         """Array of integers, containing the powers to fit in the polynomial. (work vector)"""
         return hArray(int,[self["nofAntennas"],self["ncoeffs"]],range(self["ncoeffs"]))
+
+
     def default_xpowers(self):
         """Array holding the x-values and their powers for the fit. (work vector)"""
         return hArray(float,[self["nofAntennas"],self["nbins"],self["ncoeffs"]],name="Powers of Frequency")
+
+
     def default_covariance(self):
         """Array containign the covariance matrix of the fit. (outpur only)"""
         return hArray(float,[self["nofAntennas"],self["ncoeffs"],self["ncoeffs"]])
+
+
     def default_bwipointer(self):
         """Pointer to the internal BSpline workspace as integer. Don't change! """
         return 0
+
+
     def default_clean_bins_x(self):
         """Array holding the frequencies of the clean bins. (work vector)"""
         return hArray(dimensions=[self["nofAntennas"],self["nbins"]],properties=self["freqs"],name="Clean Frequencies")
+
+
     def default_clean_bins_y(self):
         """Array holding the powers of the clean bins. (work vector)"""
         return self["spectrum"] #hArray(properties=self["spectrum"],xvalues=self["clean"]_bins_x)
+
+
     def default_baseline_x(self):
         """Array holding the x-values and their powers for calculating the baseline fit."""
         return hArray(float,[self["fftLength"],self["ncoeffs"]],name="Powers of Frequency")
+
+
     def default_height_ends(self):
         """The heights of the baseline at the left and right endpoints of the usable bandwidth where a hanning function is smoothly added."""
         return hArray(float,[2,self["nofAntennas"]])
+
+
     def default_nselected_bins(self):
         """Number of clean bins after RFI removal. (output only)"""
         return 0
+
+
     def default_selected_bins(self):
         """Array of indices pointing to clean bins, i.e. with low RFI. (work vector)"""
         return hArray(int,self["spectrum"],name="Selected bins")
+
+
     def default_coeffs(self):
         """Polynomial coeffieients of the baseline fit. (output vector)"""
         return hArray(float,[self["nofAntennas"],self["ncoeffs"]])
+
+
     def default_meanrms(self):
         """Estimate the mean rms in the spectrum per antenna. (output vector)"""
         return 0
+
 
 #Now add the new workspsace to the overall workspace list
 CRWorkSpaceList.append(CRFitBaselineWorkSpace)
@@ -257,172 +361,263 @@ CRWorkSpaceList[-1].name="FitBaseline"
 
 class CRMainWorkSpace(CRWorkSpace):
     """
-    ws=CRMainWorkSpace()
-
     WorkSpace for global parameters.
+
+    Usage::
+
+      ws=CRMainWorkSpace()
 
     This is a class to hold the variable, vectors, and arrays of all
     parameters used in the analysis.
 
-    You can access the parameters using ws["parametername"] and set
-    them using ws["parametername"]=val.
+    You can access the parameters using ``ws["parametername"]`` and set
+    them using ``ws["parametername"]=val``.
 
     Every known parameter has an associated function of the format
-    '.global_parameter' to return a default value. The defaults will
-    be set when calling the function ws.initParameters() or the first
+    ``.global_parameter`` to return a default value. The defaults will
+    be set when calling the function ``ws.initParameters()`` or the first
     time when you access a parameter. A local copy will be made in an
-    attribute of the class. So, you can access it also with
+    attribute of the class. So, you can access it also with::
 
-    ws.parametername
+      ws.parametername
 
     Workspaces can be stacked hierarchically in a tree structure, by
-    providing a parent workspace as an argument during creation, e.g.
+    providing a parent workspace as an argument during creation, e.g.::
 
-    child_ws=CRFitBaselineWorkSpace(ws)
+      child_ws=CRFitBaselineWorkSpace(ws)
 
     Parameter can than be local or global. If a parameter is not yet
     set locally, it will be searched in the parent works space. If it
     is not found in either workspace, the default value will be
     calculated and assigned locally.
 
-    You can assign your own value with ws["parname"]=value before
-    initialization to avoid execution of the defaulting mechanism.
+    You can assign your own value with::
 
-    E.g. to set the blocksize to 1024, simply set ws["blocksize"]=1024
+      ws["parname"]=value
+
+    before initialization to avoid execution of the defaulting mechanism.
+
+    E.g. to set the blocksize to 1024, simply set ``ws["blocksize"]=1024``
     prior to calling initParameters.
 
     Note that the local copy of a value is only made once
     initParameters is called or the parameter explicitly with
-    ws["..."]. So, if a global value changes, the change will not be
-    immediately reflected in the ws.parname value - hence use that with
-    care.
+    ``ws["..."]``. So, if a global value changes, the change will not
+    be immediately reflected in the ws.parname value - hence use that
+    with care.
 
-    ws.initParameters() - set all parameters (i.e. attributes) that do
-    not exist yet, and assign a default value.
+    To set all parameters (i.e. attributes) that do not exist yet, and
+    assign a default value, use::
 
-    ws.help() - get a list of all parameters and their values.
+      ws.initParameters()
 
-Available parameters:
-    nbins = 256 - The number of bins in the downsampled spectrum used to fit the baseline.
-    ncoeffs = 45 - Number of coefficients for the polynomial.
-    polyorder = 44 - Order of the plyonomial to fit.  (output only)
-    nofAntennas = 16 - Number of antennas held in memory.
-    freqs = hArray(float) - Array of frequency values of the downsampled spectrum. (work vector)
-    spectrum = hArray(float) - Array of power values holding the downsampled spectrum. (work vector)
-    rms = hArray(float) - Array of RMS values of the downsampled spectrum. (work vector)
-    rmsfactor = 2.0 - Factor above and below the RMS in each bin at which a bin is no longer considered.
-    verbose = True - Print progress information during processing.
-    selected_bins = hArray(int) - Array of indices pointing to clean bins, i.e. with low RFI. (work vector)
-    numax_i = 27459 - Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.
-    chisquare = Vec(int,16)=[1,1,1,2,1,...] - Returns the chisquare of the baseline fit. (output only)
-    doplot = False - Make plots during processing to inspect data.
-    numin = 12 - Minimum frequency of useable bandwidth. Negative if to be ignored.
-    ratio = hArray(float) - Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)
-    xpowers = hArray(float) - Array holding the x-values and their powers for the fit. (work vector)
-    bwipointer = 0 - Pointer to the internal BSpline workspace as integer. Don't change!
-    nselected_bins = Vec(int,16)=[236,236,239,239,238,...] - Number of clean bins after RFI removal. (output only)
-    clean_bins_y = hArray(float) - Array holding the powers of the clean bins. (work vector)
-    clean_bins_x = hArray(float) - Array holding the frequencies of the clean bins. (work vector)
-    baseline_x = hArray(float) - Array holding the x-values and their powers for calculating the baseline fit.
-    numin_i = 3539 - Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.
-    covariance = hArray(float) - Array containign the covariance matrix of the fit. (outpur only)
-    numax = 82 - Maximum frequency of useable bandwidth. Negative if to be ignored.
-    logfit = True - Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).
-    meanrms = Vec(float,16)=[3.48111317062,3.4784567903,3.47579235899,3.47705921127,3.47188685811,...] - Estimate the mean rms in the spectrum per antenna. (output vector)
-    fftLength = 32769 - Length of unbinned spectrum.
-    height_ends = hArray(float) - The heights of the baseline at theleft and right endpoints of the usable bandwidth where a hanning function is smoothly added.
-    extendfit = 0.1 - Extend the fit by this factor at both ends beyond numax and numin. The factor is relative to the unsued bandwidth.
-    t0 = 2.971779 - The cpu starting time of the processingin seconds, used for benchmarking.
-    weights = hArray(float) - Array of weight values for the fit. (work vector)
-    coeffs = hArray(float) - Polynomial coeffieients of the baseline fit. (output vector)
-    fittype = BSPLINE - Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default).
-    powers = hArray(int) - Array of integers, containing the powers to fit in the polynomial. (work vector)
+    A list of all parameters and their values are obtained with::
+
+      ws.help()
+
+    Available parameters:
+
+    =============================== ======================================================================
+    Parameter                       Description
+    =============================== ======================================================================
+    nbins = 256                     The number of bins in the downsampled spectrum
+                                    used to fit the baseline.
+    ncoeffs = 45                    Number of coefficients for the polynomial.
+    polyorder = 44                  Order of the polynomial to fit.  (output only)
+    nofAntennas = 16                Number of antennas held in memory.
+    freqs = hArray(float)           Array of frequency values of the downsampled spectrum.
+                                    (work vector)
+    spectrum = hArray(float)        Array of power values holding the downsampled spectrum.
+                                    (work vector)
+    rms = hArray(float)             Array of RMS values of the downsampled spectrum.
+                                    (work vector)
+    rmsfactor = 2.0                 Factor above and below the RMS in each bin at which a bin
+                                    is no longer considered.
+    verbose = True                  Print progress information during processing.
+    selected_bins = hArray(int)     Array of indices pointing to clean bins, i.e. with low RFI.
+                                    (work vector)
+    numax_i = 27459                 Channel number in spectrum of the maximum frequency of the
+                                    useable bandwidth. Negative if to be ignored.
+    chisquare = Vec(int,16)         Returns the :math:`\chi^{2}` of the baseline fit. (output only),
+                                    e.g. ``[1,1,1,2,1,...]``
+    doplot = False                  Make plots during processing to inspect data.
+    numin = 12                      Minimum frequency of useable bandwidth. Negative if to be ignored.
+    ratio = hArray(float)           Array holding the ratio between RMS and power of the downsampled
+                                    spectrum. (work vector)
+    xpowers = hArray(float)         Array holding the :math:`x`-values and their powers for the fit.
+                                    (work vector)
+    bwipointer = 0                  Pointer to the internal BSpline workspace as integer.
+                                    Don't change!
+    nselected_bins = Vec(int,16)    Number of clean bins after RFI removal. (output only),
+                                    e.g. ``[236,236,239,239,238,...]``
+    clean_bins_y = hArray(float)    Array holding the powers of the clean bins. (work vector)
+    clean_bins_x = hArray(float)    Array holding the frequencies of the clean bins. (work vector)
+    baseline_x = hArray(float)      Array holding the :math:`x`-values and their powers for calculating
+                                    the baseline fit.
+    numin_i = 3539                  Channel number in spectrum of the minimum frequency of the
+                                    useable bandwidth. Negative if to be ignored.
+    covariance = hArray(float)      Array containign the covariance matrix of the fit. (output only)
+    numax = 82                      Maximum frequency of useable bandwidth. Negative if to be ignored.
+    logfit = True                   Actually fit the polynomial to the log of the (downsampled) data.
+                                    (Hence you need to ``.exp`` the baseline afterwards).
+    meanrms = Vec(float,16)         Estimate the mean rms in the spectrum per antenna. (output vector)
+    fftLength = 32769               Length of unbinned spectrum.
+    height_ends = hArray(float)     The heights of the baseline at theleft and right endpoints of the
+                                    usable bandwidth where a hanning function is smoothly added.
+    extendfit = 0.1                 Extend the fit by this factor at both ends beyond
+                                    :math:`\\nu_\\textrm{max}` and :math:`\\nu_\\textrm{min}`.
+                                    The factor is relative to the unsued bandwidth.
+    t0 = 2.971779                   The CPU starting time of the processingin seconds, used for
+                                    benchmarking.
+    weights = hArray(float)         Array of weight values for the fit. (work vector)
+    coeffs = hArray(float)          Polynomial coeffieients of the baseline fit. (output vector)
+    fittype = BSPLINE               Determine which type of fit to do: ``fittype="POLY"``: do a
+                                    polynomial fit. ``fittype="BSPLINE"``: do a basis spline fit
+                                    (default).
+    powers = hArray(int)            Array of integers, containing the powers to fit in the
+                                    polynomial. (work vector)
+    =============================== ======================================================================
+
     """
+
     def __init__(self,modulename=None,**keywords):
 # Here list the parameters which have to be initialized in a
 # particular order at the beginning (e.g., if the depend on each
 # other). The attribute will be extended automatically.
         self.parameters=["filename","blocksize","datafile","nofAntennas","fftLength","frequency","numin","numax","numin_i","numax_i","ncoeffs"]
         CRWorkSpace.__init__(self,modulename=modulename,parent=None,**keywords)
+
+
     def default_filename(self):
         """Name of the data file to process."""
         return LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+
+
     def default_datafile(self):
         """Datafile object. Will be created from the filename and set to the right blocksize, if it does not exist yet."""
         return crfile(self["filename"]).set("blocksize",self["blocksize"])
+
+
     def default_blocksize(self):
         """Size (number of values) of each block to be read in."""
         return 2**16
+
+
     def default_nofAntennas(self):
         """Number of antennas in the datafile (output only)"""
         return self["datafile"]["nofAntennas"]
+
+
     def default_fftLength(self):
         """Size of the FFT or spectrum derived from the datareader object."""
         return self["datafile"]["fftLength"]
+
+
     def default_numin(self):
         """Minimum frequency of useable bandwidth. Negative if to be ignored."""
         return -1
+
+
     def default_numax(self):
         """Maximum frequency of useable bandwidth. Negative if to be ignored."""
         return -1
+
+
     def default_numin_i(self):
         """Channel number in spectrum of the minimum frequency of the useable bandwidth. (output only)"""
         if self["numin"]>0: return self["frequency"].findlowerbound(self["numin"]).val()
         else: return 1
+
+
     def default_numax_i(self):
         """Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored."""
         if self["numax"]>0: return self["frequency"].findlowerbound(self["numax"]).val()
         else: return len(self["frequency"])
+
+
     def default_frequency(self):
-        """Frequency values (x-axis) corresponding to FFT and spectrum"""
+        """Frequency values (*x*-axis) corresponding to FFT and spectrum"""
         return self["datafile"]["Frequency"].setUnit("M","")
+
+
     def default_spectrum(self):
         """Power as a function of frequency."""
         return hArray(float,[self["nofAntennas"],self["datafile"]["fftLength"]],fill=0,name="Spectrum",units="a.u.",xvalues=self["frequency"],par=dict(logplot="y"))
+
+
     def default_cleanspec(self):
         """Copy of the spectrum with the gain curve and the spiky channels taken out."""
         return hArray(properties=self["spectrum"])
+
+
     def default_bad_channels(self):
         """Indexlist of bad channels containing RFI. (output only)"""
         return hArray(int,self["spectrum"],name="Bad Channels")
+
+
     def default_nbad_channels(self):
         """Number of bad channels (output only)"""
         return 0
+
+
     def default_rfi_nsigma(self):
         """Threshold for identifying a spike in Frequency as an RFI line to flag, in units of standard deviations of the noise."""
         return 5
+
+
     def default_fx(self):
         """Raw time series antenna data."""
         return self["datafile"]["emptyFx"]
+
+
     def default_fft(self):
         """FFT of the Raw time series antenna data."""
         return self["datafile"]["emptyFFT"]
+
+
     def default_ncoeffs(self):
         """Number of coefficients to describe the baseline."""
         return 18
+
+
     def default_coeffs(self):
         """Polynomial coeffieients of the baseline fit. (output vector)"""
         return hArray(float,[self["nofAntennas"],self["ncoeffs"]])
+
+
     def default_baseline(self):
         """Array with a baseline fit to the spectrum."""
         return hArray(properties=self["spectrum"],xvalues=self["frequency"],name="Baseline")
+
+
     def default_qualitycriteria(self):
-        """a Python dict with keywords of parameters and
+        """A Python dict with keywords of parameters and
         tuples with limits thereof (lower, upper). Keywords currently
-        implemented are mean, rms, spikyness (i.e. spikyness).
-        Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+        implemented are ``mean``, ``rms``, ``spikyness`` (i.e. spikyness).
+
+        Example::
+
+          qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+
         """
         return {"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+
+
     def default_flaglist(self):
         """A list of bad antennas which failed the qualitycheck. (output only)"""
         return []
 
+
 def CRWorkSpace_default_doplot(self):
     """Make plots during processing to inspect data."""
     return False
+
+
 def CRWorkSpace_default_t0(self):
     """The cpu starting time of the processingin seconds, used for benchmarking."""
     return time.clock()
+
+
 def CRWorkSpace_default_verbose(self):
     """Print progress information during processing."""
     return False
@@ -446,15 +641,21 @@ def CRsetWorkSpace(ws,modulename,**keywords):
     """
     Sets the workspace in a function if not defined already and
     initialize parameters. One can provide a global workspace and the
-    functions will pick the module corresponding to modulename.
+    functions will pick the module corresponding to modulename
 
-    ws - the workspace, if ws==None then create new one using function func
+    Parameters:
 
-    modulename - name of the (sub)module to use, will call the
-    initialization function (naming convention:
-    "CR"+modulename+"WorkSpace") if workspace does not exist.
-
-    keywords - local parameters to overwrite
+    ============= ============================================================
+    Parameter     Description
+    ============= ============================================================
+    ws            the workspace, if ``ws==None`` then create new
+                  one using function func
+    modulename    name of the (sub)module to use, will call
+                  the initialization function (naming convention:
+                  ``"CR"+modulename+"WorkSpace"``) if workspace
+                  does not exist.
+    keywords      local parameters to overwrite
+    ============= ============================================================
 
     """
     func=eval("CR"+modulename+"WorkSpace")
@@ -464,12 +665,13 @@ def CRsetWorkSpace(ws,modulename,**keywords):
     ws.setParameters(**keywords)
     return ws
 
+
 def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywords):
     """
-    hCRCalcBaseline(baseline, coeffs, frequency,ws=None, **keywords):
+    hCRCalcBaseline(baseline, coeffs, frequency,ws=None, \*\*keywords):
 
     Calculate a smooth baseline from a set of coefficients that
-    determine the baseline (e.g. as calculated by hCRFitBaseline) and
+    determine the baseline (e.g. as calculated by ``hCRFitBaseline``) and
     an array of frequencies (which need not be equi-spaced).
 
     """
@@ -509,12 +711,11 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
         baseline[...].plot(title="Baseline")
         raw_input("Plotted baseline - press Enter to continue...")
 
+
 def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     """
-    hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords)
-
     Function to fit a baseline using a polynomial function
-    (fittype='POLY') or a basis spine fit to a spectrum while ignoring
+    (``fittype='POLY'``) or a basis spine fit to a spectrum while ignoring
     positive spikes in the fit (e.g., those coming from RFI = Radio Frequency
     Interference). The functions returns an array of coefficients of
     the polynomial or splines.
@@ -522,19 +723,19 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
     Use baseline.polynomial(frequency,coeffs,powers) to caluclate the
     baseline from the coefficients.
 
-    Parameters can be provided as additional keywords
+    Parameters can be provided as additional keywords. e.g.::
 
-    e.g., baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
+      baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
 
-    or in a WorkSpace.
+    or in a WorkSpace::
 
-    e.g., baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
+      baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
 
     or in a mix of the two. Otherwise default values are used.
 
-    A full list of parameters can be obtained with with:
+    A full list of parameters can be obtained with with::
 
-    CRFitBaselineWorkSpace().help()
+      CRFitBaselineWorkSpace().help()
     """
 #Defining the workspace, setting up the arrays, if not existing
     keywords["nofAntennas"]=spectrum.getDim()[0]
@@ -612,43 +813,73 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
 
 def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=None,fft=None, verbose=False)
     """
-    Usage: CRAverageSpectrum(spectrum,datafile,blocks=None,fx=None,fft=None)
+    Usage::
+
+      CRAverageSpectrum(spectrum,datafile,blocks=None,fx=None,fft=None)
 
     Reads several blocks in a CR data file, does an FFT and then
     averages the powers to calculuate an average spectrum. The
     parameters are:
 
-    spectrum - a float array of dimensions [nofAntennas,fftLength],
-    containing the average spectrum.
 
-    datafile - a datareader object where the block size has been set
-    appropriately.
+    =========== ====================================================================
+    Parameters  Description
+    =========== ====================================================================
+    spectrum    a float array of dimensions ``[nofAntennas,fftLength]``,
+                containing the average spectrum.
+    datafile    a datareader object where the block size has been set
+                appropriately.
+    blocks      a list of blocknumbers to read (e.g. ``range(number_of_blocks)``).
+                Default is to read all blocks.
+    fx          a work array of dimensions
+                ``[datafile.nofAntennas,datafile.blocksize]`` which is used
+                to read in the raw antenna data. Will be created if not provided.
+    fft         a work array of dimensions
+                ``[datafile.nofAntennas,datafile.fftLength]`` which is used to
+                calculate the FFT from the raw antenna data. Will be created
+                if not provided.
+    verbose     Provide progress messages
+    =========== ====================================================================
 
-    blocks - a list of blocknumbers to read
-    (e.g. range(number_of_blocks)). Default is to read all blocks.
+    Available parameters in the Workspace (Examples):
 
-    fx - a work Array of dimensions
-    [datafile.nofAntennas,datafile.blocksize] which is used to read in
-    the raw antenna data. Will be created if not provided.
+    DataReader object to read the data from::
 
-    fft - a work Array of dimensions
-    [datafile.nofAntennas,datafile.fftLength] which is used to
-    calculate the FFT from the raw antenna data. Will be created if
-    not provided.
+      datafile = crfile('/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecondtbb1.h5')
 
-    verbose - Provide progress messages
+    Absolute maximum number of blocks to average, irrespective of filesize::
 
-    Available parameters in the Workspace (Example):
+      max_nblocks = 3
 
-    datafile = crfile('/Users/falcke/LOFAR/usg/data/lofar/RS307C-readfullsecondtbb1.h5') - DataReader object to read the data from.
-    max_nblocks = 3 - Absolute maximum number of blocks to average, irrespective of filesize.
-    nblocks = 3 - Number of blocks to average, take all blocks by default.
-    blocks = [0, 1, 2] - List of blocks to process.
-    verbose = True - Print progress information during processing.
-    fx = hArray(float) - Array to hold the x-values of the raw time series data. (work vector)
-    fft = hArray(complex) - Array to hold the FFTed x-values (i.e. complex spectrum) of the raw time series data. (work vector)
-    t0 = 2.971839 - The cpu starting time of the processing in seconds, used for benchmarking.
-    doplot = True - Make plots during processing to inspect data.
+    Number of blocks to average, take all blocks by default::
+
+      nblocks = 3
+
+    List of blocks to process::
+
+      blocks = [0, 1, 2]
+
+    Print progress information during processing::
+
+      verbose = True
+
+    Array to hold the *x*-values of the raw time series data. (work vector)::
+
+      fx = hArray(float)
+
+    Array to hold the FFTed *x*-values (i.e. complex spectrum) of the
+    raw time series data. (work vector)::
+
+      fft = hArray(complex)
+
+    The cpu starting time of the processing in seconds, used for benchmarking::
+
+      t0 = 2.971839
+
+    Make plots during processing to inspect data::
+
+      doplot = True
+
     """
     ws=CRsetWorkSpace(ws,"AverageSpectrum",datafile=datafile,**keywords)
     if ws["verbose"]:
@@ -676,6 +907,7 @@ def hCRAverageSpectrum(spectrum,datafile,ws=None,**keywords): #blocks=None,fx=No
                 print progress*10,"% -",t,"s (Remaining:",t/count*maxcount-t,"s) - Calculated block #",block
                 lastprogress=progress
     spectrum /= len(ws["blocks"])
+
 
 def CheckParameterConformance(data,keys,limits):
     """
@@ -709,11 +941,12 @@ def CheckParameterConformance(data,keys,limits):
 
 def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=None,nbocks=None,maxblocksize=65536,blocksize=None,nsigma=5,verbose=True):
     """
-    Usage:
-    CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True)
-
     Do a basic quality check of raw time series data, looking for rms,
     mean and spikes.
+
+    Usage::
+
+      CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True)
 
     If a datafile is provided it will step through all (selected)
     antennas of a file, assess the data quality (checking first and
@@ -723,54 +956,63 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
     Instead of providing a datafile one can also provdide a data
     array, which will be processed in full.
 
-    Example:
+    Example::
 
-    >> datafile=crfile(filename)
-    >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
-    >> flaglist=CRQualityCheck(qualitycriteria,datafile,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) # -> list of antennas failing the limits
+      >>> datafile=crfile(filename)
+      >>> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+      >>> flaglist=CRQualityCheck(qualitycriteria,datafile,dataarray=None,maxblocksize=65536,nsigma=5,verbose=True) # -> list of antennas failing the limits
 
 
     Parameters:
 
-    qualitycriteria - a Python dict with keywords of parameters and
-    tuples with limits thereof (lower, upper). Keywords currently
-    implemented are mean, rms, spikyness (i.e. spikyness).
-    Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
 
-    datafile - Data Reader file object, if None, use values in
-    dataarray and don't read data in again.
+    ========================= ======================================================================
+    Parameter                 Description
+    ========================= ======================================================================
+    qualitycriteria           A Python dict with keywords of parameters and tuples with
+                              limits thereof (lower, upper). Keywords currently
+                              implemented are mean, rms, spikyness (i.e. spikyness).
+                              Example::
 
-    datarray - an optional data storage array to read in the data if
-    no datafile is specified, this array should contain the data to
-    inspect.  In a pipeline where teh function is called multiple
-    times, it is recommended to always provide this array, since it
-    saves one the creation and destruction of the array.
+                                qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
 
-    blocksize - The blocksize for reading in the data, will be
-    determined automatically is not provided explicitly here.  If None
-    use information from datafile or use first dimension of dataarray.
+    datafile                  Data Reader file object, if None, use values in dataarray and
+                              don't read data in again.
 
-    natennas - How many antennas are in the dataarray or in the
-    datafile. If None use information from datafile or use first
-    dimension of dataarray. If equal to 0 then dataarray does not have
-    that dimension.
+    datarray                  An optional data storage array to read in the data if no datafile
+                              is specified, this array should contain the data to inspect.
+                              In a pipeline where the function is called multiple times,
+                              it is recommended to always provide this array, since it saves
+                              one the creation and destruction of the array.
 
-    nblocks - How many antennas are in the dataarray or in the
-    datafile.  If None use information from datafile or use first
-    dimension of dataarray.
+    blocksize                 The blocksize for reading in the data, will be determined
+                              automatically is not provided explicitly here.  If ``None``
+                              use information from ``datafile`` or use first dimension
+                              of ``dataarray``.
 
-    maxblocksize - If the blocksize is determined automatically, this
-    is the maximum blocksize to use.
+    antennas                  How many antennas are in the ``dataarray`` or in the ``datafile``.
+                              If ``None`` use information from ``datafile`` or use first
+                              dimension of ``dataarray``. If equal to 0 then ``dataarray``
+                              does not have that dimension.
 
-    blocklist - The algorithms takes by default the first and last
-    quarter of a file (and sets the blocksize accordingly). If you
-    want to investigate all or other blocks, you need to provide the
-    list explicitly here and also set the desired blocksize.
+    nblocks                   How many antennas are in the ``dataarray`` or in the ``datafile``.
+                              If None use information from datafile or use first dimension
+                              of ``dataarray``.
 
-    nsigma - determines for the peak counting algorithm the threshold
-    for peak detection in standard deviations
+    maxblocksize              If the blocksize is determined automatically, this is the maximum
+                              blocksize to use.
 
-    verbose - sets whether or not to print additional information
+    blocklist                 The algorithms takes by default the first and last quarter of a
+                              file (and sets the blocksize accordingly). If you want to
+                              investigate all or other blocks, you need to provide the list
+                              explicitly here and also set the desired blocksize.
+
+    nsigma                    Determines for the peak counting algorithm the threshold for
+                              peak detection in standard deviations.
+
+    verbose                   Sets whether or not to print additional information.
+    ========================= ======================================================================
+
     """
     #Initialize some parameters
     if not datafile==None:
@@ -829,6 +1071,7 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
                 print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)," ",noncompliancelist
     if not datafile==None: datafile["blocksize"]=blocksize
     return qualityflaglist
+
 
 #qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
 #CRQualityCheck(datafile,qualitycriteria,maxblocksize=65536,nsigma=5,verbose=True)

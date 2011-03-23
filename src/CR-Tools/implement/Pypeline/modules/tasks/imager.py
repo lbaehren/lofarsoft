@@ -1,4 +1,7 @@
-"""Imager documentation.
+"""
+Imager documentation
+====================
+
 """
 
 # What is exported by default
