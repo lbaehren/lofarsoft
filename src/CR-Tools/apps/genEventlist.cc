@@ -751,10 +751,10 @@ int main(int argc, char* argv[])
       lnAg = -8.2485*log10sizeg + 10.7833*log10sizmg - 14.7251/TMath::Cos(Zeg) + 12.3177;
       // calculate energy and mass error
       if (exp(lnAg)<=1.5) {
-        err_lgEg=0.1588;  //from Michael's plots
-        err_lnAg=2.13;
+        err_lgEg=0.1588*lgEg;  //from Michael's plots
+        err_lnAg=2.13*lnAg;
       } else {
-        err_lgEg=0.0922;
+        err_lgEg=0.0922*lgEg;
         err_lnAg=( ((1.17 - 1.26) / (60.-2.))*exp(lnAg) + 1.263); //from Michael's plots, linear dependence
       }  
       
@@ -805,9 +805,9 @@ int main(int argc, char* argv[])
 
       // mass dependent energy error from Michael's plots
       if(exp(lnA)<1.5)
-        err_lgE = 0.17;
+        err_lgE = 0.17*lgE;
       else 
-        err_lgE = 0.72;
+        err_lgE = 0.085*lgE;
 
       // mass and zenith dependent mass error from Michael's plots  
       if(Ze<(14./57.29578))     // Ze < 14°
@@ -850,8 +850,8 @@ int main(int argc, char* argv[])
       // if no KASCADE reconstruction is available, continue if KASCADE is wanted
       if ((!useBothReconstructions) && (!Grande))
         continue;
-    }
-*/
+    }*/
+
 
 
     ///********** Energy and primary Mass reconstructed by KASCADE (Wommer's formulas) with KASCADE Nmu Ne*****///
@@ -859,20 +859,37 @@ int main(int argc, char* argv[])
       // calculate energy and mass
       lgE = 0.3069*log10Size + 0.7064*log10Nmu + 1.2699/TMath::Cos(Ze) + 0.2931;
       lnA = -8.2485*log10Size + 10.7833*log10Nmu - 14.7251/TMath::Cos(Ze) + 12.3177;
-      // calculate energy and mass error
-      if (exp(lnA)<=1.5) {
-        err_lgE=0.1588;  //from Michael's plots
-        err_lnA=2.13;
-      } else {
-        err_lgE=0.0922;
-        err_lnA=( ((1.17 - 1.26) / (60.-2.))*exp(lnA) + 1.263); //from Michael's plots, linear dependence
-      }  
-      
-      // use fixed error for core and angular uncertainties
+
+
+      // mass dependent energy error from Michael's plots
+      if(exp(lnA)<1.5)
+        err_lgE = 0.17*lgE;
+      else 
+        err_lgE = 0.085*lgE;
+
+      // mass and zenith dependent mass error from Michael's plots  
+      if(Ze<(14./57.29578))     // Ze < 14°
+        FDeltaTheta=1./1.265;
+      else
+        FDeltaTheta=(((2.05 - 1.1)/((40.-14.)/57.29578))*(Ze) + 0.6)/1.265;
+
+      if (exp(lnA)<1.5)
+        FDeltaA=2.12/1.269;
+      else
+        FDeltaA=(((0.58 - 1.226)/(60.-2.)) *(exp(lnA)) + 3.247)/1.269;
+
+      err_lnA = 1.267*FDeltaA*FDeltaTheta;
+
+      // use fixed error for core and azimuth uncertainties
       // (approximation for E > 10^17 eV)
-      err_core = 7.;
-      err_Az = 0.006; // ~0.35°
-      err_Ze = 0.003; // ~0.17°
+      err_core = 4.;
+      err_Az = 0.009; // ~0.5°
+
+      // energy dependent zenith error
+      if (lgE < 8.2)
+        err_Ze = 0.003; // ~0.17°
+      else   
+        err_Ze = 0.007; // ~0.4°
 
       // calculate geomagnetic angle
       cos_geomag =   TMath::Cos(Az) * TMath::Sin(Ze) * TMath::Cos(TMath::Pi()) * TMath::Sin(TMath::Pi()/180.0 * 25)
