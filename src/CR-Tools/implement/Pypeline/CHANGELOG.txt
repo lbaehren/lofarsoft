@@ -325,6 +325,8 @@ precedence over parfile parameters
 - introduced pardict= keyword for WorkSpaces and Tasks which can
 contain parameters of multiple tasks
 
+2011-03-24 Pypeline - rev 7365 - Pim Schellart
+- added FFTW module with wrappers for the fftw advanced routines including plan storrage
 
 ------------------------------------------------------------------------
 TODO
