@@ -50,6 +50,7 @@
 #include "mVector.h"
 #include "mMath.h"
 #include "mFFT.h"
+#include "mFFTW.h"
 #include "mFilter.h"
 #include "mFitting.h"
 #include "mImaging.h"
@@ -283,6 +284,32 @@ BOOST_PYTHON_MODULE(_hftools)
 //                                                                      FFT
 
 #include "../../../../build/cr/implement/Pypeline/mFFT.def.h"
+
+// ________________________________________________________________________
+//                                                                     FFTW
+
+#include "../../../../build/cr/implement/Pypeline/mFFTW.def.h"
+
+  class_<FFTWPlanManyDft>("FFTWPlanManyDft", init<int, int, int, int, int, int, enum fftw_sign, enum fftw_flags>())
+    ;
+
+  class_<FFTWPlanManyDftR2c>("FFTWPlanManyDftR2c", init<int, int, int, int, int, int, enum fftw_flags>())
+    ;
+
+  class_<FFTWPlanManyDftC2r>("FFTWPlanManyDftC2r", init<int, int, int, int, int, int, enum fftw_flags>())
+    ;
+
+  enum_<fftw_flags>("fftw_flags")
+    .value("ESTIMATE", ESTIMATE)
+    .value("MEASURE", MEASURE)
+    .value("PATIENT", PATIENT)
+    .value("EXHAUSTIVE", EXHAUSTIVE)
+    ;
+
+  enum_<fftw_sign>("fftw_sign")
+    .value("FORWARD", FORWARD)
+    .value("BACKWARD", BACKWARD)
+    ;
 
 // ________________________________________________________________________
 //                                                                   Filter

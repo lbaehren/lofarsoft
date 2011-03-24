@@ -92,6 +92,7 @@ set (PYPELINE_CPP_MODULES
   Array
   Vector
   FFT
+  FFTW
   Filter
   Fitting
   Imaging
