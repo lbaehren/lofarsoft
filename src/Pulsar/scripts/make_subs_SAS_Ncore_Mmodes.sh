@@ -4,10 +4,10 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.16
+VERSION=2.17
 
 #Check the usage
-USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help] [-test]\n\n"\
+USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
 "         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or\n"\
@@ -30,7 +30,8 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Out
 "      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"\
 "      [-nofold] ==> optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible\n"\
 "      [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline\n"\
-"      [-test] ==> optional for testing: runs bf2presto and bypasses prepfold and rfi processing but echo's all commands\n"
+"      [-test] ==> optional for testing: runs bf2presto and bypasses prepfold and rfi processing but echo's all commands\n"\
+"      [-debug] ==> optional for testing: turns on debugging in ksh (tons of STDOUT messages)\n"
 
 
 if [ $# -lt 1 ]                    # this script needs at least 6 args, including -switches
@@ -63,6 +64,7 @@ transpose=0
 help=0
 test=0
 nofold=0
+debug=0
 input_string=$*
 while [ $# -gt 0 ]
 do
@@ -85,6 +87,7 @@ do
 	-transpose)   transpose=1;;
 	-test)   test=1;;
 	-nofold)   nofold=1;;
+	-debug)   debug=1;;
 	-help)   help=1 
 	         cat $LOFARSOFT/release/share/pulsar/data/pulp_help.txt
 	         exit 1;;
@@ -103,6 +106,14 @@ then
    exit 1
 fi
 
+if [[ $debug == 1 ]]
+then
+   echo "====================Turning on ksh DEBUGGING (to STDOUT)===================="
+   echo ""
+   set -x
+fi
+
+#check for minimum required input
 if [[ $PULSAR == "" ]]
 then 
    echo ""
@@ -1205,13 +1216,15 @@ do
 #                    cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			        bf2presto_pid[$ii]=$!  
 			     else # (( $TiedArray == 1 ))
+			        counter=0
 			        for jjj in $beams
 			        do
 			            ${STOKES}/"RSP"${ii}/${jjj}
                         cd ${location}/${STOKES}/RSP$ii/${jjj}
 			            echo bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> $log  
 			            bf2presto8 ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}_${OBSID}"_RSP"$ii `cat "RSP"$ii".list"` >> "bf2presto_RSP"$ii".out" 2>&1 &
-			           bf2presto_pid[$ii][$jjj]=$!  
+			           bf2presto_pid[$ii][$counter]=$!  
+				       counter=$(( $counter + 1 )) 
 			        done
 			     
 			     fi
@@ -1773,10 +1786,10 @@ do
 						   if [ $test == 0 ]
 						   then
 						      prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+  						      prepfold_pid[$ii]=$!  
 						   fi
-						   prepfold_pid[$ii]=$!  
 						   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
-						   sleep 5
+						   sleep 10
 					    done
 				     else
 					    if (( $TiedArray == 0 ))
@@ -1792,15 +1805,14 @@ do
 						    do
 							   cd ${location}/${STOKES}/RSP${ii}/${jjj}
 							   echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
-							   kk=`echo "$ii * $counter" | bc`
 							   echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
 						       if [ $test == 0 ]
 						       then
 							       prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+						           prepfold_pid[$ii][$counter]=$!  
 							   fi
-						       prepfold_pid[$kk]=$!  
 							   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
-							   sleep 15
+							   sleep 10
 						    done
 						    counter=$(( $counter + 1 ))
 					    done
@@ -1810,32 +1822,58 @@ do
 					cd ${location}
 
 					#Check when all DONE files are available, then all processes have exited
-				    if (( $flyseye == 0 ))
-				    then
-					   for ii in $num_dir
-					   do
-					      echo "Waiting for RSP$ii prepfold to finish"
-					      wait ${prepfold_pid[ii]}
-					   done
-					else
-					    if (( $TiedArray == 0 ))
-					    then
-					       loop_beams=$beams_init
-					    else
-					       loop_beams=$beams
-					    fi
-                        counter=0
-					    for jjj in $loop_beams
-					    do
-							for ii in $num_dir
-						    do
-							   kk=`echo "$ii * $counter" | bc`
-					           echo "Waiting for RSP$ii $jjj prepfold to finish"
-					           wait ${prepfold_pid[kk]}
-				            done	
-						    counter=$(( $counter + 1 ))
-					    done
-					fi
+					for ii in $num_dir
+					do
+					   echo "Waiting for RSP$ii prepfold_pid to finish"
+					   if (( $flyseye == 0 ))
+					   then
+					       wait ${prepfold_pid[ii]}
+					   else
+				  		    if (( $TiedArray == 0 ))
+						    then
+						       loop_beams=$beams_init
+						    else
+						       loop_beams=$beams
+						    fi
+			
+					        counter=0
+					        for jjj in $loop_beams
+					        do
+					           echo "Waiting for RSP$ii beam_$counter prepfold_pid to finish"
+					           wait ${prepfold_pid[ii][counter]}
+							   counter=$(( $counter + 1 )) 
+					        done
+					   fi
+					done
+
+
+#				    if (( $flyseye == 0 ))
+#				    then
+#					   for ii in $num_dir
+#					   do
+#					      echo "Waiting for RSP$ii prepfold to finish; pid = ${prepfold_pid[ii]}"
+#					      wait ${prepfold_pid[ii]}
+#					   done
+#					else
+#					    if (( $TiedArray == 0 ))
+#					    then
+#					       loop_beams=$beams_init
+#					    else
+#					       loop_beams=$beams
+#					    fi
+#                        counter=0
+#					    for jjj in $loop_beams
+#					    do
+#							for ii in $num_dir
+#						    do
+#					           echo "Waiting for RSP$ii for beam $jjj prepfold to finish"
+#					           wait ${prepfold_pid[ii][counter]}
+#				            done	
+#						    counter=$(( $counter + 1 ))
+#					    done
+#					fi
+					
+					
 				done # finished loop over PULSAR_LIST
 			fi # end if [[ $PULSAR_LIST != "NONE" ]] && [[ $nofold == 0 ]]
 		else # nrBeams > 1
@@ -1859,8 +1897,8 @@ do
 						if [ $test == 0 ]
 						then
 			   	            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+						    prepfold_pid[$ii]=$!  
 			   	        fi
-						prepfold_pid[$ii]=$!  
 						echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 						sleep 5
 					fi # end if [[ $fold_pulsar == "NONE" ]] || [[ $nofold == 1 ]]
@@ -1905,8 +1943,8 @@ do
 			     if [ $test == 0 ]
 			     then
 		            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+			        prepfold_pid_all[$index]=$!  
 		         fi
-			     prepfold_pid_all[$index]=$!  
 		         echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> $log
 		         cd ${location}
 		         sleep 5
@@ -1924,7 +1962,7 @@ do
 #			         sleep 5
 #			     done
 			  fi # end if (( $flyseye == 0 ))
-			  (( index = $index + 1 ))
+			  index=$(( $index + 1 ))
 		  done # end for fold_pulsar in $PULSAR_LIST
 	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 	fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
@@ -1973,24 +2011,27 @@ do
 	    echo cd ${location} >> $log
 	    cd ${location}
 		
-		#Make a .pdf and .png version of the plots
-		echo "Running convert on ps to pdf and png of the plots"
-		echo "Running convert on ps to pdf and png of the plots" >> $log
-		date
-		date >> $log
-
-        #find all the .ps files and convert them into .pdf .png and .th.png results
-        find ./ -name "*.ps" -print | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
-        wc_convert=`wc -l convert.sh | awk '{print $1}'`
-        if [[ $wc_convert > 0 ]]
-        then
-           chmod 777 convert.sh
-           cat convert.sh >> $log
-           ./convert.sh
-        else
-           echo "No prepfold .ps files were found for conversion to pdf and png."
-           echo "No prepfold .ps files were found for conversion to pdf and png." >> $log
-        fi
+		if [[ $nofold == 0 ]]
+		then
+			#Make a .pdf and .png version of the plots
+			echo "Running convert on ps to pdf and png of the plots"
+			echo "Running convert on ps to pdf and png of the plots" >> $log
+			date
+			date >> $log
+	
+	        #find all the .ps files and convert them into .pdf .png and .th.png results
+	        find ./ -name "*.ps" -print | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
+	        wc_convert=`wc -l convert.sh | awk '{print $1}'`
+	        if [[ $wc_convert > 0 ]]
+	        then
+	           chmod 777 convert.sh
+	           cat convert.sh >> $log
+	           ./convert.sh
+	        else
+	           echo "No prepfold .ps files were found for conversion to pdf and png."
+	           echo "No prepfold .ps files were found for conversion to pdf and png." >> $log
+	        fi
+        fi # end if [[ $nofold == 0 ]]
 	fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] 
 		
 	#RFI-Report
@@ -2009,9 +2050,10 @@ do
 	         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
 		     if [ $test == 0 ]
 		     then
+			    sleep 5
 	            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
+	            subdyn_pid[$ii]=$!
 	         fi
-	         subdyn_pid[$ii]=$!
 	      else
 # commented out as there seems to be a bug for FE (solar obs)
 #			 for jjj in $beams_init
@@ -2050,10 +2092,8 @@ do
 			     then
 			        sleep 5
 		            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
+		            subdyn_pid[$ii][$counter]=$!	
 		         fi
-			     kk=`echo "$ii * $counter" | bc`
-
-		         subdyn_pid[$ii][$kk]=$!	
 			     counter=$(( $counter + 1 ))
 	         done      
 
@@ -2070,7 +2110,7 @@ do
 	      do
 	         echo "Waiting for RSP$ii subdyn to finish non-Fly's eye mode; pid = ${subdyn_pid[ii]}"
 	         wait ${subdyn_pid[ii]}
-	         echo "Exit status of subdyn for RSP$ii is $?"
+#	         echo "Exit status of subdyn for RSP$ii is $?"
 	      done
 	   else
 	      for ii in $num_dir
@@ -2078,10 +2118,9 @@ do
              counter=0
 			 for jjj in $loop_beams
 			 do
-			     kk=`echo "$ii * $counter" | bc`
-		         echo "Waiting for RSP$ii and $jjj subdyn to finish in Fly's eye mode pid ${subdyn_pid_[ii][kk]}"
-	             wait ${subdyn_pid_[ii][kk]}
-	             echo "Exit status of subdyn for RSP$ii in beam $jjj is $?"
+		         echo "Waiting for RSP$ii and $jjj subdyn to finish in Fly's eye mode pid ${subdyn_pid_[ii][counter]}"
+	             wait ${subdyn_pid[ii][counter]}
+#	             echo "Exit status of subdyn for RSP$ii in beam $jjj is $?"
 			     counter=$(( $counter + 1 ))
 	         done
 	      done
@@ -2121,7 +2160,6 @@ do
               counter=0
 		   	  for jjj in $loop_beams
 			  do
-			      kk=`echo "$ii * $counter" | bc`
 	              rfi_file=$location/${STOKES}/RSP${ii}/${PULSAR_ARRAY_PRIMARY[$counter]}_${OBSID}_sub0-${max_num}.rfirep
 			      if [ -f $rfi_file ]
 			      then
@@ -2166,7 +2204,7 @@ do
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 		
 	#Wait for the all prepfold to finish
-	if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+	if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 	then
 		if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 		then
@@ -2229,13 +2267,13 @@ do
 					   convert -rotate 90 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png
 					   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
 					   convert -rotate 90 -crop 200x140-0 ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/${jjj}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
-					   (( beam_index = $beam_index + 1 ))
+					   beam_index=$(( $beam_index + 1 ))
 		           done
 		       fi # end if (( $flyseye == 0 ))
-		       (( index = $index + 1 ))
+		       index=$(( $index + 1 ))
 	       done # end for fold_pulsar in $PULSAR_LIST
 		fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
-    fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+    fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 
 #    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 #    then
