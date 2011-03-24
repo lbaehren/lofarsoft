@@ -1,14 +1,15 @@
 This is the help page for the LOFAR Known Pulsar Pipeline (shell-script), also known as "pulp.sh".  The command line options and examples are listed below.  The executable is a link to the most recent version of the pipeline (make_subs_SAS_Ncore_Mmodes.sh).
 
-By default, the pipeline needs the LOFAR OBSID in the form of L<year>_OBSID where OBSID is 5-digits padded by zero's;  the output directory location is also required;  lastly, you must specify either the Pulsar name or a list of Pulsars or the word "position" in order for the pipeline to fold the data for the pulsar(s) in the FOV.  Additional optional switches are described below.  The pipeline uses 8 cores on a machine by default, splitting up the data into 8 sets of subbands (generally 248 subbands are split into 8 groups of 31 subbands each);  the split is adjustable using the "-core" argument; however, the split must be even, else an even split if found closest to the user-requested number of cores.   
+By default, the pipeline needs the LOFAR OBSID in the form of L<year>_OBSID where OBSID is 5-digits padded by zero's;  the output directory location is also required;  lastly, you must specify either the Pulsar name or a list of Pulsars or the word "NONE" or the word "position" in order for the pipeline to fold the data for the pulsar(s) in the FOV.  Additional optional switches are described below.  The pipeline uses 8 cores on a machine by default, splitting up the data into 8 sets of subbands (generally 240 subbands are split into 8 groups of 30 subbands each);  the split is adjustable using the "-core" argument; however, the split must be even, else an even split if found closest to the user-requested number of cores.   
 
 Also see the examples section below.
 
-usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-help]
+usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]
 
       -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) 
       -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or
          specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation
+         specify the word 'NONE' (upper case) when you want to skip the folding step of the processing
          (i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) 
          (i.e. up to 3 brights pulsars to fold at location of FOV: position)
       -o Output_Processing_Location ==> Specify the Output Processing Location 
@@ -25,7 +26,10 @@ usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core 
       [-incoh_redo] ==> optional parameter to redo processing for Incoherentstokes (deletes previous incoh results!)
       [-coh_redo] ==> optional parameter to redo processing for Coherentstokes (deletes previous coh results!)
       [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose
+      [-nofold] ==> optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible
       [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline
+      [-test] ==> optional for testing: runs bf2presto and bypasses prepfold and rfi processing but echo's all commands
+      [-debug] ==> optional for testing: turns on debugging in ksh (tons of STDOUT messages)
 
 
 Examples:
@@ -40,7 +44,7 @@ Examples:
 
 3) Perform the same processing as above, but use the position of the pointing to process the data for all known pulsars within the FOV of the observation:
 
-	> pulp.sh -p position -o L2010_20542_red -id L2010_09550
+	> pulp.sh -p position -o /data/scratch/username/L2010_20542_red -id L2010_09550
 
 4) Perform the same processing as above, but use 4 cores/splits of subbands instead of the default 8 cores/splits:
 
@@ -94,6 +98,10 @@ Examples:
 16) The "-help" option will print this page:
 
 	> pulp.sh -help
+
+17) Skip the folding process, since this Pulsar is unknown;  also turn on debugging:
+
+	> pulp.sh -p Geminga -o L2010_28990_red -id L2010_28990 -nofold -debug -rfi
 
 
 
