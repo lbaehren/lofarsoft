@@ -751,10 +751,10 @@ int main(int argc, char* argv[])
       lnAg = -8.2485*log10sizeg + 10.7833*log10sizmg - 14.7251/TMath::Cos(Zeg) + 12.3177;
       // calculate energy and mass error
       if (exp(lnAg)<=1.5) {
-        err_lgEg=0.1588*lgEg;  //from Michael's plots
-        err_lnAg=2.13*lnAg;
+        err_lgEg=0.1588;  //from Michael's plots
+        err_lnAg=2.13;
       } else {
-        err_lgEg=0.0922*lgEg;
+        err_lgEg=0.0922;
         err_lnAg=( ((1.17 - 1.26) / (60.-2.))*exp(lnAg) + 1.263); //from Michael's plots, linear dependence
       }  
       
@@ -805,9 +805,9 @@ int main(int argc, char* argv[])
 
       // mass dependent energy error from Michael's plots
       if(exp(lnA)<1.5)
-        err_lgE = 0.17*lgE;
+        err_lgE = 0.17;
       else 
-        err_lgE = 0.085*lgE;
+        err_lgE = 0.085;
 
       // mass and zenith dependent mass error from Michael's plots  
       if(Ze<(14./57.29578))     // Ze < 14°
@@ -863,9 +863,9 @@ int main(int argc, char* argv[])
 
       // mass dependent energy error from Michael's plots
       if(exp(lnA)<1.5)
-        err_lgE = 0.17*lgE;
+        err_lgE = 0.17;
       else 
-        err_lgE = 0.085*lgE;
+        err_lgE = 0.085;
 
       // mass and zenith dependent mass error from Michael's plots  
       if(Ze<(14./57.29578))     // Ze < 14°
