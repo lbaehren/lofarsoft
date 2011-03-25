@@ -336,6 +336,7 @@ add_dependencies (dspsr_install dspsr_build dspsr_configure dspsr_bootstrap dsps
   set (ssps_archive "${ssps_directory}.tar.gz")
   
   add_custom_target (ssps_unpack
+    COMMAND cd ${PULSAR_BINARY_DIR}/apps
     COMMAND rm -rf ${ssps_name}
     COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${ssps_archive}
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
@@ -343,6 +344,7 @@ add_dependencies (dspsr_install dspsr_build dspsr_configure dspsr_bootstrap dsps
     )
   
 add_custom_target (ssps_build
+  COMMAND cd ${PULSAR_BINARY_DIR}/apps/${ssps_name}
   COMMAND python setup.py build
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
   COMMENT "Building project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
@@ -351,6 +353,7 @@ add_custom_target (ssps_build
 add_dependencies (ssps_build ssps_unpack)
 
 add_custom_target (ssps_build_docs
+  COMMAND cd ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs
   COMMAND make html
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs
   COMMENT "Building docs from project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs..."
@@ -361,7 +364,7 @@ add_dependencies (ssps_build_docs ssps_build ssps_unpack)
 add_custom_target (ssps_install_docs
   COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/doc/ssps
   COMMAND mkdir ${CMAKE_INSTALL_PREFIX}/doc/ssps
-  COMMAND cp -r docs/_build/html/* ${CMAKE_INSTALL_PREFIX}/doc/ssps/
+  COMMAND cp -r ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs/_build/html/* ${CMAKE_INSTALL_PREFIX}/doc/ssps/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
   COMMENT "Install docs for SSPS ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs/_build/html into ${CMAKE_INSTALL_PREFIX}/doc/ssps..."
   )
@@ -369,7 +372,7 @@ add_dependencies (ssps_install_docs ssps_build_docs ssps_build ssps_unpack)
 
 add_custom_target (ssps_install
   COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/python/ssps
-  COMMAND cp -r build/lib/ssps ${CMAKE_INSTALL_PREFIX}/lib/python/
+  COMMAND cp -r ${PULSAR_BINARY_DIR}/apps/${ssps_name}/build/lib/ssps ${CMAKE_INSTALL_PREFIX}/lib/python/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
   COMMENT "Install project SSPS library ${PULSAR_BINARY_DIR}/apps/${ssps_name}/build/lib/ssps into ${CMAKE_INSTALL_PREFIX}/lib/python/ssps..."
   )
