@@ -77,13 +77,20 @@ set (NO_DEFAULT_PATH YES)
 
 ## Additional locations
 
-if (EXISTS /home/joerivl/src/presto/deps)
-  ## Augment search locations
-  list (INSERT lib_locations     0 /home/joerivl/src/presto/deps)
-  list (INSERT include_locations 0 /home/joerivl/src/presto/deps)
-  ## Augment include path
-  include_directories (/home/joerivl/src/presto/deps)
-endif (EXISTS /home/joerivl/src/presto/deps)
+foreach (_extraLocations
+    /home/joerivl/src/presto/deps
+    )
+
+  if (EXISTS ${_extraLocations})
+    ## Augment search locations
+    list (INSERT lib_locations     0 ${_extraLocations})
+    list (INSERT include_locations 0 ${_extraLocations})
+    ## Augment include path
+    include_directories (${_extraLocations})
+  endif (EXISTS ${_extraLocations})
+  
+endforeach (_extraLocations)
+
 
 find_program (tar_executable  tar  ${bin_locations} )
 find_program (gzip_executable gzip ${bin_locations} )
