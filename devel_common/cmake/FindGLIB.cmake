@@ -39,7 +39,7 @@ include (CMakeSettings)
 ## [1] find the main header file
 
 find_path (GLIB_INCLUDES glib.h
-  PATHS ${include_locations}
+  PATHS ${include_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0
   PATH_SUFFIXES
   glib
   glib/include
@@ -50,7 +50,7 @@ find_path (GLIB_INCLUDES glib.h
   )
 
 find_path (GLIB_glibh_INCLUDES glib.h
-  PATHS ${include_locations}
+  PATHS ${include_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0
   PATH_SUFFIXES
   glib
   glib/include
@@ -67,7 +67,7 @@ string (REGEX REPLACE "include/glib-2.0/glib" "include/glib-2.0" GLIB_INCLUDES $
 ## [2] further header files might be in a slightly different location
 
 find_path (glibconfig_h glibconfig.h
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0-include
   PATH_SUFFIXES
   glib
   glib/include
@@ -78,7 +78,7 @@ find_path (glibconfig_h glibconfig.h
   )
 
 find_path (GLIB_glibconfh_INCLUDES glibconfig.h
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0-include
   PATH_SUFFIXES
   glib
   glib/include
@@ -95,8 +95,8 @@ endif (glibconfig_h)
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (GLIB_LIBRARIES glib glib-2.0
-  PATHS ${lib_locations}
+find_library (GLIB_LIBRARIES glib-2.0
+  PATHS ${lib_locations} /lib64
   PATH_SUFFIXES
   glib
   glib/lib

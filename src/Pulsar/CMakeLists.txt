@@ -77,8 +77,13 @@ set (NO_DEFAULT_PATH YES)
 
 ## Additional locations
 
-list (APPEND lib_locations      /home/joerivl/src/presto/deps)
-list (APPEND include_locations  /home/joerivl/src/presto/deps)
+if (EXISTS /home/joerivl/src/presto/deps)
+  ## Augment search locations
+  list (INSERT lib_locations     0 /home/joerivl/src/presto/deps)
+  list (INSERT include_locations 0 /home/joerivl/src/presto/deps)
+  ## Augment include path
+  include_directories (/home/joerivl/src/presto/deps)
+endif (EXISTS /home/joerivl/src/presto/deps)
 
 find_program (tar_executable  tar  ${bin_locations} )
 find_program (gzip_executable gzip ${bin_locations} )
@@ -125,9 +130,8 @@ check_type_size ("uint64_t"      SIZEOF_UINT64_T     )
 ##__________________________________________________________
 ## CFITSIO
 
-if (NOT HAVE_CFITSIO)
-  include (FindCFITSIO)
-endif (NOT HAVE_CFITSIO)
+set (FIND_CFITSIO_CMAKE FALSE)
+include (FindCFITSIO)
 
 ##__________________________________________________________
 ## GLIB library
@@ -454,6 +458,7 @@ message (STATUS "=============================================================="
 message (STATUS "  PULSAR: Summary of configuration settings                   " )
 message (STATUS "+------------------------------------------------------------+" )
 message (STATUS " System configuration:"                                         )
+message (STATUS " .. CMAKE_COMMAND                = ${CMAKE_COMMAND}")
 message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"             )
 message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"   )
 message (STATUS " Package configuration:"                                        )
@@ -462,6 +467,9 @@ message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}"
 message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}")
 message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}" )
 message (STATUS " External dependencies:"                                        )
+message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"            )
+message (STATUS "    .. CFITSIO library           = ${CFITSIO_LIBRARIES}"        )
+message (STATUS "    .. CFITSIO include path      = ${CFITSIO_INCLUDES}"         )
 message (STATUS " .. Have MPI                     = ${MPI_FOUND}"                )
 message (STATUS "    .. MPI compiler              = ${MPI_COMPILER}")
 message (STATUS "    .. MPI library               = ${MPI_LIBRARY}")

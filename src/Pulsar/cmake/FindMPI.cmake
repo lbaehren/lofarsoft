@@ -2,7 +2,7 @@
 ##_______________________________________________________________________________
 ## Additional settings to locate MPI installation
 
-list (APPEND _MPI_PREFIX_PATH   /opt/openmpi/1.3.2)
+list (APPEND CMAKE_SYSTEM_PREFIX_PATH  /opt/openmpi/1.3.2)
 
 ##_______________________________________________________________________________
 ## Include standard CMake module

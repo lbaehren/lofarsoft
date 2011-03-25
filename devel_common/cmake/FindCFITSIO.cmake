@@ -45,7 +45,7 @@ if (NOT FIND_CFITSIO_CMAKE)
   FIND_PATH (HAVE_FITSIO_H fitsio.h
     HINTS ${CFITSIO_ROOT_DIR}
     PATHS ${include_locations}
-    PATH_SUFFIXES include include/cfitsio cfitsio
+    PATH_SUFFIXES include include/cfitsio cfitsio cfitsio/include
     NO_DEFAULT_PATH
     )
   
@@ -58,8 +58,9 @@ if (NOT FIND_CFITSIO_CMAKE)
   
   FIND_LIBRARY (CFITSIO_CFITSIO_LIBRARY
     NAMES cfitsio
+    HINTS ${CFITSIO_ROOT_DIR}
     PATHS ${lib_locations}
-    PATH_SUFFIXES cfitsio
+    PATH_SUFFIXES cfitsio cfitsio/lib
     NO_DEFAULT_PATH
     )
   

@@ -41,7 +41,7 @@ configure_file (
 if (NOT APPLE)
   
   include_directories (
-    ${X11_X11_INCLUDE_PATH}
+    ${X11_INCLUDE_DIR}
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_BINARY_DIR}
     )
@@ -53,11 +53,16 @@ if (NOT APPLE)
     util.cpp
     gifsave.cpp
     )
+
+  if (X11_Xt_LIB)
+    target_link_libraries (see ${X11_Xt_LIB})
+    get_filename_component (X11_LIBRARY_PATH ${X11_Xt_LIB} PATH)
+  endif (X11_Xt_LIB)
   
   set_target_properties (see
     PROPERTIES
     COMPILE_FLAGS "-c -g -O3 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Wno-deprecated"
-    LINK_FLAGS "-L${X11_X11_LIB} -lXt -lSM -lICE" 
+    LINK_FLAGS "-L${X11_X11_LIB} -L${X11_LIBRARY_PATH} -lSM -lICE" 
     #  target_link_libraries (see X11 Xt SM ICE)
     #  target_link_libraries (see -lXt ${X11_Xt_LIB})
     )
