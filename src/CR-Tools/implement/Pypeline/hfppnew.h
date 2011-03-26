@@ -33,6 +33,8 @@ gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/Pypeli
 
 
 //Definitions of Operators
+#define HFPP_OPERATOR_Assign =
+#define HFPP_OPERATOR_INPLACE_Assign =
 #define HFPP_OPERATOR_Mul *
 #define HFPP_OPERATOR_INPLACE_Mul *=
 #define HFPP_OPERATOR_Add +

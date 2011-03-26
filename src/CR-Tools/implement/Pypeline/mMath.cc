@@ -746,7 +746,7 @@ Example:
 vec=Vector([1.,2.,4.])
 vec.divself(1) -> [1.0,0.5,0.25]
 
-See also: hMulSelf, hDivSelf, HSubSelf, hAddSelf.
+See also: hMulSelf, hDivSelf, HSubSelf, hAddSelf, hInverse.
 */
 template <class Iter, class S>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
@@ -764,6 +764,39 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
 
 //$ENDITERATE
 
+//$DOCSTRING: Take the inverse of the values in a vector, i.e. 1/vec
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInverse
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  hInverse(vec) -> 1/vec 
+  vec.inverse(val) -> 1/vec
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+
+Example:
+
+vec=Vector([1.,2.,4.])
+vec.inverse() -> [1.0,0.5,0.25]
+
+See also: hMulSelf, hDivSelf, HSubSelf, hAddSelf.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  Iter it(vec);
+  if (it>vec_end) {return;}
+  while (it!=vec_end) {
+    *it = 1/(*it);
+    ++it;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 //========================================================================
@@ -2498,6 +2531,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 // ========================================================================
 //
 //$Section:  Find & Seach
@@ -2753,6 +2787,7 @@ HInteger hFind{$MFUNC}1 (const Iter vecin,const Iter vecin_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 //$DOCSTRING: Find the samples that are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}
@@ -2789,6 +2824,52 @@ HInteger hFind{$MFUNC}2 (const typename vector<HInteger>::iterator vecout, const
       };
     };
     ++itin;
+  };
+  return (itout-vecout);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Find the samples that are $MFUNC the corresponding threshold values and returns the number of samples found and the positions of the samples in a second vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind{$MFUNC}Vec
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(threshold)()("Vector with threshold values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+See also: find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+          findgreaterthanvec, findgreaterequalvec, findlessthanvec, findlessequalvec
+*/
+template <class Iter, class Iter2>
+HInteger HFPP_FUNC_NAME (
+                        const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+                        const Iter vecin , const Iter vecin_end,
+                        const Iter2 threshold , const Iter2 threshold_end
+			 )
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  Iter2 itthreshold(threshold);
+  typename vector<HInteger>::iterator itout(vecout);
+
+  if (itthreshold >= threshold_end) return 0;
+
+  // Function operation
+  while (itin != vecin_end) {
+    if (*itin HFPP_OPERATOR_$MFUNC (*itthreshold)) {
+      if (itout != vecout_end) {
+        *itout=(itin-vecin);
+        ++itout;
+      };
+    };
+    ++itin;
+    ++itthreshold;
+    if (itthreshold==threshold_end) itthreshold=threshold;
   };
   return (itout-vecout);
 }
@@ -3079,7 +3160,7 @@ std::vector<T> HFPP_FUNC_NAME (
 
 
 
-//$DOCSTRING: Interpolate a vector between two end points, which are part also start and end points of the new vector.
+//$DOCSTRING: Interpolate a vector between two end points, which are part also start and end points of the new vector (adds to output vector!)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInterpolate2P
 //-----------------------------------------------------------------------
@@ -3093,6 +3174,9 @@ std::vector<T> HFPP_FUNC_NAME (
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+Note, the interpolated data is added to the output vector, so the
+array needs to be initialized with zero.
 
 Example:
 v=hArray(float, [10])
@@ -3117,7 +3201,7 @@ void HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
   } else if (len > 1) {
     slope = (endvalue-startvalue)/(len-1);
     while (it != vec_end) {
-      *it=(IterValueType)(startvalue + count*slope);
+      *it+=(IterValueType)(startvalue + count*slope);
       ++it; ++count;
     }
   }
@@ -3125,7 +3209,7 @@ void HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Interpolate a vector between two end points, where the 2nd end point marks the last element of the output vector plus one. Useful for piecing interpolations together.
+//$DOCSTRING: Interpolate a vector between two end points, where the 2nd end point marks the last element of the output vector plus one. Useful for piecing interpolations together (adds to output vector!)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInterpolate2PSubpiece
 //-----------------------------------------------------------------------
@@ -3139,6 +3223,9 @@ void HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+Note, the interpolated data is added to the output vector, so the
+array needs to be initialized with zero.
 
 Example:
 v=hArray(float, [10])
@@ -3164,7 +3251,7 @@ void HFPP_FUNC_NAME (const Iter vec,
   } else if (len > 1) {
     slope = (endvalue-startvalue)/len;
     while (it != vec_end) {
-      *it=(IterValueType)(startvalue + count*slope);
+      *it+=(IterValueType)(startvalue + count*slope);
       ++it; ++count;
     }
   }
@@ -3242,7 +3329,7 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Upsample the input vector to a larger output vector by linear interpolation.
+//$DOCSTRING: Upsample the input vector to a larger output vector by linear interpolation and add to output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hUpsample
 //-----------------------------------------------------------------------
@@ -3255,6 +3342,9 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+Note, the interpolated data is added to the output vector, so the
+array needs to be initialized with zero.
 
 Example:
 x=hArray(float, [31])

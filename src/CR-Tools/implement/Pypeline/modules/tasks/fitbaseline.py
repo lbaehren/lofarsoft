@@ -113,10 +113,16 @@ class FitBaseline(tasks.Task):
                default:lambda self:self.spectrum.getDim()},
     "ncoeffs":{doc:"""Number of coefficients for the polynomial.""",
            default:18},
+    "splineorder":{doc:"""Order of the polynomial to fit for the BSpline, order=3 is bicubic spline.""",
+           default:3},
     "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
          default:-1},
     "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
          default:-1},
+    "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to numin_i (output)""",
+         default:lambda self:self.frequency[self.numin_i]},
+    "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to numax_i (output)""",
+         default:lambda self:self.frequency[self.numax_i]},
     "numin_i":{doc:"""Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.""",
            default:fitbaseline_calc_numin_i,output:True},
     "numax_i":{doc:"""Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.""",
@@ -163,11 +169,27 @@ class FitBaseline(tasks.Task):
     "frequency":{doc:"Frequency values in Hz for each spectral channel (dimension: [nchannels])",unit:"Hz",workarray:True,
              default:lambda self:hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues},
     "spectrum":{doc:"Array with input spectrum either of dimension [nofAntennas,nchannels] or just [nchannels] for a single spectrum. Note that the frequency values for the array are expected to be provided as spectrum.par.xvalues=hArray(float,[nofChannels],fill=...) otherwise provide the frequencies explicitly in 'frequency'"},
+
+    "work_frequency":{doc:"Wrapper to frequencies with dimension [nofAntennas,nchannels] even for a single spectrum.",
+             default:lambda self:hArray(self.frequency.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.frequency),export:False},
+
     "work_spectrum":{doc:"Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(self.spectrum.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum),export:False},
+             default:lambda self:hArray(self.spectrum.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.work_frequency),export:False},
+        
     "meanrms":{doc:"""Estimate the mean rms in the spectrum per antenna. (output vector)""",
            default:0,output:True},
+    "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration (information only at this point).",default:0},
+
     "verbose":{doc:"""Print progress information""",default:True},
+        
+    "plotlen":{default:2**17,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
+
+    "plot_center":{default:0.5,doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
+
+    "plot_start":{default:lambda self: max(int(self.nofChannels*self.plot_center)-self.plotlen,0),doc:"Start plotting from this sample number."},
+
+    "plot_end":{default:lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),doc:"End plotting before this sample number."},
+
     "doplot":{doc:"""Plot progress information. If value >1, plot more information.""",default:False}
     }
 
@@ -193,12 +215,13 @@ class FitBaseline(tasks.Task):
         #Plotting
         if self.doplot>2:
             print "Plotting full spectrum and downsampled spectrum (doplot>=3) - can take some time..."
-            self.work_spectrum[0].plot(title="RFI Downsampling")
+            self.work_spectrum[0,self.plot_start:self.plot_end].plot(title="RFI Downsampling")
             self.small_spectrum[...].plot(xvalues=self.freqs,clf=False)
-            raw_input("... press Enter to continue.")
+            #self.small_spectrum[...].plot(xvalues=self.freqs);
+            plt.ioff(); plt.draw(); plt.show()
+            if not hasattr(plt,"hanging"): raw_input("... press Enter to continue.")
         #Normalize the spectrum to unity
         self.meanspec=self.small_spectrum[...].mean()
-        self.small_spectrum[...] /= self.meanspec
         #Calculate RMS/amplitude for each bin
         self.ratio[...].div(self.rms[...],self.small_spectrum[...])
         #Get the RMS of the part of the spectrum where it is lowest (i.e. which is least affected by RFI)
@@ -211,7 +234,7 @@ class FitBaseline(tasks.Task):
             plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="green")
             plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="green")
             plt.ioff(); plt.draw(); plt.show()
-            raw_input("Plotted relative RMS of downsampled spectrum (doplot>=2) - press Enter to continue...")
+            if not hasattr(plt,"hanging"): raw_input("Plotted relative RMS of downsampled spectrum (doplot>=2) - press Enter to continue...")
         #Now select bins where the ratio between RMS and amplitude is within the limits
         self.nselected_bins=self.selected_bins[...,1:].findbetween(self.ratio[...,1:-1],self.limit1,self.limit2)
         self.selected_bins+=1; # We started the search only at bin #1 in self.ratio, so the indices returned are off by one
@@ -236,9 +259,9 @@ class FitBaseline(tasks.Task):
             self.chisquare=self.coeffs[...].linearfit(self.covariance[...],self.xpowers[...],self.clean_bins_y[...],self.nselected_bins)  #self.weights[...],
         else:
             if self.verbose:
-                print "Performing a basis spline fit with ",self.ncoeffs-2,"break points."
+                print "Performing a basis spline fit with ",self.ncoeffs+self.splineorder+1-2,"break points."
             #Perform a Basis Spline fit to the data
-            self.chisquare=self.coeffs[...].bsplinefit(self.covariance[...],self.xpowers[...,[0]:self.nselected_bins],self.clean_bins_x[...,[0]:self.nselected_bins],self.clean_bins_y[...,[0]:self.nselected_bins])
+            self.chisquare=self.coeffs[...].bsplinefit(self.covariance[...],self.xpowers[...,[0]:self.nselected_bins],self.clean_bins_x[...,[0]:self.nselected_bins],self.clean_bins_y[...,[0]:self.nselected_bins],self.numin_val_i,self.numax_val_i,self.splineorder+1)
 
         #Calculate an estimate of the average RMS of the clean spectrum after baseline division
         self.ratio[...].copy(self.ratio,self.selected_bins[...],self.nselected_bins)
@@ -251,11 +274,10 @@ class FitBaseline(tasks.Task):
             if self.fittype=="POLY":
                 self.clean_bins_y[...,[0]:self.nselected_bins].polynomial(self.clean_bins_x[...,[0]:self.nselected_bins],self.coeffs[...],self.powers[...])
             else:
-                self.clean_bins_y[...,[0]:self.nselected_bins].bspline(self.xpowers[...,[0]:(self.nselected_bins)],self.coeffs[...])
-                self.clean_bins_y[...,[0]:self.nselected_bins].bsplinecalc(self.clean_bins_x[...,[0]:(self.nselected_bins)],self.coeffs[...])
-                self.clean_bins_y[...,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,logplot=False)
+                self.clean_bins_y[...,[0]:self.nselected_bins].bsplinecalc(self.clean_bins_x[...,[0]:(self.nselected_bins)],self.coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+            self.clean_bins_y[...,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,logplot=False)
             print "Plotted downsampled and cleaned spectrum with baseline fit."
-            plt.draw(); plt.show(); plt.ion(); 
+            plt.draw(); plt.show(); plt.ion();
         self.spectrum.setHeader(FitBaseline=self.ws.getParameters())
         if self.save_output:
             self.spectrum.writeheader(self.filename)
@@ -273,10 +295,17 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
      'dim_spectrum',
      'powers',
      'work_spectrum',
+     'work_frequency',
      'frequency',
+     'numin_val_i',
+     'numax_val_i',
      'nofAntennas',
      'polyorder',
-     'fittype'
+     'fittype',
+     'plotlen',
+     'plot_start',
+     'plot_end',
+     'plot_center'
      ]])
 
 CalcBaselineParameters.update({
@@ -285,15 +314,14 @@ CalcBaselineParameters.update({
         default:None,
         workarray:True,export:False},
 
+    "addHanning":{default: True,doc:"Add a Hanning filter above nu_max and below nu_min to suppress out-of-badn emission smoothly."},
+
     "logfit":{default:lambda self:True if self.FitParameters==None else self.FitParameters["logfit"]},
 
     "fittype":{default:lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]},
 
     "work_baseline":{doc:"Wrapper to baseline with dimension [nofAntennas,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(self.baseline.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline),export:False},
-
-    "work_frequency":{doc:"Wrapper to frequenies with dimension [nofAntennas,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(self.frequency.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.frequency),export:False},
+             default:lambda self:hArray(self.baseline.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline,xvalues=self.work_frequency),export:False},
 
     "FitParameters":{doc:"Parameters of the baseline fitting routine.",
              default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
@@ -303,6 +331,12 @@ CalcBaselineParameters.update({
 
     "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
          default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
+
+    "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to numin_i (output)""",
+         default:lambda self:self.frequency[self.numin_i] if self.FitParameters==None else self.FitParameters["numin_val_i"]},
+
+    "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to numax_i (output)""",
+         default:lambda self:self.frequency[self.numax_i] if self.FitParameters==None else self.FitParameters["numax_val_i"]},
 
     "numin_i":{doc:"""Channel number in spectrum of the minium frequency where to calculate baseline. Apply hanning taper below.""",
            default: lambda self:max(self.frequency.findlowerbound(self.numin).val(),0) if self.numin>0 else 0,
@@ -324,10 +358,16 @@ CalcBaselineParameters.update({
              default:lambda self:1 if len(self.dim_coeffs)==1 else self.dim_coeffs[0]},
     "ncoeffs":{doc:"Number of coefficients for the polynomial.",
            default:lambda self:self.dim_coeffs[1] if len(self.dim_coeffs)>=2 else self.dim_coeffs[0]},
+
+    "splineorder":{doc:"Order of the polynomial to fit for the BSpline, order=3 is bicubic spline.",
+           default: lambda self:3 if self.FitParameters==None else self.FitParameters["splineorder"]},
+
     "work_coeffs":{doc:"Array with coefficients in the form [nofAntennas,ncoeff]",
            default:lambda self:hArray(self.coeffs.vec(),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])},
     "normalize":{doc:"If true, normalize the baseline to have a total sum of unity.",
           default:True}
+#    "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration. If >0 then multiply the new baseline wvith th (information only at this point).",default:0},
+
     })
 
 
@@ -358,7 +398,6 @@ class CalcBaseline(tasks.Task):
             print "ERROR: please provide an hArray as input for the positional argument 'spectrum'!"
             return
 
-
         self.t0=time.clock()
         if not hasattr(self.spectrum,"par"):
             setattr(self.spectrum,"par",hArray_par())
@@ -373,31 +412,34 @@ class CalcBaseline(tasks.Task):
             self.spectrum.par.baseline=self.baseline
 
         if self.fittype=="POLY":
-            self.work_baseline.fill(0.0)
-            self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial( self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.powers[...])
+            self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.powers[...])
         else:
-            self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...])
+            self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+
         #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
         #Left end
-        self.height_ends[0,...].copy(self.work_baseline[...,self.numin_i])
-        self.factor=hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
-        if not self.logfit:
-            self.factor.fill(self.height_ends[0])
-            self.factor *= 1000.0
-        self.work_baseline[...,0:self.numin_i].gethanningfilterhalf(Vector(self.factor),Vector([self.height_ends[0]]),Vector(bool,self.nofAntennas,fill=True))
-        #Right end
-        self.height_ends[1,...].copy(self.work_baseline[...,self.numax_i-1])
-        if not self.logfit:
-            self.factor.fill(self.height_ends[1])
-            self.factor *= 1000.0
-        self.work_baseline[...,self.numax_i:].gethanningfilterhalf(Vector(self.factor),Vector([self.height_ends[1]]),Vector(bool,self.nofAntennas,fill=False))
+        if self.addHanning:    
+            self.height_ends[0,...].copy(self.work_baseline[...,self.numin_i])
+            self.factor=hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
+            if not self.logfit:
+                self.factor.fill(self.height_ends[0])
+                self.factor *= 1000.0
+            self.work_baseline[...,0:self.numin_i].gethanningfilterhalf(Vector(self.factor),Vector([self.height_ends[0]]),Vector(bool,self.nofAntennas,fill=True))
+            #Right end
+            self.height_ends[1,...].copy(self.work_baseline[...,self.numax_i-1])
+            if not self.logfit:
+                self.factor.fill(self.height_ends[1])
+                self.factor *= 1000.0
+            self.work_baseline[...,self.numax_i:].gethanningfilterhalf(Vector(self.factor),Vector([self.height_ends[1]]),Vector(bool,self.nofAntennas,fill=False))
         if self.logfit:
             self.work_baseline.min(40)# avoid numerical trouble
             self.work_baseline.max(-40)# avoid numerical trouble
-            self.work_baseline.negate()
             self.work_baseline.exp()
-        else:
-            self.work_baseline.hDivSelf(1.0) # -> 1/baseline
+        if self.doplot:
+            self.work_spectrum[0,self.plot_start:self.plot_end].plot()
+            self.work_baseline[0,self.plot_start:self.plot_end].plot(title="Baseline",clf=False)
+            plt.ioff(); plt.draw(); plt.show()
+        self.work_baseline.inverse() # -> 1/baseline
         if self.normalize:
             self.work_baseline[...] /= self.work_baseline[...,self.numin_i:self.numax_i].mean()
         if self.save_output:
@@ -405,9 +447,7 @@ class CalcBaseline(tasks.Task):
             print "Written spectrum to file, to read it back: sp=hArrayRead('"+self.filename+"')"
         if self.verbose:
             print time.clock()-self.t0,"s: Done CalcBaseline."
-        if self.doplot:
-            self.baseline.plot(title="Baseline")
-            plt.ioff(); plt.draw(); plt.show()
+
 
 ApplyBaselineParameters = dict(
     [(p,CalcBaseline.parameters[p]) for p in 
@@ -415,6 +455,7 @@ ApplyBaselineParameters = dict(
      'FitParameters',
      'spectrum',
      'frequency',
+     'work_frequency',
      'work_spectrum',
      'baseline',
      'work_baseline',
@@ -428,8 +469,12 @@ ApplyBaselineParameters = dict(
      'dim_spectrum',
      'nofChannels',
      'nofAntennas',
-     'doplot'
-     ]
+     'doplot',
+     'plotlen',
+     'plot_start',
+     'plot_end',
+     'plot_center'
+         ]
      ]
     )
 
@@ -447,11 +492,19 @@ ApplyBaselineParameters.update({
     # "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
     #        default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
 
-    "minmean":{doc:"Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-           default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),output:True},
+    "adaptive_peak_threshold":{doc:"If True then calculate the threshold above which to cut peaks in 'nbins' separate bins and thus let it vary over the spectrum",
+        default:False},
+    "apply_baseline":{doc:"If true then divide spectrum by baseline before removing peaks.",default: True},
+    
+    "mean":{doc:"Median mean value of blocks in downsampled spectrum - used to replace flagged data with (output only)",
+           default:1},
 
-    "minrms":{doc:"RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
+    "rms":{doc:"Median RMS value of blocks in downsampled spectrum - used to calculate threshold for cutting peaks (output only)",
           default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),output:True},
+
+    "means":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),doc:"Mean value per block in input spectrum"},
+
+    "stddevs":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),doc:"Standard deviation per block in input spectrum"},
 
     "nofChannelsUsed":{doc:"""Number of channels remaining after downsampling and ignoring edges.""",
                default:lambda self:self.numax_i-self.numin_i},
@@ -500,24 +553,40 @@ class ApplyBaseline(tasks.Task):
         if hasattr(self.spectrum.par,"baseline") and self.baseline==None:
             self.baseline=self.spectrum.par.baseline
 
-        self.work_spectrum *= self.work_baseline
+        if self.apply_baseline:
+            self.work_spectrum *= self.work_baseline
 
         # Some ugly way to fool the python bindings, since right now they down return data in the argument variables
-        self.minblk=self.work_spectrum[...,self.numin_i:self.numax_i].minstddevblock(Vector(int,[self.nofAntennas],fill=self.blocklen),self.minrms,self.minmean)
+        #self.minblk=self.work_spectrum[...,self.numin_i:self.numax_i].minstddevblock(Vector(int,[self.nofAntennas],fill=self.blocklen),self.minrms,self.minmean)
 
-        self.limit=self.minmean+self.minrms*self.rmsfactor
-
+        
+        if self.adaptive_peak_threshold:
+            self.means[...].downsamplespikydata(self.stddevs[...],self.work_spectrum[...],1.0);
+            self.mean=self.work_spectrum[...,self.numin_i:self.numax_i].mean().val()
+            self.limit=hArray(properties=self.work_baseline,name="Threshold",fill=0.0)
+            self.limit[...].upsample(self.stddevs[...])
+            self.limit *= self.rmsfactor
+            self.limit[...].upsample(self.means[...])
+        else:
+            self.means[...].downsamplespikydata(self.stddevs[...],self.work_spectrum[...,self.numin_i:self.numax_i],1.0);
+            self.rms=self.stddevs[...].sortmedian()
+            self.mean=self.means[...].sortmedian()
+            self.limit=self.mean+self.rms*self.rmsfactor
         if self.doplot:
-            self.work_spectrum.plot(color='red')
-            plotconst(self.frequency,self.limit[0]).plot(clf=False,color="green")
-
-            #Now select bins where the ratio between RMS and amplitude is within the limits
+            self.work_spectrum[0,self.plot_start:self.plot_end].plot(title="RFI Downsampling",color='red')
+            if self.adaptive_peak_threshold:
+                self.limit[0,self.plot_start:self.plot_end].plot(clf=False,color="green")
+            else:
+                plotconst(self.frequency[self.plot_start:self.plot_end],self.limit[0]).plot(clf=False,color="green")
+        #Now select bins where the ratio between RMS and amplitude is within the limits
+        if self.adaptive_peak_threshold:
+            self.ndirty_channels=self.dirty_channels[...].findgreaterthanvec(self.work_spectrum[...],self.limit[...])
+        else:
             self.ndirty_channels=self.dirty_channels[...].findgreaterthan(self.work_spectrum[...],self.limit)
-            #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
+        #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
         if self.nofAntennas>1:
             print "Attention multiple antennas not yet supported! Only flagging first antenna." 
-    #   self.work_spectrum[...,self.dirty_channels[...,:self.ndirty_channels]]=self.minmean
-        self.work_spectrum[0,self.dirty_channels[0,:self.ndirty_channels[0]]]=self.minmean[0]
+        self.work_spectrum[...,self.dirty_channels[...,:self.ndirty_channels[0]]]=self.mean
         if self.save_output:
             self.spectrum.setHeader(filename=self.filename)
             self.spectrum.write(self.filename)
@@ -525,7 +594,5 @@ class ApplyBaseline(tasks.Task):
         if self.verbose:
             print time.clock()-self.t0,"s: Done ApplyBaseline."
         if self.doplot:
-            self.spectrum.plot(clf=False,color='blue')
+            self.work_spectrum[0,self.plot_start:self.plot_end].plot(color='blue',clf=False)
             plt.ioff(); plt.draw(); plt.show()
-
-

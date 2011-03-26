@@ -3,23 +3,19 @@ execfile("/Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/scripts/testrf
 """
 
 #Version with pardict
-pardict=dict(doplot=False,
-             AverageSpectrum=dict(delta_nu=2000,nantennas_start=0,nantennas_stride=2,filefilter='~/data/Pulses/*-0.h5',maxnantennas=1,maxnchunks=1),
-             FitBaseline=dict(ncoeffs=40,numax=85,numin=20,fittype="POLY",ApplyBaseline=dict(doplot=True))
+pardict=dict(doplot=False,plotlen=2**15,
+             AverageSpectrum=dict(delta_nu=2000,nantennas_start=0,nantennas_stride=2,filefilter='~/data/Pulses/*-0.h5',maxnantennas=99,maxnchunks=99,doplot=False),
+             FitBaseline=dict(ncoeffs=20,numax=85,numin=11,fittype="BSPLINE",normalize=False,splineorder=3),
+             ApplyBaseline=dict(doplot=True)
              )
 
-avspec=tasks.averagespectrum.AverageSpectrum(pardict=pardict); ws=avspec(); sp=ws.power
-fitb=tasks.fitbaseline.FitBaseline(pardict=pardict)(sp)
-calcb=tasks.fitbaseline.CalcBaseline()(sp,pardict=pardict)
-apply_baseline=tasks.fitbaseline.ApplyBaseline(pardict=pardict)(sp)
+plt.hanging=True
+#avspec=tasks.averagespectrum.AverageSpectrum(pardict=pardict); ws=avspec(); sp=ws.power
 
-#The same with 
-#First calculate average spectrum of even antennas in station, calculate baseline and identify RFI lines
-sp=tasks.averagespectrum.AverageSpectrum()(delta_nu=1000,nantennas_start=0,nantennas_stride=2,filefilter='~/data/Pulses/*-0.h5',maxnantennas=96).power 
-fitb=tasks.fitbaseline.FitBaseline()(sp,ncoeffs=40,numax=85,numin=20,fittype="POLY")
-tasks.fitbaseline.CalcBaseline()(sp)
-apply_baseline=tasks.fitbaseline.ApplyBaseline()(sp,doplot=True)
-
+sp=hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
+fitb=tasks.fitbaseline.FitBaseline(pardict=pardict); fitb(sp);
+calcb=tasks.fitbaseline.CalcBaseline(); calcb(sp,pardict=pardict);
+apply_baseline=tasks.fitbaseline.ApplyBaseline(pardict=pardict); apply_baseline(sp,rmsfactor=3.5);
 
 #Example on how to apply this to individual - first set up a test data set
 datafile=crfile("/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5")

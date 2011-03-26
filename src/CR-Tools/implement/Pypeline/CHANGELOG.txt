@@ -328,6 +328,20 @@ contain parameters of multiple tasks
 2011-03-24 Pypeline - rev 7365 - Pim Schellart
 - added FFTW module with wrappers for the fftw advanced routines including plan storrage
 
+2011-03-26  Pypeline - rev 7368 - Heino Falcke
+- added hInverse to calculate inverse of a vector
+- hPolynomialMul/Add and hBSplineCalcAdd/Mul to add or multiply
+polynomial/spline to output vector - useful for iteratively
+calculating a baseline
+- took out the bspline functions without providing an order 
+- BSpline functions now also excplicitly need xmin,xmax parameter (to
+avoid scaling errors)
+- BSplineCalc made faster - had to copy GSL routines (e.g.,
+gsl_bspline_eval_nonzero) from more recent
+version (1.14) into source code - I have 1.11 
+- tasks/fitbaseline.py debugged and improved
+
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

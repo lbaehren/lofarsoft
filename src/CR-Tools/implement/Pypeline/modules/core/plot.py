@@ -49,12 +49,12 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     *clf*        if ``True`` (default) clear the screen beforehand
                  (use ``False`` to compose plots with multiple lines
                  from different arrays.
-    *logplot*    can be used to make loglog or semilog plots::
-
-                   'x' ->semilog in x
-                   'y' ->semilog in y
-                   'xy'->loglog plot
-
+    *logplot*    can be used to make loglog or semilog plots:
+                   False -> linear plot                                                     
+                   None  -> take defaults from array if present
+                   'x'   -> semilog in x
+                   'y'   -> semilog in y
+                   'xy'  -> loglog plot
     *plotarg1*   =..., plotarg2=...: you can add any plotting parameter
                  that is understood by ``.plot`` of scipy, e.g.
                  ``color='green``, ``linestyle='dashed``.

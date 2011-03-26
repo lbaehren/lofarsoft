@@ -180,7 +180,8 @@ def hArray_repr(self, maxlen=100):
 
     # Compose string
 #    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+name+" # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> "+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+")"
-    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),self.getBegin(),self.getEnd(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
+#    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),self.getBegin(),self.getEnd(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
+    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
 
     return s
 
@@ -473,8 +474,8 @@ def hArray_setitem(self,dims,fill):
 
 
     """
-    if type(fill) in hAllListTypes:
-        fill=hArray(fill)
+    if type(fill) in [list,tuple]:
+        fill=hVector(fill)
     if type(dims)==int:
         hFill(hArray_getSlicedArray(self,dims),fill)
     elif type(dims)==tuple:# (multi-d index)

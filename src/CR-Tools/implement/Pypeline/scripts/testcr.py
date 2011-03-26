@@ -96,6 +96,7 @@ cr_rfi_amplitudes3[0].plot(clf=False)
 
 cr_rfi_baseline=hArray(properties=cr_spectrum)
 cr_rfi_baseline[...,1:].rfibaselinefitting(cr_rfi_amplitudes2[...],cr_rfi_rms[...],2.)
+Note: upsample changed now uses +=!y
 cr_rfi_baseline[...].upsample(cr_rfi_amplitudes2[...])
 
 """
