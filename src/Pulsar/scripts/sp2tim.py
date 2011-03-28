@@ -146,7 +146,7 @@ if __name__=="__main__":
 			else:
 				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i])) for i in np.arange(np.size(offset))]
 
-	timp = open(timfile, 'a')	
+	timp = open(timfile, 'w')	
 	if is_tempo2:
 		timp.write("FORMAT 1\n")
 	np.savetxt(timp, np.transpose((lines)), fmt="%s")
