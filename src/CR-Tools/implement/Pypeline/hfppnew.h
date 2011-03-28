@@ -612,9 +612,6 @@ BOOST_PP_IF(HFPP_FUNC_IS_VOID,BOOST_PP_EMPTY(),vector<HFPP_GET_FUNC_BASETYPE> re
       , PYDOCSTRING                                                     \
       BOOST_PP_COMMA_IF(HFPP_GET_FUNC_PASSREFERENCE) BOOST_PP_IF(HFPP_GET_FUNC_PASSREFERENCE,return_internal_reference<>(),BOOST_PP_EMPTY())); _H_NL_
 
-//      , BOOST_PP_IF(PYDOCSTRING, PYDOCSTRING, "") \
-//      , ""                                    \
-
 //========================================================================
 // Choose the correct wrapper appropriate for the current type of
 // file(.cc, .h, python exposer). This allows one to generate wrappers of
