@@ -72,26 +72,49 @@ class BFDataReader():
 
 
     def setDatatype(self,type):
-        if type == "incoherentstokes":
-            if self.par["stokestype"]=="I":
-                self.datatype="IncoherentStokesI"
-                self.data=np.zeros((self.samples,self.channels*len(self.files)))
-            if self.par["stokestype"]=="IQUV":
-                self.datatype="IncoherentStokesIQUV"
-                self.data=np.zeros((4,self.samples,self.channels*len(self.files)))
-        elif type == "coherentstokes":
-            if self.par["stokestype"]=="I":
-                self.datatype="CoherentStokesI"
-                self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))
-            elif self.par["stokestype"]=="IQUV":
-                self.datatype="CoherentStokesIQUV"
-        elif type == "complexvoltage":
-            self.datatype="ComplexVoltage"
-            self.samples=self.par["samples"]
-        else:
-            print "Invalide type"
-            return False
-        return True
+            if type == "incoherentstokes":
+                if self.par["stokestype"]=="I":
+                    print "Changing datatype to: incoherentstokes I"
+                    self.datatype="IncoherentStokesI"
+                    self.files=[]
+                    for file in self.par["files"]:
+                         if '.incoherentstokes' in file and  os.path.isfile(file):
+                              self.files.append(open(file))
+                    self.data=np.zeros((self.samples,self.channels*len(self.files)))
+                if self.par["stokestype"]=="IQUV":
+                    print "Changing datatype to: incoherentstokes IQUV"
+                    self.datatype="IncoherentStokesIQUV"
+                    self.files=[]
+                    for file in self.par["files"]:
+                         if '.incoherentstokes' in file and  os.path.isfile(file):
+                              self.files.append(open(file))
+                    self.data=np.zeros((4,self.samples,self.channels*len(self.files)))
+            elif type == "coherentstokes":
+                if self.par["stokestype"]=="I":
+                    print "Changing datatype to: coherentstokes I"
+                    self.datatype="CoherentStokesI"
+                    self.files=[]
+                    for file in self.par["files"]:
+                         if '.raw' in file and  os.path.isfile(file):
+                              self.files.append(open(file))
+                    self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))     
+                elif self.par["stokestype"]=="IQUV":
+                    print "Changing datatype to: coherentstokes IQUV"
+                    self.datatype="CoherentStokesIQUV"
+                    self.files=[]
+                    for file in self.par["files"]:
+                         if '.raw' in file and  os.path.isfile(file):
+                              self.files.append(open(file))
+            elif type == "complexvoltage":
+                self.datatype="ComplexVoltage"
+                self.samples=self.par["samples"]
+            else:
+                print "Invalide type"
+                return False
+            print "datatype set to", self.datatype
+            print "nr files",len(self.files)
+            return True
+          
 
 
     def read(self,block):
@@ -158,27 +181,21 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     dt=np.dtype(np.float32)
     dt=dt.newbyteorder('>')
 
-    # read data from file
-    if block < 0:
-        file.seek(file.tell()+szH)
-        # unpack struct into intermediate data
-    else:
-        file.seek(sz*block)
-        x=file.read(szH)
-        # unpack struct into intermediate data
-        t=struct.unpack(fmtH,x)
-        if t[0] != block:
-            file.seek(0)
-            x=file.read(szH)
-            t=struct.unpack(fmtH,x)
-            startblock=t[0]
-            file.seek((block-startblock)*sz)
-            x=file.read(szH)
-            t=struct.unpack(fmtH,x)
-            if t[0] != block:
-                print "Discontinuous data is not supported yet in this mode. Use blocknr = -1 and step through the data"
-                assert False
+    if block>=0:
+        if not put_file_at_sequence(file,block,szD): #searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
+            if bCoherent:
+                 if noSubbandAxis:
+                      data=np.zeros((samples,channels*nrsubbands))
+                 else:
+                      data=np.zeros((samples,nrsubbands,channels))
+            else:
+                 data=np.zeros((nrStokes,channels,samples))
+            return data;
 
+    # read data from file
+    else:
+        file.read(szH);
+ 
     # unpack struct into intermediate data
     #t=struct.unpack(fmt,x)
     if bCoherent:
@@ -257,6 +274,7 @@ def put_file_at_sequence(file,seq_nr,szD):
     szH=struct.calcsize(fmtH)
     filesize = os.path.getsize(file.name);
     max_size = filesize/(szH+szD);
+    corr_seq_nr=seq_nr
     if seq_nr >= max_size:
 #        print "larger than maxsize, resetting to",max_size;
         corr_seq_nr = max_size-1;
@@ -313,7 +331,7 @@ def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstatio
     dt=dt.newbyteorder('>')
 
     if block>=0:
-        if not put_file_at_sequence(file,block,szD): #searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
+        if not put_file_at_sequence(file,block,szD): #searches for block with sequencence nr block in the data. returns false if sequence number not available. Otherwise put filepointer after header of this block
             data = np.zeros((samples|2,nrsubbands,channels,2)); #return empty data
             return data;
     else:
@@ -1044,7 +1062,7 @@ def get_parameters_new(obsid, useFilename=False):
             name='/net/'+subcluster[node]+'/'+node
             name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
             for pol in range(nrpol):
-                name2=name+'_S'+str(pol)+'_bf.raw'
+                name2=name+'_S'+str(pol)+'_P000_bf.raw'
                 names.append(name2)
 
 
