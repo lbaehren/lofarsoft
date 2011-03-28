@@ -137,14 +137,14 @@ if __name__=="__main__":
 	else: # Princeton format
 		if is_phase == True:
 			if extra != "":
-				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i], extra) for i in np.arange(np.size(offset))]
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], extra) for i in np.arange(np.size(offset))]
 			else:
-				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), phase[i]) for i in np.arange(np.size(offset))]
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i]) for i in np.arange(np.size(offset))]
 		else:
 			if extra != "":
-				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), extra) for i in np.arange(np.size(offset))]
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], extra) for i in np.arange(np.size(offset))]
 			else:
-				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i])) for i in np.arange(np.size(offset))]
+				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i]) for i in np.arange(np.size(offset))]
 
 	timp = open(timfile, 'w')	
 	if is_tempo2:
