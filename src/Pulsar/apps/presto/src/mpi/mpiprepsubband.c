@@ -63,9 +63,8 @@ extern void get_filterbank_static(int *bytesperpt, int *bytesperblk,
 extern void set_filterbank_static(int ptsperblk, int bytesperpt,
                                   int bytesperblk, int numchan,
                                   float clip_sigma, double dt);
-
 static int get_data(FILE * infiles[], int numfiles, float **outdata,
-                    mask * obsmask, double *dispdts, int **offsets, int *padding);
+                    mask * obsmask,  float *padvals, double dt, double *dispdts, int **offsets, int *padding);
 
 MPI_Datatype infodata_type;
 MPI_Datatype maskbase_type;
@@ -138,6 +137,7 @@ int main(int argc, char *argv[])
    if (cmd->noclipP)
       cmd->clip = 0.0;
 
+
 #ifdef DEBUG
    showOptionValues();
 #endif
@@ -200,6 +200,7 @@ int main(int argc, char *argv[])
             free(suffix);
          }
       }
+
 
       if (cmd->pkmbP) {
          if (numinfiles > 1)
@@ -277,9 +278,11 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
+
    /* Determine the output file names and open them */
 
    local_numdms = cmd->numdms / (numprocs - 1);
+
    dms = gen_dvect(local_numdms);
    if (cmd->numdms % (numprocs - 1)) {
       if (myid == 0)
@@ -313,14 +316,17 @@ int main(int argc, char *argv[])
    if (cmd->maskfileP) {
       if (myid == 0) {
          read_mask(cmd->maskfile, &obsmask);
-         printf("Read mask information from '%s'\n\n", cmd->maskfile);
          good_padvals = determine_padvals(cmd->maskfile, &obsmask, &padvals);
       }
       broadcast_mask(&obsmask, myid);
+
       if (myid != 0)
          padvals = gen_fvect(obsmask.numchan);
+
       MPI_Bcast(&good_padvals, 1, MPI_INT, 0, MPI_COMM_WORLD);
       MPI_Bcast(padvals, obsmask.numchan, MPI_FLOAT, 0, MPI_COMM_WORLD);
+      fflush(stdout);
+
    } else {
       obsmask.numchan = obsmask.numint = 0;
       MPI_Bcast(&good_padvals, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -552,6 +558,7 @@ int main(int argc, char *argv[])
          numbarypts = (int) (T * 1.1 / TDT + 5.5) + 1;
       }
 
+
       MPI_Bcast(&ptsperblk, 1, MPI_INT, 0, MPI_COMM_WORLD);
       MPI_Bcast(&bytesperpt, 1, MPI_INT, 0, MPI_COMM_WORLD);
       MPI_Bcast(&bytesperblk, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -603,8 +610,8 @@ int main(int argc, char *argv[])
             set_WAPP_padvals(padvals, good_padvals);
          }
       }
-      if (cmd->maskfileP)
-         free(padvals);
+      //      if (cmd->maskfileP)
+      //   free(padvals);
 
       /* Which IFs will we use? */
       if (cmd->ifsP) {
@@ -717,8 +724,12 @@ int main(int argc, char *argv[])
       }
 
       outdata = gen_fmatrix(local_numdms, worklen / cmd->downsamp);
+      /*      for (ii=0; ii < 10; ii++)
+	{
+	  printf("get_data-1 myid %d padvals[%d] = %f\n",myid,ii,padvals[ii]);
+	  } */
       numread = get_data(infiles, numinfiles, outdata,
-                         &obsmask, dispdt, offsets, &padding);
+                         &obsmask, padvals, idata.dt, dispdt, offsets, &padding);
 
       while (numread == worklen) {
 
@@ -749,7 +760,7 @@ int main(int argc, char *argv[])
             break;
 
          numread = get_data(infiles, numinfiles, outdata,
-                            &obsmask, dispdt, offsets, &padding);
+                            &obsmask, padvals, idata.dt, dispdt, offsets, &padding);
       }
       datawrote = totwrote;
 
@@ -900,7 +911,7 @@ int main(int argc, char *argv[])
 
       outdata = gen_fmatrix(local_numdms, worklen / cmd->downsamp);
       numread = get_data(infiles, numinfiles, outdata,
-                         &obsmask, dispdt, offsets, &padding);
+                         &obsmask, padvals, idata.dt, dispdt, offsets, &padding);
 
       while (numread == worklen) {      /* Loop to read and write the data */
          int numwritten = 0;
@@ -990,9 +1001,8 @@ int main(int argc, char *argv[])
 
          if (cmd->numoutP && (totwrote == cmd->numout))
             break;
-
          numread = get_data(infiles, numinfiles, outdata,
-                            &obsmask, dispdt, offsets, &padding);
+                            &obsmask, padvals, idata.dt, dispdt, offsets, &padding);
       }
    }
 
@@ -1105,7 +1115,7 @@ int main(int argc, char *argv[])
 }
 
 
-static int read_subbands(FILE * infiles[], int numfiles, short *subbanddata)
+static int read_subbands_avg(FILE * infiles[], int numfiles, short *subbanddata)
 /* Read short int subband data written by prepsubband */
 {
    int ii, jj, index, numread = 0;
@@ -1146,17 +1156,74 @@ static void convert_subbands(int numfiles, short *shortdata, float *floatdata)
    }
 }
 
+static void convert_n_zap_subbands(int numfiles, int my_id, short *shortdata,
+				   float *subbanddata, double timeperblk,
+				   int *maskchans, int *nummasked, mask * obsmask,
+				   float clip_sigma, float *padvals)
+/* Convert and transpose the subband data then mask it*/
+{
 
+	
+  int ii, jj, index, shortindex, numread = 0, mask = 0;
+  double starttime;
+  static int currentblock = 0;
+  double run_avg=0;
+
+  *nummasked = 0;
+  if (obsmask->numchan) mask = 1;
+
+
+
+   for (ii = 0; ii < numfiles; ii++) {
+      shortindex = ii * SUBSBLOCKLEN;
+      for (jj = 0, index = ii; jj < SUBSBLOCKLEN; jj++, index += numfiles)
+         subbanddata[index] = (float) shortdata[shortindex + jj];
+   }
+
+   if (mask) {
+     starttime = currentblock * timeperblk;
+     *nummasked = check_mask(starttime, timeperblk, obsmask, maskchans);
+   }
+
+   /* Clip nasty RFI if requested and we're not masking all the channels*/
+   if ((clip_sigma > 0.0) && !(mask && (*nummasked == -1))){
+     subs_clip_times(subbanddata, SUBSBLOCKLEN, numfiles, clip_sigma, padvals);
+   }
+
+   /* Mask it if required */
+   if (mask) {
+     fflush(stdout);
+     if (*nummasked == -1) {   /* If all channels are masked */
+       for (ii = 0; ii < SUBSBLOCKLEN; ii++)
+	 memcpy(subbanddata + ii * numfiles, padvals, sizeof(float) * numfiles);
+     fflush(stdout);
+     } else if (*nummasked > 0) {      /* Only some of the channels are masked */
+       int offset, channum;
+       for (ii = 0; ii < SUBSBLOCKLEN; ii++) {
+	 offset = ii * numfiles;
+	 for (jj = 0; jj < *nummasked; jj++) {
+	   channum = maskchans[jj];
+	   subbanddata[offset + channum] = padvals[channum];
+	 }
+       }
+     }
+   }
+   currentblock += 1;
+}
+
+/* BWS modified to enable masking..... Dec 30 2010 */
 static int get_data(FILE * infiles[], int numfiles, float **outdata,
-                    mask * obsmask, double *dispdts, int **offsets, int *padding)
+                    mask * obsmask, float *padvals, double dt, double *dispdts, int **offsets, int *padding)
 {
    static int firsttime = 1, worklen, *maskchans = NULL, blocksize;
    static int dsworklen;
    static float *tempzz, *data1, *data2, *dsdata1 = NULL, *dsdata2 = NULL;
    static float *currentdata, *lastdata, *currentdsdata, *lastdsdata;
+   static double blockdt;
    static unsigned char *rawdata = NULL;
    int totnumread = 0, numread = 0, tmpnumread = 0, ii, jj, tmppad =
        0, nummasked = 0;
+
 
    if (firsttime) {
       /* For rawdata, we need to make two initial reads in order to        */
@@ -1168,6 +1235,7 @@ static int get_data(FILE * infiles[], int numfiles, float **outdata,
       worklen = blocklen * blocksperread;
       dsworklen = worklen / cmd->downsamp;
       blocksize = blocklen * cmd->nsub;
+      blockdt = blocklen * dt;
       data1 = gen_fvect(cmd->nsub * worklen);
       data2 = gen_fvect(cmd->nsub * worklen);
       rawdata = gen_bvect(bytesperblk);
@@ -1280,11 +1348,19 @@ static int get_data(FILE * infiles[], int numfiles, float **outdata,
          subsdata = gen_svect(SUBSBLOCKLEN * numfiles);
          for (ii = 0; ii < blocksperread; ii++) {
             if (myid == 0)
-               numread = read_subbands(infiles, numfiles, subsdata);
+	      {	
+               numread = read_subbands_avg(infiles, numfiles, subsdata);
+	      }
             MPI_Bcast(&numread, 1, MPI_INT, 0, MPI_COMM_WORLD);
             MPI_Bcast(subsdata, SUBSBLOCKLEN * numfiles, MPI_SHORT, 0,
                       MPI_COMM_WORLD);
-            convert_subbands(numfiles, subsdata, currentdata + ii * blocksize);
+	    //            convert_subbands(numfiles, subsdata, currentdata + ii * blocksize);
+	    //
+
+
+
+	    convert_n_zap_subbands(numfiles, myid, subsdata,
+				    currentdata + ii * blocksize,blockdt, maskchans, &nummasked, obsmask, cmd->clip, padvals);
             if (!firsttime)
                totnumread += numread;
          }
@@ -1337,6 +1413,7 @@ static int get_data(FILE * infiles[], int numfiles, float **outdata,
    if (totnumread != worklen) {
       if (cmd->maskfileP)
          free(maskchans);
+      free(padvals);
       free(data1);
       free(data2);
       free(rawdata);
