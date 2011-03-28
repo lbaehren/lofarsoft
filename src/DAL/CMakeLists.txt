@@ -28,6 +28,7 @@ set (DAL_GIT            "https://github.com/nextgen-astrodata/DAL.git" )
 
 option (DAL_FORCE_BUILD    "Force build and installation of package?" NO  )
 option (DAL_FROM_REPOS     "Install package from repository?"         NO  )
+option (DAL_FROM_RELEASE   "Use release version instead of trunk?"    YES )
 option (DAL_ENABLE_TESTING "Enable testing and experimental builds?"  YES )
 
 ## Handle options
@@ -94,26 +95,42 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   
   if (DAL_FROM_REPOS)
     
-    ExternalProject_Add (dal
-      PREFIX ${PROJECT_BINARY_DIR}
-      DOWNLOAD_DIR download
-      SOURCE_DIR source
-      GIT_REPOSITORY ${DAL_GIT}
-      CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-      INSTALL_COMMAND make install
-      )
+    if (DAL_FROM_RELEASE)
+      
+      ExternalProject_Add (dal
+	PREFIX ${PROJECT_BINARY_DIR}
+	DOWNLOAD_DIR download
+	SOURCE_DIR source
+	GIT_REPOSITORY ${DAL_GIT}
+	GIT_TAG release
+	CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+	INSTALL_COMMAND make install
+	)
+      
+    else (DAL_FROM_RELEASE)
+      
+      ExternalProject_Add (dal
+	PREFIX ${PROJECT_BINARY_DIR}
+	DOWNLOAD_DIR download
+	SOURCE_DIR source
+	GIT_REPOSITORY ${DAL_GIT}
+	CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+	INSTALL_COMMAND make install
+	)
   
+    endif (DAL_FROM_RELEASE)
+    
   else (DAL_FROM_REPOS)
     
-    ExternalProject_Add (dal
-      PREFIX ${PROJECT_BINARY_DIR}
-      DOWNLOAD_DIR download
-      SOURCE_DIR source
-      URL ${DAL_SOURCE}
-      CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-      INSTALL_COMMAND make install
-      )
-    
+      ExternalProject_Add (dal
+	PREFIX ${PROJECT_BINARY_DIR}
+	DOWNLOAD_DIR download
+	SOURCE_DIR source
+	URL ${DAL_SOURCE}
+	CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+	INSTALL_COMMAND make install
+	)
+      
   endif (DAL_FROM_REPOS)
   
 else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
