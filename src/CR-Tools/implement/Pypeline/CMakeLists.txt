@@ -158,6 +158,7 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
             ${PYPELINE_CPP_MODULE_HEADER_FILES}
             ${PYPELINE_CPP_MODULE_WRAPPER_HEADER_FILES}
+	    ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew-generatewrappers.def
             ${CMAKE_CURRENT_SOURCE_DIR}/core.h
 	    ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew.h
 	    ${CMAKE_CURRENT_SOURCE_DIR}/numpy_ptr.h
@@ -233,27 +234,8 @@ set_target_properties (hftools
 
 foreach (FILE ${PYPELINE_CPP_MODULES})
 
-  list (APPEND PYPELINE_PYTHON_DOCS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.py)
-
-  # # Generate the basic documentation strings that python help will use
-  # add_custom_command (
-  #   TARGET hftools
-  #   POST_BUILD
-  #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
-  #   COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-  #   COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetpydoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.py
-  #   #     COMMENT "Generating python documentation for module ${FILE}"
-  #   )
-
-  # # Generate basic documentation in text form
-  # add_custom_command (
-  #   TARGET hftools
-  #   POST_BUILD
-  #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc
-  #   COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-  #   COMMAND ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfgetdoc.awk ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.pp.cc >> ${CMAKE_CURRENT_BINARY_DIR}/hftools.doc.tex
-  #   #     COMMENT "Generating text documentation for module ${FILE}"
-  #   )
+  string (TOLOWER ${FILE} docfile)
+  list (APPEND PYPELINE_PYTHON_DOCS ${CMAKE_CURRENT_BINARY_DIR}/${docfile}.py)
 
   # # Generate a file that can be processed by doxygen
   # add_custom_command (

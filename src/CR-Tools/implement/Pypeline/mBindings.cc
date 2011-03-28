@@ -176,8 +176,8 @@ BOOST_PYTHON_MODULE(_hftools)
    using namespace boost::python;
 
    docstring_options doc_options;
-   doc_options.enable_user_defined();
-   doc_options.disable_py_signatures();
+   doc_options.disable_user_defined();
+   doc_options.enable_py_signatures();
    doc_options.disable_cpp_signatures();
 
 // ________________________________________________________________________

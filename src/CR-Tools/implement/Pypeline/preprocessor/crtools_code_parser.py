@@ -267,6 +267,7 @@ class WrapperBlock():
                     inHeader = False
                     # Dump all extra (auto generated) header information, e.g. PYDOCSTRING
                     self._file.write("#define PYDOCSTRING \"" + pyDocString + "\"\n")
+                    self._deffile.write("#define PYDOCSTRING \"" + pyDocString + "\"\n")
                     # Dump documentation
                     self._file.write("/*!\n" + doxDoc + "\n*/\n")
                     self._pydocfile.write(pythonDoc + "\n\n")
@@ -303,8 +304,6 @@ class DocumentationBlock():
     """
     Documentation of a wrapper block function.
     """
-
-
 
     # ______________________________________________________________________
     #                                                         Initialisation
@@ -473,9 +472,10 @@ class DocumentationBlock():
         """
         result = ""
 
-        # result += "from _hftools import %s\n" %(self.name())
-        # result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.name(), self.getPyDocString())
-        # result += "__all__.append(\'%s\')\n" %(self.name())
+        result += "from _hftools import %s\n" %(self.name())
+        result += "doc_temp = %s.__doc__.splitlines()[-1] + \"\\n\\n\"\n" %(self.name())
+        result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.name(), self.getPyDocString())
+        result += "__all__.append(\'%s\')\n" %(self.name())
 
         return result
 
@@ -644,14 +644,13 @@ def parseCode(input_filename, output_filename, options):
     if (options.verbose):
         print "Output file : %s" %(os.path.relpath(output_filename))
 
-
     # Definitions file
     def_file = None
 
     # PyDoc file
-    pydoc_filename = output_path + "/" + output_basename + ".py"
+    pydoc_filename = output_path + "/" + output_basename[1:].lower() + ".py"
     pydoc_file = open(pydoc_filename, 'w')
-    pydoc_file.write("from _hftools import *\n\n")
+    pydoc_file.write("__all__ = []\n\n")
     if (options.verbose):
         print "Python doc file  : %s" %(os.path.relpath(pydoc_filename))
 
