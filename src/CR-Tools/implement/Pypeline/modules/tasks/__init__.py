@@ -383,7 +383,7 @@ Here is an example of using it::
 """
 
 #Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum","fitbaseline","imager"]
+task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager"]
 
 import os
 import shelve
@@ -1311,6 +1311,7 @@ class WorkSpace(object):
         """
         if par in self._modified_parameters: return True
         if self.parameter_properties[par].has_key(dependencies) and len(self.parameter_properties[par][dependencies])>0:
+#            print "Modified parameter -> ",par
             modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p),self.parameter_properties[par][dependencies]))
             if modified: self._modified_parameters.add(par)
             return modified

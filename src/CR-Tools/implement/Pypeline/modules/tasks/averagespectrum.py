@@ -112,14 +112,32 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory."),
 
         "doublefft":{doc:"if True split the FFT into two, thereby saving memory.", default:False},
+"""
+        "dynamicspectrum":{doc:"If true calculate a dynamic spectrum, where per time inetrval each spectrum is intergrated over nchunk spectra.", default:False},
 
-        "delta_nu":{default:1000,doc:"6 frequency resolution",unit:"Hz"},
+        "delta_t_dynspec":{default:lambda self:self.fullsize*self.delta_t,doc:"Time resolution of dynamic spectrum (if calculated). (output only, set nchunk!)",unit:"s"},
+
+        "integration_time":{default:0.001,doc:"Desired time resolution of dynamic spectrum.",unit:"s"},
+
+        "blocklen_time":{default:lambda self:self.blocklen*self.samplerate,doc:"Length of one block in time units. (output only, set nchunk!)",unit:"s"},
+
+        "dynspec_nspec_per_interval":{default: lambda ws:ceil(ws.nchunks*ws.blocklen_time/ws.integration_time)},
+
+
+        "dynspec_tlen":{default:lambda self:self.block*self.samplerate,doc:"Time resolution of dynamic spectrum (if calculated). (output only, set nchunk!)",unit:"s"},
+
+        "dynspec_maxtlen":{default:lambda self:self.fullsize*self.samplerate,doc:"Time resolution of dynamic spectrum (if calculated). (output only, set nchunk!)",unit:"s"},
+
+        "dynspec_max_nspec":{default: lambda ws:ws.fullsize*ws.nchunks},
+"""
+
+        "delta_nu":{default:1000,doc:"Frequency resolution",unit:"Hz"},
 
         "blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),doc:"The size of a block being read in."},
 
         "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
 
-        "maxchunks":{default:1,doc:"Maximum number of chunks of raw data to integrate spectrum over."},
+        "maxnchunks":{default:1,doc:"Maximum number of chunks of raw data to integrate spectrum over."},
 
         "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
 
@@ -220,7 +238,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "nchunks_max":{default:lambda ws:float(ws.datafile.filesize)/ws.fullsize,
                        doc:"Maximum number of spectral chunks to average"},
 
-        "nchunks":{default:lambda ws:min(ws.datafile.filesize/ws.fullsize,ws.maxchunks),
+        "nchunks":{default:lambda ws:min(ws.datafile.filesize/ws.fullsize,ws.maxnchunks),
                    doc:"Number of spectral chunks that are averaged"},
 
         "nspectraadded":p_(lambda ws:0,"Number of spectra added at the end.",output=True),
@@ -236,7 +254,8 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "nantennas_total":p_(0,"Total number of antennas that were processed (flagged or not) in this run.",output=True),
 
 
-        "delta_t":p_(lambda ws:ws.datafile["sampleInterval"]),
+        "delta_t":p_(lambda ws:ws.datafile["sampleInterval"],"Sample length in raw data set.","s"),
+        
         "fullsize_estimated":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile.filesize)),
         "blocklen_section":p_(lambda ws:ws.blocklen/ws.stride),
         "nsubblocks":p_(lambda ws:ws.stride*ws.nblocks),
@@ -499,7 +518,7 @@ class AverageSpectrum(tasks.Task):
                                     self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
                                     #print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
                                     plt.draw(); plt.show()
-                        else: # do just a single FFT
+                        else: # doublefft - i.e. here do just a single FFT
                             if self.nspectraadded>1:
                                 self.cdataT/=float(self.nspectraadded)
                             self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)

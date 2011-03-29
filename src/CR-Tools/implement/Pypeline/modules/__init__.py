@@ -61,7 +61,8 @@ def tload(name,**args):
     One can also provide a number, which refers to the number
     associated with the task when typing 'tlist'.
     """
-    if type(name)==int: name=tasks.task_allloaded.keys()[name]
+    if type(name)==int:
+        name=tasks.task_allloaded.keys()[name]
     tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
     tasks.task_instance=tasks.task_class(**args)
     tasks.set_globals("Task",tasks.task_instance)

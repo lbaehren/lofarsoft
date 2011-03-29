@@ -107,7 +107,9 @@ def CRQualityCheckAntenna(dataarray,
 
     *count* - an identifier to print in front of flag information (output only)
 
-    *verbose* - sets whether or not to print additional information
+    *verbose* - sets whether or not to print additional
+     information. verbose=True only prints when a block is
+     flagged. verbose=2 prints information on every chunk.
     """
     dim=dataarray.getDim()
     (nblocks,blocksize)=dim
@@ -146,7 +148,7 @@ def CRQualityCheckAntenna(dataarray,
         upper_limit=Vector(float,nblocks,fill=datamean+datarms*nsigma)
     datanpeaks = dataarray[...].countoutside(lower_limit,upper_limit)
     npeaks=datanpeaks.sum(); peaksexcess=npeaks/npeaksexpected_full
-    if verbose:
+    if verbose>1:
 #        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected,"+/-",npeakserror
         print "{8} - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma,count)
     dataNonGaussianity = Vector(float,nblocks)
@@ -173,7 +175,7 @@ def CRQualityCheckAntenna(dataarray,
             flaggedblocklist.append(prop[0])
             qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"spikeexcess":prop[5],"flags":noncompliancelist})
             if verbose:
-                print "- Block {0:5d}: mean={1: 6.2f}, rel. rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}".format(*prop)," ",noncompliancelist
+                print "#Flagged: count=",count,", Block {0:5d}: mean={1: 6.2f}, rel. rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}".format(*prop)," ",noncompliancelist
     return {"filename":filename,"type":"QualityFx","observatory":observatory,"mode":observatorymode,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":qualityflaglist}
 
 

@@ -80,7 +80,7 @@ using namespace casa;
 
   Copy to numpy ndarray.
 
-  WARNING! Be carefull with this function as it automatically typecasts to
+  WARNING! Be careful with this function as it automatically typecasts to
   the type of the output array. In general you should always use matched
   types.
 

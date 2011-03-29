@@ -489,10 +489,11 @@ def hArray_setitem(self,dims,fill):
         self.set(hArray(dims),fill)
     elif type(dims) == IntArray:
         self.set(dims,fill)
-    elif dims == Ellipsis:
+    elif dims == Ellipsis or type(dims)==slice:
         hFill(hArray_getSlicedArray(self,dims),fill)
     else:
-        print "Wrong type of index for array:",dims
+        import pdb; pdb.set_trace()
+        raise IndexError ("Wrong type of index for array: " + str(dims))
 
 def hArray_read(self,datafile,key,block=-1,antenna=-1):
     """

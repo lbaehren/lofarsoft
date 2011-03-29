@@ -63,7 +63,24 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     if (xvalues==None):
         if hasattr(self.par,"xvalues"):
             if hasattr(self,"__slice__"):
-                xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
+                dim_difference=self.getNumberOfDimensions() - self.par.xvalues.getNumberOfDimensions()
+                if dim_difference==0:
+                    xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
+                elif dim_difference>0:
+                    ellipsiscount=self.__slice__.count(Ellipsis) # check if an ellipsis is present that occupies and extra slot in the index list 
+                    if ellipsiscount==1:
+                        ellipsislocation=self.__slice__.index(Ellipsis)
+                        if ellipsislocation==0 or type(self.__slice__[ellipsislocation-1])==int:
+                            ellipsiscount=0
+                    dim_difference+=ellipsiscount
+                    if dim_difference==len(self.__slice__):
+                        xvalues=self.par.xvalues
+                    elif dim_difference<len(self.__slice__):
+                        xvalues=self.par.xvalues.getSlicedArray(self.__slice__[dim_difference:])
+                    else:
+                        raise IndexError("Slicing made y-value array dimenisons too small for x-value array in plot.")
+                else:
+                    raise IndexError("x-value array has higher dimensions than y-value array in plot.")
             else:
                 xvalues=self.par.xvalues
         else:
