@@ -23,3 +23,4 @@ doc/CMake.html
 doc/CTest.html
 external/matplotlib/setupext.py
 release
+src/CR-Tools/implement/Pypeline/documentation/build

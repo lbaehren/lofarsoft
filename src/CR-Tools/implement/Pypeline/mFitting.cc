@@ -203,7 +203,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 
 Note: for k=2 you get a linear fit
 
-See also: BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalMul
+See also: BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -261,7 +261,7 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalMul
+See also:  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -564,44 +564,13 @@ Notes: 1) The w->knots vector must be initialized prior to calling
 //////////////////////END COPIED FROM GSL 1.14//////////////////
 ////////////////////////////////////////////////////////////////
 
-//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit and assign to the output vector.
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hBSplineCalc
-//-----------------------------------------------------------------------
-//#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
-#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with X-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the Ncoeff coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(xmin)()("Lower limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_4 (HNumber)(xmax)()("Upper limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END ----------------------------------------------------------
-/*!
-  \brief $DOCSTRING
-  $PARDOCSTRING
-
-This is just an alias for BSplineCalcAssign!
-*/
-template <class Iter>
-void HFPP_FUNC_NAME(
-		    const Iter vecout, const Iter vecout_end,
-		    const Iter xvec, const Iter xvec_end,
-		    const Iter coeffs, const Iter coeffs_end,
-            const HNumber xmin,
-            const HNumber xmax,
-            const HInteger k
-		    )
-{hBSplineCalc(vecout,vecout_end,xvec,xvec_end,coeffs,coeffs_end,xmin,xmax,k);}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //========================================================================
 //$ITERATE MFUNC Mul,Add,Assign
 //========================================================================
 
-//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit and $MUNC to the output vector.
+//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit and $MFUNC to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
-//#define hBSplineCalcAssign hBSplineCalc
 #define HFPP_FUNC_NAME hBSplineCalc{$MFUNC}
 //-----------------------------------------------------------------------
 //#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
@@ -617,7 +586,7 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalMul
+See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -671,6 +640,46 @@ void HFPP_FUNC_NAME(
 //$ENDITERATE
 
 
+//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit and assign to the output vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBSplineCalc
+//-----------------------------------------------------------------------
+//#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with X-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the Ncoeff coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(xmin)()("Lower limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(xmax)()("Upper limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalcMul
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
+		    const Iter xvec, const Iter xvec_end,
+		    const Iter coeffs, const Iter coeffs_end,
+                    const HNumber xmin,
+                    const HNumber xmax,
+                    const HInteger k
+		    )
+{
+  hBSplineCalcAssign(vecout, vecout_end,
+                     xvec, xvec_end,
+                     coeffs, coeffs_end,
+                     xmin, xmax,
+                     k);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+
+
 //$DOCSTRING: Do a basis spline fit to a data set (without weights) and return the coefficients and covariance matrix in two vectors. Returns the chi-square value of the fit.
 // Returns as function value a pointer to the bspline workspace that is needed by other functions.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -690,7 +699,7 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalcAssign,  BSplineCalcAdd,  BSplineCalMul
+See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalcAssign,  BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(

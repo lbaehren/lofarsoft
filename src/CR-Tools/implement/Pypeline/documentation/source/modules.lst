@@ -12,7 +12,7 @@ pycrtools.core.workspaces
 # pycrtools
 pycrtools.metadata
 pycrtools.grid
-pycrtools.matching
+pycrtools.matchinglr
 pycrtools.srcfind
 pycrtools.PPF
 pycrtools.tasks
