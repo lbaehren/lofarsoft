@@ -15,11 +15,11 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (CASACORE_VERSION        "1.2.0" )
+set (CASACORE_VERSION        "1.2.0-r21024" )
 set (CASACORE_SOURCE_ARCHIVE "casacore-${CASACORE_VERSION}.tar.bz2" )
 set (CASACORE_URL            "http://casacore.googlecode.com/files/${CASACORE_SOURCE_ARCHIVE}" )
 set (CASACORE_SVN            "http://casacore.googlecode.com/svn/trunk" )
-set (CASACORE_SVN_REVISION   "-r21018")
+set (CASACORE_SVN_REVISION   "-r21024")
 
 ## ==============================================================================
 ##
