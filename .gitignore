@@ -5,6 +5,7 @@
 *.dvi
 *.toc
 *.rel
+*.pyc
 build/cr
 build/CMake*
 build/dal
@@ -24,3 +25,4 @@ doc/CTest.html
 external/matplotlib/setupext.py
 release
 src/CR-Tools/implement/Pypeline/documentation/build
+src/CR-Tools/implement/Pypeline/documentation/source/modules
