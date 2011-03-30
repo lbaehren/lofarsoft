@@ -277,7 +277,7 @@ print "Day:    $dg\n";
 sub error {
  my ($str, $par, $msg) = @_;
  print ("Error: Bad value of $str: $par !$msg\n");
- exit;
+ exit 1;
 }
 
 
