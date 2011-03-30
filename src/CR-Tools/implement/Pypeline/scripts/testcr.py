@@ -2,7 +2,7 @@
 
 from pycrtools import *
 
-print "!!!!OUTDATED!!!!! USE testcr2.ps instead!!!""
+print "!!!!OUTDATED!!!!! USE testcr2.ps instead!!!"
 
 def p_(var):
     if (type(var)==list): map(lambda x:p_(x),var)
@@ -32,7 +32,7 @@ XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
 
 cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0]
 
-FarField=True
+FarField=False
 
 cr=crfile(filename_cr)
 """
@@ -96,7 +96,7 @@ cr_rfi_amplitudes3[0].plot(clf=False)
 
 cr_rfi_baseline=hArray(properties=cr_spectrum)
 cr_rfi_baseline[...,1:].rfibaselinefitting(cr_rfi_amplitudes2[...],cr_rfi_rms[...],2.)
-Note: upsample changed now uses +=!y
+#Note: upsample changed now uses +=!y
 cr_rfi_baseline[...].upsample(cr_rfi_amplitudes2[...])
 
 """
@@ -158,7 +158,7 @@ correct delays:
 """
 horneffer_delays=Vector([0.00,  -1.87,  -0.22,  -0.30,  -2.02,  -2.06,   1.05,  -1.35])
 horneffer_delays *= 12.5*10**-9
-cal_delays-=horneffer_delays
+cal_delays=horneffer_delays
 p_("cal_delays")
 """
 
@@ -172,7 +172,7 @@ hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Car
 Then calculate geometric delays and add the instrumental delays.
 
 """
-delays=hArray(float,dimensions=cal_delays)
+delays=hArray(float,[len(cal_delays)])
 hGeometricDelays(delays,antenna_positions,cartesian,FarField)
 """
 
@@ -237,6 +237,6 @@ cr_efield_shifted_added_abs=hArray(copy=cr_efield_shifted_added,xvalues=cr_time)
 cr_efield_shifted_added_abs.abs()
 cr_efield_shifted_added_smoothed=hArray(float,dimensions=[cr.blocksize],xvalues=cr_time,name="E-Field")
 cr_efield_shifted_added_smoothed.runningaverage(cr_efield_shifted_added_abs,7,hWEIGHTS.GAUSSIAN)
-cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename)
+cr_efield_shifted_added_smoothed.plot(xlim=(-3,-0.5),title=cr.filename);plt.show()
 #cr_efield_shifted[...].abs()
 #cr_efield_shifted[...].plot(xlim=(-1.9,-1.7),clf=False)

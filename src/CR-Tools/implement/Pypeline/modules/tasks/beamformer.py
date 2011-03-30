@@ -1,4 +1,38 @@
-"""Spectrum documentation.
+"""
+Calculate complex beams towards multiple directions
+
+Example:
+file=crfile(LOFARSOFT+"/data/lopes/example.event")
+tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
+tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
+tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
+tpar phase_center=[-84.5346,36.1096,0]
+tpar FarField=True
+tpar NyquistZone=2
+tpar randomize_peaks=False
+
+#file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+#file["SelectedAntennasID"]=[0]
+#fx0=file["Fx"]
+
+
+------------------------------------------------------------------------
+file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
+tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
+tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
+tpar cal_delays=dict(zip(file["antennaIDs"],[0,-2.3375e-08,-2.75e-09,-3.75e-09,-2.525e-08,-2.575e-08,1.3125e-08,-1.6875e-08]))
+tpar phase_center=[-22.1927,15.3167,0]
+tpar FarField=False
+tpar NyquistZone=2
+tpar randomize_peaks=False
+------------------------------------------------------------------------
+antenna pos: hArray(float, [8, 3], fill=[-84.5346,36.1096,0,-52.6146,54.4736,-0.0619965,-34.3396,22.5366,-0.131996,-2.3706,40.6976,-0.00299835,41.0804,1.97557,-0.0769958,22.7764,34.1686,-0.0549927,-20.8546,72.5436,-0.154999,11.1824,90.8196,-0.221992]) # len=24 slice=[0:24])
+
+self=Task
+self.beams[...,0].nyquistswap(self.NyquistZone)
+fxb=hArray(float,[2,self.blocklen],name="Fx"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
+fxb[...].plot(clf=True); plt.show()
 
 
 """
@@ -10,13 +44,18 @@ from pycrtools.tasks.shortcuts import *
 import pycrtools.tasks as tasks
 import pycrtools.qualitycheck as qualitycheck
 import time
+import pytmf
+
 from pycrtools import IO
+"""
+"""
 
 #Defining the workspace parameters
 
+deg=pi/180.
+pi2=pi/2.
 
-
-def dynamicspectrum_getfile(ws):
+def getfile(ws):
     """
     To produce an error message in case the file does not exist
     """
@@ -48,7 +87,7 @@ value is one larger than he value in par1 in the workspace.
 
 #    files = [f for f in files if test.search(f)]
 
-class DynamicSpectrum(tasks.Task):
+class BeamFormer(tasks.Task):
     """
 
     The function will calculate a dynamic spectrum from a list of
@@ -113,13 +152,24 @@ class DynamicSpectrum(tasks.Task):
 
     """
     parameters = {
+#Beamformer parameters:
+#------------------------------------------------------------------------
+        "pointings":{default:[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)], doc:"List of coordinate dicts ({'az':az1,'el':elevation value}) containing pointing directions for each beam on the sky."},
+        "cal_delays":{default:{},doc:"A dict containing 'cable' delays for each antenna in seconds as values. Key is the antenna ID. Delays will be added to geometrical delays.",unit:"s"},
+        "antenna_positions":{default:{},doc:"A dict containing x,y,z-Antenna positions for each antenna in seconds as values. Key is the antenna ID.",unit:"m"},
+        "phase_center":{default:[0,0,0],doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
+        "FarField":{default:True,doc:"Form a beam towards the far field, i.e. no distance."},
+        "NyquistZone":{default:1,doc:"In which Nyquist zone was the data taken (e.g. NyquistZone=2 if data is from 100-200 MHz for 200 MHz sampling rate)."},
+#------------------------------------------------------------------------        
+#Some standard parameters
+#------------------------------------------------------------------------        
         "filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
                         "Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
 
         "file_start_number":{default:0,
                     doc:"Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."},
 
-        "datafile":{default:dynamicspectrum_getfile,export:False,doc:"Data file object pointing to raw data."},
+        "datafile":{default:getfile,export:False,doc:"Data file object pointing to raw data."},
 
         "doplot":{default:False,doc:"Plot current spectrum while processing."},
 
@@ -127,25 +177,25 @@ class DynamicSpectrum(tasks.Task):
 
         "plotskip":{default:1,doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
 
-         "plot_center":{default:0.5,doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
+        "plot_center":{default:0.5,doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
+        
+        "plot_start":{default:lambda self: max(int(self.speclen*self.plot_center)-self.plotlen,0),doc:"Start plotting from this sample number."},
+        
+        "plot_end":{default:lambda self: min(int(self.speclen*self.plot_center)+self.plotlen,self.speclen),doc:"End plotting before this sample number."},
 
-         "plot_start":{default:lambda self: max(int(self.speclen*self.plot_center)-self.plotlen,0),doc:"Start plotting from this sample number."},
-
-         "plot_end":{default:lambda self: min(int(self.speclen*self.plot_center)+self.plotlen,self.speclen),doc:"End plotting before this sample number."},
-
-         "delta_nu":{default:10**4,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen",unit:"Hz"},
+        "delta_nu":{default:10**4,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen",unit:"Hz"},
          
-         "delta_t":{default:10**-3,doc:"Desired time resolution - will be rounded off to get integer number of spectral chunks",unit:"s"},
+        "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
 
-         "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
+        "maxnchunks":{default:128,doc:"Maximum number of spectral chunks to include in dynamic spectrum."},
 
-         "maxnchunks":{default:128,doc:"Maximum number of spectral chunks to include in dynamic spectrum."},
+        "maxchunklen":{default:10**25,doc:"Length of one chunk of data used to calcuate one time step in dynamic spectrum.", unit:"Samples"},
 
-         "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
+        "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
 
-         "stride":{default:1, doc:"If stride>1 skip (stride-1) blocks."},
+        "stride":{default:1, doc:"If stride>1 skip (stride-1) blocks."},
          
-         "tmpfileext":{default:".pcr",
+        "tmpfileext":{default:".pcr",
                       doc:"Extension of filename for temporary data files (e.g., used if stride>1.)",export:False},
 
         "tmpfilename":{default:"tmp",
@@ -198,59 +248,7 @@ class DynamicSpectrum(tasks.Task):
         "randomize_peaks":{default:True,doc:"Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."},
 
         "peak_rmsfactor":dict(default=5,doc="At how many sigmas above the mean will a peak be randomized."),
-
-#------------------------------------------------------------------------
-# Derived parameters
         
-        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
-
-        "block_duration":{default:lambda self:self.samplerate*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
-        
-        "speclen":p_(lambda self:self.blocklen/2+1,"Length of one spectrum.","Channels"),
-
-        "samplerate":p_(lambda self:self.datafile["sampleInterval"],"Length in time of one sample in raw data set.","s"),
-
-        "filesize":p_(lambda self:getattr(self.datafile,"filesize"),"Length of file.","Samples"),
-
-        "fullsize":p_(lambda self:self.nblocks*self.blocklen*self.nchunks,"The full length of the raw time series data used for the dynamic spectrum.","Samples"),
-
-        "delta_nu_used":{default:lambda self:1/(self.samplerate*self.blocklen),doc:"Actual frequency resolution of dynamic spectrum",unit:"Hz"},
-
-        "delta_t_used":{default:lambda self:self.samplerate*self.blocklen*self.nblocks,doc:"Actual frequency resolution of dynamic spectrum",unit:"s"},
-
-        "max_nblocks":{default:lambda self:int(floor(self.filesize/self.stride/self.blocklen)),doc:"Maximum number of blocks in file."},
-
-        "nblocks":{default:lambda self:int(min(max(round(self.delta_t/self.block_duration),1),self.max_nblocks)),
-                   doc:"Number of blocks of length blocklen integrated per spectral chunk. The blocks are also used for quality checking."},
-
-        "chunklen":{default:lambda self:self.nblocks*self.blocklen,
-                   doc:"Length of one chunk of data used to calcuate one time step in dynamic spectrum.", unit:"Samples"},
-
-        "sectlen":{default:lambda self:self.chunklen*self.stride,
-                   doc:"Length of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.", unit:"Samples"},
-
-        "sectduration":{default:lambda self:self.sectlen*self.samplerate,
-                   doc:"Length in time units of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.", unit:"s"},
-
-        "end_time":{default:lambda self:self.sectduration*self.nchunks, doc:"End of time axis.", unit:"s"},
-
-        "start_time":{default:lambda self:0,doc:"Start of time axis.", unit:"s"},
-
-        "blocks_per_sect":{default:lambda self:self.nblocks*self.stride,doc:"Number of blockse per section of data."},
-
-        "nchunks":{default:lambda self:min(int(floor(self.filesize/self.sectlen)),self.maxnchunks),doc:"Maximum number of spectral chunks to average"},
-
-        "start_frequency":{default:lambda self:self.freqs[0],
-                           doc:"Start frequency of spectrum",unit:"Hz"},
-
-        "end_frequency":{default:lambda self:self.freqs[-1],
-
-                         doc:"End frequency of spectrum",unit:"Hz"},
-
-        "delta_frequency":p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
-
-#------------------------------------------------------------------------
-
         "nantennas":{default:lambda self:len(self.antennas),
                      doc:"The actual number of antennas available for calculation in the file (<maxnantennas)."},
 
@@ -282,6 +280,58 @@ class DynamicSpectrum(tasks.Task):
         "lofarmode":{default:"LBA_OUTER",
                      doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER) - only used for quality output"},
 
+#------------------------------------------------------------------------
+# Derived parameters
+
+        "nbeams":{default:lambda self:len(self.pointings),doc:"Number of beams to calculate."},
+
+        "phase_center_array":{default:lambda self:hArray(list(self.phase_center),name="Phase Center",units=("","m")),doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
+        
+        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
+
+        "block_duration":{default:lambda self:self.samplerate*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
+        
+        "speclen":p_(lambda self:self.blocklen/2+1,"Length of one spectrum.","Channels"),
+
+        "samplerate":p_(lambda self:self.datafile["sampleInterval"],"Length in time of one sample in raw data set.","s"),
+
+        "filesize":p_(lambda self:getattr(self.datafile,"filesize"),"Length of file.","Samples"),
+
+        "fullsize":p_(lambda self:self.nblocks*self.blocklen*self.nchunks,"The full length of the raw time series data used for the dynamic spectrum.","Samples"),
+
+        "delta_nu_used":{default:lambda self:1/(self.samplerate*self.blocklen),doc:"Actual frequency resolution of dynamic spectrum",unit:"Hz"},
+
+        "max_nblocks":{default:lambda self:int(floor(self.filesize/self.stride/self.blocklen)),doc:"Maximum number of blocks in file."},
+
+        "chunklen":{default:lambda self:min(self.filesize/self.stride,self.maxchunklen),
+                   doc:"Length of one chunk of data treated in memory.", unit:"Samples"},
+
+        "nblocks":{default:lambda self:int(min(max(round(self.chunklen/self.blocklen),1),self.max_nblocks)),
+                   doc:"Number of blocks of length blocklen integrated per spectral chunk. The blocks are also used for quality checking."},
+
+        "sectlen":{default:lambda self:self.blocklen*self.nblocks*self.stride,
+                   doc:"Length of one section of data used to extract one chunk of data treated in memory.", unit:"Samples"},
+
+        "sectduration":{default:lambda self:self.sectlen*self.samplerate,
+                   doc:"Length in time units of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.", unit:"s"},
+
+        "end_time":{default:lambda self:self.sectduration*self.nchunks, doc:"End of time axis.", unit:"s"},
+
+        "start_time":{default:lambda self:0,doc:"Start of time axis.", unit:"s"},
+
+        "blocks_per_sect":{default:lambda self:self.nblocks*self.stride,doc:"Number of blockse per section of data."},
+
+        "nchunks":{default:lambda self:min(int(floor(self.filesize/self.sectlen)),self.maxnchunks),doc:"Maximum number of spectral chunks to average"},
+
+        "start_frequency":{default:lambda self:self.freqs[0],
+                           doc:"Start frequency of spectrum",unit:"Hz"},
+
+        "end_frequency":{default:lambda self:self.freqs[-1],doc:"End frequency of spectrum",unit:"Hz"},
+
+        "delta_frequency":p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
+
+#------------------------------------------------------------------------
+
 #Now define all the work arrays used internally
         "data":{workarray:True,
                  doc:"main input array of raw data",default:lambda self:
@@ -291,24 +341,35 @@ class DynamicSpectrum(tasks.Task):
                  doc:"main input array of raw data",default:lambda self:
                  hArray(complex,[self.nblocks,self.speclen],name="fftdata",header=self.header)},
 
+        "avspec":{workarray:True,
+                 doc:"Average spectrum in each beam.",default:lambda self:
+                 hArray(float,[self.nbeams,self.speclen],name="Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
+
+        "beams":{workarray:True,
+                 doc:"Output array containing the FFTed data for each beam.",default:lambda self:
+                 hArray(complex,[self.nbeams,self.nblocks,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
+
+        "pointingsXYZ":{default:lambda self:hArray(float,[self.nbeams,3],fill=[item for sublist in [convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"), doc:"Array of shape [nbeams,3] with x,y,z positions for each beam on the sky."},
+
+        "phases":{workarray:True,
+                 doc:"Complex phases for each beam and each freqeuncy channel used to calculate complex weights for beamforming.",default:lambda self:
+                 hArray(float,[self.nbeams,self.speclen],name="Phases",header=self.header)},
+
+        "weights":{workarray:True,
+                 doc:"Complex weights for each beam and each freqeuncy channel used to calculate beams.",default:lambda self:
+                 hArray(complex,[self.nbeams,self.speclen],name="Weights",header=self.header)},
+
+        "delays":{workarray:True,
+                 doc:"Contains the geometric delays for the current antenna for each beam",default:lambda self:
+                 hArray(float,[self.nbeams],name="Delays",header=self.header)},
+
+        "antpos":{workarray:True,
+                 doc:"Cartesian coordinates of the current antenna relative to the phase center of the array.",default:lambda self:
+                 hArray(float,[3],name="Delays",header=self.header,units=("","m")),unit:"m"},
+
         "frequencies":{workarray:True,
                        doc:"Frequency axis for final power spectrum.",default:lambda self:
-                       hArray(float,[self.speclen],name="Frequency",units=("M","Hz"),header=self.header)},
-
-        "dynspec":{workarray:True,
-                 doc:"Resulting dynamic spectrum",default:lambda self:
-                 hArray(float,[self.nchunks,self.speclen],fill=0.0,name="Dynamic Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)},
-
-        "cleanspec":{workarray:True,
-                 doc:"Resulting cleaned dynamic spectrum",default:lambda self:
-                 hArray(float,[self.nchunks,self.speclen],fill=0.0,name="Clean Dynamic Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)},
-
-        "avspec":{workarray:True,
-                 doc:"Average spectrum over all times",default:lambda self:
-                 hArray(float,[self.speclen],fill=0.0,name="Average Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)},
-
-        "npcleanspec":{workarray:True,
-                 doc:"Resulting clean dynamic spectrum in a numpy array for plotting",default:lambda self:np.zeros([self.nchunks,self.speclen])}
+                       hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header)},
 }
 
     def run(self):
@@ -324,19 +385,22 @@ class DynamicSpectrum(tasks.Task):
         self.count=0
         self.nofAntennas=0
         self.nantennas_total=0
-        self.dynspec.getHeader("increment")[1]=self.delta_frequency
-        self.dynspec.par.avspec=self.avspec
-        self.dynspec.par.cleanspec=self.cleanspec
-        self.updateHeader(self.dynspec,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_t="delta_t_used",delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
-        self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
+        self.beams.getHeader("increment")[1]=self.delta_frequency
+        self.beams.par.avspec=self.avspec
+        
+        self.updateHeader(self.beams,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
+        self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
 
+        clearfile=True
+        
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         if self.doplot:
             plt.ioff()
 
         original_file_start_number=self.file_start_number
-
+        self.beams.fill(0)
+        self.avspec.fill(0)
         for fname in self.filenames[self.file_start_number:]:
             print "# Start File",str(self.file_start_number)+":",fname
             self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
@@ -345,9 +409,26 @@ class DynamicSpectrum(tasks.Task):
             for iantenna in self.antenna_list[fname]:
                 antenna=self.antennas[iantenna]
                 rms=0; mean=0; npeaks=0
-                self.datafile["selectedAntennas"]=[antenna]
+                self.datafile["selectedAntennasID"]=[antenna] # this is confusing, but works due to a bug in the old datareader
                 antennaID=self.antennaIDs[iantenna]
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):"
+
+                self.antpos=self.antenna_positions[antennaID]
+                print "Antenna position =",self.antpos
+                self.antpos -= self.phase_center_array
+                print "Relative antenna position =",self.antpos
+                
+                #Calculate the geometrical delays needed for beamforming
+                hGeometricDelays(self.delays,self.antpos,self.pointingsXYZ, self.FarField)
+
+                #Add the cable/calibration delay
+                cal_delay=self.cal_delays.setdefault(antennaID,0.0); print "Delay =",cal_delay
+                self.delays+=cal_delay; print "Total delay =",self.delays
+
+                self.phases.delaytophase(self.frequencies,self.delays)
+                self.weights.phasetocomplex(self.phases)
+                #hGeometricWeights(self.weights,self.frequencies,self.antpos,self.pointings_cartesian,self.FarField)
+
                 for nchunk in range(self.nchunks):
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
                     self.data[...].read(self.datafile,"Fx",blocks)
@@ -372,23 +453,28 @@ class DynamicSpectrum(tasks.Task):
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.data.randomizepeaks(lower_limit,upper_limit)
                         self.fftdata[...].fftw(self.data[...])
+                        self.fftdata[...].nyquistswap(self.NyquistZone)
                         if self.nspectraadded[nchunk]>1:
                             self.fftdata/=float(self.nspectraadded[nchunk])
-                        self.dynspec[nchunk:nchunk+1] *= (self.nspectraadded[nchunk]-1.0)/(self.nspectraadded[nchunk])
-                        self.dynspec[nchunk:nchunk+1,...].spectralpower(self.fftdata[...])
+                        if self.nofAntennas==1:
+                            self.beams.fill(0)
+                        elif self.nchunks>1:
+                            self.beams.readfilebinary(self.spectrum_file_bin,self.nchunks*self.chunklen*self.nbeams)
+                        self.beams *= (self.nspectraadded[nchunk]-1.0)/(self.nspectraadded[nchunk])
+                        self.beams[...].muladd(self.fftdata,self.weights[...])
+                        for b in range(self.nbeams):
+                            self.avspec[b].spectralpower(self.beams[b,...])
+                        self.beams.write(self.spectrum_file,nblocks=self.nchunks,block=nchunk,clearfile=clearfile)
+                        clearfile=False
                     #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
 
                         if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
-                            self.dynspec[nchunk,self.plot_start:self.plot_end].plot()
-                            print "RMS of plotted spectrum=",self.dynspec[nchunk,self.plot_start:self.plot_end].stddev()
+                            self.avspec[...,self.plot_start:self.plot_end].plot()
+                            print "RMS of plotted spectra=",self.avspec[...,self.plot_start:self.plot_end].stddev()
                             plt.draw(); plt.show()
-                     #End for nchunk       
+                     #End for nchunk
                 if self.doplot>1:
-                    self.avspec.fill(0.0)
-                    self.dynspec[...].addto(self.avspec)
-                    self.cleanspec.copy(self.dynspec)
-                    self.cleanspec /= self.avspec
-                    self.dynplot(self.dynspec)
+                    self.avspec[...].plot()
                 mean/=self.nchunks
                 rms/=self.nchunks
                 self.mean_antenna[self.nantennas_total]=mean
@@ -403,12 +489,8 @@ class DynamicSpectrum(tasks.Task):
                 print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum(),l
                 self.nantennas_total+=1
             print "# End File",str(self.file_start_number)+":",fname
-            self.avspec.fill(0.0)
-            self.dynspec[...].addto(self.avspec)
-            self.cleanspec.copy(self.dynspec)
-            self.cleanspec /= self.avspec
-            self.updateHeader(self.dynspec,["nofAntennas","nspectraadded","filenames","antennas_used"])
-            self.dynspec.write(self.spectrum_file)
+            self.updateHeader(self.beams,["nofAntennas","nspectraadded","filenames","antennas_used"])
+#            self.beams.write(self.spectrum_file)
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
@@ -427,7 +509,7 @@ class DynamicSpectrum(tasks.Task):
         print "To read back the spectrum type: dsp=hArrayRead('"+self.spectrum_file+"')"
         print "To plot the spectrum, use 'Task.dynplot(dsp)'."
         if self.doplot:
-            self.dynplot(self.dynspec)
+            self.avspec[...].plot()
             plt.ion()
 
     def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):

@@ -30,7 +30,7 @@ class CRWorkSpace():
         l=len("default")+1
 #Create a list of all the parameters with default values (and initialization functions)
         if not hasattr(self,"parameters"): self.parameters=[]
-        self.parameters+=list(set(map(lambda s:s[l:],filter(lambda s:s.find("default_")==0,dir(self)))).difference(set(self.parameters)))
+        self.parameters+=list(set(map(lambda s:s[l:],__builtins__["filter"](lambda s:s.find("default_")==0,dir(self)))).difference(set(self.parameters)))
         for par in self.parameters:
             if hasattr(self,"default_"+par):
                 if type(getattr(self,"default_"+par).__doc__)==str: #assign docstring, reusing the one from the initialization function
@@ -687,23 +687,23 @@ def hCRCalcBaseline(baseline, frequency, numin_i,numax_i,coeffs,ws=None, **keywo
     else:
         #Create the correct powers of x
         #        ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,-1].val(),ws["ncoeffs"])
-        ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,ws["nselected_bins"]-1:ws["nselected_bins"]].val(),ws["ncoeffs"])
-        baseline[...,numin_i:numax_i].bspline(ws["baseline_x"][numin_i:numax_i],ws["coeffs"][...])
+        #ws["clean_bins_x"][...,0].val(),ws["clean_bins_x"][...,ws["nselected_bins"]-1:ws["nselected_bins"]].val(),
+        ws["baseline_x"][numin_i:numax_i].bsplinefitxvalues(frequency[numin_i:numax_i],ws["ncoeffs"],frequency[0],frequency[-1],3)
+        baseline[...,numin_i:numax_i].bspline(ws["baseline_x"][numin_i:numax_i],ws["coeffs"][...],3)
     #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
     #Left end
-#    import pdb; pdb.set_trace()
     ws["height_ends"][0,...].copy(baseline[...,numin_i])
     factor=hArray(float,ws["nofAntennas"],fill=6.9) # Factor 1000 in log
     if not ws["logfit"]:
         factor.copy(ws["height_ends"][0])
         factor *= 1000.0
-    baseline[...,0:numin_i].gethanningfilterhalf(Vector(factor),Vector([ws["height_ends"][0]]),Vector(bool,ws["nofAntennas"],fill=True))
+    baseline[...,0:numin_i].gethanningfilterhalf(Vector(factor),ws["height_ends"][0].vec(),Vector(bool,ws["nofAntennas"],fill=True))
     #Right end
     ws["height_ends"][1,...].copy(baseline[...,numax_i-2])
     if not ws["logfit"]:
         factor.copy(ws["height_ends"][1])
         factor *= 1000.0
-    baseline[...,numax_i-1:].gethanningfilterhalf(Vector(factor),Vector([ws["height_ends"][1]]),Vector(bool,ws["nofAntennas"],fill=False))
+    baseline[...,numax_i-1:].gethanningfilterhalf(Vector(factor),ws["height_ends"][1].vec(),Vector(bool,ws["nofAntennas"],fill=False))
     if ws["logfit"]: baseline.exp()
     if ws["verbose"]:
         print time.clock()-ws["t0"],"s: Done CalcBaseline."
@@ -793,7 +793,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
         if ws["verbose"]:
             print "Performing a basis spline fit with ",ws["ncoeffs"]-2,"break points."
         #Perform a Basis Spline fit to the data
-        ws["chisquare"]=coeffs[...].bsplinefit(ws["covariance"][...],ws["xpowers"][...,[0]:ws["nselected_bins"]],ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],ws["clean_bins_y"][...,[0]:ws["nselected_bins"]])
+        ws["chisquare"]=coeffs[...].bsplinefit(ws["covariance"][...],ws["xpowers"][...,[0]:ws["nselected_bins"]],ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],ws["clean_bins_y"][...,[0]:ws["nselected_bins"]],frequency[0],frequency[-1],3)
     #Calculate an estimate of the average RMS of the clean spectrum after baseline division
     ws["ratio"][...].copy(ws["ratio"],ws["selected_bins"][...],ws["nselected_bins"])
     meanrms=ws["ratio"][...,[0]:ws["nselected_bins"]].meaninverse()
@@ -805,7 +805,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
         if ws["fittype"]=="POLY":
             ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].polynomial(ws["clean_bins_x"][...,[0]:ws["nselected_bins"]],coeffs[...],ws["powers"][...])
         else:
-            ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].bspline(ws["xpowers"][...,[0]:(ws["nselected_bins"])],coeffs[...])
+            ws["clean_bins_y"][...,[0]:ws["nselected_bins"]].bspline(ws["xpowers"][...,[0]:(ws["nselected_bins"])],coeffs[...],3)
         ws["clean_bins_y"][...,[0]:ws["nselected_bins"]-1].plot(xvalues=ws["clean_bins_x"][...,[0]:ws["nselected_bins"]-1],clf=False,logplot=False)
         raw_input("Plotted downsampled spectrum - press Enter to continue...")
     return meanrms

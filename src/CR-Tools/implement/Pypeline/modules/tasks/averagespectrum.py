@@ -198,7 +198,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "end_frequency":{default:lambda ws:ws.freqs[-1],
                          doc:"End frequency of spectrum",unit:"Hz"},
 
-        "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen),"Separation of two subsequent channels in final spectrum"),
+        "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
 
         "delta_band":{default:lambda ws:(ws.end_frequency-ws.start_frequency)/ws.stride*2,
                       doc:"Frequency width of one section/band of spectrum",unit:"Hz"},
@@ -261,7 +261,6 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "nsubblocks":p_(lambda ws:ws.stride*ws.nblocks),
         "nblocks_section":p_(lambda ws:ws.nblocks/ws.stride),
         "speclen":p_(lambda ws:ws.fullsize/2+1),
-        "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0)),
         "header":p_(lambda ws:ws.datafile.hdr,"Header of datafile",export=False),
         "freqs":p_(lambda ws:ws.datafile["Frequency"],export=False),
 
@@ -555,7 +554,7 @@ class AverageSpectrum(tasks.Task):
         self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
         self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
         self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
-        self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2.
+        self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
         print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
         print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
         print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"

@@ -1,42 +1,4 @@
-#! /usr/bin/env python
-
-from pycrtools import *
-trackHistory(True)
-
-def p_(var):
-    if (type(var)==list): map(lambda x:p_(x),var)
-    else: print " ",var,"=>",eval(var)
-
-filename_sun=LOFARSOFT+"/data/lopes/example.event"
-filename_biglofar=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
-filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
-figno=0
-
-plt.clf()
-#------------------------------------------------------------------------
-filename_cr=LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event"
-cr_direction=[41.9898208, 64.70544, 1750.]
-XC=-25.44; YC=8.94; #shower core in KASCADE coordinates
-antennalist=[0,1,2,3,4,5,6,7]
-
-#       // Rotation by 15.25 degrees
-#       // (GPS measurement of angle between KASCADE and LOPES coordinate system)
-#       // remark: the value in the Gauss-Kuerger coordinate system is 15.7 Degree
-#       // which would correspond to 15.23 Degree to geographic north
-#       // Value used in the KRETA-evaluation is 15.0 Degree.
-#       // cos 15.25 Degree = 0.964787323  ;  sin 15.25 Degree = 0.263031214
-#       XCn = XC*0.964787323+YC*0.263031214;
-#       YCn = XC*-0.263031214+YC*0.964787323;
-
-cr_shower_core=[XC*0.964787323 + YC*0.263031214,-XC*0.263031214 + YC*0.964787323,0.0] # first version
-#cr_shower_core=[-XC*0.263031214 + YC*0.964787323,XC*0.964787323 + YC*0.263031214,0.0]
-#FarField=True
-FarField=False
-
-ws=CRMainWorkSpace(filename=filename_cr,fittype="POLY",ncoeffs=8,nbins=1024,doplot=False,verbose=False,modulename="ws")
-ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256) #fittype="POLY" or "BSPLINE"
-
-if ws["datafile"]["Observatory"]=='LOFAR':
+"datafile"]["Observatory"]=='LOFAR':
     ws["numin"]=12 #MHz
     ws["numax"]=82 #MHz
 elif ws["datafile"]["Observatory"]=='LOPES':
@@ -72,6 +34,7 @@ and then make the Fourier transform followed by a reordering of the
 output, noting that the data was taken in the second Nyquist domain
 
 """
+import pdb; pdb.set_trace()
 ws["fft"][...].fftw(ws["efield"][...])
 ws["fft"][...].nyquistswap(cr["nyquistZone"])
 """
@@ -96,7 +59,7 @@ ws["rfithreshold"] = (ws["meanrms"] * ws["rfi_nsigma"]) + ws["meanspec"]
 ws["nbad_channels"]=ws["bad_channels"][...].findgreaterthan(ws["spectrum"][...],ws["rfithreshold"])
 ws["fft"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
 ws["spectrum"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
-ws["spectrum"][0].plot(clf=False)
+ws["spectrum"][0].plot(clf=False); plt.show()
 raw_input("Plotted spectrum - press Enter to continue...")
 
 t1=cr_time.findlowerbound(-1.95).val()+3
@@ -111,7 +74,7 @@ t2=t1+32
 ws["efield_processed"][...].invfftcasa(ws["fft"][...],ws["datafile"]["nyquistZone"])
 
 ws["efield_processed"][0:2,...,t1:t2].plot(xvalues=cr_time[t1:t2])
-ws["efield"][0:2,...,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False)
+ws["efield"][0:2,...,t1:t2].plot(xvalues=cr_time[t1:t2],clf=False); plt.show()
 raw_input("Plotted inverse FFT - press Enter to continue...")
 
 
@@ -142,7 +105,7 @@ maxpos.vec().copy(ws["crosscorr_smooth"][...].maxpos())
 maxpos -= (t2-t1)/2
 maxpos *= 12.5/1000.
 
-ws["crosscorr_smooth"][...].plot()
+ws["crosscorr_smooth"][...].plot();plt.show()
 raw_input("Plotted cross-correlations - press Enter to continue...")
 """
 
@@ -213,12 +176,16 @@ Then calculate geometric delays and add the instrumental delays.
 """
 delays=hArray(float,dimensions=cal_delays)
 hGeometricDelays(delays,antenna_positions,cartesian,FarField)
+print "Geometric delays:",delays
+print "antenna positions:",antenna_positions
+print "cartesian:",cartesian
 """
 
 To get the total delay we add the geometric and the calibration delays.
 
 """
 delays += cal_delays
+print "Total delays:",delays
 """
 
 The delays can be converted to phases of coplex weights (to be applied
@@ -272,7 +239,7 @@ this is very slow with 8x65000 points.
 tb1=cr_time.findlowerbound(-2.0)
 tb2=cr_time.findlowerbound(-1.0)
 
-ws["efield_shifted"][...,tb1:tb2].plot(xlim=(-1.95,-1.65),xvalues=cr_time[tb1:tb2],legend=antennalist)
+ws["efield_shifted"][...,tb1:tb2].plot(xlim=(-1.95,-1.65),xvalues=cr_time[tb1:tb2],legend=antennalist);plt.show()
 plt.savefig("cr_efields.pdf")
 raw_input("Plotted shifted efields - press Enter to continue...")
 
@@ -302,11 +269,11 @@ raw_input("Overplotted smoothed beamformed pulse - press Enter to continue...")
 
 ws["efield_shifted_added_abs"][tb1:tb2].plot(xlim=(-2,-1),xvalues=cr_time[tb1:tb2],title=cr.filename,clf=True)
 ws["efield_shifted_added_smoothed"][tb1:tb2].plot(xlim=(-2,-1),xvalues=cr_time[tb1:tb2],title=cr.filename,clf=False)
-plt.savefig("cr_pulse_zoom.pdf")
+plt.savefig("cr_pulse_zoom.pdf");#plt.show()
 raw_input("Plotted final pulse - press Enter to continue...")
 
 ws["efield_shifted_added_abs"].plot(xlim=(-400,400),title=cr.filename,clf=True)
 ws["efield_shifted_added_smoothed"].plot(xlim=(-400,400),title=cr.filename,clf=False)
-plt.savefig("cr_pulse.pdf")
+plt.savefig("cr_pulse.pdf");
 
 #Voila ...

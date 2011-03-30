@@ -383,7 +383,7 @@ Here is an example of using it::
 """
 
 #Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager"]
+task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer"]
 
 import os
 import shelve
@@ -1415,7 +1415,7 @@ class WorkSpace(object):
          parameter_properties or added with .add but simply assigned
          by ws.par=value.
         """
-
+#        variables=set(Task.run.func_code.co_names)
         s="#-----------------------------------------------------------------------\n# WorkSpace of "+self.__taskname__+"("+",".join(self.getPositionalParameters())+")\n#-----------------------------------------------------------------------\n"
         s0=""; s1=""; s2=""
         pars=self.parameter_properties.items()

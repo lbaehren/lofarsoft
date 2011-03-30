@@ -343,7 +343,6 @@ version (1.14) into source code - I have 1.11
 
 
 2011-03-29  Pypeline - rev 7387 - Heino Falcke
-
 - harray.plot now better handles sliced y values in combination with
 xvalues of different dimensions. I.e. you can have a 2D array with 
 1D xvalues
@@ -352,6 +351,13 @@ for compatibility with the documentation generation
 - changed parameter maxchunk to maxnchunks in averagespectrum,
 - added a new task to calculate a(n incohrent) dynamic spectrum from
 a number of files and to plot it
+
+2011-03-30  Pypeline - rev 7409 - Heino Falcke
+- fixed testcr2 to work again
+- uploaded "/data/lopes/2004.01.12.00:28:11.577.event" as testfile.
+- first working version of a BeamFormer task - works with LOPES data 
+- a draft and completely incomplete version of a conversion routine "convert"
+for coordinates 
 
 ------------------------------------------------------------------------
 TODO

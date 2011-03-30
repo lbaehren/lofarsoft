@@ -886,24 +886,24 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
         if type(v) in hAllVectorTypes:
-            parname=prefix+"."+k
+            parname=prefix+"."+str(k)
             filename=parname+".pcr"
             if parname in blockedIOnames:
-                hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+                hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             else:
-                hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+                hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             newdictionary[k]=hFileContainer(path,filename,vector=True)
         if type(v) in hAllArrayTypes:
-            parname=prefix+"."+k
+            parname=prefix+"."+str(k)
             filename=parname+".pcr"
-            filename=prefix+"."+k+".pcr"
+            filename=prefix+"."+str(k)+".pcr"
             if parname in blockedIOnames:
-                hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+                hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             else:
-                hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=k,clearfile=clearfile)
+                hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             newdictionary[k]=hFileContainer(path,filename)
         elif type(v) == dict:
-            newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+k)
+            newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+str(k))
     return newdictionary
 
 def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None):
@@ -969,6 +969,10 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f.write("ha_nblocks = "+str(nblocks)+"\n")
     f.write("ha_name = '" + self.getKey("name")+"'\n")
     f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
+    if hasattr(self,"__slice__"):
+        f.write("ha_slice = " + str(self.__slice__)+"\n")
+    else:
+        f.write("ha_slice = None\n")
     f.write("ha_varname = '" + varname+"'\n")
     par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile)
     f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
@@ -1024,6 +1028,7 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
       y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0])
 
     """
+    ha_slice=None # Put there to assure backward compatibility
     fn=os.path.expandvars(os.path.expanduser(filename))
     if fn[-4:].upper() == ".PCR": fn=fn[:-4]+".pcr"
     else: fn+=".pcr"
@@ -1050,7 +1055,10 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
         dim=ha_dim
     par=pickle.loads(ha_parameters)
     par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
-    ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
+    if ha_slice:
+        ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)[ha_slice]
+    else:
+        ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
     ary.par.nblocks=ha_nblocks
     ary.par.dim=ha_dim
     if sum(dim)>0:

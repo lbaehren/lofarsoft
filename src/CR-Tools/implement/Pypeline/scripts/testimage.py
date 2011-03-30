@@ -73,7 +73,7 @@ for el in np.arange (*elrange):
         n+=1
 
 print "t=",time.clock(),"s -","Calculating coordinates and delays"
-hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,FarField)
+hCoordinateConvert(azel[...],CoordinateTypes.AzElRadius,cartesian[...],CoordinateTypes.Cartesian,True)
 hGeometricDelays(delays,antenna_positions,cartesian,FarField)
 delays += cal_delays
 
@@ -110,6 +110,8 @@ intpower=np.array(power[...].sum())
 maxval=intpower.max()
 intpower /= maxval
 intpower.resize([n_az,n_el])
+
+
 
 print "t=",time.clock(),"s -","Plotting"
 plt.clf()
