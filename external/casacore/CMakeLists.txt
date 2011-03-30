@@ -90,6 +90,7 @@ if (LUS_ROOT)
   include (FindGFortran)
   include (FindLAPACK)
   include (FindWCSLIB)
+  include (FindCASACORE)
 else (LUS_ROOT)
   message (FATAL_ERROR "[casacore] Unable to locate additional CMake scripts!")
 endif (LUS_ROOT)
@@ -163,7 +164,7 @@ if (CASACORE_FROM_REPOS)
   set (CASACORE_FORCE_BUILD TRUE)
 endif (CASACORE_FROM_REPOS)
 
-if (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
+if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   
   ## Locate source file to build from
   
@@ -221,39 +222,40 @@ if (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
       )
     
   endif (CASACORE_FROM_REPOS)
+
+  ## ==============================================================================
+  ##
+  ##  Configuration summary
+  ##
+  ## ==============================================================================
+
+  message (STATUS "+------------------------------------------------------------+" )
+  message (STATUS "| [casacore] Summary of configuration settings               |" )
+  message (STATUS "+------------------------------------------------------------+" )
+  message (STATUS " casacore package description:"                             )
+  message (STATUS " .. Version                   = ${CASACORE_VERSION}"        )
+  message (STATUS " .. Source archive            = ${CASACORE_SOURCE_ARCHIVE}" )
+  message (STATUS " .. Build  from SVN HEAD      = ${CASACORE_FROM_REPOS_HEAD}")
+  message (STATUS " .. SVN revision number       = ${CASACORE_SVN_REVISION}"   )
+  message (STATUS " PROJECT_SOURCE_DIR           = ${PROJECT_SOURCE_DIR}"      )
+  message (STATUS " CMAKE_INSTALL_PREFIX         = ${CMAKE_INSTALL_PREFIX}"    )
+  message (STATUS " Enable FFTW3 library support = ${CASACORE_WITH_FFTW3}"     )
+  message (STATUS " Enable HDF5 library support  = ${CASACORE_WITH_HDF5}"      )
+  message (STATUS " Build test programs          = ${CASACORE_BUILD_TESTING}"  )
+  message (STATUS " Found CFITSIO library        = ${CFITSIO_FOUND}"           )
+  message (STATUS " Found FFTW3 library          = ${FFTW3_FOUND}"             )
+  message (STATUS " Found HDF5 library           = ${HDF5_FOUND}"              )
+  message (STATUS " Found LAPACK library         = ${LAPACK_FOUND}"            )
+  message (STATUS " Found MPI library            = ${MPI_FOUND}"               )
+  message (STATUS " Found WCSLIB library         = ${WCSLIB_FOUND}"            )
+  message (STATUS "+------------------------------------------------------------+" )
   
-else (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
+else (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   
   add_custom_target (casacore
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[CASACORE] Found system-wide installation; skipping rebuild!"
     )
   
-endif (NOT CASACORE_FOUND OR CASACORE_FORCE_BUILD)
+endif (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 
-## ==============================================================================
-##
-##  Configuration summary
-##
-## ==============================================================================
-
-message (STATUS "+------------------------------------------------------------+" )
-message (STATUS "| [casacore] Summary of configuration settings               |" )
-message (STATUS "+------------------------------------------------------------+" )
-message (STATUS " casacore package description:"                             )
-message (STATUS " .. Version                   = ${CASACORE_VERSION}"        )
-message (STATUS " .. Source archive            = ${CASACORE_SOURCE_ARCHIVE}" )
-message (STATUS " .. Build  from SVN HEAD      = ${CASACORE_FROM_REPOS_HEAD}")
-message (STATUS " .. SVN revision number       = ${CASACORE_SVN_REVISION}"   )
-message (STATUS " PROJECT_SOURCE_DIR           = ${PROJECT_SOURCE_DIR}"      )
-message (STATUS " CMAKE_INSTALL_PREFIX         = ${CMAKE_INSTALL_PREFIX}"    )
-message (STATUS " Enable FFTW3 library support = ${CASACORE_WITH_FFTW3}"     )
-message (STATUS " Enable HDF5 library support  = ${CASACORE_WITH_HDF5}"      )
-message (STATUS " Build test programs          = ${CASACORE_BUILD_TESTING}"  )
-message (STATUS " Found CFITSIO library        = ${CFITSIO_FOUND}"           )
-message (STATUS " Found FFTW3 library          = ${FFTW3_FOUND}"             )
-message (STATUS " Found HDF5 library           = ${HDF5_FOUND}"              )
-message (STATUS " Found LAPACK library         = ${LAPACK_FOUND}"            )
-message (STATUS " Found MPI library            = ${MPI_FOUND}"               )
-message (STATUS " Found WCSLIB library         = ${WCSLIB_FOUND}"            )
-message (STATUS "+------------------------------------------------------------+" )
