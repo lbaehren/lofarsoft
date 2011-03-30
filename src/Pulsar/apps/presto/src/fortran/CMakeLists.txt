@@ -12,14 +12,16 @@ if (UNIX)
    set_target_properties (fort
      PROPERTIES
      SUFFIX .dylib
-     COMPILE_FLAGS "-fPIC -g -O2 -fno-second-underscore"
+#     COMPILE_FLAGS "-fPIC -g -O2 -fno-second-underscore"
+     COMPILE_FLAGS "-fPIC -O2 -fno-second-underscore"
      LINK_FLAGS "-dynamiclib -fno-second-underscore"
      )
  else (APPLE)
    set_target_properties (fort
      PROPERTIES
      SUFFIX .so
-     COMPILE_FLAGS "-fPIC -g -O2 -fno-second-underscore"
+#     COMPILE_FLAGS "-fPIC -g -O2 -fno-second-underscore"
+     COMPILE_FLAGS "-fPIC -O2 -fno-second-underscore"
      LINK_FLAGS "-shared -fno-second-underscore"
      )
  endif (APPLE)

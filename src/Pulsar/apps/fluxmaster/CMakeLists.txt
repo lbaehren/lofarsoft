@@ -12,7 +12,8 @@ project(fluxmaster)
 
 #include_directories (${PULSAR_SOURCE_DIR}/apps/sigproc-4.3/ ${PULSAR_SOURCE_DIR}/apps/fluxmaster )
 
-set(CMAKE_CXX_FLAGS "-g -O3")
+#set(CMAKE_CXX_FLAGS "-g -O3")
+set(CMAKE_CXX_FLAGS "-O3")
 
 #the one C++ file
 add_executable(fluxmaster fluxmaster.cpp)

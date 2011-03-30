@@ -118,14 +118,16 @@ if (UNIX)
    set_target_properties (presto
      PROPERTIES
      SUFFIX .dylib
-     COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+#     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+     COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
      LINK_FLAGS "-dynamiclib"
      )
  else (APPLE)
    set_target_properties (presto
      PROPERTIES
      SUFFIX .so
-     COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+#     COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+     COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
      LINK_FLAGS "-shared"
      )
  endif (APPLE)
@@ -416,7 +418,8 @@ add_executable (makewisdom
 foreach (src ${presto_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+#    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+    COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto sla ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
@@ -426,7 +429,8 @@ foreach (src ${presto_glib_binaries})
     PROPERTIES
 #    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 #    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
-    COMPILE_FLAGS "-g -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+#    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+    COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${GLIB_LIBRARIES} ${libm})
 endforeach (src)
@@ -436,7 +440,8 @@ foreach (src ${presto_fc_binaries})
   set_target_properties (${src}
     PROPERTIES
     LINKER_LANGUAGE Fortran
-    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+#    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+    COMPILE_FLAGS "-O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto ${CFITSIO_LIBRARIES} ${libm})
 endforeach (src)
@@ -445,7 +450,8 @@ foreach (src ${presto_fc_special_binaries})
   set_target_properties (${src}
     PROPERTIES
     LINKER_LANGUAGE Fortran
-    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+#    COMPILE_FLAGS "-g -O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+    COMPILE_FLAGS "-O -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
   target_link_libraries (${src} presto fort ${libpthread} ${libz} ${libdl} ${libm})
 #  target_link_libraries (${src} presto fort X11 ${libpthread} png ${libz} ${libdl} ${libm})

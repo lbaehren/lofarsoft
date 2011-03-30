@@ -14,15 +14,17 @@ if (UNIX)
    set_target_properties (sla
      PROPERTIES
      SUFFIX .dylib
-     COMPILE_FLAGS "-fPIC -g -O -fno-second-underscore"
+#     COMPILE_FLAGS "-fPIC -g -O -fno-second-underscore"
+     COMPILE_FLAGS "-fPIC -O -fno-second-underscore"
      LINK_FLAGS "-dynamiclib -fno-second-underscore"
      )
  else (APPLE)
    set_target_properties (sla
      PROPERTIES
      SUFFIX .so
-     COMPILE_FLAGS "-fPIC -g -O -fno-second-underscore"
-     LINK_FLAGS "-shared -fno-second-underscore"
+#     COMPILE_FLAGS "-fPIC -g -O -fno-second-underscore"
+     COMPILE_FLAGS "-fPIC -O -fno-second-underscore"
+    LINK_FLAGS "-shared -fno-second-underscore"
      )
  endif (APPLE)
 endif (UNIX)
