@@ -231,8 +231,8 @@ class WrapperBlock():
         """
         inDoc = False
 
-        pyDocString = self.doc.getPyDocString()
-        pythonDoc = self.doc.getPythonDoc()
+        sphinxDoc = self.doc.getSphinxDoc()
+        pythonDocStatements = self.doc.getPythonDocStatements()
         doxDoc = self.doc.getDoxygenDoc()
 
         # Write block content to output file
@@ -243,8 +243,8 @@ class WrapperBlock():
                 # In iterator blocks: replace iterator variable
                 if (iter_var is not None):
                     line = iter_subst(iter_var, iter_val, line)
-                    pyDocString = iter_subst(iter_var, iter_val, pyDocString)
-                    pythonDoc = iter_subst(iter_var, iter_val, pythonDoc)
+                    sphinxDoc = ""
+                    pythonDocStatements = iter_subst(iter_var, iter_val, pythonDocStatements)
                     doxDoc = iter_subst(iter_var, iter_val, doxDoc)
 
                 # Header block start
@@ -266,11 +266,11 @@ class WrapperBlock():
                 if (m is not None):
                     inHeader = False
                     # Dump all extra (auto generated) header information, e.g. PYDOCSTRING
-                    self._file.write("#define PYDOCSTRING \"" + pyDocString + "\"\n")
-                    self._deffile.write("#define PYDOCSTRING \"" + pyDocString + "\"\n")
+                    self._file.write("#define PYDOCSTRING \"" + sphinxDoc + "\"\n")
+                    self._deffile.write("#define PYDOCSTRING \"\"\n")
                     # Dump documentation
                     self._file.write("/*!\n" + doxDoc + "\n*/\n")
-                    self._pydocfile.write(pythonDoc + "\n\n")
+                    self._pydocfile.write(pythonDocStatements + "\n\n")
                     # Add separator in definition file
                     self._deffile.write("#include \"hfppnew-generatewrappers.def\"\n\n")
                     continue
@@ -450,7 +450,7 @@ class DocumentationBlock():
         self._example_lines.append(example_checked)
 
 
-    def examples(self):
+    def example(self):
         """
         Return example.
         """
@@ -489,45 +489,8 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
-    #                                                         getPyDocString
-    def getPyDocString(self):
-        """
-        Get a compact version of the Python docstring
-        """
-        result = ""
-
-        # Function name
-        result += self.name() + "("
-        parameters = self.parameters()
-        if (len(parameters) > 0):
-            for i in range(len(parameters)):
-                par_name = parameters[i][0]
-                result += par_name
-                if (i < len(parameters)-1):
-                    result += ", "
-        result += ")\\n\\n"
-
-        # Brief function description
-        result += self.summary() + "\\n\\n"
-
-        # Parameter description
-        if (len(self.parameters()) > 0):
-            result += "Parameters:\\n\\n"
-            for par in self.parameters():
-                result += "*" + par[0] + "* " + par[1] + "\\n\\n"
-
-        # Examples (disabled due to bugs in text)
-        # if (len(self.examples()) > 0):
-        #     result += "\\nExample:\\n"
-        #     for example in self.examples():
-        #         result += "  " + example.strip() + "\\n"
-
-        return result
-
-
-    # ______________________________________________________________________
     #                                                           getPythonDoc
-    def getPythonDoc(self):
+    def getPythonDocStatements(self):
         """
         Get Python documentation statement.
         """
@@ -535,7 +498,7 @@ class DocumentationBlock():
 
         result += "from _hftools import %s\n" %(self.name())
         result += "doc_temp = %s.__doc__.splitlines()[-1] + \"\\n\\n\"\n" %(self.name())
-        result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.name(), self.getPyDocString())
+        result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.name(), self.getSphinxDoc())
         result += "__all__.append(\'%s\')\n" %(self.name())
 
         return result
@@ -558,22 +521,31 @@ class DocumentationBlock():
                 result += par_name
                 if (i < len(parameters)-1):
                     result += ", "
-        result += ")\n\n"
+        result += ")\\n\\n"
 
         # Brief function description
-        result += self.summary() + "\n"
+        result += self.summary() + "\\n"
 
         # Parameter description
         if (len(self.parameters()) > 0):
-            result += "Parameters:\n"
+            result += "Parameters:\\n"
             for par in parameters:
-                result += "*" + par[0] + "* " + par[1] + "\n"
+                result += "*" + par[0] + "* " + par[1] + "\\n"
+
+        # Description
+        # -- empty --
+
+        # References
+        # -- empty --
 
         # Examples
         if (len(self.example()) > 0):
-            result += "\nExamples::\n"
-            for example in self.examples():
-                result += "  " + example.strip() + "\n"
+            result += "\\nExamples::\\n"
+            for line in self.example():
+                result += "  " + line.strip() + "\\n"
+
+        # Additional documentation
+
 
         return result
 
@@ -712,7 +684,7 @@ def parseFile(input_filename, output_filename, options):
     def_file = None
 
     # PyDoc file
-    pydoc_filename = output_path + "/" + output_basename[1:].lower() + ".py"
+    pydoc_filename = output_path + "/" + output_basename + ".py"
     pydoc_file = open(pydoc_filename, 'w')
     pydoc_file.write("__all__ = []\n\n")
     if (options.verbose):
@@ -720,7 +692,6 @@ def parseFile(input_filename, output_filename, options):
 
     # Parse input file
     for line in input_file:
-
         # Check definition file (open if filename is set)
         m = re.match("^\/\/\$FILENAME: HFILE=(.*)", line)
         if ((m is not None) & (def_file is None)):

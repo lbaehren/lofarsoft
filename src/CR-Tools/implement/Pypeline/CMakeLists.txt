@@ -234,8 +234,7 @@ set_target_properties (hftools
 
 foreach (FILE ${PYPELINE_CPP_MODULES})
 
-  string (TOLOWER ${FILE} docfile)
-  list (APPEND PYPELINE_PYTHON_DOCS ${CMAKE_CURRENT_BINARY_DIR}/${docfile}.py)
+  list (APPEND PYPELINE_PYTHON_DOCS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.py)
 
   # # Generate a file that can be processed by doxygen
   # add_custom_command (
