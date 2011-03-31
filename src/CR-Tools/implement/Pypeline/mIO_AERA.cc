@@ -74,8 +74,8 @@ using namespace std;
 #define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to open including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
- \brief $DOCSTRING
- $PARDOCSTRING
+  \brief $DOCSTRING
+  $PARDOCSTRING
 */
 AERA::Datareader& HFPP_FUNC_NAME (const HString Filename)
 {
@@ -103,8 +103,8 @@ AERA::Datareader& HFPP_FUNC_NAME (const HString Filename)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
- \brief $DOCSTRING
- $PARDOCSTRING
+  \brief $DOCSTRING
+  $PARDOCSTRING
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -381,10 +381,11 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr,
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the event pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -410,10 +411,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the event pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -441,10 +443,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the event pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -472,10 +475,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the event pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
@@ -502,10 +506,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the local station pointer was successfully changed, false otherwise.
-
-  \brief $DOCSTRING
+ \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -535,10 +540,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the local station pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -570,10 +576,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  Return true if the local station pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -605,10 +612,11 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  Return true if the local station pointer was successfully changed, false otherwise.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -638,14 +646,15 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
- \brief $DOCSTRING
- $PARDOCSTRING
+  \brief $DOCSTRING
+  $PARDOCSTRING
 */
 void HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
   dr.summary();
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Print a brief summary of the AERA data file contents and current settings.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -656,8 +665,8 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
- \brief $DOCSTRING
- $PARDOCSTRING
+  \brief $DOCSTRING
+  $PARDOCSTRING
 */
 void HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -669,6 +678,7 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 //$DOCSTRING: Print a brief summary of the AERA data file contents and current settings.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hAERALocalStationSummary
@@ -678,8 +688,8 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
 #define HFPP_PARDEF_0 (AERADatareader)(dr)()("AERA Datareader object")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
- \brief $DOCSTRING
- $PARDOCSTRING
+  \brief $DOCSTRING
+  $PARDOCSTRING
 */
 void HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -695,5 +705,3 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
