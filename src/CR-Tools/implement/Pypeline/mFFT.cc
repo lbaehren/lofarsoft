@@ -76,22 +76,24 @@ using namespace casa;
 #define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex Input vector to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  outvec.fftw(invec) -> return FFT of invec in outvec
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
-The DFT results are stored in-order in the array out, with the
-zero-frequency (DC) component in data_out[0]. If data_in != data_out, the transform
-is out-of-place and the input array in is not modified. Otherwise, the
-input array is overwritten with the transform.
+  The DFT results are stored in-order in the array out, with the
+  zero-frequency (DC) component in ``data_out[0]``. If ``data_in !=
+  data_out``, the transform is out-of-place and the input array in is
+  not modified. Otherwise, the input array is overwritten with the
+  transform.
 
-Users should note that FFTW computes an unnormalized DFT. Thus,
-computing a forward followed by a backward transform (or vice versa)
-results in the original array scaled by n.
+  Users should note that FFTW computes an unnormalized DFT. Thus,
+  computing a forward followed by a backward transform (or vice versa)
+  results in the original array scaled by ``n``.
 
+  Usage:
+  outvec.fftw(invec) -> return FFT of invec in outvec
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -128,25 +130,26 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 #define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex Input vector to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-
-  outvec.fftw(invec) -> return backward FFT of invec in outvec
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
   !!!! Note that the input vector will be modified and scrambled !!!!
 
-The DFT results are stored in-order in the array out, with the
-zero-frequency (DC) component in data_out[0]. If data_in != data_out, the transform
-is out-of-place and the input array in is not modified. Otherwise, the
-input array is overwritten with the transform.
+  The DFT results are stored in-order in the array out, with the
+  zero-frequency (DC) component in ``data_out[0]``. If ``data_in !=
+  data_out``, the transform is out-of-place and the input array in is
+  not modified. Otherwise, the input array is overwritten with the
+  transform.
 
-Users should note that FFTW computes an unnormalized DFT. Thus,
-computing a forward followed by a backward transform (or vice versa)
-results in the original array scaled by n.
+  Users should note that FFTW computes an unnormalized DFT. Thus,
+  computing a forward followed by a backward transform (or vice versa)
+  results in the original array scaled by ``n``.
 
+  Usage:
+  outvec.fftw(invec) -> return backward FFT of invec in outvec
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -174,7 +177,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Apply a backward FFT on a complex vector and return it properly scaled and without scrambling the input vector
+//$DOCSTRING: Apply a backward FFT on a complex vector and return it properly scaled and without scrambling the input vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSaveInvFFTw
 //-----------------------------------------------------------------------
@@ -185,25 +188,26 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-
-  outvec.fftw(invec) -> return backward FFT of invec in outvec
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
   This inverse fft will preserve the input (at the cost of
-  performance, compared to the pure hInvFFTw). It will also swap the
-  data back if it was previously swapped by hNyquistSwap (no swap if
-  NyquistZone=0) and multiply with the correct normalisation factor
-  (1/N).
+  performance, compared to the pure ``hInvFFTw``). It will also swap the
+  data back if it was previously swapped by ``hNyquistSwap`` (no swap if
+  ``NyquistZone=0``) and multiply with the correct normalisation factor
+  ``(1/N)``.
 
   The DFT results are stored in-order in the array out, with the
-  zero-frequency (DC) component in data_out[0].
+  zero-frequency (DC) component in ``data_out[0]``.
 
-See also: hFFTw, hInvFFTw
+  Usage:
+  outvec.fftw(invec) -> return backward FFT of invec in outvec
 
+  See also:
+  hFFTw, hInvFFTw
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -245,15 +249,18 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 #define HFPP_PARDEF_1 (HInteger)(nyquistZone)()("Nyquist zone. 1: nu= 0 - Nu_max, 2: nu=Nu_max - 2 * Nu_max, etc ...  ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec.nyquistswap()
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  The order of the elements in the vector will be reversed and replaced with their negative complex conjugate.
+  Description:
+  The order of the elements in the vector will be reversed and
+  replaced with their negative complex conjugate.
 
-  The operation is only performed for an even Nyquist Zone (2,4,6,..). Otherwise nothing is done.
+  The operation is only performed for an even Nyquist Zone,
+  e.g. ``(2,4,6,..)``, otherwise nothing is done.
 
+  Usage:
+  vec.nyquistswap()
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
@@ -284,25 +291,26 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-
-  outvec.fftw(invec) -> return backward FFT of invec in outvec
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
   This inverse fft will preserve the input (at the cost of
-  performance, compared to the pure hInvFFTw). It will also swap the
-  data back if it was previously swapped by hNyquistSwap (no swap if
-  NyquistZone=0) and multiply with the correct normalisation factor
-  (1/N).
+  performance, compared to the pure ``hInvFFTw``). It will also swap
+  the data back if it was previously swapped by ``hNyquistSwap`` (no
+  swap if ``NyquistZone=0``) and multiply with the correct
+  normalisation factor ``(1/N)``.
 
   The DFT results are stored in-order in the array out, with the
-  zero-frequency (DC) component in data_out[0].
+  zero-frequency (DC) component in ``data_out[0]``.
 
-See also: hFFTw, hInvFFTw
+  Usage:
+  outvec.fftw(invec) -> return backward FFT of invec in outvec
 
+  See also:
+  hFFTw, hInvFFTw
 */
 template <class IterOut,class Iter>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -344,23 +352,24 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_PARDEF_1 (HNumber)(data_in)()("Real input vector of N elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  complexvec.fftw(floatvec) -> return FFT of floatvec in complexvec
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
-Users should note that FFTW computes an unnormalized DFT. Thus,
-computing a forward followed by a backward transform (or vice versa)
-results in the original array scaled by N.
+  Users should note that FFTW computes an unnormalized DFT. Thus,
+  computing a forward followed by a backward transform (or vice versa)
+  results in the original array scaled by ``N``.
 
-The size N can be any positive integer, but sizes that are products of
-small factors are transformed most efficiently (although prime sizes
-still use an O(N log N) algorithm).  The two arguments are input and
-output arrays of the transform.  These vectors can be equal,
-indicating an in-place transform.
+  The size ``N`` can be any positive integer, but sizes that are
+  products of small factors are transformed most efficiently (although
+  prime sizes still use an O(``N log N``) algorithm).  The two
+  arguments are input and output arrays of the transform.  These
+  vectors can be equal, indicating an in-place transform.
 
+  Usage:
+  complexvec.fftw(floatvec) -> return FFT of floatvec in complexvec
 */
 template <class IterOut,class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -397,23 +406,23 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex input vector of The length is N/2+1 elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec.invfftw(complexvec) -> return (inv) FFT of complexvec in vec
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
-Users should note that FFTW computes an unnormalized DFT. Thus,
-computing a forward followed by a backward transform (or vice versa)
-results in the original array scaled by N.
+  Users should note that FFTW computes an unnormalized DFT. Thus,
+  computing a forward followed by a backward transform (or vice versa)
+  results in the original array scaled by ``N``.
 
-The size N can be any positive integer, but sizes that are products of
-small factors are transformed most efficiently (although prime sizes
-still use an O(N log N) algorithm).  The two arguments are input and
-output arrays of the transform.  These vectors can be equal,
-indicating an in-place transform.
+  The size ``N`` can be any positive integer, but sizes that are
+  products of small factors are transformed most efficiently (although
+  prime sizes still use an O(``N log N``) algorithm).  The two
+  arguments are input and output arrays of the transform.  These
+  vectors can be equal, indicating an in-place transform.
 
+  Usage:
+  vec.invfftw(complexvec) -> return (inv) FFT of complexvec in vec
 */
 template <class IterOut,class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -440,8 +449,6 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
-
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply an FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -453,10 +460,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  complexvec.fftcasa(floatvec) -> return FFT for floatvec in complexvec.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  complexvec.fftcasa(floatvec) -> return FFT for floatvec in complexvec.
 */
 template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -527,6 +535,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply an Inverse FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -538,10 +547,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  floatvec.invfftcasa(complexvec) -> return inverse FFT for complexvecvec in floatvec.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  floatvec.invfftcasa(complexvec) -> return inverse FFT for complexvec in floatvec.
 */
 template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -610,10 +620,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  complexvec.fft(floatvec) -> return FFT of floatvec in complexvec.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  complexvec.fft(floatvec) -> return FFT of floatvec in complexvec.
 */
 template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -637,10 +648,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  floatvec.invfft(complexvec) -> return inverse FFT of complexvec in floatvec.
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  floatvec.invfft(complexvec) -> return inverse FFT of complexvec in floatvec.
 */
 template <class IterIn, class IterOut>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -653,7 +665,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Multiplies a transposed complex FFT matrix with an appropriate phase factor needed to calculate a second FFT with higher spectral resolution
+
+//$DOCSTRING: Multiplies a transposed complex FFT matrix with an appropriate phase factor needed to calculate a second FFT with higher spectral resolution.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDoubleFFTPhaseMul
 //-----------------------------------------------------------------------
@@ -669,7 +682,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See: hDoubleFFT for an extensive description
+  See also:
+  hDoubleFFT
 */
 
 template <class Iter>
@@ -693,7 +707,8 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns a vector with phases to be multiplied (after exponentiation) with a transposed complex FFT matrix to calculate a second FFT with higher spectral resolution
+
+//$DOCSTRING: Returns a vector with phases to be multiplied (after exponentiation) with a transposed complex FFT matrix to calculate a second FFT with higher spectral resolution.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDoubleFFTPhase
 //-----------------------------------------------------------------------
@@ -709,7 +724,8 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  See hDoubleFFT for a detailed description.
+  See also:
+  hDoubleFFT
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size,  const HInteger nblocks, const HInteger blocklen, const HInteger offset)
@@ -733,7 +749,8 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory
+
+//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDoubleFFT
 //-----------------------------------------------------------------------
@@ -750,127 +767,127 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
   \brief $DOCSTRING
   $PARDOCSTRING
 
-Description of the data input vector:
--------------------------------------
+  Description:
+  Description of the data input vector:
+  -------------------------------------
 
-This is how the data is to be provided and dealt with:
+  This is how the data is to be provided and dealt with:
 
-First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector:
+  First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector:
 
-full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE-1 Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l]
+  full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE-1 Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l]
 
--> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
+  -> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
 
-(B2-3 means: 2nd block, and 3rd sample within the block)
+  (B2-3 means: 2nd block, and 3rd sample within the block)
 
-It is possible to leave out m=stride-1 blocks in between, so that only a fraction 1/(stride+1) of data is read in.
+  It is possible to leave out m=stride-1 blocks in between, so that only a fraction 1/(stride+1) of data is read in.
 
-The next step is to transpose the data into a matrix, giving (B1-2 reads data block 1, sample number 2):
+  The next step is to transpose the data into a matrix, giving (B1-2 reads data block 1, sample number 2):
 
-Mb=  [
+  Mb=  [
      [B1-1,B2-1,..,Bn-1],
      [B1-2,B2-2,..,Bn-2],
              ...
      [B1-l,B2-l,..,Bn-l]
      ]
 
-Hence this matrix is incomplete, since it is missing OFFSET times a
-similar matrix on top (e.g., when one was starting to reading not from
-the first block, but the 2nd, 3rd etc.) and STRIDE-1-OFFSET matrices at
-the end.
+  Hence this matrix is incomplete, since it is missing OFFSET times a
+  similar matrix on top (e.g., when one was starting to reading not from
+  the first block, but the 2nd, 3rd etc.) and STRIDE-1-OFFSET matrices at
+  the end.
 
-For clarity: the full matrix would look have looked like (for the example of OFFSET=1 and STRIDE=3 above ... even tough stride is better a power of two!)
+  For clarity: the full matrix would look have looked like (for the
+  example of OFFSET=1 and STRIDE=3 above ... even tough stride is
+  better a power of two!)
 
-Mabc=[
-     [A1-1,A2-1,..,An-1],       I
-     [A1-2,A2-2,..,An-2],       I
-             ...                I  cdataT
-     [A1-l,A2-l,..,An-l],       I
+  Mabc=[
+       [A1-1,A2-1,..,An-1],       I
+       [A1-2,A2-2,..,An-2],       I
+               ...                I  cdataT
+       [A1-l,A2-l,..,An-l],       I
 
-     [B1-1,B2-1,..,Bn-1],
-     [B1-2,B2-2,..,Bn-2],
-             ...
-     [B1-l,B2-l,..,Bn-l],
+       [B1-1,B2-1,..,Bn-1],
+       [B1-2,B2-2,..,Bn-2],
+               ...
+       [B1-l,B2-l,..,Bn-l],
 
-     [C1-1,C2-1,..,Cn-1],
-     [C1-2,C2-2,..,Cn-2],
-             ...
-     [C1-l,C2-l,..,Cn-l]
-     ]
+       [C1-1,C2-1,..,Cn-1],
+       [C1-2,C2-2,..,Cn-2],
+               ...
+       [C1-l,C2-l,..,Cn-l]
+       ]
 
-The next step is now to take the FFT over rows above and mutliply by
-the phase factor calculated in this function.  Finally, the data is
-transposed a 2nd time.
+   The next step is now to take the FFT over rows above and mutliply by
+   the phase factor calculated in this function.  Finally, the data is
+   transposed a 2nd time.
 
-Note: Here the function DoubleFFT1 ends (i.e. with the transpose of
-the blocks above. This is done to allow for rearranging the blocks in
-case they were written to disk. Afterwards DoubleFFT2 picks up again.
+   Note: Here the function DoubleFFT1 ends (i.e. with the transpose of
+   the blocks above. This is done to allow for rearranging the blocks in
+   case they were written to disk. Afterwards DoubleFFT2 picks up again.
 
-The matrix then looks like (if the blocks were merged, which is
-essentially also a transpose...)
+   The matrix then looks like (if the blocks were merged, which is
+   essentially also a transpose...)
 
-Mabc2=[
-     [A1-1,A1-2,..,A1-l,B1-1,..,B1-l,C1-1,..,C1-l],     I   tmpspec
-     [A2-1,A2-2,..,A2-l,B2-1,..,B2-l,C2-1,..,C2-l],     I
-     ...
-     now take only n/stride rows per memory chunk
-     ...
-     [An-1,An-2,..,An-l,Bn-1,..,Bn-l,Cn-1,..,Cn-l],
-     ]
+   Mabc2=[
+          [A1-1,A1-2,..,A1-l,B1-1,..,B1-l,C1-1,..,C1-l],     I   tmpspec
+          [A2-1,A2-2,..,A2-l,B2-1,..,B2-l,C2-1,..,C2-l],     I
+          ...
+          now take only n/stride rows per memory chunk
+          ...
+          [An-1,An-2,..,An-l,Bn-1,..,Bn-l,Cn-1,..,Cn-l],
+         ]
 
-where one now needs to split the matrix again (after n/stride rows each) to
-work with the same memory size.
+   where one now needs to split the matrix again (after n/stride rows each) to
+   work with the same memory size.
 
-In a second step (DoubleFFT2), the FFT is taken a second time (again
-over what are then the rows above) and the result is tranposed a last time,
-giving the final spectrum (with gaps, if the blocks are not properly rearranged again).
+   In a second step (DoubleFFT2), the FFT is taken a second time (again
+   over what are then the rows above) and the result is tranposed a last time,
+   giving the final spectrum (with gaps, if the blocks are not properly rearranged again).
 
-Mfinal=[
-     [A1-1,A2-1,..,An-1],      (specT: only first nblock_section columns)
-     [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and
+   Mfinal=[
+           [A1-1,A2-1,..,An-1],      (specT: only first nblock_section columns)
+           [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and
              ...                        nblock_section columns
-     [A1-l,A2-l,..,An-l],
-     [B1-1,B2-1,..,Bn-1],
-     [B1-2,B2-2,..,Bn-2],
-             ...
-     [B1-l,B2-l,..,Bn-l]]
-     [C1-1,C2-1,..,Cn-1],
-     [C1-2,C2-2,..,Cn-2],
-             ...
-     [C1-l,C2-l,..,Cn-l]
-     ]
+           [A1-l,A2-l,..,An-l],
+           [B1-1,B2-1,..,Bn-1],
+           [B1-2,B2-2,..,Bn-2],
+                   ...
+           [B1-l,B2-l,..,Bn-l]]
+           [C1-1,C2-1,..,Cn-1],
+           [C1-2,C2-2,..,Cn-2],
+                   ...
+           [C1-l,C2-l,..,Cn-l]
+          ]
 
+   Example:
+   #Input parameters
+   ncolumns = 128
+   nrows = 1024  # = bigFFTblocksize / ncolumns
+   bigFFTblocksize = ncolumns*nrows
 
-Example:
+   #Prepare some vectors
+   a=hArray(complex,[nrows, ncolumns])
+   a.random(-2.0,2.0)
+   b=hArray(complex,copy=a)
+   bT=b.transpose()
 
-#Input parameters
-ncolumns = 128
-nrows = 1024  # = bigFFTblocksize / ncolumns
-bigFFTblocksize = ncolumns*nrows
+   #Do only one big FFT
+   bigFFT=hArray(complex,[bigFFTblocksize])
+   bigFFT.fftw(a)
 
-#Prepare some vectors
-a=hArray(complex,[nrows, ncolumns])
-a.random(-2.0,2.0)
-b=hArray(complex,copy=a)
-bT=b.transpose()
+   #Do two FFTs with the steps described above
+   aT=hArray(a).transpose()
+   aT[...].fftw(aT[...])
+   aT.doublefftphasemul(bigFFTblocksize,nrows,ncolumns,0)
+   a.transpose(aT)
+   a[...].fftw(a[...])
+   aT.transpose(a)
 
-#Do only one big FFT
-bigFFT=hArray(complex,[bigFFTblocksize])
-bigFFT.fftw(a)
+   #Do the steps just above in one go
+   bT.doublefft(b,bigFFTblocksize,nrows,ncolumns,0)
 
-#Do two FFTs with the steps described above
-aT=hArray(a).transpose()
-aT[...].fftw(aT[...])
-aT.doublefftphasemul(bigFFTblocksize,nrows,ncolumns,0)
-a.transpose(aT)
-a[...].fftw(a[...])
-aT.transpose(a)
-
-#Do the steps just above in one go
-bT.doublefft(b,bigFFTblocksize,nrows,ncolumns,0)
-
--> bigFFT, aT, & bT all contain the same spectra
-
+   -> bigFFT, aT, & bT all contain the same spectra
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger full_size,  const HInteger nblocks, const HInteger blocklen, const HInteger offset)
@@ -902,7 +919,8 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory
+
+//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDoubleFFT1
 //-----------------------------------------------------------------------
@@ -919,9 +937,11 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See DoubleFFT for description!
+  Description:
+  NOTE: here is output is in the input vector ``vecin`` - vecout is just a scratch vector
 
-NOTE: here is output is in the input vector "vecin" - vecout is just a scratch vector
+  See also:
+  hDoubleFFT
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger full_size,  const HInteger nblocks, const HInteger blocklen, const HInteger offset)
@@ -946,7 +966,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory
+//$DOCSTRING: Performs two subsequent FFTs to obtain a spectrum with higher resolution, allowing one to operate only on a fraction of the data in memory.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDoubleFFT2
 //-----------------------------------------------------------------------
@@ -961,16 +981,18 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See DoubleFFT for description!
+  See also:
+  hDoubleFFT
 
-    cdataT[offset].doublefft(cdata[offset],fullsize,nblocks,blocklen,offset)
+  Example:
+  >>> cdataT[offset].doublefft(cdata[offset],fullsize,nblocks,blocklen,offset)
 
-    is the same as:
+  is the same as:
 
-    cdataT[offset].doublefft1(cdata[offset],fullsize,nblocks,blocklen,offset)
-    cdataT[offset].doublefft2(cdata[offset],nblocks,blocklen)
+  >>> cdataT[offset].doublefft1(cdata[offset],fullsize,nblocks,blocklen,offset)
+  >>> cdataT[offset].doublefft2(cdata[offset],nblocks,blocklen)
 
-    but result is in cdata (and not cdataT)
+  but result is in cdata (and not cdataT)
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger nblocks, const HInteger blocklen)
