@@ -162,12 +162,12 @@ class WrapperBlock():
         #                                                  Substitutions
 
         # Substitute DOCSTRING
-        if (self.doc.summary() != ""):
-            line = re.sub("\$DOCSTRING", self.doc.summary(), line)
+        if (self.doc.getSummary() != ""):
+            line = re.sub("\$DOCSTRING", self.doc.getSummary(), line)
 
         # Substitute HFPP_FUNC_NAME
-        if (self.doc.name() != ""):
-            line = re.sub("HFPP_FUNC_NAME", self.doc.name(), line)
+        if (self.doc.getName() != ""):
+            line = re.sub("HFPP_FUNC_NAME", self.doc.getName(), line)
 
         # ______________________________________________________________
         #                                                       Comments
@@ -203,15 +203,16 @@ class WrapperBlock():
                 return
 
             # Check for redundant (superfluous) comments
-            if (re.match("\s*.brief.*", line) is not None):
-                #print "Brief comment found."
+            if (re.match("\s*.brief.*", line)):
                 return
-            if (re.match(".*\$PARDOCSTRING.*", line) is not None):
+            if (re.match(".*\$PARDOCSTRING.*", line)):
                 return
 
-            #print line.strip("\n")
+            # Add line to documentation
+            self.doc.parseDocLine(line)
+
             # Add comment line to examples
-            self.doc.addExample(line.strip())
+            # self.doc.addExample(line.strip())
             return
 
         # ______________________________________________________________
@@ -231,7 +232,7 @@ class WrapperBlock():
         """
         inDoc = False
 
-        sphinxDoc = self.doc.getSphinxDoc()
+        sphinxDoc = "" # Disabled writing of sphinxDoc in cc files
         pythonDocStatements = self.doc.getPythonDocStatements()
         doxDoc = self.doc.getDoxygenDoc()
 
@@ -243,7 +244,7 @@ class WrapperBlock():
                 # In iterator blocks: replace iterator variable
                 if (iter_var is not None):
                     line = iter_subst(iter_var, iter_val, line)
-                    sphinxDoc = ""
+                    sphinxDoc = iter_subst(iter_var, iter_val, sphinxDoc)
                     pythonDocStatements = iter_subst(iter_var, iter_val, pythonDocStatements)
                     doxDoc = iter_subst(iter_var, iter_val, doxDoc)
 
@@ -313,11 +314,13 @@ class DocumentationBlock():
         """
         self._name = ""
         self._summary = ""
+        self._sectionType = "Dump"
+        self._docIndent = 0
         self._parameters = []
         self._description_lines = []
-        self._seealso_list = []
+        self._reference_list = []
         self._example_lines = []
-        self._misc_lines = []
+        self._dump_lines = []
 
 
     # ______________________________________________________________________
@@ -345,6 +348,80 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
+    #                                                  Documentation parsing
+
+    def parseDocLine(self,line):
+        """
+        Add a documentation line to the documentation section of the
+        current sectionType.
+        """
+        sectionChanged = self.setDocSection(line)
+
+        if (not sectionChanged):
+            sectionType = self.getDocSection()
+
+            # Catch dump mode
+            if (sectionType == "Dump"):
+                self.addDump(line)
+                return
+
+            if (sectionType == "Description"):
+                self.addDescription(line)
+                return
+            elif (sectionType == "Reference"):
+                self.addReference(line)
+                return
+            elif (sectionType == "Example"):
+                self.addExample(line)
+                return
+
+
+    def setDocSection(self, line):
+        """
+        Set the sectiontype within the documentation.
+        """
+        # Ignore documentation sections when dumping documentation
+        # Dump prevents the interpretationof other sectioning types
+        if (self.getDocSection() == "Dump"):
+            return False
+
+        line_content = line.strip()
+
+        if (line_content == "Description:"):
+            self._sectionType = "Description"
+            return True
+        elif ((line_content == "See also:") or
+              (line_content == "Reference:") or
+              (line_content == "References:")):
+            self._sectionType = "Reference"
+            return True
+        elif ((line_content == "Example:") or
+              (line_content == "Examples:")):
+            self._sectionType = "Example"
+            return True
+
+        return False
+
+
+    def formatDocSection(self, title):
+        """
+        Get the documentation section title in a Sphinx parsable format.
+        """
+        result = ""
+
+        result += "**" + title.strip() + "**" + r"\n"
+
+        return result
+
+
+    def getDocSection(self):
+        """
+        Return the current documentation sectionType.
+        """
+        return self._sectionType
+
+
+    # ______________________________________________________________________
     #                                                   Name of the function
     def setName(self, name="[empty]"):
         """
@@ -356,29 +433,32 @@ class DocumentationBlock():
         self._name = name_checked
 
 
-    def name(self):
+    def getName(self):
         """
         Return the name attribute.
         """
         return self._name
 
 
-    # ______________________________________________________________________
-    #                                                Summary of the function
-    def setSummary(self, summary="[empty]"):
+    def formatSyntax(self):
         """
-        Set the summary of the block.
+        Return the syntax of the command in a Sphinx parsable format.
         """
-        summary_checked = self.checkSyntax(summary)
+        result = ""
 
-        self._summary = summary_checked
+        result += self.getName()
 
+        parameters = self.getParameters()
+        result += "("
+        if parameters:
+            for i in range(len(parameters)):
+                par_name = parameters[i][0]
+                result += par_name
+                if (i < len(parameters)-1):
+                    result += ", "
+        result += ")"
 
-    def summary(self):
-        """
-        Return the summary attribute.
-        """
-        return self._summary
+        return result
 
 
     # ______________________________________________________________________
@@ -393,12 +473,48 @@ class DocumentationBlock():
         self._parameters.append([name_checked, description_checked])
 
 
-    def parameters(self):
+    def formatParameters(self):
+        """
+        Put the parameter list in a parsable Sphinx format.
+        """
+        result = ""
+
+        for par in self.getParameters():
+            result += "*" + par[0] + "* " + par[1] + r"\n\n"
+
+        return result
+
+
+    def getParameters(self):
         """
         Return the parameter description.
         """
         return self._parameters
 
+
+    # ______________________________________________________________________
+    #                                                Summary of the function
+    def setSummary(self, summary="[empty]"):
+        """
+        Set the summary of the block.
+        """
+        summary_checked = self.checkSyntax(summary)
+
+        self._summary = summary_checked
+
+
+    def formatSummary(self):
+        """
+        Put the function summary in a Sphinx parsable format.
+        """
+        return self.getSummary()
+
+
+    def getSummary(self):
+        """
+        Return the summary attribute.
+        """
+        return self._summary
 
     # ______________________________________________________________________
     #                                            Description of the function
@@ -411,13 +527,22 @@ class DocumentationBlock():
         pass
 
 
-    def description(self):
+    def formatDescription(self):
+        """
+        Put the function description in a Sphinx parsable format
+        """
+        result = "[no formatted description]"
+
+        # TODO: Add formatting
+
+        return result
+
+
+    def getDescription(self):
         """
         Return the function description.
         """
-        # TODO: add implementation
-
-        pass
+        return self._description_lines
 
 
     # ______________________________________________________________________
@@ -431,12 +556,22 @@ class DocumentationBlock():
         pass
 
 
-    def reference(self):
+    def formatReference(self):
+        """
+        Put the references in a Sphinx parsable format.
+        """
+        result = "[no formatted references]"
+
+        # TODO: Add formatting
+
+        return result
+
+
+    def getReference(self):
         """
         Return the refernces to other functions.
         """
-        # TODO: add implementation
-        pass
+        return self._reference_list
 
 
     # ______________________________________________________________________
@@ -450,7 +585,18 @@ class DocumentationBlock():
         self._example_lines.append(example_checked)
 
 
-    def example(self):
+    def formatExample(self):
+        """
+        Put example documentation in a Sphinx parsable format.
+        """
+        result = "[no formatted example]"
+
+        # TODO: Add formatting
+
+        return result
+
+
+    def getExample(self):
         """
         Return example.
         """
@@ -459,22 +605,38 @@ class DocumentationBlock():
 
     # ______________________________________________________________________
     #                               Additional documentation of the function
-    def addAdditionalDocumentation(self, additionalDocumentation):
+    def addDump(self, dump):
         """
-        Add additional documentation of the function.
+        Dump a line of documentation of the function.
         """
-        # TODO: add implementation
+        dump_line = dump.rstrip()
 
-        pass
+        self._dump_lines.append(dump_line)
 
 
-    def additionalDocumentation(self):
+    def formatDump(self):
         """
-        return the additional documentation.
+        Put the documentation dump in a Sphinx parsable format.
         """
-        # TODO: add implementation
+        result = ""
+        indent = "  "
 
-        pass
+        result += r"::\n"
+
+        for line in self.getDump():
+            result += indent + line + r"\n"
+
+        result += r"\n"
+
+        return result
+
+
+    def getDump(self):
+        """
+        Return the additional documentation.
+        """
+        return self._dump_lines
+
 
     # ______________________________________________________________________
     #                                                          Add attribute
@@ -496,10 +658,10 @@ class DocumentationBlock():
         """
         result = ""
 
-        result += "from _hftools import %s\n" %(self.name())
-        result += "doc_temp = %s.__doc__.splitlines()[-1] + \"\\n\\n\"\n" %(self.name())
-        result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.name(), self.getSphinxDoc())
-        result += "__all__.append(\'%s\')\n" %(self.name())
+        result += "from _hftools import %s\n" %(self.getName())
+        result += "doc_temp = %s.__doc__.splitlines()[-1] + \"\\n\\n\"\n" %(self.getName())
+        result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.getName(), self.getSphinxDoc())
+        result += "__all__.append(\'%s\')\n" %(self.getName())
 
         return result
 
@@ -512,40 +674,35 @@ class DocumentationBlock():
         """
         result = ""
 
-        # Function name
-        result += self.name() + "("
-        parameters = self.parameters()
-        if (len(parameters) > 0):
-            for i in range(len(parameters)):
-                par_name = parameters[i][0]
-                result += par_name
-                if (i < len(parameters)-1):
-                    result += ", "
-        result += ")\\n\\n"
+        # Function name + parameters
+        result += self.formatSyntax() + r"\n"
 
-        # Brief function description
-        result += self.summary() + "\\n"
+        # Brief function description (summary)
+        result += r"\n" + self.formatSummary() + r"\n"
 
         # Parameter description
-        if (len(self.parameters()) > 0):
-            result += "Parameters:\\n"
-            for par in parameters:
-                result += "*" + par[0] + "* " + par[1] + "\\n"
+        if self.getParameters():
+            result += r"\n" + self.formatDocSection("Parameters") + r"\n"
+            result += self.formatParameters() + r"\n"
 
         # Description
-        # -- empty --
+        if self.getDescription():
+            result += r"\n" + self.formatDocSection("Description") + r"\n"
+            result += self.formatDescription() + r"\n"
 
         # References
-        # -- empty --
+        if self.getReference():
+            result += r"\n" + self.formatDocSection("Reference") + r"\n"
+            result += self.formatReference() + r"\n"
 
         # Examples
-        if (len(self.example()) > 0):
-            result += "\\nExamples::\\n"
-            for line in self.example():
-                result += "  " + line.strip() + "\\n"
+        if self.getExample():
+            result += r"\n" + self.formatDocSection("Example") + r"\n"
+            result += self.formatExample() + r"\n"
 
         # Additional documentation
-
+        if self.getDump():
+            result += self.formatDump() +r"\n"
 
         return result
 
@@ -559,9 +716,9 @@ class DocumentationBlock():
         result = ""
 
         # Function name
-        result += self.name() + "("
-        parameters = self.parameters()
-        if (len(parameters) > 0):
+        result += self.getName() + "("
+        parameters = self.getParameters()
+        if parameters:
             for i in range(len(parameters)):
                 par_name = parameters[i][0]
                 result += par_name
@@ -570,18 +727,20 @@ class DocumentationBlock():
         result += ")\n\n"
 
         # Brief summary
-        result += "\\brief %s\n\n" %(self.summary())
+        result += "\\brief %s\n\n" %(self.getSummary())
 
         # Parameter description
-        for par in self.parameters():
+        for par in self.getParameters():
             result += "\\param %s -- %s\n" %(par[0], par[1])
 
         # Examples
         result += "\n"
-        for line in self._example_lines:
-            result += line
+        if self.getExample():
+            for line in self.getExample():
+                result += line + "\n"
 
         return result
+
 
 
 ## =============================================================================
@@ -694,7 +853,7 @@ def parseFile(input_filename, output_filename, options):
     for line in input_file:
         # Check definition file (open if filename is set)
         m = re.match("^\/\/\$FILENAME: HFILE=(.*)", line)
-        if ((m is not None) & (def_file is None)):
+        if (m and (not def_file)):
             def_filename = m.group(1) + ".latest"
             def_file = open(def_filename, 'w')
             if (options.verbose):
