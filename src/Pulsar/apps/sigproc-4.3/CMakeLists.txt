@@ -386,7 +386,9 @@ foreach (src ${sigproc_fc_binaries})
   target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${FFTW3_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm} ${PGPLOT_CPGPLOT_LIBRARY})
 endforeach (src)
 
-set (CMAKE_Fortran_COMPILER g77)
+#set (CMAKE_Fortran_COMPILER g77)
+set (CMAKE_Fortran_COMPILER gfortran)
+
 
 IF(NOT CMAKE_Fortran_LINK_EXECUTABLE)
   SET(CMAKE_Fortran_LINK_EXECUTABLE
