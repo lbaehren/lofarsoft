@@ -69,16 +69,16 @@ using namespace std;
 #define HFPP_PARDEF_2 (HInteger)(nfreq)()("Number of frequency bins per antenna.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
-  hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  The length of the ccm vector is N*(N-1)/2 * N_freq, where N is the
-  number of antennas and N_freq the number of frequency bins per
-  antenna. The length of the (input) vector is then N*N_freq.
+  Description:
+  The length of the ccm vector is ``N*(N-1)/2 * N_freq``, where ``N`` is the
+  number of antennas and ``N_freq`` the number of frequency bins per
+  antenna. The length of the (input) vector is then ``N*N_freq``.
 
+  Usage:
+  hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter ccm, const Iter ccm_end,
