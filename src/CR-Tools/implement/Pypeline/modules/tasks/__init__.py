@@ -148,6 +148,13 @@ next calling of this parameter. If ws.update was not called explicitly
 after using del (instead of tdel) then parameters which par depends on
 might still have their old value!)
 
+ATTENTION: If you use a dict, array or vector as input parameter (or
+anything non-atomic) and you modify the elements in the array, then
+the task has no chance of knowing that and the next time you start the
+task, the input has changed. So, always COPY from an input array to a
+work vector if you need to make such modifications, don't just assign
+them the input array (you will just create a reference in this case)!
+
 Basic logging and performance evaluation is not yet built in, but that
 is relatively easy to do...
 

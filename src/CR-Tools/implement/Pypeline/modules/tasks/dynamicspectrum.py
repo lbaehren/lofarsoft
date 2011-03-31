@@ -162,6 +162,8 @@ class DynamicSpectrum(tasks.Task):
         "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename)+".dynspec"+self.tmpfileext,
                          doc:"Complete filename including directory to store the final spectrum."},
 
+        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
+
         "quality_db_filename":{default:"qualitydatabase",
                                doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
 
@@ -329,7 +331,8 @@ class DynamicSpectrum(tasks.Task):
         self.dynspec.par.cleanspec=self.cleanspec
         self.updateHeader(self.dynspec,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_t="delta_t_used",delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
         self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
-
+        dataok=True
+        
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         if self.doplot:
@@ -351,23 +354,24 @@ class DynamicSpectrum(tasks.Task):
                 for nchunk in range(self.nchunks):
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
                     self.data[...].read(self.datafile,"Fx",blocks)
-                    self.count=len(self.quality)
-                    self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
-                    if not self.quality_db_filename=="":
-                        qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
-                    mean+=self.quality[self.count]["mean"]
-                    rms+=self.quality[self.count]["rms"]
-                    npeaks+=self.quality[self.count]["npeaks"]
-                    dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
+                    if self.qualitycheck:
+                        self.count=len(self.quality)
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
+                        if not self.quality_db_filename=="":
+                            qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
+                        mean+=self.quality[self.count]["mean"]
+                        rms+=self.quality[self.count]["rms"]
+                        npeaks+=self.quality[self.count]["npeaks"]
+                        dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
                     if not dataok:
                         print " # Data flagged!"
                         self.nspectraflagged[nchunk]+=1
                     else:
                         self.nspectraadded[nchunk]+=1
-                        if not antenna in self.antennas_used:
+                        if not antennaID in self.antennas_used:
                             self.antennas_used.add(antennaID)
                             self.nofAntennas+=1
-                        if self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
+                        if self.qualitycheck and self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.data.randomizepeaks(lower_limit,upper_limit)
@@ -389,18 +393,19 @@ class DynamicSpectrum(tasks.Task):
                     self.cleanspec.copy(self.dynspec)
                     self.cleanspec /= self.avspec
                     self.dynplot(self.dynspec)
-                mean/=self.nchunks
-                rms/=self.nchunks
-                self.mean_antenna[self.nantennas_total]=mean
-                self.rms_antenna[self.nantennas_total]=rms
-                self.npeaks_antenna[self.nantennas_total]=npeaks
-                if not self.quality_db_filename=="":
-                    self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-                    l={"mean":mean,"rms":rms,"npeaks":npeaks}
-                    f=open(self.quality_db_filename+".py","a")
-                    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
-                    f.close()
-                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum(),l
+                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
+                if self.qualitycheck:
+                    mean/=self.nchunks
+                    rms/=self.nchunks
+                    self.mean_antenna[self.nantennas_total]=mean
+                    self.rms_antenna[self.nantennas_total]=rms
+                    self.npeaks_antenna[self.nantennas_total]=npeaks
+                    if not self.quality_db_filename=="":
+                        self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
+                        print "#          mean =",mean,"rms =",rms,"npeaks =",npeaks
+                        f=open(self.quality_db_filename+".py","a")
+                        f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
+                        f.close()
                 self.nantennas_total+=1
             print "# End File",str(self.file_start_number)+":",fname
             self.avspec.fill(0.0)
@@ -411,17 +416,18 @@ class DynamicSpectrum(tasks.Task):
             self.dynspec.write(self.spectrum_file)
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
-        self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
-        self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
-        self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
-        self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
-        self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
-        self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
-        self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
-        print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
-        print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
-        print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
-        print "Quality factor =",self.homogeneity_factor * 100,"%"
+        if self.qualitycheck:
+            self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
+            self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
+            self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
+            self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
+            self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
+            self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
+            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
+            print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
+            print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
+            print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
+            print "Quality factor =",self.homogeneity_factor * 100,"%"
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '184 - Mean=  3.98, RMS=...'"
         print "To read back the spectrum type: dsp=hArrayRead('"+self.spectrum_file+"')"

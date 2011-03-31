@@ -40,6 +40,7 @@
 
 #include "core.h"
 #include "mArray.h"
+#include "mVector.h"
 #include "mMath.h"
 
 #include "casa/BasicSL/Constants.h"
@@ -121,7 +122,7 @@ inline T HFPP_FUNC_NAME(const T val)
   $PARDOCSTRING
 
   Example:
-  >>> sqrtAbs(-4) -> 2
+  sqrtAbs(-4) -> 2
 */
 template <class T>
 inline T HFPP_FUNC_NAME(const T val){return sqrt(abs(val));}
@@ -613,7 +614,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the input/output vector. If the second operand vector is shorter it will be applied multiple times.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different types. Looping will be done over the first argument, i.e. the input/output vector. If the second operand vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}Add
 //-----------------------------------------------------------------------
@@ -698,7 +699,6 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   while ((it1!=vec1_end) && (itout!=vec_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
-	if (itout==vec_end) itout=vec;
     if (it2==vec2_end) it2=vec2;
   };
 }
@@ -3782,6 +3782,71 @@ vector<HNumber> HFPP_FUNC_NAME (const HInteger wlen, const hWEIGHTS wtype){
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input and Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(weights)()("Weight vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+Will return a vector where each element is replaced by the sum of its
+neighbours multiplied with the weights vector. The middle of the
+weightsvector (usually its peak) is at len(weights)/2. It is assumed
+that the wights are normalized (i.e. sum(weights)=1).
+
+*/
+
+template <class Iter, class Iter2>
+void HFPP_FUNC_NAME (const Iter  vec,
+                     const Iter  vec_end,
+                     const Iter2 weights,
+                     const Iter2 weights_end)
+{
+  HInteger wlen=(weights_end-weights);
+  /* Index of the central element of the weights vector (i.e., where it
+     typically would peak) */
+  HInteger middle=wlen/2;
+  HNumber temp;
+
+  std::vector<IterValueType> buffer_vec(wlen); // will temporarily store input data
+  Iter buffer(buffer_vec.begin()),buffer_start(buffer_vec.begin()),buffer_end(buffer_vec.end());
+
+  Iter  it(vec), last(vec_end-1), it_plus_middle(vec+middle);
+  Iter2 wit;
+
+  if (vec>=vec_end) return;
+  if (weights>=weights_end) return;
+
+  //  hCopy(&(*(buffer_start+middle)),&(*buffer_end),&(*vec),&(*(vec+wlen-middle))); //initialize scratch vector
+  //hFill(&(*buffer_start),&(*(buffer_start+middle)),*it); //initialize scratch vector
+  hCopy(buffer_start+middle,buffer_end,vec,vec+wlen-middle); //initialize scratch vector
+  hFill(buffer_start,buffer_start+middle,*it); //initialize scratch vector
+  while (it!=vec_end) {
+    wit=weights; // weight iterators set to beginning of weights
+    temp = 0.0;
+    while (wit!=weights_end) {
+      temp += hfcast<HNumber>((*wit) * (*buffer));
+      ++wit; ++buffer;
+      if (buffer==buffer_end) buffer=buffer_start;
+    };
+    *it=hfcast<IterValueType>(temp);
+    ++it; 
+    if (it_plus_middle != last) ++it_plus_middle;
+    *buffer = *it_plus_middle;
+    ++buffer; //advance ring buffer
+    if (buffer==buffer_end) buffer=buffer_start; //wrap if necessary
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Calculate the running average of an input vector using a weight vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRunningAverage
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(weights)()("Weight vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -3852,11 +3917,15 @@ void HFPP_FUNC_NAME (const DataIter  odata,
   ============= ============================================================
   ``FLAT``      All have the same value
   ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
-  ``GAUSSIAN``  Gaussian distribution falling of to 2 sigma at the ends
+  ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
   ============= ============================================================
 
   Example:
   in_array.runningaverage(array_out,7,hWEIGHTS.GAUSSIAN)
+
+  x=hArray([0.,1.,0.,3.,1.,3.,0.,2.,1.])
+  x.runningaverage(3,hWEIGHTS.FLAT)
+  x->[0.333333,0.333333,1.33333,1.33333,2.33333,1.33333,1.66667,1,1.33333]
 */
 template <class DataIter>
 void HFPP_FUNC_NAME (const DataIter odata,
@@ -3871,6 +3940,45 @@ void HFPP_FUNC_NAME (const DataIter odata,
 							odata_end,
 							idata,
 							idata_end,
+							weights.begin(),
+							weights.end());
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculate the running average of an input vector using different weighting schemes.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRunningAverage
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+
+  Available Weights:
+  ============= ============================================================
+  ``FLAT``      All have weight the same value
+  ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
+  ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
+  ============= ============================================================
+
+  Example:
+  in_array.runningaverage(7,hWEIGHTS.GAUSSIAN)
+*/
+template <class DataIter>
+void HFPP_FUNC_NAME (const DataIter odata,
+		     const DataIter odata_end,
+		     const HInteger wlen,
+		     const hWEIGHTS wtype)
+{
+  vector<HNumber> weights = hWeights(wlen, wtype);
+  hRunningAverage<DataIter, vector<HNumber>::iterator> (odata,
+							odata_end,
 							weights.begin(),
 							weights.end());
 }

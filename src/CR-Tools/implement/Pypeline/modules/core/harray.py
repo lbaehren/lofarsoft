@@ -108,7 +108,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
         if name==None: name=properties.getKey("name")
         if dimensions==None: dimensions=properties.shape()
         if units==None: units=(properties.getUnitPrefix(),properties.getUnitName())
-        par=properties.par.__dict__
+        if hasattr(properties,"par"):
+            par=properties.par.__dict__
     if Type==None: Type=float
     if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
@@ -305,6 +306,38 @@ def hArray_vec(self):
     beg=self.getBegin(); end=self.getEnd()
     if ((beg==0 )& (end==len(self))): return self.getVector()
     else: return self.getVector()[beg:end]
+
+def hArray_array(self):
+    """
+    array.array() -> hArray(array.vec,properties=array)
+
+    Retrieve the currently selected slice from the stored vector as an
+    array. If the entire array is to be returned a new hArray with
+    reference to the internal data vector is returned. Otherwise, if a
+    slice is active, an hArray with a copy of that slice is
+    returned. Use hArray(getVector(),...) to ensure you always get
+    only a reference to the vector.
+
+    NOTE: right now the dimensions for sliced arrays are not preserved
+    properly. Needs more work!
+
+
+    
+    Example:
+    x=hArray(int,[2,3,4],fill=range(6*4),name="test")
+    self=x[1,1:3]
+    """
+    if hasattr(self,"__slice__"):
+        dim=self.shape()
+        if type(self.__slice__[-1])==slice:
+            slc=hSliceToNormalValues(self.__slice__[-1],dim[len(self.__slice__)-1])
+            newdim=[slc.stop-slc.start]+dim[len(self.__slice__):]
+        else:
+            newdim=dim[len(self.__slice__):]
+        beg=self.getBegin(); end=self.getEnd()
+        return hArray(self.getVector()[beg:end],dimensions=newdim,properties=self)
+    else:
+        return hArray(self.getVector(),properties=self)
 
 def hArray_list(self):
     """
@@ -974,8 +1007,11 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     else:
         f.write("ha_slice = None\n")
     f.write("ha_varname = '" + varname+"'\n")
-    par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile)
-    f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
+    if hasattr(self,"par"):
+        par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile)
+        f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
+    else:
+        f.write('ha_parameters=None\n')
     f.close()
 
 def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
@@ -1053,8 +1089,11 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
         block=0
     else:
         dim=ha_dim
-    par=pickle.loads(ha_parameters)
-    par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
+    if ha_parameters:
+        par=pickle.loads(ha_parameters)
+        par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
+    else:
+        par=hArray_par()
     if ha_slice:
         ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)[ha_slice]
     else:
@@ -1134,8 +1173,9 @@ for v in hAllArrayTypes:
     setattr(v,"setPar",hArray_setPar)
     setattr(v,"shape",hArray_shape)
     setattr(v,"reshape",hArray_reshape)
-    setattr(v,"getDim",hArray_shape) # Depricated
-    setattr(v,"setDim",hArray_reshape) # Depricated
+    setattr(v,"getDim",hArray_shape) # Depriciated use shape
+    setattr(v,"setDim",hArray_reshape) # Depriciated
+    setattr(v,"array",hArray_array)
     setattr(v,"vec",hArray_vec)
     setattr(v,"val",hArray_val)
     setattr(v,"new",hArray_new)

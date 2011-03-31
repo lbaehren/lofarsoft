@@ -17,9 +17,10 @@ tpar randomize_peaks=False
 
 
 ------------------------------------------------------------------------
+tload "BeamFormer"
 file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
 tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
-tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
+tpar antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position"))))
 tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
 tpar cal_delays=dict(zip(file["antennaIDs"],[0,-2.3375e-08,-2.75e-09,-3.75e-09,-2.525e-08,-2.575e-08,1.3125e-08,-1.6875e-08]))
 tpar phase_center=[-22.1927,15.3167,0]
@@ -33,7 +34,6 @@ self=Task
 self.beams[...,0].nyquistswap(self.NyquistZone)
 fxb=hArray(float,[2,self.blocklen],name="Fx"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
 fxb[...].plot(clf=True); plt.show()
-
 
 """
 
@@ -173,6 +173,8 @@ class BeamFormer(tasks.Task):
 
         "doplot":{default:False,doc:"Plot current spectrum while processing."},
 
+        "plotspec":{default:True,doc:"If True plot the beamformed average spectrum at the end, otherwise the time series."},
+
         "plotlen":{default:2**12,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
 
         "plotskip":{default:1,doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
@@ -206,12 +208,14 @@ class BeamFormer(tasks.Task):
 
         "output_dir":{default:"",doc:"Directory where output file is to be written to."},
     
-        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".dynspec"+self.tmpfileext,
+        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".beams"+self.tmpfileext,
                          doc:"Filename (without directory, see output_dir) to store the final spectrum."},
 
-        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename)+".dynspec"+self.tmpfileext,
+        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
                          doc:"Complete filename including directory to store the final spectrum."},
-
+        
+        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
+        
         "quality_db_filename":{default:"qualitydatabase",
                                doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
 
@@ -287,7 +291,9 @@ class BeamFormer(tasks.Task):
 
         "phase_center_array":{default:lambda self:hArray(list(self.phase_center),name="Phase Center",units=("","m")),doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
         
-        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
+        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),min(self.maxchunklen,self.filesize/self.stride)),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
+
+#        "blocklen":{default:lambda self:min(2*int(round(1./self.delta_nu/self.samplerate/2)),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
 
         "block_duration":{default:lambda self:self.samplerate*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
         
@@ -347,7 +353,7 @@ class BeamFormer(tasks.Task):
 
         "beams":{workarray:True,
                  doc:"Output array containing the FFTed data for each beam.",default:lambda self:
-                 hArray(complex,[self.nbeams,self.nblocks,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
+                 hArray(complex,[self.nblocks,self.nbeams,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
 
         "pointingsXYZ":{default:lambda self:hArray(float,[self.nbeams,3],fill=[item for sublist in [convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"), doc:"Array of shape [nbeams,3] with x,y,z positions for each beam on the sky."},
 
@@ -391,6 +397,7 @@ class BeamFormer(tasks.Task):
         self.updateHeader(self.beams,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
 
+        dataok=True
         clearfile=True
         
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
@@ -413,17 +420,15 @@ class BeamFormer(tasks.Task):
                 antennaID=self.antennaIDs[iantenna]
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):"
 
-                self.antpos=self.antenna_positions[antennaID]
-                print "Antenna position =",self.antpos
-                self.antpos -= self.phase_center_array
-                print "Relative antenna position =",self.antpos
+                self.antpos=hArray(copy=self.antenna_positions[antennaID]); #print "Antenna position =",self.antpos
+                self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                 
                 #Calculate the geometrical delays needed for beamforming
                 hGeometricDelays(self.delays,self.antpos,self.pointingsXYZ, self.FarField)
 
                 #Add the cable/calibration delay
-                cal_delay=self.cal_delays.setdefault(antennaID,0.0); print "Delay =",cal_delay
-                self.delays+=cal_delay; print "Total delay =",self.delays
+                cal_delay=self.cal_delays.setdefault(antennaID,0.0); #print "Delay =",cal_delay
+                self.delays+=cal_delay; #print "Total delay =",self.delays
 
                 self.phases.delaytophase(self.frequencies,self.delays)
                 self.weights.phasetocomplex(self.phases)
@@ -432,23 +437,24 @@ class BeamFormer(tasks.Task):
                 for nchunk in range(self.nchunks):
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
                     self.data[...].read(self.datafile,"Fx",blocks)
-                    self.count=len(self.quality)
-                    self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
-                    if not self.quality_db_filename=="":
-                        qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
-                    mean+=self.quality[self.count]["mean"]
-                    rms+=self.quality[self.count]["rms"]
-                    npeaks+=self.quality[self.count]["npeaks"]
-                    dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
+                    if self.qualitycheck:
+                        self.count=len(self.quality)
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
+                        if not self.quality_db_filename=="":
+                            qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
+                            mean+=self.quality[self.count]["mean"]
+                            rms+=self.quality[self.count]["rms"]
+                            npeaks+=self.quality[self.count]["npeaks"]
+                            dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
                     if not dataok:
                         print " # Data flagged!"
                         self.nspectraflagged[nchunk]+=1
                     else:
                         self.nspectraadded[nchunk]+=1
-                        if not antenna in self.antennas_used:
+                        if not antennaID in self.antennas_used:
                             self.antennas_used.add(antennaID)
                             self.nofAntennas+=1
-                        if self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
+                        if self.qualitycheck and self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.data.randomizepeaks(lower_limit,upper_limit)
@@ -459,58 +465,131 @@ class BeamFormer(tasks.Task):
                         if self.nofAntennas==1:
                             self.beams.fill(0)
                         elif self.nchunks>1:
-                            self.beams.readfilebinary(self.spectrum_file_bin,self.nchunks*self.chunklen*self.nbeams)
+                            self.beams.readfilebinary(self.spectrum_file_bin,nchunk*self.speclen*self.nbeams*self.nblocks)
                         self.beams *= (self.nspectraadded[nchunk]-1.0)/(self.nspectraadded[nchunk])
-                        self.beams[...].muladd(self.fftdata,self.weights[...])
-                        for b in range(self.nbeams):
-                            self.avspec[b].spectralpower(self.beams[b,...])
+                        self.beams[...].muladd(self.weights,self.fftdata[...])
+                        self.avspec.spectralpower(self.beams[...])
                         self.beams.write(self.spectrum_file,nblocks=self.nchunks,block=nchunk,clearfile=clearfile)
                         clearfile=False
-                    #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
-
+                        #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
                         if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
                             self.avspec[...,self.plot_start:self.plot_end].plot()
                             print "RMS of plotted spectra=",self.avspec[...,self.plot_start:self.plot_end].stddev()
                             plt.draw(); plt.show()
                      #End for nchunk
                 if self.doplot>1:
-                    self.avspec[...].plot()
-                mean/=self.nchunks
-                rms/=self.nchunks
-                self.mean_antenna[self.nantennas_total]=mean
-                self.rms_antenna[self.nantennas_total]=rms
-                self.npeaks_antenna[self.nantennas_total]=npeaks
-                if not self.quality_db_filename=="":
-                    self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-                    l={"mean":mean,"rms":rms,"npeaks":npeaks}
-                    f=open(self.quality_db_filename+".py","a")
-                    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
-                    f.close()
-                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum(),l
+                    self.avspec[...].plot();plt.draw();plt.show()
+                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
+                if self.qualitycheck:
+                    mean/=self.nchunks
+                    rms/=self.nchunks
+                    self.mean_antenna[self.nantennas_total]=mean
+                    self.rms_antenna[self.nantennas_total]=rms
+                    self.npeaks_antenna[self.nantennas_total]=npeaks
+                    if not self.quality_db_filename=="":
+                        self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
+                        print "#          mean =",mean,"rms =",rms,"npeaks =",npeaks
+                        f=open(self.quality_db_filename+".py","a")
+                        f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
+                        f.close()
                 self.nantennas_total+=1
             print "# End File",str(self.file_start_number)+":",fname
             self.updateHeader(self.beams,["nofAntennas","nspectraadded","filenames","antennas_used"])
-#            self.beams.write(self.spectrum_file)
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
-        self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
-        self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
-        self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
-        self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
-        self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
-        self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
-        self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
-        print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
-        print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
-        print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
-        print "Quality factor =",self.homogeneity_factor * 100,"%"
+        if self.qualitycheck:
+            self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
+            self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
+            self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
+            self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
+            self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
+            self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
+            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
+            print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
+            print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
+            print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
+            print "Quality factor =",self.homogeneity_factor * 100,"%"
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '184 - Mean=  3.98, RMS=...'"
-        print "To read back the spectrum type: dsp=hArrayRead('"+self.spectrum_file+"')"
-        print "To plot the spectrum, use 'Task.dynplot(dsp)'."
+        print "To read back the beam formed data type: bm=hArrayRead('"+self.spectrum_file+"')"
+        print "To calculate or plot the invFFTed times series of one block, use 'Task.tcalc(bm)' or 'Task.tplot(bm)'."
         if self.doplot:
-            self.avspec[...].plot()
+            self.tplot(plotspec=self.plotspec)
             plt.ion()
+
+    def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False):
+        """
+        Take the result of the BeamForm task, i.e. an array of
+        dimensions [self.nblocks,self.nbeams,self.speclen], do a
+        NyquistSwap, if necessary, and then an inverse FFT.
+
+        *beams* = None - Input array. Take self.beams from task, if None.
+        *block* = 0 - Which  block to plot, or Ellipsis ('...') for all
+        *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
+        *doabs* = True - Take the absolute of the timeseries before plotting.
+        *smooth* = 0 - If > 0 smooth data with a Gaussian kernel of that size.
+        *plotspec* = False - If True plot the average spectrum instead.
+
+        The final time series (all blocks) is stored in Task.tbeams.
+        """
+        if beams==None:
+            beams=self.beams
+        hdr=beams.getHeader()
+        if hdr.has_key("BeamFormer"):
+            if NyquistZone==None:
+                NyquistZone=hdr["BeamFormer"]["NyquistZone"]
+        if not plotspec:
+            self.tcalc(beams=beams,NyquistZone=NyquistZone,doabs=doabs,smooth=smooth)
+        if mosaic:
+            npanels=self.beams.shape()[-2]
+            width=int(ceil(sqrt(npanels)))
+            height=int(ceil(npanels/float(width)))
+            plt.clf()
+            for n in range(npanels):
+                plt.subplot(width,height,n)
+                if plotspec:
+                    beams.par.avspec[n].plot(clf=False,title=str(n)+".")
+                else:
+                    self.tbeams[block,n].plot(clf=False,title=str(n)+".")
+        else:
+            if plotspec:
+                beams.par.avspec[...].plot(clf=True)
+            else:
+                self.tbeams[block,...].plot(clf=True)
+        plt.show()
+
+    def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,smooth=0):
+        """
+        Calculate the time series after beamforming, i.e. take the
+        result of the BeamForm task, i.e. an array of dimensions
+        [self.nblocks,self.nbeams,self.speclen], do a NyquistSwap, if
+        necessary, and then an inverse FFT.
+
+        *beams* = None - Input array. Take self.beams from task, if None.
+        *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
+        *doabs* = False - Take the absolute of the timeseries, if True.
+        *smooth* = 0 - If > 0 smooth datat with a Gaussian kernel of that size.
+
+        The final time series (all blocks) is stored in Task.tbeams and returned.
+        """
+        if beams==None:
+            beams=self.beams
+        hdr=beams.getHeader()
+        if hdr.has_key("BeamFormer"):
+            if NyquistZone==None:
+                NyquistZone=hdr["BeamFormer"]["NyquistZone"]
+        dim=beams.getDim();blocklen=(dim[-1]-1)*2
+        self.beamscopy=hArray(dimensions=[dim[-3]*dim[-2],dim[-1]],copy=beams)
+        self.beamscopy[...].nyquistswap(self.NyquistZone)
+        self.tbeams2=hArray(float,[dim[-3]*dim[-2],blocklen],name="Fx")
+        self.tbeams=hArray(self.tbeams2.vec(),[dim[-3],dim[-2],blocklen],name="Fx")
+        self.tbeams2[...].invfftw(self.beamscopy[...])
+        self.tbeams /= blocklen
+        if doabs:
+            self.tbeams.abs()
+        if smooth>0:
+            self.tbeams[...].runningaverage(smooth,hWEIGHTS.GAUSSIAN)
+        return self.tbeams
 
     def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):
         """

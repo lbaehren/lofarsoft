@@ -112,24 +112,6 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory."),
 
         "doublefft":{doc:"if True split the FFT into two, thereby saving memory.", default:False},
-"""
-        "dynamicspectrum":{doc:"If true calculate a dynamic spectrum, where per time inetrval each spectrum is intergrated over nchunk spectra.", default:False},
-
-        "delta_t_dynspec":{default:lambda self:self.fullsize*self.delta_t,doc:"Time resolution of dynamic spectrum (if calculated). (output only, set nchunk!)",unit:"s"},
-
-        "integration_time":{default:0.001,doc:"Desired time resolution of dynamic spectrum.",unit:"s"},
-
-        "blocklen_time":{default:lambda self:self.blocklen*self.samplerate,doc:"Length of one block in time units. (output only, set nchunk!)",unit:"s"},
-
-        "dynspec_nspec_per_interval":{default: lambda ws:ceil(ws.nchunks*ws.blocklen_time/ws.integration_time)},
-
-
-        "dynspec_tlen":{default:lambda self:self.block*self.samplerate,doc:"Time resolution of dynamic spectrum (if calculated). (output only, set nchunk!)",unit:"s"},
-
-        "dynspec_maxtlen":{default:lambda self:self.fullsize*self.samplerate,doc:"Time resolution of dynamic spectrum (if calculated). (output only, set nchunk!)",unit:"s"},
-
-        "dynspec_max_nspec":{default: lambda ws:ws.fullsize*ws.nchunks},
-"""
 
         "delta_nu":{default:1000,doc:"Frequency resolution",unit:"Hz"},
 
@@ -155,6 +137,8 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         "spectrum_file":{default:lambda ws:(ws.filenames[0] if len(ws.filenames)>0 else "unknown")+".spec"+ws.tmpfileext,
                          doc:"Filename to store the final spectrum."},
+
+        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
 
         "quality_db_filename":{default:"qualitydatabase",
                                doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
@@ -413,7 +397,9 @@ class AverageSpectrum(tasks.Task):
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         clearfile=True
+        dataok=True
         initialround=True
+
         if self.doplot:
             plt.ioff()
 
@@ -446,19 +432,20 @@ class AverageSpectrum(tasks.Task):
                         else:
                             blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)
                             self.cdata[...].read(self.datafile,"Fx",blocks)
-                        self.count=len(self.quality)
-                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=False,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count))
-                        if not self.quality_db_filename=="":
-                            qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
-                        mean+=self.quality[self.count]["mean"]
-                        rms+=self.quality[self.count]["rms"]
-                        npeaks+=self.quality[self.count]["npeaks"]
-                        dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
+                        if self.qualitycheck:
+                            self.count=len(self.quality)
+                            self.quality.append(qualitycheck.CRQualityCheckAntenna(self.cdata,datafile=self.datafile,normalize=False,blockoffset=offset+nchunk*self.nsubblocks,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count))
+                            if not self.quality_db_filename=="":
+                                qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
+                            mean+=self.quality[self.count]["mean"]
+                            rms+=self.quality[self.count]["rms"]
+                            npeaks+=self.quality[self.count]["npeaks"]
+                            dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
                         if not dataok:
                             print " # Data flagged!"
                             break
                         #            print "Time:",time.clock()-self.t0,"s for reading."
-                        if self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
+                        if  self.qualitycheck and self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.cdata.randomizepeaks(lower_limit,upper_limit)
@@ -475,7 +462,7 @@ class AverageSpectrum(tasks.Task):
                     #print "Time:",time.clock()-self.t0,"s for 1st FFT now doing 2nd FFT."
                     if dataok:
                         self.nspectraadded+=1
-                        if not antenna in self.antennas_used:
+                        if not antennaID in self.antennas_used:
                             self.antennas_used.add(antennaID)
                             self.nofAntennas+=1
                         if self.doublefft:  # do second step of double fft, if required
@@ -533,32 +520,34 @@ class AverageSpectrum(tasks.Task):
                     else: #data not ok
                         self.nspectraflagged+=1
                         #print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
+                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged
+                if self.qualitycheck:
                     mean/=self.nchunks
                     rms/=self.nchunks
                     self.mean_antenna[self.nantennas_total]=mean
                     self.rms_antenna[self.nantennas_total]=rms
                     self.npeaks_antenna[self.nantennas_total]=npeaks
                     self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-                    l={"mean":mean,"rms":rms,"npeaks":npeaks}
+                    print "#          mean =",mean,"rms =",rms,"npeaks =",npeaks
                     f=open(self.quality_db_filename+".py","a")
                     f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
                     f.close()
-                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged,l
                 self.nantennas_total+=1
             print "# End File",str(self.file_start_number)+":",fname
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
-        self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
-        self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
-        self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
-        self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
-        self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
-        self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
-        self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
-        print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
-        print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
-        print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
-        print "Quality factor =",self.homogeneity_factor * 100,"%"
+        if self.qualitycheck:
+            self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
+            self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
+            self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
+            self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
+            self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
+            self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
+            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
+            print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
+            print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
+            print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
+            print "Quality factor =",self.homogeneity_factor * 100,"%"
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '184 - Mean=  3.98, RMS=...'"
         print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
