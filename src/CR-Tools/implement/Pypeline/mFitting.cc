@@ -118,16 +118,19 @@ gsl_vector * STL2GSL(const Iter vec, const Iter vec_end) {
 #define HFPP_PARDEF_2 (HInteger)(powers)()("Input vector with the powers to consider in the fitting. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  [x_0,x_1,x_2,...] -> [0,x_0,x_0**2,...,x_0**n,0,x_1,x_1**2,...,x_1**n]
-
-  n is the number of powers of the polynomial to fit,
-  i.e. len(powers). The length of the output vector is the length of
-  xvec*(n+1).
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: LinearFit
+  Description:
+  ``n`` is the number of powers of the polynomial to fit,
+  i.e. ``len(powers)``. The length of the output vector is the length
+  of ``xvec*(n+1)``.
+
+  See also:
+  LinearFit
+
+  Example:
+  [x_0,x_1,x_2,...] -> [0,x_0,x_0**2,...,x_0**n,0,x_1,x_1**2,...,x_1**n]
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
@@ -185,7 +188,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 // Begin k order spline
 //------------------------------------------------------------------------
 
-//$DOCSTRING: Calculate the X-Values matrix vector for the Basis Spline (BSpline) fitting routine, calculating essentially all powers of the input vector.
+//$DOCSTRING: Calculate the x-Values matrix vector for the Basis Spline (BSpline) fitting routine, calculating essentially all powers of the input vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSplineFitXValues
 //-----------------------------------------------------------------------
@@ -201,9 +204,11 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
   \brief $DOCSTRING
   $PARDOCSTRING
 
-Note: for k=2 you get a linear fit
+  Description:
+  Note: for ``k=2`` you get a linear fit.
 
-See also: BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
+  See also:
+  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -261,7 +266,8 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
+  See also:
+  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -586,7 +592,8 @@ Notes: 1) The w->knots vector must be initialized prior to calling
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalcMul
+  See also:
+  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -677,10 +684,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
-
-
-//$DOCSTRING: Do a basis spline fit to a data set (without weights) and return the coefficients and covariance matrix in two vectors. Returns the chi-square value of the fit.
+//$DOCSTRING: Do a basis spline fit to a data set (without weights) and return the coefficients and covariance matrix in two vectors.
 // Returns as function value a pointer to the bspline workspace that is needed by other functions.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSplineFit
@@ -699,7 +703,11 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalcAssign,  BSplineCalcAdd,  BSplineCalcMul
+  Description:
+  Returns the :math:`\\chi^2` value of the fit.
+
+  See also:
+  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalcAssign,  BSplineCalcAdd,  BSplineCalcMul
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(
@@ -784,15 +792,15 @@ HNumber HFPP_FUNC_NAME(
 #define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
 
   Usage:
   xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]:
   vecout.polynmomial(xvec,coeff,powers) -> [sum(C_0,C_1*x_0,C_2*x_0**2,...),sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n),...]
 
-  \brief $DOCSTRING
-  $PARDOCSTRING
-
-See also: LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul
+  See also:
+  LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(
@@ -854,6 +862,7 @@ void HFPP_FUNC_NAME(
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
 //$DOCSTRING: Calculates a polynomial from a vector of xvalues, coefficients, and powers multiplies it to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hPolynomialMul
@@ -865,21 +874,19 @@ void HFPP_FUNC_NAME(
 #define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-
-  Usage:
-
-  vecout.polynmomialmul(xvec,coeff,powers) -> vecout_0 *= [sum(C_0,C_1*x_0,C_2*x_0**2,...,C_n*x_0**n),sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n),...]
-
-  xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]
-
-
-  Same as hPolynomialMul, but multiply result to the output (i.e., use
-  *=). So, for a first iteration vecout has to be filled with 1.
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
+  Description:
+  Same as hPolynomialMul, but multiply result to the output (i.e., use
+  ``*=``). So, for a first iteration vecout has to be filled with 1.
+
+  Usage:
+  vecout.polynmomialmul(xvec,coeff,powers) -> vecout_0 *= [sum(C_0,C_1*x_0,C_2*x_0**2,...,C_n*x_0**n),sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n),...]
+  xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]
+
+  See also:
+  LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(
@@ -952,21 +959,19 @@ void HFPP_FUNC_NAME(
 #define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-
-  Usage:
-
-  vecout.polynmomialadd(xvec,coeff,powers) -> vecout += [sum(C_0,C_1*x_0,C_2*x_0**2,...),sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n),...]
-
-  xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]
-
-
-  Same as hPolynomialMul, but add result to the output (i.e., use
-  +=). So, for a first iteration vecout has to be filled with 1.
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
+  Description:
+  Same as ``hPolynomialMul``, but add result to the output (i.e., use
+  ``+=``). So, for a first iteration vecout has to be filled with 1.
+
+  Usage:
+  vecout.polynmomialadd(xvec,coeff,powers) -> vecout += [sum(C_0,C_1*x_0,C_2*x_0**2,...),sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n),...]
+  xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]
+
+  See also:
+  LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(
@@ -1029,7 +1034,7 @@ void HFPP_FUNC_NAME(
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Calculates a weight factor from an error for a fitting routine, i.e. w=1/Error**2.
+//$DOCSTRING: Calculates a weight factor from an error for a fitting routine, i.e. ``w=1/Error**2``.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hErrorsToWeights
 //-----------------------------------------------------------------------
@@ -1040,9 +1045,12 @@ void HFPP_FUNC_NAME(
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
-[x_0,x_1,x_2,...] -> [1/x_0**2,1/x_1**2,...]
 
-See also: hLinearFit, hLinearFitPolynomialX, hPolynomial
+  See also:
+  hLinearFit, hLinearFitPolynomialX, hPolynomial
+
+  Example:
+  [x_0,x_1,x_2,...] -> [1/x_0**2,1/x_1**2,...]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -1085,7 +1093,7 @@ void HFPP_FUNC_NAME(
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Do a linear fit (e.g. to an n-th order polynomial) to a data set provided a vector of weights and return the coefficients and covariance matrix in two vectors. Returns as function value the chi-square value of the fit.
+//$DOCSTRING: Do a linear fit (e.g. to an n-th order polynomial) to a data set provided a vector of weights and return the coefficients and covariance matrix in two vectors.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearFit
 //-----------------------------------------------------------------------
@@ -1101,7 +1109,11 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: hLinearFitPolynomialX,hPolynomial
+  Description:
+  Returns as function value the chi-square value of the fit.
+
+  See also:
+  hLinearFitPolynomialX,hPolynomial
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(
@@ -1164,7 +1176,7 @@ HNumber HFPP_FUNC_NAME(
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Do a linear fit (e.g. to an n-th order polynomial) to a data set (without weights) and return the coefficients and covariance matrix in two vectors. Returns as function value the chi-square value of the fit.
+//$DOCSTRING: Do a linear fit (e.g. to an n-th order polynomial) to a data set (without weights) and return the coefficients and covariance matrix in two vectors.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearFit
 //-----------------------------------------------------------------------
@@ -1179,7 +1191,11 @@ HNumber HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: hLinearFitPolynomialX,hPolynomial
+  Description:
+  Returns as function value the chi-square value of the fit.
+
+  See also:
+  hLinearFitPolynomialX, hPolynomial
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(
