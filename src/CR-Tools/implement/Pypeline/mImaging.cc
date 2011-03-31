@@ -85,30 +85,31 @@ using namespace casa;
   \brief $DOCSTRING
   $PARDOCSTRING
 
-Available Coordinate Types are:
+  Description:
+  Available Coordinate Types are:
 
-      -  Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
-      AzElHeight,
-      -  Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
-      AzElRadius,
-      -  Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-      Cartesian,
-      -  Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
-      Cylindrical,
-      -  Direction on the sky, \f$ \vec x = (Lon,Lat) \f$
-      Direction,
-      -  Direction on the sky with radial distance, \f$ \vec x = (Lon,Lat,R) \f$
-      DirectionRadius,
-      -  Frquency
-      Frequency,
-      -  Longitude-Latitude-Radius
-      LongLatRadius,
-      -  North-East-Height
-      NorthEastHeight,
-      -  Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
-      Spherical,
-      - Time
-      Time
+  -  Azimuth-Elevation-Height, ``\vec x = (Az,El,H)``
+  AzElHeight,
+  -  Azimuth-Elevation-Radius, ``\vec x = (Az,El,R)``
+  AzElRadius,
+  -  Cartesian coordinates, ``\vec x = (x,y,z)``
+  Cartesian,
+  -  Cylindrical coordinates, ``\vec x = (r,\phi,h)``
+  Cylindrical,
+  -  Direction on the sky, `\vec x = (Lon,Lat)``
+  Direction,
+  -  Direction on the sky with radial distance, ``\vec x = (Lon,Lat,R)``
+  DirectionRadius,
+  -  Frquency
+  Frequency,
+  -  Longitude-Latitude-Radius
+  LongLatRadius,
+  -  North-East-Height
+  NorthEastHeight,
+  -  Spherical coordinates, ``\vec x = (r,\phi,\theta)``
+  Spherical,
+  - Time
+  Time
 */
 
 template <class Iter>
@@ -146,38 +147,39 @@ bool HFPP_FUNC_NAME  (Iter source,
 //$COPY_TO END --------------------------------------------------
 /*!
 
-  hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   The image contains the power as a function of pixel and frequency
   bins. Each value is the sum over all baselines of the norm
   of the complex visibilities times complex weights for that pixel and
   frequency bin.
 
   The results will be added to the image, hence for a new image the
-  image must be initialized to zero! Otherwise an old image can be
+  image must be initialized to 0! Otherwise an old image can be
   provided and the new data will simply be added to it.
 
-  The length of the ccm vector is (N-1)/2*N_freq, where N is the
-  number of antennas and N_freq the number of frequency bins per
-  antenna. The length of the weights vector is N_pixel*N_ant*N_freq.
+  The length of the ``ccm`` vector is ``(N-1)/2*N_freq``, where ``N`` is the
+  number of antennas and ``N_freq`` the number of frequency bins per
+  antenna. The length of the weights vector is ``N_pixel*N_ant*N_freq``.
 
-Example:
-  ccm=Vector(complex,file["nofSelectedAntennas"]*(file["nofSelectedAntennas"]-1)/2*file["fftLength"])
+  Usage:
+  hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
+
+  Example:
+  ccm=Vector(complex,file[\"nofSelectedAntennas\"]*(file[\"nofSelectedAntennas\"]-1)/2*file[\"fftLength\"])
   cimage=Vector(complex,n_pixels*nbins,fill=0)
-  image=hArray(float,[n_pixels,file["fftLength"]])
+  image=hArray(float,[n_pixels,file[\"fftLength\"]])
 
-  hCrossCorrelationMatrix(ccm,file_fft.vec(),file["fftLength"])
-  hCImageFromCCM(cimage,ccm,weights.vec(),file["nofSelectedAntennas"],file["fftLength"])
+  hCrossCorrelationMatrix(ccm,file_fft.vec(),file[\"fftLength\"])
+  hCImageFromCCM(cimage,ccm,weights.vec(),file[\"nofSelectedAntennas\"],file[\"fftLength\"])
   cimage.norm(image.vec())
   intimage=np.array(image[...].sum()) # convert to numpy array
   immax=intimage.max()
   intimage /= immax
   intimage.resize([n_az,n_el])
   plt.imshow(intimage,cmap=plt.cm.hot)
-
 */
 template <class IterC>
 void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
@@ -255,16 +257,16 @@ void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
 #define HFPP_PARDEF_2 (HNumber)(delays)()("Input vector with real delays in units of time [second]")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hDelayToPhase(vec,frequencies,delays) -> vec = [phase(frequencies_0,delays_0),phase(frequencies_1,delays_0),...,phase(frequencies_n,delays_0),phase(frequencies_1,delays_1),...]
-
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   The frequencies always run fastest in the output vector.  If input
   vectors are shorter they will be wrapped until the output vector is
   full.
 
+  Usage:
+  hDelayToPhase(vec,frequencies,delays) -> vec = [phase(frequencies_0,delays_0),phase(frequencies_1,delays_0),...,phase(frequencies_n,delays_0),phase(frequencies_1,delays_1),...]
 */
 template <class Iter>
 void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
@@ -379,22 +381,23 @@ HNumber HFPP_FUNC_NAME (
   \brief $DOCSTRING
   $PARDOCSTRING
 
-result=[]
-plt.clf()
-for j in range(29,30):
-    x=[]; y=[]
-    for i in range(177,178):
-        azel[0]=float(i)
-        azel[1]=float(j)
-        hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-        hGeometricDelays(delays,antenna_positions,hArray(cartesian),True)
-        delays *= 10**6
-        deviations=delays-obsdelays
-        deviations.abs()
-        sum=deviations.vec().sum()
-        x.append(i); y.append(sum)
-    result.append(y)
-    plt.plot(x,y)
+  Example:
+  result=[]
+  plt.clf()
+  for j in range(29,30):
+      x=[]; y=[]
+      for i in range(177,178):
+          azel[0]=float(i)
+          azel[1]=float(j)
+          hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+          hGeometricDelays(delays,antenna_positions,hArray(cartesian),True)
+          delays *= 10**6
+          deviations=delays-obsdelays
+          deviations.abs()
+          sum=deviations.vec().sum()
+          x.append(i); y.append(sum)
+      result.append(y)
+      plt.plot(x,y)
 */
 
 template <class Iter>
@@ -450,7 +453,6 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 
 
 //$DOCSTRING: Calculates the phase gradients for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
@@ -536,7 +538,6 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 
 
 //$DOCSTRING: Calculates the phase gradients as complex weights for signals received at various antenna positions relative to a phase center from sources located at certain 3D space coordinates in near or far field and for different frequencies.
@@ -830,8 +831,6 @@ void HFPP_FUNC_NAME (const Iter world, const Iter world_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-
-
 //$DOCSTRING: Convert array of equatorial J2000 coordinates to horizontal, AZEL coordinates.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hEquatorial2Horizontal
@@ -1029,8 +1028,8 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     }
   }
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Beamform image
 //$COPY_TO HFILE START --------------------------------------------------
@@ -1124,6 +1123,5 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     }
   }
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
