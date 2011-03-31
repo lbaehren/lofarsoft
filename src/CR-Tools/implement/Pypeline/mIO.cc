@@ -409,17 +409,17 @@ void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, cons
   $PARDOCSTRING
 
   Example:
-  >>> filename=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
+  >>> filename=LOFARSOFT+\"/data/lofar/rw_20080701_162002_0109.h5\"
   >>> datafile=crfile(filename)
-  >>> datafile["blocksize"]=10
+  >>> datafile[\"blocksize\"]=10
   >>> f=hArray(float,[10])
-  >>> f.read(datafile,"Fx")
+  >>> f.read(datafile,\"Fx\")
   >>> f.pprint(-1)
   -> [29,29,35,27,9,-8,-45,-74,-92,-109]
 
-  >>> datafile["blocksize"]=2
+  >>> datafile[\"blocksize\"]=2
   >>> x=hArray(float,[5,2])
-  >>> hFileRead(datafile,"Fx",x[...],Vector(range(2)))
+  >>> hFileRead(datafile,\"Fx\",x[...],Vector(range(2)))
   >>> x.mprint()
   -> [29,29]   # blck 0
      [35,27]   # blck 1
@@ -433,7 +433,7 @@ void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, cons
 
   You may only read the data into a section of your array:
 
-  >>> x[1].read(datafile,"Fx",3)
+  >>> x[1].read(datafile,\"Fx\",3)
   >>> x.mprint()
 
   -> [29,29]
@@ -449,7 +449,7 @@ void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, cons
   row that is being read)
 
   >>> c=hArray(complex,[5,2])
-  >>> c[...].read(datafile,"Fx",Vector([0,1,2,3]))
+  >>> c[...].read(datafile,\"Fx\",Vector([0,1,2,3]))
   >>> c.mprint()
   -> [(29,0),(29,0)]
      [(35,0),(27,0)]
@@ -603,8 +603,8 @@ void HFPP_FUNC_NAME(
   $PARDOCSTRING
 
   Example:
-  antennaIDs=hFileGetParameter(file,"AntennaIDs")
-  x=hCalTable("~/LOFAR/usg/data/lopes/LOPES-CalTable","Positions",obsdate,list(antennaIDs))
+  antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
+  x=hCalTable(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",\"Positions\",obsdate,list(antennaIDs))
 */
 HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
@@ -651,8 +651,8 @@ HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const
   Possible keywords: Positions, Delay
 
   Example:
-  antennaIDs=hFileGetParameter(file,"AntennaIDs")
-  vec=hCalTablePositions("~/LOFAR/usg/data/lopes/LOPES-CalTable",obsdate,list(antennaIDs))
+  antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
+  vec=hCalTablePositions(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",obsdate,list(antennaIDs))
 */
 vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
@@ -704,9 +704,9 @@ vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, co
 
   Example:
   >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinary(v,"test.dat")
+  >>> hWriteFileBinary(v,\"test.dat\")
   >>> x=Vector(float,10,fill=1.0)
-  >>> hReadFileBinary(x,"test.dat")
+  >>> hReadFileBinary(x,\"test.dat\")
   x -> Vector(float, 10, [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0])
 */
 template <class Iter>
@@ -744,11 +744,11 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
 
   Example:
   >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinary(v,"test.dat")
+  >>> hWriteFileBinary(v,\"test.dat\")
   >>> v.fill(2.0)
-  >>> hWriteFileBinaryAppend(v,"test.dat")
+  >>> hWriteFileBinaryAppend(v,\"test.dat\")
   >>> x=Vector(float,20,fill=1.0)
-  >>> hReadFileBinary(x,"test.dat")
+  >>> hReadFileBinary(x,\"test.dat\")
   x ->  Vec(float,20)=[3.0,3.0,3.0,3.0,3.0,...,2.0,2.0]
 */
 template <class Iter>
@@ -795,11 +795,11 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 
   Example:
   >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinary(v,"test.dat",0)
+  >>> hWriteFileBinary(v,\"test.dat\",0)
   >>> v.fill(2.0)
-  >>> hWriteFileBinary(v,"test.dat",5)
+  >>> hWriteFileBinary(v,\"test.dat\",5)
   >>> x=Vector(float,15,fill=1.0)
-  >>> hReadFileBinary(x,"test.dat")
+  >>> hReadFileBinary(x,\"test.dat\")
   x -> Vector(float, 15, [3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
 */
 template <class Iter>
@@ -847,9 +847,9 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteg
 
   Example:
   >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinary(v,"test.dat")
+  >>> hWriteFileBinary(v,\"test.dat\")
   >>> x=Vector(float,10,fill=1.0)
-  >>> hReadFileBinary(x,"test.dat")
+  >>> hReadFileBinary(x,\"test.dat\")
   x ->  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
 */
 template <class Iter>
@@ -887,14 +887,14 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
 
   Example:
   >>> x=hArray(range(20))
-  >>> x.writefilebinary("test.dat")
+  >>> x.writefilebinary(\"test.dat\")
   >>> v=hArray(int,10)
-  >>> v.readfilebinary("test.dat",0)
+  >>> v.readfilebinary(\"test.dat\",0)
   >>> v.pprint()
   -> [0,1,2,3,4,5,6,7,8,9]
 
   #Now read the third block (of length 3) into the first part of the vector
-  >>> v[0:3].readfilebinary("test.dat",2*3)
+  >>> v[0:3].readfilebinary(\"test.dat\",2*3)
   >>> v.pprint()
   -> [6,7,8,3,4,5,6,7,8,9]
 */
@@ -938,7 +938,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
   Example:
   >>> from pycrtools import *
   >>> vec=Vector(float,24*3)
-  >>> hReadFileText(vec, "AERAcoordinates-1.txt", 4, Vector([5,3,7]),10)
+  >>> hReadFileText(vec, \"AERAcoordinates-1.txt\", 4, Vector([5,3,7]),10)
 
   # This will skip the first 4 rows and then read 10 rows where columns
   # 5,3,&7 will be read into the vector vec. The ordering will be [l0.c5,
@@ -1029,7 +1029,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end,
 
   Example:
   >>> vec=Vector(float,24*3,fill=range(24*3))
-  >>> vec.writetexttable("table.dat","# col1, col2, col3", 3, 24,False)
+  >>> vec.writetexttable(\"table.dat\",\"# col1, col2, col3\", 3, 24,False)
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
