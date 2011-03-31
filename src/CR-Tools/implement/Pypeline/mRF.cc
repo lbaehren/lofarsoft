@@ -81,10 +81,10 @@ using namespace std;
 #define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   The fact that the result is added to the output vector allows one to
   call the function multiple times and get a summed spectrum. If you
   need it only once, just fill the vector with zeros.
@@ -92,10 +92,10 @@ using namespace std;
   The number of loops (if used with an hArray) is here determined by
   the second parameter!
 
-Example:
-spectrum=hArray(float,[1,128])
-cplxfft=hArray(complex,[10,128],fill=1+0j)
-spectrum[...].spectralpower(cplxfft[...])
+  Example:
+  spectrum=hArray(float,[1,128])
+  cplxfft=hArray(complex,[10,128],fill=1+0j)
+  spectrum[...].spectralpower(cplxfft[...])
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
@@ -117,7 +117,6 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 
 
 //$DOCSTRING: Convert the ADC value to a voltage.
@@ -146,7 +145,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const HNumber adc2voltag
 // ___________________________________________________________________
 //                                                    hRFIDownsampling
 
-//$DOCSTRING: Generate a downsampled vector containing the mean and rms values of the spectrum amplitudes. This is needed to generate a baseline for the RFI mitigation.
+//$DOCSTRING: Generate a downsampled vector containing the mean and RMS values of the spectrum amplitudes. This is needed to generate a baseline for the RFI mitigation.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRFIDownsampling
 //-----------------------------------------------------------------------
@@ -306,7 +305,7 @@ void hRFIFlagging(IterI flagVec, IterI flagVec_end,
 // ___________________________________________________________________
 //                                                      hRFIMitigation
 
-//$DOCSTRING: Final part of the RFI mitigation: remove the flagged regions from the spectrum
+//$DOCSTRING: Final part of the RFI mitigation: remove the flagged regions from the spectrum.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRFIMitigation
 //-----------------------------------------------------------------------
