@@ -4,7 +4,7 @@
  *  Copyright (c) 2010                                                    *
  *                                                                        *
  *  Martin van den Akker <martinva@astro.ru.nl>                           *
- *  Heino Falcke <h.falcke@astro.ru.nl>                                   *     
+ *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -64,7 +64,7 @@ using namespace casa;
 //$SECTION: Numpy functions
 // ========================================================================
 
-//$DOCSTRING: Copy input array to numpy ndarray
+//$DOCSTRING: Copy input array to a numpy ``ndarray``.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCopy
 //-----------------------------------------------------------------------
@@ -74,18 +74,16 @@ using namespace casa;
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(in)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Copy to numpy ndarray.
-
+  Description:
   WARNING! Be careful with this function as it automatically typecasts to
   the type of the output array. In general you should always use matched
   types.
 
   If the input vector is shorter than the output vector, it will be
-  copied mutliple times until the output vector is filled.
+  copied multiple times until the output vector is filled.
 */
 template <class Iter>
 void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
@@ -127,7 +125,7 @@ void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Copy from input numpy ndarray to output array
+//$DOCSTRING: Copy from input numpy ``ndarray`` to an output array.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hCopy
 //-----------------------------------------------------------------------
@@ -140,8 +138,7 @@ void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Copy from numpy ndarray.
-
+  Description:
   WARNING! Be carefull with this function as it automatically typecasts to
   the type of the output array. In general you should always use matched
   types.
@@ -190,7 +187,8 @@ void HFPP_FUNC_NAME(const Iter out, const Iter out_end, ndarray in)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculates the square of the absolute value and add to output vector
+
+//$DOCSTRING: Calculates the square of the absolute value and add it to output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hAbsSquareAdd
 //-----------------------------------------------------------------------
@@ -204,8 +202,9 @@ void HFPP_FUNC_NAME(const Iter out, const Iter out_end, ndarray in)
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   Calculate absolute value squared for each value in the input vector
-  and add result to output vector.
+  and add the result to the output vector.
 */
 template <class Iter>
 void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
