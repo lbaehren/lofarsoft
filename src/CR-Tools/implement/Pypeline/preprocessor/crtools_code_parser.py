@@ -314,7 +314,10 @@ class DocumentationBlock():
         self._name = ""
         self._summary = ""
         self._parameters = []
+        self._description_lines = []
+        self._seealso_list = []
         self._example_lines = []
+        self._misc_lines = []
 
 
     # ______________________________________________________________________
@@ -379,7 +382,7 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
-    #                                                    Function parameters
+    #                                             Parameters of the function
     def addParameter(self, name, description):
         """
         Add a parameter description.
@@ -398,7 +401,46 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
-    #                                                      Function examples
+    #                                            Description of the function
+    def addDescription(self, description):
+        """
+        Add a description of the function.
+        """
+        # TODO: add implementation
+
+        pass
+
+
+    def description(self):
+        """
+        Return the function description.
+        """
+        # TODO: add implementation
+
+        pass
+
+
+    # ______________________________________________________________________
+    #                                          References to other functions
+    def addReference(self, reference):
+        """
+        Add a reference to another function.
+        """
+        # TODO: add implementation
+
+        pass
+
+
+    def reference(self):
+        """
+        Return the refernces to other functions.
+        """
+        # TODO: add implementation
+        pass
+
+
+    # ______________________________________________________________________
+    #                                  Example documentation of the function
     def addExample(self, example):
         """
         Add example.
@@ -414,6 +456,25 @@ class DocumentationBlock():
         """
         return self._example_lines
 
+
+    # ______________________________________________________________________
+    #                               Additional documentation of the function
+    def addAdditionalDocumentation(self, additionalDocumentation):
+        """
+        Add additional documentation of the function.
+        """
+        # TODO: add implementation
+
+        pass
+
+
+    def additionalDocumentation(self):
+        """
+        return the additional documentation.
+        """
+        # TODO: add implementation
+
+        pass
 
     # ______________________________________________________________________
     #                                                          Add attribute
@@ -558,7 +619,10 @@ class DocumentationBlock():
 ## =============================================================================
 
 ## _____________________________________________________________________________
-##                                                  Substitute iterator variable
+##                                                      Parser support functions
+
+## ________________________________________________________________________
+##                                             Substitute iterator variable
 def iter_subst(var, subst, input_string):
     """
     Replace a variable by a name
@@ -580,11 +644,11 @@ def iter_subst(var, subst, input_string):
 
 
 ## _____________________________________________________________________________
-##                                                                       Parsers
+##                                                                        Parser
 
 ## ________________________________________________________________________
-##                                                            Parse options
-def parseOptions():
+##                                                           Parser options
+def parserOptions():
     """
     Parse the options of the script
     """
@@ -614,7 +678,7 @@ def parseOptions():
 
 ## ________________________________________________________________________
 ##                                                              Parse files
-def parseCode(input_filename, output_filename, options):
+def parseFile(input_filename, output_filename, options):
     """
     Parse a code file.
     """
@@ -639,7 +703,7 @@ def parseCode(input_filename, output_filename, options):
 
     output_filename = output_path + "/" + output_basename + ".pp.cc"
     output_file = open(output_filename, 'w')
-    if (output_file is not None):
+    if (output_file):
         output_file.write(header)
     if (options.verbose):
         print "Output file : %s" %(os.path.relpath(output_filename))
@@ -664,19 +728,19 @@ def parseCode(input_filename, output_filename, options):
             def_file = open(def_filename, 'w')
             if (options.verbose):
                 print "Definition file: %s" %(def_filename)
-            if (def_file is not None):
+            if (def_file):
                 def_file.write(header)
             continue
 
         # Check docstring
         m = re.match('^\/\/\$DOCSTRING: (.*)',line)
-        if (m is not None):
+        if (m):
             docstring = m.group(1)
             continue
 
         # Check iterator block (start)
         m = re.match("^\/\/\$ITERATE (\w*) ([A-Za-z0-9,]*)", line)
-        if (m is not None):
+        if (m):
             iterator_block = IteratorBlock(options)         # Create iterator block
             iterator_block.setIteratorVar(m.group(1))       # Set iterator variable name
             iterator_block.setFunctionList(m.group(2))      # Fill list of functions to iterate
@@ -684,8 +748,8 @@ def parseCode(input_filename, output_filename, options):
 
         # Check iterator block (end)
         m = re.match("^\/\/\$ENDITERATE", line)
-        if (m is not None):
-            if (iterator_block is not None):
+        if (m):
+            if (iterator_block):
                 iterator_block.parse()                      # Process iterator block
                 iterator_block = None                       # Reset iterator_block
             else:
@@ -694,7 +758,7 @@ def parseCode(input_filename, output_filename, options):
 
         # Check wrapper block (start)
         m = re.match("^\/\/\$COPY_TO HFILE START", line)
-        if (m is not None):
+        if (m):
             wrapper_block = WrapperBlock(output_file, def_file, pydoc_file, options)  # Create block
             wrapper_block.addLine(line)
             wrapper_block.doc.setSummary(docstring)         # Set document summary
@@ -702,10 +766,10 @@ def parseCode(input_filename, output_filename, options):
 
         # Check wrapper block (end)
         m = re.match("^\/\/\$COPY_TO HFILE: \#include \"hfppnew-generatewrappers\.def\"", line)
-        if (m is not None):
-            if (wrapper_block is not None):
+        if (m):
+            if (wrapper_block):
                 wrapper_block.addLine("#include \"hfppnew-generatewrappers.def\"")
-                if (iterator_block is not None):
+                if (iterator_block):
                     iterator_block.addWrapperBlock(wrapper_block)  # Add wrapper block to iterator
                 else:
                     wrapper_block.parse()                   # Process wrapper block
@@ -715,23 +779,23 @@ def parseCode(input_filename, output_filename, options):
             wrapper_block = None                            # Reset wrapper block
             continue
 
-        if (wrapper_block is not None):
+        if (wrapper_block):
             wrapper_block.addLine(line)
         else:
             output_file.write(line)
 
     # Check if all blocks are closed
-    if (wrapper_block is not None):
+    if (wrapper_block):
         raise ParserError("Wrapper block is not closed at end of file.")
-    if (iterator_block is not None):
+    if (iterator_block):
         raise ParserError("Iterator block is not closed at end of file.")
 
     # Close definition file
-    if (def_file is not None):
+    if (def_file):
         def_file.close()
 
     # Close python documentation file
-    if (pydoc_file is not None):
+    if (pydoc_file):
         pydoc_file.close()
 
     # Close output file
@@ -751,12 +815,12 @@ def main():
     """
     Main function
     """
-    (options, args) = parseOptions()
+    (options, args) = parserOptions()
 
     input_filename  = args[0]
     output_filename = args[1]
 
-    parseCode(input_filename, output_filename, options)
+    parseFile(input_filename, output_filename, options)
 
 
 if __name__ == '__main__':
@@ -765,9 +829,10 @@ if __name__ == '__main__':
 
 ## =============================================================================
 ##
-##  TODO list
+##  TODO
 ##
 ## =============================================================================
 
-# TODO: Add Sphinx doxcumentation for file x.cc to x.py
-
+# * Add implementation for Documentation, References and Examples
+# * Add implementation for additionalDocumentation
+# * Optional: add formatting method for abovementioned documentation functions.
