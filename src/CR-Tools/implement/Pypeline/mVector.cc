@@ -81,13 +81,15 @@ template void hReadRawVector(std::vector<HComplex> &vec, HString raw);
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(fill_value)()("Fill value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hFill(vec,0) -> [0,0,0,...]
-  vec.fill(0) -> [0,0,0,...]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-See also: hSet
+  Usage:
+  hFill(vec,0) -> [0,0,0,...]
+  vec.fill(0) -> [0,0,0,...]
+
+  See also:
+  hSet
 */
 template <class Iter, class T>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const T fill_value)
@@ -112,16 +114,18 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const T fill_value)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE_2)(fillvec)()("Vector of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hFill(vec,[0,1,2]) -> [0,1,2,0,1,2,...]
-  vec.fill([0,1,2]) -> [0,1,2,0,1,2,...]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-If fillvec is shorther than vec, the procedure will wrap around and
-start from the beginning of fillvec again. Hence, in this case
-fillvec will appear repeated multiple times in vec.
+  Usage:
+  hFill(vec,[0,1,2]) -> [0,1,2,0,1,2,...]
+  vec.fill([0,1,2]) -> [0,1,2,0,1,2,...]
 
+  Description:
+  If ``fillvec`` is shorther than ``vec``, the procedure will wrap
+  around and start from the beginning of ``fillvec`` again. Hence, in
+  this case ``fillvec`` will appear repeated multiple times in
+  ``vec``.
 */
 template <class Iter, class IterT>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fillvec, const IterT fillvec_end)
@@ -149,20 +153,19 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fillvec, cons
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(val)()("Value to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  Usage:
-
-  vec.set(indexlist,val) -> set elements in vec at the positions given in indexlist to value 'val'
-  
   \brief $DOCSTRING
   $PARDOCSTRING
-  
 
-Example:
+  Usage:
+  vec.set(indexlist,val) -> set elements in vec at the positions given in indexlist to value 'val'
+
+  Example:
   vec=hArray(range(10))
   indx=hArray([2,4])
   vec -> hArray(int, [10], fill=[0, 1, 99, 3, 99, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
-  
-See also: hFill, hCopy
+
+  See also:
+  hFill, hCopy
 */
 template <class Iter, class IterI, class T>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const T val)
@@ -196,13 +199,18 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input and output vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec = [a_0,a_1,....,a_n-1,a_n]
-  vec.flip() ->  [a_n,a_n-1,a_n-2,...,a_0]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  The order of the elements in the vector will be reversed. Same as hReverse.
+  Usage:
+  vec = [a_0,a_1,....,a_n-1,a_n]
+  vec.flip() ->  [a_n,a_n-1,a_n-2,...,a_0]
+
+  Description:
+  The order of the elements in the vector will be reversed. Same as ``hReverse``.
+
+  See also:
+  hReverse
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
@@ -228,13 +236,18 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input and output vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
-  vec = [a_0,a_1,....,a_n-1,a_n]
-  vec.reverse() ->  [a_n,a_n-1,a_n-2,...,a_0]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  The order of the elements in the vector will be reversed (same as hFlip).
+  Usage:
+  vec = [a_0,a_1,....,a_n-1,a_n]
+  vec.reverse() ->  [a_n,a_n-1,a_n-2,...,a_0]
+
+  Description:
+  The order of the elements in the vector will be reversed (same as ``hFlip``).
+
+  See also:
+  hFlip
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
@@ -261,29 +274,25 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 #define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output (all if negative).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  Usage:
-
-  hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
-
-In [1]: a=hArray(range(10))
-
-In [2]: hPrettyString(a.vec(),8)
-Out[2]: '[0,1,2,3,...,6,7,8,9]'
-
-In [3]: hPrettyString(a.vec(),10)
-Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
-
-In [4]: hPrettyString(a.vec(),12)
-Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
-
-In [5]: hPrettyString(a.vec(),1)
-Out[5]: '[0,...,9]'
-
-In [6]: hPrettyString(a.vec(),0)
-Out[6]: '[0,...,9]'
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
+
+  Example:
+  In [1]: a=hArray(range(10))
+  In [2]: hPrettyString(a.vec(),8)
+  Out[2]: '[0,1,2,3,...,6,7,8,9]'
+  In [3]: hPrettyString(a.vec(),10)
+  Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
+  In [4]: hPrettyString(a.vec(),12)
+  Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
+  In [5]: hPrettyString(a.vec(),1)
+  Out[5]: '[0,...,9]'
+  In [6]: hPrettyString(a.vec(),0)
+  Out[6]: '[0,...,9]'
+
 */
 template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
@@ -304,36 +313,28 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 #define HFPP_PARDEF_3 (HInteger)(maxlen)()("Maximum length to output (all if negative).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
-
-  Examples:
-
-In [1]: a=hArray(range(10))
-
-In [2]: hPrettyString(a.vec(),0,10,8)
-Out[2]: '[0,1,2,3,...,6,7,8,9]'
-
-In [3]: hPrettyString(a.vec(),0,10,10)
-Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
-
-In [4]: hPrettyString(a.vec(),0,10,12)
-Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
-
-In [5]: hPrettyString(a.vec(),0,10,1)
-Out[5]: '[0,...,9]'
-
-In [6]: hPrettyString(a.vec(),0,10,0)
-Out[6]: '[0,...,9]'
-
-In [7]: hPrettyString(a.vec(),4,10,8)
-Out[7]: '[4,5,6,7,8,9]'
-
-In [8]: hPrettyString(a.vec(),4,10,4)
-Out[8]: '[4,5,...,8,9]'
-
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
+
+  Example:
+  In [1]: a=hArray(range(10))
+  In [2]: hPrettyString(a.vec(),0,10,8)
+  Out[2]: '[0,1,2,3,...,6,7,8,9]'
+  In [3]: hPrettyString(a.vec(),0,10,10)
+  Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
+  In [4]: hPrettyString(a.vec(),0,10,12)
+  Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
+  In [5]: hPrettyString(a.vec(),0,10,1)
+  Out[5]: '[0,...,9]'
+  In [6]: hPrettyString(a.vec(),0,10,0)
+  Out[6]: '[0,...,9]'
+  In [7]: hPrettyString(a.vec(),4,10,8)
+  Out[7]: '[4,5,6,7,8,9]'
+  In [8]: hPrettyString(a.vec(),4,10,4)
+  Out[8]: '[4,5,...,8,9]'
 */
 template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_slice, const HInteger end_slice, const HInteger maxlen)
@@ -371,7 +372,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_s
       s+=hf2string(*it);
       ++it;
     };
-  
+
     while(it<vec_end1) {
       s+=","+hf2string(*it);
       ++it;
@@ -379,7 +380,7 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_s
 
     if (it<vec_start2) s+=",...";
     it=vec_start2;
-    
+
     while (it<vec_end2) {
       s+=","+hf2string(*it);
       ++it;
@@ -401,10 +402,11 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_s
 #define HFPP_PARDEF_1 (HInteger)(maxlen)()("Maximum length to output.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hPrettyString(vec,3) -> '[vec_0,vec_1,vec_3,...]'
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  hPrettyString(vec,3) -> '[vec_0,vec_1,vec_3,...]'
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
@@ -422,10 +424,11 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hPrettyString(vec) -> '[vec_0,vec_1,vec_3,...]'
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  hPrettyString(vec) -> '[vec_0,vec_1,vec_3,...]'
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
@@ -444,12 +447,12 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(increment)()("Increment (to multiply loop variable with).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hFillRange(vec,-2.5,2.) -> [-2.5,-0.5,1.5,3.5,...]
-  vec.fillrange(start,increment) -> vec=[start, start+1*increment, start+2*increment ...]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Usage:
+  hFillRange(vec,-2.5,2.) -> [-2.5,-0.5,1.5,3.5,...]
+  vec.fillrange(start,increment) -> vec=[start, start+1*increment, start+2*increment ...]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  IterValueType start,  const IterValueType increment)
@@ -474,15 +477,16 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  IterValueType star
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(vecB)()("Input vector #2 of values to fill it with")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  hZipper(vec,vecA,vecB) -> vec=[vecA_0,vecB_0,vecA_1,vecB_1,...,vecA_n,vecB_n]
-  vec.zipper(vecA,vecB) -> vec=[vecA_0,vecB_0,vecA_1,vecB_1,...,vecA_n,vecB_n]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  If the input vectors are shorther than vec they will wrap around and
+  Description:
+  If the input vectors are shorther than ``vec`` they will wrap around and
   start from the beginning.
 
+  Usage:
+  hZipper(vec,vecA,vecB) -> vec=[vecA_0,vecB_0,vecA_1,vecB_1,...,vecA_n,vecB_n]
+  vec.zipper(vecA,vecB) -> vec=[vecA_0,vecB_0,vecA_1,vecB_1,...,vecA_n,vecB_n]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter vecA, const Iter vecA_end, const Iter vecB, const Iter vecB_end)
@@ -627,10 +631,11 @@ void HFPP_FUNC_NAME (casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  vec1.convert(vec2) -> Copy vec1 to vec2
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  vec1.convert(vec2) -> Copy vec1 to vec2
 */
 template <class Iter, class Iter2>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter2 vec2,const Iter2 vec2_end)
@@ -671,10 +676,11 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter2 vec2,const 
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  vec1.convert(vec2) -> Copy vec1 to vec2
-
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Usage:
+  vec1.convert(vec2) -> Copy vec1 to vec2
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
@@ -698,16 +704,17 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  vec1.copy(vec2) -> copy elements of vec2 to vec1
-
-  If the input vector is shorter than the output vector, it will be
-  copied mutliple times until the output vector is filled.  Use
-  vec.resize first if you want to ensure that both vectors have the
-  same size.
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Usage:
+  vec1.copy(vec2) -> copy elements of vec2 to vec1
+
+  Description:
+  If the input vector is shorter than the output vector, it will be
+  copied mutliple times until the output vector is filled.  Use
+  ``vec.resize`` first if you want to ensure that both vectors have the
+  same size.
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
@@ -754,16 +761,17 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   If the index vector is shorter than the output vector, the (indexed
   part of the) input vector will be copied multiple times until the
-  output vector is filled.  Use vec.resize first if you want to ensure
+  output vector is filled.  Use ``vec.resize`` first if you want to ensure
   that both vectors have the same size.
-
-  If number_of_elements is larger than zero and smaller than the
+  If ``number_of_elements`` is larger than 0 and smaller than the
   length of the index vector, the remaining elements in the index
   vector are simply ignored.
 
-See also: hFindGreaterThan, etc..
+  See also:
+  hFindGreaterThan
 */
 template <class Iter, class Iterin, class IterI>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end, const IterI index, const IterI index_end, const HInteger number_of_elements)
@@ -830,14 +838,15 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 #define HFPP_PARDEF_3 (HInteger)(stride)()("Stride (interval) between subsequent elements in the output Vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-  vec=[0,1,2,3]
-  vec.redistribute(invec,0,2) -> invec = [0,0,0,1,0,0,2,0,0,3,0,0]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
   Operation will stop whenever the end of one of the vectors is reached.
 
+  Usage:
+  vec=[0,1,2,3]
+  vec.redistribute(invec,0,2) -> invec = [0,0,0,1,0,0,2,0,0,3,0,0]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger offset, HInteger stride)
@@ -870,15 +879,17 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const It
 #define HFPP_PARDEF_2 (HInteger)(ncolumns)()("Number of columns in input vector (i.e., width of a row, or the last and fastest running index)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-Usage:
-  invec=[0,1,2,3,4,5]; ncolumns=2
-  hTranspose(outvec,invec,ncolumns) -> outvec = [0,2,4,1,3,5]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Usage:
+  invec=[0,1,2,3,4,5]; ncolumns=2
+  hTranspose(outvec,invec,ncolumns) -> outvec = [0,2,4,1,3,5]
+
+  Description:
   Operation will stop whenever the end of one of the input vector is reached.
 
+  Example:
   >>  x=hArray(range(6),[3,2])
   >>  y=hArray(int,[2,3],fill=-1)
 
@@ -892,7 +903,6 @@ Usage:
 
   [0,2,4]
   [1,3,5]
-
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const Iter invec_end, HInteger ncolumns)
@@ -922,18 +932,19 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const It
 #define HFPP_PARDEF_3 (HInteger)(ncolumns)()("Number of columns in input vector (i.e., width of a row, or the faster running index)")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
-Usage:
-  invec=[0,1,2,3,4,5]; ncolumns=2
-  hTranspose(outvec,invec,ncolumns) -> outvec = [0,2,4,1,3,5]
-
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Usage:
+  invec=[0,1,2,3,4,5]; ncolumns=2
+  hTranspose(outvec,invec,ncolumns) -> outvec = [0,2,4,1,3,5]
+
+  Description:
   Operation will stop whenever the end of one of the input vector is reached.
 
+  Example:
   >>  x=hArray(range(6),[3,2])
   >>  y=hArray(int,[2,3],fill=-1)
-
   >>  x.mprint()
   [0,1]
   [2,3]
@@ -941,10 +952,8 @@ Usage:
 
   >>  hTranspose(y,x,2)
   >>  y.mprint()
-
   [0,2,4]
   [1,3,5]
-
 */
 
 template <class Iter>
@@ -980,7 +989,7 @@ void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter i
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
- $PARDOCSTRING
+  $PARDOCSTRING
 */
 template <class Iter>
 HNumber hVectorLength (const Iter vec, const Iter vec_end)
@@ -1004,7 +1013,7 @@ HNumber hVectorLength (const Iter vec, const Iter vec_end)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
- $PARDOCSTRING
+  $PARDOCSTRING
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
