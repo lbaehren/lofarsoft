@@ -6,7 +6,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [-subsHBAHigh subband_range] [-subsHBALow subband_range] [-subsLBA subband_range] 
        [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] 
-       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages]
+       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug]
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -19,10 +19,13 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
        [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
        [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) 
-       [[-antenna HBA_or_LBA]] ==> The antenna name: HBAHigh, HBALow or LBA (default = HBAHigh) 
-       [[-subsHBAHigh subband_range]] ==> The subband range for HBAHigh (default = '77..320') 
-       [[-subsHBALow subband_range]] ==> The subband range for HBALow (default = '54..297') 
-       [[-subsLBA subband_range]] ==> The subband range (default = '154..397') 
+       [[-antenna HBA_or_LBA]] ==> The antenna name: HBAHigh, HBAMid, HBALow or LBA, LBALow, LBAHigh (default = HBAHigh)
+       [[-subsHBALow subband_range]] ==> The HBALow subband range (default = IM:'54..297') 
+       [[-subsHBAMid subband_range]] ==> The HBAMid subband range, valid for 160MHz clock only (default = IM:'66..309') 
+       [[-subsHBAHigh subband_range]] ==> The HBAHigh subband range (default = IM:'52..255')
+       [[-subsLBA subband_range]] ==> The IM LBA (High) default subband range (default = IM:'156..399')
+       [[-subsLBALow subband_range]] ==> The LBALow subband range (default = IM:'54..297')
+       [[-subsLBAHigh subband_range]] ==> The LBAHigh subband range (default = IM:'156..399')
        [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 64) 
        [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 64) 
        [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) 
@@ -37,6 +40,8 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM
        [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal 
                         (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).
+       [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.
+       [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).
                 
        For help on Beam_formed input format and options, use '-help BF' switch
 
@@ -92,13 +97,13 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
       4) Example input file with pointing and antenna specification:
          Example Type IV input file using source names:
          # object       antenna
-         3C99           LBA 
+         3C99           LBAlow 
          3C99           HBALow 
          3C327          HBALow 
          
          Example Type IV input file using ra dec positions:
          # ra     dec           antenna
-         13.98   +68.487         LBA 
+         13.98   +68.487         LBAHigh 
          70.498  +1.728          HBALow 
          217.17   -1.623         HBAHigh 
          
@@ -197,7 +202,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          
          Example Type IV input file using ra dec positions:
          # ra     dec           antenna
-         13.98   +68.487         LBA 
+         13.98   +68.487         LBALow 
          70.498  +1.728          HBALow  ;    13.98   +68.487
          217.17   -1.623         HBAHigh ;    70.498  +1.728    ;    13.98   +68.487
          
@@ -254,4 +259,5 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 -chansubsLBA 16
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype position -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 -chansubsLBA 16 -sexages
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch IM -intype position -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 -chansubsLBA 16 -sexages
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch IM -intype position -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -subsLBAHigh 10..45 -integLBA 7 -chansubsLBA 16 -sexages -debug 

@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-# vervion = 1.1
+VERSION=1.1
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -11,21 +11,25 @@ USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       -in observation_list_file -inswitch IM -intype source_or_position \n"\
 "       -out template_output_file -project project_name [-stations stations_list]   \n"\
 "       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
-"       [-subsHBAHigh subband_range] [-subsHBALow subband_range] [-subsLBA subband_range] \n"\
+"       [-subsHBAHigh subband_range] [-subsHBAMid subband_range] [-subsHBALow subband_range] \n"\
+"       [-subsLBAHigh subband_range] [-subsLBALow subband_range]  \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] \n"\
 "       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages]\n"
+"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug] \n"
 
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
 "       -out template_output_file -project project_name [-st stations_list]   \n"\
 "       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL]  \n"\
 "       [+IS|+CS|+FD|+BF list_or_ALL] [-subsHBA subband_range] [-subsLBA subband_range] \n"\
+"       [-subsHBAHigh subband_range] [-subsHBAMid subband_range] [-subsHBALow subband_range] \n"\
+"       [-subsLBAHigh subband_range] [-subsLBALow subband_range]  \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
 "       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-sexages]\n"
+"       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug]"\
+"       [-sexages] [-clock 200|160] \n"
 
 USAGE3="Options: \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
@@ -36,11 +40,14 @@ USAGE3="Options: \n"\
 USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.\n"\
 "         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.\n"\
 "         [[-stations stations_list]] ==> Comma separated list of stations (i.e. CS001,CS002,RS405) \n"\
-"         [[-antenna HBA_or_LBA]] ==> The antenna name - HBA, HBAHigh, HBALow or LBA (default = HBA (BF); HBAHigh (IM)) \n"\
-"         [[-subsHBA subband_range]] ==> The BF HBA subband range (default = '200..443') \n"\
-"         [[-subsHBAHigh subband_range]] ==> The IM HBAHigh subband range (default = '77..320') \n"\
-"         [[-subsHBALow subband_range]] ==> The IM HBALow subband range (default = '54..297') \n"\
-"         [[-subsLBA subband_range]] ==> The subband range (default = '154..397') \n"\
+"         [[-antenna HBA_or_LBA]] ==> The antenna name: HBA, HBAHigh, HBAMid, HBALow or LBA, LBALow, LBAHigh (default = HBALow (BF); HBAHigh (IM)) \n"\
+"         [[-subsHBA subband_range]] ==> The BF HBA (Low) default subband range (default = '200..443') \n"\
+"         [[-subsHBALow subband_range]] ==> The HBALow subband range (default = BF:'200..443'  IM:'54..297') \n"\
+"         [[-subsHBAMid subband_range]] ==> The HBAMid subband range, valid for 160MHz clock only (default = BF:'140..383'  IM:'66..309') \n"\
+"         [[-subsHBAHigh subband_range]] ==> The HBAHigh subband range (default = BF:'77..320'  IM:'52..255') \n"\
+"         [[-subsLBA subband_range]] ==> The BF LBA (Low), IM LBA (High) default subband range (default = BF:'100..343'  IM:'156..399') \n"\
+"         [[-subsLBALow subband_range]] ==> The LBALow subband range (default = BF:'100..343'  IM:'54..297') \n"\
+"         [[-subsLBAHigh subband_range]] ==> The LBAHigh subband range (default = BF:'154..397'  IM:'156..399') \n"\
 "         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16 (BF), 64 (IM)) \n"\
 "         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16 (BF), 64 (IM)) \n"\
 "         [[-integstepsHBA integration_steps_HBA]] ==> The BF integration steps for HBA (default = 16) \n"\
@@ -54,10 +61,12 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[+CS list_or_ALL]] ==> Turn on coherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+FD list_or_ALL]] ==> Turn on filteredData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+BF list_or_ALL]] ==> Turn on beamformedData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
-"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One (default), Dual, Joined)\n"\
-"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, Sparse Even, Sparse Odd, X, Y)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default BF & IM), Joined)\n"\
+"         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default BF & IM), Inner, Sparse Even, Sparse Odd, X, Y)\n"\
 "         [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM\n"\
-"         [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).\n"
+"         [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).\n"\
+"         [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.\n"\
+"         [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).\n"
 
 USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
 "For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
@@ -89,10 +98,16 @@ SUBBANDS_HBA="200..443"
 user_subbands_hba=0
 SUBBANDS_HBAHigh="77..320"
 user_subbands_hbahigh=0
-SUBBANDS_HBALow="54..297"
+SUBBANDS_HBAMid="140..383"
+user_subbands_hbamid=0
+SUBBANDS_HBALow="200..443"
 user_subbands_hbalow=0
 SUBBANDS_LBA="154..397"
 user_subbands_lba=0
+SUBBANDS_LBALow="154..397"
+user_subbands_lbalow=0
+SUBBANDS_LBAHigh="100..343"
+user_subbands_lbahigh=0
 SUBBANDS=""
 SUBBANDS_SET=0
 START=""
@@ -139,7 +154,9 @@ FD=0
 FD_LIST=""
 BF=0
 BF_LIST=""
-modeHBA="Dual"
+modeHBA_IM="Dual"
+#modeHBA_BF="Zero"
+modeHBA_BF="Dual"
 user_modeHBA=0
 modeLBA="Outer"
 user_modeLBA=0
@@ -150,6 +167,9 @@ user_multi=0
 NAMECOL=0
 user_namecol=0
 sexages=0
+debug=0
+clock=200
+input_string=$*
 
 while [ $# -gt 0 ]
 do
@@ -163,10 +183,13 @@ do
      -gap)               GAP=$2; user_gap=1; shift;;
      -subsHBA)           SUBBANDS_HBA=$2; user_subbands_hba=1; shift;;
      -subsLBA)           SUBBANDS_LBA=$2; user_subbands_lba=1; shift;;
+     -subsLBAHigh)       SUBBANDS_LBAHigh=$2; user_subbands_lbahigh=1; shift;;
+     -subsLBALow)        SUBBANDS_LBALow=$2; user_subbands_lbalow=1; shift;;
      -subsHBAHigh)       SUBBANDS_HBAHigh=$2; user_subbands_hbahigh=1; shift;;
+     -subsHBAMid)        SUBBANDS_HBAMid=$2; user_subbands_hbamid=1; shift;;
      -subsHBALow)        SUBBANDS_HBALow=$2; user_subbands_hbalow=1; shift;;
      -antenna)           ANTENNA=$2; user_antenna=1; shift;;
-     -modeHBA)           modeHBA=$2; user_modeHBA=1; shift;;
+     -modeHBA)           modeHBA_IM=$2; modeHBA_BF=$2; user_modeHBA=1; shift;;
      -modeLBA)           modeLBA=$2; user_modeLBA=1; shift;;
      -chansubsHBA)       CHAN_SUBS_HBA=$2; CHAN_SUBS_HBA_IM=$2; user_chan_subs_hba=1; shift;;
      -chansubsLBA)       CHAN_SUBS_LBA=$2; CHAN_SUBS_LBA_IM=$2; user_chan_subs_lba=1; shift;;
@@ -187,6 +210,8 @@ do
      +multi)             MULTI=1; user_multi=1;;
      -namecol)           NAMECOL=1; user_namecol=1;;
      -sexages)           sexages=1;;
+     -debug)             debug=1;;
+     -clock)             clock=$2;;
        -*)
             print >&2 \
             "$USAGE1" \
@@ -215,6 +240,13 @@ then
       cat $LOFARSOFT/release/share/pulsar/data/multi-template_helpBF.txt
    fi
    exit 1
+fi
+
+if [[ $debug == 1 ]]
+then
+   echo "====================Turning on ksh DEBUGGING (to STDOUT)===================="
+   echo ""
+   set -x
 fi
 
 
@@ -285,6 +317,17 @@ else
    fi
 fi
 
+if (( $clock != 200 )) && (( $clock != 160 ))
+then
+      echo "ERROR: Input clock setting must be either 200 or 160 (units of MHz); user setting was $clock."
+      exit 1
+fi
+
+#write the version number to the screen
+echo "Script V$VERSION"
+echo "$0 $input_string"
+echo "Run on date: $date_start" 
+
 ##################################################
 # Check if input/output files exist
 if [ ! -f $infile ]
@@ -340,24 +383,30 @@ system_typ=`uname -s | awk '{print $1}'`
 # Input is dependant on whether this is Imaging or BF;
 # depending on the type of input, check for required input parameters
 ncols=0
-ncols=`grep -v "#" $infile | grep -v '^$' | tail -1 | awk -F";" '{print $1}' | wc -w`
+ncols=`grep -v "#" $infile | grep -v '^$' | tail -1 | awk -F";" '{print $1}' | wc -w | sed 's/ //g'`
 echo "Your input file $infile contains $ncols columns"
 
+# if there are at least 8 columns, then subbands are provided in the input file and command line switches are ignored
 if (( $ncols >= 8 ))
 then
-   if (( $user_subbands_hba != 0 )) || (( $user_subbands_hbahigh != 0 )) || (( $user_subbands_hbalow != 0 ))
+   if (( $user_subbands_hba != 0 )) || (( $user_subbands_hbahigh != 0 )) || (( $user_subbands_hbalow != 0 )) || (( $user_subbands_hbamid != 0 ))
    then
       echo "WARNING: ignoring user-specified command line HBA subbands setting;  subbands from observation list will be used."
       user_subbands_hba=0
       user_subbands_hbahigh=0
+      user_subbands_hbamid=0
       user_subbands_hbalow=0
    fi
-   if (( $user_subbands_lba != 0 ))
+   if (( $user_subbands_lba != 0 )) || (( $user_subbands_lbahigh != 0 )) || (( $user_subbands_lbalow != 0 )) 
    then
       echo "WARNING: ignoring user-specified command line LBA subbands setting;  subbands from observation list will be used."
       user_subbands_lba=0
+      user_subbands_lbahigh=0
+      user_subbands_lbalow=0
    fi
 fi
+
+# if there are at least 7 column, then the time-related information is provided in the input file;  command line switches are ignored
 if (( $ncols >= 7 ))
 then
    if (( $user_gap != 0 ))
@@ -382,6 +431,7 @@ then
    fi
 fi
 
+# if there are at least 4 column, then the chan per subband and integ steps are in the input file;  command line switches are ignored
 if (( $ncols >= 4 ))
 then
    if (( $user_chan_subs_hba == 1 ))
@@ -408,7 +458,7 @@ then
    fi
 fi
 
-if (( (( $ncols >= 2 )) && (( $INTYPE == 1 )) )) || (( $ncols >= 3 )) && (( $INTYPE == 2 ))
+if (( (( $ncols >= 2 )) && (( $INTYPE == 1 )) )) || (( (( $ncols >= 3 )) && (( $INTYPE == 2 )) ))
 then
    if (( $user_antenna == 1 ))
    then
@@ -417,10 +467,7 @@ then
    fi
 fi
 
-if (( $ncols == 1 ))
-then
-   type=4
-elif (( $ncols == 6 )) 
+if (( $ncols == 6 )) 
 then
    echo "ERROR: Your file contains $ncols columns which is not allowed (1,2,3,4,5,7,8,9 columns allowed)."
    echo "       Please refer to the script usage for input file options (type > $0) by itself."
@@ -445,153 +492,64 @@ then
    fi
 fi
 
-if [ $INSWITCH == 1 ]
+if [ $INSWITCH == 1 ]  # BF data
 then
-	if (( (( $ncols == 1 )) && (( $INTYPE == 1 )) )) || (( (( $ncols == 2 )) && (( $INTYPE == 2 )) ))
+	if (( ($ncols == 1) && ($INTYPE == 1) )) || (( ($ncols == 2) && ($INTYPE == 2) ))
 	then
-	   # set the default antenna to HBA for BF when user has not specified one
+	   # set the default antenna to HBALow for BF when user has not specified one
 	   if [[ $user_antenna == 0 ]]
 	   then
-	       ANTENNA="HBA"
-	       echo "NOTE: Antenna not set by the user, will be set to HBA by default"
+	       ANTENNA="HBALow"
+	       ANT_SHORT=HBA
+	       echo "NOTE: Antenna not set by the user, will be set to HBALow by default for BF data."
 	   fi
 	
 	   # check that the user has specified optional params
-	   if [[ $ANTENNA == "HBA" ]]
+	   if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
 	   then
+	       ANT_SHORT=HBA
 	       CHAN_SUBS=$CHAN_SUBS_HBA
 	       STEPS=$STEPS_HBA
 	       INTERVAL=$INTEG_HBA
-	   fi
-	   if [[ $ANTENNA == "LBA" ]]
+	   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
 	   then
+	       ANT_SHORT=LBA
 	       CHAN_SUBS=$CHAN_SUBS_LBA
 	       STEPS=$STEPS_LBA
 	       INTERVAL=$INTEG_LBA
+	   else 
+	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBA, HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
+	      exit 1
 	   fi
 	fi   
-else
-	if (( (( $ncols == 1 )) && (( $INTYPE == 1 )) )) || (( (( $ncols == 2 )) && (( $INTYPE == 2 )) ))
+else  # IM data
+	if (( ($ncols == 1) && ($INTYPE == 1) )) || (( ($ncols == 2) && ($INTYPE == 2) ))
 	then
 	
 	   # set the default antenna to HBAHigh for IM when user has not specified one
 	   if [[ $user_antenna == 0 ]]
 	   then
 	       ANTENNA="HBAHigh"
-	       echo "NOTE: Antenna not set by the user, will be set to HBAHigh by default"
+	       echo "NOTE: Antenna not set by the user, will be set to HBAHigh by default for IM data."
 	   fi
 
 	   # check that the user has specified optional params
-	   if [[ $ANTENNA == "HBALow" ]]
+	   if [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
 	   then
 	       ANT_SHORT=HBA
 	       CHAN_SUBS=$CHAN_SUBS_HBA_IM
 	       INTERVAL=$INTEG_HBA
-	   elif [[ $ANTENNA == "HBAHigh" ]]
-	   then
-	       ANT_SHORT=HBA
-	       CHAN_SUBS=$CHAN_SUBS_HBA_IM
-	       INTERVAL=$INTEG_HBA
-	   elif [[ $ANTENNA == "LBA" ]]
+	   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
 	   then
 	       ANT_SHORT=LBA
 	       CHAN_SUBS=$CHAN_SUBS_LBA_IM
 	       INTERVAL=$INTEG_LBA
 	   else
-	      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBAHigh or LBA"
+	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBA, HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
 	      exit 1
 	   fi
 	fi   
 fi # end if [ $INSWITCH == 1 ]
-
-
-#else ###### Imaging column check
-#
-#	if  (( $ncols >= 5 )) 
-#	then
-#	   if (( $user_subbands_hba != 0 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified command line HBA subbands setting;  subbands from observation list will be used."
-#	      user_subbands_hba=0
-#	   fi
-#	   if (( $user_subbands_lba != 0 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified command line LBA subbands setting;  subbands from observation list will be used."
-#	      user_subbands_hba=0
-#	   fi
-#    fi
-#
-#	if (( $ncols >= 5 )) 
-#	then
-#	   if (( $user_gap != 0 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified gap setting;  start time from observation list will be used."
-#	      user_gap=0
-#	   fi
-#	   if (( $user_start == 1 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified start setting;  start time from observation list will be used."
-#	      user_start=0
-#	   fi
-#	   if (( $user_duration == 1 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified gap setting;  start time from observation list will be used."
-#	      user_duration=0
-#	   fi
-#	   if (( $user_stations == 1 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified stations list;  input file station list will be used."
-#	      user_stations=0
-#	   fi
-#	fi
-#	
-#	
-#	if (( $ncols >= 3 )) || (( (( $ncols == 2 )) && (( $INTYPE == 1 )) ))
-#	then
-#	   if (( $user_antenna == 1 ))
-#	   then
-#	      echo "WARNING: ignoring user-specified antenna setting;  input file antenna setting will be used."
-#	      user_antenna=0
-#	   fi
-#	fi
-#	
-#	if (( $ncols <= 3 )) 
-#	then
-#	   # check that the user has specified required input
-#	   if (( $user_start == 0 )) 
-#	   then
-#	      echo "ERROR: $ncols column input file requires '-start obs_start' as input"
-#	      exit 1
-#	   elif (( $user_duration == 0 )) 
-#	   then
-#	      echo "ERROR: $ncols column input file requires '-time duration' as input"
-#	      exit 1
-#	   elif (( $user_stations == 0 )) 
-#	   then
-#	      echo "ERROR: $ncols column input file requires '-stations stations_list' as input"
-#	      exit 1
-#	   fi
-#	fi
-#	
-#	if (( $ncols == 1 )) || (( (( $ncols == 2 )) && (( $INTYPE == 2 )) ))
-#	then
-#	   # check that the user has specified optional params
-#	   if [[ $ANTENNA == "HBALow" ]]
-#	   then
-#	       ANT_SHORT=HBA
-#	   elif [[ $ANTENNA == "HBAHigh" ]]
-#	   then
-#	       ANT_SHORT=HBA
-#	   elif [[ $ANTENNA == "LBA" ]]
-#	   then
-#	       ANT_SHORT=LBA
-#	   else
-#	      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBAHigh or LBA"
-#	      exit 1
-#	   fi
-#	fi   
-#
-#fi # end of input file column checks
 
 ##################################################
 # If LST was set by the user, then calculate the time difference 
@@ -905,30 +863,37 @@ do
 				    then
 				       ANTENNA=`echo $line | awk '{print $2}'`
 
-					   if [[ $ANTENNA == "HBALow" ]] && [[ $INSWITCH == 2 ]]
-					   then
-					       ANT_SHORT=HBA
-					   elif [[ $ANTENNA == "HBAHigh" ]] && [[ $INSWITCH == 2 ]]
-					   then
-					       ANT_SHORT=HBA
-					   elif [[ $ANTENNA == "HBA" ]]  && [[ $INSWITCH == 1 ]]
-					   then
-					       ANT_SHORT=HBA
-					   elif [[ $ANTENNA == "LBA" ]]
-					   then
-					       ANT_SHORT=LBA
-					   else
-					      echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAHigh, LBA"
-					      echo "ERROR: Antenna must be set to any of these values BF: HBA, LBA"
-					      exit 1
-					   fi
+                       if [[ $INSWITCH == 2 ]] # IM
+                       then
+						   if [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
+						   then
+						       ANT_SHORT=HBA
+						   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
+						   then
+						       ANT_SHORT=LBA
+						   else
+						      echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
+						      exit 1
+						   fi
+                       else
+						   if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
+						   then
+						       ANT_SHORT=HBA
+						   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
+						   then
+						       ANT_SHORT=LBA
+						   else
+						      echo "ERROR: Antenna must be set to any of these values BF: HBA, HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
+						      exit 1
+						   fi
+                       fi
 				    fi # end if (( $ncols >= 2 ))
 			
 				    if (( $ncols == 2 ))
 				    then
 	                    if [ $INSWITCH == 1 ] # BF
 	                    then
-							if [[ $ANTENNA == "HBA" ]] 
+							if [[ $ANT_SHORT == "HBA" ]] 
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA
 						        STEPS=$STEPS_HBA
@@ -939,7 +904,7 @@ do
 						        INTERVAL=$INTEG_LBA
 							fi
 						else
-							if [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBALow" ]] 
+							if [[ $ANT_SHORT == "HBA" ]]
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
@@ -956,7 +921,7 @@ do
 				        if [ $INSWITCH == 1 ] # BF
 				        then
 				            STEPS=`echo $line | awk '{print $4}'`
-				            if [[ $ANT_SHORT == HBA ]]
+				            if [[ $ANT_SHORT == "HBA" ]]
 				            then 
 				                INTERVAL=$INTEG_HBA
 				            else
@@ -992,14 +957,15 @@ do
 				        SUBBANDS_SET=1
 				    fi
 				    
-				    if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBALow" ]]
+				    if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBALow" ]]
 				    then
 				        ANT_SHORT=HBA
-				    elif [[ $ANTENNA == "LBA" ]]
+				    elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBAHigh" ]] || [[ $ANTENNA == "LBALow" ]]
 				    then
 				        ANT_SHORT=LBA
 				    else
-				       echo "ERROR: Antenna must be set to any of these values: HBAHigh, HBALow, HBA or LBA"
+					   echo "ERROR: Antenna must be set to any of these values BF: HBA, HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
+					   echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
 				       exit 1
 				    fi
 				# when input table contains ra and dec values
@@ -1010,30 +976,38 @@ do
 				    if (( $ncols >= 3 ))
 				    then
 				       ANTENNA=`echo $line | awk '{print $3}'`
-					   if [[ $ANTENNA == "HBALow" ]] && [[ $INSWITCH == 2 ]]
-					   then
-					       ANT_SHORT=HBA
-					   elif [[ $ANTENNA == "HBAHigh" ]] && [[ $INSWITCH == 2 ]]
-					   then
-					       ANT_SHORT=HBA
-					   elif [[ $ANTENNA == "HBA" ]] && [[ $INSWITCH == 1 ]]
-					   then
-					       ANT_SHORT=HBA
-					   elif [[ $ANTENNA == "LBA" ]]
-					   then
-					       ANT_SHORT=LBA
-					   else
-					      echo "ERROR: Antenna must be set to any of these IM values: HBALow, HBAHigh, LBA"
-					      echo "ERROR: Antenna must be set to any of these BF values: HBA, LBA"
-					      exit 1
-					   fi
+				       
+                       if [[ $INSWITCH == 1 ]] # BF
+                       then
+						   if [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
+						   then
+						       ANT_SHORT=HBA
+						   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
+						   then
+						       ANT_SHORT=LBA
+						   else
+						      echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
+						      exit 1
+						   fi
+                       else
+						   if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
+						   then
+						       ANT_SHORT=HBA
+						   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
+						   then
+						       ANT_SHORT=LBA
+						   else
+						      echo "ERROR: Antenna must be set to any of these values BF: HBA, HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
+						      exit 1
+						   fi
+                       fi
 				    fi
 			
 				    if (( $ncols == 3 ))
 				    then
 	                    if [ $INSWITCH == 1 ] # BF
 	                    then
-							if [[ $ANTENNA == "HBA" ]] 
+							if [[ $ANT_SHORT == "HBA" ]] 
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA
 						        STEPS=$STEPS_HBA
@@ -1044,7 +1018,7 @@ do
 						        INTERVAL=$INTEG_LBA
 							fi
 						else
-							if [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBALow" ]] 
+							if [[ $ANT_SHORT == "HBA" ]]  
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
@@ -1097,167 +1071,270 @@ do
 				        SUBBANDS_SET=1
 				    fi
 				    
-				    if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBALow" ]]
+				    if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBAHigh" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBALow" ]]
 				    then
 				        ANT_SHORT=HBA
-				    elif [[ $ANTENNA == "LBA" ]]
+				    elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBAHigh" ]] || [[ $ANTENNA == "LBALow" ]]
 				    then
 				        ANT_SHORT=LBA
 				    else
-				       echo "ERROR: Antenna must be set to any of these values: HBAHigh, HBALow, HBA or LBA"
+					   echo "ERROR: Antenna must be set to any of these values BF: HBA, HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
+					   echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
 				       exit 1
 				    fi
 				fi  #end if (( $INTYPE == 1))
-#		        else # IM
-#			        # when input table contains object-names
-#			        if (( $INTYPE == 1))
-#			        then
-#				       OBJECT=`echo $line | awk '{print $1}'`
-#				       if (( $ncols >= 2 ))
-#				       then
-#				           ANTENNA=`echo $line | awk '{print $2}'`
-#		
-#						   if [[ $ANTENNA == "HBALow" ]]
-#						   then
-#						       ANT_SHORT=HBA
-#						   elif [[ $ANTENNA == "HBAHigh" ]]
-#						   then
-#						       ANT_SHORT=HBA
-#						   elif [[ $ANTENNA == "LBA" ]]
-#						   then
-#						       ANT_SHORT=LBA
-#						   else
-#						      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBAHigh or LBA"
-#						      exit 1
-#						   fi
-#			           fi
-#				       if (( $ncols >= 5 ))
-#				       then
-#					        START=`echo $line | awk '{print $3}'`
-#					        TIME=`echo $line | awk '{print $4}'`
-#					        STATIONS=`echo $line | awk '{print $5}'`                
-#				
-#						    if (( $LST == 1 ))
-#						    then
-#					           LST_DIFF=120
-#						       # change the start time from LST to UT
-#						       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-#						       #echo "new start is $new_start"
-#						       #START=$new_start
-#						       #previous_start=$new_start
-#						    else 
-#						       LST_DIFF=0
-#						    fi
-#			           fi
-#				       if (( $ncols == 6 ))
-#				       then
-#					        SUBBANDS=`echo $line | awk '{print $6}'`
-#					        SUBBANDS_SET=1
-#		               fi
-#			        # when input table contains ra and dec values
-#				    else
-#				       RA_DEG=`echo $line | awk '{print $1}'`
-#				       DEC_DEG=`echo $line | awk '{print $2}'`
-#			
-#				       if (( $ncols >= 3 ))
-#				       then
-#				           ANTENNA=`echo $line | awk '{print $3}'`
-#			
-#						   if [[ $ANTENNA == "HBALow" ]]
-#						   then
-#						       ANT_SHORT=HBA
-#						   elif [[ $ANTENNA == "HBAHigh" ]]
-#						   then
-#						       ANT_SHORT=HBA
-#						   elif [[ $ANTENNA == "LBA" ]]
-#						   then
-#						       ANT_SHORT=LBA
-#						   else
-#						      echo "ERROR: Antenna must be set to any of these three values: HBALow, HBSHigh or LBA"
-#						      exit 1
-#						   fi
-#			           fi
-#				       if (( $ncols >= 6 ))
-#				       then
-#					        START=`echo $line | awk '{print $4}'`
-#					        TIME=`echo $line | awk '{print $5}'`
-#					        STATIONS=`echo $line | awk '{print $6}'`                
-#				
-#						    if (( $LST == 1 ))
-#						    then
-#					           LST_DIFF=120
-#						       # change the start time from LST to UT
-#						       #new_start=`date -j -v +$LST_DIFF"M" -f "%Y-%m-%dT%H:%M:%S" $START "+%Y-%m-%dT%H:%M:%S"`
-#						       #echo "new start is $new_start"
-#						       #START=$new_start
-#						       #previous_start=$new_start
-#						    else 
-#						       LST_DIFF=0
-#						    fi
-#			           fi
-#			           if (( $ncols == 7 ))
-#				       then
-#					        SUBBANDS=`echo $line | awk '{print $7}'`
-#					        SUBBANDS_SET=1
-#		               fi
-#		
-#				    fi # end if (( $INTYPE == 1))
-#		        fi # end if [ $INSWITCH == 1 ] 
-		
 		
 		        ##################################################
-		        # Set up the Subbands
+		        # Set up the Subbands if they were not set via the file
 		        if [ $SUBBANDS_SET == 0 ]
 		        then
-					if [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] 
-					then
-					    SUBBANDS="200..443"
-					elif [ $user_subbands_hbahigh == 0 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] 
-					then
-					    SUBBANDS="77..320"
-			        elif ( [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ] && [ $INSWITCH == 1 ] ) 
-			        then
-			            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
-			            if [ $needs_expand != "" ]
-			            then
-			               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
-			            else
-					       SUBBANDS=$SUBBANDS_HBA
-					    fi
-			        elif ( [ $user_subbands_hbahigh == 1 ] && [ $ANTENNA == "HBAHigh" ] && [ $INSWITCH == 2 ] )
-			        then
-			            needs_expand=`echo $SUBBANDS_HBAHigh | grep "," | grep ".."`
-			            if [ $needs_expand != "" ]
-			            then
-			               SUBBANDS=`echo "$SUBBANDS_HBAHigh" | expand_sblist.py`
-			            else
-					       SUBBANDS=$SUBBANDS_HBAHigh
-					    fi
-			        elif [ $user_subbands_hbalow == 0 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] 
-			        then
-					    SUBBANDS="54..297"
-			        elif [ $user_subbands_hbalow == 1 ] && [ $ANTENNA == "HBALow" ] && [ $INSWITCH == 2 ] 
-			        then
-					    needs_expand=`echo $SUBBANDS_HBALow | grep "," | grep ".."`
-			            if [ $needs_expand != "" ]
-			            then
-			               SUBBANDS=`echo "$SUBBANDS_HBALow" | expand_sblist.py`
-			            else
-					       SUBBANDS=$SUBBANDS_HBALow
-					    fi
-					elif [ $user_subbands_lba == 0 ] && [ $ANTENNA == "LBA" ] 
-					then
-					    SUBBANDS="154..397"
-			        elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ] 
-			        then
-			            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
-			            if [ $needs_expand != "" ]
-			            then
-			               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
-			            else
-					       SUBBANDS=$SUBBANDS_LBA
-					    fi
-				    fi   
+		            if [ $INSWITCH == 1 ]  # BF
+		            then
+		                if [ $user_subbands_hba == 0 ] && [ $ANTENNA == "HBA" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="200..443"
+		                    else
+		                        SUBBANDS="195..438"
+                            fi
+		                elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_HBA
+						    fi
+		                elif [ $user_subbands_hbahigh == 0 ] && [ $ANTENNA == "HBAHigh" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="77..320"
+		                    else
+		                        SUBBANDS="3..246"
+                            fi
+		                elif [ $user_subbands_hbahigh == 1 ] && [ $ANTENNA == "HBAHigh" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_HBAHigh | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_HBAHigh" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_HBAHigh
+						    fi
+		                elif [ $user_subbands_hbamid == 0 ] && [ $ANTENNA == "HBAMid" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        echo "ERROR: HBAMid is not allowed with the 200MHz clock;  please recheck your inputs; clock is set for entire list of observations."
+		                        exit 1
+		                    else
+		                        SUBBANDS="140..383"
+                            fi
+		                elif [ $user_subbands_hbamid == 1 ] && [ $ANTENNA == "HBAMid" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        echo "ERROR: HBAMid is not allowed with the 200MHz clock;  please recheck your inputs; clock is set for entire list of observations."
+		                        exit 1
+		                    else
+	                            needs_expand=`echo $SUBBANDS_HBAMid | grep "," | grep ".."`
+					            if [ $needs_expand != "" ]
+					            then
+					               SUBBANDS=`echo "$SUBBANDS_HBAMid" | expand_sblist.py`
+					            else
+							       SUBBANDS=$SUBBANDS_HBAMid
+							    fi
+                            fi
+		                elif [ $user_subbands_hbalow == 0 ] && [ $ANTENNA == "HBALow" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="200..443"
+		                    else
+		                        SUBBANDS="195..438"
+                            fi
+		                elif [ $user_subbands_hbalow == 1 ] && [ $ANTENNA == "HBALow" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_HBALow | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_HBALow" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_HBALow
+						    fi
+		                elif [ $user_subbands_lba == 0 ] && [ $ANTENNA == "LBA" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="100..343"
+		                    else
+		                        SUBBANDS="128..371"
+                            fi
+		                elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_LBA
+						    fi
+		                elif [ $user_subbands_lbahigh == 0 ] && [ $ANTENNA == "LBAHigh" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="154..397"
+		                    else
+		                        SUBBANDS="195..438"
+                            fi
+		                elif [ $user_subbands_lbahigh == 1 ] && [ $ANTENNA == "LBAHigh" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_LBAHigh | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_LBAHigh" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_LBAHigh
+						    fi
+		                elif [ $user_subbands_lbalow == 0 ] && [ $ANTENNA == "LBALow" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="100..343"
+		                    else
+		                        SUBBANDS="128..371"
+                            fi
+		                elif [ $user_subbands_lbalow == 1 ] && [ $ANTENNA == "LBALow" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_LBALow | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_LBALow" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_LBALow
+						    fi
+                        else
+                            echo "ERROR: BF, unable to set proper list of subbands"
+                            exit 1
+		                fi
+		            else  # if [ $INSWITCH == 2 ]  (Imaging)
+		                if [ $user_subbands_hbahigh == 0 ] && [ $ANTENNA == "HBAHigh" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="52..255"
+		                    else
+		                        SUBBANDS="52..255"  
+                            fi
+		                elif [ $user_subbands_hbahigh == 1 ] && [ $ANTENNA == "HBAHigh" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_HBAHigh | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_HBAHigh" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_HBAHigh
+						    fi
+		                elif [ $user_subbands_hbamid == 0 ] && [ $ANTENNA == "HBAMid" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        echo "ERROR: HBAMid is not allowed with the 200MHz clock;  please recheck your inputs; clock is set for entire list of observations."
+		                        exit 1
+		                    else
+		                        SUBBANDS="66..309"
+                            fi
+		                elif [ $user_subbands_hbamid == 1 ] && [ $ANTENNA == "HBAMid" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        echo "ERROR: HBAMid is not allowed with the 200MHz clock;  please recheck your inputs; clock is set for entire list of observations."
+		                        exit 1
+		                    else
+	                            needs_expand=`echo $SUBBANDS_HBAMid | grep "," | grep ".."`
+					            if [ $needs_expand != "" ]
+					            then
+					               SUBBANDS=`echo "$SUBBANDS_HBAMid" | expand_sblist.py`
+					            else
+							       SUBBANDS=$SUBBANDS_HBAMid
+							    fi
+                            fi
+		                elif [ $user_subbands_hbalow == 0 ] && [ $ANTENNA == "HBALow" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="77..320"
+		                    else
+		                        SUBBANDS="77..320"
+                            fi
+		                elif [ $user_subbands_hbalow == 1 ] && [ $ANTENNA == "HBALow" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_HBALow | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_HBALow" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_HBALow
+						    fi
+		                elif [ $user_subbands_lbahigh == 0 ] && [ $ANTENNA == "LBAHigh" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="156..399"
+		                    else
+		                        SUBBANDS="195..438"
+                            fi
+		                elif [ $user_subbands_lbahigh == 1 ] && [ $ANTENNA == "LBAHigh" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_LBAHigh | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_LBAHigh" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_LBAHigh
+						    fi
+		                elif [ $user_subbands_lba == 0 ] && [ $ANTENNA == "LBA" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="156..399"
+		                    else
+		                        SUBBANDS="195..438"
+                            fi
+		                elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_LBA
+						    fi
+		                elif [ $user_subbands_lbalow == 0 ] && [ $ANTENNA == "LBALow" ]
+		                then
+		                    if [ $clock == "200" ]
+		                    then
+		                        SUBBANDS="54..297"
+		                    else
+		                        SUBBANDS="128..371"
+                            fi
+		                elif [ $user_subbands_lbalow == 1 ] && [ $ANTENNA == "LBALow" ]
+		                then
+                            needs_expand=`echo $SUBBANDS_LBALow | grep "," | grep ".."`
+				            if [ $needs_expand != "" ]
+				            then
+				               SUBBANDS=`echo "$SUBBANDS_LBALow" | expand_sblist.py`
+				            else
+						       SUBBANDS=$SUBBANDS_LBALow
+						    fi
+                        else
+                            echo "ERROR: IM, unable to set proper list of subbands"
+                            exit 1
+		                fi		            
+		            fi # if [ $INSWITCH == 1 ] 
 			    fi # end if [ $SUBBANDS_SET == 0 ]
 		    fi # end if (( $beam > 1 ))
 		    
@@ -1472,65 +1549,110 @@ do
 	        fi # end if (( $beam == 1 ))
 	        
 	        ##################################################
-	        # Antenna related setttings, depending on input
+	        # Antenna filter related setttings	        
+            
 		    if [ $ANTENNA == "HBAHigh" ]
 		    then
 		       INSTRUMENT_FILTER="210-250"
-		       if [ $user_modeHBA == 0 ]
-		       then
-		          ANTENNA_SETTING="HBA Dual"
-		       else
-		          if [ $modeHBA == "Zero" ] || [ $modeHBA == "One" ] || [ $modeHBA == "Dual" ] || [ $modeHBA == "Joined" ]
-		          then
-		             ANTENNA_SETTING="HBA $modeHBA"
-		          else 
-		             echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using defaul HBA Dual"
-		             ANTENNA_SETTING="HBA Dual"
-		          fi
-		       fi
+		    elif [ $ANTENNA == "HBAMid" ] && [ $clock == "200" ]
+		    then
+		       echo "ERROR: HBAMid is not allowed with the 200MHz clock;  please recheck your inputs; clock is set for entire list of observations."
+		       exit 1
+		    elif [ $ANTENNA == "HBAMid" ] && [ $clock == "160" ]
+		    then
+		       INSTRUMENT_FILTER="170-230"
 		    elif [ $ANTENNA == "HBALow" ] || [ $ANTENNA == "HBA" ]
 		    then
 		       INSTRUMENT_FILTER="110-190"
-		       if [ $user_modeHBA == 0 ] && [ $INSWITCH == 1 ]
-		       then
-		          ANTENNA_SETTING="HBA Zero"
-		       elif [ $user_modeHBA == 0 ] && [ $INSWITCH == 2 ]
-		       then
-		          ANTENNA_SETTING="HBA Dual"
-		       else
-		          if [ $modeHBA == "Zero" ] || [ $modeHBA == "One" ] || [ $modeHBA == "Dual" ] || [ $modeHBA == "Joined" ]
-		          then
-		             ANTENNA_SETTING="HBA $modeHBA"
-		          else 
-		             if [ $INSWITCH == 1 ]
-		             then
-		                echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using defaul HBA Zero"
-		                ANTENNA_SETTING="HBA Zero"
-		             else
-		                echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using defaul HBA Dual"
-		                ANTENNA_SETTING="HBA Dual"
-		             fi
-		          fi
-		       fi
-		    elif [ $ANTENNA == "LBA" ]
+		    elif [ $ANTENNA == "LBAHigh" ] 
 		    then
-		       INSTRUMENT_FILTER="30-90"
-	           ANTENNA_SETTING="LBA Outer"
-		       if [ $modeLBA == "Outer" ] || [ $modeLBA == "Inner" ] || [ $modeLBA == "Sparse Even" ] || [ $modeLBA == "Sparse Odd" ] || [ $modeLBA == "X" ] || [ $modeLBA == "Y" ]
-		       then
-		          ANTENNA_SETTING="LBA $modeLBA"
-		       else 
-		             echo "WARNING: user antenna mode LBA $modeLBA is not recognized, using defaul LBA Outer"
-		             ANTENNA_SETTING="LBA Outer"
+		       if (( $clock == 200 ))
+		       then 
+		          INSTRUMENT_FILTER="30-90"
+		       else
+		          INSTRUMENT_FILTER="30-70"
 		       fi
-		    fi
-						
+		    elif [ $ANTENNA == "LBALow" ]  
+		    then
+		       if (( $clock == 200 ))
+		       then 
+		          INSTRUMENT_FILTER="10-90"
+		       else
+		          INSTRUMENT_FILTER="10-70"
+		       fi
+		    elif [ $ANTENNA == "LBA" ]  && [ $INSWITCH == 1 ]  # defaults to LBALow values
+		    then
+		       if (( $clock == 200 ))
+		       then 
+		          INSTRUMENT_FILTER="10-90"
+		       else
+		          INSTRUMENT_FILTER="10-70"
+		       fi
+		    elif [ $ANTENNA == "LBA" ]  && [ $INSWITCH == 2 ]  # defaults to LBAHigh values
+		    then
+		       if (( $clock == 200 ))
+		       then 
+		          INSTRUMENT_FILTER="30-90"
+		       else
+		          INSTRUMENT_FILTER="30-70"
+		       fi
+            fi
+
+	        ##################################################
+	        # Antenna mode settings  	        
+
+	       if [ $user_modeHBA == 0 ] && [ $ANT_SHORT == "HBA" ]
+	       then
+	          if [ $INSWITCH == 1 ] #BF
+	          then
+	             ANTENNA_SETTING="HBA $modeHBA_BF"
+	          else
+	             ANTENNA_SETTING="HBA $modeHBA_IM"
+	          fi
+	       elif [ $user_modeHBA == 1 ] && [ $ANT_SHORT == "HBA" ]
+	       then
+	          if [ $INSWITCH == 1 ] #BF
+	          then
+	             modeHBA=$modeHBA_BF
+	          else
+	             modeHBA=$modeHBA_IM
+	          fi
+	          if [ $modeHBA == "Zero" ] || [ $modeHBA == "One" ] || [ $modeHBA == "Dual" ] || [ $modeHBA == "Joined" ]
+	          then
+	             ANTENNA_SETTING="HBA $modeHBA"
+	          else 
+	              echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using default"
+		          if [ $INSWITCH == 1 ] #BF
+		          then
+		             ANTENNA_SETTING="HBA $modeHBA_BF"
+		          else
+		             ANTENNA_SETTING="HBA $modeHBA_IM"
+		          fi
+	          fi
+	       fi
+
+	       if [ $user_modeLBA == 0 ] && [ $ANT_SHORT == "LBA" ]
+	       then
+	          ANTENNA_SETTING="LBA $modeLBA"
+	       elif [ $user_modeLBA == 1 ] && [ $ANT_SHORT == "LBA" ]
+	       then 
+	          if [ $modeLBA == "Outer" ] || [ $modeLBA == "Inner" ] || [ $modeLBA == "Sparse Even" ] || [ $modeLBA == "Sparse Odd" ] || [ $modeLBA == "X" ] || [ $modeLBA == "Y" ]
+	          then
+	             ANTENNA_SETTING="HBA $modeLBA"
+	          else 
+	             echo "WARNING: user antenna mode LBA $modeLBA is not recognized, using default LBA Outer"
+	             ANTENNA_SETTING="LBA Outer"
+	          fi
+	       fi
+
+	        # sanity check on the time interval						
 			if (( $INTERVAL < 1 ))
 			then
 			    echo "ERROR: integration time of $INTERVAL is invalid; must be >= 1."
 			    exit 1
 			fi
 
+            # increase the coutner if in multi beam mode
 	       	if [ $MULTI == 0 ]
 	        then
 	           beam_counter=0
@@ -1543,14 +1665,14 @@ do
 			if (( $INTYPE == 1 ))
 			then
 			   echo "OBJECT NAME = $OBJECT"
-			   OBJECT="$OBJECT ($ANTENNA)"
+			   OBJECT="$OBJECT ($ANT_SHORT)"
 			   if [ $nbeams == 1 ]
 			   then
-			      OBJECT_LONG="$OBJECT"
-			      OBJECT_LONG_BEAM="$OBJECT"
+			      OBJECT_LONG=`echo $OBJECT | sed -e "s/$ANT_SHORT/$ANTENNA/g"`
+			      OBJECT_LONG_BEAM=`echo $OBJECT | sed -e "s/$ANT_SHORT/$ANTENNA/g"`
 			   else
-			      OBJECT_LONG="$OBJECT Multi-Beam"
-			      OBJECT_LONG_BEAM="$OBJECT Multi-Beam #$beam"
+			      OBJECT_LONG=`echo "$OBJECT Multi-Beam" | sed -e "s/$ANT_SHORT/$ANTENNA/g"`
+			      OBJECT_LONG_BEAM=`echo "$OBJECT Multi-Beam #$beam" | sed -e "s/$ANT_SHORT/$ANTENNA/g"`
 			   fi
 			else
 			   if [ $nbeams == 1 ]
@@ -1708,7 +1830,7 @@ do
 			      fi
 			   done
 			fi
-	
+		        
 			#write the observation section per OBJECT in the list
 	
 	#		if [[ $ANTENNA == "HBA" ]] 
@@ -1732,13 +1854,13 @@ do
 	           if (( $beam_counter == 0 ))
 	           then
 #	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" $middle >> $outfile
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/CLOCK/$clock/g" $middle >> $outfile
 	           fi
 	        elif [ $INSWITCH == 2 ]  && [ $skip == 0 ]
 	        then
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/CLOCK/$clock/g" $middle >> $outfile
 	           fi
 	        fi 
 		        
