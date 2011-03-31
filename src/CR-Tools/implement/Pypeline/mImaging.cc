@@ -88,28 +88,19 @@ using namespace casa;
   Description:
   Available Coordinate Types are:
 
-  -  Azimuth-Elevation-Height, ``\vec x = (Az,El,H)``
-  AzElHeight,
-  -  Azimuth-Elevation-Radius, ``\vec x = (Az,El,R)``
-  AzElRadius,
-  -  Cartesian coordinates, ``\vec x = (x,y,z)``
-  Cartesian,
-  -  Cylindrical coordinates, ``\vec x = (r,\phi,h)``
-  Cylindrical,
-  -  Direction on the sky, `\vec x = (Lon,Lat)``
-  Direction,
-  -  Direction on the sky with radial distance, ``\vec x = (Lon,Lat,R)``
-  DirectionRadius,
-  -  Frquency
-  Frequency,
-  -  Longitude-Latitude-Radius
-  LongLatRadius,
-  -  North-East-Height
-  NorthEastHeight,
-  -  Spherical coordinates, ``\vec x = (r,\phi,\theta)``
-  Spherical,
-  - Time
-  Time
+  ================ ======================================================================
+  AzElHeight       Azimuth-Elevation-Height, ``\\vec x = (Az,El,H)``
+  AzElRadius       Azimuth-Elevation-Radius, ``\\vec x = (Az,El,R)``
+  Cartesian        Cartesian coordinates, ``\\vec x = (x,y,z)``
+  Cylindrical      Cylindrical coordinates, ``\\vec x = (r,\\phi,h)``
+  Direction        Direction on the sky, ``\\vec x = (Lon,Lat)``
+  DirectionRadius  Direction on the sky with radial distance, ``\\vec x = (Lon,Lat,R)``
+  Frquency         Frequency
+  LongLatRadius    Longitude-Latitude-Radius
+  NorthEastHeight  North-East-Height
+  Spherical        Spherical coordinates, ``\\vec x = (r,\\phi,\\theta)``
+  Time             Time
+  ================ ======================================================================
 */
 
 template <class Iter>
@@ -121,15 +112,15 @@ bool HFPP_FUNC_NAME  (Iter source,
                       )
 {
   return CR::convertVector(*target,
-			   *(target+1),
-			   *(target+2),
-			   targetCoordinate,
-			   *source,
-			   *(source+1),
-			   *(source+2),
-			   sourceCoordinate,
-			   anglesInDegrees
-			       );
+                           *(target+1),
+                           *(target+2),
+                           targetCoordinate,
+                           *source,
+                           *(source+1),
+                           *(source+2),
+                           sourceCoordinate,
+                           anglesInDegrees
+                               );
     }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -183,11 +174,11 @@ bool HFPP_FUNC_NAME  (Iter source,
 */
 template <class IterC>
 void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
-		    const IterC ccm,const IterC ccm_end,
-		    const IterC weights,const IterC weights_end,
-		    const HInteger nofAntennas,
-		    const HInteger nfreq
-		    )
+                    const IterC ccm,const IterC ccm_end,
+                    const IterC weights,const IterC weights_end,
+                    const HInteger nofAntennas,
+                    const HInteger nfreq
+                    )
 {
   IterC it_im(image);
   IterC it_im_start=image;
@@ -215,25 +206,25 @@ void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
     ++it_w1; ++it_w2; ++it_ccm; ++it_im;
     if (it_w1>=it_w1_end) { //reached the end of frequency bins of first antenna, restart at first bin and advance second antenna by one
       if (it_w2>=it_w2_end) { //the second antenna has reached the last antenna value (last baseline to first antenna), so increase first antenna by one
-	it_w1_start+=nfreq; //advance by one antenna (each containing nfreq frequencies), i.e. next baseline
-	it_w1_end+=nfreq;
-	if (it_w1_end>=it_w2_end) { //has cycled through all antenna pairs/all baselines, restart at beginning and advance to next pixel
-	  if (it_im!=it_im_end) {
-	    ERROR("hImageFromCCM: Mismatch between image vector, ccm, and weights");
-	    return;
-	  };
-	  if (it_ccm!=ccm_end) {
-	    ERROR("Error - hImageFromCCM: Mismatch between ccm and weights");
-	    return;
-	  };
-	  it_im_start=it_im_end;  //first frequency bin of NEXT PIXEL
-	  it_im_end=it_im_start+nfreq;
-	  it_w1_start=it_w2_end;  // at the end of w2 comes the next sequence fo weights for the next pixel
-	  it_w1_end=it_w1_start+nfreq;
-	  it_w2_end = it_w1_start+nofAntennas*nfreq;
-	  it_ccm=ccm; //ccm begins at first frequency first baseline again
-	};
-	it_w2=it_w1_end; //start second antenna pair pointer at antenna 1 - start with baseline 0-1
+        it_w1_start+=nfreq; //advance by one antenna (each containing nfreq frequencies), i.e. next baseline
+        it_w1_end+=nfreq;
+        if (it_w1_end>=it_w2_end) { //has cycled through all antenna pairs/all baselines, restart at beginning and advance to next pixel
+          if (it_im!=it_im_end) {
+            ERROR("hImageFromCCM: Mismatch between image vector, ccm, and weights");
+            return;
+          };
+          if (it_ccm!=ccm_end) {
+            ERROR("Error - hImageFromCCM: Mismatch between ccm and weights");
+            return;
+          };
+          it_im_start=it_im_end;  //first frequency bin of NEXT PIXEL
+          it_im_end=it_im_start+nfreq;
+          it_w1_start=it_w2_end;  // at the end of w2 comes the next sequence fo weights for the next pixel
+          it_w1_end=it_w1_start+nfreq;
+          it_w2_end = it_w1_start+nofAntennas*nfreq;
+          it_ccm=ccm; //ccm begins at first frequency first baseline again
+        };
+        it_w2=it_w1_end; //start second antenna pair pointer at antenna 1 - start with baseline 0-1
       };
       it_w1=it_w1_start;  //start over at first frequency bin in weights (with next baseline)
       it_im=it_im_start; //start over at first frequency bin in image (with next baseline)
@@ -322,14 +313,14 @@ void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (
-			const Iter antPosition,
-			const Iter skyDirection,
-			HNumber length
-			)
+                        const Iter antPosition,
+                        const Iter skyDirection,
+                        HNumber length
+                        )
 {
   return - (*skyDirection * *antPosition
-	    + *(skyDirection+1) * *(antPosition+1)
-	    + *(skyDirection+2) * *(antPosition+2))/length/CR::lightspeed;
+            + *(skyDirection+1) * *(antPosition+1)
+            + *(skyDirection+2) * *(antPosition+2))/length/CR::lightspeed;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -352,17 +343,17 @@ HNumber HFPP_FUNC_NAME (
 
 template <class Iter>
 HNumber HFPP_FUNC_NAME (
-			const Iter antPosition,
-			const Iter skyPosition,
-			const HNumber distance)
+                        const Iter antPosition,
+                        const Iter skyPosition,
+                        const HNumber distance)
 {
   return (
-	  sqrt(
-	       square(*skyPosition - *antPosition)
-	       +square(*(skyPosition+1) - *(antPosition+1))
-	       +square(*(skyPosition+2) - *(antPosition+2))
-	       ) - distance
-	  )/CR::lightspeed;
+          sqrt(
+               square(*skyPosition - *antPosition)
+               +square(*(skyPosition+1) - *(antPosition+1))
+               +square(*(skyPosition+2) - *(antPosition+2))
+               ) - distance
+          )/CR::lightspeed;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -402,10 +393,10 @@ HNumber HFPP_FUNC_NAME (
 
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
-		     const Iter antPositions, const Iter antPositions_end,
-		     const Iter skyPositions, const Iter skyPositions_end,
-		     const bool farfield
-		     )
+                     const Iter antPositions, const Iter antPositions_end,
+                     const Iter skyPositions, const Iter skyPositions_end,
+                     const bool farfield
+                     )
 {
   // Declaration of variables
   HNumber distance;
@@ -436,8 +427,8 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
       *del=hGeometricDelayFarField(ant,sky,distance);
       ++del;
       ant+=3; if (ant>=ant_end) {
-	ant=antPositions;
-	sky+=3; if (sky>=sky_end) sky=skyPositions;
+        ant=antPositions;
+        sky+=3; if (sky>=sky_end) sky=skyPositions;
       };
     };
   } else {
@@ -446,8 +437,8 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
       *del=hGeometricDelayNearField(ant,sky,distance);
       ++del;
       ant+=3; if (ant>=ant_end) {
-	ant=antPositions;
-	sky+=3; if (sky>=sky_end) sky=skyPositions;
+        ant=antPositions;
+        sky+=3; if (sky>=sky_end) sky=skyPositions;
       };
     };
   };
@@ -473,11 +464,11 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
 
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
-		     const Iter frequencies, const Iter frequencies_end,
-		     const Iter antPositions, const Iter antPositions_end,
-		     const Iter skyPositions, const Iter skyPositions_end,
-		     const bool farfield
-		     )
+                     const Iter frequencies, const Iter frequencies_end,
+                     const Iter antPositions, const Iter antPositions_end,
+                     const Iter skyPositions, const Iter skyPositions_end,
+                     const bool farfield
+                     )
 {
   // Declaration of variables
   HNumber distance=0.;
@@ -512,12 +503,12 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
       distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
-	freq=frequencies;
-	while (freq < frequencies_end && phase < phases_end) {
-	  *phase=hPhase(*freq,hGeometricDelayFarField(ant,sky,distance));
-	  ++phase; ++freq;
-	};
-	ant+=3;
+        freq=frequencies;
+        while (freq < frequencies_end && phase < phases_end) {
+          *phase=hPhase(*freq,hGeometricDelayFarField(ant,sky,distance));
+          ++phase; ++freq;
+        };
+        ant+=3;
       };
       sky+=3;
     };
@@ -526,12 +517,12 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
       distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && phase < phases_end) {
-	freq=frequencies;
-	while (freq < frequencies_end && phase < phases_end) {
-	  *phase=hPhase(*freq,hGeometricDelayNearField(ant,sky,distance));
-	  ++phase; ++freq;
-	};
-	ant+=3;
+        freq=frequencies;
+        while (freq < frequencies_end && phase < phases_end) {
+          *phase=hPhase(*freq,hGeometricDelayNearField(ant,sky,distance));
+          ++phase; ++freq;
+        };
+        ant+=3;
       };
       sky+=3;
     };
@@ -558,11 +549,11 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
 
 template <class CIter, class Iter>
 void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
-		     const Iter frequencies, const Iter frequencies_end,
-		     const Iter antPositions, const Iter antPositions_end,
-		     const Iter skyPositions, const Iter skyPositions_end,
-		     const bool farfield
-		     )
+                     const Iter frequencies, const Iter frequencies_end,
+                     const Iter antPositions, const Iter antPositions_end,
+                     const Iter skyPositions, const Iter skyPositions_end,
+                     const bool farfield
+                     )
 {
   // Declaration of variables
   HNumber distance;
@@ -598,12 +589,12 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
       distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
-	freq=frequencies;
-	while (freq < frequencies_end && weight < weights_end) {
-	  *weight=polar(1.0, hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))); // exp(HComplex(0.0,hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))));
-	  ++weight; ++freq;
-	};
-	ant+=3;
+        freq=frequencies;
+        while (freq < frequencies_end && weight < weights_end) {
+          *weight=polar(1.0, hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))); // exp(HComplex(0.0,hPhase(*freq,hGeometricDelayFarField(ant,sky,distance))));
+          ++weight; ++freq;
+        };
+        ant+=3;
       };
       sky+=3;
     };
@@ -612,12 +603,12 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
       distance = hVectorLength(sky,sky+3);
       ant=antPositions;
       while (ant < ant_end && weight < weights_end) {
-	freq=frequencies;
-	while (freq < frequencies_end && weight < weights_end) {
-	  *weight=polar(1.0, hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))); // exp(HComplex(0.0,hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))));
-	  ++weight; ++freq;
-	};
-	ant+=3;
+        freq=frequencies;
+        while (freq < frequencies_end && weight < weights_end) {
+          *weight=polar(1.0, hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))); // exp(HComplex(0.0,hPhase(*freq,hGeometricDelayNearField(ant,sky,distance))));
+          ++weight; ++freq;
+        };
+        ant+=3;
       };
       sky+=3;
     };
