@@ -46,7 +46,7 @@ import pycrtools.qualitycheck as qualitycheck
 import time
 import pytmf
 
-from pycrtools import IO
+#from pycrtools import IO
 """
 """
 
