@@ -64,22 +64,10 @@ using namespace std;
 TBBData::TBBData (std::string const &filename)
   : DAL::TBB_Timeseries (filename)
 {
-  init ();
 }
 
 TBBData::~TBBData ()
 {
-  destroy();
-}
-
-bool TBBData::init ()
-{
-  return true;
-}
-
-void TBBData::destroy ()
-{
-  ;
 }
 
 //__________________________________________________________________________
@@ -112,9 +100,116 @@ bool TBBData::python_selectDipoles(boost::python::list names)
   return selectDipoles(selection);
 }
 
-double TBBData::python_clockFrequency()
+boost::python::list TBBData::python_time()
 {
-  return commonAttributes().clockFrequency();
+  boost::python::list lst;
+
+  casa::Vector<uint> vec = time();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_sample_number()
+{
+  boost::python::list lst;
+
+  casa::Vector<uint> vec = sample_number();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_data_length()
+{
+  boost::python::list lst;
+
+  casa::Vector<uint> vec = data_length();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_sample_frequency_value()
+{
+  boost::python::list lst;
+
+  casa::Vector<double> vec = sample_frequency_value();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_sample_frequency_unit()
+{
+  boost::python::list lst;
+
+  casa::Vector< std::string > vec = sample_frequency_unit();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_sample_offset(int refAntenna)
+{
+  boost::python::list lst;
+
+  casa::Vector<int> vec = sample_offset(static_cast<uint>(refAntenna));
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_channelID()
+{
+  boost::python::list lst;
+
+  casa::Vector<int> vec = channelID();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_nyquist_zone()
+{
+  boost::python::list lst;
+
+  casa::Vector<uint> vec = nyquist_zone();
+
+  for(uint i=0; i<vec.nelements(); ++i)
+  {
+    lst.append(vec(i));
+  }
+
+  return lst;
 }
 
 std::ostream& operator<<(std::ostream& output, const TBBData& d)
@@ -148,25 +243,14 @@ std::ostream& operator<<(std::ostream& output, const TBBData& d)
 template <class Iter, class IIter>
 void HFPP_FUNC_NAME(const Iter vec_begin, const Iter vec_end, const IIter start_begin, const IIter start_end, const HInteger nofSamples, TBBData &data)
 {
-//  std::cout<<data.dipoleNames()<<std::endl;
-//
-//  std::set< std::string > selection;
-//
-//  selection.insert("007000000");
-//  selection.insert("007000001");
-//
-//  data.selectDipoles(selection);
-//
-//  std::cout<<data.selectedDipoles()<<std::endl;
-
-  const int N_vec = std::distance(vec_begin, vec_end);
+  const uint N_vec = std::distance(vec_begin, vec_end);
 
   if (N_vec != nofSamples*data.nofSelectedDatasets())
   {
     throw PyCR::ValueError("Data array has wrong size.");
   }
 
-  const int N_start = std::distance(start_begin, start_end);
+  const uint N_start = std::distance(start_begin, start_end);
 
   if (N_start != data.nofSelectedDatasets())
   {
@@ -176,7 +260,7 @@ void HFPP_FUNC_NAME(const Iter vec_begin, const Iter vec_end, const IIter start_
   IIter start_it = start_begin;
 
   casa::Vector<int> start(N_start);
-  for (int i=0; i<N_start; ++i)
+  for (uint i=0; i<N_start; ++i)
   {
     start(i) = static_cast<int>(*start_it);
     ++start_it;

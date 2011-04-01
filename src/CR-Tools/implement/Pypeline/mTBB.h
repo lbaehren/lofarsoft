@@ -53,18 +53,25 @@ public:
 
   bool python_selectDipoles(boost::python::list);
 
-  double python_clockFrequency();
+  boost::python::list python_time();
+
+  boost::python::list python_sample_number();
+
+  boost::python::list python_data_length();
+
+  boost::python::list python_sample_frequency_value();
+
+  boost::python::list python_sample_frequency_unit();
+
+  boost::python::list python_sample_offset(int refAntenna);
+
+  boost::python::list python_channelID();
+
+  boost::python::list python_nyquist_zone();
 
   // === Operators =========================================================
   friend std::ostream& operator<<(std::ostream& output, const TBBData& d);
 
-private:
-
-  //! Initialize the internal settings
-  bool init ();
-
-  //! Unconditional deletion 
-  void destroy(void);
 };
 
 // ________________________________________________________________________

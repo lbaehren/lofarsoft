@@ -415,7 +415,14 @@ BOOST_PYTHON_MODULE(_hftools)
     .def("selectAllDipoles", &TBBData::selectAllDipoles)
     .def("dipoleNames", &TBBData::python_dipoleNames)
     .def("selectDipoles", &TBBData::python_selectDipoles)
-    .def("clockFrequency", &TBBData::python_clockFrequency)
+    .def("time", &TBBData::python_time)
+    .def("sample_number", &TBBData::python_sample_number)
+    .def("data_length", &TBBData::python_data_length)
+    .def("sample_frequency_value", &TBBData::python_sample_frequency_value)
+    .def("sample_frequency_unit", &TBBData::python_sample_frequency_unit)
+    .def("sample_offset", &TBBData::python_sample_offset)
+    .def("channelID", &TBBData::python_channelID)
+    .def("nyquist_zone", &TBBData::python_nyquist_zone)
     ;
 
 }
