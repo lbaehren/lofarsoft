@@ -41,6 +41,14 @@
       Array</a> (LASA).</td>
     </tr>
     <tr valign="top">
+      <td bgcolor="dddddd">\b pulsar</td>
+      <td bgcolor="eeeeee">Tools and pipeline developed by the LOFAR Pulsar 
+      Working Group.  The majority of the tools are off-the-shelf software
+      packages used by the Pulsar community over the last 30 years.  These
+      tools and others developed for LOFAR are wrapped and use by the LOFAR Pulsar 
+      Pipelines.</td>
+    </tr>
+    <tr valign="top">
       <td bgcolor="dddddd">\b pybdsm</td>
       <td bgcolor="eeeeee">Python version of the <i>Blob detection and source
       modelling</i> package developed by the Surveys KSP.</td>
