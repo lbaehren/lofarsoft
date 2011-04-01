@@ -1012,3 +1012,41 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Get frequency values corresponding to FFT depending on the blocksize (derived from the length of the output array), sample frequency and Nyquist zone.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFTFrequencies
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(frequencies)()("Output vector with frequency values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(sampleFrequency)()("Sample frequency.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter frequencies, const Iter frequencies_end, const HNumber sampleFrequency, const HInteger nyquistZone)
+{
+  const int Nf = std::distance(frequencies, frequencies_end);
+
+  const int blocksize = 2 * (Nf - 1);
+
+  double nu = (sampleFrequency * (nyquistZone - 1)) / 2.0;
+
+  const double deltanu = sampleFrequency / blocksize;
+
+  Iter freq = frequencies;
+
+  while (freq != frequencies_end)
+  {
+    *freq = nu;
+
+    nu += deltanu;
+
+    ++ freq;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
