@@ -350,9 +350,9 @@ class TBBData(IOInterface):
         """
 
         if key == "TIMESERIES_DATA":
-            return self.readTimeseriesData(data, *args, **kwargs)
+            return self.getTimeseriesData(data, *args, **kwargs)
         if key == "FFT_DATA":
-            return self.readFFTData(data, *args, **kwargs)
+            return self.getFFTData(data, *args, **kwargs)
         else:
             raise KeyError("Unknown key: " + str(key))
 
