@@ -57,6 +57,7 @@
 #include "mIO.h"
 #include "mRF.h"
 #include "mNumpy.h"
+#include "mTBB.h"
 
 #ifdef HAVE_AERA
 #include "mIO_AERA.h"
@@ -400,6 +401,14 @@ BOOST_PYTHON_MODULE(_hftools)
 //                                                                  Numpy
 
 #include "../../../../build/cr/implement/Pypeline/mNumpy.def.h"
+
+// ________________________________________________________________________
+//                                                                      TBB 
+
+#include "../../../../build/cr/implement/Pypeline/mTBB.def.h"
+
+  class_<TBBData>("TBBData", init<std::string, uint>())
+    ;
 
 }
 
