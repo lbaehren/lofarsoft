@@ -156,7 +156,7 @@ class WrapperBlock():
         Process line and add it to the block.
         """
 
-        line_org = line # TODO: Fix shallow copy -> deep copy
+        line_org = line
 
         # ______________________________________________________________
         #                                                  Substitutions
@@ -355,10 +355,10 @@ class DocumentationBlock():
         Add a documentation line to the documentation section of the
         current sectionType.
         """
-        sectionChanged = self.setDocSection(line)
+        sectionChanged = self.setSection(line)
 
         if (not sectionChanged):
-            sectionType = self.getDocSection()
+            sectionType = self.getSection()
 
             # Catch dump mode
             if (sectionType == "Dump"):
@@ -376,13 +376,13 @@ class DocumentationBlock():
                 return
 
 
-    def setDocSection(self, line):
+    def setSection(self, line):
         """
         Set the sectiontype within the documentation.
         """
         # Ignore documentation sections when dumping documentation
         # Dump prevents the interpretationof other sectioning types
-        if (self.getDocSection() == "Dump"):
+        if (self.getSection() == "Dump"):
             return False
 
         line_content = line.strip()
@@ -403,7 +403,7 @@ class DocumentationBlock():
         return False
 
 
-    def formatDocSection(self, title):
+    def formatSectionTitle(self, title):
         """
         Get the documentation section title in a Sphinx parsable format.
         """
@@ -414,7 +414,7 @@ class DocumentationBlock():
         return result
 
 
-    def getDocSection(self):
+    def getSection(self):
         """
         Return the current documentation sectionType.
         """
@@ -658,10 +658,16 @@ class DocumentationBlock():
         """
         result = ""
 
-        result += "from _hftools import %s\n" %(self.getName())
-        result += "doc_temp = %s.__doc__.splitlines()[-1] + \"\\n\\n\"\n" %(self.getName())
-        result += "%s.__doc__ = \"\"\"%s\"\"\"\n" %(self.getName(), self.getSphinxDoc())
-        result += "__all__.append(\'%s\')\n" %(self.getName())
+        name = self.getName()
+        doc = self.getSphinxDoc()
+
+        result += "from _hftools import " + name + "\n"
+        result += "if (" + name + ".__doc__):\n"
+        result += "    " + name + ".__doc__ += \"" + "-"*80 + "\\n\\n\"\n"
+        result += "    " + name + ".__doc__ += \"\"\"" + doc + "\"\"\"\n"
+        result += "else:\n"
+        result += "    " + name + ".__doc__ = \"\"\"" + doc + "\"\"\"\n"
+        result += "__all__.append(\'" + name + "\')\n\n"
 
         return result
 
@@ -682,22 +688,22 @@ class DocumentationBlock():
 
         # Parameter description
         if self.getParameters():
-            result += r"\n" + self.formatDocSection("Parameters") + r"\n"
+            result += r"\n" + self.formatSectionTitle("Parameters") + r"\n"
             result += self.formatParameters() + r"\n"
 
         # Description
         if self.getDescription():
-            result += r"\n" + self.formatDocSection("Description") + r"\n"
+            result += r"\n" + self.formatSectionTitle("Description") + r"\n"
             result += self.formatDescription() + r"\n"
 
         # References
         if self.getReference():
-            result += r"\n" + self.formatDocSection("Reference") + r"\n"
+            result += r"\n" + self.formatSectionTitle("Reference") + r"\n"
             result += self.formatReference() + r"\n"
 
         # Examples
         if self.getExample():
-            result += r"\n" + self.formatDocSection("Example") + r"\n"
+            result += r"\n" + self.formatSectionTitle("Example") + r"\n"
             result += self.formatExample() + r"\n"
 
         # Additional documentation
@@ -817,8 +823,11 @@ def parseFile(input_filename, output_filename, options):
     iterator_block = None
     wrapper_block = None
 
-    header_rule  = "//" + "="*80 + "\n"
-    header = header_rule + "// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY code_parser.py\n" + header_rule + "\n"
+
+    header_rule = "="*80
+    header_text = "ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY crtools_code_parser.py"
+
+    #header = header_rule + "// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY crtools_code_parser.py\n" + header_rule + "\n"
 
     if (options.verbose | debugFlag):
         print "Executing parseFile..."
@@ -835,7 +844,8 @@ def parseFile(input_filename, output_filename, options):
     output_filename = output_path + "/" + output_basename + ".pp.cc"
     output_file = open(output_filename, 'w')
     if (output_file):
-        output_file.write(header)
+        output_file.write("// " + header_text + "\n")
+        output_file.write("// " + header_rule + "\n")
     if (options.verbose):
         print "Output file : %s" %(os.path.relpath(output_filename))
 
@@ -845,7 +855,10 @@ def parseFile(input_filename, output_filename, options):
     # PyDoc file
     pydoc_filename = output_path + "/" + output_basename + ".py"
     pydoc_file = open(pydoc_filename, 'w')
-    pydoc_file.write("__all__ = []\n\n")
+    if (pydoc_file):
+        pydoc_file.write("# " + header_text + "\n")
+        pydoc_file.write("# " + header_rule + "\n\n")
+        pydoc_file.write("__all__ = []\n\n")
     if (options.verbose):
         print "Python doc file  : %s" %(os.path.relpath(pydoc_filename))
 
@@ -859,7 +872,8 @@ def parseFile(input_filename, output_filename, options):
             if (options.verbose):
                 print "Definition file: %s" %(def_filename)
             if (def_file):
-                def_file.write(header)
+                def_file.write("// " + header_text + "\n")
+                def_file.write("// " + header_rule + "\n\n")
             continue
 
         # Check docstring
