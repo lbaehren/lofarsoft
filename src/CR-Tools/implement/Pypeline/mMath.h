@@ -71,7 +71,7 @@ extern HNumber funcGaussian (const HNumber x, const HNumber sigma, const HNumber
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mMath.def.h"
+#include "mMath.def.h"
 
 
 

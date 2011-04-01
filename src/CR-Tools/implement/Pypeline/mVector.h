@@ -69,6 +69,6 @@ template <class T> void hReadRawVector(std::vector<T> &vec, HString raw)
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mVector.def.h"
+#include "mVector.def.h"
 
 #endif /* CR_PIPELINE_VECTOR_H */

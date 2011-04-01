@@ -83,7 +83,7 @@ void hAERALocalStationSummary (AERA::Datareader& dr);
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mIO_AERA.def.h"
+#include "mIO_AERA.def.h"
 
 #endif /* CR_PIPELINE_IO_AERA_H */
 

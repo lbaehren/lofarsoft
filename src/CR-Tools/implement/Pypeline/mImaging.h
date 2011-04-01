@@ -46,7 +46,7 @@ typedef CR::CoordinateType::Types CRCoordinateType;
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mImaging.def.h"
+#include "mImaging.def.h"
 
 
 #endif /* CR_PIPELINE_IMAGING_H */

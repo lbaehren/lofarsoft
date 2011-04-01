@@ -42,7 +42,7 @@ void hInitFitting();
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mFitting.def.h"
+#include "mFitting.def.h"
 
 
 #endif /* CR_PIPELINE_FITTING_H */

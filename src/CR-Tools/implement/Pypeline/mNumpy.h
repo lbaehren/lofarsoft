@@ -47,7 +47,7 @@ typedef boost::python::numeric::array ndarray;
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mNumpy.def.h"
+#include "mNumpy.def.h"
 
 
 #endif /* CR_PIPELINE_NUMPY_H */
