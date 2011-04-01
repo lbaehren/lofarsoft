@@ -3,6 +3,7 @@
 .. moduleauthor:: Pim Schellart <P.Schellart@astro.ru.nl>
 """
 
+import numpy as np
 import pycrtools as cr
 from pycrtools import metadata as md
 
@@ -33,6 +34,9 @@ class TBBData(IOInterface):
         # Select all antennas by default
         self.__selectedDipoles = self.__file.dipoleNames()
 
+        # Find reference antenna
+        self.__refAntenna = self.__file.find_reference_antenna()
+
         # Selection dependent initialization
         self.init_selection()
 
@@ -44,7 +48,7 @@ class TBBData(IOInterface):
         """
         
         # Align data
-        self.__alignment_offset = cr.hArray(self.__file.alignment_offset())
+        self.__alignment_offset = cr.hArray(self.__file.alignment_offset(self.__refAntenna))
 
         # Get antenna set
         self.__antenna_set = self.__file.antenna_set()

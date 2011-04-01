@@ -186,10 +186,22 @@ boost::python::list TBBData::python_sample_offset(int refAntenna)
   return lst;
 }
 
-boost::python::list TBBData::python_alignment_offset()
+boost::python::list TBBData::python_alignment_offset(int refAntenna)
 {
   boost::python::list lst;
 
+  std::vector<int> vec = sample_offset(static_cast<uint>(refAntenna));
+
+  for(uint i=0; i<vec.size(); ++i)
+  {
+    lst.append(-1 * vec[i]);
+  }
+
+  return lst;
+}
+
+int TBBData::python_find_reference_antenna()
+{
   // Reference antenna for alignment
   int refAntenna = 0;
   double current = 0.;
@@ -203,29 +215,21 @@ boost::python::list TBBData::python_alignment_offset()
   // Get FREQUENCY_VALUE for each antenna
   std::vector<double> f = sample_frequency_value();
 
-  // Find antenna that starts getting data last
-  double min = static_cast<double>(t[0])+(static_cast<double>(sn[0])/(f[0]*1.e6));
+  // Find antenna that starts getting data last and use it as reference
+  double max = static_cast<double>(t[0])+(static_cast<double>(sn[0])/(f[0]*1.e6));
 
   for (uint i=1; i<t.size(); ++i)
   {
     current = static_cast<double>(t[i])+(static_cast<double>(sn[i])/(f[i]*1.e6));
 
-    if (current < min)
+    if (current > max)
     {
       refAntenna = i;
-      min = current;
+      max = current;
     }
   }
 
-  // Get offsets with correct refference antenna for alignment
-  std::vector<int> offset = sample_offset(static_cast<uint>(refAntenna));
-
-  for(uint i=0; i<offset.size(); ++i)
-  {
-    lst.append(offset[i]);
-  }
-
-  return lst;
+  return refAntenna;
 }
 
 boost::python::list TBBData::python_channelID()

@@ -64,7 +64,9 @@ public:
 
   boost::python::list python_sample_offset(int refAntenna);
 
-  boost::python::list python_alignment_offset();
+  boost::python::list python_alignment_offset(int refAntenna);
+
+  int python_find_reference_antenna();
 
   boost::python::list python_channelID();
 
