@@ -213,3 +213,29 @@ class CoordinateGrid(object):
             temp.reshape((self.npix,2))
             self.azel[...,0:2]=temp[...]
             self.azel[...,2:3]=1.
+
+    def __repr__(self):
+        """Return string representation.
+        """
+
+        s = "Grid ("
+        s += "REFCODE " + str(self.refcode)
+        s += "PROJECTION " + str(self.projection) + " "
+        s += "NAXIS1 " + str(self.naxis1) + " "
+        s += "NAXIS2 " + str(self.naxis2) + " "
+        s += "CRVAL1 " + str(self.crval1) + " "
+        s += "CRVAL2 " + str(self.crval2) + " "
+        s += "CDELT1 " + str(self.cdelt1) + " "
+        s += "CDELT2 " + str(self.cdelt2) + " "
+        s += "CRPIX1 " + str(self.crpix1) + " "
+        s += "CRPIX2 " + str(self.crpix2) + " "
+        s += "LONPOLE " + str(self.lonpole) + " "
+        s += "LATPOLE " + str(self.latpole) + " "
+        s += "OBSTIME " + str(self.obstime) + " "
+        s += "UT1_UTC " + str(self.obstime) + " "
+        s += "L " + str(self.obstime) + " "
+        s += "PHI " + str(self.obstime)
+        s += ")"
+
+        return s
+
