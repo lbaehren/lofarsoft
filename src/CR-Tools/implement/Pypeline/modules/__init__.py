@@ -8,6 +8,9 @@
 from core import *
 import tasks
 
+# Import open function from IO module
+from IO import open
+
 # Ensure from pycrtools import * works correctly
 # for all functions exported from core
 #__all__ = [func for func in dir(core) if "__" not in  func]

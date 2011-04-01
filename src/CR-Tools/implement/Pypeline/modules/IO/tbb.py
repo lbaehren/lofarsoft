@@ -283,15 +283,23 @@ class TBBData(IOInterface):
         If **frequencies** is the array of frequencies available for the
         selected blocksize, then subsequent calls to `getFFTData` will
         return data corresponding to frequencies[nfmin:nfmax].
-        
-        Arguments:
-        *nfmin* minimum frequency as index into frequency array
-        *nfmax* maximum frequency as index into frequency array
-        
-        Return value:
+
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *nfmin*       minimum frequency as index into frequency array
+        *nfmax*       maximum frequency as index into frequency array
+        ============= =================================================
+
+        Output:
         This method does not return anything.
-        It raises an IndexError if frequency selection cannot be set
+
+        Raises:
+        It raises an `IndexError` if frequency selection cannot be set
         to requested values (e.g. index out of range)
+
         """
 
         if not isinstance(nfmin, int) or not isinstance(nfmax, int):
@@ -313,6 +321,7 @@ class TBBData(IOInterface):
         Return value:
         This method returns a FloatVector with the selected frequencies
         in Hz.
+
         """
         
         frequencies = self.__frequencies
@@ -321,6 +330,29 @@ class TBBData(IOInterface):
             frequencies=frequencies[range(self.__nfmin, self.__nfmax)]
 
         return frequencies
+
+    def read(self, key, data, *args, **kwargs):
+        """Generic read function supporting keyword arguments.
+
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *key*         Data type to read, one of:
+                      *TIMESERIES_DATA*
+                      *FFT_DATA*
+        *data*        array to write data to.
+        ============= =================================================
+
+        """
+
+        if key == "TIMESERIES_DATA":
+            return self.readTimeseriesData(data, *args, **kwargs)
+        if key == "FFT_DATA":
+            return self.readFFTData(data, *args, **kwargs)
+        else:
+            raise KeyError("Unknown key: " + str(key))
 
     def close(self):
         """Closes file and sets the data attribute `.closed` to
@@ -332,10 +364,4 @@ class TBBData(IOInterface):
         del self.__file
 
         self.closed = True
-
-def open(filename, blocksize=1024):
-    """Open file containing Transient Buffer Board data.
-    """
-
-    return TBBData(filename, blocksize)
 

@@ -110,7 +110,7 @@ class IOInterface(object):
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
 
     def getFrequencies(self):
-        """Returns the frequencies that are appicable to the FFT data
+        """Returns the frequencies that are applicable to the FFT data
 
         Output:
         This method returns a FloatVector with the selected frequencies
@@ -197,3 +197,19 @@ class IOInterface(object):
         system.
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
+
+    def read(self, key, data, *args, **kwargs):
+        """Generic read function supporting keyword arguments.
+
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *key*         Data type to read.
+        *data*        array to write data to.
+        ============= =================================================
+
+        """
+        raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
+

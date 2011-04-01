@@ -18,7 +18,6 @@ from math import *
 from datareader import *
 
 # Import structure modules
-
 from workspaces import *
 
 # Some initialization on the C++ side
