@@ -44,7 +44,6 @@ public:
   ~TBBData ();
 
   // === Parameters access =================================================
-  inline uint nofSelectedDatasets() { return selectedDatasets_p.size(); };
 
   // === Methods ===========================================================
 

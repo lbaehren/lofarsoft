@@ -106,11 +106,11 @@ boost::python::list TBBData::python_time()
 {
   boost::python::list lst;
 
-  casa::Vector<uint> vec = time();
+  std::vector<uint> vec = time();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -120,11 +120,11 @@ boost::python::list TBBData::python_sample_number()
 {
   boost::python::list lst;
 
-  casa::Vector<uint> vec = sample_number();
+  std::vector<uint> vec = sample_number();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -134,11 +134,11 @@ boost::python::list TBBData::python_data_length()
 {
   boost::python::list lst;
 
-  casa::Vector<uint> vec = data_length();
+  std::vector<uint> vec = data_length();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -148,11 +148,11 @@ boost::python::list TBBData::python_sample_frequency_value()
 {
   boost::python::list lst;
 
-  casa::Vector<double> vec = sample_frequency_value();
+  std::vector<double> vec = sample_frequency_value();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -162,11 +162,11 @@ boost::python::list TBBData::python_sample_frequency_unit()
 {
   boost::python::list lst;
 
-  casa::Vector< std::string > vec = sample_frequency_unit();
+  std::vector< std::string > vec = sample_frequency_unit();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -176,11 +176,11 @@ boost::python::list TBBData::python_sample_offset(int refAntenna)
 {
   boost::python::list lst;
 
-  casa::Vector<int> vec = sample_offset(static_cast<uint>(refAntenna));
+  std::vector<int> vec = sample_offset(static_cast<uint>(refAntenna));
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -195,20 +195,20 @@ boost::python::list TBBData::python_alignment_offset()
   double current = 0.;
 
   // Get TIME for each antenna
-  casa::Vector<uint> t = time();
+  std::vector<uint> t = time();
 
   // Get SAMPLE_NUMBER for each antenna
-  casa::Vector<uint> sn = sample_number();
+  std::vector<uint> sn = sample_number();
 
   // Get FREQUENCY_VALUE for each antenna
-  casa::Vector<double> f = sample_frequency_value();
+  std::vector<double> f = sample_frequency_value();
 
   // Find antenna that starts getting data last
-  double min = static_cast<double>(t(0))+(static_cast<double>(sn(0))/(f(0)*1.e6));
+  double min = static_cast<double>(t[0])+(static_cast<double>(sn[0])/(f[0]*1.e6));
 
-  for (int i=1; i<t.nelements(); ++i)
+  for (uint i=1; i<t.size(); ++i)
   {
-    current = static_cast<double>(t(i))+(static_cast<double>(sn(i))/(f(i)*1.e6));
+    current = static_cast<double>(t[i])+(static_cast<double>(sn[i])/(f[i]*1.e6));
 
     if (current < min)
     {
@@ -218,11 +218,11 @@ boost::python::list TBBData::python_alignment_offset()
   }
 
   // Get offsets with correct refference antenna for alignment
-  casa::Vector<int> offset = sample_offset(static_cast<uint>(refAntenna));
+  std::vector<int> offset = sample_offset(static_cast<uint>(refAntenna));
 
-  for(uint i=0; i<offset.nelements(); ++i)
+  for(uint i=0; i<offset.size(); ++i)
   {
-    lst.append(offset(i));
+    lst.append(offset[i]);
   }
 
   return lst;
@@ -232,11 +232,11 @@ boost::python::list TBBData::python_channelID()
 {
   boost::python::list lst;
 
-  casa::Vector<int> vec = channelID();
+  std::vector<int> vec = channelID();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
@@ -246,11 +246,11 @@ boost::python::list TBBData::python_nyquist_zone()
 {
   boost::python::list lst;
 
-  casa::Vector<uint> vec = nyquist_zone();
+  std::vector<uint> vec = nyquist_zone();
 
-  for(uint i=0; i<vec.nelements(); ++i)
+  for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec(i));
+    lst.append(vec[i]);
   }
 
   return lst;
