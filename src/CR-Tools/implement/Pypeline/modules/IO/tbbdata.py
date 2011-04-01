@@ -35,7 +35,7 @@ class TBBData(IOInterface):
         self.__alignment_offset = cr.hArray(self.__file.alignment_offset())
 
         # Get antenna set
-        self.__antennaSet = "HBA"
+        self.__antennaSet = self.__file.antenna_set()
 
         # Get Nyquist zone for each antenna
         self.__nyquist_zone = self.__file.nyquist_zone()

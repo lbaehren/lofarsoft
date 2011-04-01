@@ -27,7 +27,7 @@
 #include "mModule.h"
 
 /* DAL header files */
-#include <dal/TBB_Timeseries.h>
+#include <data_hl/TBB_Timeseries.h>
 
 class TBBData : public DAL::TBB_Timeseries {
 
