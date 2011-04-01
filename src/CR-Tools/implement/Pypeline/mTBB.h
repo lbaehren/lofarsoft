@@ -23,18 +23,20 @@
 #define CR_PIPELINE_TBB_H
 
 #include "core.h"
+#include "mArray.h"
+#include "mModule.h"
 
 /* DAL header files */
 #include <dal/TBB_Timeseries.h>
 
-class TBBData : private DAL::TBB_Timeseries {
+class TBBData : public DAL::TBB_Timeseries {
 
 public:
-  
+
   // === Construction ======================================================
 
   //! Argumented constructor
-  TBBData (std::string const &filename, uint const &blocksize=1);
+  TBBData (std::string const &filename);
 
   // === Destruction =======================================================
 
@@ -42,8 +44,19 @@ public:
   ~TBBData ();
 
   // === Parameters access =================================================
+  inline uint nofSelectedDatasets() { return selectedDatasets_p.size(); };
 
   // === Methods ===========================================================
+
+  // === Python specific methods ===========================================
+  boost::python::list python_dipoleNames();
+
+  bool python_selectDipoles(boost::python::list);
+
+  double python_clockFrequency();
+
+  // === Operators =========================================================
+  friend std::ostream& operator<<(std::ostream& output, const TBBData& d);
 
 private:
 
@@ -53,7 +66,7 @@ private:
   //! Unconditional deletion 
   void destroy(void);
 };
-  
+
 // ________________________________________________________________________
 //                                    Add declarations of wrapper functions
 

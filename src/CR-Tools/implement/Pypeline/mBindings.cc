@@ -407,7 +407,15 @@ BOOST_PYTHON_MODULE(_hftools)
 
 #include "../../../../build/cr/implement/Pypeline/mTBB.def.h"
 
-  class_<TBBData>("TBBData", init<std::string, uint>())
+  class_<TBBData>("TBBData", init<std::string>())
+    .def("filename", &TBBData::filename)
+    .def("nofStationGroups", &TBBData::nofStationGroups)
+    .def("nofDipoleDatasets", &TBBData::nofStationGroups)
+    .def("nofSelectedDatasets", &TBBData::nofSelectedDatasets)
+    .def("selectAllDipoles", &TBBData::selectAllDipoles)
+    .def("dipoleNames", &TBBData::python_dipoleNames)
+    .def("selectDipoles", &TBBData::python_selectDipoles)
+    .def("clockFrequency", &TBBData::python_clockFrequency)
     ;
 
 }
