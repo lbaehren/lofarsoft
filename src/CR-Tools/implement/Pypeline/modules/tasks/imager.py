@@ -4,82 +4,52 @@ Imager documentation
 
 """
 
-# What is exported by default
-__all__ = ['imager']
-
 from pycrtools.tasks import Task
 from pycrtools.grid import CoordinateGrid
 import pycrtools as cr
 import pytmf
 
-# Default all-sky image
-wcs_default = {
-    'NAXIS' : 2,
-    'NAXIS1' : 90,
-    'NAXIS2' : 90,
-    'CTYPE1' : 'ALON-STG',
-    'CTYPE2' : 'ALAT-STG',
-    'LONPOLE' : 0.,
-    'LATPOLE' : 90.,
-    'CRVAL1' : 180.,
-    'CRVAL2' : 90.,
-    'CRPIX1' : 45.5,
-    'CRPIX2' : 45.5,
-    'CDELT1' : 2.566666603088E+00,
-    'CDELT2' : 2.566666603088E+00,
-    'CUNIT1' : 'deg',
-    'CUNIT2' : 'deg',
-    'PC001001' : 1.000000000000E+00,
-    'PC002001' : 0.000000000000E+00,
-    'PC001002' : 0.000000000000E+00,
-    'PC002002' : 1.000000000000E+00
-}
-
 class Imager(Task):
-    """Imager class documentation.
+    """Imager task documentation.
     """
 
-    def call(self, #This function actually never gets called
-             image,
-             data,
-             startblock=0,
-             nblocks=16,
-             ntimesteps=1,
-             obstime=0, # Not a sensible default
-             L=pytmf.deg2rad(6.869837540),
-             phi=pytmf.deg2rad(52.915122495),
-             wcs=wcs_default):
-
-        # Store reference to image and data
-        self.image = image
-        self.data = data
-
-        # Store image parameters
-        self.startblock = startblock
-        self.nblocks = nblocks
-        self.ntimesteps = ntimesteps
-        self.obstime = obstime
-        self.wcs=wcs
-        self.phi=phi
-        self.L=L
+    parameters = {
+        'image' : { "default" : None, "positional" : 1 },
+        'data' : { "default" : None, "positional" : 2 },
+	    'startblock' : { "default" : 0 },
+	    'nblocks' : { "default" : 16 },
+	    'ntimesteps' : { "default" : 1 },
+	    'obstime' : { "default" : 0 },
+	    'L' : { "default" : pytmf.deg2rad(6.869837540) },
+	    'phi' : { "default" : pytmf.deg2rad(52.915122495) },
+        'NAXIS' : { "default" : 2 },
+        'NAXIS1' : { "default" : 90 },
+        'NAXIS2' : { "default" : 90 },
+        'CTYPE1' : { "default" : 'ALON-STG' },
+        'CTYPE2' : { "default" : 'ALAT-STG' },
+        'LONPOLE' : { "default" : 0. },
+        'LATPOLE' : { "default" : 90. },
+        'CRVAL1' : { "default" : 180. },
+        'CRVAL2' : { "default" : 90. },
+        'CRPIX1' : { "default" : 45.5 },
+        'CRPIX2' : { "default" : 45.5 },
+        'CDELT1' : { "default" : 2.566666603088E+00 },
+        'CDELT2' : { "default" : 2.566666603088E+00 },
+        'CUNIT1' : { "default" : 'deg' },
+        'CUNIT2' : { "default" : 'deg' },
+        'PC001001' : { "default" : 1.000000000000E+00 },
+        'PC002001' : { "default" : 0.000000000000E+00 },
+        'PC001002' : { "default" : 0.000000000000E+00 },
+        'PC002002' : { "default" : 1.000000000000E+00 }
+    }
 
     def init(self):
-
-        """Initialize the imager.
-
-        *data* IO object for accessing data
-        *L* observatory longitude (default center of LOFAR CS002)
-        *phi* observatory latitude (default center of LOFAR CS002)
-        *wcs* FITS world coordinate system parameters used for grid
-              (default all-sky image in AZEL)
+        """Initialize imager.
         """
-
-        # Start initialization
-        print "Initializing imager - setting derived parameters (beter use WorkSpace)"
 
         # Generate coordinate grid
         print "Generating grid"
-        self.grid=CoordinateGrid(obstime=obstime, L=self.L, phi=self.phi, **self.wcs)
+        self.grid=CoordinateGrid(obstime=self.obstime, L=self.L, phi=self.phi, NAXIS=self.NAXIS, NAXIS1=self.NAXIS1, NAXIS2=self.NAXIS2, CTYPE1=self.CTYPE1, CTYPE2=self.CTYPE2, LONPOLE=self.LONPOLE, LATPOLE=self.LATPOLE, CRVAL1=self.CRVAL1, CRVAL2=self.CRVAL2, CRPIX1=self.CRPIX1, CRPIX2=self.CRPIX2, CDELT1=self.CDELT1, CDELT2=self.CDELT2, CUNIT1=self.CUNIT1, CUNIT2=self.CUNIT2, PC001001=self.PC001001, PC002001=self.PC002001, PC001002=self.PC001002, PC002002=self.PC002002)
         print "Grid generation finished"
 
         # Get frequencies
@@ -92,13 +62,14 @@ class Imager(Task):
         self.antpos=self.data.getRelativeAntennaPositions()
         self.nantennas=int(self.antpos.getDim()[0])
 
+
         # Calculate geometric delays for all sky positions for all antennas
-        self.delays = cr.hArray(float, dimensions=(wcs['NAXIS1'], wcs['NAXIS2'], self.nantennas))
+        self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
         cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
 
         # Initialize empty arrays
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        self.t_image=cr.hArray(complex, dimensions=(wcs['NAXIS1'], wcs['NAXIS2'], self.nfreq), fill=0.)
+        self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
     def run(self):
         """Run the imager.
@@ -123,5 +94,3 @@ class Imager(Task):
 
             self.startblock += self.nblocks
 
-# Create a TaskLauncher
-#imager = TaskLauncher(Imager)
