@@ -8,6 +8,8 @@ from pycrtools.tasks import Task
 from pycrtools.grid import CoordinateGrid
 import pycrtools as cr
 import pytmf
+import numpy as np
+import time
 
 class Imager(Task):
     """Imager task documentation.
@@ -72,6 +74,7 @@ class Imager(Task):
                                  PC001002=self.PC001002,
                                  PC002002=self.PC002002)
         print "Grid generation finished"
+        print self.grid
 
         # Get frequencies
         self.frequencies=self.data.getFrequencies()
@@ -83,10 +86,9 @@ class Imager(Task):
         self.antpos=self.data.getRelativeAntennaPositions()
         self.nantennas=int(self.antpos.getDim()[0])
 
-
-        # Calculate geometric delays for all sky positions for all antennas
-        self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
-        cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
+#        # Calculate geometric delays for all sky positions for all antennas
+#        self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
+#        cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
 
         # Initialize empty arrays
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
@@ -96,6 +98,7 @@ class Imager(Task):
         """Run the imager.
         """
 
+        start = time.time()
         for step in range(self.ntimesteps):
             for block in range(self.startblock, self.startblock+self.nblocks):
 
@@ -115,4 +118,7 @@ class Imager(Task):
                 cr.hAbsSquareAdd(self.image[step], self.t_image)
 
             self.startblock += self.nblocks
+
+        end = time.time()
+        print "total runtime:", end-start, "s"
 
