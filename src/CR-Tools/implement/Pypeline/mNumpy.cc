@@ -218,7 +218,7 @@ void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
   // Copy and cast to correct type
   while (out_it != out_end && in_it != in_end)
   {
-    *out_it = static_cast<double>(real(*in_it * conj(*in_it)));
+    *out_it += static_cast<double>(real(*in_it * conj(*in_it)));
 
     ++out_it;
     ++in_it;
