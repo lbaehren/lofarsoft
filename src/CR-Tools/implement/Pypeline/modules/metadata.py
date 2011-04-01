@@ -70,7 +70,10 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     if isinstance(antennaIDs,cr.IntArray):
         antennaIDs=antennaIDs.vec()
     if isinstance(antennaIDs,list):
-        antennaIDs=cr.Vector(antennaIDs)
+        if isinstance(antennaIDs[0], str):
+            antennaIDs=cr.Vector([int(ID) for ID in antennaIDs])
+        else:
+            antennaIDs=cr.Vector(antennaIDs)
     stationIDs=np.array(list(antennaIDs))/1000000
     rcuIDs=np.mod(antennaIDs,1000)
     allStIDs=np.unique(stationIDs)

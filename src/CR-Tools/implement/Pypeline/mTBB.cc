@@ -38,6 +38,8 @@
 //
 // ========================================================================
 
+#include <sstream>
+
 #include "core.h"
 #include "mTBB.h"
 
@@ -184,6 +186,48 @@ boost::python::list TBBData::python_sample_offset(int refAntenna)
   return lst;
 }
 
+boost::python::list TBBData::python_alignment_offset()
+{
+  boost::python::list lst;
+
+  // Reference antenna for alignment
+  int refAntenna = 0;
+  double current = 0.;
+
+  // Get TIME for each antenna
+  casa::Vector<uint> t = time();
+
+  // Get SAMPLE_NUMBER for each antenna
+  casa::Vector<uint> sn = sample_number();
+
+  // Get FREQUENCY_VALUE for each antenna
+  casa::Vector<double> f = sample_frequency_value();
+
+  // Find antenna that starts getting data last
+  double min = static_cast<double>(t(0))+(static_cast<double>(sn(0))/(f(0)*1.e6));
+
+  for (int i=1; i<t.nelements(); ++i)
+  {
+    current = static_cast<double>(t(i))+(static_cast<double>(sn(i))/(f(i)*1.e6));
+
+    if (current < min)
+    {
+      refAntenna = i;
+      min = current;
+    }
+  }
+
+  // Get offsets with correct refference antenna for alignment
+  casa::Vector<int> offset = sample_offset(static_cast<uint>(refAntenna));
+
+  for(uint i=0; i<offset.nelements(); ++i)
+  {
+    lst.append(offset(i));
+  }
+
+  return lst;
+}
+
 boost::python::list TBBData::python_channelID()
 {
   boost::python::list lst;
@@ -210,6 +254,21 @@ boost::python::list TBBData::python_nyquist_zone()
   }
 
   return lst;
+}
+
+std::string TBBData::python_antenna_set()
+{
+  DAL::CommonAttributes c = commonAttributes();
+  return c.antennaSet(); 
+}
+
+std::string TBBData::python_summary()
+{
+  std::ostringstream os;
+
+  summary(os);
+
+  return os.str();
 }
 
 std::ostream& operator<<(std::ostream& output, const TBBData& d)

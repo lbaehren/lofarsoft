@@ -65,9 +65,15 @@ public:
 
   boost::python::list python_sample_offset(int refAntenna);
 
+  boost::python::list python_alignment_offset();
+
   boost::python::list python_channelID();
 
   boost::python::list python_nyquist_zone();
+
+  std::string python_antenna_set();
+
+  std::string python_summary();
 
   // === Operators =========================================================
   friend std::ostream& operator<<(std::ostream& output, const TBBData& d);

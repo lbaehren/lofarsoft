@@ -408,6 +408,7 @@ BOOST_PYTHON_MODULE(_hftools)
 #include "../../../../build/cr/implement/Pypeline/mTBB.def.h"
 
   class_<TBBData>("TBBData", init<std::string>())
+    .def("summary", &TBBData::python_summary)
     .def("filename", &TBBData::filename)
     .def("nofStationGroups", &TBBData::nofStationGroups)
     .def("nofDipoleDatasets", &TBBData::nofStationGroups)
@@ -421,8 +422,10 @@ BOOST_PYTHON_MODULE(_hftools)
     .def("sample_frequency_value", &TBBData::python_sample_frequency_value)
     .def("sample_frequency_unit", &TBBData::python_sample_frequency_unit)
     .def("sample_offset", &TBBData::python_sample_offset)
+    .def("alignment_offset", &TBBData::python_alignment_offset)
     .def("channelID", &TBBData::python_channelID)
     .def("nyquist_zone", &TBBData::python_nyquist_zone)
+    .def("antenna_set", &TBBData::python_antenna_set)
     ;
 
 }
