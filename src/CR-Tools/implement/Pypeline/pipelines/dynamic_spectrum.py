@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import pyfits
 import pycrtools as cr
 import metadata as md
-import IO as IO
+import IO
 
 ########### parameters needed to run  ###########
 
@@ -134,8 +134,8 @@ if filtertype == 'PPF' and not blocksize==1024:
     filtertype = 'Hanning'
 
 if filtertype == 'PPF':
-    import PPF
-    ppf=PPF.PPF()
+    import ppf
+    ppf=ppf.PPF()
     ppf.weights.div(65536.)
 elif filtertype == 'Hanning':
     thefilter=cr.hArray(float,[blocksize])

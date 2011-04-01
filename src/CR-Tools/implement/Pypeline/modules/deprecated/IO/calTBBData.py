@@ -33,8 +33,8 @@ The 'to-do' list for this class is:
 #import TBBData as TBD
 import IO as TBD
 import pycrtools as cr
-import PPF as PPF
-import os as os
+import ppf
+import os
 
 reload(TBD)
 
@@ -124,7 +124,7 @@ class AntennaSet():
 
 ## initialises the filter arrays
         if self.filterType == 'PPF':
-            self.ppf = PPF.PPF()
+            self.ppf = ppf.PPF()
             self.filter=None
         elif self.filterType == 'HANNING':
             hfilter=cr.hArray(float,[self.blockSize])
@@ -548,7 +548,7 @@ self.blockSize > 0 and self.startBlock >= 0:
 ## initialises the filter arrays
         if self.filterType == 'PPF':
             import PPF as PPF
-            self.ppf = PPF.PPF()
+            self.ppf = ppf.PPF()
         elif self.filterType == 'HANNING':
             hfilter=cr.hArray(float,[self.blockSize])
             hfilter.gethanningfilter()

@@ -39,8 +39,8 @@ filtertype="Hanning"
 if filtertype is "PPF":
     #Check if PPF is possible
     assert blocksize == 1024
-    import PPF
-    myppf=PPF.PPF()
+    import ppf
+    myppf=ppf.PPF()
 
 ########## Now we again look at subsets of the data ###########
 

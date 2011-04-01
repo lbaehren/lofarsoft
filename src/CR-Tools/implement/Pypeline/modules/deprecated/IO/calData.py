@@ -37,7 +37,7 @@ import numpy as np
 import os
 import metadata as md
 import iocalibration as ioCal
-import PPF as PPF
+import ppf
 import interfaces
 import IOfunctions as iof
 import iocalibration as ioc
