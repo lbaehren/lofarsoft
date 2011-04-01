@@ -345,7 +345,7 @@ add_dependencies (dspsr_install dspsr_build dspsr_configure dspsr_bootstrap dsps
   
 add_custom_target (ssps_build
   COMMAND cd ${PULSAR_BINARY_DIR}/apps/${ssps_name}
-  COMMAND python setup.py build
+  COMMAND python setup.py build --build-lib=build/lib
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ssps_name}
   COMMENT "Building project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
   COMMENT "Building project SSPS with command: python ${PULSAR_BINARY_DIR}/apps/${ssps_name}/setup.py build"
