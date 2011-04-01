@@ -16,12 +16,12 @@ class Imager(Task):
     parameters = {
         'image' : { "default" : None, "positional" : 1 },
         'data' : { "default" : None, "positional" : 2 },
-	    'startblock' : { "default" : 0 },
-	    'nblocks' : { "default" : 16 },
-	    'ntimesteps' : { "default" : 1 },
-	    'obstime' : { "default" : 0 },
-	    'L' : { "default" : pytmf.deg2rad(6.869837540) },
-	    'phi' : { "default" : pytmf.deg2rad(52.915122495) },
+        'startblock' : { "default" : 0 },
+        'nblocks' : { "default" : 16 },
+        'ntimesteps' : { "default" : 1 },
+        'obstime' : { "default" : 0 },
+        'L' : { "default" : pytmf.deg2rad(6.869837540) },
+        'phi' : { "default" : pytmf.deg2rad(52.915122495) },
         'NAXIS' : { "default" : 2 },
         'NAXIS1' : { "default" : 90 },
         'NAXIS2' : { "default" : 90 },
@@ -49,7 +49,28 @@ class Imager(Task):
 
         # Generate coordinate grid
         print "Generating grid"
-        self.grid=CoordinateGrid(obstime=self.obstime, L=self.L, phi=self.phi, NAXIS=self.NAXIS, NAXIS1=self.NAXIS1, NAXIS2=self.NAXIS2, CTYPE1=self.CTYPE1, CTYPE2=self.CTYPE2, LONPOLE=self.LONPOLE, LATPOLE=self.LATPOLE, CRVAL1=self.CRVAL1, CRVAL2=self.CRVAL2, CRPIX1=self.CRPIX1, CRPIX2=self.CRPIX2, CDELT1=self.CDELT1, CDELT2=self.CDELT2, CUNIT1=self.CUNIT1, CUNIT2=self.CUNIT2, PC001001=self.PC001001, PC002001=self.PC002001, PC001002=self.PC001002, PC002002=self.PC002002)
+        self.grid=CoordinateGrid(obstime=self.obstime,
+                                 L=self.L,
+                                 phi=self.phi,
+                                 NAXIS=self.NAXIS,
+                                 NAXIS1=self.NAXIS1,
+                                 NAXIS2=self.NAXIS2,
+                                 CTYPE1=self.CTYPE1,
+                                 CTYPE2=self.CTYPE2,
+                                 LONPOLE=self.LONPOLE,
+                                 LATPOLE=self.LATPOLE,
+                                 CRVAL1=self.CRVAL1,
+                                 CRVAL2=self.CRVAL2,
+                                 CRPIX1=self.CRPIX1,
+                                 CRPIX2=self.CRPIX2,
+                                 CDELT1=self.CDELT1,
+                                 CDELT2=self.CDELT2,
+                                 CUNIT1=self.CUNIT1,
+                                 CUNIT2=self.CUNIT2,
+                                 PC001001=self.PC001001,
+                                 PC002001=self.PC002001,
+                                 PC001002=self.PC001002,
+                                 PC002002=self.PC002002)
         print "Grid generation finished"
 
         # Get frequencies
@@ -87,7 +108,8 @@ class Imager(Task):
                 self.t_image.fill(0.)
 
                 print "beamforming started"
-                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
+#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
+                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian)
                 print "beamforming done"
 
                 cr.hAbsSquareAdd(self.image[step], self.t_image)
