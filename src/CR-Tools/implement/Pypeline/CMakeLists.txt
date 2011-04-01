@@ -237,15 +237,6 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
 
   list (APPEND PYPELINE_PYTHON_DOCS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.py)
 
-  # # Generate a file that can be processed by doxygen
-  # add_custom_command (
-  #   TARGET hftools
-  #   POST_BUILD
-  #   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc
-  #   COMMAND ${CMAKE_CXX_COMPILER} -w -E -C -P -DH_DEBUG_CPP  -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES} -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${CASACORE_INCLUDES} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.split.cc | ${awk_executable} -f ${PYPELINE_PREPROCESSOR_DIR}/hfinsert-newline.awk  > ${CMAKE_CURRENT_BINARY_DIR}/${PYPELINE_CPP_MODULE_PREFIX}${FILE}.doc.cc
-
-  #   COMMENT "Generating doxygen parsable documentation for module ${FILE}"
-  #   )
 endforeach (FILE)
 
 ##_______________________________________________________________________________
