@@ -9,6 +9,35 @@ import struct
 import os
 import pycrtools as cr
 
+def mapAntennasetKeyword(antennaset):
+    """Ugly fix to map correct antenna names in input to wrong antenna names
+    for metadata module.
+    """
+
+    # Strip whitespace
+    antennaset = antennaset.strip()
+
+    incorrect = { 'LBA_INNER' : 'LBA_INNER',
+                          'LBA_OUTER' : 'LBA_OUTER',
+                          'LBA_SPARSE_EVEN' : 'LBA_SPARSE_0',
+                          'LBA_SPARSE_ODD' : 'LBA_SPARSE_1',
+                          'LBA_X' : 'LBA_X',
+                          'HBA_ZERO' : 'HBA_0',
+                          'HBA_ONE' : 'HBA_1',
+                          'HBA_DUAL' : 'HBA',
+                          'HBA_JOINED' : 'HBA' }
+
+    if antennaset in incorrect:
+        antennaset = incorrect[antennaset]
+    elif antennaset == "HBA_BOTH":
+        # This keyword is also wrong but present in file headers
+        print "Keyword " + antennaset + " does not comply with ICD, mapping..."
+        antennaset = "HBA"
+    else:
+        print "Keyword " + antennaset + " does not comply with ICD, mapping..."
+
+    return antennaset
+
 def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     """Return metadata values, given the antennaIDs and the antennaset.
 
@@ -44,6 +73,8 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     ================== ====================================================
 
     """
+
+    antennaset = mapAntennasetKeyword(antennaset)
 
     dim2=0
     if keyword is "StationPhaseCalibration":
@@ -192,7 +223,6 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
            [ 1.+0.j,  1.+0.j,  1.+0.j, ...,  1.+0.j,  1.+0.j,  1.+0.j]])
 
     """
-
 
     # Return mode nr depending on observation mode
 

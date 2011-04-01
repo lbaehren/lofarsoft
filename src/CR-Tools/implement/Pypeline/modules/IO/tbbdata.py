@@ -1,4 +1,6 @@
 """Module documentation.
+
+.. moduleauthor:: Pim Schellart <P.Schellart@astro.ru.nl>
 """
 
 import pycrtools as cr
@@ -39,6 +41,15 @@ class TBBData(IOInterface):
 
         # Get Nyquist zone for each antenna
         self.__nyquist_zone = self.__file.nyquist_zone()
+
+        # Get Sample frequency value and units for each antenna
+        self.__sample_frequency_value = self.__file.sample_frequency_value()
+        self.__sample_frequency_unit = self.__file.sample_frequency_unit()
+
+        # Calculate frequencies for FFT
+        self.__nfmin = None # Frequency range minimum index
+        self.__nfmax = None # Frequency range maximum index
+        self.__calculateFrequencies()
 
         # Generate scrach arrays
         self.__makeScratch()
@@ -87,6 +98,23 @@ class TBBData(IOInterface):
         """
 
         return key in self.keys()
+
+    def __calculateFrequencies(self):
+        """Calculate frequencies for FFT depending on sample frequency,
+        nyquist zone and blocksize.
+        """
+
+        self.__frequencies = cr.hArray(float, self.__blocksize/2+1)
+
+        # Calculate sample frequency in Hz
+        sampleFrequency = self.__sample_frequency_value[0]
+
+        if self.__sample_frequency_unit[0] == 'MHz':
+            sampleFrequency *= 1e6
+        elif self.__sample_frequency_unit[0] == 'GHz':
+            sampleFrequency *= 1e9
+
+        cr.hFFTFrequencies(self.__frequencies, sampleFrequency, self.__nyquist_zone[0])
 
     def __makeScratch(self):
         """Create scratch arrays.
@@ -197,8 +225,16 @@ class TBBData(IOInterface):
         if hanning:
             self.__scratch[...].applyhanningfilter()
 
-        # Perform FFT
-        data[...].fftcasa(self.__scratch[...], self.__nyquist_zone[0])
+        # For selected frequency range
+        if self.__nfmin != None and self.__nfmax != None:
+            # Perform FFT
+            self.__scratch[...].fftcasa(self.__scratch[...], self.__nyquist_zone[0])
+
+            data[...].copy(self.__scratch[..., self.__nfmin:self.__nfmax])
+
+        else:
+            # Perform FFT
+            data[...].fftcasa(self.__scratch[...], self.__nyquist_zone[0])
 
     def getRelativeAntennaPositions(self):
         """Returns relative antenna positions for selected antennas, or all
@@ -227,6 +263,51 @@ class TBBData(IOInterface):
         """
 
         return md.get("AbsoluteAntennaPositions", self.__selectedDipoles, self.__antennaSet, True)
+
+    def setFrequencyRangeByIndex(self, nfmin, nfmax):
+        """Sets the frequency selection used in subsequent calls to
+        `getFFTData`.
+        If **frequencies** is the array of frequencies available for the
+        selected blocksize, then subsequent calls to `getFFTData` will
+        return data corresponding to frequencies[nfmin:nfmax].
+        
+        Arguments:
+        *nfmin* minimum frequency as index into frequency array
+        *nfmax* maximum frequency as index into frequency array
+        
+        Return value:
+        This method does not return anything.
+        It raises an IndexError if frequency selection cannot be set
+        to requested values (e.g. index out of range)
+        """
+
+        if not isinstance(nfmin, int) or not isinstance(nfmax, int):
+            raise ValueError("Provided values for nfmin and nfmax are not of the correct type 'int'.")
+
+        elif not 0 <= nfmin <= nfmax < len(self.__frequencies):
+            raise ValueError("Invalid frequency range.")
+
+        else:
+            self.__nfmin = nfmin
+            self.__nfmax = nfmax
+
+    def getFrequencies(self):
+        """Returns the frequencies that are appicable to the FFT data
+
+        Arguments:
+        None
+
+        Return value:
+        This method returns a FloatVector with the selected frequencies
+        in Hz.
+        """
+        
+        frequencies = self.__frequencies
+
+        if self.__nfmin != None and self.__nfmax != None:
+            frequencies=frequencies[range(self.__nfmin, self.__nfmax)]
+
+        return frequencies
 
     def close(self):
         """Closes file and sets the data attribute `.closed` to
