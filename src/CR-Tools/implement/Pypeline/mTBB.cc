@@ -292,10 +292,10 @@ std::ostream& operator<<(std::ostream& output, const TBBData& d)
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
-#define HFPP_PARDEF_0 (HNumber)(vec)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HInteger)(start)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(nofSamples)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (TBBData)(data)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Output vector, expected to be of length Na * Ns where Na is the number of selected antennas and Ns is the number of samples per antenna.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(start)()("Vector with start positions in samples, expected to have length Na where Na is the number of selected antennas.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nofSamples)()("Number of samples, Ns, to read.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (TBBData)(data)()("TBBData object to read from.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
 
@@ -306,6 +306,7 @@ std::ostream& operator<<(std::ostream& output, const TBBData& d)
 template <class Iter, class IIter>
 void HFPP_FUNC_NAME(const Iter vec_begin, const Iter vec_end, const IIter start_begin, const IIter start_end, const HInteger nofSamples, TBBData &data)
 {
+  // Sanity checks
   const uint N_vec = std::distance(vec_begin, vec_end);
 
   if (N_vec != nofSamples*data.nofSelectedDatasets())
@@ -320,6 +321,7 @@ void HFPP_FUNC_NAME(const Iter vec_begin, const Iter vec_end, const IIter start_
     throw PyCR::ValueError("Array with start samples has wrong size.");
   }
 
+  // Get start numbers into casa vector
   IIter start_it = start_begin;
 
   casa::Vector<int> start(N_start);
@@ -329,12 +331,15 @@ void HFPP_FUNC_NAME(const Iter vec_begin, const Iter vec_end, const IIter start_
     ++start_it;
   }
 
+  // Set shape of temp array
   casa::IPosition vec_shape(2);
   vec_shape(0) = nofSamples;
   vec_shape(1) = data.nofSelectedDatasets();
 
+  // Create temporary casa matrix sharing memory with the output vector
   casa::Matrix<double> temp(vec_shape, &(*vec_begin), casa::SHARE);
 
+  // Read data into matrix and hence to the output vector
   data.readData(temp, start, nofSamples);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
