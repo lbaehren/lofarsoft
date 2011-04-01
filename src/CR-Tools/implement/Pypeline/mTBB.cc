@@ -186,6 +186,8 @@ boost::python::list TBBData::python_sample_offset(int refAntenna)
   return lst;
 }
 
+// WARNING Needed for incompatibility between sample_offset (negative) and
+// readData which expects positive offset. This needs to be corrected.
 boost::python::list TBBData::python_alignment_offset(int refAntenna)
 {
   boost::python::list lst;
@@ -200,8 +202,37 @@ boost::python::list TBBData::python_alignment_offset(int refAntenna)
   return lst;
 }
 
-int TBBData::python_find_reference_antenna()
+// WARNING Non trivial method needs to be migrated to parrent class
+uint TBBData::python_maximum_read_length(int refAntenna)
 {
+  std::vector<uint> length = data_length();
+  std::vector<int> offset = sample_offset(refAntenna);
+
+  uint currentLength = 0;
+  uint maxLength = 0;
+
+  for (uint i=0; i<length.size(); ++i)
+  {
+    currentLength = length[i] - offset[i];
+
+    if (currentLength > maxLength)
+    {
+      maxLength = currentLength;
+    }
+  }
+
+  return maxLength;
+}
+
+// WARNING Non trivial method needs to be migrated to parrent class
+int TBBData::python_alignment_reference_antenna()
+{
+  // Store current antenna selection
+  std::set<std::string> selection = selectedDipoles();
+
+  // Select all dipoles to find overall best antenna for alignment
+  selectAllDipoles();
+
   // Reference antenna for alignment
   int refAntenna = 0;
   double current = 0.;
@@ -220,6 +251,8 @@ int TBBData::python_find_reference_antenna()
 
   for (uint i=1; i<t.size(); ++i)
   {
+    // WARNING this assumes frequency is in MHz this needs to be migrated
+    // to parrent class taking units into account.
     current = static_cast<double>(t[i])+(static_cast<double>(sn[i])/(f[i]*1.e6));
 
     if (current > max)
@@ -228,6 +261,9 @@ int TBBData::python_find_reference_antenna()
       max = current;
     }
   }
+
+  // Restore antenna selection
+  selectDipoles(selection);
 
   return refAntenna;
 }

@@ -1,4 +1,6 @@
-"""Module documentation.
+"""This module implements the primary interface for reading LOFAR TBB data.
+
+It contains one function `open` that is used to open an HDF5 file containing LOFAR TBB data and returns a :class:`~TBBData` file object.
 
 .. moduleauthor:: Pim Schellart <P.Schellart@astro.ru.nl>
 """
@@ -15,7 +17,7 @@ class TBBData(IOInterface):
     Board data.
     """
 
-    def __init__(self, filename, blocksize):
+    def __init__(self, filename, blocksize=1024):
         """Constructor.
         """
 
@@ -35,7 +37,7 @@ class TBBData(IOInterface):
         self.__selectedDipoles = self.__file.dipoleNames()
 
         # Find reference antenna
-        self.__refAntenna = self.__file.find_reference_antenna()
+        self.__refAntenna = self.__file.alignment_reference_antenna()
 
         # Selection dependent initialization
         self.init_selection()
@@ -364,4 +366,10 @@ class TBBData(IOInterface):
         del self.__file
 
         self.closed = True
+
+def open(filename, *args, **kwargs):
+    """Open file with LOFAR TBB data.
+    """
+
+    return TBBData(filename, *args, **kwargs)
 

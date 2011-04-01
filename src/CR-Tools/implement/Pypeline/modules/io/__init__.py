@@ -1,16 +1,31 @@
 """This is the top level package for input/output of data using pycrtools.
 
-Currently only LOFAR TBB data is supported.
-In order to transparantly support both raw and calibrated data from any function or module one should always use the interfaces defined in the :mod:`~pycrtools.IO.interfaces` submodule.
+It defines only one function `open` that is used to open all supported file
+types.
+
 """
 
 __all__ = ['tbb', 'interfaces']
 
-from tbb import TBBData
+import tbb
+import pyfits
+import __builtin__ # Needed because from io import * will cause overloading
 
 def open(filename, *args, **kwargs):
-    """Open a supported file type (currently only HDF5 files with TBB data).
+    """Open a supported file type or fall back to Python built in open
+    function.
     """
 
-    return TBBData(filename, *args, **kwargs)
+    # Get file extension to determine type
+    ext = filename.split(".")[-1].strip().lower()
+
+    if ext == "h5":
+        # Open file with LOFAR TBB data
+        return tbb.open(filename, *args, **kwargs)
+    elif ext == "fits":
+        # Open FITS file with pyfits
+        return pyfits.open(filename, *args, **kwargs)
+    else:
+        # Fall back to regular Python `open` function
+        return __builtin__.open(filename, *args, **kwargs)
 
