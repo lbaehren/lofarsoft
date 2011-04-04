@@ -15,7 +15,7 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (DAL_VERSION        "0.1.2" )
+set (DAL_VERSION        "0.1.3" )
 set (DAL_SOURCE_ARCHIVE "dal-${DAL_VERSION}.tar.gz" )
 set (DAL_URL            "" )
 set (DAL_GIT            "https://github.com/nextgen-astrodata/DAL.git" )
