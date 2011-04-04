@@ -36,8 +36,23 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 // forward declaration
 #define FRAT_TASK_BUFFER_LENGTH (20000)
+#define FRAT_TRIGGER_PORT_0 (0x7BA0)
+#define FRAT_TRIGGER_PORT_1 (0x7BA1)
+
 
 struct triggerEvent {
 	int time;
@@ -47,9 +62,12 @@ struct triggerEvent {
 	int subband;
 	float sum;
 	float max;
+	int obsID;
+    int beam;
+	float DM;
 };
 
-void swap_endian( char *x )
+inline void swap_endian( char *x )
 {
 	char c;
 	
@@ -63,7 +81,7 @@ void swap_endian( char *x )
 	x[2] = c;
 }
 
-float FloatSwap( float f )
+inline float FloatSwap( float f )
 {
 	union
 	{
@@ -79,19 +97,21 @@ float FloatSwap( float f )
 	return dat2.f;
 }
 
-float SubbandToFreq(int subbandnr, int HBAmode=1, int samplefreq=200) {
+inline float SubbandToFreq(int subbandnr, int HBAmode=1, int samplefreq=200) {
     //returns frequency in GHz
 	//takes samplefreq in MHz
 	return subbandnr*samplefreq/1024000.0+(samplefreq/2000.0)*HBAmode;
 }
 
-float CalcFreqResolution(int channels, int frequencyIntegration=1, int samplefreq=200) {
+inline float CalcFreqResolution(int channels, int frequencyIntegration=1, int samplefreq=200) {
 	return samplefreq/1024000.0/channels*frequencyIntegration;
 }
 
-float CalcTimeResolution(int channels,  int timeintegration=1, int samplefreq=200){
+inline float CalcTimeResolution(int channels,  int timeintegration=1, int samplefreq=200){
     return 1e-6/samplefreq*1024*channels*timeintegration;
 }
+
+
 
 
 namespace FRAT {
@@ -115,15 +135,13 @@ namespace FRAT {
 		CoinCheck(const CoinCheck&);
 		CoinCheck& operator=(const CoinCheck&);
 		
-        std::string printEvent();
-        std::string printLastEvent();
+        std::string printEvents(int reftime, int timewindow);
     private:
 
 
       int itsNoCoincidenceChannels;
       double itsCoincidenceTime;
-      std::stringstream itsEventString;
-      std::stringstream itsLastEventString;
+
       // avoid defaultconstruction and copying
 
       
@@ -174,7 +192,7 @@ namespace FRAT {
 		  public:	  
 			  //SubbandTrigger();
 			  ~SubbandTrigger();
-			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true);
+			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, int obsID=0, int beam=0);
 			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime);
 			  int CalculateBufferSize();
 			  void InitDedispersionOffset();
@@ -182,6 +200,7 @@ namespace FRAT {
 			  bool makeplotBuffer(std::string pulselogfilename);
 			  std::string blockAnalysisSummary();
 			  std::string FoundTriggers();
+			  bool SendTriggerMessage(struct triggerEvent trigger);
 			  
 		  private:
 			  int itsNrChannels;
@@ -213,6 +232,13 @@ namespace FRAT {
 			  bool verbose;
 			  struct triggerEvent trigger;
 			  int itsStreamID;
+			  int sock;
+			  struct sockaddr_in server_addr;
+			  struct hostent *host;
+			  //char send_data[1024];
+			  char* send_data;
+			  char* hostname;
+			  
 			  std::string itsFoundTriggers;
 			  		  
 		  }; //SubbandTrigger

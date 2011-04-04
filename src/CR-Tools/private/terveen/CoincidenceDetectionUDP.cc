@@ -14,6 +14,10 @@
 #include <string>
 #include "FRATcoincidence.h"
 #include "FRATcoincidence.cc"
+#include <map>
+#include <time.h>
+#include <ctime>
+#include "sys/time.h"
 
 
 using namespace FRAT::coincidence;
@@ -22,25 +26,42 @@ using namespace std;
 int main(int argc , char *argv[])
 {
 
-         if(argc<3){
-             cout << "usage: " << argv[0] << " <CoincidenceNumber> <CoincidenceTime>" << endl;
+         if(argc<4){
+             cout << "usage: " << argv[4] << " <CoincidenceNumber> <CoincidenceTime> <nrbeams> <nrDMs>" << endl;
              return 200;
          }
          int CoinNr=atoi(argv[1]);
          int CoinTime=atoi(argv[2]);
-         CoinCheck* cc;
-         cc = new CoinCheck();
-
-
-        int sock;
+	     int nrbeams=atoi(argv[3]);
+	     int nrDMs=atoi(argv[4]);
+         int mincoinbeams=2;
+         int coinbeams=nrbeams-1;
+         CoinCheck* cc[nrbeams][nrDMs];
+	     for(int i=0;i<nrbeams;i++){
+			 for(int j=0;j<nrDMs;j++){
+                 cc[i][j] = new CoinCheck();
+			 }
+	     }
+			 
+	     CoinCheck* RFIcc[nrDMs];
+	     for(int j=0;j<nrDMs;j++){
+		     RFIcc[j] = new CoinCheck();
+	     }
+	    
+        
+	    int sock;
         int bytes_read;
         socklen_t addr_len;
-        char recv_data[1024];
+        char recv_data[sizeof(struct triggerEvent)];
         struct sockaddr_in server_addr , client_addr;
-
-        struct triggerEvent trigger;
+        triggerEvent * trigger;
+        trigger = new triggerEvent;
         int latestindex;
-
+	    
+	    typedef std::map<float,int> FloatToIntMap;
+	    FloatToIntMap DMtoID;
+	    FloatToIntMap::iterator iter=DMtoID.begin();
+	    int DMid=0;
 
 //        int subband;
 //        int time;
@@ -55,7 +76,7 @@ int main(int argc , char *argv[])
         }
 
         server_addr.sin_family = AF_INET;
-        server_addr.sin_port = htons(5000);
+        server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
         server_addr.sin_addr.s_addr = INADDR_ANY;
         bzero(&(server_addr.sin_zero),8);
 
@@ -68,50 +89,79 @@ int main(int argc , char *argv[])
         }
 
         addr_len = sizeof(struct sockaddr);
+	
+	    int obsID=-1;
 		
-	printf("\nUDPServer Waiting for client on port 5000");
+	printf("\nUDPServer Waiting for client on port %d", FRAT_TRIGGER_PORT_0);
         fflush(stdout);
 
 	while (1)
 	{
+          cout << " Waiting for new event ..." << endl;
 
-          bytes_read = recvfrom(sock,recv_data,1024,0,
+          bytes_read = recvfrom(sock,recv_data,sizeof(struct triggerEvent),0,
 	                    (struct sockaddr *)&client_addr, &addr_len);
 	  
-
+          
 	      recv_data[bytes_read] = '\0';
-
-          printf("\n(%s , %d) said : ",inet_ntoa(client_addr.sin_addr),
-                                       ntohs(client_addr.sin_port));
-          printf("%s", recv_data);
-          stringstream data (recv_data, stringstream::in | stringstream::out);
          
-          data >> temp;
-          data >> temp;
-          data >> temp;
-          trigger.subband=atoi(temp.c_str());
-          data >> temp;
-          data >> temp;
-          data >> temp;
-          data >> temp;
-          trigger.time=atoi(temp.c_str()); 
-          data >> temp;
-          data >> temp;
-          data >> temp;
-          trigger.max=atoi(temp.c_str());
-          data >> temp;
-          data >> temp;
+          trigger = (triggerEvent*) recv_data;
+		  if(obsID!=trigger->obsID){
+		     if(obsID < 0) {
+			    obsID=trigger->obsID;
+				
+		     } else {
+                cerr << "Receiving triggers from two obsIDs not supported: " << obsID << " " << trigger->obsID << " . Discarding trigger " << endl;
+				continue; 
+			 }
+	      }
+          if(trigger->beam>=nrbeams) {
+              cerr << "Receiving trigger from a higher beam number than expected, discarding trigger" << endl;
+              continue;
+          }
+		  
+		  iter=DMtoID.find(trigger->DM);
+		  if ( iter==DMtoID.end() ) {
+              if ( DMid == nrDMs ){
+              cerr << "Received triggers on more DMs than expected.  discarding trigger" << endl;
+              continue;
+              }
+              else{
+                 cout << "Adding DM " << trigger->DM << " at ID " << DMid << endl;
+			     DMtoID[trigger->DM]=DMid;
+			     DMid++;
+              }
+		  }
 
-          latestindex=cc->add2buffer(trigger);
-          if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
-                cout << "Trigger found at time: " << trigger.time << endl;
-                // cout << cc->printEvent();
+		 
+		  printf("%d \n",trigger->subband);
+          latestindex=cc[trigger->beam][  DMtoID[trigger->DM]   ]->add2buffer(*trigger);
+          if(cc[trigger->beam][  DMtoID[trigger->DM]   ]->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
+                timeval t;
+                gettimeofday (&t, NULL);
+
+                time_t _timestamp;
+                long int _timestamp_msec;
+
+                _timestamp      = t.tv_sec;
+                _timestamp_msec = t.tv_usec/1000;
+
+
+                cout << _timestamp << "." << _timestamp_msec  << " Trigger found in beam " << trigger->beam << " at time: " << trigger->time << " with DM: " << trigger->DM << endl;
+                //cout << cc->printEvent();
+			  if(nrbeams > mincoinbeams) {
+			    trigger->subband=trigger->beam;
+			    latestindex=RFIcc[  DMtoID[trigger->DM]   ]->add2buffer(*trigger);
+			    if(RFIcc[  DMtoID[trigger->DM]   ]->coincidenceCheck(latestindex, coinbeams, CoinTime)){
+					cout << _timestamp << "." << _timestamp_msec << " Trigger is probably RFI at time " << trigger->time << " and DM " << trigger->DM << endl;
+				}
+			  }
           }
 
    
 
 	  fflush(stdout);
 
-        }
-        return 0;
+    }
+    return 0;
 }

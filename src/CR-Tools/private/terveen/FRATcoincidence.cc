@@ -29,7 +29,7 @@ namespace FRAT {
 		itsNrTriggers (0),
 		itsInitialized (false) {
 			// set default parameters for coincidence
-			//std::cout << FRAT_TASK_BUFFER_LENGTH << std::endl;
+			std::cout << FRAT_TASK_BUFFER_LENGTH << std::endl;
 			itsNoCoincidenceChannels = 8;
 			itsCoincidenceTime = 10.3e-6;
 			// Initialize the trigger messages buffer
@@ -50,7 +50,7 @@ namespace FRAT {
 		
 		
 		//
-		// ~VHECRTask()
+		// ~CoinCheck()
 		//
 		CoinCheck::~CoinCheck()
 		{
@@ -65,12 +65,12 @@ namespace FRAT {
 			unsigned int i,foundSBs[nChannles],nfound;
 			unsigned int startindex,runindex;
 			int reftime;
+			
 			startindex = first;
 			while ((startindex!=trigBuffer[latestindex].next) && (startindex < FRAT_TASK_BUFFER_LENGTH)) {
 				runindex = trigBuffer[startindex].next;
 				reftime=trigBuffer[startindex].Time-timeWindow; //earliest time for coincidence events
 				nfound=1;
-		                itsEventString.str("");	
 				foundSBs[0]=trigBuffer[startindex].SBnr;
 				while ((runindex < FRAT_TASK_BUFFER_LENGTH) && (trigBuffer[runindex].Time>= reftime)){
 					//check if current time is higher than the reftime. Stop if that is not the case
@@ -85,21 +85,20 @@ namespace FRAT {
 						};
 						if (i == nfound) { 
 							if (nfound+2 > nChannles) { 
-		                                                itsEventString.str("");	
-								itsEventString << "Subbands found:" ;
+								std::cout << "Subbands found:" ;
 								for (i=0; i<nfound; i++){
-									itsEventString << " " << foundSBs[i];
+									std::cout << " " << foundSBs[i];
 								}
-								itsEventString << " " << trigBuffer[runindex].SBnr << std::endl;
+								std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
 								return true; 
 							}; //startindex; };
 							foundSBs[nfound] = trigBuffer[runindex].SBnr;
-							//itsEventString << "Subbands found:" ;
+							std::cout << "Subbands found:" ;
 							for (i=0; i<nfound; i++){
-								itsEventString << " " << foundSBs[i];
+								std::cout << " " << foundSBs[i];
 							}
-							itsEventString << " " << trigBuffer[runindex].SBnr << std::endl;
-							itsEventString << "Not enough. Continuing...." << std::endl;
+							std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
+							std::cout << "Not enough. Continuing...." << std::endl;
 							nfound++;
 						};
 						runindex = trigBuffer[runindex].next;
@@ -110,21 +109,13 @@ namespace FRAT {
 			//return -1;
 			return false;
 		};
-
-                std::string CoinCheck::printEvent(){
-                     return itsEventString.str();
-                }
-
-                std::string CoinCheck::printLastEvent(){
-                     return itsLastEventString.str();
-                }
 		
 		// Add a trigger message to the buffer. 
 		unsigned int CoinCheck::add2buffer(const triggerEvent& trigger){
 			// double date;
 			unsigned int newindex,runindex;
-		        itsLastEventString.str("");	
-			itsLastEventString << "Adding new event: SB "  << trigger.subband << " at time " << trigger.time << std::endl;
+			
+			std::cout << "Adding new event: SB " << trigger.subband << " at time " << trigger.time << std::endl;
 			
 			// date = trigger.itsTime + trigger.itsSampleNr/200e6;
 			newindex = last;
@@ -175,7 +166,7 @@ namespace FRAT {
 	namespace analysis {
 		
 		
-		SubbandTrigger::SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2)
+		SubbandTrigger::SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, int obsID, int beam)
 		{
 			
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
@@ -207,10 +198,22 @@ namespace FRAT {
 			itsBufferLength=1000;
 			InitDedispersionOffset();
 			verbose=true;
-			
+			hostname="127.0.0.1";
+			send_data = new char[sizeof(struct triggerEvent)];
+			host= (struct hostent *) gethostbyname(hostname);
 			
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
 			SumDeDispersed.resize(itsBufferLength, 0.0);
+			if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+			{
+				perror("socket");
+				exit(1);
+			}
+			
+			server_addr.sin_family = AF_INET;
+			server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
+			server_addr.sin_addr = *((struct in_addr *)host->h_addr);
+			bzero(&(server_addr.sin_zero),8);
 			
 			
 			
@@ -221,6 +224,10 @@ namespace FRAT {
 			trigger.sum=0;
 			trigger.max=0;
 			trigger.subband=itsStreamID;
+			trigger.obsID=obsID;
+			trigger.beam=beam;
+			trigger.DM=DM;
+			
 			
 			
 			
@@ -361,6 +368,8 @@ namespace FRAT {
 									if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
 								}
 							} else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+								SendTriggerMessage(trigger);
+								
 								int latestindex = cc->add2buffer(trigger);
 								
 								if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
@@ -499,6 +508,16 @@ namespace FRAT {
 		std::string SubbandTrigger::FoundTriggers(){
 			return itsFoundTriggers;
 		}
+		
+		bool SubbandTrigger::SendTriggerMessage(struct triggerEvent trigger){
+			send_data = (char*) &trigger;
+			int n = sendto(sock, send_data, sizeof(struct triggerEvent), 0,
+				   (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+			if (n  < 0){
+				return false;
+		    }
+			return true;
+	    }
 		/*			
 		 SubbandTrigger::setNrChannels(int NrChannels){ itsNrChannels = NrChannels; }
 		 SubbandTrigger::setNrSamples(int NrSamples){ itsNrSamples = NrSamples; }
