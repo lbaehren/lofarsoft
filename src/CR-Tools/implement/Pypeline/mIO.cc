@@ -415,17 +415,17 @@ void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, cons
   >>> f=hArray(float,[10])
   >>> f.read(datafile,\"Fx\")
   >>> f.pprint(-1)
-  -> [29,29,35,27,9,-8,-45,-74,-92,-109]
+  [29,29,35,27,9,-8,-45,-74,-92,-109]
 
   >>> datafile[\"blocksize\"]=2
   >>> x=hArray(float,[5,2])
   >>> hFileRead(datafile,\"Fx\",x[...],Vector(range(2)))
   >>> x.mprint()
-  -> [29,29]   # blck 0
-     [35,27]   # blck 1
-     [29,29]   # blck 0
-     [35,27]   # blck 1
-     [29,29]   # blck 0
+  [29,29]   # blck 0
+  [35,27]   # blck 1
+  [29,29]   # blck 0
+  [35,27]   # blck 1
+  [29,29]   # blck 0
 
   Note, that here block 0,1 and one are read in 2-3 times, since the
   array was longer then the block list specified! This is the default
@@ -435,12 +435,11 @@ void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, cons
 
   >>> x[1].read(datafile,\"Fx\",3)
   >>> x.mprint()
-
-  -> [29,29]
-     [-45,-74]
-     [29,29]
-     [35,27]
-     [29,29]
+  [29,29]
+  [-45,-74]
+  [29,29]
+  [35,27]
+  [29,29]
 
   Now, we sneaked the 4th block (block 3) into the second row (index 1).
 
@@ -451,11 +450,11 @@ void uglycopy(const Iter vecout, const Iter vecout_end, const Iterin vecin, cons
   >>> c=hArray(complex,[5,2])
   >>> c[...].read(datafile,\"Fx\",Vector([0,1,2,3]))
   >>> c.mprint()
-  -> [(29,0),(29,0)]
-     [(35,0),(27,0)]
-     [(9,0),(-8,0)]
-     [(-45,0),(-74,0)]
-     [(29,0),(29,0)]   # here we have block 0 again ....
+  [(29,0),(29,0)]
+  [(35,0),(27,0)]
+  [(9,0),(-8,0)]
+  [(-45,0),(-74,0)]
+  [(29,0),(29,0)]   # here we have block 0 again ....
 */
 
 template <class Iter>
@@ -603,8 +602,8 @@ void HFPP_FUNC_NAME(
   $PARDOCSTRING
 
   Example:
-  antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
-  x=hCalTable(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",\"Positions\",obsdate,list(antennaIDs))
+  >>> antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
+  >>> x=hCalTable(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",\"Positions\",obsdate,list(antennaIDs))
 */
 HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
@@ -648,11 +647,12 @@ HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const
   $PARDOCSTRING
 
   Description:
-  Possible keywords: Positions, Delay
+
+  Possible keywords: ``Positions``, ``Delay``
 
   Example:
   antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
-  vec=hCalTablePositions(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",obsdate,list(antennaIDs))
+  vec=hCalTablePositions(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",\"Positions\",obsdate,list(antennaIDs))
 */
 vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
@@ -707,7 +707,8 @@ vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, co
   >>> hWriteFileBinary(v,\"test.dat\")
   >>> x=Vector(float,10,fill=1.0)
   >>> hReadFileBinary(x,\"test.dat\")
-  x -> Vector(float, 10, [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0])
+  >>> x
+  Vector(float, 10, [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0])
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
@@ -783,7 +784,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   Attention: if a file exists already and a start value is specified,
   then it will not be overwritten, but the data will be written into
   the location asked by start. This can be dangerous if one writes a
-  smaller file (e.g. with start=0) to a pre-existing older and larger
+  smaller file (e.g. with ``start=0``) to a pre-existing older and larger
   file because then the 'new' file will contain the rest of the old
   file.
 
@@ -800,7 +801,8 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   >>> hWriteFileBinary(v,\"test.dat\",5)
   >>> x=Vector(float,15,fill=1.0)
   >>> hReadFileBinary(x,\"test.dat\")
-  x -> Vector(float, 15, [3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
+  >>> x
+  Vector(float, 15, [3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteger start) {
@@ -850,7 +852,8 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteg
   >>> hWriteFileBinary(v,\"test.dat\")
   >>> x=Vector(float,10,fill=1.0)
   >>> hReadFileBinary(x,\"test.dat\")
-  x ->  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
+  >>> x
+  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
@@ -880,7 +883,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   $PARDOCSTRING
 
   Usage:
-  vec.readdump(filename,start) -> reads a specfic block from file starting at element start (blocklength determined by len(vec))
+  vec.readdump(filename,start) -> reads a specfic block from file starting at element start (blocklength determined by ``len(vec)``).
 
   See also:
   hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend, hWriteFileText, hReadFileText
@@ -891,12 +894,12 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
   >>> v=hArray(int,10)
   >>> v.readfilebinary(\"test.dat\",0)
   >>> v.pprint()
-  -> [0,1,2,3,4,5,6,7,8,9]
+  [0,1,2,3,4,5,6,7,8,9]
 
   #Now read the third block (of length 3) into the first part of the vector
   >>> v[0:3].readfilebinary(\"test.dat\",2*3)
   >>> v.pprint()
-  -> [6,7,8,3,4,5,6,7,8,9]
+  [6,7,8,3,4,5,6,7,8,9]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInteger start) {

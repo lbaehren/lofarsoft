@@ -385,7 +385,7 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr,
   $PARDOCSTRING
 
   Description:
-  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+  Returns ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -447,7 +447,7 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
   $PARDOCSTRING
 
   Description:
-  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+  Returns ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -479,7 +479,7 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
   $PARDOCSTRING
 
   Description:
-  Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+  Returns ``True`` if the event pointer was successfully changed, ``False`` otherwise.
 */
 
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
@@ -510,7 +510,7 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
   $PARDOCSTRING
 
   Description:
-  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+  Returns ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -580,7 +580,7 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
   $PARDOCSTRING
 
   Description:
-  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+  Returns ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -616,7 +616,7 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
   $PARDOCSTRING
 
   Description:
-  Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+  Returns ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
