@@ -127,7 +127,7 @@ gsl_vector * STL2GSL(const Iter vec, const Iter vec_end) {
   of ``xvec*(n+1)``.
 
   See also:
-  LinearFit
+  hLinearFit
 
   Example:
   [x_0,x_1,x_2,...] -> [0,x_0,x_0**2,...,x_0**n,0,x_1,x_1**2,...,x_1**n]
@@ -208,7 +208,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
   Note: for ``k=2`` you get a linear fit.
 
   See also:
-  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
+  hBSplineFit, hBSplineCalc, hBSpline, hBSplineFitXValues, hBSplineCalcAdd,  hBSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -267,7 +267,7 @@ void HFPP_FUNC_NAME(
   $PARDOCSTRING
 
   See also:
-  BSplineFit, BSplineCalc, hBSpline, hBSplineFitXValues, BSplineCalcAdd,  BSplineCalcMul
+  hBSplineFit, hBSplineCalc, hBSpline, hBSplineFitXValues, hBSplineCalcAdd,  hBSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -593,7 +593,7 @@ Notes: 1) The w->knots vector must be initialized prior to calling
   $PARDOCSTRING
 
   See also:
-  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalcMul
+  hBSplineFit, hBSpline, hBSplineFitXValues, hBSplineCalc,  hBSplineCalcAdd,  hBSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(
@@ -664,7 +664,8 @@ void HFPP_FUNC_NAME(
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  See also:  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalc,  BSplineCalcAdd,  BSplineCalcMul
+  See also:
+  hBSplineFit, hBSpline, hBSplineFitXValues, hBSplineCalc,  hBSplineCalcAdd,  hBSplineCalcMul
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
@@ -707,7 +708,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
   Returns the :math:`\\chi^2` value of the fit.
 
   See also:
-  BSplineFit, hBSpline, hBSplineFitXValues, BSplineCalcAssign,  BSplineCalcAdd,  BSplineCalcMul
+  hBSplineFit, hBSpline, hBSplineFitXValues, hBSplineCalcAssign,  hBSplineCalcAdd,  hBSplineCalcMul
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(
@@ -800,7 +801,7 @@ HNumber HFPP_FUNC_NAME(
   vecout.polynmomial(xvec,coeff,powers) -> [sum(C_0,C_1*x_0,C_2*x_0**2,...),sum(C_0,C_1*x_1,C_2*x_1**2,...,C_n*x_1**n),...]
 
   See also:
-  LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul
+  hLinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(
@@ -886,7 +887,7 @@ void HFPP_FUNC_NAME(
   xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]
 
   See also:
-  LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
+  hLinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(
@@ -971,7 +972,7 @@ void HFPP_FUNC_NAME(
   xvec=[x_0,x_1,x_2,...],powers=[0,1,2,....],coeff=[C_0,C_1,C_2,...]
 
   See also:
-  LinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
+  hLinearFit, hLinearFitPolynomialX, hPolynomialAdd, hPolynomialMul, hPolynomial
 */
 template <class Iter, class IterI>
 void HFPP_FUNC_NAME(
@@ -1110,10 +1111,10 @@ void HFPP_FUNC_NAME(
   $PARDOCSTRING
 
   Description:
-  Returns as function value the chi-square value of the fit.
+  Returns as function value the :math:`\\chi^2` value of the fit.
 
   See also:
-  hLinearFitPolynomialX,hPolynomial
+  hLinearFitPolynomialX, hPolynomial
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME(
