@@ -150,19 +150,22 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
         else: print "Error - hArray: Wrong format for units specified."
     if not (fill == None):
         if type(fill) in hAllVectorTypes:
-            if fill.loopingMode():
-                pass
+            #ary.vec().fill(fill)
+            #if fill.loopingMode():
+            #    pass
             #                iterate=True
             #                lfill=fill.getSize()
             #                lary=ary.getSize()
             #                ary2=hArray(ary.vec(),[,)
             #                while iterate:
             #                    ary.vec().fill(fill)
-            else:
-                ary.vec().fill(fill)
-        if type(fill) in [tuple,list]:
-            if len(fill)>0: ary.vec().fill(Vector(fill))
-        else: ary.fill(fill)
+            #else:
+            ary.vec().fill(fill)
+        elif type(fill) in [tuple,list]:
+            if len(fill)>0:
+                ary.vec().fill(Vector(fill))
+        else:
+            ary.fill(fill)
     if type(name)==str: ary.setKey("name",name);
     return ary
 

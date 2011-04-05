@@ -185,13 +185,13 @@ class BeamFormer(tasks.Task):
         
         "plot_end":{default:lambda self: min(int(self.speclen*self.plot_center)+self.plotlen,self.speclen),doc:"End plotting before this sample number."},
 
-        "delta_nu":{default:10**4,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen",unit:"Hz"},
+        "delta_nu":{default:1,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen. Alternatively set blocklen directly.",unit:"Hz"},
          
-        "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
+        "maxnantennas":{default:96,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
 
-        "maxnchunks":{default:128,doc:"Maximum number of spectral chunks to include in dynamic spectrum."},
+        "maxnchunks":{default:2**15,doc:"Maximum number of spectral chunks to calculate."},
 
-        "maxchunklen":{default:10**25,doc:"Length of one chunk of data used to calcuate one time step in dynamic spectrum.", unit:"Samples"},
+        "maxchunklen":{default:10**25,doc:"Maximum length of one chunk of data that is kept in memory.", unit:"Samples"},
 
         "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
 
@@ -517,18 +517,24 @@ class BeamFormer(tasks.Task):
             self.tplot(plotspec=self.plotspec)
             plt.ion()
 
-    def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False):
+    def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
         """
         Take the result of the BeamForm task, i.e. an array of
         dimensions [self.nblocks,self.nbeams,self.speclen], do a
-        NyquistSwap, if necessary, and then an inverse FFT.
+        NyquistSwap, if necessary, and then calculate an inverse
+        FFT. If the time series (self.tbeams) has already been
+        caclulated it will only be recalculated if explicitly asked
+        for with recalc=True.
 
         *beams* = None - Input array. Take self.beams from task, if None.
+        *recalc*= False - If true force a recalculation of the time series beam if it exists
         *block* = 0 - Which  block to plot, or Ellipsis ('...') for all
         *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
         *doabs* = True - Take the absolute of the timeseries before plotting.
         *smooth* = 0 - If > 0 smooth data with a Gaussian kernel of that size.
         *plotspec* = False - If True plot the average spectrum instead.
+        *xlim*       tuple with minimum and maximum limits for the *x*-axis.
+        *ylim*       tuple with minimum and maximum limits for the *y*-axis.
 
         The final time series (all blocks) is stored in Task.tbeams.
         """
@@ -538,7 +544,7 @@ class BeamFormer(tasks.Task):
         if hdr.has_key("BeamFormer"):
             if NyquistZone==None:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
-        if not plotspec:
+        if not plotspec and (not hasattr(self,"tbeams") or recalc):
             self.tcalc(beams=beams,NyquistZone=NyquistZone,doabs=doabs,smooth=smooth)
         if mosaic:
             npanels=self.beams.shape()[-2]
@@ -546,16 +552,16 @@ class BeamFormer(tasks.Task):
             height=int(ceil(npanels/float(width)))
             plt.clf()
             for n in range(npanels):
-                plt.subplot(width,height,n)
+                plt.subplot(width,height,n+1)
                 if plotspec:
-                    beams.par.avspec[n].plot(clf=False,title=str(n)+".")
+                    beams.par.avspec[n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
                 else:
-                    self.tbeams[block,n].plot(clf=False,title=str(n)+".")
+                    self.tbeams[block,n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
         else:
             if plotspec:
-                beams.par.avspec[...].plot(clf=True)
+                beams.par.avspec[...].plot(clf=True,xlim=xlim,ylim=ylim)
             else:
-                self.tbeams[block,...].plot(clf=True)
+                self.tbeams[block,...].plot(clf=True,xlim=xlim,ylim=ylim)
         plt.show()
 
     def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,smooth=0):
@@ -589,6 +595,11 @@ class BeamFormer(tasks.Task):
             self.tbeams.abs()
         if smooth>0:
             self.tbeams[...].runningaverage(smooth,hWEIGHTS.GAUSSIAN)
+        if hdr.has_key("sampleInterval"):
+            dt=beams.getHeader("sampleInterval")
+            self.tbeams.par.xvalues=hArray(float,[blocklen],name="Time",units=("","s"))
+            self.tbeams.par.xvalues.fillrange(-(blocklen/2)*dt,dt)
+            self.tbeams.par.xvalues.setUnit("mu","")
         return self.tbeams
 
     def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):

@@ -502,6 +502,48 @@ class Task(object):
     *ws* - provide a workspace to initialize parameters
     *parfile* - provide a (python) parameter file defining variables, to initialize parameters
     *kwargs* - any parameter=value pair to set the value of the respective parameter in the workspace
+
+    To create a task instance say:
+
+    Task=tasks.tasknam.TaskName()
+
+    To run it call Task(), or directly instantiate and run it by
+
+    Task=tasks.tasknam.TaskName()(pars ....)
+
+    Task() -> (re)run the task with currently set parameters.
+
+    If called for the first time the initialization
+    routine will be called.
+
+    Task(x1,x2,...,par1=val1,par2=val2) -> rerun the task with
+    the positional parameters xN and the parameters parN set to
+    the values provided and keeping the previous parameters the
+    same
+
+    Parametees for calling the Task:
+
+    *init* = False - force the initalisation to run again
+
+    *parfile* = filename - read parameters from file
+        
+    *pardict* - provide a dict with paramter value pairs or a
+    taskname and a paramter dict. Parameters from the top level
+    and in a dict with a taskname will be assigned. The dicts can
+    be nested.
+
+    *ws* - replace workspace with a different Workspace and then
+    update parameters therein as provided in the file and the
+    keywords.
+ 
+    ws parameters will be overwritten by file parameter and they
+    will be overwritten by keyword parameters (which thus have
+    the highest priority).
+
+    If the run function returns a value, this value will be
+    returned otherwise the task instance itself will be
+    returned. Hence you can access all parameters through the
+    returned task object.
     """
     __metaclass__ = TaskInit
 
@@ -622,6 +664,12 @@ class Task(object):
          ws parameters will be overwritten by file parameter and they
          will be overwritten by keyword parameters (which thus have
          the highest priority).
+
+         If the run function returns a value, this value will be
+         returned otherwise the task instance itself will be
+         returned. Hence you can access all parameters through the
+         returned task object.
+         
         """
         ws=None; init=False
         if kwargs.has_key("ws"):
@@ -655,7 +703,7 @@ class Task(object):
         retval=self.run()
         self.saveOutputFile() # to store final values
 	if retval==None:
-	    return self.ws
+	    return self
 	else:
 	    return retval
 

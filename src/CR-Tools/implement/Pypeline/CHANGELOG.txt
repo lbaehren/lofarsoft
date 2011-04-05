@@ -365,8 +365,15 @@ is wrapped if shorter
 - a new method to hArrays: ary[0,0,etc.].array() will return a copy of
 the slice of the original hArray.
 - added a new version of hRunningAverage that can operate on the same vector
--checked and bugfixed the different modes of the beamformer task
+-checked and bugfixed the different modes of the beamformer task -
+seems to work now 
+-also related bugfixes in averagespectrum, dynamicspectrum
 
+2011-04-02  Pypeline - rev 74... - Heino Falcke
+- By default tasks now return themselves rather than the workspace
+object (uness an explicit return value is given in .run)!!
+- hRandomizePhase alos 
+- finished testcr3.py to demonstrate RFI excision and beamforming
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

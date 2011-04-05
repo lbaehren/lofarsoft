@@ -1468,6 +1468,68 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//$DOCSTRING: Randomize the phases of certain elements in a complec vector and set the amplitude from a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRandomizePhase
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Vector in which to randomize the phase.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(indexlist)()("Index list containing the positions of the elements to be set, (e.g. [0,2,4,...] will set every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(amplitude_vec)()("Amplitude to assign to the indexed elements.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  The elements are specified in an indexlist. 
+
+**(NOT QUITE CORRECT: SPECIFY PROPPER WEIGHTING TO RAND GENERATOR)**
+
+  Usage:
+
+  vec.randomizephase(indexlist,amplitude) -> elements in vec at positions provided in indexlist are set to a complex number with random phase and an amplitude picked from the amplitude vector at the same location.
+
+  See also:
+  hSetAmplitude
+
+  Example:
+  baseline=hArray(float,[10],fill=range(90,100))
+  c=hArray(complex,[10],fill=range(10)) -> hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (3+0j), (4+0j), (5+0j), (6+0j), (7+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+  c.randomizephase(hArray([1,3]),baseline) -> hArray(complex, [10], fill=[(0,0),(-21.2026,-88.4955),(2,0),(3.61145,92.9299),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0)]) # len=10 slice=[0:10])
+  c.abs() -> hArray(complex, [10], fill=[(0,0),(91,0),(2,0),(93,0),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0)]) # len=10 slice=[0:10])
+
+*/
+template <class Iter, class IterI, class IterA>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const IterA amplitude_vec, const IterA amplitude_vec_end)
+{
+  // Sanity check
+  if (index >= index_end) return;
+
+  // Variables
+  Iter it;
+  IterI itidx(index);
+  IterA  amplitude;
+  HNumber real_part, amplitude_t, imag_part, scale(2.0/RAND_MAX);
+  HInteger r;
+  while (itidx != index_end) {
+    it = vec + *itidx;
+    amplitude = amplitude_vec + *itidx;
+    if ((it < vec_end) && (it >= vec) && (amplitude < amplitude_vec_end) && (amplitude >= amplitude_vec)) {
+      amplitude_t=hfcast<HNumber>(*amplitude);
+      r=rand();
+      real_part=(r*scale-1.0) * amplitude_t; // does this needs some arccos or so ...?
+      if (r % 2) imag_part=sqrt(pow(amplitude_t,2)-pow(real_part,2));
+      else imag_part=-sqrt(pow(amplitude_t,2)-pow(real_part,2));
+      *it=HComplex(real_part,imag_part);
+    };
+    ++itidx;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Set the amplitude of complex numbers to the values provided in a second vector
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSetAmplitude
