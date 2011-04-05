@@ -890,17 +890,16 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const It
   Operation will stop whenever the end of one of the input vector is reached.
 
   Example:
-  >>  x=hArray(range(6),[3,2])
-  >>  y=hArray(int,[2,3],fill=-1)
+  >>>  x=hArray(range(6),[3,2])
+  >>>  y=hArray(int,[2,3],fill=-1)
 
-  >>  x.mprint()
+  >>>  x.mprint()
   [0,1]
   [2,3]
   [4,5]
 
-  >>  hTranspose(y,x,2)
-  >>  y.mprint()
-
+  >>>  hTranspose(y,x,2)
+  >>>  y.mprint()
   [0,2,4]
   [1,3,5]
 */
@@ -943,15 +942,15 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iter invec,const It
   Operation will stop whenever the end of one of the input vector is reached.
 
   Example:
-  >>  x=hArray(range(6),[3,2])
-  >>  y=hArray(int,[2,3],fill=-1)
-  >>  x.mprint()
+  >>>  x=hArray(range(6),[3,2])
+  >>>  y=hArray(int,[2,3],fill=-1)
+  >>>  x.mprint()
   [0,1]
   [2,3]
   [4,5]
 
-  >>  hTranspose(y,x,2)
-  >>  y.mprint()
+  >>>  hTranspose(y,x,2)
+  >>>  y.mprint()
   [0,2,4]
   [1,3,5]
 */
