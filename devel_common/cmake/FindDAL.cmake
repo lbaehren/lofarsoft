@@ -28,6 +28,10 @@
 #   DAL_INCLUDES   = Include path for the header files of DAL
 #   DAL_LIBRARIES  = Link these to use DAL
 #   DAL_LFLAGS     = Linker flags (optional)
+#   DAL_VERSION_MAJOR = Major version number
+#   DAL_VERSION_MINOR = Minor version number
+#   DAL_VERSION_PATCH = Patch version number
+#   DAL_VERSION       = DAL version string
 #
 # In order to maintain compatibility with the Filesystem Hierarchy Standard (FHS)
 # the following default installation layout has been defined:
@@ -145,6 +149,21 @@ if (NOT DAL_FOUND)
   endif (DAL_INCLUDES AND DAL_LIBRARIES)
   
   ##_____________________________________________________________________________
+  ## Find library version
+
+  if (DAL_INCLUDES AND EXISTS "${DAL_INCLUDES}/dal_config.h")
+    file (STRINGS "${DAL_INCLUDES}/dal_config.h" DAL_H REGEX "^#define DAL_VERSION \"[^\"]*\"$")
+
+    string (REGEX REPLACE "^.*DAL_VERSION \"([0-9]+).*$" "\\1" DAL_VERSION_MAJOR "${DAL_H}")
+    string (REGEX REPLACE "^.*DAL_VERSION \"[0-9]+\\.([0-9]+).*$" "\\1" DAL_VERSION_MINOR  "${DAL_H}")
+    string (REGEX REPLACE "^.*DAL_VERSION \"[0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" DAL_VERSION_PATCH "${DAL_H}")
+    set (DAL_VERSION "${DAL_VERSION_MAJOR}.${DAL_VERSION_MINOR}.${DAL_VERSION_PATCH}")
+
+  else (DAL_INCLUDES AND EXISTS "${DAL_INCLUDES}/dal_config.h")
+    message (ERROR "Cannot find dal_config.h file")
+  endif (DAL_INCLUDES AND EXISTS "${DAL_INCLUDES}/dal_config.h")
+  
+  ##_____________________________________________________________________________
   ## Actions taken when all components have been found
   
   if (DAL_INCLUDES AND DAL_LIBRARIES)
@@ -167,6 +186,7 @@ if (NOT DAL_FOUND)
       message (STATUS "DAL_ROOT_DIR  = ${DAL_ROOT_DIR}")
       message (STATUS "DAL_INCLUDES  = ${DAL_INCLUDES}")
       message (STATUS "DAL_LIBRARIES = ${DAL_LIBRARIES}")
+      message (STATUS "DAL_VERSION   = ${DAL_VERSION}")
     endif (NOT DAL_FIND_QUIETLY)
   else (DAL_FOUND)
     if (DAL_FIND_REQUIRED)
