@@ -660,14 +660,16 @@ class DocumentationBlock():
 
         name = self.getName()
         doc = self.getSphinxDoc()
+        newline = "\n"
 
-        result += "from _hftools import " + name + "\n"
-        result += "if (" + name + ".__doc__):\n"
-        result += "    " + name + ".__doc__ += \"" + "-"*80 + "\\n\\n\"\n"
-        result += "    " + name + ".__doc__ += \"\"\"" + doc + "\"\"\"\n"
-        result += "else:\n"
-        result += "    " + name + ".__doc__ = \"\"\"" + doc + "\"\"\"\n"
-        result += "__all__.append(\'" + name + "\')\n\n"
+        result += "from _hftools import " + name + newline
+        result += "docstring = \"\"\"" + doc + "\"\"\"" + newline
+        result += "if (" + name + ".__doc__):" + newline
+        result += "    " + name + ".__doc__ += \"-\"*80 + \"\\n\\n\"" + newline
+        result += "    " + name + ".__doc__ += docstring" + newline
+        result += "else:" + newline
+        result += "    " + name + ".__doc__ = docstring" + newline
+        result += "__all__.append(\'" + name + "\')"
 
         return result
 
