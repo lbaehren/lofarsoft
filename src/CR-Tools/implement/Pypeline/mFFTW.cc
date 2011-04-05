@@ -137,14 +137,14 @@ std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDftC2r& d)
 
   Example:
   # Set up input/output arrays
-  x = cr.hArray(complex, N)
-  y = cr.hArray(complex, N)
+  >>> x = cr.hArray(complex, N)
+  >>> y = cr.hArray(complex, N)
 
   # Create plan
-  p = cr.FFTWPlanManyDft(N, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)
+  >>> p = cr.FFTWPlanManyDft(N, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)
 
   # Execute plan
-  cr.hFFTWExecutePlan(y, x, p)
+  >>> cr.hFFTWExecutePlan(y, x, p)
 */
 template <class CIter>
 void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
@@ -190,14 +190,14 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 
   Example:
   # Set up input/output arrays
-  x = cr.hArray(float, N)
-  y = cr.hArray(complex, N/2+1)
+  >>> x = cr.hArray(float, N)
+  >>> y = cr.hArray(complex, N/2+1)
 
   # Create plan
-  p = cr.FFTWPlanManyDftR2c(N, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+  >>> p = cr.FFTWPlanManyDftR2c(N, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
   # Execute plan
-  cr.hFFTWExecutePlan(y, x, p)
+  >>> cr.hFFTWExecutePlan(y, x, p)
 */
 template <class CIter, class Iter>
 void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
@@ -243,14 +243,14 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 
   Example:
   # Set up input/output arrays
-  x = cr.hArray(complex, N/2+1)
-  y = cr.hArray(float, N)
+  >>> x = cr.hArray(complex, N/2+1)
+  >>> y = cr.hArray(float, N)
 
   # Create plan
-  p = cr.FFTWPlanManyDftC2r(N, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+  >>> p = cr.FFTWPlanManyDftC2r(N, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
   # Execute plan
-  cr.hFFTWExecutePlan(y, x, p)
+  >>> cr.hFFTWExecutePlan(y, x, p)
 */
 template <class Iter, class CIter>
 void HFPP_FUNC_NAME(const Iter out, const Iter out_end,
