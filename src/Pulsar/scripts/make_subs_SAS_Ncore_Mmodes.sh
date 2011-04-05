@@ -4,10 +4,10 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.17
+VERSION=2.18
 
 #Check the usage
-USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
+USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
 "         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or\n"\
@@ -16,10 +16,17 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Out
 "         (i.e. up to 3 brights pulsars to fold at location of FOV: position \n"\
 "      -o Output_Processing_Location ==> Specify the Output Processing Location \n"\
 "         (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) \n"\
+"      [-raw input_raw_data_location] ==> when pipeline is not run on CEPI, input raw data locations can be specified;\n"\
+"            directory structure assumed as: input_raw_data_location/L2011_OBSID/\n"\
+"            Wildcards can be used for multiple input locations, but MUST be quoted:\n"\
+"            (i.e. -raw \"/state/partition2/lofarpwg/RAW?\" ) \n"\
+"      [-par parset_location] ==> when pipeline is not run on CEPI, input parameter file location can be specified;\n"\
+"            directory structure assumed as: parset_location/<any_path>/LOBSID.parset\n"\
+"            (i.e. -par /state/partition2/lofarpwg/PARSET ) \n"\
 "      [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)\n"\
 "      [-all_pproc] ==> Post-Processing optional parameter to ONLY perform folding on entire subband set based on already-processed N-splits\n"\
-"      [-rfi] ==> optional parameter perform Vlad's RFI checker and only use clean results (takes 7 extra min)\n"\
-"      [-rfi_pproc] ==> Post-Processing optional parameter to perform Vlad's RFI checker on already-processed N-splits\n"\
+"      [-rfi] ==> optional parameter perform Vlad's RFI checker and only use clean results (takes 7 extra min)\n"
+USAGE2="      [-rfi_pproc] ==> Post-Processing optional parameter to perform Vlad's RFI checker on already-processed N-splits\n"\
 "      [-C | -c] ==> optional parameter to switch on bf2presto COLLAPSE (Collapse all channels in MS to a single .sub file)\n"\
 "      [-del] ==> optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists (override previous results!)\n"\
 "      [-core N] ==> optional parameter to change the number of cores (splits) used for processing (default = 8)\n"\
@@ -36,7 +43,8 @@ USAGE="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Out
 
 if [ $# -lt 1 ]                    # this script needs at least 6 args, including -switches
 then
-   print "$USAGE"    
+   print "$USAGE1"    
+   print "$USAGE2"    
    exit 1
 fi
 
@@ -65,6 +73,10 @@ help=0
 test=0
 nofold=0
 debug=0
+input_location=""
+user_input_location=0
+parset_location=""
+user_parset_location=0
 input_string=$*
 while [ $# -gt 0 ]
 do
@@ -88,12 +100,14 @@ do
 	-test)   test=1;;
 	-nofold)   nofold=1;;
 	-debug)   debug=1;;
+	-raw)     input_location="$2"; user_input_location=1; shift;;
+	-par)     parset_location="$2"; user_parset_location=1; shift;;
 	-help)   help=1 
 	         cat $LOFARSOFT/release/share/pulsar/data/pulp_help.txt
 	         exit 1;;
 	-*)
 	    echo >&2 \
-	    "$USAGE"
+	    "$USAGE1" "$USAGE2"
 	    exit 1;;
 	*)  break;;	
     esac
@@ -118,21 +132,24 @@ if [[ $PULSAR == "" ]]
 then 
    echo ""
    echo "Pulsar name is required as input with -p flag."
-   print "$USAGE" 
+   print "$USAGE1" 
+   print "$USAGE2" 
    exit 1
 fi
 if [[ $OBSID == "" ]]
 then 
    echo ""
    echo "OBSID is required as input with -id flag."
-   print "$USAGE" 
+   print "$USAGE1" 
+   print "$USAGE2" 
    exit 1
 fi
 if [[ $location == "" ]]
 then 
    echo ""
    echo "Output is required as input with -o flag."
-   print "$USAGE" 
+   print "$USAGE1" 
+   print "$USAGE2" 
    exit 1
 fi
 
@@ -211,6 +228,16 @@ then
    echo "    Folding has been turned OFF for this pipeline run;  prepfold will be skipped." 
 fi
 
+if [ $user_input_location == 1 ]
+then
+   echo "    Will user user-specified raw data input location: $input_location." 
+fi
+
+if [ $user_parset_location == 1 ]
+then
+   echo "    Will user user-specified parset input location: $parset_location." 
+fi
+
 #Check whether Output Processing Location already exists
 if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
@@ -272,19 +299,39 @@ else
 	# (3) 2nd transpose parset as of Aug 20, 2010 is here: /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
 	
 	#Check if case 1; else case 2
-	PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+    if [ $user_parset_location == 0 ]
+    then
+	    PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+	else
+	    PARSET=$parset_location/${OBSID}/RTCP.parset.0
+	fi
 	short_id=`echo $OBSID | sed 's/L.....//g'`
 	
 	if [ ! -f $PARSET ] 
 	then
-	   new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
+	   if [ $user_parset_location == 0 ]
+       then
+	      new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
+	   else
+	      new_parset=`find $parset_location/ -name RTCP-${short_id}.parset -print`
+	   fi
 	   if [[ $new_parset == "" ]]
 	   then
-	      new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
+	      if [ $user_parset_location == 0 ]
+          then
+	         new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
+	      else
+	         new_parset=`find $parset_location/ -name RTCP-${short_id}.parset -print`
+	      fi
    	      if [[ $new_parset == "" ]]
 	      then
 	          # Sept 23, 2010 another parset location added
-	          new_parset=/globalhome/lofarsystem/log/L${short_id}/L${short_id}.parset
+	          if [ $user_parset_location == 0 ]
+	          then
+   	             new_parset=/globalhome/lofarsystem/log/L${short_id}/L${short_id}.parset
+	          else
+	             new_parset=`find $parset_location/ -name L${short_id}.parset -print`
+	          fi
 			  if [ ! -f $new_parset ] 
 			  then
 	             echo "ERROR: Unable to find parset for L$short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L${short_id} directory"
@@ -752,13 +799,19 @@ do
 	else
 		#Create subband lists
 		if [[ $transpose == 0 ]] 
-		then		    
-			all_list=`ls /net/sub?/lse*/data?/${OBSID}/*.${STOKES} | sort -t B -g -k 2`
+		then	
+		    if [ $user_input_location == 0 ]
+		    then 	    
+			   all_list=`ls /net/sub?/lse*/data?/${OBSID}/*.${STOKES} | sort -t B -g -k 2`
 #A2test			all_list=`cat /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list`
 		#XXX	all_list=`ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2`
-			ls /net/sub?/lse*/data?/${OBSID}/*.${STOKES} | sort -t B -g -k 2 > $master_list
+			   ls /net/sub?/lse*/data?/${OBSID}/*.${STOKES} | sort -t B -g -k 2 > $master_list
 #A2test			cp /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list $master_list
 		#XXX	ls /net/sub[456]/lse01[35]/data?/${OBSID}/SB*.MS.${STOKES} | sort -t B -g -k 2 > $master_list
+		    else
+			   all_list=`ls $input_location/${OBSID}/*.${STOKES} | sort -t B -g -k 2`
+			   ls $input_location/${OBSID}/*.${STOKES} | sort -t B -g -k 2 > $master_list
+		    fi
 	    else
 
 		    if [[ $STOKES == "incoherentstokes" ]]
@@ -773,8 +826,14 @@ do
 		       exit 1
 		    fi
 
-			all_list=`ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2`
-			ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2 > $master_list
+		    if [ $user_input_location == 0 ]
+		    then 	    
+			   all_list=`ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2`
+			   ls /net/sub?/lse*/data?/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2 > $master_list
+			else
+			   all_list=`ls $input_location/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2`
+			   ls $input_location/${OBSID}/L${short_id}_${fname} | sort -t B -g -k 2 > $master_list
+			fi
 			
 			#check that CS raw data files are non-zero length
 		    if [[ $STOKES == "stokes" ]]
@@ -793,8 +852,8 @@ do
 					 date >> $log
 					 echo chmod 774 -R . * >> $log
 					 chmod 774 -R . * 
-					 echo chgrp -R pulsar . * >> $log
-					 chgrp -R pulsar . * 
+#					 echo chgrp -R pulsar . * >> $log
+#					 chgrp -R pulsar . * 
 
 		             exit 1
 		          fi
