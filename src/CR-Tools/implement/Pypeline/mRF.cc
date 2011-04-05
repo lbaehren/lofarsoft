@@ -93,9 +93,9 @@ using namespace std;
   the second parameter!
 
   Example:
-  spectrum=hArray(float,[1,128])
-  cplxfft=hArray(complex,[10,128],fill=1+0j)
-  spectrum[...].spectralpower(cplxfft[...])
+  >>> spectrum=hArray(float,[1,128])
+  >>> cplxfft=hArray(complex,[10,128],fill=1+0j)
+  >>> spectrum[...].spectralpower(cplxfft[...])
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
