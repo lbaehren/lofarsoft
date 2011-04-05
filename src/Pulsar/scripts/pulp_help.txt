@@ -4,7 +4,7 @@ By default, the pipeline needs the LOFAR OBSID in the form of L<year>_OBSID wher
 
 Also see the examples section below.
 
-usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]
+usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]
 
       -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) 
       -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or
@@ -14,6 +14,13 @@ usage : pulp.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-core 
          (i.e. up to 3 brights pulsars to fold at location of FOV: position)
       -o Output_Processing_Location ==> Specify the Output Processing Location 
          (i.e. /net/sub5/lse013/data4/LOFAR_PULSAR_ARCHIVE_lse013/L2010_06296_red) 
+      [-raw input_raw_data_location] ==> when pipeline is not run on CEPI, input raw data locations can be specified;
+            directory structure assumed as: input_raw_data_location/L2011_OBSID/
+            Wildcards can be used for multiple input locations, but MUST be quoted:
+            (i.e. -raw "/state/partition2/lofarpwg/RAW?" ) 
+      [-par parset_location] ==> when pipeline is not run on CEPI, input parameter file location can be specified
+            directory structure assumed as: parset_location/<any_path>/LOBSID.parset
+            (i.e. -par /state/partition2/lofarpwg/PARSET ) 
       [-all] ==> optional parameter perform folding on entire subband set in addition to N-splits (takes 11 extra min)
       [-all_pproc] ==> Post-Processing optional parameter to ONLY perform folding on entire subband set based on already-processed N-splits
       [-rfi] ==> optional parameter perform Vlad's RFI checker and only use clean results (takes 7 extra min)
@@ -102,6 +109,10 @@ Examples:
 17) Skip the folding process, since this Pulsar is unknown;  also turn on debugging:
 
 	> pulp.sh -p Geminga -o L2010_28990_red -id L2010_28990 -nofold -debug -rfi
+
+18) Specify the input raw data location and input parset location:
+
+	> pulp.sh -id L2011_24878 -o L2011_24878_red -p B0329+54 -raw "/state/partition2/lofarpwg/RAW?" -par /state/partition2/lofarpwg/PARSET
 
 
 
