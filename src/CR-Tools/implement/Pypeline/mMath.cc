@@ -122,7 +122,8 @@ inline T HFPP_FUNC_NAME(const T val)
   $PARDOCSTRING
 
   Example:
-  sqrtAbs(-4) -> 2
+  >>> sqrtAbs(-4)
+  2
 */
 template <class T>
 inline T HFPP_FUNC_NAME(const T val){return sqrt(abs(val));}
@@ -254,8 +255,9 @@ void hMax(const Iter vec,const Iter vec_end, const T max_value)
   vec.min(min_value) -> all values in vec are smaller (or equal) than min_value
 
   Example:
-  v=hArray(range(5))
-  v.min(3) -> [0,1,2,3]
+  >>> v=hArray(range(5))
+  >>> v.min(3)
+  [0,1,2,3]
 */
 template <class Iter, class T>
 void hMin(const Iter vec,const Iter vec_end, const T min_value)
@@ -487,7 +489,7 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
   hDivTo(vecA,vecB) -> vecB=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
 
   Example:
-  hMul(vecA,vecB) = vecA.mul(vecB)  etc.
+  >>> hMul(vecA,vecB) = vecA.mul(vecB)
 */
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Iter vec2_end)
@@ -526,7 +528,7 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
   vecA /= vecB  -> vecA=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
 
   Example:
-  hMul(vecA,vecB) of vecA.mul(vecB)  etc.
+  >>> hMul(vecA,vecB) = vecA.mul(vecB)
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)
@@ -626,16 +628,16 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Description:
+  To loop over the second argument (i.e., ``vec1``) use
+  ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``.
+
   Usage:
   h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
   vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
 
   See also:
   hMulAdd, hDivAdd, HSubAdd, hAddAdd
-
-  Description:
-  To loop over the second argument (i.e., vec1) use
-  ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``.
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
@@ -759,11 +761,12 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin vec1,const Iter
   Doesn't really make sense for ``add`` and ``mul``, but is useful to get the inverse of a vector.
 
   See also:
-  hMulSelf, hDivSelf, hSubSelf, hAddSelf, hInverse.
+  hMulSelf, hDivSelf, hSubSelf, hAddSelf, hInverse
 
   Example:
-  vec=Vector([1.,2.,4.])
-  vec.divself(1) -> [1.0,0.5,0.25]
+  >>> vec=Vector([1.,2.,4.])
+  >>> vec.divself(1)
+  [1.0,0.5,0.25]
 */
 template <class Iter, class S>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
@@ -797,11 +800,12 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
   vec.inverse(val) -> 1/vec
 
   See also:
-  hMulSelf, hDivSelf, hSubSelf, hAddSelf.
+  hMulSelf, hDivSelf, hSubSelf, hAddSelf
 
   Example:
-  vec=Vector([1.,2.,4.])
-  vec.inverse() -> [1.0,0.5,0.25]
+  >>> vec=Vector([1.,2.,4.])
+  >>> vec.inverse()
+  [1.0,0.5,0.25]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
@@ -1045,7 +1049,7 @@ HComplex HFPP_FUNC_NAME(const HNumber phase)
   $PARDOCSTRING
 
   Description:
-  If input vector is shorter it will be repeated until output vector is full.
+  If input vector is shorter it will be repeated until the output vector is filled.
 
   Usage:
   hPhaseToComplex(outvec,phase) -> outvec = [exp(i*phase_1),exp(i*phase_2),...,exp(i*phase_n)]
@@ -1112,13 +1116,11 @@ HComplex HFPP_FUNC_NAME(const HNumber amplitude, const HNumber phase)
   $PARDOCSTRING
 
   Description:
-  If input vector is shorter it will be repeated until output vector is full.
+  If input vector is shorter it will be repeated until output vector is filled.
 
   Usage:
   hAmplitudePhaseToComplex(vec,ampphase) -> vec = [ampphase_0,0*exp(i*ampphase_0,1),ampphase_1,0*exp(i*ampphase_1,1),...,ampphase_n,0*exp(i*ampphase_n,1)]
   vec.amplitudephasetocomplex(ampphase) -> vec = [ampphase_0,0*exp(i*ampphase_0,1),ampphase_1,0*exp(i*ampphase_1,1),...,ampphase_n,0*exp(i*ampphase_n,1)]
-
-
 */
 template <class Iter1,class Iter2>
 void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end,
@@ -1258,13 +1260,15 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
   Input and output vector can be identical.
 
   The following functions are available for getting real values from
-  complex numbers::
+  complex numbers:
 
-  - norm - magnitude (length) squared of a complex number, i.e. ``c * conj(c)``
-  - abs - amplitude of a complex number, i.e. ``c * conj(c)``
-  - arg - phase angle of a complex number (in radians)
-  - imag - imaginary part of a complex number
-  - real - real part of a complex number
+    ===== ======================================================================
+    norm  magnitude (length) squared of a complex number, i.e. ``c * conj(c)``
+    abs   amplitude of a complex number, i.e. ``c * conj(c)``
+    arg   phase angle of a complex number (in radians)
+    imag  imaginary part of a complex number
+    real  real part of a complex number
+    ===== ======================================================================
 
   Usage:
   vec2.$MFUNC(vec1) -> vec2 = [$MFUNC(vec1_0), $MFUNC(vec1_1), ... , $MFUNC(vec1_n)]
@@ -1322,13 +1326,13 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end, const IterIn vecin,
   The following functions are available for getting real values from
   complex numbers:
 
-  ===== ======================================================================
-  norm  magnitude (length) squared of a complex number, i.e. ``c * conj(c)``
-  abs   amplitude of a complex number, i.e. ``c * conj(c)``
-  arg   phase angle of a complex number (in radians)
-  imag  imaginary part of a complex number
-  real  real part of a complex number
-  ===== ======================================================================
+    ===== ======================================================================
+    norm  magnitude (length) squared of a complex number, i.e. ``c * conj(c)``
+    abs   amplitude of a complex number, i.e. ``c * conj(c)``
+    arg   phase angle of a complex number (in radians)
+    imag  imaginary part of a complex number
+    real  real part of a complex number
+    ===== ======================================================================
 
   Usage:
   vec2.$MFUNC(vec1) -> vec2 = [$MFUNC(vec1_0), $MFUNC(vec1_1), ... , $MFUNC(vec1_n)]
@@ -1370,12 +1374,13 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end)
   $PARDOCSTRING
 
   See also:
-  findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal, hRandomizePhase, hSetAmplitude
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hRandomizePhase, hSetAmplitude
 
   Example:
-  c=hArray(float,[10],fill=range(10)) -> hArray(float, [10], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]) # len=10 slice=[0:10])
-  c.randomizepeaks(3,7) -> hArray(float, [10], fill=[3.87583674531, 3.18817846486, 5.71545886747, 3.0, 4.0, 5.0, 6.0, 7.0, 5.71718562335, 6.73877158376]) # len=10 slice=[0:10])
-
+  >>> c=hArray(float,[10],fill=range(10))
+  hArray(float, [10], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]) # len=10 slice=[0:10])
+  >>> c.randomizepeaks(3,7)
+  hArray(float, [10], fill=[3.87583674531, 3.18817846486, 5.71545886747, 3.0, 4.0, 5.0, 6.0, 7.0, 5.71718562335, 6.73877158376]) # len=10 slice=[0:10])
 */
 template <class Iter,class T>
 HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
@@ -1418,7 +1423,9 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
   $PARDOCSTRING
 
   Description:
-  The elements are specified in an indexlist. **(NOT QUITE CORRECT: SPECIFY PROPPER WEIGHTING TO RAND GENERATOR)**
+  The elements are specified in an indexlist.
+
+  **(NOT QUITE CORRECT: SPECIFY PROPER WEIGHTING TO RAND GENERATOR)**
 
   Usage:
   vec.randomizephase(indexlist,amplitude) -> elements in vec at positions provided in indexlist are set to a complex number with random phase and amplitude 'amplitude'
@@ -1427,10 +1434,12 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
   hSetAmplitude
 
   Example:
-  c=hArray(complex,[10],fill=range(10)) -> hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (3+0j), (4+0j), (5+0j), (6+0j), (7+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
-  c.randomizephase(hArray([1,3,5,7]),1.) -> hArray(complex, [10], fill=[0j, (0.661930692225-0.749565046337j), (2+0j), (-0.930855778945-0.365386807102j), (4+0j), (-0.893076729911+0.449904383721j), (6+0j), (0.0594003866703+0.998234238074j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
-  c.abs() -> hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (1+0j), (4+0j), (1+0j), (6+0j), (1+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
-
+  >>> c=hArray(complex,[10],fill=range(10))
+  hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (3+0j), (4+0j), (5+0j), (6+0j), (7+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+  >>> c.randomizephase(hArray([1,3,5,7]),1.)
+  hArray(complex, [10], fill=[0j, (0.661930692225-0.749565046337j), (2+0j), (-0.930855778945-0.365386807102j), (4+0j), (-0.893076729911+0.449904383721j), (6+0j), (0.0594003866703+0.998234238074j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+  >>> c.abs()
+  hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (1+0j), (4+0j), (1+0j), (6+0j), (1+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
 */
 template <class Iter, class IterI, class T>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const T amplitude)
@@ -1996,9 +2005,11 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Usage:
-  hRandom(vector,-1,1) -> [-0.5,0.3,0.1, ...]
-  vector.random(-1,1) -> [-0.5,0.3,0.1, ...]
+  Example:
+  >>> hRandom(vector,-1,1)
+  [-0.5,0.3,0.1, ...]
+  >>> vector.random(-1,1)
+  [-0.5,0.3,0.1, ...]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType minimum, const IterValueType maximum)
@@ -2347,6 +2358,9 @@ HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, const IterValueType 
   Description:
   This simply call ``hMeanGreaterThanThreshold`` or ``hMeanLessThanThreshold`` with a
   threshold value of ``mean+nsigma*rms``.
+
+  See also:
+  hMeanLessThanThreshold, hMeanGreaterThanThreshold
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end, HNumber mean, HNumber rms, HNumber nsigma)
@@ -2660,7 +2674,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T lower_limi
   Return -1 if not found.
 
   See also:
-  findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
 */
 template <class Iter>
 HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
@@ -2699,8 +2713,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
   $PARDOCSTRING
 
   See also:
-  find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
-
+  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
 */
 template <class Iter>
 HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
@@ -2752,28 +2765,31 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   $PARDOCSTRING
 
   See also:
-  find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal
+  hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual,
+  hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
   Example:
-  #Make a test time series data set for 4 antennas and some peaks at various locations
-  data=hArray(float,[4,512],name="Random series with peaks")
-  data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
-  for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,-4096,4096,5099,3096])
+  # Make a test time series data set for 4 antennas and some peaks at various locations
+  >>> data=hArray(float,[4,512],name="Random series with peaks")
+  >>> data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
+  >>> for i in range(4):
+          data[i,[2,3,32,64,65,67],...] = Vector([4096.,5097,-4096,4096,5099,3096])
+  >>> nsigma=5
+  >>> datapeaks=hArray(int,[4,256,2],name="Location of peaks")
+  >>> datamean=data[...].mean()
+  >>> datathreshold2 = data[...].stddev(datamean)
+  >>> datathreshold2 *= nsigma
+  >>> datathreshold1 = datathreshold2*(-1)
+  >>> datathreshold1 += datamean
+  >>> datathreshold2 += datamean
 
-  nsigma=5
-  datapeaks=hArray(int,[4,256,2],name="Location of peaks")
-  datamean=data[...].mean()
-  datathreshold2 = data[...].stddev(datamean)
-  datathreshold2 *= nsigma
-  datathreshold1 = datathreshold2*(-1)
-  datathreshold1 += datamean
-  datathreshold2 += datamean
-
-  maxgap=Vector(int,len(datamean),fill=10)
-  minlength=Vector(int,len(datamean),fill=1)
-  npeaks=datapeaks[...].findsequenceoutside(data[...],datathreshold1,datathreshold2,maxgap,minlength)
-  npeaks -> Vec(int,4)=[3,3,3,3]
-  datapeaks -> hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
+  >>> maxgap=Vector(int,len(datamean),fill=10)
+  >>> minlength=Vector(int,len(datamean),fill=1)
+  >>> npeaks=datapeaks[...].findsequenceoutside(data[...],datathreshold1,datathreshold2,maxgap,minlength)
+  >>> npeaks
+  Vec(int,4)=[3,3,3,3]
+  >>> datapeaks
+  hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
 */
 template <class Iter, class IterI>
 HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
@@ -2843,7 +2859,7 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
   Return -1 if not found.
 
   See also:
-  findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
 */
 template <class Iter, class T>
 HInteger hFind{$MFUNC}1 (const Iter vecin,const Iter vecin_end,
@@ -2882,7 +2898,7 @@ HInteger hFind{$MFUNC}1 (const Iter vecin,const Iter vecin_end,
   $PARDOCSTRING
 
   See also:
-  find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
+  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
 */
 template <class Iter, class T>
 HInteger hFind{$MFUNC}2 (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
@@ -2923,7 +2939,9 @@ HInteger hFind{$MFUNC}2 (const typename vector<HInteger>::iterator vecout, const
   $PARDOCSTRING
 
   See also:
-  find, findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal, findgreaterthanvec, findgreaterequalvec, findlessthanvec, findlessequalvec
+  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual
+  hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
+  hFindGreaterThanVec, hFindGreaterEqualVec, hFindLessThanVec, hFindLessEqualVec
 */
 template <class Iter, class Iter2>
 HInteger HFPP_FUNC_NAME (
@@ -3072,25 +3090,28 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
   $PARDOCSTRING
 
   See also:
-  find, findsequencegreaterthan, findsequencegreaterequal, findsequencelessthan, findsequencelessequal, findsequencebetween, findsequenceoutside, findsequenceoutsideorequal, findsequencebetweenorequal
+  hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual
+  hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
   Example:
-  #Make a test time series data set for 4 antennas and some peaks at various locations
-  data=hArray(float,[4,512],name="Random series with peaks")
-  data.random(0,1024); data[...] += Vector([128.,256., 385.,50.])
-  for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,4096,4096,5099,3096])
+  # Make a test time series data set for 4 antennas and some peaks at various locations
+  >>> data=hArray(float,[4,512],name="Random series with peaks")
+  >>> data.random(0,1024); data[...] += Vector([128.,256., 385.,50.])
+  >>> for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,4096,4096,5099,3096])
 
-  datapeaks=hArray(int,[4,256,2],name="Location of peaks")
-  datamean=data[...].mean()
-  datathreshold = data[...].stddev(datamean)
-  datathreshold *= 5
-  datathreshold += datamean
+  >>> datapeaks=hArray(int,[4,256,2],name="Location of peaks")
+  >>> datamean=data[...].mean()
+  >>> datathreshold = data[...].stddev(datamean)
+  >>> datathreshold *= 5
+  >>> datathreshold += datamean
 
-  maxgap=Vector(int,len(datamean),fill=10)
-  minlength=Vector(int,len(datamean),fill=1)
-  npeaks=datapeaks[...].findsequencegreaterthan(data[...],datathreshold,maxgap,minlength)
-  npeaks -> Vec(int,4)=[3,3,3,3]
-  datapeaks -> hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
+  >>> maxgap=Vector(int,len(datamean),fill=10)
+  >>> minlength=Vector(int,len(datamean),fill=1)
+  >>> npeaks=datapeaks[...].findsequencegreaterthan(data[...],datathreshold,maxgap,minlength)
+  >>> npeaks
+  Vec(int,4)=[3,3,3,3]
+  >>> datapeaks
+  hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
 */
 template <class Iter, class IterI, class T>
 HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
@@ -3309,9 +3330,9 @@ void HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
   Useful for piecing interpolations together (adds to output vector!)
 
   Example:
-  v=hArray(float, [10])
-  v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
-  v.interpolate2psubpiece(0.,10.) #-> [0,1,2,3,4,5,6,7,8,9]
+  >>> v=hArray(float, [10])
+  >>> v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
+  >>> v.interpolate2psubpiece(0.,10.) #-> [0,1,2,3,4,5,6,7,8,9]
 */
 
 template <class Iter>
@@ -3431,10 +3452,10 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
   array needs to be initialized with zero.
 
   Example:
-  x=hArray(float, [31])
-  v=hArray(float, [10])
-  v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
-  x.upsample(v)
+  >>> x=hArray(float, [31])
+  >>> v=hArray(float, [10])
+  >>> v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
+  >>> x.upsample(v)
 */
 
 template <class Iter>
@@ -3495,7 +3516,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
   As a second output the root mean square (RMS, standard deviation)
   of the mean in each downsampled bin is returned.
 
-  The mean here is taken only of data that is nsigma below
+  The mean here is taken only of data that is ``nsigma`` below
   (negative) or above (positive) the RMS in the bin.
 */
 
@@ -3787,11 +3808,11 @@ vector<HNumber> HFPP_FUNC_NAME (const HInteger wlen, const hWEIGHTS wtype){
   \brief $DOCSTRING
   $PARDOCSTRING
 
-Will return a vector where each element is replaced by the sum of its
-neighbours multiplied with the weights vector. The middle of the
-weightsvector (usually its peak) is at len(weights)/2. It is assumed
-that the wights are normalized (i.e. sum(weights)=1).
-
+  Description:
+  Will return a vector where each element is replaced by the sum of its
+  neighbours multiplied with the weights vector. The middle of the
+  weightsvector (usually its peak) is at ``len(weights)/2``. It is assumed
+  that the wights are normalized (i.e. ``sum(weights)=1``).
 */
 
 template <class Iter, class Iter2>
@@ -3912,11 +3933,11 @@ void HFPP_FUNC_NAME (const DataIter  odata,
   Description
   Available Weights:
 
-  ============= ============================================================
-  ``FLAT``      All have the same value
-  ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
-  ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
-  ============= ============================================================
+    ============= ============================================================
+    ``FLAT``      All have the same value
+    ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
+    ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
+    ============= ============================================================
 
   Example:
   in_array.runningaverage(array_out,7,hWEIGHTS.GAUSSIAN)
@@ -3959,11 +3980,12 @@ void HFPP_FUNC_NAME (const DataIter odata,
   Description:
 
   Available Weights:
-  ============= ============================================================
-  ``FLAT``      All have weight the same value
-  ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
-  ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
-  ============= ============================================================
+
+    ============= ============================================================
+    ``FLAT``      All have weight the same value
+    ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
+    ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
+    ============= ============================================================
 
   Example:
   in_array.runningaverage(7,hWEIGHTS.GAUSSIAN)
@@ -4004,9 +4026,9 @@ void HFPP_FUNC_NAME (const DataIter odata,
   the second parameter!
 
   Example:
-  spectrum=hArray(float,[1,128])
-  cplxfft=hArray(complex,[10,128],fill=1+0j)
-  spectrum[...].spectralpower(cplxfft[...])
+  >>> spectrum=hArray(float,[1,128])
+  >>> cplxfft=hArray(complex,[10,128],fill=1+0j)
+  >>> spectrum[...].spectralpower(cplxfft[...])
 */
 template <class Iter, class Iterin>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
