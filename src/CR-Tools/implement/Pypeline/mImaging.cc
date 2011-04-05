@@ -88,20 +88,20 @@ using namespace casa;
   Description:
   Available Coordinate Types are:
 
-  ================ ======================================================================
-  AzElHeight       Azimuth-Elevation-Height, ``\\vec x = (Az,El,H)``
-  AzElRadius       Azimuth-Elevation-Radius, ``\\vec x = (Az,El,R)``
-  Cartesian        Cartesian coordinates, ``\\vec x = (x,y,z)``
-  Cylindrical      Cylindrical coordinates, ``\\vec x = (r,\\phi,h)``
-  Direction        Direction on the sky, ``\\vec x = (Lon,Lat)``
-  DirectionRadius  Direction on the sky with radial distance, ``\\vec x = (Lon,Lat,R)``
-  Frquency         Frequency
-  LongLatRadius    Longitude-Latitude-Radius
-  NorthEastHeight  North-East-Height
-  Spherical        Spherical coordinates, ``\\vec x = (r,\\phi,\\theta)``
-  Time             Time
-  ================ ======================================================================
-*/
+    ================ =========================================== ====================================
+    AzElHeight       Azimuth-Elevation-Height                    :math:`\\vec x = (Az,El,H)`
+    AzElRadius       Azimuth-Elevation-Radius                    :math:`\\vec x = (Az,El,R)`
+    Cartesian        Cartesian coordinates                       :math:`\\vec x = (x,y,z)`
+    Cylindrical      Cylindrical coordinates                     :math:`\\vec x = (r,\\phi,h)`
+    Direction        Direction on the sky                        :math:`\\vec x = (Lon,Lat)`
+    DirectionRadius  Direction on the sky with radial distance   :math:`\\vec x = (Lon,Lat,R)`
+    Frquency         Frequency
+    LongLatRadius    Longitude-Latitude-Radius
+    NorthEastHeight  North-East-Height
+    Spherical        Spherical coordinates                       :math:`\\vec x = (r,\\phi,\\theta)`
+    Time             Time
+    ================ =========================================== ====================================
+  */
 
 template <class Iter>
 bool HFPP_FUNC_NAME  (Iter source,
@@ -159,18 +159,19 @@ bool HFPP_FUNC_NAME  (Iter source,
   hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)
 
   Example:
-  ccm=Vector(complex,file[\"nofSelectedAntennas\"]*(file[\"nofSelectedAntennas\"]-1)/2*file[\"fftLength\"])
-  cimage=Vector(complex,n_pixels*nbins,fill=0)
-  image=hArray(float,[n_pixels,file[\"fftLength\"]])
+  >>> ccm=Vector(complex,file[\"nofSelectedAntennas\"]*(file[\"nofSelectedAntennas\"]-1)/2*file[\"fftLength\"])
+  >>> cimage=Vector(complex,n_pixels*nbins,fill=0)
+  >>> image=hArray(float,[n_pixels,file[\"fftLength\"]])
 
-  hCrossCorrelationMatrix(ccm,file_fft.vec(),file[\"fftLength\"])
-  hCImageFromCCM(cimage,ccm,weights.vec(),file[\"nofSelectedAntennas\"],file[\"fftLength\"])
-  cimage.norm(image.vec())
-  intimage=np.array(image[...].sum()) # convert to numpy array
-  immax=intimage.max()
-  intimage /= immax
-  intimage.resize([n_az,n_el])
-  plt.imshow(intimage,cmap=plt.cm.hot)
+  >>> hCrossCorrelationMatrix(ccm,file_fft.vec(),file[\"fftLength\"])
+  >>> hCImageFromCCM(cimage,ccm,weights.vec(),file[\"nofSelectedAntennas\"],file[\"fftLength\"])
+  >>> cimage.norm(image.vec())
+  >>> intimage=np.array(image[...].sum()) # convert to numpy array
+  >>> immax=intimage.max()
+  >>> intimage /= immax
+  >>> intimage.resize([n_az,n_el])
+
+  >>> plt.imshow(intimage,cmap=plt.cm.hot)
 */
 template <class IterC>
 void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
@@ -373,22 +374,24 @@ HNumber HFPP_FUNC_NAME (
   $PARDOCSTRING
 
   Example:
-  result=[]
-  plt.clf()
-  for j in range(29,30):
-      x=[]; y=[]
-      for i in range(177,178):
-          azel[0]=float(i)
-          azel[1]=float(j)
-          hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
-          hGeometricDelays(delays,antenna_positions,hArray(cartesian),True)
-          delays *= 10**6
-          deviations=delays-obsdelays
-          deviations.abs()
-          sum=deviations.vec().sum()
-          x.append(i); y.append(sum)
-      result.append(y)
-      plt.plot(x,y)
+  >>> result=[]
+  >>> plt.clf()
+  >>> for j in range(29,30):
+  >>>     x=[]
+  >>>     y=[]
+  >>>     for i in range(177,178):
+  >>>         azel[0]=float(i)
+  >>>         azel[1]=float(j)
+  >>>         hCoordinateConvert(azel,CoordinateTypes.AzElRadius,cartesian,CoordinateTypes.Cartesian,True)
+  >>>         hGeometricDelays(delays,antenna_positions,hArray(cartesian),True)
+  >>>         delays *= 10**6
+  >>>         deviations=delays-obsdelays
+  >>>         deviations.abs()
+  >>>         sum=deviations.vec().sum()
+  >>>         x.append(i)
+  >>>         y.append(sum)
+  >>>     result.append(y)
+  >>>     plt.plot(x,y)
 */
 
 template <class Iter>
