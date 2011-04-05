@@ -633,7 +633,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   See also:
   hMulAdd, hDivAdd, HSubAdd, hAddAdd
 
-  Documentation:
+  Description:
   To loop over the second argument (i.e., vec1) use
   ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``.
 */

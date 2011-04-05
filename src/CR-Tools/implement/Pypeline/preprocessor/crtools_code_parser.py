@@ -359,11 +359,6 @@ class DocumentationBlock():
         if (not self.setSection(line)):
             sectionType = self.getSection()
 
-            # Catch dump mode
-            if (sectionType == "Dump"):
-                self.addDump(line)
-                return
-
             if (sectionType == "Description"):
                 self.addDescription(line)
                 return
@@ -608,10 +603,12 @@ class DocumentationBlock():
         """
         Add a reference to another function.
         """
-        reference_function = reference.strip()
+        reference_line = reference.strip()
+        reference_functions = reference_line.split(', ')
 
-        if (len(reference_function) > 0):
-            self._reference_list.append(reference_function)
+        for reference_function in reference_functions:
+            if (len(reference_function) > 0):
+                self._reference_list.append(reference_function)
 
 
     def formatReference(self):
@@ -622,7 +619,7 @@ class DocumentationBlock():
 
         nReferences = len(self.getReference())
         for i in range(nReferences):
-            result += ":meth:`" + self._reference_list[i] + "`"
+            result += ":func:`" + self._reference_list[i] + "`"
             if (i < nReferences - 1):
                 result += ", "
             result += r"\n"
@@ -746,11 +743,6 @@ class DocumentationBlock():
         if self.getExample():
             result += r"\n" + self.formatSectionTitle("Example") + r"\n"
             result += self.formatExample() + r"\n"
-
-        # Dump additional documentation
-        if self.getDump():
-#            result += r"\n" + self.formatSectionTitle("Dump") + r"\n"
-            result += self.formatDump() +r"\n"
 
         return result
 
