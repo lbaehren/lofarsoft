@@ -604,7 +604,9 @@ class DocumentationBlock():
         Add a reference to another function.
         """
         reference_line = reference.strip()
-        reference_functions = reference_line.split(', ')
+        reference_line = reference_line.replace(".", " ")
+        reference_line = reference_line.replace(",", " ")
+        reference_functions = reference_line.split(' ')
 
         for reference_function in reference_functions:
             if (len(reference_function) > 0):
