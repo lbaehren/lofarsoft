@@ -382,11 +382,6 @@ class DocumentationBlock():
         """
         Set the sectiontype within the documentation.
         """
-        # Ignore documentation sections when dumping documentation
-        # Dump prevents the interpretationof other sectioning types
-        if (self.getSection() == "Dump"):
-            return False
-
         line_content = line.strip()
 
         if (line_content == "Description:"):
@@ -675,41 +670,6 @@ class DocumentationBlock():
         Return example.
         """
         return self._example_lines
-
-
-    # ______________________________________________________________________
-    #                               Additional documentation of the function
-    def addDump(self, dump):
-        """
-        Dump a line of documentation of the function.
-        """
-        dump_line = dump.rstrip()
-
-        self._dump_lines.append(dump_line)
-
-
-    def formatDump(self):
-        """
-        Put the documentation dump in a Sphinx parsable format.
-        """
-        result = ""
-        indent = "  "
-
-        result += r"::\n\n"
-
-        for line in self.getDump():
-            result += indent + line + r"\n"
-
-        result += r"\n"
-
-        return result
-
-
-    def getDump(self):
-        """
-        Return the additional documentation.
-        """
-        return self._dump_lines
 
 
     # ______________________________________________________________________
@@ -1052,13 +1012,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-## =============================================================================
-##
-##  TODO
-##
-## =============================================================================
-
-# * Add implementation for Documentation, References and Examples
-# * Add implementation for additionalDocumentation
-# * Optional: add formatting method for abovementioned documentation functions.
