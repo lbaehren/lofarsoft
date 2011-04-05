@@ -88,9 +88,9 @@ set (PYPELINE_CPP_FILES
 set (PYPELINE_CPP_MODULE_PREFIX "m")
 
 set (PYPELINE_CPP_MODULES
-  Math
   Array
   Vector
+  Math
   FFT
   FFTW
   Filter
