@@ -59,7 +59,7 @@ extern vector<HNumber> hWeights(const HInteger wlen, const hWEIGHTS wtype);
 extern HNumber hPhase(const HNumber frequency, const HNumber time);
 
 extern HComplex hAmplitudePhaseToComplex(const HNumber amplitude, const HNumber phase);
-extern HComplex hPhaseToComplex(const HNumber phase);
+extern HComplex hPhaseToComplex(const HNugmber phase);
 extern HNumber funcGaussian (const HNumber x, const HNumber sigma, const HNumber mu);
 
 

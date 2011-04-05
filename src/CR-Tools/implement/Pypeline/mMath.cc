@@ -487,7 +487,6 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
   hDivTo(vecA,vecB) -> vecB=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
 
   Example:
-  Alternative usages are:
   hMul(vecA,vecB) = vecA.mul(vecB)  etc.
 */
 template <class Iterin, class Iter>
@@ -527,7 +526,6 @@ void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,con
   vecA /= vecB  -> vecA=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
 
   Example:
-  Alternative usages are:
   hMul(vecA,vecB) of vecA.mul(vecB)  etc.
 */
 template <class Iter, class Iterin>
@@ -741,7 +739,7 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin vec1,const Iter
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW operation (i.e., val +/-* ``vec``) in place between a scalar and a vector, where the scalar is the first argument.
+//$DOCSTRING: Performs a ``$MFUNC!LOW`` operation (i.e., val ``+/-*`` ``vec``) in place between a scalar and a vector, where the scalar is the first argument.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}Self
 //-----------------------------------------------------------------------
@@ -2433,8 +2431,8 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
   hMinStdDevS(vec,blocklen) -> minium rms (float)
 
   Description:
-  Subdivide the input vector into smaller blocks of len``blocklen``
-  and calculate for each block the standard deviation. The standard
+  Subdivide the input vector into smaller blocks of len ``blocklen`` and
+  calculate for each block the standard deviation. The standard
   deviation of the block with the smallest value will be returned.
   All blocks have the same length with a possible exception of the
   last block, which is ignored if it is shorter.
@@ -2493,11 +2491,11 @@ HNumber HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger b
   hMinRMS(vec,blocklen) -> block number of minimum rms (int)
 
   Description:
-  Subdivide the input vector into smaller blocks of len ``blocklen``
-  and calculate for each block the standard deviation. The block
+  Subdivide the input vector into smaller blocks of len ``blocklen`` and
+  calculate for each block the standard deviation. The block
   number of the block with the smallest standard deviation will be
   returned. The values of mean and standard deviation will be
-  returned in the variables minrms and minmean.
+  returned in the variables ``minrms`` and ``minmean``.
 
   All blocks have the same length with a possible exception of the last
   block, which is ignored if it is shorter.
@@ -2579,7 +2577,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   $PARDOCSTRING
 
   Description:
-  Return -1 if not found.
+  Return -1 if ``value`` is not found.
 
   See also:
   findgreaterthan, findgreaterequal, findlessthan, findlessequal, findbetween, findoutside, findoutsideorequal, findbetweenorequal
@@ -2607,7 +2605,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
 
 // ========================================================================
 //
-//$Section:  Find & Seach
+//$Section:  Find & Search
 //
 // ========================================================================
 
@@ -3830,7 +3828,7 @@ void HFPP_FUNC_NAME (const Iter  vec,
       if (buffer==buffer_end) buffer=buffer_start;
     };
     *it=hfcast<IterValueType>(temp);
-    ++it; 
+    ++it;
     if (it_plus_middle != last) ++it_plus_middle;
     *buffer = *it_plus_middle;
     ++buffer; //advance ring buffer

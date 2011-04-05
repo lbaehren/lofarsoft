@@ -769,28 +769,27 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
 
   Description:
   Description of the data input vector:
-  -------------------------------------
 
   This is how the data is to be provided and dealt with:
 
-  First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector:
+  First, the time series data is read in as n=nblocks of length l=blocklength each, i.e. giving a vector::
 
-  full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE-1 Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l]
+    full data -> [B1-1,B1-2,..,B1-l, --STRIDE-1 Blocks to be left out--, B2-1,B2-2,..,B2-l, --STRIDE-1 Blocks to be left out--, ...,  Bn-1,Bn-2,..,Bn-l]
 
-  -> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
+    -> [B1-1,B1-2,..,B1-l, B2-1,B2-2,..,B2-l,  ...,  Bn-1,Bn-2,..,Bn-l]
 
   (B2-3 means: 2nd block, and 3rd sample within the block)
 
   It is possible to leave out m=stride-1 blocks in between, so that only a fraction 1/(stride+1) of data is read in.
 
-  The next step is to transpose the data into a matrix, giving (B1-2 reads data block 1, sample number 2):
+  The next step is to transpose the data into a matrix, giving (B1-2 reads data block 1, sample number 2)::
 
-  Mb=  [
-     [B1-1,B2-1,..,Bn-1],
-     [B1-2,B2-2,..,Bn-2],
-             ...
-     [B1-l,B2-l,..,Bn-l]
-     ]
+    Mb=  [
+       [B1-1,B2-1,..,Bn-1],
+       [B1-2,B2-2,..,Bn-2],
+               ...
+       [B1-l,B2-l,..,Bn-l]
+       ]
 
   Hence this matrix is incomplete, since it is missing OFFSET times a
   similar matrix on top (e.g., when one was starting to reading not from
@@ -799,24 +798,24 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
 
   For clarity: the full matrix would look have looked like (for the
   example of OFFSET=1 and STRIDE=3 above ... even tough stride is
-  better a power of two!)
+  better a power of two!)::
 
-  Mabc=[
-       [A1-1,A2-1,..,An-1],       I
-       [A1-2,A2-2,..,An-2],       I
-               ...                I  cdataT
-       [A1-l,A2-l,..,An-l],       I
+    Mabc=[
+         [A1-1,A2-1,..,An-1],       I
+         [A1-2,A2-2,..,An-2],       I
+                 ...                I  cdataT
+         [A1-l,A2-l,..,An-l],       I
 
-       [B1-1,B2-1,..,Bn-1],
-       [B1-2,B2-2,..,Bn-2],
-               ...
-       [B1-l,B2-l,..,Bn-l],
+         [B1-1,B2-1,..,Bn-1],
+         [B1-2,B2-2,..,Bn-2],
+                 ...
+         [B1-l,B2-l,..,Bn-l],
 
-       [C1-1,C2-1,..,Cn-1],
-       [C1-2,C2-2,..,Cn-2],
-               ...
-       [C1-l,C2-l,..,Cn-l]
-       ]
+         [C1-1,C2-1,..,Cn-1],
+         [C1-2,C2-2,..,Cn-2],
+                 ...
+         [C1-l,C2-l,..,Cn-l]
+         ]
 
    The next step is now to take the FFT over rows above and mutliply by
    the phase factor calculated in this function.  Finally, the data is
@@ -827,38 +826,38 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
    case they were written to disk. Afterwards DoubleFFT2 picks up again.
 
    The matrix then looks like (if the blocks were merged, which is
-   essentially also a transpose...)
+   essentially also a transpose...)::
 
-   Mabc2=[
-          [A1-1,A1-2,..,A1-l,B1-1,..,B1-l,C1-1,..,C1-l],     I   tmpspec
-          [A2-1,A2-2,..,A2-l,B2-1,..,B2-l,C2-1,..,C2-l],     I
-          ...
-          now take only n/stride rows per memory chunk
-          ...
-          [An-1,An-2,..,An-l,Bn-1,..,Bn-l,Cn-1,..,Cn-l],
-         ]
+     Mabc2=[
+            [A1-1,A1-2,..,A1-l,B1-1,..,B1-l,C1-1,..,C1-l],     I   tmpspec
+            [A2-1,A2-2,..,A2-l,B2-1,..,B2-l,C2-1,..,C2-l],     I
+            ...
+            now take only n/stride rows per memory chunk
+            ...
+            [An-1,An-2,..,An-l,Bn-1,..,Bn-l,Cn-1,..,Cn-l],
+           ]
 
    where one now needs to split the matrix again (after n/stride rows each) to
    work with the same memory size.
 
    In a second step (DoubleFFT2), the FFT is taken a second time (again
    over what are then the rows above) and the result is tranposed a last time,
-   giving the final spectrum (with gaps, if the blocks are not properly rearranged again).
+   giving the final spectrum (with gaps, if the blocks are not properly rearranged again)::
 
-   Mfinal=[
-           [A1-1,A2-1,..,An-1],      (specT: only first nblock_section columns)
-           [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and
-             ...                        nblock_section columns
-           [A1-l,A2-l,..,An-l],
-           [B1-1,B2-1,..,Bn-1],
-           [B1-2,B2-2,..,Bn-2],
-                   ...
-           [B1-l,B2-l,..,Bn-l]]
-           [C1-1,C2-1,..,Cn-1],
-           [C1-2,C2-2,..,Cn-2],
-                   ...
-           [C1-l,C2-l,..,Cn-l]
-          ]
+     Mfinal=[
+             [A1-1,A2-1,..,An-1],      (specT: only first nblock_section columns)
+             [A1-2,A2-2,..,An-2],       specT2: only first blocklen rows and
+               ...                        nblock_section columns
+             [A1-l,A2-l,..,An-l],
+             [B1-1,B2-1,..,Bn-1],
+             [B1-2,B2-2,..,Bn-2],
+                     ...
+             [B1-l,B2-l,..,Bn-l]]
+             [C1-1,C2-1,..,Cn-1],
+             [C1-2,C2-2,..,Cn-2],
+                     ...
+             [C1-l,C2-l,..,Cn-l]
+            ]
 
    Example:
    #Input parameters

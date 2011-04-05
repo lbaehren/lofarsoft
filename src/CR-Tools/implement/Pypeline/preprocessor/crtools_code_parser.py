@@ -314,10 +314,11 @@ class DocumentationBlock():
         """
         self._name = ""
         self._summary = ""
-        self._sectionType = "Dump"
+        self._sectionType = ""
         self._docIndent = 0
         self._parameters = []
         self._description_lines = []
+        self._usage_lines = []
         self._reference_list = []
         self._example_lines = []
         self._dump_lines = []
@@ -330,7 +331,7 @@ class DocumentationBlock():
         Check and correct the syntax of a string in order not to
         conflict with python syntax.
         """
-        result = line_str
+        result = line_str.rstrip()
 
         # Check for quotes: " -> '
         result = re.sub("\"", "\'", result)
@@ -355,9 +356,7 @@ class DocumentationBlock():
         Add a documentation line to the documentation section of the
         current sectionType.
         """
-        sectionChanged = self.setSection(line)
-
-        if (not sectionChanged):
+        if (not self.setSection(line)):
             sectionType = self.getSection()
 
             # Catch dump mode
@@ -367,6 +366,9 @@ class DocumentationBlock():
 
             if (sectionType == "Description"):
                 self.addDescription(line)
+                return
+            elif (sectionType == "Usage"):
+                self.addUsage(line)
                 return
             elif (sectionType == "Reference"):
                 self.addReference(line)
@@ -389,15 +391,22 @@ class DocumentationBlock():
 
         if (line_content == "Description:"):
             self._sectionType = "Description"
+            self._docIndent = len(line.rstrip()) - len(line_content)
+            return True
+        elif (line_content == "Usage:"):
+            self._sectionType = "Usage"
+            self._docIndent = len(line.rstrip()) - len(line_content)
             return True
         elif ((line_content == "See also:") or
               (line_content == "Reference:") or
               (line_content == "References:")):
             self._sectionType = "Reference"
+            self._docIndent = len(line.rstrip()) - len(line_content)
             return True
         elif ((line_content == "Example:") or
               (line_content == "Examples:")):
             self._sectionType = "Example"
+            self._docIndent = len(line.rstrip()) - len(line_content)
             return True
 
         return False
@@ -444,7 +453,7 @@ class DocumentationBlock():
         """
         Return the syntax of the command in a Sphinx parsable format.
         """
-        result = ""
+        result = "``"
 
         result += self.getName()
 
@@ -456,7 +465,7 @@ class DocumentationBlock():
                 result += par_name
                 if (i < len(parameters)-1):
                     result += ", "
-        result += ")"
+        result += ")``"
 
         return result
 
@@ -475,12 +484,25 @@ class DocumentationBlock():
 
     def formatParameters(self):
         """
-        Put the parameter list in a parsable Sphinx format.
+        Put the parameter list in a parsable Sphinx table format.
         """
         result = ""
+        indent = 2
+        name_width = 0
+        desc_width = 0
 
-        for par in self.getParameters():
-            result += "*" + par[0] + "* " + par[1] + r"\n\n"
+        for par in self._parameters:
+            name_width = max(len(par[0]), name_width)
+            desc_width = max(len(par[1]), desc_width)
+
+        table_hline = " " * indent + "=" * (name_width+3) + " " + "=" * (desc_width+2) + r"\n"
+
+        result += table_hline
+
+        for par in self._parameters:
+            result += " " * indent + "*" + par[0] + "*" + " " * (name_width - len(par[0]) + 2) + par[1] + r"\n"
+
+        result += table_hline
 
         return result
 
@@ -516,24 +538,29 @@ class DocumentationBlock():
         """
         return self._summary
 
+
     # ______________________________________________________________________
     #                                            Description of the function
     def addDescription(self, description):
         """
         Add a description of the function.
         """
-        # TODO: add implementation
+        line_content = description.rstrip()
 
-        pass
+        if (len(line_content) >= self._docIndent):
+            line_content = line_content[self._docIndent:]
+
+        self._description_lines.append(line_content)
 
 
     def formatDescription(self):
         """
         Put the function description in a Sphinx parsable format
         """
-        result = "[no formatted description]"
+        result = ""
 
-        # TODO: Add formatting
+        for line in self.getDescription():
+            result +=  line + r" \n"
 
         return result
 
@@ -546,23 +573,64 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
+    #                                                  Usage of the function
+    def addUsage(self, usage):
+        """
+        Add usage description of the function.
+        """
+
+        if (len(usage.strip()) > 0):
+            line_content = usage.rstrip()
+
+            if (len(line_content) >= self._docIndent):
+                line_content = line_content[self._docIndent:]
+
+            self._usage_lines.append(line_content)
+
+
+    def formatUsage(self):
+        """
+        Put the function usage in a Sphinx parsable format.
+        """
+        result = ""
+
+        for line in self.getUsage():
+            result += r"``" + line + r"``\n\n"
+
+        return result
+
+
+    def getUsage(self):
+        """
+        Return the function usage.
+        """
+        return self._usage_lines
+
+
+    # ______________________________________________________________________
     #                                          References to other functions
     def addReference(self, reference):
         """
         Add a reference to another function.
         """
-        # TODO: add implementation
+        reference_function = reference.strip()
 
-        pass
+        if (len(reference_function) > 0):
+            self._reference_list.append(reference_function)
 
 
     def formatReference(self):
         """
         Put the references in a Sphinx parsable format.
         """
-        result = "[no formatted references]"
+        result = ""
 
-        # TODO: Add formatting
+        nReferences = len(self.getReference())
+        for i in range(nReferences):
+            result += ":meth:`" + self._reference_list[i] + "`"
+            if (i < nReferences - 1):
+                result += ", "
+            result += r"\n"
 
         return result
 
@@ -589,9 +657,15 @@ class DocumentationBlock():
         """
         Put example documentation in a Sphinx parsable format.
         """
-        result = "[no formatted example]"
+        result = ""
+        indent = "  "
 
-        # TODO: Add formatting
+        result += r"::\n\n"
+
+        for line in self.getExample():
+            result += indent + line + r"\n"
+
+        result += r"\n"
 
         return result
 
@@ -621,7 +695,7 @@ class DocumentationBlock():
         result = ""
         indent = "  "
 
-        result += r"::\n"
+        result += r"::\n\n"
 
         for line in self.getDump():
             result += indent + line + r"\n"
@@ -665,7 +739,6 @@ class DocumentationBlock():
         result += "from _hftools import " + name + newline
         result += "docstring = \"\"\"" + doc + "\"\"\"" + newline
         result += "if (" + name + ".__doc__):" + newline
-        result += "    " + name + ".__doc__ += \"-\"*80 + \"\\n\\n\"" + newline
         result += "    " + name + ".__doc__ += docstring" + newline
         result += "else:" + newline
         result += "    " + name + ".__doc__ = docstring" + newline
@@ -686,17 +759,23 @@ class DocumentationBlock():
         result += self.formatSyntax() + r"\n"
 
         # Brief function description (summary)
+        # result += r"\n" + self.formatSectionTitle("Summary") + r"\n"
         result += r"\n" + self.formatSummary() + r"\n"
 
         # Parameter description
         if self.getParameters():
             result += r"\n" + self.formatSectionTitle("Parameters") + r"\n"
-            result += self.formatParameters() + r"\n"
+            result += self.formatParameters() + r"\n\n"
 
         # Description
         if self.getDescription():
             result += r"\n" + self.formatSectionTitle("Description") + r"\n"
             result += self.formatDescription() + r"\n"
+
+        # Usage (disabled)
+        # if self.getUsage():
+        #     result += r"\n" + self.formatSectionTitle("Usage") + r"\n"
+        #     result += self.formatUsage() + r"\n"
 
         # References
         if self.getReference():
@@ -708,8 +787,9 @@ class DocumentationBlock():
             result += r"\n" + self.formatSectionTitle("Example") + r"\n"
             result += self.formatExample() + r"\n"
 
-        # Additional documentation
+        # Dump additional documentation
         if self.getDump():
+#            result += r"\n" + self.formatSectionTitle("Dump") + r"\n"
             result += self.formatDump() +r"\n"
 
         return result
