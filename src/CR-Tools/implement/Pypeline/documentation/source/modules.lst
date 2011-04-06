@@ -1,14 +1,23 @@
 # pycrtools.template
 # pycrtools.core
-# -- Begin: New --
 # pycrtools.core.types
 pycrtools.core.htypes
 pycrtools.core.harray
 pycrtools.core.vector
 pycrtools.core.plot
 pycrtools.core.workspaces
-# -- End: New --
-# pycrtools.core.hftools
+pycrtools.core.hftools.mArray
+pycrtools.core.hftools.mVector
+pycrtools.core.hftools.mMath
+pycrtools.core.hftools.mFitting
+pycrtools.core.hftools.mFilter
+pycrtools.core.hftools.mFFT
+pycrtools.core.hftools.mFFTW
+pycrtools.core.hftools.mImaging
+pycrtools.core.hftools.mIO
+pycrtools.core.hftools.mNumpy
+pycrtools.core.hftools.mRF
+pycrtools.core.hftools.mVector
 # pycrtools
 pycrtools.metadata
 pycrtools.grid

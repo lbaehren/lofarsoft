@@ -526,7 +526,7 @@ class Task(object):
     *init* = False - force the initalisation to run again
 
     *parfile* = filename - read parameters from file
-        
+
     *pardict* - provide a dict with paramter value pairs or a
     taskname and a paramter dict. Parameters from the top level
     and in a dict with a taskname will be assigned. The dicts can
@@ -535,7 +535,7 @@ class Task(object):
     *ws* - replace workspace with a different Workspace and then
     update parameters therein as provided in the file and the
     keywords.
- 
+
     ws parameters will be overwritten by file parameter and they
     will be overwritten by keyword parameters (which thus have
     the highest priority).
@@ -657,19 +657,19 @@ class Task(object):
          and in a dict with a taskname will be assigned. The dicts can
          be nested.
 
-         *ws* - replace workspace with a different Workspace and then
-         update parameters therein as provided in the file and the
-         keywords.
- 
-         ws parameters will be overwritten by file parameter and they
-         will be overwritten by keyword parameters (which thus have
-         the highest priority).
+        *ws* - replace workspace with a different Workspace and then
+        update parameters therein as provided in the file and the
+        keywords.
 
-         If the run function returns a value, this value will be
-         returned otherwise the task instance itself will be
-         returned. Hence you can access all parameters through the
-         returned task object.
-         
+        ws parameters will be overwritten by file parameter and they
+        will be overwritten by keyword parameters (which thus have
+        the highest priority).
+
+        If the run function returns a value, this value will be
+        returned otherwise the task instance itself will be
+        returned. Hence you can access all parameters through the
+        returned task object.
+
         """
         ws=None; init=False
         if kwargs.has_key("ws"):
@@ -740,8 +740,8 @@ class Task(object):
 
         Task.get(name) will retrieve the parameters stored under 'name'
 
-	*delete*=False - If True the database entry will be deleted.
-	
+	*delete* = False - If True the database entry will be deleted.
+
         """
         # # Open task database
         taskdb = shelve.open(dbfile)
@@ -781,10 +781,10 @@ class Task(object):
 	else:
 	    print "Available parameter sets:\n-------------------------\n",", ".join(taskdb.keys()),"\n"
 	    retval=False
-	    
+
         taskdb.close()
 	return retval
-    
+
 
     def reset(self,restorecallparameters=False,init=True,**args):
         """
@@ -877,7 +877,7 @@ class WorkSpaceType(type):
 
          *parameter* = a dict defining the parameters of the form
          dict(par1={default:val1,doc:"Documentation"},...)
-         
+
          *parfile* - if a string, then open filename and read in
          workspace parameters from the file (which is a simple python
          file defining variables, i.e. x=1, y=2,... etc.). The
@@ -966,7 +966,7 @@ class WorkSpace(object):
 
         The function will not complain if a parameter in the dict is
         not known to the workspace. It will simply ignore it.
-        
+
         *root* = True - This is the toplevel dict of global
         parameters. Set all toplevel key,value pares as parameters in
         the workspace. If False, only do so for a dict that is a
@@ -988,7 +988,7 @@ class WorkSpace(object):
         for k,v in d.items():
             if (k==taskname) and (type(v) == dict): # This is a parameter for the current task, stop going through tree
                 self.setParFromDict(v)
-            elif taskname and follow_tree and (type(v)==dict): # A taskname is provided and a dict, then go through the tree and search for the taskname 
+            elif taskname and follow_tree and (type(v)==dict): # A taskname is provided and a dict, then go through the tree and search for the taskname
                 self.setParFromDict(v,root=False,taskname=self.__taskname__,follow_tree=True)
 
     def reset(self,restorecallparameters=False):
@@ -1025,7 +1025,7 @@ class WorkSpace(object):
          in the form par1=val1, par2=val2,....
         """
         self.setParFromDict(pardict,root=True, taskname=self.__taskname__, follow_tree=True)
-            
+
         margs=readParfiles(parfile) #Reading parameters from a file
         margs.update(**args)
 
