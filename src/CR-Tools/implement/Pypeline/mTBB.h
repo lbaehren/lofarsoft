@@ -50,6 +50,8 @@ public:
   // === Python specific methods ===========================================
   boost::python::list python_dipoleNames();
 
+  boost::python::list python_selectedDipoles();
+
   bool python_selectDipoles(boost::python::list);
 
   boost::python::list python_time();
@@ -75,6 +77,66 @@ public:
   boost::python::list python_nyquist_zone();
 
   std::string python_antenna_set();
+
+  std::string python_filetype();
+
+  std::string python_filedate();
+
+  std::string python_telescope();
+
+  std::string python_observer();
+
+  double python_clockFrequency();
+
+  std::string python_clockFrequencyUnit();
+
+  std::string python_filterSelection();
+
+  std::string python_target();
+
+  std::string python_systemVersion();
+
+  std::string python_pipelineName();
+
+  std::string python_pipelineVersion();
+
+  std::string python_notes();
+
+  std::string python_projectID();
+
+  std::string python_projectTitle();
+
+  std::string python_projectPI();
+
+  std::string python_projectCoI();
+
+  std::string python_projectContact();
+
+  std::string python_observationID();
+
+  std::string python_startMJD();
+
+  std::string python_startTAI();
+
+  std::string python_startUTC();
+
+  std::string python_endMJD();
+
+  std::string python_endTAI();
+
+  std::string python_endUTC();
+
+  int python_nofStations();
+
+  boost::python::list TBBData::python_stationList();
+
+  double python_frequencyMin();
+
+  double python_frequencyMax();
+
+  double python_frequencyCenter();
+
+  std::string python_frequencyUnit();
 
   std::string python_summary();
 

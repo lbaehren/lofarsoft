@@ -18,13 +18,16 @@ f = cr.open(filename, blocksize)
 print "Reading metadata:"
 for key in f.keys():
     print key, f[key]
+    print ""
 
 print "Applying antenna selection:"
-f.setAntennaSelection(selection)
+#f.setAntennaSelection(selection)
+f["SELECTED_DIPOLES"] = selection
 
 print "Reading metadata for selected antennas:"
 for key in f.keys():
     print key, f[key]
+    print ""
 
 print "Reading one block of timeseries data:"
 f.getTimeseriesData(data, 0)

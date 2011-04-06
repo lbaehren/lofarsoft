@@ -80,7 +80,7 @@ class TBBData(IOInterface):
         """Returns list of valid keywords.
         """
 
-        return ["FILENAME", "ANTENNA_SET", "NYQUIST_ZONE", "TIME", "SAMPLE_NUMBER", "SAMPLE_FREQUENCY_VALUE", "SAMPLE_FREQUENCY_UNIT", "DATA_LENGTH"]
+        return ["FILENAME", "ANTENNA_SET", "NYQUIST_ZONE", "TIME", "SAMPLE_NUMBER", "SAMPLE_FREQUENCY_VALUE", "SAMPLE_FREQUENCY_UNIT", "DATA_LENGTH", "NOF_STATION_GROUPS", "NOF_DIPOLE_DATASETS", "NOF_SELECTED_DATASETS", "DIPOLE_NAMES", "SELECTED_DIPOLES", "CHANNEL_ID", "GROUPTYPE", "FILEDATE", "FILETYPE", "TELESCOPE", "OBSERVER", "CLOCK_FREQUENCY", "CLOCK_FREQUENCY_UNIT", "FILTER_SELECTION", "TARGET", "SYSTEM_VERSION", "PIPELINE_NAME", "PIPELINE_VERSION", "NOTES", "PROJECT_ID", "PROJECT_TITLE", "PROJECT_PI", "PROJECT_CO_I", "PROJECT_CONTACT", "OBSERVATION_ID", "OBSERVATION_START_MJD", "OBSERVATION_START_TAI", "OBSERVATION_START_UTC", "OBSERVATION_END_MJD", "OBSERVATION_END_TAI", "OBSERVATION_END_UTC", "OBSERVATION_NOF_STATIONS", "OBSERVATION_STATION_LIST", "OBSERVATION_FREQUENCY_MAX", "OBSERVATION_FREQUENCY_MIN", "OBSERVATION_FREQUENCY_CENTER", "OBSERVATION_FREQUENCY_UNIT"]
 
     def __getitem__(self, key):
         """Implements keyword access.
@@ -105,6 +105,87 @@ class TBBData(IOInterface):
             return self.__file.sample_frequency_unit()
         elif key is "DATA_LENGTH":
             return self.__file.data_length()
+        elif key is "NOF_STATION_GROUPS":
+            return self.__file.nofStationGroups()
+        elif key is "NOF_DIPOLE_DATASETS":
+            return self.__file.nofDipoleDatasets()
+        elif key is "NOF_SELECTED_DATASETS":
+            return self.__file.nofSelectedDatasets()
+        elif key is "DIPOLE_NAMES":
+            return self.__file.dipoleNames()
+        elif key is "SELECTED_DIPOLES":
+            return self.__file.selectedDipoles()
+        elif key is "CHANNEL_ID":
+            return self.__file.channelID()
+        elif key is "FILETYPE":
+            return self.__file.filetype()
+        elif key is "FILEDATE":
+            return self.__file.filedate()
+        elif key is "TELESCOPE":
+            return self.__file.telescope()
+        elif key is "OBSERVER":
+            return self.__file.observer()
+        elif key is "CLOCK_FREQUENCY":
+            return self.__file.clockFrequency()
+        elif key is "CLOCK_FREQUENCY_UNIT":
+            return self.__file.clockFrequencyUnit()
+        elif key is "FILTER_SELECTION":
+            return self.__file.filterSelection()
+        elif key is "TARGET":
+            return self.__file.target()
+        elif key is "SYSTEM_VERSION":
+            return self.__file.systemVersion()
+        elif key is "PIPELINE_NAME":
+            return self.__file.pipelineName()
+        elif key is "PIPELINE_VERSION":
+            return self.__file.pipelineVersion()
+        elif key is "NOTES":
+            return self.__file.notes()
+        elif key is "PROJECT_ID":
+            return self.__file.projectID()
+        elif key is "PROJECT_TITLE":
+            return self.__file.projectTitle()
+        elif key is "PROJECT_PI":
+            return self.__file.projectPI()
+        elif key is "PROJECT_CO_I":
+            return self.__file.projectCoI()
+        elif key is "PROJECT_CONTACT":
+            return self.__file.projectContact()
+        elif key is "OBSERVATION_ID":
+            return self.__file.observationID()
+        elif key is "OBSERVATION_START_MJD":
+            return self.__file.startMJD()
+        elif key is "OBSERVATION_START_TAI":
+            return self.__file.startTAI()
+        elif key is "OBSERVATION_START_UTC":
+            return self.__file.startUTC()
+        elif key is "OBSERVATION_END_MJD":
+            return self.__file.endMJD()
+        elif key is "OBSERVATION_END_TAI":
+            return self.__file.endTAI()
+        elif key is "OBSERVATION_END_UTC":
+            return self.__file.endUTC()
+        elif key is "OBSERVATION_NOF_STATIONS":
+            return self.__file.nofStations()
+        elif key is "OBSERVATION_STATION_LIST":
+            return self.__file.stationList()
+        elif key is "OBSERVATION_FREQUENCY_MIN":
+            return self.__file.frequencyMin()
+        elif key is "OBSERVATION_FREQUENCY_MAX":
+            return self.__file.frequencyMax()
+        elif key is "OBSERVATION_FREQUENCY_CENTER":
+            return self.__file.frequencyCenter()
+        elif key is "OBSERVATION_FREQUENCY_UNIT":
+            return self.__file.frequencyUnit()
+
+    def __setitem__(self, key, value):
+        if key not in self.keys():
+            raise KeyError("Invalid keyword")
+
+        elif key is "SELECTED_DIPOLES":
+            self.setAntennaSelection(value)
+        else:
+            raise KeyError(str(key) + " cannot be set")
 
     def __contains__(self, key):
         """Allows inquiry if key is implemented.
@@ -332,6 +413,17 @@ class TBBData(IOInterface):
             frequencies=frequencies[range(self.__nfmin, self.__nfmax)]
 
         return frequencies
+
+    def empty(self, key):
+        """Return empty array for keyword data.
+        """
+
+        if key == "TIMESERIES_DATA":
+            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize))
+        elif key == "FFT_DATA":
+            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1))
+        else:
+            raise KeyError("Unknown key: " + str(key))
 
     def read(self, key, data, *args, **kwargs):
         """Generic read function supporting keyword arguments.
