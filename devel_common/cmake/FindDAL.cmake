@@ -149,25 +149,19 @@ if (NOT DAL_FOUND)
   endif (DAL_INCLUDES AND DAL_LIBRARIES)
   
   ##_____________________________________________________________________________
-  ## Find library version
+  ## Actions taken when all components have been found
 
-  if (DAL_INCLUDES AND EXISTS "${DAL_INCLUDES}/dal_config.h")
+  if (DAL_INCLUDES AND DAL_LIBRARIES)
+    set (DAL_FOUND TRUE)
+
+    ## __________________________________________________________________________
+    ## Find library version
     file (STRINGS "${DAL_INCLUDES}/dal_config.h" DAL_H REGEX "^#define DAL_VERSION \"[^\"]*\"$")
-
     string (REGEX REPLACE "^.*DAL_VERSION \"([0-9]+).*$" "\\1" DAL_VERSION_MAJOR "${DAL_H}")
     string (REGEX REPLACE "^.*DAL_VERSION \"[0-9]+\\.([0-9]+).*$" "\\1" DAL_VERSION_MINOR  "${DAL_H}")
     string (REGEX REPLACE "^.*DAL_VERSION \"[0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" DAL_VERSION_PATCH "${DAL_H}")
     set (DAL_VERSION "${DAL_VERSION_MAJOR}.${DAL_VERSION_MINOR}.${DAL_VERSION_PATCH}")
 
-  else (DAL_INCLUDES AND EXISTS "${DAL_INCLUDES}/dal_config.h")
-    message (ERROR "Cannot find dal_config.h file")
-  endif (DAL_INCLUDES AND EXISTS "${DAL_INCLUDES}/dal_config.h")
-  
-  ##_____________________________________________________________________________
-  ## Actions taken when all components have been found
-  
-  if (DAL_INCLUDES AND DAL_LIBRARIES)
-    set (DAL_FOUND TRUE)
   else (DAL_INCLUDES AND DAL_LIBRARIES)
     set (DAL_FOUND FALSE)
     if (NOT DAL_FIND_QUIETLY)
