@@ -96,7 +96,7 @@ def crossCheckTimes(LORAevents, LOFARevents):
         match = []
         for LORAevent in LORAevents:
             #print '%d --- %d' % (LORAevent[0], thisTimestamp)
-            if LORAevent[0] == thisTimestamp:
+            if LORAevent[0] - 15 == thisTimestamp:
                 tdiff = event[1] - LORAevent[1]
 #                tdiffsec = float(tdiff) / 1e9
                 tdiffms = float(tdiff) / 1e6
