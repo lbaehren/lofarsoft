@@ -17,6 +17,7 @@ import sys
 import os
 import time
 import pickle
+from datetime import datetime
 
 dateKey = 0
 hourKey = 1
@@ -45,9 +46,16 @@ def readLORAevents(infile):
         thisTime = (thisTime - minute) / 100
         hour = thisTime
         
+        d = datetime(year, month, day, hour, minute, second)
+        
         thisDateString = '%d-%d-%d %d:%d:%d' % (year, month, day, hour, minute, second)
         print 'Date string = %s' % thisDateString
-        thisTimestamp = int(time.mktime(time.strptime(thisDateString, '%Y-%m-%d %H:%M:%S')))
+        
+        thisTimestamp = int(time.mktime(d.timetuple()) - time.timezone)
+        
+        #thisTimestamp = int(time.mktime(time.strptime(thisDateString, '%Y-%m-%d %H:%M:%S'))) 
+        #                    - time.timezone + 3600 * time.localtime().tm_isdst  
+                            # Account for time zone and daylight saving time!
         print thisTimestamp
         thisNanosec = int(float(thisEvent[nsecKey])) # int('3.0') fails!
         thisTheta = float(thisEvent[thetaKey])
