@@ -652,9 +652,10 @@ class DocumentationBlock():
         Put example documentation in a Sphinx parsable format.
         """
         result = ""
-        indent = "  "
+        indent = "    "
 
-        result += r"::\n\n"
+        # result += r"::\n\n"
+        # result += r".. highlight:: python\n\n"
 
         for line in self.getExample():
             result += indent + line + r"\n"
@@ -743,7 +744,7 @@ class DocumentationBlock():
 
         # Examples
         if self.getExample():
-            result += r"\n" + self.formatSectionTitle("Example") + r"\n"
+            result += r"\n" + self.formatSectionTitle("Example") + r"::\n\n"
             result += self.formatExample() + r"\n"
 
         return result

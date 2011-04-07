@@ -17,7 +17,7 @@ pycrtools.core.hftools.mImaging
 pycrtools.core.hftools.mIO
 pycrtools.core.hftools.mNumpy
 pycrtools.core.hftools.mRF
-pycrtools.core.hftools.mVector
+pycrtools.core.hftools.mTBB
 # pycrtools
 pycrtools.metadata
 pycrtools.grid

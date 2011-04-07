@@ -112,7 +112,7 @@ bool TBBData::python_selectDipoles(boost::python::list names)
   {
     selection.insert(boost::python::extract<std::string>(names[i]));
   }
-  
+
   return selectDipoles(selection);
 }
 
@@ -313,7 +313,7 @@ boost::python::list TBBData::python_nyquist_zone()
 std::string TBBData::python_antenna_set()
 {
   DAL::CommonAttributes c = commonAttributes();
-  return c.antennaSet(); 
+  return c.antennaSet();
 }
 
 std::string TBBData::python_filetype()
@@ -567,16 +567,14 @@ std::ostream& operator<<(std::ostream& output, const TBBData& d)
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
-#define HFPP_PARDEF_0 (HNumber)(vec)()("Output vector, expected to be of length Na * Ns where Na is the number of selected antennas and Ns is the number of samples per antenna.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HInteger)(start)()("Vector with start positions in samples, expected to have length Na where Na is the number of selected antennas.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(nofSamples)()("Number of samples, Ns, to read.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Output vector, expected to be of length :math:`N_a * N_s` where :math:`N_a` is the number of selected antennas and :math:`N_s` is the number of samples per antenna.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(start)()("Vector with start positions in samples, expected to have length :math:`N_a` where :math:`N_a` is the number of selected antennas.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(nofSamples)()("Number of samples, :math:`N_s`, to read.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (TBBData)(data)()("TBBData object to read from.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
-
   \brief $DOCSTRING
   $PARDOCSTRING
-
 */
 template <class Iter, class IIter>
 void HFPP_FUNC_NAME(const Iter vec_begin, const Iter vec_end, const IIter start_begin, const IIter start_end, const HInteger nofSamples, TBBData &data)

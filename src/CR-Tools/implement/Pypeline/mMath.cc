@@ -1483,23 +1483,24 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   $PARDOCSTRING
 
   Description:
-  The elements are specified in an indexlist. 
+  The elements are specified in an indexlist.
 
 **(NOT QUITE CORRECT: SPECIFY PROPPER WEIGHTING TO RAND GENERATOR)**
 
   Usage:
-
   vec.randomizephase(indexlist,amplitude) -> elements in vec at positions provided in indexlist are set to a complex number with random phase and an amplitude picked from the amplitude vector at the same location.
 
   See also:
   hSetAmplitude
 
   Example:
-  baseline=hArray(float,[10],fill=range(90,100))
-  c=hArray(complex,[10],fill=range(10)) -> hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (3+0j), (4+0j), (5+0j), (6+0j), (7+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
-  c.randomizephase(hArray([1,3]),baseline) -> hArray(complex, [10], fill=[(0,0),(-21.2026,-88.4955),(2,0),(3.61145,92.9299),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0)]) # len=10 slice=[0:10])
-  c.abs() -> hArray(complex, [10], fill=[(0,0),(91,0),(2,0),(93,0),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0)]) # len=10 slice=[0:10])
-
+  >>> baseline=hArray(float,[10],fill=range(90,100))
+  >>> c=hArray(complex,[10],fill=range(10))
+  hArray(complex, [10], fill=[0j, (1+0j), (2+0j), (3+0j), (4+0j), (5+0j), (6+0j), (7+0j), (8+0j), (9+0j)]) # len=10 slice=[0:10])
+  >>> c.randomizephase(hArray([1,3]),baseline)
+  hArray(complex, [10], fill=[(0,0),(-21.2026,-88.4955),(2,0),(3.61145,92.9299),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0)]) # len=10 slice=[0:10])
+  >>> c.abs()
+  hArray(complex, [10], fill=[(0,0),(91,0),(2,0),(93,0),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0)]) # len=10 slice=[0:10])
 */
 template <class Iter, class IterI, class IterA>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const IterA amplitude_vec, const IterA amplitude_vec_end)
@@ -2831,7 +2832,9 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
   Example:
-  # Make a test time series data set for 4 antennas and some peaks at various locations
+
+  """Make a test time series data set for 4 antennas and some peaks at various locations"""
+
   >>> data=hArray(float,[4,512],name="Random series with peaks")
   >>> data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
   >>> for i in range(4):
@@ -2848,8 +2851,10 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   >>> maxgap=Vector(int,len(datamean),fill=10)
   >>> minlength=Vector(int,len(datamean),fill=1)
   >>> npeaks=datapeaks[...].findsequenceoutside(data[...],datathreshold1,datathreshold2,maxgap,minlength)
+
   >>> npeaks
   Vec(int,4)=[3,3,3,3]
+
   >>> datapeaks
   hArray(int,[4, 256, 2], name="Location of peaks") # len=2048, slice=[0:512], vec -> [2,4,32,33,64,68,0,0,...]
 */
@@ -3156,7 +3161,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
   hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
   Example:
-  # Make a test time series data set for 4 antennas and some peaks at various locations
+  >>> # Make a test time series data set for 4 antennas and some peaks at various locations
   >>> data=hArray(float,[4,512],name="Random series with peaks")
   >>> data.random(0,1024); data[...] += Vector([128.,256., 385.,50.])
   >>> for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,4096,4096,5099,3096])
@@ -3578,7 +3583,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
   As a second output the root mean square (RMS, standard deviation)
   of the mean in each downsampled bin is returned.
 
-  The mean here is taken only of data that is ``nsigma`` below
+  The mean here is taken only of data that is :math:`n \\sigma` below
   (negative) or above (positive) the RMS in the bin.
 */
 
@@ -3710,7 +3715,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 //#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(len)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3718,27 +3723,27 @@ HInteger HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
 */
  //template <class T>
 
-std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
   // Sanity Check
-  if (wlen <= 0) {
+  if (len <= 0) {
     throw PyCR::ValueError("Length of weight vector should be > 0.");
   }
 
-  std::vector<HNumber> weights(wlen,1.0/wlen);
+  std::vector<HNumber> weights(len, 1.0/len);
   return weights;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
 
-//$DOCSTRING:  Returns vector of weights of length ``wlen`` with linearly rising and decreasing weights centered at ``len/2``.
+//$DOCSTRING:  Returns vector of weights of length ``len`` with linearly rising and decreasing weights centered at ``len/2``.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearWeights
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 //#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(len)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3753,17 +3758,17 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 */
  //template <class T>
 
-std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
   // Sanity check
-  if (wlen <= 0) {
+  if (len <= 0) {
     throw PyCR::ValueError("Length of weight vector should be > 0.");
   }
 
-  std::vector<HNumber> weights(wlen,0.0);
-  HInteger i,middle=wlen/2;
-  HNumber f,sum=0.0;
+  std::vector<HNumber> weights(len, 0.0);
+  HInteger i, middle=len/2;
+  HNumber f, sum=0.0;
 
-  for (i=0; i<wlen; i++) {
+  for (i=0; i<len; i++) {
     f=1.0-abs(middle-i)/(middle+1.0);
     weights[i]=f;
     sum+=f;
@@ -3772,40 +3777,47 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   if (abs(sum) < A_LOW_NUMBER) {
     throw PyCR::ZeroDivisionError("Sum value is 0.");
   } else {
-    for (i=0; i<wlen; i++) weights[i] /= sum;
+    for (i=0; i<len; i++) weights[i] /= sum;
   }
   return weights;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Returns vector of weights of length ``wlen`` with Gaussian distribution centered at ``len/2`` and ``sigma=len/4`` (i.e. the Gaussian extends over ``2 sigma`` in both directions).
+//$DOCSTRING: Returns vector of wieghts with Gaussian distribution.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGaussianWeights
 //-----------------------------------------------------------------------
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 //#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(len)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+
+  Returns vector of weights of length ``len`` with a Gaussian
+  distribution centered at :math:`\\mu=` ``len/2`` and
+  :math:`\\sigma=` ``len/4`` (i.e. the Gaussian extends over :math:`2
+  \\sigma` in both directions).
 */
  //template <class T>
 
-std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
   // Sanity check
-  if (wlen <= 0) {
+  if (len <= 0) {
     throw PyCR::ValueError("Length of weight vector should be > 0.");
   }
 
-  vector<HNumber> weights(wlen,0.0);
-  HInteger i,middle=wlen/2;
-  HNumber f,sum=0.0;
+  vector<HNumber> weights(len,0.0);
+  HInteger i, middle=len/2;
+  HNumber f, sum=0.0;
 
-  for (i=0; i<wlen; i++) {
-    f=funcGaussian(i,max(wlen/4.0,1.0),middle);
+  for (i=0; i<len; i++) {
+    f=funcGaussian(i,max(len/4.0,1.0),middle);
     weights[i]=f;
     sum+=f;
   };
@@ -3813,7 +3825,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
   if (abs(sum) < A_LOW_NUMBER) {
     throw PyCR::ZeroDivisionError("Sum value is 0.");
   } else {
-    for (i=0; i<wlen; i++) weights[i] /= sum;
+    for (i=0; i<len; i++) weights[i] /= sum;
   }
 
   return weights;
@@ -3830,26 +3842,26 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger wlen) {
 #define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 //#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_1 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(len)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (hWEIGHTS)(type)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-vector<HNumber> HFPP_FUNC_NAME (const HInteger wlen, const hWEIGHTS wtype){
+vector<HNumber> HFPP_FUNC_NAME (const HInteger len, const hWEIGHTS type){
   vector<HNumber> weights;
-  HInteger wlen2(wlen);
-  if (wlen2<1) wlen2=1;
-  switch (wtype) {
+  HInteger len2(len);
+  if (len2<1) len2=1;
+  switch (type) {
   case WEIGHTS_LINEAR:
-    weights=hLinearWeights(wlen2);
+    weights=hLinearWeights(len2);
     break;
   case WEIGHTS_GAUSSIAN:
-    weights=hGaussianWeights(wlen2);
+    weights=hGaussianWeights(len2);
     break;
   default: //  WEIGHTS_FLAT:
-    weights=hFlatWeights(wlen2);
+    weights=hFlatWeights(len2);
   };
   return weights;
 }
@@ -3883,13 +3895,13 @@ void HFPP_FUNC_NAME (const Iter  vec,
                      const Iter2 weights,
                      const Iter2 weights_end)
 {
-  HInteger wlen=(weights_end-weights);
+  HInteger len=(weights_end-weights);
   /* Index of the central element of the weights vector (i.e., where it
      typically would peak) */
-  HInteger middle=wlen/2;
+  HInteger middle=len/2;
   HNumber temp;
 
-  std::vector<IterValueType> buffer_vec(wlen); // will temporarily store input data
+  std::vector<IterValueType> buffer_vec(len); // will temporarily store input data
   Iter buffer(buffer_vec.begin()),buffer_start(buffer_vec.begin()),buffer_end(buffer_vec.end());
 
   Iter  it(vec), last(vec_end-1), it_plus_middle(vec+middle);
@@ -3898,9 +3910,9 @@ void HFPP_FUNC_NAME (const Iter  vec,
   if (vec>=vec_end) return;
   if (weights>=weights_end) return;
 
-  //  hCopy(&(*(buffer_start+middle)),&(*buffer_end),&(*vec),&(*(vec+wlen-middle))); //initialize scratch vector
+  //  hCopy(&(*(buffer_start+middle)),&(*buffer_end),&(*vec),&(*(vec+len-middle))); //initialize scratch vector
   //hFill(&(*buffer_start),&(*(buffer_start+middle)),*it); //initialize scratch vector
-  hCopy(buffer_start+middle,buffer_end,vec,vec+wlen-middle); //initialize scratch vector
+  hCopy(buffer_start+middle,buffer_end,vec,vec+len-middle); //initialize scratch vector
   hFill(buffer_start,buffer_start+middle,*it); //initialize scratch vector
   while (it!=vec_end) {
     wit=weights; // weight iterators set to beginning of weights
@@ -3985,38 +3997,39 @@ void HFPP_FUNC_NAME (const DataIter  odata,
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(idata)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(len)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (hWEIGHTS)(type)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Description
+  Description:
   Available Weights:
 
-    ============= ============================================================
+    ============= ====================================================================
     ``FLAT``      All have the same value
     ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
-    ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
-    ============= ============================================================
+    ``GAUSSIAN``  Gaussian distribution falling off to :math:`2 \\sigma` at the ends
+    ============= ====================================================================
 
   Example:
-  in_array.runningaverage(array_out,7,hWEIGHTS.GAUSSIAN)
+  >>> in_array.runningaverage(array_out,7,hWEIGHTS.GAUSSIAN)
+  >>> x=hArray([0.,1.,0.,3.,1.,3.,0.,2.,1.])
+  >>> x.runningaverage(3,hWEIGHTS.FLAT)
 
-  x=hArray([0.,1.,0.,3.,1.,3.,0.,2.,1.])
-  x.runningaverage(3,hWEIGHTS.FLAT)
-  x->[0.333333,0.333333,1.33333,1.33333,2.33333,1.33333,1.66667,1,1.33333]
+  >>> x
+  [0.333333,0.333333,1.33333,1.33333,2.33333,1.33333,1.66667,1,1.33333]
 */
 template <class DataIter>
 void HFPP_FUNC_NAME (const DataIter odata,
 		     const DataIter odata_end,
 		     const DataIter idata,
 		     const DataIter idata_end,
-		     const HInteger wlen,
-		     const hWEIGHTS wtype)
+		     const HInteger len,
+		     const hWEIGHTS type)
 {
-  vector<HNumber> weights = hWeights(wlen, wtype);
+  vector<HNumber> weights = hWeights(len, type);
   hRunningAverage<DataIter, vector<HNumber>::iterator> (odata,
 							odata_end,
 							idata,
@@ -4032,33 +4045,32 @@ void HFPP_FUNC_NAME (const DataIter odata,
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(odata)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HInteger)(wlen)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (hWEIGHTS)(wtype)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HInteger)(len)()("Length of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (hWEIGHTS)(type)()("Type of weight vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 
   Description:
-
   Available Weights:
 
-    ============= ============================================================
+    ============= ====================================================================
     ``FLAT``      All have weight the same value
     ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
-    ``GAUSSIAN``  Gaussian distribution falling off to 2 sigma at the ends
-    ============= ============================================================
+    ``GAUSSIAN``  Gaussian distribution falling off to :math:`2 \\sigma` at the ends
+    ============= ====================================================================
 
   Example:
-  in_array.runningaverage(7,hWEIGHTS.GAUSSIAN)
+  >>> in_array.runningaverage(7,hWEIGHTS.GAUSSIAN)
 */
 template <class DataIter>
 void HFPP_FUNC_NAME (const DataIter odata,
 		     const DataIter odata_end,
-		     const HInteger wlen,
-		     const hWEIGHTS wtype)
+		     const HInteger len,
+		     const hWEIGHTS type)
 {
-  vector<HNumber> weights = hWeights(wlen, wtype);
+  vector<HNumber> weights = hWeights(len, type);
   hRunningAverage<DataIter, vector<HNumber>::iterator> (odata,
 							odata_end,
 							weights.begin(),

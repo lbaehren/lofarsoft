@@ -651,8 +651,8 @@ HPyObjectPtr HFPP_FUNC_NAME(const HString filename, const HString keyword, const
   Possible keywords: ``Positions``, ``Delay``
 
   Example:
-  antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
-  vec=hCalTablePositions(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",\"Positions\",obsdate,list(antennaIDs))
+  >>> antennaIDs=hFileGetParameter(file,\"AntennaIDs\")
+  >>> vec=hCalTablePositions(\"~/LOFAR/usg/data/lopes/LOPES-CalTable\",\"Positions\",obsdate,list(antennaIDs))
 */
 vector<HNumber> HFPP_FUNC_NAME(const HString filename, const HString keyword, const HInteger date, const HPyObjectPtr pyob) {
   CR::CalTableReader* CTRead = new CR::CalTableReader(filename);
@@ -750,7 +750,8 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
   >>> hWriteFileBinaryAppend(v,\"test.dat\")
   >>> x=Vector(float,20,fill=1.0)
   >>> hReadFileBinary(x,\"test.dat\")
-  x ->  Vec(float,20)=[3.0,3.0,3.0,3.0,3.0,...,2.0,2.0]
+  >>> x
+  Vec(float,20)=[3.0,3.0,3.0,3.0,3.0,...,2.0,2.0]
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
