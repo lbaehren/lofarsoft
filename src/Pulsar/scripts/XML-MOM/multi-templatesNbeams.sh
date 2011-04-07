@@ -1638,7 +1638,7 @@ do
 	       then 
 	          if [ $modeLBA == "Outer" ] || [ $modeLBA == "Inner" ] || [ $modeLBA == "Sparse Even" ] || [ $modeLBA == "Sparse Odd" ] || [ $modeLBA == "X" ] || [ $modeLBA == "Y" ]
 	          then
-	             ANTENNA_SETTING="HBA $modeLBA"
+	             ANTENNA_SETTING="LBA $modeLBA"
 	          else 
 	             echo "WARNING: user antenna mode LBA $modeLBA is not recognized, using default LBA Outer"
 	             ANTENNA_SETTING="LBA Outer"
