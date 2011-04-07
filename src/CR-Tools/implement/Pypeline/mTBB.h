@@ -128,7 +128,7 @@ public:
 
   int python_nofStations();
 
-  boost::python::list TBBData::python_stationList();
+  boost::python::list python_stationList();
 
   double python_frequencyMin();
 
@@ -153,7 +153,7 @@ public:
 //-----------------------
 #define HFPP_FILETYPE hFILE
 //-----------------------
-#include "../../../../build/cr/implement/Pypeline/mTBB.def.h"
+#include "mTBB.def.h"
 
 #endif /* CR_PIPELINE_TBB_H */
 
