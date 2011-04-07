@@ -203,7 +203,7 @@ void HFPP_FUNC_NAME(const Iter out, const Iter out_end, ndarray in)
   $PARDOCSTRING
 
   Description:
-  Calculate absolute value squared for each value in the input vector
+  Calculate :math:`|a|^2` for each element :math:`a` in the input vector
   and add the result to the output vector.
 */
 template <class Iter>

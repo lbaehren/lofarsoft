@@ -637,7 +637,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
 
   See also:
-  hMulAdd, hDivAdd, HSubAdd, hAddAdd
+  hMulAdd, hDivAdd, hSubAdd, hAddAdd
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
@@ -4092,6 +4092,9 @@ void HFPP_FUNC_NAME (const DataIter odata,
   $PARDOCSTRING
 
   Description:
+  Calculate :math:`|a|^2` for each element :math:`a` in the input vector
+  and add the result to the output vector.
+
   The fact that the result is added to the output vector allows one to
   call the function multiple times and get a summed spectrum. If you
   need it only once, just fill the vector with zeros.

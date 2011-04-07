@@ -242,14 +242,14 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
   $PARDOCSTRING
 
   Example:
-  # Set up input/output arrays
+  >>> # Set up input/output arrays
   >>> x = cr.hArray(complex, N/2+1)
   >>> y = cr.hArray(float, N)
 
-  # Create plan
+  >>> # Create plan
   >>> p = cr.FFTWPlanManyDftC2r(N, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
-  # Execute plan
+  >>> # Execute plan
   >>> cr.hFFTWExecutePlan(y, x, p)
 */
 template <class Iter, class CIter>

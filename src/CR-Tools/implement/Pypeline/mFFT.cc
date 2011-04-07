@@ -90,7 +90,7 @@ using namespace casa;
 
   Users should note that FFTW computes an unnormalized DFT. Thus,
   computing a forward followed by a backward transform (or vice versa)
-  results in the original array scaled by ``n``.
+  results in the original array scaled by :math:`N`.
 
   Usage:
   outvec.fftw(invec) -> return FFT of invec in outvec
@@ -146,7 +146,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 
   Users should note that FFTW computes an unnormalized DFT. Thus,
   computing a forward followed by a backward transform (or vice versa)
-  results in the original array scaled by ``n``.
+  results in the original array scaled by :math:`N`.
 
   Usage:
   outvec.fftw(invec) -> return backward FFT of invec in outvec
@@ -198,7 +198,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   performance, compared to the pure ``hInvFFTw``). It will also swap the
   data back if it was previously swapped by ``hNyquistSwap`` (no swap if
   ``NyquistZone=0``) and multiply with the correct normalisation factor
-  ``(1/N)``.
+  :math:`(1/N)`.
 
   The DFT results are stored in-order in the array out, with the
   zero-frequency (DC) component in ``data_out[0]``.
@@ -207,7 +207,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   outvec.fftw(invec) -> return backward FFT of invec in outvec
 
   See also:
-  hFFTw, hInvFFTw
+  hFFTw, hInvFFTw, hNyquistSwap
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -246,7 +246,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(vec)()("Complex input and output vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HInteger)(nyquistZone)()("Nyquist zone. 1: nu= 0 - Nu_max, 2: nu=Nu_max - 2 * Nu_max, etc ...  ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HInteger)(nyquistZone)()("Nyquist zone.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -255,6 +255,14 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   Description:
   The order of the elements in the vector will be reversed and
   replaced with their negative complex conjugate.
+
+  The Nyquist zone :math:`n` is defined as
+  :math:`[(n-1)\\nu_\\textrm{max}, n\\nu_\\textrm{max}]`
+
+  e.g.
+  1: :math:`\\nu= [0, \\nu_\\textrm{max}]`,
+  2: :math:`\\nu=[\\nu_\\textrm{max}, 2\\nu_\\textrm{max}]`,
+  etc ...
 
   The operation is only performed for an even Nyquist Zone,
   e.g. ``(2,4,6,..)``, otherwise nothing is done.
@@ -286,8 +294,8 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector of N real elements in which the inverse FFT (DFT) transformed data is stored. ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex input vector of The length is N/2+1 elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector of :math:`N` real elements in which the inverse FFT (DFT) transformed data is stored. ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex input vector of The length is :math:`N/2+1` elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(nyquistZone)()("Nyquist zone")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
@@ -301,7 +309,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
   performance, compared to the pure ``hInvFFTw``). It will also swap
   the data back if it was previously swapped by ``hNyquistSwap`` (no
   swap if ``NyquistZone=0``) and multiply with the correct
-  normalisation factor ``(1/N)``.
+  normalisation factor :math:`1/N`.
 
   The DFT results are stored in-order in the array out, with the
   zero-frequency (DC) component in ``data_out[0]``.
@@ -348,8 +356,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_FUNC_NAME hFFTw
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(data_out)()("Return vector in which the FFT (DFT) transformed data is stored. The length is N/2+1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(data_in)()("Real input vector of N elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(data_out)()("Return vector in which the FFT (DFT) transformed data is stored. The length is :math:`N/2+1`.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(data_in)()("Real input vector of :math:`N` elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -360,11 +368,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 
   Users should note that FFTW computes an unnormalized DFT. Thus,
   computing a forward followed by a backward transform (or vice versa)
-  results in the original array scaled by ``N``.
+  results in the original array scaled by :math:`N`.
 
-  The size ``N`` can be any positive integer, but sizes that are
+  The size :math:`N` can be any positive integer, but sizes that are
   products of small factors are transformed most efficiently (although
-  prime sizes still use an O(``N log N``) algorithm).  The two
+  prime sizes still use an :math:`\\mathcal{O}(N \\log N)` algorithm).  The two
   arguments are input and output arrays of the transform.  These
   vectors can be equal, indicating an in-place transform.
 
@@ -402,8 +410,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 #define HFPP_FUNC_NAME hInvFFTw
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector of N real elements in which the inverse FFT (DFT) transformed data is stored. ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex input vector of The length is N/2+1 elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(data_out)()("Return vector of :math:`N` real elements in which the inverse FFT (DFT) transformed data is stored. ")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(data_in)()("Complex input vector of The length is :math:`N/2+1` elements to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -413,13 +421,13 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 
   Users should note that FFTW computes an unnormalized DFT. Thus,
   computing a forward followed by a backward transform (or vice versa)
-  results in the original array scaled by ``N``.
+  results in the original array scaled by :math:`N`.
 
-  The size ``N`` can be any positive integer, but sizes that are
+  The size :math:`N` can be any positive integer, but sizes that are
   products of small factors are transformed most efficiently (although
-  prime sizes still use an O(``N log N``) algorithm).  The two
-  arguments are input and output arrays of the transform.  These
-  vectors can be equal, indicating an in-place transform.
+  prime sizes still use an :math:`\\mathcal{O}(N \\log N)` algorithm).
+  The two arguments are input and output arrays of the transform.
+  These vectors can be equal, indicating an in-place transform.
 
   Usage:
   vec.invfftw(complexvec) -> return (inv) FFT of complexvec in vec
@@ -858,33 +866,32 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
            ]
 
   Example:
-  #Input parameters
-  ncolumns = 128
-  nrows = 1024  # = bigFFTblocksize / ncolumns
-  bigFFTblocksize = ncolumns*nrows
+  Input parameters
+  >>> ncolumns = 128
+  >>> nrows = 1024  # = bigFFTblocksize / ncolumns
+  >>> bigFFTblocksize = ncolumns*nrows
 
-  #Prepare some vectors
-  a=hArray(complex,[nrows, ncolumns])
-  a.random(-2.0,2.0)
-  b=hArray(complex,copy=a)
-  bT=b.transpose()
+  Prepare some vectors
+  >>> a=hArray(complex,[nrows, ncolumns])
+  >>> a.random(-2.0,2.0)
+  >>> b=hArray(complex,copy=a)
+  >>> bT=b.transpose()
 
-  #Do only one big FFT
-  bigFFT=hArray(complex,[bigFFTblocksize])
-  bigFFT.fftw(a)
+  Do only one big FFT
+  >>> bigFFT=hArray(complex,[bigFFTblocksize])
+  >>> bigFFT.fftw(a)
 
-  #Do two FFTs with the steps described above
-  aT=hArray(a).transpose()
-  aT[...].fftw(aT[...])
-  aT.doublefftphasemul(bigFFTblocksize,nrows,ncolumns,0)
-  a.transpose(aT)
-  a[...].fftw(a[...])
-  aT.transpose(a)
+  Do two FFTs with the steps described above
+  >>> aT=hArray(a).transpose()
+  >>> aT[...].fftw(aT[...])
+  >>> aT.doublefftphasemul(bigFFTblocksize,nrows,ncolumns,0)
+  >>> a.transpose(aT)
+  >>> a[...].fftw(a[...])
+  >>> aT.transpose(a)
 
-  #Do the steps just above in one go
-  bT.doublefft(b,bigFFTblocksize,nrows,ncolumns,0)
-
-  -> bigFFT, aT, & bT all contain the same spectra
+  Do the steps just above in one go
+  >>> bT.doublefft(b,bigFFTblocksize,nrows,ncolumns,0)
+  bigFFT, aT, & bT all contain the same spectra
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger full_size,  const HInteger nblocks, const HInteger blocklen, const HInteger offset)
@@ -970,7 +977,7 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(vecout)()("Complex output of spectrum - same size as input vector and must not be the same vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector obtianed from DoubleFFT1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Complex input vector obtained from DoubleFFT1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(nblocks)()("How many blocks were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (HInteger)(blocklen)()("The block length for individual data blocks that were read in.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
