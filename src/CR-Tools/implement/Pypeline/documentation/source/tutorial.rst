@@ -9,8 +9,6 @@ This tutorial will get you started with the pycrtools package.
 .. Installation
 .. ============
 
-.. [empty]
-
 
 Starting up
 ===========
@@ -83,11 +81,11 @@ Constructing vectors
 A number of vector types are provided: bool, int, float, complex, and
 str. To create a vector most efficiently, use the original vector constructors:
 
-- BoolVec()
-- IntVec()
-- FloatVec()
-- ComplexVec()
-- StrVec()
+1. BoolVec()
+2. IntVec()
+3. FloatVec()
+4. ComplexVec()
+5. StrVec()
 
 e.g.::
 
