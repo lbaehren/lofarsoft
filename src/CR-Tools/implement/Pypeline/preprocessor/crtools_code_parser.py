@@ -124,10 +124,13 @@ class WrapperBlock():
         """
         Initialisation of the wrapper block.
 
+        ========== ===================================================
         *file_ptr* File object for output file
         *file_ptr* File object for wrapper definition file
         *file_ptr* File object for python function documentation file
         *options*  Processing options.
+        ========== ===================================================
+
         """
         self._file = file_ptr
         self._deffile = deffile_ptr
@@ -227,8 +230,7 @@ class WrapperBlock():
     #                                                      Process the block
     def parse(self, iter_var=None, iter_val=None):
         """
-        Parse pp
-        the wrapper block for output to file
+        Parse the wrapper block for output to file.
         """
         inDoc = False
 
@@ -654,9 +656,6 @@ class DocumentationBlock():
         result = ""
         indent = "    "
 
-        # result += r"::\n\n"
-        # result += r".. highlight:: python\n\n"
-
         for line in self.getExample():
             result += indent + line + r"\n"
 
@@ -719,7 +718,6 @@ class DocumentationBlock():
         result += self.formatSyntax() + r"\n"
 
         # Brief function description (summary)
-        # result += r"\n" + self.formatSectionTitle("Summary") + r"\n"
         result += r"\n" + self.formatSummary() + r"\n"
 
         # Parameter description
@@ -801,9 +799,12 @@ def iter_subst(var, subst, input_string):
     """
     Replace a variable by a name
 
+    ============== ========================================
     *var*          Variable to be substituted.
     *repl*         Substitution string.
     *input_string* Source string in which to substitute.
+    ============== ========================================
+
     """
 
     result = input_string
@@ -863,8 +864,6 @@ def parseFile(input_filename, output_filename, options):
 
     header_rule = "="*80
     header_text = "ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY crtools_code_parser.py"
-
-    #header = header_rule + "// ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY crtools_code_parser.py\n" + header_rule + "\n"
 
     if (options.verbose | debugFlag):
         print "Executing parseFile..."
