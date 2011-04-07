@@ -861,7 +861,6 @@ def parseFile(input_filename, output_filename, options):
     iterator_block = None
     wrapper_block = None
 
-
     header_rule = "="*80
     header_text = "ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY crtools_code_parser.py"
 
