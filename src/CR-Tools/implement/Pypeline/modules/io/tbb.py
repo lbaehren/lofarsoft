@@ -150,9 +150,14 @@ class TBBData(IOInterface):
         """
         self.__block+=step
         
-    def __getitem__(self, key):
+    def __getitem__(self, *keys):
         """Implements keyword access.
         """
+        #If multiple keywords are provided, return a list of results
+        if type(keys[0])==tuple:
+            return [self[k] for k in keys[0]]
+        else:
+            key=keys[0]
         if key not in self.keys():
             raise KeyError("Invalid keyword: "+key)
         else:
