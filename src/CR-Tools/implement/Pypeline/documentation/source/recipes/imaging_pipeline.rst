@@ -42,7 +42,7 @@ transforming the time domain data to the frequency space and then multiplying a 
 
     P(\vec{\rho})[\omega] = \left|S(\vec{\rho})[\omega]\right|^{2} = \left|\sum_{i=1}^{N_{\mathrm{ant}}}w_{i}(\vec{\rho})[\omega]s_{i}[\omega]\right|^{2}
 
-With :math:`P(\vec{\rho})` being the power in the direction :math:`\vec{\rho}`, :math:`S(\vec{\rho})` the beam formed data, :math:`N_{\mathrm{ant}}` the number of antennas, :math:`w_{i}(\vec{\rho}[\omega] = e^{i\omega r_{i}/c}` the weighting factor of the phase gradient and :math:`s_{i}[\omega]` the frequency domain data of the single antennas.
+With :math:`P(\vec{\rho})` being the power in the direction :math:`\vec{\rho}`, :math:`S(\vec{\rho})` the beam formed data, :math:`N_{\mathrm{ant}}` the number of antennas, :math:`w_{i}(\vec{\rho})[\omega] = e^{i\omega r_{i}/c}` the weighting factor of the phase gradient and :math:`s_{i}[\omega]` the frequency domain data of the single antennas.
 
 Examples
 --------
