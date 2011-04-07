@@ -125,11 +125,10 @@ class TBBData(IOInterface):
         # Generate scrach arrays
         self.__makeScratch()
 
- #   def __repr__(self):
- #       """Display summary when printed.
- #       """
-#
-#       return self.__file.summary().strip()
+    def __repr__(self):
+        """Display summary when printed.
+        """
+        return self.__file.summary().strip()
 
     def keys(self):
         """Returns list of valid keywords.

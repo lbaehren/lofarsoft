@@ -369,7 +369,7 @@ the slice of the original hArray.
 seems to work now 
 -also related bugfixes in averagespectrum, dynamicspectrum
 
-2011-04-02  Pypeline - rev 74... - Heino Falcke
+2011-04-02  Pypeline - rev 74508 - Heino Falcke
 - By default tasks now return themselves rather than the workspace
 object (uness an explicit return value is given in .run)!!
 - hRandomizePhase alos 
@@ -385,6 +385,15 @@ problems with semilog axes. Semilog will then work only with reduced
 functionality.
 
 - io/tbb.py object - made keyword access a little more elegant
+
+Sending        Pypeline/CHANGELOG.txt
+Sending        Pypeline/extras/ipython.el
+Sending        Pypeline/mIO.cc
+Sending        Pypeline/modules/core/harray.py
+Sending        Pypeline/modules/core/plot.py
+Sending        Pypeline/modules/io/tbb.py
+Sending        Pypeline/scripts/testcr3.py
+
 
 2011-04-06  CMake - rev 7508 - Heino Falcke
 - FindPython first finds Enthought python (EDP) version also for
