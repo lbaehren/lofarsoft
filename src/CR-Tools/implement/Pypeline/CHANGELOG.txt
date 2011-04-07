@@ -374,6 +374,24 @@ seems to work now
 object (uness an explicit return value is given in .run)!!
 - hRandomizePhase alos 
 - finished testcr3.py to demonstrate RFI excision and beamforming
+
+2011-04-06 CMake - rev 74508 - Heino Falcke 
+
+- Put in a flag to plot semilog graphs also with buggy EDP64 version
+on new Macs ...  If your name is Heino and you have a MacBook more
+recent then March 2011 with OS10.6.7 and you use the Enthought 64 bit
+(EDP64) Python version 6.3 then set plt.EDP64bug=True to avoid
+problems with semilog axes. Semilog will then work only with reduced
+functionality.
+
+- io/tbb.py object - made keyword access a little more elegant
+
+2011-04-06  CMake - rev 7508 - Heino Falcke
+- FindPython first finds Enthought python (EDP) version also for
+libraries and includes
+
+
+
 ------------------------------------------------------------------------
 TODO
 ------------------------------------------------------------------------

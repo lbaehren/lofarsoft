@@ -298,7 +298,7 @@ HPyObject HFPP_FUNC_NAME(CRDataReader &dr, const HString key)
 #define HFPP_PARDEF_1 (HString)(keyword)()("Keyword to be set in the file")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_2 (HPyObjectPtr)(pyob)()("Input parameter")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 ////$COPY_TO END --------------------------------------------------
-/*!
+/*! 
   \brief $DOCSTRING
   $PARDOCSTRING
 */

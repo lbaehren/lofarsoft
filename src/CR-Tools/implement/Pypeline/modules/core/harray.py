@@ -120,7 +120,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     else: # Create a new vector
         if type(Type) == np.ndarray and not dimensions:
             dimensions=Type.shape
-        if type(dimensions)==int:
+        if type(dimensions) in [int,long]:
             size=dimensions
         elif (type(dimensions) in [list,tuple,IntVec]):
             size=reduce(lambda x,y : x*y, dimensions)
@@ -134,7 +134,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
         ary.setVector(ary.stored_vector)
     if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
     if not hasattr(ary.par,"hdr"): setattr(ary.par,"hdr",{})
-    if type(dimensions)==int: ary.reshape([dimensions])
+    if type(dimensions) in [int,long]: ary.reshape([dimensions])
     elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
     elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
     if type(par) == dict:
@@ -207,7 +207,7 @@ def hArray_newreference(self):
     still access the same underlying vector in memory.
     """
     ary=self.shared_copy()
-    ary.par=self.par
+    if hasattr(self,"par"): ary.par=self.par
     return ary
 
 def hArray_shape(self):
@@ -279,7 +279,7 @@ def hSliceToNormalValues(s,dim):
     """
     Returns a slice object where none and negative numbers are replaced by the appropriate integers, given a dimension (length) dim of the full slice.
     """
-    if type(s)==int:
+    if type(s) in [int,long]:
         if s<0: return s+dim
     if not type(s)==slice: return s
     s1=s.start;s2=s.stop;s3=s.step
@@ -428,7 +428,8 @@ def hArray_getSlicedArray(self,indexlist):
     else:
         indexlist=[indexlist]
     ary=hArray(self)
-    ary.par=self.par
+    if hasattr(self,"par"):
+        ary.par=self.par
     ary.__slice__=tuple(indexlist)
     dimensions=ary.shape()
     subslice_start=0; subslice_end=-1;
@@ -512,7 +513,7 @@ def hArray_setitem(self,dims,fill):
     """
     if type(fill) in [list,tuple]:
         fill=hVector(fill)
-    if type(dims)==int:
+    if type(dims) in [int,long]:
         hFill(hArray_getSlicedArray(self,dims),fill)
     elif type(dims)==tuple:# (multi-d index)
         if type(dims[-1]) in [list,IntVec]:
@@ -544,7 +545,7 @@ def hArray_read(self,datafile,key,block=-1,antenna=-1):
     """
     self.par.filename=datafile.filename
     self.addHistory("read","Reading data from file "+self.par.filename)
-    if type(block)==int: block=Vector([block])
+    if type(block) in [int,long]: block=Vector([block])
     if type(block) in [list,tuple]: block=Vector(block)
     self.par.file=self
     datafile.read(key,self,block,antenna)

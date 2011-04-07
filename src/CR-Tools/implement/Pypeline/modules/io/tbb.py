@@ -17,12 +17,14 @@ class TBBData(IOInterface):
     Board data.
     """
 
-    def __init__(self, filename, blocksize=1024):
+    def __init__(self, filename, blocksize=1024, block=0):
         """Constructor.
         """
 
         # Store blocksize for readout
         self.__blocksize = blocksize
+
+        self.__block = block
 
         # Open file
         self.__file = cr.TBBData(filename)
@@ -44,6 +46,59 @@ class TBBData(IOInterface):
 
         # Mark file as opened
         self.closed = False
+
+        #Create keyword dict for easy access
+        self.setKeywordDict()
+
+    def setKeywordDict(self):
+        self.__keyworddict={
+            "FILENAME":self.__file.filename,
+            "BLOCKSIZE":self.__blocksize,
+            "BLOCK":self.__block,
+            "ANTENNA_SET":self.__file.antenna_set,
+            "NYQUIST_ZONE":self.__file.nyquist_zone,
+            "TIME":self.__file.time,
+            "SAMPLE_NUMBER":self.__file.sample_number,
+            "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
+            "SAMPLE_FREQUENCY_UNIT":self.__file.sample_frequency_unit,
+            "DATA_LENGTH":self.__file.data_length,
+            "NOF_STATION_GROUPS":self.__file.nofStationGroups,
+            "NOF_DIPOLE_DATASETS":self.__file.nofDipoleDatasets,
+            "NOF_SELECTED_DATASETS":self.__file.nofSelectedDatasets,
+            "DIPOLE_NAMES":self.__file.dipoleNames,
+            "SELECTED_DIPOLES":self.__file.selectedDipoles,
+            "CHANNEL_ID":self.__file.channelID,
+            "FILETYPE":self.__file.filetype,
+            "FILEDATE":self.__file.filedate,
+            "TELESCOPE":self.__file.telescope,
+            "OBSERVER":self.__file.observer,
+            "CLOCK_FREQUENCY":self.__file.clockFrequency,
+            "CLOCK_FREQUENCY_UNIT":self.__file.clockFrequencyUnit,
+            "FILTER_SELECTION":self.__file.filterSelection,
+            "TARGET":self.__file.target,
+            "SYSTEM_VERSION":self.__file.systemVersion,
+            "PIPELINE_NAME":self.__file.pipelineName,
+            "PIPELINE_VERSION":self.__file.pipelineVersion,
+            "NOTES":self.__file.notes,
+            "PROJECT_ID":self.__file.projectID,
+            "PROJECT_TITLE":self.__file.projectTitle,
+            "PROJECT_PI":self.__file.projectPI,
+            "PROJECT_CO_I":self.__file.projectCoI,
+            "PROJECT_CONTACT":self.__file.projectContact,
+            "OBSERVATION_ID":self.__file.observationID,
+            "OBSERVATION_START_MJD":self.__file.startMJD,
+            "OBSERVATION_START_TAI":self.__file.startTAI,
+            "OBSERVATION_START_UTC":self.__file.startUTC,
+            "OBSERVATION_END_MJD":self.__file.endMJD,
+            "OBSERVATION_END_TAI":self.__file.endTAI,
+            "OBSERVATION_END_UTC":self.__file.endUTC,
+            "OBSERVATION_NOF_STATIONS":self.__file.nofStations,
+            "OBSERVATION_STATION_LIST":self.__file.stationList,
+            "OBSERVATION_FREQUENCY_MIN":self.__file.frequencyMin,
+            "OBSERVATION_FREQUENCY_MAX":self.__file.frequencyMax,
+            "OBSERVATION_FREQUENCY_CENTER":self.__file.frequencyCenter,
+            "OBSERVATION_FREQUENCY_UNIT":self.__file.frequencyUnit
+            }
 
     def init_selection(self):
         """Selection dependent initialization.
@@ -70,19 +125,45 @@ class TBBData(IOInterface):
         # Generate scrach arrays
         self.__makeScratch()
 
-    def __repr__(self):
-        """Display summary when printed.
-        """
-
-        return self.__file.summary().strip()
+ #   def __repr__(self):
+ #       """Display summary when printed.
+ #       """
+#
+#       return self.__file.summary().strip()
 
     def keys(self):
         """Returns list of valid keywords.
         """
+        return self.__keyworddict.keys()
 
-        return ["FILENAME", "BLOCKSIZE", "ANTENNA_SET", "NYQUIST_ZONE", "TIME", "SAMPLE_NUMBER", "SAMPLE_FREQUENCY_VALUE", "SAMPLE_FREQUENCY_UNIT", "DATA_LENGTH", "NOF_STATION_GROUPS", "NOF_DIPOLE_DATASETS", "NOF_SELECTED_DATASETS", "DIPOLE_NAMES", "SELECTED_DIPOLES", "CHANNEL_ID", "GROUPTYPE", "FILEDATE", "FILETYPE", "TELESCOPE", "OBSERVER", "CLOCK_FREQUENCY", "CLOCK_FREQUENCY_UNIT", "FILTER_SELECTION", "TARGET", "SYSTEM_VERSION", "PIPELINE_NAME", "PIPELINE_VERSION", "NOTES", "PROJECT_ID", "PROJECT_TITLE", "PROJECT_PI", "PROJECT_CO_I", "PROJECT_CONTACT", "OBSERVATION_ID", "OBSERVATION_START_MJD", "OBSERVATION_START_TAI", "OBSERVATION_START_UTC", "OBSERVATION_END_MJD", "OBSERVATION_END_TAI", "OBSERVATION_END_UTC", "OBSERVATION_NOF_STATIONS", "OBSERVATION_STATION_LIST", "OBSERVATION_FREQUENCY_MAX", "OBSERVATION_FREQUENCY_MIN", "OBSERVATION_FREQUENCY_CENTER", "OBSERVATION_FREQUENCY_UNIT"]
+    def items(self):
+        """Return list of keyword/content tuples of all header variables
+        """
+        return [(k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]) for k in self.keys()]
 
+    def hdr(self):
+        """Return a dict with keyword/content pairs for all header variables."""
+        return dict(self.items())
+
+    def next(self,step=1):
+        """Advance to next block.
+        *step* = 1 - advance by 'step' blocks (optional)
+        """
+        self.__block+=step
+        
     def __getitem__(self, key):
+        """Implements keyword access.
+        """
+        if key not in self.keys():
+            raise KeyError("Invalid keyword: "+key)
+        else:
+            if hasattr(self.__keyworddict[key],"__call__"):
+                return self.__keyworddict[key]()
+            else:
+                return self.__keyworddict[key]
+        
+    def __getitem__old(self, key):
+
         """Implements keyword access.
         """
 
@@ -187,6 +268,8 @@ class TBBData(IOInterface):
         elif key is "BLOCKSIZE":
             self.__blocksize = value
             self.init_selection()
+        elif key is "BLOCK":
+            self.__block = value
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
         else:
@@ -195,7 +278,7 @@ class TBBData(IOInterface):
     def __contains__(self, key):
         """Allows inquiry if key is implemented.
         """
-
+        
         return key in self.keys()
 
     def __calculateFrequencies(self):
@@ -274,7 +357,7 @@ class TBBData(IOInterface):
         # Selection dependent initialization
         self.init_selection()
 
-    def getTimeseriesData(self, data, block):
+    def getTimeseriesData(self, data, block=None):
         """Returns timeseries data for selected antennas.
 
         Required Arguments:
@@ -283,7 +366,8 @@ class TBBData(IOInterface):
         Parameter     Description
         ============= =================================================
         *data*        data array to write timeseries data to.
-        *block*       index of block to return data from.
+        *block*       index of block to return data from. Use last set
+                      block if not provided or None
         ============= =================================================
 
         Output:
@@ -293,10 +377,10 @@ class TBBData(IOInterface):
         length blocksize of antenna i.
 
         """
-
+        if block == None: block=self.__block
         cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize, self.__blocksize, self.__file)
 
-    def getFFTData(self, data, block, hanning=True):
+    def getFFTData(self, data, block=None, hanning=True):
         """Writes FFT data for selected antennas to data array.
 
         Required Arguments:
@@ -318,6 +402,7 @@ class TBBData(IOInterface):
         length (number of frequencies) of antenna i.
 
         """
+        if block == None: block=self.__block
 
         # Get timeseries data
         self.getTimeseriesData(self.__scratch, block)

@@ -1,7 +1,7 @@
 ;;; ipython.el --- Adds support for IPython to python-mode.el
 
-;; This file was located in:
-;;  ~/Library/Application Support/Emacs/site-lisp/
+;; To install do:
+;;  cp ipython.el ~/Library/Preferences/Emacs/ipython.el
 
 ;; Copyright (C) 2002, 2003, 2004, 2005 Alexander Schmolck
 ;; Author:        Alexander Schmolck

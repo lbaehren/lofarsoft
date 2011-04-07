@@ -14,8 +14,8 @@ def makeGrid(AZ,EL,Distance,offset=5*deg):
             dict(az=AZ-5, el=EL-5,r=Distance),dict(az=AZ, el=EL-5,r=Distance),dict(az=AZ+5, el=EL-5,r=Distance)]
     
 pardict=dict(
-    doplot=False,
-    qualitycheck=False,
+    doplot=True,
+    qualitycheck=True,
     BeamFormer=dict(
         filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event",
         antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position")))),
@@ -33,21 +33,22 @@ pardict=dict(
         splineorder=3),
     ApplyBaseline=dict(
         rmsfactor=3.5,
-        doplot=True
+        doplot=False
         )
     )
 
-plt.hanging=True
+plt.hanging=False # Use true if exectuion hangs after plotting one window
+plt.EDP64bug=True # use True if your system crashes for plotting semilog axes
 
 #print "---> BeamFormer"
-bf=tasks.beamformer.BeamFormer(); bf(pardict=pardict); # BeamForm
+bf=tasks.beamformer.BeamFormer()(pardict=pardict); # BeamForm
 bf.avspec.par.xvalues.setUnit("M","")
 
 #print "---> Start Fitbaseline"
-fitb=tasks.fitbaseline.FitBaseline()(bf.avspec,pardict=pardict);
+fitb=tasks.fitbaseline.FitBaseline(); fitb(bf.avspec,pardict=pardict);
 
 #Calculate a smooth version of the spectrum which is later used to set amplitudes
-calcb=tasks.fitbaseline.CalcBaseline()(bf.avspec,pardict=pardict,invert=False,HanningUp=False,normalize=False);
+calcb=tasks.fitbaseline.CalcBaseline(); calcb(bf.avspec,pardict=pardict,invert=False,HanningUp=False,normalize=False);
 amplitudes=hArray(copy=calcb.baseline)
 
 #Now calculate it again, but now to flatten the spectrum

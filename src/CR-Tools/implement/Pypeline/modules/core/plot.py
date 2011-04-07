@@ -15,10 +15,16 @@ from harray import *
 #  Define Plotting functions for vectors and arrays
 #======================================================================
 
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,**plotargs):
+def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,EDP64bug=None,**plotargs):
     """
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
+
+    If your name is Heino and you have a MacBook more recent then
+    March 2011 with OS10.6.7 and you use the Enthought 64 bit (EDP64)
+    Python version 6.3 then set plt.EDP64bug=True to avoid problems
+    with semilog axes.Semilog will then work only with reduced
+    functionality.
 
     Usage::
 
@@ -60,6 +66,8 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
                  ``color='green``, ``linestyle='dashed``.
     ============ ============================================================
     """
+    if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
+        EDP64bug=self.plt.EDP64bug
     if (xvalues==None):
         if hasattr(self.par,"xvalues"):
             if hasattr(self,"__slice__"):
@@ -70,7 +78,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
                     ellipsiscount=self.__slice__.count(Ellipsis) # check if an ellipsis is present that occupies and extra slot in the index list 
                     if ellipsiscount==1:
                         ellipsislocation=self.__slice__.index(Ellipsis)
-                        if ellipsislocation==0 or type(self.__slice__[ellipsislocation-1])==int:
+                        if ellipsislocation==0 or type(self.__slice__[ellipsislocation-1]) in [int,long]:
                             ellipsiscount=0
                     dim_difference+=ellipsiscount
                     if dim_difference==len(self.__slice__):
@@ -138,9 +146,9 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
         else: exec(var+"="+str(dflt.__repr__()))
     if type(val)==str: val=(str)
     if clf: self.plt.clf()
-    if logplot=="x": _plot=self.plt.semilogx
-    elif logplot=="y": _plot=self.plt.semilogy
-    elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
+    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx 
+    elif logplot=="y": _plot=hSemiLogY if EDP64bug else self.plt.semilogy
+    elif (logplot=="xy") | (logplot=="yx"): _plot=hSemiLogXY if EDP64bug else self.plt.loglog
     else: _plot=self.plt.plot
     iterate=True
     loop=0
@@ -152,7 +160,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
         else:
             _plot(xvalues.vec(),self.vec(),**plotargs)
         if not highlight==None:
-            if type(nhighlight)==int: nhighlight=[nhighlight]
+            if type(nhighlight) in [int,long]: nhighlight=[nhighlight]
             hv=highlight.vec()
             ha=hArray(hv,[len(hv)/2,2])
             for n in range(nhighlight[loop]): #how many sections are to be highlighted?
@@ -173,6 +181,24 @@ for v in hAllArrayTypes:
     setattr(v,"plot",hPlot_plot)
 
 
+def hSemiLogY(x,y,**args):
+    """Total frustration avoid EDP64 crash on new Mac function"""
+    xvec=x
+    yvec=Vector(float,len(y)); yvec.copy(y); yvec.log10()
+    plt.plot(xvec,yvec,**args)
+    
+def hSemiLogX(x,y,**args):
+    """Total frustration avoid EDP64 crash on new Mac function"""
+    yvec=y
+    xvec=Vector(float,len(x)); xvec.copy(x); xvec.log10()
+    plt.plot(xvec,yvec,**args)
+    
+def hSemiLogXY(x,y,**args):
+    """Total frustration avoid EDP64 crash on new Mac function"""
+    yvec=Vector(float,len(y)); yvec.copy(y); yvec.log10()
+    xvec=Vector(float,len(x)); xvec.copy(x); xvec.log10()
+    plt.plot(xvec,yvec,**args)
+    
 def plotconst(xvalues,y):
     """
     Plot a constant line.
