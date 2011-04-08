@@ -51,16 +51,16 @@ we try to avoid copying large chunks of data as much as possible.
 
 The basic functions operating on the data in C++ either take STL
 iterators as inputs (i.e. pointers to the begin and end of the memory
-where the data in the STL vector is stored) or casa::Vectors, which
+where the data in the STL vector is stored) or ``casa::Vectors``, which
 are created with shared memory (i.e. their physical memory is the same
 as that of the STL vector).
 
-For that reason MEMORY ALLOCATION is done almost exclusively in the
+For that reason *memory allocation* is done almost exclusively in the
 Python layer. The fast majority of C++ functions is not even able to
 allocate or free any memory. This allows for very efficient memory
 management and processing, but also means that the user is responsible
-for providing properly sized vectors as input AND output
-vectors. I.e. you need to know beforehand what sized vector you
+for providing properly sized vectors as input *and* output
+vectors. I.e., you need to know beforehand what sized vector you
 expect in return!
 
 This may be annoying, but forces you to think carefully about how to
@@ -81,11 +81,11 @@ Constructing vectors
 A number of vector types are provided: bool, int, float, complex, and
 str. To create a vector most efficiently, use the original vector constructors:
 
-1. BoolVec()
-2. IntVec()
-3. FloatVec()
-4. ComplexVec()
-5. StrVec()
+#. :meth:`BoolVec`
+#. :meth:`IntVec`
+#. :meth:`FloatVec`
+#. :meth:`ComplexVec`
+#. :meth:`StrVec`
 
 e.g.::
 
@@ -151,16 +151,6 @@ Note, that size and fill take precedence over the list and tuple
 input. Hence if you create a vector with ``Vector([1,2,3], size=2)`` it
 will contain only ``[1,2]``. ``Vector([1,2,3], size=2, fill=4)`` will give
 ``[4,4]``.
-
-.. Some simple support for multiple dimensions had been implemented,
-.. using the methods::
-
-..     >>> vector.setDim([n1,n2,..])
-..     >>> vector.getDim()
-..     >>> vector.elem(n)
-
-.. However, this is already depreciated, since there is an array class to
-.. do this better.
 
 
 
@@ -284,11 +274,11 @@ Here are examples of some basic statistics functions one can use::
     >>> v1.median()
     5.0
 
-    >>> # Summing all elements in a vector::
+    >>> # Summing all elements in a vector
     >>> v1.sum()
     27.0
 
-    >>> # Standard Deviation::
+    >>> # Standard Deviation
     >>> v1.stddev()
     1.87082869339
 
@@ -385,10 +375,10 @@ between vectors and arrays is currently not supported.
 Changing dimensions
 -------------------
 
-The dimensions can be obtained and set, using the ``getDim`` and ``setDim``
-methods. If the length of the underlying vector changes due to a
-change in the dimensions, the vector will be resized and padded with
-zeros, if necessary::
+The dimensions can be obtained and set, using the :meth:`getDim` and
+:meth:`setDim` methods. If the length of the underlying vector changes
+due to a change in the dimensions, the vector will be resized and
+padded with zeros, if necessary::
 
     >>> a.getDim()
 
@@ -810,4 +800,9 @@ The keyword values can be retrieved using :meth:`getKey`::
 
     >>> a.getKey("name")
 
+
+Reading data from file
+======================
+
+[in preparation]v
 
