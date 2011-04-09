@@ -3,6 +3,31 @@
 It contains one function `open` that is used to open an HDF5 file containing LOFAR TBB data and returns a :class:`~TBBData` file object.
 
 .. moduleauthor:: Pim Schellart <P.Schellart@astro.ru.nl>
+
+The underlying metadata module used for obtaining the antenna positions depends on the ANTENNA_SET parameter being set to one of the ICD specified values:
+
+LBA_INNER LBA_OUTER LBA_SPARSE_EVEN LBA_SPARSE_ODD LBA_X
+LBA_Y HBA_ZERO HBA_ONE HBA_DUAL HBA_JOINED
+
+if you also need the frequencies for the FFT the correct Nyquist zone needs to be set as well.
+Sander is currently adding this to the data writer but in the mean time (and for existing files) you can adapt the following script to set these.
+
+#! /usr/bin/env python
+
+import h5py
+
+f = h5py.File("D20101104T75613_CS002C.h5", "a")
+
+for station in f.itervalues():
+   station["ANTENNA_SET"] = "HBA_DUAL"
+
+   for dataset in station.itervalues():
+       dataset.attrs["NYQUIST_ZONE"] = 2
+
+f.flush()
+f.close()
+
+
 """
 
 import numpy as np
@@ -20,7 +45,9 @@ class TBBData(IOInterface):
     def __init__(self, filename, blocksize=1024, block=0):
         """Constructor.
         """
-
+        #Useful to do unit conversion
+        self.conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
+        
         # Store blocksize for readout
         self.__blocksize = blocksize
 
@@ -41,21 +68,39 @@ class TBBData(IOInterface):
         # Find reference antenna
         self.__refAntenna = self.__file.alignment_reference_antenna()
 
+        #Create keyword dict for easy access
+        self.setKeywordDict()
+
         # Selection dependent initialization
         self.init_selection()
 
         # Mark file as opened
         self.closed = False
 
-        #Create keyword dict for easy access
-        self.setKeywordDict()
 
     def setKeywordDict(self):
         self.__keyworddict={
+            ##SOME NON-ICD KEYWORDS
+            "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
+            "ITRFANTENNA_POSITIONS":self.getITRFAntennaPositions,
+            "ANTENNA_POSITIONS":self.getRelativeAntennaPositions,
+            "TIMESERIES_DATA":lambda:(lambda x:x if self.getTimeseriesData(x) else x)(self.empty("TIMESERIES_DATA")), 
+            "TIME_DATA":self.getTimeData,
+            "FREQUENCY_DATA":self.getFrequencies,
+            "FFT_DATA":lambda:(lambda x:x if self.getFFTData(x) else x)(self.empty("FFT_DATA")), 
+            "EMPTY_TIMESERIES_DATA":lambda:self.empty("TIMESERIES_DATA"),
+            "EMPTY_FFT_DATA":lambda:self.empty("FFT_DATA"),
+            "SAMPLE_FREQUENCY":lambda:[v*self.conversiondict[u] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
+            "SAMPLE_INTERVAL":lambda:[1/(v*self.conversiondict[u]) for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
+            "FREQUENCY_INTERVAL":lambda:[v*self.conversiondict[u]/self["BLOCKSIZE"] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
+            "FREQUENCY_RANGE":lambda:[(f/2*(n-1),f/2*n) for f,n in zip(self["SAMPLE_FREQUENCY"],self["NYQUIST_ZONE"])],
+            "FFTSIZE":lambda:self["BLOCKSIZE"]/2+1,
+
+            ##ICD KEYWORDS
             "FILENAME":self.__file.filename,
-            "BLOCKSIZE":self.__blocksize,
-            "BLOCK":self.__block,
-            "ANTENNA_SET":self.__file.antenna_set,
+            "BLOCKSIZE":lambda: self.__blocksize,
+            "BLOCK":lambda: self.__block,
+            "ANTENNA_SET":lambda:self.__file.antenna_set if hasattr(self,"__antenna_set") else self.__file.antenna_set(),
             "NYQUIST_ZONE":self.__file.nyquist_zone,
             "TIME":self.__file.time,
             "SAMPLE_NUMBER":self.__file.sample_number,
@@ -130,19 +175,19 @@ class TBBData(IOInterface):
         """
         return self.__file.summary().strip()
 
-    def keys(self):
+    def keys(self,excludedata=False):
         """Returns list of valid keywords.
         """
-        return self.__keyworddict.keys()
+        return [k for k in self.__keyworddict.keys() if not k[-5:]=="_DATA"] if excludedata else self.__keyworddict.keys() 
 
-    def items(self):
+    def items(self,excludedata=False):
         """Return list of keyword/content tuples of all header variables
         """
-        return [(k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]) for k in self.keys()]
+        return [(k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]) for k in self.keys(excludedata)]
 
-    def hdr(self):
+    def getHeader(self):
         """Return a dict with keyword/content pairs for all header variables."""
-        return dict(self.items())
+        return dict(self.items(excludedata=True))
 
     def next(self,step=1):
         """Advance to next block.
@@ -158,6 +203,7 @@ class TBBData(IOInterface):
             return [self[k] for k in keys[0]]
         else:
             key=keys[0]
+
         if key not in self.keys():
             raise KeyError("Invalid keyword: "+key)
         else:
@@ -166,7 +212,7 @@ class TBBData(IOInterface):
             else:
                 return self.__keyworddict[key]
         
-    def __getitem__old(self, key):
+    def getitem__old(self, key):
 
         """Implements keyword access.
         """
@@ -265,9 +311,11 @@ class TBBData(IOInterface):
         elif key is "OBSERVATION_FREQUENCY_UNIT":
             return self.__file.frequencyUnit()
 
+    setable_keywords=set(["BLOCKSIZE","BLOCK","SELECTED_DIPOLES","ANTENNA_SET"])
+    
     def __setitem__(self, key, value):
-        if key not in self.keys():
-            raise KeyError("Invalid keyword")
+        if key not in self.setable_keywords:
+            raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))
 
         elif key is "BLOCKSIZE":
             self.__blocksize = value
@@ -276,8 +324,10 @@ class TBBData(IOInterface):
             self.__block = value
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
+        elif key is "ANTENNA_SET":
+            self.__antenna_set=value
         else:
-            raise KeyError(str(key) + " cannot be set")
+            raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
     def __contains__(self, key):
         """Allows inquiry if key is implemented.
@@ -290,18 +340,22 @@ class TBBData(IOInterface):
         nyquist zone and blocksize.
         """
 
-        self.__frequencies = cr.hArray(float, self.__blocksize/2+1)
+        self.__frequencies = self.empty("FREQUENCY_DATA")
 
         # Calculate sample frequency in Hz
-        sampleFrequency = self.__sample_frequency_value[0]
 
-        if self.__sample_frequency_unit[0] == 'MHz':
-            sampleFrequency *= 1e6
-        elif self.__sample_frequency_unit[0] == 'GHz':
-            sampleFrequency *= 1e9
-
-        cr.hFFTFrequencies(self.__frequencies, sampleFrequency, self.__nyquist_zone[0])
-
+        cr.hFFTFrequencies(self.__frequencies, self["SAMPLE_FREQUENCY"][0], self.__nyquist_zone[0])
+    
+    def getTimeData(self,ary=None):
+        """Calculate time axis depending on sample frequency and
+        blocksize (and later also time offset). Create a new array, if
+        none is provided, otherwise put data into array.
+        """
+        if not ary:
+            ary = self.empty("TIME_DATA")
+        ary.fillrange(self["BLOCK"]*self["BLOCKSIZE"]*self["SAMPLE_INTERVAL"][0],self["SAMPLE_INTERVAL"][0])
+        return ary
+    
     def __makeScratch(self):
         """Create scratch arrays.
         """
@@ -361,7 +415,7 @@ class TBBData(IOInterface):
         # Selection dependent initialization
         self.init_selection()
 
-    def getTimeseriesData(self, data, block=None):
+    def getTimeseriesData(self, data, block=-1):
         """Returns timeseries data for selected antennas.
 
         Required Arguments:
@@ -381,10 +435,14 @@ class TBBData(IOInterface):
         length blocksize of antenna i.
 
         """
-        if block == None: block=self.__block
+        if block<0:
+            block=self.__block
+        else:
+            self.__block=block
+            
         cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize, self.__blocksize, self.__file)
 
-    def getFFTData(self, data, block=None, hanning=True):
+    def getFFTData(self, data, block=-1, hanning=True):
         """Writes FFT data for selected antennas to data array.
 
         Required Arguments:
@@ -406,7 +464,11 @@ class TBBData(IOInterface):
         length (number of frequencies) of antenna i.
 
         """
-        if block == None: block=self.__block
+        if block<0:
+            block=self.__block
+        else:
+            self.__block=block
+
 
         # Get timeseries data
         self.getTimeseriesData(self.__scratch, block)
@@ -490,7 +552,7 @@ class TBBData(IOInterface):
             self.__nfmax = nfmax
 
     def getFrequencies(self):
-        """Returns the frequencies that are appicable to the FFT data
+        """Returns the frequencies that are applicable to the FFT data
 
         Arguments:
         None
@@ -510,12 +572,17 @@ class TBBData(IOInterface):
 
     def empty(self, key):
         """Return empty array for keyword data.
+        Known keywords are: "TIMESERIES_DATA","TIME_DATA","FREQUENCY_DATA","FFT_DATA"
         """
 
         if key == "TIMESERIES_DATA":
-            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize))
+            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize),name="TIMESERIES_DATA")
+        elif key == "TIME_DATA":
+            return cr.hArray(float, self["BLOCKSIZE"],name="Time",units=("","s"))
+        elif key == "FREQUENCY_DATA":
+            return cr.hArray(float, self.__blocksize/2+1,name="Frequency",units=("","Hz"))
         elif key == "FFT_DATA":
-            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1))
+            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1),name="FFT_DATA")
         else:
             raise KeyError("Unknown key: " + str(key))
 
@@ -530,6 +597,8 @@ class TBBData(IOInterface):
         *key*         Data type to read, one of:
                       *TIMESERIES_DATA*
                       *FFT_DATA*
+                      *FREQUENCY_DATA*
+                      *TIME_DATA*
         *data*        array to write data to.
         ============= =================================================
 
@@ -537,7 +606,11 @@ class TBBData(IOInterface):
 
         if key == "TIMESERIES_DATA":
             return self.getTimeseriesData(data, *args, **kwargs)
-        if key == "FFT_DATA":
+        elif key == "TIME_DATA":
+            return self.getTimeData(data, *args, **kwargs)
+        elif key == "FREQUENCY_DATA":
+            return data.copy(self.getFrequencies(*args, **kwargs))
+        elif key == "FFT_DATA":
             return self.getFFTData(data, *args, **kwargs)
         else:
             raise KeyError("Unknown key: " + str(key))

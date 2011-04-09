@@ -543,25 +543,14 @@ def hArray_read(self,datafile,key,block=-1,antenna=-1):
     specified as a list, the read operation will loop over the array
     (if ellipses are used).
     """
-    self.par.filename=datafile.filename
+    self.par.filename=datafile["FILENAME"]
     self.addHistory("read","Reading data from file "+self.par.filename)
     if type(block) in [int,long]: block=Vector([block])
     if type(block) in [list,tuple]: block=Vector(block)
     self.par.file=self
-    datafile.read(key,self,block,antenna)
+#    datafile.read(key,self,block,antenna)
+    datafile.read(key,self,block)
     return self
-
-"""   if block==None:
-        self.par.file=datafile.read(key,self)
-    el
-        datafile["block"]=block
-        self.par.file=datafile.read(key,self)
-    else:
-        iterate=True
-        while iterate:
-            self.par.file=datafile.read(key,self)
-            self.next()
-"""
 
 
 def hArray_setPar(self,key,value):

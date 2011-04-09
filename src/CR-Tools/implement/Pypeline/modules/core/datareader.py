@@ -121,7 +121,7 @@ def DataReader_read(self,key,aryvec,block=-1,antenna=-1):
 
     antenna: allows you to select (a single) antenna to read. -1 means all.
     """
-    hFileRead(self,key,aryvec,block,antenna)
+    hFileRead(self,self.translate(key),aryvec,block,antenna)
     return self
 
 
@@ -139,10 +139,58 @@ def DataReader_getHeaderVariables(self):
     """
     self.keywords=map(lambda s:s[0].lower()+s[1:],set(self.get("keywords").split(", ")).difference(['keywords','help', 'positions','dDate', 'presync', 'TL', 'LTL', 'EventClass', 'SampleFreq', 'StartSample','frequencyValues']))
     self.hdr={"filename":self.filename}
-    for v in self.keywords:
-        self.hdr[v]=self.get(v)     # hdr=header - This is probably a better way to store the keywords
-        setattr(self,v,self.get(v)) # This should then become obsolete
+    for v in self.keywords+DataReader_TranslationDict.keys():
+        if not v[-5:]=="_DATA":
+            self.hdr[v]=self[v]     # hdr=header - This is probably a better way to store the keywords
+            setattr(self,v,self[v]) # This should then become obsolete
 
+def DataReader_keys(self):
+    """
+    Method to get a list of all the keywords in the Datareader.
+    """
+    self.keywords=set(map(lambda s:s[0].lower()+s[1:],self.get("keywords").split(", "))+DataReader_extraKeywords+DataReader_TranslationDict.keys())
+    return list(self.keywords)
+
+DataReader_TranslationDict = {
+    "TIMESERIES_DATA":"Fx",
+    "FFT_DATA":"FFT",
+    "TIME_DATA":"Time",
+    "FREQUENCY_DATA":"Frequency",
+    "EMPTY_TIMESERIES_DATA":"emptyFx",
+    "EMPTY_TIME_DATA":"emptyTimes",
+    "EMPTY_FREQUENCY_DATA":"emptyFrequencies",
+    "EMPTY_FFT_DATA":"emptyFFT",
+    "NOF_SELECTED_DATASETS":"nofSelectedAntennas",
+    "NOF_DIPOLE_DATASETS":"nofAntennas",
+    "SELECTED_DIPOLES":"selectedAntennasID",
+    "FFTSIZE":"fftLength",
+    "BLOCKSIZE":"blocksize",
+    "BLOCK":"block",
+    "SAMPLE_FREQUENCY_VALUE":"sampleFrequency",
+    "DIPOLE_NAMES":"antennaIDs",
+    "FILENAME":"Filename",
+    "DATA_LENGTH":"DATA_LENGTH",
+    "TIME":"TIME",
+    "FREQUENCY_RANGE":"FREQUENCY_RANGE",
+    "SAMPLE_INTERVAL":"SAMPLE_INTERVAL",
+    "NYQUIST_ZONE":"nyquistZone",
+    "ANTENNA_POSITIONS":"Position",
+    "ANTENNA_SET":"ANTENNA_SET",
+    "TELESCOPE":"observatory"
+    }
+
+def DataReader_translate(self,key):
+    if DataReader_TranslationDict.has_key(key):
+        return DataReader_TranslationDict[key]
+    else:
+        return key
+
+DataReader_extraKeywords=set(["Time","Frequency","Fx","Voltage","FFT","CalFFT","TimeLag","Position","Delay","Filename","FREQUENCY_RANGE","DATA_LENGTH","SAMPLE_INTERVAL","ANTENNA_SET","selectedAntennasID","TIME"])
+
+def DataReader_getHeader(self):
+    """compatibility function to return self.hdr dict
+    """
+    return self.hdr
 
 def DataReader_getitem(self,*keys):
     """
@@ -159,14 +207,24 @@ def DataReader_getitem(self,*keys):
         return
     emptyarray=(keys0[0:5]=='empty')
     if emptyarray: keys0=keys0[5:]
-    if keys0 in ["Time","Frequency","Fx","Voltage","FFT","CalFFT","TimeLag"]: #these are the data vectors
-        if keys0=="Time": ary=hArray(float,dimensions=[self["blocksize"]],name="Time",units="s",header=self.hdr)
-        if keys0=="Frequency": ary=hArray(float,dimensions=[self["fftLength"]],name="Frequency",units="Hz",header=self.hdr)
+    keys0=DataReader_translate(self,keys0)
+    if keys0 in DataReader_extraKeywords: #these are the data vectors
         if keys0=="Fx": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="E-Field",units="ADC Counts",header=self.hdr)
-        if keys0=="Voltage": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="Voltage",units="V",header=self.hdr)
-        if keys0=="FFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="FFT(E-Field)",units="ar.u.",header=self.hdr)
-        if keys0=="CalFFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="CalFFT(E-Field)",units="ar.u.",header=self.hdr)
-        if keys0=="TimeLag": ary=hArray(float,dimensions=[self["blocksize"]],name="Time Lag",units="s",header=self.hdr)
+        elif keys0=="Time": ary=hArray(float,dimensions=[self["blocksize"]],name="Time",units="s",header=self.hdr)
+        elif keys0=="Frequency": ary=hArray(float,dimensions=[self["fftLength"]],name="Frequency",units="Hz",header=self.hdr)
+        elif keys0=="Voltage": ary=hArray(float,dimensions=[self["nofSelectedAntennas"],self["blocksize"]],name="Voltage",units="V",header=self.hdr)
+        elif keys0=="FFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="FFT(E-Field)",units="ar.u.",header=self.hdr)
+        elif keys0=="CalFFT": ary=hArray(complex,dimensions=[self["nofSelectedAntennas"],self["fftLength"]],name="CalFFT(E-Field)",units="ar.u.",header=self.hdr)
+        elif keys0=="TimeLag": ary=hArray(float,dimensions=[self["blocksize"]],name="Time Lag",units="s",header=self.hdr)
+        elif keys0=="Position": return hgetCalData(self,keys0)
+        elif keys0=="Delay": return hgetCalData(self,keys0)
+        elif keys0=="Filename": return self.filename
+        elif keys0=="selectedAntennasID": return ashArray(hArray(self["AntennaIDs"])[self["selectedAntennas"]]).vec()
+        elif keys0=="ANTENNA_SET": return "UNDEFINED" if not hasattr(self,"antenna_set") else self.antenna_set
+        elif keys0=="TIME": return [self["Date"] for i in range(self["nofSelectedAntennas"])]
+        elif keys0=="DATA_LENGTH": return [self.filesize for i in range(self["nofSelectedAntennas"])]
+        elif keys0=="FREQUENCY_RANGE": return [tuple(self["frequencyRange"]) for i in range(self["nofSelectedAntennas"])]
+        elif keys0=="SAMPLE_INTERVAL": return [self["sampleInterval"] for i in range(self["nofSelectedAntennas"])]
         if not emptyarray:
             if keys0=="TimeLag": ary.fillrange(-self["blocksize"]/2*self["sampleInterval"],self["sampleInterval"])
             else: ary.read(self,keys0)
@@ -200,11 +258,19 @@ def DataReader_setitem(self,*keyval):
         return
     key=keyval[0]
     val=keyval[1]
+
     if (type(key)==tuple):
         for k,v in zip(key,val):
-            self.set(k,v)
+            self[k]=v
     else:
-        self.set(key,val)
+        if key=="SELECTED_DIPOLES":
+            key="selectedAntennasID"
+            ids=list(self["antennaIDs"])
+            val=[ids.index(x) for x in val]
+        elif key=="ANTENNA_SET":
+            self.antenna_set=val
+            return
+        self.set(DataReader_translate(self,key),val)
 
 
 def crfile(filename):
@@ -239,6 +305,7 @@ def hgetCalData(datafile,keyword):
 
 
 DataReader.read=DataReader_read
+DataReader.keys=DataReader_keys
 DataReader.set=DataReader_set
 DataReader.__setitem__=DataReader_setitem
 DataReader.__getitem__=DataReader_getitem
@@ -246,3 +313,5 @@ DataReader.getHeaderVariables=DataReader_getHeaderVariables
 DataReader.__doc__=crfile.__doc__
 DataReader.getCalData = hgetCalData
 DataReader.__repr__=DataReader_repr
+DataReader.getHeader=DataReader_getHeader
+DataReader.translate=DataReader_translate

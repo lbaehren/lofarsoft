@@ -1,8 +1,5 @@
 ;;; ipython.el --- Adds support for IPython to python-mode.el
 
-;; To install do:
-;;  cp ipython.el ~/Library/Preferences/Emacs/ipython.el
-
 ;; Copyright (C) 2002, 2003, 2004, 2005 Alexander Schmolck
 ;; Author:        Alexander Schmolck
 ;; Keywords:      ipython python languages oop
@@ -129,11 +126,6 @@
 ;;      - look into init priority issues with `py-python-command' (if it's set
 ;;        via custom)
 
-(load-file "/Library/Application Support/Emacs/site-lisp/pymacs.el")
-(load-file "/Library/Application Support/Emacs/site-lisp/python-mode.el")
-(load-file "/Library/Application Support/Emacs/site-lisp/pycomplete.el")
-(require 'pycomplete)
-
 
 ;;; Code
 (require 'cl)
@@ -190,27 +182,13 @@ the second for a 'normal' command, and the third for a multiline command.")
       (add-hook 'comint-input-filter-functions 'shell-directory-tracker nil t)
 
       (ansi-color-for-comint-mode-on)
-
-;;  HACK:  I have replaced the mapping with references to py-complete ....
-
-;;      (define-key py-shell-map [tab] 'ipython-complete)
+      (define-key py-shell-map [tab] 'ipython-complete)
       ;; Add this so that tab-completion works both in X11 frames and inside
       ;; terminals (such as when emacs is called with -nw).
-;;      (define-key py-shell-map "\t" 'ipython-complete)
+      (define-key py-shell-map "\t" 'ipython-complete)
       ;;XXX this is really just a cheap hack, it only completes symbols in the
       ;;interactive session -- useful nonetheless.
-;;      (define-key py-mode-map [(meta tab)] 'ipython-complete)
-
-
-;;The following is a hack to use py-complete here ....
-      (define-key py-shell-map "\M-\C-i" 'py-complete)
-      (define-key py-shell-map [tab] 'py-complete)
-      (define-key py-shell-map "\t" 'py-complete)
-      (define-key py-shell-map [f1] 'py-complete-help-thing-at-point)
-      (define-key py-shell-map "(" 'py-complete-electric-lparen)
-      (define-key py-shell-map "," 'py-complete-electric-comma)
-      (define-key py-shell-map [f2] 'py-complete-signature-expr)
-      (define-key py-shell-map [f3] 'py-complete-help)
+      (define-key py-mode-map [(meta tab)] 'ipython-complete)
 
       )
     (add-hook 'py-shell-hook 'ipython-shell-hook)

@@ -1,6 +1,36 @@
 """
 Calculate complex beams towards multiple directions
 
+************************************************************************
+Replacements for new tbb.py
+************************************************************************
+(query-replace "nofAntennas" "NOF_DIPOLE_DATASETS" nil (point-min) (point-max))
+(query-replace "AntennaIDs" "DIPOLE_NAMES" nil (point-min) (point-max))
+(query-replace "sampleInterval" "SAMPLE_INTERVAL" nil (point-min) (point-max))
+(query-replace "datafile.hdr" "datafile.getHeader()" nil (point-min) (point-max))
+(query-replace "fftLength" "FFTSIZE" nil (point-min) (point-max))
+(query-replace "blocksize" "BLOCKSIZE" nil (point-min) (point-max))
+(query-replace "block" "BLOCK" 1 (point-min) (point-max))
+(query-replace "Fx" "TIMESERIES_DATA" nil (point-min) (point-max))
+(query-replace "Time" "TIME_DATA" nil (point-min) (point-max))
+(query-replace "selectedAntennasID" "SELECTED_DIPOLES" nil (point-min) (point-max))
+
+del-> freqs
+
+        "start_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][0], doc:"Start frequency of spectrum",unit:"Hz"},
+        "end_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][1], doc:"End frequency of spectrum",unit:"Hz"},
+        "filesize":p_(lambda self:self.datafile["DATA_LENGTH"][0],"Length of file for one antenna.","Samples"),
+
+        self.beams.setHeader("FREQUENCY_INTERVAL"=self.delta_frequency)
+        self.datafile["SELECTED_DIPOLES"]=[antennaID] 
+
+        "lofarmode":{default:"LBA_OUTER",
+                     doc:"Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."},
+
+getfile: 
+        if ws.lofarmode:
+            f["ANTENNA_SET"]=ws.lofarmode
+************************************************************************
 Example:
 file=crfile(LOFARSOFT+"/data/lopes/example.event")
 tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
@@ -13,7 +43,7 @@ tpar randomize_peaks=False
 
 #file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
 #file["SelectedAntennasID"]=[0]
-#fx0=file["Fx"]
+#fx0=file["TIMESERIES_DATA"]
 
 
 ------------------------------------------------------------------------
@@ -32,7 +62,7 @@ antenna pos: hArray(float, [8, 3], fill=[-84.5346,36.1096,0,-52.6146,54.4736,-0.
 
 self=Task
 self.beams[...,0].nyquistswap(self.NyquistZone)
-fxb=hArray(float,[2,self.blocklen],name="Fx"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
+fxb=hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
 fxb[...].plot(clf=True); plt.show()
 
 """
@@ -60,7 +90,10 @@ def getfile(ws):
     To produce an error message in case the file does not exist
     """
     if ws.file_start_number < len(ws.filenames):
-        return crfile(ws.filenames[ws.file_start_number])
+        f=open(ws.filenames[ws.file_start_number])
+        if ws.lofarmode:
+            f["ANTENNA_SET"]=ws.lofarmode
+        return f
     else:
         print "ERROR: File "+ws.filefilter+" not found!"
         return None
@@ -156,7 +189,6 @@ class BeamFormer(tasks.Task):
 #------------------------------------------------------------------------
         "pointings":{default:[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)], doc:"List of coordinate dicts ({'az':az1,'el':elevation value}) containing pointing directions for each beam on the sky."},
         "cal_delays":{default:{},doc:"A dict containing 'cable' delays for each antenna in seconds as values. Key is the antenna ID. Delays will be added to geometrical delays.",unit:"s"},
-        "antenna_positions":{default:{},doc:"A dict containing x,y,z-Antenna positions for each antenna in seconds as values. Key is the antenna ID.",unit:"m"},
         "phase_center":{default:[0,0,0],doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
         "FarField":{default:True,doc:"Form a beam towards the far field, i.e. no distance."},
         "NyquistZone":{default:1,doc:"In which Nyquist zone was the data taken (e.g. NyquistZone=2 if data is from 100-200 MHz for 200 MHz sampling rate)."},
@@ -269,21 +301,21 @@ class BeamFormer(tasks.Task):
 
         "nspectraflagged":p_(lambda self:hArray(int,[self.nchunks],fill=0,name="Spectra flagged"),"Number of spectra flagged per chunk.",output=True),
 
-        "antennas":p_(lambda self:hArray(range(min(self.datafile["nofAntennas"],self.maxnantennas))),"Antennas from which to select initially for the current file."),
+        "antennas":p_(lambda self:hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"],self.maxnantennas))),"Antennas from which to select initially for the current file."),
 
         "antennas_used":p_(lambda self:set(),"A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",output=True),
 
-        "antennaIDs":p_(lambda self:ashArray(hArray(self.datafile["AntennaIDs"])[self.antennas]),"Antenna IDs to be selected from for current file."),
+        "antennaIDs":p_(lambda self:ashArray(hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),"Antenna IDs to be selected from for current file."),
 
         "nantennas_total":p_(0,"Total number of antennas that were processed (flagged or not) in this run.",output=True),
 
-        "header":p_(lambda self:self.datafile.hdr,"Header of datafile",export=False),
-
-        "freqs":p_(lambda self:self.datafile["Frequency"],export=False),
+        "header":p_(lambda self:self.datafile.getHeader(),"Header of datafile",export=False),
         
         "lofarmode":{default:"LBA_OUTER",
-                     doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER) - only used for quality output"},
+                     doc:"Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."},
 
+        "antenna_positions":{default:lambda self:dict(map(lambda x: (x[0],x[1].array()),zip(self.datafile["DIPOLE_NAMES"],self.datafile["ANTENNA_POSITIONS"]))),
+                             doc:"A dict containing x,y,z-Antenna positions for each antenna in seconds as values. Key is the antenna ID.",unit:"m"},
 #------------------------------------------------------------------------
 # Derived parameters
 
@@ -299,9 +331,9 @@ class BeamFormer(tasks.Task):
         
         "speclen":p_(lambda self:self.blocklen/2+1,"Length of one spectrum.","Channels"),
 
-        "samplerate":p_(lambda self:self.datafile["sampleInterval"],"Length in time of one sample in raw data set.","s"),
+        "samplerate":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0],"Length in time of one sample in raw data set.","s"),
 
-        "filesize":p_(lambda self:getattr(self.datafile,"filesize"),"Length of file.","Samples"),
+        "filesize":p_(lambda self:self.datafile["DATA_LENGTH"][0],"Length of file for one antenna.","Samples"),
 
         "fullsize":p_(lambda self:self.nblocks*self.blocklen*self.nchunks,"The full length of the raw time series data used for the dynamic spectrum.","Samples"),
 
@@ -329,10 +361,8 @@ class BeamFormer(tasks.Task):
 
         "nchunks":{default:lambda self:min(int(floor(self.filesize/self.sectlen)),self.maxnchunks),doc:"Maximum number of spectral chunks to average"},
 
-        "start_frequency":{default:lambda self:self.freqs[0],
-                           doc:"Start frequency of spectrum",unit:"Hz"},
-
-        "end_frequency":{default:lambda self:self.freqs[-1],doc:"End frequency of spectrum",unit:"Hz"},
+        "start_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][0], doc:"Start frequency of spectrum",unit:"Hz"},
+        "end_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][1], doc:"End frequency of spectrum",unit:"Hz"},
 
         "delta_frequency":p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
 
@@ -389,12 +419,12 @@ class BeamFormer(tasks.Task):
         self.nspectraflagged.fill(0)
         self.nspectraadded.fill(0)
         self.count=0
-        self.nofAntennas=0
+        self.NOF_DIPOLE_DATASETS=0
         self.nantennas_total=0
-        self.beams.getHeader("increment")[1]=self.delta_frequency
+        self.beams.setHeader(FREQUENCY_INTERVAL=self.delta_frequency)
         self.beams.par.avspec=self.avspec
         
-        self.updateHeader(self.beams,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
+        self.updateHeader(self.beams,["NOF_DIPOLE_DATASETS","nspectraadded","filenames","antennas_used","nchunks"],delta_nu="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",filename="spectrum_file")
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
 
         dataok=True
@@ -411,13 +441,13 @@ class BeamFormer(tasks.Task):
         for fname in self.filenames[self.file_start_number:]:
             print "# Start File",str(self.file_start_number)+":",fname
             self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
-            self.datafile["blocksize"]=self.blocklen #Setting initial block size
+            self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
             self.antenna_list[fname]=range(self.nantennas_start,self.nantennas, self.nantennas_stride)
             for iantenna in self.antenna_list[fname]:
                 antenna=self.antennas[iantenna]
                 rms=0; mean=0; npeaks=0
-                self.datafile["selectedAntennasID"]=[antenna] # this is confusing, but works due to a bug in the old datareader
                 antennaID=self.antennaIDs[iantenna]
+                self.datafile["SELECTED_DIPOLES"]=[antennaID] 
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):"
 
                 self.antpos=hArray(copy=self.antenna_positions[antennaID]); #print "Antenna position =",self.antpos
@@ -436,7 +466,7 @@ class BeamFormer(tasks.Task):
 
                 for nchunk in range(self.nchunks):
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
-                    self.data[...].read(self.datafile,"Fx",blocks)
+                    self.data[...].read(self.datafile,"TIMESERIES_DATA",blocks)
                     if self.qualitycheck:
                         self.count=len(self.quality)
                         self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
@@ -453,7 +483,7 @@ class BeamFormer(tasks.Task):
                         self.nspectraadded[nchunk]+=1
                         if not antennaID in self.antennas_used:
                             self.antennas_used.add(antennaID)
-                            self.nofAntennas+=1
+                            self.NOF_DIPOLE_DATASETS+=1
                         if self.qualitycheck and self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
@@ -462,7 +492,7 @@ class BeamFormer(tasks.Task):
                         self.fftdata[...].nyquistswap(self.NyquistZone)
                         if self.nspectraadded[nchunk]>1:
                             self.fftdata/=float(self.nspectraadded[nchunk])
-                        if self.nofAntennas==1:
+                        if self.NOF_DIPOLE_DATASETS==1:
                             self.beams.fill(0)
                         elif self.nchunks>1:
                             self.beams.readfilebinary(self.spectrum_file_bin,nchunk*self.speclen*self.nbeams*self.nblocks)
@@ -494,7 +524,7 @@ class BeamFormer(tasks.Task):
                         f.close()
                 self.nantennas_total+=1
             print "# End File",str(self.file_start_number)+":",fname
-            self.updateHeader(self.beams,["nofAntennas","nspectraadded","filenames","antennas_used"])
+            self.updateHeader(self.beams,["NOF_DIPOLE_DATASETS","nspectraadded","filenames","antennas_used"])
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         if self.qualitycheck:
@@ -514,9 +544,9 @@ class BeamFormer(tasks.Task):
         print "To read back the beam formed data type: bm=hArrayRead('"+self.spectrum_file+"')"
         print "To calculate or plot the invFFTed times series of one block, use 'Task.tcalc(bm)' or 'Task.tplot(bm)'."
         if self.doplot:
-            self.tplot(plotspec=self.plotspec)
+            self.tplot(plotspec=self.plotspec); plt.show()
             plt.ion()
-
+            
     def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
         """
         Take the result of the BeamForm task, i.e. an array of
@@ -587,16 +617,16 @@ class BeamFormer(tasks.Task):
         dim=beams.getDim();blocklen=(dim[-1]-1)*2
         self.beamscopy=hArray(dimensions=[dim[-3]*dim[-2],dim[-1]],copy=beams)
         self.beamscopy[...].nyquistswap(self.NyquistZone)
-        self.tbeams2=hArray(float,[dim[-3]*dim[-2],blocklen],name="Fx")
-        self.tbeams=hArray(self.tbeams2.vec(),[dim[-3],dim[-2],blocklen],name="Fx")
+        self.tbeams2=hArray(float,[dim[-3]*dim[-2],blocklen],name="TIMESERIES_DATA")
+        self.tbeams=hArray(self.tbeams2.vec(),[dim[-3],dim[-2],blocklen],name="TIMESERIES_DATA")
         self.tbeams2[...].invfftw(self.beamscopy[...])
         self.tbeams /= blocklen
         if doabs:
             self.tbeams.abs()
         if smooth>0:
             self.tbeams[...].runningaverage(smooth,hWEIGHTS.GAUSSIAN)
-        if hdr.has_key("sampleInterval"):
-            dt=beams.getHeader("sampleInterval")
+        if hdr.has_key("SAMPLE_INTERVAL"):
+            dt=beams.getHeader("SAMPLE_INTERVAL")[0]
             self.tbeams.par.xvalues=hArray(float,[blocklen],name="Time",units=("","s"))
             self.tbeams.par.xvalues.fillrange(-(blocklen/2)*dt,dt)
             self.tbeams.par.xvalues.setUnit("mu","")
@@ -688,19 +718,20 @@ class BeamFormer(tasks.Task):
             s="flaggedblock # "+str(flaggedblock)+"/"+str(len(quality_entry["flaggedblocks"])-1)
         else:
             s=""
-        print "Filename:",filename,"block =",block,"blocksize =",quality_entry["blocksize"],s
+        print "Filename:",filename,"block =",block,"BLOCKSIZE =",quality_entry["BLOCKSIZE"],s
         if all:
-            datafile["blocksize"]=quality_entry["size"]
-            datafile["block"]=quality_entry["offset"]*quality_entry["blocksize"]/quality_entry["size"]
-            y0=datafile["Fx"]
+            datafile["BLOCKSIZE"]=quality_entry["size"]
+            datafile["BLOCK"]=quality_entry["offset"]*quality_entry["BLOCKSIZE"]/quality_entry["size"]
+            y0=datafile["TIMESERIES_DATA"]
             y0.par.xvalues=datafile["Time"]
             y0.par.xvalues.setUnit("mu","")
             y0.plot()
-        datafile["blocksize"]=quality_entry["blocksize"]
-        datafile["block"]=block
-        y=datafile["Fx"]
+        datafile["BLOCKSIZE"]=quality_entry["BLOCKSIZE"]
+        datafile["BLOCK"]=block
+        y=datafile["TIMESERIES_DATA"]
         y.par.xvalues=datafile["Time"]
         y.par.xvalues.setUnit("mu","")
         y.plot(clf=not all)
 
 
+        

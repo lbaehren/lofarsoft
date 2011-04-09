@@ -118,11 +118,11 @@ def CRQualityCheckAntenna(dataarray,
     flaggedblocklist=[]
     noncompliancelist=[]
     if not datafile==None:
-        if antennaID==None: antennaID=datafile["AntennaIDs"][datafile["selectedAntennas"][0]]
-        if date==None: date=datafile["Date"]
-        if observatory==None: observatory=datafile["Observatory"]
-        if observatorymode==None: observatorymode="unknown"
-        if filename=="": filename=datafile.filename
+        if antennaID==None: antennaID=datafile["SELECTED_DIPOLES"][0]
+        if date==None: date=datafile["TIME"][0]
+        if observatory==None: observatory=datafile["TELESCOPE"]
+        if observatorymode==None: observatorymode=datafile["ANTENNA_SET"]
+        if filename=="": filename=datafile["FILENAME"]
 #Calculate probabilities to find peaks
     if nsigma<0:
         nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is one

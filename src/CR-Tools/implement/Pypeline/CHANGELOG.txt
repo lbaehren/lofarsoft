@@ -375,7 +375,7 @@ object (uness an explicit return value is given in .run)!!
 - hRandomizePhase alos 
 - finished testcr3.py to demonstrate RFI excision and beamforming
 
-2011-04-06 CMake - rev 74508 - Heino Falcke 
+2011-04-06 CMake - rev 7508 - Heino Falcke 
 
 - Put in a flag to plot semilog graphs also with buggy EDP64 version
 on new Macs ...  If your name is Heino and you have a MacBook more
@@ -386,19 +386,22 @@ functionality.
 
 - io/tbb.py object - made keyword access a little more elegant
 
-Sending        Pypeline/CHANGELOG.txt
-Sending        Pypeline/extras/ipython.el
-Sending        Pypeline/mIO.cc
-Sending        Pypeline/modules/core/harray.py
-Sending        Pypeline/modules/core/plot.py
-Sending        Pypeline/modules/io/tbb.py
-Sending        Pypeline/scripts/testcr3.py
-
 
 2011-04-06  CMake - rev 7508 - Heino Falcke
 - FindPython first finds Enthought python (EDP) version also for
 libraries and includes
 
+2011-04-09 CMake - rev 7518 - Heino Falcke 
+- testcr3.py now works on a LOPES and a LOFAR dataset (not yet
+including RFI, baselinefitting etc.)
+- changed beamformer.py and qualitycheck.py to accept new keywords
+- tbb.py and datareader.py synchronized to treat keywords in a similar
+way
+- made sure that wrappers for "hFill","hSet","hFind","hFlip","hCopy",
+"hSort", "hZipper","hReadFileBinary","hWriteFileBinary",
+"hWriteFileBinaryAppend","hRedistribute","hPPrint","
+hPrettyString","hReadFileText", "hWriteFileText","hTranspose" are also
+generated for string and boolean vectors.
 
 
 ------------------------------------------------------------------------
