@@ -2832,13 +2832,11 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
   hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
   Example:
-
-  """Make a test time series data set for 4 antennas and some peaks at various locations"""
-
+  >>> # Make a test time series data set for 4 antennas and some peaks at various locations
   >>> data=hArray(float,[4,512],name="Random series with peaks")
   >>> data.random(-1024,1024); data[...] += Vector([-128.,256., 385.,-50.])
   >>> for i in range(4):
-          data[i,[2,3,32,64,65,67],...] = Vector([4096.,5097,-4096,4096,5099,3096])
+  ...     data[i,[2,3,32,64,65,67],...] = Vector([4096.,5097,-4096,4096,5099,3096])
   >>> nsigma=5
   >>> datapeaks=hArray(int,[4,256,2],name="Location of peaks")
   >>> datamean=data[...].mean()
@@ -3164,16 +3162,17 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
   >>> # Make a test time series data set for 4 antennas and some peaks at various locations
   >>> data=hArray(float,[4,512],name="Random series with peaks")
   >>> data.random(0,1024); data[...] += Vector([128.,256., 385.,50.])
-  >>> for i in range(4): data[i,[2,3,32,64,65,67],...]=Vector([4096.,5097,4096,4096,5099,3096])
+  >>> for i in range(4):
+  ...     data[i,[2,3,32,64,65,67],...] = Vector([4096.,5097,4096,4096,5099,3096])
 
-  >>> datapeaks=hArray(int,[4,256,2],name="Location of peaks")
-  >>> datamean=data[...].mean()
+  >>> datapeaks = hArray(int,[4,256,2], name="Location of peaks")
+  >>> datamean = data[...].mean()
   >>> datathreshold = data[...].stddev(datamean)
   >>> datathreshold *= 5
   >>> datathreshold += datamean
 
-  >>> maxgap=Vector(int,len(datamean),fill=10)
-  >>> minlength=Vector(int,len(datamean),fill=1)
+  >>> maxgap = Vector(int,len(datamean),fill=10)
+  >>> minlength = Vector(int,len(datamean),fill=1)
   >>> npeaks=datapeaks[...].findsequencegreaterthan(data[...],datathreshold,maxgap,minlength)
   >>> npeaks
   Vec(int,4)=[3,3,3,3]
@@ -3519,8 +3518,8 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
   array needs to be initialized with zero.
 
   Example:
-  >>> x=hArray(float, [31])
-  >>> v=hArray(float, [10])
+  >>> x = hArray(float, [31])
+  >>> v = hArray(float, [10])
   >>> v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
   >>> x.upsample(v)
 */
@@ -4015,7 +4014,7 @@ void HFPP_FUNC_NAME (const DataIter  odata,
 
   Example:
   >>> in_array.runningaverage(array_out,7,hWEIGHTS.GAUSSIAN)
-  >>> x=hArray([0.,1.,0.,3.,1.,3.,0.,2.,1.])
+  >>> x = hArray([0.,1.,0.,3.,1.,3.,0.,2.,1.])
   >>> x.runningaverage(3,hWEIGHTS.FLAT)
 
   >>> x
@@ -4103,8 +4102,8 @@ void HFPP_FUNC_NAME (const DataIter odata,
   the second parameter!
 
   Example:
-  >>> spectrum=hArray(float,[1,128])
-  >>> cplxfft=hArray(complex,[10,128],fill=1+0j)
+  >>> spectrum = hArray(float,[1,128])
+  >>> cplxfft = hArray(complex,[10,128],fill=1+0j)
   >>> spectrum[...].spectralpower(cplxfft[...])
 */
 template <class Iter, class Iterin>
