@@ -53,7 +53,9 @@ print dateStrings
 for station in stationList:
     for date in dateStrings:
         triggerFilename = date + '_TRIGGER-'+station+'.dat'
-        print 'Downloading station %s, file for date %s to trigger file: %s' % (station, date, triggerFilename)        
-        proc = subprocess.Popen(['scp','-C', station+'C:/localhome/data/'+date+'_TRIGGER.dat', './'+triggerFilename])
-        proc.wait()
-
+        if not os.path.exists('./'+triggerFilename):
+            print 'Downloading station %s, file for date %s to trigger file: %s' % (station, date, triggerFilename)        
+            proc = subprocess.Popen(['scp','-C', station+'C:/localhome/data/'+date+'_TRIGGER.dat', './'+triggerFilename])
+            proc.wait()
+        else:
+            print 'Skipping file: %s; it already exists.' % triggerFilename
