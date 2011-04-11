@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.18
+VERSION=2.19
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -186,9 +186,9 @@ then
 fi
 echo "    Using N=$core cores for processing (change with '-core N' command line option)"
 
-if [ $core -lt 1 ] || [ $core -gt 8 ]
+if [ $core -lt 1 ] || [ $core -gt 50 ]
 then
-   echo "ERROR: Number of cores must be 1 >= N <= 8 ;  currently requested $core cores."
+   echo "ERROR: Number of cores must be 1 >= N <= 50 ;  currently requested $core cores."
    exit 1
 fi
 
@@ -249,7 +249,7 @@ then
 	fi
     cd $location
 else
-	if [ -d $location ] && [ $delete -ne 1 ] && [ $incoh_redo -ne 1 ] && [ $coh_redo -ne 1 ]
+	if [ -d $location ] && [ $delete -ne 1 ] && [ $incoh_redo -ne 1 ] && [ $coh_redo -ne 1 ] 
 	then
 	   echo "ERROR: Output Processing Location $location already exists;  "
 	   echo "       please specify different output location or try again with delete option (-del)."
@@ -732,20 +732,20 @@ do
 	   echo "WARNING: 2nd Transpose CoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams."
 	   echo "WARNING: 2nd Transpose CoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams." >> $log
 	   core=$nrBeams
-	elif [[ $transpose == 1 ]] && [[ $STOKES == 'stokes' ]] && [[ $flyseye == 1 ]] && (( $NBEAMS > 8 ))
+	elif [[ $transpose == 1 ]] && [[ $STOKES == 'stokes' ]] && [[ $flyseye == 1 ]] && [[ $NBEAMS -gt 50 ]]
 	then
-	   echo "ERROR: Pipeline is currently unable to handle more than 8 beams FE mode;  there are $NBEAMS in this observation."
-	   echo "ERROR: Pipeline is currently unable to handle more than 8 beams FE mode;  there are $NBEAMS in this observation."  >> $log
+	   echo "ERROR: Pipeline is currently unable to handle more than 50 beams FE mode;  there are $NBEAMS in this observation."
+	   echo "ERROR: Pipeline is currently unable to handle more than 50 beams FE mode;  there are $NBEAMS in this observation."  >> $log
 	   exit 1
-	elif [[ $STOKES == 'incoherentstokes' ]] && (( $nrBeams > 1 )) && (( $nrBeams <= 8 )) 
+	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 1 ]] && [[ $nrBeams -le 50 ]] 
 	then
 	   echo "WARNING: 2nd Transpose IncoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams."
 	   echo "WARNING: 2nd Transpose IncoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams." >> $log
 	   core=$nrBeams
-	elif [[ $STOKES == 'incoherentstokes' ]] && (( $nrBeams > 8 )) 
+	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 50 ]]
 	then
-	   echo "ERROR: Pipeline is currently unable to handle more than 8 Incoherent beams;  there are $nrBeams in this observation."
-	   echo "ERROR: Pipeline is currently unable to handle more than 8 Incoherent beams;  there are $nrBeams in this observation."  >> $log
+	   echo "ERROR: Pipeline is currently unable to handle more than 50 Incoherent beams;  there are $nrBeams in this observation."
+	   echo "ERROR: Pipeline is currently unable to handle more than 50 Incoherent beams;  there are $nrBeams in this observation."  >> $log
 	   exit 1
 	else 
 	   core=$user_core
@@ -780,7 +780,10 @@ do
 	if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 	then
 	    # find the number of RSP? directories;  this is the number of cores used previously for processing
-	    if [ $flyseye == 0 ]
+	    if [ -f $location/${STOKES}/nof_cores.txt ]
+	    then
+	       core=`cat $location/${STOKES}/nof_cores.txt`
+	    elif [ $flyseye == 0 ]
 	    then
 	       core=`ls -F $location/${STOKES} | grep -w 'RSP[0-7].' | wc -l`
 	    else
@@ -871,9 +874,20 @@ do
 		
         if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 1 ]]
         then
-           all_num=$NBEAMS
-  		   echo "2nd transpose has $nSubbands subbands in $all_num files" 
-  		   echo "2nd transpose has $nSubbands subbands in $all_num files" >> $log
+           if (( $all_num != $NBEAMS ))
+           then
+              echo "WARNING: cannot find all beams as noted in the parset;  continuing with number of files found."
+              echo "WARNING: cannot find all beams as noted in the parset;  continuing with number of files found." >> $log
+              NBEAMS=$all_num
+              echo "NOTE: core was set to $core, being reset to $all_num to match number of input raw files found."
+              core=$all_num
+           else
+              all_num=$NBEAMS
+              echo "Able to find correct number of raw files for CS FE as noted in the parset."
+              echo "Able to find correct number of raw files for CS FE as noted in the parset." >> $log
+           fi
+  		   echo "2nd transpose FE data has $nSubbands subbands each in $all_num files" 
+  		   echo "2nd transpose FE data has $nSubbands subbands each in $all_num files" >> $log
 		elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 0 ]]
         then
            if (( $nrBeams == 1 )) && (( $all_num > 1 ))
@@ -898,38 +912,38 @@ do
 		  exit 1
 		fi
         
-			modulo_files=`echo $all_num $core | awk '{print ($1 % $2)}'`
-			# If the number of cores does not evenly divide into the # of files, then find another good value
-			if (( $modulo_files != 0 )) && (( $nrBeams > 1 )) && [[ $STOKES == "incoherentstokes" ]]
-            then 
-			   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!"
-			   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."
-			   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!" >> $log
-			   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."  >> $log
-               exit            
-            elif (( $modulo_files != 0 )) 
-			then
-			   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files"
-			   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files" >> $log
-			   echo "         Searching for alternative N core value..."
-			   echo "         Searching for alternative N core value..." >> $log
-			   ii=`expr $core - 1`
-			   while (( $ii > 0 ))
-			   do 
-			       modulo_files=`echo $all_num $ii | awk '{print ($1 % $2)}'`
-			       if (( $modulo_files == 0 ))
-			       then
-			          echo "Success: $ii cores divides into $all_num subbands"
-			          break
-			       else
-			          echo "Tried $ii cores, but still not divisble into $all_num" >> $log
-			          echo "Tried $ii cores, but still not divisble into $all_num"
-			       fi
-			       ii=`expr $ii - 1`
-			   done
-			   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands"
-			   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands" >> $log
-			   core=$ii
+		modulo_files=`echo $all_num $core | awk '{print ($1 % $2)}'`
+		# If the number of cores does not evenly divide into the # of files, then find another good value
+		if [[ $modulo_files -ne 0 ]] && [[ $nrBeams -gt 1 ]] && [[ $STOKES == "incoherentstokes" ]]
+           then 
+		   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!"
+		   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."
+		   echo "ERROR: For multi-beam IS mode, the number of files ($all_num) must divide by the number of beams ($core)!" >> $log
+		   echo "       There seems to be missing data or an error in the parset or pipeline;  cannot continue."  >> $log
+           exit            
+        elif (( $modulo_files != 0 )) 
+		then
+		   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files"
+		   echo "WARNING: User requested $core cores; this does not evently divide into $all_num number of files" >> $log
+		   echo "         Searching for alternative N core value..."
+		   echo "         Searching for alternative N core value..." >> $log
+		   ii=`expr $core - 1`
+		   while (( $ii > 0 ))
+		   do 
+		       modulo_files=`echo $all_num $ii | awk '{print ($1 % $2)}'`
+		       if (( $modulo_files == 0 ))
+		       then
+		          echo "Success: $ii cores divides into $all_num subbands"
+		          break
+		       else
+		          echo "Tried $ii cores, but still not divisble into $all_num" >> $log
+		          echo "Tried $ii cores, but still not divisble into $all_num"
+		       fi
+		       ii=`expr $ii - 1`
+		   done
+		   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands"
+		   echo "WARNING: Resetting user requested number of cores from $core to $ii for processing of $all_num subbands" >> $log
+		   core=$ii
 
 		fi # [[ $nrBeams == 1 ]]
         		    
@@ -941,7 +955,7 @@ do
 #		echo split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
 #		split -a 1 -d -l $div_files $master_list ${STOKES}/$$"_split_"
 
-        if (( $TiedArray == 1 ))
+        if (( $TiedArray == 1 )) 
         then 
 			echo split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_"
 			echo split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_" >> $log
@@ -965,132 +979,35 @@ do
 		fi
     fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 
-	if [ $core -eq 1 ]
-	then
-	   num_dir="0"
-	   last=0
-	elif [ $core -eq 2 ]
-	then
-	   num_dir="0 1"
-	   last=1
-	elif [ $core -eq 3 ]
-	then
-	   num_dir="0 1 2"
-	   last=2
-	elif [ $core -eq 4 ]
-	then
-	   num_dir="0 1 2 3"
-	   last=3
-	elif [ $core -eq 5 ]
-	then
-	   num_dir="0 1 2 3 4"
-	   last=4
-	elif [ $core -eq 6 ]
-	then
-	   num_dir="0 1 2 3 4 5"
-	   last=5
-	elif [ $core -eq 7 ]
-	then
-	   num_dir="0 1 2 3 4 5 6"
-	   last=6
-	elif [ $core -eq 8 ]
-	then
-	   num_dir="0 1 2 3 4 5 6 7"
-	   last=7
-	fi
-	
-	#Set up the strings for the beam names when in fly's eye mode;  max 8 beams currently allowed
-	beams=""
+    # Set the number of working directories (string), based on the number of cores set
+    num_dir=""
+    min=0
+    max=$core
+    ii=0
+    while (( $ii < $max ))
+    do
+       num_dir=`echo $num_dir " " $ii`
+       last=$ii
+       ii=$(( $ii + 1 )) 
+    done
+		
+	#Set up the strings for the beam names when in fly's eye mode;  max NBEAMS beams currently allowed
+    beams=""
 	beams_init="beam_0"
 	if (( $flyseye == 1 )) 
 	then
-	   if (( $NBEAMS == 1 ))
-	   then
-	      beams="beam_0"
-	      last_beam="beam_0"
-	   elif (( $NBEAMS == 2 ))
-	   then
-	      beams="beam_0 beam_1"
-	      last_beam="beam_1"
-	   elif (( $NBEAMS == 3 ))
-	   then
-	      beams="beam_0 beam_1 beam_2"
-	      last_beam="beam_2"
-	   elif (( $NBEAMS == 4 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3"
-	      last_beam="beam_3"
-	   elif (( $NBEAMS == 5 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4"
-	      last_beam="beam_4"
-	   elif (( $NBEAMS == 6 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5"
-	      last_beam="beam_5"
-	   elif (( $NBEAMS == 7 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6"
-	      last_beam="beam_6"
-	   elif (( $NBEAMS == 8 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7"
-	      last_beam="beam_7"
-	   elif (( $NBEAMS == 9 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8"
-	      last_beam="beam_8"
-	   elif (( $NBEAMS == 10 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9"
-	      last_beam="beam_9"
-	   elif (( $NBEAMS == 11 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10"
-	      last_beam="beam_10"
-	   elif (( $NBEAMS == 12 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11"
-	      last_beam="beam_11"
-	   elif (( $NBEAMS == 13 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12"
-	      last_beam="beam_12"
-	   elif (( $NBEAMS == 14 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13"
-	      last_beam="beam_13"
-	   elif (( $NBEAMS == 15 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14"
-	      last_beam="beam_14"
-	   elif (( $NBEAMS == 16 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15"
-	      last_beam="beam_15"
-	   elif (( $NBEAMS == 17 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16"
-	      last_beam="beam_16"
-	   elif (( $NBEAMS == 18 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16 beam_17"
-	      last_beam="beam_17"
-	   elif (( $NBEAMS == 19 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16 beam_17 beam_18"
-	      last_beam="beam_18"
-	   elif (( $NBEAMS == 20 ))
-	   then
-	      beams="beam_0 beam_1 beam_2 beam_3 beam_4 beam_5 beam_6 beam_7 beam_8 beam_9 beam_10 beam_11 beam_12 beam_13 beam_14 beam_15 beam_16 beam_17 beam_18 beam_19"
-	      last_beam="beam_19"
-	   else
-	      echo "ERROR: unable to work on more than 20 beams in this pipeline"
-	      echo "ERROR: unable to work on more than 20 beams in this pipeline" >> $log
-	      exit 1
-	   fi
-	fi
+		min=0
+	    max=$NBEAMS
+	    ii=0
+	    while (( $ii < $max ))
+	    do
+	       beams=`echo $beams " beam_"$ii`
+	       last_beam="beam_"$ii
+	       ii=$(( $ii + 1 )) 
+	    done
+    fi
 
+    # if this is post processing FE, then the beams were renamed to the station names;  get the station names
 	if (( $flyseye == 1 )) && (( (( $all_pproc == 1 )) || (( $rfi_pproc == 1 )) ))
 	then
        beams_tmp=""
@@ -2162,7 +2079,7 @@ do
 	   echo cd ${location} >> $log
 	   cd ${location}
 	
-	   #Check when all 8 DONE files are available, then all processes have exited
+	   #Check when all processes to be done, then all processes have exited
 	   if (( $flyseye == 0 ))
 	   then
 	      for ii in $num_dir
@@ -2365,13 +2282,15 @@ do
 		do
 			N=$ii
 			N=`echo "$N+1" | bc`
-			NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$N'}'`
+			beam_index=`sed -n "$N"p SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+			beam_index=`echo "$beam_index+1" | bc`
+			NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$beam_index'}'`
 			echo "mv RSP${ii} $NAME" >> $log
 			mv RSP${ii} $NAME
 		done
 		cd ${location}	
     fi
- 
+    echo $core > $location/${STOKES}/nof_cores.txt
 done # for loop over modes in $mode_str 
 
 #Make a combined png of all the th.png files
