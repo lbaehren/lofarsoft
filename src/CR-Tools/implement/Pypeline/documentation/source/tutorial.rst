@@ -36,11 +36,11 @@ Some basics
 
 The fundamental data structure we use is a standard C++ vector defined
 in the C++ standard template library (STL). This is wrapped and
-exposed to Python using the BOOST PYTHON system.
+exposed to Python using the Boost Python system.
 
 (NB: Unfortunately different systems provide different Python data
 structures. Hence a function exposed to Python with SWIG or SIP is not
-directly able to accept a BOOST PYTHON wrapped vector as input or vice
+directly able to accept a Boost Python wrapped vector as input or vice
 versa. If you want to do this you have to provide extra conversion
 routines.)
 
@@ -804,5 +804,5 @@ The keyword values can be retrieved using :meth:`getKey`::
 Reading data from file
 ======================
 
-[in preparation]v
+[in preparation]
 

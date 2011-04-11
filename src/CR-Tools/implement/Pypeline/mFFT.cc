@@ -866,22 +866,22 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
            ]
 
   Example:
-  Input parameters
+  >>> # Input parameters
   >>> ncolumns = 128
   >>> nrows = 1024  # = bigFFTblocksize / ncolumns
   >>> bigFFTblocksize = ncolumns*nrows
 
-  Prepare some vectors
+  >>> # Prepare some vectors
   >>> a=hArray(complex,[nrows, ncolumns])
   >>> a.random(-2.0,2.0)
   >>> b=hArray(complex,copy=a)
   >>> bT=b.transpose()
 
-  Do only one big FFT
+  >>> # Do only one big FFT
   >>> bigFFT=hArray(complex,[bigFFTblocksize])
   >>> bigFFT.fftw(a)
 
-  Do two FFTs with the steps described above
+  >>> # Do two FFTs with the steps described above
   >>> aT=hArray(a).transpose()
   >>> aT[...].fftw(aT[...])
   >>> aT.doublefftphasemul(bigFFTblocksize,nrows,ncolumns,0)
@@ -889,7 +889,7 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
   >>> a[...].fftw(a[...])
   >>> aT.transpose(a)
 
-  Do the steps just above in one go
+  >>> # Do the steps just above in one go
   >>> bT.doublefft(b,bigFFTblocksize,nrows,ncolumns,0)
   bigFFT, aT, & bT all contain the same spectra
 */
@@ -991,12 +991,12 @@ void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,c
   Example:
   >>> cdataT[offset].doublefft(cdata[offset],fullsize,nblocks,blocklen,offset)
 
-  is the same as:
+  >>> # This is the same as:
 
   >>> cdataT[offset].doublefft1(cdata[offset],fullsize,nblocks,blocklen,offset)
   >>> cdataT[offset].doublefft2(cdata[offset],nblocks,blocklen)
 
-  but result is in cdata (and not cdataT)
+  >>> # but result is in cdata (and not cdataT)
 */
 template <class Iter>
 void HFPP_FUNC_NAME (const Iter vecout,const Iter vecout_end, const Iter vecin,const Iter vecin_end, const HInteger nblocks, const HInteger blocklen)
