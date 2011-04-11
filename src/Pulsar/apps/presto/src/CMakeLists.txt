@@ -146,6 +146,7 @@ add_dependencies (presto
   presto_cat_install
   ssps_install
   lpps_install
+  psrcat_install
   )
 
 ##__________________________________________________________
