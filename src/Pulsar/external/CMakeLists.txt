@@ -381,4 +381,39 @@ add_dependencies (ssps_install ssps_build ssps_unpack)
 
 #endif (ssps_cmake_build)
 
+## ==============================================================================
+##
+##  Handle configuration and build of PSRCAT
+##
+## ==============================================================================
+
+set (psrcat_version "V1.32")
+set (psrcat_name "psrcat-${psrcat_version}")
+set (psrcat_directory "psrcat/psrcat-${psrcat_version}")
+
+add_custom_target (psrcat_unpack
+  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/psrcat
+  COMMAND cp ${PULSAR_SOURCE_DIR}/external/${psrcat_directory}.tar.gz ${PULSAR_BINARY_DIR}/apps/
+  COMMAND cd ${PULSAR_BINARY_DIR}/apps/
+  COMMAND tar xvfz ${psrcat_name}.tar.gz
+  COMMAND rm ${psrcat_name}.tar.gz
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+  COMMENT "Copying PSRCAT from ${PULSAR_SOURCE_DIR}/external/${psrcat_directory}.tar.gz to ${PULSAR_BINARY_DIR}/apps/${psrcat_name}.tar.gz"
+  )
+
+add_custom_target (psrcat_build
+  COMMAND ./makeit
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/psrcat
+  COMMENT "Building project psrcat in ${PULSAR_BINARY_DIR}/apps/psrcat..."
+  )
+add_dependencies (psrcat_build psrcat_unpack)
+
+add_custom_target (psrcat_install
+  COMMAND cp ${PULSAR_BINARY_DIR}/apps/psrcat/psrcat.db ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND cp ${PULSAR_BINARY_DIR}/apps/psrcat/psrcat ${CMAKE_INSTALL_PREFIX}/bin/
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/psrcat
+  COMMENT "Install project psrcat into ${CMAKE_INSTALL_PREFIX}/data and ${CMAKE_INSTALL_PREFIX}/bin..."
+  )
+add_dependencies (psrcat_install psrcat_build psrcat_unpack)
+
 
