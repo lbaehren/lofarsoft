@@ -21,7 +21,6 @@ def readStationListAndDates(obsID):
         elif 'Observation.startTime' in line:
             startTime = line.split('=')[1].strip('\n').split(' ')[0]
             startDate = datetime.strptime(startTime, '%Y-%b-%d')
-#            startDateString = str(startDate.year) + '-' + str(startDate.month) + '-' + str(startDate.day)
         elif 'Observation.stopTime' in line:
             stopTime = line.split('=')[1].strip('\n').split(' ')[0]
             stopDate = datetime.strptime(stopTime, '%Y-%b-%d')
@@ -37,8 +36,6 @@ def readStationListAndDates(obsID):
         
     return (stationList, dateStrings)
     
-
-
 if len(sys.argv) > 1:
     obsID = sys.argv[1] # The file name of the observation
     print 'Taking observation ID file: %s' % obsID
@@ -55,7 +52,8 @@ print dateStrings
 
 for station in stationList:
     for date in dateStrings:
-        print 'Downloading station %s, file for date %s' % (station, date)        
-        proc = subprocess.Popen(['scp','-C', station+'C:/localhome/data/'+date+'_TRIGGER.dat', '.'])
+        triggerFilename = date + '_TRIGGER-'+station+'.dat'
+        print 'Downloading station %s, file for date %s to trigger file: %s' % (station, date, triggerFilename)        
+        proc = subprocess.Popen(['scp','-C', station+'C:/localhome/data/'+date+'_TRIGGER.dat', './'+triggerFilename])
         proc.wait()
 
