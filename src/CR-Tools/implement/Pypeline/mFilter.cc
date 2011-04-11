@@ -64,7 +64,7 @@ using namespace std;
 #define HFPP_FUNC_NAME hCrossCorrelationMatrix
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(ccm)()("Upper half of the cross-correlation matrix (output) containing complex visibilities as a function of frequency. The ordering is ant0*ant1,ant0*ant2,...,ant1*ant2,... - where each antN contains many frequency bins.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HComplex)(ccm)()("Upper half of the cross-correlation matrix (output) containing complex visibilities as a function of frequency. The ordering is ``ant0*ant1,ant0*ant2,...,ant1*ant2,...`` - where each ``antN`` contains many frequency bins.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(fftdata)()("Vector containing the FFTed data of all antennas subsequently.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(nfreq)()("Number of frequency bins per antenna.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -73,9 +73,9 @@ using namespace std;
   $PARDOCSTRING
 
   Description:
-  The length of the ccm vector is ``N*(N-1)/2 * N_freq``, where ``N`` is the
+  The length of the ccm vector is ``N * (N - 1) / 2 * N_freq``, where ``N`` is the
   number of antennas and ``N_freq`` the number of frequency bins per
-  antenna. The length of the (input) vector is then ``N*N_freq``.
+  antenna. The length of the (input) vector is then ``N * N_freq``.
 
   Usage:
   hCrossCorrelationMatrix(ccm,fftdata,nfreq) -> ccm = ccm(old) + ccm(fftdata)

@@ -108,14 +108,14 @@ gsl_vector * STL2GSL(const Iter vec, const Iter vec_end) {
   return m;
 }
 
-//$DOCSTRING: Calculate the XValues matrix vector for the polynomial (linear-fitting) routine, calculating essentially all powers of the input vector.
+//$DOCSTRING: Calculate the :math:`x`-value vector for the polynomial (linear-fitting) routine, calculating essentially all powers of the input vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hLinearFitPolynomialX
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing rows with all the requested powers of the x vector. Size is (n+1)*len(xvec), where n=len(powers).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x values for the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(powers)()("Input vector with the powers to consider in the fitting. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing rows with all the requested powers of the :math:`x`-vector. Size is ``(n+1)*len(xvec)``, where ``n=len(powers)``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with :math:`x`-values for the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(powers)()("Input vector with the powers to consider in the fitting. For an nth order polynomial, this is simply ``[0,1,2,...,n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -188,17 +188,17 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 // Begin k order spline
 //------------------------------------------------------------------------
 
-//$DOCSTRING: Calculate the x-Values matrix vector for the Basis Spline (BSpline) fitting routine, calculating essentially all powers of the input vector.
+//$DOCSTRING: Calculate the :math:`x`-value vector for the basis Spline (BSpline) fitting routine, calculating essentially all powers of the input vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSplineFitXValues
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing rows with all the requested powers of the x vector. Size is Ncoeffs*len(xvec).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x values for the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing rows with all the requested powers of the :math:`x`-vector. Size is ``Ncoeffs * len(xvec)``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with :math:`x`-values for the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HInteger)(Ncoeffs)()("Number of coefficients to calculate.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HNumber)(xmin)()("Lower end of the x-range for calculation of break points.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_4 (HNumber)(xmax)()("Upper end of the x-range for calculation of break points.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(xmin)()("Lower end of the :math:`x`-range for calculation of break points.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(xmax)()("Upper end of the :math:`x`-range for calculation of break points.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, e.g. ``k=4`` is a 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -251,16 +251,16 @@ void HFPP_FUNC_NAME(
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit, providing the powers of x as input.
+//$DOCSTRING: Calculate the :math:`y`-value vector of the results of a basis Spline fit, providing the powers of :math:`x` as input.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSpline
 //-----------------------------------------------------------------------
 //#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector of Ndata*Ncoeffs X-values produced with hBSplineFitXValues. Size is Ncoeffs*len(xvec).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the :math:`y`-values for the input vector :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector of ``Ndata*Ncoeffs`` :math:`x`-values produced with :func:`hBSplineFitXValues`. Size is ``Ncoeffs*len(xvec)``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(k)()("Order of polynomial to fit locally, e.g. ``k=4`` is a 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -575,18 +575,18 @@ Notes: 1) The w->knots vector must be initialized prior to calling
 //$ITERATE MFUNC Mul,Add,Assign
 //========================================================================
 
-//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit and $MFUNC to the output vector.
+//$DOCSTRING: Calculate the :math:`y`-values of the results of a basis Spline fit and $MFUNC to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSplineCalc{$MFUNC}
 //-----------------------------------------------------------------------
 //#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with X-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the Ncoeff coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the :math:`y`-values for the input vector :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the number of coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HNumber)(xmin)()("Lower limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_4 (HNumber)(xmax)()("Upper limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, e.g. ``k=4`` is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -647,18 +647,18 @@ void HFPP_FUNC_NAME(
 //$ENDITERATE
 
 
-//$DOCSTRING: Calculate the y-values of the results of a Basis Spline fit and assign to the output vector.
+//$DOCSTRING: Calculate the :math:`y`-values of the results of a basis Spline fit and assign to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBSplineCalc
 //-----------------------------------------------------------------------
 //#define HFPP_WRAPPER_CLASSES HFPP_CLASS_STL HFPP_CLASS_hARRAY HFPP_CLASS_hARRAYALL
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the y-values for the input vector x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with X-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the Ncoeff coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the :math:`y`-values for the input vector :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(coeffs)()("Input vector with the number of coefficients calculated by the fitting routine.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HNumber)(xmin)()("Lower limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_4 (HNumber)(xmax)()("Upper limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(k)()("Order of polynomial to fit locally, e.g. ``k=4`` is a 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -691,14 +691,14 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 #define HFPP_FUNC_NAME hBSplineFit
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients C_n of the polynomial Sum_n(C_n*x**n). The first element is C_0, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length n*n containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(xmatrix)()("Output vector containing the x values of the data, where each value is actually one row of ncoeff values some power of x. Calculated with hBSplineFitXValues.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(xvec)()("Vector containing the x values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients :math:`C_n` of the polynomial :math:`\\sum_n C_n x^n`. The first element is :math:`C_0`, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length :math:`n^2` containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xmatrix)()("Output vector containing the :math:`x`-values of the data, where each value is actually one row of ``ncoeff`` values some power of :math:`x`. Calculated with :func:`hBSplineFitXValues`.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(xvec)()("Vector containing the :math:`x` values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(yvec)()("Vector containing the :math:`y` values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_5 (HNumber)(xmin)()("Lower limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_6 (HNumber)(xmax)()("Upper limit of interval where spline is defined.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_7 (HInteger)(k)()("Order of polynomial to fit locally, k=4 is 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HInteger)(k)()("Order of polynomial to fit locally, e.g. ``k=4`` is a 3rd order polynomial.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -782,15 +782,15 @@ HNumber HFPP_FUNC_NAME(
 //------------------------------------------------------------------------
 
 
-//$DOCSTRING: Calculates a polynomial from a vector of xvalues, coefficients, and powers writing it to the output vector.
+//$DOCSTRING: Calculates a polynomial from a vector of :math:`x`-values, coefficients, and powers writing it to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hPolynomial
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the polynomial y-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the polynomial :math:`y`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(coeff)()("Coefficients for each power in powers.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply ``[0,1,2,...,n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -864,22 +864,22 @@ void HFPP_FUNC_NAME(
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Calculates a polynomial from a vector of xvalues, coefficients, and powers multiplies it to the output vector.
+//$DOCSTRING: Calculates a polynomial from a vector of :math:`x`-values, coefficients, and powers multiplies it to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hPolynomialMul
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the polynomial y-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with x-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the polynomial :math:`y`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(xvec)()("Input vector with :math:`x`-values.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(coeff)()("Coefficients for each power in powers.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply [0,1,2,...,n].")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(powers)()("Input vector with the powers to take into account. For an n-th order polynomial, this is simply ``[0,1,2,...,n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 
   Description:
-  Same as hPolynomialMul, but multiply result to the output (i.e., use
+  Same as :func:`hPolynomialMul`, but multiply result to the output (i.e., use
   ``*=``). So, for a first iteration vecout has to be filled with 1.
 
   Usage:
@@ -964,7 +964,7 @@ void HFPP_FUNC_NAME(
   $PARDOCSTRING
 
   Description:
-  Same as ``hPolynomialMul``, but add result to the output (i.e., use
+  Same as :func:`hPolynomialMul`, but add result to the output (i.e., use
   ``+=``). So, for a first iteration vecout has to be filled with 1.
 
   Usage:
@@ -1099,12 +1099,12 @@ void HFPP_FUNC_NAME(
 #define HFPP_FUNC_NAME hLinearFit
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients C_n of the polynomial Sum_n(C_n*x**n). The first element is C_0, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length n*n containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(xvec)()("Vector containing the x values of the data, where each value is actually one row of (n+1) values of x**n (e.g., if x values are [2,3] => xvec=[0,2,4,0,3,9] for a quadratic polynomical (n=2)).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(wvec)()("Vector containing the weights of the data (which are 1/Error^2).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_5 (HInteger)(ndata)()("Number of data points to take into account (ndata=-1 -> take all elements in yvec, if ndata>0 only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients :math:`C_n` of the polynomial :math:`\sum_n C_n x^n`). The first element is :math:`C_0`, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length :math:`n^2` containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xvec)()("Vector containing the :math:`x`-values of the data, where each value is actually one row of :math:`n+1` values of :math:`x^n` (e.g., if :math:`x`-values are ``[2,3] => xvec=[0,2,4,0,3,9]`` for a quadratic polynomical (:math:`n=2`)).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the :math:`y`-values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(wvec)()("Vector containing the weights of the data (which are ``1/Error^2``).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HInteger)(ndata)()("Number of data points to take into account (``ndata=-1`` -> take all elements in ``yvec``; if ``ndata > 0`` only take the first ``ndata``). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -1182,18 +1182,18 @@ HNumber HFPP_FUNC_NAME(
 #define HFPP_FUNC_NAME hLinearFit
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients C_n of the polynomial Sum_n(C_n*x**n). The first element is C_0, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length n*n containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(xvec)()("Vector containing the x values of the data, where each value is actually one row of (n+1) values of x**n (e.g., if x values are [2,3] => xvec=[0,2,4,0,3,9] for a quadratic polynomical (n=2)).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the y values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HInteger)(ndata)()("Number of data points to take into account (ndata=-1 -> take all elements in yvec, if ndata>0 only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vecout)()("Output vector containing the bets fit coefficients :math:`C_n` of the polynomial :math:`\\sum_n C_n x^n`. The first element is :math:`C_0`, i.e. the constant. Its length determines the order of the polynomial.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(veccov)()("Output vector of length :math:`n^2` containing the covariance matrix of the fit.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(xvec)()("Vector containing the :math:`x`-values of the data, where each value is actually one row of :math:`n+1` values of :math:`x^n` (e.g., if :math:`x`-values are ``[2,3] => xvec=[0,2,4,0,3,9]`` for a quadratic polynomical (:math:`n=2`)).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(yvec)()("Vector containing the :math:`y`-values of the data.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HInteger)(ndata)()("Number of data points to take into account (``ndata=-1`` -> take all elements in ``yvec``; if ``ndata > 0`` only take the first ndata). ")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END ----------------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 
   Description:
-  Returns as function value the chi-square value of the fit.
+  Returns as function value the :math:`\\chi^2` value of the fit.
 
   See also:
   hLinearFitPolynomialX, hPolynomial

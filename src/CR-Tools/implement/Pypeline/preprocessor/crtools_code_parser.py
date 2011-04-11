@@ -445,7 +445,7 @@ class DocumentationBlock():
         """
         Return the syntax of the command in a Sphinx parsable format.
         """
-        result = "``"
+        result = "**"
 
         result += self.getName()
 
@@ -457,7 +457,7 @@ class DocumentationBlock():
                 result += par_name
                 if (i < len(parameters)-1):
                     result += ", "
-        result += ")``"
+        result += ")**"
 
         return result
 

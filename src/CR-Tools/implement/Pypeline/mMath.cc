@@ -681,7 +681,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Looping will be done over the first argument, i.e. the input/output
   vector. If the second operand vector is shorter it will be applied
   multiple times.  To loop over the first argument (i.e., ``vec``) use
-  ``hMulAdd``, `hDivAdd``, ``hSubAdd``, ``hAddAdd``.
+  ``hMulAdd``, ``hDivAdd``, ``hSubAdd``, ``hAddAdd``.
 
   See also:
   hMulAdd2, hDivAdd2, hSubAdd2, hAddAdd2
@@ -758,7 +758,7 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin vec1,const Iter
   vec.$MFUNC(val) -> vec = val $MFUNC!LOW vec
 
   Description:
-  Doesn't really make sense for ``add`` and ``mul``, but is useful to get the inverse of a vector.
+  It does not really make sense for ``add`` and ``mul``, but is useful to get the inverse of a vector.
 
   See also:
   hMulSelf, hDivSelf, hSubSelf, hAddSelf, hInverse
@@ -1109,7 +1109,7 @@ HComplex HFPP_FUNC_NAME(const HNumber amplitude, const HNumber phase)
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(vec)()("Output vector returning complex numbers")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(ampphase)()("Input vector with real amplitudes and phases (2 numbers per entry: [amp_0, phase_0, amp_1, phase_1, ...])")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(ampphase)()("Input vector with real amplitudes and phases (2 numbers per entry: ``[amp_0, phase_0, amp_1, phase_1, ...]``)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -3038,7 +3038,7 @@ HInteger HFPP_FUNC_NAME (
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Find the samples whose ABSOLUTE values are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
+//$DOCSTRING: Find the samples whose *absolute* values are $MFUNC a certain threshold value and returns the number of samples found and the positions of the samples in a second vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFind{$MFUNC}Abs
 //-----------------------------------------------------------------------

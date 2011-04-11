@@ -136,14 +136,14 @@ std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDftC2r& d)
   $PARDOCSTRING
 
   Example:
-  # Set up input/output arrays
+  >>> # Set up input/output arrays
   >>> x = cr.hArray(complex, N)
   >>> y = cr.hArray(complex, N)
 
-  # Create plan
+  >>> # Create plan
   >>> p = cr.FFTWPlanManyDft(N, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)
 
-  # Execute plan
+  >>> # Execute plan
   >>> cr.hFFTWExecutePlan(y, x, p)
 */
 template <class CIter>
@@ -189,14 +189,14 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
   $PARDOCSTRING
 
   Example:
-  # Set up input/output arrays
+  >>> # Set up input/output arrays
   >>> x = cr.hArray(float, N)
   >>> y = cr.hArray(complex, N/2+1)
 
-  # Create plan
+  >>> # Create plan
   >>> p = cr.FFTWPlanManyDftR2c(N, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
-  # Execute plan
+  >>> # Execute plan
   >>> cr.hFFTWExecutePlan(y, x, p)
 */
 template <class CIter, class Iter>

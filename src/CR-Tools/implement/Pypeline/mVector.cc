@@ -244,7 +244,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
   vec.reverse() ->  [a_n,a_n-1,a_n-2,...,a_0]
 
   Description:
-  The order of the elements in the vector will be reversed (same as ``hFlip``).
+  The order of the elements in the vector will be reversed (same as :func:`hFlip`).
 
   See also:
   hFlip
@@ -281,18 +281,21 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
   hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
 
   Example:
-  In [1]: a=hArray(range(10))
-  In [2]: hPrettyString(a.vec(),8)
-  Out[2]: '[0,1,2,3,...,6,7,8,9]'
-  In [3]: hPrettyString(a.vec(),10)
-  Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
-  In [4]: hPrettyString(a.vec(),12)
-  Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
-  In [5]: hPrettyString(a.vec(),1)
-  Out[5]: '[0,...,9]'
-  In [6]: hPrettyString(a.vec(),0)
-  Out[6]: '[0,...,9]'
+  >>> a=hArray(range(10))
+  >>> hPrettyString(a.vec(),8)
+  '[0,1,2,3,...,6,7,8,9]'
 
+  >>> hPrettyString(a.vec(),10)
+  '[0,1,2,3,4,5,6,7,8,9]'
+
+  >>> hPrettyString(a.vec(),12)
+  '[0,1,2,3,4,5,6,7,8,9]'
+
+  >>> hPrettyString(a.vec(),1)
+  '[0,...,9]'
+
+  >>> hPrettyString(a.vec(),0)
+  '[0,...,9]'
 */
 template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
@@ -320,21 +323,27 @@ HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger maxlen)
   hPrettyString(vec,start_slice,end_slice,maxlen) -> "[vec_0,vec_1,vec_3,...,vec_n-2,vec_n-1,vec_n]"
 
   Example:
-  In [1]: a=hArray(range(10))
-  In [2]: hPrettyString(a.vec(),0,10,8)
-  Out[2]: '[0,1,2,3,...,6,7,8,9]'
-  In [3]: hPrettyString(a.vec(),0,10,10)
-  Out[3]: '[0,1,2,3,4,5,6,7,8,9]'
-  In [4]: hPrettyString(a.vec(),0,10,12)
-  Out[4]: '[0,1,2,3,4,5,6,7,8,9]'
-  In [5]: hPrettyString(a.vec(),0,10,1)
-  Out[5]: '[0,...,9]'
-  In [6]: hPrettyString(a.vec(),0,10,0)
-  Out[6]: '[0,...,9]'
-  In [7]: hPrettyString(a.vec(),4,10,8)
-  Out[7]: '[4,5,6,7,8,9]'
-  In [8]: hPrettyString(a.vec(),4,10,4)
-  Out[8]: '[4,5,...,8,9]'
+  >>> a=hArray(range(10))
+  >>> hPrettyString(a.vec(),0,10,8)
+  '[0,1,2,3,...,6,7,8,9]'
+
+  >>> hPrettyString(a.vec(),0,10,10)
+  '[0,1,2,3,4,5,6,7,8,9]'
+
+  >>> hPrettyString(a.vec(),0,10,12)
+  '[0,1,2,3,4,5,6,7,8,9]'
+
+  >>> hPrettyString(a.vec(),0,10,1)
+  '[0,...,9]'
+
+  >>> hPrettyString(a.vec(),0,10,0)
+  '[0,...,9]'
+
+  >>> hPrettyString(a.vec(),4,10,8)
+  '[4,5,6,7,8,9]'
+
+  >>> hPrettyString(a.vec(),4,10,4)
+  '[4,5,...,8,9]'
 */
 template <class Iter>
 HString HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const HInteger start_slice, const HInteger end_slice, const HInteger maxlen)
