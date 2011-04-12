@@ -4,10 +4,13 @@
 Documenting your code
 =====================
 
-Low level C++ routines
-======================
+At the Python side documentation is available for both Python
+functions as well as Python wrapper C++ functions. The following
+sections describe how to add documentation for each of these types of
+functions.
 
-This should describe how to document the low level C++ routines.
+
+.. _python-modules:
 
 Python modules
 ==============
@@ -86,7 +89,7 @@ Examples are:
 * ``:sup:`text``` for superscript
 * ``:mod:`module``` to refer to a module
 * ``:class:`ClassName``` to refer to a particular class
-* ``:meth:`method``` to refer to a method 
+* ``:meth:`method``` to refer to a method
 * ``:func:`function``` to refer to a function
 
 Lists and Quote-like blocks
@@ -97,10 +100,10 @@ List markup is natural: just place an asterisk at the start of a paragraph and i
     * This is a bulleted list.
     * It has two items, the second
       item uses two lines.
-    
+
     1. This is a numbered list.
     2. It has two items too.
-    
+
     #. This is a numbered list.
     #. It has two items too.
 
@@ -108,19 +111,19 @@ Nested lists are possible, but be aware that they must be separated from the par
 
     * this is
     * a list
-    
+
       * with a nested list
       * and some subitems
-    
+
     * and here the parent list continues
 
 Definition lists are created as follows::
 
     term (up to a line of text)
        Definition of the term, which must be indented
-    
+
        and can even consist of multiple paragraphs
-    
+
     next term
        Description.
 
@@ -140,10 +143,10 @@ Source Code
 Literal code blocks are introduced by ending a paragraph with the special marker ``::``. The literal block must be indented (and, like all paragraphs, separated from the surrounding ones by blank lines)::
 
     This is a normal text paragraph. The next paragraph is a code sample::
-    
+
        It is not processed in any way, except
        that the indentation is removed.
-    
+
        It can span multiple lines.
 
 This is a normal text paragraph again.
@@ -212,7 +215,7 @@ Use ```Link text <http://example.com/>`_`` for inline web links. If the link tex
 You can also separate the link and the target definition, like this::
 
     This is a paragraph that contains `a link`_.
-    
+
     .. _a link: http://example.com/
 
 Internal links
@@ -235,12 +238,12 @@ To support cross-referencing to arbitrary locations in any document, the standar
 If you place a label directly before a section title, you can reference to it with ``:ref:`label-name```. Example::
 
     .. _my-reference-label:
-    
+
     Section to cross-reference
     --------------------------
-    
+
     This is the text of the section.
-    
+
     It refers to the section itself, see :ref:`my-reference-label`.
 
 The ``:ref:`` role would then generate a link to the section, with the link title being "Section to cross-reference". This works just as well when section and reference are in different source files.
@@ -249,7 +252,7 @@ See also sections
 ^^^^^^^^^^^^^^^^^
 
 To refer to additional documentation you may use the ``.. seealso::`` directive::
-    
+
     .. seealso::
 
         The tasks module :mod:`~pycrtools.tasks`.
@@ -286,9 +289,9 @@ Footnotes
 For footnotes, use ``[#name]_`` to mark the footnote location, and add the footnote body at the bottom of the document after a "Footnotes" rubric heading, like so::
 
     Lorem ipsum [#f1]_ dolor sit amet ... [#f2]_
-    
+
     .. rubric:: Footnotes
-    
+
     .. [#f1] Text of the first footnote.
     .. [#f2] Text of the second footnote.
 
@@ -300,7 +303,7 @@ Citations
 Standard reST citations are supported, with the additional feature that they are "global", i.e. all citations can be referenced from all files. Use them like so::
 
     Lorem ipsum [Ref]_ dolor sit amet.
-    
+
     .. [Ref] Book or article reference, URL or whatever.
 
 Citation usage is similar to footnote usage, but with a label that is not numeric or begins with ``#``.
@@ -368,9 +371,9 @@ Since Pythagoras, we know that :math:`a^2 + b^2 = c^2`.
 For multiple equations, which should be separated by a blank line use the ``.. math::`` directive::
 
     .. math::
-    
+
        (a + b)^2 = a^2 + 2ab + b^2
-    
+
        (a - b)^2 = a^2 - 2ab + b^2
 
 which renders as follows.
@@ -378,20 +381,20 @@ which renders as follows.
 .. math::
 
     (a + b)^2 = a^2 + 2ab + b^2
-    
+
     (a - b)^2 = a^2 - 2ab + b^2
 
 In addition, each single equation is set within a split environment, which means that you can have multiple aligned lines in an equation, aligned at ``&`` and separated by ``\\``::
 
     .. math::
-    
+
        (a + b)^2  &=  (a + b)(a + b) \\
                   &=  a^2 + 2ab + b^2
 
 to give.
 
 .. math::
-    
+
     (a + b)^2  &=  (a + b)(a + b) \\
                &=  a^2 + 2ab + b^2
 
@@ -408,4 +411,186 @@ Finally equations can be cross-referenced via their label. This currently works 
 
 Euler's identity, equation :eq:`euler`, was elected one of the most
 beautiful mathematical formulas.
+
+
+
+Low level C++ routines
+======================
+
+This section describes how to add/modify the documentation for the low
+level C++ routines that add functionality to the Python layer (i.e
+only for wrapped functions).  As these functions are wrapped and
+exposed to Python, the documentation of these functions should, like
+for Python functions, be done in a style that can be interpreted by
+the Sphinx documentation generator, which is described in
+:ref:`python-modules`. Furthermore, being C++ functions, there is also
+documentation information needed by the Doxygen documentation
+generator that is used for the C++ documentation.
+
+A typical documentation for a C++ function is of the following form.
+
+.. code-block:: c
+
+   //$DOCSTRING: Summary of the function
+   //$COPY_TO HFILE START ---------------------------------------------------
+   ...
+   //$COPY_TO END -----------------------------------------------------------
+   /*!
+     \brief $DOCSTRING
+     $PARDOCSTRING
+      ...
+   */
+
+where the first ellipsis (...) contains the wrapper definitions and
+the second ellipsis located between ``/*!`` and ``*/`` the
+documentation of the function.
+
+The lines containing ``\brief $DOCSTRING`` and ``$PARDOCSTRING`` are
+only used for Doxygen and are ignored in the Python documentation
+generation process.
+
+
+Basics
+------
+
+Most important (and essential) are the function summary and parameter
+description.
+
+The function summary is obtained from the ``$DOCSTRING`` parameter of
+the wrapper definition, e.g.
+
+.. code-block:: c
+
+   //$DOCSTRING: Summary of the function
+
+which is used in the function definition, e.g.
+
+.. code-block:: c
+
+   #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+
+The names and descriptions of the function parameters are also obtained from the wrapper definition, e.g.
+
+.. code-block:: c
+
+   #define HFPP_PARDEF_0 (HNumber)(vec)()("Parameter description")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+
+Both function summary and parameter description should be formatted in a string that can be parsed by Sphinx.
+
+
+Additional documentation
+------------------------
+
+It is often good to have a more elaborate description of the
+functionality of a function, a reference to related functions or an
+example of how to use the function. Therefore, additional
+documentation can be added by placing them under one of the following
+sections titles:
+
+* Description
+* See also
+* Examples
+
+A section is started by specifying the aforementioned section name
+followed by a colon, e.g.
+
+.. code-block:: none
+
+   Description:
+
+All lines following are added to this specific section until a new
+section is declared or the until end of the end of the comment block
+is reached (as specified by ``*/``). When multiple sections of the same
+type declared, their content is merged into one section.
+
+The order in which the sections are written in the code is not
+relevant. When the documentation is generated the sections are
+``Description``, ``Reference``, and ``Examples``.
+
+
+Description
+***********
+
+A more in depth description of the function should be placed under the
+section of type ``Description`` All text within the description
+section should be typeset using the Sphinx syntax as is described
+in :ref:`python-modules`.
+
+.. code-block:: c
+
+   /*
+
+     Description:
+     This is the 1:sup:`st` description line.
+     This is the 2:sup:`nd` description line.
+
+   */
+
+References
+**********
+
+This contains a comma or new line separated list of function
+names. Instead of the section type ``Reference`` it is also allowed to
+use ``References`` or ``See also``, e.g.
+
+.. code-block:: c
+
+   /*!
+
+     See also:
+     functionName1, functionName2, functionName3
+
+   */
+
+Each function name will be converted into a link to the corresponding
+function when the documentation is generated.
+
+
+Example
+*******
+
+Examples of the code usage should be placed in the ``Example``
+section. As the functions are available in Python the examples are
+typeset as code using Python syntax highlighting. For proper
+highlighting use ``>>>`` as a prefix for Python code and ``...`` as
+a prefix for code continuation for multiple line commands. Results
+from the Python code do not have a prefix.
+
+.. code-block:: c
+
+   /*!
+
+     Example:
+     >>> vec = Vector([1.,2.,4.])
+     >>> for i in range(len(vec)):
+     ...     print vec[i]
+     1.
+     2.
+     4.
+
+   */
+
+
+Documentation example
+---------------------
+
+A typical example of the function documentation is shown below:
+
+.. code-block:: c
+
+   /*!
+     \brief $DOCSTRING
+     $PARDOCSTRING
+
+     Description:
+     This is a more extended version of the documentation hDivSelf.
+
+     See also:
+     hMulSelf, hDivSelf, hSubSelf, hAddSelf, hInverse
+
+     Example:
+     >>> vec = Vector([1.,2.,4.])
+     >>> vec.divself(1)
+     [1.0,0.5,0.25]
+    */
 
