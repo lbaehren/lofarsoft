@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.19
+VERSION=2.20
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -1023,32 +1023,32 @@ do
     fi
 
 	#Set up the list of files called "DONE" for output checking of prepfold results
-	done_list=""
-	if (( $flyseye == 0 ))
-	then
-		for ii in $num_dir
-		do
-		   if [ $ii -ne $last ]
-		   then
-		      done_list=`echo "&& -e "${STOKES}/"RSP"${ii}/"DONE" $done_list`
-		   else
-		      done_list=`echo ${STOKES}/"RSP"${ii}/"DONE"  $done_list`
-		   fi   
-		done
-	else
-	    for ii in $num_dir
-	    do
-		   for jjj in $beams
-	       do
-			   if [ $ii -ne $last ]
-			   then
-			      done_list=`echo "&& -e "${STOKES}/"RSP"${ii}/${jjj}/"DONE" $done_list`
-			   else
-			      done_list=`echo ${STOKES}/"RSP"${ii}/${jjj}/"DONE"  $done_list`
-			   fi   
-		   done	
-		done
-	fi # end if (( $flyseye == 0 ))
+#	done_list=""
+#	if (( $flyseye == 0 ))
+#	then
+#		for ii in $num_dir
+#		do
+#		   if [ $ii -ne $last ]
+#		   then
+#		      done_list=`echo "&& -e "${STOKES}/"RSP"${ii}/"DONE" $done_list`
+#		   else
+#		      done_list=`echo ${STOKES}/"RSP"${ii}/"DONE"  $done_list`
+#		   fi   
+#		done
+#	else
+#	    for ii in $num_dir
+#	    do
+#		   for jjj in $beams
+#	       do
+#			   if [ $ii -ne $last ]
+#			   then
+#			      done_list=`echo "&& -e "${STOKES}/"RSP"${ii}/${jjj}/"DONE" $done_list`
+#			   else
+#			      done_list=`echo ${STOKES}/"RSP"${ii}/${jjj}/"DONE"  $done_list`
+#			   fi   
+#		   done	
+#		done
+#	fi # end if (( $flyseye == 0 ))
     
 	#Create directories with appropriate permissions (beams are ignored/blank when not needed)
     if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
@@ -1106,7 +1106,7 @@ do
 		fi
 		
 		chmod -R 774 . * 
-		chgrp -R pulsar . *
+		#chgrp -R pulsar . *
     fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
  	
     #Move the split lists to the appropriate directories
@@ -1121,8 +1121,8 @@ do
 			     echo mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
 			     mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
 			  else
-			     echo mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
-			     mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
+			     echo mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
+			     mv ${STOKES}/$$"_split_"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
 			  fi
 			done
 		fi
@@ -1146,6 +1146,8 @@ do
 		echo rm ${STOKES}/$$"_split_"* >> $log
 		rm ${STOKES}/$$"_split_"*
     fi	
+   
+    exit #A2 delete 
     
 	#Convert the subbands with bf2presto
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
