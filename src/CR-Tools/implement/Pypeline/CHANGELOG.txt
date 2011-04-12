@@ -366,16 +366,22 @@ is wrapped if shorter
 the slice of the original hArray.
 - added a new version of hRunningAverage that can operate on the same vector
 -checked and bugfixed the different modes of the beamformer task -
-seems to work now 
+seems to work now
 -also related bugfixes in averagespectrum, dynamicspectrum
 
 2011-04-02  Pypeline - rev 74508 - Heino Falcke
 - By default tasks now return themselves rather than the workspace
 object (uness an explicit return value is given in .run)!!
-- hRandomizePhase alos 
+- hRandomizePhase alos
 - finished testcr3.py to demonstrate RFI excision and beamforming
 
-2011-04-06 CMake - rev 7508 - Heino Falcke 
+
+2011-04-05 Pypeline - - Martin van den Akker
+
+Update of pycrtools documentation generation: Added description,
+references and examples in the correct formatting.
+
+2011-04-06 CMake - rev 7508 - Heino Falcke
 
 - Put in a flag to plot semilog graphs also with buggy EDP64 version
 on new Macs ...  If your name is Heino and you have a MacBook more
@@ -391,7 +397,7 @@ functionality.
 - FindPython first finds Enthought python (EDP) version also for
 libraries and includes
 
-2011-04-09 CMake - rev 7518 - Heino Falcke 
+2011-04-09 CMake - rev 7518 - Heino Falcke
 - testcr3.py now works on a LOPES and a LOFAR dataset (not yet
 including RFI, baselinefitting etc.)
 - changed beamformer.py and qualitycheck.py to accept new keywords
@@ -403,6 +409,10 @@ way
 hPrettyString","hReadFileText", "hWriteFileText","hTranspose" are also
 generated for string and boolean vectors.
 
+2011-04-12 - Martin van den Akker
+
+- Added tutorial of how to write C++ code for python wrappers.
+- Added tutorial of how to write documentation for the C++ code.
 
 ------------------------------------------------------------------------
 TODO
@@ -419,8 +429,4 @@ is factor 2-3 faster in comparisons using 'in' ....
 - averagespectrums need to take nquistzone into account (use nyquistflip)
 
 - use shutils rmtree for hArray_write to remove old file directory
-
-
-2011-04-05 Pypeline - - Martin van den Akker
-Update of pycrtools documentation generation: Added description, references and examples in the correct formatting.
 
