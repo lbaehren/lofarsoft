@@ -61,6 +61,7 @@ void usage(){
   puts("-o\t\tOutput Name(Default = PULSAR_OBS)");
   puts("-parset\t\tRead this parset file to obtain header parameters.");
   puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum.");
+  puts("-CS\t\tInput data is CS data (one file, total I only)");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -389,9 +390,13 @@ int isNum( char c )
   return 1;
 }
 
+/*
+ *  ====================== M A I N ====================================
+ */
 int main( int argc, char **argv ) 
 {
   int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits, debugpacking;
+  int is_CS = 0; // if 1 then input file is CS data
   char buf[1024], *filename, *dummy_ptr;
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
@@ -445,6 +450,8 @@ int main( int argc, char **argv )
         i++;
       }else if(strcmp(argv[i], "-clipav") == 0) {
 	clipav = 1;
+      }else if(strcmp(argv[i], "-CS") == 0) {
+	is_CS = 1;
       }else if(strcmp(argv[i], "-o") == 0) {
 	j = sscanf(argv[i+1], "%s", OUTNAME);
 	if(j != 1) {
@@ -721,17 +728,15 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   }
 
   /* open files */
+  char *sbpointer;
   for( b = 0; b < BEAMS; b++ ) {
 
    /* loop over input files */
     while((filename = getNextFilenameFromList(&application, argv)) != NULL) {
       printf("Processing %s\n", filename);
 
-      for(i = 0; i < strlen(filename); i++) {
-	if(isNum(filename[i]))
-	  break;
-      }
-      sscanf(filename+i, "%*8c%d", &subbandnr);
+      sbpointer = strstr (filename, "_SB");
+      sscanf(sbpointer, "%*3c%d", &subbandnr);
       subintdata.freq_cent = lofreq + subbandnr*subintdata.bw + 0.5*(subintdata.nrFreqChan-1)*subintdata.channelbw;
       printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
 
