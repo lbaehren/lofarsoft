@@ -9,7 +9,6 @@ functions as well as Python wrapper C++ functions. The following
 sections describe how to add documentation for each of these types of
 functions.
 
-
 .. _python-modules:
 
 Python modules
@@ -427,7 +426,7 @@ the Sphinx documentation generator, which is described in
 documentation information needed by the Doxygen documentation
 generator that is used for the C++ documentation.
 
-A typical documentation for a C++ function is of the following form.
+A typical documentation for a C++ function is of the following form:
 
 .. code-block:: c
 
@@ -525,6 +524,7 @@ in :ref:`python-modules`.
      This is the 2:sup:`nd` description line.
 
    */
+
 
 References
 **********
