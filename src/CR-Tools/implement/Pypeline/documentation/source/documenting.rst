@@ -11,6 +11,8 @@ functions.
 
 .. _python-modules:
 
+.. _python-modules:
+
 Python modules
 ==============
 
