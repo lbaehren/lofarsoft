@@ -1147,7 +1147,7 @@ do
 		rm ${STOKES}/$$"_split_"*
     fi	
    
-    exit #A2 delete 
+    
     
 	#Convert the subbands with bf2presto
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
