@@ -99,8 +99,9 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
   typedef struct {
     unsigned	sequence_number;
     char        pad[508];
-    float	samples[BEAMS][CHANNELS][SAMPLES|2][STOKES];
+    float	samples[BEAMS][STOKES][CHANNELS][SAMPLES|2];
   }stokesdata_struct;
+
     
  stokesdata_struct *stokesdata;
  int prev_seqnr = -1;
@@ -176,7 +177,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
        b = beamnr;
        for( t = 0; t < SAMPLES; t++ ) {
          for( s = 0; s < STOKES; s++ ) {
-	   floatSwap( &stokesdata[i].samples[b][c][t][s] );
+	   floatSwap( &stokesdata[i].samples[b][s][c][t] );
          }
        }
      }
@@ -209,11 +210,11 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
      float ms = 0.0f;
      int N = 0;
      unsigned validsamples = 0;
-     float prev = WRITEFUNC( stokesdata[0].samples[beamnr][c][0]);
+     float prev = stokesdata[0].samples[beamnr][STOKES_SWITCH][c][0];
      /* compute average */
      for( i = 0; i < num; i++ ) {
        for( time = 0; time < SAMPLES; time++ ) {
-         const float value = WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
+         const float value = stokesdata[i].samples[beamnr][STOKES_SWITCH][c][time];
 	 if(prev < 1){
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
@@ -294,7 +295,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
      for( c = 0; c < CHANNELS; c++ ) {
        for( time = 0; time < SAMPLES; time++ ) {
          float sum;
-         sum = WRITEFUNC( stokesdata[i].samples[beamnr][c][time] );
+         sum = stokesdata[i].samples[beamnr][STOKES_SWITCH][c][time] ;
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
@@ -638,7 +639,7 @@ int main( int argc, char **argv )
     }
     subband_width = bw / nsubbands;
     lofreq = lowerBandEdge + (subbandFirst -0.5) * subband_width;
-    printf("BWS debug: lowerBandEdge %f subbandFirst %d lofreq %10fi %10f\n",lowerBandEdge,subbandFirst,subband_width,lofreq);
+
     /*
 
 if (lowerBandFreq < 150.0 and lowerBandFreq > 100.0 and par.clock == "200"):
@@ -731,17 +732,15 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	  break;
       }
       sscanf(filename+i, "%*8c%d", &subbandnr);
-      /* subintdata.freq_cent = lofreq + subbandnr*subintdata.bw + 0.5*(subintdata.nrFreqChan-1)*subintdata.channelbw;*/
-      subintdata.freq_cent = lofreq + (subbandnr+1) * subintdata.bw; 
+      subintdata.freq_cent = lofreq + subbandnr*subintdata.bw + 0.5*(subintdata.nrFreqChan-1)*subintdata.channelbw;
       printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
 
       /* create names */
       sprintf( buf, "%s.sub%04d", OUTNAME, subbandnr);
       if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
       fprintf(stderr,"  %s -> %s\n", filename, buf); 
+
       /* open file */
-
-
       fin = fopen(filename, "rb");
       if(fin == NULL) {
 	fprintf(stderr, "bf2fits: Cannot open input file\n");
