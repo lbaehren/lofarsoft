@@ -125,7 +125,7 @@ def CRQualityCheckAntenna(dataarray,
         if filename=="": filename=datafile["FILENAME"]
 #Calculate probabilities to find peaks
     if nsigma<0:
-        nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is one
+        nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is (roughly) one
     probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
     npeaksexpected=probability*blocksize # what is the probability to see such a peak for the given blocksize
     npeaksexpected_full=npeaksexpected*nblocks # what is the probability to see such a peak for the given blocksize

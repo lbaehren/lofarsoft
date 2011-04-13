@@ -156,11 +156,15 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "filenames":{default:lambda ws:listFiles(ws.filefilter),
                     doc:"List of filenames of data file to read raw data from."},
 
-        "spectrum_file":{default:lambda ws:(ws.filenames[0] if len(ws.filenames)>0 else "unknown")+".spec"+ws.tmpfileext,
-                         doc:"Filename to store the final spectrum."},
+        "output_dir":{default:"",doc:"Directory where output file is to be written to."},
+    
+        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".spec"+self.tmpfileext,
+                         doc:"Filename (without directory, see output_dir) to store the final spectrum."},
 
-        "qualitycheck":{default:True,
-                        doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
+        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
+                         doc:"Complete filename including directory to store the final spectrum."},
+
+        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
 
         "quality_db_filename":{default:"qualitydatabase",
                                doc:"Root filename of log file containing the derived antenna quality values (uses '.py' and '.txt' extension)."},

@@ -177,7 +177,7 @@ class DynamicSpectrum(tasks.Task):
         "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".dynspec"+self.tmpfileext,
                            doc:"Filename (without directory, see ``output_dir``) to store the final spectrum."},
 
-        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename)+".dynspec"+self.tmpfileext,
+        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
                          doc:"Complete filename including directory to store the final spectrum."},
 
         "qualitycheck":{default:True,

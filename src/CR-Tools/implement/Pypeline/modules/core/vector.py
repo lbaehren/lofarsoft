@@ -116,6 +116,15 @@ def asvec(self):
     else:
         return [self]
 
+def asval(self):
+    """
+    Return the argument as a single value. If it is a list/tuple/vector/array, return the first element.
+    """
+    if type(self) in hListAndArrayTypes:
+        return self[0]
+    else:
+        return self
+    
 def hVector_list(self):
     """
     Retrieve the STL vector as a python list.

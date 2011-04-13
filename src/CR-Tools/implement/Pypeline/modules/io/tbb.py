@@ -100,7 +100,7 @@ class TBBData(IOInterface):
             "FILENAME":self.__file.filename,
             "BLOCKSIZE":lambda: self.__blocksize,
             "BLOCK":lambda: self.__block,
-            "ANTENNA_SET":lambda:self.__file.antenna_set if hasattr(self,"__antenna_set") else self.__file.antenna_set(),
+            "ANTENNA_SET":lambda:self.antenna_set if hasattr(self,"antenna_set") else self.__file.antenna_set(),
             "NYQUIST_ZONE":self.__file.nyquist_zone,
             "TIME":self.__file.time,
             "SAMPLE_NUMBER":self.__file.sample_number,
@@ -153,7 +153,8 @@ class TBBData(IOInterface):
         self.__alignment_offset = cr.hArray(self.__file.alignment_offset(self.__refAntenna))
 
         # Get antenna set
-        self.__antenna_set = self.__file.antenna_set()
+        if not hasattr(self,"antenna_set"):
+            self.antenna_set = self.__file.antenna_set()
 
         # Get Nyquist zone for each antenna
         self.__nyquist_zone = self.__file.nyquist_zone()
@@ -316,7 +317,7 @@ class TBBData(IOInterface):
     def __setitem__(self, key, value):
         if key not in self.setable_keywords:
             raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))
-
+        
         elif key is "BLOCKSIZE":
             self.__blocksize = value
             self.init_selection()
@@ -325,7 +326,7 @@ class TBBData(IOInterface):
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
         elif key is "ANTENNA_SET":
-            self.__antenna_set=value
+            self.antenna_set=value
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
@@ -346,15 +347,23 @@ class TBBData(IOInterface):
 
         cr.hFFTFrequencies(self.__frequencies, self["SAMPLE_FREQUENCY"][0], self.__nyquist_zone[0])
     
-    def getTimeData(self,ary=None):
+    def getTimeData(self,data=None,block=-1):
         """Calculate time axis depending on sample frequency and
         blocksize (and later also time offset). Create a new array, if
         none is provided, otherwise put data into array.
         """
-        if not ary:
-            ary = self.empty("TIME_DATA")
-        ary.fillrange(self["BLOCK"]*self["BLOCKSIZE"]*self["SAMPLE_INTERVAL"][0],self["SAMPLE_INTERVAL"][0])
-        return ary
+        if not data:
+            data = self.empty("TIME_DATA")
+
+        block=cr.asval(block)
+
+        if block<0:
+            block=self.__block
+        else:
+            self.__block=block
+
+        data.fillrange(self["BLOCK"]*self["BLOCKSIZE"]*cr.asval(self["SAMPLE_INTERVAL"]),cr.asval(self["SAMPLE_INTERVAL"]))
+        return data
     
     def __makeScratch(self):
         """Create scratch arrays.
@@ -435,11 +444,13 @@ class TBBData(IOInterface):
         length blocksize of antenna i.
 
         """
+        block=cr.asval(block)
+
         if block<0:
             block=self.__block
         else:
             self.__block=block
-            
+
         cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize, self.__blocksize, self.__file)
 
     def getFFTData(self, data, block=-1, hanning=True):
@@ -464,11 +475,12 @@ class TBBData(IOInterface):
         length (number of frequencies) of antenna i.
 
         """
+        block=cr.asval(block)
+
         if block<0:
             block=self.__block
         else:
             self.__block=block
-
 
         # Get timeseries data
         self.getTimeseriesData(self.__scratch, block)
@@ -500,7 +512,7 @@ class TBBData(IOInterface):
         length 3 with positions (x,y,z) of antenna i.
         """
 
-        return md.get("RelativeAntennaPositions", self.__selectedDipoles, self.__antenna_set, True)
+        return md.get("RelativeAntennaPositions", self.__selectedDipoles, self.antenna_set, True)
 
     def getITRFAntennaPositions(self):
         """Returns antenna positions for selected antennas, or all
@@ -514,7 +526,7 @@ class TBBData(IOInterface):
         length 3 with positions (x,y,z) of antenna i.
         """
 
-        return md.get("AbsoluteAntennaPositions", self.__selectedDipoles, self.__antenna_set, True)
+        return md.get("AbsoluteAntennaPositions", self.__selectedDipoles, self.antenna_set, True)
 
     def setFrequencyRangeByIndex(self, nfmin, nfmax):
         """Sets the frequency selection used in subsequent calls to
@@ -551,11 +563,11 @@ class TBBData(IOInterface):
             self.__nfmin = nfmin
             self.__nfmax = nfmax
 
-    def getFrequencies(self):
+    def getFrequencies(self, block=-1):
         """Returns the frequencies that are applicable to the FFT data
 
         Arguments:
-        None
+        *block* = -1 - Is without function, just for compatibility.
 
         Return value:
         This method returns a FloatVector with the selected frequencies

@@ -844,6 +844,10 @@ y=hArrayRead("test")
 y -> hArray(float, [20], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], name="test") # len=20 slice=[0:20])
 y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=20 slice=[0:20])
     """
+    if type(self)==StringArray:
+        print "Attention: StringArrays cannot be dumped to disk!"
+        return
+    
     fn=os.path.expandvars(os.path.expanduser(filename))
 
     #Add proper ending if missing
@@ -911,6 +915,8 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
     """
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
+        if v in [StringArray,StringVec]:
+            newdictionary[k]=list(v)
         if type(v) in hAllVectorTypes:
             parname=prefix+"."+str(k)
             filename=parname+".pcr"
@@ -994,7 +1000,10 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
     f.write("ha_dim = "+str(arydim)+"\n")
     f.write("ha_nblocks = "+str(nblocks)+"\n")
     f.write("ha_name = '" + self.getKey("name")+"'\n")
-    f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
+    if basetype(self) in hNumericalTypes:
+        f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
+    else:
+        f.write("ha_units = None\n")
     if hasattr(self,"__slice__"):
         f.write("ha_slice = " + str(self.__slice__)+"\n")
     else:

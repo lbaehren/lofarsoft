@@ -390,7 +390,7 @@ Here is an example of using it::
 """
 
 #Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer"]
+task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2"]
 
 import os
 import shelve
@@ -876,6 +876,27 @@ class Task(object):
             ary.setHeader(**{p:getattr(self,p)})
         for p,v in kwargs.items():
             ary.setHeader(**{p:getattr(self,v)})
+
+    def plotpause(self):
+        """
+        Function to be called after a plotting command. If
+        ``self.plot_pause = True`` it will pause and ask for user input
+        whether and how to continue calculation and plotting.
+        May modify `self.plot_pause`` and ``self.doplot``.
+        """
+        if hasattr(self,"plot_pause") and self.plot_pause:
+            print "Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting..."
+            plt.draw();
+            k=raw_input()
+            if k=="q":
+                self.plot_pause=False
+                print "Continue without pausing in this task (other tasks not affected)." 
+            elif k=="n":
+                self.doplot=False
+                print "Continue without plotting in this task (other tasks not affected)." 
+                plt.ion()
+            else:
+                print "Continue."
 
 
 

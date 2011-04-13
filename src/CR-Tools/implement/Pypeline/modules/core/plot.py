@@ -61,6 +61,14 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
                    'x'   -> semilog in x
                    'y'   -> semilog in y
                    'xy'  -> loglog plot
+
+    *highlightcolor* color (e.g. 'red'), used to highlight sections of the plot
+
+    *nhighlight* determines how many (if any) sections of the data to highlight.
+
+    *highlight*  ylist, vector, or array of tuples with start and end indices of
+                 sections to highlight
+                 
     *plotarg1*   =..., plotarg2=...: you can add any plotting parameter
                  that is understood by ``.plot`` of scipy, e.g.
                  ``color='green``, ``linestyle='dashed``.
@@ -161,7 +169,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
             _plot(xvalues.vec(),self.vec(),**plotargs)
         if not highlight==None:
             if type(nhighlight) in [int,long]: nhighlight=[nhighlight]
-            hv=highlight.vec()
+            hv=ashArray(highlight).vec()
             ha=hArray(hv,[len(hv)/2,2])
             for n in range(nhighlight[loop]): #how many sections are to be highlighted?
                 slc=slice(ha[n,0],ha[n,1]+1)

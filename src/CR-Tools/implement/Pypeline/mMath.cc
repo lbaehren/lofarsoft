@@ -629,15 +629,16 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   $PARDOCSTRING
 
   Description:
-  To loop over the second argument (i.e., ``vec1``) use
-  ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``.
+  To loop slicec over the second argument (i.e., ``vec1``) use
+  ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``. To repeatedly
+  add to the output vector, use `hMulAddSum``.
 
   Usage:
   h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
   vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
 
   See also:
-  hMulAdd, hDivAdd, hSubAdd, hAddAdd
+  hMulAdd2, hDivAdd2, hSubAdd2, hAddAdd2,  hMulAddSum, hDivAddSum, hSubAddSum, hAddAddSum
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
@@ -647,6 +648,10 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;
+
+  if (itout>=vec_end) return;
+  if (it1>=vec1_end) return;
+  if (it2>=vec2_end) return;
 
   // Vector operation
   while ((it1!=vec1_end)  && (itout !=vec_end)) {
@@ -678,9 +683,58 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 
   Description:
 
-  Looping will be done over the first argument, i.e. the input/output
+  Slice looping will be done over the first argument, i.e. the input/output
   vector. If the second operand vector is shorter it will be applied
   multiple times.  To loop over the first argument (i.e., ``vec``) use
+  ``hMulAdd``, ``hDivAdd``, ``hSubAdd``, ``hAddAdd``. To repeatedly
+  add to the output vector, use ```hMulAddSum`.
+
+  See also:
+  hMulAdd, hDivAdd, hSubAdd, hAddAdd,  hMulAddSum, hDivAddSum, hSubAddSum, hAddAddSum
+*/
+template <class Iter, class Iterin1, class Iterin2>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
+{
+  // Declaration of variables
+  typedef IterValueType T;
+  Iterin1 it1=vec1;
+  Iterin2 it2=vec2;
+  Iter itout=vec;
+
+  if (itout>=vec_end) return;
+  if (it1>=vec1_end) return;
+  if (it2>=vec2_end) return;
+
+  // Vector operation
+  while ((it1!=vec1_end) && (itout!=vec_end)) {
+    *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
+    ++it1; ++it2; ++itout;
+    if (it2==vec2_end) it2=vec2;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type. Wrap and repeatedly add to input array if shorter.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}AddSum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector containing the result of operation")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec1)()("Vector containing the first operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(vec2)()("Vector containing the second operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
+  vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
+
+  Description:
+
+  Slice looping will be done over the first argument, i.e. the output
+  vector. If the output vector is shorter than the first operand vector it will be wrapped, i.e. the additional slices in vec1 will repeatedly be added to the output vector. Also the second operand will be wrapped. To not loop over the first argument (i.e., ``vec``) use
   ``hMulAdd``, ``hDivAdd``, ``hSubAdd``, ``hAddAdd``.
 
   See also:
@@ -695,10 +749,15 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Iterin2 it2=vec2;
   Iter itout=vec;
 
+  if (itout>=vec_end) return;
+  if (it1>=vec1_end) return;
+  if (it2>=vec2_end) return;
+
   // Vector operation
-  while ((it1!=vec1_end) && (itout!=vec_end)) {
+  while ((it1!=vec1_end)) {
     *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (*it2));
     ++it1; ++it2; ++itout;
+    if (itout==vec_end) itout=vec;
     if (it2==vec2_end) it2=vec2;
   };
 }
@@ -1065,11 +1124,7 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
   HInteger lenPhase = phasevec_end - phasevec;
 
   // Sanity check
-  if (lenPhase < lenOut) {
-    cout << "Size of phase vector is smaller than output vector: looping over phase vector." << endl;
-  } else if (lenPhase > lenOut) {
-    throw PyCR::ValueError("Phase vector is larger than output vector.");
-  } else if (lenPhase <= 0) {
+  if ((lenPhase <= 0) || (lenOut <= 0)) {
     throw PyCR::ValueError("Illegal size of phase vector");
   }
 
@@ -2564,20 +2619,24 @@ HNumber HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger b
   $PARDOCSTRING
 
   Usage:
-  vec.minrms(blocklen) -> block number of minimum rms (int)
-  hMinRMS(vec,blocklen) -> block number of minimum rms (int)
+  vec.minstddevblock(blocklen,minrms,minmean) -> block number of minimum rms (int)
+  hMinStdDevBlock(vec,blocklen,minrms,minmean) -> block number of minimum rms (int)
 
   Description:
   Subdivide the input vector into smaller blocks of len ``blocklen`` and
   calculate for each block the standard deviation. The block
   number of the block with the smallest standard deviation will be
   returned. The values of mean and standard deviation will be
-  returned in the variables ``minrms`` and ``minmean``.
+  returned in the variables ``minrms`` and ``minmean``. In Python 
+  both variables should be vectors, since scalars are not returned 
+  (in this case also blocklen needs to be a vector).
 
   All blocks have the same length with a possible exception of the last
   block, which is ignored if it is shorter.
 
   Used to find the the cleanest part of a spiky data set.
+
+
  */
 
 template <class Iter>
@@ -2603,7 +2662,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger 
   it1=it2;
   it2+=blen;
 
-  while (it2<vecin_end) {
+  while (it2<=vecin_end) {
     ++nblock;
     mean=hMean(it1,it2);
     rms=hStdDev(it1,it2,mean);
@@ -2618,6 +2677,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger 
   return minblock;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 //$DOCSTRING: Calculates the standard deviation of a vector of values.
@@ -2829,7 +2889,8 @@ HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const
 
   See also:
   hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual,
-  hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
+  hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual,
+  hMaxInSequences, hMinInSequences, hSumInSequences,hMeanInSequences, hStdDevInSequences
 
   Example:
   >>> # Make a test time series data set for 4 antennas and some peaks at various locations
@@ -2901,6 +2962,69 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
 
 //$ENDITERATE
 
+//========================================================================
+//$ITERATE MFUNC Max,Min,Sum,Mean,StdDev
+//========================================================================
+
+//$DOCSTRING: Find the $MFUNC in a list of sequences provided by an indexlist of start/end values.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}InSequences
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Numeric output vector containing the maxima of each sequence")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Numeric input vector containing the values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(indexlist)()("Integer list containing 2-tuples with begin and end index for each sequence")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(nsequences)()("The maximum number of sequences to take (all if <0 or >vector length).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  maxima.maxinsequences(datavector,indexlist,npeaks) -> return maxima in each sequence indicated by indexlist
+
+  indexlist=Vector(int,[npeaks,2],fill=[seq0_start,seq0_end,seq1_start,seq1_end, ...])
+
+  See also:
+  hMaxInSequences, hMinInSequences, hSumInSequences,hMeanInSequences, hStdDevInSequences, hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual, hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
+
+  
+Example:
+npeaks=3
+datavector=hArray(float,[10],fill=range(10))
+indexlist=hArray(int,[npeaks,2],fill=[0,2,3,5,5,9])
+maxima=hArray(float,[npeaks])
+maxima.maxinsequences(datavector,indexlist,npeaks)
+maxima -> hArray(float, [3], fill=[1,4,8]) # len=3 slice=[0:3])
+*/
+
+template <class Iter,class Iter2,class IterI>
+void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end, const Iter2 vecin, const Iter2 vecin_end,const IterI indexlist, const IterI indexlist_end, const HInteger nsequences)
+{
+  // Sanity check
+  if (vecin_end-vecin < 0) throw PyCR::ValueError((HString)(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME)) + ": Size of input vector < 0.");
+  if (vecout_end-vecout < 0) throw PyCR::ValueError((HString)(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME)) + ": Size of input vector < 0.");
+  if (indexlist_end-indexlist < 0) throw PyCR::ValueError((HString)(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME)) + ": Size of input vector < 0.");
+
+  Iter itout(vecout);
+  IterI iti1(indexlist),iti2(indexlist+1);
+  Iter2 itin1,itin2;
+  HInteger ncount(0);
+
+  if (iti2>indexlist_end) return;
+
+  while (iti2<=indexlist_end && itout != vecout_end && ncount<nsequences) {
+    itin1=vecin+*iti1; itin2=vecin+*iti2;
+    if ((itin1>=vecin_end) || (itin1<vecin)) throw PyCR::ValueError((HString)(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME))+ ": Sequence start pointing outside vector.");
+    if ((itin2>vecin_end) || (itin2<=vecin)) throw PyCR::ValueError((HString)(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME)) + ": Sequence end pointing outside vector.");
+    if (itin2<=itin1) throw PyCR::ValueError((HString)(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME)) + ": Invalid sequence specified (length<0).");
+    *itout = hfcast<IterValueType>(h{$MFUNC}(itin1,itin2));
+    ++ncount; iti1+=2; iti2+=2; ++itout;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$ENDITERATE
 
 //========================================================================
 //$ITERATE MFUNC GreaterThan,GreaterEqual,LessThan,LessEqual
@@ -3143,7 +3267,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of 3 tuples of position, length, and mean value for each sequence found.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of 2 tuples of position and length for each sequence found.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(threshold)()("Threshold value - if values are $MFUNC this, they can belong to a sequence.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_3 (HInteger)(maxgap)()("The maximum gap (in between sample numbers) between two samples to still belong to one sequence. 0=no gaps allowed, i.e. consecutive.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -3153,6 +3277,8 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T threshold)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+  Usage:
+  npeaks=indexlist.findsequencegreaterthan(vecin,threshold,maxgap,minlength)
 
   See also:
   hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual
@@ -4077,7 +4203,59 @@ void HFPP_FUNC_NAME (const DataIter odata,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Calculates the square of the absolute value and add to output vector
+//$DOCSTRING: Calculates the square of the input vector and add it to the values in the output vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSquareAdd
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Input vector containing complex values. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  Calculate :math:`a^2` for each element :math:`a` in the input vector
+  and add the result to the output vector. Note that (unlike for 
+  hSpectralPower) for complex numbers the result can also be negative!
+
+  The fact that the result is added to the output vector allows one to
+  call the function multiple times and get a summed spectrum. If you
+  need it only once, just fill the vector with zeros.
+
+  The number of loops (if used with an ``hArray``) is here determined by
+  the second parameter!
+
+  If the vectors have different lengths, the shortest one is taken to
+  determine for how many elements this is calculated.
+
+  See also:
+
+  hSpectralPower, hSpectralPower2 
+
+  Example:
+  >>> spectrum = hArray(float,[1,128])
+  >>> cplxfft = hArray(complex,[10,128],fill=1+0j)
+  >>> spectrum[...].squareadd(cplxfft[...])
+*/
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
+{
+  // Declaration of variables
+  Iterin itin(vecin);
+  Iter itout(vecout);
+
+  // Calculation of spectral power
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout+=hfcast<IterValueType>((*itin)*(*itin));
+    ++itin; ++itout;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the square of the absolute value of a complex number and add to output vector
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hAbsSquareAdd
 //-----------------------------------------------------------------------

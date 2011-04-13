@@ -7,6 +7,8 @@ types.
 
 __all__ = ['tbb', 'interfaces']
 
+import os
+
 import tbb
 import pyfits
 import pycrtools as cr
@@ -16,6 +18,8 @@ def open(filename, *args, **kwargs):
     """Open a supported file type or fall back to Python built in open
     function.
     """
+
+    filename=os.path.expandvars(os.path.expanduser(filename))
 
     # Get file extension to determine type
     ext = filename.split(".")[-1].strip().lower()

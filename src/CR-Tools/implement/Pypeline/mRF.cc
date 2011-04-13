@@ -71,7 +71,7 @@ using namespace std;
 //
 // ========================================================================
 
-//$DOCSTRING: Calculates the square root of the power of a complex spectrum and add it to an output vector.
+//$DOCSTRING: Calculates the square root of the power of a complex spectrum and adds it to an output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
@@ -84,13 +84,22 @@ using namespace std;
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Usage:
+
+  vecout.spectralpower(vecin) -> vecout_i=sqrt(real((vecin_i)*conj(vecin_i)))
+
   Description:
+
   The fact that the result is added to the output vector allows one to
   call the function multiple times and get a summed spectrum. If you
   need it only once, just fill the vector with zeros.
 
   The number of loops (if used with an hArray) is here determined by
   the second parameter!
+  
+  See also:
+
+  hSquareAdd, hSpectralPower2 
 
   Example:
   >>> spectrum=hArray(float,[1,128])
@@ -113,6 +122,62 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   // Calculation of spectral power
   while ((itin != vecin_end) && (itout != vecout_end)) {
     *itout+=sqrt(real((*itin)*conj(*itin)));
+    ++itin; ++itout;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculates the power of a complex spectrum and adds it to an output vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSpectralPower2
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+
+  vecout.spectralpower2(vecin) -> vecout_i=real((vecin_i)*conj(vecin_i))
+
+  Description:
+
+  The fact that the result is added to the output vector allows one to
+  call the function multiple times and get a summed spectrum. If you
+  need it only once, just fill the vector with zeros.
+
+  The number of loops (if used with an hArray) is here determined by
+  the second parameter!
+  
+  See also:
+
+  hSquareAdd, hSpectralPower
+
+  Example:
+  >>> spectrum=hArray(float,[1,128])
+  >>> cplxfft=hArray(complex,[10,128],fill=1+0j)
+  >>> spectrum[...].spectralpower2(cplxfft[...])
+*/
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end)
+{
+  // Declaration of variables
+  Iterin itin(vecin);
+  Iter itout(vecout);
+
+  // Sanity check
+  if ((vecin_end<vecin) || (vecout_end<vecout)) {
+    throw PyCR::ValueError("Incorrect size of input vector.");
+    return;
+  }
+
+  // Calculation of spectral power
+  while ((itin != vecin_end) && (itout != vecout_end)) {
+    *itout+=real((*itin)*conj(*itin));
     ++itin; ++itout;
   };
 }

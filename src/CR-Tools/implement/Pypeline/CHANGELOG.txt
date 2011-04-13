@@ -392,12 +392,14 @@ functionality.
 
 - io/tbb.py object - made keyword access a little more elegant
 
+2011-04-05 Pypeline - rev ???? - Martin van den Akker
+Update of pycrtools documentation generation: Added description, references and examples in the correct formatting.
 
 2011-04-06  CMake - rev 7508 - Heino Falcke
 - FindPython first finds Enthought python (EDP) version also for
 libraries and includes
 
-2011-04-09 CMake - rev 7518 - Heino Falcke
+2011-04-09 Pypeline - rev 7518 - Heino Falcke
 - testcr3.py now works on a LOPES and a LOFAR dataset (not yet
 including RFI, baselinefitting etc.)
 - changed beamformer.py and qualitycheck.py to accept new keywords
@@ -409,8 +411,25 @@ way
 hPrettyString","hReadFileText", "hWriteFileText","hTranspose" are also
 generated for string and boolean vectors.
 
-2011-04-12 - Martin van den Akker
 
+2011-04-13 Pypeline - rev 7547- Heino Falcke 
+- hSquareAdd to calculate the power of a real (timeseries) array and add it to a
+vector (like spectralpower for complex data)
+- hMulAddSum -added to add two larger vectors and sum them onto a
+smaller output vector
+- hMaxInSequences, hMinInSequences, hSumInSequences, hMeanInSequences,
+hStdDevInSequences added to work with the sequences provided by
+hFindSequence...
+- started a new module 'rftools' to contain some simple and commone
+operations needed in radio frequency interferometry, calibration and
+pulse detection
+- Functions added to rftools: TimeBeamIncoherent,  LocatePulseTrain
+- SpectralPower2 added to give the actual spectral power (squared)
+- fixed testcr3 and testrfi4
+- fixed a bug for hArray_write - stringarrays in dicts will be
+replaced by lists 
+
+2011-04-12 - rev 7546 - Martin van den Akker
 - Added tutorial of how to write C++ code for python wrappers.
 - Added tutorial of how to write documentation for the C++ code.
 
