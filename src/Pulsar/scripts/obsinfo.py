@@ -457,21 +457,27 @@ class obsinfo:
                         	self.FE = "+"
 
 	        # getting info about the pointing
-        	cmd="grep 'Beam\[0\].angle1' %s" % (self.parset,)
+        	cmd="grep 'Beam\[0\].angle1 | grep -v AnaBeam' %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status)>0:
                 	# RA info exists in parset file
-                	self.rarad=float(status[0][:-1].split(" = ")[-1])
+			try:
+                		self.rarad=float(status[0][:-1].split(" = ")[-1])
+			except:
+				self.rarad=0.0
                 	rahours=self.rarad*12./3.1415926
                 	rah=int(rahours)
                 	ram=int((rahours-rah)*60.)
                 	self.rastring="%02d%02d" % (rah, ram)
 
-        	cmd="grep 'Beam\[0\].angle2' %s" % (self.parset,)
+        	cmd="grep 'Beam\[0\].angle2' %s | grep -v AnaBeam" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status)>0:
                 	# DEC info exists in parset file
-                	self.decrad=float(status[0][:-1].split(" = ")[-1])
+			try:
+                		self.decrad=float(status[0][:-1].split(" = ")[-1])
+			except:
+				self.decrad=0.0
                 	decdeg=self.decrad*180./3.1415926
                 	if decdeg>0:
                         	decsign="+"
