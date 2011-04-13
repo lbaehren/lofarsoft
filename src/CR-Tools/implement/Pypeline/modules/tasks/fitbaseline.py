@@ -1,5 +1,10 @@
-"""Spectrum documentation.
-sp=hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
+"""
+Spectrum documentation
+======================
+
+Usage::
+
+  >>> sp=hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
 """
 
 from pycrtools import *
@@ -10,35 +15,43 @@ import os
 #from pycrtools import IO
 
 """
-*default*  contains a default value or a function that will be assigned
-when the parameter is accessed the first time and no value has been
-explicitly set. The function has the form "lambda ws: functionbody", where ws is the worspace itself, so that one can access other
-parameters. E.g.: default:lambda ws: ws.par1+1 so that the default
-value is one larger than he value in par1 in the workspace.
+  =========== ===== ========================================================
+  *default*         contains a default value or a function that will be
+                    assigned when the parameter is accessed the first time
+                    and no value has been explicitly set. The function has
+                    the form ``lambda ws: functionbody``, where ws is the
+                    worspace itself, so that one can access other
+                    parameters. E.g.: ``default:lambda ws: ws.par1+1`` so
+                    that the default value is one larger than the value in
+                    ``par1`` in the workspace.
+  *doc*             A documentation string describing the parameter.
+  *unit*            The unit of the value (for informational purposes only)
+  *export*    True  If ``False`` do not export the parameter with
+                    ``ws.parameters()`` or print the parameter
+  *workarray* False If ``True`` then this is a workarray which contains
+                    large amount of memory and is listed separately and
+                    not written to file.
+  =========== ===== ========================================================
+"""
 
-*doc* a documentation string describing the parameter
-
-*unit* the unit of the value (for informational purposes only)
-
-*export* (True) if False do not export the parameter with
- ws.parameters() or print the parameter
-
-*workarray* (False) If True then this is a workarray which contains
- large amount of memory and is listed separately and not written to
- file.
-"""    
 def fitbaseline_calc_freqs(self):
+    """
+    """
     val=hArray(float,dimensions=[1,self.nbins],name="Frequency",units=("M","Hz"))
     val.downsample(self.frequency[self.numin_i:self.numax_i])
     return val
 
 def fitbaseline_calc_numin_i(self):
+    """
+    """
     if self.numin>0: numin_i=self.frequency.findlowerbound(self.numin).val()
     else: numin_i=2
     numin_i=max(numin_i-int(numin_i*self.extendfit),2)
     return numin_i
 
 def fitbaseline_calc_numax_i(self):
+    """
+    """
     if self.numax>0: numax_i=self.frequency.findlowerbound(self.numax).val()
     else: numax_i=len(self.frequency)
     numax_i=min(numax_i+int((len(self.frequency)-numax_i)*self.extendfit),len(self.frequency)-1)
@@ -46,53 +59,50 @@ def fitbaseline_calc_numax_i(self):
 
 class FitBaseline(tasks.Task):
     """
-    Usage:
-    
-    FitBaseline(input_spectrum, **keywords)
+    Usage::
+
+      >>> FitBaseline(input_spectrum, **keywords)
 
     Function to fit a baseline using a polynomial function
-    (fittype='POLY') or a basis spine fit (fittype='BSPLINE', default)
+    (``fittype='POLY'``) or a basis spine fit (default: ``fittype='BSPLINE'``)
     to a spectrum while trying to ignore positive spikes in the fit
     (e.g., those coming from RFI = Radio Frequency Interference).
 
     The input_spectrum is a float array with input spectrum either of
-    dimension [nofAntennas,nofChannels] or just [nofChannels] for a
+    dimension ``[nofAntennas,nofChannels]`` or just ``[nofChannels]`` for a
     single spectrum. Note that the frequency values for the array are
     expected to be provided as
-    input_spectrum.par.xvalues=hArray(float,[nofChannels],fill=...) -
+    ``input_spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)``
     the same you would use to provide xvalues for plotting. You can
     also provide the frequencies explicitly in the keyword
-    'frequency', otherwise a simple numbering is assumed
-    frequency=[0,1,2,3...].
+    ``frequency``, otherwise a simple numbering is assumed
+    ``frequency=[0,1,2,3...]``.
 
     Returns its own workspace.
-    
-    Use baseline.polynomial(task.frequency,task.coeffs,task.powers) to caluclate the
-    baseline from the coefficients for the polynomial fit, or
 
-    task.xpowers[...,[0]:task.nselected_bins].linearfitpolynomialx(task.clean_bins_x[...,[0]:task.nselected_bins],task.powers[...])
-    task.clean_bins_y[...,[0]:task.nselected_bins].bspline(task.xpowers[...,[0]:(task.nselected_bins)],task.coeffs[...])
+    Use ``baseline.polynomial(task.frequency,task.coeffs,task.powers)`` to caluclate the
+    baseline from the coefficients for the polynomial fit, or::
 
+      >>> task.xpowers[...,[0]:task.nselected_bins].linearfitpolynomialx(task.clean_bins_x[...,[0]:task.nselected_bins],task.powers[...])
+      >>> task.clean_bins_y[...,[0]:task.nselected_bins].bspline(task.xpowers[...,[0]:(task.nselected_bins)],task.coeffs[...])
 
-    
-    Parameters can be provided as additional keywords
+    Parameters can be provided as additional keywords, e.g.::
 
-    e.g., baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
+      baseline.polynomial(frequency,coeffs,powers, parameter1=value1, parameter2=value2)
 
-    or in a WorkSpace.
+    or in a WorkSpace, e.g.::
 
-    e.g., baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
+      baseline.polynomial(frequency,coeffs,powers, ws=WorkSpace),
 
     or in a mix of the two. Otherwise default values are used.
-
     """
     parameters = {
     "filename":{default:lambda self: "tmpspec.pcr" if not self.spectrum.hasHeader("filename") else self.spectrum.getHeader("filename"),
-            doc: "Filename to write output to"},    
+            doc: "Filename to write output to"},
 
     "save_output":{default:False,
                doc:"If true save the results in the header files of the input spectrum with file name given in 'filename'"},
-    
+
     "nbins":{doc:"""The number of bins in the downsampled spectrum used to fit the baseline.""",
          default: lambda self:max(self.nofChannels/256,min(256,self.nofChannels/8))},
     "polyorder":{doc:"""Order of the plyonomial to fit.  (output only)""",
@@ -101,7 +111,7 @@ class FitBaseline(tasks.Task):
              default:2.0},
     "logfit":{doc:"""Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).""",
           default:True},
-        
+
     "fittype":{doc:"""Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default).""",
            default:"BSPLINE"},
     "nofAntennas":{doc:"""Number of antennas in input spectrum.""",
@@ -179,13 +189,13 @@ class FitBaseline(tasks.Task):
 
     "work_spectrum":{doc:"Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
              default:lambda self:hArray(self.spectrum.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),export:False},
-        
+
     "meanrms":{doc:"""Estimate the mean rms in the spectrum per antenna. (output vector)""",
            default:0,output:True},
     "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration (information only at this point).",default:0},
 
     "verbose":{doc:"""Print progress information""",default:True},
-        
+
     "plotlen":{default:2**17,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
 
     "plot_center":{default:0.5,doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
@@ -198,8 +208,10 @@ class FitBaseline(tasks.Task):
     }
 
     def call(self,spectrum):
+        """
+        """
         pass
-    
+
     def run(self):
         """Run the program.
         """
@@ -229,7 +241,7 @@ class FitBaseline(tasks.Task):
         #Calculate RMS/amplitude for each bin
         self.ratio[...].div(self.rms[...],self.small_spectrum[...])
         #Get the RMS of the part of the spectrum where it is lowest (i.e. which is least affected by RFI)
-        self.minblk=self.ratio[...].minstddevblock(Vector(int,[self.nbins],fill=self.minrms_blen),self.minrms,self.minmean) 
+        self.minblk=self.ratio[...].minstddevblock(Vector(int,[self.nbins],fill=self.minrms_blen),self.minrms,self.minmean)
         #Set limits for which spikes to ignore
         self.limit2=self.minmean+self.minrms*self.rmsfactor
         self.limit1=self.minmean-self.minrms*self.rmsfactor
@@ -243,7 +255,7 @@ class FitBaseline(tasks.Task):
         self.nselected_bins=self.selected_bins[...,1:].findbetween(self.ratio[...,1:-1],self.limit1,self.limit2)
         self.selected_bins+=1; # We started the search only at bin #1 in self.ratio, so the indices returned are off by one
         #Make sure the endpoints are part of it
-        self.nselected_bins+=2 # add the two endpoints 
+        self.nselected_bins+=2 # add the two endpoints
         self.selected_bins[...,0].fill(0)
         self.endpoints=hArray(int,[self.nofAntennas,1],fill=self.nselected_bins-1)
         self.selected_bins[...].set(self.endpoints,len(self.freqs)-1)
@@ -288,7 +300,7 @@ class FitBaseline(tasks.Task):
             self.spectrum.writeheader(self.filename)
             print "Written spectrum to file, to read it back: sp=hArrayRead('"+self.filename+"')"
 
-CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in 
+CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
     ['selected_bins',
      'filename',
      'save_output',
@@ -346,17 +358,17 @@ CalcBaselineParameters.update({
     "numin_i":{doc:"""Channel number in spectrum of the minium frequency where to calculate baseline. Apply hanning taper below.""",
            default: lambda self:max(self.frequency.findlowerbound(self.numin).val(),0) if self.numin>0 else 0,
            output:True},
-    
+
     "numax_i":{doc:"""Channel number in spectrum of the maxium frequency where to calculate baseline. Apply hanning taper above.""",
            default: lambda self:min(self.frequency.findlowerbound(self.numax).val(),self.nofChannels) if self.numax>0 else self.nofChannels,
            output:True},
-    
+
     "height_ends":{doc:"""The heights of the baseline at theleft and right endpoints of the usable bandwidth where a hanning function is smoothly added.""",
            default:lambda self:hArray(float,[2,self.nofAntennas])},
 
     "coeffs":{doc:"Polynomial coefficients of the baseline fit with the dimension [nofAntennas,ncoeffs] or [ncoeffs]",#input:True,
           default:lambda self:hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]},
-    
+
     "dim_coeffs":{doc:"Dimension of the coefficients array (which should be [nofAntennas,ncoeff] or [ncoeff] for nofAntennas==1)",
           default:lambda self:self.coeffs.getDim()},
     "nofAntennasCoeffs":{doc:"Number of antennas in coeffcient array.",
@@ -373,7 +385,7 @@ CalcBaselineParameters.update({
     "invert":{doc:"Invert the baseline so that it can later simply be multiplied to take out the gain variations.", default:True},
 
     "HanningUp":{doc:"Let the Hanning filter at the ends go up rather than down (useful if one wants to divide by baseline and suppress out-of-band-noise)", default:True},
-    
+
     "normalize":{doc:"If true, normalize the baseline to have a total sum of unity.",  default:True}
 #    "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration. If >0 then multiply the new baseline wvith th (information only at this point).",default:0},
 
@@ -382,26 +394,27 @@ CalcBaselineParameters.update({
 
 class CalcBaseline(tasks.Task):
     """
-    CalcBaseline(baseline_array)
+    Usage::
 
-    
+      >>> CalcBaseline(baseline_array)
+
     Calculate a smooth baseline from a set of coefficients that
-    determine the baseline (e.g. as calculated by FitBaseline) and an
+    determine the baseline (e.g. as calculated by ``FitBaseline``) and an
     array of frequencies (which need not be equi-spaced).
 
-    It will return the inverse of the baseline (if invert=True), i.e. what one needs to
+    It will return the inverse of the baseline (if ``invert=True``), i.e. what one needs to
     multiply a measured spectrum with.
 
-    Note, sometimes the fit can go wrong if 'logfit=True' the
+    Note, sometimes the fit can go wrong if ``logfit=True`` the
     interpolation has wiggles. In this case the exponent of a large
     number is calculated, yielding a numerical error. In this case
-    switch set logfit=False (to see what is going).    
+    switch set ``logfit=False`` (to see what is going).
     """
     parameters=CalcBaselineParameters
-    
+
     def call(self,spectrum):
         pass
-    
+
     def run(self):
         if not type(self.spectrum) in hAllArrayTypes:
             print "ERROR: please provide an hArray as input for the positional argument 'spectrum'!"
@@ -427,7 +440,7 @@ class CalcBaseline(tasks.Task):
 
         #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
         #Left end
-        if self.addHanning:    
+        if self.addHanning:
             self.height_ends[0,...].copy(self.work_baseline[...,self.numin_i])
             self.height_ends[1,...].copy(self.work_baseline[...,self.numax_i-1])
             self.factor=hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
@@ -460,7 +473,7 @@ class CalcBaseline(tasks.Task):
 
 
 ApplyBaselineParameters = dict(
-    [(p,CalcBaseline.parameters[p]) for p in 
+    [(p,CalcBaseline.parameters[p]) for p in
      [
      'FitParameters',
      'spectrum',
@@ -491,11 +504,11 @@ ApplyBaselineParameters = dict(
 ApplyBaselineParameters.update({
 
     "filename":{default:lambda self: "tmpspec.clean.pcr" if not self.spectrum.hasHeader("filename") else root_filename(self.spectrum.getHeader("filename"))+".clean",
-        doc: "Filename to write output to"},    
+        doc: "Filename to write output to"},
 
     # "FitParameters":{doc:"Parameters of the baseline fitting routine.",
     #            default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
-    
+
     # "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
     #        default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
 
@@ -503,12 +516,12 @@ ApplyBaselineParameters.update({
     #        default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
 
     "plotchannel":{doc:"Which channel to plot",default:0},
-    
+
     "adaptive_peak_threshold":{doc:"If True then calculate the threshold above which to cut peaks in 'nbins' separate bins and thus let it vary over the spectrum",
         default:False},
-    
+
     "apply_baseline":{doc:"If true then divide spectrum by baseline before removing peaks.",default: True},
-    
+
     "mean":{doc:"Median mean value of blocks in downsampled spectrum - used to replace flagged data with (output only)",
            default:1},
 
@@ -527,13 +540,13 @@ ApplyBaselineParameters.update({
 
     "nbins":{doc:"""The number of bins to be used to subdivide spectrum for selecting the best RMS.""",
          default: lambda self:max(self.nofChannelsUsed/256,min(256,self.nofChannelsUsed/8))},
-    
+
     "blocklen":{doc:"""The blocklem of one bin used to subdivide spectrum for selecting the best RMS.""",
         default: lambda self:self.nofChannelsUsed/self.nbins},
-    
+
     "ndirty_channels":{doc:"""Number of dirty channles to be removed as RFI. (output only)""",
                default:0,output:True},
-    
+
     "dirty_channels":{doc:"""Array of indices pointing to dirty bins, i.e. with high RFI. (work vector)""",
               default:lambda self:hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),workarray:True}
     })
@@ -541,18 +554,19 @@ ApplyBaselineParameters.update({
 
 class ApplyBaseline(tasks.Task):
     """
-    ApplyBaseline(spectrum)
-    
-    contains spectrum.par.baseline ....
+    Usage::
+
+      >>> ApplyBaseline(spectrum)
+
+    contains ``spectrum.par.baseline``
 
     Also does RFI excision.
-    
     """
     parameters=ApplyBaselineParameters
-    
+
     def call(self,spectrum):
         pass
-    
+
     def run(self):
         self.t0=time.clock()
 
@@ -572,7 +586,7 @@ class ApplyBaseline(tasks.Task):
         # Some ugly way to fool the python bindings, since right now they down return data in the argument variables
         #self.minblk=self.work_spectrum[...,self.numin_i:self.numax_i].minstddevblock(Vector(int,[self.nofAntennas],fill=self.blocklen),self.minrms,self.minmean)
 
-        
+
         if self.adaptive_peak_threshold:
             self.means[...].downsamplespikydata(self.stddevs[...],self.work_spectrum[...],1.0);
             self.mean=self.work_spectrum[...,self.numin_i:self.numax_i].mean().val()

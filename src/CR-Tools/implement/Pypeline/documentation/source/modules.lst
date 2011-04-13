@@ -18,13 +18,16 @@ pycrtools.core.hftools.mIO
 pycrtools.core.hftools.mNumpy
 pycrtools.core.hftools.mRF
 pycrtools.core.hftools.mTBB
-# pycrtools
 pycrtools.metadata
 pycrtools.grid
 pycrtools.matching
 pycrtools.srcfind
 pycrtools.PPF
 pycrtools.tasks
+pycrtools.tasks.averagespectrum
+pycrtools.tasks.beamformer
+pycrtools.tasks.dynamicspectrum
+pycrtools.tasks.fitbaseline
 pycrtools.tasks.imager
 pycrtools.IO
 pycrtools.IO.interfaces

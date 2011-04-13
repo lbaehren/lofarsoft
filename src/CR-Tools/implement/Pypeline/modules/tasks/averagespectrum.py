@@ -1,26 +1,30 @@
-"""Spectrum documentation.
+"""
+Task: Average spectrum
+======================
 
-sp=hArrayRead('tmpspec.dat'); make_frequencies(sp)
-t=task(); r=t(sp)
+Usage::
 
-Old:
-current_task=False
-import tasks
+  >>> sp=hArrayRead('tmpspec.dat')
+  >>> make_frequencies(sp)
+  >>> t=task()
+  >>> r=t(sp)
 
-import tasks.averagespectrum as avspec
-av=avspec.averagespectrum(maxnantennas=2)
+  >>> current_task=False
+  >>> import tasks
 
+  >>> import tasks.averagespectrum as avspec
+  >>> av=avspec.averagespectrum(maxnantennas=2)
 
-import tasks.averagespectrum
-tt=avspec.ttest(y=2)
+  >>> import tasks.averagespectrum
+  >>> tt=avspec.ttest(y=2)
 
-import tasks.averagespectrum as avspec
-ws=avspec.WorkSpace(maxnantennas=2)
-ws.stride=2
-del ws.stride
-ws
+  >>> import tasks.averagespectrum as avspec
+  >>> ws=avspec.WorkSpace(maxnantennas=2)
+  >>> ws.stride=2
+  >>> del ws.stride
+  >>> ws
 
-ws=tasks.WorkSpace(**args)
+  >>> ws=tasks.WorkSpace(**args)
 """
 
 #import pdb; pdb.set_trace()
@@ -71,22 +75,23 @@ def averagespectrum_getfile(ws):
         return None
 
 """
-*default*  contains a default value or a function that will be assigned
-when the parameter is accessed the first time and no value has been
-explicitly set. The function has the form "lambda ws: functionbody", where ws is the worspace itself, so that one can access other
-parameters. E.g.: default:lambda ws: ws.par1+1 so that the default
-value is one larger than he value in par1 in the workspace.
-
-*doc* a documentation string describing the parameter
-
-*unit* the unit of the value (for informational purposes only)
-
-*export* (True) if False do not export the parameter with
- ws.parameters() or print the parameter
-
-*workarray* (False) If True then this is a workarray which contains
- large amount of memory and is listed separately and not written to
- file.
+  =========== ===== ========================================================
+  *default*         contains a default value or a function that will be
+                    assigned when the parameter is accessed the first time
+                    and no value has been explicitly set. The function has
+                    the form ``lambda ws: functionbody``, where ws is the
+                    worspace itself, so that one can access other
+                    parameters. E.g.: ``default:lambda ws: ws.par1+1`` so
+                    that the default value is one larger than the value in
+                    ``par1`` in the workspace.
+  *doc*             A documentation string describing the parameter.
+  *unit*            The unit of the value (for informational purposes only)
+  *export*    True  If ``False`` do not export the parameter with
+                    ``ws.parameters()`` or print the parameter
+  *workarray* False If ``True`` then this is a workarray which contains
+                    large amount of memory and is listed separately and
+                    not written to file.
+  =========== ===== ========================================================
 """
 
 class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
@@ -239,7 +244,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
 
         "delta_t":p_(lambda ws:ws.datafile["sampleInterval"],"Sample length in raw data set.","s"),
-        
+
         "fullsize_estimated":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile.filesize)),
         "blocklen_section":p_(lambda ws:ws.blocklen/ws.stride),
         "nsubblocks":p_(lambda ws:ws.stride*ws.nblocks),
@@ -297,7 +302,6 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
 class AverageSpectrum(tasks.Task):
     """
-
     The function will calculate an average spectrum from a list of
     files and a series of antennas (all averaged into one
     spectrum).
@@ -305,38 +309,38 @@ class AverageSpectrum(tasks.Task):
     The task will do a basic quality check of each time series data
     set and only average good data.
 
-    For very large FFTs, and to save memory, one can use a 'doublefft'
+    For very large FFTs, and to save memory, one can use a ``doublefft``
     which means that one big FFT is split into two steps of smaller
     FFts. This allows almost arbitrary resolution.
 
     The desired frequency resolution is provided with the parameter
-    delta_nu, but this will be rounded off to the nearest value using
+    ``delta_nu``, but this will be rounded off to the nearest value using
     channel numbers of a power of 2.
 
-    The resulting spectrum is stored in the array Task.power (only
-    complete for stride=1) and written to disk as an hArray with
+    The resulting spectrum is stored in the array ``Task.power`` (only
+    complete for ``stride=1``) and written to disk as an hArray with
     parameters stored in the header dict (use
-    getHeader('AverageSpectrum') to retrieve this.)
+    ``getHeader('AverageSpectrum')`` to retrieve this.)
 
     This spectrum can be read back and a baseline can be fitted with
-    FitBaseline.
+    ``FitBaseline``.
 
     To avoid the spectrum being influenced by spikes in the time
     series, those spikes can be replaced by random numbers, before the
-    FFT is taken (see 'randomize_peaks').
+    FFT is taken (see ``randomize_peaks``).
 
     The quality information (RMS, MEAN, flagged blocks per antennas)
     is stored in a data 'quality database' in text and python form and
-    is also available as Task.quality. (See also:
-    Task.antennacharacteristics, Task.mean, Task.mean_rms, Task.rms,
-    Task.rms_rms, Task.npeaks, Task.npeaks_rms,
-    Task.homogeneity_factor - the latter is printend and is a useful
+    is also available as ``Task.quality``. (See also:
+    ``Task.antennacharacteristics``, ``Task.mean``, ``Task.mean_rms``, ``Task.rms``,
+    ``Task.rms_rms``, ``Task.npeaks``, ``Task.npeaks_rms``,
+    ``Task.homogeneity_factor`` - the latter is printend and is a useful
     hint if something is wrong)
 
     Flagged blocks can be easily inspeced using the task method
-    Task.qplot (qplot for quality plot).
+    ``Task.qplot`` (``qplot`` for quality plot).
 
-    If you see an outputline like this,
+    If you see an outputline like this::
 
       # Start antenna = 92 (ID= 17011092) - 4 passes:
       184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
@@ -347,21 +351,20 @@ class AverageSpectrum(tasks.Task):
     this will tell you that Antenna 17011092 was worked on (the 92nd
     antenna in the data file) and the 186th chunk (block 514)
     contained some suspicious data (too many spikes). If you want to
-    inspect this, you can call
+    inspect this, you can call::
 
-    Task.qplot(186)
+      >>> Task.qplot(186)
 
     This will plot the chunk and highlight the first flagged block
-    (#514) in that chunk.
+    (#514) in that chunk::
 
-    Task.qplot(186,1)
+      >>> Task.qplot(186,1)
 
     would highlight the second flagged block (which does not exist here).
 
-    If the chunks are too long to be entirely plotted, use
+    If the chunks are too long to be entirely plotted, use::
 
-    Task.qplot(186,all=False).
-
+      >>> Task.qplot(186,all=False).
     """
     WorkSpace = WorkSpace
 
@@ -556,31 +559,31 @@ class AverageSpectrum(tasks.Task):
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
-        If you see an output line like this,
+        If you see an output line like this::
 
-    # Start antenna = 92 (ID= 17011092) - 4 passes:
-    184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
-    185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
-    186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
-    - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
+          # Start antenna = 92 (ID= 17011092) - 4 passes:
+          184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
+          185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
+          186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
+          - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
 
-    this will tell you that Antenna 17011092 was worked on (the 92nd
-    antenna in the data file) and the 186th chunk (block 514)
-    contained some suspicious data (too many spikes). If you want to
-    inspect this, you can call
+        this will tell you that Antenna 17011092 was worked on (the 92nd
+        antenna in the data file) and the 186th chunk (block 514)
+        contained some suspicious data (too many spikes). If you want to
+        inspect this, you can call::
 
-    Task.qplot(186)
+          >>> Task.qplot(186)
 
-    This will plot the chunk and highlight the first flagged block
-    (#514) in that chunk.
+        This will plot the chunk and highlight the first flagged block
+        (#514) in that chunk::
 
-    Task.qplot(186,1)
+          >>> Task.qplot(186,1)
 
-    would highlight the second flagged block (which does not exist here).
+        would highlight the second flagged block (which does not exist here).
 
-    If the chunks are too long to be entirely plotted, use
+        If the chunks are too long to be entirely plotted, use::
 
-    Task.qplot(186,all=False).
+          >>> Task.qplot(186,all=False).
         """
         quality_entry=self.quality[entry]
         filename=quality_entry["filename"]
@@ -609,29 +612,27 @@ class AverageSpectrum(tasks.Task):
 
 
 
-"""
-class test1(tasks.Task):
-#    " ""
-    Documentation of task - parameters will be added automatically
-#    " ""
-#    parameters = {"x":{default:None,doc:"x-value - a positional parameter",positional:True},"y":{default:2, doc:"y-value - a normal keyword parameter"},"xy":{default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
-    parameters = {"x":p_(None,"x-value - a positional parameter",positional=True),"y":p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
-    def init(self):
-        print "Calling optional initialization routine - Nothing to do here."
-    def run(self):
-        print "Calling Run Function."
-        print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
 
-class test2(tasks.Task):
-    " ""
-    Documentation of task - parameters will be added automatically
-    " ""
-    def call(self,x,y=2,xy=lambda ws:ws.x*ws.y):
-        pass
-    def init(self):
-        print "Calling optional initialization routine - Nothing to do here."
-    def run(self):
-        print "Calling Run Function."
-        print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
+# class test1(tasks.Task):
+#     """
+#     Documentation of task - parameters will be added automatically
+#     """
+#     parameters = {"x":p_(None,"x-value - a positional parameter",positional=True),"y":p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
+#     def init(self):
+#         print "Calling optional initialization routine - Nothing to do here."
+#     def run(self):
+#         print "Calling Run Function."
+#         print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
 
-"""
+# class test2(tasks.Task):
+#     """
+#     Documentation of task - parameters will be added automatically
+#     """
+#     def call(self,x,y=2,xy=lambda ws:ws.x*ws.y):
+#         pass
+#     def init(self):
+#         print "Calling optional initialization routine - Nothing to do here."
+#     def run(self):
+#         print "Calling Run Function."
+#         print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
+

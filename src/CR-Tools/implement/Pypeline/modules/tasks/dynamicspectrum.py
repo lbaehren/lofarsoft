@@ -1,6 +1,6 @@
-"""Spectrum documentation.
-
-
+"""
+Dynamic spectrum documentation
+==============================
 """
 
 #import pdb; pdb.set_trace()
@@ -27,30 +27,30 @@ def dynamicspectrum_getfile(ws):
         return None
 
 """
-*default*  contains a default value or a function that will be assigned
-when the parameter is accessed the first time and no value has been
-explicitly set. The function has the form "lambda ws: functionbody", where ws is the worspace itself, so that one can access other
-parameters. E.g.: default:lambda ws: ws.par1+1 so that the default
-value is one larger than he value in par1 in the workspace.
-
-*doc* a documentation string describing the parameter
-
-*unit* the unit of the value (for informational purposes only)
-
-*export* (True) if False do not export the parameter with
- ws.parameters() or print the parameter
-
-*workarray* (False) If True then this is a workarray which contains
- large amount of memory and is listed separately and not written to
- file.
-"""
+  =========== ===== ========================================================
+  *default*         contains a default value or a function that will be
+                    assigned when the parameter is accessed the first time
+                    and no value has been explicitly set. The function has
+                    the form ``lambda ws: functionbody``, where ws is the
+                    worspace itself, so that one can access other
+                    parameters. E.g.: ``default:lambda ws: ws.par1+1`` so
+                    that the default value is one larger than the value in
+                    ``par1`` in the workspace.
+  *doc*             A documentation string describing the parameter.
+  *unit*            The unit of the value (for informational purposes only)
+  *export*    True  If ``False`` do not export the parameter with
+                    ``ws.parameters()`` or print the parameter
+  *workarray* False If ``True`` then this is a workarray which contains
+                    large amount of memory and is listed separately and
+                    not written to file.
+  =========== ===== ========================================================
+  """
 
 
 #    files = [f for f in files if test.search(f)]
 
 class DynamicSpectrum(tasks.Task):
     """
-
     The function will calculate a dynamic spectrum from a list of
     files and a series of antennas (all averaged into one
     spectrum).
@@ -64,28 +64,28 @@ class DynamicSpectrum(tasks.Task):
     rounded to give an integer number of blocks which Nyquist sample
     the rounded frequency resolution.
 
-    The resulting spectrum is stored in the array Task.dynspec and
+    The resulting spectrum is stored in the array ``Task.dynspec`` and
     written to disk as an hArray with parameters stored in the header
-    dict (use getHeader('DynamicSpectrum') to retrieve this.)
+    dict (use ``getHeader('DynamicSpectrum')`` to retrieve this.)
 
-    This spectrum can be read back and viewed with Task.dynspec.
+    This spectrum can be read back and viewed with ``Task.dynspec``.
 
     To avoid the spectrum being influenced by spikes in the time
     series, those spikes can be replaced by random numbers, before the
-    FFT is taken (see 'randomize_peaks').
+    FFT is taken (see ``randomize_peaks``).
 
     The quality information (RMS, MEAN, flagged blocks per antennas)
     is stored in a data 'quality database' in text and python form and
-    is also available as Task.quality. (See also:
-    Task.antennacharacteristics, Task.mean, Task.mean_rms, Task.rms,
-    Task.rms_rms, Task.npeaks, Task.npeaks_rms,
-    Task.homogeneity_factor - the latter is printend and is a useful
+    is also available as ``Task.quality``. (See also:
+    ``Task.antennacharacteristics``, ``Task.mean``, ``Task.mean_rms``, ``Task.rms``,
+    ``Task.rms_rms``, ``Task.npeaks``, ``Task.npeaks_rms``,
+    ``Task.homogeneity_factor`` - the latter is printend and is a useful
     hint if something is wrong)
 
     Flagged blocks can be easily inspeced using the task method
     Task.qplot (qplot for quality plot).
 
-    If you see an outputline like this,
+    If you see an outputline like this::
 
       # Start antenna = 92 (ID= 17011092) - 4 passes:
       184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
@@ -96,21 +96,20 @@ class DynamicSpectrum(tasks.Task):
     this will tell you that Antenna 17011092 was worked on (the 92nd
     antenna in the data file) and the 186th chunk (block 514)
     contained some suspicious data (too many spikes). If you want to
-    inspect this, you can call
+    inspect this, you can call::
 
-    Task.qplot(186)
+      >>> Task.qplot(186)
 
     This will plot the chunk and highlight the first flagged block
-    (#514) in that chunk.
+    (#514) in that chunk::
 
-    Task.qplot(186,1)
+      >>> Task.qplot(186,1)
 
     would highlight the second flagged block (which does not exist here).
 
-    If the chunks are too long to be entirely plotted, use
+    If the chunks are too long to be entirely plotted, use::
 
-    Task.qplot(186,all=False).
-
+      >>> Task.qplot(186,all=False).
     """
     parameters = {
         "filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
@@ -134,7 +133,7 @@ class DynamicSpectrum(tasks.Task):
          "plot_end":{default:lambda self: min(int(self.speclen*self.plot_center)+self.plotlen,self.speclen),doc:"End plotting before this sample number."},
 
          "delta_nu":{default:10**4,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen",unit:"Hz"},
-         
+
          "delta_t":{default:10**-3,doc:"Desired time resolution - will be rounded off to get integer number of spectral chunks",unit:"s"},
 
          "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
@@ -144,7 +143,7 @@ class DynamicSpectrum(tasks.Task):
          "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
 
          "stride":{default:1, doc:"If stride>1 skip (stride-1) blocks."},
-         
+
          "tmpfileext":{default:".pcr",
                       doc:"Extension of filename for temporary data files (e.g., used if stride>1.)",export:False},
 
@@ -155,7 +154,7 @@ class DynamicSpectrum(tasks.Task):
                     doc:"List of filenames of data file to read raw data from."},
 
         "output_dir":{default:"",doc:"Directory where output file is to be written to."},
-    
+
         "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".dynspec"+self.tmpfileext,
                          doc:"Filename (without directory, see output_dir) to store the final spectrum."},
 
@@ -192,7 +191,7 @@ class DynamicSpectrum(tasks.Task):
         "homogeneity_factor":{default:0,doc:"=1-(rms_rms/rms+ npeaks_rms/npeaks)/2 - this describes the homogeneity of the data processed. A homogeneity_factor=1 means that all antenna data were identical, a low factor should make one wonder if something went wrong.",output:True},
 
         "spikeexcess":dict(default=20,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
-        
+
         "rmsfactor":dict(default=2,doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
 
         "meanfactor":dict(default=3,doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
@@ -203,11 +202,11 @@ class DynamicSpectrum(tasks.Task):
 
 #------------------------------------------------------------------------
 # Derived parameters
-        
+
         "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
 
         "block_duration":{default:lambda self:self.samplerate*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
-        
+
         "speclen":p_(lambda self:self.blocklen/2+1,"Length of one spectrum.","Channels"),
 
         "samplerate":p_(lambda self:self.datafile["sampleInterval"],"Length in time of one sample in raw data set.","s"),
@@ -280,7 +279,7 @@ class DynamicSpectrum(tasks.Task):
         "header":p_(lambda self:self.datafile.hdr,"Header of datafile",export=False),
 
         "freqs":p_(lambda self:self.datafile["Frequency"],export=False),
-        
+
         "lofarmode":{default:"LBA_OUTER",
                      doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER) - only used for quality output"},
 
@@ -332,7 +331,7 @@ class DynamicSpectrum(tasks.Task):
         self.updateHeader(self.dynspec,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_t="delta_t_used",delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
         self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
         dataok=True
-        
+
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         if self.doplot:
@@ -386,7 +385,7 @@ class DynamicSpectrum(tasks.Task):
                             self.dynspec[nchunk,self.plot_start:self.plot_end].plot()
                             print "RMS of plotted spectrum=",self.dynspec[nchunk,self.plot_start:self.plot_end].stddev()
                             plt.draw(); plt.show()
-                     #End for nchunk       
+                     #End for nchunk
                 if self.doplot>1:
                     self.avspec.fill(0.0)
                     self.dynspec[...].addto(self.avspec)
@@ -441,22 +440,19 @@ class DynamicSpectrum(tasks.Task):
         Plot the dynamic spectrum. Provide the dynamic spectrum
         computed by the Task DynamicSpectrum as input.
 
-        *plot_cleanspec* = None - If False, don't plot the cleaned
-         spectrum (provided as dynspec.par.cleanspec).
+        ================ ==== ==============================================================================
+        *plot_cleanspec* None If False, don't plot the cleaned spectrum (provided as dynspec.par.cleanspec).
+        *dmin*                Minimum z-value (intensity) in dynamic spectrum to plot.
+        *dmax*                Maximum z-value (intensity) in dynamic spectrum to plot.
+        *cmin*                Minimum z-value (intensity) in clean dynamic spectrum to plot.
+        *cmax*                Maximum z-value (intensity) in clean dynamic spectrum to plot.
+        ================ ==== ==============================================================================
 
-         *dmin* - Minimum z-value (intensity) in dynamic spectrum to plot
-         
-         *dmax* - Maximum z-value (intensity) in dynamic spectrum to plot
-         
-         *cmin* - Minimum z-value (intensity) in clean dynamic spectrum to plot
-         
-         *cmax* - Maximum z-value (intensity) in clean dynamic spectrum to plot
+        Example::
 
-         Example:
-         
-         tload "DynamicSpectrum"
-         dsp=hArrayRead("Saturn.h5.dynspec.pcr")
-         Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
+          >>> tload "DynamicSpectrum"
+          >>> dsp=hArrayRead("Saturn.h5.dynspec.pcr")
+          >>> Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
         """
         if hasattr(dynspec,"par") and hasattr(dynspec.par,"cleanspec") and not plot_cleanspec==False:
             cleanspec=dynspec.par.cleanspec
@@ -486,31 +482,31 @@ class DynamicSpectrum(tasks.Task):
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
-        If you see an output line like this,
+        If you see an output line like this::
 
-    # Start antenna = 92 (ID= 17011092) - 4 passes:
-    184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
-    185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
-    186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
-    - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
+          # Start antenna = 92 (ID= 17011092) - 4 passes:
+          184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
+          185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
+          186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
+          - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
 
-    this will tell you that Antenna 17011092 was worked on (the 92nd
-    antenna in the data file) and the 186th chunk (block 514)
-    contained some suspicious data (too many spikes). If you want to
-    inspect this, you can call
+        this will tell you that Antenna 17011092 was worked on (the 92nd
+        antenna in the data file) and the 186th chunk (block 514)
+        contained some suspicious data (too many spikes). If you want to
+        inspect this, you can call::
 
-    Task.qplot(186)
+          >>> Task.qplot(186)
 
-    This will plot the chunk and highlight the first flagged block
-    (#514) in that chunk.
+        This will plot the chunk and highlight the first flagged block
+        (#514) in that chunk::
 
-    Task.qplot(186,1)
+           >>> Task.qplot(186,1)
 
-    would highlight the second flagged block (which does not exist here).
+        would highlight the second flagged block (which does not exist here).
 
-    If the chunks are too long to be entirely plotted, use
+        If the chunks are too long to be entirely plotted, use::
 
-    Task.qplot(186,all=False).
+          >>> Task.qplot(186,all=False).
         """
         quality_entry=self.quality[entry]
         filename=quality_entry["filename"]
@@ -536,5 +532,4 @@ class DynamicSpectrum(tasks.Task):
         y.par.xvalues=datafile["Time"]
         y.par.xvalues.setUnit("mu","")
         y.plot(clf=not all)
-
 
