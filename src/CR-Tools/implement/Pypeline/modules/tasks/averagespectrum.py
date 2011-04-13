@@ -25,6 +25,7 @@ Usage::
   >>> ws
 
   >>> ws=tasks.WorkSpace(**args)
+
 """
 
 #import pdb; pdb.set_trace()
@@ -75,64 +76,79 @@ def averagespectrum_getfile(ws):
         return None
 
 """
-  =========== ===== ========================================================
-  *default*         contains a default value or a function that will be
-                    assigned when the parameter is accessed the first time
-                    and no value has been explicitly set. The function has
-                    the form ``lambda ws: functionbody``, where ws is the
-                    worspace itself, so that one can access other
-                    parameters. E.g.: ``default:lambda ws: ws.par1+1`` so
-                    that the default value is one larger than the value in
-                    ``par1`` in the workspace.
-  *doc*             A documentation string describing the parameter.
-  *unit*            The unit of the value (for informational purposes only)
-  *export*    True  If ``False`` do not export the parameter with
-                    ``ws.parameters()`` or print the parameter
-  *workarray* False If ``True`` then this is a workarray which contains
-                    large amount of memory and is listed separately and
-                    not written to file.
-  =========== ===== ========================================================
+=========== ===== ========================================================
+*default*         contains a default value or a function that will be
+                  assigned when the parameter is accessed the first time
+                  and no value has been explicitly set. The function has
+                  the form ``lambda ws: functionbody``, where ws is the
+                  worspace itself, so that one can access other
+                  parameters. E.g.: ``default:lambda ws: ws.par1+1`` so
+                  that the default value is one larger than the value in
+                  ``par1`` in the workspace.
+*doc*             A documentation string describing the parameter.
+*unit*            The unit of the value (for informational purposes only)
+*export*    True  If ``False`` do not export the parameter with
+                  ``ws.parameters()`` or print the parameter
+*workarray* False If ``True`` then this is a workarray which contains
+                  large amount of memory and is listed separately and
+                  not written to file.
+=========== ===== ========================================================
+
 """
 
 class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
+    """
+    """
     parameters = {
 
         "filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
-                        "Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
+                        "Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
 
         "file_start_number":{default:0,
-                    doc:"Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."},
+                    doc:"Integer number pointing to the first file in the ``filenames`` list with which to start. Can be changed to restart a calculation."},
 
-        "datafile":{default:averagespectrum_getfile,export:False,doc:"Data file object pointing to raw data."},
+        "datafile":{default:averagespectrum_getfile,export:False,
+                    doc:"Data file object pointing to raw data."},
 
-        "doplot":{default:False,doc:"Plot current spectrum while processing."},
+        "doplot":{default:False,
+                  doc:"Plot current spectrum while processing."},
 
-        "plotlen":{default:2**12,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
+        "plotlen":{default:2**12,
+                   doc:"How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."},
 
-        "plotskip":{default:1,doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
+        "plotskip":{default:1,
+                    doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
 
         "lofarmode":{default:"LBA_OUTER",
-                     doc:"Which LOFAR mode was used (HBA/LBA_OUTER/LBA_INNER)"},
+                     doc:"Which LOFAR mode was used (``HBA``/``LBA_OUTER``/``LBA_INNER``)"},
 
-        "stride_n":p_(0,"if >0 then divide the FFT processing in n=2**stride_n blocks. This is slower but uses less memory."),
+        "stride_n":p_(0,
+                      "if >0 then divide the FFT processing in ``n=2**stride_n blocks``. This is slower but uses less memory."),
 
-        "doublefft":{doc:"if True split the FFT into two, thereby saving memory.", default:False},
+        "doublefft":{default:False,
+                     doc:"if True split the FFT into two, thereby saving memory."},
 
-        "delta_nu":{default:1000,doc:"Frequency resolution",unit:"Hz"},
+        "delta_nu":{default:1000,
+                    doc:"Frequency resolution",
+                    unit:"Hz"},
 
-        "blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),doc:"The size of a block being read in."},
+        "blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),
+                    doc:"The size of a block being read in."},
 
-        "maxnantennas":{default:1,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
+        "maxnantennas":{default:1,
+                        doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
 
-        "maxnchunks":{default:1,doc:"Maximum number of chunks of raw data to integrate spectrum over."},
+        "maxnchunks":{default:1,
+                      doc:"Maximum number of chunks of raw data to integrate spectrum over."},
 
-        "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
+        "maxblocksflagged":{default:2,
+                            doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
 
         "stride":{default:lambda ws: 2**ws.stride_n if ws.doublefft else 1,
-                  doc:"If stride>1 divide the FFT processing in n=stride blocks."},
+                  doc:"If ``stride>1`` divide the FFT processing in ``n=stride`` blocks."},
 
         "tmpfileext":{default:".pcr",
-                      doc:"Extension of filename for temporary data files (e.g., used if stride>1.)"},
+                      doc:"Extension of filename for temporary data files (e.g., used if ``stride > 1``.)"},
 
         "tmpfilename":{default:"tmp",
                        doc:"Root filename for temporary data files."},
@@ -143,86 +159,128 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "spectrum_file":{default:lambda ws:(ws.filenames[0] if len(ws.filenames)>0 else "unknown")+".spec"+ws.tmpfileext,
                          doc:"Filename to store the final spectrum."},
 
-        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
+        "qualitycheck":{default:True,
+                        doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
 
         "quality_db_filename":{default:"qualitydatabase",
-                               doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
+                               doc:"Root filename of log file containing the derived antenna quality values (uses '.py' and '.txt' extension)."},
 
-        "quality":{default:[],doc:"A list containing quality check information about every large chunk of data that was read in. Use Task.qplot(Entry#,flaggedblock=nn) to plot blocks in question.",export:False,output:True},
+        "quality":{default:[],
+                   doc:"A list containing quality check information about every large chunk of data that was read in. Use ``Task.qplot(Entry#,flaggedblock=nn)`` to plot blocks in question.",
+                   export:False,
+                   output:True},
 
-        "antennacharacteristics":{default:{},doc:"A dict with antenna IDs as key, containing quality information about every antenna.",export:False,output:True},
+        "antennacharacteristics":{default:{},
+                                  doc:"A dict with antenna IDs as key, containing quality information about every antenna.",
+                                  export:False,
+                                  output:True},
 
-        "mean_antenna":{default:lambda self: hArray(float,[self.maxnantennas], name="Mean per Antenna"),doc:"Mean value of time series per antenna.",output:True},
+        "mean_antenna":{default:lambda self: hArray(float,[self.maxnantennas], name="Mean per Antenna"),
+                        doc:"Mean value of time series per antenna.",
+                        output:True},
 
-        "rms_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="RMS per Antenna"),doc:"Rms value of time series per antenna.",output:True},
+        "rms_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="RMS per Antenna"),
+                       doc:"RMS value of time series per antenna.",
+                       output:True},
 
-        "npeaks_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="Number of Peaks per Antenna"),doc:"Number of peaks of time series per antenna.",output:True},
+        "npeaks_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="Number of Peaks per Antenna"),
+                          doc:"Number of peaks of time series per antenna.",
+                          output:True},
 
-        "mean":{default:0,doc:"Mean of mean time series values of all antennas.",output:True},
+        "mean":{default:0,
+                doc:"Mean of mean time series values of all antennas.",
+                output:True},
 
-        "mean_rms":{default:0,doc:"RMS of mean of mean time series values of all antennas.",output:True},
+        "mean_rms":{default:0,
+                    doc:"RMS of mean of mean time series values of all antennas.",
+                    output:True},
 
-        "npeaks":{default:0,doc:"Mean of number of peaks all antennas.",output:True},
+        "npeaks":{default:0,
+                  doc:"Mean of number of peaks all antennas.",
+                  output:True},
 
-        "npeaks_rms":{default:0,doc:"RMS of npeaks over all antennas.",output:True},
+        "npeaks_rms":{default:0,
+                      doc:"RMS of npeaks over all antennas.",
+                      output:True},
 
-        "rms":{default:0,doc:"Mean of rms time series values of all antennas.",output:True},
+        "rms":{default:0,
+               doc:"Mean of RMS time series values of all antennas.",
+               output:True},
 
-        "rms_rms":{default:0,doc:"RMS of rms of mean time series values of all antennas.",output:True},
+        "rms_rms":{default:0,
+                   doc:"RMS of rms of mean time series values of all antennas.",
+                   output:True},
 
-        "homogeneity_factor":{default:0,doc:"=1-(rms_rms/rms+ npeaks_rms/npeaks)/2 - this describes the homogeneity of the data processed. A homogeneity_factor=1 means that all antenna data were identical, a low factor should make one wonder if something went wrong.",output:True},
+        "homogeneity_factor":{default:0,
+                              doc:"``=1-(rms_rms/rms+ npeaks_rms/npeaks)/2`` - this describes the homogeneity of the data processed. A ``homogeneity_factor = 1`` means that all antenna data were identical, a low factor should make one wonder if something went wrong.",
+                              output:True},
 
-        "spikeexcess":dict(default=20,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
-        "rmsfactor":dict(default=2,doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
+        "spikeexcess":dict(default=20,
+                           doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
 
-        "meanfactor":dict(default=3,doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
+        "rmsfactor":dict(default=2,
+                         doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
 
-        "randomize_peaks":{default:True,doc:"Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."},
+        "meanfactor":dict(default=3,
+                          doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
 
-        "peak_rmsfactor":dict(default=5,doc="At how many sigmas above the mean will a peak be randomized."),
+        "randomize_peaks":{default:True,
+                           doc:"Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."},
+
+        "peak_rmsfactor":dict(default=5,
+                              doc="At how many sigmas above the mean will a peak be randomized."),
 
         "start_frequency":{default:lambda ws:ws.freqs[0],
-                           doc:"Start frequency of spectrum",unit:"Hz"},
+                           doc:"Start frequency of spectrum",
+                           unit:"Hz"},
 
         "end_frequency":{default:lambda ws:ws.freqs[-1],
-                         doc:"End frequency of spectrum",unit:"Hz"},
+                         doc:"End frequency of spectrum",
+                         unit:"Hz"},
 
-        "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
+        "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),
+                             "Separation of two subsequent channels in final spectrum"),
 
         "delta_band":{default:lambda ws:(ws.end_frequency-ws.start_frequency)/ws.stride*2,
-                      doc:"Frequency width of one section/band of spectrum",unit:"Hz"},
+                      doc:"Frequency width of one section/band of spectrum",
+                      unit:"Hz"},
 
         "full_blocklen":{default:lambda ws:ws.blocklen*ws.stride,
-                         doc:"Full block length",unit:"Samples"},
+                         doc:"Full block length",
+                         unit:"Samples"},
 
-        "fullsize":p_(lambda ws:ws.nblocks*ws.full_blocklen,"The full length of the raw time series data used for one spectral chunk."),
+        "fullsize":p_(lambda ws:ws.nblocks*ws.full_blocklen,
+                      "The full length of the raw time series data used for one spectral chunk."),
 
         "nblocks":{default:lambda ws:2**int(round(log(ws.fullsize_estimated/ws.full_blocklen,2))),
-                   doc:"Number of blocks of lenght blocklen the time series data set is split in. The blocks are also used for quality checking."},
+                   doc:"Number of blocks of lenght ``blocklen`` the time series data set is split in. The blocks are also used for quality checking."},
 
         "nbands":{default:lambda ws:(ws.stride+1)/2,
-                  doc:"Number of bands in spectrum which are separately written to disk, if stride>1. This is one half of stride, since only the lower half of the spectrum is written to disk."},
+                  doc:"Number of bands in spectrum which are separately written to disk, if ``stride > 1``. This is one half of stride, since only the lower half of the spectrum is written to disk."},
 
         "subspeclen":{default:lambda ws:ws.blocklen*ws.nblocks,
                       doc:"Size of one section/band of the final spectrum"},
 
         "nsamples_data":{default:lambda ws:float(ws.fullsize)/10**6,
-                         doc:"Number of samples in raw antenna file",unit:"MSamples"},
+                         doc:"Number of samples in raw antenna file",
+                         unit:"MSamples"},
 
         "size_data":{default:lambda ws:float(ws.fullsize)/1024/1024*16,
-                     doc:"Number of samples in raw antenna file",unit:"MBytes"},
+                     doc:"Number of samples in raw antenna file",
+                     unit:"MBytes"},
 
         "nantennas":{default:lambda ws:len(ws.antennas),
-                     doc:"The actual number of antennas available for calculation in the file (<maxnantennas)."},
+                     doc:"The actual number of antennas available for calculation in the file (``< maxnantennas``)."},
 
         "nantennas_start":{default:0,
-                     doc:"Start with the nth antenna in each file (see also natennas_stride). Can be used for selecting odd/even antennas."},
+                     doc:"Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."},
 
         "antenna_list":{default:{},
-                     doc:"List of antenna indices used as input from each filename.",output:True},
+                     doc:"List of antenna indices used as input from each filename.",
+                        output:True},
 
         "nantennas_stride":{default:1,
-                     doc:"Take only every nth antenna from antennas list (see also natennas_start). Use 2 to select odd/even."},
+                     doc:"Take only every *n*-th antenna from antennas list (see also ``nantennas_start``). Use 2 to select odd/even."},
 
         "nchunks_max":{default:lambda ws:float(ws.datafile.filesize)/ws.fullsize,
                        doc:"Maximum number of spectral chunks to average"},
@@ -230,73 +288,95 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "nchunks":{default:lambda ws:min(ws.datafile.filesize/ws.fullsize,ws.maxnchunks),
                    doc:"Number of spectral chunks that are averaged"},
 
-        "nspectraadded":p_(lambda ws:0,"Number of spectra added at the end.",output=True),
+        "nspectraadded":p_(lambda ws:0,
+                           "Number of spectra added at the end.",
+                           output=True),
 
-        "nspectraflagged":p_(lambda ws:0,"Number of spectra flagged and not used.",output=True),
+        "nspectraflagged":p_(lambda ws:0,
+                             "Number of spectra flagged and not used.",
+                             output=True),
 
-        "antennas":p_(lambda ws:hArray(range(min(ws.datafile["nofAntennas"],ws.maxnantennas))),"Antennas from which to select initially for the current file."),
+        "antennas":p_(lambda ws:hArray(range(min(ws.datafile["nofAntennas"],ws.maxnantennas))),
+                      "Antennas from which to select initially for the current file."),
 
-        "antennas_used":p_(lambda ws:set(),"A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",output=True),
+        "antennas_used":p_(lambda ws:set(),
+                           "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
+                           output=True),
 
-        "antennaIDs":p_(lambda ws:ashArray(hArray(ws.datafile["AntennaIDs"])[ws.antennas]),"Antenna IDs to be selected from for current file."),
+        "antennaIDs":p_(lambda ws:ashArray(hArray(ws.datafile["AntennaIDs"])[ws.antennas]),
+                        "Antenna IDs to be selected from for current file."),
 
-        "nantennas_total":p_(0,"Total number of antennas that were processed (flagged or not) in this run.",output=True),
+        "nantennas_total":p_(0,
+                             "Total number of antennas that were processed (flagged or not) in this run.",
+                             output=True),
 
 
-        "delta_t":p_(lambda ws:ws.datafile["sampleInterval"],"Sample length in raw data set.","s"),
+        "delta_t":p_(lambda ws:ws.datafile["sampleInterval"],
+                     "Sample length in raw data set.",
+                     "s"),
 
         "fullsize_estimated":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile.filesize)),
+
         "blocklen_section":p_(lambda ws:ws.blocklen/ws.stride),
+
         "nsubblocks":p_(lambda ws:ws.stride*ws.nblocks),
+
         "nblocks_section":p_(lambda ws:ws.nblocks/ws.stride),
+
         "speclen":p_(lambda ws:ws.fullsize/2+1),
-        "header":p_(lambda ws:ws.datafile.hdr,"Header of datafile",export=False),
-        "freqs":p_(lambda ws:ws.datafile["Frequency"],export=False),
+
+        "header":p_(lambda ws:ws.datafile.hdr,
+                    "Header of datafile",
+                    export=False),
+
+        "freqs":p_(lambda ws:ws.datafile["Frequency"],
+                   export=False),
 
 
 #Now define all the work arrays used internally
 
         "frequencies":{workarray:True,
-                       doc:"Frequency axis for final power spectrum.",default:lambda ws:
-                       hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)},
+                       doc:"Frequency axis for final power spectrum.",
+                       default:lambda ws:hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)},
 
         "power":{workarray:True,
-                 doc:"Resulting average power spectrum (or part thereof if stride>1)",default:lambda ws:
-                 hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)},
+                 doc:"Resulting average power spectrum (or part thereof if ``stride > 1``)",
+                 default:lambda ws:hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)},
 
 #                hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)},
 #Need to cerate frequencies, taking current subspec (stride) into account
 
         "cdata":{workarray:True,
-                 doc:"main input and work array",default:lambda ws:
-                 hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)},
+                 doc:"main input and work array",
+                 default:lambda ws:hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)},
 
         "cdataT":{workarray:True,
-                  doc:"Secondary input and work array",default:lambda ws:
-                  hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)},
+                  doc:"Secondary input and work array",
+                  default:lambda ws:hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)},
 
 #Note, that all the following arrays have the same memory als cdata and cdataT
 
         "tmpspecT":{workarray:True,
-                    doc:"Wrapper array for cdataT",default:lambda ws:
-                    hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)},
+                    doc:"Wrapper array for ``cdataT``",
+                    default:lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)},
 
         "tmpspec":{workarray:True,
-                   doc:"Wrapper array for cdata",default:lambda ws:
-                   hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)},
+                   doc:"Wrapper array for ``cdata``",
+                   default:lambda ws:hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)},
 
         "specT":{workarray:True,
-                 doc:"Wrapper array for cdataT",default:lambda ws:
-                 hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)},
+                 doc:"Wrapper array for ``cdataT``",
+                 default:lambda ws:hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)},
 
         "specT2":{workarray:True,
-                  doc:"Wrapper array for cdataT",default:lambda ws:
-                  hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)},
+                  doc:"Wrapper array for ``cdataT``",
+                  default:lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)},
 
         "spec":{workarray:True,
-                doc:"Wrapper array for cdata",default:lambda ws:
-                hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header)}
-}
+                doc:"Wrapper array for ``cdata``",
+                default:lambda ws:hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header)}
+        }
+
 
 #    files = [f for f in files if test.search(f)]
 
@@ -365,6 +445,7 @@ class AverageSpectrum(tasks.Task):
     If the chunks are too long to be entirely plotted, use::
 
       >>> Task.qplot(186,all=False).
+
     """
     WorkSpace = WorkSpace
 

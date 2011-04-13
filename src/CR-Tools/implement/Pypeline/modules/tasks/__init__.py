@@ -12,7 +12,7 @@ pipeline or as complex tasks to be called interactively by a user.
 
 The main parts of a pipeline are a 'run' function that performs the
 main computations, and optional initialization part that is called
-before the first time execution of the task, and a 'workspace' which
+before the first time execution of the task, and a *workspace* which
 holds all the input and output parameters of the task. The workspace
 can also hold large scratch arrays and derived parameters, which are
 only calculated when needed.
@@ -60,7 +60,7 @@ value), e.g.::
     value=Task()
 
 The run function of the task can be called repeatedly without
-re-running the initialization: Task.run() executes the run function
+re-running the initialization: ``Task.run()`` executes the run function
 and ``Task.init()`` executes the init function.
 
 To run the task one can also simply type ``go`` (also with extra
@@ -102,7 +102,7 @@ accessed via ``myWorkSpace=Task.ws`` and a workspace can be provided
 as input to a task, e.g. ``f(ws=myWorkSpace)``.
 
 The task will also write all input and output parameters to a
-parameter file (taskname-TIME.par) at execution time (and at the
+parameter file (``taskname-TIME.par``) at execution time (and at the
 end). This file is in python style and easy to read and to edit with a
 normal text editor. Tasks can be run with this file as input to set
 the parameters accordingly, using::
@@ -115,7 +115,7 @@ values can be provided so that not all parameters have to be
 specified. The parameters can also have various properties determining
 for what they are used (e.g. input/output/workarrays) and a
 documentation string which is printed at output and included in the
-__doc__ string of the task.
+``__doc__`` string of the task.
 
 The default value, however, can also be a function which is executed
 the first time the variable is accessed and the result is then stored
@@ -171,7 +171,7 @@ The modules to import in a task module are::
 If one wants to add a new task then it should either be defined in a
 separate new file in the directory modules/tasks or it should be added
 to one of the files in modules/tasks. In the former case, you have to
-add the modulename to the list 'task_modules' in __init__.py in
+add the modulename to the list 'task_modules' in ``__init__.py`` in
 modules/tasks, in the latter case it will be found automatically.
 
 The four ingredients of a task are the parameters definition (a dict
@@ -466,34 +466,62 @@ class TaskInit(type):
         """
         Adds a task to the library and adds its parameters to the documentation.
         """
-        if cls.__taskname__=='Task': return
+        if cls.__taskname__=='Task':
+            return
         task_list.add(cls.__module__+"."+cls.__taskname__)
         if hasattr(cls, "parameters"):
-            dct=cls.parameters
+            dct = cls.parameters
         else:
-            dct={}
+            dct = {}
             if hasattr(cls, "WorkSpace") and hasattr(cls.WorkSpace,"parameters"):
                 dct.update(cls.WorkSpace.parameters)
-        if not type(cls.__doc__)==str: cls.__doc__=""
-        s1=""
-        s2=""
-        for p,v in dct.items():
-            s="\n*"+p+"*"
-            if ((v.has_key(default) and not type(v[default])==types.FunctionType)):
-                s+=" = "+str(v[default])
-            if v.has_key(doc): s += " - "+v[doc]
-            if ((v.has_key(default) and type(v[default])==types.FunctionType)
-                or (v.has_key(output) and v[output])):
-                s2+=s+" (OUTPUT)"
-            else:
-                s1+=s+" (INPUT)"
-        cls.__doc__+=s1+s2
+        if (not type(cls.__doc__) == str):
+            cls.__doc__=""
 
-#    def pardoc(cls,par,**kwargs):
-#       """
-#       Return a pretty string describing a parameter based on its
-#       properties. Typcially added to the __doc__ string of a class.
-#       """
+        # Add parameter documentation
+        par_doc_input, par_doc_output = cls.pardoc(dct, indent="  ")
+        cls.__doc__ += "\n  **Input parameters**\n" + par_doc_input
+        cls.__doc__ += "\n  **Output parameters**\n" + par_doc_output + "\n"
+
+
+    def pardoc(cls, dct, indent=""):
+        """
+        Return a pretty string describing a parameter based on its
+        properties. Typcially added to the __doc__ string of a class.
+        """
+        par_doc_input = ""
+        par_doc_output = ""
+
+        newline = "\n" + indent
+
+        for p,v in sorted(dct.items()):
+            par_doc = newline + "*" + p + "*"
+            # Check for default values
+            if (v.has_key(default) and
+                (not type(v[default]) == types.FunctionType)):
+                par_doc_default = str(v[default]).strip()
+                par_doc += " [default value: "
+                # Print string values in quotes
+                if isinstance(v[default],(str, unicode, basestring)):
+                    par_doc += "'" + par_doc_default + "'"
+                else:
+                   if par_doc_default:
+                       par_doc += "``" + par_doc_default + "``"
+                par_doc += "]"
+            par_doc += newline
+            # Check for documentation
+            if v.has_key(doc):
+                par_doc += "  " + v[doc].strip() + newline*2
+            else:
+                par_doc += newline
+            # Add parameter documentation to input- or output parameter documentation.
+            if ((v.has_key(default) and (type(v[default]) == types.FunctionType)) or
+                (v.has_key(output) and v[output])):
+                par_doc_output += par_doc
+            else:
+                par_doc_input += par_doc
+
+        return par_doc_input, par_doc_output
 
 
 class Task(object):
@@ -919,7 +947,7 @@ class WorkSpace(object):
     memory.
 
     If 'ws' is the workspace the you can access parameters 'parname' in
-    the workspace as 'ws.parname' and set them with 'ws.parname=value'.
+    the workspace as ``ws.parname`` and set them with ``ws.parname=value``.
 
     The 'ws.parname' se are actually getter and setter functions. The
     actual value is stored in ws._parnanme and should not be accessed.
@@ -933,7 +961,7 @@ class WorkSpace(object):
     be nested.
 
     *parfile* - provide a filename from which to read parameters
-    in the form par1=val1, par2=val2,....
+    in the form ``par1=val1, par2=val2``,...
 
      """
     __metaclass__ = WorkSpaceType
@@ -1067,9 +1095,9 @@ class WorkSpace(object):
 
     def __setitem__(self,par,value):
         """
-        Usage:
+        Usage::
 
-        ws["parname"]=value
+          ws["parname"] = value
 
         Set the parameter value using square brackets and a string
         of the parameter name. The basic "setter" function for parameters.
@@ -1166,19 +1194,36 @@ class WorkSpace(object):
 
     def addParameters(self,parlist):
         """
-        This provides an easy interface to add a number of parameters, either as a list or as a dict with properties.
+        This provides an easy interface to add a number of parameters,
+        either as a list or as a dict with properties.
 
-        ws.addParameters(["par1","par2",...]) will simply add the parameters parN without documentation and default values
+        ::
 
-        ws.addParameters([("par1",val1, doc1, unit1),(,"par2",...),...]) will add the parameters parN with the respective
-        properties. The properties are assigned based on their position in the tuple:
-            pos 0 = parmeter name
-            pos 1 = default value
-            pos 2 = doc string
-            pos 3 = unit of values
+          >>> ws.addParameters(["par1","par2",...])
 
-        ws.addParameters({"par1":{"default":val1,"doc":doc1,"unit":unit1},"par2":{...},...}) will add the parameters parN with the respective
-        parameters.
+        will simply add the parameters ``parN`` without documentation
+        and default values
+
+        ::
+
+          ws.addParameters([("par1",val1, doc1, unit1),(,"par2",...),...])
+
+        will add the parameters ``parN`` with the respective
+        properties. The properties are assigned based on their
+        position in the tuple:
+
+            ===== ================
+            pos 0 parmeter name
+            pos 1 default value
+            pos 2 doc string
+            pos 3 unit of values
+            ===== ================
+
+        ::
+
+          >>> ws.addParameters({"par1":{"default":val1,"doc":doc1,"unit":unit1},"par2":{...},...})
+
+        will add the parameters ``parN`` with the respective parameters.
         """
         if type(parlist)==dict:
             for p,v in parlist.items():

@@ -97,114 +97,183 @@ class FitBaseline(tasks.Task):
     or in a mix of the two. Otherwise default values are used.
     """
     parameters = {
-    "filename":{default:lambda self: "tmpspec.pcr" if not self.spectrum.hasHeader("filename") else self.spectrum.getHeader("filename"),
-            doc: "Filename to write output to"},
+        "filename":{default:lambda self: "tmpspec.pcr" if not self.spectrum.hasHeader("filename") else self.spectrum.getHeader("filename"),
+                    doc: "Filename to write output to"},
 
-    "save_output":{default:False,
-               doc:"If true save the results in the header files of the input spectrum with file name given in 'filename'"},
+        "save_output":{default:False,
+                       doc:"If **True** save the results in the header files of the input spectrum with file name given in ``filename``"},
 
-    "nbins":{doc:"""The number of bins in the downsampled spectrum used to fit the baseline.""",
-         default: lambda self:max(self.nofChannels/256,min(256,self.nofChannels/8))},
-    "polyorder":{doc:"""Order of the plyonomial to fit.  (output only)""",
-             default:lambda self:self.ncoeffs-1,output:True},
-    "rmsfactor":{doc:"""Factor above and below the RMS in each bin at which a bin is no longer considered due to too many spikes.""",
-             default:2.0},
-    "logfit":{doc:"""Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).""",
-          default:True},
+        "nbins":{doc:"The number of bins in the downsampled spectrum used to fit the baseline.",
+                 default: lambda self:max(self.nofChannels/256,min(256,self.nofChannels/8))},
 
-    "fittype":{doc:"""Determine which type of fit to do: fittype="POLY" - do a polynomial fit, else ("BSPLINE") do a basis spline fit (default).""",
-           default:"BSPLINE"},
-    "nofAntennas":{doc:"""Number of antennas in input spectrum.""",
-               default:lambda self:1 if len(self.dim_spectrum)==1 else self.dim_spectrum[0]},
-    "nofChannels":{doc:"""Number of channels in input spectrum.""",
-               default:lambda self:self.dim_spectrum[0] if len(self.dim_spectrum)==1 else self.dim_spectrum[1]},
-    "nofChannelsUsed":{doc:"""Number of channels remaining after downsampling and ignoring edges.""",
-               default:lambda self:self.numax_i-self.numin_i},
-    "dim_spectrum":{doc:"""Dimension of input spectrum (typically n antennas times m spectral points) or just one dimensional for one antenna.""",
-               default:lambda self:self.spectrum.getDim()},
-    "ncoeffs":{doc:"""Number of coefficients for the polynomial.""",
-           default:18},
-    "splineorder":{doc:"""Order of the polynomial to fit for the BSpline, order=3 is bicubic spline.""",
-           default:3},
-    "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
-         default:-1},
-    "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
-         default:-1},
-    "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to numin_i (output)""",
-         default:lambda self:self.frequency[self.numin_i]},
-    "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to numax_i (output)""",
-         default:lambda self:self.frequency[self.numax_i]},
-    "numin_i":{doc:"""Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.""",
-           default:fitbaseline_calc_numin_i,output:True},
-    "numax_i":{doc:"""Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.""",
-           default:fitbaseline_calc_numax_i,output:True},
-    "extendfit":{doc:"""Extend the fit by this factor at both ends beyond numax and numin. The factor is relative to the unused bandwidth. Use this to make sure there is a stable solution at least between numax/numin, i.e. avoid wiggles at the endpoint.""",
-             default:0.1},
-    "freqs":{doc:"""Array of frequency values of the downsampled spectrum. (work vector)""",
-         default:fitbaseline_calc_freqs,workarray:False},
-    "small_spectrum":{doc:"""Array of power values holding the downsampled spectrum. (work vector)""",
-            default:lambda self:hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),workarray:True},
-    "rms":{doc:"""Array of RMS values of the downsampled spectrum. (work vector)""",
-           default:lambda self:hArray(properties=self.small_spectrum, name="RMS of Spectrum"),workarray:True},
-    "minmean":{doc:"Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-           default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),output:True},
-    "minrms":{doc:"RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-           default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),output:True},
-    "minrms_blen":{doc:"Block length within downsampled data to look for the cleanest part of the spectrum.",
-           default:lambda self:min(64,max(self.nbins/16,4))},
-    "chisquare":{doc:"""Returns the chisquare of the baseline fit. (output only)""",
-             default:0,output:True},
-    "weights":{doc:"""Array of weight values for the fit. (work vector)""",
-           default:lambda self:hArray(properties=self.small_spectrum, name="Fit Weights"),workarray:True},
-    "ratio":{doc:"""Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)""",
-         default:lambda self:hArray(properties=self.small_spectrum,name="RMS/Amplitude",par=("logplot",False)),workarray:True},
-    "covariance":{doc:"""Array containign the covariance matrix of the fit. (output only)""",
-              default:lambda self:hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs]),output:True},
-    "bwipointer":{doc:"""Pointer to the internal BSpline workspace as integer. Don't change! """,
-              default:0,export:False,output:True},
-    "clean_bins_x":{doc:"""Array holding the frequencies of the clean bins. (work vector)""",
-            default:lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Clean Frequencies"),workarray:True},
-    "clean_bins_y":{doc:"""Array holding the powers of the clean bins. (work vector)""",
-            default:lambda self:self.small_spectrum,workarray:True},
-    "xpowers":{doc:"Array holding the x-values and their powers for calculating the baseline fit.",
-           default:lambda self:hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
-           workarray:True},
-    "powers":{doc:"Array of integers, containing the powers to fit in the polynomial. (work vector)",
-          default:lambda self:hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),workarray:True},
-    "nselected_bins":{doc:"""Number of clean bins after RFI removal. (output only)""",
-              default:0,output:True},
-    "selected_bins":{doc:"""Array of indices pointing to clean bins, i.e. with low RFI. (work vector)""",
-             default:lambda self:hArray(int,self.small_spectrum,name="Selected bins"),workarray:True},
-    "coeffs":{doc:"""Polynomial coefficients of the baseline fit with the dimension [nofAntennas,ncoeffs] (output vector)""",
-          default:lambda self:hArray(float,[self.nofAntennas,self.ncoeffs]),output:True},
-    "frequency":{doc:"Frequency values in Hz for each spectral channel (dimension: [nchannels])",unit:"Hz",workarray:True,
-             default:lambda self:hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues},
-    "spectrum":{doc:"Array with input spectrum either of dimension [nofAntennas,nchannels] or just [nchannels] for a single spectrum. Note that the frequency values for the array are expected to be provided as spectrum.par.xvalues=hArray(float,[nofChannels],fill=...) otherwise provide the frequencies explicitly in 'frequency'"},
+        "polyorder":{doc:"Order of the polynomial to fit. (output only)",
+                     default:lambda self:self.ncoeffs-1,
+                     output:True},
+
+        "rmsfactor":{doc:"Factor above and below the RMS in each bin at which a bin is no longer considered due to too many spikes.",
+                     default:2.0},
+
+        "logfit":{doc:"Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).",
+                  default:True},
+
+        "fittype":{doc:"""Determine which type of fit to do: ``fittype='POLY'`` - do a polynomial fit, else ('BSPLINE') do a basis spline fit (default).""",
+                   default:"BSPLINE"},
+
+        "nofAntennas":{doc:"""Number of antennas in input spectrum.""",
+                       default:lambda self:1 if len(self.dim_spectrum)==1 else self.dim_spectrum[0]},
+
+        "nofChannels":{doc:"""Number of channels in input spectrum.""",
+                       default:lambda self:self.dim_spectrum[0] if len(self.dim_spectrum)==1 else self.dim_spectrum[1]},
+
+        "nofChannelsUsed":{doc:"""Number of channels remaining after downsampling and ignoring edges.""",
+                           default:lambda self:self.numax_i-self.numin_i},
+
+        "dim_spectrum":{doc:"""Dimension of input spectrum (typically *n* antennas times *m* spectral points) or just one dimensional for one antenna.""",
+                        default:lambda self:self.spectrum.getDim()},
+
+        "ncoeffs":{doc:"""Number of coefficients for the polynomial.""",
+                   default:18},
+
+        "splineorder":{doc:"""Order of the polynomial to fit for the BSpline, ``splineorder=3`` is a bicubic spline.""",
+                       default:3},
+
+        "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
+                 default:-1},
+
+        "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
+                 default:-1},
+
+        "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to ``numin_i`` (output)""",
+                       default:lambda self:self.frequency[self.numin_i]},
+
+        "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to ``numax_i`` (output)""",
+                       default:lambda self:self.frequency[self.numax_i]},
+
+        "numin_i":{doc:"""Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.""",
+                   default:fitbaseline_calc_numin_i,
+                   output:True},
+
+        "numax_i":{doc:"""Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.""",
+                   default:fitbaseline_calc_numax_i,
+                   output:True},
+
+        "extendfit":{doc:"""Extend the fit by this factor at both ends beyond ``numax`` and ``numin``. The factor is relative to the unused bandwidth. Use this to make sure there is a stable solution at least between ``numax``/``numin``, i.e. avoid wiggles at the endpoint.""",
+                     default:0.1},
+
+        "freqs":{doc:"""Array of frequency values of the downsampled spectrum. (work vector)""",
+                 default:fitbaseline_calc_freqs,
+                 workarray:False},
+
+        "small_spectrum":{doc:"""Array of power values holding the downsampled spectrum. (work vector)""",
+                          default:lambda self:hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),
+                          workarray:True},
+
+        "rms":{doc:"""Array of RMS values of the downsampled spectrum. (work vector)""",
+               default:lambda self:hArray(properties=self.small_spectrum, name="RMS of Spectrum"),
+               workarray:True},
+
+        "minmean":{doc:"Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
+                   default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+                   output:True},
+
+        "minrms":{doc:"RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
+                  default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+                  output:True},
+
+        "minrms_blen":{doc:"Block length within downsampled data to look for the cleanest part of the spectrum.",
+                       default:lambda self:min(64,max(self.nbins/16,4))},
+
+        "chisquare":{doc:"""Returns the :math`\\chi^2` of the baseline fit. (output only)""",
+                     default:0,
+                     output:True},
+
+        "weights":{doc:"""Array of weight values for the fit. (work vector)""",
+                   default:lambda self:hArray(properties=self.small_spectrum, name="Fit Weights"),
+                   workarray:True},
+
+        "ratio":{doc:"""Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)""",
+                 default:lambda self:hArray(properties=self.small_spectrum,name="RMS/Amplitude",par=("logplot",False)),
+                 workarray:True},
+
+        "covariance":{doc:"""Array containing the covariance matrix of the fit. (output only)""",
+                      default:lambda self:hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs]),
+                      output:True},
+
+        "bwipointer":{doc:"""Pointer to the internal BSpline workspace as integer. Don't change! """,
+                      default:0,
+                      export:False,
+                      output:True},
+
+        "clean_bins_x":{doc:"""Array holding the frequencies of the clean bins. (work vector)""",
+                        default:lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Clean Frequencies"),
+                        workarray:True},
+
+        "clean_bins_y":{doc:"""Array holding the powers of the clean bins. (work vector)""",
+                        default:lambda self:self.small_spectrum,
+                        workarray:True},
+
+        "xpowers":{doc:"Array holding the *x*-values and their powers for calculating the baseline fit.",
+                   default:lambda self:hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
+                   workarray:True},
+
+        "powers":{doc:"Array of integers, containing the powers to fit in the polynomial. (work vector)",
+                  default:lambda self:hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),
+                  workarray:True},
+
+        "nselected_bins":{doc:"""Number of clean bins after RFI removal. (output only)""",
+                          default:0,
+                          output:True},
+
+        "selected_bins":{doc:"""Array of indices pointing to clean bins, i.e. with low RFI. (work vector)""",
+                         default:lambda self:hArray(int,self.small_spectrum,name="Selected bins"),
+                         workarray:True},
+
+        "coeffs":{doc:"""Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas,ncoeffs]`` (output vector)""",
+                  default:lambda self:hArray(float,[self.nofAntennas,self.ncoeffs]),
+                  output:True},
+
+        "frequency":{doc:"Frequency values in Hz for each spectral channel (dimension: ``[nchannels]``)",
+                     unit:"Hz",
+                     workarray:True,
+                     default:lambda self:hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues},
+
+        "spectrum":{doc:"Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"},
 
 #    "work_frequency":{doc:"Wrapper to frequencies with dimension [nofAntennas,nchannels] even for a single spectrum.",
 #             default:lambda self:hArray(self.frequency.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.frequency),export:False},
 
-    "work_frequency":{doc:"Wrapper to frequencies with dimension [1,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(self.frequency.vec(),dimensions=[1,self.nofChannels],properties=self.frequency),export:False},
+        "work_frequency":{doc:"Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
+                          default:lambda self:hArray(self.frequency.vec(),dimensions=[1,self.nofChannels],properties=self.frequency),
+                          export:False},
 
-    "work_spectrum":{doc:"Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(self.spectrum.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),export:False},
+        "work_spectrum":{doc:"Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
+                         default:lambda self:hArray(self.spectrum.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),
+                         export:False},
 
-    "meanrms":{doc:"""Estimate the mean rms in the spectrum per antenna. (output vector)""",
-           default:0,output:True},
-    "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration (information only at this point).",default:0},
+        "meanrms":{doc:"""Estimate the mean RMS in the spectrum per antenna. (output vector)""",
+                   default:0,
+                   output:True},
 
-    "verbose":{doc:"""Print progress information""",default:True},
+        "iteration":{doc:"If 0 or **False**, then this is the first iteration, of the fitting otherwise the *n*-th iteration (information only at this point).",
+                     default:0},
 
-    "plotlen":{default:2**17,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
+        "verbose":{doc:"""Print progress information.""",
+                   default:True},
 
-    "plot_center":{default:0.5,doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
+        "plotlen":{default:2**17,
+                   doc:"How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."},
 
-    "plot_start":{default:lambda self: max(int(self.nofChannels*self.plot_center)-self.plotlen,0),doc:"Start plotting from this sample number."},
+        "plot_center":{default:0.5,
+                       doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
 
-    "plot_end":{default:lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),doc:"End plotting before this sample number."},
+        "plot_start":{default:lambda self: max(int(self.nofChannels*self.plot_center)-self.plotlen,0),
+                      doc:"Start plotting from this sample number."},
 
-    "doplot":{doc:"""Plot progress information. If value >1, plot more information.""",default:False}
+        "plot_end":{default:lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),
+                    doc:"End plotting before this sample number."},
+
+        "doplot":{doc:"""Plot progress information. If ``value > 1``, plot more information.""",
+                  default:False}
     }
 
     def call(self,spectrum):
@@ -326,68 +395,79 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
      ]])
 
 CalcBaselineParameters.update({
-    "baseline":{doc:"Array containing the calculated baseline with the same dimensions as 'spectrum' - can be provided as spectrum.par.baseline (will be created if not).",
-#       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else hArray(float,dimensions=self.spectrum,name="Baseline"),
-        default:None,
-        workarray:True,export:False},
+    "baseline":{doc:"Array containing the calculated baseline with the same dimensions as ``spectrum`` - can be provided as spectrum.par.baseline (will be created if not).",
+                #       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else hArray(float,dimensions=self.spectrum,name="Baseline"),
+                default:None,
+                workarray:True,
+                export:False},
 
-    "addHanning":{default: True,doc:"Add a Hanning filter above nu_max and below nu_min to suppress out-of-badn emission smoothly."},
+    "addHanning":{default: True,
+                  doc:"Add a Hanning filter above ``nu_max`` and below ``nu_min`` to suppress out-of-band emission smoothly."},
 
     "logfit":{default:lambda self:True if self.FitParameters==None else self.FitParameters["logfit"]},
 
     "fittype":{default:lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]},
 
-    "work_baseline":{doc:"Wrapper to baseline with dimension [nofAntennas,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(self.baseline.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline,xvalues=self.work_frequency),export:False},
+    "work_baseline":{doc:"Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
+                     default:lambda self:hArray(self.baseline.vec(),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline,xvalues=self.work_frequency),
+                     export:False},
 
     "FitParameters":{doc:"Parameters of the baseline fitting routine.",
-             default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
+                     default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
 
     "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
-         default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
+             default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
 
     "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
-         default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
+             default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
 
-    "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to numin_i (output)""",
-         default:lambda self:self.frequency[self.numin_i] if self.FitParameters==None else self.FitParameters["numin_val_i"]},
+    "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to ``numin_i`` (output)""",
+                   default:lambda self:self.frequency[self.numin_i] if self.FitParameters==None else self.FitParameters["numin_val_i"]},
 
-    "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to numax_i (output)""",
-         default:lambda self:self.frequency[self.numax_i] if self.FitParameters==None else self.FitParameters["numax_val_i"]},
+    "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to ``numax_i`` (output)""",
+                   default:lambda self:self.frequency[self.numax_i] if self.FitParameters==None else self.FitParameters["numax_val_i"]},
 
     "numin_i":{doc:"""Channel number in spectrum of the minium frequency where to calculate baseline. Apply hanning taper below.""",
-           default: lambda self:max(self.frequency.findlowerbound(self.numin).val(),0) if self.numin>0 else 0,
-           output:True},
+               default: lambda self:max(self.frequency.findlowerbound(self.numin).val(),0) if self.numin>0 else 0,
+               output:True},
 
     "numax_i":{doc:"""Channel number in spectrum of the maxium frequency where to calculate baseline. Apply hanning taper above.""",
-           default: lambda self:min(self.frequency.findlowerbound(self.numax).val(),self.nofChannels) if self.numax>0 else self.nofChannels,
-           output:True},
+               default: lambda self:min(self.frequency.findlowerbound(self.numax).val(),self.nofChannels) if self.numax>0 else self.nofChannels,
+               output:True},
 
-    "height_ends":{doc:"""The heights of the baseline at theleft and right endpoints of the usable bandwidth where a hanning function is smoothly added.""",
-           default:lambda self:hArray(float,[2,self.nofAntennas])},
+    "height_ends":{doc:"""The heights of the baseline at the left and right endpoints of the usable bandwidth where a hanning function is smoothly added.""",
+                   default:lambda self:hArray(float,[2,self.nofAntennas])},
 
-    "coeffs":{doc:"Polynomial coefficients of the baseline fit with the dimension [nofAntennas,ncoeffs] or [ncoeffs]",#input:True,
-          default:lambda self:hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]},
+    "coeffs":{doc:"Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas, ncoeffs]`` or ``[ncoeffs]``",
+              #input:True,
+              default:lambda self:hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]},
 
-    "dim_coeffs":{doc:"Dimension of the coefficients array (which should be [nofAntennas,ncoeff] or [ncoeff] for nofAntennas==1)",
-          default:lambda self:self.coeffs.getDim()},
+    "dim_coeffs":{doc:"Dimension of the coefficients array (which should be ``[nofAntennas, ncoeff]`` or ``[ncoeff]`` for ``nofAntennas==1``)",
+                  default:lambda self:self.coeffs.getDim()},
+
     "nofAntennasCoeffs":{doc:"Number of antennas in coeffcient array.",
-             default:lambda self:1 if len(self.dim_coeffs)==1 else self.dim_coeffs[0]},
+                         default:lambda self:1 if len(self.dim_coeffs)==1 else self.dim_coeffs[0]},
+
     "ncoeffs":{doc:"Number of coefficients for the polynomial.",
-           default:lambda self:self.dim_coeffs[1] if len(self.dim_coeffs)>=2 else self.dim_coeffs[0]},
+               default:lambda self:self.dim_coeffs[1] if len(self.dim_coeffs)>=2 else self.dim_coeffs[0]},
 
-    "splineorder":{doc:"Order of the polynomial to fit for the BSpline, order=3 is bicubic spline.",
-           default: lambda self:3 if self.FitParameters==None else self.FitParameters["splineorder"]},
+    "splineorder":{doc:"Order of the polynomial to fit for the BSpline, ``splineorder=3`` is a bicubic spline.",
+                   default: lambda self:3 if self.FitParameters==None else self.FitParameters["splineorder"]},
 
-    "work_coeffs":{doc:"Array with coefficients in the form [nofAntennas,ncoeff]",
-           default:lambda self:hArray(self.coeffs.vec(),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])},
+    "work_coeffs":{doc:"Array with coefficients in the form ``[nofAntennas, ncoeff]``",
+                   default:lambda self:hArray(self.coeffs.vec(),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])},
 
-    "invert":{doc:"Invert the baseline so that it can later simply be multiplied to take out the gain variations.", default:True},
+    "invert":{doc:"Invert the baseline so that it can later simply be multiplied to take out the gain variations.",
+              default:True},
 
-    "HanningUp":{doc:"Let the Hanning filter at the ends go up rather than down (useful if one wants to divide by baseline and suppress out-of-band-noise)", default:True},
+    "HanningUp":{doc:"Let the Hanning filter at the ends go up rather than down (useful if one wants to divide by baseline and suppress out-of-band-noise)",
+                 default:True},
 
-    "normalize":{doc:"If true, normalize the baseline to have a total sum of unity.",  default:True}
-#    "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration. If >0 then multiply the new baseline wvith th (information only at this point).",default:0},
+    "normalize":{doc:"If **True**, normalize the baseline to have a total sum of unity.",
+                 default:True}
+
+    # "iteration":{doc:"If 0 or **False**, then this is the first iteration, of the fitting otherwise the *n*-th iteration. If > 0 then multiply the new baseline wvith th (information only at this point).",
+    #              default:0},
 
     })
 
@@ -504,51 +584,58 @@ ApplyBaselineParameters = dict(
 ApplyBaselineParameters.update({
 
     "filename":{default:lambda self: "tmpspec.clean.pcr" if not self.spectrum.hasHeader("filename") else root_filename(self.spectrum.getHeader("filename"))+".clean",
-        doc: "Filename to write output to"},
+                doc: "Filename to write output to."},
 
     # "FitParameters":{doc:"Parameters of the baseline fitting routine.",
-    #            default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
+    #                  default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
 
     # "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
-    #        default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
+    #         default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
 
     # "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
-    #        default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
+    #          default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
 
-    "plotchannel":{doc:"Which channel to plot",default:0},
+    "plotchannel":{doc:"Which channel to plot.",
+                   default:0},
 
-    "adaptive_peak_threshold":{doc:"If True then calculate the threshold above which to cut peaks in 'nbins' separate bins and thus let it vary over the spectrum",
-        default:False},
+    "adaptive_peak_threshold":{doc:"If **True** then calculate the threshold above which to cut peaks in ``nbins`` separate bins and thus let it vary over the spectrum",
+                               default:False},
 
-    "apply_baseline":{doc:"If true then divide spectrum by baseline before removing peaks.",default: True},
+    "apply_baseline":{doc:"If **True** then divide spectrum by baseline before removing peaks.",
+                      default: True},
 
     "mean":{doc:"Median mean value of blocks in downsampled spectrum - used to replace flagged data with (output only)",
-           default:1},
+            default:1},
 
     "rms":{doc:"Median RMS value of blocks in downsampled spectrum - used to calculate threshold for cutting peaks (output only)",
-          default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),output:True},
+           default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+           output:True},
 
-    "means":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),doc:"Mean value per block in input spectrum"},
+    "means":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),
+             doc:"Mean value per block in input spectrum"},
 
-    "stddevs":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),doc:"Standard deviation per block in input spectrum"},
+    "stddevs":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),
+               doc:"Standard deviation per block in input spectrum"},
 
     "nofChannelsUsed":{doc:"""Number of channels remaining after downsampling and ignoring edges.""",
-               default:lambda self:self.numax_i-self.numin_i},
+                       default:lambda self:self.numax_i-self.numin_i},
 
     "rmsfactor":{doc:"""Factor above the RMS in each channel at which a channel is considered poluted by RFI.""",
-         default:5.0},
+                 default:5.0},
 
     "nbins":{doc:"""The number of bins to be used to subdivide spectrum for selecting the best RMS.""",
-         default: lambda self:max(self.nofChannelsUsed/256,min(256,self.nofChannelsUsed/8))},
+             default: lambda self:max(self.nofChannelsUsed/256,min(256,self.nofChannelsUsed/8))},
 
-    "blocklen":{doc:"""The blocklem of one bin used to subdivide spectrum for selecting the best RMS.""",
-        default: lambda self:self.nofChannelsUsed/self.nbins},
+    "blocklen":{doc:"""The block length of one bin used to subdivide spectrum for selecting the best RMS.""",
+                default: lambda self:self.nofChannelsUsed/self.nbins},
 
-    "ndirty_channels":{doc:"""Number of dirty channles to be removed as RFI. (output only)""",
-               default:0,output:True},
+    "ndirty_channels":{doc:"""Number of dirty channels to be removed as RFI. (output only)""",
+                       default:0,
+                       output:True},
 
     "dirty_channels":{doc:"""Array of indices pointing to dirty bins, i.e. with high RFI. (work vector)""",
-              default:lambda self:hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),workarray:True}
+                      default:lambda self:hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),
+                      workarray:True}
     })
 
 
