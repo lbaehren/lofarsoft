@@ -637,7 +637,7 @@ int main( int argc, char **argv )
       bw = 100.0;
     }
     subband_width = bw / nsubbands;
-    lofreq = lowerBandEdge + (subbandFirst -0.5) * subband_width;
+    lofreq = lowerBandEdge + (subbandFirst -1) * subband_width;
     printf("BWS debug: lowerBandEdge %f subbandFirst %d lofreq %10fi %10f\n",lowerBandEdge,subbandFirst,subband_width,lofreq);
     /*
 
@@ -731,8 +731,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	  break;
       }
       sscanf(filename+i, "%*8c%d", &subbandnr);
-      /* subintdata.freq_cent = lofreq + subbandnr*subintdata.bw + 0.5*(subintdata.nrFreqChan-1)*subintdata.channelbw;*/
-      subintdata.freq_cent = lofreq + (subbandnr+1) * subintdata.bw; 
+      subintdata.freq_cent = lofreq + subbandnr*subintdata.bw + 0.5*(subintdata.nrFreqChan)*subintdata.channelbw;
       printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
 
       /* create names */
