@@ -702,7 +702,7 @@ class BeamFormer(tasks.Task):
         if ylim==None and not plotspec:
             ylim=(self.tbeams.min().val(),self.tbeams.max().val())
         if mosaic:
-            npanels=self.beams.shape()[-2]
+            npanels=beams.shape()[-2]
             width=int(ceil(sqrt(npanels)))
             height=int(ceil(npanels/float(width)))
             plt.clf()

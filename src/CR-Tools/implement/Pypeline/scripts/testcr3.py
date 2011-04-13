@@ -66,36 +66,43 @@ pardict=dict(
 plt.hanging=False # Use true if exectuion hangs after plotting one window
 plt.EDP64bug=True # use True if your system crashes for plotting semilog axes
 
-#print "---> BeamFormer"
-bf=tasks.beamformer.BeamFormer(); bf(pardict=pardict); # BeamForm
-bf.avspec.par.xvalues.setUnit("M","")
-"""
-bm=hArrayRead('oneshot_level4_CS017_19okt_no-9.h5.beams.pcr')
-bm.par.avspec.par.xvalues.setUnit("M","")
-"""
+print "---> BeamFormer"
+bf=tasks.beamformer.BeamFormer();
 
-#You can also use bf.avspec instead of bm.par.avspec and not read in bm above
+###The following block can be commented out
+bf(pardict=pardict); # BeamForm
+bf.avspec.par.xvalues.setUnit("M","")
+avspec=bf.avspec
+bm=bf.beams
+
+### and be replaced by this block once the average spectrum has been calculated (and written to disk)
+#One can also read the stored data back from file and proceed without re-calculating the spectrum ...
+#bm=hArrayRead('oneshot_level4_CS017_19okt_no-9.h5.beams.pcr')
+#bm.par.avspec.par.xvalues.setUnit("M","")
+#avspec=bm.par.avspec
+
+
 
 #print "---> Start Fitbaseline"
-fitb=tasks.fitbaseline.FitBaseline(); fitb(bf.avspec,pardict=pardict)
+fitb=tasks.fitbaseline.FitBaseline(); fitb(avspec,pardict=pardict)
 
 #Calculate a smooth version of the spectrum which is later used to set amplitudes
-calcb=tasks.fitbaseline.CalcBaseline(); calcb(bf.avspec,pardict=pardict,invert=False,HanningUp=False,normalize=False);
+calcb=tasks.fitbaseline.CalcBaseline(); calcb(avspec,pardict=pardict,invert=False,HanningUp=False,normalize=False);
 amplitudes=hArray(copy=calcb.baseline)
 amplitudes.sqrt()
 
 #Now calculate it again, but now to flatten the spectrum
-calcb=tasks.fitbaseline.CalcBaseline()(bf.avspec,pardict=pardict);
+calcb=tasks.fitbaseline.CalcBaseline()(avspec,pardict=pardict);
 
 #... and to find channels with RFI spikes
-apply_baseline=tasks.fitbaseline.ApplyBaseline()(bf.avspec,pardict=pardict)
+apply_baseline=tasks.fitbaseline.ApplyBaseline()(avspec,pardict=pardict)
 
 #Now we apply them to the beam-formed spectrum
-bf.beams[0,...].randomizephase(apply_baseline.dirty_channels[...,[0]:apply_baseline.ndirty_channels.vec()],amplitudes[...])
+bm[0,...].randomizephase(apply_baseline.dirty_channels[...,[0]:apply_baseline.ndirty_channels.vec()],amplitudes[...])
 
 #And finally we make an inverse fft and plot the different beams (inv FFT is done by the plotting routine or by bf.tcalc)
-if dataset=="LOPES": bf.tplot(doabs=True,smooth=9,xlim=(-3.5,0))
-if dataset=="LOFAR": bf.tplot(doabs=True,smooth=9,xlim=(0.5,2.5))
+if dataset=="LOPES": bf.tplot(bm,doabs=True,smooth=9,xlim=(-3.5,0))
+if dataset=="LOFAR": bf.tplot(bm,doabs=True,smooth=9,xlim=(0.5,2.5))
 
 
 """

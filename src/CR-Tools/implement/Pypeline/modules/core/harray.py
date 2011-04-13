@@ -529,7 +529,6 @@ def hArray_setitem(self,dims,fill):
     elif dims == Ellipsis or type(dims)==slice:
         hFill(hArray_getSlicedArray(self,dims),fill)
     else:
-        import pdb; pdb.set_trace()
         raise IndexError ("Wrong type of index for array: " + str(dims))
 
 def hArray_read(self,datafile,key,block=-1,antenna=-1):
@@ -844,9 +843,11 @@ y=hArrayRead("test")
 y -> hArray(float, [20], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], name="test") # len=20 slice=[0:20])
 y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=20 slice=[0:20])
     """
+    
     if type(self)==StringArray:
         print "Attention: StringArrays cannot be dumped to disk!"
         return
+
     
     fn=os.path.expandvars(os.path.expanduser(filename))
 
@@ -915,9 +916,9 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
     """
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
-        if v in [StringArray,StringVec]:
+        if type(v) in [StringArray,StringVec]:
             newdictionary[k]=list(v)
-        if type(v) in hAllVectorTypes:
+        elif type(v) in hAllVectorTypes:
             parname=prefix+"."+str(k)
             filename=parname+".pcr"
             if parname in blockedIOnames:
@@ -925,7 +926,7 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
             else:
                 hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             newdictionary[k]=hFileContainer(path,filename,vector=True)
-        if type(v) in hAllArrayTypes:
+        elif type(v) in hAllArrayTypes:
             parname=prefix+"."+str(k)
             filename=parname+".pcr"
             filename=prefix+"."+str(k)+".pcr"

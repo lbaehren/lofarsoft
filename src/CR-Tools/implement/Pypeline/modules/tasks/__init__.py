@@ -885,9 +885,8 @@ class Task(object):
         May modify `self.plot_pause`` and ``self.doplot``.
         """
         if hasattr(self,"plot_pause") and self.plot_pause:
-            print "Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting..."
             plt.draw();
-            k=raw_input()
+            k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
             if k=="q":
                 self.plot_pause=False
                 print "Continue without pausing in this task (other tasks not affected)." 

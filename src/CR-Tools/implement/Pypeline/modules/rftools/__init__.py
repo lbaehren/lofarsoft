@@ -68,8 +68,8 @@ def LocatePulseTrain(timeseries_data,nblocks=16,nsigma=7,maxgap=7,minlength=7):
 file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
 file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
 file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
-timeseries_data=TimeBeamIncoherent(file["TIMESERIES_DATA"])
-(start,end)=LocatePulseTrain(timeseries_data)
+timeseries_data=rf.TimeBeamIncoherent(file["TIMESERIES_DATA"])
+(start,end)=rf.LocatePulseTrain(timeseries_data)
 timeseries_data.plot(highlight=(start,end),nhighlight=1)
 
     """
@@ -91,7 +91,7 @@ file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5
 file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
 file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
 timeseries_data=file["TIMESERIES_DATA"]
-(start,end)=LocatePulseTrain(TimeBeamIncoherent(timeseries_data))
+(start,end)=rf.LocatePulseTrain(rf.TimeBeamIncoherent(timeseries_data))
 extension=32
 length=int(2**ceil(log(end-start+extension,2))); center=(end+start)/2
 start=center-length/2; end=start+length
