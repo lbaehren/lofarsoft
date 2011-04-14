@@ -60,6 +60,10 @@ public:
 
   boost::python::list python_data_length();
 
+  boost::python::list python_cable_delay();
+
+  boost::python::list python_cable_delay_unit();
+
   boost::python::list python_sample_frequency_value();
 
   boost::python::list python_sample_frequency_unit();
@@ -67,6 +71,10 @@ public:
   boost::python::list python_sample_offset(int refAntenna);
 
   boost::python::list python_alignment_offset(int refAntenna);
+
+  boost::python::list python_antenna_position();
+
+  boost::python::list python_itrf_antenna_position();
 
   uint python_maximum_read_length(int refAntenna);
 

@@ -40,6 +40,11 @@
 
 #include <sstream>
 
+#include <measures/Measures.h>
+#include <measures/Measures/MeasConvert.h>
+#include <measures/Measures/MPosition.h>
+#include <measures/Measures/MCPosition.h>
+
 #include "core.h"
 #include "mTBB.h"
 
@@ -158,6 +163,34 @@ boost::python::list TBBData::python_data_length()
   return lst;
 }
 
+boost::python::list TBBData::python_cable_delay()
+{
+  boost::python::list lst;
+
+  std::vector<double> vec = cable_delay();
+
+  for(uint i=0; i<vec.size(); ++i)
+  {
+    lst.append(vec[i]);
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_cable_delay_unit()
+{
+  boost::python::list lst;
+
+  std::vector<std::string> vec = cable_delay_unit();
+
+  for(uint i=0; i<vec.size(); ++i)
+  {
+    lst.append(vec[i]);
+  }
+
+  return lst;
+}
+
 boost::python::list TBBData::python_sample_frequency_value()
 {
   boost::python::list lst;
@@ -211,6 +244,51 @@ boost::python::list TBBData::python_alignment_offset(int refAntenna)
   for(uint i=0; i<vec.size(); ++i)
   {
     lst.append(-1 * vec[i]);
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_antenna_position()
+{
+  boost::python::list lst;
+
+  // Get antenna positions
+  casa::Vector<casa::MPosition> vec = antenna_position();
+  casa::IPosition shape = vec.shape();
+
+  for(int i=0; i<shape(0); ++i)
+  {
+    // Append x,y,z positions to list
+    lst.append(static_cast<double>(vec(i).getValue()(0)));
+    lst.append(static_cast<double>(vec(i).getValue()(1)));
+    lst.append(static_cast<double>(vec(i).getValue()(2)));
+  }
+
+  return lst;
+}
+
+/**
+ * \brief Returns Python list with antenna positions in ITRF automatically
+ * converted from whatever frame is used in the file.
+ */
+boost::python::list TBBData::python_itrf_antenna_position()
+{
+  boost::python::list lst;
+
+  // Get antenna positions
+  casa::Vector<casa::MPosition> vec = antenna_position();
+  casa::IPosition shape = vec.shape();
+
+  for(int i=0; i<shape(0); ++i)
+  {
+    // Convert to ITRF
+    casa::MPosition pos = casa::MPosition::Convert(vec(i), casa::MPosition::Ref(casa::MPosition::ITRF))();
+
+    // Append x,y,z positions to list
+    lst.append(static_cast<double>(pos.getValue()(0)));
+    lst.append(static_cast<double>(pos.getValue()(1)));
+    lst.append(static_cast<double>(pos.getValue()(2)));
   }
 
   return lst;
