@@ -2,53 +2,63 @@
 
 import sys
 import pycrtools as cr
+from optparse import OptionParser
 
-if len(sys.argv)!=2:
-    print "USAGE: test_datareader FILENAME"
-    sys.exit()
+# Parse commandline options
+usage = "usage: %prog [options] file0.h5 file1.h5 ..."
+parser = OptionParser(usage=usage)
+parser.add_option("--blocksize", type="int", default=1024)
 
-filename = sys.argv[1]
-blocksize = 1024
-selection = range(0,10,2)
-data = cr.hArray(float, dimensions=(len(selection), blocksize))
-fftdata = cr.hArray(complex, dimensions=(len(selection), blocksize / 2 + 1))
+(options, args) = parser.parse_args()
 
-f = cr.open(filename, blocksize)
+# Filenames
+if not args:
+    parser.print_help()
+    sys.exit(1)
 
-print "Reading metadata:"
-for key in f.keys():
-    print key, f[key]
-    print ""
+for filename in args:
 
-print "Applying antenna selection:"
-#f.setAntennaSelection(selection)
-f["SELECTED_DIPOLES"] = selection
-
-print "Reading metadata for selected antennas:"
-for key in f.keys():
-    print key, f[key]
-    print ""
-
-print "Reading one block of timeseries data:"
-f.getTimeseriesData(data, 0)
-
-print data
-
-print "Reading one block of timeseries data in alternative way:"
-f.read("TIMESERIES_DATA", data, 0)
-
-print data
-
-print "Reading one block of FFT data:"
-f.getFFTData(fftdata, 0)
-
-print data
-
-print "Reading one block of FFT data in alternative way:"
-f.read("FFT_DATA", fftdata, 0)
-
-print data
-
-print "Corresponding frequencies"
-print f.getFrequencies()
-
+    blocksize = options.blocksize
+    selection = range(0,10,2)
+    data = cr.hArray(float, dimensions=(len(selection), blocksize))
+    fftdata = cr.hArray(complex, dimensions=(len(selection), blocksize / 2 + 1))
+    
+    f = cr.open(filename, blocksize)
+    
+    print "Reading metadata:"
+    for key in f.keys():
+        print key, f[key]
+        print ""
+    
+    print "Applying antenna selection:"
+    #f.setAntennaSelection(selection)
+    f["SELECTED_DIPOLES"] = selection
+    
+    print "Reading metadata for selected antennas:"
+    for key in f.keys():
+        print key, f[key]
+        print ""
+    
+    print "Reading one block of timeseries data:"
+    f.getTimeseriesData(data, 0)
+    
+    print data
+    
+    print "Reading one block of timeseries data in alternative way:"
+    f.read("TIMESERIES_DATA", data, 0)
+    
+    print data
+    
+    print "Reading one block of FFT data:"
+    f.getFFTData(fftdata, 0)
+    
+    print data
+    
+    print "Reading one block of FFT data in alternative way:"
+    f.read("FFT_DATA", fftdata, 0)
+    
+    print data
+    
+    print "Corresponding frequencies"
+    print f.getFrequencies()
+    
