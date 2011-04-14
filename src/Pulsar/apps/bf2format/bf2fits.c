@@ -628,7 +628,7 @@ int main( int argc, char **argv )
     nsubbands = 512;
  
 
-    printf("This is a %s obs at %f MHz (clock=%d subbandFirst=%d totalnrchannels=%d)\n", subintdata.instrument, lowerBandFreq, clockparam, subbandFirst, totalnrchannels);
+    printf("This is a %s obs at %f MHz\n (clock=%d subbandFirst=%d totalnrchannels=%d)\n", subintdata.instrument, lowerBandFreq, clockparam, subbandFirst, totalnrchannels);
     if (lowerBandFreq < 150.0 && lowerBandFreq > 100.0 && clockparam == 200) {
       lowerBandEdge = 100.0;
       bw = 100.0;
@@ -637,8 +637,9 @@ int main( int argc, char **argv )
       bw = 100.0;
     }
     subband_width = bw / nsubbands;
-    lofreq = lowerBandEdge + (subbandFirst -1) * subband_width;
-    printf("BWS debug: lowerBandEdge %f subbandFirst %d lofreq %10fi %10f\n",lowerBandEdge,subbandFirst,subband_width,lofreq);
+    lofreq = lowerBandEdge + (subbandFirst * subband_width);
+    //printf("TH DEBUG lowest sub %d central freq: %f\n", subbandFirst, lofreq);
+    /*printf("BWS debug: lowerBandEdge %f subbandFirst %d lofreq %10fi %10f\n",lowerBandEdge,subbandFirst,subband_width,lofreq);
     /*
 
 if (lowerBandFreq < 150.0 and lowerBandFreq > 100.0 and par.clock == "200"):
@@ -730,8 +731,9 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	if(isNum(filename[i]))
 	  break;
       }
-      sscanf(filename+i, "%*8c%d", &subbandnr);
-      subintdata.freq_cent = lofreq + subbandnr*subintdata.bw + 0.5*(subintdata.nrFreqChan)*subintdata.channelbw;
+      sscanf(filename+i, "%d", &subbandnr);
+      //printf("TH DEBUG %d %f %d %f \n",subbandnr, subintdata.bw, subintdata.nrFreqChan, subintdata.channelbw);
+      subintdata.freq_cent = lofreq + subbandnr*subintdata.bw;
       printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
 
       /* create names */
