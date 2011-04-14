@@ -272,7 +272,7 @@ boost::python::list TBBData::python_antenna_position()
  * \brief Returns Python list with antenna positions in ITRF automatically
  * converted from whatever frame is used in the file.
  */
-boost::python::list TBBData::python_itrf_antenna_position()
+boost::python::list TBBData::python_antenna_position_itrf()
 {
   boost::python::list lst;
 

@@ -74,7 +74,7 @@ public:
 
   boost::python::list python_antenna_position();
 
-  boost::python::list python_itrf_antenna_position();
+  boost::python::list python_antenna_position_itrf();
 
   uint python_maximum_read_length(int refAntenna);
 
