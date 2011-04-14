@@ -27,7 +27,6 @@ for station in f.itervalues():
 f.flush()
 f.close()
 
-
 """
 
 import numpy as np
@@ -95,17 +94,22 @@ class TBBData(IOInterface):
             "FREQUENCY_INTERVAL":lambda:[v*self.conversiondict[u]/self["BLOCKSIZE"] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
             "FREQUENCY_RANGE":lambda:[(f/2*(n-1),f/2*n) for f,n in zip(self["SAMPLE_FREQUENCY"],self["NYQUIST_ZONE"])],
             "FFTSIZE":lambda:self["BLOCKSIZE"]/2+1,
+            "BLOCKSIZE":lambda: self.__blocksize,
+            "BLOCK":lambda: self.__block,
+            "MAXIMUM_READ_LENGTH":self.__file.maximum_read_length(self.__refAntenna),
 
             ##ICD KEYWORDS
             "FILENAME":self.__file.filename,
-            "BLOCKSIZE":lambda: self.__blocksize,
-            "BLOCK":lambda: self.__block,
             "ANTENNA_SET":lambda:self.antenna_set if hasattr(self,"antenna_set") else self.__file.antenna_set(),
+            "ANTENNA_POSITION":self.__file.antenna_position,
+            "ITRF_ANTENNA_POSITION":self.__file.itrf_antenna_position,
             "NYQUIST_ZONE":self.__file.nyquist_zone,
             "TIME":self.__file.time,
             "SAMPLE_NUMBER":self.__file.sample_number,
             "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
             "SAMPLE_FREQUENCY_UNIT":self.__file.sample_frequency_unit,
+            "CABLE_DELAY":self.__file.cable_delay(),
+            "CABLE_DELAY_UNIT":self.__file.cable_delay_unit(),
             "DATA_LENGTH":self.__file.data_length,
             "NOF_STATION_GROUPS":self.__file.nofStationGroups,
             "NOF_DIPOLE_DATASETS":self.__file.nofDipoleDatasets,
