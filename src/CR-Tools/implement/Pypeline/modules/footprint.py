@@ -19,8 +19,9 @@ def plotFootprint(datafile, footprintValues = [], dotsize = 200.0):
 
     Can be modified to not do the plotting but return relevant arrays instead.
     """
-    antennaPositions = datafile["RelativeAntennaPositions"]
-    nofAntennas = datafile["nofAntennas"]
+    datafile["ANTENNA_SET"] = "LBA_OUTER" # HACK !!
+    antennaPositions = datafile["RELATIVEANTENNA_POSITIONS"]
+    nofAntennas = datafile["NOF_DIPOLE_DATASETS"]
 
     antennaPositions = antennaPositions.toNumpy()
     antennaPositions = np.reshape(antennaPositions, (nofAntennas, 3)).T

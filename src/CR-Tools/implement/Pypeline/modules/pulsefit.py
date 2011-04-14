@@ -12,7 +12,7 @@ pulse
 """
 import os
 from pycrtools import *
-from pycrtools import IO
+#from pycrtools import IO
 from pycrtools import matching as match
 from pycrtools import srcfind as sfind
 from pycrtools import beamformer as bf
@@ -88,7 +88,10 @@ def initialDirectionFit(crfile, efield, fitType='bruteForce'):
 
     Tdiffs -= np.mean(Tdiffs)
     Tdiffs *= 5e-9
-    match_positions = crfile["RelativeAntennaPositions"].toNumpy().reshape(3 * len(Tdiffs))
+#    print "ANTENNA SET"
+#    print crfile["ANTENNA_SET"]
+    crfile["ANTENNA_SET"] = "LBA_OUTER" # HACK !!
+    match_positions = crfile["RELATIVEANTENNA_POSITIONS"].toNumpy().reshape(3 * len(Tdiffs))
     (radaz, radel, bftime) = sfind.directionBruteForceSearch(match_positions, Tdiffs)
     mse = sfind.mse(radaz, radel, match_positions, Tdiffs)
     degaz = radaz*rad2deg
@@ -111,7 +114,7 @@ def initialDirectionFit(crfile, efield, fitType='bruteForce'):
 def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to be imported using IO module!
     #Get the trigger-message information
     result = dict(success=False, action = 'Trigger message fit')
-    fileDate = crfile["Date"]
+    fileDate = crfile["TIME"][0]
     fileSamplenum = crfile["SAMPLE_NUMBER"][0]                  # assuming start sample nr. is the same for all antennas
     ddate = fileDate + fileSamplenum / 200.0e6
     (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggers)
@@ -121,7 +124,7 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
         return result
 
     #get the position for that
-    nofAntennas = crfile["nofAntennas"]
+    nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
     # now trim the matched trigger IDs to include only antennas which are actually in the data!
     validChannels = np.argwhere(mIDs < nofAntennas) # get indices in array
 #  print mTdiffs
@@ -132,7 +135,8 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
 #  print ' '
     mIDs = mIDs[validChannels].ravel()
 #  print len(mIDs)
-    match_positions = crfile["RelativeAntennaPositions"].toNumpy()[mIDs].reshape(3 * len(mIDs))
+    crfile["ANTENNA_SET"] = "LBA_OUTER" # HACK !!
+    match_positions = crfile["RELATIVEANTENNA_POSITIONS"].toNumpy()[mIDs].reshape(3 * len(mIDs))
     #print mTdiffs
     #print len(mTdiffs)
 #  print match_positions
@@ -167,22 +171,24 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
     samplefreq = 200.0e6 # must be
     #crfile.set("blocksize", blocksize) # proper way, apparently
 #  crfile.set("shift", 512)
-    print 'File size is %d' % crfile["Filesize"]
-    print 'Block size is now: %d' % crfile["blocksize"]
-    print 'So there are: %d blocks' % int((crfile["Filesize"]) / int(crfile["blocksize"]))
+    dataLength = crfile["DATA_LENGTH"][0]
+    #blocksize = crfile["BLOCKSIZE"]
+    print 'Data length is %d' % dataLength # once again assume all the same; move to Datacheck?
+    print 'Block size is now: %d' % blocksize
+    print 'So there are: %d blocks' % (int(dataLength) / int(blocksize))
     pulseMidpoint = int(triggerFitResult["avgToffset"] * samplefreq)
-    nofAntennas = crfile["nofAntennas"]
+    nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
 
     # here we select the region of the data such that the pulse is (on average over antennas)
     # is in the middle of the block
-    cr_alldata = crfile["emptyFx"]
+    cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
     crfile.getTimeseriesData(cr_alldata, 0) # MOVE upward to crpipeline?
     cr_efield = hArray(copy=cr_alldata, dimensions = [nofAntennas, blocksize])
     start = pulseMidpoint - blocksize/2
     stop = pulseMidpoint + blocksize/2
     cr_efield[...].copy(cr_alldata[..., start:stop])
 
-    crfile.set("blocksize", blocksize) # workaround, needed for correct settings in Beamformer
+    crfile["BLOCKSIZE"] = blocksize # workaround, needed for correct settings in Beamformer
 
     abs_efield = hArray(copy = cr_efield)
     abs_efield.abs()
@@ -212,14 +218,15 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
 #  plt.plot(efield.T)
 #  raw_input("--- Plotted pulse, check if pulse is in block - press Enter to continue...")
 
-    cr_fft = crfile["emptyFFT"]
+    cr_fft = crfile["EMPTY_FFT_DATA"]
 #  import pdb; pdb.set_trace()
     cr_fft = hArray(complex, dimensions = [nofAntennas, blocksize/2 + 1])
 
     print 'Number of antennas = %d' % cr_fft.shape()[0]
     print 'Block length fft = %d' % cr_fft.shape()[1]
-
-    antenna_positions = crfile["RelativeAntennaPositions"]
+    
+    crfile["ANTENNA_SET"] = "LBA_OUTER" # HACK !!
+    antenna_positions = crfile["RELATIVEANTENNA_POSITIONS"]
 #  print 'ANTENNA POSITIONS: '
 #  print antenna_positions
 #  print ' '

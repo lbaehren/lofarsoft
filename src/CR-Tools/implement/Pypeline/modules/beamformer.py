@@ -14,19 +14,19 @@ class Beamformer(object):
     """
 
     def __init__(self, crfile, cr_fft):
-        nofAntennas = crfile["nofAntennas"]
+        nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
 
-        blocksize = crfile["blocksize"] # BUG: use cr_fft for sizes instead...
+        blocksize = crfile["BLOCKSIZE"] # BUG: use cr_fft for sizes instead...
         # WORKAROUND: adjust crfile's blocksize accordingly
 
         self.delays = hArray(float,dimensions=[nofAntennas])
         self.weights = hArray(complex,dimensions = cr_fft,name="Complex Weights")
-        self.freqs = hArray(crfile["frequencyValues"]) # a FloatVec comes out, so put it into hArray
-        self.phases = hArray(float,dimensions=cr_fft,name="Phases",xvalues=crfile["frequencyValues"])
+        self.freqs = hArray(crfile["FREQUENCY_DATA"]) # a FloatVec comes out, so put it into hArray
+        self.phases = hArray(float,dimensions=cr_fft,name="Phases",xvalues=crfile["FREQUENCY_DATA"])
         self.shiftedFFT = hArray(complex,dimensions=cr_fft)
         self.shiftedTimeSeries = hArray(float, dimensions=[nofAntennas, blocksize])
 
-        self.beamformedFFT=hArray(complex,dimensions=[crfile["fftLength"]])
+        self.beamformedFFT=hArray(complex,dimensions=[crfile["FFTSIZE"]])
 
         self.tiedArrayBeam = hArray(float, dimensions=[blocksize])
         self.incoherentBeam = hArray(float, dimensions=[blocksize])

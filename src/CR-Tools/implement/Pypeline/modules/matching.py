@@ -97,13 +97,13 @@ def readtriggers(crfile, directory=''):
 
     """
     timestamp = crfile["TIME"][0] # we know from datacheck that all are the same
-    stationID = int(crfile["AntennaIDs"][0]) / int(1e6) # assume all from the same station!
+    stationID = int(crfile["CHANNEL_ID"][0]) / int(1e6) # assume all from the same station!
     #print stationID
     stationName = md.idToStationName(stationID)
     #print stationName
     datestring = time.strftime("%Y-%m-%d", time.gmtime(timestamp)) # like "2011-02-15"
 #    import pdb; pdb.set_trace()
-    h5filename = crfile.files[0].filename
+    h5filename = crfile["FILENAME"]
     directory = os.path.dirname(h5filename) + '/'
     filename = directory + datestring + "_TRIGGER-"+stationName+".dat" # like "2011-02-15_TRIGGER-RS307.dat"
 

@@ -8,7 +8,9 @@
 
 import os
 import time
-from pycrtools import IO, CRQualityCheck, Vector, hArray
+from pycrtools import CRQualityCheck, Vector, hArray
+import pycrtools as cr
+
 import matplotlib.pyplot as plt
 
 def safeOpenFile(filename, antennaset): # antennaset only here because it's not set in the file
@@ -43,38 +45,50 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         result.update(reason = format("File size too small: %d") % bytesize)
         return result
 
-    crfile = IO.open([filename.strip()])
-    crfile.set("blocksize", 2*65536)
-    crfile.setAntennaset(antennaset)
+    crfile = cr.open(filename.strip(), 2*65536)
+    print 'KEYS: '
+    keys = crfile.keys()
+    keys.sort()
+    print keys
+    print ' '
+#    crfile.set("blocksize", 2*65536)
+    crfile["ANTENNA_SET"] = antennaset
+#    print crfile["SAMPLE_NUMBER"]    
+    times = crfile["TIME"]
 
-    fileDate = crfile["Date"]
+    fileDate = times[0]
     readableDate = time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime(fileDate))
     result.update(date = readableDate)
     #print result
 
-    times = crfile["TIME"]
   #  print crfile["shift"]
-    if times.max() - times.min() > 0:
+    if max(times) - min(times) > 0:
         print 'Error: Timestamps vary across antennas' # redundant
         result.update(reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()) )
         return result
 
-    if crfile["sampleFrequency"] != 200e6:
+    sampleFrequency = crfile["SAMPLE_FREQUENCY_VALUE"][0]
+    if crfile["SAMPLE_FREQUENCY_UNIT"][0] == "MHz":
+        sampleFrequency *= 1.0e6
+        print 'boe'
+    if sampleFrequency != 200e6:
         print 'Error: wrong sampling frequency: %d; needs to be 200e6' % crfile["sampleFrequency"]
         result.update(reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
         return result
-
-    if crfile["Filesize"] < 2 * 65536:
-        result.update(reason=format("Data length too small: %d") % crfile["Filesize"])
+    
+    dataLength = crfile["DATA_LENGTH"][0]
+    if dataLength < 2 * 65536:
+        result.update(reason=format("Data length too small: %d") % dataLength)
         return result
-    result.update(datalength = crfile["Filesize"])
-    if crfile["nofAntennas"] < 64: # arbitrary choice...
-        result.update(reason=format("not enough antennas: %d") % crfile["nofAntennas"])
+    result.update(datalength = dataLength)
+    nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
+    if nofAntennas < 64: # arbitrary choice...
+        result.update(reason=format("not enough antennas: %d") % nofAntennas)
         return result
-    result.update(nofAntennas = crfile["nofAntennas"])
+    result.update(nofAntennas = nofAntennas)
 
     # get all timeseries data
-    cr_alldata = crfile["emptyFx"]
+    cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
     crfile.getTimeseriesData(cr_alldata, 0)
 
     result.update(success=True, file=crfile, efield = cr_alldata)
@@ -88,12 +102,12 @@ def qualityCheck(crfile, cr_efield, doPlot=False):
         raw_input("--- Plotted raw timeseries data - press Enter to continue...")
 
     qualitycriteria={"mean":(-1.5,1.5),"rms":(3,15),"spikyness":(-5,5)}
-    # BUG: works only with one file at a time. 'crfile' has no attribute 'filename' because it can be one or many...
+   
 #    datalength = crfile["Filesize"]
 #    blocksize = 1024
 #    blocklist = hArray(int, [0.5 * datalength / blocksize])
-    flaglist=CRQualityCheck(qualitycriteria, crfile.files[0], dataarray=None, maxblocksize=2*65536, nsigma=5, verbose=True)  # NOTE: this changes the crfile's blocksize! Change it back afterwards.
-    crfile.set("blocksize", 2 * 65536) # parameter...
+    flaglist = CRQualityCheck(qualitycriteria, crfile, dataarray=None, maxblocksize=2*65536, nsigma=5, verbose=True)  # NOTE: this changes the crfile's blocksize! Change it back afterwards.
+    crfile["BLOCKSIZE"] = 2 * 65536 # parameter...
     # make warnings for DC offsets and spikyness; flag out for rms too high (i.e. junk data)
     flagged = []
     highDCOffsets = 0
@@ -118,7 +132,7 @@ def qualityCheck(crfile, cr_efield, doPlot=False):
     maxgap = Vector(int, len(datamean), fill=20) # parameter...
     minlength = Vector(int, len(datamean), fill=1) # idem
 
-    nofAntennas = crfile["nofAntennas"]
+    nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
     pulses = hArray(int, dimensions=[nofAntennas, 100, 2], name = 'Location of the pulses')
     npulses = pulses[...].findsequenceoutside(cr_efield[...], thresholdLow, thresholdHigh, maxgap, minlength)
 
@@ -127,7 +141,7 @@ def qualityCheck(crfile, cr_efield, doPlot=False):
     maxPulseCount = npulses.max()
 
     if doPlot and len(flagged) > 0:
-        cr_efield = crfile["emptyFx"]
+        cr_efield = crfile["EMPTY_TIMESERIES_DATA"]
         crfile.getTimeseriesData(cr_efield, 0) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
         efield = cr_efield.toNumpy()
         toplot = efield[flagged]

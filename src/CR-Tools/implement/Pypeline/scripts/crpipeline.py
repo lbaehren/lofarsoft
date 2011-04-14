@@ -134,7 +134,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-            result = pf.fullDirectionFit(crfile, triggerFitResult, 512, flaggedList = flaggedList, FarField = False, doPlot = doPlot)
+            result = pf.fullDirectionFit(crfile, triggerFitResult, 2048, flaggedList = flaggedList, FarField = False, doPlot = doPlot)
             fullDirectionResult = result
             writeDict(outfile, result)
             if not result["success"]:
@@ -144,7 +144,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
             print 'EROR!'
             print msg
         writeResultLine(asciiOutfile, qualityCheckResult, triggerFitResult, fullDirectionResult,
-                        crfile.files[0].filename, fileTimestamp, fileSampleNumber)
+                        crfile["FILENAME"], fileTimestamp, fileSampleNumber)
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
 
@@ -175,7 +175,7 @@ else:
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-441.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-12*.h5'
+    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5'
 sortstring = 'sort -n --field-separator="-" --key=18'
 outfile = 'crPipelineResults.txt'
 outfileAscii = 'asciiPipelineResults.txt'
@@ -209,7 +209,7 @@ if nofiles > nthreads:
                 i += 1
                 
 else:
-    runAnalysis(files, outfile, outfileAscii, doPlot = False)
+    runAnalysis(files, outfile, outfileAscii, doPlot = True)
 #fitergs = dict()
 
 

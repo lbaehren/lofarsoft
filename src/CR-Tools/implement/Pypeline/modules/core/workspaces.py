@@ -1016,13 +1016,18 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
     """
     #Initialize some parameters
     if not datafile==None:
-        nAntennas=datafile.get("nofSelectedAntennas")
-        selected_antennas=datafile.get("selectedAntennas")
-        oldblocksize=datafile["blocksize"]
-        filesize=datafile.get("filesize")
+        nAntennas=datafile["NOF_SELECTED_DATASETS"]
+        channelIDs = datafile["CHANNEL_ID"]
+        selected_antennas = []
+        for item in channelIDs:
+            selected_antennas.append(item % 100) 
+            # only last 2 digits; FAILS on international stations rcucount > 100
+        
+        oldblocksize=datafile["BLOCKSIZE"]
+        filesize=datafile["DATA_LENGTH"][0]
         if blocksize==None:
             blocksize=min(filesize/4,maxblocksize)
-        if not oldblocksize == blocksize: datafile["blocksize"]=blocksize
+        if not oldblocksize == blocksize: datafile["BLOCKSIZE"]=blocksize
         nBlocks=filesize/blocksize;
         if blocklist==None:
             blocklist=range(nBlocks/4)+range(3*nBlocks/4,nBlocks)
@@ -1043,14 +1048,17 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
     npeakserror=sqrt(npeaksexpected) # what is the statistical error on that expectation
 #Start checking
     if verbose:
-        if not datafile==None: print "Quality checking of file ",datafile.filename
+        if not datafile==None: print "Quality checking of file ",datafile["FILENAME"]
         print "Considering",nAntennas," antennas and the Blocks:",blocklist
         print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected
     for Block in blocklist:
         if verbose:
             print "\nBlock = ", Block
             print "-----------------------------------------------------------------------------------------"
-        if not datafile==None: datafile.set("block",Block).read("Voltage",dataarray.vec())
+        if not datafile==None: 
+            datafile["BLOCK"] = Block # redundant?
+            datafile.getTimeseriesData(dataarray, Block)
+
         datamean = dataarray[...].mean()
         datarms = dataarray[...].stddev(datamean)
         # Count # peaks while accounting for DC offset
@@ -1069,7 +1077,7 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
                     print "Block= {0:5d}, Antenna {1:3d}: mean={2: 6.2f}, rms={3:6.1f}, npeaks={4:5d}, spikyness={5: 7.2f}".format(*((Block,)+prop))," ",noncompliancelist
             if verbose:
                 print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)," ",noncompliancelist
-    if not datafile==None: datafile["blocksize"]=blocksize
+    if not datafile==None: datafile["BLOCKSIZE"]=blocksize
     return qualityflaglist
 
 
