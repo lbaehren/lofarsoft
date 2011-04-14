@@ -26,7 +26,7 @@ for filename in args:
     f = cr.open(filename, blocksize)
     
     print "Reading metadata:"
-    for key in f.keys():
+    for key in sorted(f.keys()):
         print key, f[key]
         print ""
     
@@ -35,7 +35,7 @@ for filename in args:
     f["SELECTED_DIPOLES"] = selection
     
     print "Reading metadata for selected antennas:"
-    for key in f.keys():
+    for key in sorted(f.keys()):
         print key, f[key]
         print ""
     
