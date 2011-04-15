@@ -1054,7 +1054,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
          sscanf(sbpointer, "%*3c%d", &subbandnr);
          subintdata.freq_cent = lofreq + subbandnr * subintdata.bw;
       } else { // CS data
-         subintdata.freq_cent = lofreq + SUBBANDS * subintdata.bw;
+         subintdata.freq_cent = lofreq + 0.5 * SUBBANDS * subintdata.bw;
       }
       printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
 
