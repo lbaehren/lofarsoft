@@ -480,8 +480,11 @@ class TaskInit(type):
 
         # Add parameter documentation
         par_doc_input, par_doc_output = cls.pardoc(dct, indent="  ")
-        cls.__doc__ += "\n  **Input parameters**\n" + par_doc_input
-        cls.__doc__ += "\n  **Output parameters**\n" + par_doc_output + "\n"
+        if par_doc_input:
+            cls.__doc__ += "\n  **Input parameters**\n" + par_doc_input
+        if par_doc_output:
+            cls.__doc__ += "\n  **Output parameters**\n" + par_doc_output
+        cls.__doc__ += "\n"
 
 
     def pardoc(cls, dct, indent=""):
