@@ -949,6 +949,8 @@ template <class T> hArray<T> &  hArray<T>::setUnit(HString prefix, HString name)
 
 /*!
   \brief Write the vector content to a raw (binary) string.
+
+  NOTE: This templated function does NOT work for boolean arrays!
 */
 template <class T> HString hArray<T>::writeRaw()
 {
@@ -966,12 +968,7 @@ template <class T> HString hArray<T>::writeRaw()
   raw.resize(raw_size);
   raw_ptr = &(raw[0]);
 
-  if (typeid(T).name() == typeid(bool).name()) {
-    // Processing boolean vector
-    //    PyCR::NotImplementedError("Not implemented for booleans");
-    // vector<bool> is not an actual container type
-    //memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size/8);
-  } else {
+  if (typeid(T).name() != typeid(bool).name()) {
     // Processing non-boolean vector
     memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size);
   }
@@ -982,6 +979,8 @@ template <class T> HString hArray<T>::writeRaw()
 
 /*!
   \brief Read the vector content from a raw (binary) string.
+
+  NOTE: This templated function does NOT work for boolean arrays!
 */
 template <class T> void hArray<T>::readRaw(HString raw)
 {
@@ -997,11 +996,7 @@ template <class T> void hArray<T>::readRaw(HString raw)
   raw_size = hfmin(vector_size*element_size, raw.size());
   raw_ptr = &(raw[0]);
 
-  if (typeid(T).name() == typeid(bool).name()) {
-    // Processing boolean vector
-    //PyCR::NotImplementedError("Not implemented for booleans");
-    // vector<bool> is not an actual container type
-  } else {
+  if (typeid(T).name() != typeid(bool).name()) {
     // Processing non-boolean vector
     memcpy(&(*storage_p->vec_p->begin()), raw_ptr, raw_size);
   }
@@ -1101,7 +1096,7 @@ void hArray_trackHistory(HBool on){
 //defining a dummy function that is never called.
 
 
-#define HFPP_DUMMYCALL_MACRO(R,DATA,TYPE) void BOOST_PP_CAT(dummycall,TYPE) (){ _H_NL_\
+#define HFPP_DUMMYCALL_MACRO_GENERIC(R,DATA,TYPE) void BOOST_PP_CAT(dummycall_generic,TYPE) (){ _H_NL_\
     std::vector<TYPE> vec;	   _H_NL_\
     std::vector<HInteger> ivec;	   _H_NL_\
     hArray<TYPE> ary0(); _H_NL_\
@@ -1167,11 +1162,17 @@ void hArray_trackHistory(HBool on){
     ary.clearHistory();			_H_NL_\
     ary.setHistory(true);			_H_NL_\
     ary.isTrackingHistory();			_H_NL_\
+} _H_NL_
+
+#define HFPP_DUMMYCALL_MACRO_NONBOOL(R,DATA,TYPE) void BOOST_PP_CAT(dummycall_nonbool,TYPE) (){ _H_NL_\
+    std::vector<TYPE> vec;	   _H_NL_\
+    hArray<TYPE> ary(vec); _H_NL_\
     ary.writeRaw();                             _H_NL_\
     ary.readRaw("dummy");                       _H_NL_\
-}
+} _H_NL_
 
 //Create dummy function for all types
-BOOST_PP_SEQ_FOR_EACH(HFPP_DUMMYCALL_MACRO,NIX,HFPP_ALL_TYPES(HBool))
+BOOST_PP_SEQ_FOR_EACH(HFPP_DUMMYCALL_MACRO_GENERIC,NIX,HFPP_ALL_TYPES(HBool))
+BOOST_PP_SEQ_FOR_EACH(HFPP_DUMMYCALL_MACRO_NONBOOL,NIX,HFPP_ALL_TYPES)
 
 #undef HFPP_FILETYPE
