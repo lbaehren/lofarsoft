@@ -27,13 +27,19 @@ rad2deg = 180./np.pi
 
 #------------------------------------------------------------ simplexPositionFit
 def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices,
-                       cr_freqs, FarField=True, blocksize=-1, doPlot = False):
+                       cr_freqs, FarField=True, blocksize=-1, method='smoothedAbs', doPlot = False):
 #  print 'ANT INDICES: '
 #  print ant_indices
 #  print ' '
     thisBF = bf.Beamformer(crfile, cr_fft) # initialize object. Isn't this an ugly memory leak?
     #import pdb; pdb.set_trace()
-    optimum = fmin(thisBF.pulseMaximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-1, ftol=1e-1, full_output=1)
+    if method == 'smoothedAbs':
+        maximizer = thisBF.pulseSmoothedAbsMaximizer
+    elif method == 'abs':
+        maximizer = thisBF.pulseAbsMaximizer
+    elif method == 'smoothedPower':
+        maximizer = thisBF.pulseSmoothedPowerMaximizer
+    optimum = fmin(maximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-1, ftol=1e-1, full_output=1)
 
     if not FarField:
         nPoints = 30
@@ -46,7 +52,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 #      print distances
         for i in range(nPoints):
             pos = [optimum[0][0], optimum[0][1], 2000.0 / distances[i]]
-            distResult[i] = - thisBF.pulseMaximizer(pos, cr_fft, antenna_positions, ant_indices, False)
+            distResult[i] = - maximizer(pos, cr_fft, antenna_positions, ant_indices, False)
 
         optR = distances[np.argmax(distResult)]
         pos[2] = 2000.0 / optR
@@ -54,7 +60,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
             plt.clf()
             plt.semilogx(distances, distResult)
             raw_input("--- Plotted bf pulse height versus distance - press Enter to continue...")
-        optimum = fmin(thisBF.pulseMaximizer, pos, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1) # extra simplex fit to finish it off
+        optimum = fmin(maximizer, pos, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-2, ftol=1e-4, full_output=1) # extra simplex fit to finish it off
         pos = [optimum[0][0], optimum[0][1], optimum[0][2]] # done at once?
 
         optBeam = thisBF.getTiedArrayBeam(pos, cr_fft, antenna_positions, ant_indices, False)
@@ -166,7 +172,8 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
     return result
 
 #------------------------------------------------------------------ fullPulseFit
-def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True, doPlot = False):
+def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True, 
+                     method = 'smoothedAbs', doPlot = False):
     #Set the parameters
     samplefreq = 200.0e6 # must be
     #crfile.set("blocksize", blocksize) # proper way, apparently
@@ -178,7 +185,7 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
     print 'So there are: %d blocks' % (int(dataLength) / int(blocksize))
     pulseMidpoint = int(triggerFitResult["avgToffset"] * samplefreq)
     nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
-
+    #import pdb; pdb.set_trace()
     # here we select the region of the data such that the pulse is (on average over antennas)
     # is in the middle of the block
     cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
@@ -248,8 +255,8 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
     for entry in flaggedList:
         if entry in ant_indices:
             ant_indices.remove(entry) # or [ant_indices.remove(x) for x in flaggedList if x in ant_indices] ...
-
-    (fitDataEven, optBeamEven) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
+    #import pdb; pdb.set_trace()
+    (fitDataEven, optBeamEven) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, cr_freqs, FarField=FarField,blocksize=blocksize, method=method, doPlot=doPlot)
 
     ant_indices = range(1, nofAntennas, 2)
     for entry in flaggedList:
@@ -257,7 +264,7 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
             ant_indices.remove(entry)
 
     (fitDataOdd, optBeamOdd) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices,
-                                    cr_freqs, FarField=FarField,blocksize=blocksize, doPlot=doPlot)
+                                    cr_freqs, FarField=FarField,blocksize=blocksize, method=method, doPlot=doPlot)
     if FarField:
         Reven = -1.0
         Rodd = -1.0

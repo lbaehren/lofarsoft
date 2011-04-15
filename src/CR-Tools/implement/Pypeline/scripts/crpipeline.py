@@ -8,6 +8,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
+from optparse import OptionParser
 
 from pycrtools import datacheck as dc
 from pycrtools import rficlean as rf
@@ -71,7 +72,7 @@ def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionRe
     outString += filename
     outfile.write(outString + '\n')
 
-def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
+def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = False):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
     outfile = open(outfilename, mode='a')
@@ -94,7 +95,9 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         if not result["success"]:
             continue
         crfile = result["file"] # blocksize is 2 * 65536 by default ('almost' entire file)
-        cr_efield = result["efield"] # gets all data
+        # get all timeseries data
+        cr_efield = crfile["EMPTY_TIMESERIES_DATA"]
+        crfile.getTimeseriesData(cr_efield, 0)
 #        crfile.set("blocksize", 32768)
 #        import pdb; pdb.set_trace()
 #        rf.cleanSpectrum(crfile)
@@ -134,7 +137,7 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
         triggerFitResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-            result = pf.fullDirectionFit(crfile, triggerFitResult, 2048, flaggedList = flaggedList, FarField = False, doPlot = doPlot)
+            result = pf.fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = flaggedList, FarField = False, method = options.method, doPlot = doPlot)
             fullDirectionResult = result
             writeDict(outfile, result)
             if not result["success"]:
@@ -161,21 +164,47 @@ def runAnalysis(files, outfilename, asciiFilename, doPlot = False):
     #return (bfEven, bfOdd)
 
 # get list of files to process
-nthreads = 2
-if len(sys.argv) > 2:
-    datafiles = sys.argv[1]
+# Parse command line options
+parser=OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
+parser.add_option("-n", "--nthreads",
+                  type="int", dest="nthreads", default=2,
+                  help="Number of processes to use in parallel, default = 2")
+parser.add_option("-b", "--blocksize",
+                  type="int", dest="blocksize", default=2048,
+                  help="Blocksize to use for simplex fitting of pulse direction+distance. Default is 2048")
+parser.add_option("-m", "--method",
+                  type="string", dest="method", default='smoothedAbs',
+                  help="Pulse maximization method. Possible are 'abs', 'smoothedAbs' and 'smoothedPower'")
+parser.add_option("-f", "--files",
+                  type="string", dest="files", default='/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5',
+                  help="Files to process")
+parser.add_option("--doPlot", action="store_true", dest="doPlot", default=False,
+                  help="Plots are done when this flag is set")
+
+(options, args)=parser.parse_args()
+
+nthreads = options.nthreads
+datafiles = options.files
+method = options.method
+blocksize = options.blocksize
+print 'Using %d threads' % nthreads
+print 'Using pulse maximization method %s' % method
+
+#if len(sys.argv) > 2:
+#    datafiles = sys.argv[1]
 #    triggerMessageFile = sys.argv[2]
-    nthreads = int(sys.argv[2])
-    print 'Using %d threads' % nthreads
-elif len(sys.argv) > 1:
-    datafiles = sys.argv[1]
-    print 'Taking default trigger message file (i.e. name constructed from date and station name in the hdf5 data file).'
-else:
-    print 'No files given on command line, using a default set instead.'
+#    nthreads = int(sys.argv[2])
+#    print 'Using %d threads' % nthreads
+#elif len(sys.argv) > 1:
+#    datafiles = sys.argv[1]
+#    print 'Taking default trigger message file (i.e. name constructed from date and station name in the hdf5 data file).'
+#else:
+#    print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-441.h5'
 #    datafiles = '/Users/acorstanje/triggering/MACdatarun_2feb2011/automatic_obs_test-2feb-2-26.h5'
-    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5'
+#    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5'
+
 sortstring = 'sort -n --field-separator="-" --key=18'
 outfile = 'crPipelineResults.txt'
 outfileAscii = 'asciiPipelineResults.txt'
@@ -196,20 +225,20 @@ if nofiles > nthreads:
 
     processes = []
     for i in range(nthreads):
-        thisProcess = subprocess.Popen(['./crpipeline.py', files[i]])
+        thisProcess = subprocess.Popen(['./crpipeline.py', '--files='+files[i], '--method='+options.method])
         processes.append(thisProcess)
     i = nthreads
 #    i = 2
     while i < nofiles:
-        time.sleep(0.33)
+        time.sleep(0.2)
         for k in range(nthreads):
             if processes[k].poll() != None:
                 print 'Going to do: %s' % files[i]
-                processes[k] = subprocess.Popen(['./crpipeline.py', files[i]])
+                processes[k] = subprocess.Popen(['./crpipeline.py', '--files='+files[i], '--method='+options.method])
                 i += 1
                 
 else:
-    runAnalysis(files, outfile, outfileAscii, doPlot = True)
+    runAnalysis(files, outfile, outfileAscii, doPlot = options.doPlot)
 #fitergs = dict()
 
 

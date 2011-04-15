@@ -18,7 +18,6 @@ class Beamformer(object):
 
         blocksize = crfile["BLOCKSIZE"] # BUG: use cr_fft for sizes instead...
         # WORKAROUND: adjust crfile's blocksize accordingly
-
         self.delays = hArray(float,dimensions=[nofAntennas])
         self.weights = hArray(complex,dimensions = cr_fft,name="Complex Weights")
         self.freqs = hArray(crfile["FREQUENCY_DATA"]) # a FloatVec comes out, so put it into hArray
@@ -137,7 +136,7 @@ class Beamformer(object):
 #        pdb.set_trace()
         return (self.tiedArrayBeam, self.incoherentBeam, self.ccBeam)
 
-    def pulseMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+    def pulseAbsMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
         # Develop this to calculate the pulse height in a proper way!
         tiedArrayBeam = self.getTiedArrayBeam(azel_in, fftData, antennaPositions, antennaIndices, FarField)
         tiedArrayBeam.abs() # make absolute value!
@@ -147,6 +146,27 @@ class Beamformer(object):
         print ' value = %f ' % value
         return value
 
+    def pulseSmoothedPowerMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+        # Develop this to calculate the pulse height in a proper way!
+        tiedArrayBeam = self.getTiedArrayBeam(azel_in, fftData, antennaPositions, antennaIndices, FarField)
+        tiedArrayBeam.square() # make square!
+        hRunningAverage(self.smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
+
+#        value = - tiedArrayBeam.max()[0] # just the maximum.
+        value = - self.smoothedBeam.max()[0]
+        print ' value = %f ' % value
+        return value
+
+    def pulseSmoothedAbsMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField):
+        # Develop this to calculate the pulse height in a proper way!
+        tiedArrayBeam = self.getTiedArrayBeam(azel_in, fftData, antennaPositions, antennaIndices, FarField)
+        tiedArrayBeam.abs() # make absolute value!
+        hRunningAverage(self.smoothedBeam, tiedArrayBeam, 5, hWEIGHTS.GAUSSIAN)
+
+#        value = - tiedArrayBeam.max()[0] # just the maximum.
+        value = - self.smoothedBeam.max()[0]
+        print ' value = %f ' % value
+        return value
 
     def fancyPulseMaximizer(self, azel_in, fftData, antennaPositions, antennaIndices, FarField, beamType = 'tiedArrayBeam'):
         # Develop this to calculate the pulse height in a proper way!

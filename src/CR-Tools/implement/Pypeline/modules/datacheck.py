@@ -46,14 +46,12 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         return result
 
     crfile = cr.open(filename.strip(), 2*65536)
-    print 'KEYS: '
-    keys = crfile.keys()
-    keys.sort()
-    print keys
-    print ' '
-#    crfile.set("blocksize", 2*65536)
+#    print 'KEYS: '
+#    keys = crfile.keys()
+#    keys.sort()
+#    print keys
+#    print ' '
     crfile["ANTENNA_SET"] = antennaset
-#    print crfile["SAMPLE_NUMBER"]    
     times = crfile["TIME"]
 
     fileDate = times[0]
@@ -64,16 +62,15 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
   #  print crfile["shift"]
     if max(times) - min(times) > 0:
         print 'Error: Timestamps vary across antennas' # redundant
-        result.update(reason=format("Timestamps don't match, spread = %d seconds") % (dates.max() - dates.min()) )
+        result.update(reason=format("Timestamps don't match, spread = %d seconds") % (max(times) - min(times)) )
         return result
 
     sampleFrequency = crfile["SAMPLE_FREQUENCY_VALUE"][0]
     if crfile["SAMPLE_FREQUENCY_UNIT"][0] == "MHz":
         sampleFrequency *= 1.0e6
-        print 'boe'
     if sampleFrequency != 200e6:
-        print 'Error: wrong sampling frequency: %d; needs to be 200e6' % crfile["sampleFrequency"]
-        result.update(reason=format("wrong sampling frequency %d") % crfile["sampleFrequency"])
+        print 'Error: wrong sampling frequency: %d; needs to be 200e6' % sampleFrequency
+        result.update(reason=format("wrong sampling frequency %d") % sampleFrequency)
         return result
     
     dataLength = crfile["DATA_LENGTH"][0]
@@ -87,11 +84,7 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
         return result
     result.update(nofAntennas = nofAntennas)
 
-    # get all timeseries data
-    cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
-    crfile.getTimeseriesData(cr_alldata, 0)
-
-    result.update(success=True, file=crfile, efield = cr_alldata)
+    result.update(success=True, file=crfile)
     return result
 #    return result.update(success=True, file=crfile) !!! This actually returns None (nonetype)...
 
