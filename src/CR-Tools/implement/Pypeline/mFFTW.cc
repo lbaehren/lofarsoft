@@ -60,14 +60,15 @@ using namespace std;
 //__________________________________________________________________________
 //                                                                  FFTWPlan
 
-FFTWPlanManyDft::FFTWPlanManyDft (int n, int howmany, int istride, int idist, int ostride, int odist, enum fftw_sign sign, enum fftw_flags flags)
+FFTWPlanManyDft::FFTWPlanManyDft (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_sign sign, enum fftw_flags flags)
 {
-  // Store input size
-  N = n;
+  // Store input and output size
+  isize = N * howmany;
+  osize = N * howmany;
 
   // Allocate space for arrays
-  in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-  out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
+  in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * isize);
+  out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * osize);
 
   // Create FFTW plan
   p = fftw_plan_many_dft(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, sign, flags | FFTW_DESTROY_INPUT);
@@ -80,14 +81,15 @@ std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDft& d)
     return output;
 }
 
-FFTWPlanManyDftR2c::FFTWPlanManyDftR2c (int n, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags)
+FFTWPlanManyDftR2c::FFTWPlanManyDftR2c (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags)
 {
-  // Store input size
-  N = n;
+  // Store input and output size
+  isize = N * howmany;
+  osize = (N / 2 + 1) * howmany;
 
   // Allocate space for arrays
-  in = (double*) fftw_malloc(sizeof(double) * N);
-  out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (N/2+1));
+  in = (double*) fftw_malloc(sizeof(double) * isize);
+  out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * osize);
 
   // Create FFTW plan
   p = fftw_plan_many_dft_r2c(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags | FFTW_DESTROY_INPUT);
@@ -100,14 +102,15 @@ std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDftR2c& d)
     return output;
 }
 
-FFTWPlanManyDftC2r::FFTWPlanManyDftC2r (int n, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags)
+FFTWPlanManyDftC2r::FFTWPlanManyDftC2r (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags)
 {
-  // Store input size
-  N = n;
+  // Store input and output size
+  isize = (N / 2 + 1) * howmany;
+  osize = N * howmany;
 
   // Allocate space for arrays
-  in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (N/2+1));
-  out = (double*) fftw_malloc(sizeof(double) * N);
+  in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * isize);
+  out = (double*) fftw_malloc(sizeof(double) * osize);
 
   // Create FFTW plan
   p = fftw_plan_many_dft_c2r(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags | FFTW_DESTROY_INPUT);
@@ -156,7 +159,7 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
   const int Nout = std::distance(out, out_end);
 
   // Sanity check
-  if (Nin != plan.N || Nout != Nin)
+  if (Nin != plan.isize || Nout != plan.osize)
   {
     throw PyCR::ValueError("In- and output vectors do not have the required size.");
     return;
@@ -209,7 +212,7 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
   const int Nout = std::distance(out, out_end);
 
   // Sanity check
-  if (Nin != plan.N || Nout != Nin / 2 + 1)
+  if (Nin != plan.isize || Nout != plan.osize)
   {
     throw PyCR::ValueError("In- and output vectors do not have the required size.");
     return;
@@ -262,7 +265,7 @@ void HFPP_FUNC_NAME(const Iter out, const Iter out_end,
   const int Nout = std::distance(out, out_end);
 
   // Sanity check
-  if (Nout != plan.N || Nin != Nout / 2 + 1)
+  if (Nin != plan.isize || Nout != plan.osize)
   {
     throw PyCR::ValueError("In- and output vectors do not have the required size.");
     return;

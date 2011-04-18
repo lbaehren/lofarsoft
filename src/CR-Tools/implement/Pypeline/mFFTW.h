@@ -47,12 +47,13 @@ class FFTWPlanManyDft {
 public:
 
   // === Variables =========================================================
-  int N;
+  int isize;
+  int osize;
   fftw_complex *in;
   fftw_complex *out;
 
   // === Methods ===========================================================
-  FFTWPlanManyDft (int n, int howmany, int istride, int idist, int ostride, int odist, enum fftw_sign sign, enum fftw_flags flags);
+  FFTWPlanManyDft (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_sign sign, enum fftw_flags flags);
 
   void execute() { fftw_execute(p); };
 
@@ -68,12 +69,13 @@ class FFTWPlanManyDftR2c {
 public:
 
   // === Variables =========================================================
-  int N;
+  int isize;
+  int osize;
   double *in;
   fftw_complex *out;
 
   // === Methods ===========================================================
-  FFTWPlanManyDftR2c (int n, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags);
+  FFTWPlanManyDftR2c (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags);
 
   void execute() { fftw_execute(p); };
 
@@ -89,12 +91,13 @@ class FFTWPlanManyDftC2r {
 public:
 
   // === Variables =========================================================
-  int N;
+  int isize;
+  int osize;
   fftw_complex *in;
   double *out;
 
   // === Methods ===========================================================
-  FFTWPlanManyDftC2r (int n, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags);
+  FFTWPlanManyDftC2r (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags);
 
   void execute() { fftw_execute(p); };
 
