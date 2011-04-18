@@ -76,15 +76,19 @@ fi
 
 #find ./ -name "*.th.png" -print | sort | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS_/IS_/g' -e 's/^.*_CS_/CS_/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' -e 's/_beam_./\\n&\\n/g'  > /tmp/$$_combine_col2.txt
 
-is_IS=`grep "incoherentstokes/" /tmp/$$_combine_col1.txt`
-if [[ $is_IS != "" ]]
-then
-   STOKES="IS"
-else
-   STOKES="CS"
-fi
+#is_IS=`grep "incoherentstokes/" /tmp/$$_combine_col1.txt`
+#if [[ $is_IS != "" ]]
+#then
+#   STOKES="IS"
+#else
+#   STOKES="CS"
+#fi
 
-find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/^.*L20..//g" -e "s/\..*//g" | awk -v STOKES=$STOKES '{print STOKES"_"$2"\\n_"$4}' > /tmp/$$_combine_col2.txt
+#find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/^.*L20..//g" -e "s/\..*//g" | awk -v STOKES=$STOKES '{print STOKES"_"$2"\\n_"$4}' > /tmp/$$_combine_col2.txt
+
+
+#assume anything without long paths which contain incoherentstokes or stokes, is CS data for now
+find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g"  | awk '{print $1 $3"\\n_"$5}'> /tmp/$$_combine_col2.txt
 
 paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
 
