@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.20
+VERSION=2.21
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -2282,13 +2282,30 @@ do
         cd ${location}/${STOKES}/
 		for ii in $num_dir
 		do
+            cd ${location}/${STOKES}/
 			N=$ii
 			N=`echo "$N+1" | bc`
 			beam_index=`sed -n "$N"p SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 			beam_index=`echo "$beam_index+1" | bc`
 			NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$beam_index'}'`
 			echo "mv RSP${ii} $NAME" >> $log
+			echo "mv RSP${ii} $NAME"
 			mv RSP${ii} $NAME
+			cd ${location}/${STOKES}/$NAME
+		    for jjj in $loop_beams
+			do
+			   cd ${location}/${STOKES}/$NAME/${jjj}
+			   /bin/ls *_RSP${ii}* > name_change.list
+			   while read filename
+			   do
+#			      new_name=`echo $filename | sed -e "s/_RSP.*_/_$NAME_/g" -e "s/_RSP.*\./_$NAME./g"`
+                  NAME1="_"${NAME}"_PSR"
+                  NAME2="_"${NAME}
+                  NAME3="_"${NAME}"_"
+			      new_name=`echo $filename | sed   -e "s/_RSP.*PSR/$NAME1/g"  -e "s/_RSP.*\./$NAME2\./g" -e "s/_RSP.*_/$NAME3/g"`
+			      mv $filename $new_name
+			   done < name_change.list
+			done
 		done
 		cd ${location}	
     fi
@@ -2326,8 +2343,8 @@ date
 date >> $log
 echo chmod 774 -R . * >> $log
 chmod 774 -R . * 
-echo chgrp -R pulsar . * >> $log
-chgrp -R pulsar . * 
+#echo chgrp -R pulsar . * >> $log
+#chgrp -R pulsar . * 
 	
 date_end=`date`
 echo "Start Time: " $date_start
