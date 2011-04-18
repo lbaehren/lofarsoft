@@ -39,8 +39,33 @@ fi
 
 # find all the paths to the th.png files
 find ./ -name "*.th.png" -print | sort  > /tmp/$$_combine_col1.txt
+wc_col1=`wc -l /tmp/$$_combine_col1.txt`
+if [[ $wc_col1 < 1 ]]
+then
+   echo ""
+   echo "No thumbnail (*.th.png) files were found to combine."
+   echo ""
+
+   if [ $log != "NONE" ]
+   then
+      echo "No thumbnail (*.th.png) files were found to combine." >> $log
+   fi
+fi
 
 find ./ -name "*prepout" -print -exec grep -i squared {} \; | sed 's/prepout/prepout \\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | sort | sed 's/^.*= //g'  > /tmp/$$_combine_col3.txt
+wc_col3=`wc -l /tmp/$$_combine_col3.txt`
+if [[ $wc_col3 < 1 ]]
+then
+   echo ""
+   echo "No presto (*.prepout) files were found to extract Chi-Squared values."
+   echo ""
+
+   if [ $log != "NONE" ]
+   then
+      echo "No presto (*.prepout) files were found to extract Chi-Squared values." >> $log
+   fi
+fi
+
 
 # find all the paths to the th.png files and print just the RSP? location and the Pulsar name to the output file
 #find ./ -name "*.th.png" -print  | sed -e 's/\// /g' -e 's/^.* //g' -e 's/.*_RSP/RSP/g' -e 's/\..*//g'  -e 's/_PSR//g' > /tmp/$$_combine_col2.txt
@@ -49,10 +74,24 @@ find ./ -name "*prepout" -print -exec grep -i squared {} \; | sed 's/prepout/pre
 #   and RSP? location and the Pulsar name to the output file
 
 
-find ./ -name "*.th.png" -print | sort | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS_/IS_/g' -e 's/^.*_CS_/CS_/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' -e 's/_beam_./\\n&\\n/g'  > /tmp/$$_combine_col2.txt
+#find ./ -name "*.th.png" -print | sort | sed -e 's/\/incoherentstokes\//_IS_/g' -e 's/\/stokes\//_CS_/g' -e 's/\//_/g' -e 's/^.*_IS_/IS_/g' -e 's/^.*_CS_/CS_/g' -e 's/_L20.*//g' -e 's/_RSP._/&\\n/g' -e 's/_beam_./\\n&\\n/g'  > /tmp/$$_combine_col2.txt
+
+is_IS=`grep "incoherentstokes/" /tmp/$$_combine_col1.txt`
+if [[ $is_IS != "" ]]
+then
+   STOKES="IS"
+else
+   STOKES="CS"
+fi
+
+find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/^.*L20..//g" -e "s/\..*//g" | awk -v STOKES=$STOKES '{print STOKES"_"$2"\\n_"$4}' > /tmp/$$_combine_col2.txt
 
 paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
+
+#delete intermediate files
 rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt
+
+#make sure there is text in the new shell script
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
 
 if [[ $wc_convert > 0 ]]
