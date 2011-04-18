@@ -4,28 +4,14 @@ It contains one function `open` that is used to open an HDF5 file containing LOF
 
 .. moduleauthor:: Pim Schellart <P.Schellart@astro.ru.nl>
 
-The underlying metadata module used for obtaining the antenna positions depends on the ANTENNA_SET parameter being set to one of the ICD specified values:
+This module assumes that correct ICD specified values are set for the folowing attributes:
 
-LBA_INNER LBA_OUTER LBA_SPARSE_EVEN LBA_SPARSE_ODD LBA_X
-LBA_Y HBA_ZERO HBA_ONE HBA_DUAL HBA_JOINED
+* ANTENNA_SET
+* ANTENNA_POSITION
+* ANTENNA_POSITION_UNIT
+* NYQUIST_ZONE
 
-if you also need the frequencies for the FFT the correct Nyquist zone needs to be set as well.
-Sander is currently adding this to the data writer but in the mean time (and for existing files) you can adapt the following script to set these.
-
-#! /usr/bin/env python
-
-import h5py
-
-f = h5py.File("D20101104T75613_CS002C.h5", "a")
-
-for station in f.itervalues():
-   station["ANTENNA_SET"] = "HBA_DUAL"
-
-   for dataset in station.itervalues():
-       dataset.attrs["NYQUIST_ZONE"] = 2
-
-f.flush()
-f.close()
+If this is not true for your files use the ``fix_metadata.py`` script to fix this.
 
 """
 
@@ -76,10 +62,9 @@ class TBBData(IOInterface):
         # Mark file as opened
         self.closed = False
 
-
     def setKeywordDict(self):
         self.__keyworddict={
-            ##SOME NON-ICD KEYWORDS
+            # NON-ICD KEYWORDS
             "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
             "ITRFANTENNA_POSITIONS":self.getITRFAntennaPositions,
             "ANTENNA_POSITIONS":self.getRelativeAntennaPositions,
@@ -98,7 +83,7 @@ class TBBData(IOInterface):
             "BLOCK":lambda: self.__block,
             "MAXIMUM_READ_LENGTH":self.__file.maximum_read_length(self.__refAntenna),
 
-            ##ICD KEYWORDS
+            # ICD KEYWORDS
             "FILENAME":self.__file.filename,
             "ANTENNA_SET":lambda:self.antenna_set if hasattr(self,"antenna_set") else self.__file.antenna_set(),
             "ANTENNA_POSITION":self.__file.antenna_position,
@@ -174,6 +159,9 @@ class TBBData(IOInterface):
 
         # Generate scrach arrays
         self.__makeScratch()
+
+        # Generate FFTW plan
+        self.__plan = cr.FFTWPlanManyDftR2c(self.__blocksize, self.__file.nofSelectedDatasets(), 1, self.__blocksize, 1, self.__blocksize / 2 + 1, cr.fftw_flags.MEASURE)
 
     def __repr__(self):
         """Display summary when printed.
@@ -356,6 +344,7 @@ class TBBData(IOInterface):
         blocksize (and later also time offset). Create a new array, if
         none is provided, otherwise put data into array.
         """
+
         if not data:
             data = self.empty("TIME_DATA")
 
@@ -496,13 +485,16 @@ class TBBData(IOInterface):
         # For selected frequency range
         if self.__nfmin != None and self.__nfmax != None:
             # Perform FFT
-            self.__scratchFFT[...].fftcasa(self.__scratch[...], self.__nyquist_zone[0])
+            cr.hFFTWExecutePlan(self.__scratchFFT, self.__scratch, self.__plan)
 
             data[...].copy(self.__scratchFFT[..., self.__nfmin:self.__nfmax])
 
         else:
             # Perform FFT
-            data[...].fftcasa(self.__scratch[...], self.__nyquist_zone[0])
+            cr.hFFTWExecutePlan(data, self.__scratch, self.__plan)
+
+        # Swap Nyquist zone if needed
+        data[...].nyquistswap(self.__nyquist_zone[0])
 
     def getRelativeAntennaPositions(self):
         """Returns relative antenna positions for selected antennas, or all

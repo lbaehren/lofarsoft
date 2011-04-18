@@ -52,12 +52,12 @@ for filename in args:
     print "Reading one block of FFT data:"
     f.getFFTData(fftdata, 0)
     
-    print data
+    print fftdata
     
     print "Reading one block of FFT data in alternative way:"
     f.read("FFT_DATA", fftdata, 0)
     
-    print data
+    print fftdata
     
     print "Corresponding frequencies"
     print f.getFrequencies()
