@@ -55,6 +55,8 @@ public:
   // === Methods ===========================================================
   FFTWPlanManyDft (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_sign sign, enum fftw_flags flags);
 
+  ~FFTWPlanManyDft ();
+
   void execute() { fftw_execute(p); };
 
   // === Operators =========================================================
@@ -77,6 +79,8 @@ public:
   // === Methods ===========================================================
   FFTWPlanManyDftR2c (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags);
 
+  ~FFTWPlanManyDftR2c ();
+
   void execute() { fftw_execute(p); };
 
   // === Operators =========================================================
@@ -98,6 +102,8 @@ public:
 
   // === Methods ===========================================================
   FFTWPlanManyDftC2r (int N, int howmany, int istride, int idist, int ostride, int odist, enum fftw_flags flags);
+
+  ~FFTWPlanManyDftC2r ();
 
   void execute() { fftw_execute(p); };
 

@@ -73,6 +73,13 @@ FFTWPlanManyDft::FFTWPlanManyDft (int N, int howmany, int istride, int idist, in
   // Create FFTW plan
   p = fftw_plan_many_dft(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, sign, flags | FFTW_DESTROY_INPUT);
 }
+  
+FFTWPlanManyDft::~FFTWPlanManyDft ()
+{
+  fftw_free(in);
+  fftw_free(out);
+  fftw_destroy_plan(p);
+}
 
 std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDft& d)
 {
@@ -95,6 +102,13 @@ FFTWPlanManyDftR2c::FFTWPlanManyDftR2c (int N, int howmany, int istride, int idi
   p = fftw_plan_many_dft_r2c(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags | FFTW_DESTROY_INPUT);
 }
 
+FFTWPlanManyDftR2c::~FFTWPlanManyDftR2c ()
+{
+  fftw_free(in);
+  fftw_free(out);
+  fftw_destroy_plan(p);
+}
+
 std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDftR2c& d)
 {
     output << "FFTWPlanManyDftR2c";
@@ -114,6 +128,13 @@ FFTWPlanManyDftC2r::FFTWPlanManyDftC2r (int N, int howmany, int istride, int idi
 
   // Create FFTW plan
   p = fftw_plan_many_dft_c2r(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags | FFTW_DESTROY_INPUT);
+}
+
+FFTWPlanManyDftC2r::~FFTWPlanManyDftC2r ()
+{
+  fftw_free(in);
+  fftw_free(out);
+  fftw_destroy_plan(p);
 }
 
 std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDftC2r& d)
@@ -152,7 +173,7 @@ std::ostream& operator<<(std::ostream& output, const FFTWPlanManyDftC2r& d)
 template <class CIter>
 void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 		    const CIter in,  const CIter in_end,
-        FFTWPlanManyDft plan)
+        FFTWPlanManyDft &plan)
 {
   // Get array lengths
   const int Nin =  std::distance(in, in_end);
@@ -205,7 +226,7 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 template <class CIter, class Iter>
 void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 		    const Iter in,  const Iter in_end,
-        FFTWPlanManyDftR2c plan)
+        FFTWPlanManyDftR2c &plan)
 {
   // Get array lengths
   const int Nin =  std::distance(in, in_end);
@@ -258,7 +279,7 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 template <class Iter, class CIter>
 void HFPP_FUNC_NAME(const Iter out, const Iter out_end,
 		    const CIter in,  const CIter in_end,
-        FFTWPlanManyDftC2r plan)
+        FFTWPlanManyDftC2r &plan)
 {
   // Get array lengths
   const int Nin =  std::distance(in, in_end);
