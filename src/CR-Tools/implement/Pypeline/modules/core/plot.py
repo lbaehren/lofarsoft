@@ -37,42 +37,42 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
 
     Parameters:
 
-    ============ ============================================================
-    Parameter    Description
-    ============ ============================================================
-    *xvalues*    an array with corresponding *x* values, if ``None``
-                 numbers from 0 to length of the array are used.
-    *xlabel*     the *x*-axis label, if not specified, use the ``name``
-                 keyword of the ``xvalues`` array - units will be added
-                 automatically.
-    *ylabel*     the *y*-axis label, if not specified, use the ``name``
-                 keyword of the array - units will be added automatically.
-    *xlim*       tuple with minimum and maximum limits for the *x*-axis.
-    *ylim*       tuple with minimum and maximum limits for the *y*-axis.
-    *legend*     plots a legend, taking a tuple of strings for each
-                 plotted line as input, e.g. ``legend=('A','B',...)``.
-    *title*      the title for the plot
-    *clf*        if ``True`` (default) clear the screen beforehand
-                 (use ``False`` to compose plots with multiple lines
-                 from different arrays.
-    *logplot*    can be used to make loglog or semilog plots:
-                   False -> linear plot                                                     
-                   None  -> take defaults from array if present
-                   'x'   -> semilog in x
-                   'y'   -> semilog in y
-                   'xy'  -> loglog plot
+    ================ ======================================================================
+    Parameter        Description
+    ================ ======================================================================
+    *xvalues*        an array with corresponding *x* values, if ``None``
+                     numbers from 0 to length of the array are used.
+    *xlabel*         the *x*-axis label, if not specified, use the ``name``
+                     keyword of the ``xvalues`` array - units will be added
+                     automatically.
+    *ylabel*         the *y*-axis label, if not specified, use the ``name``
+                     keyword of the array - units will be added automatically.
+    *xlim*           tuple with minimum and maximum limits for the *x*-axis.
+    *ylim*           tuple with minimum and maximum limits for the *y*-axis.
+    *legend*         plots a legend, taking a tuple of strings for each
+                     plotted line as input, e.g. ``legend=('A','B',...)``.
+    *title*          the title for the plot
+    *clf*            if ``True`` (default) clear the screen beforehand
+                     (use ``False`` to compose plots with multiple lines
+                     from different arrays.
+    *logplot*        can be used to make loglog or semilog plots:
+                       False -> linear plot
+                       None  -> take defaults from array if present
+                       'x'   -> semilog in x
+                       'y'   -> semilog in y
+                       'xy'  -> loglog plot
 
     *highlightcolor* color (e.g. 'red'), used to highlight sections of the plot
 
-    *nhighlight* determines how many (if any) sections of the data to highlight.
+    *nhighlight*     determines how many (if any) sections of the data to highlight.
 
-    *highlight*  ylist, vector, or array of tuples with start and end indices of
-                 sections to highlight
-                 
-    *plotarg1*   =..., plotarg2=...: you can add any plotting parameter
-                 that is understood by ``.plot`` of scipy, e.g.
-                 ``color='green``, ``linestyle='dashed``.
-    ============ ============================================================
+    *highlight*      ylist, vector, or array of tuples with start and end indices of
+                     sections to highlight
+
+    *plotarg1*       =..., plotarg2=...: you can add any plotting parameter
+                     that is understood by ``.plot`` of scipy, e.g.
+                     ``color='green``, ``linestyle='dashed``.
+    ================ ======================================================================
     """
     if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
         EDP64bug=self.plt.EDP64bug
@@ -83,7 +83,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
                 if dim_difference==0:
                     xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
                 elif dim_difference>0:
-                    ellipsiscount=self.__slice__.count(Ellipsis) # check if an ellipsis is present that occupies and extra slot in the index list 
+                    ellipsiscount=self.__slice__.count(Ellipsis) # check if an ellipsis is present that occupies and extra slot in the index list
                     if ellipsiscount==1:
                         ellipsislocation=self.__slice__.index(Ellipsis)
                         if ellipsislocation==0 or type(self.__slice__[ellipsislocation-1]) in [int,long]:
@@ -154,7 +154,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
         else: exec(var+"="+str(dflt.__repr__()))
     if type(val)==str: val=(str)
     if clf: self.plt.clf()
-    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx 
+    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx
     elif logplot=="y": _plot=hSemiLogY if EDP64bug else self.plt.semilogy
     elif (logplot=="xy") | (logplot=="yx"): _plot=hSemiLogXY if EDP64bug else self.plt.loglog
     else: _plot=self.plt.plot
@@ -194,19 +194,19 @@ def hSemiLogY(x,y,**args):
     xvec=x
     yvec=Vector(float,len(y)); yvec.copy(y); yvec.log10()
     plt.plot(xvec,yvec,**args)
-    
+
 def hSemiLogX(x,y,**args):
     """Total frustration avoid EDP64 crash on new Mac function"""
     yvec=y
     xvec=Vector(float,len(x)); xvec.copy(x); xvec.log10()
     plt.plot(xvec,yvec,**args)
-    
+
 def hSemiLogXY(x,y,**args):
     """Total frustration avoid EDP64 crash on new Mac function"""
     yvec=Vector(float,len(y)); yvec.copy(y); yvec.log10()
     xvec=Vector(float,len(x)); xvec.copy(x); xvec.log10()
     plt.plot(xvec,yvec,**args)
-    
+
 def plotconst(xvalues,y):
     """
     Plot a constant line.

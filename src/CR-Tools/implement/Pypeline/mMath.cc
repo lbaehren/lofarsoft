@@ -687,7 +687,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   vector. If the second operand vector is shorter it will be applied
   multiple times.  To loop over the first argument (i.e., ``vec``) use
   ``hMulAdd``, ``hDivAdd``, ``hSubAdd``, ``hAddAdd``. To repeatedly
-  add to the output vector, use ```hMulAddSum`.
+  add to the output vector, use ``hMulAddSum``.
 
   See also:
   hMulAdd, hDivAdd, hSubAdd, hAddAdd,  hMulAddSum, hDivAddSum, hSubAddSum, hAddAddSum
@@ -2627,8 +2627,8 @@ HNumber HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger b
   calculate for each block the standard deviation. The block
   number of the block with the smallest standard deviation will be
   returned. The values of mean and standard deviation will be
-  returned in the variables ``minrms`` and ``minmean``. In Python 
-  both variables should be vectors, since scalars are not returned 
+  returned in the variables ``minrms`` and ``minmean``. In Python
+  both variables should be vectors, since scalars are not returned
   (in this case also blocklen needs to be a vector).
 
   All blocks have the same length with a possible exception of the last
@@ -2988,7 +2988,7 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
   See also:
   hMaxInSequences, hMinInSequences, hSumInSequences,hMeanInSequences, hStdDevInSequences, hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual, hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
-  
+
 Example:
 npeaks=3
 datavector=hArray(float,[10],fill=range(10))
@@ -4218,7 +4218,7 @@ void HFPP_FUNC_NAME (const DataIter odata,
 
   Description:
   Calculate :math:`a^2` for each element :math:`a` in the input vector
-  and add the result to the output vector. Note that (unlike for 
+  and add the result to the output vector. Note that (unlike for
   hSpectralPower) for complex numbers the result can also be negative!
 
   The fact that the result is added to the output vector allows one to
@@ -4233,7 +4233,7 @@ void HFPP_FUNC_NAME (const DataIter odata,
 
   See also:
 
-  hSpectralPower, hSpectralPower2 
+  hSpectralPower, hSpectralPower2
 
   Example:
   >>> spectrum = hArray(float,[1,128])

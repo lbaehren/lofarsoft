@@ -1,46 +1,44 @@
 """
-====================================================================
 Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
-Example:
-file=crfile(LOFARSOFT+"/data/lopes/example.event")
-tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
-tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
-tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
-tpar phase_center=[-84.5346,36.1096,0]
-tpar FarField=True
-tpar NyquistZone=2
-tpar randomize_peaks=False
+Example::
+  file=crfile(LOFARSOFT+"/data/lopes/example.event")
+  tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
+  tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
+  tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
+  tpar phase_center=[-84.5346,36.1096,0]
+  tpar FarField=True
+  tpar NyquistZone=2
+  tpar randomize_peaks=False
 
-#file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
-#file["SelectedAntennasID"]=[0]
-#fx0=file["TIMESERIES_DATA"]
+  #file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+  #file["SelectedAntennasID"]=[0]
+  #fx0=file["TIMESERIES_DATA"]
 
 
-------------------------------------------------------------------------
-tload "BeamFormer"
-file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
-tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
-tpar antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position"))))
-tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
-tpar cal_delays=dict(zip(file["antennaIDs"],[0,-2.3375e-08,-2.75e-09,-3.75e-09,-2.525e-08,-2.575e-08,1.3125e-08,-1.6875e-08]))
-tpar phase_center=[-22.1927,15.3167,0]
-tpar FarField=False
-tpar NyquistZone=2
-tpar randomize_peaks=False
-------------------------------------------------------------------------
-antenna pos: hArray(float, [8, 3], fill=[-84.5346,36.1096,0,-52.6146,54.4736,-0.0619965,-34.3396,22.5366,-0.131996,-2.3706,40.6976,-0.00299835,41.0804,1.97557,-0.0769958,22.7764,34.1686,-0.0549927,-20.8546,72.5436,-0.154999,11.1824,90.8196,-0.221992]) # len=24 slice=[0:24])
+  # ------------------------------------------------------------------------
+  tload "BeamFormer"
+  file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+  tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
+  tpar antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position"))))
+  tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
+  tpar cal_delays=dict(zip(file["antennaIDs"],[0,-2.3375e-08,-2.75e-09,-3.75e-09,-2.525e-08,-2.575e-08,1.3125e-08,-1.6875e-08]))
+  tpar phase_center=[-22.1927,15.3167,0]
+  tpar FarField=False
+  tpar NyquistZone=2
+  tpar randomize_peaks=False
+  # ------------------------------------------------------------------------
+  antenna pos: hArray(float, [8, 3], fill=[-84.5346,36.1096,0,-52.6146,54.4736,-0.0619965,-34.3396,22.5366,-0.131996,-2.3706,40.6976,-0.00299835,41.0804,1.97557,-0.0769958,22.7764,34.1686,-0.0549927,-20.8546,72.5436,-0.154999,11.1824,90.8196,-0.221992]) # len=24 slice=[0:24])
 
-self=Task
-self.beams[...,0].nyquistswap(self.NyquistZone)
-fxb=hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
-fxb[...].plot(clf=True); plt.show()
-
+  self=Task
+  self.beams[...,0].nyquistswap(self.NyquistZone)
+  fxb=hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
+  fxb[...].plot(clf=True); plt.show()
 """
 
 
-                     
+
 #import pdb; pdb.set_trace()
 
 from pycrtools import *
@@ -99,10 +97,9 @@ def getfile(ws):
 
 class BeamFormer(tasks.Task):
     """
-
     The function will calculate multiple beams for a list of files and
     a series of antennas (all integrated into one compex spectrum per
-    beam).  
+    beam).
 
     The task will do a basic quality check of each time series data
     set and only integrate good blocks.
@@ -118,16 +115,17 @@ class BeamFormer(tasks.Task):
     read back for adding the next antenna, which obviously is a slower
     process).
 
-    The resulting beam is stored in the array Task.beam and written to
+    The resulting beam is stored in the array ``Task.beam`` and written to
     disk as an hArray with parameters stored in the header dict (use
-    getHeader('BeamFormer') to retrieve this.)
+    ``getHeader('BeamFormer')`` to retrieve this.)
 
     The incoherent and beamed average spectra are stored in
-    Task.avspec_incoherent and Task.avspec respectively. They are also
-    available as attributes to Task.bf.par (also when stored to disk).
+    ``Task.avspec_incoherent`` and ``Task.avspec`` respectively. They
+    are also available as attributes to Task.bf.par (also when stored
+    to disk).
 
-    The beam can be FFTed back to time using Task.tcalc viewed with
-    Task.tplot.
+    The beam can be FFTed back to time using ``Task.tcalc`` viewed with
+    ``Task.tplot``.
 
     To avoid the spectrum being influenced by spikes in the time
     series, those spikes can be replaced by random numbers, before the
@@ -221,10 +219,10 @@ class BeamFormer(tasks.Task):
 
         "plot_pause":{default:True,doc:"Pause after every plot?"},
 
-         
+
         "plot_start":{default:lambda self: max(int(self.speclen*self.plot_center)-self.plotlen,0),
                       doc:"Start plotting from this sample number."},
-        
+
         "plot_end":{default:lambda self: min(int(self.speclen*self.plot_center)+self.plotlen,self.speclen),
                     doc:"End plotting before this sample number."},
 
@@ -535,7 +533,7 @@ class BeamFormer(tasks.Task):
         self.beams.par.avspec=self.avspec
         self.beams.par.avspec_incoherent=self.avspec_incoherent
         self.beams.par.tbeam_incoherent=self.tbeam_incoherent
-        
+
         self.updateHeader(self.beams,["NOF_DIPOLE_DATASETS","nspectraadded","filenames","antennas_used","nchunks"],delta_nu="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",filename="spectrum_file")
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
 
