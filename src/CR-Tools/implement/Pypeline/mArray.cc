@@ -164,7 +164,7 @@ template <class T> void hArray<T>::initialize_storage(){
 template <class T> void hArray<T>::delete_storage(){
   if (!array_is_shared) {
     if (storage_p->ndims_p!=NULL) {delete storage_p->ndims_p; storage_p->ndims_p=NULL;}
-    if (storage_p->size_p!=NULL) {delete storage_p->dimensions_p; storage_p->dimensions_p=NULL;}
+    if (storage_p->size_p!=NULL) {delete storage_p->size_p; storage_p->size_p=NULL;}
     if (storage_p->dimensions_p!=NULL) {delete storage_p->dimensions_p; storage_p->dimensions_p=NULL;}
     if (storage_p->slice_sizes_p!=NULL) {delete storage_p->slice_sizes_p; storage_p->slice_sizes_p=NULL;}
     delVector();
@@ -431,16 +431,16 @@ template <class T> void  hArray<T>::setDimensions8(HInteger dim0, HInteger dim1,
   if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=8;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim4)+","+hf2string(dim4)+","+hf2string(dim4)+"]");
+  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+"]");
   if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
   (*storage_p->dimensions_p)[0]=dim0;
   (*storage_p->dimensions_p)[1]=dim1;
   (*storage_p->dimensions_p)[2]=dim2;
   (*storage_p->dimensions_p)[3]=dim3;
   (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->dimensions_p)[4]=dim5;
-  (*storage_p->dimensions_p)[4]=dim6;
-  (*storage_p->dimensions_p)[4]=dim7;
+  (*storage_p->dimensions_p)[5]=dim5;
+  (*storage_p->dimensions_p)[6]=dim6;
+  (*storage_p->dimensions_p)[7]=dim7;
   (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
   if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
   setSlice(0,(*storage_p->size_p));
