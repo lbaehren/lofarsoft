@@ -29,6 +29,7 @@ pycrtools.tasks.beamformer
 pycrtools.tasks.dynamicspectrum
 pycrtools.tasks.fitbaseline
 pycrtools.tasks.imager
+pycrtools.tasks.pulsecal
 pycrtools.IO
 pycrtools.IO.interfaces
 #pycrtools.IO.TBB

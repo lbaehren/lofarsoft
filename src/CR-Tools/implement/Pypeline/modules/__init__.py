@@ -41,6 +41,7 @@ to try it start ipython and type
 Task                    # the currently loaded task instance
 Task.par (=value)       # access or set a parameter (without updating)
 Task(par1,par2,...)     # run the task with parameters par1,par2,....
+trun "taskname", pars   # run the task with name "taskname" and assign it to the global variable `Task``
 tlist                   # to view the available tasks
 tload 2                 # to load the task #2 (can also provide a name)
 tload "taskname"        # i.e., this is safer in code since the task number can change with time
@@ -55,6 +56,20 @@ tinit                   # run the initialization routine again (without resettin
 thelp                   # print documentation of task module
 """
 
+def trun(name,*args,**kwargs):
+    """
+    Usage:
+
+    ``trun(taskname,parameter,keyword1=....)``
+    
+    Run the taks with the given tasknname and with the parameters provided as argument list.
+
+    The task itself will be available via the global variable ``Task``.
+    """
+    tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
+    tasks.task_instance=tasks.task_class()
+    tasks.set_globals("Task",tasks.task_instance)
+    return tasks.task_instance(*args,**kwargs)
 
 def tload(name,**args):
     """

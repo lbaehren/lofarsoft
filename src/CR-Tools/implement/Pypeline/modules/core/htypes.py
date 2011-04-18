@@ -130,7 +130,7 @@ Whenever a new function is defined on the c-side, in the hftools library, it sho
 """
 hAllVectorMethods = ["hResize","hNew"]
 
-hAllContainerMethods = ["hFill","hSet","hFind","hFlip","hCopy","hSort","hZipper","hReadFileBinary","hWriteFileBinary","hWriteFileBinaryAppend","hRedistribute","hPPrint","hPrettyString","hReadFileText","hWriteFileText","hTranspose"]
+hAllContainerMethods = ["hFill","hSet","hElem","hFirst","hLast","hFind","hFlip","hCopy","hSort","hZipper","hReadFileBinary","hWriteFileBinary","hWriteFileBinaryAppend","hRedistribute","hPPrint","hPrettyString","hReadFileText","hWriteFileText","hTranspose"]
 
 hRealContainerMethods = ["hMeanSquare","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hVectorLength","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hSaveInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hSpectralPower2","hRFIDownsampling","hRFIBaselineFitting","hRFIFlagging","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineCalc","hBSplineFit","hErrorsToWeights","hPolynomial"]
 

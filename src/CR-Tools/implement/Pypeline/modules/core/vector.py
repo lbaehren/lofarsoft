@@ -10,7 +10,7 @@ from htypes import *
 # Convenience Vector Constructor
 #========================================================================
 
-def Vector(Type=float,size=-1,fill=None):
+def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
     """
     The basic Boost Python STL vector constructor takes no arguments
     and hence is a litte cumbersome to use. Here we provide a wrapper
@@ -18,6 +18,16 @@ def Vector(Type=float,size=-1,fill=None):
     essence, use the original vector constructors: ``BoolVec()``,
     ``IntVec()``, ``FloatVec()``, ``ComplexVec()``, ``StringVec()``
 
+    *Type* - type of vector (int, float,complex,bool, str) or an array/vector/list where they type can be deduced from.
+
+    *size* - length of the vector
+
+    *fill* -  a value or vector/list that is used to fill the vector with
+
+    *copy* - a vector which is used to copy content and properties from (other keywords have priority though)
+
+    *properties* - assume the properties of this vector if provided (other keywords have priority though)
+    
     Usage:
 
     ``Vector(Type)``
@@ -44,7 +54,25 @@ def Vector(Type=float,size=-1,fill=None):
     input. Hence if you create a vector with
     ``Vector([1,2,3],size=2)`` it will contain only
     ``[1,2]``. ``Vector([1,2,3],size=2,fill=4)`` will give ``[4,4]``.
+
+
+    Example:
+    
+    v = Vector(int,10,fill=range(10)) -> v = Vector(int, 10, fill=[0,1,2,3,4,5,6,7,8,9])
+    vv = Vector(copy=v) ->  vv = Vector(int, 10, fill=[0,1,2,3,4,5,6,7,8,9])
+
     """
+    if not copy==None:
+        if not properties:
+            properties=copy
+        if not fill:
+            fill=copy
+
+    if not properties==None:
+        if not Type:
+            Type=basetype(properties)
+        if size<0:
+            size=len(properties)
 
     vtype=Type
     # Check the 'type' parameter
@@ -151,17 +179,6 @@ def hVector_val(self):
     """
     if len(self)==1: return self[0]
     else: return list(self)
-
-def hVector_elem(self,n):
-    """
-    Usage::
-
-      >>> self.elem(n)
-      -> nth element the vector
-
-    """
-    print n
-    return self[n]
 
 def hVector_vec(self):
     """
@@ -393,7 +410,6 @@ for v in hAllVectorTypes:
     setattr(v,"__setstate__",hVector_setstate)
     setattr(v,"__getstate_manages_dict__",1)
     setattr(v,"extendflat",extendflat)
-    setattr(v,"elem",hVector_elem)
     setattr(v,"val",hVector_val)
     setattr(v,"vec",hVector_vec)
     setattr(v,"list",hVector_list)

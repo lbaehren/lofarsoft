@@ -412,7 +412,7 @@ hPrettyString","hReadFileText", "hWriteFileText","hTranspose" are also
 generated for string and boolean vectors.
 
 
-2011-04-13 Pypeline - rev 7547- Heino Falcke 
+2011-04-13 Pypeline - rev 7548- Heino Falcke 
 - hSquareAdd to calculate the power of a real (timeseries) array and add it to a
 vector (like spectralpower for complex data)
 - hMulAddSum -added to add two larger vectors and sum them onto a
@@ -432,6 +432,15 @@ replaced by lists
 2011-04-12 - rev 7546 - Martin van den Akker
 - Added tutorial of how to write C++ code for python wrappers.
 - Added tutorial of how to write documentation for the C++ code.
+
+2011-04-18 Pypeline - rev 7573 - Heino Falcke 
+- added hElem, hFirst, hLast to return elements of a vector (can than
+be used in conjunction with looping)
+- added function trun to execute a task by name right away
+- added Tasks in pulsecal.py
+ + LocatePulseTrain in time series
+ + CrossCorrelateAntennas - to crossorrelate a set of time series
+ + FitMaxima - to fit the maximum of a pulse/peak precisely
 
 ------------------------------------------------------------------------
 TODO

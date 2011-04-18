@@ -25,7 +25,7 @@ dataset="LOPES"
 dataset="LOFAR"       
 
 pardict=dict(
-    doplot=False,
+    doplot=True,
     qualitycheck=False,
     spikeexcess=100, # after all we are looking for spikes
     randomize_peaks=False,
@@ -48,6 +48,7 @@ pardict=dict(
         ncoeffs=20,
         numin=30,
         numax=80,
+        doplot=3,
         fittype="BSPLINE",
         splineorder=3) if dataset=="LOFAR" else dict(
         ncoeffs=20,

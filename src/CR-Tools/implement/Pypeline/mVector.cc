@@ -71,6 +71,104 @@ template void hReadRawVector(std::vector<HInteger> &vec, HString raw);
 template void hReadRawVector(std::vector<HNumber> &vec, HString raw);
 template void hReadRawVector(std::vector<HComplex> &vec, HString raw);
 
+//$DOCSTRING: Return the nth element of the vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hElem
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(N)()("Zero-based index of element in vector to return.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  ``hElem(vec,N) -> vec_N``
+
+  Reference:
+
+  hFirst, hLast, hElem
+
+  Example:
+
+  v=Vector(range(5))
+  v.elem(3) -> 3
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, HInteger N)
+{
+  if (vec+N>=vec_end) throw PyCR::ValueError("hElem: requested element does not exist!");
+  else return *(vec+N);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Return the first element of the vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFirst
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  ``hFirst(vec) -> vec_0``
+
+  Reference:
+
+  hFirst, hLast, hElem
+
+  Example:
+
+  v=Vector(range(5)) -> Vector(int, 5, fill=[0,1,2,3,4])
+  v.first() -> 0
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  if (vec>=vec_end) throw PyCR::ValueError("hElem: requested element does not exist!");
+  else return *(vec);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Return the last element of the vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLast
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to output")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  ``hLast(vec) -> vec[len(vec)-1]``
+
+  Reference:
+
+  hFirst, hLast, hElem
+
+  Example:
+
+  v=Vector(range(5)) -> Vector(int, 5, fill=[0,1,2,3,4])
+  v.last() -> 4
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
+{
+  if (vec_end<=vec) throw PyCR::ValueError("hElem: requested element does not exist!");
+  else return *(vec_end-1);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Fills a vector with a constant value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFill
@@ -451,9 +549,9 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_NAME hFillRange
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Vector to fill.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(start)()("Start value of the range.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(increment)()("Increment (to multiply loop variable with).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Vector to fill.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(start)()("Start value of the range.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(increment)()("Increment (to multiply loop variable with).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -463,13 +561,13 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
   hFillRange(vec,-2.5,2.) -> [-2.5,-0.5,1.5,3.5,...]
   vec.fillrange(start,increment) -> vec=[start, start+1*increment, start+2*increment ...]
 */
-template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  IterValueType start,  const IterValueType increment)
+template <class Iter,class T>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  T start,  const T increment)
 {
   Iter it=vec;
   HInteger i=0;
   while (it!=vec_end) {
-    *it=start+increment*i;
+    *it=hfcast<IterValueType>(start+increment*i);
     ++it; ++i;
   };
 }

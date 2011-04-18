@@ -28,7 +28,7 @@ line (i.e., Python prompt) functions that allow convenient loading of
 tasks (``tload``), listing of available parameters (``tlist``)
 inspecting of parameters (``tpars``), modifying them (``tpar
 par=value``), storing and retrieving of parameters
-(``tput``/``tget``), and execution of tasks (``go``). The task
+(``tput``/``tget``), and execution of tasks (``go, trun``). The task
 instance itself is retrieved with the function ``task()`` or simply
 with the variable ``Task``.
 
@@ -53,6 +53,11 @@ by calling::
 This actually executes a wrapper function which then puts those
 parameters into the workspace and executes the ``Task.run()``
 function.
+
+
+You can also exectue them with ``trun"taskname", par1,par2=xyz,par3=...``.
+This will run the task with name "taskname" and assign it to the global variable ``Task``
+
 
 A task can return a return value (if the run function does return a
 value), e.g.::
@@ -83,7 +88,8 @@ command prompt in ipython:
                                                    number can change with time
 ``tpars``                                          to list all parameters
 ``tpar nchunks=2``                                 to set a parameter
-``go``                                             to run the task
+``go``                                             to run the loaded task
+``trun "taskname", pars...``                       load and run the task with name "taskname" -> ``Task``
 ``tpar parfile="avgspec_2011-02-15_23:52:15.par"`` to read back a parameter file
 ``treset``                                         to reset parameters to default values
 ``tget (name)``                                    to read back the parameters from the latest run
@@ -390,7 +396,7 @@ Here is an example of using it::
 """
 
 #Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2"]
+task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2","pulsecal"]
 
 import os
 import shelve
