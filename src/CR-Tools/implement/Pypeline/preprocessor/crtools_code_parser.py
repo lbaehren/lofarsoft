@@ -737,7 +737,7 @@ class DocumentationBlock():
 
         # References
         if self.getReference():
-            result += r"\n" + self.formatSectionTitle("Reference") + r"\n"
+            result += r"\n" + self.formatSectionTitle("See also") + r"\n"
             result += self.formatReference() + r"\n"
 
         # Examples
