@@ -4,6 +4,8 @@
 #generally used in the Pulsar Pipeline, at the top level OBSID_red (processing location)
 #optional input argument is the pipeline logfile, where STDOUT statements are repeated
 
+# version 2.0
+
 log="NONE"
 
 if [ $# -eq 1 ]                    # get the log file name
@@ -88,12 +90,21 @@ fi
 
 
 #assume anything without long paths which contain incoherentstokes or stokes, is CS data for now
-find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g"  | awk '{print $1 $3"\\n_"$5}'> /tmp/$$_combine_col2.txt
+find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g"  | awk '{print $1 $3"\\n_"$5}' > /tmp/$$_combine_col2.txt
 
-paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
+find ./ -name "*.th.png" -print | sort |  sed -e "s/^.*beam/beam/g" -e "s/\/.*//g" -e "s/\.//g" | awk '{print "\\n"$1}' > /tmp/$$_combine_col4.txt
+
+has_beams=`grep beam /tmp/$$_combine_col4.txt`
+if [[ $has_beams != "" ]]
+then
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$3" "$2"\\nChiSq = " $4"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
+else
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
+
+fi
 
 #delete intermediate files
-rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt
+rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt /tmp/$$_combine_col4.txt
 
 #make sure there is text in the new shell script
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
