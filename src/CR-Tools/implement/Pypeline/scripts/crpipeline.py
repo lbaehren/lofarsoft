@@ -178,6 +178,9 @@ parser.add_option("-m", "--method",
 parser.add_option("-f", "--files",
                   type="string", dest="files", default='/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5',
                   help="Files to process")
+parser.add_option("-o", "--outfilepath",
+                  type="string", dest="outfilePath", default='./',
+                  help="Path for output files")
 parser.add_option("--doPlot", action="store_true", dest="doPlot", default=False,
                   help="Plots are done when this flag is set")
 
@@ -206,8 +209,8 @@ print 'Using pulse maximization method %s' % method
 #    datafiles = '/Users/acorstanje/triggering/datarun_19-20okt/data/oneshot_level4_CS017_19okt_no-9.h5'
 
 sortstring = 'sort -n --field-separator="-" --key=18'
-outfile = 'crPipelineResults.txt'
-outfileAscii = 'asciiPipelineResults.txt'
+outfile = options.outfilePath + 'crPipelineResults.txt'
+outfileAscii = options.outfilePath + 'asciiPipelineResults.txt'
 antennaset="LBA_OUTER"
 
 #fd = os.popen('ls '+ datafiles+' | ' + sortstring)
@@ -222,10 +225,10 @@ print "Number of files to process:", nofiles
 
 if nofiles > nthreads:
     print '--- Spawning new processes for each file ---'
-
+    thisScriptsPath = os.environ['LOFARSOFT'] + '/src/CR-Tools/implement/Pypeline/scripts/crpipeline.py'
     processes = []
     for i in range(nthreads):
-        thisProcess = subprocess.Popen(['./crpipeline.py', '--files='+files[i], '--method='+options.method])
+        thisProcess = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath])
         processes.append(thisProcess)
     i = nthreads
 #    i = 2
@@ -234,7 +237,7 @@ if nofiles > nthreads:
         for k in range(nthreads):
             if processes[k].poll() != None:
                 print 'Going to do: %s' % files[i]
-                processes[k] = subprocess.Popen(['./crpipeline.py', '--files='+files[i], '--method='+options.method])
+                processes[k] = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath])
                 i += 1
                 
 else:
