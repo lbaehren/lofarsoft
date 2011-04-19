@@ -31,6 +31,8 @@ for name in filenames:
     print "fixing", name
     
     f = h5py.File(name, "a")
+
+    f.attrs["ANTENNA_SET"] = options.antenna_set
     
     for station in f.itervalues():
         # Get station number
