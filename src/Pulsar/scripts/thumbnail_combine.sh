@@ -39,9 +39,19 @@ then
    rm combined.png
 fi
 
+if [ -f chi-squared.txt ]
+then 
+   echo "WARNING: deleting previous version of results: chi-squared.txt"
+   if [ $log != "NONE" ]
+   then
+      echo "WARNING: deleting previous version of results: chi-squared.txt" >> $log
+   fi
+   rm chi-squared.txt
+fi
+
 # find all the paths to the th.png files
 find ./ -name "*.th.png" -print | sort  > /tmp/$$_combine_col1.txt
-wc_col1=`wc -l /tmp/$$_combine_col1.txt`
+wc_col1=`wc -l /tmp/$$_combine_col1.txt | awk '{print $1}'`
 if [[ $wc_col1 < 1 ]]
 then
    echo ""
@@ -55,7 +65,7 @@ then
 fi
 
 find ./ -name "*prepout" -print -exec grep -i squared {} \; | sed 's/prepout/prepout \\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | sort | sed 's/^.*= //g'  > /tmp/$$_combine_col3.txt
-wc_col3=`wc -l /tmp/$$_combine_col3.txt`
+wc_col3=`wc -l /tmp/$$_combine_col3.txt | awk '{print $1}'`
 if [[ $wc_col3 < 1 ]]
 then
    echo ""
@@ -94,13 +104,16 @@ find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/in
 
 find ./ -name "*.th.png" -print | sort |  sed -e "s/^.*beam/beam/g" -e "s/\/.*//g" -e "s/\.//g" | awk '{print "\\n"$1}' > /tmp/$$_combine_col4.txt
 
+# create a shell script which needs to be run to create the combined plots
+# create an ascii file which stores the results Chi-Squared for data statistics
 has_beams=`grep beam /tmp/$$_combine_col4.txt`
 if [[ $has_beams != "" ]]
 then
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$3" "$2"\\nChiSq = " $4"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt |  sed 's/\\n//g' | awk '{print "file="$1" beam="$2" obs="$3" chi-sq="$4}'   > chi-squared.txt
 else
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
-
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt |  sed 's/\\n//g' | awk '{print "file="$1" obs="$2" chi-sq="$3}' > chi-squared.txt
 fi
 
 #delete intermediate files
