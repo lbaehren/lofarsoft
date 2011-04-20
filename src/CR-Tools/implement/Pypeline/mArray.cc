@@ -238,8 +238,8 @@ this class!!
 
 */
 template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
-  delVector();
   initialize_storage();
+  delVector();
   storage_p->vec_p=&vec;
   (*storage_p->size_p)=vec.size();
   setDimensions1((*storage_p->size_p));
