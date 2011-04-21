@@ -14,7 +14,9 @@ from pycrtools import datacheck as dc
 from pycrtools import rficlean as rf
 from pycrtools import pulsefit as pf
 from pycrtools import matching as match # possibly push this down to pulsefit?
+from pycrtools import footprint as fp
 from pycrtools import tasks
+import pycrtools as cr
 # import beamformer as bf
 
 antennaset = 'LBA_OUTER' # hack around missing info in data files
@@ -37,7 +39,7 @@ def writeDict(outfile, dict):
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
 
-def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionResult, filename, timestamp, sampleNumber):
+def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionResult, footprintResult, filename, timestamp, sampleNumber):
     d = triggerFitResult
     az = str(d["az"])
     el = str(d["el"])
@@ -63,8 +65,9 @@ def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionRe
     maxCount = str(d["maxPulseCount"])
     outString += avgCount + ' ' + maxCount + ' '
 
-    summedPulseHeight = str(fullDirectionResult["summedPulseHeight"])
-    coherencyFactor = str(fullDirectionResult["coherencyFactor"])
+    summedPulseHeight = str(footprintResult["summedPulseHeight"])
+    coherencyFactor = (float(optHeightOdd) + float(optHeightEven)) / float(summedPulseHeight) # very crude way of estimating coherency
+    coherencyFactor = str(coherencyFactor)
     outString += summedPulseHeight + ' ' + coherencyFactor + ' '
 
     outString += str(timestamp) + ' '
@@ -96,15 +99,17 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
             continue
         crfile = result["file"] # blocksize is 2 * 65536 by default ('almost' entire file)
         # get all timeseries data
-        cr_efield = crfile["EMPTY_TIMESERIES_DATA"]
-        crfile.getTimeseriesData(cr_efield, 0)
+        cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
+        nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
+        crfile.getTimeseriesData(cr_alldata, 0)
+
 #        crfile.set("blocksize", 32768)
 #        import pdb; pdb.set_trace()
 #        rf.cleanSpectrum(crfile)
 
         outfile.write('\n')
         # do quality check and rfi cleaning here
-        result = dc.qualityCheck(crfile, cr_efield, doPlot = doPlot)
+        result = dc.qualityCheck(crfile, cr_alldata, doPlot = doPlot)
         flaggedList = result["flagged"]
         writeDict(outfile, result)
         if not result["success"]:
@@ -119,7 +124,7 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
             continue
         #print flaglist
         # find initial direction of incoming pulse, using trigger logs
-        result = pf.initialDirectionFit(crfile, cr_efield, fitType = 'linearFit')
+        result = pf.initialDirectionFit(crfile, cr_alldata, fitType = 'linearFit')
         writeDict(outfile, result)       
         
         #result = pf.triggerMessageFit(crfile, triggers, 'linearFit') 
@@ -135,9 +140,21 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         if not result["success"]:
             continue
         triggerFitResult = result
+        # cut out a block of length 'blocksize' containing the pulse
+        pulseMidpoint = int(triggerFitResult["avgToffset"] * 200.0e6)
+        cr_efield = cr.hArray(copy=cr_alldata, dimensions = [nofAntennas, blocksize])
+        start = pulseMidpoint - blocksize/2
+        stop = pulseMidpoint + blocksize/2
+        cr_efield[...].copy(cr_alldata[..., start:stop])
+        
+        result = fp.footprintForCRdata(crfile, cr_efield, doPlot = doPlot)
+        if not result["success"]:
+            continue
+        writeDict(outfile, result)
+        footprintResult = result
         # now find the final direction based on all data, using initial direction as starting point
         try: # apparently it's dangerous...
-            result = pf.fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = flaggedList, FarField = False, method = options.method, doPlot = doPlot)
+            result = pf.fullDirectionFit(crfile, cr_efield, triggerFitResult, blocksize, flaggedList = flaggedList, FarField = False, method = options.method, doPlot = doPlot)
             fullDirectionResult = result
             writeDict(outfile, result)
             if not result["success"]:
@@ -146,7 +163,7 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         except (ZeroDivisionError, IndexError), msg:
             print 'EROR!'
             print msg
-        writeResultLine(asciiOutfile, qualityCheckResult, triggerFitResult, fullDirectionResult,
+        writeResultLine(asciiOutfile, qualityCheckResult, triggerFitResult, fullDirectionResult, footprintResult,
                         crfile["FILENAME"], fileTimestamp, fileSampleNumber)
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
@@ -154,6 +171,16 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         if doPlot:
             bfEven.plot()
             raw_input("--- Plotted optimal beam for even antennas - press Enter to continue...")
+#            frequency.read(datafile,"FREQUENCY_DATA")
+            fftlength = blocksize/2 + 1
+            spec = cr.hArray(complex, dimensions=[fftlength])
+            spec.fftw(bfEven)
+            power=cr.hArray(float,[fftlength],par=dict(logplot="y")) # xvalues=frequency
+            power.spectralpower(spec)
+            
+            power.plot()
+            raw_input("--- Plotted power spectrum of optimal beam for even antennas - press Enter to continue...")
+            
             bfOdd.plot()
             raw_input("--- Plotted optimal beam for odd antennas - press Enter to continue...")
 
@@ -228,7 +255,7 @@ if nofiles > nthreads:
     thisScriptsPath = os.environ['LOFARSOFT'] + '/src/CR-Tools/implement/Pypeline/scripts/crpipeline.py'
     processes = []
     for i in range(nthreads):
-        thisProcess = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath])
+        thisProcess = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+options.blocksize])
         processes.append(thisProcess)
     i = nthreads
 #    i = 2
@@ -237,11 +264,11 @@ if nofiles > nthreads:
         for k in range(nthreads):
             if processes[k].poll() != None:
                 print 'Going to do: %s' % files[i]
-                processes[k] = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath])
+                processes[k] = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+options.blocksize])
                 i += 1
                 
 else:
-    runAnalysis(files, outfile, outfileAscii, doPlot = options.doPlot)
+    runAnalysis(files, outfile, outfileAscii, blocksize = options.blocksize, doPlot = options.doPlot)
 #fitergs = dict()
 
 

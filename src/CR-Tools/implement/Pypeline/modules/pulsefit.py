@@ -172,7 +172,7 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
     return result
 
 #------------------------------------------------------------------ fullPulseFit
-def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarField=True, 
+def fullDirectionFit(crfile, cr_efield, triggerFitResult, blocksize, flaggedList = [], FarField=True, 
                      method = 'smoothedAbs', doPlot = False):
     #Set the parameters
     samplefreq = 200.0e6 # must be
@@ -183,26 +183,20 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
     print 'Data length is %d' % dataLength # once again assume all the same; move to Datacheck?
     print 'Block size is now: %d' % blocksize
     print 'So there are: %d blocks' % (int(dataLength) / int(blocksize))
-    pulseMidpoint = int(triggerFitResult["avgToffset"] * samplefreq)
+#    pulseMidpoint = int(triggerFitResult["avgToffset"] * samplefreq)
     nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
     #import pdb; pdb.set_trace()
     # here we select the region of the data such that the pulse is (on average over antennas)
     # is in the middle of the block
-    cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
-    crfile.getTimeseriesData(cr_alldata, 0) # MOVE upward to crpipeline?
-    cr_efield = hArray(copy=cr_alldata, dimensions = [nofAntennas, blocksize])
-    start = pulseMidpoint - blocksize/2
-    stop = pulseMidpoint + blocksize/2
-    cr_efield[...].copy(cr_alldata[..., start:stop])
+#    cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
+#    crfile.getTimeseriesData(cr_alldata, 0) # MOVE upward to crpipeline?
+#    cr_efield = hArray(copy=cr_alldata, dimensions = [nofAntennas, blocksize])
+#    start = pulseMidpoint - blocksize/2
+#    stop = pulseMidpoint + blocksize/2
+#    cr_efield[...].copy(cr_alldata[..., start:stop])
 
     crfile["BLOCKSIZE"] = blocksize # workaround, needed for correct settings in Beamformer
-
-    abs_efield = hArray(copy = cr_efield)
-    abs_efield.abs()
-    maxPerAntenna = abs_efield[...].max()
-    summedPulseHeight = maxPerAntenna.sum() # incoherently summed pulse height
-
-    del abs_efield
+         
     #blockNo = int((triggerFitResult["avgToffset"] * samplefreq) / blocksize)
     #print "fullPulseFit: set block-number to:", blockNo
 #  crfile.set("block", blockNo)
@@ -275,10 +269,7 @@ def fullDirectionFit(crfile, triggerFitResult, blocksize, flaggedList = [], FarF
     evenHeight = - fitDataEven[1] # optimized pulse height
     oddHeight = - fitDataOdd[1]
 
-    coherencyFactor = (evenHeight + oddHeight) / summedPulseHeight # very crude way of estimating coherency
-
-    result = dict(success = True, action = 'Full direction fit', summedPulseHeight = summedPulseHeight,
-                  coherencyFactor = coherencyFactor,
+    result = dict(success = True, action = 'Full direction fit',
                   even = dict(az = fitDataEven[0][0], el = fitDataEven[0][1], R = Reven,
                   optValue = evenHeight, optBeam = optBeamEven),
                   odd = dict(az = fitDataOdd[0][0], el = fitDataOdd[0][1], R = Rodd,
