@@ -11,11 +11,11 @@ project (DAL)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
-## Enforced CMake policy 
+## Enforced CMake policy
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (DAL_SOURCE_VERSION "0.1.3" )
+set (DAL_SOURCE_VERSION "0.1.6" )
 set (DAL_SOURCE_ARCHIVE "dal-${DAL_SOURCE_VERSION}.tar.gz" )
 set (DAL_URL            "" )
 set (DAL_GIT            "https://github.com/nextgen-astrodata/DAL.git" )
@@ -83,7 +83,7 @@ if (${DAL_FOUND})
 endif (${DAL_FOUND})
 
 if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
-  
+
   include (ExternalProject)
 
   ## Locate source file to build from
@@ -95,13 +95,13 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   if (NOT DAL_SOURCE)
     set (DAL_FROM_REPOS TRUE)
   endif (NOT DAL_SOURCE)
-  
+
   ## Build package from source
-  
+
   if (DAL_FROM_REPOS)
-    
+
     if (DAL_FROM_RELEASE)
-      
+
       ExternalProject_Add (dal
 	PREFIX ${PROJECT_BINARY_DIR}
 	DOWNLOAD_DIR download
@@ -111,9 +111,9 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 	CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	INSTALL_COMMAND make install
 	)
-      
+
     else (DAL_FROM_RELEASE)
-      
+
       ExternalProject_Add (dal
 	PREFIX ${PROJECT_BINARY_DIR}
 	DOWNLOAD_DIR download
@@ -122,11 +122,11 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 	CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	INSTALL_COMMAND make install
 	)
-  
+
     endif (DAL_FROM_RELEASE)
-    
+
   else (DAL_FROM_REPOS)
-    
+
       ExternalProject_Add (dal
 	PREFIX ${PROJECT_BINARY_DIR}
 	DOWNLOAD_DIR download
@@ -135,16 +135,16 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 	CMAKE_ARGS -D LUS_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	INSTALL_COMMAND make install
 	)
-      
+
   endif (DAL_FROM_REPOS)
-  
+
 else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
-  
+
   add_custom_target (dal
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[DAL] Found system-wide installation; skipping rebuild!"
     )
-  
+
 endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 
 ## ==============================================================================
@@ -155,25 +155,25 @@ endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 
 if (DAL_FOUND AND HDF5_FOUND)
 
-  
+
   ## Assemble list of test programs
   file (GLOB dalTestPrograms *.cc)
-  
+
   if (dalTestPrograms)
-    
+
     include_directories (
       ${DAL_INCLUDES}
       ${HDF5_INCLUDES}
       )
-    
+
     foreach (_dalTest ${dalTestPrograms})
-      
+
       get_filename_component (_dalTestName ${_dalTest} NAME_WE)
-      
+
       add_executable (${_dalTestName} ${_dalTest})
-      
+
     endforeach (_dalTest)
-    
+
   endif (dalTestPrograms)
-  
+
 endif (DAL_FOUND AND HDF5_FOUND)
