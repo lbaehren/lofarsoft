@@ -54,11 +54,64 @@ def plot_p_dm(candidates, bright_pulsars, full_path):
     pyplot.savefig(full_path)
     pyplot.clf()
 
+# TODO : check the layout of the zaplist files 
+# Assumption is now:
+# column 0 : center frequency
+# column 1 : frequency width (f_width = f_hi - f_center)
+
+def read_zaplist_file(zaplist_file):
+    '''
+    Read the contents of a zaplist file.
+    '''
+    birdies = []
+    try:
+        f = open(zaplist_file)
+        try:
+            for line in f:
+                if line and line[0] == '#': continue
+                tmp = line.split() 
+                if len(tmp) >= 2: # in case harmonics are also listed?!
+                    try: 
+                        f_center = float(tmp[0])
+                        f_width = float(tmp[1])
+                    except ValueError, e:
+                        pass
+                    else:
+                        birdies.append((f_center, f_width))
+        finally:
+            f.close()
+    except OSError, e:
+        print 'Failed to openm %s' % zaplist_file
+        raise
+    return birdies
+
+
+def apply_zap_list(cand_list, zaplist_file):
+    '''
+    Remove bad rotational frequencies from the list of candidates. (To remove
+    known RFI frequencies.)
+    '''
+    birdies = read_zaplist_file(zaplist_file)
+    out_cand_list = []
+
+    for c in cand_list:
+        is_rfi = False
+        for f_center, f_width in birdies:
+            f_lo = f_center - f_width
+            f_hi = f_center + f_width
+            if f_lo <= c.f < f_hi:
+                is_rfi = True
+                break
+        if not is_rfi:
+            out_cand_list.append(c)
+    return out_cand_list
+            
+                 
 # TODO: Split sift_accel_cands into 2 steps (reading and sifting) to 
 # facilitate plotting the candidate period and candidate frequency historgrams
 # before and after sifting.
 
-def sift_accel_cands(cand_dir, basename):
+def sift_accel_cands(cand_dir, basename, zaplist_file = ''):
     '''Sift through the candidate pulsars found by accelsearch.'''
     crawl_results = crawler.find_accelsearch_output(cand_dir, basename)
     # Reorder the results to send them to PRESTO's sifting module (it needs a
@@ -109,8 +162,13 @@ def sift_accel_cands(cand_dir, basename):
     
     if sifted_accelcands:
         sifted_accelcands.sort(sifting.cmp_sigma)
-    # PRESTO seems to return None in stead of an empty list
+    # PRESTO seems to return None in stead of an empty list, fix that:
     if sifted_accelcands == None: sifted_accelcands = []
+    # Apply zaplist to candidates (used if stand alone sifting script is used).
+    if zaplist_file:
+        print 'Before applying zaplist there are %d candidates.' % len(sifted_accelcands)
+        sifted_accelcands = apply_zap_list(sifted_accelcands, zaplist_file)
+        print 'After applying zaplist there are %d candidates.' % len(sifted_accelcands)
 
     sifted_accelcands = sifted_accelcands[:MAX_CANDIDATES]
     return unsifted_accelcands, sifted_accelcands 

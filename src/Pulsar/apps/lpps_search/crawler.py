@@ -24,6 +24,10 @@ FILETYPE_SUFFIXES = {
     'RFIFIND_PS' : r'^_rfifind.ps', 
     'RFIFIND_RFI' : r'^_rfifind.rfi', 
     'RFIFIND_STATS' : r'^_rfifind.stats', 
+
+    'PFD_BESTPROF_PSRNAME' : '^_DM(?P<dm>\d+\.\d{2})_(?P<pulsar_name>\S+)\.pfd\.bestprof$',
+#    'PFD_BESTPROF_PSRNAME' : '^_DM(?P<dm>\d+\.\d{2})_(?P<pulsar_name>\S)',
+    
 }
 
 FILETYPE_PATTERNS = {}
@@ -136,7 +140,29 @@ def find_inf_files(path, basename, **kwargs):
 
 # TODO : refactor the find_<SOMETHING>_files functions to be more general
    
+def find_pfd_bestprof(path, basename, **kwargs):
+    '''Find the output of the known ephemeris (prepfold driven) search.''' 
+    out = {}
 
+    if kwargs.has_key('files'):
+        files = kwargs['files']
+    else:
+        try:
+            files = os.listdir(path)
+        except OSError, e:
+            files = []
+
+    L = len(basename)
+    for f in files:
+        if not f.startswith(basename): continue
+        suffix = f[L:]
+        match = FILETYPE_PATTERNS['PFD_BESTPROF_PSRNAME'].match(suffix)
+        if match:
+            try:
+                out[match.group('pulsar_name')].append(f)
+            except KeyError, e:
+                out[match.group('pulsar_name')] = [f]
+    return out
 
 if __name__ == '__main__':
     # some non formalized self tests:
@@ -160,4 +186,9 @@ if __name__ == '__main__':
         print 'find_single_pulse_search_output test succelful.'
     else:
         print 'find_single_pulse_search_output test failed.'
+
+
+    l = ['BASENAME_DM2.00_J1234+1234.pfd.bestprof']
+    print find_pfd_bestprof('', 'BASENAME', files = l)
+
 

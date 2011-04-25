@@ -25,7 +25,8 @@ from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.sift import sift_accel_cands
 from lpps_search.sift import plot_p_histogram, plot_f_histogram, plot_p_dm
-import knownpulsar
+from lpps_search import knownpulsar
+from lpps_search.par import get_p0
 
 def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern, 
         mask_filename = '' ):
@@ -36,6 +37,81 @@ def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern,
             subband_globpattern, mask_filename)
     ))
     return commands
+
+# ---------------------------------------------------------------------------- 
+# Placeholder function to generate prepfold commandlines in the case a known 
+# ephemeris and timeseries are available.
+
+def get_folding_command_ke(basename, dm, dat_file, mask_filename='', 
+    par_filename='', search=False):
+    # Place holder performs no search for each fold
+
+    p = get_p0(par_filename)
+    # Determine the options for prepfold based on the GBT search script's
+    # logic:
+    if p < 0.002:
+        options = {
+            '-npart' : '50',
+        } 
+        n, npfact, ndmfact = 24, 2, 2
+    elif p < 0.05:
+        options = {
+            '-npart' : '40',
+            '-pstep' : '1',
+            '-pdstep' : '2',
+            '-dmstep' : '3',
+        }
+        n, npfact, ndmfact = 50, 2, 1
+    elif p < 0.5:
+        options = {
+            '-npart' : '30',
+            '-pstep' : '1',
+            '-pdstep' : '2',
+            '-dmstep' : '1',
+        }
+        n, npfact, ndmfact = 100, 1, 1
+    else:
+        options = {
+            '-npart' : '30',
+            '-pstep' : '1',
+            '-pdstep' : '2', 
+            '-dmstep' : '1',
+        }
+        n, npfact, ndmfact = 200, 1, 1
+    options.update({
+        '-runavg' : '',
+        '-noxwin' : '',
+        # accel_cand.accelfile contains the full path to the file because of
+        # the way we call the sifting.read_candidates function : 
+        '-dm' : '%.2f' % dm,
+        # Output in working directory to make TEMPO and prepfold behave 
+        # correctly :
+        '-n' : str(n),              # N in GBT code
+        '-par' : par_filename,
+    })
+    if mask_filename:
+        options['-mask'] = mask_filename
+
+    # set options appropriate to search over P (or not as appropriate)
+    if search:
+        options.update({
+            '-npfact' : str(npfact),    # Mp in GBT code
+            '-nopdsearch' : '',
+            '-o' : basename + '_DM%.2f' % dm + '_NO_PDSEARCH',
+        })
+    else:
+        options.update({
+            '-nosearch' : '',
+            '-o' : basename + '_DM%.2f' % dm + '_NO_SEARCH',
+        })
+
+    # TODO : think about the directory where everything should run
+    # Something todo with subband files ...
+    args = [dat_file]  
+    return 'prepfold', options, args
+
+
+# ---------------------------------------------------------------------------- 
 
 def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
         mask_filename = ''):
@@ -51,7 +127,7 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
     if p < 0.002:
         options = {
             '-npart' : '50',
-            '-ndmfact' : '3'
+#            '-ndmfact' : '3'
         } 
         n, npfact, ndmfact = 24, 2, 2
     elif p < 0.05:
@@ -101,7 +177,8 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
     args = [subband_globpattern]  
     return 'prepfold', options, args
 
-def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8):
+def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8, 
+        zaplist_file=''):
     '''Importable version of the whole script.'''
 
     # Check that the directories are available and that the output directory
@@ -119,7 +196,8 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8):
         raise DirectoryNotEmpty(fold_dir)
  
     # search for all the accelcand files and sift them
-    unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename)
+    unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename,
+         zaplist_file)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
         assert len(sifted_candidates) > 0

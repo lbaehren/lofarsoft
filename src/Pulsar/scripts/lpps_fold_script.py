@@ -48,6 +48,9 @@ if __name__ == '__main__':
         help='Number of processor cores to use default is 8.', dest='ncores')
     parser.add_option('--basename', type='string', metavar='BASENAME', 
         help='Basename of PRESTO files to look for.', dest='basename')
+    parser.add_option('--zap_file', type='string', metavar='ZAPFILE',
+        help='Apply zaplist file (birdies) during sifting', default='',
+        dest='zaplist_file')
     options, args = parser.parse_args()
 
     # Check that all the required options were supplied on the commandline:
@@ -96,7 +99,8 @@ if __name__ == '__main__':
         'subbdir' : os.path.abspath(options.subbdir),
         'n_cores' : options.ncores,
         'basename' : options.basename,
-        'mask_filename' : rfifind_mask_file
+        'mask_filename' : rfifind_mask_file,
+        'zaplist_file' : options.zaplist_file,
     }
     main(**kwargs)
 

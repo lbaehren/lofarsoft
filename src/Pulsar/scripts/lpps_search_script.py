@@ -49,6 +49,9 @@ import pprint
 
 # Common python library imports:
 import numpy
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot
 
 # PRESTO / PSR UTILS / LOFAR PULSAR library imports:
 import presto
@@ -60,9 +63,11 @@ import psr_utils
 from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
 import lpps_search.fold as folder
+from lpps_search.fold import get_folding_command_ke
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
+from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
 # -- Utility functions from GBT or Vishal's scripts --------------------------
@@ -355,7 +360,7 @@ def run_single_pulse_search_plotter(work_dir, basename):
 # ----------------------------------------------------------------------------
 
 class SearchRun(object):
-    def __init__(self, in_dir, work_dir, out_dir, rfi_file, zap_file):
+    def __init__(self, in_dir, work_dir, out_dir, rfi_file, zap_file, rfi_dir):
         '''This class describes a blind pulsar search.'''
         # Set directories used in search
         self.in_dir = os.path.abspath(in_dir)
@@ -410,6 +415,16 @@ class SearchRun(object):
             self.rfi_file = os.path.join(lofarsoft, 'release', 'share', 
                 'pulsar', 'data', 'master.rfi')
         self.zap_file = zap_file
+
+        # Deal with optional pre-existing rfifind output:
+        rfifind_input_dir = os.path.abspath(rfi_dir)
+        if not len(crawler.find_rfifind_output(rfi_dir, self.basename)) == 7:
+            print 'rfifind output not complete, ignoring - rerunning rfifind.'
+            self.rfifind_input_dir = ''
+        else:
+            print 'rfifind output complete, using the old mask'
+            self.rfifind_input_dir = rfifind_input_dir
+
         ra_str = ra2ascii(*self.metadata.j2000_ra)
         dec_str = dec2ascii(*self.metadata.j2000_dec)
         self.bary_v = get_baryv(ra_str, dec_str, self.metadata.epoch_mjd, 
@@ -490,7 +505,8 @@ class SearchRun(object):
             for i in range(ddplan.dmsperpass)]
 
     def run_search(self, ddplans, z_values, n_cores = None, 
-            no_singlepulse = False):
+            no_singlepulse = False, no_accel = False, save_timeseries = False, 
+            par_files = None):
         # The GBT drift scan survey uses dedispersion plans as units
         # of work. Because our use of mpiprepsubband (has extra constraints
         # on the number of DM trials it can write) and the fact that
@@ -498,6 +514,11 @@ class SearchRun(object):
         # that get created in one go we need to split the work into some
         # smaller units than specified in the dedipersion plan. We create new 
         # DDplans to that take the constraints into account.
+        print 'No accelsearch', no_accel
+        print 'No single pulse search', no_singlepulse
+        if par_files == None:
+            par_files = []
+
         self.annotated_ddplans = self.rebatch(ddplans, n_cores)
         m = self.determine_channel_frequency_range_mapping()
         
@@ -514,36 +535,58 @@ class SearchRun(object):
         for fr in bad_freq_ranges:
             bad_channels.extend(intersect_channel_map_with_freq_range(m, fr))
 
-        # Perform rfifind
-        t_rfifind_start = time.time()
-        rfifind_status = run_rfifind(self.get_subband_globpattern(), 
-            self.work_dir, self.basename, bad_channels)
-        t_rfifind_end = time.time()
-        # Do some exit status checking on rfifind
-        if rfifind_status != 0:
-            print 'rfifind failed, exiting'
-            sys.exit(1)
-        print 'Running rfifind took %.2f seconds.' % \
-            (t_rfifind_end - t_rfifind_start)
         # Create 
         try:
             os.mkdir(os.path.join(self.work_dir, 'RFIFIND'))
-
+            for i in range(n_cores):
+                os.mkdir(os.path.join(self.work_dir, 'CORE_%d' % i))
+            os.mkdir(os.path.join(self.out_dir, 'KNOWN_EPHEMERIS'))
             os.mkdir(os.path.join(self.out_dir, 'SINGLEPULSE'))
             os.mkdir(os.path.join(self.out_dir, 'LOGS'))
             os.mkdir(os.path.join(self.out_dir, 'INF'))
             os.mkdir(os.path.join(self.out_dir, 'RFIFIND'))
             os.mkdir(os.path.join(self.out_dir, 'ACCELSEARCH')) 
             os.mkdir(os.path.join(self.out_dir, 'DM0.00'))
+            os.mkdir(os.path.join(self.out_dir, 'TIMESERIES'))
         except Exception, e:
             raise e
 
-        # Move the rfifind output files
-        for file in glob.glob(os.path.join(self.work_dir, '*_rfifind*')):
-            try:
-                shutil.move(file, os.path.join(self.work_dir, 'RFIFIND'))
-            except IOError, e:
-                pass 
+        # Make copies of the TEMPO .par files (if any were given) to the 
+        # directories that will be used for folding on a known ephemeris.
+        for par_file in par_files:
+            assert os.path.split(par_file)[0] != self.out_dir
+            for i in range(n_cores):
+                shutil.copy(par_file, os.path.join(self.work_dir, 
+                    'CORE_%d' % i))
+            # Also provide copies of the par files in the output directory
+            # for future reference.
+            shutil.copy(par_file, os.path.join(self.out_dir, 
+                'KNOWN_EPHEMERIS', os.path.split(par_file)[1]))
+
+        # Perform rfifind if at all needed
+        if not self.rfifind_input_dir:
+            t_rfifind_start = time.time()
+            rfifind_status = run_rfifind(
+                self.get_subband_globpattern(), 
+                os.path.join(self.work_dir, 'RFIFIND'), 
+                self.basename, bad_channels
+            )
+            t_rfifind_end = time.time()
+            # Do some exit status checking on rfifind
+            if rfifind_status != 0:
+                print 'rfifind failed, exiting'
+                sys.exit(1)
+            print 'Running rfifind took %.2f seconds.' % \
+                (t_rfifind_end - t_rfifind_start)
+        else:
+            # copy over the old rfifind output
+            rfifind_input_files = crawler.find_rfifind_output(
+                self.rfifind_input_dir, self.basename)
+            for f in rfifind_input_files:
+                shutil.copy(os.path.join(self.rfifind_input_dir, f),
+                    os.path.join(self.work_dir, 'RFIFIND'))
+
+
         # Store the location of the rfifind mask file (used by other PRESTO
         # binaries):
         rfifind_mask_file = os.path.join(os.path.join(self.work_dir, 'RFIFIND', 
@@ -562,6 +605,8 @@ class SearchRun(object):
             t_prepsubband_end = time.time()
             ddplan.prepsubband_time = t_prepsubband_end - t_prepsubband_start
 
+            
+
             t_search_start = time.time() 
             command_list = [[] for i in range(n_cores)]
             for i, dm in enumerate(self.get_dms(ddplan)):
@@ -569,20 +614,20 @@ class SearchRun(object):
                 core_index = i % n_cores
                 # Append all the per DM processing commands to the appropriate
                 # list of commands:
-                # fourier transform + rednoise correction:
-                command_list[core_index].extend(
-                    get_fourier_and_correct_commands(
-                        self.work_dir, self.basename, dm, self.bary_v, 
-                        self.zap_file,
-                    )
-                )
-
-                # acceleration search for each z value:
-                for z_max in z_values:
+                if not no_accel:
+                    # fourier transform + rednoise correction:
                     command_list[core_index].extend(
-                        get_accelsearch_command(self.work_dir, 
-                            self.basename, dm, z_max)
+                        get_fourier_and_correct_commands(
+                            self.work_dir, self.basename, dm, self.bary_v, 
+                            self.zap_file,
+                        )
                     )
+                    # acceleration search for each z value:
+                    for z_max in z_values:
+                        command_list[core_index].extend(
+                            get_accelsearch_command(self.work_dir, 
+                                self.basename, dm, z_max)
+                        )
 
                 if not no_singlepulse:                   
                     # Run PRESTO single pulse search (not the plotting or SSPS part):
@@ -591,6 +636,35 @@ class SearchRun(object):
                             self.work_dir, self.basename, dm
                             )
                         )
+
+                # Known ephemeris folding:
+                for par_file in par_files:
+                    # use the local copy of the TEMPO .par file (so as not to
+                    # run into file name length problems).
+                    par_file = os.path.split(par_file)[1]
+                    command_list[core_index].append(
+                        get_command('cd', {}, 
+                            [os.path.join(self.work_dir, 'CORE_%d' % core_index)]))
+                    command_list[core_index].append(
+                        get_command(*get_folding_command_ke(self.basename, dm, 
+                            os.path.join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
+                            rfifind_mask_file, 
+                            par_file, False)
+                        )
+                    )
+                    command_list[core_index].append(
+                        get_command(*get_folding_command_ke(self.basename, dm, 
+                            os.path.join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
+                            rfifind_mask_file, 
+                            par_file, True)
+                        )
+                    )
+                    command_list[core_index].append(get_command('cp', {}, 
+                        ['*.pfd.bestprof', os.path.join(self.out_dir, 'KNOWN_EPHEMERIS')]))
+                    command_list[core_index].append(get_command('cp', {}, 
+                        ['*.pfd.ps', os.path.join(self.out_dir, 'KNOWN_EPHEMERIS')]))
+                    command_list[core_index].append(
+                        get_command('cd', {}, [self.work_dir]))
                
                 # Copy the DM 0 files to the output directories.
                 if dm == 0:
@@ -600,19 +674,42 @@ class SearchRun(object):
                     )
                 
               
-                # remove datafiles that are no longer necessary
-                command_list[core_index].append(
-                    get_command('rm', {}, [os.path.join(self.work_dir, 
-                        self.basename + '_DM%.2f' % dm + '.fft')]
+                if not no_accel:
+                    # remove datafiles that are no longer necessary
+                    command_list[core_index].append(
+                        get_command('rm', {}, [os.path.join(self.work_dir, 
+                            self.basename + '_DM%.2f' % dm + '.fft')]
+                        )
                     )
-                )
-                command_list[core_index].append(
-                    get_command('rm', {}, [os.path.join(self.work_dir,
-                        self.basename + '_DM%.2f' % dm + '.dat')]
-                    )
-                )
 
-            
+                if save_timeseries:
+                    # copy timeseries to output directory
+                    # This can fail miserably if there is not enough disk!
+                    command_list[core_index].append(
+                        get_command('mv', {}, [os.path.join(self.work_dir,
+                            self.basename + '_DM%.2f' % dm + '.dat'),
+                            os.path.join(self.out_dir, 'TIMESERIES')]
+                        )
+                    )
+                else:
+                    # remove dedispersed timeseries (.dat files)
+                    command_list[core_index].append(
+                        get_command('rm', {}, [os.path.join(self.work_dir,
+                            self.basename + '_DM%.2f' % dm + '.dat')]
+                        )
+                    )
+                if par_files:
+                    # clean up after the known ephemeris folding
+                    command_list[core_index].append(
+                        get_command('rm', {}, [os.path.join(self.work_dir, 'CORE_%d' % core_index, '*.pfd*')])
+                    )
+                    command_list[core_index].append(
+                        get_command('rm', {}, [os.path.join(self.work_dir, 'CORE_%d' % core_index, '*.lis')])
+                    )
+                    command_list[core_index].append(
+                        get_command('rm', {}, [os.path.join(self.work_dir, 'CORE_%d' % core_index, '*.tmp')])
+                    )
+             
             # Run the per DM analysis in a paralellized fashion.
             print 'Running per DM analysis'
             popen_objects = []            
@@ -640,37 +737,72 @@ class SearchRun(object):
                 p.wait()
             t_search_end = time.time()
             ddplan.search_time = t_search_end - t_search_start
-            
-        # Run the seperate folding script (after having created a directory
-        # for it to write the folds to).
-        os.mkdir(os.path.join(self.work_dir, 'FOLDS'))
-        folder.main(
-            folddir=os.path.join(self.work_dir, 'FOLDS'),
-            subbdir=self.in_dir,
-            canddir=self.work_dir,
-            basename=self.basename,
-            mask_filename=rfifind_mask_file,
-            n_cores=n_cores
-        )
+
+
+        if not no_accel:            
+            # Run the seperate folding script (after having created a directory
+            # for it to write the folds to).
+            os.mkdir(os.path.join(self.work_dir, 'FOLDS'))
+            folder.main(
+                folddir=os.path.join(self.work_dir, 'FOLDS'),
+                subbdir=self.in_dir,
+                canddir=self.work_dir,
+                basename=self.basename,
+                mask_filename=rfifind_mask_file,
+                n_cores=n_cores
+            )
         if not no_singlepulse:
             # Deal with single pulse search plotting
             d = os.getcwd()
             os.chdir(self.work_dir)
             status = run_single_pulse_search_plotter('.', self.basename)
             os.chdir(d)
+
+        # create a plots of chi-squared versus DM for the output of the known
+        # ephemeris search
+        if par_files:
+            tmp = crawler.find_pfd_bestprof(os.path.join(self.out_dir, 'KNOWN_EPHEMERIS'), self.basename)
+            print 'FOUND KNOWN EPHEMERIS SEARCH OUTPUT FILES :', tmp
+            tmp_graphs = {}
+            for pulsar in tmp:
+                tmp_graphs[pulsar] = ([], [])
+                for pfd_bestprof_file in tmp[pulsar]:
+                    chi_square, best_dm = parse_pfd_bestprof_file(
+                        os.path.join(self.out_dir, 'KNOWN_EPHEMERIS', pfd_bestprof_file))
+                    tmp_graphs[pulsar][0].append(best_dm)
+                    tmp_graphs[pulsar][1].append(chi_square)
+            for pulsar in tmp_graphs:
+                peak_chi_sq = tmp_graphs[pulsar][1][0]
+                peak_dm = tmp_graphs[pulsar][0][0]
+                for tmp_dm, tmp_chi_sq in zip(tmp_graphs[pulsar][0], tmp_graphs[pulsar][1]):
+                    if tmp_chi_sq > peak_chi_sq:
+                        peak_chi_sq = tmp_chi_sq
+                        peak_dm = tmp_dm
+                pyplot.clf()
+                pyplot.scatter(tmp_graphs[pulsar][0], tmp_graphs[pulsar][1])
+                pyplot.title('Chi square for %s (peak at DM = %.2f)' % (pulsar, peak_dm))
+                pyplot.xlabel('DM pc cm^-3')
+                pyplot.ylabel('chi square')
+                pyplot.savefig(os.path.join(self.out_dir, 'KNOWN_EPHEMERIS', pulsar + '.pdf'))
+                pyplot.clf()
+
+
+
         # Add code that cleans up after the search:
-        # move the FOLDS directory to the output directory
-        shutil.move(os.path.join(self.work_dir, 'FOLDS'), 
-            os.path.join(self.out_dir, 'FOLDS'))
-        # move all the candidate files to the output location
-        for f in glob.glob(os.path.join(self.work_dir, self.basename \
-            + '_DM*.[0-9][0-9]_ACCEL*')):
-            shutil.move(f, os.path.join(self.out_dir, 'ACCELSEARCH'))
-        # move all the singlepulse related stuff
-        for f in glob.glob(os.path.join(self.work_dir, '*.singlepulse')):
-            shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
-        for f in glob.glob(os.path.join(self.work_dir, '*_singlepulse.ps')):
-            shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
+        if not no_accel:
+            # move the FOLDS directory to the output directory
+            shutil.move(os.path.join(self.work_dir, 'FOLDS'), 
+                os.path.join(self.out_dir, 'FOLDS'))
+            # move all the candidate files to the output location
+            for f in glob.glob(os.path.join(self.work_dir, self.basename \
+                + '_DM*.[0-9][0-9]_ACCEL*')):
+                shutil.move(f, os.path.join(self.out_dir, 'ACCELSEARCH'))
+        if not no_singlepulse:
+            # move all the singlepulse related stuff
+            for f in glob.glob(os.path.join(self.work_dir, '*.singlepulse')):
+                shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
+            for f in glob.glob(os.path.join(self.work_dir, '*_singlepulse.ps')):
+                shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
         # move all the .inf files
         for f in glob.glob(os.path.join(self.work_dir, '*.inf')):
             shutil.move(f, os.path.join(self.out_dir, 'INF'))
@@ -799,6 +931,15 @@ if __name__ == '__main__':
         default=8, help='Number of cores to use (default 8).')
     parser.add_option('--ns', dest='ns', help='Run no single pulse search.',
         action='store_true', default=False)
+    parser.add_option('--na', dest='na', help='Run no acceleration search.',
+        action='store_true', default=False)
+    parser.add_option('--par', dest='par_list', type='string',
+        metavar='PAR_LIST', help='List of TEMPO .par files [file1,file2]')
+    parser.add_option('--rfidir', dest='rfi_dir', type='string', 
+        metavar='RFI_DIR', default='',
+        help='Directory containing rfifind output for current data set.') 
+    parser.add_option('--st', dest='st', action='store_true', default=False,
+        help='Keep dedispersed timeseries around.')
     
     options, args = parser.parse_args()
     N_CORES = options.ncores
@@ -822,7 +963,20 @@ if __name__ == '__main__':
     else:
         print 'Z values list needs to be inside of [] and contain no spaces.'
         raise Exception()
-    
+
+    # parse list of filenames for TEMPO .par files
+    par_files = []
+    if options.par_list and options.par_list[0] == '[' and options.par_list[-1] == ']':
+        tmp = options.par_list[1:-1].split(',')
+        try:
+            for par_file in tmp:
+                par_files.append(os.path.abspath(par_file))
+        except Exception, e:
+            print 'Problem occured parsing list of TEMPO .par files'
+            raise
+    else:
+        pass
+
     # Add basic logging right here.
     logging.basicConfig(
         format='%(asctime)-15s - %(name)s - %(levelname)s - %(message)s',
@@ -830,7 +984,7 @@ if __name__ == '__main__':
     ) 
     t_start = time.time()
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
-        options.rfi_file, options.zap_file)  
+        options.rfi_file, options.zap_file, options.rfi_dir)  
 
     ddplans = []
     # The number of subbands defaults to being the number of channels in the
@@ -865,7 +1019,8 @@ if __name__ == '__main__':
         ddplans.append(DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=16))
 
-    SR.run_search(ddplans, z_values, N_CORES, options.ns)
+    SR.run_search(ddplans, z_values, N_CORES, options.ns, options.na, options.st,
+        par_files)
     t_end = time.time()
     print '\n=== TIMINGS ==='
     search_time = 0
