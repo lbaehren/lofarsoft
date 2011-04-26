@@ -54,10 +54,11 @@ def plot_p_dm(candidates, bright_pulsars, full_path):
     pyplot.savefig(full_path)
     pyplot.clf()
 
-# TODO : check the layout of the zaplist files 
+# TODO : check the layout of the zaplist files < - DONE (with Jason)
 # Assumption is now:
 # column 0 : center frequency
-# column 1 : frequency width (f_width = f_hi - f_center)
+# column 1 : frequency width (f_width = f_hi - f_lo)
+
 
 def read_zaplist_file(zaplist_file):
     '''
@@ -97,8 +98,8 @@ def apply_zap_list(cand_list, zaplist_file):
     for c in cand_list:
         is_rfi = False
         for f_center, f_width in birdies:
-            f_lo = f_center - f_width
-            f_hi = f_center + f_width
+            f_lo = f_center - (f_width / 2)
+            f_hi = f_center + (f_width / 2)
             if f_lo <= c.f < f_hi:
                 is_rfi = True
                 break
