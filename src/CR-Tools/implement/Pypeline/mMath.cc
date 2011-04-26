@@ -108,7 +108,7 @@ inline T HFPP_FUNC_NAME(const T val)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Returns the square root of the absolute of a nummber
+//$DOCSTRING: Returns the square root of the absolute of a number.
 //$COPY_TO HFILE START ---------------------------------------------------
 #define HFPP_FUNC_NAME sqrtAbs
 //------------------------------------------------------------------------
@@ -153,7 +153,7 @@ HNumber funcGaussian (const HNumber x,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Return the maximum value in a vector
+//$DOCSTRING: Return the maximum value in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMax
 //-----------------------------------------------------------------------
@@ -181,7 +181,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Return the minimum value in a vector
+//$DOCSTRING: Return the minimum value in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMin
 //-----------------------------------------------------------------------
@@ -208,7 +208,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: For each element in a vector replace its value by the maximum of the element value and an in input value
+//$DOCSTRING: For each element in a vector replace its value by the maximum of the element value and an input value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMax
 //-----------------------------------------------------------------------
@@ -239,7 +239,7 @@ void hMax(const Iter vec,const Iter vec_end, const T max_value)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: For each element in a vector replace its value by the minimum of the element value and an in input value
+//$DOCSTRING: For each element in a vector replace its value by the minimum of the element value and an in input value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMin
 //-----------------------------------------------------------------------
@@ -273,7 +273,7 @@ void hMin(const Iter vec,const Iter vec_end, const T min_value)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Return the position of the maximum value in a vector
+//$DOCSTRING: Return the position of the maximum value in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMaxPos
 //-----------------------------------------------------------------------
@@ -305,7 +305,7 @@ HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Return the position of the minimum value in a vector
+//$DOCSTRING: Return the position of the minimum value in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMinPos
 //-----------------------------------------------------------------------
@@ -578,7 +578,7 @@ void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, const S val)
 
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, which is returned in the first vector. If the second operand vector is shorter it will be applied multiple times.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, which is returned in the first vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h$MFUNC
 //-----------------------------------------------------------------------
@@ -590,6 +590,12 @@ void h{$MFUNC}2(const Iter vec1,const Iter vec1_end, const S val)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+
+  Performs a $MFUNC!LOW between the last two vectors, which is
+  returned in the first vector. If the second operand vector is
+  shorter it will be applied multiple times.
 
   Usage:
   h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
@@ -614,7 +620,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different types. Looping will be done over the first argument, i.e. the input/output vector. If the second operand vector is shorter it will be applied multiple times.
+//$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different types.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}Add
 //-----------------------------------------------------------------------
@@ -629,16 +635,22 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   $PARDOCSTRING
 
   Description:
-  To loop slicec over the second argument (i.e., ``vec1``) use
-  ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``. To repeatedly
-  add to the output vector, use `hMulAddSum``.
+  Performs a $MFUNC!LOW between the last two vectors, and add the
+  result to the first vector which can be of different types. Looping
+  will be done over the first argument, i.e. the input/output
+  vector. If the second operand vector is shorter it will be applied
+  multiple times.
+
+  To loop slices over the second argument (i.e., ``vec1``) use
+  ``h$MFUNC!CAPSAdd2``. To repeatedly add to the output vector, use
+  ``h$MFUNC!CAPSAddSum``.
 
   Usage:
   h$MFUNC(vec,vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
   vec.$MFUNC(vec1,vec2) -> vec = vec1 $MFUNC!LOW vec2
 
   See also:
-  hMulAdd2, hDivAdd2, hSubAdd2, hAddAdd2,  hMulAddSum, hDivAddSum, hSubAddSum, hAddAddSum
+  h$MFUNC!CAPSAdd2, h$MFUNC!CAPSAddSum
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
@@ -686,11 +698,11 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Slice looping will be done over the first argument, i.e. the input/output
   vector. If the second operand vector is shorter it will be applied
   multiple times.  To loop over the first argument (i.e., ``vec``) use
-  ``hMulAdd``, ``hDivAdd``, ``hSubAdd``, ``hAddAdd``. To repeatedly
-  add to the output vector, use ``hMulAddSum``.
+  ``h$MFUNC!CAPSAdd``. To repeatedly
+  add to the output vector, use ``h$MFUNC!CAPSAddSum``.
 
   See also:
-  hMulAdd, hDivAdd, hSubAdd, hAddAdd,  hMulAddSum, hDivAddSum, hSubAddSum, hAddAddSum
+  h$MFUNC!CAPSAdd, h$MFUNC!CAPSAddSum
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
@@ -734,11 +746,14 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
   Description:
 
   Slice looping will be done over the first argument, i.e. the output
-  vector. If the output vector is shorter than the first operand vector it will be wrapped, i.e. the additional slices in vec1 will repeatedly be added to the output vector. Also the second operand will be wrapped. To not loop over the first argument (i.e., ``vec``) use
-  ``hMulAdd``, ``hDivAdd``, ``hSubAdd``, ``hAddAdd``.
+  vector. If the output vector is shorter than the first operand
+  vector it will be wrapped, i.e. the additional slices in vec1 will
+  repeatedly be added to the output vector. Also the second operand
+  will be wrapped. To not loop over the first argument (i.e., ``vec``)
+  use ``h$MFUNC!CAPSAdd``.
 
   See also:
-  hMulAdd2, hDivAdd2, hSubAdd2, hAddAdd2
+  h$MFUNC!CAPSAdd2
 */
 template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
@@ -820,7 +835,7 @@ void h{$MFUNC}2(const Iter vec,const Iter vec_end,  const Iterin vec1,const Iter
   It does not really make sense for ``add`` and ``mul``, but is useful to get the inverse of a vector.
 
   See also:
-  hMulSelf, hDivSelf, hSubSelf, hAddSelf, hInverse
+  h$MFUNC!CAPSSelf, hInverse
 
   Example:
   >>> vec=Vector([1.,2.,4.])
@@ -1540,7 +1555,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   Description:
   The elements are specified in an indexlist.
 
-**(NOT QUITE CORRECT: SPECIFY PROPPER WEIGHTING TO RAND GENERATOR)**
+  **(NOT QUITE CORRECT: SPECIFY PROPPER WEIGHTING TO RAND GENERATOR)**
 
   Usage:
   vec.randomizephase(indexlist,amplitude) -> elements in vec at positions provided in indexlist are set to a complex number with random phase and an amplitude picked from the amplitude vector at the same location.
@@ -1599,7 +1614,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   $PARDOCSTRING
 
   Description:
-  The function calculates ``(c.setamplitude(newamplitude))`` for each
+  The function calculates ``c.setamplitude(newamplitude)`` for each
   element ``c -> c/|c|*newamplitude``.
 
   If the input vector is shorter than output vector it will wrap around
@@ -1658,7 +1673,7 @@ void HFPP_FUNC_NAME (const IterOut vecout,const IterOut vecout_end, const IterIn
   $PARDOCSTRING
 
   Description:
-  The function calculates ``(c.setamplitude(amp))`` for each
+  The function calculates ``c.setamplitude(amp)`` for each
   element ``c -> c/|c|*amp``.
 */
 template <class IterOut, class Iter>
@@ -1915,8 +1930,8 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 #define HFPP_FUNC_NAME hMeanDiffSquaredSum
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector 2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -1942,17 +1957,20 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Calculate the :math:`\\chi^2` of two vectors, i.e., ``(v1,i-v2,i)**2/v2,i``.
+//$DOCSTRING: Calculate the :math:`\\chi^2` of two vectors.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hChiSquared
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(v1)()("Numeric input vector 1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(v2)()("Numeric input vector 2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Calculate the :math:`\\chi^2` of two vectors, i.e., :math:`\\frac{(v1_i-v2_i)^2}{v2_i}`.
 
   Usage:
   hChiSquared(Vector([a,b,c,...]),Vector([x,y,z,...]) -> (a-x)**2/x + (b-y)**2/y + (c-z)**2/z + ....
@@ -1974,17 +1992,26 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Calculate the mean :math:`\\chi-squared` of two vectors, i.e., ``mean((v1,i-v2,i)**2/v2,i)``.
+//$DOCSTRING: Calculate the mean :math:`\\chi^2` of two vectors.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMeanChiSquared
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector (observed values)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector (expected values) - must not be zero")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(v1)()("Numeric input vector (observed values)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(v2)()("Numeric input vector (expected values) - must not be zero")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Description:
+  Calculate the mean :math:`\\chi^2` of two vectors., i.e.
+
+  .. math::
+
+    \\frac{1}{n}\\sum_i \\frac{(v1_i - v2_i)^2}{v2_i}
+
+  where :math:`n` is the length of the vector.
 
   Usage:
   hChiSquared(Vector([a,b,c,...]),Vector([x,y,z,...]) -> ((a-x)**2/x + (b-y)**2/y + (c-z)**2/z + ....)/N
@@ -2252,9 +2279,11 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   $PARDOCSTRING
 
   Description:
-  Attention!!! The vector will be sorted in place. Hence, if you want to
-  keep the data in its original order, you need to copy the data first
-  to a scratch vector and then call this function with the scratch vector!
+  .. warning::
+
+    The vector will be sorted in place. Hence, if you want to
+    keep the data in its original order, you need to copy the data first
+    to a scratch vector and then call this function with the scratch vector!
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
@@ -2277,9 +2306,13 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
   $PARDOCSTRING
 
   Description:
-  Attention!!! The vector will be sorted first. Hence, if you want to
-  keep the data in its original order, you need to copy the data first
-  to a scratch vector and then call this function with the scratch vector!
+
+  .. warning::
+
+    The vector will be sorted first. Hence, if you want to keep the
+    data in its original order, you need to copy the data first to a
+    scratch vector and then call this function with the scratch
+    vector!
 */
 template <class Iter>
 IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
@@ -2986,16 +3019,19 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
   indexlist=Vector(int,[npeaks,2],fill=[seq0_start,seq0_end,seq1_start,seq1_end, ...])
 
   See also:
-  hMaxInSequences, hMinInSequences, hSumInSequences,hMeanInSequences, hStdDevInSequences, hFind, hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual, hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
+  hMaxInSequences, hMinInSequences, hSumInSequences,hMeanInSequences, hStdDevInSequences, hFind,
+  hFindSequenceGreaterThan, hFindSequenceGreaterEqual, hFindSequenceLessThan, hFindSequenceLessEqual,
+  hFindSequenceBetween, hFindSequenceOutside, hFindSequenceOutsideOrEqual, hFindSequenceBetweenOrEqual
 
 
-Example:
-npeaks=3
-datavector=hArray(float,[10],fill=range(10))
-indexlist=hArray(int,[npeaks,2],fill=[0,2,3,5,5,9])
-maxima=hArray(float,[npeaks])
-maxima.maxinsequences(datavector,indexlist,npeaks)
-maxima -> hArray(float, [3], fill=[1,4,8]) # len=3 slice=[0:3])
+  Example:
+  >>> npeaks=3
+  >>> datavector = hArray(float,[10],fill=range(10))
+  >>> indexlist = hArray(int,[npeaks,2],fill=[0,2,3,5,5,9])
+  >>> maxima = hArray(float,[npeaks])
+  >>> maxima.maxinsequences(datavector,indexlist,npeaks)
+  >>> maxima
+  hArray(float, [3], fill=[1,4,8]) # len=3 slice=[0:3])
 */
 
 template <class Iter,class Iter2,class IterI>
@@ -3522,7 +3558,7 @@ void HFPP_FUNC_NAME (const Iter vec, const Iter vec_end,
   Useful for piecing interpolations together (adds to output vector!)
 
   Example:
-  >>> v=hArray(float, [10])
+  >>> v = hArray(float, [10])
   >>> v.interpolate2p(0.,9.) #-> [0,1,2,3,4,5,6,7,8,9]
   >>> v.interpolate2psubpiece(0.,10.) #-> [0,1,2,3,4,5,6,7,8,9]
 */
@@ -4133,9 +4169,9 @@ void HFPP_FUNC_NAME (const DataIter  odata,
   Available Weights:
 
     ============= ====================================================================
-    ``FLAT``      All have the same value
-    ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``)
-    ``GAUSSIAN``  Gaussian distribution falling off to :math:`2 \\sigma` at the ends
+    ``FLAT``      All have the same value.
+    ``LINEAR``    Linearly rising, peaking at the center (i.e., ``/\``).
+    ``GAUSSIAN``  Gaussian distribution falling off to :math:`2 \\sigma` at the ends.
     ============= ====================================================================
 
   Example:
