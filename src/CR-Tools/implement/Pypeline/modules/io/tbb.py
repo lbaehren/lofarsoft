@@ -161,7 +161,7 @@ class TBBData(IOInterface):
         self.__makeScratch()
 
         # Generate FFTW plan
-        self.__plan = cr.FFTWPlanManyDftR2c(self.__blocksize, self.__file.nofSelectedDatasets(), 1, self.__blocksize, 1, self.__blocksize / 2 + 1, cr.fftw_flags.MEASURE)
+        self.__plan = cr.FFTWPlanManyDftR2c(self.__blocksize, self.__file.nofSelectedDatasets(), 1, self.__blocksize, 1, self.__blocksize / 2 + 1, cr.fftw_flags.ESTIMATE)
 
     def __repr__(self):
         """Display summary when printed.
