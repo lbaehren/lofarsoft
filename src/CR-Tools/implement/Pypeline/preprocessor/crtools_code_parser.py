@@ -730,10 +730,10 @@ class DocumentationBlock():
             result += r"\n" + self.formatSectionTitle("Description") + r"\n"
             result += self.formatDescription() + r"\n"
 
-        # Usage (disabled)
-        # if self.getUsage():
-        #     result += r"\n" + self.formatSectionTitle("Usage") + r"\n"
-        #     result += self.formatUsage() + r"\n"
+        # Usage
+        if self.getUsage():
+            result += r"\n" + self.formatSectionTitle("Usage") + r"\n"
+            result += self.formatUsage() + r"\n"
 
         # References
         if self.getReference():
