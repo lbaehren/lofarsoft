@@ -59,11 +59,12 @@
 - ``tbb.py`` and ``datareader.py`` synchronized to treat keywords in a
   similar way.
 - Made sure that wrappers for :func:`hFill`, :func:`Set`,
-  :func:`Find`, :func:`Flip`, :func:`Copy`, `hSort`, `hZipper`,
-  :func:`ReadFileBinary`, :func:`WriteFileBinary`,
-  `hWriteFileBinaryAppend`, :func:`Redistribute`, :func:`PPrint`,
-  :func:`hPrettyString`, :func:`ReadFileText`, `hWriteFileText`,
-  :func:`Transpose` are also generated for string and boolean vectors.
+  :func:`Find`, :func:`Flip`, :func:`Copy`, :func:`hSort`,
+  :func:`hZipper`, :func:`ReadFileBinary`, :func:`WriteFileBinary`,
+  :func:`hWriteFileBinaryAppend`, :func:`Redistribute`,
+  :func:`PPrint`, :func:`hPrettyString`, :func:`ReadFileText`,
+  :func:`hWriteFileText`, :func:`Transpose` are also generated for
+  string and boolean vectors.
 
 
 2011-04-06 - Rev 7508
@@ -73,22 +74,6 @@
 
 - FindPython first finds Enthought python (EDP) version also for
   libraries and includes.
-
-
-2011-04-05
-==========
-
-  :Author: Martin van den Akker <martinva@astro.ru.nl>
-
-- Update of pycrtools documentation generation: Added description,
-  references and examples in the correct formatting.
-
-
-2011-04-06 CMake - Rev 7508
-===========================
-
-  :Author: Heino Falcke <h.falcke@astro.ru.nl>
-
 - Put in a flag to plot semilog graphs also with buggy EDP64 version
   on new Macs ...  If your name is Heino and you have a MacBook more
   recent then March 2011 with OS10.6.7 and you use the Enthought 64 bit
@@ -96,6 +81,10 @@
   problems with semilog axes. Semilog will then work only with reduced
   functionality.
 - ``io/tbb.py`` object - made keyword access a little more elegant.
+- By default tasks now return themselves rather than the workspace
+  object (uness an explicit return value is given in ``.run``)!!
+- :func:`hRandomizePhase`.
+- Finished ``testcr3.py`` to demonstrate RFI excision and beamforming.
 
 
 2011-04-05
@@ -105,17 +94,6 @@
 
 - Update of pycrtools documentation generation: Added description,
   references and examples in the correct formatting.
-
-
-2011-04-02  - Rev 74508
-=======================
-
-  :Author: Heino Falcke <h.falcke@astro.ru.nl>
-
-- By default tasks now return themselves rather than the workspace
-  object (uness an explicit return value is given in ``.run``)!!
-- :func:`hRandomizePhase`.
-- Finished ``testcr3.py`` to demonstrate RFI excision and beamforming.
 
 
 2011-03-30 - Rev 7432
@@ -199,7 +177,7 @@
 
 - Fixed some indentation errors.
 - Renamed ``listfiles`` to ``listFiles``.
-- Added ``readParfiles`` to ``datareader.py`` - to return a dict from a
+- Added :func:`readParfiles` to ``datareader.py`` - to return a dict from a
   parameter file.
 - WorkSpace class definition now accepts a python parameterfile to set
   variables in a workspace. Useful to control a pipeline script, eg::
@@ -402,7 +380,7 @@
   :Author: Heino Falcke <h.falcke@astro.ru.nl>
 
 - Minor updates and bugfixes to tasks.
-- Added list files to get a list of files, using Unix-style file
+- Added ``listfiles`` to get a list of files, using Unix-style file
   patterns and evironment variables.
 - Made :mod:`averagespectrum` to work on multiple files.
 - Added :func:`spikeexcess` to qualitycheck routine (the one in
@@ -521,7 +499,7 @@
 
   :Author: Martin van den Akker <martinva@astro.ru.nl>
 
-- Added support for AERA datareader
+- Added support for AERA datareader.
 
 
 2010-12-14
@@ -694,7 +672,7 @@
   :func:`hDoubleFFTPhaseMul` to do a double FFT based on Arthur's
   numpy example.
 - ``testDoubleFFT.py`` shows an example testing the double FFT.
-- Created a separate plot.py module in core, as this was not working
+- Created a separate ``plot.py`` module in core, as this was not working
   properly in the new structure.
 - Moved the list of hftools function to be added as methods to harrays
   and vectors to ``type.py``.
@@ -707,7 +685,7 @@
   :Author: Sander ter Veen <s.terveen@astro.ru.nl>
 
 - Corrected :func:`hMulAdd2`.
-- Added IO and calibration module.
+- Added ``IO`` and ``calibration`` module.
 - Added ``pipeline_start.py`` script for the first basic steps using these
   modules.
 
@@ -723,7 +701,7 @@
 2010-08-26 - Rev 5751
 =====================
 
-- Added :func:`hMulAdd2` which will loop over the second rather than
+- Added :func:`hMulAdd2` which will loop over the 2nd rather than
   the 1st parameter in looping mode
 
 
@@ -768,31 +746,18 @@
 - Remaining: some not-understood behaviour of the inverse fftw.
 
 
+Todo
+====
 
-Original changelog entries
-==========================
-
-::
-
-
-
-
-
-
-
-  ------------------------------------------------------------------------
-  TODO
-  ------------------------------------------------------------------------
-  - change hAllTypes, hArrayTypes etc in core/htypes.py to sets - that
-  is factor 2-3 faster in comparisons using 'in' ....
-
-  - revisit hArrays sharing the same vector. If one has a different
-    shape the other one is also affected and lengths and slices become
-    inconsistent!!
-
-  - make hArray_set accept a list of an array as last dimension
-
-  - averagespectrums need to take nquistzone into account (use nyquistflip)
-
-  - use shutils rmtree for hArray_write to remove old file directory
+- Change :func:`hAllTypes`, :func:`hArrayTypes`, etc. in
+  ``core/htypes.py`` to sets - that is factor 2-3 faster in
+  comparisons using 'in' ....
+- Revisit hArrays sharing the same vector. If one has a different
+  shape the other one is also affected and lengths and slices become
+  inconsistent!!
+- Make :func:`hArray_set` accept a list of an array as last dimension.
+- :mod:`averagespectrum` need to take ``nquistzone`` into account (use
+  :func:`nyquistflip`).
+- Use ``shutils rmtree`` for :func:`hArray_write` to remove old file
+  directory.
 
