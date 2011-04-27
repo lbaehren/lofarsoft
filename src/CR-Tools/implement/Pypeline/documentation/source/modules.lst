@@ -22,7 +22,7 @@ pycrtools.metadata
 pycrtools.grid
 pycrtools.matching
 pycrtools.srcfind
-pycrtools.PPF
+pycrtools.ppf
 pycrtools.tasks
 pycrtools.tasks.averagespectrum
 pycrtools.tasks.beamformer
@@ -30,6 +30,6 @@ pycrtools.tasks.dynamicspectrum
 pycrtools.tasks.fitbaseline
 pycrtools.tasks.imager
 pycrtools.tasks.pulsecal
-pycrtools.IO
-pycrtools.IO.interfaces
+pycrtools.io
+pycrtools.io.interfaces
 #pycrtools.IO.TBB
