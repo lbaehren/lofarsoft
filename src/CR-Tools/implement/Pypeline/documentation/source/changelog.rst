@@ -4,5 +4,4 @@
  Changelog
 ***********
 
-.. include:: ../../CHANGELOG.txt
-   :literal:
+.. include:: ../../CHANGELOG.rst
