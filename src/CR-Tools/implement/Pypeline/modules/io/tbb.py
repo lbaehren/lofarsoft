@@ -15,6 +15,7 @@ If this is not true for your files use the ``fix_metadata.py`` script to fix thi
 
 """
 
+import os
 import numpy as np
 import pycrtools as cr
 from pycrtools import metadata as md
@@ -638,5 +639,8 @@ def open(filename, *args, **kwargs):
     """Open file with LOFAR TBB data.
     """
 
-    return TBBData(filename, *args, **kwargs)
+    if not os.path.isfile(filename):
+        raise IOError("No such file or directory: "+filename)
+    else:
+        return TBBData(filename, *args, **kwargs)
 
