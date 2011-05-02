@@ -303,3 +303,32 @@ void HFPP_FUNC_NAME(const Iter out, const Iter out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Convert between FFT definitions
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFTConvert
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HComplex)(vec)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class CIter>
+void HFPP_FUNC_NAME(const CIter vec, const CIter vec_end)
+{
+  CIter it_vec = vec;
+
+  int sign = -1;
+  while (it_vec != vec_end)
+  {
+    *it_vec *= sign;
+    sign = -(sign);
+    ++it_vec;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

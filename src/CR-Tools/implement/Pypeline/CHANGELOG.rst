@@ -1,3 +1,9 @@
+2011-05-01 - Rev xxxx
+=====================
+  :Author: Pim Schelart <P.Schellart@astro.ru.nl>
+
+- Added :func:`hFFTConvert` to convert between FFTW and FFT CASA results.
+
 2011-04-18 - Rev 7573
 =====================
 
