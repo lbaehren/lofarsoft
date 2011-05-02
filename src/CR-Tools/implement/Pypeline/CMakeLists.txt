@@ -99,6 +99,7 @@ set (PYPELINE_CPP_MODULES
   IO
   RF
   Numpy
+  EndPointRadiation
   TBB
   )
 

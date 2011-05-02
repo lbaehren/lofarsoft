@@ -57,6 +57,7 @@
 #include "mIO.h"
 #include "mRF.h"
 #include "mNumpy.h"
+#include "mEndPointRadiation.h"
 #include "mTBB.h"
 
 #ifdef HAVE_AERA
@@ -398,12 +399,18 @@ BOOST_PYTHON_MODULE(_hftools)
 #include "../../../../build/cr/implement/Pypeline/mRF.def.h"
 
 // ________________________________________________________________________
-//                                                                  Numpy
+//                                                                    Numpy
 
 #include "../../../../build/cr/implement/Pypeline/mNumpy.def.h"
 
 // ________________________________________________________________________
-//                                                                      TBB 
+//                                                        EndPointRadiation
+
+#include "../../../../build/cr/implement/Pypeline/mEndPointRadiation.def.h"
+
+
+// ________________________________________________________________________
+//                                                                      TBB
 
 #include "../../../../build/cr/implement/Pypeline/mTBB.def.h"
 
