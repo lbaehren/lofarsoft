@@ -31,12 +31,13 @@ class TBBData(IOInterface):
     def __init__(self, filename, blocksize=1024, block=0):
         """Constructor.
         """
-        #Useful to do unit conversion
-        self.conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
+        # Useful to do unit conversion
+        self.__conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
         
         # Store blocksize for readout
         self.__blocksize = blocksize
 
+        # Current block number
         self.__block = block
 
         # Open file
@@ -55,15 +56,15 @@ class TBBData(IOInterface):
         self.__refAntenna = self.__file.alignment_reference_antenna()
 
         #Create keyword dict for easy access
-        self.setKeywordDict()
+        self.__setKeywordDict()
 
         # Selection dependent initialization
-        self.init_selection()
+        self.__initSelection()
 
         # Mark file as opened
         self.closed = False
 
-    def setKeywordDict(self):
+    def __setKeywordDict(self):
         self.__keyworddict={
             # NON-ICD KEYWORDS
             "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
@@ -75,9 +76,9 @@ class TBBData(IOInterface):
             "FFT_DATA":lambda:(lambda x:x if self.getFFTData(x) else x)(self.empty("FFT_DATA")), 
             "EMPTY_TIMESERIES_DATA":lambda:self.empty("TIMESERIES_DATA"),
             "EMPTY_FFT_DATA":lambda:self.empty("FFT_DATA"),
-            "SAMPLE_FREQUENCY":lambda:[v*self.conversiondict[u] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
-            "SAMPLE_INTERVAL":lambda:[1/(v*self.conversiondict[u]) for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
-            "FREQUENCY_INTERVAL":lambda:[v*self.conversiondict[u]/self["BLOCKSIZE"] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
+            "SAMPLE_FREQUENCY":lambda:[v*self.__conversiondict[u] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
+            "SAMPLE_INTERVAL":lambda:[1/(v*self.__conversiondict[u]) for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
+            "FREQUENCY_INTERVAL":lambda:[v*self.__conversiondict[u]/self["BLOCKSIZE"] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
             "FREQUENCY_RANGE":lambda:[(f/2*(n-1),f/2*n) for f,n in zip(self["SAMPLE_FREQUENCY"],self["NYQUIST_ZONE"])],
             "FFTSIZE":lambda:self["BLOCKSIZE"]/2+1,
             "BLOCKSIZE":lambda: self.__blocksize,
@@ -135,7 +136,7 @@ class TBBData(IOInterface):
             "OBSERVATION_FREQUENCY_UNIT":self.__file.frequencyUnit
             }
 
-    def init_selection(self):
+    def __initSelection(self):
         """Selection dependent initialization.
         """
         
@@ -152,11 +153,6 @@ class TBBData(IOInterface):
         # Get Sample frequency value and units for each antenna
         self.__sample_frequency_value = self.__file.sample_frequency_value()
         self.__sample_frequency_unit = self.__file.sample_frequency_unit()
-
-        # Calculate frequencies for FFT
-        self.__nfmin = None # Frequency range minimum index
-        self.__nfmax = None # Frequency range maximum index
-        self.__calculateFrequencies()
 
         # Generate scrach arrays
         self.__makeScratch()
@@ -313,7 +309,7 @@ class TBBData(IOInterface):
         
         elif key is "BLOCKSIZE":
             self.__blocksize = value
-            self.init_selection()
+            self.__initSelection()
         elif key is "BLOCK":
             self.__block = value
         elif key is "SELECTED_DIPOLES":
@@ -329,17 +325,6 @@ class TBBData(IOInterface):
         
         return key in self.keys()
 
-    def __calculateFrequencies(self):
-        """Calculate frequencies for FFT depending on sample frequency,
-        nyquist zone and blocksize.
-        """
-
-        self.__frequencies = self.empty("FREQUENCY_DATA")
-
-        # Calculate sample frequency in Hz
-
-        cr.hFFTFrequencies(self.__frequencies, self["SAMPLE_FREQUENCY"][0], self.__nyquist_zone[0])
-    
     def getTimeData(self,data=None,block=-1):
         """Calculate time axis depending on sample frequency and
         blocksize (and later also time offset). Create a new array, if
@@ -416,7 +401,7 @@ class TBBData(IOInterface):
             raise Exception("Not all antennas in selection are in file.")
 
         # Selection dependent initialization
-        self.init_selection()
+        self.__initSelection()
 
     def getTimeseriesData(self, data, block=-1):
         """Returns timeseries data for selected antennas.
@@ -483,16 +468,8 @@ class TBBData(IOInterface):
         if hanning:
             self.__scratch[...].applyhanningfilter()
 
-        # For selected frequency range
-        if self.__nfmin != None and self.__nfmax != None:
-            # Perform FFT
-            cr.hFFTWExecutePlan(self.__scratchFFT, self.__scratch, self.__plan)
-
-            data[...].copy(self.__scratchFFT[..., self.__nfmin:self.__nfmax])
-
-        else:
-            # Perform FFT
-            cr.hFFTWExecutePlan(data, self.__scratch, self.__plan)
+        # Perform FFT
+        cr.hFFTWExecutePlan(data, self.__scratch, self.__plan)
 
         # Swap Nyquist zone if needed
         data[...].nyquistswap(self.__nyquist_zone[0])
@@ -525,41 +502,6 @@ class TBBData(IOInterface):
 
         return md.get("AbsoluteAntennaPositions", self.__selectedDipoles, self.antenna_set, True)
 
-    def setFrequencyRangeByIndex(self, nfmin, nfmax):
-        """Sets the frequency selection used in subsequent calls to
-        `getFFTData`.
-        If **frequencies** is the array of frequencies available for the
-        selected blocksize, then subsequent calls to `getFFTData` will
-        return data corresponding to frequencies[nfmin:nfmax].
-
-        Required Arguments:
-
-        ============= =================================================
-        Parameter     Description
-        ============= =================================================
-        *nfmin*       minimum frequency as index into frequency array
-        *nfmax*       maximum frequency as index into frequency array
-        ============= =================================================
-
-        Output:
-        This method does not return anything.
-
-        Raises:
-        It raises an `IndexError` if frequency selection cannot be set
-        to requested values (e.g. index out of range)
-
-        """
-
-        if not isinstance(nfmin, int) or not isinstance(nfmax, int):
-            raise ValueError("Provided values for nfmin and nfmax are not of the correct type 'int'.")
-
-        elif not 0 <= nfmin <= nfmax < len(self.__frequencies):
-            raise ValueError("Invalid frequency range.")
-
-        else:
-            self.__nfmin = nfmin
-            self.__nfmax = nfmax
-
     def getFrequencies(self, block=-1):
         """Returns the frequencies that are applicable to the FFT data
 
@@ -572,16 +514,17 @@ class TBBData(IOInterface):
 
         """
         
-        frequencies = self.__frequencies
+        # Get empty array of correct size
+        frequencies = self.empty("FREQUENCY_DATA")
 
-        if self.__nfmin != None and self.__nfmax != None:
-            frequencies=frequencies[range(self.__nfmin, self.__nfmax)]
-
+        # Calculate sample frequency in Hz
+        cr.hFFTFrequencies(frequencies, self["SAMPLE_FREQUENCY"][0], self.__nyquist_zone[0])
+    
         return frequencies
 
     def empty(self, key):
         """Return empty array for keyword data.
-        Known keywords are: "TIMESERIES_DATA","TIME_DATA","FREQUENCY_DATA","FFT_DATA"
+        Known keywords are: "TIMESERIES_DATA", "TIME_DATA", "FREQUENCY_DATA", "FFT_DATA".
         """
 
         if key == "TIMESERIES_DATA":

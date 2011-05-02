@@ -2,6 +2,16 @@
 =====================
   :Author: Pim Schelart <P.Schellart@astro.ru.nl>
 
+- Moved frequency range selection out of the :mod:`tbb` datareader module for simplicity.
+- Added support for skipping frequency channels to the imager.
+- Added :func:`hMaskToStep` to convert mask of ones and zeros to shifts to step through array.
+- Added :func:`hCountZero` to count the number of zero entries in an array.
+- Added :func:`hCountNonZero` to count the number of non-zero entries in an array.
+
+2011-05-01 - Rev xxxx
+=====================
+  :Author: Pim Schelart <P.Schellart@astro.ru.nl>
+
 - Added :func:`hFFTConvert` to convert between FFTW and FFT CASA results.
 
 2011-04-18 - Rev 7573

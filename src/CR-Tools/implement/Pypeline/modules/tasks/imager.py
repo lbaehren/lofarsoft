@@ -18,9 +18,12 @@ class Imager(Task):
     parameters = {
         'image' : { "default" : None, "positional" : 1 },
         'data' : { "default" : None, "positional" : 2 },
+        'mask' : { "default" : None, "positional" : 3 },
         'startblock' : { "default" : 0 },
         'nblocks' : { "default" : 16 },
         'ntimesteps' : { "default" : 1 },
+        'nfmin' : { "default" : None },
+        'nfmax' : { "default" : None },
         'obstime' : { "default" : 0 },
         'L' : { "default" : pytmf.deg2rad(6.869837540) },
         'phi' : { "default" : pytmf.deg2rad(52.915122495) },
@@ -78,6 +81,10 @@ class Imager(Task):
 
         # Get frequencies
         self.frequencies=self.data.getFrequencies()
+
+        if self.nfmin != None and self.nfmax != None:
+            self.frequencies=self.frequencies[range(self.nfmin, self.nfmax)]
+
         self.nfreq = len(self.frequencies)
 
         print "Frequency range:", self.frequencies[0], self.frequencies[-1], "Hz"
@@ -91,6 +98,7 @@ class Imager(Task):
 #        cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
 
         # Initialize empty arrays
+        self.scratchfft = self.data.empty("FFT_DATA")
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
         self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
@@ -98,13 +106,25 @@ class Imager(Task):
         """Run the imager.
         """
 
+        # Get steps corresponding to mask
+        mask = self.mask
+        step = cr.hArray(int, cr.hCountZero(mask))
+        cr.hMaskToStep(step, mask)
+
         start = time.time()
-        for step in range(self.ntimesteps):
+        for tstep in range(self.ntimesteps):
             for block in range(self.startblock, self.startblock+self.nblocks):
 
                 print "processing block:", block
 
-                self.data.getFFTData(self.fftdata, block)
+                if self.nfmin != None and self.nfmax != None:
+                    self.data.getFFTData(self.scratchfft, block)
+
+                    self.fftdata[...].copy(self.scratchfft[..., self.nfmin:self.nfmax])
+                else:
+                    self.data.getFFTData(self.fftdata, block)
+
+                cr.hFFTConvert(self.fftdata)
 
                 print "reading done"
 
@@ -112,10 +132,10 @@ class Imager(Task):
 
                 print "beamforming started"
 #                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
-                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian)
+                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, step)
                 print "beamforming done"
 
-                cr.hAbsSquareAdd(self.image[step], self.t_image)
+                cr.hAbsSquareAdd(self.image[tstep], self.t_image)
 
             self.startblock += self.nblocks
 

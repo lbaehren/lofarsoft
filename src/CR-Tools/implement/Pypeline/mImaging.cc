@@ -945,7 +945,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   const int Nskycoord = Nskypos / 3;
 
   // Indices
-  int j, k;
+  int i, j, k;
 
   // Sanity checks
   if (Nantpos != Nantennas * 3)
@@ -980,7 +980,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 #else
   std::cout<<"Running in serial mode"<<std::endl;
 #endif // _OPENMP
-  for (int i=0; i<Nskycoord; ++i)
+  for (i=0; i<Nskycoord; ++i)
   {
     // Image iterator to start position
     it_im = image + (i * Nfrequencies);
@@ -1018,7 +1018,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       }
 
       // Next antenna position
-      it_ant+=3;
+      it_ant += 3;
     }
   }
 }
@@ -1058,7 +1058,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   const int Nskycoord = Ndelays / Nantennas;
 
   // Indices
-  int j, k;
+  int i, j, k;
 
   // Sanity checks
   if (Nfftdata != Nfrequencies * Nantennas)
@@ -1084,7 +1084,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 #else
   std::cout<<"Running in serial mode"<<std::endl;
 #endif // _OPENMP
-  for (int i=0; i<Nskycoord; ++i)
+  for (i=0; i<Nskycoord; ++i)
   {
     // Image iterator to start position
     it_im = image + (i * Nfrequencies);
@@ -1116,6 +1116,246 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       ++it_delays;
     }
   }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Beamform image
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBeamformImage
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(image)()("Array to store resulting image. Stored as ``[I(x_0, y_0, f_0), I(x_0, y_0, f_1), ... I(x_nx, y_ny, f_nf)]`` e.g. the rightmost (frequency) index runs fastest. This array may contain an existing image.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as ``[f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)]`` e.g. ``f(i,j)`` where ``i`` is the antenna number and ``j`` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies [Hz] stored as ``[f_0, f_1, ..., f_n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(antpos)()("Array with antenna positions in the local Cartesian frame [meter]. Stored as ``[x_0, y_0, z_0, x_1, y_1, z_1, ... x_na, y_na, z_na]`` where ``na`` is the number of antennas.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(skypos)()("Array with sky positions in the local cartesian frame [Hz]. Stored as ``[x_0, y_0, z_0, x_1, y_1, z_1, ... x_np, y_np, z_np]`` where ``np`` is the number of pixels in the image. Storage order for the pixels is the same as for the image e.g. runs faster in ``y``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HInteger)(step)()("Array with steps to take for stepping though the frequency channels (used to efficiently skip bad channels).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class NIter, class IIter>
+void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
+    const CIter fftdata, const CIter fftdata_end,
+    const NIter frequencies, const NIter frequencies_end,
+    const NIter antpos, const NIter antpos_end,
+    const NIter skypos, const NIter skypos_end,
+    const IIter step, const IIter step_end
+    )
+{
+  // Variables
+  HNumber norm = 0.0;
+  HNumber delay = 0.0;
+
+  // Inspect length of input arrays
+  const int Nimage = std::distance(image, image_end);
+  const int Nfftdata = std::distance(fftdata, fftdata_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
+  const int Nantpos = std::distance(antpos, antpos_end);
+  const int Nskypos = std::distance(skypos, skypos_end);
+  const int Nstep = std::distance(step, step_end);
+
+  // Get relevant numbers
+  const int Nantennas = Nantpos / 3;
+  const int Nskycoord = Nskypos / 3;
+
+  // Indices
+  int i, j, k;
+
+  // Sanity checks
+  if (Nantpos != Nantennas * 3)
+  {
+    throw PyCR::ValueError("Antenna positions array has wrong size.");
+  }
+  if (Nskypos != Nskycoord * 3)
+  {
+    throw PyCR::ValueError("Sky positions array has wrong size.");
+  }
+  if (Nfftdata != Nfrequencies * Nantennas)
+  {
+    throw PyCR::ValueError("FFT data array has wrong size.");
+  }
+  if (Nimage != Nskycoord * Nfrequencies)
+  {
+    throw PyCR::ValueError("Image array has wrong size.");
+  }
+
+  // Get iterators
+  CIter it_im = image;
+  CIter it_im_inner = image;
+  CIter it_fft = fftdata;
+  CIter it_fft_start = fftdata;
+  NIter it_freq = frequencies;
+  NIter it_ant = antpos;
+  NIter it_sky = skypos;
+  IIter it_step = step;
+
+  // Loop over pixels (parallel on multi core systems if supported)
+#ifdef _OPENMP
+  std::cout<<"Running in parallel mode"<<std::endl;
+  #pragma omp parallel for private(delay, norm, it_im, it_im_inner, it_fft, it_fft_start, it_freq, it_ant, it_sky, it_step, j, k)
+#else
+  std::cout<<"Running in serial mode"<<std::endl;
+#endif // _OPENMP
+  for (i=0; i<Nskycoord; ++i)
+  {
+    // Image iterator to start position
+    it_im = image + (i * Nfrequencies);
+
+    // Sky coordinate iterator to start position
+    it_sky = skypos + (i * 3);
+
+    // Loop over antennas
+    it_fft_start = fftdata;
+    it_fft = fftdata;
+    it_ant = antpos;
+
+    for (j=Nantennas; j!=0; --j)
+    {
+      // Reset image iterator to first frequency of current pixel
+      it_im_inner = it_im;
+
+      // Calculate norm of sky vector
+      norm = sqrt(*it_sky * *it_sky +
+                  *(it_sky+1) * *(it_sky+1) +
+                  *(it_sky+2) * *(it_sky+2));
+
+      // Calculate geometric delay
+      delay = hGeometricDelayFarField(it_ant, it_sky, norm);
+
+      // Loop over frequencies
+      it_fft = it_fft_start;
+      it_freq = frequencies;
+      it_step = step;
+
+      for (k=Nstep; k!=0; --k)
+      {
+        // Go to next frequeny channel
+        it_im_inner += *it_step;
+        it_fft += *it_step;
+        it_freq += *it_step;
+
+        // Multiply by geometric weight and add to image
+        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));
+
+        // Set frequency channel step for next iteration
+        ++it_step;
+      }
+
+      // Next antenna position
+      it_ant += 3;
+
+      // Shift FFT data start position to next antenna
+      it_fft_start += Nfrequencies;
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Calculate steps to skip masked entries
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaskToStep
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(step)()("Array with steps to skip masked entries.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(mask)()("Array with mask defining which frequency channels are to be skipped. Expected array of lenght Nf (where Nf is the number of frequency channels) containing zeros (for channels to be included) and ones (for channels to be masked and not used for imaging).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter>
+void HFPP_FUNC_NAME (const IIter step, const IIter step_end,
+    const IIter mask, const IIter mask_end
+    )
+{
+  // Step counter
+  int count = 0;
+
+  // Get iterators
+  IIter it_step = step;
+  IIter it_mask = mask;
+
+  // Calculate steps
+  while (it_step != step_end && it_mask != mask_end)
+  {
+    if (*it_mask == 0)
+    {
+      *it_step = count;
+
+      count = 1;
+
+      ++it_step;
+    }
+    else
+    {
+      ++count;
+    }
+    ++it_mask;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Count the number of zero elements
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCountZero
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter>
+HInteger HFPP_FUNC_NAME (const IIter vec, const IIter vec_end)
+{
+  // Get iterator
+  IIter it_vec = vec;
+
+  // Calculate vecs
+  int count = 0;
+  while (it_vec != vec_end)
+  {
+    if (*it_vec == 0) ++count;
+    ++it_vec;
+  }
+
+  return count;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Count the number of non-zero elements
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCountNonZero
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter>
+HInteger HFPP_FUNC_NAME (const IIter vec, const IIter vec_end)
+{
+  // Get iterator
+  IIter it_vec = vec;
+
+  // Calculate vecs
+  int count = 0;
+  while (it_vec != vec_end)
+  {
+    if (*it_vec != 0) ++count;
+    ++it_vec;
+  }
+
+  return count;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

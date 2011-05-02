@@ -23,7 +23,7 @@ usage = "usage: %prog [options] file0.h5 file1.h5 ..."
 parser = OptionParser(usage=usage)
 parser.add_option("--startblock", type="int", default=0)
 parser.add_option("--nblocks", type="int", default=16)
-parser.add_option("--ntimesteps", type="int", default=(12487 / 16 - 1) / 2)
+parser.add_option("--ntimesteps", type="int", default=None) #(12487 / 16 - 1) / 2)
 parser.add_option("--blocksize", type="int", default=16*1024)
 parser.add_option("--nfmin", type="int", default=5750)
 parser.add_option("--nfmax", type="int", default=6050)
@@ -51,11 +51,10 @@ for n in filenames:
 # Parameters
 startblock=options.startblock
 nblocks=options.nblocks
-ntimesteps=options.ntimesteps
 blocksize=options.blocksize
 nfmin=options.nfmin
 nfmax=options.nfmax
-nfreq=nfmax-nfmin
+nfreq = nfmax-nfmin
 
 # Select even antennae
 selection=range(0, 48, 2)
@@ -66,10 +65,17 @@ f=cr.open(filenames[0], blocksize) # Only single file mode supported
 # Set antenna selection
 f.setAntennaSelection(selection)
 
-# Set frequency range
-f.setFrequencyRangeByIndex(nfmin, nfmax)
+if not options.ntimesteps:
+    ntimesteps = f["MAXIMUM_READ_LENGTH"] / (nblocks * blocksize)
+else:
+    ntimesteps = options.ntimesteps
+print "Number of time steps:", ntimesteps
 
+# Get frequencies
 frequencies = f.getFrequencies()
+
+# Create frequency mask
+mask = cr.hArray(int, nfreq, fill=0)
 
 # Get observation time (as UNIX timestamp)
 obstime = f["TIME"][0]
@@ -87,7 +93,7 @@ LONPOLE = 0.
 LATPOLE = 90.
 CRVAL1 = pytmf.hms2deg(5, 34, 31.97)
 CRVAL2 = pytmf.dms2deg(22, 0, 52.0)
-CRVAL3 = frequencies[0]
+CRVAL3 = frequencies[nfmin]
 CRVAL4 = 0.
 CRPIX1 = float(options.naxis1) / 2
 CRPIX2 = float(options.naxis2) / 2
@@ -95,7 +101,7 @@ CRPIX3 = 0.0
 CRPIX4 = 0.0
 CDELT1 = -1.0 * options.angres
 CDELT2 = 1.0 * options.angres
-CDELT3 = frequencies[1]-frequencies[0]
+CDELT3 = frequencies[nfmin+1]-frequencies[nfmin]
 
 if f["SAMPLE_FREQUENCY_UNIT"][0] == "MHz":
     CDELT4 = nblocks*blocksize*(1./(f["SAMPLE_FREQUENCY_VALUE"][0]*1e6))
@@ -113,7 +119,7 @@ CUNIT4 = 's'
 image = np.zeros(shape=(ntimesteps, NAXIS1, NAXIS2, nfreq), dtype='float')
 
 # Initialize imager
-im = imager.Imager(image = image, data = f, startblock = startblock, nblocks = nblocks, ntimesteps = ntimesteps, obstime = obstime, NAXIS = NAXIS,NAXIS1 = NAXIS1, NAXIS2 = NAXIS2, CTYPE1 = CTYPE1, CTYPE2 = CTYPE2, LONPOLE = LONPOLE,LATPOLE = LATPOLE,CRVAL1 = CRVAL1, CRVAL2 = CRVAL2, CRPIX1 = CRPIX1, CRPIX2 = CRPIX2, CDELT1 = CDELT1, CDELT2 = CDELT2, CUNIT1 = CUNIT1, CUNIT2 = CUNIT2)
+im = imager.Imager(image = image, data = f, mask = mask, startblock = startblock, nblocks = nblocks, ntimesteps = ntimesteps, obstime = obstime, NAXIS = NAXIS,NAXIS1 = NAXIS1, NAXIS2 = NAXIS2, CTYPE1 = CTYPE1, CTYPE2 = CTYPE2, LONPOLE = LONPOLE,LATPOLE = LATPOLE,CRVAL1 = CRVAL1, CRVAL2 = CRVAL2, CRPIX1 = CRPIX1, CRPIX2 = CRPIX2, CDELT1 = CDELT1, CDELT2 = CDELT2, CUNIT1 = CUNIT1, CUNIT2 = CUNIT2, nfmin = nfmin, nfmax = nfmax)
 
 #np.save("/Users/pschella/Desktop/frequencies_new.npy", frequencies.toNumpy())
 
