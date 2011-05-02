@@ -169,7 +169,12 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         bfOdd = result["odd"]["optBeam"]
 
         if doPlot:
-            bfEven.plot()
+#            bfEven.plot()
+            plt.clf()
+            plt.plot(bfEven.toNumpy().T)
+            plt.title('Beamformed pulse, even polarization')
+            plt.xlabel('Sample number')
+            plt.ylabel('Voltage (ADC units)')
             raw_input("--- Plotted optimal beam for even antennas - press Enter to continue...")
 #            frequency.read(datafile,"FREQUENCY_DATA")
             fftlength = blocksize/2 + 1

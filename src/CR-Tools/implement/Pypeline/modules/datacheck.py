@@ -92,8 +92,10 @@ def qualityCheck(crfile, cr_efield, doPlot=False):
     if doPlot:
         efield = cr_efield.toNumpy()
         plt.plot(efield.T)
+        plt.title('Timeseries for all channels')
+        plt.xlabel('Sample number')
+        plt.ylabel('Voltage (ADC units)')
         raw_input("--- Plotted raw timeseries data - press Enter to continue...")
-
     qualitycriteria={"mean":(-1.5,1.5),"rms":(3,15),"spikyness":(-5,5)}
    
 #    datalength = crfile["Filesize"]
@@ -132,7 +134,6 @@ def qualityCheck(crfile, cr_efield, doPlot=False):
     # now we can check for spurious pulse locations and/or just for the count
     avgPulseCount = npulses.sum() / float(nofAntennas)
     maxPulseCount = npulses.max()
-
     if doPlot and len(flagged) > 0:
         cr_efield = crfile["EMPTY_TIMESERIES_DATA"]
         crfile.getTimeseriesData(cr_efield, 0) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
