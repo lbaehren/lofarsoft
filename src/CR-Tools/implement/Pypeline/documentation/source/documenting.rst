@@ -412,6 +412,70 @@ Euler's identity, equation :eq:`euler`, was elected one of the most
 beautiful mathematical formulas.
 
 
+Documentation layout
+--------------------
+
+The typical layout of the documentation for a Python function should
+look like the following::
+
+  """
+  A brief summary of the function.
+
+  **Parameters**
+
+    =========== ============================================================
+    *param_1*   Description.
+    *param_2*   Description.
+    =========== ============================================================
+
+  **Description**
+
+  A longer description of the functionality.
+
+  **Usage**
+
+    ``func(param_1, param_2) -> return value of the function``
+
+  **See also**
+
+  :func:`other_func_1`, :func:`other_func_2`
+
+  **Example**
+  ::
+
+    >>> Example of how to use the function.
+
+  """
+
+Resulting in:
+
+  A brief summary of the function.
+
+  **Parameters**
+
+    =========== ============================================================
+    *param_1*   Description.
+    *param_2*   Description.
+    =========== ============================================================
+
+  **Description**
+
+  A longer description of the functionality.
+
+  **Usage**
+
+    ``func(param_1, param_2) -> return value of the function``
+
+  **See also**
+
+  :func:`other_func_1`, :func:`other_func_2`
+
+  **Example**
+  ::
+
+    >>> Example of how to use the function.
+
+
 
 Low level C++ routines
 ======================
