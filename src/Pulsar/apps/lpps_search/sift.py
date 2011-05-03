@@ -112,7 +112,8 @@ def apply_zap_list(cand_list, zaplist_file):
 # facilitate plotting the candidate period and candidate frequency historgrams
 # before and after sifting.
 
-def sift_accel_cands(cand_dir, basename, zaplist_file = ''):
+def sift_accel_cands(cand_dir, basename, zaplist_file = '', 
+        n_candidates_cutoff=None):
     '''Sift through the candidate pulsars found by accelsearch.'''
     crawl_results = crawler.find_accelsearch_output(cand_dir, basename)
     # Reorder the results to send them to PRESTO's sifting module (it needs a
@@ -158,7 +159,6 @@ def sift_accel_cands(cand_dir, basename, zaplist_file = ''):
         if accel_cands:
             accel_cands = duplicates.remove_duplicates(accel_cands)
         sifted_accelcands.extend(accel_cands)
-    MAX_CANDIDATES = 10 * len(list(accel_cands_found_for.keys()))
     sifted_accelcands = duplicates.remove_duplicates(sifted_accelcands)
     
     if sifted_accelcands:
@@ -171,6 +171,9 @@ def sift_accel_cands(cand_dir, basename, zaplist_file = ''):
         sifted_accelcands = apply_zap_list(sifted_accelcands, zaplist_file)
         print 'After applying zaplist there are %d candidates.' % len(sifted_accelcands)
 
-    sifted_accelcands = sifted_accelcands[:MAX_CANDIDATES]
+    if n_candidates_cutoff != None:
+        # We want an integer that is larger than 0 if a cutoff is specified.
+        assert n_candidates_cutoff > 0 and (type(n_candidates_cutoff) == type(1))
+        sifted_accelcands = sifted_accelcands[:n_candidates_cutoff]
     return unsifted_accelcands, sifted_accelcands 
 

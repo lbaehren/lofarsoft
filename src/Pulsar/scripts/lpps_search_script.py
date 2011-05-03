@@ -70,6 +70,9 @@ from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
+N_CANDIDATES_CUTOFF = 20
+
+# ----------------------------------------------------------------------------
 # -- Utility functions from GBT or Vishal's scripts --------------------------
 
 class DedispPlan(object):
@@ -749,7 +752,8 @@ class SearchRun(object):
                 canddir=self.work_dir,
                 basename=self.basename,
                 mask_filename=rfifind_mask_file,
-                n_cores=n_cores
+                n_cores=n_cores,
+                n_candidates_cutoff=N_CANDIDATES_CUTOFF,
             )
         if not no_singlepulse:
             # Deal with single pulse search plotting

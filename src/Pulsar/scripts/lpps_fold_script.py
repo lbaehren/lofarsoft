@@ -16,6 +16,7 @@ import optparse
 import glob
 import stat
 import subprocess
+import re
 # PRESTO imports
 import sifting
 # LOFAR PILOT PULSAR SURVEY imports
@@ -29,8 +30,9 @@ from lpps_search.util import MissingOptionException
 from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 
-REQUIRED_OPTIONS = ['searchoutdir', 'subbdir', 'workdir', 'basename']
+REQUIRED_OPTIONS = ['searchoutdir', 'subbdir', 'workdir',]
 OPTIONAL_OPTIONS = ['ncores']
+SUBB_PATTERN = re.compile(r'(?P<basename>\S+)\.sub\d{4}$')
 
 
 if __name__ == '__main__':
@@ -46,8 +48,6 @@ if __name__ == '__main__':
         type='string', dest='workdir', metavar='WORK_DIR')
     parser.add_option('--ncores', metavar='N_CORES', default=8, type='int', 
         help='Number of processor cores to use default is 8.', dest='ncores')
-    parser.add_option('--basename', type='string', metavar='BASENAME', 
-        help='Basename of PRESTO files to look for.', dest='basename')
     parser.add_option('--zap_file', type='string', metavar='ZAPFILE',
         help='Apply zaplist file (birdies) during sifting', default='',
         dest='zaplist_file')
@@ -62,6 +62,21 @@ if __name__ == '__main__':
             raise MissingCommandLineOptionException(k)
 
     search_out_dir = os.path.abspath(options.searchoutdir)
+
+    # figure out the basename for the observation
+    subbdir = os.path.abspath(options.subbdir)
+    files = os.listdir(subbdir)
+    basenames = set()
+    for f in files:
+        m = SUBB_PATTERN.match(f)
+        if m:
+            basenames.add(m.group('basename'))
+    if len(basenames) > 1:
+        raise Exception('Could not unambigously determine basename.')
+    elif len(basenames) == 0:
+        raise Exception('No files matching the expected subband nomenclature.')
+    else:
+        basename = basenames.pop()
 
     # prepare working directory (for both candidates and folds in the end)
     work_dir = os.path.abspath(options.workdir)
@@ -90,17 +105,18 @@ if __name__ == '__main__':
     
     # reconstruct path to rfifind produced mask file
     rfifind_mask_file = os.path.join(search_out_dir, 'RFIFIND', 
-        options.basename + '_rfifind.mask')
+        basename + '_rfifind.mask')
     
     # prepare the keyword arguments dictionary to give to the folding module
     kwargs = {
         'canddir' : canddir,
         'folddir' : folddir,
-        'subbdir' : os.path.abspath(options.subbdir),
+        'subbdir' : subbdir,
         'n_cores' : options.ncores,
-        'basename' : options.basename,
+        'basename' : basename, 
         'mask_filename' : rfifind_mask_file,
         'zaplist_file' : options.zaplist_file,
+        'n_candidates_cutoff' : 20,
     }
     main(**kwargs)
 

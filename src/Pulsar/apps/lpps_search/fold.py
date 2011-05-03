@@ -178,7 +178,7 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
     return 'prepfold', options, args
 
 def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8, 
-        zaplist_file=''):
+        zaplist_file='', n_candidates_cutoff=20):
     '''Importable version of the whole script.'''
 
     # Check that the directories are available and that the output directory
@@ -197,7 +197,7 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8,
  
     # search for all the accelcand files and sift them
     unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename,
-         zaplist_file)
+         zaplist_file, n_candidates_cutoff)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
         assert len(sifted_candidates) > 0
@@ -221,6 +221,12 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8,
             os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
         plot_p_dm(sifted_candidates, bright_pulsars, 
             os.path.join(histogram_dir, 'after.pdf'))
+
+    # spit out a file with the candidates that survived the sifting
+    txt_out_dir = os.path.join(fold_dir, 'SIFTED_CANDIDATES')
+    os.mkdir(txt_out_dir)
+    candidates_out_file = os.path.join(txt_out_dir, 'sifted_candidates.txt')
+    sifting.write_candlist(sifted_candidates, candidates_out_file)
 
     # using knowledge about the directory layout:
     subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')
