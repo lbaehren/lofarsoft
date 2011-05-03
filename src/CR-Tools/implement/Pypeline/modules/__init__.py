@@ -71,7 +71,7 @@ def trun(name,*args,**kwargs):
     tasks.set_globals("Task",tasks.task_instance)
     return tasks.task_instance(*args,**kwargs)
 
-def tload(name,**args):
+def tload(name,get=True,**args):
     """
     Loads a specific task as the current task, you you can start it
     with 'go' and set parameters with 'par x=value'.
@@ -84,14 +84,35 @@ def tload(name,**args):
     tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
     tasks.task_instance=tasks.task_class(**args)
     tasks.set_globals("Task",tasks.task_instance)
-    tget()
-
-def task():
-    """
-    Return the currently loaded task.
-    """
+    if get: tget()
     return tasks.task_instance
 
+def task(*args,**kwargs):
+    """
+    **Usage:**
+
+    ``task() -> return current loaded task``
+
+    or
+
+    ``task("taskname",par,par1=X,par2=Y,...) - > return task named taskname``
+
+    **Description:**
+    
+    With no parameters return the currently loaded task. Otherwise
+    return the task with the name given as first argument and the
+    other parameters as arguments.
+
+    **See also:**
+
+    tload 
+    """
+    if not args and not kwargs:
+        return tasks.task_instance
+    else:
+        name=args[0]
+        return eval(tasks.task_allloaded[name]+"."+name)(*args[1:],**kwargs)
+       
 class t_class():
     """
     Dummy base class which redefined the __repr__ object such that the

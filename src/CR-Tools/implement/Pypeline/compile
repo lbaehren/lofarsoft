@@ -1,4 +1,5 @@
 #
 cd $LOFARSOFT/build/cr
-make -j4
+#make -j4
+make
 make install

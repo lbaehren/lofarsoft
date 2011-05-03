@@ -3,30 +3,7 @@ Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
 Example:
-file=crfile(LOFARSOFT+"/data/lopes/example.event")
-tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
-tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
-tpar phase_center=[-84.5346,36.1096,0]
-tpar FarField=True
-tpar NyquistZone=2
-tpar randomize_peaks=False
-
-#file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
-#file["SelectedAntennasID"]=[0]
-#fx0=file["TIMESERIES_DATA"]
-
-
-------------------------------------------------------------------------
-tload "BeamFormer2"
-file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
-tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
-tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
-tpar cal_delays=dict(zip(file["antennaIDs"],[0,-2.3375e-08,-2.75e-09,-3.75e-09,-2.525e-08,-2.575e-08,1.3125e-08,-1.6875e-08]))
-tpar phase_center=[-22.1927,15.3167,0]
-tpar FarField=False
-tpar NyquistZone=2
-tpar randomize_peaks=False
-------------------------------------------------------------------------
+::
 
 self=Task
 self.beams[...,0].nyquistswap(self.NyquistZone)
@@ -34,9 +11,6 @@ fxb=hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw
 fxb[...].plot(clf=True); plt.show()
 
 """
-
-
-
                      
 #import pdb; pdb.set_trace()
 
@@ -97,10 +71,16 @@ class BeamFormer2(tasks.Task):
 
     The function will calculate multiple beams for a list of files and
     a series of antennas (all integrated into one compex spectrum per
-    beam).  
+    beam).
 
-    The task will do a basic quality check of each time series data
-    set and only integrate good blocks.
+    This beamformer will read all selected antennas at once into
+    memory and hence is optimized for shot datasets with many antennas
+    (e.g. cosmic ray event ).
+
+    It can also be called without a datafile and just hArrays as
+    input. In this case provide the following information:
+    
+    ``Task(data=timeseries_data, antennas=file["SELECTED_DIPOLES"], antpos=file["ANTENNA_POSITIONS"], sample_interval=file["SAMPLE_INTERVAL"][0], pointings=[dict(az=143.4092*deg,el= 81.7932*deg, r=600.3)])``
 
     The desired frequency resolution is provided with the parameter
     delta_nu, but by default this will be rounded off to the nearest
@@ -109,57 +89,16 @@ class BeamFormer2(tasks.Task):
 
     The resulting beam is stored in the array Task.beam and written to
     disk as an hArray with parameters stored in the header dict (use
-    getHeader('BeamFormer') to retrieve this.)
+    getHeader('BeamFormer2') to retrieve this.)
 
     The incoherent and beamed average spectra are stored in
     Task.avspec_incoherent and Task.avspec respectively. They are also
     available as attributes to Task.bf.par (also when stored to disk).
 
-    The beam can be FFTed back to time using Task.tcalc viewed with
-    Task.tplot.
+    The beam can be FFTed back to time using Task.tcalc and viewed
+    with Task.tplot.
 
-    To avoid the spectrum being influenced by spikes in the time
-    series, those spikes can be replaced by random numbers, before the
-    FFT is taken (see 'randomize_peaks').
-
-    The quality information (RMS, MEAN, flagged blocks per antennas)
-    is stored in a data 'quality database' in text and python form and
-    is also available as Task.quality. (See also:
-    Task.antennacharacteristics, Task.mean, Task.mean_rms, Task.rms,
-    Task.rms_rms, Task.npeaks, Task.npeaks_rms,
-    Task.homogeneity_factor - the latter is printend and is a useful
-    hint if something is wrong)
-
-    Flagged blocks can be easily inspeced using the task method
-    Task.qplot (qplot for quality plot).
-
-    If you see an outputline like this,
-
-      # Start antenna = 92 (ID= 17011092) - 4 passes:
-      184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
-      185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
-      186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
-      - count= 186, Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
-
-    this will tell you that Antenna 17011092 was worked on (the 92nd
-    antenna in the data file) and the 186th chunk (block 514)
-    contained some suspicious data (too many spikes). If you want to
-    inspect this, you can call
-
-    Task.qplot(186)
-
-    This will plot the chunk and highlight the first flagged block
-    (#514) in that chunk.
-
-    Task.qplot(186,1)
-
-    would highlight the second flagged block (which does not exist here).
-
-    If the chunks are too long to be entirely plotted, use
-
-    Task.qplot(186,all=False).
-
-    """
+   """
     parameters = {
 #Beamformer parameters:
 #------------------------------------------------------------------------
@@ -179,6 +118,14 @@ class BeamFormer2(tasks.Task):
         "start_block":{default:0,doc:"Block number to start with. Will be used to to read the first block from file (if provided) and to calculate time."},
 
         "datafile":{default:getfile,export:False,doc:"Data file object pointing to raw data."},
+
+        "calc_timeseries":{default:False,doc:"If True also do the inverse FFT of all antennas and return the shifted time series for each antenna in data_shifted."},
+
+        "calc_tbeams":{default:True,doc:"Calculate the inverse FFT of all beams and return the shifted and beamformed time series for each beam in Task.tbeams"},
+
+        "doabs":{default:True,doc:"Take the absolute of the tbeam."},
+
+        "smooth_width":{default:True,doc:"Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",unit:"Samples"},
 
         "doplot":{default:False,doc:"Plot current spectrum while processing."},
 
@@ -220,46 +167,7 @@ class BeamFormer2(tasks.Task):
 
         "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
                          doc:"Complete filename including directory to store the final spectrum."},
-        
-        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
-        
-        "quality_db_filename":{default:"qualitydatabase",
-                               doc:"Root filename of log file containing the derived antenna quality values (uses .py and .txt extension)."},
-
-        "quality":{default:[],doc:"A list containing quality check information about every large chunk of data that was read in. Use Task.qplot(Entry#,flaggedblock=nn) to plot blocks in question.",export:False,output:True},
-
-        "antennacharacteristics":{default:{},doc:"A dict with antenna IDs as key, containing quality information about every antenna.",export:False,output:True},
-
-        "mean_antenna":{default:lambda self: hArray(float,[self.maxnantennas], name="Mean per Antenna"),doc:"Mean value of time series per antenna.",output:True},
-
-        "rms_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="RMS per Antenna"),doc:"Rms value of time series per antenna.",output:True},
-
-        "npeaks_antenna":{default: lambda self: hArray(float,[self.maxnantennas], name="Number of Peaks per Antenna"),doc:"Number of peaks of time series per antenna.",output:True},
-
-        "mean":{default:0,doc:"Mean of mean time series values of all antennas.",output:True},
-
-        "mean_rms":{default:0,doc:"RMS of mean of mean time series values of all antennas.",output:True},
-
-        "npeaks":{default:0,doc:"Mean of number of peaks all antennas.",output:True},
-
-        "npeaks_rms":{default:0,doc:"RMS of npeaks over all antennas.",output:True},
-
-        "rms":{default:0,doc:"Mean of rms time series values of all antennas.",output:True},
-
-        "rms_rms":{default:0,doc:"RMS of rms of mean time series values of all antennas.",output:True},
-
-        "homogeneity_factor":{default:0,doc:"=1-(rms_rms/rms+ npeaks_rms/npeaks)/2 - this describes the homogeneity of the data processed. A homogeneity_factor=1 means that all antenna data were identical, a low factor should make one wonder if something went wrong.",output:True},
-
-        "spikeexcess":dict(default=20,doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
-        
-        "rmsfactor":dict(default=2,doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
-
-        "meanfactor":dict(default=3,doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
-
-        "randomize_peaks":{default:True,doc:"Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."},
-
-        "peak_rmsfactor":dict(default=5,doc="At how many sigmas above the mean will a peak be randomized."),
-        
+                
         "nantennas":{default:lambda self:len(self.antennas),
                      doc:"The actual number of antennas available for calculation in the file (<maxnantennas)."},
 
@@ -288,7 +196,7 @@ class BeamFormer2(tasks.Task):
                      doc:"Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."},
 
         "verbose":{default:True,doc:"Print progress information."},
-#------------------------------------------------------------------------
+#----------------------------------------------------------------------t--
 # Derived parameters
 
         "nbeams":{default:lambda self:len(self.pointings),doc:"Number of beams to calculate."},
@@ -297,35 +205,35 @@ class BeamFormer2(tasks.Task):
 
         "phase_center_array":{default:lambda self:hArray(list(self.phase_center),name="Phase Center",units=("","m")),doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
         
-        "block_duration":{default:lambda self:self.samplerate*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
+        "block_duration":{default:lambda self:self.sample_interval*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
         
         "speclen":p_(lambda self:self.blocklen/2+1,"Length of one spectrum.","Channels"),
 
-        "samplerate":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0] if datafile else 1,"Length in time of one sample in raw data set.","s"),
+        "sample_interval":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0] if datafile else 1,"Length in time of one sample in raw data set.","s"),
 
         "filesize":p_(lambda self:self.datafile["DATA_LENGTH"][0] if self.datafile else self.data.shape()[-1],"Length of file for one antenna.","Samples"),
 
-        "delta_nu_used":{default:lambda self:1/(self.samplerate*self.blocklen),doc:"Actual frequency resolution of dynamic spectrum",unit:"Hz"},
+        "delta_nu_used":{default:lambda self:1/(self.sample_interval*self.blocklen),doc:"Actual frequency resolution of dynamic spectrum",unit:"Hz"},
 
         "max_nblocks":{default:lambda self:int(floor(self.filesize/self.stride/self.blocklen)),doc:"Maximum number of blocks in file."},
 
         "nblocks":{default:lambda self:int(min(max(round((self.filesize-self.start_block*self.blocklen*self.stride)/self.stride/self.blocklen),1),self.max_nblocks)),
                    doc:"Number of blocks to read in."},
 
-        "blockduration":{default:lambda self:self.blocklen*self.samplerate,
+        "blockduration":{default:lambda self:self.blocklen*self.sample_interval,
                    doc:"Length in time units of one block of data, i.e. on time step in dynamic spectrum.", unit:"s"},
 
         "end_time":{default:lambda self:self.blockduration*self.nblocks*self.stride, doc:"End of time axis.", unit:"s"},
 
         "start_time":{default:lambda self:self.start_block*self.blockduration,doc:"Start of time axis.", unit:"s"},
 
-        "start_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][0] if self.datafile else ((self.NyquistZone-1)/self.samplerate/2.0), doc:"Start frequency of spectrum",unit:"Hz"},
+        "start_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][0] if self.datafile else ((self.NyquistZone-1)/self.sample_interval/2.0), doc:"Start frequency of spectrum",unit:"Hz"},
 
-        "end_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][1] if self.datafile else (self.NyquistZone/self.samplerate/2.0), doc:"End frequency of spectrum",unit:"Hz"},
+        "end_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][1] if self.datafile else (self.NyquistZone/self.sample_interval/2.0), doc:"End frequency of spectrum",unit:"Hz"},
 
         "delta_frequency":p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
 
-        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),2**int(round(log(self.filesize/self.stride,2)))) if self.datafile else self.data.shape()[-1],doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
+        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.sample_interval,2))),2**int(round(log(self.filesize/self.stride,2)))) if self.datafile else self.data.shape()[-1],doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
 
         "cable_delays":{default:lambda self:hArray(float,[self.nantennas],name="Cable Delays",units=("","s")),doc:"An hArray containing 'cable' delays for each selected antenna in seconds as values. These delays will be added to the geometrical delays.",unit:"s"},
 
@@ -415,7 +323,7 @@ class BeamFormer2(tasks.Task):
         if self.tbeam_incoherent:
             self.tbeam_incoherent.fill(0)
         self.file_count=0
-        for fname in self.filenames[self.file_start_number:]:
+        for fname in self.filenames[self.file_start_number:] if self.datafile else ["nofile"]:
             self.file_count+=1
             if self.verbose:
                 print "# Start File",str(self.file_start_number)+":",fname
@@ -437,7 +345,7 @@ class BeamFormer2(tasks.Task):
                 hGeometricDelays(self.delays,self.antpos,self.pointingsXYZ, self.FarField)
 
                 #Add the cable/calibration delay
-                self.delays+=self.cable_delays; 
+                self.delays.add(ashArray(self.cable_delays)); 
 
                 self.phases.delaytophase(self.frequencies,self.delays)
                 self.weights.phasetocomplex(self.phases)
@@ -445,7 +353,7 @@ class BeamFormer2(tasks.Task):
 
                 if self.datafile:
                     self.data.read(self.datafile,"TIMESERIES_DATA",block)
-                self.times.fillrange(self.start_time,self.samplerate)
+                self.times.fillrange(self.start_time,self.sample_interval)
                 self.times.setUnit("mu","")
                 self.nspectraadded[block]+=self.nantennas
                 self.fftdata[...].fftw(self.data[...])
@@ -469,15 +377,16 @@ class BeamFormer2(tasks.Task):
                 if self.spectrum_file:
                     self.beams.write(self.spectrum_file,nblocks=self.nblocks,block=block,clearfile=clearfile)
                     clearfile=False
+                if self.calc_timeseries:
+                    self.fftdata.mul(self.weights)
+                    self.fftdata[...].nyquistswap(self.NyquistZone)
+                    self.data_shifted[...].invfftw(self.fftdata[...])
                 if self.doplot>1 and self.nspectraadded[block]%self.plotskip==0:
-                    if self.plotspec and self.avspec:
+                    if (self.plotspec or not self.calc_timeseries) and self.avspec:
                         self.avspec[self.mainbeam].plot()
-                    else:
-                        self.fftdata.mul(self.weights[self.mainbeam])
-                        self.fftdata[...].nyquistswap(self.NyquistZone)
-                        self.data_shifted[...].invfftw(self.fftdata[...])
+                    elif self.calc_timeseries:
                         self.data_shifted[self.plot_antennas,...,self.plot_start:self.plot_end].plot()
-                    plt.draw(); plt.show()
+                    plt.draw(); 
                 if self.verbose:
                     print "# End  block =",block," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
             if self.verbose:
@@ -490,6 +399,8 @@ class BeamFormer2(tasks.Task):
             self.avspec_incoherent /= self.nspectraadded.sum().val()
         if self.tbeam_incoherent:
             self.tbeam_incoherent[...] /= self.nspectraadded[...].val()
+        if self.calc_tbeams:
+            self.tcalc(NyquistZone=self.NyquistZone,doabs=self.doabs,smooth=self.smooth_width)
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         if self.verbose:
             print "Finished - total time used:",time.clock()-self.t0,"s."
@@ -545,7 +456,6 @@ class BeamFormer2(tasks.Task):
                 beams.par.avspec[...].plot(clf=True,xlim=xlim,ylim=ylim)
             else:
                 self.tbeams[...].plot(clf=True,xlim=xlim,ylim=ylim)
-        plt.show()
 
     def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,smooth=0):
         """
@@ -633,58 +543,3 @@ class BeamFormer2(tasks.Task):
             plt.ylabel("+/- Time [ms]")
         plt.draw(); plt.show()
 
-    def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
-        """
-        If you see an output line like this,
-
-    # Start antenna = 92 (ID= 17011092) - 4 passes:
-    184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
-    185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
-    186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
-    - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
-
-    this will tell you that Antenna 17011092 was worked on (the 92nd
-    antenna in the data file) and the 186th chunk (block 514)
-    contained some suspicious data (too many spikes). If you want to
-    inspect this, you can call
-
-    Task.qplot(186)
-
-    This will plot the chunk and highlight the first flagged block
-    (#514) in that chunk.
-
-    Task.qplot(186,1)
-
-    would highlight the second flagged block (which does not exist here).
-
-    If the chunks are too long to be entirely plotted, use
-
-    Task.qplot(186,all=False).
-        """
-        quality_entry=self.quality[entry]
-        filename=quality_entry["filename"]
-        datafile=crfile(filename)
-        iantenna=datafile["Antennas"].find(quality_entry["antenna"])
-        datafile["selectedAntennas"]=[iantenna]
-        if block<0 and flaggedblock<len(quality_entry["flaggedblocks"]):
-            block=quality_entry["flaggedblocks"][flaggedblock]
-            s="flaggedblock # "+str(flaggedblock)+"/"+str(len(quality_entry["flaggedblocks"])-1)
-        else:
-            s=""
-        print "Filename:",filename,"block =",block,"BLOCKSIZE =",quality_entry["BLOCKSIZE"],s
-        if all:
-            datafile["BLOCKSIZE"]=quality_entry["size"]
-            datafile["BLOCK"]=quality_entry["offset"]*quality_entry["BLOCKSIZE"]/quality_entry["size"]
-            y0=datafile["TIMESERIES_DATA"]
-            y0.par.xvalues=datafile["Time"]
-            y0.par.xvalues.setUnit("mu","")
-            y0.plot()
-        datafile["BLOCKSIZE"]=quality_entry["BLOCKSIZE"]
-        datafile["BLOCK"]=block
-        y=datafile["TIMESERIES_DATA"]
-        y.par.xvalues=datafile["Time"]
-        y.par.xvalues.setUnit("mu","")
-        y.plot(clf=not all)
-
-
-        

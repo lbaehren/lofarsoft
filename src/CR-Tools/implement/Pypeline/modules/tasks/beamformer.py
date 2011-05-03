@@ -392,13 +392,13 @@ class BeamFormer(tasks.Task):
                               doc:"List or vector containing the *x*, *y*, *z* positions of the phase center of the array.",
                               unit:"m"},
 
-        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.samplerate,2))),min(self.maxchunklen,self.filesize/self.stride)),
+        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.sample_interval,2))),min(self.maxchunklen,self.filesize/self.stride)),
                     doc:"The size of a block used for the FFT, limited by filesize.",
                     unit:"Sample"},
 
-#        "blocklen":{default:lambda self:min(2*int(round(1./self.delta_nu/self.samplerate/2)),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
+#        "blocklen":{default:lambda self:min(2*int(round(1./self.delta_nu/self.sample_interval/2)),self.filesize/self.stride),doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
 
-        "block_duration":{default:lambda self:self.samplerate*self.blocklen,
+        "block_duration":{default:lambda self:self.sample_interval*self.blocklen,
                           doc:"The length of a block in time units.",
                           unit:"s"},
 
@@ -406,7 +406,7 @@ class BeamFormer(tasks.Task):
                      "Length of one spectrum.",
                      "Channels"),
 
-        "samplerate":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0],
+        "sample_interval":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0],
                         "Length in time of one sample in raw data set.",
                         "s"),
 
@@ -418,7 +418,7 @@ class BeamFormer(tasks.Task):
                       "The full length of the raw time series data used for the dynamic spectrum.",
                       "Samples"),
 
-        "delta_nu_used":{default:lambda self:1/(self.samplerate*self.blocklen),
+        "delta_nu_used":{default:lambda self:1/(self.sample_interval*self.blocklen),
                          doc:"Actual frequency resolution of dynamic spectrum",
                          unit:"Hz"},
 
@@ -436,7 +436,7 @@ class BeamFormer(tasks.Task):
                    doc:"Length of one section of data used to extract one chunk of data treated in memory.",
                    unit:"Samples"},
 
-        "sectduration":{default:lambda self:self.sectlen*self.samplerate,
+        "sectduration":{default:lambda self:self.sectlen*self.sample_interval,
                         doc:"Length in time units of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
                         unit:"s"},
 

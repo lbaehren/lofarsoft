@@ -38,6 +38,7 @@ def directionFromThreeAntennas(positions, times):
     """
 
     p1 = np.array(positions[0:3])
+    
     p2 = np.array(positions[3:6])
     p3 = np.array(positions[6:9]) # yes, for 10 antennas we'd write it differently...
     t1 = times[0]; t2 = times[1]; t3 = times[2]
@@ -73,15 +74,18 @@ def directionFromThreeAntennas(positions, times):
 
     # Which gives the incoming-signal vector in the rotated coord. frame as (A, B, C).
     # C is free in this coord. system, but follows from imposing length 1 on the signal vector,
-    # consistent with (ct)^2 = x^2 + y^2 + z^2. Without above coordinate rotation, the following nonlinear function is part of the system to be solved:
-
+    # consistent with (ct)^2 = x^2 + y^2 + z^2. 
     square = A*A + B*B
     if square < 1:
         C = np.sqrt(1 - square) # Note! TWO solutions, +/- sqrt(...). No constraints apart from elevation > 0 in the end result - otherwise both can apply.
-    elif (square - 1) < 1e-15: # this does happen because of floating point errors, when time delays 'exactly' match elevation = 0
-        C = 0 # so this correction is needed to ensure this function correctly inverts timeDelaysFromDirection(...)
+        error=0.0
+    #    else (square - 1) < 1e-15: # this does happen because of floating point errors, when time delays 'exactly' match elevation = 0
     else:
-        return (nan, nan, nan, nan) # calculation fails, arrival times out of bounds!
+        C = 0
+        error=np.sqrt(square-1) # store the complex component as 'closure error'
+        # so this correction is needed to ensure this function correctly inverts timeDelaysFromDirection(...)
+#    else:
+#        return (nan, nan, nan, nan) # calculation fails, arrival times out of bounds!
 
     # Now we have to transform this vector back to normal x-y-z coordinates, and then to (az, el) to get our direction.
     # This is where the above xx, yy, zz vectors come in (normal notation: x', y', z')
@@ -89,6 +93,12 @@ def directionFromThreeAntennas(positions, times):
     signal  =  A * xx + B * yy + C * zz
     signal2 =  A * xx + B * yy - C * zz
 
+    r=np.sqrt(signal[0]**2+signal[1]**2+signal[2]**2)
+
+    error += abs(r1-1.0)  # Make sure the normalized vector is really normalized, if not take it as error
+    signal /= r
+    signal2 /= r
+    
     # Now get az, el from x, y, z...
     x = signal[0]; y = signal[1]; z = signal[2]
 
@@ -103,13 +113,13 @@ def directionFromThreeAntennas(positions, times):
 
     theta = np.arccos(z) # in fact, z/R with R = 1
     phi = np.arctan2(y, x) # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
-    if phi < 0:
-        phi += twopi
+    if az1 < 0: az1 += twopi
 
     az2 = halfpi - phi
     el2 = halfpi - theta
+    if az2 < 0: az2 += twopi
 
-    return (az1, el1, az2, el2)
+    return (az1, el1, az2, el2, error)
 
 def timeDelaysFromDirection(positions, direction):
     """

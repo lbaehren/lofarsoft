@@ -674,6 +674,52 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Performs a $MFUNC!LOW between the input vector and a scalar, and add the result to the first vector which can be of different type. Looping will be done over the first argument, i.e. the output vector. If the second operand vector is shorter it will be applied multiple times.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}Add
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Output vector containing the result of operation")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec1)()("Vector containing the first operand")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(val)()("Scalar value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  To loop slicec over the second argument (i.e., ``vec1``) use
+  ``hMulAdd2``, ``hDivAdd2``, ``hSubAdd2``, ``hAddAdd2``. To repeatedly
+  add to the output vector, use `hMulAddSum``.
+
+  Usage:
+  h$MFUNC(vec,vec1,val) -> vec = vec1 $MFUNC!LOW val
+  vec.$MFUNC(vec1,val) -> vec = vec1 $MFUNC!LOW val
+
+  See also:
+  hMulAdd2, hDivAdd2, hSubAdd2, hAddAdd2,  hMulAddSum, hDivAddSum, hSubAddSum, hAddAddSum
+*/
+template <class Iter, class Iterin1, class S>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const S val) 
+{
+  // Declaration of variables
+  typedef IterValueType T;
+  Iterin1 it1=vec1;
+  Iter itout=vec;
+
+  if (itout>=vec_end) return;
+  if (it1>=vec1_end) return;
+
+  // Vector operation
+  while (itout !=vec_end) {
+    *itout += hfcast<T>((*it1) HFPP_OPERATOR_$MFUNC  (val));
+    ++it1; ++itout;
+    if (it1==vec1_end) it1=vec1;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Performs a $MFUNC!LOW between the last two vectors, and add the result to the first vector which can be of different type.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -1254,32 +1300,71 @@ void  HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(vec1)()("Complex input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(vec2)()("Second complex vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HBool)(fftw)()("Was the FFT calculated with FFTw definition? Then muliply one fft vector by -1,1,-1,...")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Description:
-  If the second vector is shorter than the first one, the second vector
-  will simply wrap around and begin from the start until the end of the
-  first vector is reached. If the first vector is shorter, then the
-  calculation will simply stop.
+  Usage:
+  fftvec1.crosscorrelatecomplex(fftvec2,True) -> fftvec1 return FFT(w) of cross correlation between
 
-  Relation to Cross Correlation:
+  Description:
 
   If the complex input vectors are the Fourier transformed data of two
   (real) vector ``f1`` and ``f2``, then ``vec1*conj(vec2)`` will be
   the Fourier transform of the crosscorrelation between ``f1`` and
   ``f2``.  Hence, in order to calculate a cross correlation between
-  ``f1`` and ``f2``, first do ``vec1.fft(f1)`` and ``vec2.fft(f2)``,
-  then ``vec1.crosscorrelatecomplex(vec2)`` and FFT back through
+  ``f1`` and ``f2``, first do ``vec1.fftw(f1)`` and ``vec2.fftw(f2)``,
+  then ``vec1.crosscorrelatecomplex(vec2,True)`` and FFT back through
   ``floatvec.invfft(vec1)``.
 
-  Usage:
-  fftvec1.crosscorrelatecomplex(fftvec2) -> fftvec1 return FFT of cross correlation between
+  For zero lag (e.g. autocorrelation), the cross-correlation will peak
+  in the middle of the float vector.
+
+  If the real input vector has length ``N`` then the complex FFT
+  vectors have dimension ``N/2+1``.
+
+  There is a difference in defintion between ffts (here fftw and
+  fftcasa). If the fftw definition is used, then one of the FFT data
+  vectors still needs to be multiplied by -1,1,-1,... to get the peak
+  of the crosscorrelation for lag = 0 in the middle of floatvec. This
+  makes sense since the lag can be positive or negative.
+
+  Note: 
+
+  If the second vector is shorter than the first one, the second vector
+  will simply wrap around and begin from the start until the end of the
+  first vector is reached. If the first vector is shorter, then the
+  calculation will simply stop.
+  
+  See also:
+
+  hFFTw,  hInvFFTw,  hSaveInvFFTw, :class:`tasks.pulsecal.CrossCorrelateAntennas`
+
+  Example:
+  ::
+      file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") 
+      file["BLOCKSIZE"]=131072
+      file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
+      timeseries_data=file["TIMESERIES_DATA"]
+      timeseries_data_cut=hArray(float,[48,64]) # just look at the region with a pulse
+      timeseries_data_cut[...].copy(timeseries_data[...,65806:65870])
+      fftdata=hArray(complex,[48,64/2+1]) 
+      fftdata[...].fftw(timeseries_data_cut[...])
+      fftdata[1:,...].crosscorrelatecomplex(fftdata[0],True) # to make sure the reference data is not overwritten start at index 1
+      fftdata[0:1,...].crosscorrelatecomplex(fftdata[0],True) # only now do the autocorrelation
+      crosscorrelation=hArray(properties=timeseries_data_cut)
+      crosscorrelation[...].invfftw(fftdata[...])  
+      crosscorrelation /= 64
+      crosscorrelation.abs()
+      crosscorrelation[...].runningaverage(15,hWEIGHTS.GAUSSIAN)
+      crosscorrelation[0:4,...].plot()
+
 */
+
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
+void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end, const HBool fftw)
 {
   // Declaration of variables
   Iter it1=vec1;
@@ -1287,24 +1372,23 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
   HInteger len1 = vec1_end - vec1;
   HInteger len2 = vec2_end - vec2;
 
+  HInteger signfactor(1);
+  
   // Sanity check
-  if (len2 < len1) {
-    cout << "Size of second vector is smaller than output vector: looping over second vector." << endl;
-  } else if (len2 > len1) {
+  if (len2 > len1) {
     throw PyCR::ValueError("Second vector is larger than output vector.");
     return;
   }
 
   // Vector operation
   while (it1!=vec1_end) {
-    *it1 *= conj(*it2);
+    if (fftw) signfactor=-signfactor;
+    *it1 *= signfactor*conj(*it2);
     ++it1; ++it2;
     if (it2==vec2_end) it2=vec2;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
 
 
 //========================================================================
@@ -1339,6 +1423,10 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
     imag  imaginary part of a complex number
     real  real part of a complex number
     ===== ======================================================================
+  
+    See also:
+
+    hVectorLength
 
   Usage:
   vec2.$MFUNC(vec1) -> vec2 = [$MFUNC(vec1_0), $MFUNC(vec1_1), ... , $MFUNC(vec1_n)]
@@ -2187,19 +2275,58 @@ template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   // Declaration of variables
-  HNumber mean = hfcast<HNumber>(hSum(vec,vec_end));
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len <= 0) {
-    throw PyCR::ValueError("Size of vector is <= 0.");
-    return 0.;
-  }
+  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+
+  HNumber mean = hfcast<HNumber>(hSum(vec,vec_end));
 
   // Vector operation
   mean /= len;
 
   return mean;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns the mean value of all elements in a vector which are above a certain threshold.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMeanAbove
+//-----------------------------------------------------------------------
+//#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(threshold)()("Threshold value")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter, class T>
+HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T threshold)
+{
+  // Declaration of variables
+  HInteger len = vec_end - vec;
+
+  // Sanity check
+  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+
+  len=0;
+
+  HNumber sum;
+
+  Iter it=vec;
+  while (it!=vec_end) {
+    if (*it > threshold) {
+      sum+=hfcast<HNumber>(*it);
+      ++len;
+    };
+    ++it;
+  };
+
+  if (len>0) return sum/len;
+  else return 0.0;
+
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2218,20 +2345,20 @@ template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   // Declaration of variables
-  HNumber mean=hfcast<HNumber>(hSumAbs(vec,vec_end));
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len <= 0) {
-    throw PyCR::ValueError("Size of vector is <= 0.");
-    return 0.;
-  }
+  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+
+  HNumber mean=hfcast<HNumber>(hSumAbs(vec,vec_end));
 
   mean /= len;
 
   return mean;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 
 //$DOCSTRING: Returns the mean value of the square values of all elements in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -2249,14 +2376,12 @@ template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 {
   // Declaration of variables
-  HNumber mean=hSumSquare(vec,vec_end);
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len <= 0) {
-    throw PyCR::ValueError("Size of vector is <= 0.");
-    return 0.;
-  }
+  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+
+  HNumber mean=hSumSquare(vec,vec_end);
 
   // Vector operation
   mean /= len;
@@ -2328,20 +2453,22 @@ IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMedian
 //-----------------------------------------------------------------------
-#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+//#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
 //#define HFPP_FUNC_SLICED HFPP_FALSE
 #define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
 #define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class T>
-T HFPP_FUNC_NAME(std::vector<T> & vec)
+template <class Iter>
+//T HFPP_FUNC_NAME(std::vector<T> & vec)
+IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
-  std::vector<T> scratch(vec);
+  std::vector<IterValueType> scratch(vec,vec_end);
   return hSortMedian(scratch);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -2732,6 +2859,31 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Count the samples that are equal to a certain value and return the number of samples found.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCount
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(val)()("The value to find an count.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const IterValueType val)
+{
+  Iter it(vec);
+  HInteger count(0);
+  while (it<vec_end) {
+    if (*it == val) ++count;
+    ++it;
+  };
+  return count;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Find the first sample that equals the input values and return its position.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -2769,6 +2921,50 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
     ++itin;
   };
   return -1;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Find the samples whose values equal a certain value and return the number of samples found and the positions of the samples in a second vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in input vector matching the values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vecin)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_TYPE)(value)()("The value to search")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+			 const Iter vecin , const Iter vecin_end,
+			 const IterValueType value
+			 )
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  typename vector<HInteger>::iterator itout(vecout);
+
+  if (vecin_end < vecin) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
+    return -1;
+  }
+
+  // Function operation
+  while (itin != vecin_end) {
+    if (*itin == value) {
+      if (itout != vecout_end) {
+        *itout=(itin-vecin);
+        ++itout;
+      };
+    };
+    ++itin;
+  };
+  return (itout-vecout);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

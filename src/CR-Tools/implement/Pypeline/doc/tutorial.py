@@ -1850,7 +1850,7 @@ of a reference antenna (here antenna 0) and store that in the vector
 crosscorr_cmplx, which is done by the following method.
 
 """
-crosscorr_cmplx[...].crosscorrelatecomplex(sun_fft[0])
+crosscorr_cmplx[...].crosscorrelatecomplex(sun_fft[0],False)
 """
 
 This vector will then actually hold the FFT of the cross correlation
@@ -1989,7 +1989,7 @@ starting point).
 
 """
 crosscorr_cmplx_shifted=hArray(copy=sun_calfft_shifted)
-crosscorr_cmplx_shifted[...].crosscorrelatecomplex(sun_calfft_shifted[0])
+crosscorr_cmplx_shifted[...].crosscorrelatecomplex(sun_calfft_shifted[0],False)
 crosscorr_shifted=hArray(float,dimensions=sun_efield,name="Cross Correlation",xvalues=sun_timelags)
 crosscorr_shifted[...].invfftcasa(crosscorr_cmplx_shifted[...],2)
 crosscorr_shifted[...].plot(xlim=(-0.25,0.25),legend=sun.antennaIDs)

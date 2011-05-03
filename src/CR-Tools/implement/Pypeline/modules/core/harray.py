@@ -91,8 +91,10 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
 
     par         dict of parameters       set additional (arbitrary) parameter values that
                                          are stored in the ``.par`` attribute of the array,
-                                         and are used, e.g., by the plot method to use
-                                         certain defaults.
+                e.g. dict(logplot="y")   and are used, e.g., by the plot method to use
+                                         certain defaults. Use par=dict(logplot="y") to use
+                                         a logplot for the y-axis by default when plotting
+                                         this array.
 
     header                               a dict containing optional keywords and values that
                                          can be taken over from a datafile.
@@ -1161,6 +1163,54 @@ def asList(val):
     else:
         return list(val)
 
+hArray_find_location_functions={
+    "=":(hCount,hFind),
+    ">":(hCountGreaterThan,hFindGreaterThan),
+    "<":(hCountLessThan,hFindLessThan),
+    ">=":(hCountGreaterEqual,hFindGreaterEqual),
+    "<=":(hCountLessEqual,hFindLessEqual),
+    "between":(hCountBetween,hFindBetween),
+    "outside":(hCountOutside,hFindOutside)
+    }
+
+def hArray_find_locations(self,operator,threshold1,threshold2=None):
+    """
+    Usage:
+
+    ``ary.find_location("operator",threshold1,(threshold2)) -> indexlist of locations``
+
+    Description:
+
+    hArray_find_locations will take an array or a vector as input an
+    return a vector with zero-based indices pointing to the locations
+    in the vector/array where the imposed criterion is true.
+
+    *operator* = '=','>','<','>=','<=','between','outside'
+
+    *threshold1 = the threshold to compare vector values with
+
+    *threshold2 = the second threshold if applicable (for between, outside)
+
+    Example:
+    ::
+        v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
+        v.find_locations(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
+    
+    """
+    n=hArray_find_location_functions[operator][0](self,threshold1) if threshold2==None else hArray_find_location_functions["operator"][0](self,threshold1,threshold2)
+    if type(self) in hAllVectorTypes:
+        indexlist=Vector(int,n)
+    elif type(self) in hAllArrayTypes:
+        indexlist=hArray(int,[n[-1]])
+    else:
+        return None
+    if threshold2==None:
+        n=hArray_find_location_functions[operator][1](indexlist,self,threshold1)
+    else:
+        hArray_find_location_functions[operator][1](indexlist,self,threshold1,threshold2)
+    return indexlist
+
+
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
 
@@ -1182,6 +1232,7 @@ for v in hAllArrayTypes:
     setattr(v,"vec",hArray_vec)
     setattr(v,"val",hArray_val)
     setattr(v,"new",hArray_new)
+    setattr(v,"none",hArray_find_locations)
     setattr(v,"none",hArray_none)
     setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
@@ -1201,6 +1252,7 @@ for v in hAllArrayTypes:
 
 
 for v in hAllContainerTypes:
+    setattr(v,"find_locations",hArray_find_locations)
     for s in hAllContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hAllContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."

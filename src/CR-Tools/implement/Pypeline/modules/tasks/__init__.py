@@ -1124,9 +1124,9 @@ class WorkSpace(object):
 
     def __setitem__(self,par,value):
         """
-        Usage::
+        Usage:
 
-          ws["parname"] = value
+          ``ws["parname"] = value``
 
         Set the parameter value using square brackets and a string
         of the parameter name. The basic "setter" function for parameters.
@@ -1140,7 +1140,8 @@ class WorkSpace(object):
         reverted when calling ws.reset() or specifically for that
         parameter with del ws.par.
         """
-#       if hasattr(self,"trace") and self.trace: pdb.set_trace()
+#        if hasattr(self,"trace") and self.trace:
+#            import pdb; pdb.set_trace()
         if hasattr(self,"_"+par) or par in self.parameterlist:   #replace stored value
             if hasattr(self,"_"+par):
                 if getattr(self,"_"+par)==value: return  # don't assign or considered modified if it is the same value
@@ -1432,20 +1433,24 @@ class WorkSpace(object):
         for p in self.getInputParameters(): self[p]
 
 
-    def isModified(self,par):
+    def isModified(self,par,firstcall=True):
         """
         Returns true or false whether a parameter was modified since
         the last update or recalc. The function will also add the
         parmameter to the modified_parameters list if it was modified.
         """
+#        if hasattr(self,"trace") and self.trace:
+#            import pdb; pdb.set_trace()
+        if firstcall: self.checkedalready=set()
         if par in self._modified_parameters: return True
+        if par in self.checkedalready: return False # to avoid infinite loops
+        self.checkedalready.add(par);
         if self.parameter_properties[par].has_key(dependencies) and len(self.parameter_properties[par][dependencies])>0:
 #            print "Modified parameter -> ",par
-            modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p),self.parameter_properties[par][dependencies]))
+            modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p,firstcall=False),self.parameter_properties[par][dependencies]))
             if modified: self._modified_parameters.add(par)
             return modified
         return False
-
 
     def update(self,forced=False,workarrays=True):
         """
@@ -1465,7 +1470,7 @@ class WorkSpace(object):
         """
         pars=[]
         for p in self.getDerivedParameters(): # first make sure all modified parameters are identified
-            if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (workarrays or ((not self.parameter_properties[p].has_key(workarray)) or not self.parameter_properties[p][workarray])):
+            if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][default])==types.FunctionType) and (workarrays or ((not self.parameter_properties[p].has_key(workarray)) or not self.parameter_properties[p][workarray])):
                 delattr(self,"_"+p) # delete buffered value so that it will be recalculated
                 pars.append(p)
         for p in pars:

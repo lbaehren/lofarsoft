@@ -1112,6 +1112,33 @@ HNumber hVectorLength (const Iter vec, const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Returns the absolute length of a vector between two ther vectors, i.e. Sqrt(Sum_i((x2_i-x1_i)^2)).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hVectorLength
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HNumber hVectorLength (const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
+{
+  HNumber sum=0;
+  Iter it1(vec1),it2(vec2);
+
+  if ((vec1_end-vec1)<0) ERROR_RETURN("Illegal size of input vector 'vec1'.");
+  if ((vec2_end-vec2)<0) ERROR_RETURN("Illegal size of input vector 'vec2'.");
+
+  while (it1!=vec1_end && it2!=vec2_end) {sum += pow(hfcast<HNumber>(*it2 - *it1),2); ++it1; ++it2;};
+  return sqrt(sum);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 //$DOCSTRING: Normalizes a vector to length unity.
