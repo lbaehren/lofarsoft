@@ -1964,7 +1964,9 @@ if __name__ == "__main__":
 					# get real condition after parsing
 					real_cond = get_condition(cond)
 					# applying this condition to the real list of obsids
-					filtered_obsids=list(eval(real_cond))
+					try:
+						filtered_obsids=list(eval(real_cond))
+					except: pass
 
 			# assigning filtered out list of ObsIDs to obsids
 			obskeys=filtered_obsids
