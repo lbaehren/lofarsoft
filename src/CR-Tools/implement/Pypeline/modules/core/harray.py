@@ -327,7 +327,7 @@ def hArray_array(self):
     properly. Needs more work!
 
 
-    
+
     Example:
     x=hArray(int,[2,3,4],fill=range(6*4),name="test")
     self=x[1,1:3]
@@ -845,12 +845,12 @@ y=hArrayRead("test")
 y -> hArray(float, [20], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], name="test") # len=20 slice=[0:20])
 y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=20 slice=[0:20])
     """
-    
+
     if type(self)==StringArray:
         print "Attention: StringArrays cannot be dumped to disk!"
         return
 
-    
+
     fn=os.path.expandvars(os.path.expanduser(filename))
 
     #Add proper ending if missing
@@ -1181,21 +1181,21 @@ def hArray_find_locations(self,operator,threshold1,threshold2=None):
 
     Description:
 
-    hArray_find_locations will take an array or a vector as input an
+    This function will take an array or a vector as input an
     return a vector with zero-based indices pointing to the locations
     in the vector/array where the imposed criterion is true.
 
     *operator* = '=','>','<','>=','<=','between','outside'
 
-    *threshold1 = the threshold to compare vector values with
+    *threshold1* = the threshold to compare vector values with
 
-    *threshold2 = the second threshold if applicable (for between, outside)
+    *threshold2* = the second threshold if applicable (for between, outside)
 
-    Example:
-    ::
-        v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
-        v.find_locations(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
-    
+    Example::
+
+        >>> v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
+        >>> v.find_locations(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
+
     """
     n=hArray_find_location_functions[operator][0](self,threshold1) if threshold2==None else hArray_find_location_functions["operator"][0](self,threshold1,threshold2)
     if type(self) in hAllVectorTypes:

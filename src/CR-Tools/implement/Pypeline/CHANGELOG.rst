@@ -1,19 +1,19 @@
 2011-05-03 - Rev xxxx
-===================== 
+=====================
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
-- addeed python method find_locations to get indexlist of values
-above/below/equal/between thresholds
-- deleted :func: `ADC2Voltage`, :func:`hRFIDownsampling`, :func:`hRFIBaselineFitting`,
-:func:`hRFIFlagging`, :func:`hRFIMitigation` from mRF.cc which depended on the old CRTools.
--added :func:`hEndPointRadiation` (moved by Martin to a new file already)
+- addeed python method find_locations to get indexlist of values above/below/equal/between thresholds
+- deleted :func:`ADC2Voltage`, :func:`hRFIDownsampling`, :func:`hRFIBaselineFitting`,
+  :func:`hRFIFlagging`, :func:`hRFIMitigation` from mRF.cc which depended on the old CRTools.
+- added :func:`hEndPointRadiation` (moved by Martin to a new file already)
 - added :func:`hDirectionTriangulation`,
   :func:`hDirectionTriangulations` to calculate arrival directions
   from a set of triangles of antennas and arrival times (e.g. of
   pulses).
-- added script testpulsecal.py to describe some calibration on pulses 
+- added script testpulsecal.py to describe some calibration on pulses
 
 
+2011-05-02 - Rev xxxx
 =====================
   :Author: Pim Schelart <P.Schellart@astro.ru.nl>
 

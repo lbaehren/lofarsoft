@@ -11,7 +11,7 @@ from math import *
 deg=pi/180.
 pi2=pi/2.
 
-    
+
 class LocatePulseTrain(tasks.Task):
     """
     **Usage**
@@ -19,6 +19,7 @@ class LocatePulseTrain(tasks.Task):
     ``LocatePulseTrain()(timeseries_data[blocklen],nsigma=7,maxgap=7,minlength=7) -> (start,end)``
 
     **Description**
+
     Finds the pulse train with the highest peak in time series
     data. Calculates noise and threshold level above which to find
     pulse trains. A pulse train can have gaps of some n samples which
@@ -28,13 +29,14 @@ class LocatePulseTrain(tasks.Task):
     Returns a tuple with start and end index of the strongest pulse in
     the time series data. See hFindSequenceGreaterThan for a
     description of the other parameters.
-    
+
 
     **See also:**
-    
+
     :func:`hFindSequenceGreaterThan`
-    
+
     **Example**
+
     ::
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
@@ -48,12 +50,12 @@ class LocatePulseTrain(tasks.Task):
         nsigma=p_(7,"pulse has to be ``nsigma`` above the noise"),
         maxgap=p_(7,"maximum gap length allowed in a pulse where data is not above the threshold"),
         minlength=p_(7,"minimum length of pulse returned"),
-        
+
         )
-        
+
     def call(self,timeseries_data):
         pass
-    
+
     def run(self):
         minrms=cr.Vector(float,1)
         minmean=cr.Vector(float,1)
@@ -67,15 +69,15 @@ class LocatePulseTrain(tasks.Task):
         return tuple(indexlist[maxseq].vec())
 
 class CrossCorrelateAntennas(tasks.Task):
-    """    
+    """
     **Usage:**
 
     ``Task = trun("CrossCorrelateAntennas",timeseries_data[n_dataset,size], refant=0, reference_data=None, reference_fft_data=None, fft_data=None, fft_reference_data=None, crosscorr_data=None) -> Task.crosscorr_data (i.e., strength of cross-correlation as a function of time)``
 
     To provide only fft data use:
-    
+
     ``crosscorr_data = tload("CrossCorrelateAntennas",False)(None,fft_data=bf.fftdata).crosscorr_data``
-    
+
     **Description:**
 
     Calculates the cross-correlation of a number of time series data
@@ -96,20 +98,21 @@ class CrossCorrelateAntennas(tasks.Task):
     that the function uses fftw convention!
 
     **See also:**
-    
+
     :class:`CrossCorrelateAntennas`,
     :class:`LocatePulseTrain`,
     :class:`FitMaxima`
 
     **Example:**
+
     ::
-        file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") 
+        file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
         timeseries_data=file["TIMESERIES_DATA"]
         (start,end)=trun("LocatePulseTrain",rf.TimeBeamIncoherent(timeseries_data),nsigma=7,maxgap=3)
         start-=16
-        end=start+int(2**ceil(log(end-start,2)));  
+        end=start+int(2**ceil(log(end-start,2)));
         timeseries_data_cut=hArray(float,[timeseries_data.shape()[-2],end-start])
         timeseries_data_cut[...].copy(timeseries_data[...,start:end])
         timeseries_data_cut[...]-=timeseries_data_cut[...].mean()
@@ -127,7 +130,7 @@ class CrossCorrelateAntennas(tasks.Task):
         dimfft=p_(lambda self:self.fft_data.shape(),doc="Dimension of fft array."),
         reference_data=p_(None,doc="Reference data set to cross-correlate with"),
         fft_data=p_(lambda self:cr.hArray(complex,[self.dim[-2],self.dim[-1]/2+1]),doc="FFT of the input timeseries data",workarray=True),
-        fft_reference_data=p_(lambda self:cr.hArray(complex,[self.dimfft[-1]]), 
+        fft_reference_data=p_(lambda self:cr.hArray(complex,[self.dimfft[-1]]),
                               doc="FFT of the reference data, dimensions [N data sets, (data length)/2+1]. If no extra reference antenna array is provided, cross correlate with reference antenna in data set"),
         crosscorr_data=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2]),
                           doc="Output array of dimensions [N data sets, data length] containing the cross correlation.")
@@ -144,7 +147,7 @@ class CrossCorrelateAntennas(tasks.Task):
         else:
             self.fft_reference_data.fftw(self.reference_data)
         self.fft_data[...].crosscorrelatecomplex(self.fft_reference_data,True)
-        self.crosscorr_data[...].invfftw(self.fft_data[...])  
+        self.crosscorr_data[...].invfftw(self.fft_data[...])
         self.crosscorr_data /= self.crosscorr_data.shape()[-1]
 
 
@@ -154,7 +157,7 @@ class FitMaxima(tasks.Task):
     polynomial to the data around their respective maximum.  Then
     determine where the maximum in the interpolated data will be. This
     allows one to determine the maximum with subsample precision.
-    
+
     **Usage:**
 
     ``Task = FitMaxima()(data[n_datasets,n_samples], peak_width=20, nsubsamples=16, ncoeffs=5, splineorder=3, doplot=False, plotend=4, plotstart=0, sampleinterval=None, refant=None) -> Task.maxx, Task.maxy, Task.lag``
@@ -166,19 +169,20 @@ class FitMaxima(tasks.Task):
     units, specified by ``sampleinterval``.
 
     **See also:**
-    
+
     :class:`CrossCorrelateAntennas`,
     :class:`LocatePulseTrain`
-    
+
     **Example:**
+
     ::
-        file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") 
+        file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
         timeseries_data=file["TIMESERIES_DATA"]
         (start,end)=trun("LocatePulseTrain",rf.TimeBeamIncoherent(timeseries_data),nsigma=7,maxgap=3)
         start-=16
-        end=start+int(2**ceil(log(end-start,2)));  
+        end=start+int(2**ceil(log(end-start,2)));
         timeseries_data_cut=hArray(float,[timeseries_data.shape()[-2],end-start])
         timeseries_data_cut[...].copy(timeseries_data[...,start:end])
         timeseries_data_cut[...]-=timeseries_data_cut[...].mean()
@@ -215,10 +219,10 @@ class FitMaxima(tasks.Task):
         maxx=p_(None,"X-values of fitted maxima",output=True,unit="Samplenumber"),
         lags=p_(None,"X-values of fitted maxima",output=True,unit="User Units")
         )
-    
+
     def call(self,data):
         pass
-    
+
     def run(self):
         self.maximum=cr.asvec(self.data[...].maxpos())
         self.start=cr.Vector(int,copy=self.maximum)
