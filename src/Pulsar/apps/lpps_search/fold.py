@@ -178,7 +178,7 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
     return 'prepfold', options, args
 
 def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8, 
-        zaplist_file='', n_candidates_cutoff=20):
+        zaplist_file='', n_candidates_cutoff=20, minimum_dm_cutoff=0):
     '''Importable version of the whole script.'''
 
     # Check that the directories are available and that the output directory
@@ -197,7 +197,7 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8,
  
     # search for all the accelcand files and sift them
     unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename,
-         zaplist_file, n_candidates_cutoff)
+         zaplist_file, n_candidates_cutoff, minimum_dm_cutoff)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
         assert len(sifted_candidates) > 0

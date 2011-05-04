@@ -34,6 +34,9 @@ REQUIRED_OPTIONS = ['searchoutdir', 'subbdir', 'workdir',]
 OPTIONAL_OPTIONS = ['ncores']
 SUBB_PATTERN = re.compile(r'(?P<basename>\S+)\.sub\d{4}$')
 
+MINIMUM_DM_CUTOFF = 0
+N_CANDIDATES_CUTOFF = 20
+
 
 if __name__ == '__main__':
     # Set up and run the commandline parser:
@@ -116,7 +119,8 @@ if __name__ == '__main__':
         'basename' : basename, 
         'mask_filename' : rfifind_mask_file,
         'zaplist_file' : options.zaplist_file,
-        'n_candidates_cutoff' : 20,
+        'n_candidates_cutoff' : N_CANDIDATES_CUTOFF,
+        'minimum_dm_cutoff' : MINIMUM_DM_CUTOFF,
     }
     main(**kwargs)
 

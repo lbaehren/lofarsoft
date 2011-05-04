@@ -71,7 +71,7 @@ from lpps_search.bestprof import parse_pfd_bestprof_file
 
 # ----------------------------------------------------------------------------
 N_CANDIDATES_CUTOFF = 20
-
+MINIMUM_DM_CUTOFF = 0
 # ----------------------------------------------------------------------------
 # -- Utility functions from GBT or Vishal's scripts --------------------------
 
@@ -754,6 +754,7 @@ class SearchRun(object):
                 mask_filename=rfifind_mask_file,
                 n_cores=n_cores,
                 n_candidates_cutoff=N_CANDIDATES_CUTOFF,
+                minimum_dm_cutoff=MINIMUM_DM_CUTOFF,
             )
         if not no_singlepulse:
             # Deal with single pulse search plotting
