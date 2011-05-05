@@ -957,7 +957,7 @@ int main( int argc, char **argv )
       bw = 100.0;
     }
     subband_width = bw / nsubbands;
-    lofreq = lowerBandEdge + (subbandFirst*subband_width);
+    lofreq = lowerBandEdge + (subbandFirst*subband_width) - (subband_width/(2*CHANNELS));
 
     /*
 
