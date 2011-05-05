@@ -637,8 +637,11 @@ int main( int argc, char **argv )
       bw = 100.0;
     }
     subband_width = bw / nsubbands;
-    lofreq = lowerBandEdge + (subbandFirst * subband_width);
-    //printf("TH DEBUG lowest sub %d central freq: %f\n", subbandFirst, lofreq);
+    lofreq = lowerBandEdge + (subbandFirst * subband_width) - (subband_width/(2*CHANNELS)); 
+    
+    // PPF  -> central frequency of lowest subband = sub_no * sub_width
+    // 2PPF -> central frequency is shifted by half a channel (subband_width/(2*CHANNELS)
+
     /*printf("BWS debug: lowerBandEdge %f subbandFirst %d lofreq %10fi %10f\n",lowerBandEdge,subbandFirst,subband_width,lofreq);
     /*
 
