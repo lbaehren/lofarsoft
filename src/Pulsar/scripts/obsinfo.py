@@ -599,8 +599,9 @@ class outputInfo:
 		self.totsize=0.0
 		self.dirsize_string=""
 		for l in storage_nodes:
-			self.totsize = self.totsize + float(self.storage[l][1])
-			self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
+			if l in self.storage.keys():
+				self.totsize = self.totsize + float(self.storage[l][1])
+				self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
 		# converting total size to GB
 		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
