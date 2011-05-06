@@ -605,6 +605,10 @@ if (HAVE_CASA OR HAVE_CASACORE)
   include_directories (${CASA_INCLUDES})
 endif (HAVE_CASA OR HAVE_CASACORE)
 
+if (HAVE_WCSLIB)
+  include_directories (${WCSLIB_INCLUDES})
+endif (HAVE_WCSLIB)
+
 if (HAVE_BLITZ)
   include_directories (${BLITZ_INCLUDES})
 endif (HAVE_BLITZ)
