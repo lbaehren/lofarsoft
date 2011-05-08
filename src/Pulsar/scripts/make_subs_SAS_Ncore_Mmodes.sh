@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.21
+VERSION=2.3
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -305,7 +305,13 @@ else
 	else
 	    PARSET=$parset_location/${OBSID}/RTCP.parset.0
 	fi
-	short_id=`echo $OBSID | sed 's/L.....//g'`
+	has_underscore=`echo $OBSID | grep "_"`
+	if [[ $has_underscore != "" ]]
+	then
+	    short_id=`echo $OBSID | sed 's/L.....//g'`
+	else
+	    short_id=`echo $OBSID | sed 's/L//g'`
+	fi
 	
 	if [ ! -f $PARSET ] 
 	then
@@ -389,6 +395,21 @@ then
    cp $PARSET ${location}/${OBSID}.parset
 fi
 
+date_obs=`grep Observation.startTime *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+date_seconds=`date -d "$date_obs"  "+%s"` 
+
+date1_Apr26=`date -d "2011-04-26 00:00:00" "+%s"`
+
+#name of some parameters changed on Apr 26, 2011
+if (( $date_seconds >= $date1_Apr26 ))
+then
+	INCOHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_CoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
+	COHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_IncoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
+else 
+	INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
+	COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
+fi
+
 # number of incoherent beams
 nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{print $2}'`
 # number of coherent beams/stations
@@ -399,14 +420,10 @@ DOWN=`cat $PARSET | grep "OLAP.Stokes.integrationSteps" | grep -v ObservationCon
 MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{print $2}'`
 SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
-INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
-COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
 CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
 ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
-date_obs=`grep Observation.startTime *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
-date_seconds=`date -d "$date_obs"  "+%s"` 
 whichStokes=`grep OLAP.Stokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
 
 if [[ $whichStokes != "I" ]]
@@ -1146,9 +1163,7 @@ do
 		echo rm ${STOKES}/$$"_split_"* >> $log
 		rm ${STOKES}/$$"_split_"*
     fi	
-   
-    
-    
+         
 	#Convert the subbands with bf2presto
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
