@@ -839,7 +839,7 @@ do
 		       fname="SB*incoh*"
 		    elif [[ $STOKES == "stokes" ]]
 		    then
-		       fname="B*_S*bf.raw"
+		       fname="*bf.raw"
 		    else
 		       echo "ERROR: Unable to determine the file naming convension - not incoherent or coherent stokes" 
 		       echo "ERROR: Unable to determine the file naming convension - not incoherent or coherent stokes" >> $log
