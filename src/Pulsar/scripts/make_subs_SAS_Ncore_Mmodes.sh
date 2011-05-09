@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.3
+VERSION=2.4
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -2322,8 +2322,36 @@ do
 			   done < name_change.list
 			done
 		done
+		cd ${location}	    
+	#Rename the TA beams RSP0 to RSP<beam numner>
+    elif [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $STOKES == "stokes" ]] 
+    then
+        cd ${location}/${STOKES}/
+		for ii in $num_dir
+		do
+			N=$ii
+			N=`echo "$N+1" | bc`  #actual line number if one higher than the RSP number
+            beam_index=`sed -n "$N"p SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+            echo "The beam_index is $beam_index" >> $log
+            cd ${location}/${STOKES}/
+			NAME=$beam_index
+			mkdir -p tmp$$
+			echo "mv RSP${ii} tmp$$/RSP$NAME" >> $log
+			echo "mv RSP${ii} tmp$$/RSP$NAME"
+			mv RSP${ii} tmp$$/RSP${NAME}
+			cd ${location}/${STOKES}/tmp$$/RSP${NAME}
+			echo "rename 's/RSP$ii/RSP$NAME/g' *" >> $log
+			echo "rename 's/RSP$ii/RSP$NAME/g' *"
+			rename "s/RSP$ii/RSP$NAME/g" *
+		done
+		cd ${location}/${STOKES}/tmp$$/
+		mv * ../
+		rmdir tmp$$
 		cd ${location}	
     fi
+
+	cd ${location}	
+
     echo $core > $location/${STOKES}/nof_cores.txt
 done # for loop over modes in $mode_str 
 
