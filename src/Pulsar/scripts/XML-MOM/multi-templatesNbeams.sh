@@ -29,7 +29,7 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
 "       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
 "       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug]"\
-"       [-sexages] [-clock 200|160] \n"
+"       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]\n"
 
 USAGE3="Options: \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
@@ -66,6 +66,8 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM\n"\
 "         [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).\n"\
 "         [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.\n"\
+"         [[-nof_rings 1 | 2]] ==> Number of Tied-Array rings (generally set to 1 [7 beams] or 2 rings [19 beams]).\n"\
+"         [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg)\n"\
 "         [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).\n"
 
 USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
@@ -169,6 +171,8 @@ user_namecol=0
 sexages=0
 debug=0
 clock=200
+NOF_RINGS=0
+RING_SIZE=0.0
 input_string=$*
 
 while [ $# -gt 0 ]
@@ -212,6 +216,8 @@ do
      -sexages)           sexages=1;;
      -debug)             debug=1;;
      -clock)             clock=$2;;
+     -nof_rings)         NOF_RINGS=$2; shift;;
+     -ring_size)         RING_SIZE=$2; shift;;
        -*)
             print >&2 \
             "$USAGE1" \
@@ -371,6 +377,18 @@ else
    fi
 fi
 
+if (( $NOF_RINGS < 0 )) || (( $NOF_RINGS > 2 ))
+then
+   echo "ERROR: Number of TA rings must be 0, 1 (7 TA beams) or 2 (19 TA beams)."
+   exit 1
+fi
+
+if (( $NOF_RINGS != 0 )) && (( $RING_SIZE <= 0 ))
+then
+   echo "WARNING: User specified number of TA Rings > 0, but TA Ring Size is not specified."
+   echo "         Setting TA Ring Size to default value of 0.00872663 rad = 0.5degrees."
+   RING_SIZE=0.00872663
+fi
 
 ##################################################
 #The 'date' command is highly dependant on the OS;  
@@ -1854,7 +1872,7 @@ do
 	           if (( $beam_counter == 0 ))
 	           then
 #	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" $middle >> $outfile
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/CLOCK/$clock/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/CLOCK/$clock/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" $middle >> $outfile
 	           fi
 	        elif [ $INSWITCH == 2 ]  && [ $skip == 0 ]
 	        then

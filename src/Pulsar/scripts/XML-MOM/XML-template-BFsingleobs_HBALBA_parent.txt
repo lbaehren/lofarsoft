@@ -24,8 +24,8 @@
             <cnIntegrationSteps>12208</cnIntegrationSteps>
             <pencilBeams>
                 <flyseye>false</flyseye>
-                <nrPencilRings>0</nrPencilRings>
-                <pencilRingSize>0</pencilRingSize>
+                <nrPencilRings>NOF TA RINGS</nrPencilRings>
+                <pencilRingSize>TA RING SIZE</pencilRingSize>
                 <pencilBeamList>
                     <pencilBeam>
                         <angle1>0.0</angle1>
