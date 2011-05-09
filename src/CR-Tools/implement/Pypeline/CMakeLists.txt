@@ -10,7 +10,7 @@ include (FindNumUtil)
 include (FindAERA)
 
 ##-------------------------------------------------------------------------------
-## Compiler options
+## Options
 
 option (PYPELINE_WITH_COMPILER_WARNINGS "Compile Pypeline with compiler warnings enabled." ON)
 option (PYPELINE_WITH_RUNTIME_WARNINGS "Compile Pypeline with runtime warnings enabled." ON)
@@ -18,6 +18,23 @@ option (PYPELINE_WITH_DEBUG_SYMBOLS "Compile Pypeline with debug symbols." ON)
 option (PYPELINE_WITH_OPTIMIZATION "Compile Pypeline with optimization flags turned on." OFF)
 option (PYPELINE_WITH_CPU_OPTIMIZATION "Compile Pypeline with optimization for CPU architecture." OFF)
 option (PYPELINE_WITH_AERA "Compile Pypeline with support for AERA data files" OFF)
+
+option (PYCRTOOLS_WITH_WARNINGS "" ON)
+option (PYCRTOOLS_WITH_NUMPY "" ON)
+option (PYCRTOOLS_WITH_CASACORE "" ON)
+option (PYCRTOOLS_WITH_DAL "" ON)
+option (PYCRTOOLS_WITH_GSL "" ON)
+option (PYCRTOOLS_WITH_FFTW "" ON)
+option (PYCRTOOLS_WITH_AERA "" ON)
+
+# Debug level
+set (PYCRTOOLS_DEBUG_LEVEL 0)
+
+# Configuration file
+configure_file (
+    ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pycrtools_config.h
+)
 
 # Turn off all predefined options
 set (CMAKE_CXX_FLAGS "")

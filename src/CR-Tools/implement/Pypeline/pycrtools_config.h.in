@@ -1,0 +1,31 @@
+/* pycrtools configuration */
+
+#ifndef PYCRTOOLS_CONFIG_H
+#define PYCRTOOLS_CONFIG_H
+
+/* Set debug level */
+#define PYCRTOOLS_DEBUG_LEVEL "${PYCRTOOLS_DEBUG_LEVEL}"
+
+/* Enable warnings */
+#cmakedefine PYCRTOOLS_WITH_WARINGS
+
+/* Enable numpy support */
+#cmakedefine PYCRTOOLS_WITH_NUMPY
+
+/* Enable casacore support */
+#cmakedefine PYCRTOOLS_WITH_CASACORE
+
+/* Enable DAL support */
+#cmakedefine PYCRTOOLS_WITH_DAL
+
+/* Enable GSL support */
+#cmakedefine PYCRTOOLS_WITH_GSL
+
+/* Enable FFTW support */
+#cmakedefine PYCRTOOLS_WITH_FFTW
+
+/* Enable Aera suport */
+#cmakedefine PYCRTOOLS_WITH_AERA
+
+#endif // PYCRTOOLS_CONFIG_H
+
