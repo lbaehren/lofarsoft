@@ -7,7 +7,7 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
        [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
        [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug] 
-       [-sexages] [-clock 200|160] 
+       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]
        
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -50,6 +50,8 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal 
                         (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).
        [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.
+       [[-nof_rings 1 | 2]] ==> Number of Tied-Array rings (generally set to 1 [7 beams] or 2 rings [19 beams]).
+       [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg).
        [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).
        
        For help on Imaging input format and options, use '-help IM' switch
