@@ -63,7 +63,7 @@ import psr_utils
 from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
 import lpps_search.fold as folder
-from lpps_search.fold import get_folding_command_ke
+from lpps_search.fold import get_folding_command_new_ke as get_folding_command_ke
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
@@ -972,7 +972,9 @@ if __name__ == '__main__':
     # parse list of filenames for TEMPO .par files
     par_files = []
     if options.par_list and options.par_list[0] == '[' and options.par_list[-1] == ']':
+        print 'first check ok!'
         tmp = options.par_list[1:-1].split(',')
+        print tmp
         try:
             for par_file in tmp:
                 par_files.append(os.path.abspath(par_file))

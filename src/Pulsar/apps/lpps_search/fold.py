@@ -20,8 +20,6 @@ from lpps_search import crawler
 from lpps_search import inf
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
-from lpps_search.util import MissingOptionException
-from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.sift import sift_accel_cands
 from lpps_search.sift import plot_p_histogram, plot_f_histogram, plot_p_dm
@@ -29,92 +27,68 @@ from lpps_search import knownpulsar
 from lpps_search.par import get_p0
 
 def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern, 
-        mask_filename = '' ):
+        **kwargs):
     '''Perform the pulsar fold.'''
+    mask_filename = kwargs.get('mask_filename', '')
+
     commands = []
     commands.append(get_command(
-        *get_folding_command(cand_dir, basename, accel_cand, 
+        *get_folding_command_new(cand_dir, basename, accel_cand, 
             subband_globpattern, mask_filename)
     ))
     return commands
 
-# ---------------------------------------------------------------------------- 
-# Placeholder function to generate prepfold commandlines in the case a known 
-# ephemeris and timeseries are available.
+def get_prepfold_resolution_options(p):
+    '''
+    Get the search / fold resolution defaults based on the candidate period. 
 
-def get_folding_command_ke(basename, dm, dat_file, mask_filename='', 
-    par_filename='', search=False):
-    # Place holder performs no search for each fold
+    Note: Based on GBT drift scan defaults.
+    '''
 
-    p = get_p0(par_filename)
-    # Determine the options for prepfold based on the GBT search script's
-    # logic:
+    # -n is N in GBT code
+    # -npfact is Mp in GBT code
+    # -ndmfact is Mdm in GBT code
+
     if p < 0.002:
         options = {
             '-npart' : '50',
+            '-n' : '24',
+            '-npfact' : '2',
+            '-ndmfact' : '2',
         } 
-        n, npfact, ndmfact = 24, 2, 2
     elif p < 0.05:
         options = {
             '-npart' : '40',
             '-pstep' : '1',
             '-pdstep' : '2',
             '-dmstep' : '3',
+            '-n' : '50',
+            '-npfact' : '2',
+            '-ndmfact' : '1',
         }
-        n, npfact, ndmfact = 50, 2, 1
-    elif p < 0.5:
+    else:
         options = {
             '-npart' : '30',
             '-pstep' : '1',
             '-pdstep' : '2',
             '-dmstep' : '1',
+            '-npfact' : '1',
+            '-ndmfact' : '1',
         }
-        n, npfact, ndmfact = 100, 1, 1
-    else:
-        options = {
-            '-npart' : '30',
-            '-pstep' : '1',
-            '-pdstep' : '2', 
-            '-dmstep' : '1',
-        }
-        n, npfact, ndmfact = 200, 1, 1
-    options.update({
-        '-runavg' : '',
-        '-noxwin' : '',
-        # accel_cand.accelfile contains the full path to the file because of
-        # the way we call the sifting.read_candidates function : 
-        '-dm' : '%.2f' % dm,
-        # Output in working directory to make TEMPO and prepfold behave 
-        # correctly :
-        '-n' : str(n),              # N in GBT code
-        '-par' : par_filename,
-    })
-    if mask_filename:
-        options['-mask'] = mask_filename
+        if p < 0.5:
+            options['-n'] = '100'
+        else:
+            options['-nopdsearch'] = ''
+            options['-n'] = '200'
 
-    # set options appropriate to search over P (or not as appropriate)
-    if search:
-        options.update({
-            '-npfact' : str(npfact),    # Mp in GBT code
-            '-nopdsearch' : '',
-            '-o' : basename + '_DM%.2f' % dm + '_NO_PDSEARCH',
-        })
-    else:
-        options.update({
-            '-nosearch' : '',
-            '-o' : basename + '_DM%.2f' % dm + '_NO_SEARCH',
-        })
+    return options
+    
 
-    # TODO : think about the directory where everything should run
-    # Something todo with subband files ...
-    args = [dat_file]  
-    return 'prepfold', options, args
-
-
-# ---------------------------------------------------------------------------- 
-
-def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
+def get_folding_command_new(cand_dir, basename, accel_cand, subband_globpattern,
         mask_filename = ''):
+    '''
+    Create prepfold commandline for folding acceleration search candidates.
+    '''
     # 1 : GBT code uses the dedispersion plan to base its decisions about 
     # downsample factor on. Strictly speaking I don't have that dedispersion
     # plan available - TODO : figure out whether it can be reconstructed baesd
@@ -122,39 +96,10 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
     # files (if they are in fact intact).
     p = 1 / accel_cand.f
     z_max = int(accel_cand.filename.split('_')[-1]) 
-    # Determine the options for prepfold based on the GBT search script's
-    # logic:
-    if p < 0.002:
-        options = {
-            '-npart' : '50',
-#            '-ndmfact' : '3'
-        } 
-        n, npfact, ndmfact = 24, 2, 2
-    elif p < 0.05:
-        options = {
-            '-npart' : '40',
-            '-pstep' : '1',
-            '-pdstep' : '2',
-            '-dmstep' : '3',
-        }
-        n, npfact, ndmfact = 50, 2, 1
-    elif p < 0.5:
-        options = {
-            '-npart' : '30',
-            '-pstep' : '1',
-            '-pdstep' : '2',
-            '-dmstep' : '1',
-        }
-        n, npfact, ndmfact = 100, 1, 1
-    else:
-        options = {
-            '-npart' : '30',
-            '-nopdsearch' : '',
-            '-pstep' : '1',
-            '-pdstep' : '2', 
-            '-dmstep' : '1',
-        }
-        n, npfact, ndmfact = 200, 1, 1
+    # Set the prepfoild folding and search resoultion (according to GBT 
+    # defaults).
+    options = get_prepfold_resolution_options(p)
+
     options.update({
         '-runavg' : '',
         '-noxwin' : '',
@@ -166,20 +111,74 @@ def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
         # Output in working directory to make TEMPO and prepfold behave 
         # correctly :
         '-o' : basename + '_DM%.2f_Z%d' % (accel_cand.DM, z_max),
-        '-n' : str(n),              # N in GBT code
-        '-npfact' : str(npfact),    # Mp in GBT code
-        '-ndmfact' : str(ndmfact),  # Mdm in GBT code
     })
     if mask_filename:
         options['-mask'] = mask_filename
-    # TODO : think about the directory where everything should run
     # Something todo with subband files ...
     args = [subband_globpattern]  
     return 'prepfold', options, args
 
-def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8, 
-        zaplist_file='', n_candidates_cutoff=20, minimum_dm_cutoff=0):
+def delete_from_dict(d, keys):
+    for k in keys:
+        try:
+           del d[k]
+        except KeyError, e:
+            pass 
+
+def get_folding_command_new_ke(basename, dm, dat_file, mask_filename='', 
+    par_filename='', search=False):
+    '''
+    Create prepfold commandline for folding timeseries on a known ephemeris.
+    '''
+
+    p = get_p0(par_filename)
+    # Set the prepfoild folding and search resoultion (according to GBT 
+    # defaults).
+    options = get_prepfold_resolution_options(p)
+    # Delete some of the unneeded commandline options (as compared to folding
+    # the acceleration searh output), then set some options that are needed
+    # based on whether you want to search a bit during folding:
+    if search:
+        delete_from_dict(options, ['-ndmfact'])
+        options.update({
+            '-nopdsearch' : '',
+            '-o' : basename + '_DM%.2f' % dm + '_NO_PDSEARCH',
+        })
+    else:
+        delete_from_dict(options, ['-nopdsearch', '-npfact', '-ndmfact'])
+        options.update({
+            '-nosearch' : '',
+            '-o' : basename + '_DM%.2f' % dm + '_NO_SEARCH',
+        })
+    # Set the options that are always needed for folding on a known 
+    # ephermeris: 
+    options.update({
+        '-runavg' : '', 
+        '-noxwin' : '',
+        '-dm' : '%.2f' % dm, 
+        '-par' : par_filename
+    })
+    # Set the rfifind mask file if present:    
+    if mask_filename:
+        options['-mask'] = mask_filename
+    # Set dat file to fold on:
+    args = [dat_file] 
+    return 'prepfold', options, args
+
+
+# ---------------------------------------------------------------------------- 
+# Placeholder function to generate prepfold commandlines in the case a known 
+# ephemeris and timeseries are available.
+
+
+def main(folddir, subbdir, canddir, basename, **kwargs):
     '''Importable version of the whole script.'''
+
+    mask_filename = kwargs.get('mask_filename', '')
+    n_cores = kwargs.get('n_cores', 8)
+    zaplist_file = kwargs.get('zaplist_file', '')
+    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 20)
+    minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0)
 
     # Check that the directories are available and that the output directory
     # is empty and writable.
@@ -236,7 +235,7 @@ def main(folddir, subbdir, canddir, basename, mask_filename, n_cores=8,
     for i, c in enumerate(sifted_candidates):
         core_index = i % n_cores
         l = fold(cand_dir, basename, c, fold_dir, subband_globpattern, 
-            mask_filename)
+            mask_filename=mask_filename)
         folding_commands[core_index].extend(l)
     else:
         pass
