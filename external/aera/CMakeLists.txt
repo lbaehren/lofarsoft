@@ -47,7 +47,7 @@ include (FindAERA)
 
 if (NOT HAVE_AERA OR AERA_FORCE_BUILD)
 
-  set (AERA_VERSION     "1.0.2" )
+  set (AERA_VERSION     "1.0.3" )
   set (AERA_TAR_ARCHIVE "AERA_Datareader-${AERA_VERSION}.tar.gz" )
   set (AERA_URL         "" )
 
