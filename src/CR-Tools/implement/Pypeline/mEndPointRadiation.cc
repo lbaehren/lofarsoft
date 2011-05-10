@@ -79,15 +79,12 @@ using namespace std;
 #define HFPP_PARDEF_1 (HComplex)(Ey)()("y- component of the complex electric field spectrum received at the observer location")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HComplex)(Ez)()("z- component of the complex electric field spectrum received at the observer location")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HNumber)(frequency)()("Vector with frequency values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(x)()("x coordinate of particle location.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_5 (HNumber)(y)()("y coordinate of particle location.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_6 (HNumber)(z)()("z coordinate of particle location.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_7 (HNumber)(t)()("time of particle at endpoint.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_8 (HNumber)(n)()("refractive index at endpoint.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_9 (HNumber)(vx)()("x coordinate of particle velocity.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_10 (HNumber)(vy)()("y coordinate of particle velocity.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_11 (HNumber)(vz)()("z coordinate of particle velocity.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_12 (HNumber)(acceleration)()("sign of acceleration -1=deceleration, +1=acceleration.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(xq)()("Vector of particle location.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HNumber)(vq)()("Vector of particle velocity.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_6 (HNumber)(t)()("time of particle at endpoint.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HNumber)(n)()("refractive index at endpoint.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_8 (HNumber)(xobs)()("Vector of observer location.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_9 (HNumber)(acceleration)()("sign of acceleration -1=deceleration, +1=acceleration.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -95,7 +92,7 @@ using namespace std;
 
   Usage:
 
-  hEndPointRadiation(Ex,Ey,Ez,frequency,x,y,z,t,n,vx,vy,vz,acceleration) -> Ex,Ex,Ez = observed E-field components
+  hEndPointRadiation(Ex,Ey,Ez,frequency,x_q v_q,t,n,x_obs,acceleration) -> Ex,Ex,Ez = observed E-field components
 
   Description:
 
@@ -116,12 +113,13 @@ using namespace std;
   >>> Ey=hArray(complex,[n_frequency_channels],name="E-field (y-component)",xvalues=frequencies)
   >>> Ez=hArray(complex,[n_frequency_channels],name="E-field (z-component)",xvalues=frequencies)
   >>> total_power=hArray(float,[n_frequency_channels],name="Spectral Power",xvalues=frequencies,par=dict(logplot="y"))
-  >>> (x,y,z)=(1.,1.,1.)
+  >>> xq=hArray(float, 3, [1.,1.,1.])
   >>> t=2.
   >>> n=1.
-  >>> (vx,vy,vz)=(1.,1.,1.)
+  >>> vq=hArray(float, 3, [1.,1.,1.])
+  >>> xobs=hArray(float, 3, [0.,0.,0.])
   >>> acceleration=1.0
-  >>> hEndPointRadiation(Ex,Ey,Ez,frequencies,x,y,z,t,n,vx,vy,vz,acceleration)
+  >>> hEndPointRadiation(Ex,Ey,Ez,frequencies,xq,vq,n,xobs,acceleration)
   >>> total_power.spectralpower2(Ex) #add square of complex spectrum to total power
   >>> total_power.spectralpower2(Ey)
   >>> total_power.spectralpower2(Ez)
@@ -132,9 +130,12 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
                     const Iter Ey,const Iter Ey_end,
                     const Iter Ez,const Iter Ez_end,
                     const FIter frequency,const FIter frequency_end,
-                    const HNumber x, const HNumber y, const HNumber z,
-                    const HNumber t, const HNumber n,
-                    const HNumber vx, const HNumber vy, const HNumber vz, const HNumber acceleration
+                    const FIter xq, const FIter xq_end,
+                    const FIter vq, const FIter vq_end,
+                    const HNumber t,
+                    const HNumber n,
+                    const FIter xobs, const FIter xobs_end,
+                    const HNumber acceleration
   )
 
 {
@@ -157,12 +158,16 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
   if ((Ey_end-Ey) != length) throw PyCR::ValueError("hEndPointRadiation: Ey vector has different size than frequency vector.");
   if ((Ez_end-Ez) != length) throw PyCR::ValueError("hEndPointRadiation: Ez vector has different size than frequency vector.");
 
+  if ((xq_end-xq) != 3) throw PyCR::ValueError("x_q should have length 3");
+  if ((vq_end-vq) != 3) throw PyCR::ValueError("v_q should have length 3");
+  if ((xobs_end-xobs) != 3) throw PyCR::ValueError("x_obs should have length 3");
+
   //now loop from beginning until end of frequency vector
   while (frequency_it != frequency_end){
     //add values to the current E-field element
-    *Ex_it += x*y*z*t*n*vx*vy*vz*acceleration* (*frequency_it);
-    *Ey_it += x*y*z*t*n*vx*vy*vz*acceleration* (*frequency_it);
-    *Ez_it += x*y*z*t*n*vx*vy*vz*acceleration* (*frequency_it);
+    // *Ex_it += x*y*z*t*n*vx*vy*vz*acceleration* (*frequency_it);
+    // *Ey_it += x*y*z*t*n*vx*vy*vz*acceleration* (*frequency_it);
+    // *Ez_it += x*y*z*t*n*vx*vy*vz*acceleration* (*frequency_it);
     ++frequency_it; //increase frequency iterator, point to next element
     ++Ex_it; ++Ey_it; ++Ez_it; //increase E-field iterators, point to next element
   };
