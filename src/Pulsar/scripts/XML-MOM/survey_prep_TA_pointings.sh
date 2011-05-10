@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/ksh 
 
 # Prepare the Tied-Array Pointings to work with the xml-generator script w/ a list of observation pointings.
 USAGE="\nusage : survey_prep_TA_pointings.sh pointing_range pointings_file xml_script_options \n\n"\
