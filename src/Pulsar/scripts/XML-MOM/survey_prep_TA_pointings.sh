@@ -9,13 +9,13 @@ USAGE="\nusage : survey_prep_TA_pointings.sh pointing_range pointings_file xml_s
 "      xml_script_options  ==> All required arguments to run the multi-templatesNbeams.sh script (except -in infile) \n"\
 "\n"\
 "      Example using range:\n"\
-"      survey_prep_pointings.sh 75-139 LOTAS_TA_beam_catalog.txt -inswitch BF -intype position -project Pulsars -out /tmp/out.xml -start 2010-07-22T09:40:00 -time 17 -stations CS001,CS002 -antenna HBA -namecol +CS ALL -subsHBA 100..343 -nof_rings 2 \n"\
+"      survey_prep_TA_pointings.sh 75-139 LOTAS_TA_beam_catalog.txt -inswitch BF -intype position -project Pulsars -out /tmp/out.xml -start 2010-07-22T09:40:00 -time 17 -stations CS001,CS002 -antenna HBA -namecol +CS ALL -subsHBA 100..343 -nof_rings 2 \n"\
 "\n"\
 "      Example using row list:\n"\
-"      survey_prep_pointings.sh 75,79,93,106 LOTAS_TA_beam_catalog.txt -inswitch BF -intype position -project Pulsars -out /tmp/out.xml -start 2010-07-22T09:40:00 -time 17 -stations CS001,CS002 -antenna HBA -namecol +CS ALL -subsHBA 100..343 -nof_rings 2 \n"\
+"      survey_prep_TA_pointings.sh 75,79,93,106 LOTAS_TA_beam_catalog.txt -inswitch BF -intype position -project Pulsars -out /tmp/out.xml -start 2010-07-22T09:40:00 -time 17 -stations CS001,CS002 -antenna HBA -namecol +CS ALL -subsHBA 100..343 -nof_rings 2 \n"\
 "\n"\
 "      Example using a single row:\n"\
-"      survey_prep_pointings.sh 75 LOTAS_TA_beam_catalog.txt -inswitch BF -intype position -project Pulsars -out /tmp/out.xml -start 2010-07-22T09:40:00 -time 17 -stations CS001,CS002 -antenna HBA -namecol +CS ALL -subsHBA 100..343 -nof_rings 2 \n"\
+"      survey_prep_TA_pointings.sh 75 LOTAS_TA_beam_catalog.txt -inswitch BF -intype position -project Pulsars -out /tmp/out.xml -start 2010-07-22T09:40:00 -time 17 -stations CS001,CS002 -antenna HBA -namecol +CS ALL -subsHBA 100..343 -nof_rings 2 \n"\
 "\n"\
 "      multi-templatesNbeams.sh HELP:\n"
 
