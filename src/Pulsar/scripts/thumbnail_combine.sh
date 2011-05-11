@@ -100,7 +100,7 @@ fi
 
 
 #assume anything without long paths which contain incoherentstokes or stokes, is CS data for now
-find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g"  | awk '{print $1 $3"\\n_"$5}' > /tmp/$$_combine_col2.txt
+find ./ -name "*.th.png" -print | sort | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g" -e "s/RSP/_RSP/g" | awk '{print $1 $3"\\n_"$5}' > /tmp/$$_combine_col2.txt
 
 find ./ -name "*.th.png" -print | sort |  sed -e "s/^.*beam/beam/g" -e "s/\/.*//g" -e "s/\.//g" | awk '{print "\\n"$1}' > /tmp/$$_combine_col4.txt
 
