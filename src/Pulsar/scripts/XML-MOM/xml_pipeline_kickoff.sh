@@ -140,14 +140,14 @@ else # if [[ $cep2 == 1 ]]
         incoherent=`echo $line | grep incoh_only`
         if [[ $incoherent == "" ]]
         then
-           echo cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/$line"  >> $outfile.$ii
-           echo cexec locus:67 "mkdir -p /data/LOFAR_PULSAR_ARCHIVE_locus*/${obsid}_plots" >> $outfile.$ii
-           echo cexec locus:0-99  "scp /data/scratch/alexov/${obsid}_red/stokes/*/*th.png /data/scratch/alexov/${obsid}_red/stokes/*/*prepout /data/scratch/alexov/${obsid}_red/stokes/*/*/*th.png /data/scratch/alexov/${obsid}_red/stokes/*/*/*prepout `whoami`@locus068:/data/LOFAR_PULSAR_ARCHIVE_locus*/${obsid}_plots/"   >> $outfile.$ii
-           echo cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/${obsid}_plots/; use LUS; ~alexov/thumbnail_combine.sh"  >> $outfile.$ii
+           echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"'  >> $outfile.$ii
+           echo 'cexec locus:67 "mkdir -p /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_plots"' >> $outfile.$ii
+           echo 'cexec locus:0-99  "scp /data/scratch/alexov/'${obsid}'_red/stokes/*/*th.png /data/scratch/alexov/'${obsid}'_red/stokes/*/*prepout /data/scratch/alexov/'${obsid}'_red/stokes/*/*/*th.png /data/scratch/alexov/'${obsid}'_red/stokes/*/*/*prepout '`whoami`'@locus068:/data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_plots/"'   >> $outfile.$ii
+           echo 'cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_plots/; use LUS; ~alexov/thumbnail_combine.sh"'  >> $outfile.$ii
         else
-           echo cexec locus:67 "mkdir -p /data/scratch/pulsar/${obsid}" >> $outfile.$ii
-           echo cexec locus:0-99 "scp /data/${obsid}/*stokes `whoami`@locus068:/data/scratch/pulsar/${obsid}"  >> $outfile.$ii
-           echo cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/$line" >> $outfile.$ii
+           echo 'cexec locus:67 "mkdir -p /data/scratch/pulsar/'${obsid}'"' >> $outfile.$ii
+           echo 'cexec locus:0-99 "scp /data/${obsid}/*stokes '`whoami`'@locus068:/data/scratch/pulsar/'${obsid}'"'  >> $outfile.$ii
+           echo 'cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"' >> $outfile.$ii
         fi
 	    echo "./$outfile.$ii >& $outfile.$ii.log &" >> $outfile.all.sh
 	    ii=`expr $ii + 1`
