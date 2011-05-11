@@ -33,7 +33,7 @@ def fold(cand_dir, basename, accel_cand, fold_dir, subband_globpattern,
 
     commands = []
     commands.append(get_command(
-        *get_folding_command_new(cand_dir, basename, accel_cand, 
+        *get_folding_command(cand_dir, basename, accel_cand, 
             subband_globpattern, mask_filename)
     ))
     return commands
@@ -84,7 +84,7 @@ def get_prepfold_resolution_options(p):
     return options
     
 
-def get_folding_command_new(cand_dir, basename, accel_cand, subband_globpattern,
+def get_folding_command(cand_dir, basename, accel_cand, subband_globpattern,
         mask_filename = ''):
     '''
     Create prepfold commandline for folding acceleration search candidates.
@@ -125,7 +125,7 @@ def delete_from_dict(d, keys):
         except KeyError, e:
             pass 
 
-def get_folding_command_new_ke(basename, dm, dat_file, mask_filename='', 
+def get_folding_command_ke(basename, dm, dat_file, mask_filename='', 
     par_filename='', search=False):
     '''
     Create prepfold commandline for folding timeseries on a known ephemeris.
@@ -166,11 +166,6 @@ def get_folding_command_new_ke(basename, dm, dat_file, mask_filename='',
     return 'prepfold', options, args
 
 
-# ---------------------------------------------------------------------------- 
-# Placeholder function to generate prepfold commandlines in the case a known 
-# ephemeris and timeseries are available.
-
-
 def main(folddir, subbdir, canddir, basename, **kwargs):
     '''Importable version of the whole script.'''
 
@@ -179,6 +174,7 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     zaplist_file = kwargs.get('zaplist_file', '')
     n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 20)
     minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0)
+    metadata = kwargs.get('metadata', None)
 
     # Check that the directories are available and that the output directory
     # is empty and writable.
@@ -196,7 +192,8 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
  
     # search for all the accelcand files and sift them
     unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename,
-         zaplist_file, n_candidates_cutoff, minimum_dm_cutoff)
+         zaplist_file=zaplist_file, n_candidates_cutoff=n_candidates_cutoff, 
+        minimum_dm_cutoff=minimum_dm_cutoff, metadata=metadata)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
         assert len(sifted_candidates) > 0

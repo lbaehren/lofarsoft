@@ -63,7 +63,7 @@ import psr_utils
 from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
 import lpps_search.fold as folder
-from lpps_search.fold import get_folding_command_new_ke as get_folding_command_ke
+from lpps_search.fold import get_folding_command_ke
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
@@ -755,6 +755,7 @@ class SearchRun(object):
                 n_cores=n_cores,
                 n_candidates_cutoff=N_CANDIDATES_CUTOFF,
                 minimum_dm_cutoff=MINIMUM_DM_CUTOFF,
+                metadata=self.metadata,
             )
         if not no_singlepulse:
             # Deal with single pulse search plotting

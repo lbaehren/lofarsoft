@@ -80,6 +80,7 @@ if __name__ == '__main__':
         raise Exception('No files matching the expected subband nomenclature.')
     else:
         basename = basenames.pop()
+    metadata = inf.inf_reader(os.path.join(subbdir, basename + '.sub.inf'))
 
     # prepare working directory (for both candidates and folds in the end)
     work_dir = os.path.abspath(options.workdir)
@@ -121,6 +122,7 @@ if __name__ == '__main__':
         'zaplist_file' : options.zaplist_file,
         'n_candidates_cutoff' : N_CANDIDATES_CUTOFF,
         'minimum_dm_cutoff' : MINIMUM_DM_CUTOFF,
+        'metadata' : metadata,
     }
     main(**kwargs)
 
