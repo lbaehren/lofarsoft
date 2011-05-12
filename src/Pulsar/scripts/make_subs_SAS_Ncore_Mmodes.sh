@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.5
+VERSION=2.6
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -78,6 +78,7 @@ user_input_location=0
 parset_location=""
 user_parset_location=0
 input_string=$*
+proc=0
 while [ $# -gt 0 ]
 do
     case "$1" in
@@ -894,6 +895,8 @@ do
 		   echo "ERROR: no input files found, for this mode."
 		   echo "ERROR: no input files found, for this mode." >> $log
 		   continue
+		else
+		   proc=1
 		fi
 		
         if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 1 ]]
@@ -2362,45 +2365,55 @@ do
     echo $core > $location/${STOKES}/nof_cores.txt
 done # for loop over modes in $mode_str 
 
-#Make a combined png of all the th.png files
-echo "Combining all th.png files into one"
-echo "Combining all th.png files into one" >> $log
-date
-date >> $log
-#run the combine thumbnail script;  needs just the log file as input arg
-echo "running:  thumbnail_combine.sh $log"
-echo "running:  thumbnail_combine.sh $log" >> $log
-thumbnail_combine.sh $log
+if [[ $proc != 0 ]]
+then
+	#Make a combined png of all the th.png files
+	echo "Combining all th.png files into one"
+	echo "Combining all th.png files into one" >> $log
+	date
+	date >> $log
+	#run the combine thumbnail script;  needs just the log file as input arg
+	echo "running:  thumbnail_combine.sh $log"
+	echo "running:  thumbnail_combine.sh $log" >> $log
+	thumbnail_combine.sh $log
+		
+	#Make a tarball of all the plots
+	echo "Creating tar file of plots"
+	echo "Creating tar file of plots" >> $log
+	date
+	date >> $log
+	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
+	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" \)`
+	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
+	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
-#Make a tarball of all the plots
-echo "Creating tar file of plots"
-echo "Creating tar file of plots" >> $log
-date
-date >> $log
-#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" \)`
-echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
-tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
-
-#echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
-#gzip ${PULSAR}_${OBSID}_plots.tar
-cd ${location}
-
-#Change permissions and move files
-echo "Changing permissions of files"
-echo "Changing permissions of files" >> $log
-date
-date >> $log
-echo chmod 774 -R . * >> $log
-chmod 774 -R . * 
-#echo chgrp -R pulsar . * >> $log
-#chgrp -R pulsar . * 
+	#echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
+	#gzip ${PULSAR}_${OBSID}_plots.tar
+	cd ${location}
 	
-date_end=`date`
-echo "Start Time: " $date_start
-echo "Start Time: " $date_start >> $log
-echo "End Time: " $date_end
-echo "End Time: " $date_end >> $log
+	#Change permissions and move files
+	echo "Changing permissions of files"
+	echo "Changing permissions of files" >> $log
+	date
+	date >> $log
+	echo chmod 774 -R . * >> $log
+	chmod 774 -R . * 
+	#echo chgrp -R pulsar . * >> $log
+	#chgrp -R pulsar . * 
+		
+	date_end=`date`
+	echo "Start Time: " $date_start
+	echo "Start Time: " $date_start >> $log
+	echo "End Time: " $date_end
+	echo "End Time: " $date_end >> $log
+	
+	echo "Results output location:" $location
+else
+    #no processing done, clean up
+    cd $location/..
+    echo "ERROR: No processing was performed due to no input data found"
+    rm -rf $location
+    exit 1
+fi
 
-echo "Results output location:" $location
 exit 0
