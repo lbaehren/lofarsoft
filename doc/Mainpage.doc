@@ -44,17 +44,6 @@
       <li>\ref LUS_BuildTargets_doc
       <li>\ref LUS_BuildTargets_clean
     </ul>
-    <li><b>Interface control documents</b> (ICD)
-    <ul>
-      <li>\ref dal_icd_001
-      <li>\ref dal_icd_002
-      <li>\ref dal_icd_003
-      <li>\ref dal_icd_004
-      <li>\ref dal_icd_005
-      <li>\ref dal_icd_006
-      <li>\ref dal_icd_007
-      <li>\ref dal_icd_008
-    </ul>
     <li>\subpage LUS_Troubleshooting
     <li>\subpage LUS_Glossary
   </ul>
