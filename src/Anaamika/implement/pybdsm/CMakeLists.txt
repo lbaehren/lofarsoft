@@ -41,6 +41,18 @@ endif (APPLE)
 ##
 ## ==============================================================================
 
+## We should use f2py to generate these modules, otherwise the required Python
+## "glue" will be missing.
+## For example:
+##
+##   $ f2py -c -m <module-name> <Fortran-sources>
+##
+## This will generate a shared library (module) called <module-name>.so in the
+## current directory. The proper way to implement this in CMake is to use
+## a combination of add_custom_command() and add_custom_target() and
+## add_dependencies().
+##
+
 ##__________________________________________________________
 ## Module : _pytesselate
 
