@@ -889,6 +889,13 @@ do
 		echo "Found a total of $all_num ${STOKES} input datafiles to process" 
 		echo "Found a total of $all_num ${STOKES} input datafiles to process" >> $log
 		
+		if [[ $all_num == 0 ]]
+		then
+		   echo "ERROR: no input files found, for this mode."
+		   echo "ERROR: no input files found, for this mode." >> $log
+		   continue
+		fi
+		
         if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 1 ]]
         then
            if (( $all_num != $NBEAMS ))
