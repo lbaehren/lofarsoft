@@ -140,16 +140,16 @@ else # if [[ $cep2 == 1 ]]
         incoherent=`echo $line | grep incoh_only`
         if [[ $incoherent == "" ]]
         then
-           echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"'  >> $outfile.$ii
-           echo 'cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; mkdir -p '${obsid}'_plots"' >> $outfile.$ii
-           echo 'cexec locus:0-99  "scp /data/scratch/alexov/'${obsid}'_red/stokes/*/*th.png /data/scratch/alexov/'${obsid}'_red/stokes/*/*prepout /data/scratch/alexov/'${obsid}'_red/stokes/*/*/*th.png /data/scratch/alexov/'${obsid}'_red/stokes/*/*/*prepout '`whoami`'@locus068:/data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_plots/"'   >> $outfile.$ii
-           echo 'cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_plots/; use LUS; ~alexov/thumbnail_combine.sh"'  >> $outfile.$ii
+           echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"'  >> $outfile.$obsid.$ii
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; mkdir -p '${obsid}'_plots"' >> $outfile.$obsid.$ii
+           echo 'cexec locus:0-99  "scp /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*prepout /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*prepout '`whoami`'@locus100:/data/LOFAR_PULSAR_ARCHIVE_locus100/'${obsid}'_plots/"'   >> $outfile.$obsid.$ii
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus100/'${obsid}'_plots/; use LUS; ~alexov/thumbnail_combine.sh"'  >> $outfile.$obsid.$ii
         else
-           echo 'cexec locus:67 "cd /data/scratch/pulsar/; mkdir -p '${obsid}'"' >> $outfile.$ii
-           echo 'cexec locus:0-99 "scp /data/${obsid}/*stokes '`whoami`'@locus068:/data/scratch/pulsar/'${obsid}'"'  >> $outfile.$ii
-           echo 'cexec locus:67 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"' >> $outfile.$ii
+           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; mkdir -p '${obsid}'"' >> $outfile.$obsid.$ii
+           echo 'cexec locus:0-99 "scp /data/LOFAR_PULSAR_ARCHIVE_locus*/${obsid}/*stokes '`whoami`'@locus101:/data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'"'  >> $outfile.$obsid.$ii
+           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; use LUS; ~alexov/'$line' -del"' >> $outfile.$obsid.$ii
         fi
-	    echo "./$outfile.$ii >& $outfile.$ii.log &" >> $outfile.all.sh
+	    echo "./$outfile.$obsid.$ii >& $outfile.$obsid.$ii.log &" >> $outfile.all.sh
 	    ii=`expr $ii + 1`
     done < $outfile.all
 fi #end if [[ $cep2 == 0 ]]
@@ -169,6 +169,6 @@ then
 	fi
 else
    echo "Single script '$outfile.all.sh' contains all the processing commands in one file."
-   echo "Copy that file and all the sub-scripts ($outfile.*) to activate processing."
+   echo "Copy that file and all the sub-scripts ($outfile.OBSIDnumber*) to activate processing."
 fi
 
