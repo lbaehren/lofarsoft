@@ -50,7 +50,7 @@ then
 fi
 
 # find all the paths to the th.png files
-find ./ -name "*.th.png" -print | sort  > /tmp/$$_combine_col1.txt
+find ./ -name "*.th.png" -print | sort -d > /tmp/$$_combine_col1.txt
 wc_col1=`wc -l /tmp/$$_combine_col1.txt | awk '{print $1}'`
 if [[ $wc_col1 < 1 ]]
 then
@@ -64,7 +64,7 @@ then
    fi
 fi
 
-find ./ -name "*prepout" -print -exec grep -i squared {} \; | sed 's/prepout/prepout \\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | sort | sed 's/^.*= //g'  > /tmp/$$_combine_col3.txt
+find ./ -name "*prepout" -print -exec grep -i squared {} \; | sed 's/prepout/prepout \\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | sort -d | sed 's/^.*= //g'  > /tmp/$$_combine_col3.txt
 wc_col3=`wc -l /tmp/$$_combine_col3.txt | awk '{print $1}'`
 if [[ $wc_col3 < 1 ]]
 then
