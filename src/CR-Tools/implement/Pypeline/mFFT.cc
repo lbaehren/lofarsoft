@@ -94,6 +94,9 @@ using namespace casa;
 
   Usage:
   outvec.fftw(invec) -> return FFT of invec in outvec
+
+  See also:
+  hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -105,11 +108,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   fftw_plan p;
 
   // Sanity check
-  if (lenIn != lenOut) {
-    throw PyCR::ValueError("In- and output vectors do not have the same size.");
-    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << lenIn << " Nout=" << lenOut);
-    return;
-  };
+  if (lenIn != lenOut) ERROR_RETURN("In- and output vectors do not have the same size.");
 
   // Implementation
   p = fftw_plan_dft_1d(lenIn, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_FORWARD, FFTW_ESTIMATE);
@@ -136,7 +135,8 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   Description:
   This implementation uses fftw3 - for more information see: http://www.fftw.org/fftw3.pdf
 
-  !!!! Note that the input vector will be modified and scrambled !!!!
+  Note that the input vector may be modified and scrambled for a
+  complex-to-complex fft (check!)
 
   The DFT results are stored in-order in the array out, with the
   zero-frequency (DC) component in ``data_out[0]``. If ``data_in !=
@@ -150,6 +150,9 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
 
   Usage:
   outvec.fftw(invec) -> return backward FFT of invec in outvec
+
+  See also:
+  hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -161,11 +164,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   fftw_plan p;
 
   // Sanity check
-  if (lenIn != lenOut) {
-    throw PyCR::ValueError("In- and output vectors do not have the same size.");
-    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) <<": input and output vector have different sizes! N=" << lenIn << " Nout=" << lenOut);
-    return;
-  };
+  if (lenIn != lenOut) ERROR_RETURN("In- and output vectors do not have the same size.");
 
   // Implementation
   p = fftw_plan_dft_1d(lenIn, (fftw_complex*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_BACKWARD, FFTW_ESTIMATE);
@@ -207,7 +206,7 @@ void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
   outvec.fftw(invec) -> return backward FFT of invec in outvec
 
   See also:
-  hFFTw, hInvFFTw, hNyquistSwap
+  hFFTw, hInvFFTw, hNyquistSwap, hShiftFFT
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter data_out, const Iter data_out_end,
@@ -349,6 +348,76 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Multiplies the FFT of a data set with weights such that the data shifts by N samples, where N can be fractional.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hShiftFFT
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(outvec)()("Output vector containing the shifted FFT")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(invec)()("Input vector with FFT of data (can be the same as output vector)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(shift)()("Shift in fractional samples of the original data")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description: 
+
+  The data simply gets multiplied by a complex weight vector of unity
+  amplitude and linearly increasing phase ``\phi = 2 \pi \nu_i \delta
+  t``, corresponding to constant time delay. Here ``\nu_i = 
+  
+  The length of the input and output vector is (N/2+1) if N is the
+  length of the original data.
+
+  Usage:
+  hShiftDelay(outvec,invec,shift) -> outvec (fft of shifted data)
+
+  Example:
+
+  #Setup data arrays and fill with random numbers
+  N=64
+  data=hArray(float,N)
+  shifted=hArray(float,N)
+  data.random(-1.,1.)
+  fft=hArray(complex,N/2+1)
+  shifted_fft=hArray(complex,N/2+1)
+
+  fft.fftw(data); fft /= N # FFT and normalize properly
+  data.plot()
+
+  #Shift by one sample
+  shifted_fft.shiftfft(fft,1.)
+  shifted.invfftw(shifted_fft)
+  shifted.plot(clf=False)
+
+  #Shift half a sample
+  shifted_fft.shiftfft(fft,.5)
+  shifted.invfftw(shifted_fft)
+  shifted.plot(clf=False)
+*/
+template <class Iter>
+void  HFPP_FUNC_NAME(const Iter outvec, const Iter outvec_end,
+                     const Iter invec, const Iter invec_end,
+                     const HNumber shift)
+{
+  HInteger lenInvec = invec_end - invec;
+  HInteger lenOutvec = outvec_end - outvec;
+
+  if (lenInvec <= 1) ERROR_RETURN("Incorrect size of output vector (must be >1).");
+  if (lenOutvec != lenInvec) ERROR_RETURN("Output vector size does not match input vector.");
+
+  Iter it_out(outvec),it_in(invec);
+  HInteger i(0);
+  HNumber phase_factor(shift*M_PI/(lenInvec-1));
+
+  while (it_out!=outvec_end) {
+    *it_out = (*it_in) * polar(1.0, i*phase_factor);
+    ++i; ++it_out; ++it_in;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply a real-to-complex FFT using fftw3
@@ -378,6 +447,10 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 
   Usage:
   complexvec.fftw(floatvec) -> return FFT of floatvec in complexvec
+
+  See also:
+  hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
+
 */
 template <class IterOut,class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -431,6 +504,10 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 
   Usage:
   vec.invfftw(complexvec) -> return (inv) FFT of complexvec in vec
+
+  See also:
+  hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
+
 */
 template <class IterOut,class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -442,11 +519,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   fftw_plan p;
 
   // Sanity check
-  if (lenIn != (lenOut/2+1)) {
-    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(in) = N(out)/2+1.");
-    // ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(out)=" << lenOut << " N(in)=" << lenIn << " (should be = " << lenOut/2+1 << ")");
-    return;
-  };
+  if (lenIn != (lenOut/2+1)) ERROR_RETURN("Input or output vector has the wrong size. This should be: N(in) = N(out)/2+1.");
 
   // Implementation
   p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(*data_in), (double*) &(*data_out), FFTW_ESTIMATE);
@@ -473,6 +546,10 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 
   Usage:
   complexvec.fftcasa(floatvec) -> return FFT for floatvec in complexvec.
+
+  See also:
+
+  hFFTw
 */
 template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -543,7 +620,6 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply an Inverse FFT on a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -560,6 +636,10 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
 
   Usage:
   floatvec.invfftcasa(complexvec) -> return inverse FFT for complexvec in floatvec.
+
+  See also:
+  hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
+
 */
 template <class IterOut, class IterIn>
 void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
@@ -691,7 +771,8 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   $PARDOCSTRING
 
   See also:
-  hDoubleFFT
+  hDoubleFFT, hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
+
 */
 
 template <class Iter>
@@ -864,6 +945,9 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
                     ...
             [C1-l,C2-l,..,Cn-l]
            ]
+
+  See also:
+  hFFT, hInvFFTw, hSaveInvFFTw, hNyquistSwap, hShiftFFT
 
   Example:
   >>> # Input parameters

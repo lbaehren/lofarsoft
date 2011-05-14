@@ -100,7 +100,9 @@
 // Replacement of "hfcommon.h"
 
 #define ERROR( txt ) ( std::cout << std::endl << "ERROR in file " << __FILE__ << " line " << __LINE__ << ": "  << txt << std::endl )
-#define ERROR_RETURN( txt ) throw PyCR::ValueError((HString) "ERROR [" + __FILE__ + ", l." + BOOST_PP_STRINGIZE(__LINE__) + ", " + BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) + "]: " + txt)
+#define ERROR_RETURN( TXT ) ERROR_RETURN_VALUE( TXT , BOOST_PP_EMPTY() )
+#define ERROR_RETURN_VALUE( TXT, VALUE ) {throw PyCR::ValueError((HString) "ERROR [" + __FILE__ + ", l." + BOOST_PP_STRINGIZE(__LINE__) + ", " + BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) + "]: " + TXT); return VALUE;}
+
 
 #define MESSAGE( txt ) ( std::cout << "[" << __FILE__ << "," << __LINE__ << "]: " << txt << std::endl )
 #define PRINT( txt ) ( std::cout << txt << std::endl )

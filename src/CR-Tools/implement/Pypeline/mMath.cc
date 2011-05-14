@@ -291,6 +291,7 @@ template <class Iter>
 HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
   Iter it(vec);
+  if (vec_end-vec <= 0) ERROR_RETURN_VALUE("Illegal size of input vector (<=0)",0);
   IterValueType val=*it;
   HInteger ipos(0);
   while (it!=vec_end) {
@@ -543,6 +544,54 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const
     *it1 =  hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC (*it2));
     ++it1; ++it2;
     if (it2==vec2_end) it2=vec2;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Performs a $MFUNC (in-place) between the two vectors, which is returned in the first vector. If the first vector is shorter it will be wrapped unitl the end of the second vector is reached. Can, e.g., be used to calculate sums/products of vectors. 
+
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME h{$MFUNC}Vec
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vec2)()("Vector containing the second operands")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vecA *= vecB  -> vecA=[ vecA[0]*vecB[0], vecA[1]*vecB[1], ..., vecA[n]*vecB[n] ]
+  vecA += vecB  -> vecA=[ vecA[0]+vecB[0], vecA[1]+vecB[1], ..., vecA[n]+vecB[n] ]
+  vecA -= vecB  -> vecA=[ vecA[0]-vecB[0], vecA[1]-vecB[1], ..., vecA[n]-vecB[n] ]
+  vecA /= vecB  -> vecA=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
+
+  hMul(vecA,vecB) = vecA.mul(vecB)
+
+  Example:
+
+    v1=hArray(float,[3],fill=0)
+    v2=hArray(float,[3,3],fill=range(9))
+    v1.addvec(v2)
+
+*/
+template <class Iter, class Iterin>
+void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iterin vec2,const Iterin vec2_end)
+{
+  // Declaration of variables
+  typedef IterValueType T;
+  Iter it1=vec1;
+  Iterin it2=vec2;
+  
+  if ((vec1_end-vec1) <= 0) ERROR_RETURN("Size of 2nd vector is <= 0.");
+  if ((vec2_end-vec2) < 0) ERROR_RETURN("Invalid size of 1st vector.");
+
+  // Vector operation
+  while (it2!=vec2_end) {
+    *it1 =  hfcast<T>(*it1 HFPP_OPERATOR_$MFUNC (*it2));
+    ++it1; ++it2;
+    if (it1==vec1_end) it1=vec1;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -1132,7 +1181,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end,
 */
 HNumber HFPP_FUNC_NAME(const HNumber frequency, const HNumber time)
 {
-  return CR::_2pi*frequency*time;
+  return 2*M_PI*frequency*time;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1372,13 +1421,10 @@ void HFPP_FUNC_NAME(const Iter vec1,const Iter vec1_end, const Iter vec2,const I
   HInteger len1 = vec1_end - vec1;
   HInteger len2 = vec2_end - vec2;
 
-  HInteger signfactor(1);
+  HInteger signfactor(-1);
   
   // Sanity check
-  if (len2 > len1) {
-    throw PyCR::ValueError("Second vector is larger than output vector.");
-    return;
-  }
+  if (len2 > len1) ERROR_RETURN("Second vector is larger than output vector.");
 
   // Vector operation
   while (it1!=vec1_end) {
@@ -2140,21 +2186,11 @@ template <class Iter>
 IterValueType HFPP_FUNC_NAME (const Iter vecin1, const Iter vecin1_end,
 			      const Iter vecin2, const Iter vecin2_end)
 {
-  // Declaration of variables
-  IterValueType dotProduct(0.);
-  HInteger len1 = vecin1_end - vecin1;
-  HInteger len2 = vecin2_end - vecin2;
-
   // Sanity check
-  if (len1 != len2) {
-    throw PyCR::ValueError("Input vectors not of equal size.");
-    return 0.;
-  }
+  if ((vecin1_end - vecin1) != (vecin2_end - vecin2)) {ERROR_RETURN_VALUE("Input vectors not of equal size.",0);};
 
   // Vector operation
-  dotProduct = hMulSum(vecin1, vecin1_end, vecin2, vecin2_end);
-
-  return dotProduct;
+  return hMulSum(vecin1, vecin1_end, vecin2, vecin2_end);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2191,18 +2227,10 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
   HInteger lenOut = vecout_end - vecout;
 
   // Sanity check
-  if (lenIn1 != 3) {
-    throw PyCR::ValueError("First input vector is not of length 3.");
-    return;
-  }
-  if (lenIn2 != 3) {
-    throw PyCR::ValueError("Second input vector is not of length 3.");
-    return;
-  }
-  if (lenOut != 3) {
-    throw PyCR::ValueError("Output vector is not of length 3.");
-    return;
-  }
+  if (lenIn1 != 3) ERROR_RETURN("First input vector is not of length 3.");
+  if (lenIn2 != 3) ERROR_RETURN("Second input vector is not of length 3.");
+  if (lenOut != 3) ERROR_RETURN("Output vector is not of length 3.");
+
 
   // Vector operation
   *(itout)   = *(itin1+1) * *(itin2+2) - *(itin1+2) * *(itin2+1);
@@ -2270,6 +2298,11 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType minim
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  See also:
+
+  hMeanAbove, hMeanSquare, hMeanAbs, hMeanChiSquared
+
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
@@ -2278,7 +2311,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+  if (len < 0) ERROR_RETURN_VALUE("Size of vector is < 0.",0.0);
 
   HNumber mean = hfcast<HNumber>(hSum(vec,vec_end));
 
@@ -2286,6 +2319,54 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   mean /= len;
 
   return mean;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Calculates a mean vector of an array of vectors
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMean
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(outvec)()("Numeric output vector of length Nel containing the mean values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(invec)()("Numeric input vector of size Nvec*Nel")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+
+  Assume you have a 2D array of dimensions [Nvec,Nel], i.e. Nvec
+  vectors of length Nel, then return the mean vector of all vectors in
+  the input array. Input and output vectors can be of different types
+  (with all consequences of rounding, of course!).
+
+  See also:
+
+  hMeanAbove, hMeanSquare, hMeanAbs, hMeanChiSquared
+
+  Example:
+
+  v1=hArray(float,[3],fill=0)
+  v2=hArray(float,[3,3],fill=range(9))
+  v1.mean(v2) # v1 -> hArray(float, [3L], fill=[3,4,5]) # len=3 slice=[0:3])
+*/
+template <class Iter, class Iter2>
+void HFPP_FUNC_NAME (const Iter outvec,const Iter outvec_end, const Iter2 invec,const Iter2 invec_end)
+{
+  // Declaration of variables
+  HInteger Nel = outvec_end - outvec;
+
+  if (Nel <= 0) ERROR_RETURN("Size of output vector is <= 0.");
+
+  HInteger Nvec = (invec_end - invec)/Nel;
+  if (Nvec < 0) ERROR_RETURN("Size of input vector is < 0.");
+
+  IterValueType null(0);
+  hFill(outvec,outvec_end,null);
+  hAddVec(outvec,outvec_end,invec,invec_end);
+  hDiv2(outvec,outvec_end,Nvec);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -2301,6 +2382,11 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  See also:
+
+  hMeanAbove, hMeanSquare, hMeanAbs, hMeanChiSquared
+
 */
 template <class Iter, class T>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T threshold)
@@ -2309,7 +2395,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T threshold)
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+  if (len < 0) ERROR_RETURN_VALUE("Size of vector is < 0.",0.);
 
   len=0;
 
@@ -2340,6 +2426,11 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T threshold)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  See also:
+
+  hMeanAbove, hMeanSquare, hMeanAbs, hMeanChiSquared
+
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
@@ -2348,7 +2439,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+  if (len < 0) ERROR_RETURN_VALUE("Size of vector is < 0.",0.);
 
   HNumber mean=hfcast<HNumber>(hSumAbs(vec,vec_end));
 
@@ -2357,8 +2448,6 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   return mean;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-
 
 //$DOCSTRING: Returns the mean value of the square values of all elements in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -2371,6 +2460,11 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  See also:
+
+  hMeanAbove, hMeanSquare, hMeanAbs, hMeanChiSquared
+
 */
 template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
@@ -2379,7 +2473,7 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
   HInteger len = vec_end - vec;
 
   // Sanity check
-  if (len < 0) ERROR_RETURN("Size of vector is < 0.");
+  if (len < 0) ERROR_RETURN_VALUE("Size of vector is < 0.",0.);
 
   HNumber mean=hSumSquare(vec,vec_end);
 

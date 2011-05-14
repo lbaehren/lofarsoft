@@ -269,7 +269,9 @@ template <class Iter, class IterI, class T>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const T val)
 {
   // Sanity check
-  if (index >= index_end) return;
+  if (index > index_end) ERROR_RETURN("Illegal size of index vector");
+  if (index == index_end) return;
+  if (vec >= vec_end) return;
 
   // Variables
   Iter it;
@@ -569,6 +571,71 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  T start,  const T 
   while (it!=vec_end) {
     *it=hfcast<IterValueType>(start+increment*i);
     ++it; ++i;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Fills a vector of vectors with a series of values starting with a start vector and then increasing by an increment vector until it is filled
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFillRangeVec
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Vector to fill - assumed to have sub-vectors of length N.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(start)()("Vector with N start values, i.e. one for each element of the sub-vectors in vec.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(increment)()("Vector with N Increment (to multiply loop variable with) values, i.e. one for each element of the sub-vectors in vec..")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vec.fillrangevec([start],[increment]) -> vec=[start_0,start_1,..., start_0+1*increment_0, start_1+1*increment_1, ..., start_0+2*increment_0, start_1+2*increment_1, ...]
+
+  Description:
+  
+  The length of vec should be a multiple of the size of ``start``.
+
+  Looping Behaviour:
+
+  Function fill loop over every element of ``vec``. The size of
+  ``start``determines the size of the sub-vectors. ``increment`` will
+  be wrapped if it is shorter than vec (so, you can use the same
+  increment for all elements of the sub-vector). 
+
+  Example:
+  
+  #Create points which lie on a circle around the origin
+  #First create spherical coordinates with fillrangevec
+  ary=hArray(float,[8,3])
+  ary.fillrangevec(hArray([0.0,0.0,25.]),hArray([pi/4.,0.,0.]))
+  # ary -> hArray(float, [8L, 3L], fill=[0,0,25,0,0.785398,25,0,1.5708,25,0,2.35619,25,0,3.14159,25,0,3.92699,25,0,4.71239,25,0,5.49779,25]) # len=24 slice=[0:24])
+
+  #Then convert to Cartesian
+  xyz=hArray(float,[8,3]);
+  hCoordinateConvert(ary,CoordinateTypes.AzElRadius,xyz,CoordinateTypes.Cartesian,False)
+  #xyz -> hArray(float, [8L, 3L], fill=[0,25,0,0,17.6777,17.6777,0,1.53081e-15,25,-0,-17.6777,17.6777,-0,-25,3.06162e-15,-0,-17.6777,-17.6777,-0,-4.59243e-15,-25,0,17.6777,-17.6777]) # len=24 slice=[0:24])
+  
+*/
+template <class Iter,class Iter2>
+void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  Iter2 start, const  Iter2 start_end,  const  Iter2 increment, const  Iter2 increment_end)
+{
+  Iter it(vec);
+  Iter2 it_start,it_increment; 
+  HInteger i(0),veclen(vec_end-vec),startlen(start_end-start);
+
+  if (increment_end<=increment) ERROR_RETURN("Input vector `increment` has zero length.");
+  if (startlen<=0) ERROR_RETURN("Input vector `start` has zero length.");
+  if (veclen < 0) ERROR_RETURN("Input vector `vec` has illegal size.");
+  if (veclen % startlen != 0) ERROR_RETURN("Size of input vector `vec` should be a multiple of the size of `start`.");
+
+  while (it!=vec_end) {
+    it_start=start; it_increment=increment;
+    while (it_start!=start_end) {
+      *it=hfcast<IterValueType>(*it_start+(*it_increment) * i);
+      ++it_start; ++it_increment; ++it;
+      if (it_increment==increment_end) it_increment=increment;
+    };
+    ++i;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -880,7 +947,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   vector are simply ignored.
 
   See also:
-  hFindGreaterThan
+  hFindGreaterThan, hRedistribute, hFill
 */
 template <class Iter, class Iterin, class IterI>
 void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end, const IterI index, const IterI index_end, const HInteger number_of_elements)
@@ -892,7 +959,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   Iterin itin;
   HInteger count(number_of_elements);
 
-  HInteger lenIn = std::distance(vecin, vecin_end);
+  //  HInteger lenIn = std::distance(vecin, vecin_end);
   HInteger lenOut = std::distance(vecout, vecout_end);
 
   // Sanity check
@@ -903,21 +970,24 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   if ((count<0) || (count > lenOut))
     count = lenOut;
 
-  // Checking indices
-  while (itidx != index_end) {
-    if ((*itidx >= lenIn) || (*itidx < -lenIn)) {
-      std::string errormessage;
-      std::stringstream sstream (stringstream::in | stringstream::out);
-      sstream << "Error: Illegal index value: " << *itidx;
-      errormessage = sstream.str();
-      throw PyCR::ValueError(errormessage);
-    } else {
-      if (*itidx < 0) {
-        *itidx += lenIn;
-      }
-    }
-    ++itidx;
-  }
+  // Don't really understand the following, check is done in the loop, isn't it ...
+
+  // // Checking indices
+  // while (itidx != index_end) {
+  //   if ((*itidx >= lenIn) || (*itidx < -lenIn)) {
+  //     std::string errormessage;
+  //     std::stringstream sstream (stringstream::in | stringstream::out);
+  //     sstream << "Error: Illegal index value: " << *itidx;
+  //     errormessage = sstream.str();
+  //     throw PyCR::ValueError(errormessage);
+  //   } else {
+  //     if (*itidx < 0) {
+  //       *itidx += lenIn;
+  //     }
+  //   }
+  //   ++itidx;
+  // }
+
   itidx = index;
 
   // Copying of data
@@ -928,12 +998,107 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
     --count;
     ++itidx;
     ++itout;
-    if (itidx==index_end)
-      itidx=index;
+    if (itidx==index_end) itidx=index;
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Copies all vectors of an array pointed to by an indexlist from one vector to another (no resizing is done!).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCopyVec
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vecout)()("Vector containing a copy of the input values")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(indexlist)()("Index list containing the positions of the elements to be copied over, (e.g. [0,2,4,...] will copy every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(number_of_elements)()("Maximum number of elements to be copied, if this value is <0, then copying will be repeated until the output vector is filled.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(veclen)()("Length of the (sub-)vectors to copy.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+
+  If the index vector is shorter than the output vector, the (indexed
+  part of the) input vector will be copied multiple times until the
+  output vector is filled.  Use ``vec.resize`` first if you want to ensure
+  that both vectors have the same size.
+  If ``number_of_elements`` is larger than 0 and smaller than the
+  length of the index vector, the remaining elements in the index
+  vector are simply ignored. 
+
+  If the index list is smaller than the number of elements to copy,
+  then the indexlist will be wrapped and restarted from the beginning
+
+  See also:
+
+  hFindGreaterThan, hCopy
+
+  Example:
+
+  v1=hArray(float,[3,3],fill=range(9));
+  indx=hArray([0,2])
+  v2=hArray(properties=v1)
+  hCopyVec(v2,v1,indx,2,3) # -> hArray(float, [3L, 3L], fill=[0,1,2,6,7,8,0,0,0]) # len=9 slice=[0:9])
+*/
+template <class Iter, class Iterin, class IterI>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin, const Iterin vecin_end, const IterI index, const IterI index_end, const HInteger number_of_elements, const HInteger veclen)
+{
+  // Declaration of variables
+  typedef IterValueType T;
+  Iter itout(vecout);
+  IterI itidx(index);
+  Iterin itin;
+  HInteger count(number_of_elements);
+  HInteger vec_count;
+
+  HInteger lenOut = std::distance(vecout, vecout_end);
+
+  // Sanity check
+  if ((index >= index_end) || (count==0))
+    return;
+  if (vecin >= vecin_end)
+    return;
+  if (count<0) count = lenOut;
+
+  // Don't really understand the following, check is done in the loop, isn't it ...
+
+  // // Checking indices
+  // while (itidx != index_end) {
+  //   if ((*itidx >= lenIn) || (*itidx < -lenIn)) {
+  //     std::string errormessage;
+  //     std::stringstream sstream (stringstream::in | stringstream::out);
+  //     sstream << "Error: Illegal index value: " << *itidx;
+  //     errormessage = sstream.str();
+  //     throw PyCR::ValueError(errormessage);
+  //   } else {
+  //     if (*itidx < 0) {
+  //       *itidx += lenIn;
+  //     }
+  //   }
+  //   ++itidx;
+  // }
+
+  itidx = index;
+
+  // Copying of data
+  while ((itout != vecout_end) && (count > 0)) {
+    itin = vecin + (*itidx)*veclen; 
+    vec_count=veclen;
+    while ((itin >= vecin) && (itin < vecin_end) && (vec_count>0) && (itout<vecout_end)) {
+      *itout=hfcast<T>(*itin);
+      --vec_count;
+      ++itout;
+      ++itin;
+    };
+    --count;
+    ++itidx;
+    if (itidx==index_end) itidx=index;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Redistributes the values in one vector sequentially into another vector, given an offset and stride (interval) - can be used for a transpose operation
 //$COPY_TO HFILE START --------------------------------------------------
@@ -1101,9 +1266,14 @@ void hTranspose(const Iter vec,const Iter vec_end, const Iter invec,const Iter i
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  See also:
+
+  hVectorSeparation
+
 */
 template <class Iter>
-HNumber hVectorLength (const Iter vec, const Iter vec_end)
+HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 {
   HNumber sum=0;
   Iter it=vec;
@@ -1112,7 +1282,7 @@ HNumber hVectorLength (const Iter vec, const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns the absolute length of a vector between two ther vectors, i.e. Sqrt(Sum_i((x2_i-x1_i)^2)).
+//$DOCSTRING: Returns the absolute length of a vector between two N-dim vectors, i.e. Sqrt(Sum_i((x2_i-x1_i)^2)).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hVectorLength
 //-----------------------------------------------------------------------
@@ -1124,18 +1294,87 @@ HNumber hVectorLength (const Iter vec, const Iter vec_end)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  See also:
+
+  hVectorSeparation
+
 */
 template <class Iter>
-HNumber hVectorLength (const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
+HNumber HFPP_FUNC_NAME  (const Iter vec1,const Iter vec1_end, const Iter vec2,const Iter vec2_end)
 {
   HNumber sum=0;
   Iter it1(vec1),it2(vec2);
 
-  if ((vec1_end-vec1)<0) ERROR_RETURN("Illegal size of input vector 'vec1'.");
-  if ((vec2_end-vec2)<0) ERROR_RETURN("Illegal size of input vector 'vec2'.");
+  if ((vec1_end-vec1)<0) ERROR_RETURN_VALUE("Illegal size of input vector 'vec1'.",-1.0);
+  if ((vec2_end-vec2)<0) ERROR_RETURN_VALUE("Illegal size of input vector 'vec2'.",-1.0);
 
   while (it1!=vec1_end && it2!=vec2_end) {sum += pow(hfcast<HNumber>(*it2 - *it1),2); ++it1; ++it2;};
   return sqrt(sum);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Returns the length of the difference of two vectors (i.e., their separation).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hVectorSeparation
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Numeric output vector containing length of vec1-vec2")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+  
+  Usage:
+  
+  separation.vectorseparation(vec1,vec2) # separation -> |vec1-vec2|
+
+  Description:
+  
+  This function will loop over the first input vector, if it is shorter
+  than the last input vector. The length of the vector to sum (i.e.,
+  the number elements to sum over) is determined by the first vector.
+
+  The length of the output vector should then be
+  ``len(vec)=len(vec1)/len(vec2)``.
+
+  Example:
+  ary=hArray(float,[3,3],fill=range(9))
+  sep=hArray(float,[3])
+  sep.vectorseparation(hArray([1.,1,1]),ary)
+  #sep -> hArray(float, [3L], fill=[1.41421,5.38516,10.4881]) # len=3 slice=[0:3])
+  
+  See also:
+
+  hVectorLength
+
+*/
+template <class Iter, class Iter1, class Iter2>
+void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const Iter1 vec1,const Iter1 vec1_end, const Iter2 vec2,const Iter2 vec2_end)
+{
+  Iter it(vec);
+  Iter1 it1(vec1);
+  Iter2 it2(vec2);
+
+  if ((vec_end-vec)<=0) ERROR_RETURN("Illegal size of output vector 'vec'.");
+  if ((vec1_end-vec1)<=0) ERROR_RETURN("Illegal size of input vector 'vec1'.");
+  if ((vec2_end-vec2)<0) ERROR_RETURN("Illegal size of input vector 'vec2'.");
+
+  *it=0.0;
+  while (it2!=vec2_end) {
+    *it += pow(hfcast<HNumber>(*it2 - *it1),2); 
+    ++it1; ++it2;
+    if  (it1==vec1_end) {
+      *it = sqrt(*it);
+      ++it; if (it==vec_end) break;
+      *it=0.0; 
+      it1=vec1;
+    };
+  };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

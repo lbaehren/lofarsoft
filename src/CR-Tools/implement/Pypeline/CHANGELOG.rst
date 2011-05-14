@@ -1,4 +1,35 @@
-2011-05-03 - Rev xxxx
+
+
+2011-05-14 - Rev 7703
+=====================
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+ -Introduced 'ERROR_RETURN' and ERROR_RETURN_VALUE for c++ to throw standardized error
+  messages and return from the function.
+- streamlined  :func:`hDotProduct`
+- Added :func:`hFillRangeVec`  to fill an array of vectors with some suitable
+  numbers (start and increment values are then also vectors)
+- renamed the python methods array.transpose to array.Transpose to not
+  shadow the :func:`hTranspose` method
+- added function :func:`hSkewLinesDistanceToClosestApproach`
+- renamed :func:`hArray_find_locations` to :func:`hArray_Find`  
+- added function :func:`hArray_Select` to select elements in a list
+- renamed :func:`hArray_transpose` to
+  :func:`hArray_Transpose`. Accrodingly the method also starts with
+  upper case.
+- added testskewlines.py added testskewlines2.py to test distance finding
+- added testpulsecal2.py to phase-calibrate on a pulse 
+- New task :class:`DirectionFitTriangles` which will fit the direction
+  of a source and also allows one to iterate on cable delays to get a
+  consistent solution.
+- added :func:`hShiftFFT` to shift a data set by fractional samples in
+  the FFT domain
+-:class:`CrossCorrelateAntennas` uses hShiftFFT to produced
+  oversampled cross-correlations that make it easier to locate the
+  peak.
+
+
+2011-05-03 - Rev 7650
 =====================
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
@@ -791,4 +822,7 @@ Todo
   :func:`nyquistflip`).
 - Use ``shutils rmtree`` for :func:`hArray_write` to remove old file
   directory.
+-hCoorindateConvert can only do AZELR -> XYZ and not vice versa. Use
+  pytmf to do that (and check other conversions as well), also,
+  autmatically loop over all 3-tuples in vector.
 

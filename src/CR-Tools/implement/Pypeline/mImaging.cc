@@ -101,6 +101,12 @@ using namespace casa;
     Spherical        Spherical coordinates                       :math:`\\vec x = (r,\\phi,\\theta)`
     Time             Time
     ================ =========================================== ====================================
+
+    Precede the Coordinate Types by ``CoordinateTypes.``, i.e., CoordinateTypes.AzElRadius.
+
+    Example:
+
+    hCoordinateConvert(meandirection,CoordinateTypes.AzElRadius,azelr,CoordinateTypes.Cartesian,False)
   */
 
 template <class Iter>
@@ -211,12 +217,10 @@ void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
         it_w1_end+=nfreq;
         if (it_w1_end>=it_w2_end) { //has cycled through all antenna pairs/all baselines, restart at beginning and advance to next pixel
           if (it_im!=it_im_end) {
-            ERROR("hImageFromCCM: Mismatch between image vector, ccm, and weights");
-            return;
+            ERROR_RETURN("hImageFromCCM: Mismatch between image vector, ccm, and weights");
           };
           if (it_ccm!=ccm_end) {
-            ERROR("Error - hImageFromCCM: Mismatch between ccm and weights");
-            return;
+            ERROR_RETURN("Error - hImageFromCCM: Mismatch between ccm and weights");
           };
           it_im_start=it_im_end;  //first frequency bin of NEXT PIXEL
           it_im_end=it_im_start+nfreq;
@@ -618,7 +622,6 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
 
 //$DOCSTRING: Get pixel coordinates for given vector of world coordinates
 //$COPY_TO HFILE START --------------------------------------------------

@@ -1162,6 +1162,13 @@ class WorkSpace(object):
         self._modified_parameters=set([])
 
 
+    def clearModification(self,p):
+        """
+        Remove parameter from modification list.
+        """
+        if p in self._modified_parameters:
+            del self._modified_parameters[p]
+
     def addParameterDefinition(self,p,v):
         """
         Add the defintion dict of one parameter to the overall dict containing parameter definitions.
@@ -1477,6 +1484,23 @@ class WorkSpace(object):
             self[p] # recalculate the parameters where the local value was deleted
         self.clearModifications()
 
+    def updateParameter(self,p,forced=False):
+        """
+        Recalculates the named parameter and assign it
+        the default values if it depends on a value that was
+        modified. Note that parameters which had a default function at
+        initialization but were set explicitly will not be
+        recalculated. Use ws.reset() or del ws.par first.
+
+        *forced* = False - If True, then update all parameters
+         irrespective of whether they depend on modified parameters or
+         not.
+
+        """
+        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][default])==types.FunctionType)):
+            delattr(self,"_"+p) # delete buffered value so that it will be recalculated
+            self[p] # recalculate the parameters where the local value was deleted
+            self.clearModification(p)
 
     def getParameterDoc(self,name):
         """

@@ -618,7 +618,7 @@ def hArray_transpose(self,ary=None):
     hRedistribute and is not well suited to deal with slicing and
     looping.
 
-    Note: vec.transpose = hArray_transpose (and not teh c++ function
+    Note: vec.transpose = hArray_transpose (and not the c++ function
     hTranspose). This function (hArray_transpose) is a python
     interface to hTranspose that also changes the shape of the array
     (which is something the c++ function cannot do by design of the
@@ -1163,7 +1163,7 @@ def asList(val):
     else:
         return list(val)
 
-hArray_find_location_functions={
+hArray_Find_functions={
     "=":(hCount,hFind),
     ">":(hCountGreaterThan,hFindGreaterThan),
     "<":(hCountLessThan,hFindLessThan),
@@ -1173,11 +1173,11 @@ hArray_find_location_functions={
     "outside":(hCountOutside,hFindOutside)
     }
 
-def hArray_find_locations(self,operator,threshold1,threshold2=None):
+def hArray_Find(self,operator,threshold1,threshold2=None):
     """
     Usage:
 
-    ``ary.find_location("operator",threshold1,(threshold2)) -> indexlist of locations``
+    ``ary.Find("operator",threshold1,(threshold2)) -> indexlist of locations``
 
     Description:
 
@@ -1194,10 +1194,10 @@ def hArray_find_locations(self,operator,threshold1,threshold2=None):
     Example::
 
         >>> v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
-        >>> v.find_locations(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
+        >>> v.Find(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
 
     """
-    n=hArray_find_location_functions[operator][0](self,threshold1) if threshold2==None else hArray_find_location_functions["operator"][0](self,threshold1,threshold2)
+    n=hArray_Find_functions[operator][0](self,threshold1) if threshold2==None else hArray_Find_functions["operator"][0](self,threshold1,threshold2)
     if type(self) in hAllVectorTypes:
         indexlist=Vector(int,n)
     elif type(self) in hAllArrayTypes:
@@ -1205,10 +1205,40 @@ def hArray_find_locations(self,operator,threshold1,threshold2=None):
     else:
         return None
     if threshold2==None:
-        n=hArray_find_location_functions[operator][1](indexlist,self,threshold1)
+        n=hArray_Find_functions[operator][1](indexlist,self,threshold1)
     else:
-        hArray_find_location_functions[operator][1](indexlist,self,threshold1,threshold2)
+        hArray_Find_functions[operator][1](indexlist,self,threshold1,threshold2)
     return indexlist
+
+
+def hArray_Select(self,*args,**kwargs):
+    """
+    Usage:
+
+    ``ary.Select('operator',threshold1,(threshold2)) -> [ary_i </=/> threshold]``
+
+    Description:
+
+    This function will return an array with elements the input array
+    which fulfill the search criterion (i.e. to be equal, or
+    above/below a threshold value).
+
+    *operator* = '=','>','<','>=','<=','between','outside'
+
+    *threshold1* = the threshold to compare vector values with
+
+    *threshold2* = the second threshold if applicable (for between, outside)
+
+    See also:
+
+    hArray_Find
+    
+    Example::
+
+        v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
+        v.Select(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
+    """
+    return self[self.Find(*args,**kwargs)]
 
 
 # Fourier Transforms
@@ -1232,14 +1262,13 @@ for v in hAllArrayTypes:
     setattr(v,"vec",hArray_vec)
     setattr(v,"val",hArray_val)
     setattr(v,"new",hArray_new)
-    setattr(v,"none",hArray_find_locations)
     setattr(v,"none",hArray_none)
     setattr(v,"read",hArray_read)
     setattr(v,"list",hArray_list)
     setattr(v,"write",hArray_write)
     setattr(v,"writeheader",hArray_writeheader)
     setattr(v,"mprint",hArray_mprint)
-    setattr(v,"transpose",hArray_transpose)
+    setattr(v,"Transpose",hArray_transpose)
     setattr(v,"copy_resize",hArray_copy_resize)
     setattr(v,"newreference",hArray_newreference)
     setattr(v,"getSlicedArray",hArray_getSlicedArray)
@@ -1252,7 +1281,8 @@ for v in hAllArrayTypes:
 
 
 for v in hAllContainerTypes:
-    setattr(v,"find_locations",hArray_find_locations)
+    setattr(v,"Find",hArray_Find)
+    setattr(v,"Select",hArray_Select)
     for s in hAllContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hAllContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
