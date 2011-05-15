@@ -78,7 +78,7 @@ then
 elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
 then
    egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_red -coh_only -raw /data/ -rfi\n", $1, $1)}' > $outfile
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw /data/ -rfi\n", $1, $1)}' >> $outfile
+   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw \"/cep2/locus???_data/\" -rfi\n", $1, $1)}' >> $outfile
 elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
 then
    egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -coh_only -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $2, $1)}' > $outfile
@@ -134,20 +134,19 @@ else # if [[ $cep2 == 1 ]]
     rm -rf $outfile.all.sh
     while read line 
     do
-        rm -rf $outfile.$ii
         obsid=`echo $line | sed 's/^.*-id //g' | awk '{print $1}'`  
+        rm -rf $outfile.$obsid.$ii
         #create a shell script per line to run on locus nodes
         incoherent=`echo $line | grep incoh_only`
         if [[ $incoherent == "" ]]
         then
            echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"'  >> $outfile.$obsid.$ii
-           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; mkdir -p '${obsid}'_plots"' >> $outfile.$obsid.$ii
-           echo 'cexec locus:0-99  "scp /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*prepout /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*prepout '`whoami`'@locus100:/data/LOFAR_PULSAR_ARCHIVE_locus100/'${obsid}'_plots/"'   >> $outfile.$obsid.$ii
-           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus100/'${obsid}'_plots/; use LUS; ~alexov/thumbnail_combine.sh"'  >> $outfile.$obsid.$ii
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; mkdir -p '${obsid}'_plots"' >> $outfile.$obsid.$ii
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; use LUS; mount_locus_nodes.sh; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*th.png /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*prepout /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*th.png /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*prepout '${obsid}'_plots"' >> $outfile.$obsid.$ii          
+#           echo 'cexec locus:0-99  "scp /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*prepout /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*prepout '`whoami`'@locus100:/data/LOFAR_PULSAR_ARCHIVE_locus100/'${obsid}'_plots/"'   >> $outfile.$obsid.$ii
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_plots/; use LUS; ~alexov/thumbnail_combine.sh"'  >> $outfile.$obsid.$ii
         else
-           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; mkdir -p '${obsid}'"' >> $outfile.$obsid.$ii
-           echo 'cexec locus:0-99 "scp /data/LOFAR_PULSAR_ARCHIVE_locus*/${obsid}/*stokes '`whoami`'@locus101:/data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'"'  >> $outfile.$obsid.$ii
-           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; use LUS; ~alexov/'$line' -del"' >> $outfile.$obsid.$ii
+           echo 'cexec hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; use LUS; mount_locus_nodes.sh; ~alexov/'$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.$ii
         fi
 	    echo "./$outfile.$obsid.$ii >& $outfile.$obsid.$ii.log &" >> $outfile.all.sh
 	    ii=`expr $ii + 1`
