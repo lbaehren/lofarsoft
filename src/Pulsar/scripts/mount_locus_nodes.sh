@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # cross mount all the locus disks for the next 10 minutes
 
