@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.6
+VERSION=2.7
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -390,11 +390,56 @@ echo "Start date: $date_start" >> $log
 echo "PARSET:" $PARSET
 echo "PARSET:" $PARSET >> $log
 
+hold_pythonpath=`echo $PYTHONPATH`
+
 if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 then
-   echo cp $PARSET ${location}/${OBSID}.parset >> $log
-   cp $PARSET ${location}/${OBSID}.parset
-fi
+   #unsetenv PYTHONPATH
+   export PYTHONPATH=""
+   echo "python /home/alexov/LOFAR/RTCP/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
+   python /home/alexov/LOFAR/RTCP/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
+   PARSET=${location}/${OBSID}.parset
+   #setenv PYTHONPATH $hold_pythonpath
+   export PYTHONPATH="$hold_pythonpath"
+   
+   #set up the beam ra,dec positions based on TA beam offsets, if TA raings > 0
+   nrTArings=-1
+   nrTArings=`cat $PARSET | grep -i "nrTabRings" | head -1 | awk -F "= " '{print $2}'`
+   if [[ $nrTArings > 0 ]]
+   then
+      nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
+      ra_center=`cat $PARSET | grep -i "Observation.Beam\[0\].angle1" | head -1 | awk -F "= " '{print $2}'`
+      dec_center=`cat $PARSET | grep -i "Observation.Beam\[0\].angle2" | head -1 | awk -F "= " '{print $2}'`
+      ii=1
+      while (( $ii < $nrTiedArrayBeams ))
+      do
+         #get the offsets
+         ra_offset=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].angle1" | head -1 | awk -F "= " '{print $2}'`
+         dec_offset=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].angle2" | head -1 | awk -F "= " '{print $2}'`
+         ra_beam=`echo $ra_center $ra_offset | awk '{printf("%17.16f\n",$1 + $2)}'`
+         dec_beam=`echo $dec_center $dec_offset | awk '{printf("%18.17f\n",$1 + $2)}'`
+         echo "Observation.Beam[$ii].angle1 = $ra_beam" >> $PARSET
+         echo "Observation.Beam[$ii].angle2 = $dec_beam" >> $PARSET
+         echo "RA (rad) of TiedArrayBeam[$ii] == $ra_beam" >> $log
+         echo "Dec (rad) of TiedArrayBeam[$ii] == $dec_beam" >> $log
+         echo "RA (rad) of TiedArrayBeam[$ii] == $ra_beam" 
+         echo "Dec (rad) of TiedArrayBeam[$ii] == $dec_beam" 
+         ii=$(( $ii + 1 ))
+      done
+   else 
+      nrTArings=0
+      nrTiedArrayBeams=0
+   fi
+else
+   nrTArings=`cat $PARSET | grep -i "nrTabRings" | head -1 | awk -F "= " '{print $2}'`
+   if [[ $nrTArings > 0 ]]
+   then
+      nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
+   else
+	   nrTArings=0
+	   nrTiedArrayBeams=0
+   fi
+fi  #end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 date_obs=`grep Observation.startTime *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
 date_seconds=`date -d "$date_obs"  "+%s"` 
@@ -1464,9 +1509,18 @@ do
 				        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
 				        status=$?	
 	                else 
-					    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
-					    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
-				        status=$?	
+	                    if [[ $nrTArings == 0 ]]
+	                    then
+						    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
+						    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
+					        status=$?	
+					     else
+					        # get the beam_num from the file name of the TA beam (assume single file TA beams per machine)
+					        beam_num=`head -1 ${location}/${STOKES}/SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+						    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 -B ${beam_num} ${location}/${OBSID}.parset >> $log
+						    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 -B ${beam_num} ${location}/${OBSID}.parset
+					        status=$?	
+					     fi
                     fi
 			        
 					if [ $status -ne 0 ]
