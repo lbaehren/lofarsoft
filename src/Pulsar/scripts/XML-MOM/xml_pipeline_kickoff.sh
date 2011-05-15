@@ -148,7 +148,7 @@ else # if [[ $cep2 == 1 ]]
         else
            echo 'cexec hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; use LUS; mount_locus_nodes.sh; ~alexov/'$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.$ii
         fi
-	    echo "./$outfile.$obsid.$ii >& $outfile.$obsid.$ii.log &" >> $outfile.all.sh
+	    echo "./$outfile.$obsid.$ii > $outfile.$obsid.$ii.log &" >> $outfile.all.sh
 	    ii=`expr $ii + 1`
     done < $outfile.all
 fi #end if [[ $cep2 == 0 ]]
