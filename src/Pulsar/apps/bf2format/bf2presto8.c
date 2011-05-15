@@ -34,6 +34,7 @@ int AVERAGE_OVER = 600;
 int NUM_BLOCKGROUPS = -1;
 float N_sigma = 7;
 int old_bnr = 0;
+int debug = 0;
 
 #define INITIALSUBBANDS			1
 #define WRITEFUNC(b)			(b[STOKES_SWITCH]) // I=0,Q=1,U/2=2,V/2=3
@@ -66,6 +67,7 @@ void usage(){
   puts("-S\tStokes Parameter to write out (Default = StokesI):\n\t 0 = StokesI\n\t 1 = StokesQ\n\t 2 = StokesU\n\t 3 = StokesV");
   puts("-r\tData further than <r>*sigma from the mean will be clipped (Default = 7)");
   puts("-t\tINCOHERENT data in Second Transpose mode");
+  puts("-d\t Turns on debugging - which turns on STDOUT messages when reading and writing data");
   puts("-T <number of subbands>\t COHERENT data in Second Transpose mode");
 }
 
@@ -407,9 +409,10 @@ void secondTranspose( FILE **inputfiles, int beamnr)
 	FILE *outputfile[CHANNELS]; 
 	sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
 	if ( BEAMS > 1 || FLYS_EYE == 1 ) {
-	  sprintf(buf2, "beam_%d/%s", beamnr, buf ); /* prepend beam name */
+	     sprintf(buf2, "beam_%d/%s", beamnr, buf ); /* prepend beam name */
 	} 
-	fprintf(stderr,"SUBBAND: %d CHANNEL %d BLOCK: %d -> %s\n", sub, chan, x, buf2);
+    if (debug)
+	   fprintf(stderr,"SUBBAND: %d CHANNEL %d BLOCK: %d -> %s\n", sub, chan, x, buf2);
 	index++;
 	if( x == 0 ){
 	  outputfile[chan] = fopen( buf2, "wb" );
@@ -1140,6 +1143,11 @@ int main( int argc, char **argv ) {
 	    exit(-1);
 	  }
 	  break;
+
+    case 'd':
+      debug = 1;
+      fprintf(stderr,"Debug/STDOUT messages turned on\n");
+      break; 
 	  
 	case 'h':
 	  usage();
