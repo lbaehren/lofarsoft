@@ -100,7 +100,7 @@ fi
 
 
 #assume anything without long paths which contain incoherentstokes or stokes, is CS data for now
-find ./ -name "*.th.png" -print | sort -d | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g" -e "s/RSP/_RSP/g" | awk '{print $1 $3"\\n_"$5}' > /tmp/$$_combine_col2.txt
+find ./ -name "*.th.png" -print | sort -d | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g" -e "s/RSP/_RSP/g" | awk '{print $1"_"$3"\\n_"$5}' > /tmp/$$_combine_col2.txt
 
 find ./ -name "*.th.png" -print | sort -d |  sed -e "s/^.*beam/beam/g" -e "s/\/.*//g" -e "s/\.//g" | awk '{print "\\n"$1}' > /tmp/$$_combine_col4.txt
 
@@ -112,12 +112,12 @@ then
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$3" "$2"\\nChiSq = " $4"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt |  sed 's/\\n//g' | awk '{print "file="$1" beam="$2" obs="$3" chi-sq="$4}'   > chi-squared.txt
 else
-   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none -pointsize 10.2 "$0" combined.png"}' > combine_png.sh
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt |  sed 's/\\n//g' | awk '{print "file="$1" obs="$2" chi-sq="$3}' > chi-squared.txt
 fi
 
 #delete intermediate files
-rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt /tmp/$$_combine_col4.txt
+#rm /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt /tmp/$$_combine_col4.txt
 
 #make sure there is text in the new shell script
 wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
