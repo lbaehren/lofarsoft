@@ -707,7 +707,8 @@ int main( int argc, char **argv )
   int channellist[1000];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
-  float lowerBandFreq, lowerBandEdge, subband_width, bw, lofreq, sigma_limit;
+  float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
+  double lofreq;
   initApplication(&application, "bf2fits", "[options] inputfiles");
   application.switch_headerlist = 1;
   application.switch_header = 1;
@@ -720,7 +721,6 @@ int main( int argc, char **argv )
   sigma_limit = -1;
   debugpacking = 0;
   clipav = 0;
-  puts("YOU ARE SUCCESSFULLY EDITING ME!");
   if(argc < 2) {
     usage();
     return 0;
@@ -957,7 +957,7 @@ int main( int argc, char **argv )
       bw = 100.0;
     }
     subband_width = bw / nsubbands;
-    lofreq = lowerBandEdge + (subbandFirst*subband_width) - (subband_width/(2*CHANNELS));
+    lofreq = (double) lowerBandEdge + (subbandFirst*subband_width) - (subband_width/(2*CHANNELS));
 
     /*
 
@@ -1052,9 +1052,9 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       if (is_CS == 0) { // IS data
          sbpointer = strstr (filename, "_SB");
          sscanf(sbpointer, "%*3c%d", &subbandnr);
-         subintdata.freq_cent = lofreq + subbandnr * subintdata.bw;
+         subintdata.freq_cent = (double) lofreq + subbandnr * subintdata.bw;
       } else { // CS data
-         subintdata.freq_cent = lofreq + 0.5 * SUBBANDS * subintdata.bw;
+	subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
       }
       printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
 
