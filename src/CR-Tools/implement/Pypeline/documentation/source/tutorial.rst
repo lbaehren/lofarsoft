@@ -1097,9 +1097,10 @@ To see whether we have more peaks than expected, we first calculate
 the expected number of peaks for a Gaussian distribution and our
 ``blocksize``, as well as the error on that number::
 
-    >>> Npeaks_expected=funcGaussian(5,1,0)*blocksize
+    >>> Npeaks_expected = funcGaussian(5, 1,0)*blocksize
     0.04909742525458545
-    >>> Npeaks_error=sqrt(Npeaks_expected)
+
+    >>> Npeaks_error = sqrt(Npeaks_expected)
     0.22157938815373926
 
 So, that we can get a normalized quantity::
@@ -1113,8 +1114,8 @@ less peaks than expected and the data is clearly not Gaussian noise.
 We do the calculation of G using our STL vectors (even though speed is not
 of the essence here)::
 
-    >>> dataNonGaussianity = Vector(float,nAntennas)
-    >>> dataNonGaussianity.sub(dataNpeaks,Npeaks_expected)
+    >>> dataNonGaussianity = Vector(float, nAntennas)
+    >>> dataNonGaussianity.sub(dataNpeaks, Npeaks_expected)
     >>> dataNonGaussianity /= Npeaks_error
 
 The next stept is to make a nice table of the results and check
@@ -1140,8 +1141,8 @@ To check automatically whether all parameters are in the allowed
 range, we can use a little python helper function, using a python
 "dict" as database for allowed parameters::
 
-    >>> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
-    >>> CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"spikyness":4},qualitycriteria)
+    >>> qualitycriteria = {"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
+    >>> CheckParameterConformance(dataproperties[0], {"mean":1,"rms":2,"spikyness":4}, qualitycriteria)
 
 The first parameter is just the list of numbers of the mean, RMS,
 etc. of one antenna we created above. The second parameter is a dict,
@@ -1155,7 +1156,7 @@ Finally, we do not want to do this manually all the time. So, a little
 python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties::
 
-    >>> badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,blocksize=blocksize,verbose=False)
+    >>> badantennalist = CRQualityCheck(qualitycriteria, datafile=datafile, dataarray=dataarray, blocksize=blocksize, verbose=False)
     Block=     0, Antenna   0: mean=  6.59, rms= 141.7, npeaks=    0, spikyness=  -0.22   ['rms']
     Block=     1, Antenna   0: mean=  6.63, rms= 138.8, npeaks=    0, spikyness=  -0.22   ['rms']
     Block=     2, Antenna   0: mean=  6.62, rms= 141.4, npeaks=    0, spikyness=  -0.22   ['rms']
@@ -1188,20 +1189,94 @@ and returns a list with failed antennas and their properties::
     Block=    60, Antenna   0: mean=  6.59, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
     Block=    61, Antenna   0: mean=  6.64, rms= 135.6, npeaks=    0, spikyness=  -0.22   ['rms']
 
-    badantennalist[0] => [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
+    >>> badantennalist[0]
+    [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
 
-(first the antenna number, then the block, then a list with the mean,
-rms, npeaks, and spikyness, and finally the failed fields)
+(first the antenna number, then the block, then a list with the
+*mean*, *rms*, *npeaks*, and *spikyness*, and finally the failed
+fields)
 
-Note, that this function can be called with "file=None". In this case
-the data provided in the datararray will be used.
+Note, that this function can be called with ``file=None``. In this
+case the data provided in the datararray will be used.
 
 
-.. Finding peaks in a vector
-.. -------------------------
+Finding peaks in a vector
+-------------------------
+
+In the following example we try to find peaks in some artificially
+generated data.
+
+First we make a test time series data set for 4 antennas::
+
+    >>> data = hArray(float, [4,512], name='Random series with peaks')
+
+and fill it with random data that have arbitrary offsets::
+
+    >>> data.random(-1024,1024)
+    >>> data[...] += Vector([-128.,256., 385.,-50.])
+
+Then we put some peaks at location 2-3, 32, and 64-67 in each of the 4
+data sets::
+
+    >>> for i in range(4):
+    ...     data[i,[2,3,32,64,65,67],...] = Vector([4096.,5097,-4096,4096,5099,3096])
+
+Now, we reverse-engineer and try finding all 5 sigma peaks::
+
+    >>> nsigma = 5
+
+First make a scratch array that will contain the locations of the
+peaks.  A location is actually a 'slice' in the array, i.e. given by
+its beginning and ending position (plus one). The length of the return
+array must be pre-allocated and should be long enough to contain all
+peaks (at maximum as long as the input array)::
+
+    >>> datapeaks = hArray(int, [4,5,2], name="Location of peaks")
+
+Now, retrieve the mean and RMS of the array to set the thresholds
+above and below which one considers a peak to be significant::
+
+    >>> datamean = data[...].mean()
+    >>> datathreshold2 = data[...].stddev(datamean)
+    >>> datathreshold2 *= nsigma
+    >>> datathreshold1 = datathreshold2*(-1)
+    >>> datathreshold1 += datamean
+    >>> datathreshold2 += datamean
+
+Finally, we determine the input parameters for the search algorithm::
+
+    >>> maxgap = Vector(int, len(datamean), fill=10)
+
+The gap vector tells the algorithm how many samples can be between two
+values that are above threshold, so that the two peaks are considered
+as one::
+
+    >>> minlength = Vector(int, len(datamean), fill=1)
+
+A minimum length can be specified to exclude peaks that consists of
+only a single or a few values (no relevant here, so set to 1, i.e. all
+peaks are relevant). Then call :func:`hFindSequenceOutside` (or Between, GreatererThan, LessEqual ...)::
+
+    >>> npeaks = datapeaks[...].findsequenceoutside(data[...], datathreshold1, datathreshold2, maxgap, minlength)
+
+The return value is the number of peaks found (in each row of the data set)::
+
+    >>> npeaks
+    Vector(int, 4, fill=[3,3,3,3])
+
+And the slices are actually contained in the return vector for each antenna::
+
+    >>> datapeaks.mprint()
+    [2,4,32,33,64,66,0,0,0,0]
+    [2,4,32,33,64,66,0,0,0,0]
+    [2,4,32,33,64,66,0,0,0,0]
+    [2,4,32,33,64,66,0,0,0,0]
+
 
 .. Fourier transforms (FFT) and cross correlation
 .. ----------------------------------------------
+
+
 
 .. Coordinate transformation
 .. -------------------------
