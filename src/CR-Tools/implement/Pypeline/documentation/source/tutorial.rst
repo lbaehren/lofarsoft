@@ -1039,3 +1039,170 @@ Alternatively you can use the method::
 
 which does this automatically.
 
+
+.. Plotting
+.. ========
+
+.. [in preparation]
+
+
+Some use cases
+==============
+
+.. [in preparation]
+
+Quality check of time series data
+---------------------------------
+
+For an automatic pipeline it is essential to check whether the data is
+of good quality, or whether one needs to flag particular
+antennas. Here we demonstrate a simple, but effective way to do this.
+
+The basic parameters to look at are the mean value of the time series
+(indicating potential DC offsets), the root-mean-square (RMS)
+deviation (related to the power received), and the number of peaks in
+the data (indicating potential RFI problems).
+
+For cosmic ray data, we expect spikes and peaks to be in the middle of
+a trace, so we will just look at the first or/and last quarter of a
+data set and set the block size accordingly::
+
+    >>> blocksize = min(filesize/4, maxblocksize)
+
+We will then read this block of data into an appropriately sized data array::
+
+    >>> dataarray = datafile.set("blocksize",blocksize).set("block",3)["Voltage"]
+
+The array now contains all the measured voltages of the selected
+antennas in the file.
+
+First we calculate the mean over all samples for each antennas (and
+make use of the looping through the Ellipsis (...) object)::
+
+    >>> datamean = dataarray[...].mean()
+    Vector(float, 16, fill=[7.17281,-7.79052,-1.97656,-0.283491,5.22623,-1.53358,0.440468,-6.22257,1.53373,4.74461,6.70252,-4.63748,-4.67412,7.92508,0.101472,-4.59787])
+
+Similarly we get the RMS (where we spare the algorithm from recalculating the
+mean, by providing it as input - actually a list of means)::
+
+    >>> dataRMS = dataarray[...].stddev(datamean)
+    Vector(float, 16, fill=[10.4218,10.3521,10.1878,11.9229,10.0157,11.8848,9.56963,10.0076,10.7717,10.1781,10.3913,10.879,9.58076,10.2835,10.4557,9.78504])
+
+and finally we get the total number of peaks 5 sigma above the noise::
+
+    >>> dataNpeaks = dataarray[...].countgreaterthanabs(dataRMS*5)
+    Vector(int, 1, fill=[0])
+
+To see whether we have more peaks than expected, we first calculate
+the expected number of peaks for a Gaussian distribution and our
+``blocksize``, as well as the error on that number::
+
+    >>> Npeaks_expected=funcGaussian(5,1,0)*blocksize
+    0.04909742525458545
+    >>> Npeaks_error=sqrt(Npeaks_expected)
+    0.22157938815373926
+
+So, that we can get a normalized quantity::
+
+    >>> G = (Npeaks_detected - Npeaks_expected)/Npeaks_error
+
+which should be of order unity if we have roughly a Gaussian
+distribution. If it is much larger or less than unity we have more or
+less peaks than expected and the data is clearly not Gaussian noise.
+
+We do the calculation of G using our STL vectors (even though speed is not
+of the essence here)::
+
+    >>> dataNonGaussianity = Vector(float,nAntennas)
+    >>> dataNonGaussianity.sub(dataNpeaks,Npeaks_expected)
+    >>> dataNonGaussianity /= Npeaks_error
+
+The next stept is to make a nice table of the results and check
+whether these parameters are within the limits we have imposed (based
+on empirical studies of the data).
+
+To ease the operation we combine all the data into one python array
+(using the zip function - zip, as in zipper)::
+
+    >>> dataproperties = zip(selectedAntennas,datamean,dataRMS,dataNpeaks,dataNonGaussianity)
+
+which is a rather nasty collection of numbers. So, we print a nice
+table (restricting it to the first 5 antennas):
+
+    >>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)
+    Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22
+
+Clearly this is a spiky dataset, with only one antenna not being
+affected by too many peaks (which is in fact not the case for the
+first block of that dataset).
+
+To check automatically whether all parameters are in the allowed
+range, we can use a little python helper function, using a python
+"dict" as database for allowed parameters::
+
+    >>> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-3,3)}
+    >>> CheckParameterConformance(dataproperties[0],{"mean":1,"rms":2,"spikyness":4},qualitycriteria)
+
+The first parameter is just the list of numbers of the mean, RMS,
+etc. of one antenna we created above. The second parameter is a dict,
+describing which parameter to find at which position in the input
+list, and the third parameter is yet another dict specifying for each
+parameter the range of allowed upper and lower values. The result is a
+list of parameter names, where the antennas failed the test. The list
+is empty if the antenna passed it.
+
+Finally, we do not want to do this manually all the time. So, a little
+python function is available, that does the quality checking for you
+and returns a list with failed antennas and their properties::
+
+    >>> badantennalist=CRQualityCheck(qualitycriteria,datafile=datafile,dataarray=dataarray,blocksize=blocksize,verbose=False)
+    Block=     0, Antenna   0: mean=  6.59, rms= 141.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     1, Antenna   0: mean=  6.63, rms= 138.8, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     2, Antenna   0: mean=  6.62, rms= 141.4, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     3, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     4, Antenna   0: mean=  6.61, rms= 140.9, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     5, Antenna   0: mean=  6.60, rms= 137.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     6, Antenna   0: mean=  6.62, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     7, Antenna   0: mean=  6.62, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     8, Antenna   0: mean=  6.63, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     9, Antenna   0: mean=  6.63, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    10, Antenna   0: mean=  6.63, rms= 140.9, npeaks=    1, spikyness=   4.29   ['rms', 'spikyness']
+    Block=    11, Antenna   0: mean=  6.60, rms= 142.4, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    12, Antenna   0: mean=  6.61, rms= 143.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    13, Antenna   0: mean=  6.61, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    14, Antenna   0: mean=  6.59, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    46, Antenna   0: mean=  6.61, rms= 142.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    47, Antenna   0: mean=  6.60, rms= 136.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    48, Antenna   0: mean=  6.59, rms= 141.1, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    49, Antenna   0: mean=  6.60, rms= 138.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    50, Antenna   0: mean=  6.63, rms= 143.8, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    51, Antenna   0: mean=  6.59, rms= 139.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    52, Antenna   0: mean=  6.58, rms= 141.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    53, Antenna   0: mean=  6.64, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    54, Antenna   0: mean=  6.61, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    55, Antenna   0: mean=  6.60, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    56, Antenna   0: mean=  6.62, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    57, Antenna   0: mean=  6.60, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    58, Antenna   0: mean=  6.60, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    59, Antenna   0: mean=  6.60, rms= 135.8, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    60, Antenna   0: mean=  6.59, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=    61, Antenna   0: mean=  6.64, rms= 135.6, npeaks=    0, spikyness=  -0.22   ['rms']
+
+    badantennalist[0] => [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
+
+(first the antenna number, then the block, then a list with the mean,
+rms, npeaks, and spikyness, and finally the failed fields)
+
+Note, that this function can be called with "file=None". In this case
+the data provided in the datararray will be used.
+
+
+.. Finding peaks in a vector
+.. -------------------------
+
+.. Fourier transforms (FFT) and cross correlation
+.. ----------------------------------------------
+
+.. Coordinate transformation
+.. -------------------------
+
