@@ -28,7 +28,7 @@ class LocatePulseTrain(tasks.Task):
     pulse in the sum of all antennas.
 
     The task calculates noise and threshold level above which to find
-    pulse trains. A pulse train can have gaps of some N=maxgaps
+    pulse trains. A pulse train can have gaps of some `N=maxgaps`
     samples which are below the threshold and yet are considered part
     of the pulse train (i.e., this is the maximum separation of
     individual pulses to be considered part of the pulse train.).
@@ -37,7 +37,7 @@ class LocatePulseTrain(tasks.Task):
     ``Task.start`` and ``Task.end``. The cut-out time series is
     returned in ``Task.timeseries_data_cut``.
 
-    See hFindSequenceGreaterThan for a description of the other
+    See :func:`hFindSequenceGreaterThan` for a description of the other
     parameters.
 
     **See also:**
@@ -47,6 +47,7 @@ class LocatePulseTrain(tasks.Task):
     **Example**
 
     ::
+
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=["017000001", "017000002", "017000005", "017000007", "017001009", "017001010", "017001012", "017001015", "017002017", "017002019", "017002020", "017002023", "017003025", "017003026", "017003029", "017003031", "017004033", "017004035", "017004037", "017004039", "017005041", "017005043", "017005045", "017005047", "017006049", "017006051", "017006053", "017006055", "017007057", "017007059", "017007061", "017007063", "017008065", "017008066", "017008069", "017008071", "017009073", "017009075", "017009077", "017009079", "017010081", "017010083", "017010085", "017010087", "017011089", "017011091", "017011093", "017011095"]
@@ -100,7 +101,7 @@ class LocatePulseTrain(tasks.Task):
         self.start=self.indexlist[self.maxseq,0]
         self.end=self.indexlist[self.maxseq,1]
         self.cutlen=int(2**ceil(log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
-        
+
         self.start-=self.prepulselen; self.end=self.start+self.cutlen
 
         #Cut the data around the main pulse
@@ -109,7 +110,7 @@ class LocatePulseTrain(tasks.Task):
                 self.timeseries_data_cut[...].copy(self.timeseries_data[...,self.start:self.end])
             else:
                 self.timeseries_data_cut.copy(self.timeseries_data[self.start:self.end])
-        
+
 
 class CrossCorrelateAntennas(tasks.Task):
     """
@@ -149,6 +150,7 @@ class CrossCorrelateAntennas(tasks.Task):
     **Example:**
 
     ::
+
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
@@ -196,7 +198,7 @@ class CrossCorrelateAntennas(tasks.Task):
 
         self.fft_data /= self.crosscorr_data.shape()[-1]
 
-        if self.oversamplefactor>1: 
+        if self.oversamplefactor>1:
             self.shift=1.0/self.oversamplefactor
             for i in range(self.oversamplefactor):
                 self.crosscorr_data_orig[...].invfftw(self.fft_data[...])
@@ -230,6 +232,7 @@ class FitMaxima(tasks.Task):
     **Example:**
 
     ::
+
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
@@ -312,7 +315,7 @@ class DirectionFitTriangles(tasks.Task):
     of arrival and the positions of the antenna.
 
     Description:
-    
+
     This task uses the function
     :func:`hDirectionTriangulationsCartesian` to calculate a list of
     arrival directions in Cartesian coordinates of a pulse/source from
@@ -337,13 +340,14 @@ class DirectionFitTriangles(tasks.Task):
     than the light-time between two antennas.  Usually, when the three
     antennas are in a more or less horizontal plane, one of the
     solutions will appear to come from below the horizon (el < 0) and
-    can be discarded. With `sign_of_solution```one can pick either the
+    can be discarded. With `sign_of_solution` one can pick either the
     positive of the negative elevation.
 
-    If N triangles are provided then the *Directions*,
-    *Origins*, and *weights* vectors have N*(N-1)*(N-2)/6 results
-    (times number of components of each result, i.e. times three for
-    *origins* and times one for the rest.)
+    If :math:`N` triangles are provided then the *Directions*,
+    *Origins*, and *weights* vectors have
+    :math:`\\frac{N(N-1)(N-2)}{6}` results (times number of components
+    of each result, i.e. times three for *origins* and times one for
+    the rest.)
 
 
     The actually measured lag is assumed to consist of two parts: the
@@ -369,7 +373,7 @@ class DirectionFitTriangles(tasks.Task):
     **Example:**
 
     ::
-    
+
         file=open("$LOFARSOFT/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
         file["ANTENNA_SET"]="LBA_OUTER"
         file["BLOCKSIZE"]=2**17
@@ -387,7 +391,7 @@ class DirectionFitTriangles(tasks.Task):
         pulse.timeseries_data_cut[...]-=pulse.timeseries_data_cut[...].mean()
         pulse.timeseries_data_cut[...]/=pulse.timeseries_data_cut[...].stddev(0)
 
-        #Cross correlate all pulses with each other 
+        #Cross correlate all pulses with each other
         crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=5)
 
         #And determine the relative offsets between them
@@ -453,7 +457,7 @@ class DirectionFitTriangles(tasks.Task):
         self.enditer=False
         if self.verbose:
             allantennas=set(range(self.NAnt))
-            
+
         for it in range(self.maxiter):
             #Calculate directions from all triangles
             self.geometric_timelags.sub(self.timelags,self.delays)
@@ -461,16 +465,16 @@ class DirectionFitTriangles(tasks.Task):
 
             if self.doplot:  #store delays for plotting
                 self.delays_history.redistribute(self.delays,it,self.maxiter)
-                
+
             #Find antennas with zero closure errors.
             self.ngood=self.index.findlessthan(self.errors,self.error_tolerance).val()
 
             #Get mean position of good antennas
-            self.goodones.copyvec(self.centers,self.index,self.ngood,3) 
+            self.goodones.copyvec(self.centers,self.index,self.ngood,3)
             self.meancenter.mean(self.goodones[:self.ngood])
 
             #Get mean direction from good antennas
-            self.goodones.copyvec(self.directions,self.index,self.ngood,3) 
+            self.goodones.copyvec(self.directions,self.index,self.ngood,3)
             self.meandirection.mean(self.goodones[:self.ngood])           # mean direction of all good antennas
             self.meandirection /= self.meandirection.vectorlength().val() #normalize direction vector
 
@@ -512,7 +516,7 @@ class DirectionFitTriangles(tasks.Task):
             print "------------------------------------------------------------------------"
             print "Number of iterations used: Task.niter =",self.niter
             print " "
-            
+
         if self.doplot:
             self.delays_history /= self.unitscalefactor
             self.offset=cr.Vector(float,self.NAnt)
