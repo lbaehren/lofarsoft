@@ -1,10 +1,9 @@
-
-
 2011-05-14 - Rev 7703
 =====================
+
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
- -Introduced 'ERROR_RETURN' and ERROR_RETURN_VALUE for c++ to throw standardized error
+- Introduced 'ERROR_RETURN' and 'ERROR_RETURN_VALUE' for C++ to throw standardized error
   messages and return from the function.
 - streamlined  :func:`hDotProduct`
 - Added :func:`hFillRangeVec`  to fill an array of vectors with some suitable
@@ -12,28 +11,29 @@
 - renamed the python methods array.transpose to array.Transpose to not
   shadow the :func:`hTranspose` method
 - added function :func:`hSkewLinesDistanceToClosestApproach`
-- renamed :func:`hArray_find_locations` to :func:`hArray_Find`  
+- renamed :func:`hArray_find_locations` to :func:`hArray_Find`
 - added function :func:`hArray_Select` to select elements in a list
 - renamed :func:`hArray_transpose` to
   :func:`hArray_Transpose`. Accrodingly the method also starts with
   upper case.
 - added testskewlines.py added testskewlines2.py to test distance finding
-- added testpulsecal2.py to phase-calibrate on a pulse 
+- added testpulsecal2.py to phase-calibrate on a pulse
 - New task :class:`DirectionFitTriangles` which will fit the direction
   of a source and also allows one to iterate on cable delays to get a
   consistent solution.
 - added :func:`hShiftFFT` to shift a data set by fractional samples in
   the FFT domain
--:class:`CrossCorrelateAntennas` uses hShiftFFT to produced
+- :class:`CrossCorrelateAntennas` uses :func:`hShiftFFT` to produced
   oversampled cross-correlations that make it easier to locate the
   peak.
 
 
 2011-05-03 - Rev 7650
 =====================
+
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
-- addeed python method find_locations to get indexlist of values above/below/equal/between thresholds
+- added python method find_locations to get indexlist of values above/below/equal/between thresholds
 - deleted :func:`ADC2Voltage`, :func:`hRFIDownsampling`, :func:`hRFIBaselineFitting`,
   :func:`hRFIFlagging`, :func:`hRFIMitigation` from mRF.cc which depended on the old CRTools.
 - added :func:`hEndPointRadiation` (moved by Martin to a new file already)
@@ -46,6 +46,7 @@
 
 2011-05-02 - Rev xxxx
 =====================
+
   :Author: Pim Schelart <P.Schellart@astro.ru.nl>
 
 - Moved frequency range selection out of the :mod:`tbb` datareader module for simplicity.
@@ -54,11 +55,14 @@
 - Added :func:`hCountZero` to count the number of zero entries in an array.
 - Added :func:`hCountNonZero` to count the number of non-zero entries in an array.
 
+
 2011-05-01 - Rev xxxx
 =====================
+
   :Author: Pim Schelart <P.Schellart@astro.ru.nl>
 
 - Added :func:`hFFTConvert` to convert between FFTW and FFT CASA results.
+
 
 2011-04-18 - Rev 7573
 =====================
@@ -822,7 +826,7 @@ Todo
   :func:`nyquistflip`).
 - Use ``shutils rmtree`` for :func:`hArray_write` to remove old file
   directory.
--hCoorindateConvert can only do AZELR -> XYZ and not vice versa. Use
+- :func:`hCoorindateConvert` can only do AZELR -> XYZ and not vice versa. Use
   pytmf to do that (and check other conversions as well), also,
   autmatically loop over all 3-tuples in vector.
 
