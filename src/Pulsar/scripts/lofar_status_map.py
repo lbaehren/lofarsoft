@@ -18,7 +18,8 @@ import os, sys
 lofarsoft=os.environ['LOFARSOFT']
 
 chisq_file="chi-squared.txt"  # file from the pipeline
-stations_file="%s/release/share/pulsar/data/stations.txt" % (lofarsoft,) # location of George's stations.txt file
+#stations_file="%s/release/share/pulsar/data/stations.txt" % (lofarsoft,) # location of George's stations.txt file
+stations_file="/home/kondratiev/bin/stations.txt" # location of George's stations.txt file
 
 # at the core location, how many meters per degree latitude,longitude?
 # Assuming that http://www.csgnetwork.com/degreelenllavcalc.html is right,
@@ -26,6 +27,8 @@ stations_file="%s/release/share/pulsar/data/stations.txt" % (lofarsoft,) # locat
 metersToLat = 1.0/111284.65883820018
 metersToLong = 1.0/67266.45194985923
 
+imw_orig=200 # original width of the png thumbnail image
+imh_orig=140 # original height of the png thumbnail image
 imw=143 # width of png image of the station
 imh=100 # height of png image of the station
 figx=12.8 # h-size of the fig in inches
@@ -150,12 +153,6 @@ for i in np.arange(len(stations)):
 		lons[i] = 6.87018+(lats[i]-254745.0)*metersToLong
 		lats[i] = lat
 
-# modifying zooms, to make separate maps for HBA core with HBA0 ears and HBA1 ears separately
-if antenna == 'HBA':
-	zooms['core0'] = zooms['core']
-	zooms['core1'] = zooms['core']
-	del zooms['core']
-
 # loop over different zooms to make plots for
 # international, remote, etc. stations
 for z in zooms.keys():
@@ -166,7 +163,7 @@ for z in zooms.keys():
 	elif z == 'remote':
 		# criterium for RS stations
 		criterion = [(s[0] == 'R') for s in stations]
-	elif z[0:4] == 'core':
+	elif z == 'core':
 		# criterium for RS stations
 		criterion = [(s[0] == 'C') for s in stations]
 	else:
@@ -210,12 +207,16 @@ for z in zooms.keys():
 	for i in np.arange(len(x)):
 		try:
 			if cols[i] != 'red':
-				if antenna == 'HBA' and z[0:4] == 'core':
-					os.system("convert %s -scale %dx%d-0 -flatten -background white -crop %dx%d-0 %s.map.png 2>/dev/null" % \
-						  (station_info['%s%s%c' % (ss[i], antenna, z[4])][0], imw, imh, imw, imh, ss[i]))
+				if antenna == 'HBA' and z == 'core':
+					for ear in ['0', '1']:
+						os.system("convert %s -flatten -background white -crop %dx%d+25+15 -background %s label:'%s' +swap -gravity Center -append  %s.%c.map.png 2>/dev/null" % \
+							(station_info['%s%s%c' % (ss[i], antenna, ear)][0], imw_orig/2, imh_orig-15, (ear == '0' and 'Khaki' or 'Plum'), station_info['%s%s%c' % (ss[i], antenna, ear)][1], ss[i], ear))
+					os.system("convert %s.0.map.png %s.1.map.png +append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
+						(ss[i], ss[i], imw, imh, ss[i]))
+					os.system("rm -f %s.[01].map.png" % (ss[i]))
 				else:
-					os.system("convert %s -scale %dx%d-0 -flatten -background white -crop %dx%d-0 %s.map.png 2>/dev/null" % \
-						  (station_info['%s%s' % (ss[i], antenna)][0], imw, imh, imw, imh, ss[i]))
+					os.system("convert %s -flatten -background white -crop %dx%d+0+15 -background Khaki label:'%s' +swap -gravity Center -append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
+						(station_info['%s%s' % (ss[i], antenna)][0], imw_orig, imh_orig-15, station_info['%s%s' % (ss[i], antenna)][1], imw, imh, ss[i]))
 				im = plt.imread('%s.map.png' % (ss[i]))	
 				if offsets[ss[i]][2] == 0:
 					xp, yp = get_pixels (x[i], y[i], figx, figy, dpi)
@@ -235,7 +236,4 @@ for z in zooms.keys():
 
 	# make plot
 	if is_at_least_one_image:
-		if antenna == 'HBA' and z[0:4] == 'core':
-			plt.savefig("%s_%s%c_%s_%s_status.png" % (obsid, antenna, z[4], pulsar, z[0:4]))
-		else:
-			plt.savefig("%s_%s_%s_%s_status.png" % (obsid, antenna, pulsar, z))
+		plt.savefig("%s_%s_%s_%s_status.png" % (obsid, antenna, pulsar, z))
