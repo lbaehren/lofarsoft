@@ -14,13 +14,11 @@ import numpy as np
 import re
 import os, sys
 
-# Setting User name
-username=os.environ['USER']
-plotsdir="/home/%s/%s/plots" % (username, hostdir)
-
+# Getting LOFARSOFT location
+lofarsoft=os.environ['LOFARSOFT']
 
 chisq_file="chi-squared.txt"  # file from the pipeline
-stations_file="/home/kondratiev/bin/stations.txt"  # location of George's stations.txt file
+stations_file="%s/release/share/pulsar/data/stations.txt" % (lofarsoft,) # location of George's stations.txt file
 
 # at the core location, how many meters per degree latitude,longitude?
 # Assuming that http://www.csgnetwork.com/degreelenllavcalc.html is right,
