@@ -209,14 +209,14 @@ for z in zooms.keys():
 			if cols[i] != 'red':
 				if antenna == 'HBA' and z == 'core':
 					for ear in ['0', '1']:
-						os.system("convert %s -flatten -background white -crop %dx%d+25+15 -background %s label:'%s' +swap -gravity Center -append  %s.%c.map.png 2>/dev/null" % \
-							(station_info['%s%s%c' % (ss[i], antenna, ear)][0], imw_orig/2, imh_orig-15, (ear == '0' and 'Khaki' or 'Plum'), station_info['%s%s%c' % (ss[i], antenna, ear)][1], ss[i], ear))
+						os.system("convert %s -flatten -background white -crop %dx%d+25+16 -background %s -pointsize 14 label:'%s' +swap -gravity Center -append  %s.%c.map.png 2>/dev/null" % \
+							(station_info['%s%s%c' % (ss[i], antenna, ear)][0], imw_orig/2, imh_orig-16, (ear == '0' and 'Khaki' or 'Plum'), station_info['%s%s%c' % (ss[i], antenna, ear)][1], ss[i], ear))
 					os.system("convert %s.0.map.png %s.1.map.png +append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
 						(ss[i], ss[i], imw, imh, ss[i]))
 					os.system("rm -f %s.[01].map.png" % (ss[i]))
 				else:
-					os.system("convert %s -flatten -background white -crop %dx%d+0+15 -background Khaki label:'%s' +swap -gravity Center -append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
-						(station_info['%s%s' % (ss[i], antenna)][0], imw_orig, imh_orig-15, station_info['%s%s' % (ss[i], antenna)][1], imw, imh, ss[i]))
+					os.system("convert %s -flatten -background white -crop %dx%d+0+16 -background Khaki -pointsize 14 label:'%s' +swap -gravity Center -append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
+						(station_info['%s%s' % (ss[i], antenna)][0], imw_orig, imh_orig-16, station_info['%s%s' % (ss[i], antenna)][1], imw, imh, ss[i]))
 				im = plt.imread('%s.map.png' % (ss[i]))	
 				if offsets[ss[i]][2] == 0:
 					xp, yp = get_pixels (x[i], y[i], figx, figy, dpi)
@@ -236,4 +236,5 @@ for z in zooms.keys():
 
 	# make plot
 	if is_at_least_one_image:
+		plt.text(0.45, 0.97, "%s   %s   %s" % (obsid, antenna, pulsar), ha='center', va='center', transform=ax.transAxes, bbox=dict(facecolor="%s" % (continents_color,), alpha=0.5), fontsize=20)
 		plt.savefig("%s_%s_%s_%s_status.png" % (obsid, antenna, pulsar, z))
