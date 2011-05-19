@@ -131,24 +131,29 @@ then
 	fi
 else # if [[ $cep2 == 1 ]]
     ii=0
-    rm -rf $outfile.all.sh
+    rm -rf $outfile.*.sh
     while read line 
     do
-        obsid=`echo $line | sed 's/^.*-id //g' | awk '{print $1}'`  
-        rm -rf $outfile.$obsid.$ii
-        #create a shell script per line to run on locus nodes
+        obsid=`echo $line | sed 's/^.*-id //g' | awk '{print $1}'` 
+        echo "Working on OBSID $obsid..."
+        #create a shell script per line to run on locus nodes;
+        #note that single and double quotes need to be VERY exact for cexec commands and wildcards;
+        #a large amount of effort was put into making all the quotes correct to farm out processing;
+        #be very careful when you change anything in this section!  you have been warned!
         incoherent=`echo $line | grep incoh_only`
         if [[ $incoherent == "" ]]
         then
-           echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; use LUS; ~alexov/'$line' -del"'  >> $outfile.$obsid.$ii
-           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; mkdir -p '${obsid}'_plots"' >> $outfile.$obsid.$ii
-           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; use LUS; mount_locus_nodes.sh; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*th.png /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*prepout /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*th.png /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*prepout '${obsid}'_plots"' >> $outfile.$obsid.$ii          
-#           echo 'cexec locus:0-99  "scp /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*prepout /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*th.png /data/LOFAR_PULSAR_ARCHIVE_locus*/'${obsid}'_red/stokes/*/*/*prepout '`whoami`'@locus100:/data/LOFAR_PULSAR_ARCHIVE_locus100/'${obsid}'_plots/"'   >> $outfile.$obsid.$ii
-           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_plots/; use LUS; ~alexov/thumbnail_combine.sh"'  >> $outfile.$obsid.$ii
-        else
-           echo 'cexec hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; use LUS; mount_locus_nodes.sh; ~alexov/'$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.$ii
+           # CS stokes processing
+           echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+           echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py"'  >> $outfile.$obsid.CS.sh
+           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; tar cvzf '${obsid}'_combinedCS.tar.gz `find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" \)` ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" \)`"' >> $outfile.$obsid.CS.sh
+	       echo "./$outfile.$obsid.CS.sh > $outfile.$obsid.CS.log &" >> $outfile.all.sh
+        else  
+           # IS stokes processing
+           echo 'cexec hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; mount_locus_nodes.sh; '$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.IS.sh  
+	       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
         fi
-	    echo "./$outfile.$obsid.$ii > $outfile.$obsid.$ii.log &" >> $outfile.all.sh
 	    ii=`expr $ii + 1`
     done < $outfile.all
 fi #end if [[ $cep2 == 0 ]]
