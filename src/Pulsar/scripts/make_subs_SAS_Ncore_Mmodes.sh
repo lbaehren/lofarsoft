@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.7
+VERSION=2.8
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -2437,7 +2437,7 @@ then
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" \)`
+	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*prepout" \)`
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
