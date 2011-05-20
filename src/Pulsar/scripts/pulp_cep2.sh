@@ -2,6 +2,8 @@
 
 USAGE="\nusage : pulp_cep2.sh <args identical to pulp.sh> \n\n"\
 "      NOTE: If '-incoh_only' or '-coh_only' is not used, then both will be run."\
+"      NOTE: There is no need to specify the raw data location becuase cep2 is assumed."\
+"      NOTE: There is little flexibility with the output directory name;  use _red for everything."\
 "\n"\
 "      Example:\n"\
 "      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -incoh_only -rfi -all \n"\
@@ -32,8 +34,8 @@ coh=`echo $args | grep "\-coh_only"`
 
 if [[ $incoh == "" ]] && [[ $coh == "" ]]
 then
-   echo "pulp.sh $args -incoh_only" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
-   echo "pulp.sh $args -coh_only"  >> pulp_$$tmp.all
+   echo "pulp.sh $args -incoh_only -raw /data/" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
+   echo "pulp.sh $args -coh_only -raw /data/"  >> pulp_$$tmp.all
 elif [[ $incoh != "" ]] && [[ $coh == "" ]]
 then
    echo "pulp.sh $args" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
