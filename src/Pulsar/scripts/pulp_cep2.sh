@@ -8,6 +8,13 @@ USAGE="\nusage : pulp_cep2.sh <args identical to pulp.sh> \n\n"\
 "      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -coh_only -rfi -del \n"\
 "      \n"
 
+if [ $# -lt 6 ]                    
+then
+   print "$USAGE"    
+   exit 1
+fi
+
+
 args=""
 while [ $# -gt 0 ]
 do
