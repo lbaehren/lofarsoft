@@ -4,8 +4,9 @@ USAGE="\nusage : pulp_cep2.sh <args identical to pulp.sh> \n\n"\
 "      NOTE: If '-incoh_only' or '-coh_only' is not used, then both will be run."\
 "\n"\
 "      Example:\n"\
-"      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_redIS -incoh_only -rfi -del -all \n"\
-"      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -coh_only -rfi -del \n"\
+"      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -incoh_only -rfi -all \n"\
+"      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -coh_only -rfi \n"\
+"      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -rfi -all\n"\
 "      \n"
 
 if [ $# -lt 6 ]                    
