@@ -2442,7 +2442,7 @@ then
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*prepout" \)`
+	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*prepout" -o -name "*parset" \)`
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
