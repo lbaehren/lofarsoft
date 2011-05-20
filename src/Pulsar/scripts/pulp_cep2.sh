@@ -34,14 +34,14 @@ coh=`echo $args | grep "\-coh_only"`
 
 if [[ $incoh == "" ]] && [[ $coh == "" ]]
 then
-   echo "pulp.sh $args -incoh_only -raw /data/" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
+   echo "pulp.sh $args -incoh_only -raw \"/cep2/locus???_data/\"" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
    echo "pulp.sh $args -coh_only -raw /data/"  >> pulp_$$tmp.all
 elif [[ $incoh != "" ]] && [[ $coh == "" ]]
 then
-   echo "pulp.sh $args" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
+   echo "pulp.sh $args -raw \"/cep2/locus???_data/\"" | sed 's/_red/_redIS/g' > pulp_$$tmp.all
 elif [[ $incoh == "" ]] && [[ $coh != "" ]]
 then
-   echo "pulp.sh $args"  > pulp_$$tmp.all
+   echo "pulp.sh $args -raw /data/"  > pulp_$$tmp.all
 else
    echo "ERROR: unable to interpret input"
 fi
