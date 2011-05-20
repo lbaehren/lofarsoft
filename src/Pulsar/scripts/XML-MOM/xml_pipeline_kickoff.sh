@@ -191,7 +191,7 @@ then
 elif [[ $noxml == 1 ]]
 then
    #run the processing
-   echo "Running the following task(s):"
+   echo "Running the following task(s) in the background;  log files are empty until tasks are completed:"
    cat $outfile.all.sh
    ./$outfile.all.sh
 fi
