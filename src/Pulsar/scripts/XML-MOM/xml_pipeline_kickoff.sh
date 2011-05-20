@@ -7,6 +7,7 @@ USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix
 "      [-survey]    ==> Indicates that all the observations are in survey mode;  changes pipeline args to:\n"\
 "                       pulp.sh -id OBSID -o OBSID_red -p position -rfi   [without -all] \n"\
 "      [-cep2]      ==> Indicates that processing will be on CEP2 cluster, distributed processing separates scripts.\n"\
+"      [-noxml]     ==> Indicates that you are not starting with an xml file, but pulp_cep2.sh parameters.\n"\
 "\n"\
 "      Example:\n"\
 "      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 \n"\
@@ -18,6 +19,7 @@ prefix=""
 splits=1
 survey=0
 cep2=0
+noxml=0
 
 if [ $# -lt 4 ]                    
 then
@@ -33,6 +35,7 @@ do
 	-splits)    splits=$2; shift;;
 	-survey)    survey=1;;
 	-cep2)      cep2=1;;
+	-noxml)     noxml=1;;
 	-*)
 	    echo >&2 \
 	    "$USAGE"
@@ -42,21 +45,25 @@ do
     shift
 done
 
-
 #temporary file
 outfile=$prefix"_PipeExec"
 
-if [ ! -f $infile ]
+if [[ $noxml == 0 ]]
 then
-   echo "ERROR: $infile does not exist"
-   exit 1
+	if [ ! -f $infile ]
+	then
+	   echo "ERROR: $infile does not exist"
+	   exit 1
+	fi
+	
+	if [ -f $outfile ]
+	then
+	   echo "WARNING: $outfile exists; overwriting!"
+	   rm -rf $outfile
+	fi 
+else 
+    outfile=$infile
 fi
-
-if [ -f $outfile ]
-then
-   echo "WARNING: $outfile exists; overwriting!"
-   rm -rf $outfile
-fi 
 
 # in one command, do the following steps:
 # grab the observationId and name w/(.BA) string from the xml file
@@ -69,25 +76,30 @@ fi
 # previous version to extract the OBSID and Target name
 #egrep "observationId|\(.BA" $infile | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/\<observationId\>//' | sed 's/<>//' | sed 's/<.*Obs / /g' | sed 's/(.BA.*//g' | awk '{printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
 
-if [[ $survey == 0 ]] && [[ $cep2 == 0 ]]
+if [[ $noxml == 0 ]]
 then
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
-elif [[ $survey == 1 ]] && [[ $cep2 == 0 ]]
-then
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
-elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
-then
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_red -coh_only -raw /data/ -rfi\n", $1, $1)}' > $outfile
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw \"/cep2/locus???_data/\" -rfi\n", $1, $1)}' >> $outfile
-elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
-then
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -coh_only -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $2, $1)}' > $outfile
-   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -incoh_only -rfi -all\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -incoh_only -rfi -all\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -incoh_only -rfi -all\n", $1, $2, $1)}' >> $outfile
+
+	if [[ $survey == 0 ]] && [[ $cep2 == 0 ]]
+	then
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+	elif [[ $survey == 1 ]] && [[ $cep2 == 0 ]]
+	then
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
+	elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
+	then
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_red -coh_only -raw /data/ -rfi\n", $1, $1)}' > $outfile
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw \"/cep2/locus???_data/\" -rfi\n", $1, $1)}' >> $outfile
+	elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
+	then
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -coh_only -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $2, $1)}' > $outfile
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -incoh_only -rfi -all\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -incoh_only -rfi -all\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -incoh_only -rfi -all\n", $1, $2, $1)}' >> $outfile
+	fi
+
+   cp $outfile $outfile.all
 fi
 
-cp $outfile $outfile.all
 
-if [[ $cep2 == 0 ]]
+if [[ $cep2 == 0 ]] && [[ $noxml == 0 ]]
 then
 
 	# perform the splitting up of the all files into multiples
@@ -145,10 +157,9 @@ else # if [[ $cep2 == 1 ]]
         then
            # CS stokes processing
            echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
-           echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
+           echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py"'  >> $outfile.$obsid.CS.sh
-#           echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; tar cvzf '${obsid}'_combinedCS.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.pfd -o -name \*.inf -o -name \*.rfirep -o -name \*.png \)` ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
-           echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
+           echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
 	       echo "./$outfile.$obsid.CS.sh > $outfile.$obsid.CS.log &" >> $outfile.all.sh
         else  
            # IS stokes processing
@@ -159,11 +170,11 @@ else # if [[ $cep2 == 1 ]]
     done < $outfile.all
 fi #end if [[ $cep2 == 0 ]]
 
-rm $outfile
+rm -rf $outfile 
 
 chmod 777 $outfile.*  $outfile.all.sh
 
-if [[ $cep2 == 0 ]]
+if [[ $cep2 == 0 ]] && [[ $noxml == 0 ]]
 then
     echo "Single script '$outfile.all' contains all the processing commands in one file."
 	if (( $splits > 1 ))
@@ -172,8 +183,16 @@ then
 	   echo "`ls $outfile.[0-9]*`"
 	   echo "in the processing locations."
 	fi
-else
+elif [[ $noxml == 0 ]]
+then
+   rm $outfile.all
    echo "Single script '$outfile.all.sh' contains all the processing commands in one file."
    echo "Copy that file and all the sub-scripts ($outfile.OBSIDnumber*) to activate processing."
+elif [[ $noxml == 1 ]]
+then
+   #run the processing
+   echo "Running the following task(s):"
+   cat $outfile.all.sh
+   ./$outfile.all.sh
 fi
 
