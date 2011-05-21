@@ -116,17 +116,15 @@ except:
 # and then use criterion to compress all lists above to have info only
 # for stations used in the observation
 try:
-	pngs, chisq = np.loadtxt (chisq_file, comments='#', usecols=(0,2), dtype=str, unpack=True)
+	# chi-squared values can be either in 3rd or 4th column
+	infofile = np.loadtxt (chisq_file, comments='#', dtype=str, unpack=True)
 except:
 	print "Error reading %s file!" % (chisq_file)
 	sys.exit(1)
 
-if np.size(pngs) < 2:
-	pngs=[pngs]
-	chisq=[chisq]
-pngs=[re.sub('file=', '', p) for p in pngs]
-used_ears=[u.split("stokes/")[1].split("/")[0] for u in pngs]
-chisq=[re.sub('chi-sq=', '', c) for c in chisq]
+pngs=[re.sub('file=', '', p) for p in list(infofile[0])]
+used_ears=[u.split("stokes/")[1].split("/")[0] for u in list(infofile[0])]
+chisq=[re.sub('chi-sq=', '', c) for c in list(infofile[-1])]
 station_info={} # dictionary with station name as a key, and value is the tuple with (filename, chi-squared value)
 for i in np.arange(len(used_ears)):
 	station_info[used_ears[i]] = ('%s' % (pngs[i]), chisq[i])
