@@ -121,7 +121,7 @@ except:
 	print "Error reading %s file!" % (chisq_file)
 	sys.exit(1)
 
-if np.size(used_ears) < 2:
+if np.size(pngs) < 2:
 	pngs=[pngs]
 	chisq=[chisq]
 pngs=[re.sub('file=', '', p) for p in pngs]
@@ -131,9 +131,9 @@ station_info={} # dictionary with station name as a key, and value is the tuple 
 for i in np.arange(len(used_ears)):
 	station_info[used_ears[i]] = ('%s' % (pngs[i]), chisq[i])
 
-antenna=used_ears[0][5:8]                                          # either LBA or HBA
-pulsar=pngs[0].split("_")[-1].split(".pfd")[0]                     # pulsar name
-obsid="_".join("_".join(pngs[0].split("_")[1:]).split("_")[0:-3])  # obsid
+antenna=used_ears[0][5:8]                                                         # either LBA or HBA
+pulsar=pngs[0].split("_")[-1].split(".pfd")[0]                                    # pulsar name
+obsid="_".join("_".join(pngs[0].split("/")[-1].split("_")[1:]).split("_")[0:-3])  # obsid
 used_stations=np.unique([u[0:5] for u in used_ears])
 
 #sift_criterium = [s in used_stations for s in stations]
