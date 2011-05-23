@@ -1476,6 +1476,14 @@ def check_connection (storage_nodes, is_debug):
 			print "%s is down" % (node)
 	return up_nodes
 
+# getting human-readable size (in GB, MB, or KB) from size in bytes
+def human_readable_size (bytesize):
+        for s in ['', 'K', 'M', 'G', 'T', 'P']:
+                if bytesize < 1000.:
+                        return "%3.1f%s" % (bytesize, s)
+                bytesize /= 1000.
+        return "O_O"
+
 ###################################################################################################################
 #          M A I N                                                                                                #
 ###################################################################################################################
@@ -1718,16 +1726,14 @@ if __name__ == "__main__":
 		if id not in set(obsids_redonly):
 			for lse in list(set(oi.nodeslist).intersection(set(storage_nodes))):
 				ddir=datadir_mask + "/" + id   # using mask here to get the Total size of raw data in one storage node
-				cmd="cexec %s 'du -sch %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
-				dirout=os.popen(cmd).readlines()
-				if np.size(dirout) > 0:
-					dirsizes[lse][0]=dirout[0][:-1]
-					cmd="cexec %s 'du -sc -B 1 %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
-					status=os.popen(cmd).readlines()
-					if np.size(status) > 0:
-						status=status[0][:-1]
-						if status.isdigit() == True:
-							dirsizes[lse][1] = status
+				cmd="cexec %s 'du -sc -B 1 %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | %s" % (cexec_nodes[lse], ddir, cexec_egrep_string)
+				status=os.popen(cmd).readlines()
+				if np.size(status) > 0:
+					status=status[0][:-1]
+					if status.isdigit() == True:
+						dirsizes[lse][1] = status
+						# getting human-readable size
+						dirsizes[lse][0] = human_readable_size(float(status))
 
 		# checking if this specific observation was already reduced. 
 		# Checking for both existence of the *_red or *_lta directory
