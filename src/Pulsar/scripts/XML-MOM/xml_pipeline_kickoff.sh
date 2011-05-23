@@ -8,6 +8,7 @@ USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix
 "                       pulp.sh -id OBSID -o OBSID_red -p position -rfi   [without -all] \n"\
 "      [-cep2]      ==> Indicates that processing will be on CEP2 cluster, distributed processing separates scripts.\n"\
 "      [-noxml]     ==> Indicates that you are not starting with an xml file, but pulp_cep2.sh parameters.\n"\
+"      [-hoover_only]  ==> Usually used only with -noxml switch; runs only the hoover/collection part of 'coh_only' pulp_cep2 pipeline. \n"\
 "\n"\
 "      Example:\n"\
 "      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 \n"\
@@ -20,6 +21,7 @@ splits=1
 survey=0
 cep2=0
 noxml=0
+hoover_only=0
 
 if [ $# -lt 4 ]                    
 then
@@ -36,6 +38,7 @@ do
 	-survey)    survey=1;;
 	-cep2)      cep2=1;;
 	-noxml)     noxml=1;;
+	-hoover_only)     hoover_only=1;;
 	-*)
 	    echo >&2 \
 	    "$USAGE"
@@ -156,7 +159,11 @@ else # if [[ $cep2 == 1 ]]
         if [[ $incoherent == "" ]]
         then
            # CS stokes processing
-           echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+           if [[ $hoover_only == 0 ]]
+              echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+           else
+              echo '#cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+           fi
            echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py"'  >> $outfile.$obsid.CS.sh
            echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
