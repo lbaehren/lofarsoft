@@ -603,7 +603,7 @@ class outputInfo:
 				self.totsize = self.totsize + float(self.storage[l][1])
 				self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
 		# converting total size to GB
-		self.totsize = "%.1f" % (self.totsize / 1024. / 1024. / 1024.,)
+		self.totsize = "%.1f" % (self.totsize / 1000. / 1000. / 1000.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 
 		if viewtype == "usual":
@@ -887,14 +887,14 @@ class obsstat:
 			self.dbinfo[sub]["totDuration"] /= 3600.
 			self.dbinfo[sub]["processedDuration"] /= 3600.
 			self.dbinfo[sub]["IMonlyDuration"] /= 3600.
-			self.dbinfo[sub]["totRawsize"] /= 1024.
-			self.dbinfo[sub]["totProcessedsize"] /= 1024.
-			self.dbinfo[sub]["IMonlyRawsize"] /= 1024.
+			self.dbinfo[sub]["totRawsize"] /= 1000.
+			self.dbinfo[sub]["totProcessedsize"] /= 1000.
+			self.dbinfo[sub]["IMonlyRawsize"] /= 1000.
 			self.dbinfo[sub]["Archivedsize"] = self.dbinfo[sub]["Archivedsize_raw"] + self.dbinfo[sub]["Archivedsize_sub"] + self.dbinfo[sub]["Archivedsize_meta"]
-			self.dbinfo[sub]["Archivedsize"] /= 1024.
-			self.dbinfo[sub]["Archivedsize_raw"] /= 1024.
-			self.dbinfo[sub]["Archivedsize_sub"] /= 1024.
-			self.dbinfo[sub]["Archivedsize_meta"] /= 1024.
+			self.dbinfo[sub]["Archivedsize"] /= 1000.
+			self.dbinfo[sub]["Archivedsize_raw"] /= 1000.
+			self.dbinfo[sub]["Archivedsize_sub"] /= 1000.
+			self.dbinfo[sub]["Archivedsize_meta"] /= 1000.
 
 		for sub in self.subclusters:
 			self.dbinfo["Total"]["totDuration"] += self.dbinfo[sub]["totDuration"]
@@ -1759,7 +1759,7 @@ if __name__ == "__main__":
 					if np.size(status) > 0:
 						status=status[0][:-1]
 						if status.isdigit() == True:
-							processed_dirsize = float(status) / 1024. / 1024. / 1024.
+							processed_dirsize = float(status) / 1000. / 1000. / 1000.
 					# checking if final tar.gz file exists
 					cmd="cexec %s 'find %s -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[lse], reddir, "*_plots.tar.gz", cexec_egrep_string)
 					if np.size(os.popen(cmd).readlines()) > 0:
