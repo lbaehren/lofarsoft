@@ -68,6 +68,7 @@ def readLORAevents(infile):
 def readLOFARevents(fileList):
     results = []
     for file in fileList:
+        print 'Processing file: %s:       ' % file,
         p1 = subprocess.Popen(['h5ls -rv ' + file + ' | grep -A2 TIME | grep -m1 Data:'], shell=True, stdout=subprocess.PIPE)
         output = p1.communicate()[0]
         if len(output) < 5:
@@ -109,8 +110,9 @@ def crossCheckTimes(LORAevents, LOFARevents):
     
     
     
-if len(sys.argv) > 1:
-    crossCheckFilename = sys.argv[1]
+if len(sys.argv) > 2:
+    datafiles = sys.argv[1]
+    crossCheckFilename = sys.argv[2]
 else:
     print 'No files given on command line, using a default set instead.'
 #    datafiles = '/Users/acorstanje/triggering/stabilityrun_15feb2011/automatic_obs_test-15febOvernight--147-10*.h5'
@@ -119,7 +121,7 @@ else:
     datafiles = '/Users/acorstanje/triggering/fullLOFAR-12hr/superterp/fullLOFAR-*.h5'
     crossCheckFilename = '/Users/acorstanje/triggering/fullLOFAR-12hr/LORAevents.dat'
        
-eventList = readLORAevents(crossCheckFilename)
+#eventList = readLORAevents(crossCheckFilename)
 #pickle.dump(eventList, 'loraevents.pic')
 
 sortstring = 'sort -n --field-separator="-" --key=18'
@@ -139,5 +141,5 @@ print "Number of files to process:", nofiles
 
 LOFARlist = readLOFARevents(files)
 #pickle.dump(LOFARlist, 'lofarevents.pic')
-
-crossCheckTimes(eventList, LOFARlist)
+print LOFARlist
+#crossCheckTimes(eventList, LOFARlist)
