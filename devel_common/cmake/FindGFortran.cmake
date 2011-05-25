@@ -72,6 +72,9 @@ if (UNIX)
     endif (osx_ppc)
     ## generic locations (Fink installation)
     list (APPEND lib_locations
+      /sw/lib/gcc4.7/lib
+      /sw/lib/gcc4.6/lib
+      /sw/lib/gcc4.5/lib
       /sw/lib/gcc4.4/lib
       /sw/lib/gcc4.3/lib
       /sw/lib/gcc4.2/lib
@@ -79,6 +82,9 @@ if (UNIX)
       )
   else (APPLE)
     list (APPEND lib_locations
+      /usr/lib/gcc/i486-linux-gnu/4.7
+      /usr/lib/gcc/i486-linux-gnu/4.6
+      /usr/lib/gcc/i486-linux-gnu/4.5
       /usr/lib/gcc/i486-linux-gnu/4.4
       /usr/lib/gcc/i486-linux-gnu/4.3
       /usr/lib/gcc/i486-linux-gnu/4.2
@@ -89,6 +95,11 @@ if (UNIX)
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3
       /usr/lib/gcc/x86_64-redhat-linux/4.1.1
       /usr/lib/gcc/x86_64-redhat-linux/4.1.2
+      /usr/lib/gcc/x86_64-linux-gnu/4.7
+      /usr/lib/gcc/x86_64-linux-gnu/4.6
+      /usr/lib/gcc/x86_64-linux-gnu/4.5
+      /usr/lib/gcc/x86_64-linux-gnu/4.4
+      /usr/lib/gcc/x86_64-linux-gnu/4.3
       /usr/lib/gcc/x86_64-linux-gnu/4.2
       /usr/lib/gcc/x86_64-linux-gnu/4.4
       )
@@ -100,7 +111,7 @@ endif (UNIX)
 
 ## Executable
 
-find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.3 gfortran-4.2  gfortran-4.1
+find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.7 gfortran-4.6 gfortran-4.5 gfortran-4.4 gfortran-4.3 gfortran-4.2  gfortran-4.1
   PATHS ${bin_locations}
   )
 
