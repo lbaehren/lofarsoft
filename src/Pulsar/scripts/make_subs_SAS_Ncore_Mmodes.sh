@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.10
+VERSION=2.11
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -925,16 +925,49 @@ do
 		          fi
 		       done < $master_list
 		    fi
-
-
-#A2test			all_list=`cat /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list`
-#A2test			cp /data4/2nd_transpose/L2010_21488_red_freqwrong/incoherentstokes/SB_master.list $master_list
-	    fi
+	    fi  #end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 	    
+	    nodename=`uname -n`
+	    is_cep2=`echo $nodename | grep locus`
+   		if [[ $STOKES == "incoherentstokes" ]] && [[ $is_cep2 != "" ]]
+   		then
+              # on cep2, there are missing subbands;  create dummy files for missing numbers
+              nfiles=`grep Observation.beamList $PARSET | head -1 | awk -F "= " '{print $2}' | sed -e 's/\[//g' -e 's/\*.*//g'`
+              master_list_wc=`wc -l $master_list | awk '{print $1}`
+              if (( $master_list_wc < $nfiles ))
+              then
+                  echo "WARNING: number of IS files is less than number requested in observation;  creating dummy files to compensate"
+                  echo "WARNING: number of IS files is less than number requested in observation;  creating dummy files to compensate"  >> $log
+                  ii=0
+                  rm -rf /data/$OBSID
+                  mkdir /data/$OBSID
+	              rootname=`head -1 $master_list | sed -e "s/\// /g" -e "s/.* //g" -e "s/_SB.*//g"`
+	              while (( $ii < $nfiles ))
+	              do
+	                 sb=`echo $ii | awk '{printf("%03d",$1)}'`
+	                 filename=`grep _SB$sb $master_list`
+	                 #sb=`echo $filename | sed -e "s/^.*_SB/ /g" -e "s/_.*//g"`
+	                 if [[ $filename == "" ]]
+	                 then
+	                     echo "WARNING: missing subband #$ii; creating dummy."
+	                     echo "WARNING: missing subband #$ii; creating dummy." >> $log
+	                     filename=`echo $rootname $ii | awk '{printf("%s_SB%03d_bf.incoherentstokes\n", $1, $2)}'`
+	                     touch /data/$OBSID/$filename
+	                 else 
+	                     ln -s $filename /data/$OBSID/
+	                 fi  
+	                 ii=$(( $ii + 1 )) 
+	              done 
+		       ls /data/$OBSID/*incoherentstokes | sort -t B -g -k 2 > $master_list
+		       echo "Created new master list" 
+		       echo "Created new master list" >> $log
+		    fi
+        fi
+
         all_num=`wc -l $master_list | awk '{print $1}'`
 		echo "Found a total of $all_num ${STOKES} input datafiles to process" 
 		echo "Found a total of $all_num ${STOKES} input datafiles to process" >> $log
-		
+
 		if [[ $all_num == 0 ]]
 		then
 		   echo "ERROR: no input files found, for this mode."
