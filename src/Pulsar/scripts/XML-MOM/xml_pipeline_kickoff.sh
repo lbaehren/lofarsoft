@@ -160,6 +160,7 @@ else # if [[ $cep2 == 1 ]]
         then
            # CS stokes processing
            if [[ $hoover_only == 0 ]]
+           then
               echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            else
               echo '#cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
