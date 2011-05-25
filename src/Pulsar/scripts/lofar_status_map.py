@@ -42,23 +42,23 @@ continents_color='lightgreen'
 # (in fraction od imw and imh)
 # if 3rd element = 1, then X-, Y- are actual coordinates, rather then offsets
 offsets={'FR606': (-1, 0.1, 0), 'UK608': (-1, 0.1, 0), 'SE607': (0, 0.1, 0),
-         'DE601': (-1, -1.1, 0), 'DE602': (0, 0.1, 0), 'DE603': (-1, 0.1, 0), 'DE604': (0, 0.1, 0), 'DE605': (-1, 0.1, 0),
+         'DE601': (-1, -1.2, 0), 'DE602': (0.1, -1.1, 0), 'DE603': (-1, 0.1, 0), 'DE604': (0, 0.1, 0), 'DE605': (-1, 0.1, 0),
 	 'RS104': (-1, 0.1, 0), 'RS106': (0, 0.1, 0), 
-	 'RS205': (0.1, -1, 0), 'RS208': (0, -1.1, 0), 'RS210': (-1, 0.1, 0), 
-	 'RS306': (-1.1, -0.4, 0), 'RS307': (-1, -1.1, 0), 'RS310': (-1, 0.1, 0), 
+	 'RS205': (0.3, -1, 0), 'RS208': (0, -1.2, 0), 'RS210': (-1, 0.1, 0), 
+	 'RS306': (10, 530, 1), 'RS307': (-1, -1.3, 0), 'RS310': (-1, 0.1, 0), 
 	 'RS404': (-1, 0.1, 0), 'RS406': (-1.0, 0.1, 0), 'RS407': (-1, 0.1, 0), 'RS409': (-1, 0.1, 0), 'RS410': (-1, 0.1, 0), 
-	 'RS503': (10, 650, 1), 'RS508': (0, 0.1, 0), 'RS509': (-1, -1.1, 0),
+	 'RS503': (10, 650, 1), 'RS508': (0, 0.1, 0), 'RS509': (10, 410, 1),
 	 'CS002': (1100, 650, 1), 'CS003': (1100, 530, 1), 'CS004': (1100, 410, 1),  # superterp
 	 'CS005': (1100, 290, 1), 'CS006': (1100, 170, 1), 'CS007': (1100, 50, 1),   # superterp
 	 'CS001': (900, 410, 1), 'CS011': (900, 530, 1), 'CS013': (0, 0.1, 0), 'CS017': (900, 650, 1),
-	 'CS021': (10, 650, 1), 'CS024': (0, -1.1, 0), 'CS026': (0, 0.1, 0), 'CS028': (-0.5, 0.1, 0),
-	 'CS030': (-1, 0.1, 0), 'CS031': (10, 530, 1), 'CS032': (-1, -1.1, 0),
-	 'CS101': (0, 0.1, 0), 'CS103': (0, -1.1, 0), 'CS201': (0, -1.1, 0), 'CS301': (-1, -1.1, 0), 'CS302': (-1, 0.1, 0),
-	 'CS401': (-1, 0.1, 0), 'CS501': (-1, 0.3, 0)
+	 'CS021': (10, 650, 1), 'CS024': (-0.4, -1.2, 0), 'CS026': (0, 0.1, 0), 'CS028': (-0.5, 0.1, 0),
+	 'CS030': (-1, 0.1, 0), 'CS031': (10, 530, 1), 'CS032': (-1, -1.2, 0),
+	 'CS101': (0, 0.1, 0), 'CS103': (0, -1.2, 0), 'CS201': (0, -1.2, 0), 'CS301': (-1, -1.2, 0), 'CS302': (-1.1, 0.1, 0),
+	 'CS401': (-1, 0.1, 0), 'CS501': (-1, 0.4, 0)
 	 }
 # same for the text labels together with justification
 text_offsets={'FR606': (-40000, 0, 'right'), 'UK608': (-40000, 0, 'right'), 'SE607': (40000, 0, 'left'),
-              'DE601': (-40000, 0, 'right'), 'DE602': (40000, 0, 'left'), 'DE603': (-40000, 0, 'right'), 
+              'DE601': (-40000, 0, 'right'), 'DE602': (-40000, 0, 'right'), 'DE603': (-40000, 0, 'right'), 
 	      'DE604': (40000, 0, 'left'), 'DE605': (-40000, 0, 'right'),
 	      'RS104': (2500, 2500, 'right'), 'RS106': (-2000, 0, 'right'), 
 	      'RS205': (-2000, 0, 'right'), 'RS208': (-2000, 0, 'right'), 'RS210': (-2000, 0, 'right'), 
@@ -127,7 +127,7 @@ used_ears=[u.split("stokes/")[1].split("/")[0] for u in list(infofile[0])]
 chisq=[re.sub('chi-sq=', '', c) for c in list(infofile[-1])]
 station_info={} # dictionary with station name as a key, and value is the tuple with (filename, chi-squared value)
 for i in np.arange(len(used_ears)):
-	station_info[used_ears[i]] = ('%s' % (pngs[i]), chisq[i])
+	station_info[used_ears[i]] = ('%s' % (pngs[i]), '%.3f' % (float(chisq[i])))
 
 antenna=used_ears[0][5:8]                                                         # either LBA or HBA
 pulsar=pngs[0].split("_")[-1].split(".pfd")[0]                                    # pulsar name
@@ -208,12 +208,16 @@ for z in zooms.keys():
 					for ear in ['0', '1']:
 						os.system("convert %s -flatten -background white -crop %dx%d+25+16 -background %s -pointsize 14 label:'%s' +swap -gravity Center -append  %s.%c.map.png 2>/dev/null" % \
 							(station_info['%s%s%c' % (ss[i], antenna, ear)][0], imw_orig/2, imh_orig-16, (ear == '0' and 'Khaki' or 'Plum'), station_info['%s%s%c' % (ss[i], antenna, ear)][1], ss[i], ear))
-					os.system("convert %s.0.map.png %s.1.map.png +append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
+					os.system("convert %s.0.map.png %s.1.map.png +append -scale %dx%d-0 temp%s.map.png 2>/dev/null" % \
 						(ss[i], ss[i], imw, imh, ss[i]))
 					os.system("rm -f %s.[01].map.png" % (ss[i]))
 				else:
-					os.system("convert %s -flatten -background white -crop %dx%d+0+16 -background Khaki -pointsize 14 label:'%s' +swap -gravity Center -append -scale %dx%d-0 %s.map.png 2>/dev/null" % \
+					os.system("convert %s -flatten -background white -crop %dx%d+0+16 -background Khaki -pointsize 14 label:'%s' +swap -gravity Center -append -scale %dx%d-0 temp%s.map.png 2>/dev/null" % \
 						(station_info['%s%s' % (ss[i], antenna)][0], imw_orig, imh_orig-16, station_info['%s%s' % (ss[i], antenna)][1], imw, imh, ss[i]))
+				# adding the station name label
+				os.system("convert temp%s.map.png -background LightBlue -pointsize 10 label:'%s' +swap -gravity Center -append  %s.map.png>/dev/null ; rm -f temp%s.map.png" % \
+					(ss[i], ss[i], ss[i], ss[i]))
+
 				im = plt.imread('%s.map.png' % (ss[i]))	
 				if offsets[ss[i]][2] == 0:
 					xp, yp = get_pixels (x[i], y[i], figx, figy, dpi)
@@ -221,7 +225,7 @@ for z in zooms.keys():
 				else:
 					fig.figimage(im, offsets[ss[i]][0], offsets[ss[i]][1], origin="upper", zorder=10)
 					# getting coords for the text label in data coords (rather than pixels)
-					xpt, ypt = get_datapoints (offsets[ss[i]][0], offsets[ss[i]][1]+imh+10, figx, figy, dpi)
+					#xpt, ypt = get_datapoints (offsets[ss[i]][0], offsets[ss[i]][1]+imh+10, figx, figy, dpi)
 					plt.text(xpt, ypt, ss[i], ha='left', va='center', color='black', fontsize=8)
 				os.system("rm -f %s.map.png" % (ss[i]))
 				is_at_least_one_image = True
