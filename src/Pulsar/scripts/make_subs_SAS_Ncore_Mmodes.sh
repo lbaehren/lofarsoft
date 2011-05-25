@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.9
+VERSION=2.10
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -449,8 +449,8 @@ date1_Apr26=`date -d "2011-04-26 00:00:00" "+%s"`
 #name of some parameters changed on Apr 26, 2011
 if (( $date_seconds >= $date1_Apr26 ))
 then
-	INCOHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_CoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
-	COHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_IncoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
+	INCOHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_IncoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
+	COHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_CoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
 else 
 	INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
 	COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
