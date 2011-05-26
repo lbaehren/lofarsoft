@@ -169,12 +169,16 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         bfOdd = result["odd"]["optBeam"]
 
         if doPlot:
-#            bfEven.plot()
             plt.clf()
-            plt.plot(bfEven.toNumpy().T)
-            plt.title('Beamformed pulse, even polarization')
-            plt.xlabel('Sample number')
-            plt.ylabel('Voltage (ADC units)')
+            import numpy as np
+            toplot = bfEven.toNumpy()
+            x = np.arange(toplot.size, dtype=float)
+            x *= 5.0 # ns
+            #x -= 4600 # hack!
+            plt.plot(x, toplot.T)            
+            plt.title('Beamformed pulse, single polarization', fontsize=21)
+            plt.xlabel('Time (ns)', fontsize=21)
+            plt.ylabel('Voltage (ADC units)', fontsize=21)
             raw_input("--- Plotted optimal beam for even antennas - press Enter to continue...")
 #            frequency.read(datafile,"FREQUENCY_DATA")
             fftlength = blocksize/2 + 1
