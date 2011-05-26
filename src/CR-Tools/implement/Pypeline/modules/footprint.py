@@ -29,7 +29,7 @@ def plotFootprint(datafile, footprintValues = [], dotsize = 200.0):
     y = antennaPositions[1]
     # assume z == 0, valid for LOFAR stations in their own reference frame. Besides, the plot is 2-D anyway.
 
-    plt.scatter(x, y, 100, marker='+', label = 'Antenna positions')
+    plt.scatter(x, y, 100, marker='+', label = '_nolegend_') # 'Antenna positions'
 
     if len(footprintValues) > 0:
         oddevensep = np.ones(len(x)) * 0.5 # want to see difference between odd/even channels
@@ -38,12 +38,12 @@ def plotFootprint(datafile, footprintValues = [], dotsize = 200.0):
 
         s = dotsize * np.array(footprintValues) / max(footprintValues)
 
-        plt.scatter(x, y, s, marker='o', c='r', label = 'Pulse height')
+        plt.scatter(x, y, s, marker='o', c='r', label = 'Pulse height X/Y pol.')
         
-        for i in range(0, len(x), 2):
-            plt.text(x[i] + 1.5, y[i] + 1.5, str(i))
+       # for i in range(0, len(x), 2):
+       #     plt.text(x[i] + 1.5, y[i] + 1.5, str(i))
 
-        plt.legend()
+        plt.legend(scatterpoints=1)
         plt.title('Pulse height per antenna, 2 polarizations')
         plt.ylabel('Distance north (m)')
         plt.xlabel('Distance east (m)')
