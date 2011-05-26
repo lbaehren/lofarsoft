@@ -91,10 +91,23 @@ def safeOpenFile(filename, antennaset): # antennaset only here because it's not 
 def qualityCheck(crfile, cr_efield, doPlot=False):
     if doPlot:
         efield = cr_efield.toNumpy()
-        plt.plot(efield.T)
-        plt.title('Timeseries for all channels')
-        plt.xlabel('Sample number')
-        plt.ylabel('Voltage (ADC units)')
+        import numpy as np
+        import matplotlib 
+        matplotlib.rc('xtick', labelsize=18) 
+        matplotlib.rc('ytick', labelsize=18) 
+        x = np.arange(efield[0].size, dtype=float)
+        x *= 5.0 # ms
+        x -= 328600
+        #plt.tick_params(fontsize=18)
+        plt.plot(x, efield.T)
+#        plt.plot(efield[0].T[64700:65500])
+#        a = np.ones(800) * 30.0
+#        plt.plot(a, color='r', linewidth = 6)
+#        plt.text(600, 38, 'threshold', size='x-large')
+#        plt.title('Timeseries for one channel')
+        plt.title('Timeseries for all channels', fontsize=21)
+        plt.xlabel('Time (ns)', fontsize=21)
+        plt.ylabel('Voltage (ADC units)', fontsize=21)
         raw_input("--- Plotted raw timeseries data - press Enter to continue...")
     qualitycriteria={"mean":(-1.5,1.5),"rms":(3,15),"spikyness":(-5,5)}
    
