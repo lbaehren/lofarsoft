@@ -27,7 +27,7 @@ rad2deg = 180./np.pi
 
 #------------------------------------------------------------ simplexPositionFit
 def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices,
-                       cr_freqs, FarField=True, blocksize=-1, method='smoothedAbs', doPlot = False):
+                       FarField=True, blocksize=-1, method='smoothedAbs', doPlot = False):
 #  print 'ANT INDICES: '
 #  print ant_indices
 #  print ' '
@@ -41,7 +41,7 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
         maximizer = thisBF.pulseSmoothedPowerMaximizer
     optimum = fmin(maximizer, start_position, (cr_fft, antenna_positions, ant_indices, FarField), xtol=1e-1, ftol=1e-1, full_output=1)
 
-    if not FarField:
+    if (not FarField) and (len(start_position) == 3):
         nPoints = 30
         distResult = np.zeros(nPoints)
         distances = np.zeros(nPoints)
@@ -65,7 +65,11 @@ def simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_in
 
         optBeam = thisBF.getTiedArrayBeam(pos, cr_fft, antenna_positions, ant_indices, False)
     else:
-        optBeam = thisBF.getTiedArrayBeam(optimum[0], cr_fft, antenna_positions, ant_indices, FarField)
+        if len(optimum[0]) == 2:
+            pos = [optimum[0][0], optimum[0][1], 1.0]
+        else:
+            pos = optimum[0]
+        optBeam = thisBF.getTiedArrayBeam(pos, cr_fft, antenna_positions, ant_indices, FarField)
 
 #  bruteRanges = ((start_position[0] - 20.0, start_position[0] + 20.0), (start_position[1] - 10.0, start_position[1] + 10.0))
     #optErg = brute(beamform_function, bruteRanges, Ns = 50, full_output = 1)
@@ -208,7 +212,7 @@ def fullDirectionFit(crfile, cr_efield, triggerFitResult, blocksize, flaggedList
 
     #Get the data
     cr_time = hArray(float, dimensions=[blocksize])
-    cr_freqs = hArray(float, dimensions=[blocksize/2 + 1])
+    #cr_freqs = hArray(float, dimensions=[blocksize/2 + 1])
 
 #  cr_efield = crfile["emptyFx"]
 #  crfile.getTimeseriesData(cr_efield, blockNo) # crfile["Fx"] crashes on invalid block number ???? While it was set to a valid value...
@@ -250,7 +254,7 @@ def fullDirectionFit(crfile, cr_efield, triggerFitResult, blocksize, flaggedList
         if entry in ant_indices:
             ant_indices.remove(entry) # or [ant_indices.remove(x) for x in flaggedList if x in ant_indices] ...
     #import pdb; pdb.set_trace()
-    (fitDataEven, optBeamEven) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices, cr_freqs, FarField=FarField,blocksize=blocksize, method=method, doPlot=doPlot)
+    (fitDataEven, optBeamEven) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices,               FarField=FarField,blocksize=blocksize, method=method, doPlot=doPlot)
 
     ant_indices = range(1, nofAntennas, 2)
     for entry in flaggedList:
@@ -258,7 +262,7 @@ def fullDirectionFit(crfile, cr_efield, triggerFitResult, blocksize, flaggedList
             ant_indices.remove(entry)
 
     (fitDataOdd, optBeamOdd) = simplexPositionFit(crfile, cr_fft, antenna_positions, start_position, ant_indices,
-                                    cr_freqs, FarField=FarField,blocksize=blocksize, method=method, doPlot=doPlot)
+                                        FarField=FarField,blocksize=blocksize, method=method, doPlot=doPlot)
     if FarField:
         Reven = -1.0
         Rodd = -1.0
