@@ -28,7 +28,7 @@ option (PYCRTOOLS_WITH_FFTW "" ON)
 option (PYCRTOOLS_WITH_AERA "" ON)
 
 # Debug level
-set (PYCRTOOLS_DEBUG_LEVEL 0)
+set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
 
 # Configuration file
 configure_file (
@@ -182,6 +182,7 @@ foreach (FILE ${PYPELINE_CPP_MODULES})
             ${PYPELINE_CPP_MODULE_WRAPPER_HEADER_FILES}
             ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew-generatewrappers.def
             ${CMAKE_CURRENT_SOURCE_DIR}/core.h
+	    ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
             ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew.h
             ${CMAKE_CURRENT_SOURCE_DIR}/numpy_ptr.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYPELINE_CPP_MODULE_PREFIX}Module.h

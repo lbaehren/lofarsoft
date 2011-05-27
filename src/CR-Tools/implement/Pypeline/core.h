@@ -90,7 +90,9 @@
 
 // ________________________________________________________________________
 //                                                       LOFAR header files
+
 #include <crtools.h>
+#include "pycrtools_config.h"
 
 #include "Math/Constants.h"
 

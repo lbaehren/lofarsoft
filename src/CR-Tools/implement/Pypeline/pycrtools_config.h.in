@@ -4,7 +4,7 @@
 #define PYCRTOOLS_CONFIG_H
 
 /* Set debug level */
-#define PYCRTOOLS_DEBUG_LEVEL "${PYCRTOOLS_DEBUG_LEVEL}"
+#define PYCRTOOLS_DEBUG_LEVEL ${PYCRTOOLS_DEBUG_LEVEL}
 
 /* Enable warnings */
 #cmakedefine PYCRTOOLS_WITH_WARINGS
