@@ -124,7 +124,7 @@ cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 # cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 cexeccmd="cexec -f /etc/c3.conf.full"
 # script that gets the status of processed data and also returns the size of processing directory
-process_dir_status_script="cep2_process_dir_status.sh"
+process_dir_status_script="/home/kondratiev/bin/cep2_process_dir_status.sh"
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -1920,7 +1920,7 @@ if __name__ == "__main__":
 			if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_CSplots or _redIS or both) in the Archive area
 				# looking for _CSplots first on locus101
 				lse=hoover_nodes[0]
-				cmd="%s %s '%s -t CS -d %s%s -type d -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
+				cmd="%s %s '%s -t CS -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
 				cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 				if cmdout[0] != "":
 					CSredlocation=cmdout[0]
@@ -1930,7 +1930,7 @@ if __name__ == "__main__":
 
 				# looking for _redIS first on locus102
 				lse=hoover_nodes[1]
-				cmd="%s %s '%s -t IS -d %s%s -type d -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
+				cmd="%s %s '%s -t IS -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
 				cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 				if cmdout[0] != "":
 					ISredlocation=cmdout[0]

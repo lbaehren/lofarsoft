@@ -23,7 +23,6 @@ do
     case "$1" in
     -id)   obsid=$2; shift;;
         -d)    psrarchive="$2"; shift;;
-        -C)    COLLAPSE="$1";;
         -t)    mode=$2; shift;;
         -*)
             echo "Usage: `basename $0` [-t CS|IS] [-id OBSID] [-d TOP-LEVEL PSRARCHIVE DIR]"
