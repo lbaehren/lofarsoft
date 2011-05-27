@@ -570,7 +570,10 @@ class outputInfo:
 		if self.oi.seconds != 0:
 			self.seconds = self.oi.seconds
 		else:
-			self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
+			try:
+				self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
+			except:
+				self.seconds = 0
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.reduced_node = reduced_node
