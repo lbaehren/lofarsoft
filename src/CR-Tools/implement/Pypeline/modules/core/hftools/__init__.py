@@ -4,7 +4,6 @@
 from mVector import *
 from mArray import *
 from mMath import *
-from mNumpy import *
 from mFFT import *
 from mFFTW import *
 from mFilter import *
