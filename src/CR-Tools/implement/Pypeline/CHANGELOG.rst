@@ -1,16 +1,16 @@
-2011-05-25
+2011-05-27
 ==========
 
   :Author: Martin van den Akker <martinva@astro.ru.nl>
 
 - Added pycrtools configuration to CMake.
+- Add Numpy functionality to Math and Vector modules.
+- Add AERA_IO functionality to IO module.
 
 TODO:
 -----
 
 - Make naming consistent: rename pypeline -> pycrtools.
-- Add Numpy functionality to Math module.
-- Add AERA_IO functionality to IO module.
 
 2011-05-14 - Rev 7703
 =====================

@@ -17,14 +17,13 @@ option (PYPELINE_WITH_RUNTIME_WARNINGS "Compile Pypeline with runtime warnings e
 option (PYPELINE_WITH_DEBUG_SYMBOLS "Compile Pypeline with debug symbols." ON)
 option (PYPELINE_WITH_OPTIMIZATION "Compile Pypeline with optimization flags turned on." OFF)
 option (PYPELINE_WITH_CPU_OPTIMIZATION "Compile Pypeline with optimization for CPU architecture." OFF)
-# option (PYPELINE_WITH_AERA "Compile Pypeline with support for AERA data files" OFF)
 
 option (PYCRTOOLS_WITH_WARNINGS "" ON)
 option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support" ON)
-option (PYCRTOOLS_WITH_CASACORE "" ON)
-option (PYCRTOOLS_WITH_DAL "" ON)
-option (PYCRTOOLS_WITH_GSL "" ON)
-option (PYCRTOOLS_WITH_FFTW "" ON)
+option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support" ON)
+option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support" ON)
+option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support" ON)
+option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support" ON)
 option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with support for AERA data files" ON)
 
 # Debug level
