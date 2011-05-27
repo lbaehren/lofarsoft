@@ -59,10 +59,6 @@
 #include "mEndPointRadiation.h"
 #include "mTBB.h"
 
-#ifdef HAVE_AERA
-#include "mIO_AERA.h"
-#endif
-
 // ========================================================================
 //
 //  Implementation
@@ -365,14 +361,7 @@ BOOST_PYTHON_MODULE(_hftools)
     .def("summary",&hFileSummary)
     ;
 
-
-// ________________________________________________________________________
-//                                                                  IO AERA
-
-#ifdef HAVE_AERA
-
-#include "../../../../build/cr/implement/Pypeline/mIO_AERA.def.h"
-
+#ifdef PYCRTOOLS_WITH_AERA
   class_<AERA::Datareader>("AERADatareader")
     //    .def("open",&hAERAFileOpen)
     .def("close",&hAERAFileClose)
@@ -389,6 +378,14 @@ BOOST_PYTHON_MODULE(_hftools)
     .def("eventSummary",&hAERAEventSummary)
     .def("localStationSummary",&hAERALocalStationSummary)
     ;
+#endif /* PYCRTOOLS_WITH_AERA */
+
+// ________________________________________________________________________
+//                                                                  IO AERA
+
+#ifdef HAVE_AERA
+
+#include "../../../../build/cr/implement/Pypeline/mIO_AERA.def.h"
 
 #endif
 

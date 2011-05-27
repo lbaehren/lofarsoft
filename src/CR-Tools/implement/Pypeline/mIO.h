@@ -31,6 +31,17 @@
 #include "IO/LOFAR_TBB.h"
 #include <Calibration/CalTableReader.h>
 
+// ________________________________________________________________________
+//                                                       AERA include files
+#ifdef PYCRTOOLS_WITH_AERA
+
+#include "AERA/Datareader.h"
+#include "AERA/Data/Event.h"
+#include "AERA/Data/LocalStation.h"
+
+#endif /* PYCRTOOLS_WITH_AERA */
+
+
 // ========================================================================
 //  Definitions
 // ========================================================================
@@ -59,6 +70,43 @@ HPyObjectPtr hCalTable(HString filename, HString keyword, HInteger date, HPyObje
 std::vector<HNumber> hCalTableVector(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
 
 
+// ========================================================================
+//
+//  AERA
+//
+// ========================================================================
+
+#ifdef PYCRTOOLS_WITH_AERA
+
+// ________________________________________________________________________
+//                                                         Type definitions
+
+typedef AERA::Datareader AERADatareader; // Used in wrapper preprocessor
+
+template<class T> inline T hfcast(AERA::Datareader v){return hfcast<T>((HInteger)((void*)&v));}
+template<> inline HString hf2string(AERA::Datareader v){return hf2string((HInteger)((void*)&v));}
+
+// ________________________________________________________________________
+//                                                     Function definitions
+
+AERA::Datareader& hAERAFileOpen (const HString filename);
+bool hAERAFileClose (AERA::Datareader& dr);
+HPyObject hAERAGetAttribute (AERA::Datareader& dr, const std::string key);
+bool hAERAFirstEvent (AERA::Datareader& dr);
+bool hAERAPrevEvent (AERA::Datareader& dr);
+bool hAERANextEvent (AERA::Datareader& dr);
+bool hAERALastEvent (AERA::Datareader& dr);
+bool hAERAFirstLocalStation (AERA::Datareader& dr);
+bool hAERAPrevLocalStation (AERA::Datareader& dr);
+bool hAERANextLocalStation (AERA::Datareader& dr);
+bool hAERALastLocalStation (AERA::Datareader& dr);
+void hAERAFileSummary (AERA::Datareader& dr);
+void hAERAEventSummary (AERA::Datareader& dr);
+void hAERALocalStationSummary (AERA::Datareader& dr);
+
+
+
+#endif /* PYCRTOOLS_WITH_AERA */
 
 // ________________________________________________________________________
 //                                    Add declarations of wrapper functions

@@ -17,15 +17,15 @@ option (PYPELINE_WITH_RUNTIME_WARNINGS "Compile Pypeline with runtime warnings e
 option (PYPELINE_WITH_DEBUG_SYMBOLS "Compile Pypeline with debug symbols." ON)
 option (PYPELINE_WITH_OPTIMIZATION "Compile Pypeline with optimization flags turned on." OFF)
 option (PYPELINE_WITH_CPU_OPTIMIZATION "Compile Pypeline with optimization for CPU architecture." OFF)
-option (PYPELINE_WITH_AERA "Compile Pypeline with support for AERA data files" OFF)
+# option (PYPELINE_WITH_AERA "Compile Pypeline with support for AERA data files" OFF)
 
 option (PYCRTOOLS_WITH_WARNINGS "" ON)
-option (PYCRTOOLS_WITH_NUMPY "" ON)
+option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support" ON)
 option (PYCRTOOLS_WITH_CASACORE "" ON)
 option (PYCRTOOLS_WITH_DAL "" ON)
 option (PYCRTOOLS_WITH_GSL "" ON)
 option (PYCRTOOLS_WITH_FFTW "" ON)
-option (PYCRTOOLS_WITH_AERA "" ON)
+option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with support for AERA data files" ON)
 
 # Debug level
 set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
@@ -84,12 +84,12 @@ if (CR_WITH_OPENMP AND OPENMP_FOUND)
   set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif (CR_WITH_OPENMP AND OPENMP_FOUND)
 
-if (PYPELINE_WITH_AERA AND AERA_FOUND)
+if (PYCRTOOLS_WITH_AERA AND AERA_FOUND)
   set (PYPELINE_CXX_FLAGS "-DHAVE_AERA ${PYPELINE_CXX_FLAGS}")
   set (PYPELINE_CPP_FLAGS "-DHAVE_AERA ${PYPELINE_CPP_FLAGS}")
   list (APPEND PYPELINE_INCLUDES ${AERA_INCLUDES})
   list (APPEND PYPELINE_LIBRARIES ${AERA_LIBRARIES})
-endif (PYPELINE_WITH_AERA AND AERA_FOUND)
+endif (PYCRTOOLS_WITH_AERA AND AERA_FOUND)
 
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
@@ -115,14 +115,9 @@ set (PYPELINE_CPP_MODULES
   Imaging
   IO
   RF
-#  Numpy
   EndPointRadiation
   TBB
   )
-
-if (PYPELINE_WITH_AERA AND AERA_FOUND)
-  list (APPEND PYPELINE_CPP_MODULES IO_AERA)
-endif (PYPELINE_WITH_AERA AND AERA_FOUND)
 
 list (APPEND PYPELINE_CPP_MODULES Bindings)
 
