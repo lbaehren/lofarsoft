@@ -26,6 +26,15 @@
 #include "mArray.h"
 #include "mModule.h"
 
+
+// ========================================================================
+//  Type definitions
+// ========================================================================
+
+#ifdef PYCRTOOLS_WITH_NUMPY
+typedef boost::python::numeric::array ndarray;
+#endif /* PYCRTOOLS_WITH_NUMPY */
+
 // ________________________________________________________________________
 //                                        Vector to raw string for storrage
 

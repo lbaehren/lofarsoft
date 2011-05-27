@@ -289,6 +289,134 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+#ifdef PYCRTOOLS_WITH_NUMPY
+
+//$DOCSTRING: Copy input array to a numpy ``ndarray``.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCopy
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (ndarray)(out)()("Numpy vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(in)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  WARNING! Be careful with this function as it automatically typecasts to
+  the type of the output array. In general you should always use matched
+  types.
+
+  If the input vector is shorter than the output vector, it will be
+  copied multiple times until the output vector is filled.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
+{
+  Iter in_it = in_begin;
+
+  // Get pointers to memory of numpy array
+  IterValueType* out_it = numpyBeginPtr<IterValueType>(out);
+  IterValueType* out_end = numpyEndPtr<IterValueType>(out);
+
+  // Get size of numpy array
+  const int N = num_util::size(out);
+
+  // Check if looping over input vector is required to fill output vector
+  if (N > in_end - in_begin)
+  {
+    // Copy and cast to correct type
+    while (out_it != out_end)
+    {
+      *out_it = static_cast<IterValueType>(*in_it);
+
+      ++out_it;
+      ++in_it;
+
+      if (in_it == in_end) in_it = in_begin;
+    }
+  }
+  else // No looping
+  {
+    // Copy and cast to correct type
+    while (out_it != out_end)
+    {
+      *out_it = static_cast<IterValueType>(*in_it);
+
+      ++out_it;
+      ++in_it;
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Copy from input numpy ``ndarray`` to an output array.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCopy
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(in)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (ndarray)(out)()("Numpy vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  WARNING! Be carefull with this function as it automatically typecasts to
+  the type of the output array. In general you should always use matched
+  types.
+
+  If the input vector is shorter than the output vector, it will be
+  copied mutliple times until the output vector is filled.
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter out, const Iter out_end, ndarray in)
+{
+  Iter out_it = out;
+
+  // Get pointers to memory of numpy array
+  IterValueType* in_begin = numpyBeginPtr<IterValueType>(in);
+  IterValueType* in_end = numpyEndPtr<IterValueType>(in);
+  IterValueType* in_it = in_begin;
+
+  // Get size of numpy array
+  const int N = num_util::size(in);
+
+  // Check if looping over input vector is required to fill output vector
+  if (out_end - out > N)
+  {
+    // Copy and cast to correct type
+    while (out_it != out_end)
+    {
+      *out_it = static_cast<IterValueType>(*in_it);
+
+      ++out_it;
+      ++in_it;
+
+      if (in_it == in_end) in_it = in_begin;
+    }
+  }
+  else // No looping
+  {
+    // Copy and cast to correct type
+    while (out_it != out_end)
+    {
+      *out_it = static_cast<IterValueType>(*in_it);
+
+      ++out_it;
+      ++in_it;
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+#endif /* PYCRTOOLS_WITH_NUMPY */
+
+
 //-----------------------------------------------------------------------
 //$DOCSTRING: Will reverse the order of elements in a vector, such the data will run from right to left rather than left to right.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -592,7 +720,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  T start,  const T 
   vec.fillrangevec([start],[increment]) -> vec=[start_0,start_1,..., start_0+1*increment_0, start_1+1*increment_1, ..., start_0+2*increment_0, start_1+2*increment_1, ...]
 
   Description:
-  
+
   The length of vec should be a multiple of the size of ``start``.
 
   Looping Behaviour:
@@ -600,10 +728,10 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  T start,  const T 
   Function fill loop over every element of ``vec``. The size of
   ``start``determines the size of the sub-vectors. ``increment`` will
   be wrapped if it is shorter than vec (so, you can use the same
-  increment for all elements of the sub-vector). 
+  increment for all elements of the sub-vector).
 
   Example:
-  
+
   #Create points which lie on a circle around the origin
   #First create spherical coordinates with fillrangevec
   ary=hArray(float,[8,3])
@@ -614,13 +742,13 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  T start,  const T 
   xyz=hArray(float,[8,3]);
   hCoordinateConvert(ary,CoordinateTypes.AzElRadius,xyz,CoordinateTypes.Cartesian,False)
   #xyz -> hArray(float, [8L, 3L], fill=[0,25,0,0,17.6777,17.6777,0,1.53081e-15,25,-0,-17.6777,17.6777,-0,-25,3.06162e-15,-0,-17.6777,-17.6777,-0,-4.59243e-15,-25,0,17.6777,-17.6777]) # len=24 slice=[0:24])
-  
+
 */
 template <class Iter,class Iter2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const  Iter2 start, const  Iter2 start_end,  const  Iter2 increment, const  Iter2 increment_end)
 {
   Iter it(vec);
-  Iter2 it_start,it_increment; 
+  Iter2 it_start,it_increment;
   HInteger i(0),veclen(vec_end-vec),startlen(start_end-start);
 
   if (increment_end<=increment) ERROR_RETURN("Input vector `increment` has zero length.");
@@ -1027,7 +1155,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   that both vectors have the same size.
   If ``number_of_elements`` is larger than 0 and smaller than the
   length of the index vector, the remaining elements in the index
-  vector are simply ignored. 
+  vector are simply ignored.
 
   If the index list is smaller than the number of elements to copy,
   then the indexlist will be wrapped and restarted from the beginning
@@ -1085,7 +1213,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 
   // Copying of data
   while ((itout != vecout_end) && (count > 0)) {
-    itin = vecin + (*itidx)*veclen; 
+    itin = vecin + (*itidx)*veclen;
     vec_count=veclen;
     while ((itin >= vecin) && (itin < vecin_end) && (vec_count>0) && (itout<vecout_end)) {
       *itout=hfcast<T>(*itin);
@@ -1328,13 +1456,13 @@ HNumber HFPP_FUNC_NAME  (const Iter vec1,const Iter vec1_end, const Iter vec2,co
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
-  
+
   Usage:
-  
+
   separation.vectorseparation(vec1,vec2) # separation -> |vec1-vec2|
 
   Description:
-  
+
   This function will loop over the first input vector, if it is shorter
   than the last input vector. The length of the vector to sum (i.e.,
   the number elements to sum over) is determined by the first vector.
@@ -1347,7 +1475,7 @@ HNumber HFPP_FUNC_NAME  (const Iter vec1,const Iter vec1_end, const Iter vec2,co
   sep=hArray(float,[3])
   sep.vectorseparation(hArray([1.,1,1]),ary)
   #sep -> hArray(float, [3L], fill=[1.41421,5.38516,10.4881]) # len=3 slice=[0:3])
-  
+
   See also:
 
   hVectorLength
@@ -1366,12 +1494,12 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const Iter1 vec1,const I
 
   *it=0.0;
   while (it2!=vec2_end) {
-    *it += pow(hfcast<HNumber>(*it2 - *it1),2); 
+    *it += pow(hfcast<HNumber>(*it2 - *it1),2);
     ++it1; ++it2;
     if  (it1==vec1_end) {
       *it = sqrt(*it);
       ++it; if (it==vec_end) break;
-      *it=0.0; 
+      *it=0.0;
       it1=vec1;
     };
   };
