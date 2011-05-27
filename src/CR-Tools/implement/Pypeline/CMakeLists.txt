@@ -115,7 +115,7 @@ set (PYPELINE_CPP_MODULES
   Imaging
   IO
   RF
-  Numpy
+#  Numpy
   EndPointRadiation
   TBB
   )

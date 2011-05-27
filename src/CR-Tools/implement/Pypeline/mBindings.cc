@@ -56,7 +56,6 @@
 #include "mImaging.h"
 #include "mIO.h"
 #include "mRF.h"
-#include "mNumpy.h"
 #include "mEndPointRadiation.h"
 #include "mTBB.h"
 
@@ -397,11 +396,6 @@ BOOST_PYTHON_MODULE(_hftools)
 //                                                                       RF
 
 #include "../../../../build/cr/implement/Pypeline/mRF.def.h"
-
-// ________________________________________________________________________
-//                                                                    Numpy
-
-#include "../../../../build/cr/implement/Pypeline/mNumpy.def.h"
 
 // ________________________________________________________________________
 //                                                        EndPointRadiation

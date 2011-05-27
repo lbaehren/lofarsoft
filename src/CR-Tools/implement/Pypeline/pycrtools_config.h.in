@@ -12,6 +12,10 @@
 /* Enable numpy support */
 #cmakedefine PYCRTOOLS_WITH_NUMPY
 
+#ifdef PYCRTOOLS_WITH_NUMPY
+#include "numpy_ptr.h"
+#endif /* PYCRTOOLS_WITH_NUMPY */
+
 /* Enable casacore support */
 #cmakedefine PYCRTOOLS_WITH_CASACORE
 
