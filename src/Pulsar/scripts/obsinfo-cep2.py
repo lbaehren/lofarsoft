@@ -124,7 +124,7 @@ cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 # cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 cexeccmd="cexec -f /etc/c3.conf.full"
 # script that gets the status of processed data and also returns the size of processing directory
-process_dir_status_script="/home/kondratiev/bin/cep2_process_dir_status.sh"
+process_dir_status_script="cep2_process_dir_status.sh"
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
