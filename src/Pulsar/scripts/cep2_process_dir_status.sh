@@ -83,6 +83,18 @@ else
   echo $procdir
   echo $statusline
   echo $procsize
+  is_combined=`ls -1 $procdir/combined.th.png 2>/dev/null | grep -v such`
+  if [[ $is_combined == "" ]]; then
+   echo "no" # combined plot does not exist
+  else
+   echo "yes"
+  fi
+  is_status=`ls -1 $procdir/status.th.png 2>/dev/null | grep -v such`
+  if [[ $is_status == "" ]]; then
+   echo "no" # status map plot does not exist
+  else
+   echo "yes"
+  fi
   exit 0
  fi # $mode == "CS"
 
@@ -116,6 +128,12 @@ else
   echo $procdir
   echo $statusline
   echo $procsize
+  is_combined=`ls -1 $procdir/combined.th.png 2>/dev/null | grep -v such`
+  if [[ $is_combined == "" ]]; then
+   echo "no" # combined plot does not exist
+  else
+   echo "yes"
+  fi
   exit 0
  fi # $mode == "IS"
 fi
