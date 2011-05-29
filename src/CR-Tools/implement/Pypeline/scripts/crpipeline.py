@@ -6,6 +6,8 @@ import os
 import sys
 import time
 import numpy as np
+import matplotlib
+matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 import subprocess
 from optparse import OptionParser
@@ -15,6 +17,7 @@ from pycrtools import rficlean as rf
 from pycrtools import pulsefit as pf
 from pycrtools import matching as match # possibly push this down to pulsefit?
 from pycrtools import footprint as fp
+from pycrtools import metadata as md
 from pycrtools import tasks
 import pycrtools as cr
 # import beamformer as bf
@@ -39,12 +42,13 @@ def writeDict(outfile, dict):
             outfile.write('%s: %s\n' % (str(key), ''.join(repr(dict[key]).strip('[]').split(','))))
     outfile.write('\n')
 
-def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionResult, footprintResult, filename, timestamp, sampleNumber):
+def writeResultLine(outfile, stationName, pulseCountResult, triggerFitResult, fullDirectionResult, footprintResult, filename, timestamp, sampleNumber):
     d = triggerFitResult
     az = str(d["az"])
     el = str(d["el"])
     mse = str(d["mse"])
-    outString = az + ' ' + el + ' ' + mse + ' '
+    avgmissed = str(d["avgmissed"])
+    outString = az + ' ' + el + ' ' + mse + ' ' + avgmissed + ' '
 
     d = fullDirectionResult["odd"]
     az = str(d["az"])
@@ -66,22 +70,28 @@ def writeResultLine(outfile, pulseCountResult, triggerFitResult, fullDirectionRe
     outString += avgCount + ' ' + maxCount + ' '
 
     summedPulseHeight = str(footprintResult["summedPulseHeight"])
+    XY = footprintResult["XY"]
+    wrongRCUs = footprintResult["wrongRCUs"]
     coherencyFactor = (float(optHeightOdd) + float(optHeightEven)) / float(summedPulseHeight) # very crude way of estimating coherency
     coherencyFactor = str(coherencyFactor)
     outString += summedPulseHeight + ' ' + coherencyFactor + ' '
 
     outString += str(timestamp) + ' '
     outString += str(sampleNumber) + ' '
+
+    outString += str(XY) + ' '
+    outString += wrongRCUs + ' '
+    outString += stationName + ' '
     outString += filename
     outfile.write(outString + '\n')
 
-def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = False):
+def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = False, pdfPlot = False):
     """ Input: list of files to process, trigger info as read in by match.readtriggers(...), filename for results output
     """
     outfile = open(outfilename, mode='a')
     if not os.path.isfile(asciiFilename) or os.path.getsize(asciiFilename) < 10:
         asciiOutfile = open(asciiFilename, mode='a')
-        headerString = 'trig.az trig.el trig.mse odd.az odd.el odd.R odd.height even.az even.el even.R even.height avgCount maxCount summedHeight coherency time samplenumber filename\n'
+        headerString = 'trig.az trig.el trig.mse trig.avgmissed odd.az odd.el odd.R odd.height even.az even.el even.R even.height avgCount maxCount summedHeight coherency time samplenumber XY wrongRCUs stationname filename\n'
         asciiOutfile.write(headerString)
         asciiOutfile.flush() # so other threads will see it
     else:
@@ -98,6 +108,9 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         if not result["success"]:
             continue
         crfile = result["file"] # blocksize is 2 * 65536 by default ('almost' entire file)
+        id = crfile["CHANNEL_ID"][0] / int(1e6) # get station name for this file, assuming ONE station
+        stationName = md.idToStationName(id)
+        print 'Station name for this file is %s' % stationName
         # get all timeseries data
         cr_alldata = crfile["EMPTY_TIMESERIES_DATA"]
         nofAntennas = crfile["NOF_DIPOLE_DATASETS"]
@@ -146,8 +159,7 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         start = pulseMidpoint - blocksize/2
         stop = pulseMidpoint + blocksize/2
         cr_efield[...].copy(cr_alldata[..., start:stop])
-        
-        result = fp.footprintForCRdata(crfile, cr_efield, doPlot = doPlot)
+        result = fp.footprintForCRdata(crfile, cr_efield, doPlot = doPlot, pdfPlot = pdfPlot)
         if not result["success"]:
             continue
         writeDict(outfile, result)
@@ -163,8 +175,7 @@ def runAnalysis(files, outfilename, asciiFilename, blocksize = 2048, doPlot = Fa
         except (ZeroDivisionError, IndexError), msg:
             print 'EROR!'
             print msg
-        writeResultLine(asciiOutfile, qualityCheckResult, triggerFitResult, fullDirectionResult, footprintResult,
-                        crfile["FILENAME"], fileTimestamp, fileSampleNumber)
+        writeResultLine(asciiOutfile, stationName, qualityCheckResult, triggerFitResult, fullDirectionResult, footprintResult, crfile["FILENAME"], fileTimestamp, fileSampleNumber)
         bfEven = result["even"]["optBeam"]
         bfOdd = result["odd"]["optBeam"]
 
@@ -219,6 +230,8 @@ parser.add_option("-o", "--outfilepath",
                   help="Path for output files")
 parser.add_option("--doPlot", action="store_true", dest="doPlot", default=False,
                   help="Plots are done when this flag is set")
+parser.add_option("--pdfPlot", action="store_true", dest="pdfPlot", default=False,
+                  help="Save plots to pdf")
 
 (options, args)=parser.parse_args()
 
@@ -264,7 +277,7 @@ if nofiles > nthreads:
     thisScriptsPath = os.environ['LOFARSOFT'] + '/src/CR-Tools/implement/Pypeline/scripts/crpipeline.py'
     processes = []
     for i in range(nthreads):
-        thisProcess = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+options.blocksize])
+        thisProcess = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+str(options.blocksize), '--pdfPlot'])
         processes.append(thisProcess)
     i = nthreads
 #    i = 2
@@ -273,11 +286,11 @@ if nofiles > nthreads:
         for k in range(nthreads):
             if processes[k].poll() != None:
                 print 'Going to do: %s' % files[i]
-                processes[k] = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+options.blocksize])
+                processes[k] = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+str(options.blocksize), '--pdfPlot'])
                 i += 1
                 
 else:
-    runAnalysis(files, outfile, outfileAscii, blocksize = options.blocksize, doPlot = options.doPlot)
+    runAnalysis(files, outfile, outfileAscii, blocksize = options.blocksize, doPlot = options.doPlot, pdfPlot = options.pdfPlot)
 #fitergs = dict()
 
 

@@ -9,8 +9,9 @@
 from pycrtools import *
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
-def plotFootprint(datafile, footprintValues = [], dotsize = 200.0):
+def plotFootprint(datafile, footprintValues = [], dotsize = 200.0, pdfPlot = False):
     """
     Plot an antenna layout based on 'datafile', with optional footprint values on top (e.g. pulse heights, signal power, etc.)
     In: datafile: the output of an IO.open(filename) call. This is needed for the call to ["RelativeAntennaPositions"].
@@ -40,16 +41,22 @@ def plotFootprint(datafile, footprintValues = [], dotsize = 200.0):
 
         plt.scatter(x, y, s, marker='o', c='r', label = 'Pulse height X/Y pol.')
         
-       # for i in range(0, len(x), 2):
-       #     plt.text(x[i] + 1.5, y[i] + 1.5, str(i))
+        for i in range(0, len(x), 2):
+            plt.text(x[i] + 1.5, y[i] + 1.5, str(i))
 
         plt.legend(scatterpoints=1)
         plt.title('Pulse height per antenna, 2 polarizations')
         plt.ylabel('Distance north (m)')
         plt.xlabel('Distance east (m)')
+        if pdfPlot:
+            filename = datafile["FILENAME"]
+            basename, extension = os.path.splitext(filename)
+            outfilename = basename + '.pdf' 
+            print outfilename   
+            plt.savefig(outfilename)
         #plt.show()
 
-def footprintForCRdata(datafile, cr_efield, doPlot = False):
+def footprintForCRdata(datafile, cr_efield, doPlot = False, pdfPlot = False):
     result = dict(success=False, action = 'Footprint per antenna')
 
     nofAntennas = cr_efield.shape()[0]
@@ -78,16 +85,25 @@ def footprintForCRdata(datafile, cr_efield, doPlot = False):
         else:
             XY[i/2] = 0
 #            print '%d: odd > even' % i
-    if max(XY) - min(XY) > 0.01:
-        result.update(XYvariable=True)
+#    if max(XY) - min(XY) > 0.01:
+    wrongcount = min(sum(XY), (nofAntennas/2) - sum(XY))
+    if wrongcount > 0:
+        if sum(XY) > nofAntennas / 4: # most are 1's
+            wrongRCUs = str(2 * np.where(XY == 0)[0])
+        else:
+            wrongRCUs = str(2 * np.where(XY == 1)[0])
     else:
-        result.update(XYvariable=False)
+        wrongRCUs = '-'
+    result.update(XY=sum(XY), wrongRCUs = wrongRCUs)
+#    else:
+#        result.update(XYvariable=False)
     
 #    plt.clf()
-    if doPlot:
+    if doPlot or pdfPlot:
         plt.clf()
-        plotFootprint(datafile, maxPerAntenna)
-        raw_input("--- Plotted footprint of maximum abs value per antenna. Press enter to continue...")
+        plotFootprint(datafile, maxPerAntenna, pdfPlot = pdfPlot)
+        if doPlot:
+            raw_input("--- Plotted footprint of maximum abs value per antenna. Press enter to continue...")
         plt.clf()
     result.update(success=True)
     return result

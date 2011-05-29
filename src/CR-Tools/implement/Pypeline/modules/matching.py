@@ -117,7 +117,8 @@ def readtriggers(crfile, directory=''):
     dDates = np.zeros(1000)
     dates = np.zeros(1000, int)
     samplenumers = np.zeros(1000, int)
-
+    missed = np.zeros(1000, int)
+    
     print timestamp
     if os.path.isfile(filename):
         fd = open(filename)
@@ -134,7 +135,7 @@ def readtriggers(crfile, directory=''):
 #        print line
         antennaIDs[i] = int(line.split()[0])
         testdate = long(line.split()[2])
-        # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type...
+        # Have to check for invalid dates! These are 2^32 - 1, and somehow Python complains about not getting that into its 'int' type... [ 32 bits system ]
         if testdate < 2.2e9:
             dates[i] = int(testdate)
         else:
@@ -146,7 +147,11 @@ def readtriggers(crfile, directory=''):
         else:
             samplenumers[i] = 0
             print 'WARNING: sample number invalid in trigger log!'
-
+        thisMissedCount = long(line.split()[9]) # And also here, 32-bits unsigned debug values can enter
+        if thisMissedCount < 65536:
+            missed[i] = int(thisMissedCount)
+        else:
+            missed[i] = -1
         dDates[i] = float(dates[i]) + float(samplenumers[i])/200.0e6
         i += 1 # !
         line = fd.readline()
@@ -156,9 +161,9 @@ def readtriggers(crfile, directory=''):
     dDates = np.resize(dDates, i)
     dates = np.resize(dates, i)
     samplenumers = np.resize(samplenumers, i)
-
-    return (antennaIDs, dDates, dates, samplenumers)
-
+    missed = np.resize(missed, i)
+    
+    return (antennaIDs, dDates, dates, samplenumers, missed)
 
 def getTriggerIndicesFromTime(ddate, dDates, coinctime=1e-6):
     """
@@ -207,29 +212,34 @@ def matchTriggerfileToTime(ddate, triggerfile, coinctime=1e-5):
         raise ValueError("Need as input the 'triggers' as obtained from matching.readtriggers(...)")
         #(allIDs, allDDates, alldates, allSNs) = readtriggers(triggerfile)
     else:
-        (allIDs, allDDates, alldates, allSNs) = triggerfile
+        (allIDs, allDDates, alldates, allSNs, allMissed) = triggerfile
     indices = getTriggerIndicesFromTime(ddate, allDDates, coinctime)
     if (len(indices)>0):
         selectedIDs = allIDs[indices]
         selectedDDates = allDDates[indices]
         selecteddates = alldates[indices]
         selectedSNs = allSNs[indices]
+        selectedMissed = allMissed[indices]
+        
         sortind = np.argsort(selectedIDs)
         sortIDs = selectedIDs[sortind]
         sortDDates = selectedDDates[sortind]
         sortdates = selecteddates[sortind]
         sortSNs = selectedSNs[sortind]
+        sortMissed = selectedMissed[sortind]
         if (len(np.unique(sortIDs)) != len(sortIDs)):
             print "matchTriggerfileToTime: duplicated antenna IDs!"
         outIDs = sortIDs
         outDDates = sortDDates
         outdates = sortdates
         outSNs = sortSNs
+        outMissed = sortMissed
     else:
         outIDs = np.zeros((0), int)
         outDDates = np.zeros((0))
         outdates = np.zeros((0), int)
         outSNs = np.zeros((0), int)
+        outMissed = np.zeros((0), int)
     difftimes = (outdates-ddate)+outSNs/200.0e6
 
-    return (outIDs, outDDates, difftimes, outdates, outSNs)
+    return (outIDs, outDDates, difftimes, outdates, outSNs, outMissed)

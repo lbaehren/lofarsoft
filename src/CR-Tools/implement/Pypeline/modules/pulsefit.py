@@ -127,7 +127,7 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
     fileDate = crfile["TIME"][0]
     fileSamplenum = crfile["SAMPLE_NUMBER"][0]                  # assuming start sample nr. is the same for all antennas
     ddate = fileDate + fileSamplenum / 200.0e6
-    (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums) = match.matchTriggerfileToTime((ddate+0.00033024),triggers)
+    (mIDs, mdDates, mTdiffs, mTriggerDates, mSampleNums, mMissed) = match.matchTriggerfileToTime((ddate+0.00033024),triggers)
     if len(mIDs) == 0:
         print 'NO TRIGGERS FOUND'
         result.update(reason = 'No matching triggers found!')
@@ -144,6 +144,8 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
 #  print len(mTdiffs)
 #  print ' '
     mIDs = mIDs[validChannels].ravel()
+    mMissed = mMissed[validChannels].ravel()
+    avgmissed = np.average(mMissed)
 #  print len(mIDs)
     crfile["ANTENNA_SET"] = "LBA_OUTER" # HACK !!
     match_positions = crfile["RELATIVEANTENNA_POSITIONS"].toNumpy()[mIDs].reshape(3 * len(mIDs))
@@ -172,7 +174,7 @@ def triggerMessageFit(crfile, triggers, fitType='bruteForce'):  # crfile has to 
     toffset = np.mean((mTriggerDates - fileDate) + (mSampleNums - fileSamplenum) / 200.0e6) # matching.py returns np array, so keep it (doing mean anyway)
     print ' T OFFSET: %e' % toffset
 
-    result.update(success = True, az = degaz, el = degel, mse = mse, avgToffset = toffset, nofAntennasUsed = len(mIDs) )
+    result.update(success = True, az = degaz, el = degel, mse = mse, avgmissed = avgmissed, avgToffset = toffset, nofAntennasUsed = len(mIDs) )
     return result
 
 #------------------------------------------------------------------ fullPulseFit
