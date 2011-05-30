@@ -15,22 +15,27 @@ import matplotlib.pyplot as plt
 trigAzKey = 0   # how to improve this?
 trigElKey = 1
 trigMseKey = 2
-oddAzKey = 3
-oddElKey = 4
-oddRKey = 5
-oddHeightKey = 6
-evenAzKey = 7
-evenElKey = 8
-evenRKey = 9
-evenHeightKey = 10
-avgCountKey = 11
-maxCountKey = 12
-summedHeightKey = 13
-coherencyKey = 14
-timeKey = 15
-filenameKey = 16
+trigMissedKey = 3
+oddAzKey = 4
+oddElKey = 5
+oddRKey = 6
+oddHeightKey = 7
+evenAzKey = 8
+evenElKey = 9
+evenRKey = 10
+evenHeightKey = 11
+avgCountKey = 12
+maxCountKey = 13
+summedHeightKey = 14
+coherencyKey = 15
+timeKey = 16
+sampleNumberKey = 17
+XYKey = 18
+wrongRCUs = 19
+stationName = 20
+filenameKey = 21
 
-resultsFile = open('asciiPipelineResults_stabilityRun_2995files.txt', mode='r')
+resultsFile = open('/Users/acorstanje/triggering/asciiPipelineResults_fullLOFAR.txt', mode='r')
 results = []
 for line in resultsFile:
     theseResults = line.split()
@@ -52,6 +57,7 @@ trigEl = np.array(results[trigElKey])
 trigMse = np.array(results[trigMseKey])
 
 avgCount = np.array(results[avgCountKey]) # will filter on this
+missed = np.array(results[trigMissedKey])
 
 dataAz = np.array(results[oddAzKey])
 dataEl = np.array(results[oddElKey])
@@ -68,13 +74,20 @@ dataEl = np.array(results[oddElKey])
 
 rlim = (0.0, 90.0) # r-axis of polar plot, here: 90.0 - elevation
 
-#selectionIndices = np.where(trigMse < 30.0)
-selectionIndices = np.where(avgCount < 2.0)
+selectionIndices = np.where(trigMse < 30.0)
 
 trigAz = trigAz[selectionIndices]
 trigEl = trigEl[selectionIndices]
+missed = missed[selectionIndices] # to use in a second selection
 goodDataAz = dataAz[selectionIndices]
 goodDataEl = dataEl[selectionIndices]
+
+selectionIndices2 = np.where(missed < 1.2)
+
+trigAz = trigAz[selectionIndices2]
+trigEl = trigEl[selectionIndices2]
+goodDataAz = goodDataAz[selectionIndices2]
+goodDataEl = goodDataEl[selectionIndices2]
 
 badIndices = np.where(trigMse > 30.0)
 falseDataAz = dataAz[badIndices]
