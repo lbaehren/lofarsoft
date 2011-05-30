@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.11
+VERSION=2.12
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug]\n\n"\
@@ -916,8 +916,8 @@ do
 					 echo "Changing permissions of files" >> $log
 					 date
 					 date >> $log
-					 echo chmod 774 -R . * >> $log
-					 chmod 774 -R . * 
+					 echo chmod 775 -R . * >> $log
+					 chmod 775 -R . * 
 #					 echo chgrp -R pulsar . * >> $log
 #					 chgrp -R pulsar . * 
 
@@ -1210,7 +1210,7 @@ do
 		   all_pproc=1
 		fi
 		
-		chmod -R 774 . * 
+		chmod -R 775 . * 
 		#chgrp -R pulsar . *
     fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
  	
@@ -2488,8 +2488,8 @@ then
 	echo "Changing permissions of files" >> $log
 	date
 	date >> $log
-	echo chmod 774 -R . * >> $log
-	chmod 774 -R . * 
+	echo chmod 775 -R . * >> $log
+	chmod 775 -R . * 
 	#echo chgrp -R pulsar . * >> $log
 	#chgrp -R pulsar . * 
 		
