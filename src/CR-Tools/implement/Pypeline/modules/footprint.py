@@ -94,7 +94,15 @@ def footprintForCRdata(datafile, cr_efield, doPlot = False, pdfPlot = False):
             wrongRCUs = str(2 * np.where(XY == 1)[0])
     else:
         wrongRCUs = '-'
-    result.update(XY=sum(XY), wrongRCUs = wrongRCUs)
+    outstring = ''
+    for ch in wrongRCUs:
+        if ch == ' ':
+            outstring += '-'
+        else:
+            outstring += ch
+    print 'OUTSTRING'
+    print outstring
+    result.update(XY=wrongcount, wrongRCUs = outstring)
 #    else:
 #        result.update(XYvariable=False)
     

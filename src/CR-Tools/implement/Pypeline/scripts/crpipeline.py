@@ -16,7 +16,7 @@ from pycrtools import datacheck as dc
 from pycrtools import rficlean as rf
 from pycrtools import pulsefit as pf
 from pycrtools import matching as match # possibly push this down to pulsefit?
-from pycrtools import footprint as fp
+import footprint as fp
 from pycrtools import metadata as md
 from pycrtools import tasks
 import pycrtools as cr
@@ -274,7 +274,8 @@ print "Number of files to process:", nofiles
 
 if nofiles > nthreads:
     print '--- Spawning new processes for each file ---'
-    thisScriptsPath = os.environ['LOFARSOFT'] + '/src/CR-Tools/implement/Pypeline/scripts/crpipeline.py'
+    #thisScriptsPath = os.environ['LOFARSOFT'] + '/src/CR-Tools/implement/Pypeline/scripts/crpipeline.py'
+    thisScriptsPath = './crpipeline.py'
     processes = []
     for i in range(nthreads):
         thisProcess = subprocess.Popen([thisScriptsPath, '--files='+files[i], '--method='+options.method, '--outfilepath='+options.outfilePath, '--blocksize='+str(options.blocksize), '--pdfPlot'])
