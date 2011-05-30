@@ -381,15 +381,6 @@ BOOST_PYTHON_MODULE(_hftools)
 #endif /* PYCRTOOLS_WITH_AERA */
 
 // ________________________________________________________________________
-//                                                                  IO AERA
-
-#ifdef HAVE_AERA
-
-#include "../../../../build/cr/implement/Pypeline/mIO_AERA.def.h"
-
-#endif
-
-// ________________________________________________________________________
 //                                                                       RF
 
 #include "../../../../build/cr/implement/Pypeline/mRF.def.h"
