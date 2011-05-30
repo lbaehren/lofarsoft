@@ -124,7 +124,7 @@ cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 # cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 cexeccmd="cexec -f /etc/c3.conf.full"
 # script that gets the status of processed data and also returns the size of processing directory
-process_dir_status_script="cep2_process_dir_status.sh"
+process_dir_status_script="/home/kondratiev/bin/cep2_process_dir_status.sh"
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -1952,7 +1952,7 @@ if __name__ == "__main__":
 							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id)
 							os.system(cmd)
 
-i				# checking if this obs has BF data (then it should not have CS)
+				# checking if this obs has BF data (then it should not have CS)
 				if oi.BF == "+":
 					lse=hoover_nodes[0] # locus101
 					# .... we are not processing BF data yet in the pipeline....
