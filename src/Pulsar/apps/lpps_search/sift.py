@@ -171,18 +171,23 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
         
         # Look in all the output candidates sift them using the PRESTO sifting
         # module.
-        
+        print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             accel_cands = sifting.remove_duplicate_candidates(accel_cands)
+        print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             accel_cands = sifting.remove_DM_problems(accel_cands, 2, dm_strs, 1.)
+        print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             accel_cands = sifting.remove_harmonics(accel_cands)
+        print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             bpc = knownpulsar.load_bright_pulsar_catalog()
             accel_cands = knownpulsar.remove_bright_pulsars(accel_cands, bpc)
+        print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             accel_cands = duplicates.remove_duplicates(accel_cands)
+        print 'Number of candidates %d' % len(accel_cands)        
         sifted_accelcands.extend(accel_cands)
     sifted_accelcands = duplicates.remove_duplicates(sifted_accelcands)
     
