@@ -168,12 +168,16 @@ else # if [[ $cep2 == 1 ]]
            echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png status.png; convert -scale 200x140-0-0 status.png status.th.png"'  >> $outfile.$obsid.CS.sh
            echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
-           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/'${obsid}'_CSplots ;  mv '${obsid}'_CSplots /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/"' >> $outfile.$obsid.CS.sh
+
+#           echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/'${obsid}'_CSplots ;  mv '${obsid}'_CSplots /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/"' >> $outfile.$obsid.CS.sh
+
 	       echo "./$outfile.$obsid.CS.sh > $outfile.$obsid.CS.log &" >> $outfile.all.sh
         else  
            # IS stokes processing
            echo 'cexec hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; mount_locus_nodes.sh; '$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.IS.sh  
-           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/"' >> $outfile.$obsid.IS.sh
+
+#           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/"' >> $outfile.$obsid.IS.sh
+
 	       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
         fi
 	    ii=`expr $ii + 1`
