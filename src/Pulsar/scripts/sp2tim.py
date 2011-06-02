@@ -17,13 +17,16 @@ obscode="t"  # LOFAR
 psrname=""
 is_tempo2 = False  # if True then output tim-file is in Tempo2 format
 extra=""
+is_col6 = False    # if True then also add 6th column from the .singlepulse file (if it exists there)
+                   # before extra-field
 
 def usage (prg):
         """ prints the usage info about the current program
         """
         print "Program %s converts the .singlepulse file to tim-file\n" % (prg,)
         print "Usage: %s [-p, --polyco <polyco-file>] [-o, --obs <obscode>]\n\
-                         [-s, --source <psrname>] [-h, --help] <inf-file> <singlepulse-file>\n\
+                         [-s, --source <psrname>] [--tempo2] [--extra <field>]\n\
+                         [--col6] [-h, --help] <inf-file> <singlepulse-file>\n\
          -o, --obs <obscode>        - set the observatory code (default = t for LOFAR)\n\
          -s, --source <psrname>     - pulsar name to be used for polyco and output tim-file\n\
          -p, --polyco <polyco-file> - use polyco-file to calculate the phase of the pulses\n\
@@ -33,6 +36,7 @@ def usage (prg):
                                       separated by comma with no spaces\n\
          --extra <field>            - extra field to pass to tim-file. It will be added to the first column\n\
                                       in Tempo2 format, or be the last column in Princeton format\n\
+         --col6                     - add 6th column from .singlepulse if it exists there\n\
          -h, --help                 - print this help\n" % (prg,)
 
 def parsecmdline (prg, argv):
@@ -43,7 +47,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hs:p:o:", ["help", "source=", "polyco=", "obs=", "tempo2", "extra="])
+                        opts, args = getopt.getopt (argv, "hs:p:o:", ["help", "source=", "polyco=", "obs=", "tempo2", "extra=", "col6"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -70,6 +74,10 @@ def parsecmdline (prg, argv):
                                 if opt in ("--extra"):
                                         global extra
                                         extra = arg
+
+                                if opt in ("--col6"):
+                                        global is_col6
+					is_col6 = True
 
                         if not args:
                                 print "inf-file and .singlepulse files are not given!\n"
@@ -113,6 +121,8 @@ if __name__=="__main__":
 	# reading .singlepulse file
 	dm, sigma, secs = np.loadtxt(spfile, usecols=(0,1,2), comments='#', dtype=float, unpack=True)
 	offset, downfact = np.loadtxt(spfile, usecols=(3,4), comments='#', dtype=int, unpack=True)
+	if is_col6:
+		col6 = np.loadtxt(spfile, usecols=(5,5), comments='#', dtype=float, unpack=True)[0]
 	toa = ["%.13f" % (startmjd + (offset[i] * tres)/86400.,) for i in np.arange(np.size(offset))]
 
 	# calculating the phases of pulses 
@@ -125,24 +135,48 @@ if __name__=="__main__":
 	timfile=inffile.split(".inf")[0] + ".tim"
 	if is_tempo2:  # output tim-file is in Tempo2 format
 		if is_phase == True:
-			if extra != "":
-				lines=["%s,%d,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+			if extra != "" or is_col6:
+				if not is_col6:
+					lines=["%s,%d,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+				else:
+					if extra == "":
+						lines=["%s,%d,%f,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], col6[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+					else:
+						lines=["%s,%d,%f,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], col6[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%s,%d,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 		else:
-			if extra != "":
-				lines=["%s,%d,,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+			if extra != "" or is_col6:
+				if not is_col6:
+					lines=["%s,%d,,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+				else:
+					if extra == "":
+						lines=["%s,%d,,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], col6[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+					else:
+						lines=["%s,%d,,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], col6[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%s,%d   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 	else: # Princeton format
 		if is_phase == True:
-			if extra != "":
-				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], extra) for i in np.arange(np.size(offset))]
+			if extra != "" or is_col6:
+				if not is_col6:
+					lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], extra) for i in np.arange(np.size(offset))]
+				else:
+					if extra == "":
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], col6[i]) for i in np.arange(np.size(offset))]
+					else:
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], col6[i], extra) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i]) for i in np.arange(np.size(offset))]
 		else:
-			if extra != "":
-				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], extra) for i in np.arange(np.size(offset))]
+			if extra != "" or is_col6:
+				if not is_col6:
+					lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], extra) for i in np.arange(np.size(offset))]
+				else:
+					if extra == "":
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], col6[i]) for i in np.arange(np.size(offset))]
+					else:
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], col6[i], extra) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i]) for i in np.arange(np.size(offset))]
 
