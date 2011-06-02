@@ -1,7 +1,7 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 # Please update the version number when you edit this file:
-VERSION=1.2
+VERSION=1.3
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -1389,7 +1389,7 @@ do
 		                   
 		    if (( $INTYPE == 1 ))
 		    then
-			    found_OBJECT=`grep -i "$OBJECT " $catalog`
+			    found_OBJECT=`grep -i $OBJECT $catalog`
 			    if [[ $found_OBJECT == "" ]]
 			    then
 			       echo "WARNING: OBJECT $OBJECT not found in catalog $catalog."
@@ -1427,8 +1427,8 @@ do
 			    DEC_DEG=`grep -i $OBJECT $catalog | awk '{print $2}'`
 	        elif (( $INTYPE == 1 )) && (( $INSWITCH == 2 ))
 	        then
-		        RA_DEG=`grep -i "$OBJECT " $catalog | awk '{print $1}'`
-		        DEC_DEG=`grep -i "$OBJECT " $catalog | awk '{print $2}'`
+		        RA_DEG=`grep -i "$OBJECT" $catalog | awk '{print $1}'`
+		        DEC_DEG=`grep -i "$OBJECT" $catalog | awk '{print $2}'`
 		    fi
 		    if [[ $RA_DEG == "" ]] || [[ $DEC_DEG == "" ]] 
 		    then
