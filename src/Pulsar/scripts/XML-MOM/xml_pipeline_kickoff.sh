@@ -176,7 +176,7 @@ else # if [[ $cep2 == 1 ]]
            # IS stokes processing
            echo 'cexec hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; mount_locus_nodes.sh; '$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.IS.sh  
 
-#           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/"' >> $outfile.$obsid.IS.sh
+           echo 'cexec hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/"' >> $outfile.$obsid.IS.sh
 
 	       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
         fi
