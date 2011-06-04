@@ -122,7 +122,7 @@ if __name__=="__main__":
 	dm, sigma, secs = np.loadtxt(spfile, usecols=(0,1,2), comments='#', dtype=float, unpack=True)
 	offset, downfact = np.loadtxt(spfile, usecols=(3,4), comments='#', dtype=int, unpack=True)
 	if is_col6:
-		col6 = np.loadtxt(spfile, usecols=(5,5), comments='#', dtype=float, unpack=True)[0]
+		col6 = np.loadtxt(spfile, usecols=(5,5), comments='#', dtype=str, unpack=True)[0]
 	toa = ["%.13f" % (startmjd + (offset[i] * tres)/86400.,) for i in np.arange(np.size(offset))]
 
 	# calculating the phases of pulses 
@@ -140,9 +140,9 @@ if __name__=="__main__":
 					lines=["%s,%d,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 				else:
 					if extra == "":
-						lines=["%s,%d,%f,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], col6[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+						lines=["%s,%d,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], col6[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 					else:
-						lines=["%s,%d,%f,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], col6[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+						lines=["%s,%d,%f,%s,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], col6[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%s,%d,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], phase[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 		else:
@@ -151,9 +151,9 @@ if __name__=="__main__":
 					lines=["%s,%d,,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 				else:
 					if extra == "":
-						lines=["%s,%d,,%f   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], col6[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+						lines=["%s,%d,,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], col6[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 					else:
-						lines=["%s,%d,,%f,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], col6[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
+						lines=["%s,%d,,%s,%s   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], col6[i], extra, freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%s,%d   %8.3f   %s   %s   %s" % (str(sigma[i]), downfact[i], freq, str(toa[i]), str(unc), obscode) for i in np.arange(np.size(offset))]
 	else: # Princeton format
@@ -163,9 +163,9 @@ if __name__=="__main__":
 					lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], extra) for i in np.arange(np.size(offset))]
 				else:
 					if extra == "":
-						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], col6[i]) for i in np.arange(np.size(offset))]
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], col6[i]) for i in np.arange(np.size(offset))]
 					else:
-						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], col6[i], extra) for i in np.arange(np.size(offset))]
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f   %s   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i], col6[i], extra) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], phase[i]) for i in np.arange(np.size(offset))]
 		else:
@@ -174,9 +174,9 @@ if __name__=="__main__":
 					lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], extra) for i in np.arange(np.size(offset))]
 				else:
 					if extra == "":
-						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %f" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], col6[i]) for i in np.arange(np.size(offset))]
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], col6[i]) for i in np.arange(np.size(offset))]
 					else:
-						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %f   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], col6[i], extra) for i in np.arange(np.size(offset))]
+						lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d   0.0   %s   %s" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i], col6[i], extra) for i in np.arange(np.size(offset))]
 			else:
 				lines=["%1s %-12s %8.3f %-20s%9s%10s   %s   %d" % (obscode, source, freq, str(toa[i]), str(unc), "0", str(sigma[i]), downfact[i]) for i in np.arange(np.size(offset))]
 
