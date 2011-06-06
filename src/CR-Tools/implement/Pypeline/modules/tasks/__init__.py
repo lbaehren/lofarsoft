@@ -1144,7 +1144,7 @@ class WorkSpace(object):
 #            import pdb; pdb.set_trace()
         if hasattr(self,"_"+par) or par in self.parameterlist:   #replace stored value
             if hasattr(self,"_"+par):
-                if getattr(self,"_"+par)==value: return  # don't assign or considered modified if it is the same value
+                if getattr(self,"_"+par) is value: return  # don't assign or considered modified if it is the same value
                 delattr(self,"_"+par) # Delete first in case it contains a large array which blocks memory
             setattr(self,"_"+par,value)
             self.parameter_properties[par][default]=value
