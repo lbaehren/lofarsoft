@@ -47,7 +47,8 @@ class Imager(Task):
         'PC001002' : { "default" : 0.000000000000E+00 },
         'PC002002' : { "default" : 1.000000000000E+00 },
         'DM' : { "default" : None },
-        'dt' : { "default" : None }
+        'dt' : { "default" : None },
+        'inversefft' : { "default" : False }
     }
 
     def init(self):
@@ -102,9 +103,16 @@ class Imager(Task):
         self.antpos=self.data.getRelativeAntennaPositions()
         self.nantennas=int(self.antpos.getDim()[0])
 
-#        # Calculate geometric delays for all sky positions for all antennas
-#        self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
-#        cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
+        # Calculate geometric delays for all sky positions for all antennas
+        self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
+        cr.hGeometricDelays(self.delays, self.antpos, self.grid.cartesian, True)
+
+        # Create plan for inverse FFT if needed
+        if self.inversefft:
+            self.blocksize = (self.nfreq - 1) * 2#self.data["BLOCKSIZE"]
+            self.plan = cr.FFTWPlanManyDftC2r(self.blocksize, self.NAXIS1 * self.NAXIS2, 1, self.nfreq, 1, self.blocksize, cr.fftw_flags.ESTIMATE)
+            print "created inverse fft plan"
+            self.t_image2=cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)
 
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
@@ -133,19 +141,24 @@ class Imager(Task):
                 else:
                     self.data.getFFTData(self.fftdata, block)
 
-                cr.hFFTConvert(self.fftdata)
+                cr.hFFTConvert(self.fftdata[...])
+                np.save("indata", self.fftdata.toNumpy())
 
                 print "reading done"
 
                 self.t_image.fill(0.)
 
                 print "beamforming started"
-#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
-                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, step)
+                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
+#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian)
+#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, step)
                 print "beamforming done"
 
                 if self.DM:
                     cr.hShiftedAddAbsSquared(self.image, self.t_image, self.dispersion_shifts + tstep)
+                elif self.inversefft:
+                    cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
+                    cr.hSquareAdd(self.image[tstep], self.t_image2)
                 else:
                     cr.hAbsSquareAdd(self.image[tstep], self.t_image)
 

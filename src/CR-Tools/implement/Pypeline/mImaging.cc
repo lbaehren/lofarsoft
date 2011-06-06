@@ -1057,20 +1057,24 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   const int Ndelays = std::distance(delays, delays_end);
 
   // Get relevant numbers
-  const int Nantennas = Nfftdata / Nfrequencies;
-  const int Nskycoord = Ndelays / Nantennas;
+  const int Nskycoord = Nimage / Nfrequencies;
+  const int Nantennas = Ndelays / Nskycoord;
 
   // Indices
   int i, j, k;
 
   // Sanity checks
-  if (Nfftdata != Nfrequencies * Nantennas)
-  {
-    throw PyCR::ValueError("FFT data array has wrong size.");
-  }
   if (Nimage != Nskycoord * Nfrequencies)
   {
     throw PyCR::ValueError("Image array has wrong size.");
+  }
+  if (Ndelays != Nantennas * Nskycoord)
+  {
+    throw PyCR::ValueError("Delays array has wrong size.");
+  }
+  if (Nfftdata != Nfrequencies * Nantennas)
+  {
+    throw PyCR::ValueError("FFT data array has wrong size.");
   }
 
   // Get iterators
@@ -1092,7 +1096,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     // Image iterator to start position
     it_im = image + (i * Nfrequencies);
 
-    // Delays iterator to start position
+    // Delay iterator to start position
     it_delays = delays + (i * Nantennas);
 
     // Loop over antennas
@@ -1109,13 +1113,13 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       for (k=Nfrequencies; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
-        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * (*delays)));
+        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * (*it_delays)));
         ++it_im_inner;
         ++it_fft;
         ++it_freq;
       }
 
-      // Next antenna delay
+      // Next antenna
       ++it_delays;
     }
   }
