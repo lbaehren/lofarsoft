@@ -4818,3 +4818,200 @@ HBool HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, cons
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate steps to skip masked entries
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaskToStep
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(step)()("Array with steps to skip masked entries.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(mask)()("Array with mask defining which frequency channels are to be skipped. Expected array of lenght Nf (where Nf is the number of frequency channels) containing zeros (for channels to be included) and ones (for channels to be masked and not used for imaging).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter>
+void HFPP_FUNC_NAME (const IIter step, const IIter step_end,
+    const IIter mask, const IIter mask_end
+    )
+{
+  // Step counter
+  int count = 0;
+
+  // Get iterators
+  IIter it_step = step;
+  IIter it_mask = mask;
+
+  // Calculate steps
+  while (it_step != step_end && it_mask != mask_end)
+  {
+    if (*it_mask == 0)
+    {
+      *it_step = count;
+
+      count = 1;
+
+      ++it_step;
+    }
+    else
+    {
+      ++count;
+    }
+    ++it_mask;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Count the number of zero elements
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCountZero
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter>
+HInteger HFPP_FUNC_NAME (const IIter vec, const IIter vec_end)
+{
+  // Get iterator
+  IIter it_vec = vec;
+
+  // Calculate vecs
+  int count = 0;
+  while (it_vec != vec_end)
+  {
+    if (*it_vec == 0) ++count;
+    ++it_vec;
+  }
+
+  return count;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Count the number of non-zero elements
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCountNonZero
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter>
+HInteger HFPP_FUNC_NAME (const IIter vec, const IIter vec_end)
+{
+  // Get iterator
+  IIter it_vec = vec;
+
+  // Calculate vecs
+  int count = 0;
+  while (it_vec != vec_end)
+  {
+    if (*it_vec != 0) ++count;
+    ++it_vec;
+  }
+
+  return count;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Add absolute value squared at shifted position
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hShiftedAbsSquareAdd
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(target)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(source)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(shifts)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class NIter, class IIter>
+void HFPP_FUNC_NAME (const NIter target, const NIter target_end,
+    const CIter source, const CIter source_end,
+    const IIter shifts, const IIter shifts_end
+    )
+{
+  // Variables
+  int i,j;
+
+  // Get dimensions of input
+  const int Ntarget = std::distance(target, target_end);
+  const int Nsource = std::distance(source, source_end);
+  const int Nshifts = std::distance(shifts, shifts_end);
+
+  // Get fractions relating input and output
+  const int Nss = Nsource / Nshifts;
+  const int Nts = Ntarget / Nss;
+
+  // Sanity checks
+  if (Nshifts > Nsource)
+  {
+    throw PyCR::ValueError("Shift dimensions cannot exceed source dimensions.");
+  }
+  if (Nsource > Ntarget)
+  {
+    throw PyCR::ValueError("Source dimensions cannot exceed target dimensions.");
+  }
+  if (Nsource != Nss * Nshifts)
+  {
+    throw PyCR::ValueError("Shifts must fit an integer number of times in source.");
+  }
+  if (Ntarget < Nss)
+  {
+    throw PyCR::ValueError("Target dimensions too small.");
+  }
+
+  // Get iterators
+  NIter target_it = target;
+  CIter source_it = source;
+  IIter shifts_it = shifts;
+
+  // Loop over shifts, which is also assumed to be the fastest index in
+  // the source array, so offset calculation is only needed for outer loop
+
+#ifdef _OPENMP
+#pragma omp parallel for private(target_it, source_it, shifts_it, j)
+#endif // _OPENMP
+ for (i=0; i<Nshifts; ++i)
+  {
+    // Shift for current iteration
+    shifts_it = shifts + i;
+
+    // Only inner loop if shift gives a valid offset into the target array
+    if (*shifts_it >= 0 && *shifts_it < Nts)
+    {
+      // Get offset into source and target arrays
+      source_it = source + i;
+      target_it = target + *shifts_it * Nss;
+
+      // Loop over second fastest index in source array stepping over
+      // the fastest index (with steps of Nshifts)
+      for (j=0; j<Nss; ++j)
+      {
+        // Add absolute value squared to the correct position in the target
+        // array
+        *target_it += real(*source_it * conj(*source_it));
+
+        // Next position in source array (skipping fastest index)
+        source_it += Nshifts;
+        
+        // Next position in target array
+        ++target_it;
+      }
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

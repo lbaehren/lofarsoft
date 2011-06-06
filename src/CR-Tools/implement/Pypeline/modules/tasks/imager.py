@@ -155,7 +155,7 @@ class Imager(Task):
                 print "beamforming done"
 
                 if self.DM:
-                    cr.hShiftedAddAbsSquared(self.image, self.t_image, self.dispersion_shifts + tstep)
+                    cr.hShiftedAbsSquareAdd(self.image, self.t_image, self.dispersion_shifts + tstep)
                 elif self.inversefft:
                     cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
                     cr.hSquareAdd(self.image[tstep], self.t_image2)
