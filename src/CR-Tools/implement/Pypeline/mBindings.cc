@@ -149,6 +149,14 @@ namespace PyCR { // Namespace PyCR -- begin
     PyErr_SetString(PyExc_IOError, e.message.c_str());
   }
 
+  bool multicore()
+  {
+#ifdef _OPENMP
+    return true;
+#else
+    return false;
+#endif // _OPENMP    
+  }
 } // Namespace PyCR -- end
 
 // ========================================================================
@@ -193,6 +201,10 @@ BOOST_PYTHON_MODULE(_hftools)
   register_exception_translator<PyCR::NameError>(PyCR::translateNameError);
   register_exception_translator<PyCR::NotImplementedError>(PyCR::translateNotImplementedError);
   register_exception_translator<PyCR::IOError>(PyCR::translateIOError);
+
+// ________________________________________________________________________
+//                                                         State inspectors 
+  def("multicore", &PyCR::multicore);
 
 // ________________________________________________________________________
 //                                                       Core functionality
