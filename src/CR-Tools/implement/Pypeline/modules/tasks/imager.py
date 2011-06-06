@@ -45,15 +45,15 @@ class Imager(Task):
     """
 
     parameters = {
-        'image' : { "default" : None, "positional" : 1 },
-        'data' : { "default" : None, "positional" : 2 },
-        'mask' : { "default" : None, "positional" : 3 },
+        'data' : { "default" : None, "positional" : 1 },
+        'image' : { "default" : None },
         'output' : { "default" : "out.fits" },
         'startblock' : { "default" : 0 },
         'nblocks' : { "default" : 16 },
         'ntimesteps' : { "default" : 1 },
-        'dt' : { "default" : None },
+        'intgrfreq' : { "default" : False, "doc" : "Output frequency integrated image." },
         'inversefft' : { "default" : False },
+        'mask' : { "default" : None },
         'FREQMIN' : { "default" : None },
         'FREQMAX' : { "default" : None },
         'OBSTIME' : { "default" : lambda self : self.data["TIME"][0] },
@@ -140,9 +140,14 @@ class Imager(Task):
         # Calculate dispersion measure shifts if requested
         if self.DM:
             self.dispersion_shifts = cr.hArray(int, self.nfreq)
-            cr.hDedispersionShifts(self.dispersion_shifts, self.frequencies, cr.hMin(self.frequencies).val(), self.DM, self.dt)
+            cr.hDedispersionShifts(self.dispersion_shifts, self.frequencies, cr.hMin(self.frequencies).val(), self.DM, self.CDELT4)
 
             print "Dedispersion shifts", self.dispersion_shifts
+
+        # Get steps corresponding to mask if given
+        if self.mask != None:
+            self.step = cr.hArray(int, cr.hCountZero(self.mask))
+            cr.hMaskToStep(self.step, self.mask)
 
         # Get antenna positions
         self.antpos=self.data.getRelativeAntennaPositions()
@@ -162,16 +167,18 @@ class Imager(Task):
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+        self.t_image=cr.hArrayrcomplex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+
+        # Create image array if none is given as input
+        if not image:
+            if self.intgrfreq:
+                self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
+            else:
+                self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
     def run(self):
         """Run the imager.
         """
-
-        # Get steps corresponding to mask
-        mask = self.mask
-        step = cr.hArray(int, cr.hCountZero(mask))
-        cr.hMaskToStep(step, mask)
 
         start = time.time()
         for tstep in range(self.ntimesteps):
@@ -196,7 +203,7 @@ class Imager(Task):
                 print "beamforming started"
                 cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
 #                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian)
-#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, step)
+#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, self.step)
                 print "beamforming done"
 
                 if self.DM:
