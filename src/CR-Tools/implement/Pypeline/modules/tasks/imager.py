@@ -50,7 +50,7 @@ class Imager(Task):
         'output' : { "default" : "out.fits" },
         'startblock' : { "default" : 0 },
         'nblocks' : { "default" : 16 },
-        'ntimesteps' : { "default" : 1 },
+        'ntimesteps' : { "default" : lambda self : self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"]) },
         'intgrfreq' : { "default" : False, "doc" : "Output frequency integrated image." },
         'inversefft' : { "default" : False },
         'mask' : { "default" : None },
@@ -75,8 +75,8 @@ class Imager(Task):
         'CRVAL2' : { "default" : 90. },
         'CRVAL3' : { "default" : 0. },
         'CRVAL4' : { "default" : 0. },
-        'CRPIX1' : { "default" : 45.5 },
-        'CRPIX2' : { "default" : 45.5 },
+        'CRPIX1' : { "default" : lambda self : float(self.NAXIS1) / 2 },
+        'CRPIX2' : { "default" : lambda self : float(self.NAXIS2) / 2 },
         'CRPIX3' : { "default" : 0. },
         'CRPIX4' : { "default" : 0. },
         'CDELT1' : { "default" : 2.566666603088E+00 },
@@ -167,10 +167,10 @@ class Imager(Task):
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        self.t_image=cr.hArrayrcomplex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+        self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
         # Create image array if none is given as input
-        if not image:
+        if not self.image:
             if self.intgrfreq:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
             else:
@@ -220,6 +220,9 @@ class Imager(Task):
         print "total runtime:", end-start, "s"
 
         # Save image to disk
+
+        self.image = np.rollaxis(self.image, 0, 3)
+
         savefits(self.output, self.image, 
                     OBSLON=self.OBSLON,
                     OBSLAT=self.OBSLAT,
