@@ -30,6 +30,7 @@ parser.add_option("--nfmax", type="int", default=6050)
 parser.add_option("--naxis1", type="int", default=41)
 parser.add_option("--naxis2", type="int", default=41)
 parser.add_option("--angres", type="float", default=0.25)
+parser.add_option("--dispersion-measure", type="float", default=None)
 parser.add_option("-o", "--output", dest="storename",
                   help="write output to FILE", metavar="FILE", default="out")
 
@@ -116,10 +117,13 @@ CUNIT3 = 'Hz'
 CUNIT4 = 's'
 
 # Create empty image
-image = np.zeros(shape=(ntimesteps, NAXIS1, NAXIS2, nfreq), dtype='float')
+if options.dispersion_measure:
+    image = cr.hArray(np.zeros(shape=(ntimesteps, NAXIS1, NAXIS2), dtype='float'))
+else:
+    image = np.zeros(shape=(ntimesteps, NAXIS1, NAXIS2, nfreq), dtype='float')
 
 # Initialize imager
-im = imager.Imager(image = image, data = f, mask = mask, startblock = startblock, nblocks = nblocks, ntimesteps = ntimesteps, obstime = obstime, NAXIS = NAXIS,NAXIS1 = NAXIS1, NAXIS2 = NAXIS2, CTYPE1 = CTYPE1, CTYPE2 = CTYPE2, LONPOLE = LONPOLE,LATPOLE = LATPOLE,CRVAL1 = CRVAL1, CRVAL2 = CRVAL2, CRPIX1 = CRPIX1, CRPIX2 = CRPIX2, CDELT1 = CDELT1, CDELT2 = CDELT2, CUNIT1 = CUNIT1, CUNIT2 = CUNIT2, nfmin = nfmin, nfmax = nfmax)
+im = imager.Imager(image = image, data = f, mask = mask, startblock = startblock, nblocks = nblocks, ntimesteps = ntimesteps, obstime = obstime, NAXIS = NAXIS,NAXIS1 = NAXIS1, NAXIS2 = NAXIS2, CTYPE1 = CTYPE1, CTYPE2 = CTYPE2, LONPOLE = LONPOLE,LATPOLE = LATPOLE,CRVAL1 = CRVAL1, CRVAL2 = CRVAL2, CRPIX1 = CRPIX1, CRPIX2 = CRPIX2, CDELT1 = CDELT1, CDELT2 = CDELT2, CUNIT1 = CUNIT1, CUNIT2 = CUNIT2, nfmin = nfmin, nfmax = nfmax, DM = options.dispersion_measure, dt = CDELT4)
 
 #np.save("/Users/pschella/Desktop/frequencies_new.npy", frequencies.toNumpy())
 
@@ -129,7 +133,10 @@ im()
 print "Image complete, storing to disk."
 
 # Save image as FITS
-image = np.rollaxis(image, 0, 4).transpose()
+if options.dispersion_measure:
+    image = image.toNumpy().transpose()
+
+#image = np.rollaxis(image, 0, 4).transpose()
 hdu = pyfits.PrimaryHDU(image)
 
 # Write WCS parameters to header

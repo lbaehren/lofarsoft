@@ -45,7 +45,9 @@ class Imager(Task):
         'PC001001' : { "default" : 1.000000000000E+00 },
         'PC002001' : { "default" : 0.000000000000E+00 },
         'PC001002' : { "default" : 0.000000000000E+00 },
-        'PC002002' : { "default" : 1.000000000000E+00 }
+        'PC002002' : { "default" : 1.000000000000E+00 },
+        'DM' : { "default" : None },
+        'dt' : { "default" : None }
     }
 
     def init(self):
@@ -88,6 +90,13 @@ class Imager(Task):
         self.nfreq = len(self.frequencies)
 
         print "Frequency range:", self.frequencies[0], self.frequencies[-1], "Hz"
+
+        # Calculate dispersion measure shifts if requested
+        if self.DM:
+            self.dispersion_shifts = cr.hArray(int, self.nfreq)
+            cr.hDedispersionShifts(self.dispersion_shifts, self.frequencies, cr.hMin(self.frequencies).val(), self.DM, self.dt)
+
+            print "Dedispersion shifts", self.dispersion_shifts
 
         # Get antenna positions
         self.antpos=self.data.getRelativeAntennaPositions()
@@ -135,7 +144,10 @@ class Imager(Task):
                 cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, step)
                 print "beamforming done"
 
-                cr.hAbsSquareAdd(self.image[tstep], self.t_image)
+                if self.DM:
+                    cr.hShiftedAddAbsSquared(self.image, self.t_image, self.dispersion_shifts + tstep)
+                else:
+                    cr.hAbsSquareAdd(self.image[tstep], self.t_image)
 
             self.startblock += self.nblocks
 
