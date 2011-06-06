@@ -85,8 +85,8 @@ class CoordinateGrid(object):
         *CRVAL1* world value corresponding to reference pixel on 2nd axis
         *CDELT1* increment (in intermediate world coordinates) for 1st axis
         *CDELT2* increment (in intermediate world coordinates) for 2nd axis
-        *CTYPE1* coordinate system and projection accordint to FITS rules
-        *CTYPE2* coordinate system and projection accordint to FITS rules
+        *CTYPE1* coordinate system and projection according to FITS rules
+        *CTYPE2* coordinate system and projection according to FITS rules
         *LONPOLE* longitude of pole
         *LATPOLE* latitude of pole
         """
