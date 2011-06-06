@@ -16,6 +16,11 @@
 
 #include <num_util.h>
 
+/*
+  Type definition for frequently used ndarray
+*/
+typedef boost::python::numeric::array ndarray;
+
 /*!
   \Brief Return the pointer to the begin of the storage of a numpy array
 
