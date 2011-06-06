@@ -10,6 +10,35 @@ import pycrtools as cr
 import pytmf
 import numpy as np
 import time
+import pyfits
+import os
+
+def savefits(filename, array, overwrite=True, **kwargs):
+    """Save image as standard FITS file.
+    """
+
+    # Convert image to Numpy array if required
+    if cr.ishArray(array):
+        array = array.toNumpy()
+
+    # Create new FITS structure (array needs to be transposed for FITS convention)
+    hdu = pyfits.PrimaryHDU(array.transpose())
+    
+    # Create FITS header
+    hdr = hdu.header
+
+    for key in sorted(kwargs.iterkeys()):
+        
+        # NAXIS are calculated by pyfits and need to match
+        if not "NAXIS" in key:
+            hdr.update(key, kwargs[key])
+
+    # Check if file exists and overwrite if requested
+    if not filename.endswith(".fits"):
+        filename += ".fits"
+    if os.path.isfile(filename) and overwrite:
+        os.remove(filename)
+    hdu.writeto(filename)
 
 class Imager(Task):
     """Imager task documentation.
@@ -19,36 +48,49 @@ class Imager(Task):
         'image' : { "default" : None, "positional" : 1 },
         'data' : { "default" : None, "positional" : 2 },
         'mask' : { "default" : None, "positional" : 3 },
+        'output' : { "default" : "out.fits" },
         'startblock' : { "default" : 0 },
         'nblocks' : { "default" : 16 },
         'ntimesteps' : { "default" : 1 },
-        'nfmin' : { "default" : None },
-        'nfmax' : { "default" : None },
-        'obstime' : { "default" : 0 },
-        'L' : { "default" : pytmf.deg2rad(6.869837540) },
-        'phi' : { "default" : pytmf.deg2rad(52.915122495) },
-        'NAXIS' : { "default" : 2 },
+        'dt' : { "default" : None },
+        'inversefft' : { "default" : False },
+        'FREQMIN' : { "default" : None },
+        'FREQMAX' : { "default" : None },
+        'OBSTIME' : { "default" : lambda self : self.data["TIME"][0] },
+        'DM' : { "default" : None },
+        'OBSLON' : { "default" : pytmf.deg2rad(6.869837540), "doc" : "Observer longitude in radians" },
+        'OBSLAT' : { "default" : pytmf.deg2rad(52.915122495), "doc" : "Observer latitude in radians" },
+        'NAXIS' : { "default" : 4 },
         'NAXIS1' : { "default" : 90 },
         'NAXIS2' : { "default" : 90 },
-        'CTYPE1' : { "default" : 'ALON-STG' },
-        'CTYPE2' : { "default" : 'ALAT-STG' },
+        'NAXIS3' : { "default" : 1 },
+        'NAXIS4' : { "default" : 1 },
         'LONPOLE' : { "default" : 0. },
         'LATPOLE' : { "default" : 90. },
+        'CTYPE1' : { "default" : 'ALON-STG' },
+        'CTYPE2' : { "default" : 'ALAT-STG' },
+        'CTYPE3' : { "default" : 'FREQ' },
+        'CTYPE4' : { "default" : 'TIME' },
         'CRVAL1' : { "default" : 180. },
         'CRVAL2' : { "default" : 90. },
+        'CRVAL3' : { "default" : 0. },
+        'CRVAL4' : { "default" : 0. },
         'CRPIX1' : { "default" : 45.5 },
         'CRPIX2' : { "default" : 45.5 },
+        'CRPIX3' : { "default" : 0. },
+        'CRPIX4' : { "default" : 0. },
         'CDELT1' : { "default" : 2.566666603088E+00 },
         'CDELT2' : { "default" : 2.566666603088E+00 },
+        'CDELT3' : { "default" : 0.0+00 },
+        'CDELT4' : { "default" : 0.0+00 },
         'CUNIT1' : { "default" : 'deg' },
         'CUNIT2' : { "default" : 'deg' },
+        'CUNIT3' : { "default" : 'Hz' },
+        'CUNIT4' : { "default" : 's' },
         'PC001001' : { "default" : 1.000000000000E+00 },
         'PC002001' : { "default" : 0.000000000000E+00 },
         'PC001002' : { "default" : 0.000000000000E+00 },
-        'PC002002' : { "default" : 1.000000000000E+00 },
-        'DM' : { "default" : None },
-        'dt' : { "default" : None },
-        'inversefft' : { "default" : False }
+        'PC002002' : { "default" : 1.000000000000E+00 }
     }
 
     def init(self):
@@ -57,9 +99,9 @@ class Imager(Task):
 
         # Generate coordinate grid
         print "Generating grid"
-        self.grid=CoordinateGrid(obstime=self.obstime,
-                                 L=self.L,
-                                 phi=self.phi,
+        self.grid=CoordinateGrid(OBSTIME=self.OBSTIME,
+                                 L=self.OBSLON,
+                                 phi=self.OBSLAT,
                                  NAXIS=self.NAXIS,
                                  NAXIS1=self.NAXIS1,
                                  NAXIS2=self.NAXIS2,
@@ -85,8 +127,11 @@ class Imager(Task):
         # Get frequencies
         self.frequencies=self.data.getFrequencies()
 
-        if self.nfmin != None and self.nfmax != None:
-            self.frequencies=self.frequencies[range(self.nfmin, self.nfmax)]
+        self.frequency_slice = None
+        if self.FREQMIN != None and self.FREQMAX != None:
+            frequency_slice = cr.hArray(int, 2)
+            cr.hFindSequenceBetweenOrEqual(frequency_slice, self.frequencies, self.FREQMIN, self.FREQMAX, 0, 0)
+            self.frequencies=self.frequencies[frequency_slice[0]:frequency_slice[1]]
 
         self.nfreq = len(self.frequencies)
 
@@ -134,10 +179,10 @@ class Imager(Task):
 
                 print "processing block:", block
 
-                if self.nfmin != None and self.nfmax != None:
+                if self.frequency_slice != None:
                     self.data.getFFTData(self.scratchfft, block)
 
-                    self.fftdata[...].copy(self.scratchfft[..., self.nfmin:self.nfmax])
+                    self.fftdata[...].copy(self.scratchfft[..., self.frequency_slice[0]:self.frequency_slice[1]])
                 else:
                     self.data.getFFTData(self.fftdata, block)
 
@@ -166,4 +211,28 @@ class Imager(Task):
 
         end = time.time()
         print "total runtime:", end-start, "s"
+
+        # Save image to disk
+        savefits(self.output, self.image, 
+                    OBSLON=self.OBSLON,
+                    OBSLAT=self.OBSLAT,
+                    NAXIS=self.NAXIS,
+                    NAXIS1=self.NAXIS1,
+                    NAXIS2=self.NAXIS2,
+                    CTYPE1=self.CTYPE1,
+                    CTYPE2=self.CTYPE2,
+                    LONPOLE=self.LONPOLE,
+                    LATPOLE=self.LATPOLE,
+                    CRVAL1=self.CRVAL1,
+                    CRVAL2=self.CRVAL2,
+                    CRPIX1=self.CRPIX1,
+                    CRPIX2=self.CRPIX2,
+                    CDELT1=self.CDELT1,
+                    CDELT2=self.CDELT2,
+                    CUNIT1=self.CUNIT1,
+                    CUNIT2=self.CUNIT2,
+                    PC001001=self.PC001001,
+                    PC002001=self.PC002001,
+                    PC001002=self.PC001002,
+                    PC002002=self.PC002002)
 
