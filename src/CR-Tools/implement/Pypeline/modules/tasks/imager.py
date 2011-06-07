@@ -33,11 +33,10 @@ def savefits(filename, array, overwrite=True, **kwargs):
         if not "NAXIS" in key:
 
             # Correct for ugly bug in casaviewer
-            if "CTYPE" in key:
-                if "ALON" in kwargs[key]:
-                    hdr.update(key, "??LN-"+kwargs[key][5:])
-                elif "ALAT" in kwargs[key]:
-                    hdr.update(key, "??LT-"+kwargs[key][5:])
+            if "CTYPE" in key and "ALON" in kwargs[key]:
+                hdr.update(key, "??LN-"+kwargs[key][5:])
+            elif "CTYPE" in key and "ALAT" in kwargs[key]:
+                hdr.update(key, "??LT-"+kwargs[key][5:])
             else:
                 hdr.update(key, kwargs[key])
 
@@ -57,7 +56,7 @@ class Imager(Task):
         'image' : { "default" : None },
         'output' : { "default" : "out.fits" },
         'startblock' : { "default" : 0 },
-        'nblocks' : { "default" : 16 },
+        'nblocks' : { "default" : 1 },
         'ntimesteps' : { "default" : lambda self : self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"]) },
         'intgrfreq' : { "default" : False, "doc" : "Output frequency integrated image." },
         'inversefft' : { "default" : False },
@@ -89,8 +88,8 @@ class Imager(Task):
         'CRPIX4' : { "default" : 0. },
         'CDELT1' : { "default" : 2.566666603088E+00 },
         'CDELT2' : { "default" : 2.566666603088E+00 },
-        'CDELT3' : { "default" : 0.0+00 },
-        'CDELT4' : { "default" : 0.0+00 },
+        'CDELT3' : { "default" : lambda self : self.data["FREQUENCY_INTERVAL"][0] },
+        'CDELT4' : { "default" : lambda self : self.nblocks * self.data["BLOCKSIZE"] * self.data["SAMPLE_INTERVAL"][0] },
         'CUNIT1' : { "default" : 'deg' },
         'CUNIT2' : { "default" : 'deg' },
         'CUNIT3' : { "default" : 'Hz' },
@@ -184,13 +183,6 @@ class Imager(Task):
             else:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
-        # Create image array if none is given as input
-        if not self.image:
-            if self.intgrfreq:
-                self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
-            else:
-                self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
-
     def run(self):
         """Run the imager.
         """
@@ -236,26 +228,33 @@ class Imager(Task):
 
         # Save image to disk
 
-        self.image = np.rollaxis(self.image, 0, 3)
+        self.image = np.rollaxis(self.image, 0, 4)
 
         savefits(self.output, self.image, 
                     OBSLON=self.OBSLON,
                     OBSLAT=self.OBSLAT,
-                    NAXIS=self.NAXIS,
-                    NAXIS1=self.NAXIS1,
-                    NAXIS2=self.NAXIS2,
                     CTYPE1=self.CTYPE1,
                     CTYPE2=self.CTYPE2,
+                    CTYPE3=self.CTYPE3,
+                    CTYPE4=self.CTYPE4,
                     LONPOLE=self.LONPOLE,
                     LATPOLE=self.LATPOLE,
                     CRVAL1=self.CRVAL1,
                     CRVAL2=self.CRVAL2,
+                    CRVAL3=self.CRVAL3,
+                    CRVAL4=self.CRVAL4,
                     CRPIX1=self.CRPIX1,
                     CRPIX2=self.CRPIX2,
+                    CRPIX3=self.CRPIX3,
+                    CRPIX4=self.CRPIX4,
                     CDELT1=self.CDELT1,
                     CDELT2=self.CDELT2,
+                    CDELT3=self.CDELT3,
+                    CDELT4=self.CDELT4,
                     CUNIT1=self.CUNIT1,
                     CUNIT2=self.CUNIT2,
+                    CUNIT3=self.CUNIT3,
+                    CUNIT4=self.CUNIT4,
                     PC001001=self.PC001001,
                     PC002001=self.PC002001,
                     PC001002=self.PC001002,

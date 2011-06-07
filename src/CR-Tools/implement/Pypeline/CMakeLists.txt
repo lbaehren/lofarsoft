@@ -75,13 +75,16 @@ endif (PYPELINE_WITH_OPTIMIZATION)
 ##-------------------------------------------------------------------------------
 ## Optional dependencies
 
-
-if (CR_WITH_OPENMP AND OPENMP_FOUND)
-  message (STATUS "[CR-Tools] Adding OpenMP support to Pypeline.")
-  set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set (PYPELINE_CPP_FLAGS ${OpenMP_CXX_FLAGS})
-  set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif (CR_WITH_OPENMP AND OPENMP_FOUND)
+if (CR_WITH_OPENMP)
+    if (OPENMP_FOUND)
+        message (STATUS "[PyCRTools] OpenMP Requested and Enabled")
+        set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+        set (PYPELINE_CPP_FLAGS ${OpenMP_CXX_FLAGS})
+        set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
+    else (OPENMP_FOUND)
+        message (WARNING "[PyCRTools] OpenMP Requested but not Enabled")
+    endif (OPENMP_FOUND)
+endif (CR_WITH_OPENMP)
 
 if (PYCRTOOLS_WITH_AERA AND AERA_FOUND)
   set (PYPELINE_CXX_FLAGS "-DHAVE_AERA ${PYPELINE_CXX_FLAGS}")
