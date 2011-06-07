@@ -167,7 +167,14 @@ class Imager(Task):
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+        self.t_image=cr.hArrayrcomplex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+
+        # Create image array if none is given as input
+        if not image:
+            if self.intgrfreq:
+                self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
+            else:
+                self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
         # Create image array if none is given as input
         if not self.image:
