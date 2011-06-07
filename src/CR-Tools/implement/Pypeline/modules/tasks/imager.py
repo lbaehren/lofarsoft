@@ -31,7 +31,15 @@ def savefits(filename, array, overwrite=True, **kwargs):
         
         # NAXIS are calculated by pyfits and need to match
         if not "NAXIS" in key:
-            hdr.update(key, kwargs[key])
+
+            # Correct for ugly bug in casaviewer
+            if "CTYPE" in key:
+                if "ALON" in kwargs[key]:
+                    hdr.update(key, "??LN-"+kwargs[key][5:])
+                elif "ALAT" in kwargs[key]:
+                    hdr.update(key, "??LT-"+kwargs[key][5:])
+            else:
+                hdr.update(key, kwargs[key])
 
     # Check if file exists and overwrite if requested
     if not filename.endswith(".fits"):
