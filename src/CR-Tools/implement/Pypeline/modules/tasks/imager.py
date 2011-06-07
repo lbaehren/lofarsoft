@@ -92,7 +92,8 @@ class Imager(Task):
         'PC001002' : { "default" : 0.000000000000E+00 },
         'PC002002' : { "default" : 1.000000000000E+00 },
         'DM' : { "default" : None },
-        'dt' : { "default" : None }
+        'dt' : { "default" : None },
+        'inversefft' : { "default" : False }
     }
 
     def init(self):
