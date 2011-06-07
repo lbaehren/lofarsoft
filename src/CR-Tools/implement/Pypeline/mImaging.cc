@@ -1311,3 +1311,145 @@ void HFPP_FUNC_NAME (const IIter shifts, const IIter shifts_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Generate shifts for dedispersion
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDedispersionShifts
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(shifts)()("Shifts.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Frequencies in Hz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(reference)()("Reference frequency in Hz.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(dm)()("Dispersion Measure.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HNumber)(dt)()("Time sampling step in seconds.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class IIter, class NIter>
+void HFPP_FUNC_NAME (const IIter shifts, const IIter shifts_end,
+    const NIter frequencies, const NIter frequencies_end,
+    const HNumber reference, const HNumber dm, const HNumber dt
+    )
+{
+  // dispersion constant (in units of Hz^2 pc^-1 cm^3 s)
+  const double k = 4.149e15;
+
+  // inverse square of the reference frequency
+  const double rs = 1. / (reference * reference);
+
+  const int Nshifts = std::distance(shifts, shifts_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
+
+  if (Nshifts != Nfrequencies)
+  {
+    throw PyCR::ValueError("Vector sizes do not match.");
+  }
+
+  IIter shifts_it = shifts;
+  NIter freq_it = frequencies;
+
+  for (int i=Nshifts; i!=0; --i)
+  {
+    // Calculate shift in sampling units and round to the nearest integer
+    *shifts_it = floor((k * dm / dt) * ((1. / ((*freq_it) * (*freq_it))) - rs) + 0.5);
+
+    ++shifts_it;
+    ++freq_it;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Add absolute value squared at time shifted position
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hShiftedAddAbsSquared
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(target)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(source)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(shifts)()("")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class NIter, class IIter>
+void HFPP_FUNC_NAME (const NIter target, const NIter target_end,
+    const CIter source, const CIter source_end,
+    const IIter shifts, const IIter shifts_end
+    )
+{
+  // Variables
+  int i,j;
+
+  // Get dimensions of input
+  const int Ntarget = std::distance(target, target_end);
+  const int Nsource = std::distance(source, source_end);
+  const int Nshifts = std::distance(shifts, shifts_end);
+
+  // Get fractions relating input and output
+  const int Nss = Nsource / Nshifts;
+  const int Nts = Ntarget / Nss;
+
+  // Sanity checks
+  if (Nshifts > Nsource)
+  {
+    throw PyCR::ValueError("Shift dimensions cannot exceed source dimensions.");
+  }
+  if (Nsource > Ntarget)
+  {
+    throw PyCR::ValueError("Source dimensions cannot exceed target dimensions.");
+  }
+  if (Nsource != Nss * Nshifts)
+  {
+    throw PyCR::ValueError("Shifts must fit an integer number of times in source.");
+  }
+  if (Ntarget < Nss)
+  {
+    throw PyCR::ValueError("Target dimensions too small.");
+  }
+
+  // Get iterators
+  NIter target_it = target;
+  CIter source_it = source;
+  IIter shifts_it = shifts;
+
+  // Loop over shifts, which is also assumed to be the fastest index in
+  // the source array, so offset calculation is only needed for outer loop
+
+#ifdef _OPENMP
+#pragma omp parallel for private(target_it, source_it, shifts_it, j)
+#endif // _OPENMP
+ for (i=0; i<Nshifts; ++i)
+  {
+    // Shift for current iteration
+    shifts_it = shifts + i;
+
+    // Only inner loop if shift gives a valid offset into the target array
+    if (*shifts_it >= 0 && *shifts_it < Nts)
+    {
+      // Get offset into source and target arrays
+      source_it = source + i;
+      target_it = target + *shifts_it * Nss;
+
+      // Loop over second fastest index in source array stepping over
+      // the fastest index (with steps of Nshifts)
+      for (j=0; j<Nss; ++j)
+      {
+        // Add absolute value squared to the correct position in the target
+        // array
+        *target_it += real(*source_it * conj(*source_it));
+
+        // Next position in source array (skipping fastest index)
+        source_it += Nshifts;
+        
+        // Next position in target array
+        ++target_it;
+      }
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
