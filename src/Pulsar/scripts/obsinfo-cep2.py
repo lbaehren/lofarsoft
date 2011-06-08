@@ -1751,7 +1751,8 @@ if __name__ == "__main__":
 		test_obsids=[] # the list of ObsIDs that have reduced data in 'test_dir' - we mark them as TEST
 	
 		# checking first locus101 (hoover_nodes[0])
-		lse=hoover_nodes[0]
+#		lse=hoover_nodes[0]
+		lse="locus092"
 		# getting the list of *_CSplots directories to get a list of ObsIDs
 		cmd="%s %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexec_nodes[lse], psr_archive_dir + lse, "*_CSplots", cexec_egrep_string)
 		dirlist = os.popen(cmd).readlines()
@@ -1759,7 +1760,8 @@ if __name__ == "__main__":
 		test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_CSplots")[0] for i in dirlist if re.search(test_dir, i)])
 
 		# then checking locus102 (hoover_nodes[1])
-		lse=hoover_nodes[1]
+#		lse=hoover_nodes[1]
+		lse="locus094"
 		# and getting the list of *_redIS directories to get a list of ObsIDs
 		cmd="%s %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexec_nodes[lse], psr_archive_dir + lse, "*_redIS", cexec_egrep_string)
 		dirlist = os.popen(cmd).readlines()
@@ -1930,12 +1932,35 @@ if __name__ == "__main__":
 			if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_CSplots or _redIS or both) in the Archive area
 				# looking for _CSplots first on locus101
 				if oi.CS == "+":
-					lse=hoover_nodes[0]  # locus101
+#					lse=hoover_nodes[0]  # locus101
+					lse="locus092"
 					cmd="%s %s '%s -t CS -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
 					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 					if cmdout[0] != "":
 						CSredlocation=cmdout[0]
 						statusline=cmdout[1]
+						# when we are here it means, that CS data is run through standard pipeline, so sub-files should exist and
+						# the data can be potentially already ran through SEARCH pipeline. So, here we are checking if search* directories
+						# exist in each of the raw nodes with the data
+						if id not in set(obsids_redonly):
+							use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
+							# forming string with all locus nodes to check in one cexec command
+							if len(use_nodes) > 0:
+								cexeclocus=cexec_nodes[use_nodes[0]]
+								if len(use_nodes) > 1:
+									for s in use_nodes[1:]:
+										cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
+								cmd="%s %s 'ls -d %s*/%s_red/search* 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id)
+								cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+								# finding all locus nodes that have the search dir and count them
+								search_dirs_number=0
+								for l in np.arange(len(cexec_output)):
+									if re.match("^-----", cexec_output[l]) is None:
+										search_dirs_number += 1
+								# modifying the statusline
+								if search_dirs_number > 0:
+									statusline=statusline[:-1] + ",+search[%d])" % (search_dirs_number)
+
 						if cmdout[2].isdigit() == True:
 							processed_dirsize + float(cmdout[2]) / 1000. / 1000. / 1000.
 						if cmdout[3] == "yes":  # combined plot exists
@@ -1954,13 +1979,15 @@ if __name__ == "__main__":
 
 				# checking if this obs has BF data (then it should not have CS)
 				if oi.BF == "+":
-					lse=hoover_nodes[0] # locus101
+#					lse=hoover_nodes[0] # locus101
+					lse="locus092"
 					# .... we are not processing BF data yet in the pipeline....
 						
 
 				# looking for _redIS first on locus102
 				if oi.IS == "+":
-					lse=hoover_nodes[1]  # locus102
+#					lse=hoover_nodes[1]  # locus102
+					lse="locus094"
 					cmd="%s %s '%s -t IS -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
 					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 					if cmdout[0] != "":
