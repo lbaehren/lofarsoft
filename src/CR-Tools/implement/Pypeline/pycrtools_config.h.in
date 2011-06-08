@@ -7,7 +7,7 @@
 #define PYCRTOOLS_DEBUG_LEVEL ${PYCRTOOLS_DEBUG_LEVEL}
 
 /* Enable warnings */
-#cmakedefine PYCRTOOLS_WITH_WARINGS
+#cmakedefine PYCRTOOLS_WITH_WARNINGS
 
 /* Enable numpy support */
 #cmakedefine PYCRTOOLS_WITH_NUMPY

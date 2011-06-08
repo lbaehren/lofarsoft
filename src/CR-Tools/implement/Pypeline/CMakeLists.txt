@@ -7,6 +7,7 @@ include (FindPython)
 include (FindBoost)
 include (FindNumPy)
 include (FindNumUtil)
+include (FindOpenMP)
 include (FindAERA)
 
 ##-------------------------------------------------------------------------------
@@ -29,14 +30,10 @@ option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with support for AERA data files"
 # Debug level
 set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
 
-# Configuration file
-configure_file (
-    ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
-    ${CMAKE_CURRENT_BINARY_DIR}/pycrtools_config.h
-)
-
 # Turn off all predefined options
 set (CMAKE_CXX_FLAGS "")
+set (PYPELINE_INCLUDES)
+set (PYPELINE_LIBRARIES)
 
 if (APPLE)
   set (PYPELINE_CXX_FLAGS "-fpermissive")
@@ -76,25 +73,37 @@ endif (PYPELINE_WITH_OPTIMIZATION)
 ## Optional dependencies
 
 if (CR_WITH_OPENMP)
-    if (OPENMP_FOUND)
-        message (STATUS "[PyCRTools] OpenMP Requested and Enabled")
-        set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        set (PYPELINE_CPP_FLAGS ${OpenMP_CXX_FLAGS})
-        set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
-    else (OPENMP_FOUND)
-        message (WARNING "[PyCRTools] OpenMP Requested but not Enabled")
-    endif (OPENMP_FOUND)
+  if (OPENMP_FOUND)
+    message (STATUS "[PyCRTools] OpenMP Requested and Enabled")
+    set (PYPELINE_CXX_FLAGS "${PYPELINE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (PYPELINE_CPP_FLAGS "${PYPELINE_CPP_FLAGS} ${OpenMP_CXX_FLAGS} ")
+    set (PYPELINE_LINKER_FLAGS "${PYPELINE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
+  else (OPENMP_FOUND)
+    message (WARNING "[PyCRTools] OpenMP Requested but not Enabled")
+  endif (OPENMP_FOUND)
 endif (CR_WITH_OPENMP)
 
-if (PYCRTOOLS_WITH_AERA AND AERA_FOUND)
-  set (PYPELINE_CXX_FLAGS "-DHAVE_AERA ${PYPELINE_CXX_FLAGS}")
-  set (PYPELINE_CPP_FLAGS "-DHAVE_AERA ${PYPELINE_CPP_FLAGS}")
-  list (APPEND PYPELINE_INCLUDES ${AERA_INCLUDES})
-  list (APPEND PYPELINE_LIBRARIES ${AERA_LIBRARIES})
-endif (PYCRTOOLS_WITH_AERA AND AERA_FOUND)
+if (PYCRTOOLS_WITH_AERA)
+  if (AERA_FOUND)
+    list (APPEND PYPELINE_INCLUDES ${AERA_INCLUDES})
+    list (APPEND PYPELINE_LIBRARIES ${AERA_LIBRARIES})
+  else (AERA_FOUND)
+    set (PYCRTOOLS_WITH_AERA FALSE)
+  endif (AERA_FOUND)
+endif (PYCRTOOLS_WITH_AERA)
+
+## _____________________________________________________________________________
+## Configuration of source files
+
+# Configuration file
+configure_file (
+    ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pycrtools_config.h
+)
 
 ##_______________________________________________________________________________
 ## Pre-processing of the source files
+
 
 set (PYPELINE_PREPROCESSOR_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/preprocessor
@@ -126,6 +135,10 @@ list (APPEND PYPELINE_CPP_MODULES Bindings)
 foreach (include ${PYPELINE_INCLUDES})
   set (PYPELINE_INCLUDE_FLAGS "-I${include} ${PYPELINE_INCLUDE_FLAGS}")
 endforeach (include ${PYPELINE_INCLUDES})
+
+string (STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
+string (STRIP "${PYPELINE_CPP_FLAGS}" PYPELINE_CPP_FLAGS)
+string (STRIP "${PYPELINE_CXX_FLAGS}" PYPELINE_CXX_FLAGS)
 
 message (STATUS "Preprocessing Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYPELINE_CPP_FLAGS}")
 message (STATUS "Compiling Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYPELINE_CXX_FLAGS}")
