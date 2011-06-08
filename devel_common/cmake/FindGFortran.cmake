@@ -102,6 +102,10 @@ if (UNIX)
       /usr/lib/gcc/x86_64-linux-gnu/4.3
       /usr/lib/gcc/x86_64-linux-gnu/4.2
       /usr/lib/gcc/x86_64-linux-gnu/4.4
+      /usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.7
+      /usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.6
+      /usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.5
+      /usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.4
       )
   endif (APPLE)
 endif (UNIX)
