@@ -58,7 +58,7 @@ if (NOT HAVE_PYTHON)
   ## ----------------------------------------------------------------------------
   ## Default Python versions
   
-  set (python_version_list      2.6 2.5 2.4          )
+  set (python_version_list      2.7 2.6 2.5 2.4          )
   set (python_bin_locations     ${bin_locations}     )
   set (python_include_locations ${include_locations} )
   set (python_lib_locations     ${lib_locations}     )
