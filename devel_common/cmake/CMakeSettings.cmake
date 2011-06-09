@@ -208,6 +208,7 @@ if (NOT USG_CMAKE_CONFIG)
     /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
     /Developer/SDKs/MacOSX10.5.sdk/usr/lib
     /app/usg/release/lib
+    /usr/lib/i386-linux-gnu
     CACHE
     PATH
     "Directories to look for libraries"
