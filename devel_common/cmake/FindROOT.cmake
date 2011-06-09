@@ -57,6 +57,7 @@ if (NOT FIND_ROOT_CMAKE)
     /opt
     /opt/auger/root-v5.18.00
     $ENV{ROOTSYS}
+    $ENV{ROOTSYS}/include
     PATH_SUFFIXES
     include
     root
@@ -99,6 +100,7 @@ if (NOT FIND_ROOT_CMAKE)
       /opt/root/lib
       /opt/auger/root-v5.18.00
       $ENV{ROOTSYS}
+      $ENV{ROOTSYS}/lib
       PATH_SUFFIXES
       root
       root/lib
