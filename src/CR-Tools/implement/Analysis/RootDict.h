@@ -14,7 +14,9 @@
 #include <string.h>
 #define G__ANSIHEADER
 #define G__DICTIONARY
+#define G__PRIVATE_GVALUE
 #include "G__ci.h"
+#include "FastAllocString.h"
 extern "C" {
 extern void G__cpp_setup_tagtableRootDict();
 extern void G__cpp_setup_inheritanceRootDict();
@@ -30,6 +32,9 @@ extern void G__set_cpp_environmentRootDict();
 #include "TObject.h"
 #include "TMemberInspector.h"
 #include "PulseProperties.h"
+#include <algorithm>
+namespace std { }
+using namespace std;
 
 #ifndef G__MEMFUNCBODY
 #endif
@@ -39,6 +44,11 @@ extern G__linked_taginfo G__RootDictLN_TBuffer;
 extern G__linked_taginfo G__RootDictLN_TMemberInspector;
 extern G__linked_taginfo G__RootDictLN_basic_ostreamlEcharcOchar_traitslEchargRsPgR;
 extern G__linked_taginfo G__RootDictLN_string;
+extern G__linked_taginfo G__RootDictLN_vectorlEROOTcLcLTSchemaHelpercOallocatorlEROOTcLcLTSchemaHelpergRsPgR;
+extern G__linked_taginfo G__RootDictLN_reverse_iteratorlEvectorlEROOTcLcLTSchemaHelpercOallocatorlEROOTcLcLTSchemaHelpergRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__RootDictLN_vectorlETVirtualArraymUcOallocatorlETVirtualArraymUgRsPgR;
+extern G__linked_taginfo G__RootDictLN_reverse_iteratorlEvectorlETVirtualArraymUcOallocatorlETVirtualArraymUgRsPgRcLcLiteratorgR;
+extern G__linked_taginfo G__RootDictLN_pulseStruct;
 extern G__linked_taginfo G__RootDictLN_PulseProperties;
 
 /* STUB derived class for protected member access */
