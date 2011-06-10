@@ -50,6 +50,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a) try
   case 'g':
     Telescopes::Effelsberg(t);
     break;
+
+  case 't':
+    Telescopes::LOFAR(t);
+    break;
     
   default: // Unknown code, throw error
     throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info",
@@ -133,3 +137,7 @@ void Pulsar::Telescopes::Parkes(Telescope *t)
   t->set_focus (Telescope::PrimeFocus);
 }
 
+void Pulsar::Telescopes::LOFAR(Telescope *t)
+{
+  t->set_name ("LOFAR");
+}
