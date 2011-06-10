@@ -141,6 +141,7 @@ using CR::LopesEventIn;
   lateralDistribution     = false
   lateralOutputFile       = false
   lateralFitDistance      = 100
+  lateralFitWithEta       = true
   lateralSNRcut           = 1.0
   lateralTimeCut          = 15e-9
   calculateMeanValues     = false
@@ -294,6 +295,8 @@ using CR::LopesEventIn;
                             could be misleading.<br>
     <li>\b lateralFitDistance  Status: <i>preliminary</i><br>
                             distance for the epsilon parameter of the lateral distribution fit<br>
+    <li>\b lateralFitWithEta Status: <i>preliminary</i><br>
+                            make LDF fit with eta=1/R_0 instead of R_0<br>
     <li>\b lateralSNRcut    Status: <i>switched off</i><br>
                             SNR cut for the lateral distribution.<br>
                             Caution: This option has no effect at the moment.<br>
@@ -927,6 +930,7 @@ void readConfigFile (const string &filename)
    config.addBool("lateralDistribution", false);    	// the lateral distribution will not be generated
    config.addBool("lateralOutputFile", false);      	// no file for the lateral distribution will be created
    config.addDouble("lateralFitDistance", 100.);        // distance for fit of epsilon
+   config.addBool("lateralFitWithEta", true);      	// lateral fit with eta instead of R_0
    config.addDouble("lateralSNRcut", 1.0);            	// SNR cut for removing points from lateral distribution
    config.addDouble("lateralTimeCut", 15e-9);         	// Allowed time window +/- arround CC-beam-center for found peaks
    config.addBool("calculateMeanValues", false);   	// calculate some mean values of all processed events
@@ -1477,8 +1481,9 @@ int main (int argc, char *argv[])
   bool Xconverged=0, Xconverged_NS=0, Xconverged_VE=0;                         // is true if the Gaussian fit to the CCbeam converged
   double AzL=0, ElL=0, AzL_NS=0, ElL_NS=0, AzL_VE=0, ElL_VE=0;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
-  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;             // R_0 from lateral distribution exponential fit
-  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;             // Epsilon from lateral distribution exponential fit
+  double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;   // R_0 from lateral distribution exponential fit
+  double eta = 0, sigeta = 0, eta_NS = 0, sigeta_NS = 0, eta_VE = 0, sigeta_VE = 0;   // eta from lateral distribution exponential fit
+  double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;   // Epsilon from lateral distribution exponential fit
   double epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;    // Epsilon at R=0 (necessary for the cut!)
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
   double dispersion_RMS_perc = 0, dispersion_Mean_perc = 0;
@@ -1614,6 +1619,7 @@ int main (int argc, char *argv[])
              << "lateralDistribution = false\n"
              << "lateralOutputFile = false\n"
              << "lateralFitDistance = 100\n"
+             << "lateralFitWithEta = true\n"
              << "lateralSNRcut = 1.0\n"
              << "lateralTimeCut = 25e-9\n"
              << "calculateMeanValues = false\n"
@@ -1784,6 +1790,8 @@ int main (int argc, char *argv[])
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0",&R_0,"R_0/D");
           roottree->Branch("sigR_0",&sigR_0,"sigR_0/D");
+          roottree->Branch("eta",&eta,"eta/D");
+          roottree->Branch("sigeta",&sigeta,"sigeta/D");
           roottree->Branch("eps",&eps,"eps/D");
           roottree->Branch("sigeps",&sigeps,"sigeps/D");
           roottree->Branch("epsilon_0m",&epsilon_0m,"epsilon_0m/D");
@@ -1842,6 +1850,8 @@ int main (int argc, char *argv[])
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_EW",&R_0,"R_0_EW/D");
           roottree->Branch("sigR_0_EW",&sigR_0,"sigR_0_EW/D");
+          roottree->Branch("eta_EW",&eta,"eta_EW/D");
+          roottree->Branch("sigeta_EW",&sigeta,"sigeta_EW/D");
           roottree->Branch("eps_EW",&eps,"eps_EW/D");
           roottree->Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
           roottree->Branch("epsilon_0m_EW",&epsilon_0m,"epsilon_0m_EW/D");
@@ -1956,6 +1966,8 @@ int main (int argc, char *argv[])
         if (config["lateralDistribution"]->bValue()) {
           roottree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
           roottree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
+          roottree->Branch("eta_VE",&eta_VE,"eta_VE/D");
+          roottree->Branch("sigeta_VE",&sigeta_VE,"sigeta_VE/D");
           roottree->Branch("eps_VE",&eps_VE,"eps_VE/D");
           roottree->Branch("sigeps_VE",&sigeps_VE,"sigeps_VE/D");
           roottree->Branch("epsilon_0m_VE",&epsilon_0m_VE,"epsilon_0m_VE/D");
@@ -2101,6 +2113,7 @@ int main (int argc, char *argv[])
       AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0, AzL_VE = 0, ElL_VE = 0;
       distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
+      eta = 0, sigeta = 0, eta_NS = 0, sigeta_NS = 0, eta_VE = 0, sigeta_VE = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
       epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
@@ -2304,10 +2317,15 @@ int main (int argc, char *argv[])
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
                                                                        calibPulsesMap, map <int, PulseProperties>(),
-                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
-                                                                       "","",config["LateralFitDistance"]->dValue());
+                                                                       gt, results.asDouble("Azimuth"),
+                                                                       90.-results.asDouble("Elevation"),
+                                                                       "","",config["LateralFitDistance"]->dValue(),
+                                                                       config["LateralFitWithEta"]->bValue()
+                                                                       );
               R_0 = latResults.asDouble("R_0");
               sigR_0 = latResults.asDouble("sigR_0");
+              eta = latResults.asDouble("eta");
+              sigeta = latResults.asDouble("sigeta");
               eps = latResults.asDouble("eps");
               epsilon_0m = latResults.asDouble("epsilon_0m");
               sigeps = latResults.asDouble("sigeps");
@@ -2328,7 +2346,8 @@ int main (int argc, char *argv[])
               Record latTimeResults =
                        lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
                                                               calibPulsesMap, map <int, PulseProperties>(),
-                                                              gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                              gt, results.asDouble("Azimuth"),
+                                                              90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
 
               latTimeSphere1DRcurv_EW = latTimeResults.asDouble("latTime1D_Rcurv");
@@ -2461,10 +2480,15 @@ int main (int argc, char *argv[])
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
                                                                        newPulses, map <int, PulseProperties>(),
-                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
-                                                                       "","",config["LateralFitDistance"]->dValue());
+                                                                       gt, results.asDouble("Azimuth"),
+                                                                       90.-results.asDouble("Elevation"),
+                                                                       "","",config["LateralFitDistance"]->dValue(),
+                                                                       config["LateralFitWithEta"]->bValue()                                                                      
+                                                                      );
               R_0_NS  = latResults.asDouble("R_0");
               sigR_0_NS  = latResults.asDouble("sigR_0");
+              eta_NS  = latResults.asDouble("eta");
+              sigeta_NS  = latResults.asDouble("sigeta");
               eps_NS  = latResults.asDouble("eps");
               epsilon_0m_NS  = latResults.asDouble("epsilon_0m");
               sigeps_NS  = latResults.asDouble("sigeps");
@@ -2485,7 +2509,8 @@ int main (int argc, char *argv[])
               Record latTimeResults =
                        lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
                                                               newPulses, map <int, PulseProperties>(),
-                                                              gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                              gt, results.asDouble("Azimuth"),
+                                                              90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
 
               latTimeSphere1DRcurv_NS = latTimeResults.asDouble("latTime1D_Rcurv");
@@ -2621,10 +2646,15 @@ int main (int argc, char *argv[])
             if (config["lateralDistribution"]->bValue()) {
               Record latResults = lateralFitter.fitLateralDistribution("lateral"+polPlotPrefix+"-",
                                                                        newPulses, map <int, PulseProperties>(),
-                                                                       gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
-                                                                       "","",config["LateralFitDistance"]->dValue());
+                                                                       gt, results.asDouble("Azimuth"),
+                                                                       90.-results.asDouble("Elevation"),
+                                                                       "","",config["LateralFitDistance"]->dValue(),
+                                                                       config["LateralFitWithEta"]->bValue()                                                                                                                                             
+                                                                      );
               R_0_VE = latResults.asDouble("R_0");
               sigR_0_VE = latResults.asDouble("sigR_0");
+              eta_VE = latResults.asDouble("eta");
+              sigeta_VE = latResults.asDouble("sigeta");
               eps_VE = latResults.asDouble("eps");
               sigeps_VE = latResults.asDouble("sigeps");
               epsilon_0m_VE = latResults.asDouble("epsilon_0m");
@@ -2640,7 +2670,8 @@ int main (int argc, char *argv[])
               Record latTimeResults =
                        lateralFitter.lateralTimeDistribution("lateralTime"+polPlotPrefix+"-",
                                                               newPulses, map <int, PulseProperties>(),
-                                                              gt, results.asDouble("Azimuth"), 90.-results.asDouble("Elevation"),
+                                                              gt, results.asDouble("Azimuth"),
+                                                              90.-results.asDouble("Elevation"),
                                                               results.asDouble("CCcenter"),"","");
 
               latTimeSphere1DRcurv_VE = latTimeResults.asDouble("latTime1D_Rcurv");

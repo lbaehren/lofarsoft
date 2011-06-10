@@ -84,7 +84,8 @@ namespace CR { // Namespace CR -- begin
                                                       int Gt, double az, double ze,
                                                       const string& index1,
                                                       const string& index2,
-                                                      const double& fitDistance)
+                                                      const double& fitDistance,
+                                                      const bool& fitWithEta)
   {
     Record erg;
     try {
@@ -93,8 +94,10 @@ namespace CR { // Namespace CR -- begin
       erg.define("eps",0.);
       erg.define("epsilon_0m",0.);
       erg.define("R_0",0.);
+      erg.define("eta",0.);
       erg.define("sigeps",0.);
       erg.define("sigR_0",0.);
+      erg.define("sigeta",0.);
       erg.define("chi2NDF",0.);
       erg.define("latMeanDist",0.);
       erg.define("latMinDist",0.);
@@ -310,26 +313,39 @@ namespace CR { // Namespace CR -- begin
       /* Fit exponential decrease */
       // do fit only if there are at least 3 antennas (otherwise set parameters to 0)!
       string epsName;
-      string R0Name;
+      string SlopeParameterName;
       if (ant >= 3) {
         // define names for statistics
         if (index1 != "") {
-          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1 + " [uV/m/MHz]";
-          R0Name = "R_{0}- " + index1 + " [m]";
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1 + " [#muV/m/MHz]";
+          if (fitWithEta)
+            SlopeParameterName = "#eta- " + index1 + " [1/m]";
+          else  
+            SlopeParameterName = "R_{0}- " + index1 + " [m]";
         } else {
           epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} [#muV/m/MHz]";
-          R0Name = "R_{0} [m]";
+          if (fitWithEta)
+            SlopeParameterName = "#eta [1/m]";
+          else  
+            SlopeParameterName = "R_{0} [m]";
         }
 
         // fit exponential
         TF1 *fitfuncExp;
-        string fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")/[1])";
+        string fitFunction;
+        if (fitWithEta)
+          fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")*[1])";
+        else
+          fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")/[1])";
         fitfuncExp=new TF1("fitfuncExp",fitFunction.c_str(),0.,maxdist*1.1);
         //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExp->SetParName(0,epsName.c_str());
         fitfuncExp->SetParameter(0,20);
-        fitfuncExp->SetParName(1,R0Name.c_str());
-        fitfuncExp->SetParameter(1,100);
+        fitfuncExp->SetParName(1,SlopeParameterName.c_str());
+        if (fitWithEta)
+          fitfuncExp->SetParameter(1,0.01);
+        else
+          fitfuncExp->SetParameter(1,100);
         fitfuncExp->SetFillStyle(0);
         fitfuncExp->SetLineWidth(2);
 
@@ -339,37 +355,54 @@ namespace CR { // Namespace CR -- begin
 
         // write fit results to record with other results
         erg.define("eps",fitfuncExp->GetParameter(0));
-        erg.define("R_0",fitfuncExp->GetParameter(1));
+        if (fitWithEta) {
+          erg.define("eta",fitfuncExp->GetParameter(1));
+          erg.define("sigeta",fitfuncExp->GetParError(1));
+        } else {
+          erg.define("R_0",fitfuncExp->GetParameter(1));
+          erg.define("sigR_0",fitfuncExp->GetParError(1));
+        }
         // error of epsilon = error of fit + 5 % calibration uncertainty due to environmental effects
         double sigmaEpsilon = sqrt(pow(fitfuncExp->GetParError(0),2)+pow((0.05*fitfuncExp->GetParameter(0)),2));
         erg.define("sigeps",sigmaEpsilon);
-        erg.define("sigR_0",fitfuncExp->GetParError(1));
         erg.define("chi2NDF",fitfuncExp->GetChisquare()/double(fitfuncExp->GetNDF()));
 
         cout << "Result of exponential fit eps * e^(-x/R_0):\n"
              << "eps    = " << fitfuncExp->GetParameter(0) << "\t +/- " << fitfuncExp->GetParError(0) << "\t µV/m/MHz\n"
-             << "total error of eps (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n"
-             << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n"
-             << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
+             << "total error of eps (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n";
+        if (fitWithEta)     
+          cout << "eta    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t 1/m\n";
+        else
+          cout << "R_0    = " << fitfuncExp->GetParameter(1) << "\t +/- " << fitfuncExp->GetParError(1) << "\t m\n";
+        cout << "Chi^2  = " << fitfuncExp->GetChisquare() << "\t NDF " << fitfuncExp->GetNDF() << "\n"
              << endl;
 
         if (fitSim) {
           cout << "-------- SIMULATIONS ---------"<<endl;
           // define names for statistics
           if (index2 != "") {
-            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index2 + " [uV/m/MHz]";
-            R0Name = "R_{0}- " + index2 + " [m]";
+            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index2 + " [#muV/m/MHz]";
+            if (fitWithEta)
+              SlopeParameterName = "#eta- " + index2 + " [1/m]";
+            else  
+              SlopeParameterName = "R_{0}- " + index2 + " [m]";
           } else {
             epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}" + "} [#muV/m/MHz]";
-            R0Name = "R_{0} [m]";
+            if (fitWithEta)
+              SlopeParameterName = "#eta [1/m]";
+            else  
+              SlopeParameterName = "R_{0} [m]";
           }
           TF1 *fitfuncExpS;
           fitfuncExpS=new TF1("fitfuncExpS",fitFunction.c_str(),0.,maxdist*1.1);
           //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
           fitfuncExpS->SetParName(0,epsName.c_str());
           fitfuncExpS->SetParameter(0,20);
-          fitfuncExpS->SetParName(1,R0Name.c_str());
-          fitfuncExpS->SetParameter(1,100);
+          fitfuncExpS->SetParName(1,SlopeParameterName.c_str());
+          if (fitWithEta)
+            fitfuncExpS->SetParameter(1,0.01);
+          else
+            fitfuncExpS->SetParameter(1,100);
           fitfuncExpS->SetFillStyle(0);
           fitfuncExpS->SetLineWidth(2);
           fitfuncExpS->SetLineColor(2); // red (2) for iron, blue (4) for proton
@@ -379,19 +412,27 @@ namespace CR { // Namespace CR -- begin
 
           // write fit results to record with other results
           erg.define("eps_sim",fitfuncExpS->GetParameter(0));
-          erg.define("R_0_sim",fitfuncExpS->GetParameter(1));
+          if (fitWithEta) {
+            erg.define("eta_sim",fitfuncExpS->GetParameter(1));
+            erg.define("sigeta_sim",fitfuncExpS->GetParError(1));
+          } else {
+            erg.define("R_0_sim",fitfuncExpS->GetParameter(1));
+            erg.define("sigR_0_sim",fitfuncExpS->GetParError(1));
+          }
           // error of epsilon = error of fit + 10 % energy uncertainty
           double sigmaEpsilon_sim = sqrt(pow(fitfuncExpS->GetParError(0),2)+pow((0.10*fitfuncExpS->GetParameter(0)),2));
           erg.define("sigeps_sim",sigmaEpsilon_sim);
-          erg.define("sigR_0_sim",fitfuncExpS->GetParError(1));
           erg.define("chi2NDF_sim",fitfuncExpS->GetChisquare()/double(fitfuncExpS->GetNDF()));
 
           cout << "Result of exponential fit eps * e^(-x/R_0):\n"
-              << "eps_sim    = " << fitfuncExpS->GetParameter(0) << "\t +/- " << fitfuncExpS->GetParError(0) << "\t µV/m/MHz\n"
-              << "total error of eps_sim (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n"
-              << "R_0sim    = " << fitfuncExpS->GetParameter(1) << "\t +/- " << fitfuncExpS->GetParError(1) << "\t m\n"
-              << "Chi^2_sim  = " << fitfuncExpS->GetChisquare() << "\t NDF " << fitfuncExpS->GetNDF() << "\n"
-              << endl;
+               << "eps_sim    = " << fitfuncExpS->GetParameter(0) << "\t +/- " << fitfuncExpS->GetParError(0) << "\t µV/m/MHz\n"
+               << "total error of eps_sim (including calibration) = " << sigmaEpsilon << "\t µV/m/MHz\n";
+          if (fitWithEta)     
+            cout << "eta_sim   = " << fitfuncExpS->GetParameter(1) << "\t +/- " << fitfuncExpS->GetParError(1) << "\t 1/m\n";
+          else
+            cout << "R_0_sim    = " << fitfuncExpS->GetParameter(1) << "\t +/- " << fitfuncExpS->GetParError(1) << "\t m\n";
+          cout << "Chi^2_sim  = " << fitfuncExpS->GetChisquare() << "\t NDF " << fitfuncExpS->GetNDF() << "\n"
+               << endl;
           //fitfuncExpS->Delete();
         }
 
