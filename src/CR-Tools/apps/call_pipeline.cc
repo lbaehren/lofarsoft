@@ -856,23 +856,23 @@ double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // bas
 double azimuthError = 0, zenithError = 0, coreError = 0; // errors (in m and radians!)
 
 // Variables of KASCADE root file
-float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
-float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
-float_t Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
-float_t Age = 0, Ageg = 0;                              // Age parameter
-float_t Nmu = 0, Lmuo = 0, Sizmg = 0;			// Muon number, trucated muon number (KASCADE), Muon number (Grande)
-double_t lgE = 0, err_lgE = 0;				// estimated energy (KASCADE)
-double_t lgEg = 0, err_lgEg = 0;			// estimated energy (Grande)
-double_t lnA = 0, err_lnA = 0;		        	// estimated mass A (KASCADE)
-double_t lnAg = 0, err_lnAg = 0;	        	// estimated mass A (Grande)
-double_t kappaMario = 0, lgEMario = 0;                  // mass and energy by Mario's formula
-double_t err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
-double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
-double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
-double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
+float Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
+float Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
+float Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
+float Age = 0, Ageg = 0;                              // Age parameter
+float Nmu = 0, Lmuo = 0, Sizmg = 0;			// Muon number, trucated muon number (KASCADE), Muon number (Grande)
+double lgE = 0, err_lgE = 0;				// estimated energy (KASCADE)
+double lgEg = 0, err_lgEg = 0;			// estimated energy (Grande)
+double lnA = 0, err_lnA = 0;		        	// estimated mass A (KASCADE)
+double lnAg = 0, err_lnAg = 0;	        	// estimated mass A (Grande)
+double kappaMario = 0, lgEMario = 0;                  // mass and energy by Mario's formula
+double err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
+double err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
+double err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
+double geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
 char KRETAver[1024] = "unknown";
-double_t EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
-double_t EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min
+double EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
+double EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min
 
 char reconstruction = 'A';	// A = KASCADE reconstruction taken, G = Grande reconstruction taken
 
@@ -1465,7 +1465,7 @@ bool getNextEvent()
 
 int main (int argc, char *argv[])
 {
- Record results;                                        // results of the pipeline
+  Record results;                                        // results of the pipeline
 
   // variables for reconstruction information (output of pipeline)
 
