@@ -777,7 +777,7 @@ void cleanPRSData(datafile_definition *datafile)
   datafile->channelbw = 0;
   datafile->mjd = 0;
   datafile->psrname[0] = 0;
-  strncpy(datafile->observatory, 'LOFAR', 100);
+  datafile->observatory[0] = 0;
   datafile->institute[0] = 0;
   datafile->instrument[0] = 0;
   datafile->scanid[0] = 0;

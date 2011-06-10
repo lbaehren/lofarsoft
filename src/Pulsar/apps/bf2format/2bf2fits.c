@@ -1435,6 +1435,9 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   if(PSRDataHeader_parse_commandline(&subintdata, argc, argv, application.verbose) == 0)
     return 0;
 
+  // check if observatory is empty, and write LOFAR as default observatory
+  if (!strcmp(subintdata.observatory, "")) strncpy(subintdata.observatory, "LOFAR", 100);
+
   subintdata.data = (float *)malloc(subintdata.NrBins*subintdata.nrFreqChan*subintdata.NrPols*sizeof(float));
   if(subintdata.data == NULL) {
     fprintf(stderr, "bf2fits: Cannot allocate memory\n");
