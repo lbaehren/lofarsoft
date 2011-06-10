@@ -119,27 +119,36 @@ int is_PSRFITS(char *filename)
 }
 
 #define get_hdr_string(name, param) {                                   \
+	status = 0; \
         fits_read_key(s->files[ii], TSTRING, (name), ctmp, comment, &status); \
-        if (ii==0) strncpy((param), ctmp, 40);                          \
-        else if (strcmp((param), ctmp)!=0)                              \
-            printf("Warning!:  %s values don't match for files 0 and %d!\n", \
-                   (name), ii);                                         \
+	if (status == 0) { \
+          if (ii==0) strncpy((param), ctmp, 40);                          \
+          else if (strcmp((param), ctmp)!=0)                              \
+              printf("Warning!:  %s values don't match for files 0 and %d!\n", \
+                     (name), ii);                                         \
+        } else status = 0; \
     }
 
 #define get_hdr_int(name, param) {                                      \
+	status = 0; \
         fits_read_key(s->files[ii], TINT, (name), &itmp, comment, &status); \
-        if (ii==0) param = itmp;                                        \
-        else if (param != itmp)                                         \
-            printf("Warning!:  %s values don't match for files 0 and %d!\n", \
-                   (name), ii);                                         \
+	if (status == 0) { \
+          if (ii==0) param = itmp;                                        \
+          else if (param != itmp)                                         \
+              printf("Warning!:  %s values don't match for files 0 and %d!\n", \
+                     (name), ii);                                         \
+	} else status = 0; \
     }
 
 #define get_hdr_double(name, param) {                                   \
+	status = 0; \
         fits_read_key(s->files[ii], TDOUBLE, (name), &dtmp, comment, &status); \
-        if (ii==0) param = dtmp;                                        \
-        else if (param != dtmp)                                         \
-            printf("Warning!:  %s values don't match for files 0 and %d!\n", \
-                   (name), ii);                                         \
+	if (status == 0) { \
+          if (ii==0) param = dtmp;                                        \
+          else if (param != dtmp)                                         \
+              printf("Warning!:  %s values don't match for files 0 and %d!\n", \
+                     (name), ii);                                         \
+	} else status = 0; \
     }
 
 int read_PSRFITS_files(char **filenames, int numfiles, struct spectra_info *s)
@@ -181,10 +190,15 @@ int read_PSRFITS_files(char **filenames, int numfiles, struct spectra_info *s)
         
         // Open the PSRFITS file
         fits_open_file(&(s->files[ii]), filenames[ii], READONLY, &status);
+	if (status) {
+            fprintf(stderr, 
+                    "\nError!  Can not open file '%s'!\n", filenames[ii]);
+	    return 0;
+	}
 
         // Is the data in search mode?
         fits_read_key(s->files[ii], TSTRING, "OBS_MODE", ctmp, comment, &status);
-        if (strcmp(ctmp, "SEARCH")!=0) {
+        if (strcmp(ctmp, "SEARCH")!=0 || status) {
             fprintf(stderr, 
                     "\nError!  File '%s' does not contain SEARCH-mode data!\n", 
                     filenames[ii]);
@@ -210,9 +224,12 @@ int read_PSRFITS_files(char **filenames, int numfiles, struct spectra_info *s)
 
         // Don't use the macros unless you are using the struct!
         fits_read_key(s->files[ii], TINT, "STT_IMJD", &IMJD, comment, &status);
+	if (status) { fprintf(stderr, "\nError! Can't read STT_IMJD value in file '%s'!\n", filenames[ii]); return 0; }
         s->start_MJD[ii] = (long double) IMJD;
         fits_read_key(s->files[ii], TINT, "STT_SMJD", &SMJD, comment, &status);
+	if (status) { fprintf(stderr, "\nError! Can't read STT_SMJD value in file '%s'!\n", filenames[ii]); return 0; }
         fits_read_key(s->files[ii], TDOUBLE, "STT_OFFS", &OFFS, comment, &status);
+	if (status) { fprintf(stderr, "\nError! Can't read STT_OFFS value in file '%s'!\n", filenames[ii]); return 0; }
         s->start_MJD[ii] += ((long double) SMJD + (long double) OFFS) / SECPERDAY;
 
         // Are we tracking?
@@ -223,6 +240,7 @@ int read_PSRFITS_files(char **filenames, int numfiles, struct spectra_info *s)
             printf("Warning!:  TRK_MODE values don't match for files 0 and %d!\n", ii);
 
         // Now switch to the SUBINT HDU header
+        status = 0;
         fits_movnam_hdu(s->files[ii], BINARY_TBL, "SUBINT", 0, &status);
         get_hdr_double("TBIN", s->dt);
         get_hdr_int("NCHAN", s->num_channels);
@@ -586,7 +604,14 @@ void spectra_info_to_inf(struct spectra_info * s, infodata * idata)
     strcpy(idata->instrument, s->backend);
     idata->num_chan = s->num_channels;
     idata->dt = s->dt;
-    DATEOBS_to_MJD(s->date_obs, &(idata->mjd_i), &(idata->mjd_f));
+    // Vlad, June 10, 2011
+    // Check now if DATE-OBS is not empty, if it is empty then use MJD start
+    if (strcmp(s->date_obs, ""))
+      DATEOBS_to_MJD(s->date_obs, &(idata->mjd_i), &(idata->mjd_f));
+    else { 
+           idata->mjd_i = (int)(s->start_MJD[0]); 
+           idata->mjd_f = (double)(s->start_MJD[0] - idata->mjd_i); 
+         }
     idata->N = s->N;
     idata->freqband = s->BW;
     idata->chan_wid = s->df;
