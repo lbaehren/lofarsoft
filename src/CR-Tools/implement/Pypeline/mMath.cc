@@ -4625,6 +4625,61 @@ void HFPP_FUNC_NAME(ndarray out, const NIter in_begin, const NIter in_end)
 
 #endif /* PYCRTOOLS_WITH_NUMPY */
 
+#ifdef PYCRTOOLS_WITH_NUMPY
+
+//$DOCSTRING: Calculates the square of the absolute value and add it to output vector while shifting last dimension to first.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSquareAddTransposed
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (ndarray)(out)()("Numpy vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(in)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(dimsize)()("Size of last dimension in input vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  Calculate :math:`|a|^2` for each element :math:`a` in the input vector
+  and add the result to the output vector.
+  In addition this routine shifts the last dimension (e.g. fastest running index) of size dimsize to
+  the first dimension (e.g. slowest running index).
+*/
+template <class NIter>
+void HFPP_FUNC_NAME(ndarray out, const NIter in_begin, const NIter in_end, HInteger dimsize)
+{
+  NIter in_it = in_begin;
+
+  // Get pointers to memory of numpy array
+  double* out_it = numpyBeginPtr<double>(out);
+  double* out_end = numpyEndPtr<double>(out);
+
+  // Get vector lengths
+  const int Nin = std::distance(in_it, in_end);
+  const int Nout = std::distance(out_it, out_end);
+  const int Ninner = Nin / dimsize;
+
+  // Copy and cast to correct type
+  for (int i=0; i<dimsize; ++i)
+  {
+    in_it = in_begin + i;
+    for (int j=0; j<Ninner; ++j)
+    {
+      *out_it += static_cast<double>((*in_it)) * (*in_it);
+
+      in_it += dimsize;
+
+      ++out_it;
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+#endif /* PYCRTOOLS_WITH_NUMPY */
+
 //$DOCSTRING: Calculates the square of the absolute value of a complex number and add to output vector
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hAbsSquareAdd

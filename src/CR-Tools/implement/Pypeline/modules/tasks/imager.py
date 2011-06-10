@@ -166,7 +166,7 @@ class Imager(Task):
 
         # Create plan for inverse FFT if needed
         if self.inversefft:
-            self.blocksize = (self.nfreq - 1) * 2#self.data["BLOCKSIZE"]
+            self.blocksize = (self.nfreq - 1) * 2
             self.plan = cr.FFTWPlanManyDftC2r(self.blocksize, self.NAXIS1 * self.NAXIS2, 1, self.nfreq, 1, self.blocksize, cr.fftw_flags.ESTIMATE)
             print "created inverse fft plan"
             self.t_image2=cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)
@@ -180,6 +180,8 @@ class Imager(Task):
         if not self.image:
             if self.intgrfreq:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
+            elif self.inversefft:
+                self.image = np.zeros(shape=(self.ntimesteps, self.blocksize, self.NAXIS1, self.NAXIS2), dtype=float)
             else:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
@@ -201,7 +203,6 @@ class Imager(Task):
                     self.data.getFFTData(self.fftdata, block)
 
                 cr.hFFTConvert(self.fftdata[...])
-                np.save("indata", self.fftdata.toNumpy())
 
                 print "reading done"
 
@@ -217,7 +218,7 @@ class Imager(Task):
                     cr.hShiftedAbsSquareAdd(self.image, self.t_image, self.dispersion_shifts + tstep)
                 elif self.inversefft:
                     cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
-                    cr.hSquareAdd(self.image[tstep], self.t_image2)
+                    cr.hSquareAddTransposed(self.image[tstep], self.t_image2, self.blocksize)
                 else:
                     cr.hAbsSquareAdd(self.image[tstep], self.t_image)
 
@@ -228,35 +229,66 @@ class Imager(Task):
 
         # Save image to disk
 
-        self.image = np.rollaxis(self.image, 0, 4)
+        if self.inversefft:
+            self.image = self.image.reshape((self.ntimesteps * self.blocksize, self.NAXIS1, self.NAXIS2))
+            self.image = np.rollaxis(self.image, 0, 3)
+        else:
+            self.image = np.rollaxis(self.image, 0, 4)
 
-        savefits(self.output, self.image, 
-                    OBSLON=self.OBSLON,
-                    OBSLAT=self.OBSLAT,
-                    CTYPE1=self.CTYPE1,
-                    CTYPE2=self.CTYPE2,
-                    CTYPE3=self.CTYPE3,
-                    CTYPE4=self.CTYPE4,
-                    LONPOLE=self.LONPOLE,
-                    LATPOLE=self.LATPOLE,
-                    CRVAL1=self.CRVAL1,
-                    CRVAL2=self.CRVAL2,
-                    CRVAL3=self.CRVAL3,
-                    CRVAL4=self.CRVAL4,
-                    CRPIX1=self.CRPIX1,
-                    CRPIX2=self.CRPIX2,
-                    CRPIX3=self.CRPIX3,
-                    CRPIX4=self.CRPIX4,
-                    CDELT1=self.CDELT1,
-                    CDELT2=self.CDELT2,
-                    CDELT3=self.CDELT3,
-                    CDELT4=self.CDELT4,
-                    CUNIT1=self.CUNIT1,
-                    CUNIT2=self.CUNIT2,
-                    CUNIT3=self.CUNIT3,
-                    CUNIT4=self.CUNIT4,
-                    PC001001=self.PC001001,
-                    PC002001=self.PC002001,
-                    PC001002=self.PC001002,
-                    PC002002=self.PC002002)
+        if self.inversefft:
+            savefits(self.output, self.image, 
+                        OBSLON=self.OBSLON,
+                        OBSLAT=self.OBSLAT,
+                        CTYPE1=self.CTYPE1,
+                        CTYPE2=self.CTYPE2,
+                        CTYPE3="TIME",
+                        LONPOLE=self.LONPOLE,
+                        LATPOLE=self.LATPOLE,
+                        CRVAL1=self.CRVAL1,
+                        CRVAL2=self.CRVAL2,
+                        CRVAL3=0.,
+                        CRPIX1=self.CRPIX1,
+                        CRPIX2=self.CRPIX2,
+                        CRPIX3=0.,
+                        CDELT1=self.CDELT1,
+                        CDELT2=self.CDELT2,
+                        CDELT3=self.data["SAMPLE_INTERVAL"][0],
+                        CUNIT1=self.CUNIT1,
+                        CUNIT2=self.CUNIT2,
+                        CUNIT3="s",
+                        PC001001=self.PC001001,
+                        PC002001=self.PC002001,
+                        PC001002=self.PC001002,
+                        PC002002=self.PC002002)
+    
+        else:
+            savefits(self.output, self.image, 
+                        OBSLON=self.OBSLON,
+                        OBSLAT=self.OBSLAT,
+                        CTYPE1=self.CTYPE1,
+                        CTYPE2=self.CTYPE2,
+                        CTYPE3=self.CTYPE3,
+                        CTYPE4=self.CTYPE4,
+                        LONPOLE=self.LONPOLE,
+                        LATPOLE=self.LATPOLE,
+                        CRVAL1=self.CRVAL1,
+                        CRVAL2=self.CRVAL2,
+                        CRVAL3=self.CRVAL3,
+                        CRVAL4=self.CRVAL4,
+                        CRPIX1=self.CRPIX1,
+                        CRPIX2=self.CRPIX2,
+                        CRPIX3=self.CRPIX3,
+                        CRPIX4=self.CRPIX4,
+                        CDELT1=self.CDELT1,
+                        CDELT2=self.CDELT2,
+                        CDELT3=self.CDELT3,
+                        CDELT4=self.CDELT4,
+                        CUNIT1=self.CUNIT1,
+                        CUNIT2=self.CUNIT2,
+                        CUNIT3=self.CUNIT3,
+                        CUNIT4=self.CUNIT4,
+                        PC001001=self.PC001001,
+                        PC002001=self.PC002001,
+                        PC001002=self.PC001002,
+                        PC002002=self.PC002002)
 
