@@ -153,7 +153,7 @@ namespace CR {  //  Namespace CR -- begin
 		  const String FieldDesc,
 		  const String DataType, 
 		  const Bool shapeFixed=False,
-		  const IPosition shape=IPosition::IPosition(),
+		  const IPosition shape=IPosition(),
 		  const Bool SingleTables=False,
 		  const String FriendField="");
     

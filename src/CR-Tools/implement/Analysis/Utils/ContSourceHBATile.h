@@ -67,7 +67,7 @@ namespace CR { // Namespace CR -- begin
   public:
     ContSourceHBATile():az(0.),el(0.)
       {
-	SimulContSource::SimulContSource();
+	SimulContSource();
 	init();
       }
     

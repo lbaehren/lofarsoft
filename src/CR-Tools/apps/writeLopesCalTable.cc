@@ -124,7 +124,7 @@ void addActiveField(bool createfield = true)
 {
   if (createfield)
     if (!writer.AddField("Active", "Shows the status of an antenna (false means not active / problems)", "Double",
-                              False,  IPosition::IPosition(), False, "HWSetup") )
+                              False,  IPosition(), False, "HWSetup") )
         cerr << "\nERROR while adding field: Active" << endl;
 
   // set Active to true of Antenna 1 for LOPES 10 and 30
@@ -706,7 +706,7 @@ void addRefAntField(bool createfield = true)
 {
   if (createfield)
     if (!writer.AddField("PhaseRefAnt", "Reference antenna for calculation of phase differences", "Double",
-                              False,  IPosition::IPosition(), False, "Delay") )
+                              False,  IPosition(), False, "Delay") )
         cerr << "\nERROR while adding field: PhaseRefAnt" << endl;
 
   // set PhaseRefAnt to AntennaID of Antenna 1 for LOPES 10 and 30
