@@ -180,7 +180,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
 
-  sprintf(dummy_txt, "PSR");
+  sprintf(dummy_txt, "SEARCH");
   if(fits_write_key(datafile->fits_fptr, TSTRING, "OBS_MODE", dummy_txt, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
@@ -777,7 +777,7 @@ void cleanPRSData(datafile_definition *datafile)
   datafile->channelbw = 0;
   datafile->mjd = 0;
   datafile->psrname[0] = 0;
-  datafile->observatory[0] = 0;
+  strncpy(datafile->observatory, 'LOFAR', 100);
   datafile->institute[0] = 0;
   datafile->instrument[0] = 0;
   datafile->scanid[0] = 0;
