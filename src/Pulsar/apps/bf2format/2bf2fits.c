@@ -63,6 +63,7 @@ void usage(){
   puts("-parset\t\tRead this parset file to obtain header parameters.");
   puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum.");
   puts("-CS\t\tInput data is CS data (one file, total I only)");
+  puts("-append\t\tfor IS data append output fits files together");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -95,6 +96,11 @@ swap_endian(u.buffer);
 *f = u.f;
 }
 
+int isNum( char c )
+{
+  if ( c < '0' || c > '9' ) return 0; 
+  return 1;
+}
 
 /* Returns 1 if successful, 0 on error */
 /* Only for IS data */
@@ -683,14 +689,409 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 
  free(stokesdata);
  return 1;
-} // void convert_nocollapse_CS()
+} // int convert_nocollapse_CS()
 
-
-int isNum( char c )
+/* Returns 1 if successful, 0 on error */
+/* Only for IS data in appending mode*/
+int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_definition *subintdata, int *seqseek, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, char **isfiles)
 {
-  if ( c < '0' || c > '9' ) return 0; 
-  return 1;
-}
+  typedef struct {
+    unsigned	sequence_number;
+    char        pad[508];
+    float	samples[BEAMS][STOKES][CHANNELS][SAMPLES|2];
+  }stokesdata_struct;
+    
+ stokesdata_struct *stokesdata[SUBBANDS];
+
+ FILE *input[SUBBANDS]; // file descriptors for each subband
+ int prev_seqnr = -1;
+ unsigned time;
+ unsigned output_samples = 0;
+ unsigned nul_samples = 0;
+ /* unsigned toobig = 0, toosmall = 0; */
+ unsigned num, ss, seq;
+ int x;
+ long filesize;
+ int min_lastseq, max_firstseq;
+
+ for (ss=0; ss<SUBBANDS; ss++) {
+  stokesdata[ss] = (stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_struct) );
+  if(stokesdata[ss] == NULL) {
+    fprintf(stderr, "Memory allocation error\n");
+    return 0;
+  }
+  /* open file */
+  input[ss] = fopen(isfiles[ss], "rb");
+  if(input == NULL) {
+   fprintf(stderr, "bf2fits: Cannot open input file\n");
+   return 0;
+  }
+ } // s
+
+ /* Only find out how many blocks (including gaps) are in the data, then quit function. */
+ if(findseq) {
+   fseek( input[0], 0, SEEK_SET );
+   num = fread( &stokesdata[0][0], sizeof(stokesdata_struct), 1, input[0] );
+   if(num != 1) {
+     fprintf(stderr, "No data?\n");
+     return 0;
+   }
+   swap_endian( (char*)&stokesdata[0][0].sequence_number );
+   *firstseq = stokesdata[0][0].sequence_number;
+   seqseek[0] = *firstseq;
+   max_firstseq = *firstseq;
+   fseek(input[0], 0, SEEK_END);
+   filesize = ftell(input[0]);
+   if(verbose) printf("  File size %ld bytes = %ld blocks of %ld bytes\n", filesize, filesize/sizeof(stokesdata_struct), sizeof(stokesdata_struct));
+   filesize /= sizeof(stokesdata_struct);
+   fseek(input[0], (filesize-1)*sizeof(stokesdata_struct), SEEK_SET);
+   num = fread( &stokesdata[0][0], sizeof(stokesdata_struct), 1, input[0] );
+   if(num != 1) {
+     fprintf(stderr, "Error reading file.\n");
+     return 0;
+   }
+   swap_endian( (char*)&stokesdata[0][0].sequence_number );
+   *lastseq = stokesdata[0][0].sequence_number;
+   min_lastseq = *lastseq;
+
+   for (ss=1; ss<SUBBANDS; ss++) {
+     fseek( input[ss], 0, SEEK_SET );
+     num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), 1, input[ss] );
+     if(num != 1) {
+       fprintf(stderr, "No data?\n");
+       return 0;
+     }
+     swap_endian( (char*)&stokesdata[ss][0].sequence_number );
+     seqseek[ss] = stokesdata[ss][0].sequence_number;
+     if (stokesdata[ss][0].sequence_number > max_firstseq) {
+      max_firstseq = stokesdata[ss][0].sequence_number;
+     }
+     fseek(input[ss], 0, SEEK_END);
+     filesize = ftell(input[ss]);
+     if(verbose) printf("  File size %ld bytes = %ld blocks of %ld bytes\n", filesize, filesize/sizeof(stokesdata_struct), sizeof(stokesdata_struct));
+     filesize /= sizeof(stokesdata_struct);
+     fseek(input[ss], (filesize-1)*sizeof(stokesdata_struct), SEEK_SET);
+     num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), 1, input[ss] );
+     if(num != 1) {
+       fprintf(stderr, "Error reading file.\n");
+       return 0;
+     }
+     swap_endian( (char*)&stokesdata[ss][0].sequence_number );
+     if (stokesdata[ss][0].sequence_number < min_lastseq) {
+      min_lastseq = stokesdata[ss][0].sequence_number;
+     }
+   } // ss
+   if (max_firstseq > *firstseq) {
+    if (verbose) {
+     printf ("First sequence number of subband 0 = %d, the maximum among all subband files = %d\n", *firstseq, max_firstseq);
+    }
+    *firstseq = max_firstseq;
+   }
+   if (min_lastseq < *lastseq) {
+    if (verbose) {
+     printf ("Last sequence number of subband 0 = %d, the minimum among all subband files = %d\n", *lastseq, min_lastseq);
+    }
+    *lastseq = min_lastseq;
+   } 
+
+   printf ("Number of blocks to be converted: %d\n", *lastseq - *firstseq + 1);
+  
+   //adjusting seek offsets
+   for (ss=0; ss<SUBBANDS; ss++) {
+    seqseek[ss] = max_firstseq - seqseek[ss];
+   }
+   if (verbose) {
+     for (ss=0; ss<SUBBANDS; ss++) {
+      if (seqseek[ss] != 0) printf ("The first seq number of subband %d is %d blocks smaller!\n", ss, seqseek[ss]);
+     }
+   }
+
+   return 1;
+ }
+
+ /* Allocate temporary memory for packed data */
+ unsigned char *packeddata;
+ float *scales, *offsets;
+ if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 1, 0) != 1) {
+   fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
+   return 0;
+ }
+
+ /* 
+    - Reads AVERAGE_OVER (10) blocks of data at the time from the input data. 
+    - Swap some bytes around
+    - Look if there is a gap in the data (sequence numbers are missing) and write zero's in gaps.
+ */
+
+ // positioning the start pointer for each file depending on its sequence number
+ for (ss=0; ss<SUBBANDS; ss++) fseek(input[ss], seqseek[ss] * sizeof(stokesdata_struct), SEEK_SET);
+
+ printf ("\nProcessing...\n");
+
+ x = 0;
+ // loop on reading sequence blocks from subband files
+ for (seq=0; seq < *lastseq - *firstseq + 1; seq+=AVERAGE_OVER) {
+
+   printf ("   blocks %d-%d (%d)\n", seq + 1, seq+AVERAGE_OVER, *lastseq - *firstseq + 1);
+
+   int exit_flag = 0;
+   if (x == NUM_BLOCKGROUPS) break;
+   x++;
+   unsigned i,c, ac;
+   int orig_prev_seqnr;
+
+   /* read data */
+   for (ss=0; ss<SUBBANDS; ss++) {
+    num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), AVERAGE_OVER, input[ss] );
+    /* If no more data, sto while loop */
+    if( !num ) { exit_flag = 1; break; }
+
+   /* i loops over the blocks of data read in */
+   for( i = 0; i < num; i++ ) {
+     for( c = 0; c < CHANNELS; c++ ) {
+       unsigned b,t,s;
+       b = beamnr;
+       for( t = 0; t < SAMPLES; t++ ) {
+         for( s = 0; s < STOKES; s++ ) {
+	   floatSwap( &stokesdata[ss][i].samples[b][s][c][t] );
+         }
+       }
+     }
+   }
+   
+   } // SUBBANDS
+   if (exit_flag == 1) break;
+
+
+   /* Print if there are gaps in the data. It doesn't deal with it here though. */
+   orig_prev_seqnr = prev_seqnr;
+   for (ss=0; ss<SUBBANDS; ss++) {
+   for( i = 0; i < num; i++ ) {
+     /* sequence number is big endian */
+     swap_endian( (char*)&stokesdata[ss][i].sequence_number );
+
+     /* detect gaps */
+     if( prev_seqnr + 1 != stokesdata[ss][i].sequence_number ) {
+       fprintf(stderr,"\nnum %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[ss][i].sequence_number );
+     } 
+     prev_seqnr = stokesdata[ss][i].sequence_number;
+   }
+     prev_seqnr = orig_prev_seqnr;
+   } // SUBBANDS
+
+   /* Calculate average. RMS not used right now. */
+   float *average = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
+   float *rms = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
+   if (!average || !rms) { perror("Out of memory: average or rms"); }
+
+   for (ss=0; ss<SUBBANDS; ss++) {
+   for( c = 0; c < CHANNELS; c++ ) {
+     float sum = 0.0f;
+     float ms = 0.0f;
+     int N = 0;
+     unsigned validsamples = 0;
+     float prev = stokesdata[ss][0].samples[beamnr][STOKES_SWITCH][c][0];
+     /* compute average */
+     for( i = 0; i < num; i++ ) {
+       for( time = 0; time < SAMPLES; time++ ) {
+         const float value = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][time];
+	 if(prev < 1){
+	   prev = value;
+	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
+           sum += value;
+	   ms += value*value;
+	   prev = value;
+           validsamples++;
+         }
+       }
+     }
+   
+     ac = ss * CHANNELS + c;
+     N = validsamples?validsamples:1;
+     average[ac] = sum/N;
+     rms[ac] = sqrt((ms-(N*average[ac]*average[ac]))/(N-1));
+   }
+   } // SUBBANDS
+
+  /* convert and write the data */
+   prev_seqnr = orig_prev_seqnr;
+   for( i = 0; i < num; i++ ) {
+     int gap;
+
+// here I should check next sequence number among all subbands file and choose the largest one
+// and then do fseek (...SEEK_CUR) for the files with smaller seq numbers...
+// for now, we assume that even if there are gaps in the middle of data streams, they are the same for all subbands....
+
+     for( gap = prev_seqnr + 1; gap < stokesdata[0][i].sequence_number; gap++ ) {
+       /* gaps, fill in zeroes */
+       for (ss=0; ss<SUBBANDS; ss++) {
+       for( c = 0; c < CHANNELS; c++ ) {
+	 for( time = 0; time < SAMPLES; time++ ) {
+	   /*	     if (writefloats==1){ */
+	   float sum = 0;
+	   /* patrick: put polarization to 0, assume only one pol
+	      written out. */
+           ac = ss * CHANNELS + c;
+	   if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	     fprintf(stderr, "Error writing to temporary memory\n");
+	     return 0;
+	   }
+	 }
+       }
+       } // SUBBANDS
+       if(verbose) {
+	 printf(".");
+	 fflush(stdout);
+       }
+       /* Pack data */
+       if(constructFITSsearchsubint(fout, subintdata->data, gap+1, &packeddata, &scales, &offsets, 0, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
+       /* Write out subint */
+       if(writeFITSsubint(fout, gap+1, packeddata, scales, offsets) != 1) {
+	 fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+	 return 0;
+       }
+       output_samples += SAMPLES;
+       nul_samples += SAMPLES;
+     }
+     for (ss=0; ss<SUBBANDS; ss++) {
+       stokesdata[ss][i].sequence_number =  prev_seqnr + 1;       
+     }
+       prev_seqnr = stokesdata[0][i].sequence_number;
+     
+
+     /*     fprintf(stderr, "XXXXXXXX %d - 2\n", i); */
+   
+       /* patrick */
+     if(sigmalimit > 0 && i == 0) {
+       for (ss=0; ss<SUBBANDS; ss++) {
+       for( c = 0; c < CHANNELS; c++ ) {
+	 /*
+	 0                         = ivalue(average[c]-sigmalimit*rms[c]);
+	 0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
+	 0                         = (average[c]-sigmalimit*rms[c] - offset);
+	 */
+         ac = ss * CHANNELS + c; 
+	 offsets[ac]                    = average[ac]-sigmalimit*rms[ac];
+
+	 /*
+	 pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
+	 pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
+	 */
+	 scales[ac]  = (average[ac]+sigmalimit*rms[ac]-offsets[ac])/(float)(pow(2,subintdata->NrBits)-1);
+	 if(debugpacking)
+	   fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[ac], offsets[ac], average[ac], rms[ac]);
+       }
+      } // SUBBANDS
+     }
+     /* process data */
+     for (ss=0; ss<SUBBANDS; ss++) {
+     for( c = 0; c < CHANNELS; c++ ) {
+       for( time = 0; time < SAMPLES; time++ ) {
+         float sum;
+         ac = ss * CHANNELS + c;
+         sum = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][time] ;
+	 
+	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
+	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[ac] : sum;
+	 if(sigmalimit > 0) {
+	   if(debugpacking)
+	     printf("value %e ", sum);
+	   sum = (sum - offsets[ac])/scales[ac];
+	   if(debugpacking)
+	     printf(" %e ", sum);
+	   if(sum < 0) {
+	     if(clipav)
+	       sum = (average[ac] - offsets[ac])/scales[ac];
+	     else
+	       sum = 0;
+	     /*	     printf("Underflow! %e\n", sum); */
+	   }
+	   if(sum > pow(2,subintdata->NrBits)-1) {
+	     if(clipav)
+	       sum = (average[ac] - offsets[ac])/scales[ac];
+	     else
+	       sum = pow(2,subintdata->NrBits)-1;
+	     /*	     printf("Overflow! %e\n", sum); */
+	   }
+	   if(debugpacking)
+	     printf(" %e \n", sum);
+
+	   /*	   printf("value %e\n", sum); */
+	 }
+	 
+	 /* patrick: put polarization to 0, assume only one pol
+	    written out. Think x is the current bin nr */
+	 if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	   fprintf(stderr, "Error writing to temporary memory");
+	   return 0;
+	 }
+	   /*	   fwrite( &sum, sizeof sum, 1, outputfile[c] ); */ /* single sample written to channel file*/
+	 output_samples++;
+	 if( sum == 0 ) nul_samples++;
+
+       } // for( time = 0; time < SAMPLES; time++ ) 
+     }
+    } // SUBBANDS
+
+     /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
+     if(verbose) {
+       printf(".");
+       fflush(stdout);
+     }
+     /* Pack data */
+     if(sigmalimit > 0) {
+       if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 1, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
+       /*     for( c = 0; c < CHANNELS; c++ ) {
+       printf("XXXXX %e\n", scales[c]);
+       }*/
+     }else {
+       if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
+     }
+     /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
+     /* Write out subint */
+     if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i, packeddata, scales, offsets) != 1) {
+       fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+       return 0;
+     }
+     /*     fprintf(stderr, "XXXXXXXX %d - 5\n", (x-1)*AVERAGE_OVER+i); */
+
+   } // loop on num
+
+   /*   fprintf(stderr, "XXXXXXXX X - 6\n"); */
+
+  free (average);
+  free (rms);
+
+ } // for (seq=0; .)
+
+ printf("\n");
+ if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 1) != 1) {
+   fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
+   return 0;
+ }
+
+ /* fprintf(stderr,"  %u samples in output, %.2f%% null values, %.2f%% too big, %.2f%% too small\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples); */
+ 
+ for (ss=0; ss<SUBBANDS; ss++) { 
+  fclose(input[ss]);
+  free(stokesdata[ss]);
+ }
+ return 1;
+} // int convert_nocollapse_ISappend()
+
+
+
+
+
 
 /*
  *  ====================== M A I N ====================================
@@ -698,7 +1099,11 @@ int isNum( char c )
 int main( int argc, char **argv ) 
 {
   int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits, debugpacking;
+  int *seqseek; // only for IS data in append mode
+                // array that will keep the seek offsets for input files due to possible differences 
+                // between firstseq (same for all subbands) and actual first sequence number of each file
   int is_CS = 0; // if 1 then input file is CS data
+  int is_append = 0;  // if 1 then the single fits-file will be written for IS data
   char buf[1024], *filename, *dummy_ptr;
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
@@ -757,6 +1162,8 @@ int main( int argc, char **argv )
 	clipav = 1;
       }else if(strcmp(argv[i], "-CS") == 0) {
 	is_CS = 1;
+      }else if(strcmp(argv[i], "-append") == 0) {
+	is_append = 1;
       }else if(strcmp(argv[i], "-o") == 0) {
 	j = sscanf(argv[i+1], "%s", OUTNAME);
 	if(j != 1) {
@@ -1003,13 +1410,14 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   }
 
   if (is_CS == 1) printf ("CS data: %d subbands\n", SUBBANDS);
+  if (is_append == 1) printf ("IS data: append mode (%d subbands), single output file will be written\n", SUBBANDS);
   printf( "%d channels %d beams %d samples %d stokes\n", CHANNELS, BEAMS, SAMPLES, STOKES );
   printf("Output Name: %s\n", OUTNAME);
   printf("Stokes Parameter: %d\n\n",STOKES_SWITCH);
 
 
   subintdata.NrBins = SAMPLES;
-  if (is_CS == 0) subintdata.nrFreqChan = CHANNELS;
+  if (is_CS == 0 && is_append == 0) subintdata.nrFreqChan = CHANNELS;
    else subintdata.nrFreqChan = CHANNELS * SUBBANDS;
   subintdata.NrPols = 1;
   subintdata.NrBits = nrbits;
@@ -1041,6 +1449,63 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     }
   }
 
+  // processing with appending (only for one beam)
+  if (is_append == 1) {
+   int seqseek[SUBBANDS]; // only for IS data in append mode
+                          // array that will keep the seek offsets for input files due to possible differences 
+                          // between firstseq (same for all subbands) and actual first sequence number of each file
+   b = 0; // beam = 0 
+
+   // forming the list of input files
+   char *sbpointer;
+   char *isfiles[SUBBANDS];
+   for (j=0; j<SUBBANDS; j++) {
+    isfiles[j] = (char *)malloc(1024);
+    if (!isfiles[j]) { perror("isfiles malloc"); exit (1); }
+    memset (isfiles[j], "\0", 255);
+   }
+   j=0;
+   while((filename = getNextFilenameFromList(&application, argv)) != NULL) {
+    sbpointer = strstr (filename, "_SB");
+    sscanf(sbpointer, "%*3c%d", &subbandnr);
+    // here we place the each filename in the proper order (so we don't need to sort the list out)
+    sprintf (isfiles[subbandnr], "%s", filename);
+    j++;
+   }
+   if (j != SUBBANDS) {
+    fprintf (stderr, "Number of input files (%d) is not equal to the number of subbands (%d)!\n", j, SUBBANDS);
+    return 0;
+   }
+
+   subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+   // outname
+   sprintf(buf, "%s.fits", OUTNAME);
+   printf("Output file \"%s\" at center frequency %f MHz\n", buf, subintdata.freq_cent);
+
+   if (convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
+    return 0;
+
+   if(application.verbose) printf("  File contains sequence numbers %d - %d\n", firstseq, lastseq);
+
+   if(application.verbose)  printf ("Allocating memory for packed data...\n");
+
+   /* Copy header parameters to output header */
+   copy_paramsPSRData(subintdata, &fout);
+   fout.NrPulses = lastseq+1;
+   if(application.verbose) {
+    printf("  Header dump:\n");
+    printHeaderPSRData(fout, 4);
+   }
+   if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose)) return 0;
+   if(!writePSRFITSHeader(&fout, application.verbose)) return 0;
+   if(convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
+    return 0;
+
+   for (j=0; j<SUBBANDS; j++) free (isfiles[j]);
+
+  } // if (is_append == 1)
+
+  if (is_append == 0) {
   /* open files */
   char *sbpointer;
   for( b = 0; b < BEAMS; b++ ) {
@@ -1103,6 +1568,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       fclose(fin);
     }
   }
+  } // if (is_append == 0)
 
   closePSRData(&subintdata);
   closePSRData(&fout);
