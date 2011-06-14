@@ -425,7 +425,7 @@ namespace CR { // Namespace CR -- begin
           Int_t shadedRed = TColor::GetColor(255,175,175);
           Int_t shadedBlue = TColor::GetColor(110,110,255);
           Int_t shadedGray = TColor::GetColor(175,175,175);
-          TGraph *errorBand = new TGraph(6);
+          TGraph *errorBand = new TGraph(7);
           float minEvaldist = maxX*0.005;
           float maxEvaldist = maxX*0.995;
           double R0forBand = 0;
@@ -447,6 +447,7 @@ namespace CR { // Namespace CR -- begin
             errorBand->SetPoint(2,minEvaldist,fitfuncExp->Eval(minEvaldist)*(1.+uncertainty));
           }
           errorBand->SetPoint(3,maxEvaldist,fitfuncExp->Eval(maxEvaldist)*(1.+uncertainty));
+          // check if error band touches lower right corner
           if (fitfuncExp->Eval(maxEvaldist)*(1.-uncertainty) < minY) {
             errorBand->SetPoint(4,maxEvaldist,minY);
             errorBand->SetPoint(5,fitDistance+R0forBand*log((1.-uncertainty)*epsForBand/minY),minY);            
@@ -454,6 +455,7 @@ namespace CR { // Namespace CR -- begin
             errorBand->SetPoint(4,maxEvaldist,fitfuncExp->Eval(maxEvaldist)*(1.+uncertainty));
             errorBand->SetPoint(5,maxEvaldist,fitfuncExp->Eval(maxEvaldist)*(1.-uncertainty));
           }
+          errorBand->SetPoint(6,minEvaldist,fitfuncExp->Eval(minEvaldist)*(1.-uncertainty));
           
           errorBand->SetFillColor(shadedGray);
           
@@ -466,7 +468,7 @@ namespace CR { // Namespace CR -- begin
           errorBand->GetYaxis()->SetRange(minY,maxY);
           errorBand->GetYaxis()->SetRangeUser(minY,maxY);
         
-          TGraph *errorBandS = new TGraph(6);
+          TGraph *errorBandS = new TGraph(7);
           if (fitWithEta)
             R0forBand = 1/fitfuncExpS->GetParameter(1);
           else  
@@ -484,6 +486,7 @@ namespace CR { // Namespace CR -- begin
             errorBandS->SetPoint(1,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
             errorBandS->SetPoint(2,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.+uncertainty));
           }
+          // check if error band touches lower right corner
           errorBandS->SetPoint(3,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+uncertainty));
           if (fitfuncExpS->Eval(maxEvaldist)*(1.-uncertainty) < minY) {
             errorBandS->SetPoint(4,maxEvaldist,minY);
@@ -492,6 +495,7 @@ namespace CR { // Namespace CR -- begin
             errorBandS->SetPoint(4,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+uncertainty));
             errorBandS->SetPoint(5,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.-uncertainty));
           }
+          errorBandS->SetPoint(6,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
           
           errorBandS->SetFillStyle(3344);
           if (simColor == kBlue)

@@ -1209,7 +1209,7 @@ int main (int argc, char *argv[])
       latTimeCone2DSigOffset_sim_EW = 0, latTimeCone2DSigOffset_sim_NS = 0, latTimeCone2DSigOffset_sim_VE = 0;
 
       CR::lateralDistribution lateralFitter;
-      lateralFitter.setDataColor(1);
+      lateralFitter.setDataColor(kBlack);
       lateralFitter.setSimColor(simColor);
       //automatic check for iron simulations
       if (automaticSwitchIronColor) {
