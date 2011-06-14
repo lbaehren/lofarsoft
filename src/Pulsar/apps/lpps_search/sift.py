@@ -10,6 +10,7 @@ generated like the prepfold command that the GBT drift scan produces.
 import os
 import sys
 import glob
+import copy
 # PRESTO imports
 import sifting
 # matplotlib imports
@@ -160,6 +161,8 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
     # them all in one big list:
     unsifted_accelcands = []
     sifted_accelcands = []
+    # TODO : fix the case where the script crashes because there are not
+    # enough candidates.
     for z_max, accel_cands in accel_cands_found_for.iteritems():
         # Read all the acceleration candidates:
         files = glob.glob(os.path.join(cand_dir, 
@@ -179,7 +182,19 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
             accel_cands = sifting.remove_DM_problems(accel_cands, 2, dm_strs, 1.)
         print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
-            accel_cands = sifting.remove_harmonics(accel_cands)
+            # The PRESTO sifting.py module can crash if there are not enough
+            # pulsar candidates, below I test for those symptoms and because
+            # the PRESTO sifting.remove_harmonics overwrites its inputs I 
+            # keep a temporary copy around in case there is a crash. 
+            # TODO : check whether this fix does not create problems further
+            # down in the sifting process. If there are more problems it is 
+            # probably better to discard the candidates and write that to the
+            # log.
+            tmp_accel_cands = copy.deepcopy(accel_cands)
+            try:
+                accel_cands = sifting.remove_harmonics(accel_cands)
+            except IndexError, e:
+                accel_cands = tmp_accel_cands
         print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             bpc = knownpulsar.load_bright_pulsar_catalog()
@@ -212,7 +227,7 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
         assert minimum_dm_cutoff >= 0
         sifted_accelcands = [c for c in sifted_accelcands if c.DM >= minimum_dm_cutoff]        
  
-    if n_candidates_cutoff:
+    if n_candidates_cutoff and len(sifted_candidates) > n_candidates_cutoff:
         # We want an integer that is larger than 0 if a cutoff is specified.
         assert n_candidates_cutoff > 0 and (type(n_candidates_cutoff) == type(1))
         sifted_accelcands = sifted_accelcands[:n_candidates_cutoff]
