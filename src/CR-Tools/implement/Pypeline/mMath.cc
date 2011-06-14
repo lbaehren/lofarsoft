@@ -4668,7 +4668,7 @@ void HFPP_FUNC_NAME(ndarray out, const NIter in_begin, const NIter in_end, HInte
     in_it = in_begin + i;
     for (int j=0; j<Ninner; ++j)
     {
-      *out_it += static_cast<double>((*in_it)) * (*in_it);
+      *out_it += static_cast<double>((*in_it) * (*in_it));
 
       in_it += dimsize;
 
