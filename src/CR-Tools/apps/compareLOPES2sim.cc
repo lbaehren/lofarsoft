@@ -84,8 +84,12 @@
  #LOPES-GT,simName,source,KRETA_ver,az_in(deg),errAz_in(deg),ze_in(deg),errZe_in(deg),coreN_in(m),coreE_in(m),errCore(m),Ne_in,Nmu_in,Nmu^tr_in,E_in(eV),errlgE
 */
 
-const static bool simulationDistances = true;  // decide wether to use the lateral distances of simulation or of data
-const static bool onlyEW = true;  // plot only EW polarization
+const static bool simulationDistances = true;      // decide wether to use the lateral distances of simulation or of data
+const static bool onlyEW = true;                   // plot only EW polarization
+const static bool lateralFitWithEta = true;        // do LDF fit with eta = 1/R_0 instead of R_0
+
+Color_t simColor = kBlue;                          // simulation color: proton = blue (4), iron = red (2)
+const static bool automaticSwitchIronColor = true; // switches color to red, if simulations path contains _i_
 
 const static double gradeg=(180./TMath::Pi());
 //const static double antennaHeightOffset = 12615.9 -8.17; // used in REAS, for Steffen's events (corresponds to average antenna height)
@@ -325,16 +329,16 @@ int main (int argc, char *argv[])
     char reconstruction = 0;                                // A = KASCADE reconstruction taken, G = Grande reconstruction taken
     bool hasNS = false;                                     // is set to true, if root file contains NS information
     bool hasVE = false;                                     // is set to true, if root file contains VE information
-    double CCheight, CCheight_NS, CCheight_VE;                          // CCheight will be used for EW polarization or ANY polarization
-    double CCwidth, CCwidth_NS, CCwidth_VE;
-    double CCcenter, CCcenter_NS, CCcenter_VE;                    // time of CC beam
-    double CCheight_error, CCheight_error_NS, CCheight_error_VE;
-    //bool CCconverged, CCconverged_NS, CCconverged_VE;                       // is true if the Gaussian fit to the CCbeam converged
-    double Xheight, Xheight_NS, Xheight_VE;                            // CCheight will be used for EW polarization or ANY polarization
-    double Xheight_error, Xheight_error_NS, Xheight_error_VE;
+    double CCheight = 0, CCheight_NS= 0, CCheight_VE= 0;    // CCheight will be used for EW polarization or ANY polarization
+    double CCwidth = 0, CCwidth_NS = 0, CCwidth_VE = 0;
+    double CCcenter = 0, CCcenter_NS = 0, CCcenter_VE = 0;  // time of CC beam
+    double CCheight_error = 0, CCheight_error_NS = 0, CCheight_error_VE = 0;
+    //bool CCconverged, CCconverged_NS, CCconverged_VE;     // is true if the Gaussian fit to the CCbeam converged
+    double Xheight = 0, Xheight_NS = 0, Xheight_VE = 0;     // CCheight will be used for EW polarization or ANY polarization
+    double Xheight_error = 0, Xheight_error_NS = 0, Xheight_error_VE = 0;
     //bool Xconverged, Xconverged_NS, Xconverged_VE;                         // is true if the Gaussian fit to the CCbeam converged
-    double AzL, ElL, AzL_NS, ElL_NS, AzL_VE, ElL_VE;                       // Azimuth and Elevation
-    double distanceResult = 0, distanceResult_NS = 0, distanceResult_VE = 0;       // distance = radius of curvature
+    double AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0, AzL_VE = 0, ElL_VE = 0; // Azimuth and Elevation
+    double distanceResult = 0, distanceResult_NS = 0, distanceResult_VE = 0; // distance = radius of curvature
     // values for lateral distribution of arrival times
     double latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
     double latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
@@ -386,12 +390,18 @@ int main (int argc, char *argv[])
     double weightedTotSignEnv=0,weightedTotSignEnv_NS=0,weightedTotSignEnv_VE=0;
     
     // results of lateral distribution fit
-    double R_0_EW = 0, sigR_0_EW = 0, eps_EW = 0, sigeps_EW = 0, chi2NDF_EW = 0; 
+    double R_0_EW = 0, sigR_0_EW = 0, eps_EW = 0, sigeps_EW = 0, chi2NDF_EW = 0;
+    double eta_EW = 0, sigeta_EW = 0;
     double R_0_sim_EW = 0, sigR_0_sim_EW = 0, eps_sim_EW = 0, sigeps_sim_EW = 0, chi2NDF_sim_EW = 0; 
+    double eta_sim_EW = 0, sigeta_sim_EW = 0;
     double R_0_NS = 0, sigR_0_NS = 0, eps_NS = 0, sigeps_NS = 0, chi2NDF_NS = 0; 
+    double eta_NS = 0, sigeta_NS = 0;
     double R_0_sim_NS = 0, sigR_0_sim_NS = 0, eps_sim_NS = 0, sigeps_sim_NS = 0, chi2NDF_sim_NS = 0; 
+    double eta_sim_NS = 0, sigeta_sim_NS = 0;
     double R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
+    double eta_VE = 0, sigeta_VE = 0;
     double R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
+    double eta_sim_VE = 0, sigeta_sim_VE = 0;
     
     double Xmax_sim = 0;
     
@@ -567,6 +577,8 @@ int main (int argc, char *argv[])
       
       outtree->Branch("R_0_EW",&R_0_EW,"R_0_EW/D");
       outtree->Branch("sigR_0_EW",&sigR_0_EW,"sigR_0_EW/D");
+      outtree->Branch("eta_EW",&eta_EW,"eta_EW/D");
+      outtree->Branch("sigeta_EW",&sigeta_EW,"sigeta_EW/D");
       outtree->Branch("eps_EW",&eps_EW,"eps_EW/D");
       outtree->Branch("sigeps_EW",&sigeps_EW,"sigeps_EW/D");
       outtree->Branch("chi2NDF_EW",&chi2NDF_EW,"chi2NDF_EW/D");
@@ -668,6 +680,8 @@ int main (int argc, char *argv[])
       
       outtree->Branch("R_0_NS",&R_0_NS,"R_0_NS/D");
       outtree->Branch("sigR_0_NS",&sigR_0_NS,"sigR_0_NS/D");
+      outtree->Branch("eta_NS",&eta_NS,"eta_NS/D");
+      outtree->Branch("sigeta_NS",&sigeta_NS,"sigeta_NS/D");
       outtree->Branch("eps_NS",&eps_NS,"eps_NS/D");
       outtree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
       outtree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
@@ -769,6 +783,8 @@ int main (int argc, char *argv[])
             
       outtree->Branch("R_0_VE",&R_0_VE,"R_0_VE/D");
       outtree->Branch("sigR_0_VE",&sigR_0_VE,"sigR_0_VE/D");
+      outtree->Branch("eta_VE",&eta_VE,"eta_VE/D");
+      outtree->Branch("sigeta_VE",&sigeta_VE,"sigeta_VE/D");
       outtree->Branch("eps_VE",&eps_VE,"eps_VE/D");
       outtree->Branch("sigeps_VE",&sigeps_VE,"sigeps_VE/D");
       outtree->Branch("chi2NDF_VE",&chi2NDF_VE,"chi2NDF_VE/D");
@@ -1147,11 +1163,17 @@ int main (int argc, char *argv[])
       } 
       
       R_0_EW = 0, sigR_0_EW = 0, eps_EW = 0, sigeps_EW = 0, chi2NDF_EW = 0; 
+      eta_EW = 0, sigeta_EW = 0;
       R_0_sim_EW = 0, sigR_0_sim_EW = 0, eps_sim_EW = 0, sigeps_sim_EW = 0, chi2NDF_sim_EW = 0; 
+      eta_sim_EW = 0, sigeta_sim_EW = 0;
       R_0_NS = 0, sigR_0_NS = 0, eps_NS = 0, sigeps_NS = 0, chi2NDF_NS = 0; 
+      eta_NS = 0, sigeta_NS = 0;
       R_0_sim_NS = 0, sigR_0_sim_NS = 0, eps_sim_NS = 0, sigeps_sim_NS = 0, chi2NDF_sim_NS = 0; 
+      eta_sim_NS = 0, sigeta_sim_NS = 0;
       R_0_VE = 0, sigR_0_VE = 0, eps_VE = 0, sigeps_VE = 0, chi2NDF_VE = 0; 
+      eta_VE = 0, sigeta_VE = 0;
       R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
+      eta_sim_VE = 0, sigeta_sim_VE = 0;
 
       latTimeSphere1DRcurv_EW = 0, latTimeSphere1DRcurv_NS = 0, latTimeSphere1DRcurv_VE = 0;
       latTimeSphere1DSigRcurv_EW = 0, latTimeSphere1DSigRcurv_NS = 0, latTimeSphere1DSigRcurv_VE = 0;
@@ -1187,6 +1209,13 @@ int main (int argc, char *argv[])
       latTimeCone2DSigOffset_sim_EW = 0, latTimeCone2DSigOffset_sim_NS = 0, latTimeCone2DSigOffset_sim_VE = 0;
 
       CR::lateralDistribution lateralFitter;
+      lateralFitter.setDataColor(1);
+      lateralFitter.setSimColor(simColor);
+      //automatic check for iron simulations
+      if (automaticSwitchIronColor) {
+        if (simPath.find("_i_")!=string::npos)
+          lateralFitter.setSimColor(kRed);
+      }
       string plotPrefix = "";
 
       if(m_recEW.size()>=4) {        
@@ -1197,11 +1226,14 @@ int main (int argc, char *argv[])
         Record ergEW = lateralFitter.fitLateralDistribution(plotPrefix,
                                                             m_recEW,m_simEW,
                                                             Gt,AzL,90.-ElL,
-                                                            index1, index2);
+                                                            index1, index2,
+                                                            100, lateralFitWithEta);
         eps_EW = ergEW.asDouble("eps");
-        R_0_EW = ergEW.asDouble("R_0");
         sigeps_EW = ergEW.asDouble("sigeps");
+        R_0_EW = ergEW.asDouble("R_0");
         sigR_0_EW = ergEW.asDouble("sigR_0");
+        eta_EW = ergEW.asDouble("eta");
+        sigeta_EW = ergEW.asDouble("sigeta");
         chi2NDF_EW = ergEW.asDouble("chi2NDF");
         eps_sim_EW = ergEW.asDouble("eps_sim");
         R_0_sim_EW = ergEW.asDouble("R_0_sim");
@@ -1259,11 +1291,14 @@ int main (int argc, char *argv[])
         Record ergNS = lateralFitter.fitLateralDistribution(plotPrefix,
                                                             m_recNS,m_simNS,
                                                             Gt,AzL,90.-ElL,
-                                                            index1, index2);
+                                                            index1, index2,
+                                                            100, lateralFitWithEta);
         eps_NS = ergNS.asDouble("eps");
-        R_0_NS = ergNS.asDouble("R_0");
         sigeps_NS = ergNS.asDouble("sigeps");
+        R_0_NS = ergNS.asDouble("R_0");
         sigR_0_NS = ergNS.asDouble("sigR_0");
+        eta_NS = ergNS.asDouble("eta");
+        sigeta_NS = ergNS.asDouble("sigeta");
         chi2NDF_NS = ergNS.asDouble("chi2NDF");
         eps_sim_NS = ergNS.asDouble("eps_sim");
         R_0_sim_NS = ergNS.asDouble("R_0_sim");

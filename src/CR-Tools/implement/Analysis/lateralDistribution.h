@@ -38,6 +38,8 @@
 #include <Analysis/analyseLOPESevent.h>
 #include <Analysis/CompletePipeline.h>
 
+#include <TColor.h>
+
 namespace CR { // Namespace CR -- begin
 
   /*!
@@ -72,6 +74,10 @@ namespace CR { // Namespace CR -- begin
     double lateralSNRcut;
     //! Time window cut for lateral distribution (pulse time must be close to cc-beam center)
     double lateralTimeCut;
+    //! Color for measured data
+    Color_t dataColor;
+    //! Color for simulations
+    Color_t simColor;
     
   public:
 
@@ -165,6 +171,42 @@ namespace CR { // Namespace CR -- begin
       lateralTimeCut = timeCut;
     }
 
+    /*!
+      \brief Get the color for the measured data, default: blue (4)
+
+      \return dataColor
+    */
+    inline Color_t getDataColor () {
+       return dataColor;
+    }
+
+    /*!
+      \brief Set the color for the measured data, default: blue (4)
+
+      \param dataColor
+    */
+    inline void setDataColor (Color_t const &newDataColor) {
+      dataColor = newDataColor;
+    }
+
+
+    /*!
+      \brief Get the color for the simulations: normally iron = red (2), proton = blue (4)
+
+      \return simColor
+    */
+    inline Color_t getSimColor () {
+       return simColor;
+    }
+
+    /*!
+      \brief Set the color for the simulations: normally iron = red (2), proton = blue (4)
+
+      \param simColor
+    */
+    inline void setSimColor (Color_t const &newSimColor) {
+      simColor = newSimColor;
+    }
 
     // ------------------------------------------------------------------ Methods
 

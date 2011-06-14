@@ -48,7 +48,9 @@ namespace CR { // Namespace CR -- begin
 
   lateralDistribution::lateralDistribution () :
     lateralSNRcut(1.0),
-    lateralTimeCut(25e-9)
+    lateralTimeCut(25e-9),
+    dataColor(kBlue),  // normally blue (4), in comparison to simulation black (1)
+    simColor(kBlue) // blue (4) for iron, red (2) for simulations
   {;}
 
   // ============================================================================
@@ -122,10 +124,10 @@ namespace CR { // Namespace CR -- begin
       bool fitSim = false;
       if (pulsesSim.size() > 0)
         fitSim = true;
-
+      
       for (map <int, PulseProperties>::iterator it=pulsesRec.begin(); it != pulsesRec.end(); ++it) {
-	if ( (*it).second.lateralCut ) // don't use an antenna marked to cut
-  	  continue;
+        if ( (*it).second.lateralCut ) // don't use an antenna marked to cut
+          continue;
         distance[ant] = (*it).second.dist;
         distanceEr[ant] = (*it).second.disterr;
         fieldStr[ant] = (*it).second.height;
@@ -136,7 +138,8 @@ namespace CR { // Namespace CR -- begin
         //for simulation
         if (fitSim) {
           if (pulsesSim[antID[ant]].antennaID != antID[ant]) { // consistency check
-            cerr << "\nlateralDistribution::fitLateralDistribution: antenna IDs of data and simulation do not match. Skipping...\n" << endl;
+            cerr << "\nlateralDistribution::fitLateralDistribution: antenna IDs of data and simulation do not match. Skipping...\n"
+                 << endl;
             //return Record();
             continue; //this antennas are not counted!
           }
@@ -184,6 +187,10 @@ namespace CR { // Namespace CR -- begin
           }
         }
       }
+      double maxX = maxdist*1.1;
+      double maxY = fieldMax*3.;
+      double minX = 0;
+      double minY = 1;
 
       cout << "\nAntennas in the Plot/Fit (no cuts applied): " << ant << endl;
       erg.define("NlateralAntennas",ant);
@@ -206,8 +213,8 @@ namespace CR { // Namespace CR -- begin
 
       TGraphErrors *latPro = new TGraphErrors (ant, distance,fieldStr,distanceEr,fieldStrEr);
       latPro->SetFillColor(0);
-      latPro->SetLineColor(4); // normally blue (4), in comparison to simulation black (1)
-      latPro->SetMarkerColor(4); // normally blue (4), in comparison to simulation black (1)
+      latPro->SetLineColor(dataColor);
+      latPro->SetMarkerColor(dataColor);
       latPro->SetMarkerStyle(kFullCircle);
       latPro->SetMarkerSize(1.1);
       stringstream label;
@@ -217,16 +224,16 @@ namespace CR { // Namespace CR -- begin
       latPro->GetXaxis()->SetTitle("distance R [m]");
       latPro->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
       latPro->GetXaxis()->SetTitleSize(0.05);
-      latPro->GetXaxis()->SetLimits(0,maxdist*1.1);
+      latPro->GetXaxis()->SetLimits(minY,maxX);
       latPro->GetYaxis()->SetTitleSize(0.05);
-      latPro->GetYaxis()->SetRange(1,fieldMax*3);
-      latPro->GetYaxis()->SetRangeUser(1,fieldMax*3);
+      latPro->GetYaxis()->SetRange(minY,maxY);
+      latPro->GetYaxis()->SetRangeUser(minY,maxY);
 
 
       TGraphErrors *latProSim = new TGraphErrors (ant, distanceSim,fieldStrSim,distanceErSim,fieldStrErSim);
       latProSim->SetFillColor(0);
-      latProSim->SetLineColor(2); // red (2) for iron, blue (4) for proton
-      latProSim->SetMarkerColor(2); // red (2) for iron, blue (4) for proton
+      latProSim->SetLineColor(simColor);
+      latProSim->SetMarkerColor(simColor);
       latProSim->SetMarkerStyle(kFullSquare);
       latProSim->SetMarkerSize(1.1);
 
@@ -255,6 +262,7 @@ namespace CR { // Namespace CR -- begin
       ptstats->SetName("Data");
       ptstats->SetBorderSize(2);
       ptstats->SetTextAlign(12);
+      ptstats->SetTextColor(dataColor);
       ptstats->SetFillColor(0);
       ptstats->SetOptStat(0);
       ptstats->SetOptFit(111);
@@ -267,6 +275,7 @@ namespace CR { // Namespace CR -- begin
       ptstatsS->SetName("Simulation");
       ptstatsS->SetBorderSize(2);
       ptstatsS->SetTextAlign(12);
+      ptstatsS->SetTextColor(simColor);
       ptstatsS->SetFillColor(0);
       ptstatsS->SetOptStat(0);
       ptstatsS->SetOptFit(111);
@@ -337,7 +346,7 @@ namespace CR { // Namespace CR -- begin
           fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")*[1])";
         else
           fitFunction = "[0]*exp(-(x-"+boost::lexical_cast<string>(fitDistance)+")/[1])";
-        fitfuncExp=new TF1("fitfuncExp",fitFunction.c_str(),0.,maxdist*1.1);
+        fitfuncExp=new TF1("fitfuncExp",fitFunction.c_str(),0.,maxX);
         //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExp->SetParName(0,epsName.c_str());
         fitfuncExp->SetParameter(0,20);
@@ -348,6 +357,7 @@ namespace CR { // Namespace CR -- begin
           fitfuncExp->SetParameter(1,100);
         fitfuncExp->SetFillStyle(0);
         fitfuncExp->SetLineWidth(2);
+        fitfuncExp->SetLineColor(dataColor);
 
         cout << "------------------------------"<<endl;
         latPro->Fit(fitfuncExp, "R");
@@ -394,7 +404,7 @@ namespace CR { // Namespace CR -- begin
               SlopeParameterName = "R_{0} [m]";
           }
           TF1 *fitfuncExpS;
-          fitfuncExpS=new TF1("fitfuncExpS",fitFunction.c_str(),0.,maxdist*1.1);
+          fitfuncExpS=new TF1("fitfuncExpS",fitFunction.c_str(),0.,maxX);
           //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
           fitfuncExpS->SetParName(0,epsName.c_str());
           fitfuncExpS->SetParameter(0,20);
@@ -405,19 +415,122 @@ namespace CR { // Namespace CR -- begin
             fitfuncExpS->SetParameter(1,100);
           fitfuncExpS->SetFillStyle(0);
           fitfuncExpS->SetLineWidth(2);
-          fitfuncExpS->SetLineColor(2); // red (2) for iron, blue (4) for proton
+          fitfuncExpS->SetLineColor(simColor);
 
           latProSim->Fit(fitfuncExpS, "R");
           ptstatsS->Draw();
+          
+          /* Uncertainty bands for data and simulations */
+          // define shaded area
+          Int_t shadedRed = TColor::GetColor(255,175,175);
+          Int_t shadedBlue = TColor::GetColor(110,110,255);
+          Int_t shadedGray = TColor::GetColor(175,175,175);
+          TGraph *errorBand = new TGraph(6);
+          float minEvaldist = maxX*0.005;
+          float maxEvaldist = maxX*0.995;
+          double R0forBand = 0;
+          if (fitWithEta)
+            R0forBand = 1/fitfuncExp->GetParameter(1);
+          else  
+            R0forBand = fitfuncExp->GetParameter(1);
+          double epsForBand = fitfuncExp->GetParameter(0);
+          
+          // uncertainty band for 35% calibration uncertainty (on measured data)
+          double uncertainty = 0.35;          
+          errorBand->SetPoint(0,minEvaldist,fitfuncExp->Eval(minEvaldist)*(1.-uncertainty));
+          // check if band touches upper left corner         
+          if (fitfuncExp->Eval(minEvaldist)*(1.+uncertainty) > maxY) {
+            errorBand->SetPoint(1,minEvaldist,maxY);
+            errorBand->SetPoint(2,fitDistance+R0forBand*log((1.+uncertainty)*epsForBand/maxY),maxY);
+          } else {
+            errorBand->SetPoint(1,minEvaldist,fitfuncExp->Eval(minEvaldist)*(1.-uncertainty));
+            errorBand->SetPoint(2,minEvaldist,fitfuncExp->Eval(minEvaldist)*(1.+uncertainty));
+          }
+          errorBand->SetPoint(3,maxEvaldist,fitfuncExp->Eval(maxEvaldist)*(1.+uncertainty));
+          if (fitfuncExp->Eval(maxEvaldist)*(1.-uncertainty) < minY) {
+            errorBand->SetPoint(4,maxEvaldist,minY);
+            errorBand->SetPoint(5,fitDistance+R0forBand*log((1.-uncertainty)*epsForBand/minY),minY);            
+          } else {
+            errorBand->SetPoint(4,maxEvaldist,fitfuncExp->Eval(maxEvaldist)*(1.+uncertainty));
+            errorBand->SetPoint(5,maxEvaldist,fitfuncExp->Eval(maxEvaldist)*(1.-uncertainty));
+          }
+          
+          errorBand->SetFillColor(shadedGray);
+          
+          errorBand->SetTitle("");
+          errorBand->GetXaxis()->SetTitle("distance R [m]"); 
+          errorBand->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
+          errorBand->GetXaxis()->SetTitleSize(0.05);
+          errorBand->GetXaxis()->SetLimits(minX,maxX);
+          errorBand->GetYaxis()->SetTitleSize(0.05);
+          errorBand->GetYaxis()->SetRange(minY,maxY);
+          errorBand->GetYaxis()->SetRangeUser(minY,maxY);
+        
+          TGraph *errorBandS = new TGraph(6);
+          if (fitWithEta)
+            R0forBand = 1/fitfuncExpS->GetParameter(1);
+          else  
+            R0forBand = fitfuncExpS->GetParameter(1);
+          epsForBand = fitfuncExpS->GetParameter(0);
+          
+          // uncertainty band for 40% KASCADE energy uncertainty
+          uncertainty = 0.4;
+          errorBandS->SetPoint(0,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
+          // check if band touches upper left corner         
+          if (fitfuncExpS->Eval(minEvaldist)*(1.+uncertainty) > maxY) {
+            errorBandS->SetPoint(1,minEvaldist,maxY);
+            errorBandS->SetPoint(2,fitDistance+R0forBand*log((1.+uncertainty)*epsForBand/maxY),maxY);
+          } else {
+            errorBandS->SetPoint(1,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
+            errorBandS->SetPoint(2,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.+uncertainty));
+          }
+          errorBandS->SetPoint(3,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+uncertainty));
+          if (fitfuncExpS->Eval(maxEvaldist)*(1.-uncertainty) < minY) {
+            errorBandS->SetPoint(4,maxEvaldist,minY);
+            errorBandS->SetPoint(5,fitDistance+R0forBand*log((1.-uncertainty)*epsForBand/minY),minY);            
+          } else {
+            errorBandS->SetPoint(4,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+uncertainty));
+            errorBandS->SetPoint(5,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.-uncertainty));
+          }
+          
+          errorBandS->SetFillStyle(3344);
+          if (simColor == kBlue)
+            errorBandS->SetFillColor(shadedBlue); // for proton
+          else  
+            errorBandS->SetFillColor(shadedRed); // for iron
+             
+          errorBandS->SetTitle("");
+          errorBandS->GetXaxis()->SetTitle("distance R [m]"); 
+          errorBandS->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
+          errorBandS->GetXaxis()->SetTitleSize(0.05);
+          errorBandS->GetXaxis()->SetLimits(minX,maxX);
+          errorBandS->GetYaxis()->SetTitleSize(0.05);
+          errorBandS->GetYaxis()->SetRange(minY,maxY);
+          errorBandS->GetYaxis()->SetRangeUser(minY,maxY);   
+
+          c1->Clear();
+          latPro->Draw("AP");
+          //latProSim->Draw("SAME P");
+          errorBand->Draw("SAME F");
+          errorBandS->Draw("SAME F");
+          latPro->Draw("SAME P");
+          latProSim->Draw("SAME P");
+          ptstats->Draw();
+          ptstatsS->Draw();
+          easstats->Draw();
 
           // write fit results to record with other results
           erg.define("eps_sim",fitfuncExpS->GetParameter(0));
           if (fitWithEta) {
             erg.define("eta_sim",fitfuncExpS->GetParameter(1));
             erg.define("sigeta_sim",fitfuncExpS->GetParError(1));
+            erg.define("R_0_sim",-1.);
+            erg.define("sigR_0_sim",-1.);
           } else {
             erg.define("R_0_sim",fitfuncExpS->GetParameter(1));
             erg.define("sigR_0_sim",fitfuncExpS->GetParError(1));
+            erg.define("eta_sim",-1.);
+            erg.define("sigeta_sim",-1.);
           }
           // error of epsilon = error of fit + 10 % energy uncertainty
           double sigmaEpsilon_sim = sqrt(pow(fitfuncExpS->GetParError(0),2)+pow((0.10*fitfuncExpS->GetParameter(0)),2));
@@ -441,7 +554,7 @@ namespace CR { // Namespace CR -- begin
         plotNameStream << filePrefix << Gt << ".eps";
         cout << "\nCreating plot: " << plotNameStream.str() << endl;
         c1->Print(plotNameStream.str().c_str());
-	plotNameStream.str("");
+        plotNameStream.str("");
         plotNameStream << filePrefix << Gt << ".root";
         c1->Print(plotNameStream.str().c_str());
 
@@ -474,9 +587,9 @@ namespace CR { // Namespace CR -- begin
 
           // make plot of deviation
           TGraphErrors *latDev = new TGraphErrors (ant, angleToCore,deviation,angleToCoreErr,deviationErr);
-          latDev->SetFillColor(4);
-          latDev->SetLineColor(4);
-          latDev->SetMarkerColor(4);
+          latDev->SetFillColor(dataColor);
+          latDev->SetLineColor(dataColor);
+          latDev->SetMarkerColor(dataColor);
           latDev->SetMarkerStyle(20);
           latDev->SetMarkerSize(1.1);
           stringstream label;
@@ -503,7 +616,7 @@ namespace CR { // Namespace CR -- begin
           plotNameStream << filePrefix << "dev-" << Gt << ".eps";
           cout << "\nCreating plot: " << plotNameStream.str() << endl;
           c1->Print(plotNameStream.str().c_str());
-	  plotNameStream.str("");
+          plotNameStream.str("");
           plotNameStream << filePrefix << "dev-" << Gt << ".root";
           c1->Print(plotNameStream.str().c_str());
           latDev->Delete();
@@ -528,9 +641,9 @@ namespace CR { // Namespace CR -- begin
            //TH1F *h1 = new TH1F("","",60,-10,10);
            TH1F *h1 = new TH1F("","",60,-100,100);
            h1->SetMarkerStyle(3);
-           h1->SetMarkerColor(kBlue);
-           h1->SetLineColor(kBlue);
-           h1->SetFillColor(kBlue);
+           h1->SetMarkerColor(dataColor);
+           h1->SetLineColor(dataColor);
+           h1->SetFillColor(dataColor);
            h1->SetFillStyle(3004);
            h1->SetLineWidth(3);
            h1->SetLineStyle(11);
@@ -762,8 +875,8 @@ namespace CR { // Namespace CR -- begin
       double offsetX = 20;
 
       timePro->SetFillColor(0);
-      timePro->SetLineColor(1); // normally blue (4), in comparison to simulation black (1)
-      timePro->SetMarkerColor(1); // normally blue (4), in comparison to simulation black (1)
+      timePro->SetLineColor(dataColor);
+      timePro->SetMarkerColor(dataColor);
       timePro->SetMarkerStyle(kFullCircle);
       timePro->SetMarkerSize(1.1);
       stringstream label;
@@ -780,8 +893,8 @@ namespace CR { // Namespace CR -- begin
       TGraph2DErrors *timePro2D =
         new TGraph2DErrors(ant, distance, zshower, timeValUnpro, distanceEr, zshowerEr, timeValUnproEr);
       timePro2D->SetFillColor(0);
-      timePro2D->SetLineColor(4);
-      timePro2D->SetMarkerColor(4);
+      timePro2D->SetLineColor(dataColor);
+      timePro2D->SetMarkerColor(dataColor);
       timePro2D->SetMarkerStyle(kFullCircle);
       timePro2D->SetMarkerSize(1.1);
       timePro2D->SetTitle("");
@@ -796,9 +909,9 @@ namespace CR { // Namespace CR -- begin
 
       TGraphErrors *timeProSim =
         new TGraphErrors (ant, distanceSim, timeValSim, distanceErSim, timeValErSim);
-      timeProSim->SetFillColor(1);
-      timeProSim->SetLineColor(4); // 2 (red) for iron, 4 (blue) for proton
-      timeProSim->SetMarkerColor(4); // 2 (red) for iron, 4 (blue) for proton
+      timeProSim->SetFillColor(simColor);
+      timeProSim->SetLineColor(simColor);
+      timeProSim->SetMarkerColor(simColor);
       timeProSim->SetMarkerStyle(kFullSquare);
       timeProSim->SetMarkerSize(1.1);
       timeProSim->GetYaxis()->SetRangeUser(timeMin, timeMax + offsetY);
@@ -806,9 +919,9 @@ namespace CR { // Namespace CR -- begin
 
       TGraph2DErrors *timePro2DSim =
         new TGraph2DErrors (ant, distanceSim, zshowerSim, timeValUnproSim, distanceErSim, zshowerErSim, timeValUnproErSim);
-      timePro2DSim->SetFillColor(1);
-      timePro2DSim->SetLineColor(2);
-      timePro2DSim->SetMarkerColor(2);
+      timePro2DSim->SetFillColor(simColor);
+      timePro2DSim->SetLineColor(simColor);
+      timePro2DSim->SetMarkerColor(simColor);
       timePro2DSim->SetMarkerStyle(kFullSquare);
       timePro2DSim->SetMarkerSize(1.1);
 
@@ -835,6 +948,7 @@ namespace CR { // Namespace CR -- begin
       ptstats->SetName("stats");
       ptstats->SetBorderSize(2);
       ptstats->SetTextAlign(12);
+      ptstats->SetTextColor(dataColor);
       ptstats->SetFillColor(0);
       ptstats->SetOptStat(0);
       ptstats->SetOptFit(111);
@@ -847,6 +961,7 @@ namespace CR { // Namespace CR -- begin
       ptstatsS->SetName("Simulation");
       ptstatsS->SetBorderSize(2);
       ptstatsS->SetTextAlign(12);
+      ptstatsS->SetTextColor(simColor);
       ptstatsS->SetFillColor(0);
       ptstatsS->SetOptStat(0);
       ptstatsS->SetOptFit(111);
@@ -951,7 +1066,7 @@ namespace CR { // Namespace CR -- begin
           fitFuncS2D->SetParameter(0,1000);
           fitFuncS->SetFillStyle(0);
           fitFuncS->SetLineWidth(2);
-          fitFuncS->SetLineColor(4);  // 2 (red) for iron, 4 (blue) for proton
+          fitFuncS->SetLineColor(simColor);
 
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncS2D, "", "");
@@ -1044,7 +1159,7 @@ namespace CR { // Namespace CR -- begin
           fitFuncConeS2D->SetParameter(0,0);
           fitFuncConeS->SetFillStyle(0);
           fitFuncConeS->SetLineWidth(2);
-          fitFuncConeS->SetLineColor(4); // red (2) for iron, blue (4) for proton
+          fitFuncConeS->SetLineColor(simColor);
 
           cout << "------------------------------"<<endl;
           timePro2DSim->Fit(fitFuncConeS2D, "", "");
