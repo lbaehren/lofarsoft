@@ -227,7 +227,7 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
         assert minimum_dm_cutoff >= 0
         sifted_accelcands = [c for c in sifted_accelcands if c.DM >= minimum_dm_cutoff]        
  
-    if n_candidates_cutoff and len(sifted_candidates) > n_candidates_cutoff:
+    if n_candidates_cutoff:
         # We want an integer that is larger than 0 if a cutoff is specified.
         assert n_candidates_cutoff > 0 and (type(n_candidates_cutoff) == type(1))
         sifted_accelcands = sifted_accelcands[:n_candidates_cutoff]
