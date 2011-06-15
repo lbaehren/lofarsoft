@@ -35,6 +35,7 @@
 #include <TH2.h>
 #include "TPaveStats.h"
 #include "TAxis.h"
+#include "TStyle.h"
 
 #ifdef HAVE_STARTOOLS
 
@@ -87,7 +88,8 @@ namespace CR { // Namespace CR -- begin
                                                       const string& index1,
                                                       const string& index2,
                                                       const double& fitDistance,
-                                                      const bool& fitWithEta)
+                                                      const bool& fitWithEta,
+                                                      const double& energyError)
   {
     Record erg;
     try {
@@ -159,9 +161,9 @@ namespace CR { // Namespace CR -- begin
       if (ant != Nant)
         cerr << "lateralDistribution::fitLateralDistribution: Nant != number of antenna values\n" << endl;
 
-      Double_t fieldMax=3.5;
-      Double_t fieldMin=0;
-      Double_t maxdist=0;
+      double fieldMax=3.5;
+      double fieldMin=0;
+      double maxdist=0;
 
       // looking for extreme values for axes
       for (unsigned int i = 0; i < Nant; ++i) {
@@ -221,7 +223,7 @@ namespace CR { // Namespace CR -- begin
       label << "Lateral distribution - " << Gt;
       //latPro->SetTitle(label.str().c_str());
       latPro->SetTitle("");
-      latPro->GetXaxis()->SetTitle("distance R [m]");
+      latPro->GetXaxis()->SetTitle("axis distance d [m]");
       latPro->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
       latPro->GetXaxis()->SetTitleSize(0.05);
       latPro->GetXaxis()->SetLimits(minY,maxX);
@@ -261,29 +263,32 @@ namespace CR { // Namespace CR -- begin
       TPaveStats *ptstats = new TPaveStats(0.54,0.84,0.98,0.99,"brNDC");
       ptstats->SetName("Data");
       ptstats->SetBorderSize(2);
-      ptstats->SetTextAlign(12);
+      ptstats->SetTextAlign(11);
       ptstats->SetTextColor(dataColor);
       ptstats->SetFillColor(0);
       ptstats->SetOptStat(0);
-      ptstats->SetOptFit(111);
-      ptstats->Draw();
-      latPro->GetListOfFunctions()->Add(ptstats);
-      ptstats->SetParent(latPro->GetListOfFunctions());
+      // automatic statistics box does not work: does not display error of epsilon
+      //ptstats->SetOptFit(111);
+      //ptstats->SetFitFormat("4.3g");
+      //latPro->GetListOfFunctions()->Add(ptstats);
+      //ptstats->SetParent(latPro->GetListOfFunctions());
 
       /* statistic box of fit SIMULATIONS */
       TPaveStats *ptstatsS = new TPaveStats(0.54,0.69,0.98,0.84,"brNDC");
       ptstatsS->SetName("Simulation");
       ptstatsS->SetBorderSize(2);
-      ptstatsS->SetTextAlign(12);
+      ptstatsS->SetTextAlign(11);
       ptstatsS->SetTextColor(simColor);
       ptstatsS->SetFillColor(0);
       ptstatsS->SetOptStat(0);
-      ptstatsS->SetOptFit(111);
-      if (fitSim) {
-        ptstatsS->Draw();
-        latProSim->GetListOfFunctions()->Add(ptstatsS);
-        ptstatsS->SetParent(latProSim->GetListOfFunctions());
-      }
+      ptstatsS->SetOptFit(0);
+      // automatic statistics box does not work: does not display error of epsilon
+      //ptstatsS->SetOptFit(111);
+      //ptstatsS->SetFitFormat("4.3f");
+      //if (fitSim) {
+      //  latProSim->GetListOfFunctions()->Add(ptstatsS);
+      //  ptstatsS->SetParent(latProSim->GetListOfFunctions());
+      //}
 
       /* statistic box of EAS parameter */
       // TPaveStats *easstats = new TPaveStats(0.45,0.78,0.62,0.99,"brNDC");
@@ -304,7 +309,7 @@ namespace CR { // Namespace CR -- begin
       // label << "E_{g}  = " << energy;
       // text = easstats->AddText(label.str().c_str());
       label.str("");
-      label << "#phi   = ";
+      label << "#phi = ";
       label.setf(ios::showpoint);
       label.precision(4);
       label.width(5);
@@ -322,21 +327,27 @@ namespace CR { // Namespace CR -- begin
       /* Fit exponential decrease */
       // do fit only if there are at least 3 antennas (otherwise set parameters to 0)!
       string epsName;
-      string SlopeParameterName;
+      string slopeParameterName;
+      string slopeParameterUnit;
+      if (fitWithEta)
+        slopeParameterUnit = " m^{-1}";
+      else
+        slopeParameterUnit = " m";    
+        
       if (ant >= 3) {
         // define names for statistics
         if (index1 != "") {
-          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index1 + " [#muV/m/MHz]";
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} - " + index1;
           if (fitWithEta)
-            SlopeParameterName = "#eta- " + index1 + " [1/m]";
-          else  
-            SlopeParameterName = "R_{0}- " + index1 + " [m]";
+            slopeParameterName = "#eta - " + index1;
+          else
+            slopeParameterName = "R_{0} - " + index1;
         } else {
-          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} [#muV/m/MHz]";
-          if (fitWithEta)
-            SlopeParameterName = "#eta [1/m]";
+          epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}";
+          if (fitWithEta) 
+            slopeParameterName = "#eta";
           else  
-            SlopeParameterName = "R_{0} [m]";
+            slopeParameterName = "R_{0}";
         }
 
         // fit exponential
@@ -350,7 +361,7 @@ namespace CR { // Namespace CR -- begin
         //fitfuncExp=new TF1("fitfuncExp","[0]*exp(-(x-100)/[1])",50,190);
         fitfuncExp->SetParName(0,epsName.c_str());
         fitfuncExp->SetParameter(0,20);
-        fitfuncExp->SetParName(1,SlopeParameterName.c_str());
+        fitfuncExp->SetParName(1,slopeParameterName.c_str());
         if (fitWithEta)
           fitfuncExp->SetParameter(1,0.01);
         else
@@ -361,7 +372,31 @@ namespace CR { // Namespace CR -- begin
 
         cout << "------------------------------"<<endl;
         latPro->Fit(fitfuncExp, "R");
+        
+        // make statistics box
+        label.str("");
+        label << "#chi^{2} / ndf   = " << fitfuncExp->GetChisquare() << " / " << fitfuncExp->GetNDF();
+        TText *text = ptstats->AddText(label.str().c_str());
+        text->SetTextSize(0.038);
+        label.str("");
+        label << epsName << " = ";
+        label.setf(ios::showpoint);
+        label.precision(3);
+        label.width(5);
+        label << fitfuncExp->GetParameter(0) << " #pm " << fitfuncExp->GetParError(0) << " #muV/m/MHz";
+        text->SetTextSize(0.038);
+        text = ptstats->AddText(label.str().c_str());
+        label.str("");
+        label << slopeParameterName << " = ";
+        label.setf(ios::showpoint);
+        label.precision(3);
+        label.width(5);
+        label << fitfuncExp->GetParameter(1) << " #pm " << fitfuncExp->GetParError(1) << slopeParameterUnit;
+        text->SetTextSize(0.038);
+        text = ptstats->AddText(label.str().c_str());
+        text->SetTextSize(0.038);
         ptstats->Draw();
+        
 
         // write fit results to record with other results
         erg.define("eps",fitfuncExp->GetParameter(0));
@@ -390,25 +425,27 @@ namespace CR { // Namespace CR -- begin
         if (fitSim) {
           cout << "-------- SIMULATIONS ---------"<<endl;
           // define names for statistics
+          string epsNameS;
+          string slopeParameterNameS;
           if (index2 != "") {
-            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}- " + index2 + " [#muV/m/MHz]";
+            epsNameS = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "} - " + index2;
             if (fitWithEta)
-              SlopeParameterName = "#eta- " + index2 + " [1/m]";
+              slopeParameterNameS = "#eta - " + index2;
             else  
-              SlopeParameterName = "R_{0}- " + index2 + " [m]";
+              slopeParameterNameS = "R_{0} - " + index2;
           } else {
-            epsName = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}" + "} [#muV/m/MHz]";
+            epsNameS = "#epsilon_{"+ boost::lexical_cast<string>( round(fitDistance) ) + "}";
             if (fitWithEta)
-              SlopeParameterName = "#eta [1/m]";
+              slopeParameterNameS = "#eta";
             else  
-              SlopeParameterName = "R_{0} [m]";
+              slopeParameterNameS = "R_{0}";
           }
           TF1 *fitfuncExpS;
           fitfuncExpS=new TF1("fitfuncExpS",fitFunction.c_str(),0.,maxX);
           //fitfuncExpS=new TF1("fitfuncExpS","[0]*exp(-(x-100)/[1])",50,190);
-          fitfuncExpS->SetParName(0,epsName.c_str());
+          fitfuncExpS->SetParName(0,epsNameS.c_str());
           fitfuncExpS->SetParameter(0,20);
-          fitfuncExpS->SetParName(1,SlopeParameterName.c_str());
+          fitfuncExpS->SetParName(1,slopeParameterNameS.c_str());
           if (fitWithEta)
             fitfuncExpS->SetParameter(1,0.01);
           else
@@ -418,13 +455,36 @@ namespace CR { // Namespace CR -- begin
           fitfuncExpS->SetLineColor(simColor);
 
           latProSim->Fit(fitfuncExpS, "R");
+          
+          // make statistics box
+          label.str("");
+          label << "#chi^{2} / ndf   = " << fitfuncExpS->GetChisquare() << " / " << fitfuncExpS->GetNDF();
+          TText *text = ptstatsS->AddText(label.str().c_str());
+          text->SetTextSize(0.038);
+          label.str("");
+          label << epsNameS << " = ";
+          label.setf(ios::showpoint);
+          label.precision(3);
+          label.width(5);
+          label << fitfuncExpS->GetParameter(0) << " #pm " << fitfuncExpS->GetParError(0) << " #muV/m/MHz";
+          text->SetTextSize(0.038);
+          text = ptstatsS->AddText(label.str().c_str());
+          label.str("");
+          label << slopeParameterNameS << " = ";
+          label.setf(ios::showpoint);
+          label.precision(3);
+          label.width(5);
+          label << fitfuncExpS->GetParameter(1) << " #pm " << fitfuncExpS->GetParError(1) << slopeParameterUnit;
+          text->SetTextSize(0.038);
+          text = ptstatsS->AddText(label.str().c_str());
+          text->SetTextSize(0.038);
           ptstatsS->Draw();
           
           /* Uncertainty bands for data and simulations */
           // define shaded area
-          Int_t shadedRed = TColor::GetColor(255,175,175);
-          Int_t shadedBlue = TColor::GetColor(110,110,255);
-          Int_t shadedGray = TColor::GetColor(175,175,175);
+          int shadedRed = TColor::GetColor(255,175,175);
+          int shadedBlue = TColor::GetColor(110,110,255);
+          int shadedGray = TColor::GetColor(175,175,175);
           TGraph *errorBand = new TGraph(7);
           float minEvaldist = maxX*0.005;
           float maxEvaldist = maxX*0.995;
@@ -457,10 +517,11 @@ namespace CR { // Namespace CR -- begin
           }
           errorBand->SetPoint(6,minEvaldist,fitfuncExp->Eval(minEvaldist)*(1.-uncertainty));
           
+          errorBand->SetFillStyle(3463);
           errorBand->SetFillColor(shadedGray);
           
           errorBand->SetTitle("");
-          errorBand->GetXaxis()->SetTitle("distance R [m]"); 
+          errorBand->GetXaxis()->SetTitle("axis distance d [m]"); 
           errorBand->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
           errorBand->GetXaxis()->SetTitleSize(0.05);
           errorBand->GetXaxis()->SetLimits(minX,maxX);
@@ -475,36 +536,35 @@ namespace CR { // Namespace CR -- begin
             R0forBand = fitfuncExpS->GetParameter(1);
           epsForBand = fitfuncExpS->GetParameter(0);
           
-          // uncertainty band for 40% KASCADE energy uncertainty
-          uncertainty = 0.4;
-          errorBandS->SetPoint(0,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
+          // uncertainty band for KASCADE energy uncertainty (default = 40%)
+          errorBandS->SetPoint(0,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-energyError));
           // check if band touches upper left corner         
-          if (fitfuncExpS->Eval(minEvaldist)*(1.+uncertainty) > maxY) {
+          if (fitfuncExpS->Eval(minEvaldist)*(1.+energyError) > maxY) {
             errorBandS->SetPoint(1,minEvaldist,maxY);
-            errorBandS->SetPoint(2,fitDistance+R0forBand*log((1.+uncertainty)*epsForBand/maxY),maxY);
+            errorBandS->SetPoint(2,fitDistance+R0forBand*log((1.+energyError)*epsForBand/maxY),maxY);
           } else {
-            errorBandS->SetPoint(1,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
-            errorBandS->SetPoint(2,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.+uncertainty));
+            errorBandS->SetPoint(1,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-energyError));
+            errorBandS->SetPoint(2,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.+energyError));
           }
           // check if error band touches lower right corner
-          errorBandS->SetPoint(3,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+uncertainty));
-          if (fitfuncExpS->Eval(maxEvaldist)*(1.-uncertainty) < minY) {
+          errorBandS->SetPoint(3,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+energyError));
+          if (fitfuncExpS->Eval(maxEvaldist)*(1.-energyError) < minY) {
             errorBandS->SetPoint(4,maxEvaldist,minY);
-            errorBandS->SetPoint(5,fitDistance+R0forBand*log((1.-uncertainty)*epsForBand/minY),minY);            
+            errorBandS->SetPoint(5,fitDistance+R0forBand*log((1.-energyError)*epsForBand/minY),minY);            
           } else {
-            errorBandS->SetPoint(4,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+uncertainty));
-            errorBandS->SetPoint(5,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.-uncertainty));
+            errorBandS->SetPoint(4,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.+energyError));
+            errorBandS->SetPoint(5,maxEvaldist,fitfuncExpS->Eval(maxEvaldist)*(1.-energyError));
           }
-          errorBandS->SetPoint(6,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-uncertainty));
+          errorBandS->SetPoint(6,minEvaldist,fitfuncExpS->Eval(minEvaldist)*(1.-energyError));
           
-          errorBandS->SetFillStyle(3344);
+          errorBandS->SetFillStyle(3436);
           if (simColor == kBlue)
             errorBandS->SetFillColor(shadedBlue); // for proton
           else  
             errorBandS->SetFillColor(shadedRed); // for iron
              
           errorBandS->SetTitle("");
-          errorBandS->GetXaxis()->SetTitle("distance R [m]"); 
+          errorBandS->GetXaxis()->SetTitle("axis distance d [m]"); 
           errorBandS->GetYaxis()->SetTitle("field strength #epsilon [#muV/m/MHz]");
           errorBandS->GetXaxis()->SetTitleSize(0.05);
           errorBandS->GetXaxis()->SetLimits(minX,maxX);
@@ -758,14 +818,14 @@ namespace CR { // Namespace CR -- begin
 
       // create arrays for plotting and fitting
       unsigned int Nant = pulsesRec.size();
-      Double_t timeVal  [Nant], distance  [Nant]; // time value at antenna position projected to shower plane
-      Double_t timeValEr[Nant], distanceEr[Nant];
-      Double_t timeValUnpro  [Nant], timeValUnproEr [Nant]; // time values at antenna positions
-      Double_t zshower[Nant],  zshowerEr[Nant];             // z shower coordinate of antenna position
-      Double_t timeValSim  [Nant], distanceSim  [Nant];
-      Double_t timeValErSim[Nant], distanceErSim[Nant];
-      Double_t timeValUnproSim[Nant], timeValUnproErSim [Nant];
-      Double_t zshowerSim[Nant], zshowerErSim[Nant];
+      double timeVal  [Nant], distance  [Nant]; // time value at antenna position projected to shower plane
+      double timeValEr[Nant], distanceEr[Nant];
+      double timeValUnpro  [Nant], timeValUnproEr [Nant]; // time values at antenna positions
+      double zshower[Nant],  zshowerEr[Nant];             // z shower coordinate of antenna position
+      double timeValSim  [Nant], distanceSim  [Nant];
+      double timeValErSim[Nant], distanceErSim[Nant];
+      double timeValUnproSim[Nant], timeValUnproErSim [Nant];
+      double zshowerSim[Nant], zshowerErSim[Nant];
       int antennaNumber [Nant];
       int antID         [Nant];
 
@@ -825,19 +885,19 @@ namespace CR { // Namespace CR -- begin
         cerr << "lateralDistribution::lateralTimeDistribution: Nant != number of antenna values\n" << endl;
 
       // find plot/fit range
-      Double_t timeMax=0;
-      Double_t timeMin=0;
-      Double_t maxdist=0;
-      Double_t mindist=0;
+      double timeMax=0;
+      double timeMin=0;
+      double maxdist=0;
+      double mindist=0;
       timeMin = *min_element(timeVal, timeVal + Nant);
       timeMax = *max_element(timeVal, timeVal + Nant);
       mindist = *min_element(distance, distance + Nant);
       maxdist = *max_element(distance, distance + Nant);
       if (fitSim) {
-        Double_t timeMaxSim=0;
-        Double_t timeMinSim=0;
-        Double_t maxdistSim=0;
-        Double_t mindistSim=0;
+        double timeMaxSim=0;
+        double timeMinSim=0;
+        double maxdistSim=0;
+        double mindistSim=0;
         timeMinSim = *min_element(timeValSim, timeValSim + Nant);
         timeMaxSim = *max_element(timeValSim, timeValSim + Nant);
         mindistSim = *min_element(distanceSim, distanceSim + Nant);
@@ -887,7 +947,7 @@ namespace CR { // Namespace CR -- begin
       label << "radius of curvature - " << Gt;
       //timePro->SetTitle(label.str().c_str());
       timePro->SetTitle("");
-      timePro->GetXaxis()->SetTitle("distance R [m]");
+      timePro->GetXaxis()->SetTitle("axis distance d [m]");
       timePro->GetYaxis()->SetTitle("time t [ns]");
       timePro->GetXaxis()->SetTitleSize(0.05);
       timePro->GetYaxis()->SetTitleSize(0.05);
@@ -902,7 +962,7 @@ namespace CR { // Namespace CR -- begin
       timePro2D->SetMarkerStyle(kFullCircle);
       timePro2D->SetMarkerSize(1.1);
       timePro2D->SetTitle("");
-      timePro2D->GetXaxis()->SetTitle("distance R [m]");
+      timePro2D->GetXaxis()->SetTitle("axis distance d [m]");
       timePro2D->GetYaxis()->SetTitle("z_shower [m]");
       timePro2D->GetZaxis()->SetTitle("time t [ns]");
       timePro2D->GetXaxis()->SetTitleSize(0.05);

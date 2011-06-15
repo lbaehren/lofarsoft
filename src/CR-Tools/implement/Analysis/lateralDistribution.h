@@ -75,9 +75,9 @@ namespace CR { // Namespace CR -- begin
     //! Time window cut for lateral distribution (pulse time must be close to cc-beam center)
     double lateralTimeCut;
     //! Color for measured data
-    Color_t dataColor;
+    int dataColor;
     //! Color for simulations
-    Color_t simColor;
+    int simColor;
     
   public:
 
@@ -176,7 +176,7 @@ namespace CR { // Namespace CR -- begin
 
       \return dataColor
     */
-    inline Color_t getDataColor () {
+    inline int getDataColor () {
        return dataColor;
     }
 
@@ -185,7 +185,7 @@ namespace CR { // Namespace CR -- begin
 
       \param dataColor
     */
-    inline void setDataColor (Color_t const &newDataColor) {
+    inline void setDataColor (int const &newDataColor) {
       dataColor = newDataColor;
     }
 
@@ -195,7 +195,7 @@ namespace CR { // Namespace CR -- begin
 
       \return simColor
     */
-    inline Color_t getSimColor () {
+    inline int getSimColor () {
        return simColor;
     }
 
@@ -204,7 +204,7 @@ namespace CR { // Namespace CR -- begin
 
       \param simColor
     */
-    inline void setSimColor (Color_t const &newSimColor) {
+    inline void setSimColor (int const &newSimColor) {
       simColor = newSimColor;
     }
 
@@ -224,6 +224,7 @@ namespace CR { // Namespace CR -- begin
        \param index2      - index for statistics box
        \param fitDistance - distance at which the fit will be done (e.g., 0 for epsilon 0)
        \param fitWithEta  - do LDF fit with eta=1/R_0 instead of R_0
+       \param energyError - energy uncertainty of KASCADE-Grande (to plot error band for simulations)
     */
 
     Record fitLateralDistribution (const string& filePrefix,
@@ -233,7 +234,8 @@ namespace CR { // Namespace CR -- begin
                                    const string& index1 = "",
                                    const string& index2 = "2",
                                    const double& fitDistance = 100,
-                                   const bool& fitWithEta = true );
+                                   const bool& fitWithEta = true,
+                                   const double& energyError = 0.4);
                                      
     /*!
        \brief Plots lateral distribution of pulse arrival times

@@ -88,7 +88,7 @@ const static bool simulationDistances = true;      // decide wether to use the l
 const static bool onlyEW = true;                   // plot only EW polarization
 const static bool lateralFitWithEta = true;        // do LDF fit with eta = 1/R_0 instead of R_0
 
-Color_t simColor = kBlue;                          // simulation color: proton = blue (4), iron = red (2)
+int simColor = kBlue;                          // simulation color: proton = blue (4), iron = red (2)
 const static bool automaticSwitchIronColor = true; // switches color to red, if simulations path contains _i_
 
 const static double gradeg=(180./TMath::Pi());
@@ -309,23 +309,23 @@ int main (int argc, char *argv[])
     PulseProperties* antPulses2[totAntenna];  // for eventual second root file
 
     unsigned int Gt = 0;
-    float_t Az = 0, Ze = 0, Xc = 0, Yc = 0;                 // KASCADE direction and core
-    float_t Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;             // Grande direction and core
-    float_t Size = 0, Sizeg = 0;                            // Electron numbers (KASCADE + Grande)
-    float_t Age = 0, Ageg = 0;                              // Age parameter
-    float_t Nmu = 0, Lmuo = 0, Sizmg = 0;                   // Muon number, trucated muon number (KASCADE), Muon number (Grande)
-    double_t lgE = 0, err_lgE = 0;                          // estimated energy (KASCADE)
-    double_t lgEg = 0, err_lgEg = 0;                        // estimated energy (Grande)
-    double_t lnA = 0, err_lnA = 0;                          // estimated mass A (KASCADE)
-    double_t lnAg = 0, err_lnAg = 0;                        // estimated mass A (Grande)
-    double_t kappaMario = 0, lgEMario = 0;                  // mass and energy by Mario's formula
-    double_t err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
-    double_t err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
-    double_t err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
-    double_t geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
+    float Az = 0, Ze = 0, Xc = 0, Yc = 0;                 // KASCADE direction and core
+    float Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;             // Grande direction and core
+    float Size = 0, Sizeg = 0;                            // Electron numbers (KASCADE + Grande)
+    float Age = 0, Ageg = 0;                              // Age parameter
+    float Nmu = 0, Lmuo = 0, Sizmg = 0;                   // Muon number, trucated muon number (KASCADE), Muon number (Grande)
+    double lgE = 0, err_lgE = 0;                          // estimated energy (KASCADE)
+    double lgEg = 0, err_lgEg = 0;                        // estimated energy (Grande)
+    double lnA = 0, err_lnA = 0;                          // estimated mass A (KASCADE)
+    double lnAg = 0, err_lnAg = 0;                        // estimated mass A (Grande)
+    double kappaMario = 0, lgEMario = 0;                  // mass and energy by Mario's formula
+    double err_core = 0, err_coreg = 0;                   // error of core position (KASCADE + Grande)
+    double err_Az = 0, err_Azg = 0;                       // error of azimuth (KASCADE + Grande)
+    double err_Ze = 0, err_Zeg = 0;                       // error of zenith (KASCADE + Grande)
+    double geomag_angle = 0, geomag_angleg = 0;           // geomagnetic angle (KASCADE + Grande)
     char KRETAver[1024] = "unknown";
-    double_t EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
-    double_t EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min    
+    double EfieldMaxAbs = 0;                              // maximum of the absolute e-field strength around +/- 15 min
+    double EfieldAvgAbs = 0;                              // average of the absolute e-field strength around +/- 15 min    
     char reconstruction = 0;                                // A = KASCADE reconstruction taken, G = Grande reconstruction taken
     bool hasNS = false;                                     // is set to true, if root file contains NS information
     bool hasVE = false;                                     // is set to true, if root file contains VE information
@@ -1216,6 +1216,13 @@ int main (int argc, char *argv[])
         if (simPath.find("_i_")!=string::npos)
           lateralFitter.setSimColor(kRed);
       }
+      // determine energy uncertainty for error band for simulations
+      double energyUncertainty = 0;
+      if (reconstruction=='A')
+        energyUncertainty = pow(10.,err_lgE)-1.;
+      else  
+        energyUncertainty = pow(10.,err_lgEg)-1.;
+      
       string plotPrefix = "";
 
       if(m_recEW.size()>=4) {        
@@ -1227,7 +1234,8 @@ int main (int argc, char *argv[])
                                                             m_recEW,m_simEW,
                                                             Gt,AzL,90.-ElL,
                                                             index1, index2,
-                                                            100, lateralFitWithEta);
+                                                            100, lateralFitWithEta,
+                                                            energyUncertainty);
         eps_EW = ergEW.asDouble("eps");
         sigeps_EW = ergEW.asDouble("sigeps");
         R_0_EW = ergEW.asDouble("R_0");
@@ -1292,7 +1300,8 @@ int main (int argc, char *argv[])
                                                             m_recNS,m_simNS,
                                                             Gt,AzL,90.-ElL,
                                                             index1, index2,
-                                                            100, lateralFitWithEta);
+                                                            100, lateralFitWithEta,
+                                                            energyUncertainty);
         eps_NS = ergNS.asDouble("eps");
         sigeps_NS = ergNS.asDouble("sigeps");
         R_0_NS = ergNS.asDouble("R_0");
