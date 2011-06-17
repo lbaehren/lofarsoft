@@ -120,22 +120,23 @@ class WrapperBlock():
 
     # ______________________________________________________________________
     #                                                         Initialisation
-    def __init__(self, file_ptr, deffile_ptr, pydocfile_ptr, options):
+    def __init__(self, file_ptr, deffile_ptr, pydocfile_ptr, ifdef_list, options):
         """
         Initialisation of the wrapper block.
 
-        ========== ===================================================
-        *file_ptr* File object for output file
-        *file_ptr* File object for wrapper definition file
-        *file_ptr* File object for python function documentation file
-        *options*  Processing options.
-        ========== ===================================================
-
+        ============= ===================================================
+        *file_ptr*    File object for output file
+        *file_ptr*    File object for wrapper definition file
+        *file_ptr*    File object for python function documentation file
+        *ifdef_list*  Ifdef preprocessor list
+        *options*     Processing options.
+        ============= ===================================================
         """
         self._file = file_ptr
         self._deffile = deffile_ptr
         self._pydocfile = pydocfile_ptr
         self._lines = []
+        self._ifdef_list = ifdef_list
 
         self.doc = DocumentationBlock(file_ptr)
         self.inDoc = False
@@ -233,6 +234,7 @@ class WrapperBlock():
         Parse the wrapper block for output to file.
         """
         inDoc = False
+        inHeader = False
 
         sphinxDoc = "" # Disabled writing of sphinxDoc in cc files
         pythonDocStatements = self.doc.getPythonDocStatements()
@@ -255,6 +257,11 @@ class WrapperBlock():
                 if (m is not None):
                     if (self._deffile is not None):
                         inHeader = True
+                        # Start ifdef-preproc statements
+                        if (self._ifdef_list):
+                            for ifdef in self._ifdef_list:
+                                ifdef_statement = "#ifdef " + ifdef + "\n"
+                                self._deffile.write(ifdef_statement)
                         continue
                     else:
                         raise ParserError("No open definition file.")
@@ -275,7 +282,15 @@ class WrapperBlock():
                     self._file.write("/*!\n" + doxDoc + "\n*/\n")
                     self._pydocfile.write(pythonDocStatements + "\n\n")
                     # Add separator in definition file
-                    self._deffile.write("#include \"hfppnew-generatewrappers.def\"\n\n")
+                    self._deffile.write("#include \"hfppnew-generatewrappers.def\"\n")
+                    # End ifdef-preproc statements
+                    if (self._ifdef_list):
+                        self._ifdef_list.reverse()
+                        for ifdef in self._ifdef_list:
+                            endif_statement = "#endif /* " + ifdef + " */\n"
+                            self._deffile.write(endif_statement)
+                        self._ifdef_list.reverse()
+                    self._deffile.write("\n")
                     continue
 
                 self._file.write(line)
@@ -860,6 +875,7 @@ def parseFile(input_filename, output_filename, options):
 
     iterator_block = None
     wrapper_block = None
+    ifdef_list = []
 
     header_rule = "="*80
     header_text = "ATTENTION: DON'T EDIT THIS FILE!!! IT IS GENERATED AUTOMATICALLY BY crtools_code_parser.py"
@@ -911,6 +927,16 @@ def parseFile(input_filename, output_filename, options):
                 def_file.write("// " + header_rule + "\n\n")
             continue
 
+        # Check ifdef
+        m = re.match("^#ifdef (.*)", line)
+        if (m):
+            ifdef_list.append(m.group(1))
+
+        # Check endif
+        m = re.match("^#endif (.*)", line)
+        if (m):
+            ifdef_list.pop()
+
         # Check docstring
         m = re.match('^\/\/\$DOCSTRING: (.*)',line)
         if (m):
@@ -938,7 +964,7 @@ def parseFile(input_filename, output_filename, options):
         # Check wrapper block (start)
         m = re.match("^\/\/\$COPY_TO HFILE START", line)
         if (m):
-            wrapper_block = WrapperBlock(output_file, def_file, pydoc_file, options)  # Create block
+            wrapper_block = WrapperBlock(output_file, def_file, pydoc_file, ifdef_list, options)  # Create block
             wrapper_block.addLine(line)
             wrapper_block.doc.setSummary(docstring)         # Set document summary
             continue
