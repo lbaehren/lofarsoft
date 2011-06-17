@@ -584,6 +584,8 @@ int main (int argc, char *argv[])
       outtree->Branch("chi2NDF_EW",&chi2NDF_EW,"chi2NDF_EW/D");
       outtree->Branch("R_0_sim_EW",&R_0_sim_EW,"R_0_sim_EW/D");
       outtree->Branch("sigR_0_sim_EW",&sigR_0_sim_EW,"sigR_0_sim_EW/D");
+      outtree->Branch("eta_sim_EW",&eta_sim_EW,"eta_sim_EW/D");
+      outtree->Branch("sigeta_sim_EW",&sigeta_sim_EW,"sigeta_sim_EW/D");
       outtree->Branch("eps_sim_EW",&eps_sim_EW,"eps_sim_EW/D");
       outtree->Branch("sigeps_sim_EW",&sigeps_sim_EW,"sigeps_sim_EW/D");
       outtree->Branch("chi2NDF_sim_EW",&chi2NDF_sim_EW,"chi2NDF_sim_EW/D");
@@ -687,6 +689,8 @@ int main (int argc, char *argv[])
       outtree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
       outtree->Branch("R_0_sim_NS",&R_0_sim_NS,"R_0_sim_NS/D");
       outtree->Branch("sigR_0_sim_NS",&sigR_0_sim_NS,"sigR_0_sim_NS/D");
+      outtree->Branch("eta_sim_NS",&eta_sim_NS,"eta_sim_NS/D");
+      outtree->Branch("sigeta_sim_NS",&sigeta_sim_NS,"sigeta_sim_NS/D");
       outtree->Branch("eps_sim_NS",&eps_sim_NS,"eps_sim_NS/D");
       outtree->Branch("sigeps_sim_NS",&sigeps_sim_NS,"sigeps_sim_NS/D");
       outtree->Branch("chi2NDF_sim_NS",&chi2NDF_sim_NS,"chi2NDF_sim_NS/D");
@@ -790,6 +794,8 @@ int main (int argc, char *argv[])
       outtree->Branch("chi2NDF_VE",&chi2NDF_VE,"chi2NDF_VE/D");
       outtree->Branch("R_0_sim_VE",&R_0_sim_VE,"R_0_sim_VE/D");
       outtree->Branch("sigR_0_sim_VE",&sigR_0_sim_VE,"sigR_0_sim_VE/D");
+      outtree->Branch("eta_sim_VE",&eta_sim_VE,"eta_sim_VE/D");
+      outtree->Branch("sigeta_sim_VE",&sigeta_sim_VE,"sigeta_sim_VE/D");
       outtree->Branch("eps_sim_VE",&eps_sim_VE,"eps_sim_VE/D");
       outtree->Branch("sigeps_sim_VE",&sigeps_sim_VE,"sigeps_sim_VE/D");
       outtree->Branch("chi2NDF_sim_VE",&chi2NDF_sim_VE,"chi2NDF_sim_VE/D");
@@ -1245,8 +1251,10 @@ int main (int argc, char *argv[])
         chi2NDF_EW = ergEW.asDouble("chi2NDF");
         eps_sim_EW = ergEW.asDouble("eps_sim");
         R_0_sim_EW = ergEW.asDouble("R_0_sim");
+        eta_sim_EW = ergEW.asDouble("eta_sim");
         sigeps_sim_EW = ergEW.asDouble("sigeps_sim");
         sigR_0_sim_EW = ergEW.asDouble("sigR_0_sim");
+        sigeta_sim_EW = ergEW.asDouble("sigeta_sim");
         chi2NDF_sim_EW = ergEW.asDouble("chi2NDF_sim");
         
         //write info of the fit into file
@@ -1311,8 +1319,10 @@ int main (int argc, char *argv[])
         chi2NDF_NS = ergNS.asDouble("chi2NDF");
         eps_sim_NS = ergNS.asDouble("eps_sim");
         R_0_sim_NS = ergNS.asDouble("R_0_sim");
+        eta_sim_NS = ergNS.asDouble("eta_sim");
         sigeps_sim_NS = ergNS.asDouble("sigeps_sim");
         sigR_0_sim_NS = ergNS.asDouble("sigR_0_sim");
+        sigeta_sim_NS = ergNS.asDouble("sigeta_sim");
         chi2NDF_sim_NS = ergNS.asDouble("chi2NDF_sim");
 
         //write info of the fit into file
