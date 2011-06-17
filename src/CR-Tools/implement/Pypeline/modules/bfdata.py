@@ -1049,6 +1049,7 @@ def get_parameters_new(obsid, useFilename=False):
     subcluster["lse024"]="sub8"
 
     names=[]
+    fullnames=[]
     datatype=[]
 
     if parameters["coherentstokes"]:
@@ -1063,17 +1064,26 @@ def get_parameters_new(obsid, useFilename=False):
             nrpernode+=1
         storNr=0
         storThreshold=nrpernode
-        for b in range(parameters["nrstations"]):
-            if b>=storThreshold:
-                storNr+=1
-                storThreshold+=nrpernode
-            node=parameters["storagenodes"][storNr]
+        if "namemask" in parameters.keys():
             mask=parameters["namemask"].strip('.MS')
-            name='/net/'+subcluster[node]+'/'+node
-            name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
-            for pol in range(nrpol):
-                name2=name+'_S'+str(pol)+'_P000_bf.raw'
-                names.append(name2)
+            for b in range(parameters["nrstations"]):
+                if b>=storThreshold:
+                    storNr+=1
+                    storThreshold+=nrpernode
+                node=parameters["storagenodes"][storNr]
+                name='/net/'+subcluster[node]+'/'+node
+                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
+                for pol in range(nrpol):
+                    name2=name+'_S'+str(pol)+'_P000_bf.raw'
+                    names.append(name2)
+        elif "Observation.DataProducts.Output_CoherentStokes.filenames" in allparameters.keys():
+             DPprefix="Observation.DataProducts.Output_CoherentStokes."
+             DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
+             DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
+             DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
+             for num,name in enumerate(DPfilenames):
+                 names.append(DPdir+name)
+                 fullnames.append(DPfulldir[num%len(DPfulldir)]+name)
 
 
 
@@ -1093,9 +1103,12 @@ def get_parameters_new(obsid, useFilename=False):
             elif "Observation.DataProducts.Output_IncoherentStokes.filenames" in allparameters.keys():
                  DPprefix="Observation.DataProducts.Output_IncoherentStokes."
                  DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
-                 DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1]
-                 for name in DPfilenames:
+                 DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
+                 DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
+                 for num,name in enumerate(DPfilenames):
                      names.append(DPdir+name)
+                     fullnames.append(DPfulldir[num%len(DPfulldir)]+name)
+
     if parameters["beamformeddata"]:
         sb=0
         nrbeams=1
@@ -1138,6 +1151,7 @@ def get_parameters_new(obsid, useFilename=False):
                 sb+=1
 
     parameters["files"]=names
+    parameters["locations"]=fullnames
 
     # Get beams information
     nrbeams=int(allparameters["Observation.nrBeams"])
