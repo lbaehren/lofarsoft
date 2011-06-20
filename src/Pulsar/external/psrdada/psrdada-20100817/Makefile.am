@@ -7,5 +7,5 @@ if COMPILE_THIRD
 SUBDIRS += 3rdparty
 endif
 
-SUBDIRS	+= src web scripts config apsr bpsr caspsr gmrt
+SUBDIRS	+= src web scripts config caspsr gmrt
 
