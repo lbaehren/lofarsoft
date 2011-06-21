@@ -1169,11 +1169,13 @@ hArray_Find_functions={
     "<":(hCountLessThan,hFindLessThan),
     ">=":(hCountGreaterEqual,hFindGreaterEqual),
     "<=":(hCountLessEqual,hFindLessEqual),
+    "even":(hCountEven,hFindEven),
+    "odd":(hCountOdd,hFindOdd),
     "between":(hCountBetween,hFindBetween),
     "outside":(hCountOutside,hFindOutside)
     }
 
-def hArray_Find(self,operator,threshold1,threshold2=None):
+def hArray_Find(self,operator,threshold1=None,threshold2=None):
     """
     Usage:
 
@@ -1185,11 +1187,13 @@ def hArray_Find(self,operator,threshold1,threshold2=None):
     return a vector with zero-based indices pointing to the locations
     in the vector/array where the imposed criterion is true.
 
-    *operator* = '=','>','<','>=','<=','between','outside'
+    *operator* = '=','>','<','>=','<=','between','outside','even','odd'
 
-    *threshold1* = the threshold to compare vector values with
+    *threshold1* = the threshold to compare vector values with (for  '=','>','<','>=','<=')
 
     *threshold2* = the second threshold if applicable (for between, outside)
+
+    'even','odd' don't take any additional argument.
 
     Example::
 
@@ -1197,15 +1201,27 @@ def hArray_Find(self,operator,threshold1,threshold2=None):
         >>> v.Find(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
 
     """
-    n=hArray_Find_functions[operator][0](self,threshold1) if threshold2==None else hArray_Find_functions["operator"][0](self,threshold1,threshold2)
+    #Find how many elements satisfy condition
+    if threshold1 == None:
+        n = hArray_Find_functions[operator][0](self)
+    elif threshold2 == None:
+        n = hArray_Find_functions[operator][0](self,threshold1)
+    else:
+        n = hArray_Find_functions["operator"][0](self,threshold1,threshold2)
+
+    #Now create a fitting vector or hArray with the right size
     if type(self) in hAllVectorTypes:
         indexlist=Vector(int,n)
     elif type(self) in hAllArrayTypes:
         indexlist=hArray(int,[n[-1]])
     else:
         return None
-    if threshold2==None:
-        n=hArray_Find_functions[operator][1](indexlist,self,threshold1)
+
+    #Search and return the respective element indices
+    if threshold1 == None:
+        hArray_Find_functions[operator][1](indexlist,self)
+    elif threshold2 == None:
+        hArray_Find_functions[operator][1](indexlist,self,threshold1)
     else:
         hArray_Find_functions[operator][1](indexlist,self,threshold1,threshold2)
     return indexlist
@@ -1223,11 +1239,13 @@ def hArray_Select(self,*args,**kwargs):
     which fulfill the search criterion (i.e. to be equal, or
     above/below a threshold value).
 
-    *operator* = '=','>','<','>=','<=','between','outside'
+    *operator* = '=','>','<','>=','<=','between','outside','even','odd'
 
-    *threshold1* = the threshold to compare vector values with
+    *threshold1* = the threshold to compare vector values with (for  '=','>','<','>=','<=')
 
     *threshold2* = the second threshold if applicable (for between, outside)
+
+    'even','odd' don't take any additional argument.
 
     See also:
 
@@ -1237,6 +1255,11 @@ def hArray_Select(self,*args,**kwargs):
 
         v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
         v.Select(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
+
+        a=hArray(['0','1','2']); a.Select("odd") -> '1'
+
+        a=hArray(['0','1','2']); a.Select("even") -> ['0','2']
+
     """
     return self[self.Find(*args,**kwargs)]
 
@@ -1310,3 +1333,9 @@ for v in hNumericalContainerTypes:
     for s in hNumericalContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+
+for v in hNumericalAndStringContainerTypes:
+    for s in hNumericalAndStringContainerMethods:
+        if s in locals(): setattr(v,s[1:].lower(),eval(s))
+        else: print "Warning hNumericalAndStringContainerTypes(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+

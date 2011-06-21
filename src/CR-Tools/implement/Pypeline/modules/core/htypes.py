@@ -16,6 +16,7 @@ hBaseNamesPy=["int","float","complex","bool","str"]
 hRealTypes=[int,float]
 hComplexTypes=[complex]
 hNumericalTypes=hRealTypes+hComplexTypes
+hNumericalAndStringTypes=hNumericalTypes+[str]
 hOtherTypes=[bool,str]
 
 #------------------------------------------------------------
@@ -107,16 +108,19 @@ def typename(btype):
 hRealVectorTypes=map(lambda t:hVectorTypeDictionary[t],hRealTypes)
 hComplexVectorTypes=map(lambda t:hVectorTypeDictionary[t],hComplexTypes)
 hNumericalVectorTypes=map(lambda t:hVectorTypeDictionary[t],hNumericalTypes)
+hNumericalAndStringVectorTypes=map(lambda t:hVectorTypeDictionary[t],hNumericalAndStringTypes)
 hOtherVectorTypes=map(lambda t:hVectorTypeDictionary[t],hOtherTypes)
 
 hRealArrayTypes=map(lambda t:hArrayTypeDictionary[t],hRealTypes)
 hComplexArrayTypes=map(lambda t:hArrayTypeDictionary[t],hComplexTypes)
 hNumericalArrayTypes=map(lambda t:hArrayTypeDictionary[t],hNumericalTypes)
+hNumericalAndStringArrayTypes=map(lambda t:hArrayTypeDictionary[t],hNumericalAndStringTypes)
 hOtherArrayTypes=map(lambda t:hArrayTypeDictionary[t],hOtherTypes)
 
 hRealContainerTypes=hRealVectorTypes+hRealArrayTypes
 hComplexContainerTypes=hComplexVectorTypes+hComplexArrayTypes
 hNumericalContainerTypes=hNumericalVectorTypes+hNumericalArrayTypes
+hNumericalAndStringContainerTypes=hNumericalAndStringVectorTypes+hNumericalAndStringArrayTypes
 hOtherContainerTypes=hOtherVectorTypes+hOtherArrayTypes
 hAllContainerTypes=hAllVectorTypes+hAllArrayTypes
 
@@ -137,3 +141,6 @@ hRealContainerMethods = ["hMeanAbove","hMeanSquare","hMeanThreshold","hMeanInver
 hComplexContainerMethods = ["hConj","hCrossCorrelateComplex","hFFTCasa","hInvFFTw","hSaveInvFFTw","hFFTw","hShiftFFT","hNyquistSwap","hPhaseToComplex","hAmplitudePhaseToComplex","hSetAmplitude","hRandomizePhase","hDoubleFFT","hDoubleFFT1","hDoubleFFT2","hDoubleFFTPhaseMul","hDoubleFFTPhase"]
 
 hNumericalContainerMethods = ["hInverse","hNegate","hMean","hMeanAbs","hStdDev","hMinStdDev","hMinStdDevBlock","hStdDevBelow","hStdDevAbove","hFillRange","hFillRangeVec","hAbs","hMax","hMaxPos","hMin","hMinPos","hConvert","hConvertResize","hMul","hDiv","hSub","hAdd","hMulTo","hDivTo","hSubTo","hAddTo","hMulAdd","hDivAdd","hSubAdd","hAddAdd","hArg","hImag","hNorm","hReal","hCos","hCosh","hExp","hLog","hLog10","hLogSave","hSqrtAbs","hSin","hSinh","hSqrt","hSquare","hTan","hTanh","hSum","hSumAbs","hSumSquare","hMulSum","hDiffSum","hDiffSquaredSum","hMeanDiffSquaredSum","hChiSquared","hMeanChiSquared","hRandom","hRandomizePeaks","hSortMedian","hMedian","hFindLowerBound","hCrossProduct","hFmod","hMulAdd2","hDivAdd2","hSubAdd2","hAddAdd2","hMulAddSum","hDivAddSum","hSubAddSum","hAddAddSum","hMulSelf","hDivSelf","hSubSelf","hAddSelf","hMulVec","hDivVec","hSubVec","hAddVec","hSquareAdd","hFindGreaterThan","hFindGreaterEqual","hFindLessThan","hFindLessEqual","hFindGreaterThanVec","hFindGreaterEqualVec","hFindLessThanVec","hFindLessEqualVec","hFindGreaterThanAbs","hFindGreaterEqualAbs","hFindLessThanAbs","hFindLessEqualAbs","hCountGreaterThan","hCountGreaterEqual","hCountGreaterThanAbs","hCountGreaterEqualAbs","hCountLessThan","hCountLessEqual","hCountLessThanAbs","hCountLessEqualAbs","hCountBetween","hCountBetweenOrEqual","hCountOutside","hCountOutsideOrEqual","hFindBetween","hFindBetweenOrEqual","hFindOutside","hFindOutsideOrEqual","hFindSequenceGreaterThan","hFindSequenceGreaterEqual","hFindSequenceLessThan","hFindSequenceLessEqual","hFindSequenceBetween","hFindSequenceBetweenOrEqual","hFindSequenceOutside","hFindSequenceOutsideOrEqual","hMaxInSequences","hMinInSequences","hSumInSequences","hMeanInSequences","hStdDevInSequences"]
+
+hNumericalAndStringContainerMethods = ["hFindEven","hCountEven","hFindOdd","hCountOdd"]
+

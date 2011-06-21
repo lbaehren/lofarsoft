@@ -1,6 +1,19 @@
 2011-05-27
 ==========
 
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- Added :func:`hFindOdd`, :func:`hFindEven`,
+  :func:`hCountOdd`,:func:`hCountEven`
+- Note that those functions also accept arrays of strings as input (which then
+  get converted to integers)
+- adapted array.Select to take "odd" and "even" as operator
+- tbb.py also accepts hArrays as input to select antennas and you can
+  simply say "odd" or "even"
+
+2011-05-27
+==========
+
   :Author: Martin van den Akker <martinva@astro.ru.nl>
 
 - Added pycrtools configuration to CMake.

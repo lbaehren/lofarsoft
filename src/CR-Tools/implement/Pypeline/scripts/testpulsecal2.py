@@ -11,8 +11,8 @@ evenantennas=["017000000","017000003","017000004","017000006","017001008","01700
 
 oddantennas=["017000001","017000002","017000005","017000007","017001009","017001010","017001012","017001015","017002017","017002019","017002020","017002023","017003025","017003026","017003029","017003031","017004033","017004035","017004037","017004039","017005041","017005043","017005045","017005047","017006049","017006051","017006053","017006055","017007057","017007059","017007061","017007063","017008065","017008066","017008069","017008071","017009073","017009075","017009077","017009079","017010081","017010083","017010085","017010087","017011089","017011091","017011093","017011095"]
 
-#file["SELECTED_DIPOLES"]=oddantennas
-file["SELECTED_DIPOLES"]=evenantennas
+file["SELECTED_DIPOLES"]=oddantennas
+#file["SELECTED_DIPOLES"]=evenantennas
 timeseries_data=file["TIMESERIES_DATA"]
 positions=file["ANTENNA_POSITIONS"]
 
@@ -30,16 +30,24 @@ pulse.timeseries_data_cut[...]-=pulse.timeseries_data_cut[...].mean()
 pulse.timeseries_data_cut[...]/=pulse.timeseries_data_cut[...].stddev(0)
 
 #Cross correlate all pulses with each other 
-crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=5)
+crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=20)
+
+## Have the suspicion that CrossCorrelateAntennas caused a seg fault when ending Python
 
 #And determine the relative offsets between them
-mx=trun('FitMaxima',crosscorr.crosscorr_data,doplot=True,refant=0,plotstart=4,plotend=5,sampleinterval=10**-9,peak_width=6,splineorder=2)
+mx=trun('FitMaxima',crosscorr.crosscorr_data,doplot=True,refant=0,plotstart=4,plotend=5,sampleinterval=5*10**-9/crosscorr.oversamplefactor)#,peak_width=6,splineorder=2)
 
 print "Time lag [ns]: ", mx.lags 
 print " "
 
+#Time lag [ns]:  Vector(float, 48, fill=[0,1.25e-09,1.25e-10,-1.01875e-08,-1.2375e-08,-1.375e-08,-1.50625e-08,-1.6125e-08,-1.15e-08,-8.25e-09,-3.9375e-09,-1.25e-10,3.25e-09,3.625e-09,3.8125e-09,1.375e-09,-1.45e-08,-1.3e-08,-1.9375e-08,-1.775e-08,-1.88125e-08,-1.68125e-08,-1.11875e-08,-3.1875e-09,3.5e-09,5.6875e-09,6.9375e-09,7e-09,2e-09,-9.1875e-09,-1.45e-08,-1.75e-08,-2.775e-08,-2.2375e-08,-2.20625e-08,-1.9625e-08,-2.10625e-08,-6.8125e-09,-4.625e-09,-3.3125e-09,5.8125e-09,9.0625e-09,5.5e-09,-4.75e-09,-2.975e-08,-2.35e-08,-2.43125e-08,-1.01875e-08])
+
+t0=time.clock()
+
 #Now fit the direction and iterate over cable delays to get a stable solution
-direction=trun("DirectionFitTriangles",positions=positions,timelags=hArray(mx.lags),maxiter=10,verbose=True,doplot=True)
+direction=trun("DirectionFitTriangles",positions=positions,timelags=hArray(mx.lags),maxiter=3,verbose=True,doplot=False)
+#direction=trun("DirectionFitTriangles",positions=positions,timelags=hArray(mx.lags),maxiter=3)
+print "Time for fitting:",time.clock()-t0
 
 print "========================================================================"
 print "Fit Arthur Az/El   ->  143.409 deg 81.7932 deg"

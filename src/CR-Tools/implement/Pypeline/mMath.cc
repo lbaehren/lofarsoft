@@ -1580,7 +1580,7 @@ void h{$MFUNC!CAPS}(const Iter vecout,const Iter vecout_end)
   $PARDOCSTRING
 
   See also:
-  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hRandomizePhase, hSetAmplitude
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven, hRandomizePhase, hSetAmplitude
 
   Example:
   >>> c=hArray(float,[10],fill=range(10))
@@ -3122,7 +3122,7 @@ HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end, const T lower_limi
   Return -1 if not found.
 
   See also:
-  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven
 */
 template <class Iter>
 HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
@@ -3161,7 +3161,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
   $PARDOCSTRING
 
   See also:
-  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
+  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven
 */
 template <class Iter>
 HInteger HFPP_FUNC_NAME (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
@@ -3376,7 +3376,7 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end, const Iter2 vecin
   Return -1 if not found.
 
   See also:
-  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven
 */
 template <class Iter, class T>
 HInteger hFind{$MFUNC}1 (const Iter vecin,const Iter vecin_end,
@@ -3415,7 +3415,7 @@ HInteger hFind{$MFUNC}1 (const Iter vecin,const Iter vecin_end,
   $PARDOCSTRING
 
   See also:
-  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
+  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven
 */
 template <class Iter, class T>
 HInteger hFind{$MFUNC}2 (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
@@ -3457,7 +3457,7 @@ HInteger hFind{$MFUNC}2 (const typename vector<HInteger>::iterator vecout, const
 
   See also:
   hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual
-  hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual
+  hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven
   hFindGreaterThanVec, hFindGreaterEqualVec, hFindLessThanVec, hFindLessEqualVec
 */
 template <class Iter, class Iter2>
@@ -3676,6 +3676,117 @@ HInteger HFPP_FUNC_NAME (const IterI vecout, const IterI vecout_end,
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$ENDITERATE
+
+
+//========================================================================
+//$ITERATE MFUNC odd,even
+//========================================================================
+
+//$DOCSTRING: Find the first sample that is $MFUNC and return its position.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_AND_STRING_TYPES
+#define HFPP_FUNC_VARIANT 1
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Input vector to search through.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Description:
+  Return -1 if not found.
+
+  See also:
+  hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven, hFindOdd, hFindEven
+*/
+template <class Iter>
+HInteger hFind{$MFUNC!CAPS}1 (const Iter vecin,const Iter vecin_end)
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  // Sanity check
+  if (vecin_end < vecin) {
+    throw PyCR::ValueError("Illegal input our output vector size.");
+    return -1;
+  }
+
+  while (itin != vecin_end) {
+    if (hf{$MFUNC}(*itin)) {return itin-vecin;}
+    ++itin;
+  };
+  return -1;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Find the samples that are $MFUNC and returns the number of samples found and the positions of the samples in a second vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFind{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_AND_STRING_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vecout)()("Output vector - contains a list of positions in the input vector which satisfy the threshold condition.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  See also:
+  hFind, hFindGreaterThan, hFindGreaterEqual, hFindLessThan, hFindLessEqual, hFindBetween, hFindOutside, hFindOutsideOrEqual, hFindBetweenOrEqual, hFindOdd, hFindEven
+*/
+template <class Iter>
+HInteger hFind{$MFUNC!CAPS} (const typename vector<HInteger>::iterator vecout, const typename vector<HInteger>::iterator vecout_end,
+			 const Iter vecin , const Iter vecin_end)
+{
+  // Declaration of variables
+  Iter itin(vecin);
+  typename vector<HInteger>::iterator itout(vecout);
+
+  // Function operation
+  while (itin != vecin_end) {
+    if (hf{$MFUNC}(*itin)) {
+      if (itout != vecout_end) {
+	*itout=(itin-vecin);
+	++itout;
+      };
+    };
+    ++itin;
+  };
+  return (itout-vecout);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Counts the samples that are $MFUNC and returns the number of samples found.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hCount{$MFUNC!CAPS}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_NUMERIC_AND_STRING_TYPES
+#define HFPP_FUNCDEF  (HInteger)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric input vector to search through")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+HInteger HFPP_FUNC_NAME (const Iter vec , const Iter vec_end)
+{
+  Iter it(vec);
+  HInteger count(0);
+  while (it<vec_end) {
+    if (hf{$MFUNC}(*it)) ++count;
+    ++it;
+  };
+  return count;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$ENDITERATE
+
+
+
 
 // ========================================================================
 //

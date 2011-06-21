@@ -361,10 +361,13 @@ class TBBData(IOInterface):
         =========== =================================================
         Parameter   Description
         =========== =================================================
-        *selection* Either Python list with index of the antenna as
+        *selection* Either Python list (or hArray, Vector)
+                    with index of the antenna as
                     known to self (integers (e.g. ``[1, 5, 6]``))
                     Or list of IDs to specify a LOFAR dipole
                     (e.g. ``['142000005', '3001008']``)
+                    or say ``odd`` or ``even`` to select odd or even
+                    antennas.
         =========== =================================================
 
         Output:
@@ -374,8 +377,19 @@ class TBBData(IOInterface):
         It raises a `ValueError` if antenna selection cannot be set
         to requested value (e.g. specified antenna not in file).
 
+        Example:
+           file["SELECTED_DIPOLES"]="odd"
         """
-
+        if type(selection)==str:
+            if selection.upper() == "ODD":
+                selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("odd"))
+            elif selection.upper() == "EVEN":
+                selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("even"))
+            else:
+                raise ValueError("Selection needs to be a list of IDs or 'odd' or 'even'.")
+        elif type(selection) in cr.hAllContainerTypes:
+            selection = list(selection.vec())
+            
         if not isinstance(selection, list):
             raise ValueError("Selection needs to be a list.")
 

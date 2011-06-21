@@ -170,17 +170,17 @@ class CrossCorrelateAntennas(tasks.Task):
         crosscorr_data[0:4,...].plot()
     """
     parameters=dict(
-        refant=p_(0,doc="Which data set in ``data`` to use as reference data set if no `reference_data`` provided."),
+        refant=p_(0,doc="Which data set in ``data`` to use as reference data set if no ``reference_data`` provided."),
         oversamplefactor=p_(1,"Oversample the final cross-correlation by so many sub-steps. If equal to one then no oversampling."),
         dim=p_(lambda self:self.timeseries_data.shape(),doc="Dimension of input array.",output=True),
         dimfft=p_(lambda self:self.fft_data.shape(),doc="Dimension of fft array.",output=True),
-        reference_data=p_(None,doc="Reference data set to cross-correlate with"),
+        reference_data=p_(None,doc="Reference data set to cross-correlate data with. If ``None`` then use data from reference antenna ``refant``."),
         fft_data=p_(lambda self:cr.hArray(complex,[self.dim[-2],self.dim[-1]/2+1]),doc="FFT of the input timeseries data",workarray=True),
         fft_reference_data=p_(lambda self:cr.hArray(complex,[self.dimfft[-1]]),
                               doc="FFT of the reference data, dimensions [N data sets, (data length)/2+1]. If no extra reference antenna array is provided, cross correlate with reference antenna in data set",workarray=True),
         crosscorr_data_orig=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2]),
                                                      "Scratch cross correlation vector in original size to hold intermediate results",workarray=True),
-        crosscorr_data=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2*self.oversamplefactor]),
+        crosscorr_data=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2*max(self.oversamplefactor,1)]),
                           doc="Output array of dimensions [N data sets, data length * oversamplefactor] containing the cross correlation.",output=True)
         )
 
@@ -487,7 +487,7 @@ class DirectionFitTriangles(tasks.Task):
             self.delta_delays_max=max(self.delta_delays.vec().max(),self.delta_delays_max)
             self.delta_delays_min=min(self.delta_delays.vec().min(),self.delta_delays_min)
 
-            rfac=self.rmsfactor*(1.0-float(it)/self.maxiter)
+            rfac=self.rmsfactor*(1.0-float(it)/(self.maxiter))
             self.ngooddelays=self.delayindex.findlessthanabs(self.delta_delays,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
             if self.ngooddelays>0:
                 self.delta_delays.set(self.delayindex[:self.ngooddelays],0.0)

@@ -211,9 +211,9 @@ class tlist_class(t_class):
     """
     def __call__(self):
         print "Available Tasks:"
-        print "----------------"
-        for tpl in zip(range(len(tasks.task_allloaded)),tasks.task_allloaded.keys()):
-            print "{0:2}: {1}".format(*tpl)
+        print "------------------------------------------------------------"
+        for tpl in zip(range(len(tasks.task_allloaded)),tasks.task_allloaded.keys(),tasks.task_allloaded.values()):
+            print "{0:2}: {1:30s} ({2})".format(*tpl)
 
 tlist = tlist_class()
 
