@@ -45,10 +45,10 @@
 #include "mMath.h"
 
 #ifdef PYCRTOOLS_WITH_AERA
-#include "AERA/Datareader.h"
-#include "AERA/Data/Header.h"
-#include "AERA/Data/Event.h"
-#include "AERA/Data/LocalStation.h"
+#include "aera/Datareader.h"
+#include "aera/Data/Header.h"
+#include "aera/Data/Event.h"
+#include "aera/Data/LocalStation.h"
 #endif /* PYCRTOOLS_WITH_AERA */
 
 // ========================================================================

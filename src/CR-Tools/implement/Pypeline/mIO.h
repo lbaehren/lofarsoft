@@ -35,9 +35,9 @@
 //                                                       AERA include files
 #ifdef PYCRTOOLS_WITH_AERA
 
-#include "AERA/Datareader.h"
-#include "AERA/Data/Event.h"
-#include "AERA/Data/LocalStation.h"
+#include "aera/Datareader.h"
+#include "aera/Data/Event.h"
+#include "aera/Data/LocalStation.h"
 
 #endif /* PYCRTOOLS_WITH_AERA */
 

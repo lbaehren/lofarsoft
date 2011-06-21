@@ -59,6 +59,7 @@ option (CR_WITH_GUI             "Build the graphical interface?"           NO  )
 option (CR_WITH_PYPELINE        "Build the Pypeline library?"              YES )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"   YES )
 option (CR_WITH_CASAPY          "Build Pyline library against CASApy?"     NO  )
+option (CR_WITH_AERA            "Build CR with support for AERA datareader" NO )
 
 option (DAL_BUILD_TESTS        "Build the test programs?"                     YES )
 option (DAL_BUILD_APPS         "Build the applications?"                      YES )
@@ -299,6 +300,10 @@ endif (CR_WITH_GUI)
 if (CR_WITH_PYPELINE)
   add_dependencies (cr tmf)
 endif (CR_WITH_PYPELINE)
+
+if (CR_WITH_AERA)
+  add_dependencies(cr aera)
+endif (CR_WITH_AERA)
 
 if (HAVE_ROOT AND CR_WITH_STARTOOLS)
   add_dependencies (cr startools)

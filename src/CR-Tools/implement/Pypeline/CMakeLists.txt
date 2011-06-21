@@ -25,7 +25,9 @@ option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support" ON)
 option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support" ON)
 option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support" ON)
 option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support" ON)
-option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with support for AERA data files" OFF)
+# option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support" OFF)
+set (PYCRTOOLS_WITH_OPENMP ${CR_WITH_OPENMP})
+set (PYCRTOOLS_WITH_AERA ${CR_WITH_AERA})
 
 # Debug level
 set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
@@ -72,7 +74,7 @@ endif (PYCRTOOLS_WITH_OPTIMIZATION)
 ##-------------------------------------------------------------------------------
 ## Optional dependencies
 
-if (CR_WITH_OPENMP)
+if (PYCRTOOLS_WITH_OPENMP)
   if (OPENMP_FOUND)
     message (STATUS "[PyCRTools] OpenMP requested and enabled")
     set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -81,7 +83,7 @@ if (CR_WITH_OPENMP)
   else (OPENMP_FOUND)
     message (WARNING "[PyCRTools] OpenMP requested but not enabled: OpenMP not found")
   endif (OPENMP_FOUND)
-endif (CR_WITH_OPENMP)
+endif (PYCRTOOLS_WITH_OPENMP)
 
 if (PYCRTOOLS_WITH_AERA)
   if (AERA_FOUND)
