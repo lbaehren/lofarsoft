@@ -47,7 +47,7 @@ include (FindAERA)
 
 if (NOT HAVE_AERA OR AERA_FORCE_BUILD)
 
-  set (AERA_VERSION     "1.0.3" )
+  set (AERA_VERSION     "1.0.4" )
   set (AERA_TAR_ARCHIVE "AERA_Datareader-${AERA_VERSION}.tar.gz" )
   set (AERA_URL         "" )
 
@@ -62,7 +62,7 @@ if (NOT HAVE_AERA OR AERA_FORCE_BUILD)
     set (HAVE_AERA_SOURCE ${AERA_URL})
   endif (NOT HAVE_AERA_SOURCE)
 
-  ExternalProject_Add (AERA
+  ExternalProject_Add (aera
     PREFIX ${PROJECT_BINARY_DIR}
     DOWNLOAD_DIR ${PROJECT_BINARY_DIR}/download
     SOURCE_DIR ${PROJECT_BINARY_DIR}/source
@@ -74,7 +74,7 @@ if (NOT HAVE_AERA OR AERA_FORCE_BUILD)
   ## <-- end build condition ----------------------------------------------------->
 
 else (NOT HAVE_AERA OR AERA_FORCE_BUILD)
-  add_custom_target (AERA
+  add_custom_target (aera
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[AERA] Found system-wide installation; skipping rebuild!"
     )
