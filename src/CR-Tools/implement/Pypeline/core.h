@@ -42,22 +42,6 @@
 #include <ctime>
 
 // ________________________________________________________________________
-//                                                CASA library header files
-
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/MatrixMath.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/String.h>
-#include <casa/Containers/Block.h>
-#include <casa/Containers/Record.h>
-#include <casa/Containers/RecordField.h>
-#include <casa/Containers/List.h>
-#include <casa/Containers/ListIO.h>
-#include <casa/Containers/OrderedMap.h>
-#include <casa/Exceptions/Error.h>
-
-// ________________________________________________________________________
 //                                        Boost Python library header files
 
 #include <boost/python/class.hpp>
@@ -95,6 +79,9 @@
 #include "pycrtools_config.h"
 
 #include "Math/Constants.h"
+
+
+using namespace std;
 
 // ________________________________________________________________________
 //                                              Common settings for hftools
@@ -155,19 +142,7 @@ typedef boost::python::object HPyObject;
 //typedef boost::python::object* HPyObjectPtr;
 typedef PyObject* HPyObjectPtr;
 
-//Define types that are being used for the data reader and the casa arrays
-typedef double CasaNumber;
-typedef casa::DComplex CasaComplex;
-typedef int CasaInteger;
-typedef casa::Record CasaRecord ;
-
-#define CasaMatrix casa::Matrix
-#define CasaArray casa::Array
-#define CasaVector casa::Vector
 #define IterValueType typename Iter::value_type
-
-#define STL2CASA_SHARED(TYPE,STLVEC,CASAVEC) TYPE * STL_storage = &(STLVEC[0]); casa::IPosition CASA_shape(1,STLVEC.size()); casa::Vector<TYPE> CASAVEC(CASA_shape,STL_storage,casa::SHARE);
-
 
 //For some reasons NULL is primarily interpreted as Integer by the
 //compiler (e.g., when it needs to determine the type of templated functions).
@@ -209,12 +184,6 @@ enum VECTORCLASS {
 //========================================================================
 //                    Casting & Conversion Functions
 //========================================================================
-
-template <class S, class T>
-void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec);
-
-template <class S, class Iter>
-void aipsvec2stdit(CasaVector<S>& data, const Iter stlvec, const Iter stlvec_end);
 
 std::vector<HNumber> PyList2STLFloatVec(PyObject* pyob);
 std::vector<HInteger> PyList2STLIntVec(PyObject* pyob);
@@ -290,15 +259,14 @@ inline HComplex operator-(HComplex c, HInteger i);
 inline HComplex operator/(HInteger i, HComplex c);
 inline HComplex operator/(HComplex c, HInteger i);
 
-casa::Int hSum(const casa::Int*, const casa::Int*);
-casa::Int hSum(casa::Int* const&, casa::Int* const&);
-
 #if H_OS64BIT
 long int hSum(const long int*, long int*);
 #endif
 
-#define A_LOW_NUMBER 1.0e-290
-#define A_HIGH_NUMBER 1.0e290
+#define A_LOW_NUMBER (HNumber) 1.0e-290
+#define A_HIGH_NUMBER (HNumber) 1.0e290
+#define NUMBER_ONE ((HNumber) 1.0)
+#define NUMBER_ZERO ((HNumber) 0.0)
 
 //Smallest DOUBLE value: -1.79769E+308
 //Largest DOUBLE value: 1.79769E+308
@@ -390,6 +358,11 @@ inline bool operator> (HComplex c, HNumber  n) {return ( real(c) >  n);}
 inline bool operator>=(HComplex c, HNumber  n) {return ( real(c) >= n);}
 inline bool operator<=(HComplex c, HNumber  n) {return ( real(c) <= n);}
 
+inline bool operator< (HComplex c, HComplex i) {return ( real(c) <  real(i) );}
+inline bool operator> (HComplex c, HComplex i) {return ( real(c) >  real(i) );}
+inline bool operator>=(HComplex c, HComplex i) {return ( real(c) >= real(i) );}
+inline bool operator<=(HComplex c, HComplex i) {return ( real(c) <= real(i) );}
+
 
 //========================================================================
 //                        Helper Functions
@@ -420,69 +393,6 @@ HString pretty_vec(std::vector<T> & v,const HInteger maxlen){
   return s;
 }
 
-
-template <class T>
-CasaVector<T> stl2casa(std::vector<T>& stlvec)
-{
-  T * storage = &(stlvec[0]);
-  casa::IPosition shape(1,stlvec.size()); //tell casa the size of the vector
-  CasaVector<T> casavec(shape,storage,casa::SHARE);
-  return casavec;
-}
-
-template <class S, class T>
-void aipscol2stlvec(casa::Matrix<S> &data, std::vector<T>& stlvec, const HInteger col){
-    HInteger i,nrow,ncol;
-
-    nrow=data.nrow();
-    ncol=data.ncolumn();
-    //    if (ncol>1) {MSG("aipscol2stlvec: ncol="<<ncol <<" (nrow="<<nrow<<")");};
-    if (col>=ncol) {
-	ERROR("aipscol2stlvec: column number col=" << col << " is larger than total number of columns (" << ncol << ") in matrix.");
-	stlvec.clear();
-	return;
-    }
-
-    stlvec.resize(nrow);
-    CasaVector<S> CASAVec = data.column(col);
-
-//    p=stlvec.begin();
-
-    for (i=0;i<nrow;i++) {
-//	*p=hfcast<T>(CASAVec[i]);
-	stlvec[i]=hfcast<T>(CASAVec[i]);
-//	p++;
-    };
-}
-
-/*!
-  \brief The function converts an aips++ vector to an stl vector
- */
-
-template <class S, class T>
-void aipsvec2stlvec(CasaVector<S>& data, std::vector<T>& stlvec){
-    HInteger i,n=data.size();
-    stlvec.resize(n);
-    for (i=0;i<n;i++) {
-	stlvec[i]=hfcast<T>(data[i]);
-    };
-}
-
-/*!
-  \brief Copies a aips++ vector to a vector of a different type specified by iterators or pointers.
- */
-template <class S, class Iter>
-void aipsvec2stdit(CasaVector<S>& data, const Iter stlvec, const Iter stlvec_end){
-  typedef IterValueType T;
-  HInteger i,n=data.size();
-  Iter vec=stlvec;
-  for (i=0; (i<n) && (vec!=stlvec_end); i++) {
-    *vec=hfcast<T>(data[i]);
-    ++vec;
-  };
-}
-
-
 //This function is copied from hfget.cc since I don't know a better
 //way to do a proper instantiation of a templated function across two
 //cpp files ..
@@ -509,9 +419,8 @@ void copycast_vec(std::vector<T> &vi, std::vector<S> & vo) {
 
 bool stringToLower(std::string& ioString);
 bool stringToUpper(std::string& ioString);
-vector<HString> stringSplit(const HString& str_const);
-vector<HString> stringSplit(const HString& str_const, const HString& delim);
-
+std::vector<HString> stringSplit(const HString& str_const);
+std::vector<HString> stringSplit(const HString& str_const, const HString& delim);
 
 // ========================================================================
 //

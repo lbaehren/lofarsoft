@@ -38,6 +38,7 @@
 // ========================================================================
 
 #include "core.h"
+#include "casa.h"
 #include "mFilter.h"
 
 #include <Filters/HanningFilter.h>

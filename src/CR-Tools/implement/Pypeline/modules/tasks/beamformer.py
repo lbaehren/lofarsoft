@@ -600,6 +600,7 @@ class BeamFormer(tasks.Task):
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.data.randomizepeaks(lower_limit,upper_limit)
+                        import pdb; pdb.set_trace();
                         self.fftdata[...].fftw(self.data[...])
                         self.fftdata[...].nyquistswap(self.NyquistZone)
                         self.avspec_incoherent.spectralpower2(self.fftdata[...])

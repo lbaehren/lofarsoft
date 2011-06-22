@@ -40,6 +40,7 @@
 // ========================================================================
 
 #include "core.h"
+#include "casa.h"
 #include "mVector.h"
 #include "mIO.h"
 #include "mMath.h"

@@ -65,6 +65,8 @@ class TBBData(IOInterface):
         self.closed = False
 
     def __setKeywordDict(self):
+#        print "Temporarily taken out ANTENNA_POSITION and ANTENNA_POSITION_ITRF (HF)!!"
+
         self.__keyworddict={
             # NON-ICD KEYWORDS
             "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
@@ -174,7 +176,7 @@ class TBBData(IOInterface):
         """Return list of keyword/content tuples of all header variables
         """
         return [(k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]) for k in self.keys(excludedata)]
-
+    
     def getHeader(self):
         """Return a dict with keyword/content pairs for all header variables."""
         return dict(self.items(excludedata=True))

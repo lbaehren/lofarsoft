@@ -1,4 +1,13 @@
-2011-05-27
+2011-06-22 - Rev 7944
+================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- Took out casa definitions from core.h and put it into casa.h
+- Started some revisions to allow for HNumber = long double (not yet
+  working, due to FFTw)
+
+2011-06-22 - Rev 7930
 ==========
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>

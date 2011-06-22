@@ -900,8 +900,10 @@ void HFPP_FUNC_NAME (std::vector<T> & vec1,std::vector<S> & vec2)
 {
   vec1.resize(vec2.size());
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+#ifdef PYCRTOOLS_WITH_CASA
+
 //$DOCSTRING: Resize a casa vector to the same length as a second vector.
 //$COPY_TO HFILE START --------------------------------------------------#
 #define HFPP_FUNC_NAME hResize
@@ -922,8 +924,10 @@ void HFPP_FUNC_NAME (casa::Vector<T> & vec1,casa::Vector<S> & vec2)
 {
   vec1.resize(*(vec2.shape().begin()));
 }
-
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+#endif //WITH_CASA
+
+
 //$DOCSTRING: Copies and converts a vector to a vector of another type.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hConvert

@@ -40,7 +40,7 @@
 
 
 
-vector<HNumber> PyList2STLFloatVec(PyObject* pyob){
+std::vector<HNumber> PyList2STLFloatVec(PyObject* pyob){
   std::vector<HNumber> vec;
   if (PyList_Check(pyob)){
     HInteger i,size=PyList_Size(pyob);
@@ -51,7 +51,7 @@ vector<HNumber> PyList2STLFloatVec(PyObject* pyob){
 }
 
 
-vector<HInteger> PyList2STLIntVec(PyObject* pyob){
+std::vector<HInteger> PyList2STLIntVec(PyObject* pyob){
   std::vector<HInteger> vec;
   if (PyList_Check(pyob)){
     HInteger i,size=PyList_Size(pyob);
@@ -61,7 +61,7 @@ vector<HInteger> PyList2STLIntVec(PyObject* pyob){
   return vec;
 }
 
-vector<int> PyList2STLInt32Vec(PyObject* pyob){
+std::vector<int> PyList2STLInt32Vec(PyObject* pyob){
   std::vector<int> vec;
   if (PyList_Check(pyob)){
     HInteger i,size=PyList_Size(pyob);
@@ -71,7 +71,7 @@ vector<int> PyList2STLInt32Vec(PyObject* pyob){
   return vec;
 }
 
-vector<uint> PyList2STLuIntVec(PyObject* pyob){
+std::vector<uint> PyList2STLuIntVec(PyObject* pyob){
   std::vector<uint> vec;
   if (PyList_Check(pyob)){
     HInteger i,size=PyList_Size(pyob);
@@ -134,7 +134,7 @@ bool stringToUpper (std::string& ioString)
 
   The delimiter characters are space, comma and tab.
 */
-vector<HString> stringSplit(const HString& str_const)
+std::vector<HString> stringSplit(const HString& str_const)
 {
   HString delim(" ,\t"); // Delimiter characters.
 
@@ -150,9 +150,9 @@ vector<HString> stringSplit(const HString& str_const)
 
   \return substrings -- Returns vector with substrings.
 */
-vector<HString> stringSplit(const HString& str_const, const HString& delim)
+std::vector<HString> stringSplit(const HString& str_const, const HString& delim)
 {
-  vector<HString> result;
+  std::vector<HString> result;
 
   HString str(str_const);
   size_t pos = str.find_first_of(delim);

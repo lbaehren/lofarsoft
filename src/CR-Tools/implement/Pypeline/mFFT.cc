@@ -285,6 +285,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+#define fftw_number HNumber
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply a complex-to-real (inverse) FFT using fftw3 and return it properly scaled and without scrambling the input vector
@@ -340,7 +341,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   // Implementation
   hCopy(scratchfft.begin(),scratchfft.end(), data_in,  data_in_end);
   hNyquistSwap(scratchfft,nyquistZone);
-  p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(scratchfft[0]), (double*) &(*data_out), FFTW_ESTIMATE);
+  p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(scratchfft[0]), (fftw_number*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
@@ -412,7 +413,7 @@ void  HFPP_FUNC_NAME(const Iter outvec, const Iter outvec_end,
   HNumber phase_factor(shift*M_PI/(lenInvec-1));
 
   while (it_out!=outvec_end) {
-    *it_out = (*it_in) * polar(1.0, i*phase_factor);
+    *it_out = (*it_in) * polar(NUMBER_ONE, i*phase_factor);
     ++i; ++it_out; ++it_in;
   };
 }
@@ -462,14 +463,11 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   fftw_plan p;
 
   // Sanity check
-  if (lenOut != (lenIn/2+1)) {
-    throw PyCR::ValueError("Input or output vector has the wrong size. This should be: N(out) = N(in)/2+1.");
-    //ERROR(BOOST_PP_STRINGIZE(HFPP_FUNC_NAME) << ": input and output vector have wrong sizes! N(in)=" << lenIn << " N(out)=" << lenOut << " (should be = " << lenIn/2+1 << ")");
-    return;
-  };
-
+  if (lenOut != (lenIn/2+1)) 
+    ERROR_RETURN("Input or output vector has the wrong size. This should be: N(out) = N(in)/2+1.");
+  
   // Implementation
-  p = fftw_plan_dft_r2c_1d(lenIn, (double*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_ESTIMATE);
+  p = fftw_plan_dft_r2c_1d(lenIn, (fftw_number*) &(*data_in), (fftw_complex*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();
@@ -522,7 +520,7 @@ void HFPP_FUNC_NAME(const IterOut data_out, const IterOut data_out_end,
   if (lenIn != (lenOut/2+1)) ERROR_RETURN("Input or output vector has the wrong size. This should be: N(in) = N(out)/2+1.");
 
   // Implementation
-  p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(*data_in), (double*) &(*data_out), FFTW_ESTIMATE);
+  p = fftw_plan_dft_c2r_1d(lenOut, (fftw_complex*) &(*data_in), (fftw_number*) &(*data_out), FFTW_ESTIMATE);
   fftw_execute(p); /* repeat as needed */
   fftw_destroy_plan(p);
   fftw_cleanup();

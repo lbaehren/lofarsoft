@@ -45,7 +45,7 @@
 
 #include <iostream>
 
-#include "casa/BasicSL/Constants.h"
+//#include "casa/BasicSL/Constants.h"
 
 
 // ========================================================================
@@ -55,7 +55,7 @@
 // ========================================================================
 
 using namespace std;
-using namespace casa;
+//using namespace casa;
 
 #undef HFPP_FILETYPE
 //--------------------
@@ -150,7 +150,7 @@ HNumber funcGaussian (const HNumber x,
                       const HNumber sigma,
                       const HNumber mu)
 {
-  return exp(-(x-mu)*(x-mu)/(2*sigma*sigma))/(sigma*sqrt(2*casa::C::pi));
+  return exp(-(x-mu)*(x-mu)/(2*sigma*sigma))/(sigma*sqrt(2*M_PI));
 };
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1202,7 +1202,7 @@ HNumber HFPP_FUNC_NAME(const HNumber frequency, const HNumber time)
 */
 HComplex HFPP_FUNC_NAME(const HNumber phase)
 {
-  return polar(1.0, phase); // exp(HComplex(0.0,phase));
+  return polar(NUMBER_ONE, phase); // exp(HComplex(0.0,phase));
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1663,7 +1663,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
     it = vec + *itidx;
     if ((it < vec_end) && (it >= vec)) {
       r=rand();
-      real_part=(r*scale-1.0) * amplitude_t; // does this needs some arccos or so ...?
+      real_part=(r*scale-NUMBER_ONE) * amplitude_t; // does this needs some arccos or so ...?
       if (r % 2) imag_part=sqrt(pow(amplitude_t,2)-pow(real_part,2));
       else imag_part=-sqrt(pow(amplitude_t,2)-pow(real_part,2));
       *it=HComplex(real_part,imag_part);
@@ -1726,7 +1726,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
     if ((it < vec_end) && (it >= vec) && (amplitude < amplitude_vec_end) && (amplitude >= amplitude_vec)) {
       amplitude_t=hfcast<HNumber>(*amplitude);
       r=rand();
-      real_part=(r*scale-1.0) * amplitude_t; // does this needs some arccos or so ...?
+      real_part=(r*scale-NUMBER_ONE) * amplitude_t; // does this needs some arccos or so ...?
       if (r % 2) imag_part=sqrt(pow(amplitude_t,2)-pow(real_part,2));
       else imag_part=-sqrt(pow(amplitude_t,2)-pow(real_part,2));
       *it=HComplex(real_part,imag_part);
@@ -2491,7 +2491,8 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSort
 //-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+//#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
@@ -2783,7 +2784,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 
   while (it!=vec_end) {
     try {
-      sum+=1.0/(*it);
+      sum+=NUMBER_ONE/(*it);
     }
     catch (T i) {
       if (abs(i) < A_LOW_NUMBER)
@@ -3838,7 +3839,7 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
     return;
   }
 
-  blen = max((((HNumber)lenIn)/((HNumber)lenOut)),1.0);
+  blen = hfmax((((HNumber)lenIn)/((HNumber)lenOut)),NUMBER_ONE);
   //use max to avoid infinite loops if output vector is too large
   //only produce the first N-1 blocks in the output vector
   while ((it1<vecin_end) && (itout<itout_end)) {
@@ -4048,7 +4049,7 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
   }
 
   // Function implementation
-  blen = max((((HNumber)lenIn)/((HNumber)lenOut)),1.0);
+  blen = max((((HNumber)lenIn)/((HNumber)lenOut)),NUMBER_ONE);
   //use max to avoid infinite loops if output vector is too large
   //only produce the first N-1 blocks in the output vector
   while ((it1<vecin_end) && (itout<itout_end) && (itrms<vecrms_end)) {
@@ -4110,7 +4111,7 @@ void HFPP_FUNC_NAME (const Iter vecout,
     throw PyCR::ValueError("Size of output vector < size of input vector.");
   }
 
-  blen = max(lenOut/(lenIn-1.0),1.0);
+  blen = max(lenOut/(lenIn-NUMBER_ONE),NUMBER_ONE);
   //use max to avoid infinite loops if input vector is too large
   it2 = it1 + (HInteger)blen;
   //only produce the first N-1 blocks in the input vector
@@ -4184,7 +4185,7 @@ void HFPP_FUNC_NAME (const Iter vecout, const Iter vecout_end,
   }
 
   // Function implementation
-  blen = max(((HNumber)lenIn)/((HNumber)lenOut),1.0);
+  blen = max(((HNumber)lenIn)/((HNumber)lenOut),NUMBER_ONE);
   //use max to avoid infinite loops if output vector is too large
   //only produce the first N-1 blocks in the output vector
   while ((it1<vecin_end) && (itout<itout_end) && (itrms<vecrms_end)) {
@@ -4293,7 +4294,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
     throw PyCR::ValueError("Length of weight vector should be > 0.");
   }
 
-  std::vector<HNumber> weights(len, 1.0/len);
+  std::vector<HNumber> weights(len, NUMBER_ONE/len);
   return weights;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -4333,7 +4334,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
   HNumber f, sum=0.0;
 
   for (i=0; i<len; i++) {
-    f=1.0-abs(middle-i)/(middle+1.0);
+    f=NUMBER_ONE-abs(middle-i)/(middle+NUMBER_ONE);
     weights[i]=f;
     sum+=f;
   };
@@ -4381,7 +4382,7 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
   HNumber f, sum=0.0;
 
   for (i=0; i<len; i++) {
-    f=funcGaussian(i,max(len/4.0,1.0),middle);
+    f=funcGaussian(i,max(len/((HNumber)4.0),NUMBER_ONE),middle);
     weights[i]=f;
     sum+=f;
   };
