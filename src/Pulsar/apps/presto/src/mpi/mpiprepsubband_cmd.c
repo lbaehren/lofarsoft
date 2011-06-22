@@ -90,6 +90,8 @@ static Cmdline cmd = {
   /* maskfileC = */ 0,
   /***** -runavg : Running mean substraction */
   /* runavgint = */ 0,
+  /***** -zerodm : Running mean substraction */
+  /* zerodm = */ 0,
   /***** uninterpreted rest of command line */
   /* argc = */ 0,
   /* argv = */ (char**)0,
@@ -919,6 +921,14 @@ showOptionValues(void)
     printf("-runavg found:\n");
   }
 
+  /***** -zerodm: Remove zero DM */
+  if( !cmd.zerodm ) {
+    printf("-zerodm not found.\n");
+  } else {
+    printf("-zerodm found:\n");
+  }
+
+
   /***** -numout: Output this many values.  If there are not enough values in the original data file, will pad the output file with the average value */
   if( !cmd.numoutP ) {
     printf("-numout not found.\n");
@@ -1031,7 +1041,7 @@ showOptionValues(void)
 void
 usage(void)
 {
-  fprintf(stderr,"%s","   -o outfile [-pkmb] [-gmrt] [-bcpm] [-spigot] [-filterbank] [-psrfits] [-wapp] [-window] [-numwapps numwapps] [-if ifs] [-clip clip] [-noclip] [-runavg] [-numout numout] [-nobary] [-DE405] [-lodm lodm] [-dmstep dmstep] [-numdms numdms] [-nsub nsub] [-downsamp downsamp] [-mask maskfile] [--] infile ...\n");
+  fprintf(stderr,"%s","   -o outfile [-pkmb] [-gmrt] [-bcpm] [-spigot] [-filterbank] [-psrfits] [-wapp] [-window] [-numwapps numwapps] [-if ifs] [-clip clip] [-noclip] [-runavg] [-zerodm] [-numout numout] [-nobary] [-DE405] [-lodm lodm] [-dmstep dmstep] [-numdms numdms] [-nsub nsub] [-downsamp downsamp] [-mask maskfile] [--] infile ...\n");
   fprintf(stderr,"%s","      Converts a raw radio data file into many de-dispersed time-series (including barycentering).\n");
   fprintf(stderr,"%s","             -o: Root of the output file names\n");
   fprintf(stderr,"%s","                 1 char* value\n");
@@ -1052,7 +1062,8 @@ usage(void)
   fprintf(stderr,"%s","                 1 float value between 0 and 1000.0\n");
   fprintf(stderr,"%s","                 default: `6.0'\n");
   fprintf(stderr,"%s","        -noclip: Do not clip the data.  (The default is to _always_ clip!)\n");
-  fprintf(stderr,"%s","        -runavg: Running mean substraction from the input data ( Vishal 17 August 2010 ) \n");
+  fprintf(stderr,"%s","        -runavg: Running mean substraction from the input data\n");
+  fprintf(stderr,"%s","        -zerodm: Subtract the mean of all channels from each sample (i.e. remove zero DM)\n");
   fprintf(stderr,"%s","        -numout: Output this many values.  If there are not enough values in the original data file, will pad the output file with the average value\n");
   fprintf(stderr,"%s","                 1 int value between 1 and oo\n");
   fprintf(stderr,"%s","        -nobary: Do not barycenter the data\n");
@@ -1180,6 +1191,11 @@ parseCmdline(int argc, char **argv)
 
     if( 0==strcmp("-runavg", argv[i]) ) {
       cmd.runavgint = 1;
+      continue;
+    }
+
+    if( 0==strcmp("-zerodm", argv[i]) ) {
+      cmd.zerodm = 1;
       continue;
     }
 
