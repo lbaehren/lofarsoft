@@ -1,5 +1,23 @@
 #!/bin/tcsh
 
+if ( "$1" == "" ) then
+
+  echo
+  echo
+  echo "Usage(example): csh doRaw.sh L00000_SAP000_B000_S0_P000_bf.raw 0329+54 " 
+  echo
+  echo " Notes: "
+  echo "         (1) This script requires a bf2puma2 system-wide installation " 
+  echo "         (2) PSRCHIVE, DSPSR, PSRCAT and TEMPO need to be installed  "
+  echo
+  echo
+
+
+  exit
+
+endif
+
+
 set before = `date +%s`
 
 set mydir = `pwd`
