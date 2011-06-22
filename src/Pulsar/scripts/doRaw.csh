@@ -4,7 +4,7 @@ set before = `date +%s`
 
 set mydir = `pwd`
 
-setenv PSRCAT_FILE /lofarhome_1/anoutsos/lofarsoft/build/pulsar/psrcat/psrcat.db
+setenv PSRCAT_FILE $LOFARSOFT/release/share/pulsar/data/psrcat.db
 
 echo " USAGE: csh doRaw.sh L00000_SAP000_B000_S0_P000_bf.raw 0329+54"
 echo "-- Note: It doesn't matter which of the two polarisation files (S0 or S1) you give to the script, it only needs one."
@@ -16,11 +16,11 @@ set Base = `echo $Name | awk -F_ '{print $1}'`
 set PSR = $2
 
 if ( !( -e {$PSR}.eph ) ) then
-  /home/anoutsos/lofarsoft/build/pulsar/psrcat/psrcat -e $PSR > {$PSR}.eph
+  psrcat -e $PSR > {$PSR}.eph
 endif
 
 ### Run the bf2puma2 converter ###
-./bf2puma2 -f {$Base}_SAP000_B000 -h header.puma2 -p {$Base}.parset -BG -v
+bf2puma2 -f {$Base}_SAP000_B000 -h header.puma2 -p {$Base}.parset -BG -v
 
 
 set SubSa = `grep Observation.subbandList ${Base}.parset | awk -F[ '{print $2}' | awk -F. '{print $1}'`
@@ -37,14 +37,14 @@ while( $sub < $Nsub )
         ### Set the MJD from the puma2 headers ###
         set MJD = `head -25 {$Base}_SAP000_B000_SB{$sub}_CH{$chan} | grep MJD | awk '{print $2}'`
         ### Dedisperse every channel of every subband ###
-        /home/anoutsos/lofarsoft/release/share/pulsar/bin/dspsr -F8:D -A -L 10 -E {$PSR}.eph -m $MJD -O {$Base}_SAP000_B000_SB{$sub}_CH{$chan} {$Base}_SAP000_B000_SB${sub}_CH${chan}
+        dspsr -F8:D -A -L 10 -E {$PSR}.eph -m $MJD -O {$Base}_SAP000_B000_SB{$sub}_CH{$chan} {$Base}_SAP000_B000_SB${sub}_CH${chan}
         @ chan = $chan + 1
     end
     @ sub = $sub + 1
 end
 
 ### Sum up all the dedispersed channels and save a PSRFITS archive ###
-/home/anoutsos/lofarsoft/release/share/pulsar/bin/psradd -R -o {$Base}.ar {$Base}_SAP000_B000_SB*_CH*.ar
+psradd -R -o {$Base}.ar {$Base}_SAP000_B000_SB*_CH*.ar
 
 
 set after = `date +%s`
