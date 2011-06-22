@@ -202,9 +202,10 @@ int main(int argc, char** argv){
 
   if(argc==1){
   	cout << endl << endl
-         << "Usage: <executable> -f <input file> -h <header file> " 
-         << "-p <parset file>  [OPTIONS]" << endl << endl;
-    return 0;
+         << "Usage: <executable> -f <input file> -h <header file> -p <parset file> -BG -v "         << endl << endl
+         << " --- Example: bf2puma2 -f L00000_SAP000_B000 -h header.puma2 -p L00000.parset -BG -v " << endl << endl; 
+         
+        return 0;
   }
 
   char* basename = 0;
