@@ -175,6 +175,7 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 20)
     minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0)
     metadata = kwargs.get('metadata', None)
+    no_fold = kwargs.get('no_fold', False)
 
     # Check that the directories are available and that the output directory
     # is empty and writable.
@@ -223,6 +224,10 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     os.mkdir(txt_out_dir)
     candidates_out_file = os.path.join(txt_out_dir, 'sifted_candidates.txt')
     sifting.write_candlist(sifted_candidates, candidates_out_file)
+
+    if no_fold:
+        print 'Skipping the folding phase, exiting.'
+        sys.exit()
 
     # using knowledge about the directory layout:
     subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')

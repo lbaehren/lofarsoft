@@ -509,7 +509,7 @@ class SearchRun(object):
 
     def run_search(self, ddplans, z_values, n_cores = None, 
             no_singlepulse = False, no_accel = False, save_timeseries = False, 
-            par_files = None):
+            par_files = None, no_fold = False):
         # The GBT drift scan survey uses dedispersion plans as units
         # of work. Because our use of mpiprepsubband (has extra constraints
         # on the number of DM trials it can write) and the fact that
@@ -756,6 +756,7 @@ class SearchRun(object):
                 n_candidates_cutoff=N_CANDIDATES_CUTOFF,
                 minimum_dm_cutoff=MINIMUM_DM_CUTOFF,
                 metadata=self.metadata,
+                no_fold=no_fold,
             )
         if not no_singlepulse:
             # Deal with single pulse search plotting
@@ -946,6 +947,8 @@ if __name__ == '__main__':
         help='Directory containing rfifind output for current data set.') 
     parser.add_option('--st', dest='st', action='store_true', default=False,
         help='Keep dedispersed timeseries around.')
+    parser.add_option('--nf', metavar='NO_FOLD', default=False, 
+        action='store_true', dest='no_fold')
     
     options, args = parser.parse_args()
     N_CORES = options.ncores
@@ -1028,7 +1031,7 @@ if __name__ == '__main__':
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=16))
 
     SR.run_search(ddplans, z_values, N_CORES, options.ns, options.na, options.st,
-        par_files)
+        par_files, options.no_fold)
     t_end = time.time()
     print '\n=== TIMINGS ==='
     search_time = 0

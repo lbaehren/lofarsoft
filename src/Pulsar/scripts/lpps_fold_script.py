@@ -54,6 +54,9 @@ if __name__ == '__main__':
     parser.add_option('--zap_file', type='string', metavar='ZAPFILE',
         help='Apply zaplist file (birdies) during sifting', default='',
         dest='zaplist_file')
+    parser.add_option('--nf', metavar='NO_FOLD', default=False, 
+        action='store_true', dest='no_fold')
+    
     options, args = parser.parse_args()
 
     # Check that all the required options were supplied on the commandline:
@@ -123,6 +126,7 @@ if __name__ == '__main__':
         'n_candidates_cutoff' : N_CANDIDATES_CUTOFF,
         'minimum_dm_cutoff' : MINIMUM_DM_CUTOFF,
         'metadata' : metadata,
+        'no_fold' : options.no_fold,
     }
     main(**kwargs)
 
