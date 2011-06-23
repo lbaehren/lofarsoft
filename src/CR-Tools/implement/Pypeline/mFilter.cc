@@ -39,9 +39,8 @@
 
 #include "core.h"
 #include "casa.h"
+#include "math.h"
 #include "mFilter.h"
-
-#include <Filters/HanningFilter.h>
 
 // ========================================================================
 //
@@ -124,6 +123,11 @@ void HFPP_FUNC_NAME(const Iter ccm, const Iter ccm_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+// ========================================================================
+//
+//  Hanning filter
+//
+// ========================================================================
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Create a Hanning filter.
@@ -149,14 +153,55 @@ void hGetHanningFilter(const Iter vec, const Iter vec_end,
 		       const HInteger BetaFall) {
 
   HInteger blocksize = vec_end - vec;
-  CR::HanningFilter<HNumber> hanning_filter(blocksize, (double)Alpha, (HInteger)Beta, (HInteger)BetaRise, (HInteger)BetaFall);
-  Iter it_v = vec;
-  CasaVector<HNumber> filter = hanning_filter.weights();
-  CasaVector<HNumber>::iterator it_f = filter.begin();
 
-  while ((it_v != vec_end) && (it_f != filter.end())) {
-    *it_v = (IterValueType) *it_f;
-    it_v++; it_f++;
+  // Sanity check
+  if (blocksize < 1) {
+    throw PyCR::ValueError("Vector size must be larger than 1");
+    return;
+  }
+  if (blocksize < Beta) {
+    throw PyCR::ValueError("Beta must be smaller or equal to vector size");
+    return;
+  }
+  if (Beta == 0) {
+    if (BetaRise < 1) {
+      throw PyCR::ValueError("BetaRise must be larger than 1");
+      return;
+    }
+    if (BetaFall < 1) {
+      throw PyCR::ValueError("BetaFall must be larger than 1");
+      return;
+    }
+  }
+
+  // Implementation of the Hanning filter
+  Iter it_v = vec;
+  HInteger idx = 0;
+
+  if (Beta == 0) {            // No width restrictions
+    HNumber phase_factor = 2*M_PI/(blocksize-1);
+
+    while ((it_v != vec_end) && (idx < blocksize)) {
+      *it_v = (IterValueType) (Alpha - (1-Alpha)*cos(idx*phase_factor));
+      ++it_v; ++idx;
+    }
+  } else {                    // Use rise- and fall widths
+    HNumber phase(0.);
+    HNumber phase_factor_rise = M_PI/(BetaRise - 1);
+    HNumber phase_factor_fall = M_PI/(BetaFall - 1);
+
+    while ((it_v != vec_end) && (idx < blocksize)) {
+      if (idx < BetaRise) {     // Rising part
+        phase = idx * phase_factor_rise;
+        *it_v = (IterValueType) (Alpha - (1 - Alpha)*cos(phase));
+      } else if (idx >= (blocksize - BetaFall)) { //  Falling part
+        phase = (idx - blocksize + BetaFall) * phase_factor_fall + M_PI;
+        *it_v = (IterValueType) (Alpha - (1 - Alpha)*cos(phase));
+      } else {                  // Flat part
+        *it_v = (IterValueType) (1.);
+      }
+      ++it_v; ++idx;
+    }
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -254,16 +299,35 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 		    const HNumber offset,
 		    const bool falling
 		       ) {
-  HInteger width=vec_end-vec;
-  CR::HanningFilter<HNumber> hanning_filter(width*2, (double)0.5, 0, (HInteger)width, (HInteger)width);
-  Iter it_v(vec);
-  CasaVector<HNumber> filter = hanning_filter.weights();
-  HNumber * it_f(filter.cbegin());
-  if (falling) it_f+=width;
-  while ((it_v != vec_end) && (it_f != filter.cend())) {
-    *it_v = (typename Iter::value_type) (*it_f)*height+offset;
-    it_v++; it_f++;
-  };
+  // Alpha = 0.5
+  // Beta = 0 (beta_rise = beta_fall = blocksize)
+  HInteger blocksize = vec_end - vec;
+
+  // Sanity check
+  if (blocksize < 1) {
+    throw PyCR::ValueError("Vector size must be larger than 1");
+    return;
+  }
+
+  HNumber phase(0);
+  HNumber phase_factor = M_PI/(2*blocksize - 1);
+  HNumber phase_offset = 0;
+
+  Iter it_v = vec;
+  HInteger idx = 0;
+
+  if (falling) {
+    phase_offset = blocksize;
+  }
+
+  while ((it_v != vec_end) && (idx < blocksize)) {
+    phase = (idx + phase_offset) * phase_factor;
+    // Use optimized hanning function with alpha=0.5 and beta=0.
+    *it_v = (IterValueType) (0.5 * (1. - cos(phase)));
+    *it_v *= height;
+    *it_v += offset;
+    ++it_v; ++idx;
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
