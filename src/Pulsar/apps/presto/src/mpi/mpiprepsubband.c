@@ -1169,10 +1169,11 @@ static void convert_n_zap_subbands(int numfiles, int my_id, short *shortdata,
 {
 
 	
-  int ii, jj, index, shortindex, numread = 0, mask = 0;
+  int ii, jj, index, shortindex, offset, channum, numread = 0, mask = 0;
   double starttime;
+  float subband_sum;
   static int currentblock = 0;
-  double run_avg=0;
+
 
   *nummasked = 0;
   if (obsmask->numchan) mask = 1;
@@ -1203,7 +1204,6 @@ static void convert_n_zap_subbands(int numfiles, int my_id, short *shortdata,
 	 memcpy(subbanddata + ii * numfiles, padvals, sizeof(float) * numfiles);
      fflush(stdout);
      } else if (*nummasked > 0) {      /* Only some of the channels are masked */
-       int offset, channum;
        for (ii = 0; ii < SUBSBLOCKLEN; ii++) {
 	 offset = ii * numfiles;
 	 for (jj = 0; jj < *nummasked; jj++) {
@@ -1213,6 +1213,24 @@ static void convert_n_zap_subbands(int numfiles, int my_id, short *shortdata,
        }
      }
    }
+
+   /* Zero-DM removal if required */
+   if (cmd->zerodm==1) {
+     //     printf("REMOVING ZERO-DM\n");
+     for (ii = 0; ii < SUBSBLOCKLEN; ii++) {
+       offset = ii * numfiles;
+       subband_sum = 0.0;
+       for (jj = offset; jj < offset+numfiles; jj++) {
+	 subband_sum += subbanddata[jj];
+       }
+       subband_sum /= (float) numfiles;
+       /* Remove the channel average */
+       for (jj = offset; jj < offset+numfiles; jj++) {
+	 subbanddata[jj] -= subband_sum;  
+       }
+     }
+   }
+
    currentblock += 1;
 }
 
