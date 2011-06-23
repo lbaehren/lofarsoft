@@ -77,6 +77,8 @@ typedef struct s_Cmdline {
   int maskfileC;
   /***** -runavg: Running mean subtraction from the .dat file */
   int runavgint;
+  /***** -zerodm: Remove zero-DM (average of channels) */
+  int zerodm;
   /***** uninterpreted command line parameters */
   int argc;
   /*@null*/char **argv;
