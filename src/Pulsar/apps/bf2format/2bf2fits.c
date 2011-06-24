@@ -53,6 +53,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose);
 char *get_ptr_entry(char *str, char **txt, int nrlines, char *separator);
 
 void usage(){
+  puts("Just wanted to make sure the new version is picked up.");
   puts("Syntax: bf2presto8 [options] SB*.MS");
   puts("-A\t\tNumber of blocks to read in at the same time, which affects calc of running mean etc. (Default = 600)");
   puts("-clipav\t\tInstead of normal clipping, write out average");
@@ -1465,7 +1466,9 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
    for (j=0; j<SUBBANDS; j++) {
     isfiles[j] = (char *)malloc(1024);
     if (!isfiles[j]) { perror("isfiles malloc"); exit (1); }
-    memset (isfiles[j], "\0", 255);
+    /* Patrick: Corrected - Should be '\0' or simply 0 */
+    /*    memset (isfiles[j], "\0", 255); */
+    memset (isfiles[j], 0, 255);
    }
    j=0;
    while((filename = getNextFilenameFromList(&application, argv)) != NULL) {
@@ -1501,6 +1504,9 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
    }
    if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose)) return 0;
    if(!writePSRFITSHeader(&fout, application.verbose)) return 0;
+   if(!appendHistoryLine(fout, argc, argv))
+     return 0;
+
    if(convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
     return 0;
 
@@ -1558,6 +1564,8 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose))
 	return 0;
       if(!writePSRFITSHeader(&fout, application.verbose))
+	return 0;
+      if(!appendHistoryLine(fout, argc, argv))
 	return 0;
 
       /* convert */
