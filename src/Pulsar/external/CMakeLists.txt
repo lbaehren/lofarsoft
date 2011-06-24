@@ -172,7 +172,7 @@ add_custom_target (psrchive_configure
 add_dependencies (psrchive_configure psrchive_unpack)
  else (APPLE)
 add_custom_target (psrchive_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux --enable-shared
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
