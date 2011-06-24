@@ -120,7 +120,10 @@ int closePSRData(datafile_definition *datafile)
       fclose(datafile->fptr);
     }
     if(datafile->format == MEMORY_format) {
-      free(datafile->data);
+      /*  in the MAKE_PASWING_SHORT_format there is no profile data stored, so nrpols is set to zero. */
+      if(datafile->NrPols != 0) {
+	free(datafile->data);
+      }
       if(datafile->nrpapoints > 0) {
 	free(datafile->data_pa);
 	free(datafile->data_dpa);
@@ -137,13 +140,99 @@ int closePSRData(datafile_definition *datafile)
   }
 }
 
-/* This function is hacked Returns NULL if the last file has been
-  processed. */
+/* Returns NULL if the last file has been processed. */
 char *getNextFilenameFromList(patrickSoftApplication *application, char **argv)
 {
   if(internal_applicationCurFilename == internal_applicationNrfilenames)
     return NULL;
   return argv[internal_applicationFilenameList[internal_applicationCurFilename++]];
+}
+
+
+void mjd2date(long double mjd, int *year, int *month, int *day, int *hour, int *minute, float *seconds)
+{
+  long A, B, C, D, E, Z, a1, a2;
+  double F;
+  /*
+    1957 4.81 oct = 2436116.31
+    333 27.5 jan = 1842713.00
+  */
+  double JD = mjd + 2400000.5;
+  /* Actually, this doesn't make sense. MJD XXXX.0 should be midnight,
+     XXXX.5 afternoon, but maybe only in astronomy? Different
+     definitions of MJD around? */
+  JD += 0.5;
+  int sign = 1;
+  if(JD < 0)
+    sign = -1;
+  Z = sign*floor(sign*JD);
+  F = JD - Z;
+  A = Z;
+  if(Z >= 2299161)
+    {
+      a1 = (Z - 1867216.25)/36524.25;
+      a2 = a1/4.0;
+      A += 1 + a1 - a2;
+    }
+  B = A + 1524;
+  C = (B - 122.13)/365.25;
+  D = 365.25*C;
+  E = (B-D)/30.6001;
+  a1 = 30.6001*E;
+  *day = B - D - a1;
+  *hour = F*24;
+  *minute = (F-(*hour)/24.0)*24*60.0;
+  *seconds = (F-(*hour+(*minute)/60.0)/24.0)*24*60.0*60.0;
+  if(E < 14)
+    *month=E - 1;
+  else
+    *month=E - 13;
+  if(*month > 2)
+    *year = C - 4716;
+  else
+    *year = C - 4715;
+  if(*year < 1)
+    *year -= 1;
+}
+
+
+/* Converts a floating point into a string with hours, minutes and
+   seconds. The number should be in hours (for instance 12.0 ->
+   12:00:00) or in degrees (-30.5 -> -30:30:00). precision states the
+   number of decimals in the seconds. */
+void converthms_string(char *hms, double number, int precision)
+{
+  char dummy_str[100];
+  int i;
+  if(number < 0) {
+    sprintf(hms, "-");
+    number *= -1;
+  }else {
+    hms[0] = 0;
+  }
+  i = number;
+  number -= i;
+  number *= 60;
+  sprintf(dummy_str, "%02d:", i);
+  strcat(hms, dummy_str);
+  i = number;
+  number -= i;
+  number *= 60;
+  sprintf(dummy_str, "%02d:", i);
+  strcat(hms, dummy_str);
+  i = number;
+  number -= i;
+  sprintf(dummy_str, "%02d", i);
+  strcat(hms, dummy_str);
+  if(precision > 0) {
+    sprintf(dummy_str, "%.20f", number);
+    if(precision > 20) {
+      fprintf(stderr, "converthms_string: WARNING, TRUNCATING PRECISION TO 20 digits\n");
+      precision = 20;
+    }
+    dummy_str[precision+2] = 0;
+    strcat(hms, dummy_str+1);
+  }
 }
 
 
@@ -155,6 +244,8 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   float dummy_float;
   double dummy_double;
   long i, j;
+  int year, month, day, hours, minutes;
+  float seconds;
 
   /* Create primary header */
 
@@ -180,7 +271,11 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
 
-  sprintf(dummy_txt, "SEARCH");
+  if(datafile->dd_mode == 0 && datafile->Period > 0) {
+    sprintf(dummy_txt, "PSR");
+  }else {
+    sprintf(dummy_txt, "SEARCH");    
+  }
   if(fits_write_key(datafile->fits_fptr, TSTRING, "OBS_MODE", dummy_txt, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
@@ -192,6 +287,80 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   }
 
   if(fits_write_key(datafile->fits_fptr, TSTRING, "BACKEND", datafile->instrument, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+
+
+
+  mjd2date(datafile->mjd, &year, &month, &day, &hours, &minutes, &seconds);
+  sprintf(dummy_txt, "%d-%02d-%02dT%02d:%02d:%02.0f", year, month, day, hours, minutes, seconds);
+  /*  printf("Written date as: '%s'\n", dummy_txt); */
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "DATE-OBS", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+
+  converthms_string(dummy_txt, (12.0/M_PI)*datafile->ra, 0);
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "RA", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  /*  printf("RA = '%s'\n", dummy_txt); */
+
+  converthms_string(dummy_txt, (180.0/M_PI)*datafile->dec, 0);
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "DEC", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  /*  printf("DEC = '%s'\n", dummy_txt); */
+
+  /* Write out some empty variables to make PRESTO stop complaining */
+  dummy_txt[0] = 0;
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "OBSERVER", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "FRONTEND", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "PROJID", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+
+  /* Set the original number of frequency channels to be the current
+     nr of frequency channels. Not necessarily correct, but PRESTO
+     requires this to be set. Likewise set total BW. CHAN_DM is the DM
+     of the online folding, set to the current DM. Note that this
+     information is redundant and I think PSRCHIVE is not really using
+     them. Assume we are tracking source. */
+  dummy_int = datafile->nrFreqChan;
+  if(fits_write_key(datafile->fits_fptr, TINT, "OBSNCHAN", &dummy_int, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  dummy_float = datafile->bw;
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSBW", &dummy_float, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  /*  dummy_double = datafile->dm; */
+  dummy_double = 0;    /* I think if set to zero means that the dm sweep is still in the data. */
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "CHAN_DM", &dummy_double, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  sprintf(dummy_txt, "TRACK");
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "TRK_MODE", dummy_txt, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+
+  /* Write out the minor axis beam width to be zero. Hopefully that makes PRESTO happy. */
+  dummy_float = 0;
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "BMIN", &dummy_float, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -329,8 +498,22 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  dummy_float = datafile->SampTime;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "TBIN", &dummy_float, "", &status) != 0) {
+
+  /* Let each psrfits file start with frequency channel 0 and subint
+     0. Is this going to work with data split over multiple files?
+     Anyway, for now it makes PRESTO happy. */
+  dummy_int = 0;
+  if(fits_write_key(datafile->fits_fptr, TINT, "NCHNOFFS", &dummy_int, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  if(fits_write_key(datafile->fits_fptr, TINT, "NSUBOFFS", &dummy_int, "", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+
+  dummy_double = datafile->SampTime;
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "TBIN", &dummy_double, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -371,8 +554,8 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  dummy_float = datafile->dm;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "DM", &dummy_float, "", &status) != 0) {
+  dummy_double = datafile->dm;
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "DM", &dummy_double, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -900,6 +1083,7 @@ int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *
   int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
   long subintsize, i;
   float weight;
+  double offset;
 
   if(lookupSubintTable(datafile) == 0) {
     fprintf(stderr, "ERROR writeFITSsubint: Cannot mode to subint table.\n");    
@@ -944,6 +1128,14 @@ int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *
     }
   }
 
+  /* Assume no subints are dropped (this is OFFS_SUB column) */
+  offset = ((double)((subintnr + 0.5)*datafile.NrBins))*(double)datafile.SampTime;
+  if(fits_write_col(datafile.fits_fptr, TDOUBLE, 3, 1+subintnr, 1, 1, &offset, &status) != 0) {
+    fprintf(stderr, "ERROR writeFITSsubint: Error writing subint offset.\n");
+    fits_report_error(stderr, status); /* print any error message */
+    return 0;
+  }
+
   return 1;
 }
 
@@ -963,4 +1155,109 @@ int writePulsePSRData(datafile_definition datafile, long pulsenr, int polarizati
     return 0;
   }
   return 1;
+}
+
+
+/* Adds a line to the history table and writes out the command line. 
+   Returns 1 on success, 0 on error */
+int appendHistoryLineFITS(datafile_definition datafile, char *txt_cmd, char *txt_date)
+{
+  int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
+  int colnum_date, colnum_cmd, nstart, n;
+  long nrows;
+  char txt2[1000], *txt_ptr, *tst;
+  if(fits_movnam_hdu(datafile.fits_fptr, BINARY_TBL, "HISTORY_NOT_PSRFITS", 0, &status)) {
+    fprintf(stderr, "ERROR appendHistoryLineFITS: Cannot move to history HDU.\n"); 
+    return 0;
+  } 
+  if(fits_get_colnum (datafile.fits_fptr, CASEINSEN, "DATE_PRO", &colnum_date, &status)) { 
+    fprintf(stderr, "ERROR appendHistoryLineFITS: No DATE_PRO column is history table?\n"); 
+    return 0;
+  }
+  if(fits_get_colnum (datafile.fits_fptr, CASEINSEN, "PROC_CMD", &colnum_cmd, &status)) { 
+    fprintf(stderr, "ERROR appendHistoryLineFITS: No PROC_CMD column is history table?\n"); 
+    return 0;
+  }
+
+
+
+  txt_ptr = txt_cmd;
+  nstart = 0;
+  do {
+    fits_get_num_rows(datafile.fits_fptr, &nrows, &status);
+    /*    printf("Before: %ld rows in history table.\n", nrows); */
+    if(fits_insert_rows(datafile.fits_fptr, nrows, 1, &status)) { 
+      fprintf(stderr, "ERROR appendHistoryLineFITS: Cannot add a row to history table\n"); 
+      fits_report_error(stderr, status); /* print any error message */
+      return 0;
+    }
+    fits_get_num_rows(datafile.fits_fptr, &nrows, &status); 
+    /*printf("After: %ld rows in history table.\n", nrows); */
+
+    if(nstart == 0) {
+      /*      printf("XXXX '%s'\n", txt_date); */
+      tst = txt_date;
+      if(fits_write_col(datafile.fits_fptr, TSTRING, colnum_date, nrows, 1, 1, &tst, &status) != 0) {
+	fprintf(stderr, "ERROR appendHistoryLineFITS: Error writing data to history table.\n");
+	fits_report_error(stderr, status); 
+	return 0;
+      }
+    }
+
+    strncpy(txt2, txt_ptr, 80);
+    n = strlen(txt2);
+    txt_ptr += n;
+    nstart += n;
+    /*    fprintf(stderr, "Adding: '%s'\n", txt2); */
+    tst = txt2;
+    if(fits_write_col(datafile.fits_fptr, TSTRING, colnum_cmd, nrows, 1, 1, &tst, &status) != 0) {
+      fprintf(stderr, "ERROR appendHistoryLineFITS: Error writing data to history table.\n");
+      fits_report_error(stderr, status); 
+      return 0;
+    }
+    /*    printf("%d %d %d\n", nstart, n, (int)strlen(txt)); */
+  }while(nstart < strlen(txt_cmd));
+
+  return 1;
+}
+
+/* Adds a line to the history table and writes out the command
+   line. The file should be opened with write permission AND THE
+   HEADER SHOULD ALREADY BE WRITTEN OUT AND NOT BE MODIFIED ANYMORE.
+   Returns 1 on success, 0 on error */
+int appendHistoryLine(datafile_definition datafile, int argc, char **argv)
+{
+  int i;
+  char txt[10000], txt2[1000];
+  time_t curtime;
+  txt[0] = 0;
+  for(i = 0; i < argc; i++) {
+    if(strchr(argv[i], ' ') == NULL) {
+      strcat(txt, argv[i]);
+    }else {
+      strcat(txt, "\"");
+      strcat(txt, argv[i]);
+      strcat(txt, "\"");
+    }
+    if(i != argc-1)
+      strcat(txt, " ");
+  }
+  /*  strcpy(txt2, asctime(gmtime(time(NULL)))); */
+  curtime = time(NULL);
+  strcpy(txt2, asctime(gmtime(&curtime))); 
+  if(txt2[strlen(txt2)-1] == '\n')
+    txt2[strlen(txt2)-1] = 0;
+  if(txt2[strlen(txt2)-1] == '\r')
+    txt2[strlen(txt2)-1] = 0;
+  if(txt2[strlen(txt2)-1] == '\n')
+    txt2[strlen(txt2)-1] = 0;
+
+  /*  printf("Time stamp: '%s'\n", txt2); */
+
+  if(datafile.format == FITS_format)
+    return appendHistoryLineFITS(datafile, txt, txt2);
+  else {
+    fprintf(stderr, "appendHistoryLine: Writing a history is not supported in this file format.\n");
+    return 0;
+  }
 }
