@@ -204,20 +204,25 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     # after sifting.
     histogram_dir = os.path.join(fold_dir, 'CANIDATE_HISTOGRAMS')
     os.mkdir(histogram_dir)
-    if unsifted_candidates: 
-        plot_p_histogram(unsifted_candidates, 
-            os.path.join(histogram_dir, 'before_sifting_periods.pdf'))
-        plot_f_histogram(unsifted_candidates,
-            os.path.join(histogram_dir, 'before_sifting_frequencies.pdf'))
-        plot_p_dm(unsifted_candidates, bright_pulsars, 
-            os.path.join(histogram_dir, 'before.pdf'))
-    if sifted_candidates: 
-        plot_p_histogram(sifted_candidates, 
-            os.path.join(histogram_dir, 'after_sifting_periods.pdf'))
-        plot_f_histogram(sifted_candidates,
-            os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
-        plot_p_dm(sifted_candidates, bright_pulsars, 
-            os.path.join(histogram_dir, 'after.pdf'))
+    try:
+        if unsifted_candidates: 
+            plot_p_histogram(unsifted_candidates, 
+                os.path.join(histogram_dir, 'before_sifting_periods.pdf'))
+            plot_f_histogram(unsifted_candidates,
+                os.path.join(histogram_dir, 'before_sifting_frequencies.pdf'))
+            plot_p_dm(unsifted_candidates, bright_pulsars, 
+                os.path.join(histogram_dir, 'before.pdf'))
+        if sifted_candidates: 
+            plot_p_histogram(sifted_candidates, 
+                os.path.join(histogram_dir, 'after_sifting_periods.pdf'))
+            plot_f_histogram(sifted_candidates,
+                os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
+            plot_p_dm(sifted_candidates, bright_pulsars, 
+                os.path.join(histogram_dir, 'after.pdf'))
+    except AttributeError, e:
+        print 'You are probably using the wrong version of Matplotlib.'
+        # TODO : print traceback without crashing
+        print 'No plots created.'
 
     # spit out a file with the candidates that survived the sifting
     txt_out_dir = os.path.join(fold_dir, 'SIFTED_CANDIDATES')

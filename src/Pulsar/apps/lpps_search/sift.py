@@ -124,7 +124,7 @@ def filter_on_effective_time_resolution(candidates, metadata, n_bins):
         if c.p / intra_channel_smearing > n_bins:
             out_cand_list.append(c)
     print 'Filtering on effective time resolution:' 
-    print '  Removed %d out %d candidatesi.' % (
+    print '  Removed %d out %d candidates.' % (
         len(candidates) - len(out_cand_list), len(candidates))
     return out_cand_list 
             
@@ -136,8 +136,9 @@ def filter_on_effective_time_resolution(candidates, metadata, n_bins):
 def sift_accel_cands(cand_dir, basename, **kwargs): 
     '''Sift through the candidate pulsars found by accelsearch.'''
 
-    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 0)
-    minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0)
+    # TODO : fix the line below to move the DM to some central settings area
+    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 1)
+    minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 1)
     zaplist_file = kwargs.get('zaplist_file', '') 
     metadata = kwargs.get('metadata', None)
 
@@ -163,7 +164,7 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
     sifted_accelcands = []
     # TODO : fix the case where the script crashes because there are not
     # enough candidates.
-    for z_max, accel_cands in accel_cands_found_for.iteritems():
+    for z_max in accel_cands_found_for.keys():
         # Read all the acceleration candidates:
         files = glob.glob(os.path.join(cand_dir, 
             basename + '_DM*.*_ACCEL_%d' % z_max))
@@ -179,7 +180,7 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
             accel_cands = sifting.remove_duplicate_candidates(accel_cands)
         print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
-            accel_cands = sifting.remove_DM_problems(accel_cands, 2, dm_strs, 1.)
+            accel_cands = sifting.remove_DM_problems(accel_cands, 2, dm_strs, minimum_dm_cutoff)
         print 'Number of candidates %d' % len(accel_cands)        
         if accel_cands:
             # The PRESTO sifting.py module can crash if there are not enough

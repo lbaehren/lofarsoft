@@ -78,7 +78,7 @@ if __name__ == '__main__':
         if m:
             basenames.add(m.group('basename'))
     if len(basenames) > 1:
-        raise Exception('Could not unambigously determine basename.')
+        raise Exception('Could not unambiguously determine basename.')
     elif len(basenames) == 0:
         raise Exception('No files matching the expected subband nomenclature.')
     else:

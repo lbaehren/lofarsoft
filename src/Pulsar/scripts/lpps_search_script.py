@@ -297,6 +297,7 @@ def get_fourier_and_correct_commands(work_dir, basename, dm, bary_v, zap_file):
     # TODO : add zapbirds support (ask about zap files)
 
     cmds = ['cd %s' % work_dir]
+    cmds.append('cp %s %s' % (zap_file, work_dir))
 
     dat_file = basename + '_DM%.2f' % dm + '.dat'
     fft_file = basename + '_DM%.2f' % dm + '.fft'
@@ -306,10 +307,11 @@ def get_fourier_and_correct_commands(work_dir, basename, dm, bary_v, zap_file):
     cmds.append(get_command('realfft', {'-outdir' : '.'}, [dat_file]))
     
     # Run zapbirds if zap_file is available
+    tmp = os.path.split(zap_file)[1]
     if zap_file:
         cmds.append(get_command('zapbirds', {
                 '-zap' : '',
-                '-zapfile' : zap_file,
+                '-zapfile' : tmp,
                 '-baryv' : '%6g' % bary_v,
             }, [fft_file])
         )
@@ -949,7 +951,7 @@ if __name__ == '__main__':
         help='Keep dedispersed timeseries around.')
     parser.add_option('--nf', metavar='NO_FOLD', default=False, 
         action='store_true', dest='no_fold')
-    
+ 
     options, args = parser.parse_args()
     N_CORES = options.ncores
 
@@ -993,9 +995,12 @@ if __name__ == '__main__':
         format='%(asctime)-15s - %(name)s - %(levelname)s - %(message)s',
         level=logging.DEBUG,
     ) 
+
+    zap_file = os.path.abspath(options.zap_file)
+
     t_start = time.time()
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
-        options.rfi_file, options.zap_file, options.rfi_dir)  
+        options.rfi_file, zap_file, options.rfi_dir)  
 
     ddplans = []
     # The number of subbands defaults to being the number of channels in the
