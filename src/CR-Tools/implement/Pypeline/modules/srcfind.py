@@ -6,6 +6,7 @@
 #import pycrtools
 import numpy as np
 from numpy import sin, cos, pi
+from scipy.optimize import brute, fmin
 
 c = 299792458.0 # speed of ligth in m/s
 twopi = 2 * pi
@@ -537,6 +538,69 @@ def directionFromAllTriangles(positions, times):
 #    print '# Uncertainty el = %f' %u_el
     print '# Total triangles = %d, valid = %d' %(count, validcount)
     return (az_avg, el_avg)
+
+def timeDelayAzElStandard(position, az, el):
+    """Calculate arrival time delays at a set of antennas for
+    a signal comming from Azimuth *az* measured Westwards positive from
+    North and Elevation *el* measured positive from 0 at the horizon to pi/2
+    at zenith.
+
+    *posision* should be a NumPy array of shape (nantennas, 3) where first
+    coordinate is East, second North and third Up in meters.
+
+    Returns time delays in seconds.
+    """
+    
+    # Calculate Cartesian direction
+    x = -1.0 * np.cos(el) * np.sin(az)
+    y = np.cos(el) * np.cos(az)
+    z = np.sin(el)
+
+    direction = np.array([x,y,z])
+
+    return (-1.0 / c) * np.dot(position, direction)
+
+def findDirectionBruteAzElStandard(positions, delays, Ns = 100):
+    """Find direction of plane wave source based on time *delays* measured
+    at given *positions* using a brute force grid search.
+
+    *posision* should be a NumPy array of shape (nantennas, 3) where first
+    coordinate is East, second North and third Up in meters.
+
+    *delays* should be a one dimensional NumPy array of length nantennas
+    with the values in seconds.
+
+    Returns an array with Azimuth *az* measured Westwards positive from
+    North and Elevation *el* measured positive from 0 at the horizon to pi/2
+    at zenith.
+    """
+
+    def inner(params):
+        az, el = params
+        return np.sum(np.square(timeDelayAzElStandard(positions, az, el)-delays))
+
+    return brute(inner, ranges=((0., 2*np.pi), (0., np.pi/2)), Ns = Ns)
+
+def findDirectionFminAzElStandard(positions, delays):
+    """Find direction of plane wave source based on time *delays* measured
+    at given *positions* using a downhill simplex algorithm.
+
+    *posision* should be a NumPy array of shape (nantennas, 3) where first
+    coordinate is East, second North and third Up in meters.
+
+    *delays* should be a one dimensional NumPy array of length nantennas
+    with the values in seconds.
+
+    Returns an array with Azimuth *az* measured Westwards positive from
+    North and Elevation *el* measured positive from 0 at the horizon to pi/2
+    at zenith.
+    """
+    
+    def inner(params):
+        az, el = params
+        return np.sum(np.square(timeDelayAzElStandard(positions, az, el)-delays))
+
+    return fmin(inner, x0=np.array([np.pi, np.pi/4]))
 
 # Execute doctests if module is executed as script
 if __name__ == "__main__":
