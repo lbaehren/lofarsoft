@@ -408,7 +408,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
 
-  dummy_int = (datafile->mjd - (float)dummy_int)*(24.0*3600.0);
+  dummy_int = (int)((datafile->mjd - (float)dummy_int)*86400.0 + 0.5);
   if(fits_write_key(datafile->fits_fptr, TINT, "STT_SMJD", &dummy_int, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
