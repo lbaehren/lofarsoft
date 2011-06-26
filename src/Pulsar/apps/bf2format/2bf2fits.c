@@ -1504,8 +1504,6 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
    }
    if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose)) return 0;
    if(!writePSRFITSHeader(&fout, application.verbose)) return 0;
-   if(!appendHistoryLine(fout, argc, argv))
-     return 0;
 
    if(convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
     return 0;
@@ -1564,8 +1562,6 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose))
 	return 0;
       if(!writePSRFITSHeader(&fout, application.verbose))
-	return 0;
-      if(!appendHistoryLine(fout, argc, argv))
 	return 0;
 
       /* convert */

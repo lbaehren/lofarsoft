@@ -408,6 +408,8 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
 
+  /*  dummy_int = (datafile->mjd - (float)dummy_int)*(24.0*3600.0); */
+  /* Make sure the second is rounded to the nearest integer */
   dummy_int = (int)((datafile->mjd - (float)dummy_int)*86400.0 + 0.5);
   if(fits_write_key(datafile->fits_fptr, TINT, "STT_SMJD", &dummy_int, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
@@ -427,6 +429,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
 
   /* Create some other unused tables */
 
+  /*
   if(fits_create_tbl(datafile->fits_fptr, BINARY_TBL, 0, 0, NULL, NULL, NULL, "HISTORY", &status)  != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot create table.\n");
     return 0;
@@ -451,7 +454,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot create table.\n");
     return 0;
   }
-  
+  */
 
   /* Create the subint header */
 
@@ -1158,106 +1161,3 @@ int writePulsePSRData(datafile_definition datafile, long pulsenr, int polarizati
 }
 
 
-/* Adds a line to the history table and writes out the command line. 
-   Returns 1 on success, 0 on error */
-int appendHistoryLineFITS(datafile_definition datafile, char *txt_cmd, char *txt_date)
-{
-  int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
-  int colnum_date, colnum_cmd, nstart, n;
-  long nrows;
-  char txt2[1000], *txt_ptr, *tst;
-  if(fits_movnam_hdu(datafile.fits_fptr, BINARY_TBL, "HISTORY_NOT_PSRFITS", 0, &status)) {
-    fprintf(stderr, "ERROR appendHistoryLineFITS: Cannot move to history HDU.\n"); 
-    return 0;
-  } 
-  if(fits_get_colnum (datafile.fits_fptr, CASEINSEN, "DATE_PRO", &colnum_date, &status)) { 
-    fprintf(stderr, "ERROR appendHistoryLineFITS: No DATE_PRO column is history table?\n"); 
-    return 0;
-  }
-  if(fits_get_colnum (datafile.fits_fptr, CASEINSEN, "PROC_CMD", &colnum_cmd, &status)) { 
-    fprintf(stderr, "ERROR appendHistoryLineFITS: No PROC_CMD column is history table?\n"); 
-    return 0;
-  }
-
-
-
-  txt_ptr = txt_cmd;
-  nstart = 0;
-  do {
-    fits_get_num_rows(datafile.fits_fptr, &nrows, &status);
-    /*    printf("Before: %ld rows in history table.\n", nrows); */
-    if(fits_insert_rows(datafile.fits_fptr, nrows, 1, &status)) { 
-      fprintf(stderr, "ERROR appendHistoryLineFITS: Cannot add a row to history table\n"); 
-      fits_report_error(stderr, status); /* print any error message */
-      return 0;
-    }
-    fits_get_num_rows(datafile.fits_fptr, &nrows, &status); 
-    /*printf("After: %ld rows in history table.\n", nrows); */
-
-    if(nstart == 0) {
-      /*      printf("XXXX '%s'\n", txt_date); */
-      tst = txt_date;
-      if(fits_write_col(datafile.fits_fptr, TSTRING, colnum_date, nrows, 1, 1, &tst, &status) != 0) {
-	fprintf(stderr, "ERROR appendHistoryLineFITS: Error writing data to history table.\n");
-	fits_report_error(stderr, status); 
-	return 0;
-      }
-    }
-
-    strncpy(txt2, txt_ptr, 80);
-    n = strlen(txt2);
-    txt_ptr += n;
-    nstart += n;
-    /*    fprintf(stderr, "Adding: '%s'\n", txt2); */
-    tst = txt2;
-    if(fits_write_col(datafile.fits_fptr, TSTRING, colnum_cmd, nrows, 1, 1, &tst, &status) != 0) {
-      fprintf(stderr, "ERROR appendHistoryLineFITS: Error writing data to history table.\n");
-      fits_report_error(stderr, status); 
-      return 0;
-    }
-    /*    printf("%d %d %d\n", nstart, n, (int)strlen(txt)); */
-  }while(nstart < strlen(txt_cmd));
-
-  return 1;
-}
-
-/* Adds a line to the history table and writes out the command
-   line. The file should be opened with write permission AND THE
-   HEADER SHOULD ALREADY BE WRITTEN OUT AND NOT BE MODIFIED ANYMORE.
-   Returns 1 on success, 0 on error */
-int appendHistoryLine(datafile_definition datafile, int argc, char **argv)
-{
-  int i;
-  char txt[10000], txt2[1000];
-  time_t curtime;
-  txt[0] = 0;
-  for(i = 0; i < argc; i++) {
-    if(strchr(argv[i], ' ') == NULL) {
-      strcat(txt, argv[i]);
-    }else {
-      strcat(txt, "\"");
-      strcat(txt, argv[i]);
-      strcat(txt, "\"");
-    }
-    if(i != argc-1)
-      strcat(txt, " ");
-  }
-  /*  strcpy(txt2, asctime(gmtime(time(NULL)))); */
-  curtime = time(NULL);
-  strcpy(txt2, asctime(gmtime(&curtime))); 
-  if(txt2[strlen(txt2)-1] == '\n')
-    txt2[strlen(txt2)-1] = 0;
-  if(txt2[strlen(txt2)-1] == '\r')
-    txt2[strlen(txt2)-1] = 0;
-  if(txt2[strlen(txt2)-1] == '\n')
-    txt2[strlen(txt2)-1] = 0;
-
-  /*  printf("Time stamp: '%s'\n", txt2); */
-
-  if(datafile.format == FITS_format)
-    return appendHistoryLineFITS(datafile, txt, txt2);
-  else {
-    fprintf(stderr, "appendHistoryLine: Writing a history is not supported in this file format.\n");
-    return 0;
-  }
-}
