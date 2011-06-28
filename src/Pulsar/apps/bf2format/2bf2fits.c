@@ -1508,6 +1508,8 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
    if(convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
     return 0;
 
+   closePSRData(&fout);
+
    for (j=0; j<SUBBANDS; j++) free (isfiles[j]);
 
   } // if (is_append == 1)
@@ -1573,12 +1575,12 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	    return 0;
 
       fclose(fin);
+      closePSRData(&fout);
     }
   }
   } // if (is_append == 0)
 
   closePSRData(&subintdata);
-  closePSRData(&fout);
 
   return 0;
 }

@@ -773,12 +773,12 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	return 0;
 
+      closePSRData(&fout);
       fclose(fin);
     }
   }
 
   closePSRData(&subintdata);
-  closePSRData(&fout);
 
   return 0;
 }
