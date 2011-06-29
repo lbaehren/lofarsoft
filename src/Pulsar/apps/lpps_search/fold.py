@@ -230,40 +230,39 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     candidates_out_file = os.path.join(txt_out_dir, 'sifted_candidates.txt')
     sifting.write_candlist(sifted_candidates, candidates_out_file)
 
-    if no_fold:
-        print 'Skipping the folding phase, exiting.'
-        sys.exit()
+    if not no_fold:
+        # using knowledge about the directory layout:
+        subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')
 
-    # using knowledge about the directory layout:
-    subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')
+        # construct all the folding commandlines
+        folding_commands = [['cd %s' % os.path.join(fold_dir, 'CORE_%d' % i)] for i in range(n_cores)]
+        for i, c in enumerate(sifted_candidates):
+            core_index = i % n_cores
+            l = fold(cand_dir, basename, c, fold_dir, subband_globpattern, 
+                mask_filename=mask_filename)
+            folding_commands[core_index].extend(l)
+        else:
+            pass
 
-    # construct all the folding commandlines
-    folding_commands = [['cd %s' % os.path.join(fold_dir, 'CORE_%d' % i)] for i in range(n_cores)]
-    for i, c in enumerate(sifted_candidates):
-        core_index = i % n_cores
-        l = fold(cand_dir, basename, c, fold_dir, subband_globpattern, 
-            mask_filename=mask_filename)
-        folding_commands[core_index].extend(l)
+        for core_index in range(n_cores):
+            try:
+                p = os.path.join(fold_dir, 'CORE_%d' % core_index) 
+                print 'making directory', p
+                os.mkdir(p)
+            except Exception, e:
+                print 'Cannot make per core folding output directories'
+                raise
+        pids = []
+        for i in range(n_cores):
+            script_filename = os.path.join(fold_dir, 'CORE_%d' % i, 'script.sh')
+            log_filename = os.path.join(fold_dir, 'CORE_%d' % i, 'log.txt')
+            pid = run_as_script(folding_commands[i], script_filename, log_filename)
+            pids.append(pid)    
+
+        for pid in pids:
+            pid.wait()
+        print 'DONE FOLDING'
+
     else:
-        pass
-
-    for core_index in range(n_cores):
-        try:
-            p = os.path.join(fold_dir, 'CORE_%d' % core_index) 
-            print 'making directory', p
-            os.mkdir(p)
-        except Exception, e:
-            print 'Cannot make per core folding output directories'
-            raise
-    pids = []
-    for i in range(n_cores):
-        script_filename = os.path.join(fold_dir, 'CORE_%d' % i, 'script.sh')
-        log_filename = os.path.join(fold_dir, 'CORE_%d' % i, 'log.txt')
-        pid = run_as_script(folding_commands[i], script_filename, log_filename)
-        pids.append(pid)    
-
-    for pid in pids:
-        pid.wait()
-    print 'DONE FOLDING'
-
+        print 'Skipping the folding phase, exiting.'
 
