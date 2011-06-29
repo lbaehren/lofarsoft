@@ -202,6 +202,7 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     bright_pulsars = knownpulsar.load_bright_pulsar_catalog()
     # Make histograms of candidate period and candidate frequency before and
     # after sifting.
+    
     histogram_dir = os.path.join(fold_dir, 'CANIDATE_HISTOGRAMS')
     os.mkdir(histogram_dir)
     try:

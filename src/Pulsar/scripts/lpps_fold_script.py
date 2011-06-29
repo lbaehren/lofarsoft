@@ -30,9 +30,9 @@ from lpps_search.util import MissingOptionException
 from lpps_search.util import MissingCommandLineOptionException
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 
-REQUIRED_OPTIONS = ['searchoutdir', 'subbdir', 'workdir',]
+REQUIRED_OPTIONS = ['searchoutdir', 'workdir',]
 OPTIONAL_OPTIONS = ['ncores']
-SUBB_PATTERN = re.compile(r'(?P<basename>\S+)\.sub\d{4}$')
+INF_PATTERN = r'(?P<basename>\S+)_DM(?P<dm>\d+\.\d{2})\.inf$'
 
 MINIMUM_DM_CUTOFF = 0
 N_CANDIDATES_CUTOFF = 20
@@ -67,12 +67,18 @@ if __name__ == '__main__':
             print 'You need to supply the --%s option' % k
             raise MissingCommandLineOptionException(k)
 
+    if not options.no_fold:
+        if options.subbdir == None:
+            print 'Folding needs the --subbdir option'
+            raise MissingCommandLineOptionException('subbdir')
+
     search_out_dir = os.path.abspath(options.searchoutdir)
 
     # figure out the basename for the observation
-    subbdir = os.path.abspath(options.subbdir)
-    basename = crawler.get_basename(subbdir, SUBB_PATTERN)
-    metadata = inf.inf_reader(os.path.join(subbdir, basename + '.sub.inf'))
+    if options.subbdir != None:
+        subbdir = os.path.abspath(options.subbdir)
+    else:
+        subbdir = ''
 
     # prepare working directory (for both candidates and folds in the end)
     work_dir = os.path.abspath(options.workdir)
@@ -98,6 +104,9 @@ if __name__ == '__main__':
         shutil.copy(os.path.join(search_accelsearch_dir, f), canddir)
     for f in os.listdir(search_inf_dir): 
         shutil.copy(os.path.join(search_inf_dir, f), canddir)
+
+    basename = crawler.get_basename(search_inf_dir, INF_PATTERN)
+    metadata = inf.inf_reader(os.path.join(search_inf_dir, basename + '_DM0.00.inf'))
     
     # reconstruct path to rfifind produced mask file
     rfifind_mask_file = os.path.join(search_out_dir, 'RFIFIND', 

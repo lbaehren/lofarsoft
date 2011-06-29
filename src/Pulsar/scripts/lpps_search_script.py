@@ -991,7 +991,10 @@ if __name__ == '__main__':
         level=logging.DEBUG,
     ) 
 
-    zap_file = os.path.abspath(options.zap_file)
+    if options.zap_file:
+        zap_file = os.path.abspath(options.zap_file)
+    else:
+        zap_file = ''
 
     t_start = time.time()
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
