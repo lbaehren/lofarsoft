@@ -67,6 +67,7 @@ from lpps_search.fold import get_folding_command_ke
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
+from lpps_search import crawler
 from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
@@ -450,14 +451,8 @@ class SearchRun(object):
     
     def determine_basename(self):
         '''Find the basename of this observation from raw data directory.'''
-        files = os.listdir(self.in_dir)
-        for f in files:
-            if f.endswith('.sub0000'):
-                basename = f[:-8]
-                break
-        else:
-            raise Exception('No %s.sub0000 file available.')
-        return basename
+        SUBB_PATTERN = re.compile(r'(?P<basename>\S+)\.sub\d{4}$')
+        return crawler.get_basename(self.in_dir, SUBB_PATTERN)
 
     def determine_channel_frequency_range_mapping(self):
         '''

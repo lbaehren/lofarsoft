@@ -71,18 +71,7 @@ if __name__ == '__main__':
 
     # figure out the basename for the observation
     subbdir = os.path.abspath(options.subbdir)
-    files = os.listdir(subbdir)
-    basenames = set()
-    for f in files:
-        m = SUBB_PATTERN.match(f)
-        if m:
-            basenames.add(m.group('basename'))
-    if len(basenames) > 1:
-        raise Exception('Could not unambiguously determine basename.')
-    elif len(basenames) == 0:
-        raise Exception('No files matching the expected subband nomenclature.')
-    else:
-        basename = basenames.pop()
+    basename = crawler.get_basename(subbdir, SUBB_PATTERN)
     metadata = inf.inf_reader(os.path.join(subbdir, basename + '.sub.inf'))
 
     # prepare working directory (for both candidates and folds in the end)

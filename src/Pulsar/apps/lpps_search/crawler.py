@@ -26,8 +26,6 @@ FILETYPE_SUFFIXES = {
     'RFIFIND_STATS' : r'^_rfifind.stats', 
 
     'PFD_BESTPROF_PSRNAME' : '^_DM(?P<dm>\d+\.\d{2})_(?P<pulsar_name>\S+)\.pfd\.bestprof$',
-#    'PFD_BESTPROF_PSRNAME' : '^_DM(?P<dm>\d+\.\d{2})_(?P<pulsar_name>\S)',
-    
 }
 
 FILETYPE_PATTERNS = {}
@@ -108,7 +106,6 @@ def find_single_pulse_search_output(path, basename, **kwargs):
         suffix = f[L:]
         match = FILETYPE_PATTERNS['SINGLEPULSE'].match(suffix)
         match2 = FILETYPE_PATTERNS['INF'].match(suffix)
-#        print match, match2
 
         if match:
             dm = float(match.group('dm'))
@@ -163,6 +160,27 @@ def find_pfd_bestprof(path, basename, **kwargs):
             except KeyError, e:
                 out[match.group('pulsar_name')] = [f]
     return out
+
+def get_basename(path, regexp):
+    '''
+    Find the basename for the PRESTO files using the supplied regexp.
+    '''
+    pattern = re.compile(regexp)
+    files = os.listdir(path)
+    basenames = set()
+    for f in files:
+        m = pattern.match(f)
+        if m:
+            basenames.add(m.group('basename'))
+    if len(basenames) > 1:
+        raise Exception('Could not unambiguously determine basename.')
+    elif len(basenames) == 0:
+        raise Exception('No files matching the expected subband nomenclature.')
+    else:
+        basename = basenames.pop()
+
+    return basename
+    
 
 if __name__ == '__main__':
     # some non formalized self tests:
