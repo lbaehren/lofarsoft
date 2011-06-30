@@ -149,24 +149,9 @@ char *getNextFilenameFromList(patrickSoftApplication *application, char **argv)
 }
 
 
-void mjd2date(long double mjd, int *year, int *month, int *day, int *hour, int *minute, float *seconds)
+void internal_mjd_A_to_year_month_day(long Z, int *year, int *month, int *day)
 {
-  long A, B, C, D, E, Z, a1, a2;
-  double F;
-  /*
-    1957 4.81 oct = 2436116.31
-    333 27.5 jan = 1842713.00
-  */
-  double JD = mjd + 2400000.5;
-  /* Actually, this doesn't make sense. MJD XXXX.0 should be midnight,
-     XXXX.5 afternoon, but maybe only in astronomy? Different
-     definitions of MJD around? */
-  JD += 0.5;
-  int sign = 1;
-  if(JD < 0)
-    sign = -1;
-  Z = sign*floor(sign*JD);
-  F = JD - Z;
+  long A, B, C, D, E, a1, a2;
   A = Z;
   if(Z >= 2299161)
     {
@@ -180,9 +165,6 @@ void mjd2date(long double mjd, int *year, int *month, int *day, int *hour, int *
   E = (B-D)/30.6001;
   a1 = 30.6001*E;
   *day = B - D - a1;
-  *hour = F*24;
-  *minute = (F-(*hour)/24.0)*24*60.0;
-  *seconds = (F-(*hour+(*minute)/60.0)/24.0)*24*60.0*60.0;
   if(E < 14)
     *month=E - 1;
   else
@@ -195,52 +177,108 @@ void mjd2date(long double mjd, int *year, int *month, int *day, int *hour, int *
     *year -= 1;
 }
 
-
 /* Converts a floating point into a string with hours, minutes and
    seconds. The number should be in hours (for instance 12.0 ->
    12:00:00) or in degrees (-30.5 -> -30:30:00). precision states the
-   number of decimals in the seconds. */
+   number of decimals in the seconds. If precision is negative, the
+   output is in minute precision only. */
 void converthms_string(char *hms, double number, int precision)
 {
-  char dummy_str[100];
-  int i;
+  char dummy_str[100], dummy_str2[100];
+  int hour, minute;
   if(number < 0) {
     sprintf(hms, "-");
     number *= -1;
   }else {
     hms[0] = 0;
   }
-  i = number;
-  number -= i;
+  hour = number;
+  number -= hour;
   number *= 60;
-  sprintf(dummy_str, "%02d:", i);
-  strcat(hms, dummy_str);
-  i = number;
-  number -= i;
+  minute = number;
+  number -= minute;
   number *= 60;
-  sprintf(dummy_str, "%02d:", i);
-  strcat(hms, dummy_str);
-  i = number;
-  number -= i;
-  sprintf(dummy_str, "%02d", i);
-  strcat(hms, dummy_str);
-  if(precision > 0) {
-    sprintf(dummy_str, "%.20f", number);
-    if(precision > 20) {
-      fprintf(stderr, "converthms_string: WARNING, TRUNCATING PRECISION TO 20 digits\n");
-      precision = 20;
+
+  if(precision < 0) {
+    if(number >= 30) {
+      minute += 1;
+      if(minute == 60) {
+	minute = 0;
+	hour += 1;
+      }
     }
-    dummy_str[precision+2] = 0;
-    strcat(hms, dummy_str+1);
+    sprintf(hms, "%02d:%02d", hour, minute);
+  }else {
+    if(precision == 0)
+      sprintf(dummy_str2, "%%0%d.%df", 2, precision);
+    else
+      sprintf(dummy_str2, "%%0%d.%df", precision+3, precision);
+    sprintf(dummy_str, dummy_str2, number);
+    
+    if(dummy_str[0] == '6' && dummy_str[1] == '0') {
+      dummy_str[0] = '0';
+      dummy_str[1] = '0';
+      minute += 1;
+      if(minute == 60) {
+	minute = 0;
+	hour += 1;
+      }
+    }
+    sprintf(hms, "%02d:%02d:%s", hour, minute, dummy_str);
   }
 }
 
+/* 
+  Type 1: YYYY-MM-DDXHH:MM:SS
+
+  X = separator
+  precision gives the number of decimal places in the seconds.
+*/
+void mjd2dateString(long double mjd, char *string, int precision, int type, char *separator)
+{
+  long Z;
+  long double F;
+  char timestr[100];
+  int year, month, day;
+  /*
+    1957 4.81 oct = 2436116.31
+    333 27.5 jan = 1842713.00
+  */
+  long double JD = mjd + 2400000.5;
+  /* Actually, this doesn't make sense. MJD XXXX.0 should be midnight,
+     XXXX.5 afternoon, but maybe only in astronomy? Different
+     definitions of MJD around? */
+  JD += 0.5;
+  int sign = 1;
+  if(JD < 0)
+    sign = -1;
+  Z = sign*floor(sign*JD);
+  F = JD - Z;
+
+  converthms_string(timestr, F*24.0, precision);
+  if(timestr[0] == '2' && timestr[1] == '4') {
+    /* Time after rounding is 24:00:00, set to 0 hours and add a day. */
+    timestr[0] = '0';
+    timestr[1] = '0';
+    internal_mjd_A_to_year_month_day(Z+1, &year, &month, &day);
+  } else {
+    internal_mjd_A_to_year_month_day(Z, &year, &month, &day);
+  }
+
+
+  if(type == 1) {
+    sprintf(string, "%04d-%02d-%02d%s%s", year, month, day, separator, timestr);
+  }else {
+    fprintf(stderr, "ERROR: Unknown type selected in mjd2dateString!");
+    return;
+  }
+}
 
 int writePSRFITSHeader(datafile_definition *datafile, int verbose)
 {
   int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
   char dummy_txt[2000], dummy_txt2[2000], dummy_txt3[2000];
-  int dummy_int;
+  int dummy_int, dummy_int2;
   float dummy_float;
   double dummy_double;
   long i, j;
@@ -292,14 +330,15 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   }
 
 
-
-  mjd2date(datafile->mjd, &year, &month, &day, &hours, &minutes, &seconds);
-  sprintf(dummy_txt, "%d-%02d-%02dT%02d:%02d:%02.0f", year, month, day, hours, minutes, seconds);
+  mjd2dateString(datafile->mjd, dummy_txt, 0, 1, "T");
+  /*  mjd2date(datafile->mjd, &year, &month, &day, &hours, &minutes, &seconds);
+      sprintf(dummy_txt, "%d-%02d-%02dT%02d:%02d:%02.0f", year, month, day, hours, minutes, seconds);*/
   /*  printf("Written date as: '%s'\n", dummy_txt); */
   if(fits_write_key(datafile->fits_fptr, TSTRING, "DATE-OBS", dummy_txt, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
+
 
   converthms_string(dummy_txt, (12.0/M_PI)*datafile->ra, 0);
   if(fits_write_key(datafile->fits_fptr, TSTRING, "RA", dummy_txt, "", &status) != 0) {
@@ -408,23 +447,21 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
 
-  /*  dummy_int = (datafile->mjd - (float)dummy_int)*(24.0*3600.0); */
   /* Make sure the second is rounded to the nearest integer */
-  dummy_int = (int)((datafile->mjd - (float)dummy_int)*86400.0 + 0.5);
-  if(fits_write_key(datafile->fits_fptr, TINT, "STT_SMJD", &dummy_int, "", &status) != 0) {
+  dummy_int2 = (int)((datafile->mjd - (double)dummy_int)*86400.0 + 0.5);
+  if(fits_write_key(datafile->fits_fptr, TINT, "STT_SMJD", &dummy_int2, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
-  dummy_int = datafile->mjd;
-  dummy_float = (datafile->mjd - (float)dummy_int)*(24.0*3600.0);
-  dummy_int = dummy_float;
-  dummy_float -= dummy_int;
+  dummy_double = (datafile->mjd - (double)dummy_int)*(24.0*3600.0);
+  dummy_double -= dummy_int2;
 
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "STT_OFFS", &dummy_float, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "STT_OFFS", &dummy_double, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
+
   
 
   /* Create some other unused tables */
@@ -558,7 +595,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
   dummy_double = datafile->dm;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "DM", &dummy_double, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "DM", &dummy_double, "", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
