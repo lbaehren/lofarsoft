@@ -200,9 +200,9 @@ endif (numpy_version_test_output)
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-if (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
+if (NUMPY_INCLUDES AND NUMPY_LIBRARIES AND F2PY_EXECUTABLE)
   set (HAVE_NUMPY TRUE)
-else (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
+else (NUMPY_INCLUDES AND NUMPY_LIBRARIES AND F2PY_EXECUTABLE)
   set (HAVE_NUMPY FALSE)
   if (NOT NUMPY_FIND_QUIETLY)
     if (NOT NUMPY_INCLUDES)
@@ -211,14 +211,18 @@ else (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
     if (NOT NUMPY_LIBRARIES)
       message (STATUS "Unable to find NUMPY library files!")
     endif (NOT NUMPY_LIBRARIES)
+    if (NOT F2PY_EXECUTABLE)
+      message(STATUS "Unable to find F2PY executable!")
+    endif (NOT F2PY_EXECUTABLE)
   endif (NOT NUMPY_FIND_QUIETLY)
-endif (NUMPY_INCLUDES AND NUMPY_LIBRARIES)
+endif (NUMPY_INCLUDES AND NUMPY_LIBRARIES AND F2PY_EXECUTABLE)
 
 if (HAVE_NUMPY)
   if (NOT NUMPY_FIND_QUIETLY)
     message (STATUS "Found components for NUMPY")
     message (STATUS "NUMPY_INCLUDES  = ${NUMPY_INCLUDES}")
     message (STATUS "NUMPY_LIBRARIES = ${NUMPY_LIBRARIES}")
+    message (STATUS "F2PY_EXECUTABLE = ${F2PY_EXECUTABLE}")
   endif (NOT NUMPY_FIND_QUIETLY)
 else (HAVE_NUMPY)
   if (NUMPY_FIND_REQUIRED)
@@ -246,3 +250,94 @@ set (CMAKE_FIND_LIBRARY_PREFIXES ${TMP_FIND_LIBRARY_PREFIXES} CACHE STRING
   FORCE
   )
 
+## -----------------------------------------------------------------------------
+## Macro to generate a Python interface module from one or more Fortran sources
+##
+## Usage: add_f2py_module(<module-name> <src1>..<srcN> DESTINATION <install-dir>
+##
+macro (add_f2py_module _name)
+
+  # Precondition check.
+  if(NOT F2PY_EXECUTABLE)
+    message(FATAL_ERROR "add_f2py_module: f2py executable is not available!")
+  endif(NOT F2PY_EXECUTABLE)
+
+  # Parse arguments.
+  string(REGEX REPLACE ";?DESTINATION.*" "" _srcs "${ARGN}")
+  string(REGEX MATCH "DESTINATION;.*" _dest_dir "${ARGN}")
+  string(REGEX REPLACE "^DESTINATION;" "" _dest_dir "${_dest_dir}")
+
+  # Sanity checks.
+  if(_srcs MATCHES "^$")
+    message(FATAL_ERROR "add_f2py_module: no source files specified")
+  endif(_srcs MATCHES "^$")
+  if(_dest_dir MATCHES "^$" OR _dest_dir MATCHES ";")
+    message(FATAL_ERROR "add_f2py_module: destination directory invalid")
+  endif(_dest_dir MATCHES "^$" OR _dest_dir MATCHES ";")
+
+  # Get the compiler-id and map it to compiler vendor as used by f2py.
+  # Currently, we only check for GNU, but this can easily be extended. 
+  # Cache the result, so that we only need to check once.
+  if(NOT F2PY_FCOMPILER)
+    if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+      if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+        set(_fcompiler "gnu95")
+      else(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+        set(_fcompiler "gnu")
+      endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+    else(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+      set(_fcompiler "F2PY_FCOMPILER-NOTFOUND")
+    endif(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    set(F2PY_FCOMPILER ${_fcompiler} CACHE STRING
+      "F2PY: Fortran compiler type by vendor" FORCE)
+    if(NOT F2PY_FCOMPILER)
+      message(STATUS "[F2PY]: Could not determine Fortran compiler type. "
+                     "Troubles ahead!")
+    endif(NOT F2PY_FCOMPILER)
+  endif(NOT F2PY_FCOMPILER)
+
+  # Set f2py compiler options: compiler vendor and path to Fortran77/90 compiler.
+  if(F2PY_FCOMPILER)
+    set(_fcompiler_opts "--fcompiler=${F2PY_FCOMPILER}")
+    list(APPEND _fcompiler_opts "--f77exec=${CMAKE_Fortran_COMPILER}")
+    if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+      list(APPEND _fcompiler_opts "--f90exec=${CMAKE_Fortran_COMPILER}")
+    endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+  endif(F2PY_FCOMPILER)
+
+  # Make the source filenames absolute.
+  set(_abs_srcs)
+  foreach(_src ${_srcs})
+    get_filename_component(_abs_src ${_src} ABSOLUTE)
+    list(APPEND _abs_srcs ${_abs_src})
+  endforeach(_src ${_srcs})
+
+  # Get a list of the include directories.
+  # The f2py --include_paths option, used when generating a signature file,
+  # needs a colon-separated list. The f2py -I option, used when compiling
+  # the sources, must be repeated for every include directory.
+  get_directory_property(_inc_dirs INCLUDE_DIRECTORIES)
+  string(REPLACE ";" ":" _inc_paths "${_inc_dirs}")
+  set(_inc_opts)
+  foreach(_dir ${_inc_dirs})
+    list(APPEND _inc_opts "-I${_dir}")
+  endforeach(_dir)
+
+  # Define the command to generate the Fortran to Python interface module. The
+  # output will be a shared library that can be imported by python.
+  add_custom_command(OUTPUT ${_name}.so
+    COMMAND ${F2PY_EXECUTABLE} --quiet -m ${_name} -h ${_name}.pyf
+            --include_paths ${_inc_paths} --overwrite-signature ${_abs_srcs}
+    COMMAND ${F2PY_EXECUTABLE} --quiet -m ${_name} -c ${_name}.pyf
+            ${_fcompiler_opts} ${_inc_opts} ${_abs_srcs}
+    DEPENDS ${_srcs}
+    COMMENT "[F2PY] Building Fortran to Python interface module ${_name}")
+
+  # Add a custom target <name> to trigger the generation of the python module.
+  add_custom_target(${_name} ALL DEPENDS ${_name}.so)
+
+  # Install the python module
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_name}.so
+    DESTINATION ${_dest_dir})
+
+endmacro (add_f2py_module)

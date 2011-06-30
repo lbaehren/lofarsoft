@@ -170,7 +170,9 @@ find_path (G2C_INCLUDES g2c.h
 ## Library
 
 find_library (G2C_LIBRARY g2c
-  PATHS ${lib_locations}
+  PATHS
+  ${lib_locations}
+  /usr/lib64/gcc-lib/x86_64-suse-linux/3.3.3-hammer
   NO_DEFAULT_PATH
   )
 

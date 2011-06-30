@@ -38,7 +38,7 @@ endif (LUS_ROOT)
 option (ANAAMIKA_BUILD_TESTS       "Build the test programs?"              YES )
 option (ANAAMIKA_ENABLE_TESTING    "Build the test programs?"              YES )
 option (ANAAMIKA_VERBOSE_CONFIGURE "Verbose output during configuration?"  NO  )
-option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
+option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     YES )
 option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 ## ==============================================================================
@@ -58,6 +58,7 @@ set (bdsm_cmake_modules
   PGPLOT
   Python
   WCSLIB
+  X11
   )
 
 include_find_module (${bdsm_cmake_modules} ${ANAAMIKA_VERBOSE_CONFIGURE})
@@ -88,6 +89,10 @@ if (ANAAMIKA_ENABLE_TESTING)
   enable_testing() 
 endif (ANAAMIKA_ENABLE_TESTING)
 
+# Set Fortran include directories and compile flags.
+include_directories (${CMAKE_SOURCE_DIR}/implement/fBDSM/includes)
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC -fno-second-underscore")
+
 ## ==============================================================================
 ##
 ##  Project subdirectories
@@ -95,4 +100,5 @@ endif (ANAAMIKA_ENABLE_TESTING)
 ## ==============================================================================
 
 add_subdirectory (implement)
-add_subdirectory (scripts)
+add_subdirectory (apps)
+#add_subdirectory (scripts)

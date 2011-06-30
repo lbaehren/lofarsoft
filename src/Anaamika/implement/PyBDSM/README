@@ -1,0 +1,15 @@
+Originally, this dir had 
+ |
+ |--- port3
+ |
+ |--- minpack
+ |
+ |--- bdsm python modules
+ |
+ |--- all the c++ and .h files here itself
+
+Now, the c++ and their .h files are in the directory c++ and the python stuff are in the dir python. 
+
+Hence the CMakeLists file here needs to be modified for that.
+
+We also need to create _pytesselate.so and _py2fbdsm.so and the fortran files for these r now in ../fBDSM/wout_pgplot/
