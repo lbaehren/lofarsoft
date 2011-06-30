@@ -96,7 +96,7 @@ def directionFromThreeAntennas(positions, times):
 
     r=np.sqrt(signal[0]**2+signal[1]**2+signal[2]**2)
 
-    error += abs(r1-1.0)  # Make sure the normalized vector is really normalized, if not take it as error
+    error += abs(r-1.0)  # Make sure the normalized vector is really normalized, if not take it as error
     signal /= r
     signal2 /= r
     
