@@ -137,7 +137,7 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
     '''Sift through the candidate pulsars found by accelsearch.'''
 
     # TODO : fix the line below to move the DM to some central settings area
-    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 1)
+    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 0)
     minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 1)
     zaplist_file = kwargs.get('zaplist_file', '') 
     metadata = kwargs.get('metadata', None)
@@ -231,7 +231,10 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
     if n_candidates_cutoff:
         # We want an integer that is larger than 0 if a cutoff is specified.
         assert n_candidates_cutoff > 0 and (type(n_candidates_cutoff) == type(1))
+        print 'Applying a cutoff on the number of candidates fo %d' % n_candidates_cutoff
         sifted_accelcands = sifted_accelcands[:n_candidates_cutoff]
+    else:
+        print 'Not applying a cutoff on the number of candidates.'
        
     return unsifted_accelcands, sifted_accelcands 
 
