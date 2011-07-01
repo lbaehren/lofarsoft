@@ -347,7 +347,6 @@ def print_opts(grouped_opts_list, img, banner=None):
                         # value is non-default
                         v1 = dc
                         v2 = nc
-                    width_par_val = minwidth
                     if isinstance(val, str):
                         valstr = v1 + repr(val) + v2
                         width_par_val = max(minwidth, len(k) + len(str(val)) + 7)
@@ -365,7 +364,7 @@ def print_opts(grouped_opts_list, img, banner=None):
                     fmt = '  ' + '%' + str(minwidth) + 's' + infix + '%44s'
                     parvalstr = sc + k + nc + ' ..'
                     if "'" in valstr:
-                        len_without_formattng = len(k) + len(str(val)) + 7
+                        len_without_formatting = len(k) + len(str(val)) + 7
                     else:
                         len_without_formatting = len(k) + len(str(val)) + 6
                     for i in range(len_without_formatting, minwidth):

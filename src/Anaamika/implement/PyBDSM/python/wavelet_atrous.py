@@ -222,6 +222,7 @@ class Op_wavelet_atrous(Op):
         opts['bbs_patches'] = img.opts.bbs_patches
         opts['filename'] = ''
         opts['output_all'] = img.opts.output_all
+        opts['verbose_fitting'] = img.opts.verbose_fitting
 
         ops = []
         for op in chain:

@@ -68,7 +68,6 @@ class Op_gausfit(Op):
           if size > maxsize and opts.split_isl:
 
             tosplit = misc.isl_tosplit(isl, img)
-            #print 'to split = ',tosplit
             if tosplit[0] > 0:
               n_subisl, sub_labels = tosplit[1], tosplit[2]
               gaul = []; fgaul = []
