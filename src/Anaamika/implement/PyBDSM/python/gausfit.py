@@ -53,7 +53,7 @@ class Op_gausfit(Op):
         opts = img.opts
         if opts.quiet == False and opts.verbose_fitting==False:
             bar.start()
-        min_maxsize = 50.0
+        min_maxsize = 10.0
         maxsize = opts.splitisl_maxsize
         if maxsize < min_maxsize: maxsize = min_maxsize
 

@@ -31,8 +31,8 @@ def isl_tosplit(isl, img):
     convex_def =  func.convexhull_deficiency(isl) 
     #print 'CONVEX = ',convex_def
 
-    import pylab as pl
     if img.opts.plot_islands:
+        import pylab as pl
         pl.figure()
         pl.suptitle('Island '+str(isl.island_id) + ' ' + repr(img.waveletimage))
         pl.subplot(2,2,1); pl.imshow(N.transpose(isl.image*~isl.mask_active), origin='lower', interpolation='nearest'); pl.title('Image')

@@ -8,6 +8,7 @@
 if ( $?APS_LOCAL == 0 ) then
     exec python $LOFARSOFT/release/lib/python/bdsm/pybdsm.py 
 else
+    source ${APS_LOCAL}/login/alias
     use Pythonlibs
     exec python $LOFARSOFT/release/lib/python/bdsm/pybdsm.py
 endif
