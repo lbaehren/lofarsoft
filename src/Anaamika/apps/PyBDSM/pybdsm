@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/csh -f
 #
 # This script simply starts the interactive PyBDSM 
 # IPython shell.
