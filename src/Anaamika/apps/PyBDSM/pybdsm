@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# This script simply starts the interactive PyBDSM 
+# IPython shell.
+#
+# Check whether called from CEPI/II. If so, init
+# the Python libraries before calling PyBDSM.
+if [ -z "$APS_LOCAL" ]; then
+    exec python $LOFARSOFT/release/lib/python/bdsm/pybdsm.py 
+else
+    exec use Pythonlibs
+    exec python $LOFARSOFT/release/lib/python/bdsm/pybdsm.py
+fi
