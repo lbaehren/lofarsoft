@@ -72,15 +72,16 @@ class Op_gausfit(Op):
             if tosplit[0] > 0:
               n_subisl, sub_labels = tosplit[1], tosplit[2]
               gaul = []; fgaul = []
-              # print '\n SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
+              if opts.verbose_fitting:
+                print 'SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
               for i_sub in range(n_subisl):
                 #print 'sub isl ',i_sub
                 islcp = isl.copy(img)
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
                 isl.islmean = 0.0
                 sgaul, sfgaul = self.fit_island(islcp, opts, img)
-                if bar.started: bar.increment()
                 gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+              if bar.started: bar.increment()
             else:
               if img.waveletimage:
                 isl.islmean = 0.0
