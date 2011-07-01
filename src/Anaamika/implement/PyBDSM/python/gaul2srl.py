@@ -55,7 +55,8 @@ class Op_gaul2srl(Op):
 
         img.source = sources
         img.nsrc = src_index+1
-        mylog.info("Grouped " + str(img.ngaus) + " gaussians into " + str(img.nsrc) + " sources")
+        mylogger.userinfo(mylog, "Number of sources formed from Gaussians",
+                          str(img.nsrc))
 
         if img.opts.output_fbdsm: opf.write_fbdsm_gaul(img)
 
@@ -244,7 +245,7 @@ class Op_gaul2srl(Op):
         import functions as func
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gaul2Srl  ")
-        dum = img.opts.beam[0]*img.opts.beam[1]
+        dum = img.beam[0]*img.beam[1]
         cdeltsq = img.wcs_obj.acdelt[0]*img.wcs_obj.acdelt[1]
         bmar_p = 2.0*pi*dum/(cdeltsq*fwsig*fwsig)
 
@@ -286,12 +287,13 @@ class Op_gaul2srl(Op):
         x1 = N.int(N.floor(mompara[1])); y1 = N.int(N.floor(mompara[2]))
         xind = slice(x1, x1+2, 1); yind = slice(y1, y1+2, 1)
         if img.opts.flag_smallsrc and (N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4):
-            mylog.debug('Mask = '+repr(mask[xind, yind])+'xind, yind, x1, y1 = '+repr(xind)+repr(yind)+repr(x1)+repr(y1))
+            mylog.debug('Island = '+str(isl.island_id))
+            mylog.debug('Mask = '+repr(mask[xind, yind])+'xind, yind, x1, y1 = '+repr(xind)+' '+repr(yind)+' '+repr(x1)+' '+repr(y1))
             import pylab as pl
             pl.subplot(1,2,1); pl.imshow(N.transpose(data*~rmask), origin='lower', interpolation='nearest')
             pl.subplot(1,2,2); pl.imshow(N.transpose(isl.image*~isl.mask_active), origin='lower', interpolation='nearest')
-            pl.suptitle('Image of M source where we crashed, island '+str(isl.island_id))
-            raise ValueError("Island number not in mask for gaus->source")
+            pl.suptitle('Image of M source where it crashed, island '+str(isl.island_id))
+            #raise ValueError("Island number not in mask for gaus->source")
         t=(mompara[1]-x1)/(x1+1-x1)  # in case u change it later
         u=(mompara[2]-y1)/(y1+1-y1)
         s_peak=(1.0-t)*(1.0-u)*subim_src[x1,y1]+t*(1.0-u)*subim_src[x1+1,y1]+ \
@@ -299,9 +301,9 @@ class Op_gaul2srl(Op):
         if (not img.opts.flag_smallsrc) and (N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4): 
             mylog.debug('Speak '+repr(s_peak)+'Mompara = '+repr(mompara))
             mylog.debug('x1, y1 : '+repr(x1)+', '+repr(y1))
-            import pylab as pl
-            pl.imshow(N.transpose(subim_src), origin='lower', interpolation='nearest')
-            pl.suptitle('Image of bad M source '+str(isl.island_id))
+            # import pylab as pl
+            # pl.imshow(N.transpose(subim_src), origin='lower', interpolation='nearest')
+            # pl.suptitle('Image of bad M source '+str(isl.island_id))
                                         # convert pixels to coords
         sra, sdec = img.pix2sky([mompara[1]+delc[0], mompara[2]+delc[1]])
         mra, mdec = img.pix2sky(posn)
@@ -422,7 +424,7 @@ class Source(object):
         self.island_id = island_id
         self.gaussians = gaussians
         self.rms_isl = img.islands[island_id].rms
-
+        self.jlevel = img.j
 
 Image.source = List(tInstance(Source), doc="List of Sources")
 Island.source = List(tInstance(Source), doc="List of Sources")

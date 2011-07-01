@@ -7,22 +7,21 @@ import pylab as pl
 
 def test_split(isl):
 
-  crms = isl.rms
   mask = N.array(isl.mask_active, int)
   connected, count = func.connect(mask)
   connectivity = nd.generate_binary_structure(2,2)
 
   ft3 = N.ones((3,3), int)
   open3 = nd.binary_opening(~isl.mask_active, ft3)
+  open3 = check_1pixcontacts(open3)
   labels, n_subisl3 = nd.label(open3, connectivity)  # get label/rank image for open3. label = 0 for masked pixels
   labels3 = assign_leftovers(isl, open3, n_subisl3, labels)  # add the leftover pixels to some island
 
   ft5 = N.ones((5,5), int)
   open5 = nd.binary_opening(~isl.mask_active, ft5)
+  open5 = check_1pixcontacts(open5)
   labels, n_subisl5 = nd.label(open5, connectivity)  # get label/rank image for open3. label = 0 for masked pixels
   labels5 = assign_leftovers(isl, open5, n_subisl5, labels)  # add the leftover pixels to some island
-
-  #mask_connect = connect_singleisl(isl, open5, n_subisl5)
 
   pl.figure()
   pl.suptitle('Island '+str(isl.island_id))
@@ -41,6 +40,22 @@ def test_split(isl):
   print 'Open 3 ',n_subisl3, N.array(npix3)/float(N.sum(npix3))
   print 'Open 5 ',n_subisl5, N.array(npix5)/float(N.sum(npix5))
 
+def check_1pixcontacts(open):
+    import scipy.ndimage as nd
+    import numpy as N
+    from copy import deepcopy as cp
+
+    connectivity = nd.generate_binary_structure(2,2)
+    ind = N.transpose(N.where(open[1:-1,1:-1] > 0)) + [1,1]   # exclude boundary to make it easier
+    for pixel in ind:
+      x, y = pixel
+      grid = cp(open[x-1:x+2, y-1:y+2]); grid[1,1] = 0
+      grid = N.where(grid == open[tuple(pixel)], 1, 0)
+      ll, nn = nd.label(grid, connectivity)
+      if nn > 1: 
+        open[tuple(pixel)] = 0
+
+    return open
 
 def assign_leftovers(isl, open, nisl, labels):
     """ 

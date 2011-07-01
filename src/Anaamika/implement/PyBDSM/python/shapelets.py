@@ -20,7 +20,6 @@ def decompose_shapelets(image, mask, basis, beta, centre, nmax, mode):
 	
     import compute_shapelet_coeff as csc
 
-    #print ' DOESNT HANDLE MASKS YET !!!!! '
     bad = False
     if (beta < 0 or beta/max(image.shape) > 5 or \
        (max(N.abs(list(centre)))-max(image.shape)/2) > 10*max(image.shape)): bad = True
@@ -58,12 +57,18 @@ def fit_shapeletbasis(image, mask, cf0, Bset):
     instead of integrating it out. This should avoid the problems of digitisation and hence
     non-orthonormality. """
     import functions as func
-    
-    cfshape = cf0.shape
+
     ma = N.where(~mask.flatten())
-    res=lambda p, image, Bset, cfshape, ma : (image.flatten()-func.shapeletfit(p, Bset, cfshape))[ma]
-    (cf, flag)=leastsq(res, cf0.flatten(), args=(image, Bset, cfshape, ma))
-    cf = cf.reshape(cfshape)
+
+    cfshape = cf0.shape
+    res=lambda p, image, Bset, cfshape, mask_flat : (image.flatten()-func.shapeletfit(p, Bset, cfshape))[ma]
+        
+    if len(ma) <= 5:
+        # Not enough degrees of freedom
+        cf = cf0
+    else:
+        (cf, flag)=leastsq(res, cf0.flatten(), args=(image, Bset, cfshape, ma))
+        cf = cf.reshape(cfshape)
 
     return cf
 
@@ -191,7 +196,7 @@ def shape_findcen(image, mask, basis, beta, nmax, beam_pix): # + check_cen_shape
     # check if estimated centre makes sense
     error=shapelet_check_centre(image, mask, cen, beam_pix)
     if error > 0:
-        print 'Error '+str(error)+' in finding centre, will take 1st moment instead.'
+        #print 'Error '+str(error)+' in finding centre, will take 1st moment instead.'
         (m1, m2, m3) = func.moment(image, mask)
 	cen = m2
     
@@ -205,17 +210,17 @@ def getzeroes_matrix(mask, cf, cen, cenx):
     x = N.arange(cf.shape[0], dtype = float)
     y = N.zeros(cf.shape[0], dtype = float)
 
-    import pylab as pl
-    pl.clf()
-    pl.imshow(cf, interpolation='nearest')
-    ii = N.random.randint(100); pl.title(' zeroes' + str(ii))
-    print 'ZZ ',cen, cenx, ii
+    # import pylab as pl
+    # pl.clf()
+    # pl.imshow(cf, interpolation='nearest')
+    # ii = N.random.randint(100); pl.title(' zeroes' + str(ii))
+    # print 'ZZ ',cen, cenx, ii
 
     for i in range(cf.shape[0]):
         l = [mask[i,j] for j in range(cf.shape[1])]
         npts = len(l)-sum(l)
      
-        print 'npts = ',npts
+        #print 'npts = ',npts
 	if npts > 3 and not N.isnan(cf[i,cen]):
  	  mrow=mask[i,:]
 	  if sum(l) == 0:
@@ -223,17 +228,17 @@ def getzeroes_matrix(mask, cf, cen, cenx):
 	    up=cf.shape[1]-1
           else:
             low = mrow.nonzero()[0][mrow.nonzero()[0].searchsorted(cen)-1]
-            print 'mrow = ',i, mrow, low,
+            #print 'mrow = ',i, mrow, low,
             try:
               up = mrow.nonzero()[0][mrow.nonzero()[0].searchsorted(cen)]
-              print 'up1= ', up
+              #print 'up1= ', up
             except IndexError:
               if [mrow.nonzero()[0].searchsorted(cen)][0]==len(mrow.nonzero()):
                 up = len(mrow)
-                print 'up2= ', up,
+                #print 'up2= ', up,
               else:
                 raise
-          print
+          #print
 	  low += 1; up -= 1
 	  npoint = up-low+1
 	  xfn = N.arange(npoint)+low

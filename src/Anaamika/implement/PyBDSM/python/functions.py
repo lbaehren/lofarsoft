@@ -262,7 +262,7 @@ def drawellipse(g):
       if isinstance(g, list) and len(g)>=6:
         param = g
       else:
-        raise RuntimeError("Input tp drawellipse neither Gaussian not list")
+        raise RuntimeError("Input to drawellipse neither Gaussian nor list")
 
     x2 = []; y2 = []
     for th in range(0, 370, 10):
@@ -273,6 +273,52 @@ def drawellipse(g):
     x2 = N.array(x2); y2 = N.array(y2)
 
     return x2, y2
+
+def drawsrc(src):
+    import math
+    import numpy as N
+    import matplotlib.path as mpath
+    Path = mpath.Path
+    paths = []
+    xmin = []
+    xmax = []
+    ymin = []
+    ymax = []
+    ellx = []
+    elly = []
+    for indx, g in enumerate(src.gaussians):
+        gellx, gelly = drawellipse(g)
+        ellx += gellx.tolist()
+        elly += gelly.tolist()
+    yarr = N.array(elly)
+    minyarr = N.min(yarr)
+    maxyarr = N.max(yarr)
+    xarr = N.array(ellx)
+    for i in range(10):
+        inblock = N.where(yarr > minyarr + float(i)*(maxyarr-minyarr)/10.0)
+        yarr = yarr[inblock]
+        xarr = xarr[inblock]
+        inblock = N.where(yarr < minyarr + float(i+1)*(maxyarr-minyarr)/10.0)
+        xmin.append(N.min(xarr[inblock])-1.0)
+        xmax.append(N.max(xarr[inblock])+1.0)
+        ymin.append(N.mean(yarr[inblock]))
+        ymax.append(N.mean(yarr[inblock]))
+
+    xmax.reverse()
+    ymax.reverse()
+    pathdata = [(Path.MOVETO, (xmin[0], ymin[0]))]
+    for i in range(10):
+        pathdata.append((Path.LINETO, (xmin[i], ymin[i])))
+        pathdata.append((Path.CURVE3, (xmin[i], ymin[i])))
+    pathdata.append((Path.LINETO, ((xmin[9]+xmax[0])/2.0, (ymin[9]+ymax[0])/2.0+1.0)))
+    for i in range(10):
+        pathdata.append((Path.LINETO, (xmax[i], ymax[i])))
+        pathdata.append((Path.CURVE3, (xmax[i], ymax[i])))
+    pathdata.append((Path.LINETO, ((xmin[0]+xmax[9])/2.0, (ymin[0]+ymax[9])/2.0-1.0)))
+    pathdata.append((Path.CLOSEPOLY, (xmin[0], ymin[0])))
+    codes, verts = zip(*pathdata)
+    path = Path(verts, codes)
+    return path
 
 def mask_fwhm(g, fac1, fac2, delc, shap):
     """ take gaussian object g and make a mask (as True) for pixels which are outside (less flux) 
@@ -374,7 +420,7 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
            else:
              p0=N.array([ind1[0], -0.8] + [0.]*(order-1))
       res=lambda p, xfit, yfit, sigfit: (yfit-funct(p, xfit))/sigfit
-      (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True)
+      (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True, warning=False)
   
       if do_err: 
         if cov != None:
@@ -491,7 +537,7 @@ def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
         errorfunction = lambda p: N.ravel(gaus_2d(p, x, y) - data)[g_ind]
     else:  
         errorfunction = lambda p: N.ravel((gaus_2d(p, x, y) - data)/err)[g_ind]
-    p, success = leastsq(errorfunction, p_ini)
+    p, success = leastsq(errorfunction, p_ini, warning=False)
 
     return p, success
 
@@ -561,6 +607,62 @@ def deconv(gaus_bm, gaus_c):
     #  pass
       
     return gaus_d
+
+def deconv2(gaus_bm, gaus_c):
+    """ Deconvolves gaus_bm from gaus_c to give gaus_dc. 
+        Stolen shamelessly from Miriad gaupar.for.
+        All PA is in degrees.
+
+        Returns deconvolved gaussian parameters and flag:
+   	 0   All OK.
+         1   Result is pretty close to a point source.
+	 2   Illegal result.
+        
+        """
+    from math import pi, cos, sin, atan2, sqrt
+
+    rad = 180.0/pi
+    gaus_d = [0.0, 0.0, 0.0]
+
+    phi_c = gaus_c[2]+900.0 % 180
+    phi_bm = gaus_bm[2]+900.0 % 180
+    theta1 = phi_c / rad
+    theta2 = phi_bm / rad
+    bmaj1 = gaus_c[0]
+    bmaj2 = gaus_bm[0]
+    bmin1 = gaus_c[1]
+    bmin2 = gaus_bm[1]
+
+    alpha = ( (bmaj1*cos(theta1))**2 + (bmin1*sin(theta1))**2 - 
+              (bmaj2*cos(theta2))**2 - (bmin2*sin(theta2))**2 )
+    beta = ( (bmaj1*sin(theta1))**2 + (bmin1*cos(theta1))**2 - 
+             (bmaj2*sin(theta2))**2 - (bmin2*cos(theta2))**2 )
+    gamma = 2 * ( (bmin1**2-bmaj1**2)*sin(theta1)*cos(theta1) - 
+                  (bmin2**2-bmaj2**2)*sin(theta2)*cos(theta2) )
+
+    s = alpha + beta
+    t = sqrt((alpha-beta)**2 + gamma**2)
+    limit = min(bmaj1, bmin1, bmaj2, bmin2)
+    limit = 0.1*limit*limit
+
+    if alpha < 0.0 or beta < 0.0 or s < t:
+        bmaj = 0
+        bmin = 0
+        bpa = 0
+        if 0.5*(s-t) < limit and alpha > -limit and beta > -limit:
+	    ifail = 1
+        else:
+            ifail = 2
+    else:
+        bmaj = sqrt(0.5*(s+t))
+        bmin = sqrt(0.5*(s-t))
+        if abs(gamma) + abs(alpha-beta) == 0:
+	    bpa = 0
+        else:
+	    bpa = rad * 0.5 * atan2(-gamma, alpha-beta)
+        ifail = 0
+    return (bmaj, bmin, bpa), ifail
+
 
 def get_errors(img, p, stdav):
 
@@ -711,7 +813,7 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
 
       errorfunction = lambda p, x, y, p_tofix, ind, image, err, g_ind: \
                      N.ravel((gaus_2d_itscomplicated(p, x, y, p_tofix, ind)-image)/err)[g_ind]
-      p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind))
+      p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind), warning=False)
     else:
       p, sucess = None, 1
 
@@ -833,43 +935,147 @@ def get_kwargs(kwargs, key, typ, default):
 
     return obj
 
-def read_image_from_file(use, fitsfile, indir):
-    """ Reads data and header from indir/fitsfile using either pyfits or pyrap depending on
-         use = 'fits'/'rap' """
-
-    if indir == None: 
-      prefix = img.opts.indir + '/'
-    else: 
-      prefix = ''
-
-    if use == 'fits': 
-      import pyfits
-      fits = pyfits.open(prefix+fits_file, mode="readonly")
-      data = fits[0].data
-      header = fits[0].header
-      fits.close()
-    if use == 'rap': 
-      import pyrap.images as pim
-      fits = pim.image(prefix+fits_file)
-      data = fits.getdata()
-      header = fits.info()
-
-    return data, header
-
-def write_image_to_file(use, filename, image, img, dir=None):
-    """ Writes image array to dir/filename using pyfits or pyrap.  """
-
+def read_image_from_file(filename, img, indir):
+    """ Reads data and header from indir/filename using either pyfits or pyrap depending on
+         img.use_io = 'fits'/'rap' """
     import mylogger
-    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Writefile         ")
-
-    if dir == None:
-      indir = img.opts.indir
+    import numpy as N
+    
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Readfile")
+    if indir == None or indir == './': 
+        prefix = ''
+    else: 
+        prefix = indir + '/'
+    image_file = prefix + filename
+    
+    # If img.use_io is set, then use appropriate io module
+    if img.use_io != '':
+        if img.use_io == 'fits':
+            import pyfits
+            try:
+                fits = pyfits.open(image_file, mode="readonly", ignore_missing_end=True)
+            except IOError:
+                return None
+        if img.use_io == 'rap':
+            import pyrap.images as pim
+            try:
+                inputimage = pim.image(image_file)
+            except IOError:
+                return None
     else:
-      indir = dir
+        # Simple check of whether pyrap and pyfits are available
+        try:
+            import pyfits
+            has_pyfits = True
+        except ImportError:
+            has_pyfits = False
+        try:
+            import pyrap.images as pim
+            has_pyrap = True
+        except ImportError:
+            has_pyrap = False
+        if not has_pyrap and not has_pyfits:
+            raise RuntimeError("Neither Pyfits nor Pyrap is available. Image cannot be read.")          
 
+        # First assume image is a fits file, and use pyfits to open it (if
+        # available). If that fails, try to use pyrap if available.
+        failed_read = False
+        try:
+            if has_pyfits:
+                fits = pyfits.open(image_file, mode="readonly", ignore_missing_end=True)
+                img.use_io = 'fits'
+            else:
+                raise IOError
+        except IOError:
+            if has_pyrap:
+                try:
+                    inputimage = pim.image(image_file)
+                    img.use_io = 'rap'
+                except IOError:
+                    failed_read = True
+            else:
+                failed_read = True
+
+        if failed_read:
+            return None
+
+    # Now that image has been read in successfully, get data and header
+    mylogger.userinfo(mylog, "Opened '"+image_file+"'")
+    if img.use_io == 'rap':
+        data = inputimage.getdata()
+        hdr = inputimage.info()
+    if img.use_io == 'fits':
+        data = fits[0].data
+        hdr = fits[0].header
+        fits.close()
+
+    ### try to reduce dimensionality of data
+    mylog.info("Original data shape of " + image_file +': ' +str(data.shape))
+    data = data.squeeze()
+    if len(data.shape) >= 4: # 4d and more -- try to drop extra dimensions
+        dims = data.shape[0:-3]
+        allones = N.equal(dims, 1).all()
+        if not allones:
+            sys.exit("Data dimensionality too high")
+        else:
+            data.shape = data.shape[-3:]
+    if len(data.shape) == 3:
+        if data.shape[0] == 1: # cut 3'd dimension if unity
+            data.shape = data.shape[-2:]
+    mylog.info("Final data shape of " + image_file + ': ' + str(data.shape))
+
+    ### now we need to transpose coordinates corresponding to RA & DEC
+    axes = range(len(data.shape))
+    axes[-1], axes[-2] = axes[-2], axes[-1]
+    data = data.transpose(*axes)
+
+    ### and make a copy of it to get proper layout & byteorder
+    data = N.array(data, order='C',
+                   dtype=data.dtype.newbyteorder('='))
+
+    ### trim image if trim_box is specified
+    if img.opts.trim_box != None:
+        img.trim_box = img.opts.trim_box
+        xmin, xmax, ymin, ymax = img.trim_box
+        if xmin < 0: xmin = 0
+        if ymin < 0: ymin = 0
+        if xmax > data.shape[0]: xmax = data.shape[0]
+        if ymax > data.shape[1]: ymax = data.shape[1]
+        if xmin >= xmax or ymin >= ymax:
+            raise RuntimeError("The trim_box option does not specify a valid part of the image.")          
+        if len(data.shape) == 3:
+            data = data[:, xmin:xmax, ymin:ymax]
+        else:
+            data = data[xmin:xmax, ymin:ymax]
+    else:
+        img.trim_box = None
+
+    return data, hdr
+
+def write_image_to_file(use, filename, image, img, outdir=None,
+                                           clobber=True):
+    """ Writes image array to dir/filename using pyfits or pyrap.  """
+    import numpy as N
+    import os
+    import mylogger
+    
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Writefile")
+
+    if outdir == None:
+      outdir = img.opts.indir
+    if not os.path.exists(outdir) and outdir != '':
+        os.mkdir(outdir)
+    
     #if use == 'fits':
     import pyfits
-    pyfits.writeto(indir + filename, image, img.header, output_verify='ignore', clobber=True)
+    if os.path.exists(outdir + filename):
+        if clobber:
+            os.remove(outdir + filename)
+        else:
+            return
+        
+    temp_im = make_fits_image(N.transpose(image), img.wcs_obj, img.beam, img.freq_pars)
+    temp_im.writeto(outdir + filename,  clobber=True)
     #if use == 'rap':
     #  import pyrap.images as pim
     #  mylog.info("Using the input file as template for writing Casa Image. No guarantees")      
@@ -878,6 +1084,31 @@ def write_image_to_file(use, filename, image, img, dir=None):
     #  im = pim.image(indir+filename)
     #  im.putdata(image)
     #  im.saveas(indir+filename)
+
+def make_fits_image(imagedata, wcsobj, beam, freq):
+    """Makes a simple FITS hdulist appropriate for images"""
+    import pyfits
+    hdu = pyfits.PrimaryHDU(imagedata)
+    hdulist = pyfits.HDUList([hdu])
+    header = hdulist[0].header
+    header.update('CTYPE1', wcsobj.ctype[0])
+    header.update('CTYPE2', wcsobj.ctype[1])
+    header.update('CRVAL1', wcsobj.crval[0])
+    header.update('CRVAL2', wcsobj.crval[1])
+    header.update('CDELT1', wcsobj.cdelt[0])
+    header.update('CDELT2', wcsobj.cdelt[1])
+    header.update('CRPIX1', wcsobj.crpix[0])
+    header.update('CRPIX2', wcsobj.crpix[1])
+    header.update('CROTA1', wcsobj.crota[0])
+    header.update('CROTA2', wcsobj.crota[1])
+    header.update('BMAJ', beam[0])
+    header.update('BMIN', beam[1])
+    header.update('BPA', beam[2])
+    header.update('CRVAL3', freq[0])
+    header.update('CDELT3', freq[1])
+    header.update('CRPIX3', freq[2])
+    hdulist[0].header = header
+    return hdulist
 
 def connect(mask):
     """ Find if a mask is singly or multiply connected """
@@ -892,6 +1123,270 @@ def connect(mask):
       connected = 'single'
 
     return connected, count
+
+def area_polygon(points):
+    """ Given an ANGLE ORDERED array points of [[x], [y]], find the total area by summing each successsive 
+    triangle with the centre """ 
+    import numpy as N
+
+    x, y = points
+    n_tri = len(x)-1
+    cenx, ceny = N.mean(x), N.mean(y)
+
+    area = 0.0
+    for i in range(n_tri):
+      p1, p2, p3 = N.array([cenx, ceny]), N.array([x[i], y[i]]), N.array([x[i+1], y[i+1]])
+      t_area= N.linalg.norm(N.cross((p2 - p1), (p3 - p1)))/2.
+      area += t_area
+      
+    return area
+      
+def convexhull_deficiency(isl):
+    """ Finds the convex hull for the island and returns the deficiency.
+    Code taken from http://code.google.com/p/milo-lab/source/browse/trunk/src/toolbox/convexhull.py?spec=svn140&r=140
+    """
+
+    import random
+    import time
+    import numpy as N
+    import scipy.ndimage as nd
+
+    def _angle_to_point(point, centre):
+        """calculate angle in 2-D between points and x axis"""
+        delta = point - centre
+        res = N.arctan(delta[1] / delta[0])
+        if delta[0] < 0:
+            res += N.pi
+        return res
+    
+    def area_of_triangle(p1, p2, p3):
+        """calculate area of any triangle given co-ordinates of the corners"""
+        return N.linalg.norm(N.cross((p2 - p1), (p3 - p1)))/2.
+    
+    def convex_hull(points):
+        """Calculate subset of points that make a convex hull around points
+        Recursively eliminates points that lie inside two neighbouring points until only convex hull is remaining.
+        points : ndarray (2 x m) array of points for which to find hull
+        Returns: hull_points : ndarray (2 x n), convex hull surrounding points """
+
+        n_pts = points.shape[1]
+        #assert(n_pts > 5)
+        centre = points.mean(1)
+        angles = N.apply_along_axis(_angle_to_point, 0, points, centre)
+        pts_ord = points[:,angles.argsort()]
+        pts = [x[0] for x in zip(pts_ord.transpose())]
+        prev_pts = len(pts) + 1
+        k = 0
+        while prev_pts > n_pts:
+            prev_pts = n_pts
+            n_pts = len(pts)
+            i = -2
+            while i < (n_pts - 2):
+                Aij = area_of_triangle(centre, pts[i], pts[(i + 1) % n_pts])
+                Ajk = area_of_triangle(centre, pts[(i + 1) % n_pts], \
+                                       pts[(i + 2) % n_pts])
+                Aik = area_of_triangle(centre, pts[i], pts[(i + 2) % n_pts])
+                if Aij + Ajk < Aik:
+                    del pts[i+1]
+                i += 1
+                n_pts = len(pts)
+            k += 1
+        return N.asarray(pts)
+    
+    mask = ~isl.mask_active
+    points = N.asarray(N.where(mask - nd.binary_erosion(mask)))
+    hull_pts = list(convex_hull(points))   # these are already in angle-sorted order
+
+    hull_pts.append(hull_pts[0])
+    hull_pts = N.transpose(hull_pts)
+
+    isl_area = isl.size_active
+    hull_area = area_polygon(hull_pts)
+    ratio1 = hull_area/(isl_area - 0.5*len(hull_pts[0]))
+
+    #import pylab as pl
+    #pl.figure(); pl.imshow(N.transpose(~isl.mask_active), origin='lower', interpolation='nearest')
+    #pl.plot(hull_pts[0], hull_pts[1], 'ro-'); pl.title(str(isl.island_id)+' : '+repr(ratio1))
+
+    return ratio1
+
+
+def readopts():
+    """ Read input parameters from opts.py and pass it as a list of lists"""
+    import commands
+
+    keyline = 'OPTS PARA FOR GUI'
+    o, dir = commands.getstatusoutput('echo $LOFARSOFT')
+    dir = dir+'/src/pybdsm/implement/bdsm_test/opts.py'
+    f = open(dir)
+    
+    paralist = []
+    line=''
+    while keyline not in line: 
+      line=f.readline()
+    line=''
+    while keyline not in line: 
+        line = f.readline().strip()
+        if keyline in line: break
+        if len(line.strip()) > 0:
+          while line[-1] == '\\': 
+            line = line[:-2] + f.readline().strip()
+            line = line.strip()
+          llist = line.split('=')
+          parameter, descr = llist[0].strip(), llist[1].strip()
+          para_doc = ''.join(llist[2:])
+          para_doc = para_doc.strip()[:-1]
+          if descr[-3:] == 'doc':
+            descr = descr[:-3]
+          else:
+            print 'Problem with keyword ', parameter
+          ind = descr.find('(')
+          para_type = descr[:ind]
+          para_descr = descr[ind+1:]
+          paralist.append([parameter, para_type, para_descr, para_doc])
+    f.close()
+
+    return paralist
+
+
+def open_isl(mask, index):
+    """ Do an opening on a mask, divide left over pixels among opened sub islands. Mask = True => masked pixel """
+    import scipy.ndimage as nd
+    import numpy as N
+
+    connectivity = nd.generate_binary_structure(2,2)
+    ft = N.ones((index,index), int)
+
+    open = nd.binary_opening(~mask, ft)
+    open = check_1pixcontacts(open)  # check if by removing one pixel from labels, you can split a sub-island
+    labels, n_subisl = nd.label(open, connectivity)  # get label/rank image for open. label = 0 for masked pixels
+    labels = assign_leftovers(mask, open, n_subisl, labels)  # add the leftover pixels to some island
+
+    isl_pixs = [len(N.where(labels==i)[0]) for i in range(1,n_subisl+1)]
+    isl_pixs = N.array(isl_pixs)/float(N.sum(isl_pixs))
+
+    return n_subisl, labels, isl_pixs
+
+def check_1pixcontacts(open):
+    import scipy.ndimage as nd
+    import numpy as N
+    from copy import deepcopy as cp
+
+    connectivity = nd.generate_binary_structure(2,2)
+    ind = N.transpose(N.where(open[1:-1,1:-1] > 0)) + [1,1]   # exclude boundary to make it easier
+    for pixel in ind:
+      x, y = pixel
+      grid = cp(open[x-1:x+2, y-1:y+2]); grid[1,1] = 0
+      grid = N.where(grid == open[tuple(pixel)], 1, 0)
+      ll, nn = nd.label(grid, connectivity)
+      if nn > 1: 
+        open[tuple(pixel)] = 0
+
+    return open
+
+def assign_leftovers(mask, open, nisl, labels):
+    """ 
+    Given isl and the image of the mask after opening (open) and the number of new independent islands n, 
+    connect up the left over pixels to the new islands if they connect to only one island and not more. 
+    Assign the remaining to an island. We need to assign the leftout pixels to either of many sub islands. 
+    Easiest is to assign to the sub island with least size.
+    """
+    import scipy.ndimage as nd
+    import numpy as N
+    from copy import deepcopy as cp
+
+    n, m = mask.shape
+    leftout = ~mask - open
+
+    connectivity = nd.generate_binary_structure(2,2)
+    mlabels, count = nd.label(leftout, connectivity)
+    npix = [len(N.where(labels==b)[0]) for b in range(1,nisl+1)]
+
+    for i_subisl in range(count):
+      c_list = []    # is list of all bordering pixels of the sub island
+      ii = i_subisl+1
+      coords = N.transpose(N.where(mlabels==ii))  # the coordinates of island i of left-out pixels
+      for co in coords:
+        co8 = [[x,y] for x in range(co[0]-1,co[0]+2) for y in range(co[1]-1,co[1]+2) if x >=0 and y >=0 and x <n and y<m]
+        c_list.extend([tuple(cc) for cc in co8 if mlabels[tuple(cc)] == 0])
+      c_list = list(set(c_list))     # to avoid duplicates
+      vals = N.array([labels[c] for c in c_list])
+      belongs = list(set(vals[N.nonzero(vals)]))
+      if len(belongs) == 0: print 'something wrong in assign_leftovers'
+      if len(belongs) == 1: 
+        for cc in coords: 
+          labels[tuple(cc)] = belongs[0]
+      else:                             # get the border pixels of the islands
+        nn = [npix[b-1] for b in belongs]
+        addto = belongs[N.argmin(nn)]
+        for cc in coords: 
+          labels[tuple(cc)] = addto
+
+    return labels
+
+
+def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
+    if tol is rel is None:
+        raise TypeError('cannot specify both absolute and relative errors are None')
+    tests = []
+    if tol is not None: tests.append(tol)
+    if rel is not None: tests.append(rel*abs(x))
+    assert tests
+    return abs(x - y) <= max(tests)
+
+
+def approx_equal(x, y, *args, **kwargs):
+    """approx_equal(float1, float2[, tol=1e-18, rel=1e-7]) -> True|False
+    approx_equal(obj1, obj2[, *args, **kwargs]) -> True|False
+
+    Return True if x and y are approximately equal, otherwise False.
+
+    If x and y are floats, return True if y is within either absolute error
+    tol or relative error rel of x. You can disable either the absolute or
+    relative check by passing None as tol or rel (but not both).
+
+    For any other objects, x and y are checked in that order for a method
+    __approx_equal__, and the result of that is returned as a bool. Any
+    optional arguments are passed to the __approx_equal__ method.
+
+    __approx_equal__ can return NotImplemented to signal that it doesn't know
+    how to perform that specific comparison, in which case the other object is
+    checked instead. If neither object have the method, or both defer by
+    returning NotImplemented, approx_equal falls back on the same numeric
+    comparison used for floats.
+
+    >>> almost_equal(1.2345678, 1.2345677)
+    True
+    >>> almost_equal(1.234, 1.235)
+    False
+
+    """
+    if not (type(x) is type(y) is float):
+        # Skip checking for __approx_equal__ in the common case of two floats.
+        methodname = '__approx_equal__'
+        # Allow the objects to specify what they consider "approximately equal",
+        # giving precedence to x. If either object has the appropriate method, we
+        # pass on any optional arguments untouched.
+        for a,b in ((x, y), (y, x)):
+            try:
+                method = getattr(a, methodname)
+            except AttributeError:
+                continue
+            else:
+                result = method(b, *args, **kwargs)
+                if result is NotImplemented:
+                    continue
+                return bool(result)
+    # If we get here without returning, then neither x nor y knows how to do an
+    # approximate equal comparison (or are both floats). Fall back to a numeric
+    # comparison.
+    return _float_approx_equal(x, y, *args, **kwargs)
+
+
+    
+
+
+
 
 
 

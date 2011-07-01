@@ -16,7 +16,6 @@ import scipy.ndimage as nd
 from image import *
 import mylogger
 import pyfits
-import output_fbdsm_files as opf
 import functions as func
 from output import write_islands
 
@@ -32,20 +31,24 @@ class Op_islands(Op):
     Prerequisites: module rmsimage should be run first.
     """
     def __call__(self, img):
+        try:
+            import output_fbdsm_files as opf
+            has_fbdsm = True
+        except ImportError:
+            has_fbdsm = False
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands   ")
         opts = img.opts
 
         img.islands = self.ndimage_alg(img, opts)
-
         img.nisl = len(img.islands)
 
-        mylog.info('%s %i' % ("Number of islands found : ", len(img.islands)))
+        mylogger.userinfo(mylog, "Number of islands found", '%i' %
+                          len(img.islands))
+        for i, isl in enumerate(img.islands): isl.island_id = i
 
-        for i, isl in enumerate(img.islands):
-            isl.island_id = i
-
-        write_islands(img)
-        if opts.output_fbdsm: opf.write_fbdsm_islands(img)
+        if opts.output_all: write_islands(img)
+        if opts.output_fbdsm and has_fbdsm:
+            opf.write_fbdsm_islands(img)
 
         return img
 
@@ -79,7 +82,7 @@ class Op_islands(Op):
         rms = img.rms
         mean = img.mean
         thresh_isl = opts.thresh_isl
-        thresh_pix = opts.thresh_pix
+        thresh_pix = img.thresh_pix
         minsize = opts.minpix_isl
         clipped_mean = img.clipped_mean
         saverank = opts.savefits_rankim
@@ -97,10 +100,12 @@ class Op_islands(Op):
         labels, count = nd.label(act_pixels, connectivity)
                         # slices has limits of bounding box of each such island
         slices = nd.find_objects(labels)
+        img.island_labels = labels
 
         ### apply cuts on island size and peak value
         pyrank = N.zeros(image.shape)
         res = []
+        islid = 0
         for idx, s in enumerate(slices):
             idx += 1 # nd.labels indices are counted from 1
                         # number of pixels inside bounding box which are in island
@@ -110,8 +115,8 @@ class Op_islands(Op):
                           N.array((s[0].start, s[1].start)))
             if (isl_size >= minsize) and (isl_peak - mean[isl_maxposn])/thresh_pix > rms[isl_maxposn]:
               isl = Island(image, mask, mean, rms, labels, s, idx)
-              pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
               res.append(isl)
+              pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
 
         if saverank: func.write_image_to_file(img.use_io, img.imagename + 'pyrank.fits', N.transpose(pyrank), img)
 
@@ -137,8 +142,11 @@ class Island(object):
     rms         = Float(doc="Average rms")
     max_value   = Float(doc="Maximum value in island")
     island_id   = Int(doc="Island id, starting from 0")
-    gresid_rms   = Float(doc="Rms of residual image of island")
-    gresid_mean  = Float(doc="Mean of residual image of island")
+    gresid_rms  = Float(doc="Rms of residual image of island")
+    gresid_mean = Float(doc="Mean of residual image of island")
+    connected   = Tuple(String(), Int(), doc="'multiple' or 'single' -ly connected, # of holes inside island")
+    convex_def  = Float(doc="Convex deficiency, with first order correction for edge effect")
+    islmean     = Float(doc="a constant value to subtract from image before fitting")
 
     def __init__(self, img, mask, mean, rms, labels, bbox, idx):
         """Create Island instance.
@@ -151,6 +159,8 @@ class Island(object):
         TCInit(self)
         
         ### we make bbox slightly bigger
+        self.oldbbox = bbox
+        self.oldidx = idx
         bbox = self.__expand_bbox(bbox, img.shape)
         origin = [b.start for b in bbox]   # easier in case ndim > 2
         data = img[bbox]
@@ -190,6 +200,12 @@ class Island(object):
         def __expand(bbox, shape):
             return slice(max(0, bbox.start - 1), min(shape, bbox.stop + 1))
         return map(__expand, bbox, shape) 
+
+    def copy(self, img):
+      mask, mean, rms = img.mask, img.mean, img.rms
+      image = img.ch0; labels = img.island_labels; bbox = self.oldbbox; idx = self.oldidx
+      return Island(image, mask, mean, rms, labels, bbox, idx)
+
 
 
 ### Insert attribute for island list into Image class

@@ -61,28 +61,29 @@ _basic_types = (types.BooleanType, types.IntType, types.LongType,
 ############################################################
 ## Wrappers around TC to simplify it's usage for end-users
 ############################################################
-def Int(value=0, doc=None):
+def Int(value=0, doc=None, group=None):
     """Create tc-value of type int"""
-    return TC(value, tcCType(int), doc)
+    return TC(value, tcCType(int), doc, group)
 
-def Float(value=0., doc=None):
+def Float(value=0., doc=None, group=None):
     """Create tc-value of type float"""
-    return TC(value, tcCType(float), doc)
+    return TC(value, tcCType(float), doc, group)
 
-def Bool(value=False, doc=None):
+def Bool(value=False, doc=None, group=None):
     """Create tc-value of type bool"""
-    return TC(value, tcCType(bool), doc)
+    return TC(value, tcCType(bool), doc, group)
 
-def String(value='', doc=None):
+def String(value='', doc=None, group=None):
     """Create tc-value of type string"""
-    return TC(value, tcCType(str), doc)
+    return TC(value, tcCType(str), doc, group)
 
 def Tuple(*values, **kws):
     """Create tc-value of type tuple.
 
     Parameters:
     values: zero or more arguments
-    kws: keyword arguments. Currently only 'doc' is recognized
+    kws: keyword arguments. Currently only 'doc' and 'group'
+    are recognized
 
     If the first item of values is a tuple, it's used as the
     default value. The remaining arguments are used to build
@@ -95,9 +96,10 @@ def Tuple(*values, **kws):
                                          default = (1, 2.0)
     """
     doc = kws.pop('doc', None)
+    group = kws.pop('group', None)
 
     if len(values) == 0:
-        return TC((), tcTuple(), doc)
+        return TC((), tcTuple(), doc, group)
 
     default = None
     if isinstance(values[0], tuple):
@@ -109,14 +111,15 @@ def Tuple(*values, **kws):
     if len(values) == 0:
         values = [tc_from(x) for x in default]
 
-    return TC(default, tcTuple(*values), doc)
+    return TC(default, tcTuple(*values), doc, group)
 
 def Enum(*values, **kws):
     """Create tc-value of type enum.
 
     Parameters:
     values: list or tuple of valid values
-    kws: keyword arguments. Currently only 'doc' is recognized
+    kws: keyword arguments. Currently only 'doc'  and 'group'
+    are recognized
 
     Default value is taken to be values[0].
 
@@ -129,15 +132,17 @@ def Enum(*values, **kws):
         values = values[1]
 
     doc = kws.pop('doc', None)
+    group = kws.pop('group', None)
 
-    return TC(default, tcEnum(*values), doc)
+    return TC(default, tcEnum(*values), doc, group)
 
-def Option(value, type=None, doc=None):
+def Option(value, type=None, doc=None, group=None):
     """Creates optional tc-value.
 
     Parameters:
     value, type: default value and type
     doc: doc-string for the value
+    group: group designation for the value
     """
     if type is None:
         type = tc_from(value)
@@ -145,14 +150,15 @@ def Option(value, type=None, doc=None):
     if isinstance(value, TC):
         value = value._default
 
-    return TC(value, tcOption(type), doc)
+    return TC(value, tcOption(type), doc, group)
 
-def NArray(value=None, or_none=True, doc=None):
+def NArray(value=None, or_none=True, doc=None, group=None):
     """Creates tc-value which holds Numpy arrays
 
     Parameters:
     value: default value
     or_none: if 'None' is valid value
+    group: group designation for the value
     """
     try:
         import numpy as N
@@ -160,14 +166,15 @@ def NArray(value=None, or_none=True, doc=None):
         raise tcError, "Can't create tc-value of type NArray " \
             "without access to numpy module"
 
-    return Instance(value, N.ndarray, or_none, doc)
+    return Instance(value, N.ndarray, or_none, doc, group)
 
-def Instance(value, type=None, or_none=True, doc=None):
+def Instance(value, type=None, or_none=True, doc=None, group=None):
     """Creates tc-value which holds instances of specific class.
 
     Parameters:
     value, type: default value and type
     or_none: flag if 'None' is valid value for this variable
+    group: group designation for the value
 
     Examples:
     Instance(instance, class)
@@ -180,7 +187,7 @@ def Instance(value, type=None, or_none=True, doc=None):
         else:
             type = value.__class__
 
-    return TC(value, tcInstance(type, or_none), doc)
+    return TC(value, tcInstance(type, or_none), doc, group)
 
 def tInstance(type, or_none=False):
     """Create tc-handler for values which are instances of
@@ -194,6 +201,7 @@ def tInstance(type, or_none=False):
     Parameters:
     type: target type/class
     or_none: flag if 'None' is valid value for this variable
+    group: group designation for the value
 
     Example: we want to define tc-variable holding a list of objects
     List(Instance(slice, or_none=False) ## FAILS, no default value
@@ -205,7 +213,7 @@ def tInstance(type, or_none=False):
 
     return tcInstance(type, or_none)
 
-def List(value, type=None, doc=None):
+def List(value, type=None, doc=None, group=None):
     """Creates tc-value which represents a list, where each element
     obeys specific type-constrains.
 
@@ -237,13 +245,13 @@ def List(value, type=None, doc=None):
     if type is None:
         value, type = [], tc_from(value)
 
-    return TC(value, tcList(type), doc)
+    return TC(value, tcList(type), doc, group)
 
-def Any(value=None, doc=None):
+def Any(value=None, doc=None, group=None):
     """Creates tc-value of arbitrary type
     (e.g. no type-checking is done)
     """
-    return TC(value, tcAny(), doc)
+    return TC(value, tcAny(), doc, group)
 
 def TCInit(obj):
     """Initialize tc-variables in the new instance"""
@@ -265,7 +273,6 @@ class tcError(exceptions.Exception):
 class TC(object):
     """TC is an implementation of the typed-checked value.
 
-
     The primary usage pattern is via class attributes:
 
     class Test(object):   ### MUST be new-style object
@@ -281,13 +288,14 @@ class TC(object):
     or 'type'. And the attribute should be defined in the
     class of the object.
     """
-    def __init__(self, value, _type=None, doc=None):
+    def __init__(self, value, _type=None, doc=None, group=None):
         """Create typed-checked object.
 
         Parameters:
         value: default value
         _type: type specification (instance of tcHandler) or None
         doc: docstring for the object
+        group: parameter group to which the option belongs
         """
         if _type is not None:
             self._type = _type
@@ -296,6 +304,7 @@ class TC(object):
 
         self._default = self._type.cast(value)
         self._name = None # name is unknown atm
+        self._group = group
         self._doc = doc
 
         self.__doc__ = "default value is %s (%s)" % \
@@ -345,6 +354,10 @@ class TC(object):
     def doc(self):
         """Return short description of tc-value"""
         return self._doc
+
+    def group(self):
+        """Return group designation of tc-value"""
+        return self._group
 
     @staticmethod
     def set_property_names(klass):

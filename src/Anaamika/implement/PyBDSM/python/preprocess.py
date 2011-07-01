@@ -72,17 +72,16 @@ class Op_preprocess(Op):
         image = img.ch0
         # blank pixels; check if pixels are outside the universe
         img.blankpix = N.sum(N.isnan(image))
-        mylog.info(str(img.blankpix)+" blank pixels in the image.")
+        frac_blank = round(float(img.blankpix)/float(image.shape[0]*image.shape[1]),3)
+        mylogger.userinfo(mylog, "Blank pixels in the image", str(img.blankpix)
+                          +' ('+str(frac_blank*100.0)+'%)')
         if opts.check_outsideuniv:
-          mylog.info("Determining the pixels outside the universe (takes some time ... )")
+          mylogger.userinfo(mylog, "Determining the pixels outside the universe")
           noutside_univ = self.outside_univ(img)
           img.noutside_univ = noutside_univ
-          if noutside_univ > 0:
-            mylog.info("Blanked "+str(noutside_univ)+" more pixels which are outside the universe. ")
-          else:
-            mylog.info("Found none.")
+          mylogger.userinfo(mylog, "Blanked additional pixels", str(noutside_univ))
         else:
-          mylog.info("Not checking to see if pixels outside the universe")
+          mylog.info("Not checking to see if there are pixels outside the universe")
 
         ### max/min pixel value & coordinates
         shape = image.shape[0:2]
@@ -102,6 +101,21 @@ class Op_preprocess(Op):
         cdelt = N.array(img.wcs_obj.acdelt[:2])
         img.omega = N.product(shape)*abs(N.product(cdelt))/(180.*180./pi/pi)
 
+        ### Total flux in ch0 image
+        if 'atrous' in img.filename:
+            # Don't do this estimate for atrous wavelet images,
+            # as it doesn't give the correct flux
+            img.ch0_sum_jy = 0
+        else:
+            gfactor = 2.0 * N.sqrt(2.0 * N.log(2.0))
+            pixels_per_beam = 2.0 * N.pi * (img.beam2pix(img.beam)[0]
+                                            * img.beam2pix(img.beam)[1])\
+                                            / gfactor**2
+            im_flux = N.nansum(img.ch0)/pixels_per_beam # Jy
+            img.ch0_sum_jy = im_flux
+            mylogger.userinfo(mylog, 'Flux from sum of pixels in image',
+                              '%.3f Jy' % (im_flux,))
+        
         ### if image seems confused, then take background mean as zero instead
         alpha_sourcecounts = 2.5  # approx diff src count slope. 2.2? 
         if opts.bmpersrc_th is None:
@@ -109,33 +123,34 @@ class Op_preprocess(Op):
           if n <= 0: 
             n = 1
             mylog.warning('No pixels in image > 5sigma.')
-            mylog.warning('Either clipped rms is wrong or the image is pure gaussian noise ? ')
+            mylog.warning('Either clipped rms is wrong or the image is pure gaussian noise?')
             mylog.info('Taking number of pixels above 5-sigma as 1.')
-          opts.bmpersrc_th = N.product(shape)/((alpha_sourcecounts-1.)*n)
-          mylog.info('%s %6.2f' % ('Estimated bmpersrc_th = ', opts.bmpersrc_th))
+          img.bmpersrc_th = N.product(shape)/((alpha_sourcecounts-1.)*n)
+          mylog.info('%s %6.2f' % ('Estimated bmpersrc_th = ', img.bmpersrc_th))
         else:
-          mylog.info('%s %6.2f' % ('Taking default bmpersrc_th = ', opts.bmpersrc_th))
+          img.bmpersrc_th = opts.bmpersrc_th
+          mylog.info('%s %6.2f' % ('Taking default bmpersrc_th = ', img.bmpersrc_th))
 
         confused = False
         if opts.mean_map == 'default':
           if opts.bmpersrc_th <= 25. or cmean/crms >= 0.1:
             confused = True
-        opts.confused = confused
-        mylog.info('Parameter confused is '+str(opts.confused))
+        img.confused = confused
+        mylog.info('Parameter confused is '+str(img.confused))
           
 
         ### box size for rms/mean map calculations
         fwsig = const.fwsig
-        if opts.rms_map in [True, None] or opts.mean_map not in ['zero', 'const']:
-          if opts.rms_box is None:
+#        if opts.rms_map in [True, None] or opts.mean_map not in ['zero', 'const']:
+        if opts.rms_box is None:
             # 'size' of brightest source
             kappa1 = 3.0
-            brightsize = int(round(2.*opts.beam[0]/cdelt[0]/fwsig* \
+            brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* \
                  sqrt(2.*log(img.max_value/(kappa1*crms)))))
             # atleast 4 boxes on each side
             largesize = int(round(min(shape)/4.))
-            intersrcsep = int(round(sqrt(opts.bmpersrc_th)*2.* \
-                                        opts.beam[0]/cdelt[0]))
+            intersrcsep = int(round(sqrt(img.bmpersrc_th)*2.* \
+                                        img.beam[0]/cdelt[0]))
 
             bsize = int(round(sqrt(brightsize*largesize*1.)))
             if intersrcsep > brightsize and intersrcsep < largesize:
@@ -146,9 +161,13 @@ class Op_preprocess(Op):
             if bsize % 10 == 0: bsize += 1
 
             bstep = int(round(min(bsize/3., min(shape)/10.)))
-            opts.rms_box = (bsize, bstep)
-
-          mylog.info('For rms image, boxsize = '+str(img.opts.rms_box[0])+' and stepsize = '+str(img.opts.rms_box[1]))
+            img.rms_box = (bsize, bstep)
+        else:
+            img.rms_box = opts.rms_box
+              
+        mylogger.userinfo(mylog, 'Value of rms_box (box size, step size)',
+                              '(' + str(img.rms_box[0]) + ', ' +
+                              str(img.rms_box[1]) + ') pixels')
 
         return img
 

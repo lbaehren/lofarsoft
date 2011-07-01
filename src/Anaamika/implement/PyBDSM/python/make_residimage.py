@@ -13,6 +13,10 @@ Image.resid_gaus = NArray(doc="Residual image calculated from " \
                                 "extracted gaussians")
 Image.resid_shap = NArray(doc="Residual image calculated from " \
                                 "shapelet coefficient")
+Image.model_gaus = NArray(doc="Model image calculated from " \
+                                "extracted gaussians")
+Image.model_shap = NArray(doc="Model image calculated from " \
+                                "shapelet coefficient")
 
 class Op_make_residimage(Op):
     """Creates an image from the fitted gaussians
@@ -29,17 +33,14 @@ class Op_make_residimage(Op):
         import functions as func
         from copy import deepcopy as cp
         import os
-        import functions as func
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"ResidImage")
         mylog.info("Calculating residual image after subtracting reconstructed gaussians")
-        dir = img.basedir + '/residual/'
-        if not os.path.exists(dir): os.mkdir(dir)
         shape = img.ch0.shape
         thresh= img.opts.fittedimage_clip
 
         img.resid_gaus = cp(img.ch0)
-
+        img.model_gaus = N.zeros(shape, dtype=float)
         for g in img.gaussians:#():
             C1, C2 = g.centre_pix
             isl = img.islands[g.island_id]
@@ -51,11 +52,21 @@ class Op_make_residimage(Op):
             x_ax, y_ax = N.mgrid[bbox]
             ffimg = func.gaussian_fcn(g, x_ax, y_ax)
             img.resid_gaus[bbox] = img.resid_gaus[bbox] - ffimg
+            img.model_gaus[bbox] = img.model_gaus[bbox] + ffimg
 
-        func.write_image_to_file(img.use_io, img.imagename + '.resid_gaus.fits', N.transpose(img.resid_gaus), img, dir)
-        mylog.info('%s %s' % ('Writing', dir+img.imagename+'.resid_gaus.fits'))
-        func.write_image_to_file(img.use_io, img.imagename + '.model.fits', N.transpose(img.ch0 - img.resid_gaus), img, dir)
-        mylog.info('%s %s' % ('Writing', dir+img.imagename+'.model_gaus.fits'))
+        # Apply mask to model and resid images
+        if isinstance(img.mask, N.ndarray):
+            pix_masked = N.where(img.mask == True)
+            img.model_gaus[pix_masked] = N.nan
+            img.resid_gaus[pix_masked] = N.nan
+
+        if img.opts.output_all:
+            dir = img.basedir + '/residual/'
+            if not os.path.exists(dir): os.mkdir(dir)
+            func.write_image_to_file(img.use_io, img.imagename + '.resid_gaus.fits', N.transpose(img.resid_gaus), img, dir)
+            mylog.info('%s %s' % ('Writing', dir+img.imagename+'.resid_gaus.fits'))
+            func.write_image_to_file(img.use_io, img.imagename + '.model.fits', N.transpose(img.ch0 - img.resid_gaus), img, dir)
+            mylog.info('%s %s' % ('Writing', dir+img.imagename+'.model_gaus.fits'))
 
         ### residual rms and mean per island
         for isl in img.islands:
@@ -82,9 +93,17 @@ class Op_make_residimage(Op):
                 image_recons=reconstruct_shapelets(isl.shape, mask, basis, beta, cen, nmax, cf)
                 fimg[isl.bbox] += image_recons
            
+            img.model_shap = fimg
             img.resid_shap = img.ch0 - fimg
-            func.write_image_to_file(img.use_io, img.imagename + '.resid_shap.fits', N.transpose(img.resid_shap), img, dir)
-            mylog.info('%s %s' % ('Writing ', dir+img.imagename+'.resid_shap.fits'))
+            # Apply mask to model and resid images
+            if isinstance(img.mask, N.ndarray):
+                pix_masked = N.where(img.mask == True)
+                img.model_shap[pix_masked] = N.nan
+                img.resid_shap[pix_masked] = N.nan
+                
+            if img.opts.output_all:
+                func.write_image_to_file(img.use_io, img.imagename + '.resid_shap.fits', N.transpose(img.resid_shap), img, dir)
+                mylog.info('%s %s' % ('Writing ', dir+img.imagename+'.resid_shap.fits'))
 
             ### shapelet residual rms and mean per island
             for isl in img.islands:

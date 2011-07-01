@@ -34,10 +34,6 @@ class Op_rmsimage(Op):
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"RMSimage  ")
         mylog.info("Calculating background rms and mean images")
-        dir = img.basedir + '/background/'
-        #import pylab as pl
-        #pl.figure()
-        if not os.path.exists(dir): os.mkdir(dir)
         if img.opts.polarisation_do:
             pols = ['I', 'Q', 'U', 'V']
         else:
@@ -70,32 +66,69 @@ class Op_rmsimage(Op):
             mylog.info('Background rms and mean images computed.')
 
           ## check if variation of rms/mean maps is significant enough
-          if pol == 'I' and opts.rms_map is None: self.check_rmsmap(img, rms)
-          if pol == 'I' and opts.mean_map == 'default': self.check_meanmap(img, rms)
+          if pol == 'I' and opts.rms_map is None:
+              # sets img.use_rms_map
+              self.check_rmsmap(img, rms)
+          else:
+              img.use_rms_map = opts.rms_map
+          if pol == 'I' and opts.mean_map == 'default':
+              # sets img.mean_map_type
+              self.check_meanmap(img, rms)
+          else:
+              img.mean_map_type = opts.mean_map
 
           ## if rms map is insignificant, or rms_map==False use const value
-          if opts.rms_map is False:
+          if img.use_rms_map is False:
+            mylog.info('Background rms set to (constant) clipped value.')
             if opts.rms_value == None:
               rms[:]  = crmss[ipol]
-              mylog.info('Background rms, mean images are constant, equals clipped value')
             else:
               rms[:]  = opts.rms_value
-              mylog.info('Background rms, mean images are constant, equals user-defined value')
-          if opts.mean_map != 'map':
+            mylogger.userinfo(mylog, 'Using constant background rms')
+            mylogger.userinfo(mylog, 'Value of background rms',
+                              '%.5f Jy/beam' % rms[0][0])
+          else:
+            rms_min = N.nanmin(rms)
+            rms_max = N.nanmax(rms)
+            mylogger.userinfo(mylog, 'Using 2D map for background rms')
+            mylogger.userinfo(mylog, 'Min/max values of background rms map',
+                              '(%.5f, %.5f) Jy/beam' % (rms_min, rms_max))
+
+          if img.mean_map_type != 'map':
             val = 0.0
             if opts.mean_map == 'const': val = img.clipped_mean
             mean[:] = val
+            mylogger.userinfo(mylog, 'Using constant background mean')
+            mylogger.userinfo(mylog, 'Value of background mean',
+                              str(round(val,5))+' Jy/beam')
+          else:
+            mean_min = N.nanmin(mean)
+            mean_max = N.nanmax(mean)
+            mylogger.userinfo(mylog, 'Using 2D map for background mean')
+            mylogger.userinfo(mylog, 'Min/max values of background mean map',
+                              '(%.5f, %.5f) Jy/beam' % (mean_min, mean_max))
 
-          if pol == 'I': 
+          if pol == 'I':
+            # Apply mask to mean_map and rms_map by setting masked values to NaN
+            if isinstance(mask, N.ndarray):
+                pix_masked = N.where(mask == True)
+                mean[pix_masked] = N.nan
+                rms[pix_masked] = N.nan
             img.mean = mean; img.rms  = rms
-            if opts.savefits_rmsim: 
+            if opts.savefits_rmsim or opts.output_all:
+              dir = img.basedir + '/background/'
+              if not os.path.exists(dir): os.mkdir(dir)
               func.write_image_to_file(img.use_io, img.imagename + '.rmsd_I.fits', N.transpose(rms), img, dir)
               mylog.info('%s %s' % ('Writing ', dir+img.imagename+'.rmsd_I.fits'))
-            if opts.savefits_meanim: 
+            if opts.savefits_meanim or opts.output_all: 
+              dir = img.basedir + '/background/'
+              if not os.path.exists(dir): os.mkdir(dir)
               func.write_image_to_file(img.use_io, img.imagename + '.mean_I.fits', N.transpose(mean), img, dir)
               mylog.info('%s %s' % ('Writing ', dir+img.imagename+'.mean_I.fits'))
-            if opts.savefits_normim: 
-              func.write_image_to_file(img.use_io, img.imagename + '.norm_I.fits', N.transpose((img.image-mean)/rms), img, dir)
+            if opts.savefits_normim or opts.output_all: 
+              dir = img.basedir + '/background/'
+              if not os.path.exists(dir): os.mkdir(dir)
+              func.write_image_to_file(img.use_io, img.imagename + '.norm_I.fits', N.transpose((img.ch0-mean)/rms), img, dir)
               mylog.info('%s %s' % ('Writing ', dir+img.imagename+'.norm_I.fits'))
           else:
             img.mean_QUV.append(mean); img.rms_QUV.append(rms)
@@ -111,18 +144,18 @@ class Op_rmsimage(Op):
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkrms  ")
         cdelt = img.wcs_obj.acdelt[:2]
-	bm = (img.opts.beam[0], img.opts.beam[1])
+	bm = (img.beam[0], img.beam[1])
 	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
 	stdsub = N.std(rms)
 
-	rms_expect = img.clipped_rms/sqrt(2)/img.opts.rms_box[0]*fw_pix
+	rms_expect = img.clipped_rms/sqrt(2)/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of rms image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
 	if stdsub > 1.1*rms_expect:
-            img.opts.rms_map = True
+            img.use_rms_map = True
             mylog.info('Variation in rms image significant, using this image.')
         else:
-            img.opts.rms_map = False
+            img.use_rms_map = False
             mylog.info('Variation in rms image not significant.')
 
         return img
@@ -136,21 +169,21 @@ class Op_rmsimage(Op):
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkmean ")
         cdelt = N.array(img.wcs_obj.acdelt[:2])
-	bm = (img.opts.beam[0], img.opts.beam[1])
+	bm = (img.beam[0], img.beam[1])
 	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
 	stdsub = N.std(mean)
 
-	rms_expect = img.clipped_rms/img.opts.rms_box[0]*fw_pix
+	rms_expect = img.clipped_rms/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of mean image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
 	if stdsub > 1.1*rms_expect:
-          img.opts.mean_map = 'map'
+          img.mean_map_type = 'map'
           mylog.info('Variation in mean image significant, using this image.')
         else:
-          if img.opts.confused:
-            img.opts.mean_map = 'zero'
+          if img.confused:
+            img.mean_map_type = 'zero'
           else:
-            img.opts.mean_map = 'const'
+            img.mean_map_type = 'const'
           mylog.info('Variation in mean image not significant.')
 
         return img
@@ -223,49 +256,102 @@ class Op_rmsimage(Op):
         rms_map[0,0] is extrapolated as .5*(rms_map[0,1] + rms_map[1,0])
         rms_map[0,1] is extrapolated as rms_map[1,1]
         """
+        mylog = mylogger.logging.getLogger("PyBDSM.RmsMean")
         if box is None:
             box = (50, 25)
+        if box[0] < box[1]:
+            raise RuntimeError('Box size is less than step size.')
 
-        ## some math first. 
-        ##   boxcount is number of boxes alongsize each axis
-        ##   bounds is non-zero for axes which have extra pixels beyond last box
+        # Some math first: boxcount is number of boxes alongsize each axis,
+        # bounds is non-zero for axes which have extra pixels beyond last box
         BS, SS = box
         imgshape = N.array(arr.shape)
-        boxcount = 1 + (imgshape - BS)/SS
-        bounds   = N.asarray((boxcount-1)*SS + BS < imgshape, dtype=int)
-        mapshape = 2 + boxcount + bounds
 
-        ## arrays for calculated data
+        # If boxize is less than 10% of image, use simple extrapolation to
+        # derive the edges of the mean and rms maps; otherwise, use padded
+        # versions of arr and mask to derive the mean and rms maps
+        if float(BS)/float(imgshape[0]) < 0.1 and \
+                float(BS)/float(imgshape[1]) < 0.1:
+            use_extrapolation = True
+            mylog.info('Using simple extrapolation for edges of mean '\
+                           'and rms maps.')
+        else:
+            use_extrapolation = False
+            mylog.info('Using padded array for edges of mean '\
+                           'and rms maps.')
+
+        if use_extrapolation:
+            boxcount = 1 + (imgshape - BS)/SS
+            bounds   = N.asarray((boxcount-1)*SS + BS < imgshape, dtype=int)
+            mapshape = 2 + boxcount + bounds    
+        else:                
+            boxcount = 1 + imgshape/SS
+            bounds   = N.asarray((boxcount-1)*SS < imgshape, dtype=int)
+            mapshape = boxcount + bounds
+            pad_border_size = int(BS/2.0)
+            new_shape = (arr.shape[0] + 2*pad_border_size, arr.shape[1]
+                         + 2*pad_border_size)
+            arr_pad = self.pad_array(arr, new_shape)
+            if mask == None:
+                mask_pad = None
+            else:
+                mask_pad = self.pad_array(mask, new_shape)
+
+        # Make arrays for calculated data
         mean_map = N.zeros(mapshape, dtype=float)
         rms_map  = N.zeros(mapshape, dtype=float)
-        axes     = [N.zeros(len, dtype=float) for len in mapshape]
+        axes     = [N.zeros(len, dtype=float) for len in mapshape]          
 
-        ### step 1: internal area of the image
+        # Step 1: internal area of the image
         for i in range(boxcount[0]):
             for j in range(boxcount[1]):
                 ind = [i*SS, i*SS+BS, j*SS, j*SS+BS]
-                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [i+1, j+1])
-                        
+                if use_extrapolation:
+                    self.for_masked(mean_map, rms_map, mask, arr, ind,
+                                    kappa, [i+1, j+1])
+                else:
+                    self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind,
+                                    kappa, [i, j])
+
         # Check if all regions have too few unmasked pixels
         if mask != None and N.size(N.where(mean_map != N.inf)) == 0:
-            raise RuntimeError("No unmasked regions from which to determine mean and rms maps.")
-                        
-        ### step 2: borders of the image
+            raise RuntimeError("No unmasked regions from which to determine "\
+                         "mean and rms maps.")
+
+        # Step 2: borders of the image
         if bounds[0]:
             for j in range(boxcount[1]):
-                ind = [-BS, arr.shape[0], j*SS,j*SS+BS]
-                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [-2, j+1])
+                if use_extrapolation:
+                    ind = [-BS, arr.shape[0], j*SS,j*SS+BS]
+                    self.for_masked(mean_map, rms_map, mask, arr, ind,
+                                    kappa, [-2, j+1])
+                else:
+                    ind = [-BS, arr_pad.shape[0], j*SS,j*SS+BS]
+                    self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind,
+                                    kappa, [-1, j])
 
         if bounds[1]:
             for i in range(boxcount[0]):
-                ind = [i*SS,i*SS+BS, -BS,arr.shape[1]]
-                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [i+1, -2])
+                if use_extrapolation:
+                    ind = [i*SS,i*SS+BS, -BS,arr.shape[1]]
+                    self.for_masked(mean_map, rms_map, mask, arr, ind,
+                                    kappa, [i+1, -2])
+                else:
+                    ind = [i*SS,i*SS+BS, -BS,arr_pad.shape[1]]
+                    self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind,
+                                    kappa, [i, -1])
 
         if bounds.all():
-                ind = [-BS,arr.shape[0], -BS,arr.shape[1]]
-                self.for_masked(mean_map, rms_map, mask, arr, ind, kappa, [-2, -2])
+                if use_extrapolation:
+                    ind = [-BS,arr.shape[0], -BS,arr.shape[1]]
+                    self.for_masked(mean_map, rms_map, mask, arr, ind,
+                                    kappa, [-2, -2])
+                else:
+                    ind = [-BS,arr_pad.shape[0], -BS,arr_pad.shape[1]]
+                    self.for_masked(mean_map, rms_map, mask_pad, arr_pad, ind,
+                                    kappa, [-1, -1])
 
-        ### step 3: correct(extrapolate) borders of the image
+        # Step 3: correct(extrapolate) borders of the image
         def correct_borders(map):
             map[0, :] = map[1, :]
             map[:, 0] = map[:, 1]
@@ -277,23 +363,32 @@ class Op_rmsimage(Op):
             map[0, -1] = (map[0, -2] + map[1, -1])/2.
             map[-1,-1] = (map[-2, -1] + map[-1, -2])/2.
 
-        correct_borders(mean_map)
-        correct_borders(rms_map)
+        if use_extrapolation:
+            correct_borders(mean_map)
+            correct_borders(rms_map)
 
-        ### step 4: fill in coordinate axes
+        # Step 4: fill in coordinate axes
         for i in range(2):
-            axes[i][1:boxcount[i]+1] = N.arange(boxcount[i])*SS + BS/2. - .5
-            if bounds[i]:
-                axes[i][-2] = imgshape[i] - BS/2. - .5
+            if use_extrapolation:
+                axes[i][1:boxcount[i]+1] = (N.arange(boxcount[i])*SS
+                                            + BS/2. - .5)
+                if bounds[i]:
+                    axes[i][-2] = imgshape[i] - BS/2. - .5
+            else:
+                axes[i][0:boxcount[i]] = N.arange(boxcount[i])*SS - .5
+                if bounds[i]:
+                    axes[i][-2] = imgshape[i] - .5
             axes[i][-1] = imgshape[i] - 1
 
-        ### step 5: fill in boxes with < 5 unmasked pixels (set to values of N.inf)
-        unmasked_boxes = N.where(mean_map != N.inf) # grid of unmasked regions (pos. irregular)
+        # Step 5: fill in boxes with < 5 unmasked pixels (set to values of
+        # N.inf)
+        unmasked_boxes = N.where(mean_map != N.inf)
         if N.size(unmasked_boxes,1) < mapshape[0]*mapshape[1]:
             mean_map = self.fill_masked_regions(mean_map)
             rms_map = self.fill_masked_regions(rms_map)
 
         return axes, mean_map, rms_map
+
 
     def fill_masked_regions(self, themap, magic=N.inf):
         """Fill masked regions (defined where values == magic) in themap.
@@ -317,10 +412,55 @@ class Op_rmsimage(Op):
                 goodcutout = cutout[cutout != magic]
                 num_unmasked = N.alen(goodcutout)
                 if num_unmasked > 0:
-                    themap[x, y] = N.mean(goodcutout)
+                    themap[x, y] = N.nansum(goodcutout)/float(len(goodcutout))
                 delx += 1
                 dely += 1
+        themap[N.where(N.isnan(themap))] = 0.0
         return themap
+
+    def pad_array(self, arr, new_shape):
+        """Returns a padded array by mirroring around the edges."""
+        # Assume that padding is the same for both axes and is equal
+        # around all edges.
+        half_size = (new_shape[0] - arr.shape[0]) / 2
+        arr_pad = N.zeros( (new_shape), dtype=arr.dtype )
+
+        # left band
+        band = arr[:half_size, :]
+        arr_pad[:half_size, half_size:-half_size] =  N.flipud( band )
+
+        # right band
+        band = arr[-half_size:, :]
+        arr_pad[-half_size:, half_size:-half_size] = N.flipud( band )
+
+        # bottom band
+        band = arr[:, :half_size]
+        arr_pad[half_size:-half_size, :half_size] = N.fliplr( band )
+
+        # top band
+        band = arr[:, -half_size:]
+        arr_pad[half_size:-half_size, -half_size:] =  N.fliplr( band )
+
+        # central band
+        arr_pad[half_size:-half_size, half_size:-half_size] = arr
+
+        # bottom left corner
+        band = arr[:half_size,:half_size]
+        arr_pad[:half_size,:half_size] = N.flipud(N.fliplr(band))
+
+        # top right corner
+        band = arr[-half_size:,-half_size:]
+        arr_pad[-half_size:,-half_size:] = N.flipud(N.fliplr(band))
+
+        # top left corner
+        band = arr[:half_size,-half_size:]
+        arr_pad[:half_size,-half_size:] = N.flipud(N.fliplr(band))
+
+        # bottom right corner
+        band = arr[-half_size:,:half_size]
+        arr_pad[-half_size:,:half_size] = N.flipud(N.fliplr(band))
+
+        return arr_pad
 
     def for_masked(self, mean_map, rms_map, mask, arr, ind, kappa, co):
 

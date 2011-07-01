@@ -23,10 +23,11 @@ class Op_psf_vary(Op):
       if img.opts.psf_vary_do:
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary  ")
         opts = img.opts
-        plot = opts.debug_figs_7
+        plot = opts.debug_figs_7_psf_vary
         image = img.ch0
 
-        generators = opts.psf_generators; nsig = opts.psf_nsig; over = opts.psf_over; kappa2 = opts.psf_kappa2
+        over = 2
+        generators = opts.psf_generators; nsig = opts.psf_nsig; kappa2 = opts.psf_kappa2
         snrcut = opts.psf_snrcut; snrtop = opts.psf_snrtop; snrbot = opts.psf_snrbot; snrcutstack = opts.psf_snrcutstack
         gencode = opts.psf_gencode; primarygen = opts.psf_primarygen; itess_method = opts.psf_itess_method
         tess_sc = opts.psf_tess_sc; tess_fuzzy= opts.psf_tess_fuzzy

@@ -7,27 +7,12 @@ from math import log10
 import matplotlib.cm as cm
 import functions as func
 
-def isl2border(img, isl):
-    """ From all valid island pixels, generate the border. """
+def isl2border(isl, shape=None):
+    """ From all valid island pixels, generate the border. Changed this huge code to 3 lines !"""
 
-    fmask = ~isl.mask_active
-    n, m = img.ch0.shape
-    subn, subm = fmask.shape
-    c0 = N.arange(isl.bbox[0].start, isl.bbox[0].stop)
-    c1 = N.arange(isl.bbox[1].start, isl.bbox[1].stop)
-    coords = [(i,j) for i in range(subn) for j in range(subm)]
-    value = [(i,j) for i in c0 for j in c1]
-
-    border = []
-    for k, val in enumerate(value):
-      if fmask[coords[k]]:
-        neigh = [[i,j] for i in range(val[0]-1,val[0]+2) for j in range(val[1]-1,val[1]+2) \
-                       if i>=0 and i<n and j>=0 and j<m and [i,j] != val]
-        dumi = len(neigh)
-        dumi1 = 0
-        for nei in neigh:
-            if fmask[tuple(N.array(nei)-N.array(isl.origin))]: dumi1 += 1
-        if dumi - dumi1 >= 2: border.append(val)
+    import scipy.ndimage as nd
+    mask = ~isl.mask_active
+    border = N.transpose(N.asarray(N.where(mask - nd.binary_erosion(mask)))) + isl.origin
 
     return N.transpose(N.array(border))
 
@@ -80,7 +65,7 @@ def plotresults(img, **kwargs):
           im = N.log10(image + low)
           for iisl, isl in enumerate(img.islands):
                                         # draw the border
-            xb, yb = isl2border(img, isl) 
+            xb, yb = isl2border(isl, img.ch0.shape) 
             pl.plot(xb, yb, 'x', color='#afeeee', markersize=8)
                                         # mark the island number
             pl.text(N.max(xb)+2, N.max(yb), str(isl.island_id), color='#afeeee')
@@ -191,6 +176,9 @@ def plot_morph_isl(img, isls=None, thr=None):
         mask = isl.mask_active
         process_morph(im, 'Island '+str(isl.island_id), ft, thr, mask, shape, img.pixel_beam)
 
+def blah(img):
+
+        pass
 
 
 

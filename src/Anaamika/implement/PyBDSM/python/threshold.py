@@ -3,8 +3,7 @@
 Defines operation Op_threshold. If the option 'thresh' is defined
 as 'fdr' then the value of thresh_pix is estimated using the
 False Detection Rate algorithm (using the user defined value 
-of fdr_alpha). If thresh is None, then the false detection prob 
-is estimated and if higher thanwhere the false detection
+of fdr_alpha). If thresh is None, then the false detection
 probability is first calculated, and if the number of false source
 pixels is more than fdr_ratio times the estimated number of true source
 pixels, then FDR is chosen, else the hard threshold option is chosen.
@@ -38,17 +37,20 @@ class Op_threshold(Op):
 	    cutoff = 5.0 
 	    false_p = 0.5*erfc(cutoff/sq2)*size
 	    if false_p < opts.fdr_ratio*source_p:
-                opts.thresh = 'hard'
+                img.thresh = 'hard'
+                mylogger.userinfo(mylog, "Using sigma-clipping thresholding")
 	    else: 
-                opts.thresh = 'fdr'
-
+                img.thresh = 'fdr'
+                mylogger.userinfo(mylog, "Using FDR (False Detection Rate) thresholding")
             mylog.debug('%s %g' % ("Estimated number of source pixels (using sourcecounts.py) is ",source_p))
             mylog.debug('%s %g' % ("Number of false positive pixels expected for 5-sigma is ",false_p))
-            mylog.debug("Threshold for pixels set to : "+str.swapcase(opts.thresh))
-
-	if img.opts.thresh=='fdr':
+            mylog.debug("Threshold for pixels set to : "+str.swapcase(img.thresh))
+        else:
+            img.thresh = img.opts.thresh
+            
+	if img.thresh=='fdr':
             cdelt = img.wcs_obj.acdelt[:2]
-	    bm = (opts.beam[0], opts.beam[1])
+	    bm = (img.beam[0], img.beam[1])
             area_pix = int(round(N.product(bm)/(abs(N.product(cdelt))* \
                                                   pi/(4.0*log(2.0)))))
 	    s0 = 0
@@ -69,11 +71,13 @@ class Op_threshold(Op):
                       (2.0/pi/dumr+log(1.0-dumr1*dumr1)/2.0)-      \
                       log(1.0-dumr1*dumr1)/dumr))*sq2
             if pcrit == 0.0:
-                opts.thresh = 'hard'
+                img.thresh = 'hard'
             else:
-                opts.thresh_pix = sigcrit
-                mylog.info('%s %5.2f' % ("Setting FDR threshold as ", sigcrit))
-
+                img.thresh_pix = sigcrit
+                mylogger.userinfo(mylog, "FDR threshold (replaces thresh_pix)", str(round(sigcrit, 4)))
+        else:
+            img.thresh_pix = opts.thresh_pix
+            
         return img
 
     def get_srcp(self, img):
@@ -82,7 +86,7 @@ class Op_threshold(Op):
 	cutoff = 5.0
 	spin = -0.80
 	freq = img.cfreq 
-        bm = (img.opts.beam[0], img.opts.beam[1])
+        bm = (img.beam[0], img.beam[1])
         cdelt = img.wcs_obj.acdelt[:2]
 	x = 2.0*pi*N.product(bm)/abs(N.product(cdelt))/(fwsig*fwsig)*img.omega
 

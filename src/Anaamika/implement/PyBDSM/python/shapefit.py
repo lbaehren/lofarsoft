@@ -7,6 +7,7 @@ from image import *
 from islands import *
 from shapelets import *
 import mylogger
+import statusbar
 
 
 Island.shapelet_basis=String(doc="Coordinate system for shapelet decomposition (cartesian/polar)")
@@ -22,28 +23,33 @@ class Op_shapelets(Op):
     def __call__(self, img):
     
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Shapefit")
-        import pylab as pl
+        global bar
+        bar = statusbar.StatusBar('Fitting islands with shapelets .......... : ', 0, img.nisl)
         if img.opts.shapelet_do:
-          for id, isl in enumerate(img.islands):
-            arr=isl.image
-	    mask=isl.mask_active + isl.mask_noisy
-	    basis=img.opts.shapelet_basis
-	    beam_pix=img.beam2pix(img.beam)
-            mode=img.opts.shapelet_fitmode
-            if mode != 'fit': mode=''
+            if img.opts.quiet == False:
+                bar.start()
+            for id, isl in enumerate(img.islands):
+                arr=isl.image
+                mask=isl.mask_active + isl.mask_noisy
+                basis=img.opts.shapelet_basis
+                beam_pix=img.beam2pix(img.beam)
+                mode=img.opts.shapelet_fitmode
+                if mode != 'fit': mode=''
 
-	    fixed=(0,0,0)
-	    (beta, centre, nmax)=self.get_shapelet_params(arr, mask, basis, beam_pix, fixed, N.array(isl.origin), mode)
+                fixed=(0,0,0)
+                (beta, centre, nmax)=self.get_shapelet_params(arr, mask, basis, beam_pix, fixed, N.array(isl.origin), mode)
 
-	    cf=decompose_shapelets(arr, mask, basis, beta, centre, nmax, mode)
+                cf=decompose_shapelets(arr, mask, basis, beta, centre, nmax, mode)
 
-	    isl.shapelet_beta=beta
-	    isl.shapelet_centre=tuple(N.array(centre) + N.array(isl.origin))
-	    isl.shapelet_nmax=nmax
-	    isl.shapelet_basis=basis
-	    isl.shapelet_cf=cf
-            mylog.info('Shape : cen '+str(isl.shapelet_centre[0])+' '+ \
-                 str(isl.shapelet_centre[1])+' beta '+str(beta))
+                isl.shapelet_beta=beta
+                isl.shapelet_centre=tuple(N.array(centre) + N.array(isl.origin))
+                isl.shapelet_nmax=nmax
+                isl.shapelet_basis=basis
+                isl.shapelet_cf=cf
+                mylog.info('Shape : cen '+str(isl.shapelet_centre[0])+' '+ \
+                     str(isl.shapelet_centre[1])+' beta '+str(beta))
+                if img.opts.quiet == False:
+                    bar.increment()
 
 
     def get_shapelet_params(self, image, mask, basis, beam_pix, fixed, ori, mode, beta=None, cen=None, nmax=None):
@@ -55,7 +61,8 @@ class Op_shapelets(Op):
 	     specified as an argument, then fixed is taken as 0."""
 	 from math import sqrt, log, floor
          import functions as func
-
+         import numpy as N
+         
 	 if fixed[0]==1 and beta==None: fixed[0]=0
 	 if fixed[1]==1 and cen==None: fixed[1]=0
 	 if fixed[2]==1 and nmax==None: fixed[2]=0

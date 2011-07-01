@@ -17,6 +17,7 @@ import numpy as N
 from image import *
 import _cbdsm
 import mylogger
+import sys
 import functions as func
 
 avspc_wtarr = NArray(doc = "Weight array for channel collapse")
@@ -29,18 +30,20 @@ class Op_collapse(Op):
     """Collapse 3D image"""
 
     def __call__(self, img):
-
-      mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Collapse  ")
+      mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Collapse")
       if img.opts.polarisation_do: pols = ['I', 'Q', 'U', 'V'] # make sure I is done first
       else: pols = ['I']                                       # assume I is always present
 
       if len(img.image.shape) == 3:
-        mylog.info('%s %i' % ('Number of channels in image :', img.image.shape[0]))
         c_mode = img.opts.collapse_mode
         chan0 = img.opts.collapse_ch0
         c_list = img.opts.collapse_av
         c_wts = img.opts.collapse_wt
         if c_list == []: c_list = N.arange(img.image.shape[0])
+        if len(c_list) == 1:
+            c_mode = 'single'
+            chan0 = c_list[0]
+            img.collapse_ch0 = chan0            
         ch0sh = img.image.shape[1:]
         img.ch0 = N.zeros(ch0sh)
         if img.opts.polarisation_do: 
@@ -66,23 +69,16 @@ class Op_collapse(Op):
             # assume (until true 4-D cubes are available) that input filename includes
             # '_I.fits' and that other Stokes cubes are named '*_Q.fits', etc.
 
-            split_fitsname=img.opts.fits_name.split("_I.") # replace 'I' with 'Q', 'U', or 'V'
-            fits_file=split_fitsname[0]+'_'+pol+split_fitsname[-1]
-            data, hdr = func.read_image_from_file(img.use_io, fitsfile, img.opts.indir)
-
-            ### now we need to transpose coordinates corresponding to RA & DEC
-            axes = range(len(data.shape))
-            axes[-1], axes[-2] = axes[-2], axes[-1]
-            data = data.transpose(*axes)
-
-            ### and make a copy of it to get proper layout & byteorder
-            data = N.array(data, order='C',
-                           dtype=data.dtype.newbyteorder('='))
+            split_filename=img.opts.filename.split("_I.") # replace 'I' with 'Q', 'U', or 'V'
+            image_file=split_filename[0]+'_'+pol+split_filename[-1]
+            data, hdr = func.read_image_from_file(image_file, img, img.opts.indir)
                 
           if c_mode == 'single':
             if pol == 'I': 
               img.ch0 = ch0 = img.image[chan0]
-              mylog.info('%s %i' % ('Source extraction will be done on channel', chan0))
+              mylogger.userinfo(mylog, 'Source extraction will be' \
+                                    'done on channel', '%i (%.3f MHz)' % \
+                                    (chan0, img.cfreq/1e6))
             else:
               ch0images[ipol][:] = ch0[:] = data[chan0][:]
 
@@ -103,8 +99,18 @@ class Op_collapse(Op):
             if pol == 'I':
               img.ch0 = ch0
               img.avspc_wtarr = wtarr
-              mylog.info('%s %s' % ('Channels averaged with weights c_wts = ',c_wts))
-              mylog.info('Source extraction will be done on averaged ch0 image')
+              init_freq_collapse(img, wtarr)
+              if c_wts == 'unity':
+                  mylogger.userinfo(mylog, 'Channels averaged with '\
+                                        'uniform weights')
+              else:
+                  mylogger.userinfo(mylog, 'Channels averaged with '\
+                                        'weights=(1/rms)^2')
+              mylogger.userinfo(mylog, 'Source extraction will be '\
+                                    'done on averaged ch0 image')
+              mylogger.userinfo(mylog, 'Frequency of averaged '\
+                                    'image', '%.3f MHz' % \
+                                    (img.cfreq/1e6,))
               str1 = " ".join(str(n) for n in c_list)
               mylog.debug('%s %s' % ('Channels averaged : ', str1))
               str1 = " ".join(["%9.4e" % n for n in wtarr])
@@ -116,19 +122,18 @@ class Op_collapse(Op):
 
       else:
         img.ch0 = img.image
+        mylogger.userinfo(mylog, 'Frequency of image',
+                          '%.3f MHz' % (img.cfreq/1e6,))
         if img.opts.polarisation_do: 
           for pol in pols[1:]:
-            split_fitsname = img.opts.fits_name.split("_I.fits") 
-            fits_file = split_fitsname[0]+'_'+pol+'.fits'
-            fits = pyfits.open(fits_file, mode="readonly")
-            data = fits[0].data
-            fits.close()
-            axes = range(len(data.shape)); axes[-1], axes[-2] = axes[-2], axes[-1]
-            data = data.transpose(*axes)
-            data = N.array(data, order='C', dtype=data.dtype.newbyteorder('='))
-            if pol == 'Q': img.ch0_Q = data
-            if pol == 'U': img.ch0_U = data
-            if pol == 'V': img.ch0_V = data
+              split_imname = img.opts.filename.split("_I.") 
+              image_file = split_imname[0] + '_' + \
+                  pol + split_imname[-1]
+              data, hdr = read_image_from_file(image_file, img,
+                                               img.opts.indir)
+              if pol == 'Q': img.ch0_Q = data
+              if pol == 'U': img.ch0_U = data
+              if pol == 'V': img.ch0_V = data
       
       # create mask if needed (assume all pols have the same mask as I)
       mask = N.isnan(img.ch0)
@@ -274,4 +279,40 @@ def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, 
 
     return imageout, beamlist, freq_av, avimage_flags, crms_av 
         
+########################################################################################
 
+def init_freq_collapse(img, wtarr):
+    # Place appropriate, post-collapse frequency info in img
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Collapse")
+
+    # Calculate weighted average frequency
+    if img.opts.frequency_sp != None:
+        c_list = img.opts.collapse_av
+        if c_list == []: c_list = N.arange(img.image.shape[0])
+        freqs = img.opts.frequency_sp
+        if len(freqs) != len(c_list):
+            raise RuntimeError("Number of channel and number of frequencies specified "\
+                         "by user do not match")
+        sumwts = 0.0
+        sumfrq = 0.0
+        for i, ch in enumerate(c_list):
+            sumwts += wtarr[i]
+            sumfrq += freqs[ch]*wtarr[i]
+        img.cfreq = sumfrq / sumwts
+    else:
+        # Calculate from header info
+        c_list = img.opts.collapse_av
+        if c_list == []: c_list = N.arange(img.image.shape[0])
+        sumwts = 0.0
+        sumfrq = 0.0
+        crval, cdelt, crpix = img.freq_pars
+        if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and \
+                img.opts.frequency == None:
+            raise RuntimeError("Frequency information not found in header and frequencies "\
+                         "not specified by user")
+        else:
+            for i, ch in enumerate(c_list):
+                sumwts += wtarr[i]
+                freq = crval+cdelt*(ch+1-crpix)
+                sumfrq += freq*wtarr[i]
+            img.cfreq = sumfrq / sumwts

@@ -1,3 +1,4 @@
+
 """Module output.
 
 Writes results of source detection in a variety of formats.
@@ -12,26 +13,26 @@ import mylogger
 class Op_outlist(Op):
     """Write out list of gaussians
 
-    Currently 4 output formats are supported:
+    Currently 5 output formats are supported:
     - BBS list
     - fbdsm gaussian list
     - star list
     - kvis annotations
+    - ascii
 
     All output lists are generated atm.
     """
     def __call__(self, img):
+        if img.opts.output_all:
+            dir = img.basedir + '/catalogues/'
+            if not os.path.exists(dir): os.mkdir(dir)
+            self.write_bbs(img, dir)
+            self.write_gaul(img, dir)
+            self.write_star(img, dir)
+            self.write_kvis_ann(img, dir)
+            self.write_opts(img, img.basedir + '/misc/')
+            self.write_gaul_FITS(img, dir)
 
-        dir = img.basedir + '/catalogues/'
-        if not os.path.exists(dir): os.mkdir(dir)
-        self.write_bbs(img, dir)
-        self.write_gaul(img, dir)
-        self.write_star(img, dir)
-        self.write_kvis_ann(img, dir)
-        self.write_opts(img, img.basedir + '/misc/')
-        #self.write_gaul_FITS(img, dir)
-
-        return img
 
     def write_bbs(self, img, dir):
         """ Writes the gaussian list as a bbs-readable file"""
@@ -39,29 +40,34 @@ class Op_outlist(Op):
         from const import fwsig
         import functions as func
 
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output    ")
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+
         prefix = ''
         if img.extraparams.has_key('bbsprefix'): prefix = img.extraparams['bbsprefix']+'_'
-        name = img.imagename
-        if img.extraparams.has_key('bbsname'): name = img.extraparams['bbsname']
-        fnames = [name + '.sky_in']
-        if img.extraparams.has_key('bbsprefix'): 
-          fnames.append(img.parentname + '.pybdsm' + '.total.sky_in')
+        if img.extraparams.has_key('bbsname'):
+            name = img.extraparams['bbsname']
         else:
-          fnames.append(name + '.total.sky_in')
-
+            name = img.imagename
+        fnames = [dir + name + '.sky_in']
+        if img.extraparams.has_key('bbsprefix'): 
+          fnames.append(dir + img.parentname + '.pybdsm' + '.total.sky_in')
+        else:
+          fnames.append(dir + name + '.total.sky_in')
+            
         if img.opts.spectralindex_do: freq = "%.5e " % img.freq0
         else: freq = "%.5e" % img.cfreq
         bbs_patches = img.opts.bbs_patches
-        if bbs_patches == 'none': 
+        if bbs_patches == None: 
           patch_s = ''
           patchname = ''
         else:
           patch_s = 'Patch, '
         type = 'GAUSSIAN'
         sep = ', '
-        sname = img.imagename.split('.')[0]
-
+        if img.opts.srcroot == None:
+            sname = img.imagename.split('.')[0]
+        else:
+            sname = img.opts.srcroot
         ### sort them in descending order of flux
         max = [] 
         for src in img.source: max.append(src.total_flux)
@@ -72,21 +78,19 @@ class Op_outlist(Op):
 
         for fno, fname in enumerate(fnames):
           if not img.extraparams.has_key('bbsappend'): img.extraparams['bbsappend'] = False
-          old = os.path.exists(dir+fname)
+          old = os.path.exists(fname)
           if fno == 1: 
-            f = open(dir+fname, 'a')
+            f = open(fname, 'a')
           else:
             if img.extraparams['bbsappend']:
-              f = open(dir+fname, 'a')
+              f = open(fname, 'a')
             else:
-              f = open(dir+fname, 'w')
-              mylog.info('Writing '+dir+fname)
+              f = open(fname, 'w')
+              mylog.info('Writing ' + fname)
 
           if not old:
             str1 = "# (Name, Type, "+patch_s+"Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
                   + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
-            f.write(str1)
-            str1 = "# The above line defines the field order and is required. It has to be a single line.\n \n"
             f.write(str1)
 
           if bbs_patches == 'single': 
@@ -97,7 +101,7 @@ class Op_outlist(Op):
 
           for iii, ii in enumerate(ind):
             src = img.source[ii]
-            if bbs_patches == 'seperate' and src.ngaus > 0: 
+            if bbs_patches == 'separate' and src.ngaus > 0: 
               str1 = ', , patch_'+img.parentname+'_'+str(p_nums[iii])+', 00:00:00, +00.00.00 \n'; 
               f.write(str1)
               patchname = 'patch_'+img.parentname+'_'+str(p_nums[iii])+', '
@@ -214,9 +218,9 @@ class Op_outlist(Op):
 
         f.close()
 
-    def write_gaul_FITS(self, img, dir):
+  
+    def write_gaul_FITS(self, img, dir, incl_wavelet=True):
         """ Write as FITS binary table. """
-
         cnames, cunit, cformat = stuff.cnames, stuff.cunit, stuff.cformat
         fbdsm_list = pybdsm2fbdsm(img)
         col_list = []
@@ -242,6 +246,17 @@ class Op_outlist(Op):
             if isinstance(attr[1], (int, str, bool, float, types.NoneType, tuple, list)):
               f.write('%-40s' % attr[0])
               f.write(repr(attr[1])+'\n')
+              
+              # Also print the values derived internally. They are all stored
+              # in img with the same name (e.g., img.opts.beam --> img.beam)
+              if hasattr(img, attr[0]):
+                  used = img.__getattribute__(attr[0])
+                  if used != attr[1] and isinstance(used, (int, str, bool, float,
+                                                           types.NoneType, tuple,
+                                                           list)):
+                      f.write('%-40s' % '    Value used')
+                      f.write(repr(used)+'\n')
+
         f.close()
               
 
@@ -255,7 +270,7 @@ def ra2hhmmss(deg):
     x, mm = modf(x*60)
     ss = x*60
 
-    return (hh, mm, ss)
+    return (int(hh), int(mm), ss)
 
 def dec2ddmmss(deg):
     """Convert DEC coordinate (in degrees) to DD MM SS"""
@@ -266,25 +281,66 @@ def dec2ddmmss(deg):
     x, ma = modf(x*60)
     sa = x*60
 
-    return (dd, ma, sa, sign)
+    return (int(dd), int(ma), sa, sign)
 
-def pybdsm2fbdsm(img):
+def pybdsm2fbdsm(img, incl_wavelet=True):
     import functions as func
 
     fbdsm = []
-    for g in img.gaussians:#():
+    g_list = img.gaussians
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        for ag in img.atrous_gaussians:
+            g_list += ag
+    for g in g_list:
         gidx = g.gaus_num
         iidx = g.island_id+1
+        widx = g.wavelet_j
         A = g.peak_flux
+        T = g.total_flux
         ra, dec = g.centre_sky
         x, y = g.centre_pix
         shape = g.size_sky
+        deconv_shape = g.deconv_size_sky
         eA = g.peak_fluxE
+        eT = g.total_fluxE
         era, edec = g.centre_skyE
         ex, ey = g.centre_pixE
         eshape = g.size_skyE
-        list1 = [gidx, iidx, 0, 0., 0., A, eA, ra, era, dec, edec, x, ex, y, ey, shape[0], eshape[0], shape[1], eshape[1], \
-                 shape[2], eshape[2], 0.,0.,0.,0.,0.,0., 0.,0.,0.,0., 0.,0., iidx, 0,0,0,0, 0.,0.,0.,0.,0.,0.]
+        deconv_eshape = g.deconv_size_skyE
+        isl_idx = g.island_id
+        isl = img.islands[isl_idx]
+        isl_rms = isl.rms
+        isl_av = isl.mean
+        src_idx = g.source_id
+        src = img.source[src_idx]
+        src_rms = src.rms_isl
+        src_av = isl.mean
+        flag = g.flag
+        grms = g.rms
+        x, y = g.centre_pix
+        xsize, ysize, ang = g.size_pix # FWHM
+        ellx, elly = func.drawellipse(g)
+        blc = [int(min(ellx)), int(min(elly))]
+        trc = [int(max(ellx)), int(max(elly))]
+    
+        specin = 0.0
+        especin = 0.0
+        if img.opts.spectralindex_do:
+            spin1 = g.spin1
+            espin1 = g.espin1
+            if spin1 == None:
+                specin = 0.0
+                especin = 0.0
+            else:                       
+                specin = spin1[1]
+                especin = espin1[1]
+
+        list1 = [gidx, iidx, widx, flag, T, eT, A, eA, ra, era, dec, edec, x, ex, y,
+                 ey, shape[0], eshape[0], shape[1], eshape[1], shape[2],
+                 eshape[2], deconv_shape[0], deconv_eshape[0],
+                 deconv_shape[1], deconv_eshape[1], deconv_shape[2],
+                 deconv_eshape[2], src_rms, src_av, isl_rms, isl_av,
+                 specin, especin, src_idx, blc[0], blc[1], trc[0], trc[1], grms]
         fbdsm.append(list1)
     fbdsm = func.trans_gaul(fbdsm)
 
@@ -314,6 +370,5 @@ def write_islands(img):
               len(isl.source)))
 
     f.close()
-
 
 

@@ -16,9 +16,15 @@ from image import *
 from copy import deepcopy as cp
 import mylogger
 import sys
+import time
+import statusbar
+import misc
+import _cbdsm
+import pylab as pl
 
 gaus_num = Int(doc="Serial number of the gaussian for the image")
 ngaus = Int(doc="Total number of gaussians extracted")
+total_flux_gaus = Float(doc="Total flux in the Gaussians extracted")
 
 class Op_gausfit(Op):
     """Fit a number of 2D gaussians to each island.
@@ -39,19 +45,74 @@ class Op_gausfit(Op):
     Prerequisites: module islands should be run first.
     """
     def __call__(self, img):
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit   ")
+        from time import time
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit")
+        global bar
+        bar = statusbar.StatusBar('Fitting islands with Gaussians .......... : ',
+                                  0, img.nisl)
         opts = img.opts
-        if not opts.verbose_fitting: sys.stdout.write("PyBDSM log>  PyBDSM."+img.log+\
-                 "Gausfit           :: Fitting Island number ...     ")
+        if opts.quiet == False and opts.verbose_fitting==False:
+            bar.start()
+        min_maxsize = 50.0
+        maxsize = opts.splitisl_maxsize
+        if maxsize < min_maxsize: maxsize = min_maxsize
+
+        # if not opts.verbose_fitting: sys.stdout.write("PyBDSM log>  PyBDSM."+img.log+\
+        #          "Gausfit           :: Fitting Island number ...     ")
         for idx, isl in enumerate(img.islands):
+          a = time()
           if opts.verbose_fitting:
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
-          else:
-            sys.stdout.write('\b\b\b\b' + ' '*(4-len(str(idx))) + str(idx))
-            sys.stdout.flush()
-            if idx == img.nisl-1: print
 
-          gaul, fgaul = self.fit_island(isl, opts, img)
+          size = isl.size_active/img.pixel_beamarea*2.0   # 2.0 roughly corrects for thresh_isl
+          if size > maxsize and opts.split_isl:
+
+            tosplit = misc.isl_tosplit(isl, img)
+            #print 'to split = ',tosplit
+            if tosplit[0] > 0:
+              n_subisl, sub_labels = tosplit[1], tosplit[2]
+              gaul = []; fgaul = []
+              # print '\n SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
+              for i_sub in range(n_subisl):
+                #print 'sub isl ',i_sub
+                islcp = isl.copy(img)
+                islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
+                isl.islmean = 0.0
+                sgaul, sfgaul = self.fit_island(islcp, opts, img)
+                if bar.started: bar.increment()
+                gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+            else:
+              if img.waveletimage:
+                isl.islmean = 0.0
+              else:
+                bstat = _cbdsm.bstat
+                islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
+                isl.islmean = islm
+                # print '\n SETTING MEAN AS ISLMEAN'
+                # pl.figure()
+                # pl.subplot(1,2,1)
+                # pl.suptitle('islmean')
+                # pl.imshow(N.transpose(isl.image), origin='lower', interpolation='nearest'); pl.colorbar()
+                # pl.subplot(1,2,2)
+                # pl.imshow(N.transpose(isl.image-isl.islmean), origin='lower', interpolation='nearest'); pl.colorbar()
+                #sys.exit()
+              gaul, fgaul = self.fit_island(isl, opts, img)
+              if bar.started: bar.increment()
+
+          else:
+            isl.islmean = 0.0
+            gaul, fgaul = self.fit_island(isl, opts, img)
+            if bar.started: bar.increment()
+
+          #print '--'*30
+
+          if opts.plot_islands:
+              pl.figure()
+              pl.suptitle('ISland : '+str(isl.island_id))
+              pl.subplot(1,2,1)
+              pl.imshow(N.transpose(isl.image), origin='lower', interpolation='nearest'); pl.colorbar()
+              pl.subplot(1,2,2)
+              pl.imshow(N.transpose(isl.image*~isl.mask_active), origin='lower', interpolation='nearest'); pl.colorbar()
 
           ### now convert gaussians into Gaussian objects and store
           gaul = [Gaussian(img, par, idx, gidx)
@@ -63,27 +124,52 @@ class Op_gausfit(Op):
 
           isl.gaul = gaul
           isl.fgaul= fgaul
-
-        ### create generator which allow to easily access all gaussians
-        def gaussian_list():
-            def list_generator():
-                for isl in img.islands:
-                    for g in isl.gaul:
-                        yield g
-            return list_generator()
+          b = time()
+          #print 'Island ', isl.island_id, ' : ', b-a
 
         gaussian_list = [g for isl in img.islands for g in isl.gaul] 
         img.gaussians = gaussian_list
 
         ### put in the serial number of the gaussians for the whole image
         n = 0
+        tot_flux = 0.0
+        if hasattr(img, 'j'):
+            # store the wavelet scale for each Gaussian
+            # (wavelet img's have a img.j attribute)
+            j = img.j
+        else:
+            j = 0
         for isl in img.islands:
             m = 0
             for g in isl.gaul:
                 n += 1; m += 1
                 g.gaus_num = n
+                g.wavelet_j = j
+                tot_flux += g.total_flux
             isl.ngaus = m
         img.ngaus = n
+        img.total_flux_gaus = tot_flux
+
+        mylogger.userinfo(mylog, "Total number of Gaussians fit to image",
+                          str(n))
+        mylogger.userinfo(mylog, "Total flux in model", '%.3f Jy' %
+                          tot_flux)
+ 
+        # Check if model flux is very different from sum of flux in image
+        if img.ch0_sum_jy > 0:
+            if img.total_flux_gaus/img.ch0_sum_jy < 0.5 or \
+                    img.total_flux_gaus/img.ch0_sum_jy > 2.0:
+                mylog.warn('Total flux in model is %0.2f times sum of pixels '\
+                               'in input image. Large residuals may remain.' %
+                           (img.total_flux_gaus/img.ch0_sum_jy,))
+            
+        # Check if there are many Gaussians with deconvolved size of 0 in one
+        # axis but not in the other
+        fraction_1d = self.check_for_1d_gaussians(img)
+        if fraction_1d > 0.5 and img.beam != None:
+            mylog.warn('After deconvolution, more than 50% of Gaussians are '\
+                           "1-D. Unless you're fitting an extended source, "\
+                           "beam may be incorrect.")
 
         return img
 
@@ -110,8 +196,12 @@ class Op_gausfit(Op):
 
         """
         from _cbdsm import MGFunction
-        fcn = MGFunction(isl.image, isl.mask_noisy, 1)
+        fcn = MGFunction(isl.image-isl.islmean, isl.mask_noisy, 1)
         beam = img.pixel_beam
+
+        if abs(beam[0]/beam[1]) < 1.1:
+            beam = (1.1*beam[0], beam[1], beam[2])
+
         thr1 = isl.mean + opts.thresh_isl*isl.rms
         thr2 = isl.mean + opts.thresh_pix*isl.rms
         verbose = opts.verbose_fitting
@@ -153,7 +243,7 @@ class Op_gausfit(Op):
         from const import fwsig
         import functions as func
 
-        im = isl.image; mask = isl.mask_active; av = img.clipped_mean 
+        im = isl.image-isl.islmean; mask = isl.mask_active; av = img.clipped_mean 
         inipeak, iniposn, im1 = func.get_maxima(im, mask, thr, isl.shape, beam)
         if len(inipeak) == 0:
           av, stdnew, maxv, maxp, minv, minp = func.arrstatmask(im, mask)
@@ -203,13 +293,13 @@ class Op_gausfit(Op):
         import scipy.ndimage as nd
         import functions as func
 
-        im = isl.image; mask = isl.mask_active; av = img.clipped_mean; thr1= -1e9
+        im = isl.image-isl.islmean; mask = isl.mask_active; av = img.clipped_mean; thr1= -1e9
         inipeak, iniposn, im1 = func.get_maxima(im, mask, thr1, isl.shape, beam)
         npeak = len(iniposn) 
         gaul = []
 
         av, stdnew, maxv, maxp, minv, minp = func.arrstatmask(im, mask)
-        mom = func.momanalmask_gaus(isl.image, isl.mask_active, 0, 1.0, True)
+        mom = func.momanalmask_gaus(isl.image-isl.islmean, isl.mask_active, 0, 1.0, True)
         if npeak <= 1:
           g = (float(maxv), int(round(mom[1])), int(round(mom[2])), mom[3]/fwsig, \
                                   mom[4]/fwsig, mom[5])
@@ -265,7 +355,7 @@ class Op_gausfit(Op):
             g = (maxv, xcen, ycen, mom[3]/fwsig, mom[4]/fwsig, mom[5]-90.)
             gaul.append(g)
             coords.append([xcen, ycen])
-          if img.opts.debug_figs_6:
+          if img.opts.debug_figs_6_ini_nobeam:
             import pylab as pl
             pl.figure(); pl.suptitle(img.imagename+' Island : '+str(isl.island_id))
             resid = N.zeros(im.shape); x, y = N.indices(im.shape); xp, yp = N.transpose(coords)
@@ -291,6 +381,7 @@ class Op_gausfit(Op):
         verbose: whether to print fitting progress information
         """
         from _cbdsm import lmder_fit, dn2g_fit, dnsg_fit
+        global bar
         fit = lmder_fit
         beam = list(beam)
 
@@ -309,6 +400,7 @@ class Op_gausfit(Op):
         ### iteratively add gaussians while there are high peaks
         ### in the image and fitting converges
         while fitok:
+          if bar.started: bar.spin()
           peak, coords = fcn.find_peak()
           if peak < thr:  ### no good peaks left
               break
@@ -442,6 +534,20 @@ class Op_gausfit(Op):
         
         return np
 
+    def check_for_1d_gaussians(self, img):
+        """Check for Gaussians with deconvolved sizes of 0 for one axis only."""
+        n1d = 0
+        ng = 0
+        for g in img.gaussians:
+            ng += 1
+            dsize = g.deconv_size_sky
+            if (dsize[0] == 0 and dsize[1] > 0) or (dsize[0] > 0 and dsize[1] == 0):
+                n1d += 1
+        if ng > 0:
+            return float(n1d)/float(ng)
+        else:
+            return 0.0
+
 
 from image import *
 
@@ -488,6 +594,7 @@ class Gaussian(object):
 
         self.gaussian_idx = g_idx
         self.island_id = isl_idx
+        self.jlevel = img.j
         self.flag = flag
         self.parameters = gaussian
 
@@ -495,6 +602,13 @@ class Gaussian(object):
         self.peak_flux = p[0]
         self.centre_pix = p[1:3]
         size = p[3:6]
+        if func.approx_equal(size[0], img.pixel_beam[0]*1.1) and \
+                func.approx_equal(size[1], img.pixel_beam[1]) and \
+                func.approx_equal(size[2], img.pixel_beam[2]):
+            # Check whether fitted Gaussian is just the distorted pixel beam
+            # given as an initial guess. If so, reset the size to the
+            # undistorted beam.
+            size = img.pixel_beam
         size = func.corrected_size(size)  # gives fwhm and P.A.
         self.size_pix = size
         self.size_sky = img.pix2beam(size)
@@ -519,9 +633,20 @@ class Gaussian(object):
         self.size_skyE = img.pix2beam(errors[3:6])
         self.rms = img.islands[isl_idx].rms
 
-        gaus_dc = func.deconv(bm_pix1, size)
-        self.deconv_size_sky = img.pix2beam(gaus_dc)
-        self.deconv_size_skyE  = [0., 0., 0.]
+        # func.deconv, based on AIPS DECONV.FOR, gives a lot of
+        # 1-D Gaussians. The Miriad algorithm in func.deconv2 does
+        # a much better job in this regard, so use it instead. Note
+        # that for resolved sources, the two algorithms give the
+        # same answer.
+        if flag == 0:
+            #gaus_dc = func.deconv(bm_pix1, size)
+            gaus_dc, err = func.deconv2(bm_pix1, size)
+            self.deconv_size_sky = img.pix2beam(gaus_dc)
+            self.deconv_size_skyE  = [0., 0., 0.]
+        else:
+            self.deconv_size_sky = [0., 0., 0.]
+            self.deconv_size_skyE  = [0., 0., 0.]
+
 
 ### Insert attributes into Island class
 from islands import Island
