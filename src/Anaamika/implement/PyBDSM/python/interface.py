@@ -535,6 +535,9 @@ def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
         return
     if incl_primary:
         if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+            if patch == 'single' or patch == None:
+                # Make sure only a single patch is used
+                wavpatl = []
             outstr_list = make_bbs_str(img, outl+wavoutl, outn+wavoutn, patl+wavpatl)
         else:
             outstr_list = make_bbs_str(img, outl, outn, patl)
@@ -886,12 +889,12 @@ def make_bbs_str(img, glist, gnames, patchnames):
         outstr_list.append("format = Name, Type, Ra, Dec, I, Q, U, V, "\
                                "MajorAxis, MinorAxis, Orientation, "\
                                "ReferenceFrequency='"+freq+"', "\
-                               "SpectralIndex=[]\n\n")
+                               "SpectralIndex='[]'\n\n")
     else:
         outstr_list.append("format = Name, Type, Patch, Ra, Dec, I, Q, U, V, "\
                                "MajorAxis, MinorAxis, Orientation, "\
                                "ReferenceFrequency='"+freq+"', "\
-                               "SpectralIndex=[]\n\n")
+                               "SpectralIndex='[]'\n\n")
 
     for pindx, patch_name in enumerate(patchnames): # loop over patches
       if patch_name != None:
