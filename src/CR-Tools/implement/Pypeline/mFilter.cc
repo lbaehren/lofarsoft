@@ -310,7 +310,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
   }
 
   HNumber phase(0);
-  HNumber phase_factor = M_PI/(2*blocksize - 1);
+  HNumber phase_factor = M_PI/(blocksize - 1);
   HNumber phase_offset = 0;
 
   Iter it_v = vec;
