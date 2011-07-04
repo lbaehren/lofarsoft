@@ -855,13 +855,13 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
   HNumber alpha, delta, A, h, H;
 
   // Calculate Terestrial Time (TT)
-  const HNumber tt = utc + tmf::tt_utc(utc) / tmf::SECONDS_PER_DAY;
+  const HNumber tt = utc + tmf_delta_tt_utc(utc) / SECONDS_PER_DAY;
 
   // Calculate Universal Time (UT1)
-  const HNumber ut1 = utc + ut1_utc / tmf::SECONDS_PER_DAY;
+  const HNumber ut1 = utc + ut1_utc / SECONDS_PER_DAY;
 
   // Calculate Local Apparant Sidereal Time (LAST)
-  const HNumber theta_L = tmf::last(ut1, tt, L);
+  const HNumber theta_L = tmf_last(ut1, tt, L);
 
   // Get iterators
   Iter hc_it=hc;
@@ -891,10 +891,10 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
     delta = *ec_it;
 
     // Calculate hour angle
-    H = tmf::rad2circle(theta_L - alpha);
+    H = tmf_rad2circle(theta_L - alpha);
 
     // Convert from equatorial to horizontal coordinates
-    tmf::equatorial2horizontal(A, h, H, delta, phi);
+    tmf_equatorial2horizontal(&A, &h, H, delta, phi);
 
     // Store output
     *hc_it = A;

@@ -9,6 +9,7 @@ include (FindNumPy)
 include (FindNumUtil)
 include (FindOpenMP)
 include (FindAERA)
+include (FindTMF)
 
 ##-------------------------------------------------------------------------------
 ## Options

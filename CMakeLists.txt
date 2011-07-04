@@ -278,11 +278,6 @@ endif (DAL_PYTHON_BINDINGS)
 # add_dependencies (dal dal_depends)
 
 ##____________________________________________________________________
-##                                          Transmogrify Library (TMF)
-
-build_package (tmf src/TMF)
-
-##____________________________________________________________________
 ##                                                            CR-Tools
 
 build_package (cr src/CR-Tools)

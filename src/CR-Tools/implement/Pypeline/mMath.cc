@@ -4767,11 +4767,11 @@ void HFPP_FUNC_NAME(ndarray out, const NIter in_begin, const NIter in_end, HInte
 
   // Get pointers to memory of numpy array
   double* out_it = numpyBeginPtr<double>(out);
-  double* out_end = numpyEndPtr<double>(out);
+  //double* out_end = numpyEndPtr<double>(out);
 
   // Get vector lengths
   const int Nin = std::distance(in_it, in_end);
-  const int Nout = std::distance(out_it, out_end);
+  //const int Nout = std::distance(out_it, out_end);
   const int Ninner = Nin / dimsize;
 
   // Copy and cast to correct type
