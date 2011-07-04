@@ -35,9 +35,29 @@ def autogen(list,output_path):
             f.write(m+'\n')
             f.write('*'*len(m)+'\n')
             f.write('\n')
+
+            # Extract members of modules
+            exec("module_members=dir("+m+")")
+
+            # Autosummary
+            f.write('Table of contents\n')
+            f.write('-----------------\n\n')
+            f.write('.. currentmodule:: '+m+'\n\n')
+            f.write('.. autosummary::\n\n')
+            for module_member in module_members:
+                if module_member[0] == "_":
+                    continue
+                try:
+                    exec ("dummy =  "+m+"."+module_member+".__package__")
+                except AttributeError:
+                    # Only non-packages should be added to the Auto summary
+                    f.write('      '+module_member+'\n')
+            f.write('\n')
+
+            # Auto module
             f.write('.. automodule:: '+m+'\n')
             f.write('   :members:\n')
-            f.write('   :undoc-members:\n')
+            f.write('   :undoc-members: \n')
             f.write('   :show-inheritance:\n')
             f.write('\n')
 
