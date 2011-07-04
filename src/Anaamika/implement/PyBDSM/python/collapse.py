@@ -69,7 +69,7 @@ class Op_collapse(Op):
             # assume (until true 4-D cubes are available) that input filename includes
             # '_I.fits' and that other Stokes cubes are named '*_Q.fits', etc.
 
-            split_filename=img.opts.filename.split("_I.") # replace 'I' with 'Q', 'U', or 'V'
+            split_filename=img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
             image_file=split_filename[0]+'_'+pol+split_filename[-1]
             data, hdr = func.read_image_from_file(image_file, img, img.opts.indir)
                 
@@ -107,7 +107,7 @@ class Op_collapse(Op):
                   mylogger.userinfo(mylog, 'Channels averaged with '\
                                         'weights=(1/rms)^2')
               mylogger.userinfo(mylog, 'Source extraction will be '\
-                                    'done on averaged ch0 image')
+                                    'done on averaged ("ch0") image')
               mylogger.userinfo(mylog, 'Frequency of averaged '\
                                     'image', '%.3f MHz' % \
                                     (img.cfreq/1e6,))
@@ -116,9 +116,9 @@ class Op_collapse(Op):
               str1 = " ".join(["%9.4e" % n for n in wtarr])
               mylog.debug('%s %s %s' % ('Channel weights : ', str1, '; unity=zero if c_wts="rms"'))
             ch0images[ipol][:] = ch0[:]
-
-          func.write_image_to_file(img.use_io, img.imagename+'.ch0_'+pol+'.fits', N.transpose(ch0), img)
-          mylog.debug('%s %s ' % ('Writing file ', img.imagename+'.ch0_'+pol+'.fits'))
+          if img.opts.output_all:
+              func.write_image_to_file(img.use_io, img.imagename+'.ch0_'+pol+'.fits', N.transpose(ch0), img)
+              mylog.debug('%s %s ' % ('Writing file ', img.imagename+'.ch0_'+pol+'.fits'))
 
       else:
         img.ch0 = img.image
@@ -126,7 +126,7 @@ class Op_collapse(Op):
                           '%.3f MHz' % (img.cfreq/1e6,))
         if img.opts.polarisation_do: 
           for pol in pols[1:]:
-              split_imname = img.opts.filename.split("_I.") 
+              split_imname = img.opts.filename.split("_I") 
               image_file = split_imname[0] + '_' + \
                   pol + split_imname[-1]
               data, hdr = read_image_from_file(image_file, img,

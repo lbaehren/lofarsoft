@@ -79,7 +79,8 @@ class Op_spectralindex(Op):
             img.avimage_crms = img.channel_clippedrms
             mylog.info('%s %i %s' % ('Kept all ',shp[0]," channels "))
         img.avimage = avimage
-        func.write_image_to_file(img.use_io, img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img, img.opts.indir)
+        if img.opts.output_all:
+            func.write_image_to_file(img.use_io, img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img, img.opts.indir)
                                                 # calculate the rms of each channel
 
         nchan = avimage.shape[0]
@@ -105,6 +106,7 @@ class Op_spectralindex(Op):
             case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
             src.case = str(case)
             para, epara, q_spec, spin_para = self.msource(img, src, rms_spec, avimage, casepara, nchan)
+            # Why are the above para, etc. not stored?
 
           if bar2.started:
             bar2.increment()

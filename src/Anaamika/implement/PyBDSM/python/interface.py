@@ -535,9 +535,6 @@ def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
         return
     if incl_primary:
         if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-            if patch == 'single' or patch == None:
-                # Make sure only a single patch is used
-                wavpatl = []
             outstr_list = make_bbs_str(img, outl+wavoutl, outn+wavoutn, patl+wavpatl)
         else:
             outstr_list = make_bbs_str(img, outl, outn, patl)
@@ -895,10 +892,11 @@ def make_bbs_str(img, glist, gnames, patchnames):
                                "MajorAxis, MinorAxis, Orientation, "\
                                "ReferenceFrequency='"+freq+"', "\
                                "SpectralIndex='[]'\n\n")
-
+    patchname_last = ''
     for pindx, patch_name in enumerate(patchnames): # loop over patches
-      if patch_name != None:
+      if patch_name != None and patch_name != patchname_last:
           outstr_list.append(', , ' + patch_name + ', 00:00:00, +00.00.00\n')
+          patchname_last = patch_name
       gaussians_in_patch = glist[pindx]
       names_in_patch = gnames[pindx]
       for gindx, g in enumerate(gaussians_in_patch):
@@ -924,8 +922,9 @@ def make_bbs_str(img, glist, gnames, patchnames):
           deconv3 = str("%.5e" % (deconv[2])) 
           deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
           specin = '-0.8'
-          if hasattr(g, 'spin1'): 
-              spin1 = g.spin1
+          if hasattr(g, 'spin1'):
+              src = get_src(img.source, g.source_id)
+              spin1 = src.spin1
               if spin1 != None:
                   specin = str("%.3e" % (spin1[1]))
           sep = ', '
@@ -1327,3 +1326,10 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
     #         print '\033[91mERROR\033[0m: File exists and clobber=False.'
     #     else:
     #         print '--> Wrote CASA clean box file ' + filename
+        
+def get_src(src_list, srcid):
+    """Returns the source for srcid or None if not found"""
+    for src in src_list:
+        if src.source_id == srcid:
+            return src
+    return None

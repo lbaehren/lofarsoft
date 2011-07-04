@@ -79,9 +79,12 @@ def userinfo(mylog, desc_str, val_str=''):
   Message is constructed as:
     'desc_str : val_str'
   """
+  bc = '\033[1;34m' # Blue
+  nc = '\033[0m'    # Normal text color
+
   if val_str == '':
     sep = ''
-    desc_str = '--> ' + desc_str
+    desc_str = bc + '--> ' + desc_str + nc
   else:
     sep = ' : '
     if len(desc_str) < 40:

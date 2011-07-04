@@ -80,6 +80,7 @@ class Op_gausfit(Op):
                 isl.islmean = 0.0
                 sgaul, sfgaul = self.fit_island(islcp, opts, img)
                 gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+                if bar.started: bar.spin()
               if bar.started: bar.increment()
             else:
               if img.waveletimage:

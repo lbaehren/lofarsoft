@@ -64,7 +64,7 @@ class Op_readimage(Op):
             if pol == 'I':
                 image_file=img.opts.filename
             else:
-                split_filename=img.opts.filename.split("_I.") # replace 'I' with 'Q', 'U', or 'V'
+                split_filename=img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
                 image_file=split_filename[0]+'_'+pol+split_filename[-1]
 
             result = read_image_from_file(image_file, img, img.opts.indir)
@@ -96,7 +96,7 @@ class Op_readimage(Op):
                 img.j = 0                    
             else:
                 # Make sure all polarisations have the same shape as I
-                if data.data.transpose(*axes).shape != img.image.shape:
+                if data.shape != img.image.shape:
                     img.opts.polarisation_do = False
                     mylog.warning('Shape of one or more of Q, U, V images '\
                                       'does not match that of I. Polarisation '\

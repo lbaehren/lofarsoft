@@ -162,12 +162,15 @@ class Op_preprocess(Op):
 
             bstep = int(round(min(bsize/3., min(shape)/10.)))
             img.rms_box = (bsize, bstep)
-        else:
-            img.rms_box = opts.rms_box
-              
-        mylogger.userinfo(mylog, 'Value of rms_box (box size, step size)',
+            mylogger.userinfo(mylog, 'Derived rms_box (box size, step size)',
                               '(' + str(img.rms_box[0]) + ', ' +
                               str(img.rms_box[1]) + ') pixels')
+        else:
+            img.rms_box = opts.rms_box
+            mylogger.userinfo(mylog, 'Using user-specified rms_box',
+                              '(' + str(img.rms_box[0]) + ', ' +
+                              str(img.rms_box[1]) + ') pixels')
+            
 
         return img
 

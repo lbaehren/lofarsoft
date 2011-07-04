@@ -38,7 +38,7 @@ class Op_rmsimage(Op):
             pols = ['I', 'Q', 'U', 'V']
         else:
             pols = ['I'] # assume I is always present
-
+            
         mask = img.mask
         opts = img.opts
         map_opts = (opts.kappa_clip, opts.rms_box, opts.spline_rank)
@@ -49,7 +49,11 @@ class Op_rmsimage(Op):
           data = ch0_images[ipol]
           mean = N.zeros(data.shape, dtype=N.float32)
           rms  = N.zeros(data.shape, dtype=N.float32)
-
+          if len(pols) > 1:
+              pol_txt = ' (' + pol + ')'
+          else:
+              pol_txt = ''
+              
           ## calculate rms/mean maps if needed
           if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
             if len(data.shape) == 2:   ## 2d case
@@ -61,51 +65,56 @@ class Op_rmsimage(Op):
                   ## iterate each plane
                   self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts)
             else:
-              mylog.critical('Image shape not handleable')
-              raise RuntimeError("Can't handle array of this shape")
-            mylog.info('Background rms and mean images computed.')
+              mylog.critical('Image shape not handleable' + pol_txt)
+              raise RuntimeError("Can't handle array of this shape" + pol_txt)
+            mylog.info('Background rms and mean images computed' + pol_txt)
 
           ## check if variation of rms/mean maps is significant enough
-          if pol == 'I' and opts.rms_map is None:
-              # sets img.use_rms_map
-              self.check_rmsmap(img, rms)
-          else:
-              img.use_rms_map = opts.rms_map
-          if pol == 'I' and opts.mean_map == 'default':
-              # sets img.mean_map_type
-              self.check_meanmap(img, rms)
-          else:
-              img.mean_map_type = opts.mean_map
+          if pol == 'I':
+              if opts.rms_map is None:
+                  # check_rmsmap() sets img.use_rms_map
+                  self.check_rmsmap(img, rms)
+              else:
+                  img.use_rms_map = opts.rms_map
+              if img.use_rms_map is False:
+                  mylogger.userinfo(mylog, 'Using constant background rms')
+              else:
+                  mylogger.userinfo(mylog, 'Using 2D map for background rms')
+                                  
+              if opts.mean_map == 'default':
+                  # check_meanmap() sets img.mean_map_type
+                  self.check_meanmap(img, rms)
+              else:
+                  img.mean_map_type = opts.mean_map
+              if img.mean_map_type != 'map':
+                  mylogger.userinfo(mylog, 'Using constant background mean')
+              else:
+                  mylogger.userinfo(mylog, 'Using 2D map for background mean')
 
           ## if rms map is insignificant, or rms_map==False use const value
           if img.use_rms_map is False:
-            mylog.info('Background rms set to (constant) clipped value.')
             if opts.rms_value == None:
               rms[:]  = crmss[ipol]
             else:
               rms[:]  = opts.rms_value
-            mylogger.userinfo(mylog, 'Using constant background rms')
-            mylogger.userinfo(mylog, 'Value of background rms',
+            mylogger.userinfo(mylog, 'Value of background rms' + pol_txt,
                               '%.5f Jy/beam' % rms[0][0])
           else:
             rms_min = N.nanmin(rms)
             rms_max = N.nanmax(rms)
-            mylogger.userinfo(mylog, 'Using 2D map for background rms')
-            mylogger.userinfo(mylog, 'Min/max values of background rms map',
+            mylogger.userinfo(mylog, 'Min/max values of background rms map' + pol_txt,
                               '(%.5f, %.5f) Jy/beam' % (rms_min, rms_max))
 
           if img.mean_map_type != 'map':
             val = 0.0
             if opts.mean_map == 'const': val = img.clipped_mean
             mean[:] = val
-            mylogger.userinfo(mylog, 'Using constant background mean')
-            mylogger.userinfo(mylog, 'Value of background mean',
+            mylogger.userinfo(mylog, 'Value of background mean' + pol_txt,
                               str(round(val,5))+' Jy/beam')
           else:
             mean_min = N.nanmin(mean)
             mean_max = N.nanmax(mean)
-            mylogger.userinfo(mylog, 'Using 2D map for background mean')
-            mylogger.userinfo(mylog, 'Min/max values of background mean map',
+            mylogger.userinfo(mylog, 'Min/max values of background mean map' + pol_txt,
                               '(%.5f, %.5f) Jy/beam' % (mean_min, mean_max))
 
           if pol == 'I':
@@ -153,10 +162,10 @@ class Op_rmsimage(Op):
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
 	if stdsub > 1.1*rms_expect:
             img.use_rms_map = True
-            mylog.info('Variation in rms image significant, using this image.')
+            mylogger.userinfo(mylog, 'Variation in rms image significant')
         else:
             img.use_rms_map = False
-            mylog.info('Variation in rms image not significant.')
+            mylogger.userinfo(mylog, 'Variation in rms image not significant')
 
         return img
 
@@ -178,13 +187,13 @@ class Op_rmsimage(Op):
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
 	if stdsub > 1.1*rms_expect:
           img.mean_map_type = 'map'
-          mylog.info('Variation in mean image significant, using this image.')
+          mylogger.userinfo(mylog, 'Variation in mean image significant')
         else:
           if img.confused:
             img.mean_map_type = 'zero'
           else:
             img.mean_map_type = 'const'
-          mylog.info('Variation in mean image not significant.')
+          mylogger.userinfo(mylog, 'Variation in mean image not significant')
 
         return img
 
