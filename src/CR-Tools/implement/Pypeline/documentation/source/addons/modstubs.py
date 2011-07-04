@@ -40,8 +40,6 @@ def autogen(list,output_path):
             exec("module_members=dir("+m+")")
 
             # Autosummary
-            f.write('Table of contents\n')
-            f.write('-----------------\n\n')
             f.write('.. currentmodule:: '+m+'\n\n')
             f.write('.. autosummary::\n\n')
             for module_member in module_members:
@@ -50,8 +48,8 @@ def autogen(list,output_path):
                 try:
                     exec ("dummy =  "+m+"."+module_member+".__package__")
                 except AttributeError:
-                    # Only non-packages should be added to the Auto summary
-                    f.write('      '+module_member+'\n')
+                    # Only non-packages should be added to the Autosummary
+                    f.write('   '+module_member+'\n')
             f.write('\n')
 
             # Auto module
