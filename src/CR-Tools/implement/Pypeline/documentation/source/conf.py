@@ -29,7 +29,14 @@ import modstubs
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.todo', 'sphinx.ext.pngmath', 'sphinx.ext.doctest']
+extensions = ['matplotlib.sphinxext.mathmpl',
+              'matplotlib.sphinxext.only_directives',
+              'matplotlib.sphinxext.plot_directive',
+              'sphinx.ext.autodoc',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.todo',
+              'sphinx.ext.pngmath',
+              'sphinx.ext.doctest']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -44,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Pycrtools'
+project = u'PyCRTools'
 copyright = u'2010, Heino Falcke'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -182,7 +189,7 @@ htmlhelp_basename = 'Pycrtoolsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Pycrtools.tex', u'Pycrtools Documentation',
+  ('index', 'PyCRTools.tex', u'PyCRTools Documentation',
    u'Heino Falcke', 'manual'),
 ]
 
@@ -214,7 +221,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pycrtools', u'Pycrtools Documentation',
+    ('index', 'pycrtools', u'PyCRTools Documentation',
      [u'Heino Falcke'], 1)
 ]
 

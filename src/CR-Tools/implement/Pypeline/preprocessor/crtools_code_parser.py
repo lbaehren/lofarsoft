@@ -338,6 +338,7 @@ class DocumentationBlock():
         self._usage_lines = []
         self._reference_list = []
         self._example_lines = []
+        self._plotcode_lines = []
         self._dump_lines = []
 
 
@@ -388,6 +389,9 @@ class DocumentationBlock():
             elif (sectionType == "Example"):
                 self.addExample(line)
                 return
+            elif (sectionType == "Plot"):
+                self.addPlot(line)
+                return
 
 
     def setSection(self, line):
@@ -413,6 +417,10 @@ class DocumentationBlock():
         elif ((line_content == "Example:") or
               (line_content == "Examples:")):
             self._sectionType = "Example"
+            self._docIndent = len(line.rstrip()) - len(line_content)
+            return True
+        elif ((line_content == "Plot:")):
+            self._sectionType = "Plot"
             self._docIndent = len(line.rstrip()) - len(line_content)
             return True
 
@@ -687,6 +695,46 @@ class DocumentationBlock():
 
 
     # ______________________________________________________________________
+    #                                           Example plot of the function
+    def addPlot(self, plotcode):
+        """
+        Add plot given a code generating the plot.
+        """
+#        plotcode_checked = self.checkSyntax(plotcode)
+        line_content = plotcode.rstrip()
+
+        if (line_content >= self._docIndent):
+            line_content = line_content[self._docIndent:]
+
+        self._plotcode_lines.append(line_content)
+
+
+    def formatPlot(self):
+        """
+        Put code to generate a plot in a Sphinx parsable format.
+        """
+        result = ""
+
+        result += ".. plot::" + r"\n"
+        result += "   :include-source:" + r"\n\n"
+
+        for line in self.getPlot():
+            result += "   " + line + r"\n"
+
+        result += r"\n"
+
+        return result
+
+
+    def getPlot(self):
+        """
+        Return plot code.
+        """
+        return self._plotcode_lines
+
+
+
+    # ______________________________________________________________________
     #                                                          Add attribute
     def addAttribute(self, attribute_name, attribute_description):
         """
@@ -762,6 +810,11 @@ class DocumentationBlock():
         if self.getExample():
             result += r"\n" + self.formatSectionTitle("Example") + r"::\n\n"
             result += self.formatExample() + r"\n"
+
+        # Plot
+        if self.getPlot():
+            result += r"\n" + self.formatSectionTitle("Example") + r"\n"
+            result += self.formatPlot() + r"\n"
 
         return result
 
