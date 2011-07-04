@@ -322,8 +322,8 @@ int main(int argc, char* argv[])
   int openEfieldFile = 0; // is set to the year of the efield file currently open.
   ifstream finEfield;
   string muonCorrectionTable("");
-  Double_t geomag_min=0, geomag_max=180, energy_min=0, energy_max=1e20;
-  Bool_t createInfoFile=false, createCopyScript=false, preferGrande=false, useBothReconstructions=false;
+  double geomag_min=0, geomag_max=180, energy_min=0, energy_max=1e20;
+  bool createInfoFile=false, createCopyScript=false, preferGrande=false, useBothReconstructions=false;
   bool minimumCuts = true; // set to true to make things faster.
   string KRETAversion("");
   char KRETAver[1024];
@@ -436,9 +436,12 @@ int main(int argc, char* argv[])
   TFile *ftemp = new TFile ("tempfile.root", "RECREATE");
   TTree *t2 = t1->CopyTree(cut);
 
-  UInt_t Gt, Mmn;
-  Float_t Az,Ze,Xc,Yc,Xcg,Ycg,Azg,Zeg,Nmu,Lmuo,Size,Sizeg,Sizmg,Age,Ageg;
-
+  unsigned int Gt, Mmn;
+  float Az,Ze,Xc,Yc,Xcg,Ycg,Azg,Zeg,Nmu,Lmuo,Size,Sizeg,Sizmg,Age,Ageg;
+  unsigned short IrunIn;
+  unsigned char IfilIn;
+  unsigned int IeveIn;
+  
   t2->SetBranchAddress("Gt",&Gt);
   t2->SetBranchAddress("Mmn",&Mmn);
   t2->SetBranchAddress("Az",&Az);
@@ -456,6 +459,9 @@ int main(int argc, char* argv[])
   t2->SetBranchAddress("Sizeg",&Sizeg);
   t2->SetBranchAddress("Age",&Age);
   t2->SetBranchAddress("Ageg",&Ageg);
+  t2->SetBranchAddress("Irun",&IrunIn);
+  t2->SetBranchAddress("Ieve",&IeveIn);
+  t2->SetBranchAddress("Ifil",&IfilIn);
   
   // check if KRETA version was provided
   if (KRETAversion == "") {
@@ -491,13 +497,14 @@ int main(int argc, char* argv[])
 
   TFile *fout = new TFile( (namebase+".root").c_str(),"recreate");
   TTree *k = new TTree("k","KASCADE-Information for eventlist");
-  Double_t energy, geomag, cos_geomag;
-  Double_t lgE, lgEg, lnA, lnAg, err_lgE, err_lgEg, err_lnA, err_lnAg;
-  Double_t err_core, err_coreg, err_Az, err_Azg, err_Ze, err_Zeg;
-  Double_t geomag_angle, geomag_angleg;
-  Double_t kappaMario, energyMario, lgEMario;
-  Double_t EfieldMaxAbs, EfieldAvgAbs; // Maximum and average of the absolute of the Efield in +/- 15 minutes arround event [V/m]
+  double energy, geomag, cos_geomag;
+  double lgE, lgEg, lnA, lnAg, err_lgE, err_lgEg, err_lnA, err_lnAg;
+  double err_core, err_coreg, err_Az, err_Azg, err_Ze, err_Zeg;
+  double geomag_angle, geomag_angleg;
+  double kappaMario, energyMario, lgEMario;
+  double EfieldMaxAbs, EfieldAvgAbs; // Maximum and average of the absolute of the Efield in +/- 15 minutes arround event [V/m]
   double Nch=0;
+  unsigned int IrunOut, IeveOut, IfilOut;
   
   k->Branch("Eventname",&eventname,"Eventname/C");
   k->Branch("Size",&Size,"Size/F");
@@ -517,6 +524,9 @@ int main(int argc, char* argv[])
   k->Branch("Zeg",&Zeg,"Zeg/F");
   k->Branch("Gt",&Gt,"Gt/i");
   k->Branch("Mmn",&Mmn,"Mmn/i");
+  k->Branch("Irun",&IrunOut,"Irun/i");
+  k->Branch("Ieve",&IeveOut,"Ieve/i");
+  k->Branch("Ifil",&IfilOut,"Ifil/i");  
 
   // add energy, mass and errors
   k->Branch("lgE",&lgE,"lgE/D");
@@ -581,11 +591,14 @@ int main(int argc, char* argv[])
   string day, month, year;
   
   // store GT and MMN of last event to get rid of double events;
-  UInt_t lastGt = 0, lastMmn = 0;
+  unsigned int lastGt = 0, lastMmn = 0;
 
   // Loop over ROOT-File ******************************************************************************
   for (int i=0; i<nentries; i++) {
     t2->GetEntry(i);
+    IfilOut = IfilIn;
+    IrunOut = IrunIn;
+    IeveOut = IeveIn;
     
     // check, if events are in chronlogical order
     if (Gt < lastGt) {

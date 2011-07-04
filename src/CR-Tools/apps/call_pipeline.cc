@@ -856,6 +856,7 @@ double azimuth=0, elevation=0, radiusOfCurvature=0, core_x=0, core_y=0;   // bas
 double azimuthError = 0, zenithError = 0, coreError = 0; // errors (in m and radians!)
 
 // Variables of KASCADE root file
+unsigned int Irun = 0, Ieve = 0, Ifil = 0;                          // Run, event and file ID
 float Az = 0, Ze = 0, Xc = 0, Yc = 0;			// KASCADE direction and core
 float Azg = 0, Zeg = 0, Xcg = 0, Ycg = 0;		// Grande direction and core
 float Size = 0, Sizeg = 0;				// Electron numbers (KASCADE + Grande)
@@ -1163,6 +1164,9 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       }
 
       // set the read in variables in the tree
+      inputTree->SetBranchAddress("Irun",&Irun);
+      inputTree->SetBranchAddress("Ifil",&Ifil);
+      inputTree->SetBranchAddress("Ieve",&Ieve);
       inputTree->SetBranchAddress("Az",&Az);
       inputTree->SetBranchAddress("Ze",&Ze);
       inputTree->SetBranchAddress("Xc",&Xc);
@@ -1330,6 +1334,9 @@ bool getEventFromLOPES (const string &lopesRootFile)
       }
 
       // set the read in variables in the tree
+      inputTree->SetBranchAddress("Irun",&Irun);
+      inputTree->SetBranchAddress("Ifil",&Ifil);
+      inputTree->SetBranchAddress("Ieve",&Ieve);
       inputTree->SetBranchAddress("Az",&Az);
       inputTree->SetBranchAddress("Ze",&Ze);
       inputTree->SetBranchAddress("Xc",&Xc);
@@ -1722,6 +1729,9 @@ int main (int argc, char *argv[])
         roottree->Branch("ElIn",&elevation,"ElIn/D");
         roottree->Branch("DistanceIn",&radiusOfCurvature,"DistanceIn/D");
       } else {
+        roottree->Branch("Irun",&Irun,"Irun/i");
+        roottree->Branch("Ieve",&Ieve,"Ieve/i");
+        roottree->Branch("Ifil",&Ifil,"Ifil/i");  
         roottree->Branch("Xc",&Xc,"Xc/F");
         roottree->Branch("Xcg",&Xcg,"Xcg/F");
         roottree->Branch("Yc",&Yc,"Yc/F");
