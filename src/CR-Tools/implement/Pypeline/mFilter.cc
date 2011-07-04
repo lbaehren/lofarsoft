@@ -144,6 +144,26 @@ void HFPP_FUNC_NAME(const Iter ccm, const Iter ccm_end,
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Plot:
+  import pycrtools as cr
+  import matplotlib.pyplot as plt
+
+  f1 = cr.hArray(float, 100)
+  f2 = f1.new()
+  f3 = f1.new()
+  f4 = f1.new()
+
+  f1.gethanningfilter()
+  f2.gethanningfilter(0.6)
+  f3.gethanningfilter(0.5, 40)
+  f4.gethanningfilter(0.5, 1, 20, 60)
+
+  plt.plot(f1, label='default (Alpha=0.5, Beta=0)')
+  plt.plot(f2, label='Alpha=0.6')
+  plt.plot(f3, label='Beta=40')
+  plt.plot(f4, label='BetaRise=20, BetaFall=60')
+  plt.legend(loc='lower center')
 */
 template <class Iter>
 void hGetHanningFilter(const Iter vec, const Iter vec_end,
