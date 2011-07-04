@@ -1,23 +1,23 @@
 2011-06-22 - Rev 7944
-================
+=====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
-- Took out casa definitions from core.h and put it into casa.h
-- Started some revisions to allow for HNumber = long double (not yet
+- Took out casa definitions from ``core.h`` and put it into ``casa.h``
+- Started some revisions to allow for ``HNumber = long double`` (not yet
   working, due to FFTw)
 
 2011-06-22 - Rev 7930
-==========
+=====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
 - Added :func:`hFindOdd`, :func:`hFindEven`,
-  :func:`hCountOdd`,:func:`hCountEven`
+  :func:`hCountOdd`, :func:`hCountEven`
 - Note that those functions also accept arrays of strings as input (which then
   get converted to integers)
 - adapted array.Select to take "odd" and "even" as operator
-- tbb.py also accepts hArrays as input to select antennas and you can
+- ``tbb.py`` also accepts ``hArrays`` as input to select antennas and you can
   simply say "odd" or "even"
 
 2011-05-27
@@ -26,8 +26,8 @@
   :Author: Martin van den Akker <martinva@astro.ru.nl>
 
 - Added pycrtools configuration to CMake.
-- Add Numpy functionality to Math and Vector modules.
-- Add AERA_IO functionality to IO module.
+- Moved Numpy functionality to Math and Vector modules.
+- Moved AERA_IO functionality to IO module.
 
 TODO:
 -----
