@@ -117,8 +117,8 @@ if (NOT HAVE_PYTHON)
       else (PYTHON_PYTHONHOME)
 	find_program (PYTHON_EXECUTABLE python${python_version}
 	  PATHS
-	  /Library/Frameworks/Python.framework/Versions/Current/bin	 
 	  /Library/Frameworks/EPD64.framework/Versions/Current/bin
+	  /Library/Frameworks/Python.framework/Versions/Current/bin	 
 	  /Library/Frameworks/Python.framework/Versions/${python_version}/bin
 	  ${python_bin_locations}
 	  ENV PATH
@@ -159,17 +159,17 @@ if (NOT HAVE_PYTHON)
       
       find_path (PYTHON_INCLUDES Python.h
 	PATHS
-	${python_include_locations}
-	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}
 	/Library/Frameworks/EPD64.framework/Versions/Current/include/python${python_version}
+	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}
+	${python_include_locations}
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
 	)
       
       find_path (HAVE_PYCONFIG_H pyconfig.h
 	PATHS 
- 	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}	
 	/Library/Frameworks/EPD64.framework/Versions/Current/include/python${python_version}
+ 	/Library/Frameworks/Python.framework/Versions/Current/include/python${python_version}	
 	${python_include_locations}
 	PATH_SUFFIXES python${python_version}
 	NO_DEFAULT_PATH
@@ -178,9 +178,9 @@ if (NOT HAVE_PYTHON)
       ## Check for the Python library
       find_library (PYTHON_LIBRARIES python${python_version}
         PATHS
-	${python_lib_locations}
-	/Library/Frameworks/Python.framework/Versions/Current/lib/python${python_version}/config
 	/Library/Frameworks/EPD64.framework/Versions/Current/lib/python${python_version}/config
+	/Library/Frameworks/Python.framework/Versions/Current/lib/python${python_version}/config
+	${python_lib_locations}
 	PATH_SUFFIXES
 	python${python_version}/config
 	NO_DEFAULT_PATH
