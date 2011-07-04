@@ -312,6 +312,20 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end){
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Plot:
+  import pycrtools as cr
+  import matplotlib.pyplot as plt
+
+  f1 = cr.hArray(float, 100)
+  f2 = cr.hArray(float, 100)
+
+  f1.gethanningfilterhalf(1., 0., False)
+  f2.gethanningfilterhalf(1., 1., True)
+
+  plt.plot(f1, label='height=1, offset=0, falling=False')
+  plt.plot(f2, label='height=1, offset=1, falling=True')
+  plt.legend(loc='lower center')
 */
 template <class Iter>
 void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
