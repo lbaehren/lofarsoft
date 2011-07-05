@@ -312,6 +312,8 @@ class BeamFormer2(tasks.Task):
         
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
+        fftplan = FFTWPlanManyDftR2c(self.data.shape()[-1], 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
+        
         if self.doplot:
             plt.ioff()
 
@@ -356,7 +358,8 @@ class BeamFormer2(tasks.Task):
                 self.times.fillrange(self.start_time,self.sample_interval)
                 self.times.setUnit("mu","")
                 self.nspectraadded[block]+=self.nantennas
-                self.fftdata[...].fftw(self.data[...])
+                hFFTWExecutePlan(self.fftdata[...], self.data[...], fftplan)
+                #self.fftdata[...].fftw(self.data[...])
                 self.fftdata[...].nyquistswap(self.NyquistZone)
                 if self.avspec_incoherent:
                     self.avspec_incoherent.squareadd(self.fftdata[...]) 
@@ -378,7 +381,7 @@ class BeamFormer2(tasks.Task):
                     self.beams.write(self.spectrum_file,nblocks=self.nblocks,block=block,clearfile=clearfile)
                     clearfile=False
                 if self.calc_timeseries:
-                    self.fftdata.mul(self.weights)
+                    self.fftdata.mul(self.weights[self.mainbeam])
                     self.fftdata[...].nyquistswap(self.NyquistZone)
                     self.data_shifted[...].invfftw(self.fftdata[...])
                 if self.doplot>1 and self.nspectraadded[block]%self.plotskip==0:
