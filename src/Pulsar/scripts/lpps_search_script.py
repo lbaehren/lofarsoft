@@ -267,8 +267,6 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
         '-numout' : str(new_numout),
         '-runavg' : '', 
     }
-    if zero_dm:
-        prepsubband_options['-zerodm'] = ''
     
 
     MPIRUN_OPTIONS = {
@@ -280,6 +278,8 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
     prepsubband_parameters =  [subband_globpattern]
 
     if n_cores > 1:
+        if zero_dm: # -zerodm is only in mpiprepsubband
+            prepsubband_options['-zerodm'] = ''
         tmp = get_command('mpiprepsubband', prepsubband_options,
             prepsubband_parameters)
         mpirun_options = copy.copy(MPIRUN_OPTIONS)
