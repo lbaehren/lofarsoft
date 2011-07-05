@@ -243,7 +243,7 @@ def run_rfifind(subband_globpattern, result_dir, basename, bad_channels):
     return status
 
 def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
-    basename, mask_file, numout):
+    basename, mask_file, numout, zero_dm=False):
     '''
     Run the (mpi)prepsubband commandline given a DDplan instance.
 
@@ -267,6 +267,8 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
         '-numout' : str(new_numout),
         '-runavg' : '', 
     }
+    if zero_dm:
+        prepsubband_options['-zerodm'] = ''
     
 
     MPIRUN_OPTIONS = {
@@ -506,7 +508,7 @@ class SearchRun(object):
 
     def run_search(self, ddplans, z_values, n_cores = None, 
             no_singlepulse = False, no_accel = False, save_timeseries = False, 
-            par_files = None, no_fold = False):
+            par_files = None, no_fold = False, zero_dm = False):
         # The GBT drift scan survey uses dedispersion plans as units
         # of work. Because our use of mpiprepsubband (has extra constraints
         # on the number of DM trials it can write) and the fact that
@@ -601,7 +603,8 @@ class SearchRun(object):
             t_prepsubband_start = time.time() 
             prepsubband_status = run_prepsubband(ddplan, n_cores_to_use,
                 self.get_subband_globpattern(), self.work_dir, self.basename,
-                rfifind_mask_file, determine_numout(self.metadata.n_bins))
+                rfifind_mask_file, determine_numout(self.metadata.n_bins), 
+                zero_dm)
             t_prepsubband_end = time.time()
             ddplan.prepsubband_time = t_prepsubband_end - t_prepsubband_start
 
@@ -946,7 +949,8 @@ if __name__ == '__main__':
         help='Keep dedispersed timeseries around.')
     parser.add_option('--nf', metavar='NO_FOLD', default=False, 
         action='store_true', dest='no_fold')
- 
+    parser.add_option('--zerodm', metavar='ZERO_DM', default=False,
+        action='store_true', dest='zero_dm') 
     options, args = parser.parse_args()
     N_CORES = options.ncores
 
@@ -1034,7 +1038,7 @@ if __name__ == '__main__':
             numpasses=1, numsub=SR.metadata.n_channels, downsamp=16))
 
     SR.run_search(ddplans, z_values, N_CORES, options.ns, options.na, options.st,
-        par_files, options.no_fold)
+        par_files, options.no_fold, options.zero_dm)
     t_end = time.time()
     print '\n=== TIMINGS ==='
     search_time = 0
