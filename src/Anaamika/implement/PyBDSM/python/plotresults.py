@@ -264,7 +264,9 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                                 gline.gaus_id = gidx
                                 gline.src_id = src.source_id
                                 gline.jlevel = g.jlevel
-                             
+                                gline.isl_id = g.island_id
+                                gline.tflux = g.total_flux
+                                gline.pflux = g.peak_flux
                     else: # just plot one color per island
                         if hasattr(img, 'ngaus'):
                             isrc = 0
@@ -278,7 +280,9 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                                 gline.gaus_id = gidx
                                 gline.src_id = src.source_id
                                 gline.jlevel = g.jlevel
-
+                                gline.isl_id = g.island_id
+                                gline.tflux = g.total_flux
+                                gline.pflux = g.peak_flux
                 if hasattr(img, 'atrous_gaussians'):
                     for jindx, atrgaus in enumerate(img.atrous_gaussians):
                         for atrg in atrgaus:
@@ -291,6 +295,9 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             gline.gaus_id = gidx
                             gline.src_id = atrg.source_id
                             gline.jlevel = atrg.jlevel
+                            gline.isl_id = g.island_id
+                            gline.tflux = g.total_flux
+                            gline.pflux = g.peak_flux
             if 'Flagged' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
                     xb, yb = _isl2border(img, isl)
@@ -350,12 +357,20 @@ def on_pick(event):
     if hasattr(g, 'gaus_id'):
         gaus_id = g.gaus_id
         src_id = g.src_id
+        isl_id = g.isl_id
+        tflux = g.tflux
+        pflux = g.pflux
         wav_j = g.jlevel
         if wav_j == 0:
-            print 'Gaussian #' + str(gaus_id) + ' (in source #' + str(src_id) + ')'
+            print 'Gaussian #' + str(gaus_id) + ' (in src #' + str(src_id) + \
+                ', isl #' + str(isl_id) + '): F_tot = ' + str(round(tflux,4)) + \
+                ' Jy, F_peak = ' + str(round(pflux,4)) + ' Jy/beam'
         else:
-            print 'Gaussian #' + str(gaus_id) + ' (in source #' + str(src_id) + \
-                ', wavelet scale j=' + str(wav_j) + ')'
+            print 'Gaussian #' + str(gaus_id) + ' (in src #' + str(src_id) + \
+                ', isl #' + str(isl_id) + ', wav #' + str(wav_j) + \
+                '): Ftot = ' + str(round(tflux,3)) + ' Jy, F_peak = ' + \
+                str(round(pflux,4)) + ' Jy/beam'
+                
         # Change source SED
         # First check that SEDs are being plotted and that the selected Gaussian
         # is from the zeroth wavelet image
@@ -374,7 +389,8 @@ def on_pick(event):
             if images[axindx] == 'seds':
                 plot_sed(sed_src, ax)
     else:
-        print 'Flagged Gaussian (flag = ' + str(g.flag) + "; use help 'flagging_opts' for info)"
+        print 'Flagged Gaussian (flag = ' + str(g.flag) + '; use "' + \
+            "help 'flagging_opts'" + '" for flag meanings)'
  
     pl.draw()
        
