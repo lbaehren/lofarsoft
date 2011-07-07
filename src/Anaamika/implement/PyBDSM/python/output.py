@@ -101,7 +101,7 @@ class Op_outlist(Op):
 
           for iii, ii in enumerate(ind):
             src = img.source[ii]
-            if bbs_patches == 'separate' and src.ngaus > 0: 
+            if bbs_patches == 'source' and src.ngaus > 0: 
               str1 = ', , patch_'+img.parentname+'_'+str(p_nums[iii])+', 00:00:00, +00.00.00 \n'; 
               f.write(str1)
               patchname = 'patch_'+img.parentname+'_'+str(p_nums[iii])+', '

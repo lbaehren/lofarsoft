@@ -44,7 +44,11 @@ class Opts(object):
                                  "into multiple scales\n"\
                                  "If True, then the Gaussian-subtracted "\
                                  "residual image is decomposed into multiple "\
-                                 "scales using an a-trous wavelet transform.")
+                                 "scales using an a-trous wavelet transform.\n"\
+                                 "This option is most useful when there is "\
+                                 "significant extended emission in the image. "\
+                                 "If the image contains only point sources, "\
+                                 "it is best to set this to Fasle.")
     beam            = Option(None, Tuple(Float(), Float(), Float()),
                              doc="FWHM of restoring beam. Specify as (maj, "\
                                  "min, pos ang E of N) in degrees. "\
@@ -130,7 +134,12 @@ class Opts(object):
                                  "so, then a 2-D map is used and, if not, "\
                                  "then the mean map is set to either 0.0 or a "\
                                  "constant depending on whether the image is "\
-                                 "thought to be confused or not.")
+                                 "thought to be confused or not.\nGenerally, "\
+                                 "'default' works well. However, if there is "\
+                                 "significant extended emission in the image, "\
+                                 "it is often necessary to force the use of a "\
+                                 "constant mean map using either 'const' or "\
+                                 "'mean'.")
     multichan_opts  =   Bool(False,
                              doc="Show options for multi-channel "\
                                  "images")
@@ -202,7 +211,11 @@ class Opts(object):
                                  "if the variation is statistically significant then it "\
                                  "is taken, else a constant value is assumed. The rms image "\
                                  "used for each channel in computing the spectral index "\
-                                 "follows what was done for the channel-collapsed image.")
+                                 "follows what was done for the channel-collapsed image.\n"\
+                                 "Generally, None works well. However, if there is "\
+                                 "significant extended emission in the image, "\
+                                 "it is often necessary to force the use of a "\
+                                 "constant rms map by setting rms_map=False.")
     shapelet_do     =   Bool(False,
                              doc="Decompose islands into shapelets\n"\
                                  "If True, then each island is decomposed using shapelets, "\
@@ -212,7 +225,8 @@ class Opts(object):
                              doc="Calculate spectral indices (for multi-channel image)\n"\
                                  "If True, then for a multi-channel image, spectral indices "\
                                  "are calculated for all Gaussians and sources which are "\
-                                 "detected in the channel-collapsed image.")
+                                 "detected in the channel-collapsed image.\nFrequencies "\
+                                 "can be specified manually using frequency_sp.")
     thresh          =   Enum(None, "hard", "fdr", 
                              doc="Type of thresholding: " \
                                  "None => calculate inside program, 'fdr' => use "\
@@ -225,7 +239,8 @@ class Opts(object):
                                  "probability is first calculated, and if the number of false "\
                                  "source pixels is more than fdr_ratio times the estimated "\
                                  "number of true source pixels, then the 'fdr' threshold "\
-                                 "option is chosen, else the 'hard' threshold option is chosen.")
+                                 "option is chosen, else the 'hard' threshold option is "\
+                                 "chosen.")
     thresh_isl      =  Float(3,
                              doc="Threshold for the island boundary in number of sigma "\
                                  "above the mean.\nOnly islands "\
@@ -233,8 +248,7 @@ class Opts(object):
                                  "The absolute threshold is calculated as abs_thr = "\
                                  "mean + thresh_isl * rms. Use the mean_map "\
                                  "and rms_map parameters to control the way "\
-                                 "the mean and rms are "\
-                                 "determined.")
+                                 "the mean and rms are determined.")
     thresh_pix      =  Float(5,
                              doc="Threshold for the island peak in number of sigma "\
                                  "above the mean. If "\
@@ -245,8 +259,7 @@ class Opts(object):
                                  "The absolute threshold is calculated as abs_thr = "\
                                  "mean + thresh_pix * rms. Use the mean_map "\
                                  "and rms_map parameters to control the way "\
-                                 "the mean and rms are "\
-                                 "determined.")
+                                 "the mean and rms are determined.")
 
 
     #--------------------------------ADVANCED OPTIONS--------------------------------
@@ -620,8 +633,9 @@ class Opts(object):
                                  "When the Gaussian catalogue is written as a "\
                                  "BBS-readable sky file, this determines whether "\
                                  "all Gaussians are in a single patch, there are "\
-                                 "no patches, or all Gaussians for a given source "\
-                                 "are in a separate patch.",
+                                 "no patches, all Gaussians for a given source "\
+                                 "are in a separate patch, or each Gaussian gets "\
+                                 "its own patch.",
                              group="output_opts")
     solnname        = Option(None, String(),
                              doc="Name of the run, to be appended "\

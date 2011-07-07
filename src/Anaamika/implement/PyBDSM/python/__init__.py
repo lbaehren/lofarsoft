@@ -157,8 +157,8 @@ def process_image(input_file, **kwargs):
     from interface import load_pars
     from image import Image
 
-    # As a temporary measure, until people are used to the new
-    # interactive shell, check for deprecated keywords:
+    # As a temporary measure, until people are used to the changed
+    # keywords (changed on 2011/7/5), check for deprecated keywords:
     for i, key in enumerate(kwargs):
         if key == 'extended':
             print 'The "extended" parameter has been removed. To replicate its effects, set:\n'\
@@ -169,7 +169,8 @@ def process_image(input_file, **kwargs):
             return
         if key == 'thresh_gaus':
             print 'The "thresh_gaus" parameter has been removed. To replicate its effects, set:\n'\
-                "mean_map='zero'"
+                "mean_map='zero' " + 'and adjust "thresh_isl" and "thresh_pix" to obtain\n'\
+                'the desired threshold'
             return
         if key == 'rms':
             print 'The "rms" parameter has been replaced with "rms_value"'
