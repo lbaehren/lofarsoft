@@ -1,7 +1,7 @@
-#!/bin/ksh
+#!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=1.3
+VERSION=1.4
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -1376,10 +1376,10 @@ do
 		             min_range=1
 		             max_range=$split_subs
 		          else
-#		             min_range=`echo "$max_range + 1" | bc`
-#		             max_range=`echo "$min_range + $split_subs - 1" | bc`
-		             min_range=1
-		             max_range=$split_subs
+		             min_range=`echo "$max_range + 1" | bc`
+		             max_range=`echo "$min_range + $split_subs - 1" | bc`
+#		             min_range=1
+#		             max_range=$split_subs
 		          fi
 		          SUBBANDS=`echo $SUBBANDS_ORIG | cut -d"," -f$min_range-$max_range`
             fi
