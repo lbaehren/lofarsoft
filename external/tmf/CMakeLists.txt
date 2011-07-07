@@ -15,7 +15,7 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (TMF_SOURCE_VERSION "2.0.8" )
+set (TMF_SOURCE_VERSION "2.0.9" )
 set (TMF_SOURCE_ARCHIVE "tmf-${TMF_SOURCE_VERSION}.tar.gz" )
 set (TMF_URL            "" )
 set (TMF_GIT            "https://github.com/pschella/tmf.git" )
