@@ -65,7 +65,7 @@ class TBBData(IOInterface):
         self.closed = False
 
     def __setKeywordDict(self):
-#        print "Temporarily taken out ANTENNA_POSITION and ANTENNA_POSITION_ITRF (HF)!!"
+        print "Temporarily taken out ANTENNA_POSITION and ANTENNA_POSITION_ITRF (HF)!!"
 
         self.__keyworddict={
             # NON-ICD KEYWORDS
@@ -90,8 +90,8 @@ class TBBData(IOInterface):
             # ICD KEYWORDS
             "FILENAME":self.__file.filename,
             "ANTENNA_SET":lambda:self.antenna_set if hasattr(self,"antenna_set") else self.__file.antenna_set(),
-            "ANTENNA_POSITION":self.__file.antenna_position,
-            "ANTENNA_POSITION_ITRF":self.__file.antenna_position_itrf,
+#            "ANTENNA_POSITION":self.__file.antenna_position,
+#            "ANTENNA_POSITION_ITRF":self.__file.antenna_position_itrf,
             "NYQUIST_ZONE":self.__file.nyquist_zone,
             "TIME":self.__file.time,
             "SAMPLE_NUMBER":self.__file.sample_number,

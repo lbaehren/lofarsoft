@@ -189,11 +189,15 @@ class CrossCorrelateAntennas(tasks.Task):
 
     def run(self):
         if self.timeseries_data:
-            self.fft_data[...].fftw(self.timeseries_data[...])
+            fftplan = cr.FFTWPlanManyDftR2c(self.timeseries_data.shape()[-1], 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+            cr.hFFTWExecutePlan(self.fft_data[...],self.timeseries_data[...],fftplan)
+            #self.fft_data[...].fftw(self.timeseries_data[...])
         if not self.reference_data:
             self.fft_reference_data.copy(self.fft_data[self.refant])
         else:
-            self.fft_reference_data.fftw(self.reference_data)
+            fftplan = cr.FFTWPlanManyDftR2c(self.refences_data.shape()[-1], 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+            cr.hFFTWExecutePlan(self.fft_reference_data[...],self.reference_data[...],fftplan)
+            #self.fft_reference_data.fftw(self.reference_data)
         self.fft_data[...].crosscorrelatecomplex(self.fft_reference_data,True)
 
         self.fft_data /= self.crosscorr_data.shape()[-1]
@@ -261,6 +265,8 @@ class FitMaxima(tasks.Task):
         refant=p_(None,"Reference antenna who's maximum determines the zero point of the x-axis (e.g., to get relative delays)."),
         sampleinterval=p_(None,"Separation of two subsequent samples on the x-axis in desired units - used to return lags in proper units."),
         doplot=p_(False,"Plot results."),
+        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
+        figure=p_(None,"The matplotlib figure containing the plot",output=True),
         plotend=p_(4,doc="Stop plotting at this data set."),
         plotstart=p_(0, doc="Start plotting at this data set."),
         legend=p_(None,doc="List containing labels for each antenna data set for plotting the label"),
@@ -299,6 +305,8 @@ class FitMaxima(tasks.Task):
         self.maxpos=self.fits_ydata[...].maxpos()
         self.maxx=self.fits_xdata[...].elem(self.maxpos)
         if self.doplot:
+            if self.newfigure and not self.figure:
+                self.figure=cr.plt.figure()
             self.data[self.plotstart:self.plotend,...].plot(xvalues=self.xvalues,legend=self.legend[self.plotstart:self.plotend] if self.legend else None)
             self.fits_ydata[self.plotstart:self.plotend,...].plot(clf=False)
             cr.plt.plot(self.maxx[self.plotstart:self.plotend],self.maxy[self.plotstart:self.plotend],marker="o",linestyle='None')
@@ -413,12 +421,12 @@ class DirectionFitTriangles(tasks.Task):
         timelags={doc:"hArray with Cartesian coordinates of the antenna positions",unit:"s"},
         expected_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),"Exact time lags expected for each antenna for a given source position",unit="s"),
         geometric_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),"Time lags minus cable delay = pure geometric delay if no error",unit="s"),
-        delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delays"),"Instrumental delays needed to calibrate the array. Will be added to timelags and will be updated during iteration",unit="s"),
+        delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delays"),"Instrumental delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",unit="s"),
         delta_delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),"Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",unit="s"),
         delays_history=p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),"Instrumental delays for each iteration (for plotting)",unit="s"),
         maxiter=p_(1,"if >1 iterate (maximally tat many times) position and delays until solution converges."),
         delay_error=p_(1e-12,"Target for the RMS of the delta delays where iteration can stop.",unit="s"),
-        rmsfactor=p_(2.,"How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad."),
+        rmsfactor=p_(3.,"How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad."),
         unitscalefactor=p_(1e-9,"Scale factor to apply for printing and plotting."),
         unitname=p_("ns","Unit corresponding to scale factor."),
         doplot=p_(False,"Plot results."),
@@ -439,7 +447,7 @@ class DirectionFitTriangles(tasks.Task):
         ngooddelays=p_(0,"Number of good delays (i.e., with only minor deviation)",output=True),
         delayindex=p_(lambda self:cr.hArray(int,[self.NAnt],name="Delay index"),"Index array of good delays.",workarray=True),
         meandirection=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean direction from all good triangles",output=True),
-        meancenter=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean cetral position of all good triangles",output=True),
+        meancenter=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean central position of all good triangles",output=True),
         goodones=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),"Scratch array to hold good directions.",unit="m"),
         meandirection_spherical=p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),"Mean direction in spherical coorindates."),
         meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth, Elevation tuple."),
@@ -450,7 +458,6 @@ class DirectionFitTriangles(tasks.Task):
         pass
 
     def run(self):
-
         self.farfield=True
         self.delta_delays_max=0
         self.delta_delays_min=1e99
@@ -458,6 +465,7 @@ class DirectionFitTriangles(tasks.Task):
         if self.verbose:
             allantennas=set(range(self.NAnt))
 
+        #import pdb; pdb.set_trace()
         for it in range(self.maxiter):
             #Calculate directions from all triangles
             self.geometric_timelags.sub(self.timelags,self.delays)
@@ -488,12 +496,10 @@ class DirectionFitTriangles(tasks.Task):
             self.delta_delays_min=min(self.delta_delays.vec().min(),self.delta_delays_min)
 
             rfac=self.rmsfactor*(1.0-float(it)/(self.maxiter))
-            self.ngooddelays=self.delayindex.findlessthanabs(self.delta_delays,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
+            self.ngooddelays=self.delayindex.findbetween(self.delta_delays,self.delta_delays_mean-self.delta_delays_rms*rfac,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
             if self.ngooddelays>0:
                 self.delta_delays.set(self.delayindex[:self.ngooddelays],0.0)
                 self.delays-=self.delta_delays
-            else:
-                self.enditer=True
 
             if self.verbose:
                 print "------------------------------------------------------------------------"
@@ -524,3 +530,201 @@ class DirectionFitTriangles(tasks.Task):
             self.delays_history[...] += self.offset
             self.delays_history[self.plotant_start:self.plotant_end,...,:it+1].plot(xlabel="Iteration #",ylabel="Delay (+offset)")
             self.delays_history[...] -= self.offset
+
+
+#Needed for Task PlotDirectionTriangles
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+
+class PlotDirectionTriangles(tasks.Task):
+    """
+    **Description:**
+
+    Plot the directions towards a source found by triangle
+    fitting. This will average directions from triangles of antennas
+    with the same center into one mean direction and then plot a mean
+    direction arrow, for this subarray.
+
+    This will als plot the underlying layout of antennas.
+
+    **Usage:**
+
+    **See also:**
+    :class:`DirectionFitTriangles`
+
+    **Example:**
+
+    ::
+        filename="oneshot_level4_CS017_19okt_no-9.h5"
+        file=open("$LOFARSOFT/data/lofar/"+filename)
+        file["ANTENNA_SET"]="LBA_OUTER"
+        file["BLOCKSIZE"]=2**17
+
+        file["SELECTED_DIPOLES"]=["017000001","017000002","017000005","017000007","017001009","017001010","017001012","017001015","017002017","017002019","017002020","017002023","017003025","017003026","017003029","017003031","017004033","017004035","017004037","017004039","017005041","017005043","017005045","017005047","017006049","017006051","017006053","017006055","017007057","017007059","017007061","017007063","017008065","017008066","017008069","017008071","017009073","017009075","017009077","017009079","017010081","017010083","017010085","017010087","017011089","017011091","017011093","017011095"]
+
+        timeseries_data=file["TIMESERIES_DATA"]
+        positions=file["ANTENNA_POSITIONS"]
+
+        #First determine where the pulse is in a simple incoherent sum of all time series data
+
+        pulse=trun("LocatePulseTrain",timeseries_data,nsigma=7,maxgap=3)
+
+        #Normalize the data which was cut around the main pulse for correlation
+        pulse.timeseries_data_cut[...]-=pulse.timeseries_data_cut[...].mean()
+        pulse.timeseries_data_cut[...]/=pulse.timeseries_data_cut[...].stddev(0)
+
+        #Cross correlate all pulses with each other
+        crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=5)
+
+        #And determine the relative offsets between them
+        mx=trun('FitMaxima',crosscorr.crosscorr_data,doplot=True,refant=0,plotstart=4,plotend=5,sampleinterval=10**-9,peak_width=6,splineorder=2)
+
+        #Now fit the direction and iterate over cable delays to get a stable solution
+        direction=trun("DirectionFitTriangles",positions=positions,timelags=hArray(mx.lags),maxiter=10,verbose=True,doplot=True)
+
+        print "========================================================================"
+        print "Fit Arthur Az/El   ->  143.409 deg 81.7932 deg"
+        print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
+
+        # Triangle Fit Az/EL ->  (144.1118392216996, 81.84042919170588) deg for odd antennas
+        # Triangle Fit Az/EL ->  (145.17844721833896, 81.973693266380721) deg for even antennas
+
+        p=trun("PlotDirectionTriangles",centers=direction.centers,positions=direction.positions,directions=direction.directions,title=filename)
+    """
+    parameters=dict(
+        positions={doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit:"m"},
+        centers={doc:"hArray of dimension [NTriangles,3] with Cartesian coordinates of the centers of each triangle (x0,y0,z0,...)",unit:"m"},
+        directions={doc:"hArray of dimension [NTriangles,3] with Cartesian coordinates of the direction each triangle has given (x0,y0,z0,...)",unit:"m"},
+        title={default:False,doc:"Title for the plot (e.g., event or filename)"},
+        plotlegend={default:False,doc:"Plot a legend"},
+        direction_arrow_length={default:10.,doc:"Relative length of the direction arrows relative to the maximum size of the array"},
+        positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
+        NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
+        SubArrayFactor=p_(lambda self:0.5,"Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
+        NSubArrays=p_(lambda self:int(self.NAnt*self.SubArrayFactor),"Number of subarrays for which to average the direction from triangles"),
+        NTriangles=p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,"Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6 ``= length of directions.",output=True)
+        )
+
+    def call(self):
+        pass
+
+    def run(self):
+        self.meancenter=cr.hArray(float,[3])
+        self.meancenter.mean(self.positions)
+
+        self.meandirection=cr.hArray(float,[3])
+        self.meandirection.mean(self.directions)
+
+        self.triangle_distances=self.centers[...,0:3].vectorlength(self.meancenter)
+        self.triangle_distances_mean=self.triangle_distances.mean()
+        self.triangle_distances_stddev=self.triangle_distances.stddev()
+        self.triangle_distances_max=self.triangle_distances.max()
+
+        self.triangle_subarray_radius=(self.triangle_distances_max-self.triangle_distances_mean)/2
+
+        self.azelr=cr.hArray(float,[self.NSubArrays,3])
+        self.xyz=cr.hArray(float,[self.NSubArrays,3])
+        self.azelr.fillrangevec(cr.hArray([0.0,0.0,self.triangle_distances_max]),cr.hArray([2.*pi/self.NSubArrays,0.0,0.]))
+        cr.hCoordinateConvert(self.azelr[...],cr.CoordinateTypes.AzElRadius,self.xyz[...],cr.CoordinateTypes.Cartesian,False)
+        self.xyz+=self.meancenter
+
+        self.indx=cr.hArray(int,[self.NSubArrays,self.NTriangles])
+        self.triangle_separations=cr.hArray(float,[self.NSubArrays,self.NTriangles])
+        self.triangle_separations[...].vectorseparation(self.xyz[...],self.centers)
+
+        #Find the triangles that are close to the respective grid point on the circle
+        self.ntriangles_subarray=self.indx[...].findlessthan(self.triangle_separations[...],self.triangle_subarray_radius)
+
+        self.scrt=cr.hArray(float,[self.NSubArrays,self.ntriangles_subarray.max(),3])
+        self.subdirections=cr.hArray(float,[self.NSubArrays,3])
+        self.suborigins=cr.hArray(float,[self.NSubArrays,3])
+
+        self.scrt[...].copyvec(self.centers,self.indx[...],self.ntriangles_subarray,cr.Vector([3]))
+        self.suborigins[...].mean(self.scrt[...,[0]:self.ntriangles_subarray])
+        self.suboriginsT=self.suborigins.Transpose()
+
+        self.scrt[...].copyvec(self.directions,self.indx[...],self.ntriangles_subarray,cr.Vector([3]))
+        self.subdirections[...].mean(self.scrt[...,[0]:self.ntriangles_subarray])
+        self.subdirections[...] /= self.subdirections[...].vectorlength()
+
+        self.subpoints2=cr.hArray(copy=self.subdirections)
+        self.subpoints2 *= self.triangle_distances_max*self.direction_arrow_length
+        self.subpoints2 += self.suborigins
+        
+        self.meanpoint2=cr.hArray(copy=self.meandirection)
+        self.meanpoint2 *= self.triangle_distances_max*self.direction_arrow_length
+        self.meanpoint2 += self.meancenter
+
+        self.fig = cr.plt.figure()
+        self.ax = self.fig.gca(projection='3d')
+        self.ax.plot([self.meancenter[0],self.meanpoint2[0]],[self.meancenter[1],self.meanpoint2[1]],[self.meancenter[2],self.meanpoint2[2]], linewidth=5,label="Mean Direction")
+        for i in range(self.NSubArrays):
+            self.ax.plot([self.suborigins[i,0],self.subpoints2[i,0]],[self.suborigins[i,1],self.subpoints2[i,1]],[self.suborigins[i,2],self.subpoints2[i,2]], label="Sub-Array "+str(i),linewidth=1)
+        self.ax.plot(self.positionsT[0].vec(),self.positionsT[1].vec(),self.positionsT[2].vec(),marker='x',linestyle='',label="Antennas")
+        self.ax.plot(self.suboriginsT[0].vec(),self.suboriginsT[1].vec(),self.suboriginsT[2].vec(),marker='o',linestyle='',label="Sub-Arrays")
+        self.ax.set_ylabel("y")
+        self.ax.set_xlabel("x")
+        self.ax.set_zlabel("z")
+        if self.title:
+            self.ax.set_title(self.title)
+        if self.plotlegend:
+            self.ax.legend()
+
+
+class PlotAntennaLayout(tasks.Task):
+    """
+    **Description:**
+
+    Plot the layout of the current dataset on the ground.
+
+    **Usage:**
+
+    **See also:**
+    :class:`DirectionFitTriangles`
+
+    **Example:**
+
+    ::
+        file=open("$LOFARSOFT/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
+        file["ANTENNA_SET"]="LBA_OUTER"
+        file["SELECTED_DIPOLES"]="odd"
+        positions=file["ANTENNA_POSITIONS"]
+        layout=trun("PlotAntennaLayout",positions=positions,sizes=range(48),names=range(48))
+   """
+    parameters=dict(
+        positions={doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit:"m"},
+        size={default:300,doc:"Size of largest point."},
+        sizes={default:20,doc:"hArray of dimension [NAnt] with the values for the size of the plot"},
+        colors={default:'b',doc:"hArray of dimension [NAnt] with the values for the colors of the plot"},
+        names={default:False,doc:"hArray of dimension [NAnt] with the names or IDs of the antennas"},
+        title={default:False,doc:"Title for the plot (e.g., event or filename)"},
+        plotlegend={default:False,doc:"Plot a legend"},
+        positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
+        NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
+        )
+
+    def call(self):
+        pass
+
+    def run(self):
+
+        #Calculate scaled sizes
+        #import pdb; pdb.set_trace()
+
+        if len(self.sizes)>1:
+            self.ssizes=cr.hArray(copy=self.sizes)
+            self.ssizes -= self.ssizes.min().val()
+            self.ssizes /= self.ssizes.max().val()
+            self.ssizes *= self.size
+        else:
+            self.ssizes=self.sizes
+
+        self.fig = cr.plt.figure()
+        if self.title:
+            cr.plt.title(self.title)
+        cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.colors)
+        if self.names:
+            for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
+                cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
+#        if self.plotlegend:
+#            self.ax.legend()

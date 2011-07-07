@@ -172,6 +172,7 @@ HNumber funcGaussian (const HNumber x,
 template <class Iter>
 IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
+  if (vec_end-vec <= 0) ERROR_RETURN_VALUE("Illegal size of input vector (<=0)",0);
   Iter it(vec);
   IterValueType val=*it;
   while (it!=vec_end) {
@@ -200,6 +201,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 template <class Iter>
 IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
+  if (vec_end-vec <= 0) ERROR_RETURN_VALUE("Illegal size of input vector (<=0)",0);
   Iter it(vec);
   IterValueType val=*it;
   while (it!=vec_end) {
@@ -292,8 +294,8 @@ void hMin(const Iter vec,const Iter vec_end, const T min_value)
 template <class Iter>
 HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
-  Iter it(vec);
   if (vec_end-vec <= 0) ERROR_RETURN_VALUE("Illegal size of input vector (<=0)",0);
+  Iter it(vec);
   IterValueType val=*it;
   HInteger ipos(0);
   while (it!=vec_end) {
@@ -325,6 +327,7 @@ HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 template <class Iter>
 HInteger HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 {
+  if (vec_end-vec <= 0) ERROR_RETURN_VALUE("Illegal size of input vector (<=0)",0);
   Iter it(vec);
   IterValueType val=*it;
   HInteger ipos(0);

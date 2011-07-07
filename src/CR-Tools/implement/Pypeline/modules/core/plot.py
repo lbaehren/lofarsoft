@@ -70,8 +70,12 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
                      sections to highlight
 
     *plotarg1*       =..., plotarg2=...: you can add any plotting parameter
-                     that is understood by ``.plot`` of scipy, e.g.
-                     ``color='green``, ``linestyle='dashed``.
+                     that is understood by ``.plot`` of scipy, e.g. color = 'green'
+                     (see following parameters)
+                     
+    *color*          = scipy name of plotting color (e.g. 'green')
+    *linestyle*      = scipy style of line plotting (e.g. 'dashed', or '' for none)
+    *marker*         = scipy style for data points (e.g. 'x' or 'o')
     ================ ======================================================================
     """
     if EDP64bug==None and hasattr(self.plt,"EDP64bug"):

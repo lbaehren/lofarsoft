@@ -103,6 +103,7 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
         vec.resize(vtype.size)
         hCopy(vec, vtype)
     else:
+        import pdb; pdb.set_trace()
         vec=type2vector(vtype)
     vec.type=vtype
     if (size>=0): vec.resize(size)
@@ -356,6 +357,18 @@ def Vec_sub(vec1,val):
     hSub(vecout,vec1,val)
     return vecout
 
+# Operator:  -
+def Vec_rsub(vec1,val):
+    """
+    Provides the ``-`` operator for subtracting two vectors or a
+    vector and a scalar. The result will be a new vector.
+    """
+    vecout=vec1.new()
+    vecout.copy(vec1)
+    hNegate(vecout)
+    hAdd(vecout,val)
+    return vecout
+
 # Operator:  *
 def Vec_mul(vec1,val):
     """
@@ -374,6 +387,17 @@ def Vec_div(vec1,val):
     """
     vecout=vec1.new()
     hDiv(vecout,vec1,val)
+    return vecout
+
+def Vec_rdiv(vec1,val):
+    """
+    Provides the ``/`` operator for dividing two vectors or a vector
+    by a scalar. The result will be a new vector.
+    """
+    vecout=vec1.new()
+    vecout.copy(vec1)
+    hInverse(vecout)
+    hMul(vecout,val)
     return vecout
 
 # Pickling

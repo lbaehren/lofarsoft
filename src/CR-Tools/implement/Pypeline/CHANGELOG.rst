@@ -34,6 +34,17 @@ TODO:
 
 - Make naming consistent: rename pypeline -> pycrtools.
 
+
+2011-07-07 - Rev 8047 - ongoing
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+ - created new tasks PlotDirectionTriangles, PlotAntennaLayout
+ - added Vec__rmul__, etc. to also allow vectors/arrays to be on the
+   right hand  of an operand like *, -,/,+
+
+
 2011-05-14 - Rev 7703
 =====================
 

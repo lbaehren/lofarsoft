@@ -80,7 +80,9 @@ command prompt in ipython:
 
 ================================================== ==================================================================
 ``Task``                                           the currently loaded task instance
-``Task.par (=value)``                              access or set a parameter (without updating)
+``Task.ws``                                        print the workspace and its parameters (like tpars)
+``Task.parname (=value)``                          the access or set a parameter (without updating)
+                                                   - parname is the name of the parameter
 ``Task(par1,par2,...)``                            run the task with parameters ``par1,par2,...``
 ``tlist``                                          to view the available tasks
 ``tload 2``                                        to load the task #2 (can also provide a name)
@@ -558,7 +560,9 @@ class Task(object):
     the values provided and keeping the previous parameters the
     same
 
-    Parametees for calling the Task:
+    Task.ws -> return workspace (and print all the pararameters)
+    
+    Parameters for calling the Task:
 
     *init* = False - force the initalisation to run again
 

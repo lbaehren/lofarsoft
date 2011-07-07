@@ -942,6 +942,74 @@ void HFPP_FUNC_NAME(
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
+// //$DOCSTRING: Calculates all the directions of one source using a plane-wave fit to the arrival times of the signal in all possible antenna triangles from a list of antennas as input 
+// //$COPY_TO HFILE START --------------------------------------------------
+// #define HFPP_FUNC_NAME hPlaneWaveFit
+// //-----------------------------------------------------------------------
+// #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+// #define HFPP_PARDEF_0 (HNumber)(directions)()("Vector containing the calculated direction vectors in Cartesian coordinates (3 values: x,y,z) towards the source for all triangles")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_1 (HNumber)(errors)()("Vector with closure errors for each triangle")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_2 (HNumber)(origins)()("Vector of 3-tuples (x,y,z) with cartesian coordinates of the center point of each triangle")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_3 (HNumber)(weights)()("Vector with weights indicating the estimated position accuracy of each triangle")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_4 (HNumber)(positions)()("Vector of 3-tuples with cartesian coordinates for all antennas in meters")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_5 (HNumber)(times)()("Vector with arrival times of the signal at each antenna in seconds")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+// #define HFPP_PARDEF_6 (HInteger)(sign_of_solution)()("There can be one or two solutions returned: use +/-1 for choosing one of the two")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+// //$COPY_TO END --------------------------------------------------
+// /*!
+//   \brief $DOCSTRING
+//   $PARDOCSTRING
+
+//   Usage:
+
+//   ``hDirectionTriangulationsCartesian([directions],[errors],[origins],[weights],[positions],[times],+/-1) -> cartesian directions,err,origins,weights``
+
+//   Description:
+
+
+// {
+// 	float P,Q,R,S,W,T1,S1,S2,S3,S4,S5,S6 ;
+// 	P=Q=R=S=W=T1=S1=S2=S3=S4=S5=S6=0 ;
+// 	int counter=0 ;
+// 	for(int j=0;j<NO_DETs;j++)
+// 	{
+// 		weight[j]=1 ;		//Ignoring event weights
+// 		if(cdt[j]>=0)
+// 		{
+// 			counter++ ;
+// 			S=S+weight[j]*Det_X[j]*Det_X[j] ;
+// 			W=W+weight[j]*Det_Y[j]*Det_Y[j] ;
+// 			T1=T1+weight[j]*Det_X[j] ;
+// 			S1=S1+weight[j]*Det_X[j]*cdt[j] ;
+// 			S2=S2+weight[j]*Det_X[j]*Det_Y[j] ;
+// 			S3=S3+weight[j]*Det_Y[j]*cdt[j] ;
+// 			S4=S4+weight[j]*Det_Y[j] ;
+// 			S5=S5+weight[j]*cdt[j] ;
+// 			S6=S6+weight[j] ;
+// 		}
+// 	}
+// 	P=(S1*S2)/S ;
+// 	Q=(T1*S2)/S ;
+// 	R=-((S2*S2)/S)+W ;
+
+// 	float t0 ;
+// 	//Here, "t0" is actually "ct0 in meters"
+// 	t0=(T1*S1*R-R*S*S5+T1*P*S2-T1*S2*S3-S*S4*P+S*S4*S3)/(T1*Q*S2-T1*S2*S4+R*T1*T1-S*S4*Q+S*S4*S4-R*S*S6) ;
+// 	m=(P-t0*Q-S3+t0*S4)/R ;
+// 	l=(-S1/S)-((P*S2)/(R*S))+((t0*Q*S2)/(R*S))+((S2*S3)/(R*S))-((t0*S2*S4)/(R*S))+((t0*T1)/S) ;
+// 	n=sqrt(1.0-(l*l+m*m)) ;
+
+// 	THETA=(asin(sqrt(l*l+m*m)))*(180.0/pi) ;	//in degrees (from vertical direction +Z)
+// 	PHI=(acos(m/sqrt(l*l+m*m)))*(180.0/pi) ;	//in degrees (Eastward from North)
+// 	if(l<0) PHI=360.0-PHI ;
+
+// 	THETA=90.0-THETA ;//in degrees (from the horizon)
+// 	PHI=360.0-PHI ;//in degrees (Westward from North)
+
+// 	//printf("THETA=%f\tPHI=%f\tl=%f\tm=%f\tn=%f\tct0=%f\n",THETA,PHI,l,m,n,t0) ;
+// }
+
+
 //$DOCSTRING: Calculates the square root of the power of a complex spectrum and adds it to an output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower

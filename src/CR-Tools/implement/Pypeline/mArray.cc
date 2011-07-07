@@ -153,10 +153,17 @@ template <class T> void hArray<T>::initialize_storage(){
   if (storage_p==NULL) new_storage();
   if (storage_p->ndims_p==NULL) storage_p->ndims_p=new HInteger;
   if (storage_p->size_p==NULL) storage_p->size_p=new HInteger;
-  if (storage_p->dimensions_p==NULL) storage_p->dimensions_p=new std::vector<HInteger>;
-  if (storage_p->slice_sizes_p==NULL) storage_p->slice_sizes_p=new std::vector<HInteger>;
+  if (storage_p->dimensions_p==NULL) {
+    storage_p->dimensions_p=new std::vector<HInteger>;
+    storage_p->dimensions_p->reserve(2);
+  };
+  if (storage_p->slice_sizes_p==NULL) {
+    storage_p->slice_sizes_p=new std::vector<HInteger>;
+    storage_p->slice_sizes_p->reserve(2);
+  };
   if (storage_p->vec_p==NULL) {
     storage_p->vec_p=new std::vector<T>;
+    storage_p->vec_p->reserve(1);
     addHistory((HString)"initialize_storage",(HString)"Vector of type "+typeid(*storage_p->vec_p).name()+" created.");
   };
 }

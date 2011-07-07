@@ -102,6 +102,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     =========== ======================== =====================================================
 
     """
+    if type(copy) in hAllVectorTypes:
+        copy=hArray(copy)
     if type(copy) in hAllArrayTypes:
         if properties==None: properties=copy
         if fill==None: fill=copy
@@ -1322,9 +1324,13 @@ for v in hComplexContainerTypes:
 
 for v in hNumericalContainerTypes:
     setattr(v,"__add__",Vec_add)
+    setattr(v,"__radd__",Vec_add)
     setattr(v,"__sub__",Vec_sub)
+    setattr(v,"__rsub__",Vec_rsub)
     setattr(v,"__div__",Vec_div)
+    setattr(v,"__rdiv__",Vec_rdiv)
     setattr(v,"__mul__",Vec_mul)
+    setattr(v,"__rmul__",Vec_mul)
     setattr(v,"__iadd__",Vec_iadd)
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)

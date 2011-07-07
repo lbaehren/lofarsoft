@@ -127,6 +127,10 @@ class BeamFormer2(tasks.Task):
 
         "smooth_width":{default:True,doc:"Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",unit:"Samples"},
 
+        "newfigure":p_(True,"Create a new figure for plotting for each new instance of the task."),
+
+        "figure":p_(None,"The matplotlib figure containing the plot",output=True),
+
         "doplot":{default:False,doc:"Plot current spectrum while processing."},
 
         "plotspec":{default:True,doc:"If True plot the beamformed average spectrum at the end, otherwise the time series."},
@@ -316,6 +320,8 @@ class BeamFormer2(tasks.Task):
         
         if self.doplot:
             plt.ioff()
+            if self.newfigure and not self.figure:
+                self.figure=plt.figure()
 
         original_file_start_number=self.file_start_number
         if self.avspec:
