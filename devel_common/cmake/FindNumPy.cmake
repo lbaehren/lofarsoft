@@ -1,5 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
+# | $Id:: FindNumPy.cmake 7993 2011-06-30 09:05:37Z loose                     $ |
 # +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
@@ -82,6 +82,7 @@ endif (numpy_path)
 
 find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
   PATHS
+  /sw/lib/python2.6/site-packages
   ${numpy_search_path}
   /System/Library/Frameworks/Python.framework/Versions
   PATH_SUFFIXES
@@ -99,6 +100,7 @@ find_path (NUMPY_INCLUDES numpy/arrayobject.h numpy/ndarrayobject.h
 
 find_library (NUMPY_MULTIARRAY_LIBRARY multiarray
   PATHS
+  /sw/lib/python2.6/site-packages
   ${numpy_search_path}
   /System/Library/Frameworks/Python.framework/Versions
   PATH_SUFFIXES
@@ -115,6 +117,7 @@ endif (NUMPY_MULTIARRAY_LIBRARY)
 
 find_library (NUMPY_SCALARMATH_LIBRARY scalarmath
   PATHS
+  /sw/lib/python2.6/site-packages
   ${numpy_search_path}
   /System/Library/Frameworks/Python.framework/Versions
   PATH_SUFFIXES
@@ -134,6 +137,8 @@ endif (NUMPY_SCALARMATH_LIBRARY)
 
 find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION} f2py-${PYTHON_VERSION}
   PATHS ${bin_locations}
+  /sw/bin
+  /sw/lib/python2.6/site-packages
   NO_DEFAULT_PATH
   )
 
