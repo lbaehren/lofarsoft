@@ -13,8 +13,6 @@ from mImaging import *
 from mIO import *
 from mEndPointRadiation import *
 
-import pycrtools.rftools as rf
-
 # Add additional hftools methods
 from _hftools import *
 

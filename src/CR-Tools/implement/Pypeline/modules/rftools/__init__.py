@@ -1,7 +1,5 @@
 """
 A number of tools useful in calibrating radio data
-
-execfile("/Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/modules/rftools/__init__.py")
 """
 
 from math import *
@@ -27,11 +25,11 @@ def TimeBeamIncoherent(timeseries_data,incoherent_sum=None):
     returns ``incoherent_sum[blocklen]``
 
     **Description:**
-    
+
     Calculate the incoherent sum of the timeseries data of multiple
     antennas. Will square the E-Field and add all antennas into one
     time series, thus containing the 'incoherent power'.
-    
+
     **Example:**
     ::
     file=cr.open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
@@ -45,4 +43,4 @@ def TimeBeamIncoherent(timeseries_data,incoherent_sum=None):
         incoherent_sum=cr.hArray(float,[dims[-1]],fill=0.0)
     incoherent_sum.squareadd(timeseries_data)
     return incoherent_sum
-    
+
