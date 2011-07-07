@@ -71,12 +71,12 @@ class Op_collapse(Op):
 
             split_filename=img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
             image_file=split_filename[0]+'_'+pol+split_filename[-1]
-            data, hdr = func.read_image_from_file(image_file, img, img.opts.indir)
+            data, hdr = func.read_image_from_file(image_file, img, img.opts.indir, quiet=True)
                 
           if c_mode == 'single':
             if pol == 'I': 
               img.ch0 = ch0 = img.image[chan0]
-              mylogger.userinfo(mylog, 'Source extraction will be' \
+              mylogger.userinfo(mylog, 'Source extraction will be ' \
                                     'done on channel', '%i (%.3f MHz)' % \
                                     (chan0, img.cfreq/1e6))
             else:

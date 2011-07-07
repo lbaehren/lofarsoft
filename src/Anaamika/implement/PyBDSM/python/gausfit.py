@@ -53,7 +53,7 @@ class Op_gausfit(Op):
         opts = img.opts
         if opts.quiet == False and opts.verbose_fitting==False:
             bar.start()
-        min_maxsize = 10.0
+        min_maxsize = 50.0
         maxsize = opts.splitisl_maxsize
         if maxsize < min_maxsize: maxsize = min_maxsize
 
@@ -65,6 +65,7 @@ class Op_gausfit(Op):
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
 
           size = isl.size_active/img.pixel_beamarea*2.0   # 2.0 roughly corrects for thresh_isl
+
           if size > maxsize and opts.split_isl:
 
             tosplit = misc.isl_tosplit(isl, img)
@@ -77,6 +78,7 @@ class Op_gausfit(Op):
                 #print 'sub isl ',i_sub
                 islcp = isl.copy(img)
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
+                islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
                 isl.islmean = 0.0
                 sgaul, sfgaul = self.fit_island(islcp, opts, img)
                 gaul = gaul + sgaul; fgaul = fgaul + sfgaul
@@ -204,7 +206,7 @@ class Op_gausfit(Op):
             beam = (1.1*beam[0], beam[1], beam[2])
 
         thr1 = isl.mean + opts.thresh_isl*isl.rms
-        thr2 = isl.mean + opts.thresh_pix*isl.rms
+        thr2 = isl.mean + img.thresh_pix*isl.rms
         verbose = opts.verbose_fitting
         peak = fcn.find_peak()[0]
         dof = isl.size_active

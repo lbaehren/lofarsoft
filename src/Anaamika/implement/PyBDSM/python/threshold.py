@@ -38,10 +38,12 @@ class Op_threshold(Op):
 	    false_p = 0.5*erfc(cutoff/sq2)*size
 	    if false_p < opts.fdr_ratio*source_p:
                 img.thresh = 'hard'
-                mylogger.userinfo(mylog, "Using sigma-clipping thresholding (expected false detection rate = %.1e)" % (false_p/source_p,))
+                mylogger.userinfo(mylog, "Expected 5-sigma-clipped false detection rate < fdr_ratio")
+                mylogger.userinfo(mylog, "Using sigma-clipping thresholding")
 	    else: 
                 img.thresh = 'fdr'
-                mylogger.userinfo(mylog, "Using FDR (False Detection Rate) thresholding (expected false detection rate = %.1e)" % (false_p/source_p,))
+                mylogger.userinfo(mylog, "Expected 5-sigma-clipped false detection rate > fdr_ratio")
+                mylogger.userinfo(mylog, "Using FDR (False Detection Rate) thresholding")
             mylog.debug('%s %g' % ("Estimated number of source pixels (using sourcecounts.py) is ",source_p))
             mylog.debug('%s %g' % ("Number of false positive pixels expected for 5-sigma is ",false_p))
             mylog.debug("Threshold for pixels set to : "+str.swapcase(img.thresh))

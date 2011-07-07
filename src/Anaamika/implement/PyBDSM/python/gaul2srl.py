@@ -186,8 +186,11 @@ class Op_gaul2srl(Op):
                 yline = N.round(min(pix1[1],pix2[1])+N.arange(maxline))
                 xline = N.round((pix1[0]-pix2[0])/(pix1[1]-pix2[1])* \
                        (min(pix1[1],pix2[1])+N.arange(maxline)-pix1[1])+pix1[0])
-
               rpixval = N.zeros(maxline)
+              xbig = N.where(xline >= N.size(subim,0))
+              xline[xbig] = N.size(subim,0) - 1
+              ybig = N.where(yline >= N.size(subim,1))
+              yline[ybig] = N.size(subim,1) - 1
               for i in range(maxline):
                 pixval = subim[xline[i],yline[i]]
                 rpixval[i] = pixval 
@@ -252,6 +255,7 @@ class Op_gaul2srl(Op):
                                         # try
         subim_src = self.make_subim(subn, subm, g_sublist, delc)
         mompara = func.momanalmask_gaus(subim_src, mask, isrc, bmar_p, True)
+        
                                         # initial peak posn and value
         maxv = N.max(subim_src)
         maxx, maxy = N.unravel_index(N.argmax(subim_src), subim_src.shape)
@@ -284,7 +288,14 @@ class Op_gaul2srl(Op):
           posn = N.unravel_index(N.argmax(data*~rmask), data.shape)+N.array(delc) +blc
 
                                         # calculate peak by bilinear interpolation around centroid
-        x1 = N.int(N.floor(mompara[1])); y1 = N.int(N.floor(mompara[2]))
+        if N.isnan(mompara[1]):
+            x1 = 0
+        else:
+            x1 = N.int(N.floor(mompara[1]))
+        if N.isnan(mompara[2]):
+            y1 = 0
+        else:
+            y1 = N.int(N.floor(mompara[2]))
         xind = slice(x1, x1+2, 1); yind = slice(y1, y1+2, 1)
         if img.opts.flag_smallsrc and (N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4):
             mylog.debug('Island = '+str(isl.island_id))

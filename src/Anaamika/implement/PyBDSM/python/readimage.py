@@ -81,16 +81,6 @@ class Op_readimage(Op):
 
             if pol == 'I':
                 # Store data and header in img, but only for pol == 'I'
-                if len(data.shape) == 3:
-                    mylogger.userinfo(mylog, 'Image size',
-                                      str(data.shape[-2:])+' pixels')
-                    mylogger.userinfo(mylog, 'Number of channels in image',
-                                      '%i' % data.shape[0])
-                else:
-                    mylogger.userinfo(mylog, 'Image size',
-                                      str(data.shape)+' pixels')
-                    mylogger.userinfo(mylog, 'Number of channels in image',
-                                      '1')
                 img.image = data
                 img.header = hdr
                 img.j = 0                    
@@ -102,6 +92,17 @@ class Op_readimage(Op):
                                       'does not match that of I. Polarisation '\
                                       'module disabled.')
                     break
+
+        if len(img.image.shape) == 3:
+            mylogger.userinfo(mylog, 'Image size',
+                              str(img.image.shape[-2:])+' pixels')
+            mylogger.userinfo(mylog, 'Number of channels in image',
+                              '%i' % img.image.shape[0])
+        else:
+            mylogger.userinfo(mylog, 'Image size',
+                              str(img.image.shape)+' pixels')
+            mylogger.userinfo(mylog, 'Number of channels in image',
+                              '1')
 
         ### initialize wcs conversion routines
         self.init_wcs(img)

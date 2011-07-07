@@ -35,7 +35,7 @@ def _isl2border(img, isl):
 def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                 ch0_islands=True, gresid_image=True, sresid_image=False,
                 gmodel_image=True, smodel_image=False, pyramid_srcs=False,
-                source_seds=False):
+                source_seds=False, ch0_flagged=False):
     """Show the results of a fit.
 
     Should be done as follows:
@@ -112,6 +112,13 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
         else:
             titles.append('Islands (hatched boundaries)')
         names.append('ch0')
+    if ch0_flagged:
+        if img.ngaus == 0:
+            print 'Image was not fit with Gaussians. Skipping display of flagged Gaussians.'
+        else:
+            images.append(img_ch0)
+            titles.append('Flagged Gaussians')
+        names.append('ch0')
     if rms_image:
         images.append(img_rms)
         titles.append('Background rms Image')
@@ -177,7 +184,10 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
             for i in range(len(j_with_gaus)):
                 images.append('wavelets')
                 names.append('pyrsrc'+str(i))
-
+    if images == []:
+        print 'No images to display.'
+        return
+    
     im_mean = img.clipped_mean
     im_rms = img.clipped_rms
     if img.resid_gaus == None:
@@ -281,9 +291,23 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             gline.gaus_id = gidx
                             gline.src_id = atrg.source_id
                             gline.jlevel = atrg.jlevel
-                            
+            if 'Flagged' in titles[i]:
+                for iisl, isl in enumerate(img.islands):
+                    xb, yb = _isl2border(img, isl)
+                    cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='#afeeee', "\
+                        "markersize=8)"
+                    exec cmd
+                    ax = pl.gca()
+                    style = '-'
+                    for ig, g in enumerate(isl.fgaul):
+                        col = colours[ig % 6]
+                        ellx, elly = func.drawellipse(g)
+                        gline, = ax.plot(ellx, elly, color = col,
+                                         linestyle = style, picker=3)
+                        gline.flag = g.flag
+
             cmd = 'ax' + str(i+1) + ".imshow(N.transpose(im), origin=origin, "\
-                    "interpolation='nearest',vmin=vmin, vmax=vmax, cmap=gray_palette)"
+                    "interpolation='bilinear',vmin=vmin, vmax=vmax, cmap=gray_palette)"
             exec cmd
             cmd = 'ax' + str(i+1) + '.format_coord = format_coord_'+names[i]
             exec cmd
@@ -323,31 +347,35 @@ def on_pick(event):
     global images
     global srcid_cur
     g = event.artist
-    gaus_id = g.gaus_id
-    src_id = g.src_id
-    wav_j = g.jlevel
-    if wav_j == 0:
-        print 'Gaussian #' + str(gaus_id) + ' (in source #' + str(src_id) + ')'
+    if hasattr(g, 'gaus_id'):
+        gaus_id = g.gaus_id
+        src_id = g.src_id
+        wav_j = g.jlevel
+        if wav_j == 0:
+            print 'Gaussian #' + str(gaus_id) + ' (in source #' + str(src_id) + ')'
+        else:
+            print 'Gaussian #' + str(gaus_id) + ' (in source #' + str(src_id) + \
+                ', wavelet scale j=' + str(wav_j) + ')'
+        # Change source SED
+        # First check that SEDs are being plotted and that the selected Gaussian
+        # is from the zeroth wavelet image
+        has_sed = False
+        if 'seds' in images and wav_j == 0:
+            has_sed = True
+        if not has_sed:
+            return
+        ax_indx = images.index('seds')
+        sed_src = get_src(src_list, src_id)
+        if srcid_cur == src_id:
+            return
+        srcid_cur = src_id
+        axes_list = fig.get_axes()
+        for axindx, ax in enumerate(axes_list):
+            if images[axindx] == 'seds':
+                plot_sed(sed_src, ax)
     else:
-        print 'Gaussian #' + str(gaus_id) + ' (in source #' + str(src_id) + \
-            ', wavelet scale j=' + str(wav_j) + ')'
-    # Change source SED
-    # First check that SEDs are being plotted and that the selected Gaussian
-    # is from the zeroth wavelet image
-    has_sed = False
-    if 'seds' in images and wav_j == 0:
-        has_sed = True
-    if not has_sed:
-        return
-    ax_indx = images.index('seds')
-    sed_src = get_src(src_list, src_id)
-    if srcid_cur == src_id:
-        return
-    srcid_cur = src_id
-    axes_list = fig.get_axes()
-    for axindx, ax in enumerate(axes_list):
-        if images[axindx] == 'seds':
-            plot_sed(sed_src, ax)
+        print 'Flagged Gaussian (flag = ' + str(g.flag) + "; use help 'flagging_opts' for info)"
+ 
     pl.draw()
        
     

@@ -135,7 +135,7 @@ ip.set_hook('complete_command', opts_completer, re_key = '.*')
 
 # Finally, print a welcome banner
 from bdsm import __version__, __revision__
-print 'PyBDSM version ' + __version__ + ' (revision ' + __revision__ + ')'
+print 'PyBDSM version ' + __version__ + ' (LUS revision ' + __revision__ + ')'
 print '=' * 72
 print 'PyBDSM commands'
 print '  inp task ............ : Set current task and list parameters'

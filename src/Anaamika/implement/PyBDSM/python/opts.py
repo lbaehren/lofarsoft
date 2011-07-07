@@ -63,7 +63,21 @@ class Opts(object):
                                  "to handle 4-D cubes and this convention will "\
                                  "no longer be necessary.")
     flagging_opts   =   Bool(False,
-                             doc="Show options for Gaussian flagging")
+                             doc="Show options for Gaussian flagging\n"\
+                                 "Gaussians which are likely in error "\
+                                 "(e.g., very small or very large Gaussians) "\
+                                 "are flagged according to a number of criteria, "\
+                                 "which the user may control. "\
+                                 "Flags are cumulative (i.e., if multiple "\
+                                 "flagging criteria are met, the respective "\
+                                 "flag values are added to produce the final "\
+                                 "flag value). Flag values are defined as follows:\n"\
+                                 "If flag_minsnr: flag + 1\n"\
+                                 "If flag_maxsnr: flag + 2\n"\
+                                 "If flag_bordersize: flag + 4 (x) or 8 (y)\n"\
+                                 "If flag_maxsize_isl: flag + 16 (x) or 32 (y)\n"\
+                                 "If flag_maxsize_bm: flag + 64\n"\
+                                 "If flag_minsize_bm: flag + 128")
     frequency       = Option(None, Float(),
                              doc="Frequency in Hz of input image. "\
                                  "E.g., frequency = 74e6. None => get from header. "\
@@ -202,7 +216,7 @@ class Opts(object):
     thresh          =   Enum(None, "hard", "fdr", 
                              doc="Type of thresholding: " \
                                  "None => calculate inside program, 'fdr' => use "\
-                                 "false discovery rate algorithm, 'hard' => "\
+                                 "false detection rate algorithm, 'hard' => "\
                                  "use sigma clipping\nIf thresh = 'hard', "\
                                  "then a hard threshold is assumed, given by thresh_pix. "\
                                  "If thresh = 'fdr', then the False Detection Rate algorithm of "\
@@ -934,6 +948,10 @@ class Opts(object):
                              group="hidden")
     ch0_islands     =   Bool(True,
                              doc="Show the ch0 image with islands and Gaussians "\
+                                 "(if any) overplotted",
+                             group="hidden")
+    ch0_flagged     =   Bool(False,
+                             doc="Show the ch0 image with flagged Gaussians "\
                                  "(if any) overplotted",
                              group="hidden")
     gresid_image    =   Bool(True,

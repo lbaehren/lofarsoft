@@ -515,7 +515,7 @@ def momanalmask_gaus(subim, mask, isrc, bmar_p, allpara=True):
       dumr = atanproper(dumr, m2[0]-m2[1], 2.0*m11)
       mompara[5] = 0.5*dumr*180.0/pi - 90.0
       if mompara[5] < 0.0: mompara[5] += 180.0
-  
+
     return mompara
      
 def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
@@ -691,15 +691,26 @@ def get_errors(img, p, stdav):
       d1 = sqrt(8.0*log(2.0))
       d2 = (size[0]*size[0]-size[1]*size[1])/(size[0]*size[0])
 
-      e_peak = pp[0]*sq2/(dumrr3*pow(dumrr1,0.75)*pow(dumrr2,0.75))
-      e_x0=size[0]/fwsig*sq2/(d1*dumrr3*pow(dumrr1,1.25)*pow(dumrr2,0.25))
-      e_y0=size[1]/fwsig*sq2/(d1*dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))
-      e_maj=size[0]*sq2/(dumrr3*pow(dumrr1,1.25)*pow(dumrr2,0.25))
-      e_min=size[1]*sq2/(dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))  # in fw
-      e_pa=2.0/(d2*dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))
-      e_pa=e_pa*180.0/pi
-      e_tot=pp[0]*sqrt(e_peak*e_peak/(pp[0]*pp[0])+(0.25/dumr/dumr)*(e_maj*e_maj/(size[0]*size[0])+\
-            e_min*e_min/(size[1]*size[1])))
+      try:
+          e_peak = pp[0]*sq2/(dumrr3*pow(dumrr1,0.75)*pow(dumrr2,0.75))
+          e_x0=size[0]/fwsig*sq2/(d1*dumrr3*pow(dumrr1,1.25)*pow(dumrr2,0.25))
+          e_y0=size[1]/fwsig*sq2/(d1*dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))
+          e_maj=size[0]*sq2/(dumrr3*pow(dumrr1,1.25)*pow(dumrr2,0.25))
+          e_min=size[1]*sq2/(dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))  # in fw
+          e_pa=2.0/(d2*dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))
+          e_pa=e_pa*180.0/pi
+          e_tot=pp[0]*sqrt(e_peak*e_peak/(pp[0]*pp[0])+
+                           (0.25/dumr/dumr)*(e_maj*e_maj/(size[0]*size[0])+
+                                             e_min*e_min/(size[1]*size[1])))
+      except:
+          e_peak = 0.0
+          e_x0 = 0.0
+          e_y0 = 0.0
+          e_maj = 0.0
+          e_min = 0.0
+          e_pa = 0.0
+          e_tot = 0.0
+          
       if abs(e_pa) > 180.0: e_pa=180.0  # dont know why i did this
       errors = errors + [e_peak, e_x0, e_y0, e_maj, e_min, e_pa, e_tot]
 
@@ -935,7 +946,7 @@ def get_kwargs(kwargs, key, typ, default):
 
     return obj
 
-def read_image_from_file(filename, img, indir):
+def read_image_from_file(filename, img, indir, quiet=False):
     """ Reads data and header from indir/filename using either pyfits or pyrap depending on
          img.use_io = 'fits'/'rap' """
     import mylogger
@@ -1000,7 +1011,8 @@ def read_image_from_file(filename, img, indir):
             return None
 
     # Now that image has been read in successfully, get data and header
-    mylogger.userinfo(mylog, "Opened '"+image_file+"'")
+    if not quiet:
+        mylogger.userinfo(mylog, "Opened '"+image_file+"'")
     if img.use_io == 'rap':
         data = inputimage.getdata()
         hdr = inputimage.info()

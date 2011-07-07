@@ -30,7 +30,7 @@ def process(img, **kwargs):
     f.close()
     mylog = mylogger.logging.getLogger("PyBDSM.Process")
     mylog.info("Running PyBDSM on "+img.opts.filename)
-       
+
     # Run all the op's
     try:
         # set options if given

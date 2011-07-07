@@ -84,6 +84,9 @@ def userinfo(mylog, desc_str, val_str=''):
 
   if val_str == '':
     sep = ''
+    if desc_str[:1] == '\n':
+      bc += '\n'
+      desc_str = desc_str[1:]
     desc_str = bc + '--> ' + desc_str + nc
   else:
     sep = ' : '
