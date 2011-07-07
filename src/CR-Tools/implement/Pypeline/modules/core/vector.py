@@ -103,7 +103,6 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
         vec.resize(vtype.size)
         hCopy(vec, vtype)
     else:
-        import pdb; pdb.set_trace()
         vec=type2vector(vtype)
     vec.type=vtype
     if (size>=0): vec.resize(size)

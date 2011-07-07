@@ -7,7 +7,7 @@
 # Make core functionality available in local namespace
 from core import *
 import tasks
-import rftools
+import rftools as rf
 
 # Import open function from IO module
 from io import open

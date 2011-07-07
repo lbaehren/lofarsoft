@@ -8,6 +8,7 @@ import pycrtools.tasks as tasks
 import pytmf
 from pycrtools.tasks.shortcuts import *
 from math import *
+import pycrtools.rftools as rf
 
 deg=pi/180.
 pi2=pi/2.
@@ -85,7 +86,7 @@ class LocatePulseTrain(tasks.Task):
         if len(self.timeseries_data.shape())==1:
             self.timeseries_data_sum=self.timeseries_data
         else:
-            self.timeseries_data_sum=cr.rf.TimeBeamIncoherent(self.timeseries_data)
+            self.timeseries_data_sum=rf.TimeBeamIncoherent(self.timeseries_data)
 
         self.minrms=cr.Vector(float,1)
         self.minmean=cr.Vector(float,1)
