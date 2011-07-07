@@ -38,7 +38,6 @@
 // ========================================================================
 
 #include "core.h"
-#include "casa.h"
 #include "math.h"
 #include "mFilter.h"
 
