@@ -102,6 +102,12 @@ class DedispPlan(object):
         self.prepsubband_time = None
         self.search_time = None
 
+    def get_dms(self):
+        '''
+        Return a list of dm values covered by this DedispPlan instance.
+        '''
+        return [self.lodm + self.dmstep * i  for i in range(self.dmsperpass)]
+
 def get_baryv(ra, dec, mjd, T, obs="LF"):
     """ 
     get_baryv(ra, dec, mjd, T):
@@ -500,12 +506,6 @@ class SearchRun(object):
         
         return annotated_ddplans
 
-   
-    def get_dms(self, ddplan):
-        # TODO : move to DDplan class
-        return [ddplan.lodm + ddplan.dmstep * i  \
-            for i in range(ddplan.dmsperpass)]
-
     def run_search(self, ddplans, z_values, n_cores = None, 
             no_singlepulse = False, no_accel = False, save_timeseries = False, 
             par_files = None, no_fold = False, zero_dm = False):
@@ -612,7 +612,7 @@ class SearchRun(object):
 
             t_search_start = time.time() 
             command_list = [[] for i in range(n_cores)]
-            for i, dm in enumerate(self.get_dms(ddplan)):
+            for i, dm in enumerate(ddplan.get_dms()):
                 # determine which core the command is for:
                 core_index = i % n_cores
                 # Append all the per DM processing commands to the appropriate
@@ -929,8 +929,8 @@ if __name__ == '__main__':
         type='string', metavar='WORK_DIR', dest='work_dir')
     parser.add_option('--rfi', help='RFI file', type='string', default='',
         metavar='RFI_FILE', dest='rfi_file')    
-    parser.add_option('-t', help='Run in testing mode (quick).',
-        action='store_true', dest='test', default=False)
+    parser.add_option('--plan', dest='plan', type='string', default='LPPS', 
+        metavar='PLAN', help='Dedispersion plan to be used (default=LPPS)'),
     parser.add_option('--z_list', dest='z_list', type='string',
         default='[0,50]', metavar='Z_LIST', 
         help='List of integer z values, default [0,50] - don\'t use spaces.')
@@ -948,9 +948,11 @@ if __name__ == '__main__':
     parser.add_option('--st', dest='st', action='store_true', default=False,
         help='Keep dedispersed timeseries around.')
     parser.add_option('--nf', metavar='NO_FOLD', default=False, 
-        action='store_true', dest='no_fold')
+        action='store_true', dest='no_fold',
+        help='Don\'t perform pulsar fold.')
     parser.add_option('--zerodm', metavar='ZERO_DM', default=False,
-        action='store_true', dest='zero_dm') 
+        action='store_true', dest='zero_dm',
+        help='Perform \'zero-DMming\' whilst running mpiprepsubband.')
     options, args = parser.parse_args()
     N_CORES = options.ncores
 
@@ -1004,38 +1006,58 @@ if __name__ == '__main__':
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
         options.rfi_file, zap_file, options.rfi_dir)  
 
-    ddplans = []
-    # The number of subbands defaults to being the number of channels in the
-    # data (according to DDplan.py which is how it is implemented here and
-    # in Vishal's script as well).
-
-
-    if options.test:
-        # Quick very tiny dedispersion plan used for testing (whether code
-        # is still ok, nothing else). Use -t flag to run with this 
-        # dedispersion plan.
-        ddplans.append(DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
-            numsub=SR.metadata.n_channels, downsamp=1))
-        ddplans.append(DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
-            numsub=SR.metadata.n_channels, downsamp=1))
-        ddplans.append(DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
-            numsub=SR.metadata.n_channels, downsamp=1))
-        ddplans.append(DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
-            numsub=SR.metadata.n_channels, downsamp=1))
+    PREDEFINED_DEDISPERSION_PLANS = {
+        'LPPS' : [
+            DedispPlan(lodm=0, dmstep=0.05, dmsperpass=1196, 
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
+            DedispPlan(lodm=59.8, dmstep=0.10, dmsperpass=408,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
+            DedispPlan(lodm=100.60, dmstep=0.20, dmsperpass=449,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
+            DedispPlan(lodm=190.40, dmstep=0.50, dmsperpass=442,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
+            DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
+        ],
+        'LOTAS' : [
+        # DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
+        # TODO : speak to Jason/Ben/Joeri about desireable time resolution
+            DedispPlan(lodm=0, dmstep=0.02, dmsperpass=6647, 
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
+            DedispPlan(lodm=132.940, dmstep=0.03, dmsperpass=2454,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
+            DedispPlan(lodm=206.560, dmstep=0.05, dmsperpass=3258,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
+            DedispPlan(lodm=369.460, dmstep=0.10, dmsperpass=3576,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
+            DedispPlan(lodm=727.060, dmstep=0.30, dmsperpass=910,
+                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
+        ],
+        'TEST' : [
+            DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
+                numsub=SR.metadata.n_channels, downsamp=1),
+            DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
+                numsub=SR.metadata.n_channels, downsamp=1),
+            DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
+                numsub=SR.metadata.n_channels, downsamp=1),
+            DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
+                numsub=SR.metadata.n_channels, downsamp=1),
+        ],
+        'LOTASTEST' : [
+            DedispPlan(lodm=0, dmstep=0.5, dmsperpass=50, numpasses=1, 
+                numsub=SR.metadata.n_channels, downsamp=1),
+        ],
+    }
+    try:
+        ddplans = PREDEFINED_DEDISPERSION_PLANS[options.plan]
+    except KeyError, e:
+        print 'There is no dedispersion plan called %s .' % options.plan
+        print 'Known dedispersion plans:'
+        for k in PREDEFINED_DEDISPERSION_PLANS.keys():
+            print k
+        sys.exit()
     else:
-        # Jason's full LPPS dedispersion plan:
-        # DDplan.py -t 0.00065536 -r 0.5 -b 6.8369375 -f 142.3828125 -n 560 
-        # -d 500
-        ddplans.append(DedispPlan(lodm=0, dmstep=0.05, dmsperpass=1196, 
-            numpasses=1, numsub=SR.metadata.n_channels, downsamp=1))
-        ddplans.append(DedispPlan(lodm=59.8, dmstep=0.10, dmsperpass=408,
-            numpasses=1, numsub=SR.metadata.n_channels, downsamp=2))
-        ddplans.append(DedispPlan(lodm=100.60, dmstep=0.20, dmsperpass=449,
-            numpasses=1, numsub=SR.metadata.n_channels, downsamp=4))
-        ddplans.append(DedispPlan(lodm=190.40, dmstep=0.50, dmsperpass=442,
-            numpasses=1, numsub=SR.metadata.n_channels, downsamp=8))
-        ddplans.append(DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
-            numpasses=1, numsub=SR.metadata.n_channels, downsamp=16))
+        print 'Using dedispersion plan called %s .' % options.plan
 
     SR.run_search(ddplans, z_values, N_CORES, options.ns, options.na, options.st,
         par_files, options.no_fold, options.zero_dm)
