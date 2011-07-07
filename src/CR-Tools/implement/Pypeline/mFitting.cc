@@ -42,12 +42,11 @@
 #include "mMath.h"
 #include "mFitting.h"
 
-
-#ifdef HAVE_GSL
+#ifdef PYCRTOOLS_WITH_GSL
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_version.h>
-#endif
+#endif /* PYCRTOOLS_WITH_GSL */
 
 
 // ========================================================================
@@ -65,18 +64,18 @@ using namespace std;
 
 //!initialize functions of the library
 void hInitFitting(){
-#ifdef HAVE_GSL
+#ifdef PYCRTOOLS_WITH_GSL
   gsl_set_error_handler_off ();
 #else
   ERROR("hInit: GSL-Libraries not installed. Some functions are not defined.")
-#endif
+#endif /* PYCRTOOLS_WITH_GSL */
 }
 
 // ================================================================================
 //$SECTION: GSL Fitting
 // ================================================================================
 
-//$COPY_TO HFILE: #ifdef HAVE_GSL
+//$COPY_TO HFILE: #ifdef PYCRTOOLS_WITH_GSL
 //!Makes a shared memory GSL Matrix. Note that m->block needs to be deleted explicitly afterwards ...
 template <class Iter>
 gsl_matrix * STL2GSLM(const Iter vec, const HInteger dim1, const HInteger dim2) {
