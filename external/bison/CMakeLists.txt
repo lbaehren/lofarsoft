@@ -24,7 +24,7 @@ option (BISON_VERBOSE_BUILD     "Be verbose during build process?"          NO  
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
 find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
+  PATHS
   ${BISON_SOURCE_DIR}
   ${BISON_SOURCE_DIR}/..
   ${BISON_SOURCE_DIR}/../..
@@ -51,19 +51,19 @@ endif (bison_executable)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
-  
+
   include (ExternalProject)
 
   set (BISON_VERSION     "2.4")
   set (BISON_DIRECTORY   "bison-${BISON_VERSION}")
   set (BISON_TAR_ARCHIVE "${BISON_DIRECTORY}.tar.gz")
   set (BISON_URL         "http://ftp.gnu.org/gnu/bison/${BISON_TAR_ARCHIVE}")
-  
+
   ##__________________________________________________________________
   ## Build the project
 
   find_file (BISON_SOURCE ${BISON_TAR_ARCHIVE} ${BISON_SOURCE_DIR})
-  
+
   if (NOT BISON_SOURCE)
     set (BISON_SOURCE ${BISON_URL})
   endif (NOT BISON_SOURCE)
@@ -71,18 +71,20 @@ if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
   if (BISON_SOURCE)
     ExternalProject_Add (bison
       PREFIX ${BISON_BINARY_DIR}
-      DOWNLOAD_DIR ${BISON_BINARY_DIR}
-      SOURCE_DIR ${BISON_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
       URL ${BISON_SOURCE}
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${BISON_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
+      BUILD_COMMAND make
+      INSTALL_COMMAND make install
       )
   else (BISON_SOURCE)
     message (WARNING "[Bison] Unable to build project - missing source!")
   endif (BISON_SOURCE)
-  
+
   ## <-- end build condition ----------------------------------------------------->
-  
+
 else (NOT HAVE_BISON OR BISON_FORCE_BUILD)
   add_custom_target (bison
     WORKING_DIRECTORY ${BISON_BINARY_DIR}
