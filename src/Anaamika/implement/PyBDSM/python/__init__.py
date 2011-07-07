@@ -156,7 +156,28 @@ def process_image(input_file, **kwargs):
     """
     from interface import load_pars
     from image import Image
-    
+
+    # As a temporary measure, until people are used to the new
+    # interactive shell, check for deprecated keywords:
+    for i, key in enumerate(kwargs):
+        if key == 'extended':
+            print 'The "extended" parameter has been removed. To replicate its effects, set:\n'\
+                "rms_map=False, mean_map='const', and atrous_do=True"
+            return
+        if key == 'use_rms_map':
+            print 'The "use_rms_map" parameter has been replaced with "rms_map"'
+            return
+        if key == 'thresh_gaus':
+            print 'The "thresh_gaus" parameter has been removed. To replicate its effects, set:\n'\
+                "mean_map='zero'"
+            return
+        if key == 'rms':
+            print 'The "rms" parameter has been replaced with "rms_value"'
+            return
+        if key == 'gaussian_maxsize':
+            print 'The "gaussian_maxsize" parameter has been replaced with "flag_maxsize_bm"'
+            return
+            
     # Try to load input_file assuming it's a parameter save file.
     # load_pars returns None if this doesn't work.
     img = load_pars(input_file)
