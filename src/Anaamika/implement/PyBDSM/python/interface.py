@@ -241,7 +241,10 @@ def print_opts(grouped_opts_list, img, banner=None):
       [25 blank spaces][at least 47 spaces for doc]
 
     As in casapy, print non-defaults in blue, options with suboptions in
-    47m and suboptions in green.
+    47m and suboptions in green. Option Values are printed in bold, to help
+    to distinguish them from the descriptions. NOTE: in iTerm, one needs
+    to set the bold color in the profiles to white, as it defaults to red,
+    which is a bit hard on the eyes in this case.
     """
     from image import Image
     import os
@@ -253,7 +256,7 @@ def print_opts(grouped_opts_list, img, banner=None):
     ec = '\033[0;47m' # expandable option text color
     sc = '\033[0;32m' # Green: suboption text color
     nc = '\033[0m'    # normal text color
-    ncb = '\033[1m'    # normal text color
+    ncb = '\033[1m'    # normal text color bold
 
     if banner != None:
         print banner
@@ -282,7 +285,7 @@ def print_opts(grouped_opts_list, img, banner=None):
                     # Since we can check whether filename is valid,
                     # do so here and print in red if not.
                     if not os.path.exists(val):
-                        valstr = '\033[31;1m' + repr(val) + v2
+                        valstr = '\033[31;1m' + repr(val) + nc
                 width_par_val = max(minwidth, len(k) + len(str(val)) + 5)
             else:
                 if isinstance(val, float):

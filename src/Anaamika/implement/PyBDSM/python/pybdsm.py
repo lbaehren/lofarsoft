@@ -113,7 +113,7 @@ def tget(filename=None):
         if os.path.isfile('pybdsm.last'):
             filename = 'pybdsm.last'
         else:
-            print '\033[31;1mERROR\033[0m: No file name given. '\
+            print '\033[31;1mERROR\033[0m: No file name given and "pybdsm.last" not found.\n'\
                 'Please specify a file to load.'
             return
         

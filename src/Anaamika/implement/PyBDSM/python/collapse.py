@@ -141,6 +141,12 @@ class Op_collapse(Op):
       img.masked = masked
       if masked:
           img.mask = mask
+      image = img.ch0
+      img.blankpix = N.sum(mask)
+      frac_blank = round(float(img.blankpix)/float(image.shape[0]*image.shape[1]),3)
+      mylogger.userinfo(mylog, "Blank pixels in the image", str(img.blankpix)
+                        +' ('+str(frac_blank*100.0)+'%)')
+
  
 ########################################################################################
 

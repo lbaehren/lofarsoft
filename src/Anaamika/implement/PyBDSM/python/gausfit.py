@@ -57,15 +57,12 @@ class Op_gausfit(Op):
         maxsize = opts.splitisl_maxsize
         if maxsize < min_maxsize: maxsize = min_maxsize
 
-        # if not opts.verbose_fitting: sys.stdout.write("PyBDSM log>  PyBDSM."+img.log+\
-        #          "Gausfit           :: Fitting Island number ...     ")
         for idx, isl in enumerate(img.islands):
           a = time()
-          if opts.verbose_fitting:
-            print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active)
-
           size = isl.size_active/img.pixel_beamarea*2.0   # 2.0 roughly corrects for thresh_isl
-
+          if opts.verbose_fitting:
+            print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active),'; size = ',size
+            
           if size > maxsize and opts.split_isl:
 
             tosplit = misc.isl_tosplit(isl, img)
@@ -75,7 +72,6 @@ class Op_gausfit(Op):
               if opts.verbose_fitting:
                 print 'SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
               for i_sub in range(n_subisl):
-                #print 'sub isl ',i_sub
                 islcp = isl.copy(img)
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
                 islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
@@ -103,7 +99,6 @@ class Op_gausfit(Op):
               if bar.started: bar.increment()
 
           else:
-            isl.islmean = 0.0
             gaul, fgaul = self.fit_island(isl, opts, img)
             if bar.started: bar.increment()
 

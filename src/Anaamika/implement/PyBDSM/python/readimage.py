@@ -30,7 +30,7 @@ Image.freq_pars = Tuple((0.0, 0.0, 0.0),
                         doc="Frequency prarmeters from the header: (crval, cdelt, crpix)")
 Image.waveletimage = Bool(doc="Whether a wavelet transform image of not")
 Image.pixel_beamarea = Float(doc="Beam area in pixel")
-Image.equinox = Float(doc='Equinox of input image from header')
+Image.equinox = Float(2000.0, doc='Equinox of input image from header')
 
 class Op_readimage(Op):
     """Image file loader
@@ -109,7 +109,11 @@ class Op_readimage(Op):
         self.init_beam(img)
         self.init_freq(img)
         year, code = self.get_equinox(img)
-        img.equinox = year
+        if year == None:
+            mylog.info('Equinox not found in image header. Assuming J2000.')
+            img.equinox = 2000.0
+        else:
+            img.equinox = year
 
         # Try to trim common extensions from filename
         root, ext = os.path.splitext(img.opts.filename)
@@ -260,11 +264,17 @@ class Op_readimage(Op):
                     found = True
                 except:
                     ### try see if AIPS as put the beam in HISTORY as usual
-                    for h in hdr.get_history():
-                      if N.all(['BMAJ' in h, 'BMIN' in h, 'BPA' in h, 'CLEAN' in h]): 
-                        dum, dum, dum, bmaj, dum, bmin, dum, bpa = h.split()
+                   for h in hdr.get_history():
+                      if N.all(['BMAJ' in h, 'BMIN' in h, 'BPA' in h, 'CLEAN' in h]):
+                        try:
+                            dum, dum, dum, bmaj, dum, bmin, dum, bpa = h.split()
+                        except ValueError:
+                            try:
+                                print h.split()
+                                dum, dum, bmaj, dum, bmin, dum, bpa, dum, dum = h.split()
+                            except ValueError:
+                                break    
                         beam = (float(bmaj), float(bmin), float(bpa))
-                        img.opts.beam = beam
                         found = True
             if not found: raise RuntimeError("No beam information found in image header.")
 

@@ -9,6 +9,7 @@ import _cbdsm
 from image import *
 from math import pi, sqrt, log
 import const
+import functions as func
 import mylogger
 
 ### Insert attributes into Image class
@@ -27,7 +28,6 @@ Image.minpix_coord = Tuple(Int(), Int(),
                            doc="Coordinates of minimal pixel in the image")
 Image.max_value = Float(doc="Maximal pixel in the image")
 Image.min_value = Float(doc="Minimal pixel in the image")
-
 Image.omega = Float(doc="Solid angle covered by the image")
 confused = String(doc = 'confused image or not')
 
@@ -54,7 +54,11 @@ class Op_preprocess(Op):
           ### basic stats
           mean, rms, cmean, crms, cnt = _cbdsm.bstat(image, mask, kappa)
           if cnt > 198: cmean = mean; crms = rms
-          if pol == 'I': 
+          if pol == 'I':
+            if func.approx_equal(crms, 0.0, rel=None):
+                raise RuntimeError('Clipped rms appears to be zero. Check for regions '\
+                                       'with values of 0 and\nblank them (with NaNs) '\
+                                       'or use trim_box to exclude them.')
             img.raw_mean    = mean
             img.raw_rms     = rms
             img.clipped_mean= cmean
@@ -71,10 +75,6 @@ class Op_preprocess(Op):
 
         image = img.ch0
         # blank pixels; check if pixels are outside the universe
-        img.blankpix = N.sum(N.isnan(image))
-        frac_blank = round(float(img.blankpix)/float(image.shape[0]*image.shape[1]),3)
-        mylogger.userinfo(mylog, "Blank pixels in the image", str(img.blankpix)
-                          +' ('+str(frac_blank*100.0)+'%)')
         if opts.check_outsideuniv:
           mylogger.userinfo(mylog, "Determining the pixels outside the universe")
           noutside_univ = self.outside_univ(img)
@@ -145,8 +145,8 @@ class Op_preprocess(Op):
         if opts.rms_box is None:
             # 'size' of brightest source
             kappa1 = 3.0
-            brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* \
-                 sqrt(2.*log(img.max_value/(kappa1*crms)))))
+            brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* 
+                                   sqrt(2.*log(img.max_value/(kappa1*crms)))))
             # atleast 4 boxes on each side
             largesize = int(round(min(shape)/4.))
             intersrcsep = int(round(sqrt(img.bmpersrc_th)*2.* \
