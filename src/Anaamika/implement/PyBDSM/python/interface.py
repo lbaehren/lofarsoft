@@ -589,7 +589,7 @@ def write_ascii_gaul(img, filename=None, incl_wavelet=True, sort_by='indx',
     import os
 
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
-    outl, outn, patl = list_and_sort_gaussians(img, patch=None)
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
     if incl_wavelet and hasattr(img, 'atrous_gaussians'):
         wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
                                                             wavelet=True,
@@ -631,23 +631,49 @@ def write_casa_gaul(img, filename=None, incl_wavelet=True, clobber=False):
     f.close()
     return filename
 
-def write_fits_gaul(img, filename=None, incl_wavelet=True, clobber=False):
+def write_fits_gaul(img, filename=None, sort_by='indx',
+                    incl_wavelet=True, clobber=False):
     """ Write as FITS binary table.
 
     incl_wavelet not yet implemented.
     """
     import mylogger
-    import output
-    import fbdsm_fitstable_stuff as stuff
     import pyfits
     import os
+    import numpy as N
 
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
-    cnames, cunit, cformat = stuff.cnames, stuff.cunit, stuff.cformat
-    fbdsm_list = output.pybdsm2fbdsm(img)
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True,
+                                                            sort_by=sort_by)
+        outl += wavoutl
+    cnames = N.array(['Gaus_id','Isl_id', 'Souce_id', 'Wave_id', 'Total', 
+                  'E_Total','Peak','E_Peak','RA','E_RA', 
+                  'DEC','E_DEC','Xposn','E_xposn','Yposn','E_yposn','Bmaj', 
+                  'E_Bmaj','Bmin','E_Bmin','Bpa','E_Bpa', 
+                  'DC_Bmaj','E_DC_Bmaj','DC_Bmin', 
+                  'E_DC_Bmin','DC_Bpa','E_DC_Bpa','I_rms', 
+                  'I_mean','I_R_rms','I_R_mean','S_code','Spec_indx',
+                  'Err_spec_indx'])
+    cformat = N.array(['1J','1J','1J','1J','1D',
+                       '1D','1D','1D','1D','1D',
+                       '1D','1D','1D','1D','1D','1D','1D',
+                       '1D','1D','1D','1D','1D',
+                       '1D','1D','1D',
+                       '1D','1D','1D','1D',
+                       '1D','1D','1D','1A','1D','1D'])
+    cunit = N.array([' ',' ',' ',' ','Jy','Jy','Jy/beam','Jy/beam','deg','deg','deg', 
+                     'deg','pix','pix','pix','pix','arcsec','arcsec','arcsec', 
+                     'arcsec','deg','deg','arcsec','arcsec','arcsec','arcsec', 
+                     'deg','deg','Jy/beam','Jy/beam','Jy/beam','Jy/beam',' ',
+                     ' ',' '])
+    out_list = make_fits_list(img, outl)
     col_list = []
-    for ind, col in enumerate(fbdsm_list):
-      list1 = pyfits.Column(name=cnames[ind], format=cformat[ind], unit=cunit[ind], array=fbdsm_list[ind])
+    for ind, col in enumerate(out_list):
+      list1 = pyfits.Column(name=cnames[ind], format=cformat[ind],
+                            unit=cunit[ind], array=out_list[ind])
       col_list.append(list1)
     tbhdu = pyfits.new_table(col_list)
     if filename == None:
@@ -694,7 +720,8 @@ def write_kvis_ann(img, filename=None, sort_by='indx', incl_wavelet=True,
     f.close()
     return filename
 
-def write_star(img, filename=None, sort_by='indx', incl_wavelet=False):
+def write_star(img, filename=None, sort_by='indx', incl_wavelet=False,
+               clobber=False):
     from output import ra2hhmmss, dec2ddmmss
     import mylogger
     import os
@@ -805,7 +832,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
             elif sort_by == 'index':
                 # Sort Gaussians by index within each source
                 indx = range(len(gausindx))
-                indx.sort(lambda x,y: cmp(gausindx[x],gausindx[y]), reverse=True)
+                indx.sort(lambda x,y: cmp(gausindx[x],gausindx[y]), reverse=False)
             else:
                 # Unrecognized property --> Don't sort
                 indx = range(len(gausindx))
@@ -839,7 +866,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
         elif sort_by == 'index':
             # Sort by Gaussian index
             indx = range(len(gausindx))
-            indx.sort(lambda x,y: cmp(gausindx[x],gausindx[y]), reverse=True)
+            indx.sort(lambda x,y: cmp(gausindx[x],gausindx[y]), reverse=False)
         else:
             # Unrecognized property --> Don't sort
             indx = range(len(gausindx))
@@ -858,7 +885,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
         elif sort_by == 'index':
             # Sort by source index
             indx = range(len(patchindx))
-            indx.sort(lambda x,y: cmp(patchindx[x],patchindx[y]), reverse=True)
+            indx.sort(lambda x,y: cmp(patchindx[x],patchindx[y]), reverse=False)
         else:
             # Unrecognized property --> Don't sort
             indx = range(len(gausindx))
@@ -910,7 +937,6 @@ def make_bbs_str(img, glist, gnames, patchnames):
           decsign = ('-' if dec[3] < 0 else '+')
           sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
           total = str("%.3e" % (g.total_flux))
-          pol = '0.0, 0.0, 0.0'
           deconv = g.deconv_size_sky
           if deconv[0] == 0.0  and deconv[1] == 0.0:
               stype = 'POINT'
@@ -928,15 +954,26 @@ def make_bbs_str(img, glist, gnames, patchnames):
               if spin1 != None:
                   specin = str("%.3e" % (spin1[1]))
           sep = ', '
+          if img.opts.polarisation_do:
+              src = get_src(img.source, g.source_id)
+              Q_flux = str("%.3e" % (src.total_flux_Q))
+              U_flux = str("%.3e" % (src.total_flux_U))
+              V_flux = str("%.3e" % (src.total_flux_V))
+          else:
+              Q_flux = '0.0'
+              U_flux = '0.0'
+              V_flux = '0.0'
           if patch_name == None:
               outstr_list.append(src_name + sep + stype + sep + sra + sep +
-                                 sdec + sep + total + sep + pol + sep +
+                                 sdec + sep + total + sep + Q_flux + sep +
+                                 U_flux + sep + V_flux + sep +
                                  deconvstr + sep + freq + sep +
                                  '[' + specin + ']\n')
           else:
               outstr_list.append(src_name + sep + stype + sep + patch_name +
                                  sep + sra + sep + sdec + sep + total + sep +
-                                 pol + sep + deconvstr + sep + freq + sep +
+                                 Q_flux + sep + U_flux + sep + V_flux + sep +
+                                 deconvstr + sep + freq + sep +
                                  '[' + specin + ']\n') 
     return outstr_list
 
@@ -1000,28 +1037,30 @@ def make_ascii_str(img, glist):
     outstr_list.append('# Reference frequency : %s Hz\n' % freq)
     outstr_list.append('# Equinox : %s \n\n' % img.equinox)
     if img.opts.spectralindex_do:
-        outstr_list.append('#  Gaul_id  Island_id  Wavelet_id  Flag Total_flux  '\
-                               'Err_total_flux  Peak_flux  Err_peak_flux  '\
-                               'Spec_indx Err_spec_indx  RA  Err_RA  '\
-                               'DEC  Err_DEC  Xpos  Err_xpos  '\
-                               'Ypos  Err_ypos  Bmaj_fw  '\
-                               'Err_bmaj  Bmin_fw  Err_bmin  Bpa  '\
-                               'Err_bpa  Bmaj_fw_deconv  '\
-                               'Err_bmaj_deconv  Bmin_fw_deconv  Err_bmin_deconv  '\
-                               'Bpa_deconv  Err_bpa_deconv\n')
+        outstr_list.append('#  Gaus_id  Isl_id  Source_id  Wave_id  Total  '\
+                               'E_Total  Peak  E_Peak  '\
+                               'RA  E_RA  DEC  E_DEC  Xposn  E_Xposn  '\
+                               'Yposn  E_Yposn  Bmaj  '\
+                               'E_Bmaj  Bmin  E_Bmin  Bpa  '\
+                               'E_Bpa  DC_Bmaj E_DC_Bmaj  '\
+                               'DC_Bmin  E_DC_Bmin  '\
+                               'DC_Bpa  E_DC_Bpa  I_rms  I_mean  I_R_rms  '\
+                               'I_R_mean  S_code  Spec_indx  Err_spec_indx\n')
     else:           
-        outstr_list.append('#  Gaul_id  Island_id  Wavelet_id  Flag  Total_flux  '\
-                               'Err_total_flux  Peak_flux  Err_peak_flux  '\
-                               'RA  Err_RA  DEC  Err_DEC  Xpos  '\
-                               'Err_xpos  Ypos  Err_ypos  Bmaj_fw  '\
-                               'Err_bmaj  Bmin_fw  Err_bmin  Bpa  Err_bpa  '\
-                               'Bmaj_fw_deconv  '\
-                               'Err_bmaj_deconv  Bmin_fw_deconv  Err_bmin_deconv  '\
-                               'Bpa_deconv  Err_bpa_deconv\n')
+        outstr_list.append('#   Gaus_id  Isl_id  Source_id  Wave_id  Total  '\
+                               'E_Total  Peak  E_Peak  '\
+                               'RA  E_RA  DEC  E_DEC  Xposn  E_Xposn  '\
+                               'Yposn  E_Yposn  Bmaj  '\
+                               'E_Bmaj  Bmin  E_Bmin  Bpa  '\
+                               'E_Bpa  DC_Bmaj E_DC_Bmaj  '\
+                               'DC_Bmin  E_DC_Bmin  '\
+                               'DC_Bpa  E_DC_Bpa  I_rms  I_mean  I_R_rms  '\
+                               'I_R_mean  S_code\n')
     for g in glist[0]:
         gidx = g.gaus_num-1  # python numbering
         iidx = g.island_id  # python numbering
         widx = g.wavelet_j
+        sidx = g.source_id
         F = g.flag
         A = g.peak_flux
         T = g.total_flux
@@ -1033,8 +1072,12 @@ def make_ascii_str(img, glist):
         eT = g.total_fluxE
         era, edec = g.centre_skyE
         ex, ey = g.centre_pixE
+        irms = g.rms
+        imean = g.mean
         eshape = g.size_skyE
         eshape_deconv = g.deconv_size_skyE
+        src = img.source[sidx]
+        scode = src.code
         if img.opts.spectralindex_do:
             spin1 = g.spin1
             espin1 = g.espin1
@@ -1044,30 +1087,90 @@ def make_ascii_str(img, glist):
             else:                       
                 specin = spin1[1]
                 especin = espin1[1]
-            outstr_list.append("%4d  %4d  %4d  %d    %10f %10f   %10f %10f  %10f %10f " \
-                                   "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
-                                   "%10f %10f   %10f %10f   %10f %10f " \
-                                   "%10f %10f   %10f %10f   %10f %10f\n" % 
-                               (gidx, iidx, widx, F,    T, eT,     A, eA, specin, especin,
-                                ra, era,     dec, edec,    x, ex,  y, ey, 
+            outstr_list.append("%4d  %4d  %4d   %4d   %10f  %10f  %10f  %10f  %10f  %10f " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %2s   %10f  %10f\n" % 
+                               (gidx, iidx, sidx, widx, T, eT, A, eA,
+                                ra, era, dec, edec, x, ex,  y, ey, 
                                 shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2],
                                 shape_deconv[0], eshape_deconv[0], shape_deconv[1],
-                                eshape_deconv[1],  shape_deconv[2], eshape_deconv[2]))
+                                eshape_deconv[1],  shape_deconv[2], eshape_deconv[2], irms,
+                                imean, irms, imean, scode, specin, especin))
         else:                
-            outstr_list.append("%4d  %4d  %4d  %d    %10f %10f   %10f %10f  " \
-                                   "%10f %10f   %10f %10f   %10f %10f   %10f %10f   " \
-                                   "%10f %10f   %10f %10f   %10f %10f  " \
-                                   "%10f %10f   %10f %10f   %10f %10f\n" % 
-                               (gidx, iidx, widx, F,    T, eT,     A, eA, 
-                                ra, era,     dec, edec,    x, ex,  y, ey, 
+            outstr_list.append("%4d  %4d  %4d   %4d   %10f  %10f  %10f  %10f  %10f  %10f " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %2s\n" % 
+                               (gidx, iidx, sidx, widx, T, eT, A, eA,
+                                ra, era, dec, edec, x, ex,  y, ey, 
                                 shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2],
                                 shape_deconv[0], eshape_deconv[0], shape_deconv[1],
-                                eshape_deconv[1],  shape_deconv[2], eshape_deconv[2]))
+                                eshape_deconv[1],  shape_deconv[2], eshape_deconv[2], irms,
+                                imean, irms, imean, scode))
     return outstr_list
         
+def make_fits_list(img, glist):
+    import functions as func
+
+    out_list = []
+    for g in glist[0]:
+        gidx = g.gaus_num
+        iidx = g.island_id+1
+        widx = g.wavelet_j
+        A = g.peak_flux
+        T = g.total_flux
+        ra, dec = g.centre_sky
+        x, y = g.centre_pix
+        shape = g.size_sky
+        deconv_shape = g.deconv_size_sky
+        eA = g.peak_fluxE
+        eT = g.total_fluxE
+        era, edec = g.centre_skyE
+        ex, ey = g.centre_pixE
+        eshape = g.size_skyE
+        deconv_eshape = g.deconv_size_skyE
+        isl_idx = g.island_id
+        isl = img.islands[isl_idx]
+        isl_rms = isl.rms
+        isl_av = isl.mean
+        sidx = g.source_id
+        src = img.source[sidx]
+        scode = src.code
+        src_rms = src.rms_isl
+        src_av = isl.mean
+        flag = g.flag
+        grms = g.rms
+        x, y = g.centre_pix
+        xsize, ysize, ang = g.size_pix # FWHM
+    
+        specin = 0.0
+        especin = 0.0
+        if img.opts.spectralindex_do:
+            spin1 = g.spin1
+            espin1 = g.espin1
+            if spin1 == None:
+                specin = 0.0
+                especin = 0.0
+            else:                       
+                specin = spin1[1]
+                especin = espin1[1]
+
+        list1 = [gidx, iidx, widx, sidx, T, eT, A, eA, ra, era, dec, edec, x, ex, y,
+                 ey, shape[0], eshape[0], shape[1], eshape[1], shape[2],
+                 eshape[2], deconv_shape[0], deconv_eshape[0],
+                 deconv_shape[1], deconv_eshape[1], deconv_shape[2],
+                 deconv_eshape[2], src_rms, src_av, isl_rms, isl_av, scode,
+                 specin, especin]
+        out_list.append(list1)
+    out_list = func.trans_gaul(out_list)
+    return out_list
 
 def make_casa_str(img, glist):
     """Makes a list of string entries for a casa clean box file."""
+    import functions as func
     outstr_list = []
     sep = ' '
     scale = 2.0

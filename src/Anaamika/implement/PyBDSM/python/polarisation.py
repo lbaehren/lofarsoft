@@ -13,6 +13,7 @@ from gaul2srl import *
 import mylogger
 import numpy as N
 import functions as func
+import statusbar
 
 ### Insert attributes into Source class
 Source.total_flux_Q        = Float(doc="Total flux(Jy), Stokes Q")
@@ -55,6 +56,9 @@ class Op_polarisation(Op):
           # Get number of pixels per beam from img.beam (gives FWHM in deg) and img.beam2pix (deg->pix)
           gfactor = 2.0 * N.sqrt(2.0 * N.log(2.0))
           pixels_per_beam = 2.0 * N.pi * (img.beam2pix(img.beam)[0] * img.beam2pix(img.beam)[1]) / gfactor**2
+          bar = statusbar.StatusBar('Calculating polarisation properties ....  : ', 0, img.nsrc)
+          if img.opts.quiet == False:
+              bar.start()
 
           for isl in img.islands:
             nsrc_in_island = len(isl.source)
@@ -129,7 +133,9 @@ class Op_polarisation(Op):
               src.tpol_fraction_err = tpol_frac_err
               src.lpol_angle = lpol_ang
               src.lpol_angle_err = lpol_ang_err
-              
+              if bar.started:
+                  bar.increment()
+
 
   ####################################################################################
     def calc_lpol_fraction(self, stokes, err):

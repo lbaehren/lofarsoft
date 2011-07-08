@@ -9,7 +9,7 @@ import inspect
 
 ###############################################################################
 # Functions needed only in the custom IPython shell are defined here. Other
-# functions need by both the custom shell and normal python or IPython
+# functions used by both the custom shell and normal Python or IPython
 # environments are defined in interface.py.
 #
 # Before starting the IPython shell, we need to define all the functions and
@@ -251,7 +251,10 @@ def _set_current_cmd(cmd):
 # specified arguments to the appropriate Image method. Here we also
 # define the detailed doc strings used by help, and, after each task
 # definition, we define its list of arguments and whether it should
-# use the opts 'group' attribute, both needed when inp is called. 
+# use the opts 'group' attribute, both needed when inp is called. If
+# a new parameter is added to a task, it needs to be added to opts.py
+# and to the list of arguments for the task below (the "arg_list")
+# attribute.
 def process_image(**kwargs):
     """Find and measure sources in an image.
 
@@ -393,7 +396,59 @@ def write_gaul(**kwargs):
 
     For more information about a parameter, use help.  E.g.,
       > help 'bbs_patches'
-                     
+
+    The ASCII and FITS output files will contain the following columns:
+    
+      1. Gaus_id - Gaussian id number : starting from zero.
+      2. Isl_id - Island id number : the id of the island the Gaussian
+         belongs to.
+      3. Source_id - Source id number : the id of the source the Gaussian
+         is grouped into. Note that if the Gaussians are not grouped into
+         sources, they have source id = 0 and source code = 'X'.
+      4. Wave_id - Wavelet id : For the original image, this is 0 and for
+         the rest, is the wavelet order of the image.
+      5. Total - Total flux, in Jy.
+      6. E_Total - Error in total flux, in Jy.
+      7. Peak - Peak flux density, in Jy/beam.
+      8. E_Peak - Error in peak flux density, in Jy/beam.
+      9. RA - R.A. of the centre of the Gaussian, in degrees.
+     10. E_RA - Error in R.A. of the centre of the Gaussian, in degrees.
+     11. Dec - Dec of the centre of the Gaussian, in degrees.
+     12. E_Dec - Error in Dec of the centre of the Gaussian, in degrees.
+     13. Xposn - x-position of the centre of the Gaussian, in pixels.
+     14. E_Xposn - Error in x-position of the centre of the Gaussian,
+         in pixels.
+     15. Yposn - y-position of the centre of the Gaussian, in pixels.
+     16. E_Yposn - Error in y-position of the centre of the Gaussian,
+         in pixels.
+     17. Bmaj - Major axis FWHM of fitted Gaussian, in degrees.
+     18. E_Bmaj - Error in major axis FWHM of fitted Gaussian, in degrees.
+     19. Bmin - Minor axis FWHM of fitted Gaussian, in degrees.
+     20. E_Bmin - Error in minor axis FWHM of fitted Gaussian, in degrees.
+     21. Bpa - Position angle of fitted Gaussian, in degrees.
+     22. E_Bpa - Error in position angle of fitted Gaussian, in degrees.
+     23. DC Bmaj - Deconvolved major axis FWHM of fitted Gaussian, in degrees.
+         Zero if unresolved.
+     24. E_DC_Bmaj - Error in deconvolved major axis FWHM of fitted Gaussian,
+         in degrees.
+     25. DC Bmin - Deconvolved minor axis FWHM of fitted Gaussian, in degrees.
+         Zero if unresolved.
+     26. E_DC_Bmin - Error in deconvolved minor axis FWHM of fitted Gaussian,
+         in degrees.
+     27. DC Bpa - Deconvolved position angle of fitted Gaussian, in degrees.
+     28. E_DC_Bpa - Error in deconvolved position angle of fitted Gaussian,
+         in degrees.
+     29. I_rms - The rms for the island, taken from the background rms image,
+         in Jy/beam.
+     30. I_mean - The mean for the island, taken from the background rms
+         image, in Jy/beam.
+     31. I_R_rms - The residual rms in the island after Gaussian subtraction,
+         in Jy/beam.
+     32. I_R_mean - The residual mean in the island after Gaussian
+         subtraction, in Jy/beam.
+     33. S_code - The code ('S', 'C' or 'M') of the source to which the
+         Gaussian belongs
+     
     """
     global _img
     success = _set_pars_from_prompt()
@@ -491,7 +546,7 @@ pydoc.help = bdsmDocHelper(sys.stdin, sys.stdout)
 
     
 # Now run the IPython shell with this namespace and the customisations
-# in the ipy_conf.py file
+# in the ipy_user_conf.py file
 _set_current_cmd(process_image)
 bdsm_path = bdsm.__file__
 bdsm_dir = bdsm_path[:-12] # strip "__init__.pyc"

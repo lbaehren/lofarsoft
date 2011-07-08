@@ -635,6 +635,7 @@ class Gaussian(object):
         self.size_pixE = errors[3:6]
         self.size_skyE = img.pix2beam(errors[3:6])
         self.rms = img.islands[isl_idx].rms
+        self.mean = img.islands[isl_idx].mean
 
         # func.deconv, based on AIPS DECONV.FOR, gives a lot of
         # 1-D Gaussians. The Miriad algorithm in func.deconv2 does
