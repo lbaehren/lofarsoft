@@ -457,7 +457,7 @@ class obsinfo:
                         	self.FE = "+"
 
 	        # getting info about the pointing
-        	cmd="grep 'Beam\[0\].angle1' %s | grep -v AnaBeam" % (self.parset,)
+        	cmd="grep 'Observation.Beam\[0\].angle1' %s | grep -v AnaBeam" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status)>0:
                 	# RA info exists in parset file
@@ -470,7 +470,7 @@ class obsinfo:
                 	ram=int((rahours-rah)*60.)
                 	self.rastring="%02d%02d" % (rah, ram)
 
-        	cmd="grep 'Beam\[0\].angle2' %s | grep -v AnaBeam" % (self.parset,)
+        	cmd="grep 'Observation.Beam\[0\].angle2' %s | grep -v AnaBeam" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status)>0:
                 	# DEC info exists in parset file
