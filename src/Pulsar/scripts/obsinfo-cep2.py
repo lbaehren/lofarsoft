@@ -908,6 +908,8 @@ class outputInfo:
 			self.colspan = 12
 
 		# Compiling obs setup ascii and html strings
+		obssetup=""
+		obssetup_html=""
 		if self.comment == "":
 			if self.oi.nrRings > 0:
 				obssetup="Station_Beams:%d|TA_beams:%d[%d_rings,%.3f_deg]|Clock:%d_MHz|CentrFreq:%.3f_MHz|BW:%.3f_MHz|Subbands:%d[%s,%f_kHz]|Channels:%d|SamplingTime:%.3f_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
@@ -915,9 +917,6 @@ class outputInfo:
 			else:
 				obssetup="Station_Beams:%d|TA_beams:%d|Clock:%d_MHz|CentrFreq:%.3f_MHz|BW:%.3f_MHz|Subbands:%d[%s,%f_kHz]|Channels:%d|SamplingTime:%.3f_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
 				obssetup_html="Station Beams: %d<br>TA beams: %d<br>Clock: %d MHz<br>Center Freq: %.3f MHz<br>BW: %.3f MHz<br>Subbands: %d [%s, %f kHz]<br>Channels: %d<br>Sampling Time: %.3f ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-		else:
-			obssetup=""
-			obssetup_html=""
 
 		# forming first Info (not html) string
 		if viewtype == "brief":
