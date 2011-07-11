@@ -38,7 +38,7 @@ import os
 def fitbaseline_calc_freqs(self):
     """
     """
-    val=hArray(float,dimensions=[1,self.nbins],name="Frequency",units=("M","Hz"))
+    val=hArray(float,dimensions=[self.nbins],name="Frequency",units=("M","Hz"))
     val.downsample(self.frequency[self.numin_i:self.numax_i])
     return val
 
@@ -113,7 +113,7 @@ class FitBaseline(tasks.Task):
                      output:True},
 
         "rmsfactor":{doc:"Factor above and below the RMS in each bin at which a bin is no longer considered due to too many spikes.",
-                     default:2.0},
+                     default:3.0},
 
         "logfit":{doc:"Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).",
                   default:True},
@@ -242,8 +242,8 @@ class FitBaseline(tasks.Task):
         "spectrum":{doc:"Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"},
 
 
-        "work_frequency":{doc:"Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
-                      default:lambda self:hArray(asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export:False},
+#        "work_frequency":{doc:"Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
+#                      default:lambda self:hArray(asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export:False},
 
         "work_spectrum":{doc:"Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
              default:lambda self:hArray(asvec(self.spectrum),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),export:False},
@@ -268,6 +268,8 @@ class FitBaseline(tasks.Task):
 
         "plot_pause":{default:True,doc:"Pause after every plot?"},
 
+        "plot_antenna":{default:0,doc:"Which antenna to plot?"},
+
         "plot_center":{default:0.5,
                        doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
 
@@ -277,7 +279,7 @@ class FitBaseline(tasks.Task):
         "plot_end":{default:lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),
                     doc:"End plotting before this sample number."},
 
-        "doplot":{doc:"""Plot progress information. If ``value > 1``, plot more information.""",
+        "doplot":{doc:"""Plot progress information. If ``value > 1``, plot more information (the number of leves varies from task to task).""",
                   default:False}
     }
 
@@ -304,8 +306,11 @@ class FitBaseline(tasks.Task):
         self.small_spectrum[...].downsamplespikydata(self.rms[...],self.work_spectrum[...,self.numin_i:self.numax_i],1.0)
         #Plotting
         if self.doplot>2:
-            print "Plotting full spectrum and downsampled spectrum (doplot>=3) - can take some time..."
-            self.work_spectrum[0,self.plot_start:self.plot_end].plot(title="RFI Downsampling")
+            print "Plotting full spectrum of refence antenna and downsampled spectra (doplot>=3) - can take some time..."
+            plt.subplot(2,1,0)
+            self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(title="RFI Downsampling",color="blue",clf=False)
+            self.small_spectrum[self.plot_antenna].plot(xvalues=self.freqs,clf=False,color="red")
+            plt.subplot(2,1,1)
             self.small_spectrum[...].plot(xvalues=self.freqs,clf=False)
             #self.small_spectrum[...].plot(xvalues=self.freqs);
             plt.ioff(); self.plotpause(); #plt.show()
@@ -360,12 +365,19 @@ class FitBaseline(tasks.Task):
         if self.verbose:
             print time.clock()-self.t0,"s: Done fitting baseline."
         if self.doplot:
-            self.clean_bins_y[...,[0]:self.nselected_bins].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins],logplot=False)
+            plt.clf()
+            plt.subplot(2,1,0)
+            self.clean_bins_y[self.plot_antenna,0:self.nselected_bins[self.plot_antenna]].plot(xvalues=self.clean_bins_x[0,0:self.nselected_bins[self.plot_antenna]],logplot=False,color="blue",clf=False)
+            plt.subplot(2,1,1)
+            self.clean_bins_y[...,[0]:self.nselected_bins].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins],logplot=False,clf=False)
             self.clean_bins_y.fill(0.0)
             if self.fittype=="POLY":
                 self.clean_bins_y[...,[0]:self.nselected_bins].polynomial(self.clean_bins_x[...,[0]:self.nselected_bins],self.coeffs[...],self.powers[...])
             else:
                 self.clean_bins_y[...,[0]:self.nselected_bins].bsplinecalc(self.clean_bins_x[...,[0]:(self.nselected_bins)],self.coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+            plt.subplot(2,1,0)
+            self.clean_bins_y[self.plot_antenna,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,color="red",logplot=False)
+            plt.subplot(2,1,1)
             self.clean_bins_y[...,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,logplot=False)
             print "Plotted downsampled and cleaned spectrum with baseline fit."
             self.plotpause(); plt.ion(); #plt.show(); 
@@ -386,7 +398,7 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
      'dim_spectrum',
      'powers',
      'work_spectrum',
-     'work_frequency',
+#     'work_frequency',
      'frequency',
      'numin_val_i',
      'numax_val_i',
@@ -394,6 +406,7 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
      'polyorder',
      'fittype',
      'plotlen',
+     'plot_antenna',
      'plot_start',
      'plot_end',
      'plot_pause',
@@ -403,9 +416,8 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
 CalcBaselineParameters.update({
     "baseline":{doc:"Array containing the calculated baseline with the same dimensions as ``spectrum`` - can be provided as spectrum.par.baseline (will be created if not).",
                 #       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else hArray(float,dimensions=self.spectrum,name="Baseline"),
-                default:None,
-                workarray:True,
-                export:False},
+                default:None
+                },
 
     "addHanning":{default: True,
                   doc:"Add a Hanning filter above ``nu_max`` and below ``nu_min`` to suppress out-of-band emission smoothly."},
@@ -415,7 +427,7 @@ CalcBaselineParameters.update({
     "fittype":{default:lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]},
 
     "work_baseline":{doc:"Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
-             default:lambda self:hArray(asvec(self.baseline),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline,xvalues=self.work_frequency),export:False},
+             default:lambda self:hArray(asvec(self.baseline),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline,xvalues=self.frequency),export:False},
 
     "FitParameters":{doc:"Parameters of the baseline fitting routine.",
                      default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
@@ -478,19 +490,28 @@ class CalcBaseline(tasks.Task):
     """
     Usage::
 
-      >>> CalcBaseline(baseline_array)
+      >>> CalcBaseline(spectrum,par1=...,par2=...)
 
     Calculate a smooth baseline from a set of coefficients that
-    determine the baseline (e.g. as calculated by ``FitBaseline``) and an
+    determine the baseline (e.g., as calculated by :class:FitBaseline) and an
     array of frequencies (which need not be equi-spaced).
 
-    It will return the inverse of the baseline (if ``invert=True``), i.e. what one needs to
-    multiply a measured spectrum with.
+    The frequencies can be provided with the .par.xvalues array of the
+    input spectrum (if available). Otherwise, they have to be
+    explicitly provided.
+
+    The result will be returned in an array ``Task.baseline``. This
+    baseline will also be attached to the .par dict of the input
+    spectrum, i.e. ``spectrum.par.baseline``.
+
+    The task can return the inverse of the baseline (if
+    ``invert=True``), i.e. what one needs to multiply a measured
+    spectrum with.
 
     Note, sometimes the fit can go wrong if ``logfit=True`` the
     interpolation has wiggles. In this case the exponent of a large
     number is calculated, yielding a numerical error. In this case
-    switch set ``logfit=False`` (to see what is going).
+    switch set ``logfit=False`` (to see what is going on).
     """
     parameters=CalcBaselineParameters
 
@@ -516,13 +537,16 @@ class CalcBaseline(tasks.Task):
             self.spectrum.par.baseline=self.baseline
 
         if self.fittype=="POLY":
-            self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.powers[...])
+#            self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.powers[...])
+            self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial(self.frequency[self.numin_i:self.numax_i],self.work_coeffs[...],self.powers[...])
         else:
-            self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+#            self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+            self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.frequency[self.numin_i:self.numax_i],self.work_coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
 
         #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
         #Left end
         if self.addHanning:
+#            import pdb; pdb.set_trace()
             self.height_ends[0,...].copy(self.work_baseline[...,self.numin_i])
             self.height_ends[1,...].copy(self.work_baseline[...,self.numax_i-1])
             self.factor=hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
@@ -540,8 +564,16 @@ class CalcBaseline(tasks.Task):
             self.work_baseline.max(-40)# avoid numerical trouble
             self.work_baseline.exp()
         if self.doplot:
-            self.work_spectrum[0,self.plot_start:self.plot_end].plot()
-            self.work_baseline[0,self.plot_start:self.plot_end].plot(title="Baseline",clf=False)
+            print "#Plotting the calculated baseline of the reference antenna."
+            plt.clf()
+            if self.doplot>1:
+                plt.subplot(2,1,0)
+            self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(color="blue",clf=False)
+            self.work_baseline[self.plot_antenna,self.plot_start:self.plot_end].plot(title="Baseline",color="red",clf=False)
+            if self.doplot>1:
+                print "#Plotting the calculated baselines of all antennas."
+                plt.subplot(2,1,1)
+                self.work_baseline[...,self.plot_start:self.plot_end].plot(title="Baseline",clf=False)
             plt.ioff(); self.plotpause(); #plt.show()
         if self.invert:
             self.work_baseline.inverse() # -> 1/baseline
@@ -560,7 +592,7 @@ ApplyBaselineParameters = dict(
      'FitParameters',
      'spectrum',
      'frequency',
-     'work_frequency',
+#     'work_frequency',
      'work_spectrum',
      'baseline',
      'work_baseline',

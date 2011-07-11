@@ -1,3 +1,11 @@
+2011-07-11 - Rev 8101 - ongoing
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- added testcr4.py to do an almost end-to-end radio-only CR pipeline
+- AverageSpectrum revised to use new data reader
+ 
 2011-07-07 - Rev 8083 - ongoing
 =====================
 

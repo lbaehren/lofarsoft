@@ -125,7 +125,7 @@ class BeamFormer2(tasks.Task):
 
         "doabs":{default:True,doc:"Take the absolute of the tbeam."},
 
-        "smooth_width":{default:True,doc:"Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",unit:"Samples"},
+        "smooth_width":{default:0,doc:"Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",unit:"Samples"},
 
         "newfigure":p_(True,"Create a new figure for plotting for each new instance of the task."),
 

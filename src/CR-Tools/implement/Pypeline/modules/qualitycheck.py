@@ -14,6 +14,8 @@ def CRQualityCheckAntenna(dataarray,
                           meanfactor=3,
                           spikyness=20,
                           spikeexcess=20,
+                          maxpeak=7,
+                          minpeak=False,
                           refblock=None,
                           blockoffset=0,
                           antennaID=None,
@@ -95,6 +97,13 @@ def CRQualityCheckAntenna(dataarray,
     is roughly what one expects from Gaussian noise). In contrast to
     'spikyness' this value cannot be negative.
 
+    *maxpeak* - Maximum height of the maximum in each block (in sigma,
+     i.e. relative to rms) before quality is failed.
+
+    *minpeak* - Maximum depth of the minimum in each block (in sigma,
+     i.e. relative to rms) before quality is failed. If ``False`` take
+     same value as maxpeak.
+
     *refblock* = None - if >=0 use this block as reference for mean/rms to
     calculate limits. For -1 pick one in the first quarter of
     blocks, otherwise take minimum RMS/MEAN in the data array.
@@ -105,7 +114,8 @@ def CRQualityCheckAntenna(dataarray,
 
     *filename* - for output and archiving only
 
-    *count* - an identifier to print in front of flag information (output only)
+    *count* - an identifier to print in front of flag information
+     (output only) to say which chunk of data was worked on.
 
     *verbose* - sets whether or not to print additional
      information. verbose=True only prints when a block is
@@ -117,10 +127,11 @@ def CRQualityCheckAntenna(dataarray,
     nblocksflagged=0
     flaggedblocklist=[]
     noncompliancelist=[]
+    if not minpeak: minpeak=maxpeak
     if not datafile==None:
         if antennaID==None: antennaID=datafile["SELECTED_DIPOLES"][0]
         if date==None: date=datafile["TIME"][0]
-        if observatory==None: observatory=datafile["TELESCOPE"]
+        #if observatory==None: observatory=datafile["TELESCOPE"]
         if observatorymode==None: observatorymode=datafile["ANTENNA_SET"]
         if filename=="": filename=datafile["FILENAME"]
 #Calculate probabilities to find peaks
@@ -147,35 +158,39 @@ def CRQualityCheckAntenna(dataarray,
         lower_limit=Vector(float,nblocks,fill=datamean-datarms*nsigma)
         upper_limit=Vector(float,nblocks,fill=datamean+datarms*nsigma)
     datanpeaks = dataarray[...].countoutside(lower_limit,upper_limit)
+    datamax = Vector(float,copy=dataarray[...].max()) # get the maxima and
+    datamin = Vector(float,copy=dataarray[...].min()) # an mininima in each block (use copy to float, in case dataarray is complex)
+    datamax -= mean; datamax /= rms # relative height (in sigma)  of maximum in data
+    datamin -= mean; datamin /= -rms # relative height (in sigma) of minimum in data
     npeaks=datanpeaks.sum(); peaksexcess=npeaks/npeaksexpected_full
     if verbose>1:
 #        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected,"+/-",npeakserror
-        print "{8} - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma,count)
+        print "{8} - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), Max={9:6.2f}, Min={10:6.2f}, nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma,count,datamax.max(),datamin.max())
     dataNonGaussianity = Vector(float,nblocks)
     dataSpikeExcess = Vector(float,nblocks)
     dataNonGaussianity.sub(datanpeaks,npeaksexpected)
     dataSpikeExcess.div(datanpeaks,npeaksexpected)
     dataNonGaussianity /= npeakserror
-    dataproperties=zip(range(blockoffset,nblocks+blockoffset),datamean,datarms,datanpeaks,dataNonGaussianity,dataSpikeExcess)
+    dataproperties=zip(range(blockoffset,nblocks+blockoffset),datamean,datarms,datanpeaks,dataNonGaussianity,dataSpikeExcess,datamax,datamin)
     if qualitycriteria==None:
         if refblock==-1:
             refblock=nblocks/4 # Take something around the first quarter of the data
         if not refblock==None:
             mean=datamean[refblock]; rms=datarms[refblock];
         if normalize:
-            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),"rms":(1/rmsfactor,rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-1,spikeexcess)}
+            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),"rms":(1/rmsfactor,rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-1,spikeexcess),"max":(-1,maxpeak),"min":(-1,minpeak)}
         else:
-            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),"rms":(rms/rmsfactor,rms*rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-spikeexcess,spikeexcess)}
+            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),"rms":(rms/rmsfactor,rms*rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-spikeexcess,spikeexcess),"max":(-1,maxpeak),"min":(-1,minpeak)}
 #        if verbose:
 #            print "Quality criteria =",qualitycriteria
     for prop in iter(dataproperties):
-        noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4,"spikeexcess":5},qualitycriteria)
+        noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4,"spikeexcess":5,"max":6,"min":7},qualitycriteria)
         if noncompliancelist:
             nblocksflagged+=1
             flaggedblocklist.append(prop[0])
             qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"spikeexcess":prop[5],"flags":noncompliancelist})
             if verbose:
-                print "#Flagged: count=",count,", Block {0:5d}: mean={1: 6.2f}, rel. rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}".format(*prop)," ",noncompliancelist
+                print "#Flagged: chunk=",count,", Block {0:5d}: mean={1: 6.2f}, rel. rms={2:6.1f}, rel. max={6:6.1f}, rel. min={7:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}".format(*prop)," ",noncompliancelist
     return {"filename":filename,"type":"QualityFx","observatory":observatory,"mode":observatorymode,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":qualityflaglist}
 
 

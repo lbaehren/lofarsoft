@@ -292,6 +292,24 @@ BoolVec.__name__="BoolVec"
 ComplexVec.__name__="ComplexVec"
 StringVec.__name__="StringVec"
 
+# Unary Operator:  +
+def Vec_pos(vec1):
+    """
+    Provides the ``+`` operator for a vector (which is its identity: +vec = vec).
+    """
+    return vec1
+
+# Unary Operator:  -
+def Vec_neg(vec1):
+    """
+    Provides the ``-`` operator for a vector. Will return a copy of
+    the vector where all elmements are multiplied by -1.
+    """
+    vecout=vec1.new()
+    vecout.copy(vec1)
+    hNegate(vecout)
+    return vecout
+
 # Operator:  +=
 def Vec_iadd(vec1,vec2):
     """
@@ -468,6 +486,8 @@ for v in hNumericalContainerTypes:
     setattr(v,"__sub__",Vec_sub)
     setattr(v,"__div__",Vec_div)
     setattr(v,"__mul__",Vec_mul)
+    setattr(v,"__pos__",Vec_pos)
+    setattr(v,"__neg__",Vec_neg)
     setattr(v,"__iadd__",Vec_iadd)
     setattr(v,"__imul__",Vec_imul)
     setattr(v,"__idiv__",Vec_idiv)

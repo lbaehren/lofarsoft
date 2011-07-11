@@ -476,7 +476,7 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
 //$ITERATE MFUNC Mul,Add,Div,Sub
 //========================================================================
 
-//$DOCSTRING: Performs a $MFUNC between the two vectors, which is returned in the second vector. If the first vector is shorter it will be applied multiple times.
+//$DOCSTRING: Performs a $MFUNC between the two vectors, returning the output in the second vector (non-standard behaviour). If the first vector is shorter it will be applied multiple times.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME h{$MFUNC}To
 //-----------------------------------------------------------------------
@@ -494,8 +494,18 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
   hSubTo(vecA,vecB) -> vecB=[ vecA[0]-vecB[0], vecA[1]-vecB[1], ..., vecA[n]-vecB[n] ]
   hDivTo(vecA,vecB) -> vecB=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
 
+  
   Example:
-  >>> hMul(vecA,vecB) = vecA.mul(vecB)
+  ::    
+      #Example is for adding operation, mul, div, sub are similar
+      a1=hArray(int,[3,5],fill=range(5))
+      #a1->hArray(int, [3L, 5L], fill=[0,1,2,3,4,0,1,2,3,4,0,1,2,3,4]) # len=15 slice=[0:15])
+
+      a2=hArray(int,[5],fill=0)
+      a1[...].addto(a2)
+
+      #a2 -> hArray(int, [5L], fill=[0,3,6,9,12]) # len=5 slice=[0:5])
+
 */
 template <class Iterin, class Iter>
 void HFPP_FUNC_NAME(const Iterin vec1,const Iterin vec1_end, const Iter vec2,const Iter vec2_end)
@@ -795,11 +805,11 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const 
 
   Description:
 
-  Slice looping will be done over the first argument, i.e. the input/output
-  vector. If the second operand vector is shorter it will be applied
+  Slice looping will be done over the second argument, i.e. vec1. If
+  the second operand vector (vec2) is shorter it will be applied
   multiple times.  To loop over the first argument (i.e., ``vec``) use
-  ``h$MFUNC!CAPSAdd``. To repeatedly
-  add to the output vector, use ``h$MFUNC!CAPSAddSum``.
+  ``h$MFUNC!CAPSAdd``. To repeatedly add to the output vector, use
+  ``h$MFUNC!CAPSAddSum``.
 
   See also:
   h$MFUNC!CAPSAdd, h$MFUNC!CAPSAddSum
@@ -808,7 +818,6 @@ template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
 {
   // Declaration of variables
-  typedef IterValueType T;
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;

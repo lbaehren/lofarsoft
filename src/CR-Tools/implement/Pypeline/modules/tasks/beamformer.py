@@ -69,6 +69,7 @@ def getfile(ws):
     if ws.file_start_number < len(ws.filenames):
         f=open(ws.filenames[ws.file_start_number])
         if ws.lofarmode:
+            print "Setting ANTENNA_SET=",ws.lofarmode,"in the data file!"
             f["ANTENNA_SET"]=ws.lofarmode
         return f
     else:

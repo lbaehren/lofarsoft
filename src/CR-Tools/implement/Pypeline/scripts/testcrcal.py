@@ -3,6 +3,8 @@
 
 #execfile(PYP+'scripts/testcrcal.py')
 
+#tpar delta_nu=5000, doublefft=False,filefilter="~/LOFAR/work/CR/lora-event-1-station-2.h5",maxnchunks=1000,maxnantennas=1,maxblocksflagged=1
+
 
 #file=open("/Users/falcke/LOFAR/work/CR/LORAweekdump--2-15.h5"); file["ANTENNA_SET"]="LBA_INNER"
 file=open("/Users/falcke/LOFAR/work/CR/lora-event-1-station-2.h5"); file["ANTENNA_SET"]="LBA_OUTER"
@@ -11,7 +13,18 @@ file["BLOCKSIZE"]=2**16
 file["BLOCK"]=93
 
 file["SELECTED_DIPOLES"]="odd"
-file["SELECTED_DIPOLES"]=file["SELECTED_DIPOLES"][0:-3] # Take out last two empty antennas
+#file["SELECTED_DIPOLES"]=file["SELECTED_DIPOLES"][0:-3] # Take out last two empty antennas
+
+
+"""
+file["BLOCKSIZE"]=32768
+file["FILESIZE"]
+timeseries_data=file["TIMESERIES_DATA"]
+file=open("/Users/falcke/LOFAR/work/CR/LORAweekdump--2-15.h5"); file["ANTENNA_SET"]="LBA_INNER"
+for i in range(file["DATA_LENGTH"][0]/file["BLOCKSIZE"]):
+    file["BLOCK"]=i
+    timeseries_data.read(file,"TIMESERIES_DATA")
+"""
 
 #Setting some parameters
 selected_dipoles=file["SELECTED_DIPOLES"]
@@ -37,7 +50,7 @@ if pulse.npeaks <= 0:
 
 #Normalize the data which was cut around the main pulse
 pulse.timeseries_data_cut[...]-=pulse.timeseries_data[...].mean()
-pulse.timeseries_data_cut[...]/=pulse.timeseries_data[...].stddev(0)
+#pulse.timeseries_data_cut[...]/=pulse.timeseries_data[...].stddev(0)
 #pulse.timeseries_data_cut[0:2,...].plot()
 
 #Now get the time series and square and smooth it to get power and derive delay from peak in power

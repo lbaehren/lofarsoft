@@ -578,25 +578,25 @@ class DynamicSpectrum(tasks.Task):
         """
         If you see an output line like this::
 
-          # Start antenna = 92 (ID= 17011092) - 4 passes:
-          184 - Mean=  3.98, RMS=  6.35, Npeaks=  211, Nexpected=256.00 (Npeaks/Nexpected=  0.82), nsigma=  2.80, limits=( -2.80,   2.80)
-          185 - Mean=  3.97, RMS=  6.39, Npeaks=  200, Nexpected=256.00 (Npeaks/Nexpected=  0.78), nsigma=  2.80, limits=( -2.80,   2.80)
-          186 - Mean=  3.98, RMS=  6.40, Npeaks=  219, Nexpected=256.00 (Npeaks/Nexpected=  0.86), nsigma=  2.80, limits=( -2.80,   2.80)
-          - Block   514: mean=  0.25, rel. rms=   2.6, npeaks=   16, spikyness=  15.00, spikeexcess= 16.00   ['rms', 'spikeexcess']
+          # Start antenna = 0 (ID= 2000000) - 375 passes:
+          #Flagged: chunk= 0 , Block    14: mean= 121.68, rel. rms= 970.1, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: chunk= 0 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          # Data flagged!
+          # End   antenna = 0  Time = 14.825337 s  nspectraadded = 374 nspectraflagged = 1
 
-        this will tell you that Antenna 17011092 was worked on (the 92nd
-        antenna in the data file) and the 186th chunk (block 514)
-        contained some suspicious data (too many spikes). If you want to
-        inspect this, you can call::
+        this will tell you that Antenna 2000000 was worked on (the 1st
+        antenna in the data file) and the chunk 0 (blocks 14 and 15)
+        contained some suspicious data (with and rms and mean which fluctuated too much). If you want
+        to inspect this, you can call::
 
-          >>> Task.qplot(186)
+          >>> Task.qplot(0)
 
         This will plot the chunk and highlight the first flagged block
-        (#514) in that chunk::
+        (#14) in that chunk::
 
-           >>> Task.qplot(186,1)
+          >>> Task.qplot(186,1)
 
-        would highlight the second flagged block (which does not exist here).
+        would highlight the second flagged block (#15)
 
         If the chunks are too long to be entirely plotted, use::
 

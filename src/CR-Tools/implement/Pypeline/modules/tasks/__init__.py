@@ -43,7 +43,9 @@ The tasks are autmatically load when importing the pycrtools, e.g::
     from pycrtools import *
 
 The list of available tasks can be viewed with 'tlist' and a specific
-task is loaded via ``tload tasknumber`` or ``tload taskname``.
+task is loaded via ``tload tasknumber`` or ``tload taskname``. The
+task stored last will be reloaded when the interactive session is 
+restarted the next time.
 
 In general tasks can then be called in the conventional way simply
 by calling::
@@ -421,7 +423,6 @@ if not os.path.isdir(configdir):
 
 dbfile = configdir+"/"+"task"
 
-
 globals=None
 
 def set_globals(var,val):
@@ -438,7 +439,6 @@ task_list = set()
 
 #list of all loaded tasks
 task_allloaded = {}
-
 
 class TaskInit(type):
     """Metaclass for tasks.

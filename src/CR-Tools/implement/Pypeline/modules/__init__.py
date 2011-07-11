@@ -8,6 +8,7 @@
 from core import *
 import tasks
 import rftools as rf
+import shelve
 
 # Import open function from IO module
 from io import open
@@ -65,27 +66,46 @@ def trun(name,*args,**kwargs):
 
     Run the taks with the given tasknname and with the parameters provided as argument list.
 
-    The task itself will be available via the global variable ``Task``.
+    The task itself will be available via the global variable ``Task`` afterwards.
     """
+    if not name in tasks.task_allloaded.keys():
+        print "ERROR: trun - Task name",name,"unknown. See 'tlist' for full list."
+        return
     tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
     tasks.task_instance=tasks.task_class()
     tasks.set_globals("Task",tasks.task_instance)
     return tasks.task_instance(*args,**kwargs)
 
-def tload(name,get=True,**args):
+def tload(name,get=True,quiet=False,**args):
     """
     Loads a specific task as the current task, you you can start it
     with 'go' and set parameters with 'par x=value'.
 
     One can also provide a number, which refers to the number
     associated with the task when typing 'tlist'.
+
+    The loaded task will be saved and reloaded the next time the
+    program is started.
     """
     if type(name)==int:
+        if name >= len(tasks.task_allloaded.keys()) or (name<0):
+            print "ERROR: tload - Index number",name,"out of range (should be <",len(tasks.task_allloaded.keys()),"). See 'tlist'"
+            return                                                                
         name=tasks.task_allloaded.keys()[name]
+    elif type(name)==str:
+        if not name in tasks.task_allloaded.keys():
+            print "ERROR: tload - Task name",name,"unknown. See 'tlist' for full list."
+            return
+    else:
+        print "ERROR: tload - Task name",name,"unknown - wrong data type (should be string or int). See 'tlist' for full list."
+        return
     tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
     tasks.task_instance=tasks.task_class(**args)
     tasks.set_globals("Task",tasks.task_instance)
-    if get: tget()
+    taskdb = shelve.open(tasks.dbfile)
+    taskdb["last_taskname"]=name
+    taskdb.close()
+    if get: tget(quiet=quiet)
     return tasks.task_instance
 
 def task(*args,**kwargs):
@@ -229,11 +249,14 @@ class tget_class(t_class):
 
     tget 0 (or any unknown name) -> show a list of all available parameter sets
     """
-    def __call__(self,name=""):
+    def __call__(self,name="",quiet=False):
+        if not isinstance(tasks.task_instance,tasks.Task):
+            print "ERROR: No valid task loaded yet - use tload first."
+            return
         found=tasks.task_instance.get(name)
         if found:
             tasks.task_instance.ws.update()
-            tpars(False,False)
+            if not quiet: tpars(False,False)
 
 tget = tget_class()
 
@@ -322,3 +345,9 @@ def tdel(*args):
 for mn in tasks.task_modules:
     m=__import__("pycrtools.tasks",fromlist=[mn])
     setattr(tasks,mn,getattr(m,mn))
+
+taskdb = shelve.open(tasks.dbfile)
+if taskdb.has_key("last_taskname"):
+    print "*** Restoring last task:",taskdb["last_taskname"] 
+    tload(taskdb["last_taskname"],quiet=True)
+taskdb.close()

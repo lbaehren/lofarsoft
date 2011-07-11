@@ -18,8 +18,12 @@ from vector import *
 #  hArray Class Methods/Attributes
 #======================================================================
 
-def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None,header=None):
+def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None,header=None,**kwargs):
     """
+
+    Usage:
+    hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None,header=None,**kwargs)
+    
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
     IntArray(), FloatArray(), ComplexArray(), StringArray(), e.g.::
@@ -89,7 +93,9 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
                                          e.g. ``units=("M","Hz")`` states that the values
                                          are provided in units of MHz.
 
-    par         dict of parameters       set additional (arbitrary) parameter values that
+    par         dict of parameters       DEPRECIATED: kept for backward compatibilit!
+                                         use kwargs 
+                                         set additional (arbitrary) parameter values that
                                          are stored in the ``.par`` attribute of the array,
                 e.g. dict(logplot="y")   and are used, e.g., by the plot method to use
                                          certain defaults. Use par=dict(logplot="y") to use
@@ -99,6 +105,12 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     header                               a dict containing optional keywords and values that
                                          can be taken over from a datafile.
 
+    kwargs=...  keywords for array       set additional (arbitrary) parameter values that
+                                         are stored in the ``.par`` attribute of the array,
+                e.g. logplot="y"         and are used, e.g., by the plot method to use
+                                         certain defaults. Use logplot="y" to use
+                                         a logplot for the y-axis by default when plotting
+                                         this array.
     =========== ======================== =====================================================
 
     """
@@ -141,6 +153,9 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     if type(dimensions) in [int,long]: ary.reshape([dimensions])
     elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
     elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
+    if kwargs:
+        for k,v in kwargs.items():
+            setattr(ary.par,k,v)
     if type(par) == dict:
         for k,v in par.items():
             setattr(ary.par,k,v)
@@ -156,7 +171,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
         if type(fill) in hAllVectorTypes:
             #ary.vec().fill(fill)
             #if fill.loopingMode():
-            #    pass
+            #    passs
             #                iterate=True
             #                lfill=fill.getSize()
             #                lary=ary.getSize()

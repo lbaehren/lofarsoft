@@ -14,6 +14,31 @@ from harray import *
 #======================================================================
 #  Define Plotting functions for vectors and arrays
 #======================================================================
+plot_pause=True
+doplot=True
+
+def plotpause(text=""):
+    """
+    Function to be called after a plotting command. If
+    ``core.plot.plot_pause = True`` it will pause and ask for user input
+    whether and how to continue calculation and plotting.
+    May modify ``plot_pause`` and ``doplot``, depending on user input.
+    """
+    if plot_pause:
+        plt.draw();
+        if text: print text
+        k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
+        if k=="q":
+            plot_pause=False
+            print "Continue without pausing in this task (other tasks not affected)." 
+        elif k=="n":
+            doplot=False
+            print "Continue without plotting in this task (other tasks not affected)." 
+            plt.ion()
+        else:
+            print "Continue."
+
+
 
 def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,EDP64bug=None,**plotargs):
     """

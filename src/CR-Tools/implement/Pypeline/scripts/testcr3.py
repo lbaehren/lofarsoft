@@ -65,7 +65,7 @@ pardict=dict(
 
 
 plt.hanging=False # Use true if exectuion hangs after plotting one window
-plt.EDP64bug=True # use True if your system crashes for plotting semilog axes
+#plt.EDP64bug=True # use True if your system crashes for plotting semilog axes
 
 print "---> BeamFormer"
 bf=tasks.beamformer.BeamFormer();
