@@ -136,6 +136,7 @@ endif (UNIX)
 add_dependencies (presto
   fftw_install
   tempo_install
+  tempo2_install
 #  bf2presto_install
   scripts_install
   see_install
