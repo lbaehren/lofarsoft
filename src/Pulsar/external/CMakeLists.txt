@@ -88,6 +88,49 @@ add_dependencies (tempo_install tempo_build tempo_unpack)
 
 ## ==============================================================================
 ##
+##  Handle configuration and build of Tempo2
+##
+## ==============================================================================
+
+set (tempo2_version "2011.7")
+set (tempo2_name "tempo2-${tempo2_version}")
+set (tempo2_directory "tempo2/tempo2-${tempo2_version}")
+set (tempo2_archive "${tempo2_directory}.tar.gz")
+
+add_custom_target (tempo2_unpack
+  COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo2_archive}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+  COMMENT "Unpacking tar archive of Tempo2 from ${PULSAR_SOURCE_DIR}/external/${tempo2_archive} to ${PULSAR_BINARY_DIR}/apps..."
+  )
+
+if (UNIX)
+ if (APPLE)
+add_custom_target (tempo2_configure
+  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --build=mac PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local 
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name} 
+  COMMENT "Configuring project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name} ..."
+  )
+add_dependencies (tempo2_configure tempo2_unpack)
+ else (APPLE)
+add_custom_target (tempo2_configure
+  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --build=mac PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local LOGIN_ARCH=linux
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name} 
+  COMMENT "Configuring project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name} ..."
+  )
+add_dependencies (tempo2_configure tempo2_unpack)
+ endif (APPLE)
+endif (UNIX)
+
+add_custom_target (tempo2_install
+  COMMAND make install
+#  COMMAND make plugins-install
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
+  COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
+  )
+add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
+
+## ==============================================================================
+##
 ##  Handle configuration and build of PPGPLOT (Python PGPLOT Bindings)
 ##
 ## ==============================================================================
