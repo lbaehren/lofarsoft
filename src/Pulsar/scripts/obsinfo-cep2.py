@@ -650,6 +650,10 @@ class obsinfo:
 		if np.size(status)>0:
 			# getting range of subbands
 			self.subbandList=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+			# in the subbands range, several ranges can be written, and also subbands can be separated
+			# just by commas. So, we leave only 8 symbols
+			if len(self.subbandList) > 8:
+				self.subbandList = self.subbandList[:8] + "..."
 
 		# Getting number of channels per subband
 		cmd="grep Observation.channelsPerSubband %s" % (self.parset,)
@@ -740,8 +744,8 @@ class obsinfo:
 
 				if self.subbandList != "?" and self.subbandWidth != 0 and self.nrChanPerSub != 0:
 					try:
-						subband_first = int(self.subbandList.split("..")[0])
-						lofreq = lower_band_edge + self.subbandWidth * subband_first - 0.5 * self.subbandWidth - 0.5 * (self.subbandWidth / self.nrChanPerSub)
+						subband_first = int(self.subbandList.split("..")[0].split(",")[0])
+						lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / self.nrChanPerSub)
 						self.cfreq = lofreq + 0.5 * self.bw
 					except: pass
 			except: pass
@@ -912,11 +916,11 @@ class outputInfo:
 		obssetup_html=""
 		if self.comment == "":
 			if self.oi.nrRings > 0:
-				obssetup="Station_Beams:%d|TA_beams:%d[%d_rings,%.3f_deg]|Clock:%d_MHz|CentrFreq:%.3f_MHz|BW:%.3f_MHz|Subbands:%d[%s,%f_kHz]|Channels:%d|SamplingTime:%.3f_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-				obssetup_html="Station Beams: %d<br>TA beams: %d [%d rings, %.3f deg]<br>Clock: %d MHz<br>Center Freq: %.3f MHz<br>BW: %.3f MHz<br>Subbands: %d [%s, %f kHz]<br>Channels: %d<br>Sampling Time: %.3f ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup="Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup_html="Station Beams: %d<br>TA beams: %d [%d ring(s), %g deg]<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
 			else:
-				obssetup="Station_Beams:%d|TA_beams:%d|Clock:%d_MHz|CentrFreq:%.3f_MHz|BW:%.3f_MHz|Subbands:%d[%s,%f_kHz]|Channels:%d|SamplingTime:%.3f_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-				obssetup_html="Station Beams: %d<br>TA beams: %d<br>Clock: %d MHz<br>Center Freq: %.3f MHz<br>BW: %.3f MHz<br>Subbands: %d [%s, %f kHz]<br>Channels: %d<br>Sampling Time: %.3f ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup="Station_Beams:%d|TA_beams:%d|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup_html="Station Beams: %d<br>TA beams: %d<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
 
 		# forming first Info (not html) string
 		if viewtype == "brief":
