@@ -141,6 +141,17 @@ endif
 
 setenv PRESTO ${LOFARSOFT}/release/share/pulsar
 
+if (${?TEMPO2}) then 
+  if (${TEMPO2} != "${LOFARSOFT}/release/share/pulsar") then
+    if ( $?prompt ) then
+      echo "-- Warning, resetting your TEMPO2 environment variable from:"
+      echo "           $TEMPO2 to ${LOFARSOFT}/release/share/pulsar"
+    endif
+  endif
+endif
+
+setenv TEMPO2 ${LOFARSOFT}/release/share/pulsar
+
 #############################################################################
 #                    Finished configuration                                 #  
 #############################################################################

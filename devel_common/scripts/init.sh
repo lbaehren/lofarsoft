@@ -102,6 +102,12 @@ if test ! -z "$PRESTO" -a  "$PRESTO" != "${LOFARSOFT}/release/share/pulsar" ; th
 fi
 export PRESTO=${LOFARSOFT}/release/share/pulsar
 
+if test  ! -z "$TEMPO2"  -a  "$TEMPO2" != "${LOFARSOFT}/release/share/pulsar/bin" ; then
+  echo "-- Warning, resetting your TEMPO2 environment variable from:"
+  echo "           $TEMPO2 to ${LOFARSOFT}/release/share/pulsar/bin"
+fi
+export TEMPO2=${LOFARSOFT}/release/share/pulsar/bin
+
 #############################################################################
 #                    Finished configuration                                 #  
 #############################################################################
