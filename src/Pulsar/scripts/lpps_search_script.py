@@ -1021,7 +1021,8 @@ if __name__ == '__main__':
         ],
         'LOTAS' : [
         # DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
-        # TODO : speak to Jason/Ben/Joeri about desireable time resolution
+        # Do some tests to see how fast this dedispersion plan is and whether
+        # some resolution should be traded for processing speed.
             DedispPlan(lodm=0, dmstep=0.02, dmsperpass=6647, 
                 numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
             DedispPlan(lodm=132.940, dmstep=0.03, dmsperpass=2454,
@@ -1032,6 +1033,18 @@ if __name__ == '__main__':
                 numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
             DedispPlan(lodm=727.060, dmstep=0.30, dmsperpass=910,
                 numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
+        ],
+        'LoMASS' : [
+            DedispPlan(lodm=0, dmstep=0.01, dmsperpass=601, numpasses=1,
+                numsub=SR.metadata.n_channels, downsamp=2),
+            DedispPlan(lodm=6.010, dmstep=0.01, dmsperpass=171, numpasses=1,
+                numsub=SR.metadata.n_channels, downsamp=4),
+            DedispPlan(lodm=7.720, dmstep=0.02, dmsperpass=376, numpasses=1,
+                numsub=SR.metadata.n_channels, downsamp=8),
+            DedispPlan(lodm=15.240, dmstep=0.03, dmsperpass=399, numpasses=1,
+                numsub=SR.metadata.n_channels, downsamp=16),
+            DedispPlan(lodm=27.210, dmstep=0.05, dmsperpass=46, numpasses=1,
+                numsub=SR.metadata.n_channels, downsamp=32),
         ],
         'TEST' : [
             DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
