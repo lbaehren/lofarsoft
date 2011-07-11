@@ -68,7 +68,6 @@ amplitudes.sqrt()
 
 print "---> Calculate it again, but now to flatten the spectrum."
 calcbaseline2=trun("CalcBaseline",avspectrum.power,pardict=par,doplot=True)
-
     
 print "---> Flatten spectrum and find channels with RFI spikes"
 
@@ -86,36 +85,90 @@ applybaseline=trun("ApplyBaseline",station_spectrum,baseline=station_gaincurve,p
 #End of calibration preparations
 
 #Set some parameters for further processing the pulse
-file=open(filedir+filename); file["ANTENNA_SET"]=lofarmode
+datafile=open(filedir+filename); datafile["ANTENNA_SET"]=lofarmode
 blocksize=avspectrum.power.getHeader("blocksize")
-selected_dipoles=list(avspectrum.power.getHeader("antennas_used"))
-file["SELECTED_DIPOLES"]=selected_dipoles
+#selected_dipoles=list(avspectrum.power.getHeader("antennas_used"))
+#datafile["SELECTED_DIPOLES"]=selected_dipoles
+datafile["SELECTED_DIPOLES"]=list(avspectrum.power.getHeader("antennas"))
+
+#datafile["SELECTED_DIPOLES"]="odd"
+selected_dipoles=datafile["SELECTED_DIPOLES"]
 ndipoles=len(selected_dipoles)
-sample_interval=file["SAMPLE_INTERVAL"][0]
+sample_interval=datafile["SAMPLE_INTERVAL"][0]
+antenna_positions=datafile["ANTENNA_POSITIONS"]
+
+"""
+['002000001',
+ '002000003',
+ '002000005',
+ '002000007',
+ '002001009',
+ '002001011',
+ '002001013',
+ '002001015',
+ '002002017',
+ '002002019',
+ '002002021',
+ '002002023',
+ '002003025',
+ '002003027',
+ '002003029',
+ '002003031',
+ '002004033',
+ '002004035',
+ '002004037',
+ '002004039',
+ '002005041',
+ '002005043',
+ '002005045',
+ '002005047',
+ '002006049',
+ '002006051',
+ '002006053',
+ '002006055',
+ '002007057',
+ '002007059',
+ '002007061',
+ '002007063',
+ '002008065',
+ '002008067',
+ '002008069',
+ '002008071',
+ '002009073',
+ '002009075',
+ '002009077',
+ '002009079',
+ '002010081',
+ '002010083',
+ '002010085',
+ '002010087',
+ '002011089',
+ '002011091',
+ '002011093',
+ '002011095']
+"""
 
 #Getting original cabledelays
-cabledelays_full=metadata.get("CableDelays",file["CHANNEL_ID"],file["ANTENNA_SET"])  # Obtain cabledelays
+cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
 cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
 cabledelays=cabledelays_full % sample_interval # Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
 cabledelays=hArray(cabledelays)
 
 
 print "---> Load the block with the peak"
-file["BLOCKSIZE"]=blocksize #2**16
-file["BLOCK"]=block_with_peak #93
-file["SELECTED_DIPOLES"]=selected_dipoles #odd
-antenna_positions=file["ANTENNA_POSITIONS"]
+datafile["BLOCKSIZE"]=blocksize #2**16
+datafile["BLOCK"]=block_with_peak #93
 
-timeseries_data=file["TIMESERIES_DATA"]
+timeseries_data=datafile["TIMESERIES_DATA"]
 timeseries_data.setUnit("","ADC Counts")
-timeseries_data.par.xvalues=file["TIME_DATA"]
+timeseries_data.par.xvalues=datafile["TIME_DATA"]
 timeseries_data.par.xvalues.setUnit("","s")
 timeseries_data.par.xvalues.setUnit("mu","")
 
 print "---> FFT, take our RFI, and apply baseline (amplitude) calibration for each antenna"
 #fft_data=file["EMPTY_FFT_DATA"]
 fft_data=hArray(complex,[ndipoles,blocksize/2+1],name="FFT",par=dict(logplot="y"),units="arb. units")
-fft_data.par.xvalues=file["FREQUENCY_DATA"]
+fft_data.par.xvalues=datafile["FREQUENCY_DATA"]
 fft_data.par.xvalues.setUnit("","Hz")
 fft_data.par.xvalues.setUnit("M","")
 
@@ -150,14 +203,20 @@ print "---> Cross correlate pulses, get time lags, and determine direction of pu
 crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=2)
 
 #And determine the relative offsets between them
-maxima=trun('FitMaxima',crosscorr.crosscorr_data,doplot=False,refant=0,plotend=10,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=6,splineorder=2)
+maxima=trun('FitMaxima',crosscorr.crosscorr_data,doplot=True,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=6,splineorder=2)
+k=raw_input("Press 'return' to continue.")
 
+#wrong ones:
+#Vector(float, 48, fill=[0,-6.25e-10,2.23437e-08,4.92188e-08,5.45313e-08,5.51563e-08,4.04688e-08,3.3125e-08,1.20312e-08,5.9375e-09,-1.875e-09,-1.1875e-08,-2.96875e-09,1.03125e-08,1.29688e-08,3.10937e-08,5.35937e-08,6.15625e-08,6.73437e-08,5.84375e-08,4.85938e-08,3.29688e-08,8.59375e-09,-1.20312e-08,-2.625e-08,-1.64063e-08,-5.46875e-09,9.375e-09,3.78125e-08,6.29688e-08,7.4375e-08,7.23437e-08,7.8125e-08,6.3125e-08,5.28125e-08,3e-08,1.84375e-08,-1.20312e-08,-1.45312e-08,-2.3125e-08,-2.32813e-08,7.34375e-09,3.64062e-08,5.76563e-08,9e-08,7.14063e-08,5.75e-08,-9.53125e-09])
+
+#Vector(float, 48, fill=[0,-7.8125e-10,2.21875e-08,4.89063e-08,5.45313e-08,5.51563e-08,4.03125e-08,3.29688e-08,1.1875e-08,5.78125e-09,-1.875e-09,-1.20312e-08,-3.28125e-09,1.0625e-08,1.29688e-08,3.09375e-08,5.32812e-08,6.125e-08,6.71875e-08,5.8125e-08,4.82812e-08,3.28125e-08,8.28125e-09,-1.20312e-08,-2.64063e-08,-1.64063e-08,-5.625e-09,9.375e-09,3.75e-08,6.28125e-08,7.42188e-08,7.21875e-08,7.79687e-08,6.29688e-08,5.25e-08,2.96875e-08,1.82813e-08,-1.21875e-08,-1.46875e-08,-2.32813e-08,-2.34375e-08,7.1875e-09,3.60937e-08,5.75e-08,8.98438e-08,7.10938e-08,5.73438e-08,-9.84375e-09])
 print "Time lag [ns]: ", maxima.lags 
 print " "
 
 #Now fit the direction and iterate over cable delays to get a stable solution
 delays=hArray(copy=cabledelays)
-#delays.fill(0)
+delays.fill(0)
+
 direction=trun("DirectionFitTriangles",positions=antenna_positions,timelags=hArray(maxima.lags),delays=delays,maxiter=9,verbose=True,doplot=False)
 print "========================================================================"
 print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"

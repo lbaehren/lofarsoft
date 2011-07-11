@@ -398,11 +398,11 @@ class TBBData(IOInterface):
         if not len(selection)>0:
             raise ValueError("No antennas selected.")
 
-        if isinstance(selection[0], int):
+        if type(selection[0])==int or type(selection[0])==long:
             # Selection by antenna number
             self.__selectedDipoles = [self.__dipoleNames[i] for i in selection if i < self.__nofDipoleDatasets]
 
-        elif isinstance(selection[0], str):
+        elif type(selection[0])==str:
             # Selection by antenna ID
             self.__selectedDipoles = [antennaID for antennaID in selection if antennaID in self.__dipoleNames]
 
