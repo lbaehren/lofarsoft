@@ -257,8 +257,11 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "spikeexcess":dict(default=20,
                            doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
 
-        "rmsfactor":dict(default=2,
+        "rmsfactor":dict(default=3,
                          doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
+
+        "rmsrange":dict(default=None,
+                         doc="Tuple with absolute min/max values of the rms of the time series that are allowed before a block is flagged. Will be igrored if None."),
 
         "meanfactor":dict(default=3,
                           doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
@@ -444,7 +447,7 @@ class AverageSpectrum(tasks.Task):
     """
     The function will calculate an average spectrum from a list of
     files and a series of antennas (all averaged into one
-    spectrum).
+    spectrum). 
 
     The task will do a basic quality check of each time series data
     set and only average good data.
@@ -464,6 +467,10 @@ class AverageSpectrum(tasks.Task):
     The desired frequency resolution is provided with the parameter
     ``delta_nu``, but this will be rounded off to the nearest value using
     channel numbers of a power of 2.
+
+    Note: the spectrum has N/2 channels and not N/2+1 channels as is
+    usually the case. This means that the last channel is missing (I
+    guess...).
 
     The resulting spectrum is stored in the array ``Task.power`` (only
     complete for ``stride=1``) and written to disk as an hArray with
@@ -570,6 +577,8 @@ class AverageSpectrum(tasks.Task):
         self.nantennas_total=0
 #        self.power.getHeader()["FREQUENCY_INTERVAL"]=self.delta_frequency
         self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","antennas","antenna_list"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
+        if not self.doublefft:
+            self.frequencies.fillrange(self.start_frequency/10**6,self.delta_frequency/10**6)
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
@@ -625,8 +634,10 @@ class AverageSpectrum(tasks.Task):
                                     spikyness=100000,
                                     maxpeak=self.maxpeak,
                                     rmsfactor=self.rmsfactor,
+                                    rmsrange=self.rmsrange,
                                     meanfactor=self.meanfactor,
-                                    count=self.count
+                                    count=self.count,
+                                    chunk=nchunk
                                     )
                                 )
                             if not self.quality_db_filename=="":
@@ -700,28 +711,30 @@ class AverageSpectrum(tasks.Task):
                                 if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
                                     #print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
-                                    plt.draw(); plt.show()
+                                    plt.draw()
                         else: # doublefft - i.e. here do just a single FFT
                             if self.addantennas:
                                 if self.nspectraadded>1:
                                     self.cdata2/=float(self.nspectraadded)
                                 self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)
                                 self.power.spectralpower(self.cdata2)
-                            #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
+                                #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
                                 if self.doplot and self.nspectraadded%self.plotskip==0:
                                     self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot()
                                     print "mean=",self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean()
-                                    plt.draw(); plt.show()
+                                    plt.draw()
                             else: #keep antennas separately
                                 if self.nspectraadded_per_antenna[antenna_processed]>1:
                                     self.cdata2/=float(self.nspectraadded_per_antenna[antenna_processed])
                                 self.power[antenna_processed] *= (self.nspectraadded_per_antenna[antenna_processed]-1.0)/(self.nspectraadded_per_antenna[antenna_processed])
                                 self.power[antenna_processed].spectralpower(self.cdata2)
                                 if self.doplot and antenna_processed==0 and self.nspectraadded_per_antenna[antenna_processed]%self.plotskip==0:
-                                    self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot()
-                                    print "mean=",self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean()
-                                    plt.draw(); plt.show()
-
+                                    self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot(
+                                        title="nspec={0:5d}, mean={1:8.3f}, rms={2:8.3f}".format(
+                                            self.nspectraadded_per_antenna[antenna_processed],
+                                            self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean().val(),
+                                            self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].stddev().val()))
+                                    plt.draw()
                     else: #data not ok
                         self.nspectraflagged+=1
                         self.nspectraflagged_per_antenna[antenna_processed]+=1
@@ -768,14 +781,16 @@ class AverageSpectrum(tasks.Task):
         If you see an output line like this::
 
           # Start antenna = 0 (ID= 2000000) - 375 passes:
-          #Flagged: chunk= 0 , Block    14: mean= 121.68, rel. rms= 970.1, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
-          #Flagged: chunk= 0 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: #0 chunk= 0 , Block    14: mean= 121.68, rel. rms= 970.1, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: #0 chunk= 0 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: #2 chunk= 2 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
           # Data flagged!
           # End   antenna = 0  Time = 14.825337 s  nspectraadded = 374 nspectraflagged = 1
 
         this will tell you that Antenna 2000000 was worked on (the 1st
-        antenna in the data file) and the chunk 0 (blocks 14 and 15)
-        contained some suspicious data (with and rms and mean which fluctuated too much). If you want
+        antenna in the data file) and the chunk 0 (blocks 14 and 15
+        within that chunk) and chunk 2 contained some suspicious data
+        (with and rms and mean which fluctuated too much). If you want
         to inspect this, you can call::
 
           >>> Task.qplot(0)
@@ -783,7 +798,7 @@ class AverageSpectrum(tasks.Task):
         This will plot the chunk and highlight the first flagged block
         (#14) in that chunk::
 
-          >>> Task.qplot(186,1)
+          >>> Task.qplot(0,1)
 
         would highlight the second flagged block (#15)
 
@@ -803,7 +818,7 @@ class AverageSpectrum(tasks.Task):
         print "Filename:",filename,"block =",block,"blocksize =",quality_entry["blocksize"],s
         if all:
             datafile["BLOCKSIZE"]=quality_entry["size"]
-            datafile["BLOCK"]=quality_entry["offset"]*quality_entry["blocksize"]/quality_entry["size"]
+            datafile["BLOCK"]=quality_entry["offset"]*quality_entry["blocksize"]/quality_entry["size"] if self.doublefft else quality_entry["chunk"]
             y0=datafile["TIMESERIES_DATA"]
             y0.par.xvalues=datafile["TIME_DATA"]
             y0.par.xvalues.setUnit("mu","")

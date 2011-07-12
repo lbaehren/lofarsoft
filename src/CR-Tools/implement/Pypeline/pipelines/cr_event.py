@@ -3,8 +3,8 @@ Basic LOFAR VHECR event processing, including gain calibration, RFI
 excision, pulse finding, direction finding, beamforming.
 
 Run with:
-execfile(PYP+"/scripts/testcr4.py")
-execfile('/Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/scripts/testcr4.py')
+execfile(PYP+"pipelines/cr_event.py")
+execfile('/Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pipelines/cr_event.py')
 
 Test event: Event-1, LBA_OUTER
 filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
@@ -25,8 +25,8 @@ from pycrtools import *
 #------------------------------------------------------------------------
 # Main input parameters
 #------------------------------------------------------------------------
-filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
 filename="LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
+filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
 
 filedir="/Users/falcke/LOFAR/work/CR/"
 block_with_peak=93
@@ -327,4 +327,4 @@ print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.
 smooth_beam_dummy=hArray(smooth_beam.vec(),dimensions=[1,blocksize])
 beam_maxima=trun('FitMaxima',smooth_beam_dummy,doplot=Pause.doplot,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 t=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
-print "# 
+print "# Peak found at sample {0:8.2f} ({1:11.8f} ms = {2:d} ms + {3:9.5f} mus) with height {4:8.2f} units.".format(beam_maxima.maxx.val(),t,int(t),(t%1)*1000,beam_maxima.maxy.val())

@@ -449,7 +449,7 @@ class DynamicSpectrum(tasks.Task):
                     self.data[...].read(self.datafile,"Fx",blocks)
                     if self.qualitycheck:
                         self.count=len(self.quality)
-                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=self.count,blockoffset=nchunk*self.blocks_per_sect))
                         if not self.quality_db_filename=="":
                             qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
                         mean+=self.quality[self.count]["mean"]

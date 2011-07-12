@@ -17,39 +17,50 @@ from harray import *
 plot_pause=True
 doplot=True
 
-def plotpause(text=""):
+class plotpause:
     """
-    Function to be called after a plotting command. If
-    ``core.plot.plot_pause = True`` it will pause and ask for user input
+    Class creating a function to be called after a plotting command. If
+    ``plotpause.plot_pause = True`` it will pause and ask for user input
     whether and how to continue calculation and plotting.
     May modify ``plot_pause`` and ``doplot``, depending on user input.
+
+    Example:
+        ::
+            pp=plotpause_class()
+            pp("Test")
+            -> Test
+            -> Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...q
+            -> Continue without pausing from now on.
+
+            pp.plot_pause -> False
+            pp("Try again")
+            -> Nothing happens (i.e. no pause)....
     """
-    if plot_pause:
-        plt.draw();
-        if text: print text
-        k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
-        if k=="q":
-            plot_pause=False
-            print "Continue without pausing in this task (other tasks not affected)." 
-        elif k=="n":
-            doplot=False
-            print "Continue without plotting in this task (other tasks not affected)." 
-            plt.ion()
-        else:
-            print "Continue."
+    def __init__(self,plotpause=True,doplot=True):
+        self.plot_pause=plotpause
+        self.doplot=doplot
+    def __call__(self,txt=""):
+        if self.plot_pause and self.doplot:
+            plt.draw();
+            if txt:
+                print txt
+            k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
+            if k=="q":
+                self.plot_pause=False
+                print "Continue without pausing from now on." 
+            elif k=="n":
+                self.doplot=False
+                print "Continue without plotting and without pausing."
+                plt.ion()
+            else:
+                print "Continue."
 
 
 
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,EDP64bug=None,**plotargs):
+def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,**plotargs):
     """
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
-
-    If your name is Heino and you have a MacBook more recent then
-    March 2011 with OS10.6.7 and you use the Enthought 64 bit (EDP64)
-    Python version 6.3 then set plt.EDP64bug=True to avoid problems
-    with semilog axes.Semilog will then work only with reduced
-    functionality.
 
     Usage::
 
@@ -103,8 +114,8 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     *marker*         = scipy style for data points (e.g. 'x' or 'o')
     ================ ======================================================================
     """
-    if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
-        EDP64bug=self.plt.EDP64bug
+#    if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
+#        EDP64bug=self.plt.EDP64bug
     if (xvalues==None):
         if hasattr(self.par,"xvalues"):
             if hasattr(self,"__slice__"):
@@ -183,9 +194,12 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
         else: exec(var+"="+str(dflt.__repr__()))
     if type(val)==str: val=(str)
     if clf: self.plt.clf()
-    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx
-    elif logplot=="y": _plot=hSemiLogY if EDP64bug else self.plt.semilogy
-    elif (logplot=="xy") | (logplot=="yx"): _plot=hSemiLogXY if EDP64bug else self.plt.loglog
+#    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx
+#    elif logplot=="y": _plot=hSemiLogY if EDP64bug else self.plt.semilogy
+#    elif (logplot=="xy") | (logplot=="yx"): _plot=hSemiLogXY if EDP64bug else self.plt.loglog
+    if logplot=="x": _plot=self.plt.semilogx
+    elif logplot=="y": _plot=self.plt.semilogy
+    elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
     else: _plot=self.plt.plot
     iterate=True
     loop=0

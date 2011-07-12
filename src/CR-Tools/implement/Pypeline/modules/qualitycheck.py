@@ -12,6 +12,7 @@ def CRQualityCheckAntenna(dataarray,
                           nsigma=-1,
                           rmsfactor=2,
                           meanfactor=3,
+                          rmsrange=None,
                           spikyness=20,
                           spikeexcess=20,
                           maxpeak=7,
@@ -25,7 +26,8 @@ def CRQualityCheckAntenna(dataarray,
                           observatorymode=None,
                           verbose=True,
                           filename="",
-                          count=""):
+                          count=0,
+                          chunk=0):
     """
     Do a basic quality check of raw time series data, looking for rms,
     mean and spikes and return a list of antennas which have failed
@@ -81,6 +83,10 @@ def CRQualityCheckAntenna(dataarray,
     *rmsfactor* - if no quality criteria present, set limits for rms at this
     factor times the rms in the reference block (or divided by this factor)
 
+    *rmsrange* - if no quality criteria present, set limits for rms at
+    least above and below the first and second value in this list or
+    tuple (e.g., ``rmsrange=(0.1,5)``). If ``None``ignore.
+
     *meanfactor* - if no quality criteria present, set limits for mean
     at mean[refblock]-rms[refblock]/sqrt(blocksize)*meanfactor
 
@@ -114,8 +120,17 @@ def CRQualityCheckAntenna(dataarray,
 
     *filename* - for output and archiving only
 
-    *count* - an identifier to print in front of flag information
-     (output only) to say which chunk of data was worked on.
+    *count* - a unique identifier to print in front of flag
+     information (output only) to say which chunk of data was worked
+     on - typically counting from 0 upwards, increasing by one for
+     each new chunk of data until the end of calculation. Can later be
+     used by Task.qplot.
+
+    *chunk* - an identifier to print in front of flag information
+     (output only) to say which chunk of data was worked on within the
+     current antenna - typically counting from 0 upwards, increasing
+     by one for each new chunk of data until the end of an antenna is
+     reached.
 
     *verbose* - sets whether or not to print additional
      information. verbose=True only prints when a block is
@@ -165,7 +180,7 @@ def CRQualityCheckAntenna(dataarray,
     npeaks=datanpeaks.sum(); peaksexcess=npeaks/npeaksexpected_full
     if verbose>1:
 #        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected,"+/-",npeakserror
-        print "{8} - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), Max={9:6.2f}, Min={10:6.2f}, nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma,count,datamax.max(),datamin.max())
+        print "{8} [{11}] - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), Max={9:6.2f}, Min={10:6.2f}, nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma,chunk,datamax.max(),datamin.max(),count)
     dataNonGaussianity = Vector(float,nblocks)
     dataSpikeExcess = Vector(float,nblocks)
     dataNonGaussianity.sub(datanpeaks,npeaksexpected)
@@ -178,20 +193,40 @@ def CRQualityCheckAntenna(dataarray,
         if not refblock==None:
             mean=datamean[refblock]; rms=datarms[refblock];
         if normalize:
-            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),"rms":(1/rmsfactor,rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-1,spikeexcess),"max":(-1,maxpeak),"min":(-1,minpeak)}
+            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),
+                             "rms":(max(1/rmsfactor,rmsrange[0]/rms),min(rmsfactor,rmsrange[1]/rms)) if rmsrange else (1/rmsfactor,rmsfactor),
+                             "spikyness":(-spikyness,spikyness),
+                             "spikeexcess":(-1,spikeexcess),
+                             "max":(-1,maxpeak),
+                             "min":(-1,minpeak)}
         else:
-            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),"rms":(rms/rmsfactor,rms*rmsfactor),"spikyness":(-spikyness,spikyness),"spikeexcess":(-spikeexcess,spikeexcess),"max":(-1,maxpeak),"min":(-1,minpeak)}
-#        if verbose:
-#            print "Quality criteria =",qualitycriteria
+            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),
+                             "rms":(max(rms/rmsfactor,rmsrange[0]),min(rms*rmsfactor,rmsrange[1])) if rmsrange else (rms/rmsfactor,rms*rmsfactor),
+                             "spikyness":(-spikyness,spikyness),
+                             "spikeexcess":(-spikeexcess,spikeexcess),
+                             "max":(-1,maxpeak),
+                             "min":(-1,minpeak)}
+        if verbose>1:
+            print "Quality criteria =",qualitycriteria
+    flags=set()
     for prop in iter(dataproperties):
         noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4,"spikeexcess":5,"max":6,"min":7},qualitycriteria)
         if noncompliancelist:
             nblocksflagged+=1
+            flags.update(noncompliancelist)
             flaggedblocklist.append(prop[0])
-            qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"spikeexcess":prop[5],"flags":noncompliancelist})
+            qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"spikeexcess":prop[5],"flags":noncompliancelist,"max":maxpeak,"min":minpeak})
             if verbose:
-                print "#Flagged: chunk=",count,", Block {0:5d}: mean={1: 6.2f}, rel. rms={2:6.1f}, rel. max={6:6.1f}, rel. min={7:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}".format(*prop)," ",noncompliancelist
-    return {"filename":filename,"type":"QualityFx","observatory":observatory,"mode":observatorymode,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":qualityflaglist}
+                if nblocksflagged<=3: # Print flagged blocks in chunk, but avoid printing too many blocks ...
+                    print "#Flagged: #"+str(count)," chunk=",chunk,(", Block {0:5d}: mean={1: 6.2f}, rms={2:6.1f},  max={6:6.1f}, min={7:6.1f} "+("(norm.)" if normalize else "") +", npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}").format(*prop)," ",noncompliancelist
+                elif nblocksflagged==4: 
+                    print "#Other flagged blocks: [{0:5d}".format(*prop),
+                else: 
+                    print ",{0:5d}".format(*prop),
+    if nblocksflagged>=4:
+        print "]"
+
+    return {"filename":filename,"type":"QualityFx","observatory":observatory,"mode":observatorymode,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"chunk":chunk,"count":count,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":flags,"flaglist":qualityflaglist}
 
 
 def CRDatabaseWrite(filename, quality):

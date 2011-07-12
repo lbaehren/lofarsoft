@@ -182,7 +182,10 @@ class CrossCorrelateAntennas(tasks.Task):
         crosscorr_data_orig=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2]),
                                                      "Scratch cross correlation vector in original size to hold intermediate results",workarray=True),
         crosscorr_data=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2*max(self.oversamplefactor,1)]),
-                          doc="Output array of dimensions [N data sets, data length * oversamplefactor] containing the cross correlation.",output=True)
+                          doc="Output array of dimensions [N data sets, data length * oversamplefactor] containing the cross correlation.",output=True),
+        blocksize = p_(lambda self:self.timeseries_data.shape()[-1],"Length of the data for each antenna"),
+        fftplan = p_(lambda self:cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),"Memory and plan for FFT",output=False,workarray=True),
+        invfftplan = p_(lambda self:cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),"Memory and plan for inverse FFT",output=False,workarray=True)
         )
 
     def call(self,timeseries_data):
@@ -190,14 +193,13 @@ class CrossCorrelateAntennas(tasks.Task):
 
     def run(self):
         if self.timeseries_data:
-            fftplan = cr.FFTWPlanManyDftR2c(self.timeseries_data.shape()[-1], 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-            cr.hFFTWExecutePlan(self.fft_data[...],self.timeseries_data[...],fftplan)
+            cr.hFFTWExecutePlan(self.fft_data[...],self.timeseries_data[...],self.fftplan)
             #self.fft_data[...].fftw(self.timeseries_data[...])
         if not self.reference_data:
             self.fft_reference_data.copy(self.fft_data[self.refant])
         else:
-            fftplan = cr.FFTWPlanManyDftR2c(self.refences_data.shape()[-1], 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-            cr.hFFTWExecutePlan(self.fft_reference_data[...],self.reference_data[...],fftplan)
+#            fftplan = cr.FFTWPlanManyDftR2c(self.refences_data.shape()[-1], 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+            cr.hFFTWExecutePlan(self.fft_reference_data[...],self.reference_data[...],self.fftplan)
             #self.fft_reference_data.fftw(self.reference_data)
         self.fft_data[...].crosscorrelatecomplex(self.fft_reference_data,True)
 
@@ -206,11 +208,13 @@ class CrossCorrelateAntennas(tasks.Task):
         if self.oversamplefactor>1:
             self.shift=1.0/self.oversamplefactor
             for i in range(self.oversamplefactor):
-                self.crosscorr_data_orig[...].invfftw(self.fft_data[...])
+                cr.hFFTWExecutePlan(self.crosscorr_data_orig[...],self.fft_data[...],self.invfftplan)
+                #self.crosscorr_data_orig[...].invfftw(self.fft_data[...])
                 self.crosscorr_data[...].redistribute(self.crosscorr_data_orig[...],i,self.oversamplefactor) # distribute with gaps in between and shift by a fraction
                 self.fft_data[...].shiftfft(self.fft_data[...],self.shift) # apply a sub-sample shift to the FFt data
         else:
-            self.crosscorr_data[...].invfftw(self.fft_data[...])
+            cr.hFFTWExecutePlan(self.crosscorr_data[...],self.fft_data[...],self.invfftplan)
+            #self.crosscorr_data[...].invfftw(self.fft_data[...])
 
 class FitMaxima(tasks.Task):
     """
@@ -424,6 +428,8 @@ class DirectionFitTriangles(tasks.Task):
         geometric_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),"Time lags minus cable delay = pure geometric delay if no error",unit="s"),
         delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delays"),"Instrumental delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",unit="s"),
         delta_delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),"Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",unit="s"),
+        delta_delays_mean_history=p_([],"Mean of the difference between expected and currently calibrated measured delays for each iteration",unit="s",output=True),
+        delta_delays_rms_history=p_([],"RMS of the difference between expected and currently calibrated measured delays for each iteration",unit="s",output=True),
         delays_history=p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),"Instrumental delays for each iteration (for plotting)",unit="s"),
         maxiter=p_(1,"if >1 iterate (maximally tat many times) position and delays until solution converges."),
         delay_error=p_(1e-12,"Target for the RMS of the delta delays where iteration can stop.",unit="s"),
@@ -462,6 +468,8 @@ class DirectionFitTriangles(tasks.Task):
         self.farfield=True
         self.delta_delays_max=0
         self.delta_delays_min=1e99
+        self.delta_delays_mean_history=[]
+        self.delta_delays_rms_history=[]
         self.enditer=False
         if self.verbose:
             allantennas=set(range(self.NAnt))
@@ -472,8 +480,7 @@ class DirectionFitTriangles(tasks.Task):
             self.geometric_timelags.sub(self.timelags,self.delays)
             cr.hDirectionTriangulationsCartesian(self.directions,self.errors,self.centers,self.triangles_size,self.positions[:self.NAnt],self.geometric_timelags[:self.NAnt],+1)
 
-            if self.doplot:  #store delays for plotting
-                self.delays_history.redistribute(self.delays,it,self.maxiter)
+            self.delays_history.redistribute(self.delays,it,self.maxiter)
 
             #Find antennas with zero closure errors.
             self.ngood=self.index.findlessthan(self.errors,self.error_tolerance).val()
@@ -496,6 +503,9 @@ class DirectionFitTriangles(tasks.Task):
             self.delta_delays_max=max(self.delta_delays.vec().max(),self.delta_delays_max)
             self.delta_delays_min=min(self.delta_delays.vec().min(),self.delta_delays_min)
 
+            self.delta_delays_rms_history.append(self.delta_delays_rms)
+            self.delta_delays_mean_history.append(self.delta_delays_mean)
+            
             rfac=self.rmsfactor*(1.0-float(it)/(self.maxiter))
             self.ngooddelays=self.delayindex.findbetween(self.delta_delays,self.delta_delays_mean-self.delta_delays_rms*rfac,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
             if self.ngooddelays>0:
