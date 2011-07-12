@@ -20,11 +20,11 @@ def process(img, **kwargs):
     from image import Image
     import mylogger 
 
-    # First, reset img to initial state (in case img is being reprocessed),
-    # but keep all currently defined options.
-    timg = Image({'filename':''})
-    timg.opts = img.opts
-    img = timg
+    # First, reset img to initial state (in case img is being reprocessed)
+    if hasattr(img, 'use_io'): del img.use_io
+    if hasattr(img, 'source'): del img.source
+    if hasattr(img, 'gaussians'): del img.gaussians
+    if hasattr(img, 'islands'): del img.islands
 
     # Start up logger. We need to initialize it each time process() is
     # called, in case the quiet or debug options have changed
