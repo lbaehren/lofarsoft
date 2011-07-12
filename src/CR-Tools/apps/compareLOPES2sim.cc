@@ -85,7 +85,7 @@
 */
 
 const static bool simulationDistances = true;      // decide wether to use the lateral distances of simulation or of data
-const static bool onlyEW = true;                   // plot only EW polarization
+const static bool onlyEW = false;                   // plot only EW polarization
 const static bool lateralFitWithEta = true;        // do LDF fit with eta = 1/R_0 instead of R_0
 
 int simColor = kBlue;                          // simulation color: proton = blue (4), iron = red (2)
@@ -403,6 +403,10 @@ int main (int argc, char *argv[])
     double R_0_sim_VE = 0, sigR_0_sim_VE = 0, eps_sim_VE = 0, sigeps_sim_VE = 0, chi2NDF_sim_VE = 0; 
     double eta_sim_VE = 0, sigeta_sim_VE = 0;
     
+    double dispersion_RMS_perc_EW = 0, dispersion_RMS_perc_NS = 0, dispersion_RMS_perc_VE = 0;
+    double dispersion_Mean_perc_EW = 0, dispersion_Mean_perc_NS = 0, dispersion_Mean_perc_VE = 0;
+    
+    
     double Xmax_sim = 0;
     
     recTree->SetBranchAddress("Gt", &Gt);
@@ -541,6 +545,10 @@ int main (int argc, char *argv[])
       outtree->Branch("latMinDist_EW",&latMinDist,"latMinDist_EW/D");
       outtree->Branch("latMaxDist_EW",&latMaxDist,"latMaxDist_EW/D");
       outtree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
+
+      outtree->Branch("dispersion_RMS_perc_EW",&dispersion_RMS_perc_EW,"dispersion_RMS_perc_EW/D");
+      outtree->Branch("dispersion_Mean_perc_EW",&dispersion_Mean_perc_EW,"dispersion_Mean_perc_EW/D");
+      
       
       outtree->Branch("latTimeSphere1DRcurv_EW",&latTimeSphere1DRcurv_EW,"latTimeSphere1DRcurv_EW/D");
       outtree->Branch("latTimeSphere1DSigRcurv_EW",&latTimeSphere1DSigRcurv_EW,"latTimeSphere1DSigRcurv_EW/D");
@@ -647,6 +655,10 @@ int main (int argc, char *argv[])
       outtree->Branch("latMaxDist_NS",&latMaxDist_NS,"latMaxDist_NS/D");
       outtree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
          
+      outtree->Branch("dispersion_RMS_perc_NS",&dispersion_RMS_perc_NS,"dispersion_RMS_perc_NS/D");
+      outtree->Branch("dispersion_Mean_perc_NS",&dispersion_Mean_perc_NS,"dispersion_Mean_perc_NS/D");
+
+      
       outtree->Branch("latTimeSphere1DRcurv_NS",&latTimeSphere1DRcurv_NS,"latTimeSphere1DRcurv_NS/D");
       outtree->Branch("latTimeSphere1DSigRcurv_NS",&latTimeSphere1DSigRcurv_NS,"latTimeSphere1DSigRcurv_NS/D");
       outtree->Branch("latTimeSphere1DChi2NDF_NS",&latTimeSphere1DChi2NDF_NS,"latTimeSphere1DChi2NDF_NS/D");
@@ -752,6 +764,10 @@ int main (int argc, char *argv[])
       outtree->Branch("latMaxDist_VE",&latMaxDist_VE,"latMaxDist_VE/D");
       outtree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
             
+      outtree->Branch("dispersion_RMS_perc_VE",&dispersion_RMS_perc_VE,"dispersion_RMS_perc_VE/D");
+      outtree->Branch("dispersion_Mean_perc_VE",&dispersion_Mean_perc_VE,"dispersion_Mean_perc_VE/D");
+      
+      
       outtree->Branch("latTimeSphere1DRcurv_VE",&latTimeSphere1DRcurv_VE,"latTimeSphere1DRcurv_VE/D");
       outtree->Branch("latTimeSphere1DSigRcurv_VE",&latTimeSphere1DSigRcurv_VE,"latTimeSphere1DSigRcurv_VE/D");
       outtree->Branch("latTimeSphere1DChi2NDF_VE",&latTimeSphere1DChi2NDF_VE,"latTimeSphere1DChi2NDF_VE/D");
@@ -1257,6 +1273,9 @@ int main (int argc, char *argv[])
         sigeta_sim_EW = ergEW.asDouble("sigeta_sim");
         chi2NDF_sim_EW = ergEW.asDouble("chi2NDF_sim");
         
+        dispersion_RMS_perc_EW = ergEW.asDouble("dispersion_RMS_perc");
+        dispersion_Mean_perc_EW = ergEW.asDouble("dispersion_Mean_perc");
+        
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<eps_EW<<"\t"<<sigeps_EW<<"\t"<<R_0_EW<<"\t"<<sigR_0_EW<<"\t"<<chi2NDF_EW<<"\t"<<eps_sim_EW<<"\t"<<sigeps_sim_EW<<"\t"<<R_0_sim_EW<<"\t"<<sigR_0_sim_EW<<"\t"<<chi2NDF_sim_EW<<endl;			
         
@@ -1324,6 +1343,10 @@ int main (int argc, char *argv[])
         sigR_0_sim_NS = ergNS.asDouble("sigR_0_sim");
         sigeta_sim_NS = ergNS.asDouble("sigeta_sim");
         chi2NDF_sim_NS = ergNS.asDouble("chi2NDF_sim");
+        
+        dispersion_RMS_perc_NS = ergNS.asDouble("dispersion_RMS_perc");
+        dispersion_Mean_perc_NS = ergNS.asDouble("dispersion_Mean_perc");
+        
 
         //write info of the fit into file
         outputEW <<m_dict[Gt]<<"\t"<<eps_NS<<"\t"<<sigeps_NS<<"\t"<<R_0_NS<<"\t"<<sigR_0_NS<<"\t"<<chi2NDF_NS<<"\t"<<eps_sim_NS<<"\t"<<sigeps_sim_NS<<"\t"<<R_0_sim_NS<<"\t"<<sigR_0_sim_NS<<"\t"<<chi2NDF_sim_NS<<endl; 

@@ -690,7 +690,7 @@ namespace CR { // Namespace CR -- begin
 
        ///put to true if you need esp_0m and dispersion % values
        ///dispersion methods to evaluete how good is the fit
-        if (false) {
+        if (true) {
 
           ///deviation along the y axix; also the deviation in the ortogonal direction to the fit have been tried but with not so much difference
           double percentDev=0.;

@@ -1494,6 +1494,8 @@ int main (int argc, char *argv[])
   double epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;    // Epsilon at R=0 (necessary for the cut!)
   double chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;                                // Chi^2/NDF of lateral distribution exponential fit
   double dispersion_RMS_perc = 0, dispersion_Mean_perc = 0;
+  double dispersion_RMS_perc_NS = 0, dispersion_Mean_perc_NS = 0;
+  double dispersion_RMS_perc_VE = 0, dispersion_Mean_perc_VE = 0;
   
   // values for conical beamforming
   double coneAngle=0, coneAngle_NS=0, coneAngle_VE=0;
@@ -1806,14 +1808,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigeps",&sigeps,"sigeps/D");
           roottree->Branch("epsilon_0m",&epsilon_0m,"epsilon_0m/D");
           roottree->Branch("chi2NDF",&chi2NDF,"chi2NDF/D");
-          //roottree->Branch("CutCloseToCore",&CutCloseToCore,"CutCloseToCore/I");
-          //roottree->Branch("CutSmallSignal",&CutSmallSignal,"CutSmallSignal/I");
-          //roottree->Branch("CutBadTiming",&CutBadTiming,"CutBadTiming/I");
-          //roottree->Branch("CutSNR",&CutSNR,"CutSNR/I");
           roottree->Branch("latMeanDist",&latMeanDist,"latMeanDist/D");
           roottree->Branch("latMinDist",&latMinDist,"latMinDist/D");
           roottree->Branch("latMaxDist",&latMaxDist,"latMaxDist/D");
           roottree->Branch("NlateralAntennas",&NlateralAntennas,"NlateralAntennas/I");
+          roottree->Branch("dispersion_RMS_perc",&dispersion_RMS_perc,"dispersion_RMS_perc/D");
+          roottree->Branch("dispersion_Mean_perc",&dispersion_Mean_perc,"dispersion_Mean_perc/D");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
           roottree->Branch("latTimeSphere1DRcurv",&latTimeSphere1DRcurv_EW,"latTimeSphere1DRcurv/D");
@@ -1866,14 +1866,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigeps_EW",&sigeps,"sigeps_EW/D");
           roottree->Branch("epsilon_0m_EW",&epsilon_0m,"epsilon_0m_EW/D");
           roottree->Branch("chi2NDF_EW",&chi2NDF,"chi2NDF_EW/D");
-          //roottree->Branch("CutCloseToCore_EW",&CutCloseToCore,"CutCloseToCore_EW/I");
-          //roottree->Branch("CutSmallSignal_EW",&CutSmallSignal,"CutSmallSignal_EW/I");
-          //roottree->Branch("CutBadTiming_EW",&CutBadTiming,"CutBadTiming_EW/I");
-          //roottree->Branch("CutSNR_EW",&CutSNR,"CutSNR_EW/I");
           roottree->Branch("latMeanDist_EW",&latMeanDist,"latMeanDist_EW/D");
           roottree->Branch("latMinDist_EW",&latMinDist,"latMinDist_EW/D");
           roottree->Branch("latMaxDist_EW",&latMaxDist,"latMaxDist_EW/D");
           roottree->Branch("NlateralAntennas_EW",&NlateralAntennas,"NlateralAntennas_EW/I");
+          roottree->Branch("dispersion_RMS_perc_EW",&dispersion_RMS_perc,"dispersion_RMS_perc_EW/D");
+          roottree->Branch("dispersion_Mean_perc_EW",&dispersion_Mean_perc,"dispersion_Mean_perc_EW/D");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
           roottree->Branch("latTimeSphere1DRcurv_EW",&latTimeSphere1DRcurv_EW,"latTimeSphere1DRcurv_EW/D");
@@ -1923,14 +1921,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigeps_NS",&sigeps_NS,"sigeps_NS/D");
           roottree->Branch("epsilon_0m_NS",&epsilon_0m_NS,"epsilon_0m_NS/D");
           roottree->Branch("chi2NDF_NS",&chi2NDF_NS,"chi2NDF_NS/D");
-          //roottree->Branch("CutCloseToCore_NS",&CutCloseToCore_NS,"CutCloseToCore_NS/I");
-          //roottree->Branch("CutSmallSignal_NS",&CutSmallSignal_NS,"CutSmallSignal_NS/I");
-          //roottree->Branch("CutBadTiming_NS",&CutBadTiming_NS,"CutBadTiming_NS/I");
-          //roottree->Branch("CutSNR_NS",&CutSNR_NS,"CutSNR_NS/I");
           roottree->Branch("latMeanDist_NS",&latMeanDist_NS,"latMeanDist_NS/D");
           roottree->Branch("latMinDist_NS",&latMinDist_NS,"latMinDist_NS/D");
           roottree->Branch("latMaxDist_NS",&latMaxDist_NS,"latMaxDist_NS/D");
           roottree->Branch("NlateralAntennas_NS",&NlateralAntennas_NS,"NlateralAntennas_NS/I");
+          roottree->Branch("dispersion_RMS_perc_NS",&dispersion_RMS_perc_NS,"dispersion_RMS_perc_NS/D");
+          roottree->Branch("dispersion_Mean_perc_NS",&dispersion_Mean_perc_NS,"dispersion_Mean_perc_NS/D");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
           roottree->Branch("latTimeSphere1DRcurv_NS",&latTimeSphere1DRcurv_NS,"latTimeSphere1DRcurv_NS/D");
@@ -1982,14 +1978,12 @@ int main (int argc, char *argv[])
           roottree->Branch("sigeps_VE",&sigeps_VE,"sigeps_VE/D");
           roottree->Branch("epsilon_0m_VE",&epsilon_0m_VE,"epsilon_0m_VE/D");
           roottree->Branch("chi2NDF_VE",&chi2NDF_VE,"chi2NDF_VE/D");
-          //roottree->Branch("CutCloseToCore_VE",&CutCloseToCore_VE,"CutCloseToCore_VE/I");
-          //roottree->Branch("CutSmallSignal_VE",&CutSmallSignal_VE,"CutSmallSignal_VE/I");
-          //roottree->Branch("CutBadTiming_VE",&CutBadTiming_VE,"CutBadTiming_VE/I");
-          //roottree->Branch("CutSNR_VE",&CutSNR_VE,"CutSNR_VE/I");
           roottree->Branch("latMeanDist_VE",&latMeanDist_VE,"latMeanDist_VE/D");
           roottree->Branch("latMinDist_VE",&latMinDist_VE,"latMinDist_VE/D");
           roottree->Branch("latMaxDist_VE",&latMaxDist_VE,"latMaxDist_VE/D");
           roottree->Branch("NlateralAntennas_VE",&NlateralAntennas_VE,"NlateralAntennas_VE/I");
+          roottree->Branch("dispersion_RMS_perc_VE",&dispersion_RMS_perc_VE,"dispersion_RMS_perc_VE/D");
+          roottree->Branch("dispersion_Mean_perc_VE",&dispersion_Mean_perc_VE,"dispersion_Mean_perc_VE/D");
         }
         if (config["lateralTimeDistribution"]->bValue()) {
           roottree->Branch("latTimeSphere1DRcurv_VE",&latTimeSphere1DRcurv_VE,"latTimeSphere1DRcurv_VE/D");
@@ -2127,6 +2121,9 @@ int main (int argc, char *argv[])
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
       epsilon_0m = 0, epsilon_0m_NS = 0, epsilon_0m_VE = 0;
       chi2NDF = 0, chi2NDF_NS = 0, chi2NDF_VE = 0;
+
+      dispersion_RMS_perc = 0, dispersion_RMS_perc_NS = 0, dispersion_RMS_perc_VE = 0;
+      dispersion_Mean_perc = 0, dispersion_Mean_perc_NS = 0, dispersion_Mean_perc_VE = 0;
 
       // values for conical beamforming
       coneAngle=0, coneAngle_NS=0, coneAngle_VE=0;
@@ -2508,9 +2505,9 @@ int main (int argc, char *argv[])
               latMaxDist_NS  = latResults.asDouble("latMaxDist");
               NlateralAntennas_NS  = latResults.asuInt("NlateralAntennas");
 
-              dispersion_RMS_perc = latResults.asDouble("dispersion_RMS_perc");
-              dispersion_Mean_perc = latResults.asDouble("dispersion_Mean_perc");
-              //hisInfo<<gt<<"\t"<<dispersion_Mean_perc<<"\t"<<dispersion_RMS_perc<<endl;
+              dispersion_RMS_perc_NS = latResults.asDouble("dispersion_RMS_perc");
+              dispersion_Mean_perc_NS = latResults.asDouble("dispersion_Mean_perc");
+              //hisInfo<<gt<<"\t"<<dispersion_Mean_perc_NS<<"\t"<<dispersion_RMS_perc_NS<<endl;
 
              }
 
@@ -2673,6 +2670,10 @@ int main (int argc, char *argv[])
               latMinDist_VE = latResults.asDouble("latMinDist");
               latMaxDist_VE = latResults.asDouble("latMaxDist");
               NlateralAntennas_VE = latResults.asuInt("NlateralAntennas");
+              
+              dispersion_RMS_perc_VE = latResults.asDouble("dispersion_RMS_perc");
+              dispersion_Mean_perc_VE = latResults.asDouble("dispersion_Mean_perc");
+              //hisInfo<<gt<<"\t"<<dispersion_Mean_perc_VE<<"\t"<<dispersion_RMS_perc_VE<<endl;
             }
 
             // plot lateral distribution of arrival times, if requested
