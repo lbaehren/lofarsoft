@@ -23,8 +23,12 @@
 #                and IS plots (OBSID_redIS) on locus102. Now in the
 #                web-page will only show combined plots for IS, CS
 #                and BF (for future)
-# July 8, 2011 - Added IM Location column with the html link to
+# Jul  8, 2011 - Added IM Location column with the html link to
 #                osbervatory page with many diagnostic plot
+# Jul 10, 2011 - Added "Obs Setup' column with plenty extra info from
+#                parset file.
+# Jul 12, 2011 - Added 'Start Time' and 'antenna config' to 'Obs Setup'
+#                column
 ###################################################################
 import os, sys, glob
 import getopt
@@ -181,7 +185,7 @@ class obsinfo:
                 self.datestring="????"
 		self.starttime=self.stoptime=""
 		self.seconds = 0
-                self.antenna=self.band=self.stations=self.stations_string="?"
+                self.antenna=self.antenna_config=self.band=self.stations=self.stations_string="?"
 		self.stations_html=""
 		self.nstations=self.ncorestations=self.nremotestations=0
 		self.nodeslist_string=self.datadir=""
@@ -388,12 +392,36 @@ class obsinfo:
                 	sday=self.starttime.split("-")[2].split(" ")[0]
                 	self.datestring=smonth+sday
 
+		# Getting the Duration
+		cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)
+		status=os.popen(cmd).readlines()
+		if np.size(self.starttime) > 0 and np.size(status) > 0:
+			# it means that both start and stop Times exist in parset file
+			self.stoptime=status[0][:-1].split(" = ")[-1]
+			c1 = time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S")
+			c2 = time.strptime(self.stoptime, "%Y-%m-%d %H:%M:%S")
+			self.dur=time.mktime(c2)-time.mktime(c1)  # difference in seconds
+			if float(self.dur/3600.0) > 1.:
+				self.duration="%.1fh" % (self.dur/3600.)
+			else:
+				self.duration="%.1fm" % (self.dur/60.)
+		
+		# Leaving only time in startTime
+		self.starttime = self.starttime.split(" ")[1]
+
 		# Getting the Antenna info (HBA or LBA)
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status)>0:
                 	# Antenna array setting exists in parset file
                 	self.antenna=status[0][:-1].split(" = ")[-1].split("_")[0]
+
+		# Getting the Antenna config (LBA_OUTER, LBA_INNER, HBA_JOINED, etc.)
+        	cmd="grep 'Observation.antennaSet' %s" % (self.parset,)
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
+                	# Antenna Set setting exists in parset file
+                	self.antenna_config=status[0][:-1].split(" = ")[-1]
 
 		# Getting the Filter setting
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
@@ -613,20 +641,6 @@ class obsinfo:
 					self.source=self.source.split("'")[1]
 				if self.source[0] == "\"":
 					self.source=self.source.split("\"")[1]
-
-        	# Getting the Duration
-        	cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(self.starttime) > 0 and np.size(status) > 0:
-                	# it means that both start and stop Times exist in parset file
-                	self.stoptime=status[0][:-1].split(" = ")[-1]
-                	c1 = time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S")
-                	c2 = time.strptime(self.stoptime, "%Y-%m-%d %H:%M:%S")
-                	self.dur=time.mktime(c2)-time.mktime(c1)  # difference in seconds
-                	if float(self.dur/3600.0) > 1.:
-                        	self.duration="%.1fh" % (self.dur/3600.)
-                	else:
-                        	self.duration="%.1fm" % (self.dur/60.)
 
 		# Getting Stokes info
 		cmd="grep OLAP.Stokes.which %s" % (self.parset,)
@@ -916,11 +930,11 @@ class outputInfo:
 		obssetup_html=""
 		if self.comment == "":
 			if self.oi.nrRings > 0:
-				obssetup="Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-				obssetup_html="Station Beams: %d<br>TA beams: %d [%d ring(s), %g deg]<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup="Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|Antenna_Config:%s|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.antenna_config, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup_html="Station Beams: %d<br>TA beams: %d [%d ring(s), %g deg]<br>Antenna Config: %s<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.antenna_config, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
 			else:
-				obssetup="Station_Beams:%d|TA_beams:%d|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-				obssetup_html="Station Beams: %d<br>TA beams: %d<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup="Station_Beams:%d|TA_beams:%d|Antenna_Config:%s|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.antenna_config, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup_html="Station Beams: %d<br>TA beams: %d<br>Antenna Config: %s<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.antenna_config, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
 
 		# forming first Info (not html) string
 		if viewtype == "brief":
