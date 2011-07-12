@@ -75,7 +75,6 @@ class Op_gausfit(Op):
                 islcp = isl.copy(img)
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
                 islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
-                isl.islmean = 0.0
                 sgaul, sfgaul = self.fit_island(islcp, opts, img)
                 gaul = gaul + sgaul; fgaul = fgaul + sfgaul
                 if bar.started: bar.spin()

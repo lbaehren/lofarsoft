@@ -62,15 +62,15 @@ class Op_readimage(Op):
 
         for pol in pols:
             if pol == 'I':
-                image_file=img.opts.filename
+                image_file = img.opts.filename
             else:
-                split_filename=img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
-                image_file=split_filename[0]+'_'+pol+split_filename[-1]
+                split_filename = img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
+                image_file = split_filename[0]+'_'+pol+split_filename[-1]
 
             result = read_image_from_file(image_file, img, img.opts.indir)
             if result == None:
                 if pol == 'I':
-                    raise RuntimeError("Cannot open file " + repr(image_file))
+                    raise RuntimeError("Cannot open file " + repr(image_file) + ". " + img._reason)
                 else:
                     img.opts.polarisation_do = False
                     mylog.warning('Cannot open ' + pol + ' image. '\

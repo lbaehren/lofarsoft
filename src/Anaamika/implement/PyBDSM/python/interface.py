@@ -17,7 +17,14 @@ def process(img, **kwargs):
 
     """
     from bdsm import default_chain, _run_op_list
+    from image import Image
     import mylogger 
+
+    # First, reset img to initial state (in case img is being reprocessed),
+    # but keep all currently defined options.
+    timg = Image({'filename':''})
+    timg.opts = img.opts
+    img = timg
 
     # Start up logger. We need to initialize it each time process() is
     # called, in case the quiet or debug options have changed
@@ -39,10 +46,7 @@ def process(img, **kwargs):
             
         # Run op's in chain
         op_chain = get_op_chain(img)
-        _run_op_list(img, op_chain)
-           
-        # Shut down logger
-        #mylogger.logging.shutdown()
+        _run_op_list(img, op_chain)   
         return True
     except RuntimeError, err:
         # Catch and log error

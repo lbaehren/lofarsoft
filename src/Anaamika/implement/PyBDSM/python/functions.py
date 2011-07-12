@@ -991,22 +991,28 @@ def read_image_from_file(filename, img, indir, quiet=False):
         # First assume image is a fits file, and use pyfits to open it (if
         # available). If that fails, try to use pyrap if available.
         failed_read = False
+        reason = 0
         try:
             if has_pyfits:
                 fits = pyfits.open(image_file, mode="readonly", ignore_missing_end=True)
                 img.use_io = 'fits'
             else:
+                reason = 2 # Pyfits unavailable
                 raise IOError
         except IOError:
+            if reason == 0:
+                reason = 1 # Pyfits available but cannot read file
             if has_pyrap:
                 try:
                     inputimage = pim.image(image_file)
                     img.use_io = 'rap'
                 except IOError:
                     failed_read = True
+                    img._reason = 'File is not a valid FITS, CASA, or HDF5 image.'
             else:
                 failed_read = True
-
+                if reason == 1:
+                    img._reason = 'PyFITS cannot read file and Pyrap is unavailable.'
         if failed_read:
             return None
 
