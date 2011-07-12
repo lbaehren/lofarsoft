@@ -25,8 +25,8 @@ from pycrtools import *
 #------------------------------------------------------------------------
 # Main input parameters
 #------------------------------------------------------------------------
-filename="LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
 filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
+filename="LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
 
 filedir="/Users/falcke/LOFAR/work/CR/"
 block_with_peak=93
@@ -241,13 +241,13 @@ Pause("Plotted time series data. Press 'return' to continue.")
 ########################################################################
 #First determine where the pulse is in a simple incoherent sum of all time series data
 print "---> Now add all antennas in the time domain, locate pulse and cut time series around it"
-pulse=trun("LocatePulseTrain",timeseries_data2,nsigma=7,maxgap=3,minlen=64)
+pulse=trun("LocatePulseTrain",timeseries_data2,pardict=par,nsigma=7,maxgap=3,minlen=64)
 
 print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
 timeseries_power=hArray(copy=pulse.timeseries_data_cut)
 timeseries_power.square()
 timeseries_power.runningaverage(5,hWEIGHTS.GAUSSIAN)
-maxima_power=trun('FitMaxima',timeseries_power,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+maxima_power=trun('FitMaxima',timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 Pause("Press 'return' to continue.")
 
 ########################################################################
@@ -255,9 +255,9 @@ Pause("Press 'return' to continue.")
 ########################################################################
 print "---> Cross correlate pulses, get time lags, and determine direction of pulse."
 #Now cross correlate all pulses with each other 
-crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=10)
+crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,pardict=par,oversamplefactor=10)
 #And determine the relative offsets between them
-maxima=trun('FitMaxima',crosscorr.crosscorr_data,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
+maxima=trun('FitMaxima',crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
 Pause("Press 'return' to continue.")
 
 print "Time lag [ns]: ", maxima.lags 
@@ -272,7 +272,7 @@ print " "
 delays=hArray(copy=cabledelays)
 delays.fill(0)
 
-direction=trun("DirectionFitTriangles",positions=antenna_positions,timelags=hArray(maxima.lags),delays=delays,maxiter=9,verbose=True,doplot=False)
+direction=trun("DirectionFitTriangles",pardict=par,positions=antenna_positions,timelags=hArray(maxima.lags),delays=delays,maxiter=9,verbose=True,doplot=False)
 print "========================================================================"
 print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
 print " "
@@ -297,7 +297,7 @@ print "\n--->Beamforming"
 
 #Beamform short data set first for inspection (and possibly for
 #maximizing later)
-bf=trun("BeamFormer2",data=pulse.timeseries_data_cut,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+bf=trun("BeamFormer2",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
 Pause("Press 'return' to continue.")
 
 #Use the above later also for maximizing peak Beam-formed timeseries
@@ -309,7 +309,7 @@ Pause("Press 'return' to continue.")
 
 print "---> Plotting full beam-formed data set"
 #Beamform full data set (not really necessary, but fun).
-beamformed_long=trun("BeamFormer2",data=pulse.timeseries_data,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+beamformed_long=trun("BeamFormer2",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
 
 ########################################################################
 #Data Analysis ... (to be expanded)
@@ -319,12 +319,14 @@ beamformed_long=trun("BeamFormer2",data=pulse.timeseries_data,maxnantennas=ndipo
 smooth_beam=hArray(dimensions=[blocksize],copy=beamformed_long.tbeams)
 smooth_beam.abs()
 smooth_beam.runningaverage(7,hWEIGHTS.GAUSSIAN)
-smooth_beam.plot()
+if Pause.doplot:
+    smooth_beam.plot()
+    Pause("Press 'return' to continue.")
 
 print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
 print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.start]/1000.,"-",timeseries_data.par.xvalues[pulse.end]/1000.,"ms (i.e., {0:d} ms + {1:6.3f}-{2:6.3f} mus)".format(int(timeseries_data.par.xvalues[pulse.start]/1000),round(timeseries_data.par.xvalues[pulse.start] % 1000.,3),round(timeseries_data.par.xvalues[pulse.end] % 1000.,3))
 
 smooth_beam_dummy=hArray(smooth_beam.vec(),dimensions=[1,blocksize])
-beam_maxima=trun('FitMaxima',smooth_beam_dummy,doplot=Pause.doplot,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+beam_maxima=trun('FitMaxima',smooth_beam_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 t=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
 print "# Peak found at sample {0:8.2f} ({1:11.8f} ms = {2:d} ms + {3:9.5f} mus) with height {4:8.2f} units.".format(beam_maxima.maxx.val(),t,int(t),(t%1)*1000,beam_maxima.maxy.val())
