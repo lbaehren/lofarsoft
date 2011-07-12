@@ -730,14 +730,14 @@ namespace CR { // Namespace CR -- begin
               (*it).second.lateralExpHeightErr = 0;
 
 
-              cout<<" x:"<<(*it).second.dist<<" eps100: "<<fitfuncExp->GetParameter(0)<<" and R0: "<<fitfuncExp->GetParameter(1)<<endl;
+              //cout<<" x:"<<(*it).second.dist<<" eps100: "<<fitfuncExp->GetParameter(0)<<" and R0: "<<fitfuncExp->GetParameter(1)<<endl;
 
               ///1st method : deviation point-function only concerning y axix
               (*it).second.lateralExpDeviation = (*it).second.height - (*it).second.lateralExpHeight;
               (*it).second.lateralExpDeviationErr = 0;
 
-              cout<<" deviation : "<<(*it).second.lateralExpDeviation<<endl;
-              cout<<" weigh     : "<<(*it).second.heightError<<endl;
+              //cout<<" deviation : "<<(*it).second.lateralExpDeviation<<endl;
+              //cout<<" weigh     : "<<(*it).second.heightError<<endl;
 
               //cout << (*it).second.antenna << " \t " << side1[1] << " \t "
               //    << modSide2 << " \t " << InternAngle << " \t " << (*it).second.lateralExpDeviation << " " << endl;

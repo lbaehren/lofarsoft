@@ -1498,7 +1498,11 @@ namespace CR { // Namespace CR -- begin
             double totaldiff = envTrace(j+1) - envTrace(j);
             double diffdown = envMaximum/2. - envTrace(j);
             double timesample = timeRange(j+1) - timeRange(j);
-            pulsestart = timeRange(j) + timesample * (diffdown/totaldiff);
+            // for simulations totaldiff can be 0
+            if (totaldiff > 0.)
+              pulsestart = timeRange(j) + timesample * (diffdown/totaldiff);
+            else
+              pulsestart = timeRange(j);
             break; // exit loop
           }
         }
@@ -1512,7 +1516,11 @@ namespace CR { // Namespace CR -- begin
             double totaldiff = envTrace(j-1) - envTrace(j);
             double diffdown = envMaximum/2. - envTrace(j);
             double timesample = timeRange(j) - timeRange(j-1);
-            pulsestop = timeRange(j) - timesample * (diffdown/totaldiff);
+            // for simulations totaldiff can be 0
+            if (totaldiff > 0.)
+              pulsestop = timeRange(j) - timesample * (diffdown/totaldiff);
+            else
+              pulsestop = timeRange(j);
             break; // exit loop
           }
         }
@@ -1520,7 +1528,11 @@ namespace CR { // Namespace CR -- begin
         // calculate the noise as mean of the part before of the trace before the pulse 
         if (noiseMethod!=-1) {
           noise = calculateNoise(yValues.column(i)(timeRangeNoise),noiseMethod);
-          snr = envMaximum / noise;
+          // check if noise is reasonalby large (for simulations events it can be close to 0
+          if (noise > 0.)
+            snr = envMaximum / noise;
+          else
+            snr = 1e6;  // large snr do not effect error or amplitude correction
         }  
 
         // store the calculated values for later calculation of the mean
