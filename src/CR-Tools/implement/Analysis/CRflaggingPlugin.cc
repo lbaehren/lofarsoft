@@ -90,6 +90,26 @@ namespace CR { // Namespace CR -- begin
 	means(i) = mean(data.column(i));
 	devs(i) = stddev(data.column(i));
       };
+
+      for (int j=0; j<nants; j++){
+         Vector<Double> tmp_data;
+         Double sum=0.;
+         int nsample;
+
+         tmp_data=data.column(j);
+         nsample=data.nrow();
+
+         for (int k=0; k<nsample; k++){
+
+            sum=sum+data(k,j);
+         }
+
+         if (sum==0) {
+            flags(j) = False;
+            cout<<"CRflaggingPlugin: Flagged Antenna #"<<j+1<<" due to no signal at all! "<<endl;
+         }
+      }
+      
       if (parameters_p.asBool("DoSpikyFlagging")) {
 	cmpfakt = parameters_p.asDouble("SpikyFaktor");
 	for (i=0; i<nants; i++) {
