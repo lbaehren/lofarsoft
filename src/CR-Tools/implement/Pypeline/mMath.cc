@@ -494,9 +494,9 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
   hSubTo(vecA,vecB) -> vecB=[ vecA[0]-vecB[0], vecA[1]-vecB[1], ..., vecA[n]-vecB[n] ]
   hDivTo(vecA,vecB) -> vecB=[ vecA[0]/vecB[0], vecA[1]/vecB[1], ..., vecA[n]/vecB[n] ]
 
-  
+
   Example:
-  ::    
+  ::
       #Example is for adding operation, mul, div, sub are similar
       a1=hArray(int,[3,5],fill=range(5))
       #a1->hArray(int, [3L, 5L], fill=[0,1,2,3,4,0,1,2,3,4,0,1,2,3,4]) # len=15 slice=[0:15])
@@ -818,6 +818,7 @@ template <class Iter, class Iterin1, class Iterin2>
 void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const Iterin1 vec1,const Iterin1 vec1_end, const Iterin2 vec2,const Iterin2 vec2_end)
 {
   // Declaration of variables
+  typedef IterValueType T;
   Iterin1 it1=vec1;
   Iterin2 it2=vec2;
   Iter itout=vec;
@@ -5185,7 +5186,7 @@ void HFPP_FUNC_NAME (const NIter target, const NIter target_end,
 
         // Next position in source array (skipping fastest index)
         source_it += Nshifts;
-        
+
         // Next position in target array
         ++target_it;
       }
