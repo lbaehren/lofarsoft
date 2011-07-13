@@ -21,6 +21,7 @@ V1.0 created by H. Falcke, July 2011
 """
 
 from pycrtools import *
+t0=time.clock()
 
 #------------------------------------------------------------------------
 # Main input parameters
@@ -28,23 +29,68 @@ from pycrtools import *
 filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
 filename="LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
 
-filedir="/Users/falcke/LOFAR/work/CR/"
+filedir="~/LOFAR/work/CR/"
+outputdir="/Users/falcke/LOFAR/work/"
 block_with_peak=93
+plotpause=False
 maximum_allowed_delay=1e-8 # maximum differential mean cable delay
                            # that the expected positions can differ
                            # from the measured ones, before we
                            # consisder something to be wrong
 #------------------------------------------------------------------------
+plt.ioff()
 
-Pause=plotpause()
+########################################################################
+#Setting filenames and directories
+########################################################################
+
+filename=os.path.expandvars(os.path.expanduser(filename))
+filedir=os.path.expandvars(os.path.expanduser(filedir))
+outputdir=os.path.expandvars(os.path.expanduser(outputdir))
+
+outputdir=os.path.join(outputdir,filename+".dir")
+result_file=os.path.join(outputdir,filename+".results")
+htmlfilename=os.path.join(outputdir,"index.html")
+
+tasks.task_write_parfiles=True
+tasks.task_outputdir=outputdir
+nparfiles = len(tasks.task_parfiles)
+
+#Removing old parfiles, if they exist
+[os.remove(f) for f in listFiles([os.path.join(outputdir,"*.par"),os.path.join(outputdir,"*.par.txt")])]
+
+print "filename    -->",filename
+print "filedir     -->",filedir
+print "outputdir   -->",outputdir
+print "result_file -->",result_file
+print "htmlfile    -->",htmlfilename
+if tasks.task_write_parfiles:
+    print "parfiles    -->",outputdir
+else:
+    print "# No parfiles will be written by tasks!"
+
+
+#Create a directory containing the output files
+if not os.path.exists(outputdir):
+    print "# Creating output directory",outputdir
+    os.mkdir(outputdir)
+else:
+    print "# Using existing output directory",outputdir
+
+Pause=plotfinish(filename=os.path.join(outputdir,filename),plotpause=plotpause)
+
+########################################################################
+#Setting the parameter block with parameters for tasks
+########################################################################
 
 par=dict(
     plot_antenna=39,
     newfigure=False, #Don't create a new plotting window for some of the tasks, but use the old one.
-    plot_pause=Pause,
+    plot_finish=Pause,
+    output_dir=outputdir,
     AverageSpectrum = dict(
         addantennas=False,
-        filefilter=filedir+filename,
+        filefilter=os.path.join(filedir,filename),
         lofarmode=lofarmode,
         antennas_start=1,
         antennas_stride=2,maxpeak=7,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=7,
@@ -75,8 +121,6 @@ par=dict(
 #reallocated, if eventually one loops over events - but that needs
 #checking).
 
-#The following are the parameters for the tasks (not all parameters
-#are already included here, stil tbd)
 
 ########################################################################
 #Getting the average spectrum and quality flags
@@ -127,12 +171,12 @@ ndipoles=len(good_antennas)
 #Create new average spectrum with only good antennas
 
 if len(bad_antennas)>0:
-    print "#Antenna Flagging:",len(bad_antennas),"bad antennas!"
-    print "Bad Antennas:",bad_antennas
+    print "# Antenna Flagging:",len(bad_antennas),"bad antennas!"
+    print "# Bad Antennas:",bad_antennas
     averagespectrum_good_antennas=hArray(dimensions=[ndipoles,speclen],properties=avspectrum.power)
     averagespectrum_good_antennas[...].copy(avspectrum.power[good_antennas_index,...])
 else:
-    print "#Antenna Flagging: All antennas OK!"
+    print "# Antenna Flagging: All antennas OK!"
     averagespectrum_good_antennas=avspectrum.power
     
 #raise KeyboardInterrupt("Forced end of Execution!")
@@ -195,7 +239,8 @@ cabledelays=hArray(cabledelays)
 ########################################################################
 #Read block with peak and FFT
 ########################################################################
-timeseries_data=datafile["TIMESERIES_DATA"]
+timeseries_data=datafile["EMPTY_TIMESERIES_DATA"]
+timeseries_data.read(datafile,"TIMESERIES_DATA")
 timeseries_data.setUnit("","ADC Counts")
 timeseries_data.par.xvalues=datafile["TIME_DATA"]
 timeseries_data.par.xvalues.setUnit("","s")
@@ -221,7 +266,7 @@ fft_data.mul(calcbaseline2.baseline)
 power=hArray(float,properties=fft_data)
 power.spectralpower(fft_data)
 if Pause.doplot: power[0:4,...].plot()
-Pause("Plotted corrected spectrum. Press 'return' to continue.")
+Pause("Plotted corrected spectrum. ",name="calibrated-spectrum")
 
 ########################################################################
 #Back to time domain
@@ -234,7 +279,7 @@ hFFTWExecutePlan(timeseries_data2[...], fft_data[...], invfftplan)
 timeseries_data2 /= blocksize # normalize back to original value
 
 if Pause.doplot: timeseries_data2[0:2,...].plot()
-Pause("Plotted time series data. Press 'return' to continue.")
+Pause("Plotted time series data. ",name="calibrated-imeseries")
 
 ########################################################################
 #Locate pulse and cut data around it
@@ -248,7 +293,7 @@ timeseries_power=hArray(copy=pulse.timeseries_data_cut)
 timeseries_power.square()
 timeseries_power.runningaverage(5,hWEIGHTS.GAUSSIAN)
 maxima_power=trun('FitMaxima',timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
-Pause("Press 'return' to continue.")
+Pause(name="pulse-maxima-power")
 
 ########################################################################
 #Cross correlate and get time lags
@@ -258,7 +303,7 @@ print "---> Cross correlate pulses, get time lags, and determine direction of pu
 crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,pardict=par,oversamplefactor=10)
 #And determine the relative offsets between them
 maxima=trun('FitMaxima',crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
-Pause("Press 'return' to continue.")
+Pause(name="pulse-maxima-crosscorr")
 
 print "Time lag [ns]: ", maxima.lags 
 print " "
@@ -298,35 +343,108 @@ print "\n--->Beamforming"
 #Beamform short data set first for inspection (and possibly for
 #maximizing later)
 bf=trun("BeamFormer2",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
-Pause("Press 'return' to continue.")
 
 #Use the above later also for maximizing peak Beam-formed timeseries
 #is in ---> bf.tbeams[bf.mainbeam]
 
 print "---> Plotting mosaic of beams around central direction"
-if Pause.doplot: bf.tplot()
-Pause("Press 'return' to continue.")
+if Pause.doplot:
+    bf.tplot()
+Pause(name="beamformed-multiple-directions")
 
 print "---> Plotting full beam-formed data set"
 #Beamform full data set (not really necessary, but fun).
-beamformed_long=trun("BeamFormer2",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+beamformed=trun("BeamFormer2",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
 
 ########################################################################
 #Data Analysis ... (to be expanded)
 ########################################################################
 
 #Produce nice looking plot of peak
-smooth_beam=hArray(dimensions=[blocksize],copy=beamformed_long.tbeams)
+smooth_beam=hArray(dimensions=[blocksize],copy=beamformed.tbeams,name="Beamformed Power",xvalues=timeseries_data.par.xvalues)
 smooth_beam.abs()
 smooth_beam.runningaverage(7,hWEIGHTS.GAUSSIAN)
 if Pause.doplot:
+    plt.ioff()
     smooth_beam.plot()
-    Pause("Press 'return' to continue.")
-
-print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
-print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.start]/1000.,"-",timeseries_data.par.xvalues[pulse.end]/1000.,"ms (i.e., {0:d} ms + {1:6.3f}-{2:6.3f} mus)".format(int(timeseries_data.par.xvalues[pulse.start]/1000),round(timeseries_data.par.xvalues[pulse.start] % 1000.,3),round(timeseries_data.par.xvalues[pulse.end] % 1000.,3))
+    Pause(name="pulse-beamformed")
 
 smooth_beam_dummy=hArray(smooth_beam.vec(),dimensions=[1,blocksize])
 beam_maxima=trun('FitMaxima',smooth_beam_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
-t=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
-print "# Peak found at sample {0:8.2f} ({1:11.8f} ms = {2:d} ms + {3:9.5f} mus) with height {4:8.2f} units.".format(beam_maxima.maxx.val(),t,int(t),(t%1)*1000,beam_maxima.maxy.val())
+pulse_time_ms=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
+
+print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
+print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.start]/1000.,"-",timeseries_data.par.xvalues[pulse.end]/1000.,"ms (i.e., {0:d} ms + {1:6.3f}-{2:6.3f} mus)".format(int(timeseries_data.par.xvalues[pulse.start]/1000),round(timeseries_data.par.xvalues[pulse.start] % 1000.,3),round(timeseries_data.par.xvalues[pulse.end] % 1000.,3))
+print "# Peak found at sample {0:8.2f} ({1:11.8f} ms = {2:d} ms + {3:9.5f} mus) with height {4:8.2f} units.".format(beam_maxima.maxx.val(),pulse_time_ms,int(pulse_time_ms),(pulse_time_ms%1)*1000,beam_maxima.maxy.val())
+
+########################################################################
+#Preparing and writing results record
+########################################################################
+
+results=dict(
+    TELESCOPE=datafile["TELESCOPE"],
+    ANTENNA_SET=datafile["ANTENNA_SET"],
+    NYQUIST_ZONE=datafile["NYQUIST_ZONE"][0],
+    SAMPLE_FREQUENCY=datafile["SAMPLE_FREQUENCY"][0],
+    FREQUENCY_RANGE=datafile["FREQUENCY_RANGE"][0],
+    NOF_DIPOLE_DATASETS=datafile["NOF_DIPOLE_DATASETS"],
+    DATA_LENGTH=datafile["DATA_LENGTH"][0],
+    SAMPLE_INTERVAL=sample_interval,
+    FILENAME=filename,
+    BLOCK=block_with_peak,
+    BLOCKSIZE=blocksize,
+    plotfiles=Pause.files,
+    filedir=filedir,
+    ndipoles=ndipoles,
+    antennas=good_antennas,
+    antenna_positions_XYZ_m=antenna_positions,
+    bad_antennas=bad_antennas,
+    pulses_maxima_x=list(maxima_power.maxx),
+    pulses_maxima_y=list(maxima_power.maxy),
+    pulses_timelags_ns=list(maxima.lags),
+    pulse_start_sample=pulse.start,
+    pulse_end_sample=pulse.end,
+    pulse_time_ms=pulse_time_ms,
+    pulse_direction=direction.meandirection_azel_deg
+    )
+
+smooth_beam.par.quality=qualitylist
+smooth_beam.par.time_series=pulse.timeseries_data_cut
+smooth_beam.par.results=results
+smooth_beam.write(result_file)
+
+########################################################################
+#Writing summary output to html file
+########################################################################
+htmlfile=open(htmlfilename,"w")
+htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(filename))
+htmlfile.write("<h1>{0:s}</h1>\n".format(filename))
+htmlfile.write("<h2>Parameters</h2>\n".format())
+htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><br>\n".format(
+    time.strftime("%A, %Y-%m-%d at %H:%M:%S"),os.getlogin(),time.clock()-t0))
+
+l=results.items(); l.sort()
+htmlfile.write('<table border="1">\n'.format())
+for k,v in l:
+    htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
+htmlfile.write("</table>\n".format())
+
+htmlfile.write("<h2>Parfiles</h2>\n".format())
+for i in range(nparfiles,len(tasks.task_parfiles)):
+    if os.path.exists(tasks.task_parfiles[i]):
+        os.rename(tasks.task_parfiles[i],tasks.task_parfiles[i]+".txt")
+        htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
+
+htmlfile.write("<h2>Plotfiles</h2>\n".format())
+for f in results["plotfiles"]:
+    htmlfile.write('{0:s}<br><a href="{0:s}"><img src="{0:s}" width=500></a><p>\n'.format(os.path.split(f)[-1]))
+
+htmlfile.write("</body></html>\n")
+htmlfile.close()    
+    
+print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
+print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``."
+print "Open",htmlfilename,"in your browser to get a summary."
+print "-----------------------------------------------------------------------------------------------------------"
+print "Finished cr_event after",time.clock()-t0,"seconds."
+plt.ion()

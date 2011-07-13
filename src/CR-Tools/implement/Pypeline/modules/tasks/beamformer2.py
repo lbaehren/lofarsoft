@@ -147,6 +147,8 @@ class BeamFormer2(tasks.Task):
         
         "plot_end":{default:lambda self: min(int(self.blocklen*self.plot_center)+self.plotlen,self.blocklen),doc:"End plotting before this sample number."},
 
+        "plot_finish":{default: lambda self:plotfinish(doplot=self.doplot),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+
         "delta_nu":{default:1,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen. Alternatively set blocklen directly.",unit:"Hz"},
          
         "maxnantennas":{default:96,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
@@ -166,7 +168,7 @@ class BeamFormer2(tasks.Task):
 
         "output_dir":{default:"",doc:"Directory where output file is to be written to."},
     
-        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".beams"+self.tmpfileext,
+        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "beamformer2")+".beams"+self.tmpfileext,
                          doc:"Filename (without directory, see output_dir) to store the final spectrum."},
 
         "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
@@ -319,6 +321,7 @@ class BeamFormer2(tasks.Task):
         fftplan = FFTWPlanManyDftR2c(self.data.shape()[-1], 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
         
         if self.doplot:
+            wasinteractive=plt.isinteractive()
             plt.ioff()
             if self.newfigure and not self.figure:
                 self.figure=plt.figure()
@@ -395,7 +398,8 @@ class BeamFormer2(tasks.Task):
                         self.avspec[self.mainbeam].plot()
                     elif self.calc_timeseries:
                         self.data_shifted[self.plot_antennas,...,self.plot_start:self.plot_end].plot()
-                    plt.draw(); 
+                    self.plot_finish(name=self.__taskname__)
+                    plt.draw()
                 if self.verbose:
                     print "# End  block =",block," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
             if self.verbose:
@@ -417,6 +421,7 @@ class BeamFormer2(tasks.Task):
             print "To calculate or plot the invFFTed times series of one block, use 'Task.tcalc(bm)' or 'Task.tplot(bm)'."
         if self.doplot:
             plt.ion()
+            if wasinteractive: plt.ion()
             
     def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
         """

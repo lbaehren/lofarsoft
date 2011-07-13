@@ -111,6 +111,9 @@ sessions without having to retype the parameters. The workspace can be
 accessed via ``myWorkSpace=Task.ws`` and a workspace can be provided
 as input to a task, e.g. ``f(ws=myWorkSpace)``.
 
+parfiles
+--------
+
 The task will also write all input and output parameters to a
 parameter file (``taskname-TIME.par``) at execution time (and at the
 end). This file is in python style and easy to read and to edit with a
@@ -118,6 +121,13 @@ normal text editor. Tasks can be run with this file as input to set
 the parameters accordingly, using::
 
     Task(parfile=filename,par1=value1,...)
+
+The location where the .par files are stored can be changed by setting
+the global variable ``tasks.task_outputdir='dir...'``in the task
+module. To inhibit writing .par files one can set
+``tasks.task_write_parfiles = False``. This will affect all tasks. A
+list of all task files created within the session, will be stored in
+``tasks.task_parfiles``.
 
 The task workspace is a relatively powerful construct. In the most
 simplest case it just holds the input parameters. Of course, default
@@ -436,6 +446,9 @@ task_instance = None
 task_name = ""
 task_class= None
 task_list = set()
+task_outputdir = "" # Where to write the .par files
+task_write_parfiles = True
+task_parfiles = []
 
 #list of all loaded tasks
 task_allloaded = {}
@@ -658,11 +671,14 @@ class Task(object):
         Save the parameters to a file that can be read back later with
         the option parfile=filename (e.g., tpar parfile=filename)
         """
-        f=open(self.oparfile,"w")
+        if not task_write_parfiles: return
+        fn=os.path.join(task_outputdir,self.oparfile)
+        if len(task_parfiles)==0 or not task_parfiles[-1]==fn:
+            task_parfiles.append(fn)
+        f=open(task_parfiles[-1],"w")
         f.write("# Task: "+self.__modulename__+" saved on "+time.strftime("%Y-%m-%d %H:%M:%S")+"\n# File: "+self.oparfile+"\n")
         f.write(self.ws.__repr__(internals=False,workarrays=False))
         f.close()
-
 
     def addProperty(self, name, *funcs):
         """

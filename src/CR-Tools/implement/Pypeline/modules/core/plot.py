@@ -17,43 +17,86 @@ from harray import *
 plot_pause=True
 doplot=True
 
-class plotpause:
+class plotfinish:
     """
-    Class creating a function to be called after a plotting command. If
-    ``plotpause.plot_pause = True`` it will pause and ask for user input
-    whether and how to continue calculation and plotting.
-    May modify ``plot_pause`` and ``doplot``, depending on user input.
+    Usage:
+      
+    Class creating a function to be called after a plotting
+    command. If ``plotpause.plotpause = True`` it will pause and ask
+    for user input whether and how to continue calculation and
+    plotting. If a filename is provided the figure will be saved to
+    disk.
 
+
+    The following parameters can be specified during initialization of
+    the class or during a call to the instance of the plotfinish
+    class.
+    
+    =========== ========  =====================================================
+    *plotpause* = True    Pause for manual input after each plot.
+
+    *doplot*    = True    Plot at all.
+
+    *filename*  = ""      If set, save figure to this file (w/o extension)
+
+    *filetype*  = "gif"   Extension of the figure file to also determine format.
+
+    *txt*       = ""      Text to print after plotting and before user input
+                          (parameter not available at initialization)
+
+    name        = ""      Name identifying current plot. Will also be appended
+                          to filename. (parameter not available at initialization)
+    =========== ========  =====================================================
+    
+    May modify ``plotpause`` and ``doplot``, depending on user input.
+
+    Filename of the image file will be filename+("-"+name+)"."+filetype
+
+    All filenames that were written to disk can be retrieved as a list
+    from the attribute ``self.files``.
+    
     Example:
         ::
-            pp=plotpause_class()
-            pp("Test")
-            -> Test
-            -> Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...q
+            pp=plotfinish(filename="test")
+            pp("Test","a")
+            -> (a) Test
+            -> Saved plot in --> Test-a.gif
+            -> Press [return] to continue. Press [q]+[return] to proceed without pausing, [n]+[return] to continue without plotting...q
             -> Continue without pausing from now on.
 
-            pp.plot_pause -> False
+            pp.plotpause -> False
             pp("Try again")
             -> Nothing happens (i.e. no pause)....
     """
-    def __init__(self,plotpause=True,doplot=True):
+    def __init__(self,name="",plotpause=True,doplot=True,filename="",filetype="gif"):
         self.plot_pause=plotpause
         self.doplot=doplot
-    def __call__(self,txt=""):
-        if self.plot_pause and self.doplot:
-            plt.draw();
+        self.filename=filename
+        self.filetype=filetype
+        self.files=[]
+    def __call__(self,txt="",name="",filename="",filetype="",savefig=False):
+        if self.doplot:
+            if not filename: filename=self.filename
+            if not filetype: filetype=self.filetype
+            if filename:
+                f=filename+("-" if name else "")+name+"."+filetype
+                self.files.append(f)
+                plt.savefig(f)
+                print "Saved plot in -->",f
             if txt:
-                print txt
-            k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
-            if k=="q":
-                self.plot_pause=False
-                print "Continue without pausing from now on." 
-            elif k=="n":
-                self.doplot=False
-                print "Continue without plotting and without pausing."
-                plt.ion()
-            else:
-                print "Continue."
+                print (("("+name+") ") if name else "")+txt
+            if self.plot_pause:
+                plt.draw();
+                k=raw_input("Press [return] to continue. Press [q+return] to proceed without pausing, [n+return] to continue without plotting ...")
+                if k=="q":
+                    self.plot_pause=False
+                    print "Continue without pausing from now on." 
+                elif k=="n":
+                    self.doplot=False
+                    self.plot_pause=False
+                    print "Continue without plotting and without pausing."
+                else:
+                    print "Continue."
 
 
 
