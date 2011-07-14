@@ -114,7 +114,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
             titles.append('Islands (hatched boundaries)')
         names.append('ch0')
     if ch0_flagged:
-        if img.ngaus == 0:
+        if not hasattr(img, 'ngaus'):
             print 'Image was not fit with Gaussians. Skipping display of flagged Gaussians.'
         else:
             images.append(img_ch0)
@@ -125,14 +125,14 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
         titles.append('Background rms Image')
         names.append('rms')
     if gresid_image:
-        if img.ngaus == 0:
+        if not hasattr(img, 'ngaus'):
             print 'Image was not fit with Gaussians. Skipping residual Gaussian image.'
         else:
             images.append(img_gaus_resid)
             titles.append('Gaussian Residual Image')
             names.append('gaus_resid')
     if gmodel_image:
-        if img.ngaus == 0:
+        if not hasattr(img, 'ngaus'):
             print 'Image was not fit with Gaussians. Skipping model Gaussian image.'
         else:
             images.append(img_gaus_mod)
