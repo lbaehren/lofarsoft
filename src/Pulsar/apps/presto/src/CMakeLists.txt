@@ -134,9 +134,13 @@ if (UNIX)
 endif (UNIX)
 
 add_dependencies (presto
+  dspsr_install
+  psrcat_install
+  psrdada_install
+  psrchive_install
+#  tempo2_install
   fftw_install
   tempo_install
-#  tempo2_install
 #  bf2presto_install
   scripts_install
   see_install
@@ -147,10 +151,6 @@ add_dependencies (presto
   presto_cat_install
   ssps_install
   lpps_install
-  psrcat_install
-  psrchive_install
-  psrdada_install
-  dspsr_install
   )
 
 ##__________________________________________________________
