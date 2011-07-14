@@ -164,12 +164,17 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "doublefft":{default:False,
                      doc:"if True split the FFT into two, thereby saving memory."},
 
+        "calc_incoherent_sum":{default:False,
+                     doc:"Calculate the incoherent sum of all antennas (doublefft=False). See incoherent_sum for result."},
+
+        "ntimeseries_data_added_per_chunk":{default:lambda ws:hArray(int,[ws.nchunks]),doc:"Number of chunks added in each bin for incoherent sum"},
+        
         "delta_nu":{default:1000,
                     doc:"Frequency resolution",
                     unit:"Hz"},
 
-        "blocklen":{default:lambda ws:2**int(round(log(ws.fullsize_estimated,2))/2),
-                    doc:"The size of a block being read in."},
+        "blocklen":{default:lambda ws:2**int(round(log(ws.blocksize,2))/2),
+                    doc:"The size of a block being read in if stride>1, otherwise ``self.blocklen*self.nblocks`` is the blocksize."},
 
         "maxnchunks":{default:-1,
                       doc:"Maximum number of chunks of raw data to integrate spectrum over (-1 = all)."},
@@ -294,7 +299,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "fullsize":p_(lambda ws:ws.nblocks*ws.full_blocklen,
                       "The full length of the raw time series data used for one spectral chunk."),
 
-        "nblocks":{default:lambda ws:2**int(round(log(ws.fullsize_estimated/ws.full_blocklen,2))),
+        "nblocks":{default:lambda ws:2**int(round(log(ws.blocksize/ws.full_blocklen,2))),
                    doc:"Number of blocks of lenght ``blocklen`` the time series data set is split in. The blocks are also used for quality checking."},
 
         "nbands":{default:lambda ws:(ws.stride+1)/2,
@@ -368,7 +373,9 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                      "Sample length in raw data set.",
                      "s"),
 
-        "fullsize_estimated":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0])),
+        "blocksize":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0]),"The desired blocksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``blocksize_used` for the actual blocksize used."),
+        
+        "blocksize_used":p_(lambda ws:ws.blocklen*ws.nblocks,"The blocksize one would use for a single FFT."),
 
         "blocklen_section":p_(lambda ws:ws.blocklen/ws.stride),
 
@@ -404,6 +411,9 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         "fdata":{workarray:True,
                  doc:"main input and work array",
                  default:lambda ws:hArray(float,[ws.nblocks,ws.blocklen],name="fdata",header=ws.header)},
+
+        "incoherent_sum":{doc:"Incoherent sum of the power in all antennas (timeseries data).",
+                 default:lambda ws:hArray(float,[ws.nchunks,ws.blocksize],name="Power(t)",header=ws.header)},
 
         "cdata":{workarray:True,
                  doc:"main input and work array",
@@ -456,29 +466,45 @@ class AverageSpectrum(tasks.Task):
     which means that one big FFT is split into two steps of smaller
     FFts. This allows almost arbitrary resolution.
 
-    The function will go through al files in the list and the loop,
+    The function will go through all files in the list and then loop,
     one-by-one, over all antennas in the files. Data will be read in
-    in ``nchunks``chunks (i.e. blocks) of size ``fullsizes``. For a
+    in ``nchunks`` chunks (i.e. blocks) of size ``fullsizes``. For a
     single FFT these chunks will be subdivided into ``nblock`` blocks
-    to do check quality (i.e. to see if certain blocke deviate form
+    to do quality checks (i.e., to see if certain blocks deviate from
     others). For a double FFT with stride>1 only a fraction of these
     blocks are read in at once.
 
     The desired frequency resolution is provided with the parameter
-    ``delta_nu``, but this will be rounded off to the nearest value using
-    channel numbers of a power of 2.
+    ``delta_nu``, but this will be rounded off to the nearest value
+    using channel numbers of a power of 2. For single FFTs you can
+    also set the parameter ``blocksize``.
 
     Note: the spectrum has N/2 channels and not N/2+1 channels as is
-    usually the case. This means that the last channel is missing (I
-    guess...).
+    usually the case. This means that the last channel is missing!!
 
     The resulting spectrum is stored in the array ``Task.power`` (only
     complete for ``stride=1``) and written to disk as an hArray with
     parameters stored in the header dict (use
     ``getHeader('AverageSpectrum')`` to retrieve this.)
 
+    Note for single FFTs one can decide whether to average all
+    antennas into one spectrum (e.g., an incoherent 'station
+    spectrum'), or whether to keep the antennas separate and get an
+    average spectrum per antenna (``addantennas=False``).
+
     This spectrum can be read back and a baseline can be fitted with
     ``FitBaseline``.
+
+    Incoherent Beam
+    ================
+
+    With the option ``calc_incoherent_sum`` one can add the square of
+    all time series data of all antennas into one long time series
+    data (containing the power) for single FFTs. The resulting array
+    Task.incoherent_sum has the length of the entire data set (of one
+    antenna, of course) and has the dimensions
+    [nchunks,chunksize=blocksize]. It will be saved on disk in
+    sp.par.incoherent_sum.
 
     Quality Checking
     ================
@@ -579,7 +605,13 @@ class AverageSpectrum(tasks.Task):
         self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","antennas","antenna_list"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
         if not self.doublefft:
             self.frequencies.fillrange(self.start_frequency/10**6,self.delta_frequency/10**6)
-
+        if self.stride>1 or self.doublefft:
+            if self.calc_incoherent_sum: self.calc_incoherent_sum=False
+        if self.calc_incoherent_sum:
+            self.ntimeseries_data_added_per_chunk.fill(0)
+            self.incoherent_sum.fill(0)
+            self.power.par.incoherent_sum=self.incoherent_sum
+            
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         clearfile=True
@@ -685,8 +717,7 @@ class AverageSpectrum(tasks.Task):
                                     ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
                                     self.specT.writefilebinary(ofile)
                                     ofiles2+=[ofile]
-                            #print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."
-                            for offset in range(self.nbands):
+                            #print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."                            for offset in range(self.nbands):
                                 if (self.nspectraadded==1): # first chunk
                                     self.power.fill(0.0)
                                 else: #2nd or higher chunk, so read data in and add new spectrum to it
@@ -735,6 +766,9 @@ class AverageSpectrum(tasks.Task):
                                             self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean().val(),
                                             self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].stddev().val()))
                                     plt.draw()
+                            if self.calc_incoherent_sum:
+                                self.incoherent_sum[nchunk].squareadd(self.fdata)
+                                self.ntimeseries_data_added_per_chunk[nchunk]+=1
                     else: #data not ok
                         self.nspectraflagged+=1
                         self.nspectraflagged_per_antenna[antenna_processed]+=1
@@ -758,6 +792,9 @@ class AverageSpectrum(tasks.Task):
             print "# End File",str(self.file_start_number)+":",fname
             self.file_start_number+=1
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
+        #Normalize the incoherent time series power
+        if self.calc_incoherent_sum:
+            self.incoherent_sum[...] /= self.ntimeseries_data_added_per_chunk.vec()
         if self.qualitycheck:
             self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
             self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)

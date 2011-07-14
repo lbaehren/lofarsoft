@@ -299,6 +299,9 @@ class BeamFormer2(tasks.Task):
         "times":{workarray:True,
                        doc:"Time axis for data.",default:lambda self:
                        hArray(float,[self.blocklen],name="Time",units=("","s"),header=self.header)},
+        "blocksize":p_(lambda self:self.data.shape()[-1],"Length of the data for each antenna"),
+        "fftplan":p_(lambda self:FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE),"Memory and plan for FFT",output=False,workarray=True),
+        "invfftplan":p_(lambda self:FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE),"Memory and plan for inverse FFT",output=False,workarray=True)
 }
 
     def run(self):
@@ -318,7 +321,7 @@ class BeamFormer2(tasks.Task):
         
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
-        fftplan = FFTWPlanManyDftR2c(self.data.shape()[-1], 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
+        #fftplan = FFTWPlanManyDftR2c(self.data.shape()[-1], 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
         
         if self.doplot:
             wasinteractive=plt.isinteractive()
@@ -367,7 +370,7 @@ class BeamFormer2(tasks.Task):
                 self.times.fillrange(self.start_time,self.sample_interval)
                 self.times.setUnit("mu","")
                 self.nspectraadded[block]+=self.nantennas
-                hFFTWExecutePlan(self.fftdata[...], self.data[...], fftplan)
+                hFFTWExecutePlan(self.fftdata[...], self.data[...], self.fftplan)
                 #self.fftdata[...].fftw(self.data[...])
                 self.fftdata[...].nyquistswap(self.NyquistZone)
                 if self.avspec_incoherent:
@@ -392,14 +395,14 @@ class BeamFormer2(tasks.Task):
                 if self.calc_timeseries:
                     self.fftdata.mul(self.weights[self.mainbeam])
                     self.fftdata[...].nyquistswap(self.NyquistZone)
-                    self.data_shifted[...].invfftw(self.fftdata[...])
+                    hFFTWExecutePlan(self.data_shifted[...], self.fftdata[...], self.invfftplan)
+                    #self.data_shifted[...].invfftw(self.fftdata[...])
                 if self.doplot>1 and self.nspectraadded[block]%self.plotskip==0:
                     if (self.plotspec or not self.calc_timeseries) and self.avspec:
                         self.avspec[self.mainbeam].plot()
                     elif self.calc_timeseries:
                         self.data_shifted[self.plot_antennas,...,self.plot_start:self.plot_end].plot(title="Shifted Time Series in Direction of Main Beam")
                     self.plot_finish(name=self.__taskname__)
-                    plt.draw()
                 if self.verbose:
                     print "# End  block =",block," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
             if self.verbose:
@@ -495,9 +498,13 @@ class BeamFormer2(tasks.Task):
         dim=beams.getDim();blocklen=(dim[-1]-1)*2
         self.beamscopy=hArray(dimensions=[dim[-2],dim[-1]],copy=beams)
         self.beamscopy[...].nyquistswap(self.NyquistZone)
+        if not hasattr(self,"tbeams2size") or not self.tbeams2size==blocklen:
+            self.tbeams2size=blocklen
+            self.tbeams2plan=FFTWPlanManyDftC2r(blocklen, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
         self.tbeams2=hArray(float,[dim[-2],blocklen],name="TIMESERIES_DATA")
         self.tbeams=hArray(self.tbeams2.vec(),[dim[-2],blocklen],name="TIMESERIES_DATA")
-        self.tbeams2[...].invfftw(self.beamscopy[...])
+        hFFTWExecutePlan(self.tbeams2[...], self.beamscopy[...], self.tbeams2plan)
+        #self.tbeams2[...].invfftw(self.beamscopy[...])
         self.tbeams /= blocklen
         if doabs:
             self.tbeams.abs()

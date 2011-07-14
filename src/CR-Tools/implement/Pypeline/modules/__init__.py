@@ -44,6 +44,7 @@ Task                    # the currently loaded task instance
 Task.par (=value)       # access or set a parameter (without updating)
 Task(par1,par2,...)     # run the task with parameters par1,par2,....
 trun "taskname", pars   # run the task with name "taskname" and assign it to the global variable `Task``
+trerun "taskname", pars # like trun, but store task and do not reload it during a 2nd call, but rerun. 
 tlist                   # to view the available tasks
 tload 2                 # to load the task #2 (can also provide a name)
 tload "taskname"        # i.e., this is safer in code since the task number can change with time
@@ -75,6 +76,38 @@ def trun(name,*args,**kwargs):
     tasks.task_instance=tasks.task_class()
     tasks.set_globals("Task",tasks.task_instance)
     return tasks.task_instance(*args,**kwargs)
+
+
+def trerun(name,version,*args,**kwargs):
+    """
+    Usage:
+
+    ``trerun(taskname,version,parameters,keyword1=....)``
+
+    Run the taks with the given task name and with the parameters provided as argument list.
+
+    *name*       - task name to load (see :func:`tlist`)
+    *version*    - assign the task a unique version number or ID, so that you can store
+                 and rerun different instances of the same task
+                 
+    The task itself will be available via the global variable ``Task`` afterwards.
+
+    All stored tasks can be found in the dict tasks.task_instances.    
+    """
+    if not name in tasks.task_allloaded.keys():
+        print "ERROR: trerun - Task name",name,"unknown. See 'tlist' for full list."
+        return
+    taskinstancename=name+str(version)
+    if tasks.task_instances.has_key(taskinstancename): #reload existing instance
+        tasks.task_class=None
+        tasks.task_instance=tasks.task_instances[taskinstancename]
+    else:                                              #create a new task instance
+        tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
+        tasks.task_instance=tasks.task_class()
+        tasks.task_instances[taskinstancename]=tasks.task_instance
+    tasks.set_globals("Task",tasks.task_instance)
+    return tasks.task_instance(*args,**kwargs)
+
 
 def tload(name,get=True,quiet=False,**args):
     """

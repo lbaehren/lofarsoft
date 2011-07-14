@@ -1,9 +1,20 @@
-2011-07-14 - Rev 8101 - ongoing
+2011-07-14 - Rev ongoing
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
- - writing of the parfiles of tasks can be controlled with the
+- added :func:`trerun` to store and rerun task instances (like trun)
+  without recreating them 
+
+-  task averagespectrum can now also form an incoherent sum of time
+   series data for all antennas
+
+2011-07-14 - Rev 8123
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- writing of the parfiles of tasks can be controlled with the
    parameters tasks.task_outputdir and tasks.task_write_parfiles
 
 - added a plotfinish class, who's instances are called after each plot

@@ -320,7 +320,7 @@ class FitMaxima(tasks.Task):
             self.lags*=self.sampleinterval
         if not self.refant==None:
             self.lags-=self.lags[self.refant]
-
+            
 
 class DirectionFitTriangles(tasks.Task):
     """
@@ -423,7 +423,230 @@ class DirectionFitTriangles(tasks.Task):
     """
     parameters=dict(
         positions={doc:"hArray with Cartesian coordinates of the antenna positions",unit:"m"},
-        timelags={doc:"hArray with Cartesian coordinates of the antenna positions",unit:"s"},
+        timelags={doc:"hArray with the measured time lags for each event and each antenna",unit:"s"},
+        expected_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),"Exact time lags expected for each antenna for a given source position",unit="s"),
+        geometric_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),"Time lags minus cable delay = pure geometric delay if no error",unit="s"),
+        delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delays"),"Instrumental delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",unit="s"),
+        delta_delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),"Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",unit="s"),
+        delta_delays_mean_history=p_([],"Mean of the difference between expected and currently calibrated measured delays for each iteration",unit="s",output=True),
+        delta_delays_rms_history=p_([],"RMS of the difference between expected and currently calibrated measured delays for each iteration",unit="s",output=True),
+        delays_history=p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),"Instrumental delays for each iteration (for plotting)",unit="s"),
+        maxiter=p_(1,"if >1 iterate (maximally tat many times) position and delays until solution converges."),
+        delay_error=p_(1e-12,"Target for the RMS of the delta delays where iteration can stop.",unit="s"),
+        rmsfactor=p_(3.,"How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until minrsmfactor)."),
+        minrmsfactor=p_(1.,"Minimum rmsfactor (see ``rmsfactor) for selecting bad antennas."),
+        unitscalefactor=p_(1e-9,"Scale factor to apply for printing and plotting."),
+        unitname=p_("ns","Unit corresponding to scale factor."),
+        doplot=p_(False,"Plot results."),
+        plotant_start=p_(0,"First antenna to plot."),
+        plotant_end=p_(lambda self:self.NAnt,"Last antenna to plot plus one."),
+        verbose=p_(False,"Print progress information."),
+        refant=p_(0,"Reference antenna for which geometric delay is zero."),
+        solution=p_(1,"Can be +/-1, determine whether to take the upper or the lower ('into the ground') solution."),
+        NAnt=p_(lambda self: self.timelags.shape()[-1],"Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
+        NTriangles=p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,"Number of Triangles = NAnt*(NAnt-1)*(NAnt-2)/6."),
+        directions=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Directions"),"Cartesian direction vector for each triangle"),
+        centers=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Centers of Triangles"),"Cartesian coordinates of center for each triangle.",unit="m"),
+        errors=p_(lambda self:cr.hArray(float,[self.NTriangles],name="Closure Errors"),"Closure errors for each triangle (nor error if = 0)."),
+        triangles_size=p_(lambda self:cr.hArray(float,[self.NTriangles],name="Triangle Size"),"Average size for each triangle.",unit="m"),
+        index=p_(lambda self:cr.hArray(int,[self.NTriangles],name="Index"),"Index array of good triangles.",workarray=True),
+        error_tolerance=p_(1e-10,"Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
+        ngood=p_(0,"Number of good triangles (i.e., without closure errors)",output=True),
+        ngooddelays=p_(0,"Number of good delays (i.e., with only minor deviation)",output=True),
+        delayindex=p_(lambda self:cr.hArray(int,[self.NAnt],name="Delay index"),"Index array of good delays.",workarray=True),
+        meandirection=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean direction from all good triangles",output=True),
+        meancenter=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean central position of all good triangles",output=True),
+        goodones=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),"Scratch array to hold good directions.",unit="m"),
+        meandirection_spherical=p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),"Mean direction in spherical coordinates."),
+        meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth (N->E), Elevation tuple."),
+        meandirection_azel_deg=p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),"Mean direction as Azimuth (N->E), Elevation tuple in degrees.")
+        )
+
+    def call(self):
+        pass
+
+    def run(self):
+        self.farfield=True
+        self.delta_delays_max=0
+        self.delta_delays_min=1e99
+        self.delta_delays_mean_history=[]
+        self.delta_delays_rms_history=[]
+        self.enditer=False
+        if self.verbose:
+            allantennas=set(range(self.NAnt))
+
+        #import pdb; pdb.set_trace()
+        for it in range(self.maxiter):
+            #Calculate directions from all triangles
+            self.geometric_timelags.sub(self.timelags,self.delays)
+            cr.hDirectionTriangulationsCartesian(self.directions,self.errors,self.centers,self.triangles_size,self.positions[:self.NAnt],self.geometric_timelags[:self.NAnt],+1)
+
+            self.delays_history.redistribute(self.delays,it,self.maxiter)
+
+            #Find antennas with zero closure errors, these are considered good antennas
+            self.ngood=self.index.findlessthan(self.errors,self.error_tolerance).val()
+
+            #Get mean position of good antennas
+            self.goodones.copyvec(self.centers,self.index,self.ngood,3)
+            self.meancenter.mean(self.goodones[:self.ngood])
+
+            #Get mean direction from good antennas
+            self.goodones.copyvec(self.directions,self.index,self.ngood,3)
+            self.meandirection.mean(self.goodones[:self.ngood])           # mean direction of all good antennas
+            self.meandirection /= self.meandirection.vectorlength().val() #normalize direction vector
+
+            cr.hGeometricDelays(self.expected_timelags,self.positions,self.meandirection, self.farfield)
+            self.expected_timelags -= self.expected_timelags[self.refant]
+            self.delta_delays.sub(self.expected_timelags,self.geometric_timelags)
+
+            self.delta_delays_mean=self.delta_delays.vec().mean()
+            self.delta_delays_rms=self.delta_delays.vec().stddev(self.delta_delays_mean)
+            self.delta_delays_max=max(self.delta_delays.vec().max(),self.delta_delays_max)
+            self.delta_delays_min=min(self.delta_delays.vec().min(),self.delta_delays_min)
+
+            self.delta_delays_rms_history.append(self.delta_delays_rms)
+            self.delta_delays_mean_history.append(self.delta_delays_mean)
+            
+            rfac=max(self.rmsfactor*(1.0-float(it)/(self.maxiter)),self.minrmsfactor)
+            self.ngooddelays=self.delayindex.findbetween(self.delta_delays,self.delta_delays_mean-self.delta_delays_rms*rfac,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
+            if self.ngooddelays>0:
+                self.delta_delays.set(self.delayindex[:self.ngooddelays],0.0)
+            self.delays-=self.delta_delays
+
+            if self.verbose:
+                print "------------------------------------------------------------------------"
+                badantennas=allantennas.difference(set(self.delayindex[:self.ngooddelays])) if self.ngooddelays>0 else allantennas
+                if self.maxiter>1:
+                    print "Iteration #",it,", rms factor =",rfac
+                self.ws.updateParameter("meandirection_spherical",forced=True)
+                self.ws.updateParameter("meandirection_azel_deg",forced=True)
+                print "Triangle Fit Az/EL -> ", self.meandirection_azel_deg,"deg"
+                print "Triangle Fit Az/EL -> ", self.meandirection
+                print "Mean delta delays ["+self.unitname+"] =",self.delta_delays_mean/self.unitscalefactor,"+/-",self.delta_delays_rms/self.unitscalefactor," (number bad antennas =",self.NAnt-self.ngooddelays,")"
+                print "Bad Antennas = ",badantennas
+
+            if self.delta_delays_rms<self.delay_error or self.enditer: #Solution has converged
+                break
+
+        #End of Iteration
+        self.niter=it
+        if self.verbose:
+            print "------------------------------------------------------------------------"
+            print "Number of iterations used: Task.niter =",self.niter
+            print " "
+
+        if self.doplot:
+            self.delays_history /= self.unitscalefactor
+            self.offset=cr.Vector(float,self.NAnt)
+            self.offset.fillrange(0,(self.delta_delays_max-self.delta_delays_min)/self.unitscalefactor)
+            self.delays_history[...] += self.offset
+            self.delays_history[self.plotant_start:self.plotant_end,...,:it+1].plot(xlabel="Iteration #",ylabel="Delay (+offset)")
+            self.delays_history[...] -= self.offset
+
+
+class DirectionMultipleFitTriangles(tasks.Task):
+    """
+    Find the direction of a source provided one has the measured delay
+    of arrival and the positions of the antenna. This will fit the
+    directions towards multiple sources at once, assuming the same
+    cable delay (errors).
+
+    Description:
+
+    This task uses the function
+    :func:`hDirectionTriangulationsCartesian` to calculate a list of
+    arrival directions in Cartesian coordinates of a pulse/source from
+    all possible triangles of (groups of three) antennas and the
+    measured arrival times at these antennas.
+
+    For the direction finding it is assumed that the signal arrives as
+    a plane wave. If one triangle of antennas does not give a valid
+    solution a solution at the horizion is returned with the complex
+    part of the solution (the "closure error") returned in ``Task.error``.
+
+    To cope with near-field sources for each triangle the coordinates
+    of its center are also calculated. This allows one to later look
+    for points where the dircetions from all triangles intercept.
+
+    The inverse of the average lengths of the triangle baselines are
+    returned in ``weights`` giving some indication how accurate the
+    measurement in principle can be.
+
+    From three antennas we get in general two solutions for the
+    direction, unless the arrival times are out of bounds, i.e. larger
+    than the light-time between two antennas.  Usually, when the three
+    antennas are in a more or less horizontal plane, one of the
+    solutions will appear to come from below the horizon (el < 0) and
+    can be discarded. With `sign_of_solution` one can pick either the
+    positive of the negative elevation.
+
+    If :math:`N` triangles are provided then the *Directions*,
+    *Origins*, and *weights* vectors have
+    :math:`\\frac{N(N-1)(N-2)}{6}` results (times number of components
+    of each result, i.e. times three for *origins* and times one for
+    the rest.)
+
+    The actually measured lag is assumed to consist of two parts: the
+    geometric delay due to light travel times plus the cable delay in
+    each antenna.
+
+    ``timelag = geometric delay + cable delay``
+
+    **Usage:**
+
+
+    The main result will be in ``Task.meandirection`` which contains
+    the direction vector to the source in Cartesian coordinates. See
+    also ``Task.meandirection_azel`` and
+    ``Task.meandirection_azel_deg``.
+
+    **See also:**
+
+    :class:`CrossCorrelateAntennas`,
+    :class:`LocatePulseTrain`,
+    :class:`FitMaxima`
+
+    **Example:**
+
+    ::
+
+        file=open("$LOFARSOFT/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
+        file["ANTENNA_SET"]="LBA_OUTER"
+        file["BLOCKSIZE"]=2**17
+
+        file["SELECTED_DIPOLES"]=["017000001","017000002","017000005","017000007","017001009","017001010","017001012","017001015","017002017","017002019","017002020","017002023","017003025","017003026","017003029","017003031","017004033","017004035","017004037","017004039","017005041","017005043","017005045","017005047","017006049","017006051","017006053","017006055","017007057","017007059","017007061","017007063","017008065","017008066","017008069","017008071","017009073","017009075","017009077","017009079","017010081","017010083","017010085","017010087","017011089","017011091","017011093","017011095"]
+
+        timeseries_data=file["TIMESERIES_DATA"]
+        positions=file["ANTENNA_POSITIONS"]
+
+        #First determine where the pulse is in a simple incoherent sum of all time series data
+
+        pulse=trun("LocatePulseTrain",timeseries_data,nsigma=7,maxgap=3)
+
+        #Normalize the data which was cut around the main pulse
+        pulse.timeseries_data_cut[...]-=pulse.timeseries_data_cut[...].mean()
+        pulse.timeseries_data_cut[...]/=pulse.timeseries_data_cut[...].stddev(0)
+
+        #Cross correlate all pulses with each other
+        crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,oversamplefactor=5)
+
+        #And determine the relative offsets between them
+        mx=trun('FitMaxima',crosscorr.crosscorr_data,doplot=True,refant=0,plotstart=4,plotend=5,sampleinterval=10**-9,peak_width=6,splineorder=2)
+
+        #Now fit the direction and iterate over cable delays to get a stable solution
+        direction=trun("DirectionFitTriangles",positions=positions,timelags=hArray(mx.lags),maxiter=10,verbose=True,doplot=True)
+
+        print "========================================================================"
+        print "Fit Arthur Az/El   ->  143.409 deg 81.7932 deg"
+        print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
+
+        # Triangle Fit Az/EL ->  (144.1118392216996, 81.84042919170588) deg for odd antennas
+        # Triangle Fit Az/EL ->  (145.17844721833896, 81.973693266380721) deg for even antennas
+
+    """
+    parameters=dict(
+        positions={doc:"hArray with Cartesian coordinates of the antenna positions",unit:"m"},
+        timelags={doc:"hArray with the measured time lags for each event and each antenna [nevents,NAnt]",unit:"s"},
         expected_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),"Exact time lags expected for each antenna for a given source position",unit="s"),
         geometric_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),"Time lags minus cable delay = pure geometric delay if no error",unit="s"),
         delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delays"),"Instrumental delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",unit="s"),
@@ -456,9 +679,9 @@ class DirectionFitTriangles(tasks.Task):
         meandirection=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean direction from all good triangles",output=True),
         meancenter=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean central position of all good triangles",output=True),
         goodones=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),"Scratch array to hold good directions.",unit="m"),
-        meandirection_spherical=p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),"Mean direction in spherical coorindates."),
-        meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth, Elevation tuple."),
-        meandirection_azel_deg=p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),"Mean direction as Azimuth, Elevation tuple in degrees.")
+        meandirection_spherical=p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),"Mean direction in spherical coordinates."),
+        meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth (N->E), Elevation tuple."),
+        meandirection_azel_deg=p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),"Mean direction as Azimuth (N->E), Elevation tuple in degrees.")
         )
 
     def call(self):
@@ -705,10 +928,14 @@ class PlotAntennaLayout(tasks.Task):
     parameters=dict(
         positions={doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit:"m"},
         size={default:300,doc:"Size of largest point."},
+        normalize_sizes={default:True,doc:"Normalize the sizes to run from 0-1."},
+        normalize_colors={default:True,doc:"Normalize the colors to run from 0-1."},
         sizes={default:20,doc:"hArray of dimension [NAnt] with the values for the size of the plot"},
         colors={default:'b',doc:"hArray of dimension [NAnt] with the values for the colors of the plot"},
         names={default:False,doc:"hArray of dimension [NAnt] with the names or IDs of the antennas"},
         title={default:False,doc:"Title for the plot (e.g., event or filename)"},
+        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
+        plot_finish={default: lambda self:plotfinish(dopause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
         plotlegend={default:False,doc:"Plot a legend"},
         positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
         NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
@@ -722,20 +949,36 @@ class PlotAntennaLayout(tasks.Task):
         #Calculate scaled sizes
         #import pdb; pdb.set_trace()
 
-        if len(self.sizes)>1:
-            self.ssizes=cr.hArray(copy=self.sizes)
-            self.ssizes -= self.ssizes.min().val()
-            self.ssizes /= self.ssizes.max().val()
-            self.ssizes *= self.size
-        else:
+        if isinstance(self.sizes, (int, long, float)):
             self.ssizes=self.sizes
+        elif isinstance(self.sizes,tuple(cr.hRealContainerTypes)):
+            if self.normalize_sizes:
+                self.ssizes=cr.hArray(copy=self.sizes)
+                self.ssizes -= self.ssizes.min().val()
+                self.ssizes /= self.ssizes.max().val()
+                self.ssizes *= self.size
+        else:
+            raise TypeError("PlotAntennaLayout: parameter 'sizes' needs to be a number or an hArray of numbers.")
 
-        self.fig = cr.plt.figure()
+        if isinstance(self.colors, (str, int, long, float)):
+            self.scolors=self.colors
+        elif isinstance(self.colors,tuple(cr.hAllContainerTypes)):
+            if self.normalize_colors:
+                self.scolors=cr.hArray(copy=self.colors)
+                self.scolors -= self.scolors.min().val()
+                self.scolors /= self.scolors.max().val()
+        else:
+            raise TypeError("PlotAntennaLayout: parameter 'colos' needs to be string or an hArray thereof.")
+
+        if self.newfigure and not self.figure:
+            self.figure=cr.plt.figure()
+        cr.plt.clf()
         if self.title:
             cr.plt.title(self.title)
         cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.colors)
         if self.names:
             for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
                 cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
+        self.plot_finish(name=self.__taskname__)
 #        if self.plotlegend:
 #            self.ax.legend()

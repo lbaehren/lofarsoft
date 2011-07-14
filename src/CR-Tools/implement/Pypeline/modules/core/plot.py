@@ -37,6 +37,9 @@ class plotfinish:
 
     *doplot*    = True    Plot at all.
 
+    *refresh*   = True    Refresh (redraw) plot window after each plotting command
+                          also in batch mode.
+
     *filename*  = ""      If set, save figure to this file (w/o extension)
 
     *filetype*  = "gif"   Extension of the figure file to also determine format.
@@ -68,9 +71,10 @@ class plotfinish:
             pp("Try again")
             -> Nothing happens (i.e. no pause)....
     """
-    def __init__(self,name="",plotpause=True,doplot=True,filename="",filetype="gif"):
+    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="gif"):
         self.plot_pause=plotpause
         self.doplot=doplot
+        self.refresh=refresh
         self.filename=filename
         self.filetype=filetype
         self.files=[]
@@ -90,12 +94,17 @@ class plotfinish:
                 print "Saved plot in -->",f
             if txt:
                 print (("("+name+") ") if name else "")+txt
-            if self.plot_pause:
+            if self.refresh:
                 plt.draw();
-                k=raw_input("Press [return] to continue. Press [q+return] to proceed without pausing, [n+return] to continue without plotting ...")
+            if self.plot_pause:
+                k=raw_input("Press key+[return]: [any]=continue, [d]=draw on screen without pause, [q]=quiet plotting, don't pause, [n]=no plots at all. ")
                 if k=="q":
                     self.plot_pause=False
+                    self.refresh=False
                     print "Continue without pausing from now on." 
+                elif k=="d":
+                    self.plot_pause=False
+                    self.refresh=True
                 elif k=="n":
                     self.doplot=False
                     self.plot_pause=False

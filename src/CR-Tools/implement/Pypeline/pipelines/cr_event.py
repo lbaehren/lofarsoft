@@ -23,6 +23,8 @@ beamforming.
 
 *plotpause*             pause and display each figure interactively?
 
+*refresh*               refresh plotting window after each plot (e.g., during batch processing).
+
 *maximum_allowed_delay* maximum differential mean cable delay that the
                         expected positions can differ rom the measured ones, before we
                         consider something to be wrong
@@ -41,6 +43,10 @@ time series data (corrected for time travel and cable delay) of all
 antennas is in ``event.par.timeseries_data``. A summary of the ouput
 with all figures can be viwed with a web browser from 
 outputdir/filename.dir/index.html.
+
+The results dict can also be read stand-alone from the file
+results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for ``results``.
+
 
 
 **Example: **
@@ -76,8 +82,9 @@ parser.add_option("-o","--outputdir", type="str", default="",help="directory whe
 parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=0,help="either 0 or 1 for selecting even or odd antennas")
 parser.add_option("-b","--block", type="int", default=93,help="in which block do you expect the peak")
-parser.add_option("-s","--blocksize", type="int", default=2**16,help="not yet implemented")
+parser.add_option("-s","--blocksize", type="int", default=2**16,help="Blocksize with which to read blocks of data.")
 parser.add_option("-q","--nopause", action="store_true",help="Do not pause after each plot and display each figure interactively")
+parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot.")
 parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
 #------------------------------------------------------------------------
@@ -85,13 +92,15 @@ parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,hel
 #------------------------------------------------------------------------
 if not parser.get_prog_name()=="cr_event.py":
 #   Program was run from within python
-    filename="~/LOFAR/work/CR/lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
     filename="~/LOFAR/work/CR/LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
+    filename="~/LOFAR/work/CR/lora-event-2-station-2.h5"; lofarmode="LBA_OUTER"
 
     outputdir="/Users/falcke/LOFAR/work/"
-    polarization=0 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
+    polarization=1 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
     block_with_peak=93
+    blocksize=2**16
     plotpause=False
+    refresh=True
     maximum_allowed_delay=1e-8 # maximum differential mean cable delay
                                # that the expected positions can differ
                                # from the measured ones, before we
@@ -110,7 +119,9 @@ else:
     outputdir = options.outputdir
     polarization = options.polarization
     block_with_peak = options.block
+    blocksize = options.blocksize
     plotpause = not options.nopause
+    refresh = not options.norefresh
     maximum_allowed_delay = options.maximum_allowed_delay
 
 #------------------------------------------------------------------------
@@ -154,41 +165,36 @@ if not os.path.exists(outputdir):
 else:
     print "# Using existing output directory",outputdir
 
-Pause=plotfinish(filename=os.path.join(outputdir,outfilename),plotpause=plotpause)
+Pause=plotfinish(filename=os.path.join(outputdir,outfilename),plotpause=plotpause,refresh=refresh)
 
 ########################################################################
 #Setting the parameter block with parameters for tasks
 ########################################################################
 
 par=dict(
-    plot_antenna=39,
+    plot_antenna=0,
     newfigure=False, #Don't create a new plotting window for some of the tasks, but use the old one.
     plot_finish=Pause,
     output_dir=outputdir,
     AverageSpectrum = dict(
+        calc_incoherent_sum=True,
         addantennas=False,
         filefilter=os.path.join(filedir,filename),
         lofarmode=lofarmode,
         antennas_start=polarization,
         antennas_stride=2,maxpeak=7,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=7,
         blocklen=4096, # only used for quality checking within one block
-        delta_nu=3000, # -> blocksize=2**16
+#        delta_nu=3000, # -> blocksize=2**16
+        blocksize=blocksize, # -> blocksize=2**16
         rmsrange=(0.5,50) #Range of RMS that is allowed in timeseries
                           #before flagging. RMS is related to power,
                           #hence we check for power excesses or
                           #deficits in an antenna.
         ),
-    
-    FitBaseline = dict(
-        ncoeffs=80,
-        numin=30,
-        numax=85,
-        fittype="BSPLINE",
-        splineorder=3),
-    
-    ApplyBaseline=dict(
-        rmsfactor=7
-        )
+    FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
+    LocatePulseTrain = dict(nsigma=6,maxgap=5,minlen=64,minpulselen=3),  #nisgma=7  
+    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0),
+    ApplyBaseline=dict(rmsfactor=7)
     )
 #------------------------------------------------------------------------
 
@@ -203,8 +209,8 @@ par=dict(
 #Getting the average spectrum and quality flags
 ########################################################################
 print "---> Calculating average spectrum of all (odd/even) antennas"
-avspectrum=trun("AverageSpectrum",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
-blocksize=avspectrum.power.getHeader("blocksize")
+avspectrum=trerun("AverageSpectrum","",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
+calblocksize=avspectrum.power.getHeader("blocksize")
 speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
 
 #Allocating the memory for the fft, if it doesn't exist yet
@@ -263,15 +269,15 @@ else:
 ########################################################################
 
 print "---> Fit a baseline to the average spectrum"
-fitbaseline=trun("FitBaseline",averagespectrum_good_antennas,extendfit=0.5,pardict=par,doplot=3 if Pause.doplot else 0)
+fitbaseline=trerun("FitBaseline","",averagespectrum_good_antennas,extendfit=0.5,pardict=par,doplot=3 if Pause.doplot else 0)
 
 print "---> Calculate a smooth version of the spectrum which is later used to set amplitudes."
-calcbaseline1=trun("CalcBaseline",averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
+calcbaseline1=trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
 amplitudes=hArray(copy=calcbaseline1.baseline)
 amplitudes.sqrt()
 
 print "---> Calculate it again, but now to flatten the spectrum."
-calcbaseline2=trun("CalcBaseline",averagespectrum_good_antennas,pardict=par,doplot=Pause.doplot)
+calcbaseline2=trerun("CalcBaseline",2,averagespectrum_good_antennas,pardict=par,doplot=Pause.doplot)
     
 ########################################################################
 #RFI identification in sum of all antennas (incoherent station spectrum)
@@ -289,7 +295,7 @@ averagespectrum_good_antennas[...].addto(station_spectrum)
 station_spectrum /= ndipoles
 station_spectrum.par.baseline=station_gaincurve
 
-applybaseline=trun("ApplyBaseline",station_spectrum,baseline=station_gaincurve,pardict=par,doplot=Pause.doplot)
+applybaseline=trerun("ApplyBaseline","",station_spectrum,baseline=station_gaincurve,pardict=par,doplot=Pause.doplot)
 
 #End of calibration preparations
 
@@ -363,13 +369,20 @@ Pause("Plotted time series data. ",name="calibrated-imeseries")
 ########################################################################
 #First determine where the pulse is in a simple incoherent sum of all time series data
 print "---> Now add all antennas in the time domain, locate pulse and cut time series around it"
-pulse=trun("LocatePulseTrain",timeseries_data2,pardict=par,nsigma=7,maxgap=3,minlen=64)
+pulse=trerun("LocatePulseTrain","",timeseries_data2,pardict=par)
 
+print "#LocatePulse: ",pulse.npeaks,"pulses found."
+if pulse.npeaks==0:
+    print "************************************************************************"
+    print "********          ATTENTION: No pulses found          ******************"
+    print "************************************************************************"
+    raise ValueError("LocatePulseTrain: No pulses found!")
+    
 print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
 timeseries_power=hArray(copy=pulse.timeseries_data_cut)
 timeseries_power.square()
 timeseries_power.runningaverage(5,hWEIGHTS.GAUSSIAN)
-maxima_power=trun('FitMaxima',timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 Pause(name="pulse-maxima-power")
 
 ########################################################################
@@ -377,9 +390,9 @@ Pause(name="pulse-maxima-power")
 ########################################################################
 print "---> Cross correlate pulses, get time lags, and determine direction of pulse."
 #Now cross correlate all pulses with each other 
-crosscorr=trun('CrossCorrelateAntennas',pulse.timeseries_data_cut,pardict=par,oversamplefactor=10)
+crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",pulse.timeseries_data_cut,pardict=par,oversamplefactor=10)
 #And determine the relative offsets between them
-maxima=trun('FitMaxima',crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
+maxima=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
 Pause(name="pulse-maxima-crosscorr")
 
 print "Time lag [ns]: ", maxima.lags 
@@ -391,10 +404,11 @@ print " "
 #Now fit the direction and iterate over cable delays to get a stable
 #solution
 
+cabledelays.negate()
 delays=hArray(copy=cabledelays)
-delays.fill(0)
+#delays.fill(0)
 
-direction=trun("DirectionFitTriangles",pardict=par,positions=antenna_positions,timelags=hArray(maxima.lags),delays=delays,maxiter=9,verbose=True,doplot=False)
+direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=antenna_positions,timelags=hArray(maxima.lags),delays=delays,verbose=True,doplot=False)
 print "========================================================================"
 print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
 print " "
@@ -410,7 +424,9 @@ if abs(direction.delta_delays_rms_history[0])>maximum_allowed_delay or abs(direc
     print "#DirectionFitTriangles: ERROR!"
 else:
     print "#DirectionFitTriangles: OK!"
-    
+
+trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.delays,sizes=50,names=good_antennas_index,title="Delay errors in station",plotlegend=True)
+
 print "\n--->Beamforming"
 
 ########################################################################
@@ -419,7 +435,7 @@ print "\n--->Beamforming"
 
 #Beamform short data set first for inspection (and possibly for
 #maximizing later)
-bf=trun("BeamFormer2",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
 
 #Use the above later also for maximizing peak Beam-formed timeseries
 #is in ---> bf.tbeams[bf.mainbeam]
@@ -429,9 +445,18 @@ if Pause.doplot:
     bf.tplot()
 Pause(name="beamformed-multiple-directions")
 
+#timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut)
+#timeseries_power_shifted.square()
+#timeseries_power_shifted.runningaverage(5,hWEIGHTS.GAUSSIAN)
+
+maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+Pause(name="pulse-maxima-power")
+
+
+
 print "---> Plotting full beam-formed data set"
 #Beamform full data set (not really necessary, but fun).
-beamformed=trun("BeamFormer2",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
 
 ########################################################################
 #Data Analysis ... (to be expanded)
@@ -452,7 +477,7 @@ if Pause.doplot:
     Pause(name="pulse-beamformed-zoomed")
 
 event_dummy=hArray(event.vec(),dimensions=[1,blocksize])
-beam_maxima=trun('FitMaxima',event_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+beam_maxima=trerun('FitMaxima',"Beam",event_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 pulse_time_ms=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
 
 print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
@@ -480,10 +505,11 @@ results=dict(
     filedir=filedir,
     ndipoles=ndipoles,
     antennas=good_antennas,
-    antenna_positions_XYZ_m=antenna_positions,
+    antenna_positions_XYZ_m=list(antenna_positions.vec()),
     bad_antennas=bad_antennas,
     pulses_maxima_x=list(maxima_power.maxx),
     pulses_maxima_y=list(maxima_power.maxy),
+    npeaks_found=pulse.npeaks,
     pulses_timelags_ns=list(maxima.lags),
     pulse_start_sample=pulse.start,
     pulse_end_sample=pulse.end,
@@ -498,6 +524,11 @@ event.par.quality=quality
 event.par.timeseries_data=pulse.timeseries_data_cut
 event.par.results=results
 event.write(result_file)
+
+#Writing results.py
+f=open(os.path.join(outputdir,"results.py"),"w")
+f.write("#"+outfilename+"\nresults="+str(results))
+f.close()
 
 ########################################################################
 #Writing summary output to html file
@@ -529,7 +560,8 @@ htmlfile.write("</body></html>\n")
 htmlfile.close()    
     
 print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
-print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``."
+print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
+print "which can be found in `results.py`(use, e.g., execfile)."
 print "Shifted time series data of all antennas is in event.par.time_series."
 print "Open",htmlfilename,"in your browser to get a summary."
 print "-----------------------------------------------------------------------------------------------------------"

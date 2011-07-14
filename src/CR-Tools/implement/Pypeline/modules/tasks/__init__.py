@@ -443,15 +443,14 @@ def set_globals(var,val):
 
 Task = None
 task_instance = None
-task_name = ""
+task_instances = {} # Will store instances of tasks loaded with rerun
+task_allloaded = {} #list of all loaded tasks
+task_name = "" # Name of currently loaded task
 task_class= None
 task_list = set()
 task_outputdir = "" # Where to write the .par files
-task_write_parfiles = True
-task_parfiles = []
-
-#list of all loaded tasks
-task_allloaded = {}
+task_write_parfiles = True # Write parfile during execution of a task
+task_parfiles = [] # List of all parfiles created since launch of session
 
 class TaskInit(type):
     """Metaclass for tasks.

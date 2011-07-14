@@ -1010,13 +1010,13 @@ void HFPP_FUNC_NAME(
 // }
 
 
-//$DOCSTRING: Calculates the square root of the power of a complex spectrum and adds it to an output vector.
+//$DOCSTRING: Calculates the abs (square of square root) of a complex vector and adds it to the output vector.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSpectralPower
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
-#define HFPP_PARDEF_0 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(outvec)()("Output vector containing the abs (square root of square) of the input vector added to itself.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
@@ -1069,7 +1069,7 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_FUNC_MASTER_ARRAY_PARAMETER 1 // Use the second parameter as the master array for looping and history informations
-#define HFPP_PARDEF_0 (HNumber)(outvec)()("Vector containing a copy of the input values converted to a new type")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(outvec)()("Output vector containing the square of the vector added to itself.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HComplex)(vecin)()("Input vector containing the complex spectrum. (Looping parameter)")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
