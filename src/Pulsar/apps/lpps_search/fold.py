@@ -197,7 +197,9 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
         minimum_dm_cutoff=minimum_dm_cutoff, metadata=metadata)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
-        assert len(sifted_candidates) > 0
+        print 'Skipping any further processing of accelsearch results.'
+        return
+#        assert len(sifted_candidates) > 0
     
     bright_pulsars = knownpulsar.load_bright_pulsar_catalog()
     # Make histograms of candidate period and candidate frequency before and
