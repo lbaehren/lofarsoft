@@ -44,11 +44,17 @@ class Op_islands(Op):
 
         mylogger.userinfo(mylog, "Number of islands found", '%i' %
                           len(img.islands))
-        for i, isl in enumerate(img.islands): isl.island_id = i
+        
+        pyrank = N.zeros(img.ch0.shape)
+        for i, isl in enumerate(img.islands):
+            isl.island_id = i
+            pyrank[isl.bbox] += N.invert(isl.mask_active)*i
 
         if opts.output_all: write_islands(img)
         if opts.output_fbdsm and has_fbdsm:
             opf.write_fbdsm_islands(img)
+        if opts.savefits_rankim:
+            func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
 
         return img
 
@@ -118,7 +124,7 @@ class Op_islands(Op):
               res.append(isl)
               pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
 
-        if saverank: func.write_image_to_file(img.use_io, img.imagename + 'pyrank.fits', N.transpose(pyrank), img)
+        #if saverank: func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
 
         return res
 

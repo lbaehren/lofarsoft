@@ -69,7 +69,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     global img_ch0, img_rms, img_mean, img_gaus_mod, img_shap_mod
     global img_gaus_resid, img_shap_resid, pixels_per_beam, pix2sky
     global vmin, vmax, vmin_cur, vmax_cur, ch0min, ch0max
-    global low, fig, images, src_list, srcid_cur, sky2pix
+    global low, fig, images, src_list, srcid_cur, sky2pix, markers
 
     # Define the images. The images are used both by imshow and by the
     # on_press() and coord_format event handlers
@@ -98,6 +98,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     images = []
     titles = []
     names = []
+    markers = []
     if ch0_image:
         images.append(img_ch0)
         titles.append('Original Image\n(arbitrary logarithmic scale)')
@@ -212,6 +213,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     print '  Press "i" ........ : Get integrated fluxes and mean rms values'
     print '                       for the visible portion of the image'
     print '  Press "m" ........ : Change min and max scaling values'
+    print '  Press "n" ........ : Show / hide island IDs'
     print '  Press "0" ........ : Reset scaling to default'
     if 'seds' in images:
         print '  Press "c" ........ : Change source for SED plot'
@@ -248,6 +250,10 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                         "markersize=8)"
                     exec cmd
                     ax = pl.gca()
+                    marker = ax.text(N.max(xb)+2, N.max(yb), str(isl.island_id),
+                                      color='#afeeee', clip_on=True)
+                    marker.set_visible(not marker.get_visible())
+                    markers.append(marker)
                     # draw the gaussians with one colour per source or island
                     # (if gaul2srl was not run)
                     if hasattr(img, 'nsrc'):
@@ -403,6 +409,7 @@ def on_press(event):
     global img_ch0, img_rms, img_mean, img_gaus_mod, img_shap_mod
     global pixels_per_beam, vmin, vmax, vmin_cur, vmax_cur
     global ch0min, ch0max, low, fig, images, src_list, srcid_cur
+    global markers
     if event.key == '0':
         print 'Resetting limits to defaults (%.4f -- %.4f Jy/beam)' \
             % (pow(10, vmin)-low,
@@ -541,7 +548,12 @@ def on_press(event):
                 % (shap_mod_flux,)
         print '  Mean rms (from rms map) ............... : %f Jy/beam'\
             % (mean_rms,)
-
+    if event.key == 'n':
+        # Show/Hide island numbers
+        if markers:
+            for marker in markers:
+                marker.set_visible(not marker.get_visible())
+            pl.draw()
 
 # The following functions add ra, dec and flux density to the
 # coordinates in the lower-right-hand corner of the figure window.
