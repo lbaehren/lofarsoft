@@ -546,9 +546,8 @@ pydoc.help = bdsmDocHelper(sys.stdin, sys.stdout)
 
     
 # Now run the IPython shell with this namespace and the customisations
-# in the ipy_user_conf.py file
+# in the pybdsm_conf.py file
 _set_current_cmd(process_image)
-bdsm_path = bdsm.__file__
-bdsm_dir = bdsm_path[:-12] # strip "__init__.pyc"
-ipshell = IPShellEmbed(['', '-ipythondir', bdsm_dir], user_ns=locals())
+ipshell = IPShellEmbed([''], user_ns=locals())
+ipshell.IP.runlines('import pybdsm_conf')
 ipshell()

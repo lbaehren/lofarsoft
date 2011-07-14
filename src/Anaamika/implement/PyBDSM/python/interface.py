@@ -15,6 +15,8 @@ def process(img, **kwargs):
     to allow reprocessing of existing Image objects with the command
     img.process().
 
+    Any options given as keyword arguments will override existing ones.
+
     """
     from bdsm import default_chain, _run_op_list
     from image import Image
@@ -1124,8 +1126,8 @@ def make_fits_list(img, glist):
 
     out_list = []
     for g in glist[0]:
-        gidx = g.gaus_num
-        iidx = g.island_id+1
+        gidx = g.gaus_num-1
+        iidx = g.island_id
         widx = g.wavelet_j
         A = g.peak_flux
         T = g.total_flux
@@ -1165,7 +1167,7 @@ def make_fits_list(img, glist):
                 specin = spin1[1]
                 especin = espin1[1]
 
-        list1 = [gidx, iidx, widx, sidx, T, eT, A, eA, ra, era, dec, edec, x, ex, y,
+        list1 = [gidx, iidx, sidx, widx, T, eT, A, eA, ra, era, dec, edec, x, ex, y,
                  ey, shape[0], eshape[0], shape[1], eshape[1], shape[2],
                  eshape[2], deconv_shape[0], deconv_eshape[0],
                  deconv_shape[1], deconv_eshape[1], deconv_shape[2],
