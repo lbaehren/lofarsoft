@@ -36,6 +36,7 @@ from __future__ import division
 import optparse
 import sys
 import os
+from os.path import join
 import re
 import copy
 import glob
@@ -265,7 +266,7 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
     prepsubband_options = {
         '-noclip' : '',
         '-mask' : mask_file, 
-        '-o' : os.path.join(result_dir, basename),
+        '-o' : join(result_dir, basename),
         '-lodm' : '%.2f' % ddplan.lodm,
         '-numdms' : str(ddplan.dmsperpass),
         '-downsamp' : str(ddplan.downsamp),
@@ -353,7 +354,7 @@ def get_accelsearch_command(work_dir, basename, dm, z_max):
 def get_single_pulse_search_command(work_dir, basename, dm):
     '''Run PRESTO single_pulse_search.py for searching.'''
 
-    dat_file = os.path.join(work_dir, basename + '_DM%.2f' % dm + '.dat')
+    dat_file = join(work_dir, basename + '_DM%.2f' % dm + '.dat')
     cmd = get_command('single_pulse_search.py', {'-p' : ''}, [dat_file])
 
     return [cmd]
@@ -364,7 +365,7 @@ def run_single_pulse_search_plotter(work_dir, basename):
     # (so the script needs to be run for subsets of the data). For now use
     # the -g option for single_pulse_search.py to pass the .singlepulse files.
     
-    globpattern = os.path.join(work_dir, basename + '_DM*.*.singlepulse')
+    globpattern = join(work_dir, basename + '_DM*.*.singlepulse')
     status = run_command('single_pulse_search.py', {
         '-g' : '"' + globpattern + '"',
     }, [])
@@ -402,11 +403,11 @@ class SearchRun(object):
         # Read the metadata from the input directory and check that it is
         # correct (old datasets had a mismatch between the number of samples
         # in the .inf file and the size of the .subXXXX files on disk).
-        self.metadata = inf_reader(os.path.join(self.in_dir, self.basename + \
+        self.metadata = inf_reader(join(self.in_dir, self.basename + \
             '.sub.inf')) 
        
         # Old data sets have incorrect metadata, deal with that.
-        datafile_size = os.path.getsize(os.path.join(self.in_dir, 
+        datafile_size = os.path.getsize(join(self.in_dir, 
             self.basename + '.sub0000'))
         if self.metadata.n_bins * 2 != datafile_size:
             if self.metadata.n_bins == 999 and datafile_size % 2 == 0:
@@ -426,7 +427,7 @@ class SearchRun(object):
                 print 'No RFI specified. $LOFARSOFT not set.'
                 raise
 
-            self.rfi_file = os.path.join(lofarsoft, 'release', 'share', 
+            self.rfi_file = join(lofarsoft, 'release', 'share', 
                 'pulsar', 'data', 'master.rfi')
         self.zap_file = zap_file
 
@@ -455,7 +456,7 @@ class SearchRun(object):
         Get a globpattern that matches the raw data (the subbands)
         
         Note : the globpattern contains the full path to the raw data.'''
-        return os.path.join(self.in_dir, self.basename + '.sub[0-9]???')
+        return join(self.in_dir, self.basename + '.sub[0-9]???')
     
     def determine_basename(self):
         '''Find the basename of this observation from raw data directory.'''
@@ -539,17 +540,17 @@ class SearchRun(object):
 
         # Create 
         try:
-            os.mkdir(os.path.join(self.work_dir, 'RFIFIND'))
+            os.mkdir(join(self.work_dir, 'RFIFIND'))
             for i in range(n_cores):
-                os.mkdir(os.path.join(self.work_dir, 'CORE_%d' % i))
-            os.mkdir(os.path.join(self.out_dir, 'KNOWN_EPHEMERIS'))
-            os.mkdir(os.path.join(self.out_dir, 'SINGLEPULSE'))
-            os.mkdir(os.path.join(self.out_dir, 'LOGS'))
-            os.mkdir(os.path.join(self.out_dir, 'INF'))
-            os.mkdir(os.path.join(self.out_dir, 'RFIFIND'))
-            os.mkdir(os.path.join(self.out_dir, 'ACCELSEARCH')) 
-            os.mkdir(os.path.join(self.out_dir, 'DM0.00'))
-            os.mkdir(os.path.join(self.out_dir, 'TIMESERIES'))
+                os.mkdir(join(self.work_dir, 'CORE_%d' % i))
+            os.mkdir(join(self.out_dir, 'KNOWN_EPHEMERIS'))
+            os.mkdir(join(self.out_dir, 'SINGLEPULSE'))
+            os.mkdir(join(self.out_dir, 'LOGS'))
+            os.mkdir(join(self.out_dir, 'INF'))
+            os.mkdir(join(self.out_dir, 'RFIFIND'))
+            os.mkdir(join(self.out_dir, 'ACCELSEARCH')) 
+            os.mkdir(join(self.out_dir, 'DM0.00'))
+            os.mkdir(join(self.out_dir, 'TIMESERIES'))
         except Exception, e:
             raise e
 
@@ -558,19 +559,18 @@ class SearchRun(object):
         for par_file in par_files:
             assert os.path.split(par_file)[0] != self.out_dir
             for i in range(n_cores):
-                shutil.copy(par_file, os.path.join(self.work_dir, 
-                    'CORE_%d' % i))
+                shutil.copy(par_file, join(self.work_dir, 'CORE_%d' % i))
             # Also provide copies of the par files in the output directory
             # for future reference.
-            shutil.copy(par_file, os.path.join(self.out_dir, 
-                'KNOWN_EPHEMERIS', os.path.split(par_file)[1]))
+            shutil.copy(par_file, join(self.out_dir, 'KNOWN_EPHEMERIS', 
+                os.path.split(par_file)[1]))
 
         # Perform rfifind if at all needed
         if not self.rfifind_input_dir:
             t_rfifind_start = time.time()
             rfifind_status = run_rfifind(
                 self.get_subband_globpattern(), 
-                os.path.join(self.work_dir, 'RFIFIND'), 
+                join(self.work_dir, 'RFIFIND'), 
                 self.basename, bad_channels
             )
             t_rfifind_end = time.time()
@@ -585,14 +585,14 @@ class SearchRun(object):
             rfifind_input_files = crawler.find_rfifind_output(
                 self.rfifind_input_dir, self.basename)
             for f in rfifind_input_files:
-                shutil.copy(os.path.join(self.rfifind_input_dir, f),
-                    os.path.join(self.work_dir, 'RFIFIND'))
+                shutil.copy(join(self.rfifind_input_dir, f),
+                    join(self.work_dir, 'RFIFIND'))
 
 
         # Store the location of the rfifind mask file (used by other PRESTO
         # binaries):
-        rfifind_mask_file = os.path.join(os.path.join(self.work_dir, 'RFIFIND', 
-            self.basename + '_rfifind.mask'))
+        rfifind_mask_file = join(self.work_dir, 'RFIFIND', 
+            self.basename + '_rfifind.mask')
         
         ddplan_i = -1 
         for ddplan, n_cores_to_use in self.annotated_ddplans:
@@ -647,25 +647,25 @@ class SearchRun(object):
                     par_file = os.path.split(par_file)[1]
                     command_list[core_index].append(
                         get_command('cd', {}, 
-                            [os.path.join(self.work_dir, 'CORE_%d' % core_index)]))
+                            [join(self.work_dir, 'CORE_%d' % core_index)]))
                     command_list[core_index].append(
                         get_command(*get_folding_command_ke(self.basename, dm, 
-                            os.path.join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
+                            join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
                             rfifind_mask_file, 
                             par_file, False)
                         )
                     )
                     command_list[core_index].append(
                         get_command(*get_folding_command_ke(self.basename, dm, 
-                            os.path.join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
+                            join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
                             rfifind_mask_file, 
                             par_file, True)
                         )
                     )
                     command_list[core_index].append(get_command('cp', {}, 
-                        ['*.pfd.bestprof', os.path.join(self.out_dir, 'KNOWN_EPHEMERIS')]))
+                        ['*.pfd.bestprof', join(self.out_dir, 'KNOWN_EPHEMERIS')]))
                     command_list[core_index].append(get_command('cp', {}, 
-                        ['*.pfd.ps', os.path.join(self.out_dir, 'KNOWN_EPHEMERIS')]))
+                        ['*.pfd.ps', join(self.out_dir, 'KNOWN_EPHEMERIS')]))
                     command_list[core_index].append(
                         get_command('cd', {}, [self.work_dir]))
                
@@ -673,14 +673,14 @@ class SearchRun(object):
                 if dm == 0:
                     command_list[core_index].append(
                         get_command('cp', {}, [self.basename + '_DM0.00.*',
-                        os.path.join(self.out_dir, 'DM0.00')])
+                        join(self.out_dir, 'DM0.00')])
                     )
                 
               
                 if not no_accel:
                     # remove datafiles that are no longer necessary
                     command_list[core_index].append(
-                        get_command('rm', {}, [os.path.join(self.work_dir, 
+                        get_command('rm', {}, [join(self.work_dir, 
                             self.basename + '_DM%.2f' % dm + '.fft')]
                         )
                     )
@@ -689,28 +689,28 @@ class SearchRun(object):
                     # copy timeseries to output directory
                     # This can fail miserably if there is not enough disk!
                     command_list[core_index].append(
-                        get_command('mv', {}, [os.path.join(self.work_dir,
+                        get_command('mv', {}, [join(self.work_dir,
                             self.basename + '_DM%.2f' % dm + '.dat'),
-                            os.path.join(self.out_dir, 'TIMESERIES')]
+                            join(self.out_dir, 'TIMESERIES')]
                         )
                     )
                 else:
                     # remove dedispersed timeseries (.dat files)
                     command_list[core_index].append(
-                        get_command('rm', {}, [os.path.join(self.work_dir,
+                        get_command('rm', {}, [join(self.work_dir,
                             self.basename + '_DM%.2f' % dm + '.dat')]
                         )
                     )
                 if par_files:
                     # clean up after the known ephemeris folding
                     command_list[core_index].append(
-                        get_command('rm', {}, [os.path.join(self.work_dir, 'CORE_%d' % core_index, '*.pfd*')])
+                        get_command('rm', {}, [join(self.work_dir, 'CORE_%d' % core_index, '*.pfd*')])
                     )
                     command_list[core_index].append(
-                        get_command('rm', {}, [os.path.join(self.work_dir, 'CORE_%d' % core_index, '*.lis')])
+                        get_command('rm', {}, [join(self.work_dir, 'CORE_%d' % core_index, '*.lis')])
                     )
                     command_list[core_index].append(
-                        get_command('rm', {}, [os.path.join(self.work_dir, 'CORE_%d' % core_index, '*.tmp')])
+                        get_command('rm', {}, [join(self.work_dir, 'CORE_%d' % core_index, '*.tmp')])
                     )
              
             # Run the per DM analysis in a paralellized fashion.
@@ -719,10 +719,10 @@ class SearchRun(object):
 
             for core_index in range(n_cores):
                 if not command_list[core_index]: continue
-                script_filename = os.path.join(self.work_dir, 
+                script_filename = join(self.work_dir, 
                     'per_dm_analysis_core%d_step%d.sh' % \
                     (core_index, ddplan_i))
-                log_filename = os.path.join(self.work_dir, 
+                log_filename = join(self.work_dir, 
                     'per_dm_analysis_core%d_step%d.log.txt' % \
                     (core_index, ddplan_i))
                 try:
@@ -745,9 +745,9 @@ class SearchRun(object):
         if not no_accel:            
             # Run the seperate folding script (after having created a directory
             # for it to write the folds to).
-            os.mkdir(os.path.join(self.work_dir, 'FOLDS'))
+            os.mkdir(join(self.work_dir, 'FOLDS'))
             folder.main(
-                folddir=os.path.join(self.work_dir, 'FOLDS'),
+                folddir=join(self.work_dir, 'FOLDS'),
                 subbdir=self.in_dir,
                 canddir=self.work_dir,
                 basename=self.basename,
@@ -768,14 +768,14 @@ class SearchRun(object):
         # create a plots of chi-squared versus DM for the output of the known
         # ephemeris search
         if par_files:
-            tmp = crawler.find_pfd_bestprof(os.path.join(self.out_dir, 'KNOWN_EPHEMERIS'), self.basename)
+            tmp = crawler.find_pfd_bestprof(join(self.out_dir, 'KNOWN_EPHEMERIS'), self.basename)
             print 'FOUND KNOWN EPHEMERIS SEARCH OUTPUT FILES :', tmp
             tmp_graphs = {}
             for pulsar in tmp:
                 tmp_graphs[pulsar] = ([], [])
                 for pfd_bestprof_file in tmp[pulsar]:
                     chi_square, best_dm = parse_pfd_bestprof_file(
-                        os.path.join(self.out_dir, 'KNOWN_EPHEMERIS', pfd_bestprof_file))
+                        join(self.out_dir, 'KNOWN_EPHEMERIS', pfd_bestprof_file))
                     tmp_graphs[pulsar][0].append(best_dm)
                     tmp_graphs[pulsar][1].append(chi_square)
             for pulsar in tmp_graphs:
@@ -790,7 +790,7 @@ class SearchRun(object):
                 pyplot.title('Chi square for %s (peak at DM = %.2f)' % (pulsar, peak_dm))
                 pyplot.xlabel('DM pc cm^-3')
                 pyplot.ylabel('chi square')
-                pyplot.savefig(os.path.join(self.out_dir, 'KNOWN_EPHEMERIS', pulsar + '.pdf'))
+                pyplot.savefig(join(self.out_dir, 'KNOWN_EPHEMERIS', pulsar + '.pdf'))
                 pyplot.clf()
 
 
@@ -798,29 +798,29 @@ class SearchRun(object):
         # Add code that cleans up after the search:
         if not no_accel:
             # move the FOLDS directory to the output directory
-            shutil.move(os.path.join(self.work_dir, 'FOLDS'), 
-                os.path.join(self.out_dir, 'FOLDS'))
+            shutil.move(join(self.work_dir, 'FOLDS'), 
+                join(self.out_dir, 'FOLDS'))
             # move all the candidate files to the output location
-            for f in glob.glob(os.path.join(self.work_dir, self.basename \
+            for f in glob.glob(join(self.work_dir, self.basename \
                 + '_DM*.[0-9][0-9]_ACCEL*')):
-                shutil.move(f, os.path.join(self.out_dir, 'ACCELSEARCH'))
+                shutil.move(f, join(self.out_dir, 'ACCELSEARCH'))
         if not no_singlepulse:
             # move all the singlepulse related stuff
-            for f in glob.glob(os.path.join(self.work_dir, '*.singlepulse')):
-                shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
-            for f in glob.glob(os.path.join(self.work_dir, '*_singlepulse.ps')):
-                shutil.move(f, os.path.join(self.out_dir, 'SINGLEPULSE'))
+            for f in glob.glob(join(self.work_dir, '*.singlepulse')):
+                shutil.move(f, join(self.out_dir, 'SINGLEPULSE'))
+            for f in glob.glob(join(self.work_dir, '*_singlepulse.ps')):
+                shutil.move(f, join(self.out_dir, 'SINGLEPULSE'))
         # move all the .inf files
-        for f in glob.glob(os.path.join(self.work_dir, '*.inf')):
-            shutil.move(f, os.path.join(self.out_dir, 'INF'))
+        for f in glob.glob(join(self.work_dir, '*.inf')):
+            shutil.move(f, join(self.out_dir, 'INF'))
         # move all the search scripts/logs to the LOGS directory
-        for f in glob.glob(os.path.join(self.work_dir, '*.log.txt')):
-            shutil.move(f, os.path.join(self.out_dir, 'LOGS'))
-        for f in glob.glob(os.path.join(self.work_dir, '*.sh')):
-            shutil.move(f, os.path.join(self.out_dir, 'LOGS'))
+        for f in glob.glob(join(self.work_dir, '*.log.txt')):
+            shutil.move(f, join(self.out_dir, 'LOGS'))
+        for f in glob.glob(join(self.work_dir, '*.sh')):
+            shutil.move(f, join(self.out_dir, 'LOGS'))
         # move the rfifind output
-        shutil.move(os.path.join(self.work_dir, 'RFIFIND'), 
-            os.path.join(self.out_dir, 'RFIFIND'))
+        shutil.move(join(self.work_dir, 'RFIFIND'), 
+            join(self.out_dir, 'RFIFIND'))
 
 def mpiprepsubband_helper(ddplan, n_cores):
     '''
