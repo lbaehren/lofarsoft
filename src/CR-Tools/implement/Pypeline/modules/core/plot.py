@@ -81,7 +81,12 @@ class plotfinish:
             if filename:
                 f=filename+("-" if name else "")+name+"."+filetype
                 self.files.append(f)
-                plt.savefig(f)
+                fig=plt.gcf()
+#                dpi=fig.get_dpi()
+#                fig.set_dpi(200)
+#                fig.set_size_inches(10,10)
+                fig.savefig(f,dpi=200)
+#               fig.set_dpi(dpi)
                 print "Saved plot in -->",f
             if txt:
                 print (("("+name+") ") if name else "")+txt

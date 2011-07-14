@@ -312,7 +312,7 @@ class FitMaxima(tasks.Task):
         if self.doplot:
             if self.newfigure and not self.figure:
                 self.figure=cr.plt.figure()
-            self.data[self.plotstart:self.plotend,...].plot(xvalues=self.xvalues,legend=self.legend[self.plotstart:self.plotend] if self.legend else None)
+            self.data[self.plotstart:self.plotend,...].plot(xvalues=self.xvalues,title="Maxima Fitting",legend=self.legend[self.plotstart:self.plotend] if self.legend else None)
             self.fits_ydata[self.plotstart:self.plotend,...].plot(clf=False)
             cr.plt.plot(self.maxx[self.plotstart:self.plotend],self.maxy[self.plotstart:self.plotend],marker="o",linestyle='None')
         self.lags=cr.Vector(copy=self.maxx)

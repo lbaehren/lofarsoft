@@ -207,7 +207,7 @@ class FitBaseline(tasks.Task):
                       output:True},
 
         "clean_bins_x":{doc:"""Array holding the frequencies of the clean bins. (work vector)""",
-                        default:lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Clean Frequencies"),
+                        default:lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Frequency"),
                         workarray:True},
 
         "clean_bins_y":{doc:"""Array holding the powers of the clean bins. (work vector)""",
@@ -313,11 +313,13 @@ class FitBaseline(tasks.Task):
         #Plotting
         if self.doplot>2:
             print "Plotting full spectrum of refence antenna and downsampled spectra (doplot>=3) - can take some time..."
+            plt.clf()
+            plt.subplots_adjust(hspace=0.4)
             plt.subplot(2,1,0)
-            self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(title="RFI Downsampling",color="blue",clf=False)
+            self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(color="blue",clf=False,title="Downsampled & Original Spectrum (antennas #"+str(self.plot_antenna)+")")
             self.small_spectrum[self.plot_antenna].plot(xvalues=self.freqs,clf=False,color="red")
             plt.subplot(2,1,1)
-            self.small_spectrum[...].plot(xvalues=self.freqs,clf=False)
+            self.small_spectrum[...].plot(xvalues=self.freqs,clf=False,title="Downsampled Spectra (all antennas)")
             self.plot_finish(name=self.__taskname__+"-donwsampled_spectrum")
         #Normalize the spectrum to unity
         #self.meanspec=self.small_spectrum[...].mean()
@@ -329,9 +331,9 @@ class FitBaseline(tasks.Task):
         self.limit2=self.minmean+self.minrms*self.rmsfactor
         self.limit1=self.minmean-self.minrms*self.rmsfactor
         if self.doplot>1:
-            self.ratio[...].plot(xvalues=self.freqs,title="RMS/Amplitude",logplot=False,clf=True,xlabel="Frequency [MHz]",ylabel="RMS/Mean (per block)")
-            plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="green")
-            plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="green")
+            self.ratio[...].plot(xvalues=self.freqs,title="RMS/Amplitude (per channel block)",logplot="y",clf=True)
+            plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="red",logplot="y",linewidth=2)
+            plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="red",logplot="y",linewidth=2,xlabel="Frequency [MHz]",ylabel="RMS/Mean")
             self.plot_finish("Plotted relative RMS of downsampled spectrum (doplot>=2)",name=self.__taskname__+"-rms_div_mean")
         #Now select bins where the ratio between RMS and amplitude is within the limits
         self.nselected_bins=self.selected_bins[...,1:].findbetween(self.ratio[...,1:-1],self.limit1,self.limit2)
@@ -369,10 +371,11 @@ class FitBaseline(tasks.Task):
             print time.clock()-self.t0,"s: Done fitting baseline."
         if self.doplot:
             plt.clf()
+            plt.subplots_adjust(hspace=0.4)
             plt.subplot(2,1,0)
-            self.clean_bins_y[self.plot_antenna,0:self.nselected_bins[self.plot_antenna]].plot(xvalues=self.clean_bins_x[0,0:self.nselected_bins[self.plot_antenna]],logplot=False,color="blue",clf=False)
+            self.clean_bins_y[self.plot_antenna,0:self.nselected_bins[self.plot_antenna]].plot(xvalues=self.clean_bins_x[0,0:self.nselected_bins[self.plot_antenna]],logplot=False,color="blue",clf=False,title="Fitted baseline to downsampled spectrum (antenna #"+str(self.plot_antenna)+")")
             plt.subplot(2,1,1)
-            self.clean_bins_y[...,[0]:self.nselected_bins].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins],logplot=False,clf=False)
+            self.clean_bins_y[...,[0]:self.nselected_bins].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins],logplot=False,clf=False,title="Fitted baseline to downsampled spectrum (all antennas)")
             self.clean_bins_y.fill(0.0)
             if self.fittype=="POLY":
                 self.clean_bins_y[...,[0]:self.nselected_bins].polynomial(self.clean_bins_x[...,[0]:self.nselected_bins],self.coeffs[...],self.powers[...])
@@ -571,15 +574,16 @@ class CalcBaseline(tasks.Task):
             print "#Plotting the calculated baseline of the reference antenna."
             wasinteractive=plt.isinteractive()
             plt.ioff()
-            plt.clf(); 
+            plt.clf();
             if self.doplot>1:
+                plt.subplots_adjust(hspace=0.4)
                 plt.subplot(2,1,0)
-            self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(color="blue",clf=False)
-            self.work_baseline[self.plot_antenna,self.plot_start:self.plot_end].plot(title="Baseline",color="red",clf=False)
+            self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(color="blue",clf=False,title="Baseline (antenna #"+str(self.plot_antenna)+")")
+            self.work_baseline[self.plot_antenna,self.plot_start:self.plot_end].plot(color="red",clf=False)
             if self.doplot>1:
                 print "#Plotting the calculated baselines of all antennas."
                 plt.subplot(2,1,1)
-                self.work_baseline[...,self.plot_start:self.plot_end].plot(title="Baseline",clf=False)
+                self.work_baseline[...,self.plot_start:self.plot_end].plot(title="Baseline (all antennas)",clf=False)
             self.plot_finish(name=self.__taskname__)
             if wasinteractive: plt.ion()
         if self.invert:
@@ -732,7 +736,7 @@ class ApplyBaseline(tasks.Task):
         if self.doplot:
             wasinteractive=plt.isinteractive()
             plt.ioff()
-            self.work_spectrum[self.plotchannel,self.plot_start:self.plot_end].plot(title="RFI Downsampling",color='red')
+            self.work_spectrum[self.plotchannel,self.plot_start:self.plot_end].plot(title="Spectrum with baseline applied",color='red')
             if self.adaptive_peak_threshold:
                 self.limit[self.plotchannel,self.plot_start:self.plot_end].plot(clf=False,color="green",logplot="y")
             else:

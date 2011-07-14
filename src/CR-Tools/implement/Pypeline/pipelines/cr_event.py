@@ -1,10 +1,53 @@
-"""
-Basic LOFAR VHECR event processing, including gain calibration, RFI
-excision, pulse finding, direction finding, beamforming.
+#! /usr/bin/env python
 
-Run with:
+"""
+**Usage:**
 execfile(PYP+"pipelines/cr_event.py")
-execfile('/Users/falcke/LOFAR/usg/src/CR-Tools/implement/Pypeline/pipelines/cr_event.py')
+
+This is the basic LOFAR VHECR event processing script, including gain
+calibration, RFI excision, pulse finding, direction finding,
+beamforming.
+
+**Parameters:**
+======================= =================================================================
+*filename*              filename of raw data to be processed (can include directory)
+
+*lofarmode*             'LBA_INNER' or 'LBA_OUTER'
+
+*polarization*          either 0 or 1 for selecting even or odd antennas
+
+*outputdir*             directory where to store the final results (will be stored in a
+                        subdirectory filename.dir/ within that directory) 
+            
+*block*                 (or block_with_peak) - in which block do you expect the peak
+
+*plotpause*             pause and display each figure interactively?
+
+*maximum_allowed_delay* maximum differential mean cable delay that the
+                        expected positions can differ rom the measured ones, before we
+                        consider something to be wrong
+======================= =================================================================
+
+**Results:**
+
+Data and results are stored in an hArray and its header. This can be
+read back with ``event=hArrayRead(filename-polN.results)``, (filename
+without the .h5 ending) in the ``outputdir/filename.dir`` directory
+where all output can be found.
+
+Some basic results are stored in the ``event.par.results`` dict. The
+quality information dict is in ``event.par.quality``.  The shifted
+time series data (corrected for time travel and cable delay) of all
+antennas is in ``event.par.timeseries_data``. A summary of the ouput
+with all figures can be viwed with a web browser from 
+outputdir/filename.dir/index.html.
+
+
+**Example: **
+
+Command line use:
+$PYP/pipelines/cr_event.py  ~/LOFAR/work/CR/LORAweekdump--2-15.h5 --lofarmode=LBA_INNER --outputdir=/Users/falcke/LOFAR/work/ --block=93 --polarization=0
+------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
 filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
@@ -15,28 +58,61 @@ Event-0, LBA_INNER:
 Azimuth (Eastwards from North) 9.4 degrees, Elevation 61.0 degrees
 LORA estimate: 17.2 degrees, 62.9 degrees
 
-
 Revision History:
 V1.0 created by H. Falcke, July 2011
 """
 
 from pycrtools import *
+from optparse import OptionParser
+
 t0=time.clock()
+#------------------------------------------------------------------------
+#Command line options
+#------------------------------------------------------------------------
+usage = "usage: %prog [options] datafile.h5 "
+parser = OptionParser(usage=usage)
+
+parser.add_option("-o","--outputdir", type="str", default="",help="directory where to store the final results (will be stored in a subdirectory filename.dir/ within that directory)")
+parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
+parser.add_option("-p","--polarization", type="int", default=0,help="either 0 or 1 for selecting even or odd antennas")
+parser.add_option("-b","--block", type="int", default=93,help="in which block do you expect the peak")
+parser.add_option("-s","--blocksize", type="int", default=2**16,help="not yet implemented")
+parser.add_option("-q","--nopause", action="store_true",help="Do not pause after each plot and display each figure interactively")
+parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
 #------------------------------------------------------------------------
 # Main input parameters
 #------------------------------------------------------------------------
-filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
-filename="LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
+if not parser.get_prog_name()=="cr_event.py":
+#   Program was run from within python
+    filename="~/LOFAR/work/CR/lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
+    filename="~/LOFAR/work/CR/LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
 
-filedir="~/LOFAR/work/CR/"
-outputdir="/Users/falcke/LOFAR/work/"
-block_with_peak=93
-plotpause=False
-maximum_allowed_delay=1e-8 # maximum differential mean cable delay
-                           # that the expected positions can differ
-                           # from the measured ones, before we
-                           # consisder something to be wrong
+    outputdir="/Users/falcke/LOFAR/work/"
+    polarization=0 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
+    block_with_peak=93
+    plotpause=False
+    maximum_allowed_delay=1e-8 # maximum differential mean cable delay
+                               # that the expected positions can differ
+                               # from the measured ones, before we
+                               # consisder something to be wrong
+else:
+    #   Program was started from command line
+    (options, args) = parser.parse_args()
+
+    # Filenames
+    if not args:
+        print "Error: No HDF5 files specified for input"
+        sys.exit(1)
+
+    filename = args[0]
+    lofarmode = options.lofarmode
+    outputdir = options.outputdir
+    polarization = options.polarization
+    block_with_peak = options.block
+    plotpause = not options.nopause
+    maximum_allowed_delay = options.maximum_allowed_delay
+
 #------------------------------------------------------------------------
 plt.ioff()
 
@@ -44,12 +120,12 @@ plt.ioff()
 #Setting filenames and directories
 ########################################################################
 
-filename=os.path.expandvars(os.path.expanduser(filename))
-filedir=os.path.expandvars(os.path.expanduser(filedir))
+(filedir,filename)=os.path.split(os.path.expandvars(os.path.expanduser(filename)))
 outputdir=os.path.expandvars(os.path.expanduser(outputdir))
+outfilename=(filename[:-3] if filename[-3:].upper()==".H5" else filename)+"-pol"+str(polarization)
 
-outputdir=os.path.join(outputdir,filename+".dir")
-result_file=os.path.join(outputdir,filename+".results")
+outputdir=os.path.join(outputdir,outfilename+".dir")
+result_file=os.path.join(outputdir,outfilename+".results")
 htmlfilename=os.path.join(outputdir,"index.html")
 
 tasks.task_write_parfiles=True
@@ -61,6 +137,7 @@ nparfiles = len(tasks.task_parfiles)
 
 print "filename    -->",filename
 print "filedir     -->",filedir
+print "outfilename -->",outfilename
 print "outputdir   -->",outputdir
 print "result_file -->",result_file
 print "htmlfile    -->",htmlfilename
@@ -77,7 +154,7 @@ if not os.path.exists(outputdir):
 else:
     print "# Using existing output directory",outputdir
 
-Pause=plotfinish(filename=os.path.join(outputdir,filename),plotpause=plotpause)
+Pause=plotfinish(filename=os.path.join(outputdir,outfilename),plotpause=plotpause)
 
 ########################################################################
 #Setting the parameter block with parameters for tasks
@@ -92,7 +169,7 @@ par=dict(
         addantennas=False,
         filefilter=os.path.join(filedir,filename),
         lofarmode=lofarmode,
-        antennas_start=1,
+        antennas_start=polarization,
         antennas_stride=2,maxpeak=7,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=7,
         blocklen=4096, # only used for quality checking within one block
         delta_nu=3000, # -> blocksize=2**16
@@ -148,8 +225,8 @@ else:
 #which contain flags indicating a potential problem
 
 #Define some convenience lists and dicts
-qualitylist=avspectrum.power.getHeader("quality")
-antennalist=[i["antenna"] for i in qualitylist if i["chunk"]==0] # just the names of all antennas
+quality=avspectrum.power.getHeader("quality")
+antennalist=[i["antenna"] for i in quality if i["chunk"]==0] # just the names of all antennas
 antenna_index={} # names of antennas and their position within the array 
 for i in range(len(antennalist)): antenna_index[antennalist[i]]=i
 
@@ -158,7 +235,7 @@ for i in range(len(antennalist)): antenna_index[antennalist[i]]=i
 # where the peak sits)
 
 #Select bad antennas
-flaglist=[i for i in qualitylist if i["chunk"]==block_with_peak and i["nblocksflagged"]>1]
+flaglist=[i for i in quality if i["chunk"]==block_with_peak and i["nblocksflagged"]>1]
 bad_antennas=[i["antenna"] for i in flaglist]
 bad_antennas_index=[antenna_index[i] for i in bad_antennas]
 
@@ -221,7 +298,7 @@ applybaseline=trun("ApplyBaseline",station_spectrum,baseline=station_gaincurve,p
 ########################################################################
 
 print "---> Load the block with the peak"
-datafile=open(filedir+filename); datafile["ANTENNA_SET"]=lofarmode
+datafile=open(os.path.join(filedir,filename)); datafile["ANTENNA_SET"]=lofarmode
 datafile["SELECTED_DIPOLES"]=good_antennas
 sample_interval=datafile["SAMPLE_INTERVAL"][0]
 antenna_positions=datafile["ANTENNA_POSITIONS"]
@@ -265,7 +342,7 @@ fft_data.mul(calcbaseline2.baseline)
 #Plotting just for quality control
 power=hArray(float,properties=fft_data)
 power.spectralpower(fft_data)
-if Pause.doplot: power[0:4,...].plot()
+if Pause.doplot: power[0:min(4,ndipoles),...].plot(title="Calibrated spectra of first 4 antennas")
 Pause("Plotted corrected spectrum. ",name="calibrated-spectrum")
 
 ########################################################################
@@ -278,7 +355,7 @@ hFFTWExecutePlan(timeseries_data2[...], fft_data[...], invfftplan)
 #timeseries_data2[...].invfftw(fft_data[...])
 timeseries_data2 /= blocksize # normalize back to original value
 
-if Pause.doplot: timeseries_data2[0:2,...].plot()
+if Pause.doplot: timeseries_data2[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
 Pause("Plotted time series data. ",name="calibrated-imeseries")
 
 ########################################################################
@@ -361,16 +438,21 @@ beamformed=trun("BeamFormer2",data=pulse.timeseries_data,pardict=par,maxnantenna
 ########################################################################
 
 #Produce nice looking plot of peak
-smooth_beam=hArray(dimensions=[blocksize],copy=beamformed.tbeams,name="Beamformed Power",xvalues=timeseries_data.par.xvalues)
-smooth_beam.abs()
-smooth_beam.runningaverage(7,hWEIGHTS.GAUSSIAN)
+event=hArray(dimensions=[blocksize],copy=beamformed.tbeams,name="Beamformed Power",xvalues=timeseries_data.par.xvalues)
+event.abs()
+event.runningaverage(7,hWEIGHTS.GAUSSIAN)
 if Pause.doplot:
     plt.ioff()
-    smooth_beam.plot()
+    event.plot(title="Beamformed Time Series")
     Pause(name="pulse-beamformed")
 
-smooth_beam_dummy=hArray(smooth_beam.vec(),dimensions=[1,blocksize])
-beam_maxima=trun('FitMaxima',smooth_beam_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+if Pause.doplot:
+    plt.ioff()
+    event[pulse.start:pulse.end].plot(title="Beamformed Time Series")
+    Pause(name="pulse-beamformed-zoomed")
+
+event_dummy=hArray(event.vec(),dimensions=[1,blocksize])
+beam_maxima=trun('FitMaxima',event_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 pulse_time_ms=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
 
 print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
@@ -393,6 +475,7 @@ results=dict(
     FILENAME=filename,
     BLOCK=block_with_peak,
     BLOCKSIZE=blocksize,
+    polarization=polarization,
     plotfiles=Pause.files,
     filedir=filedir,
     ndipoles=ndipoles,
@@ -405,20 +488,23 @@ results=dict(
     pulse_start_sample=pulse.start,
     pulse_end_sample=pulse.end,
     pulse_time_ms=pulse_time_ms,
-    pulse_direction=direction.meandirection_azel_deg
+    pulse_height=beam_maxima.maxy.val(),
+    pulse_direction=direction.meandirection_azel_deg,
+    pulse_direction_delta_delays_start=direction.delta_delays_mean_history[0],
+    pulse_direction_delta_delays_final=direction.delta_delays_mean_history[-1],
     )
 
-smooth_beam.par.quality=qualitylist
-smooth_beam.par.time_series=pulse.timeseries_data_cut
-smooth_beam.par.results=results
-smooth_beam.write(result_file)
+event.par.quality=quality
+event.par.timeseries_data=pulse.timeseries_data_cut
+event.par.results=results
+event.write(result_file)
 
 ########################################################################
 #Writing summary output to html file
 ########################################################################
 htmlfile=open(htmlfilename,"w")
-htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(filename))
-htmlfile.write("<h1>{0:s}</h1>\n".format(filename))
+htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
+htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
 htmlfile.write("<h2>Parameters</h2>\n".format())
 htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><br>\n".format(
     time.strftime("%A, %Y-%m-%d at %H:%M:%S"),os.getlogin(),time.clock()-t0))
@@ -437,13 +523,14 @@ for i in range(nparfiles,len(tasks.task_parfiles)):
 
 htmlfile.write("<h2>Plotfiles</h2>\n".format())
 for f in results["plotfiles"]:
-    htmlfile.write('{0:s}<br><a href="{0:s}"><img src="{0:s}" width=500></a><p>\n'.format(os.path.split(f)[-1]))
+    htmlfile.write('<a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><p>\n'.format(os.path.split(f)[-1]))
 
 htmlfile.write("</body></html>\n")
 htmlfile.close()    
     
 print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
 print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``."
+print "Shifted time series data of all antennas is in event.par.time_series."
 print "Open",htmlfilename,"in your browser to get a summary."
 print "-----------------------------------------------------------------------------------------------------------"
 print "Finished cr_event after",time.clock()-t0,"seconds."

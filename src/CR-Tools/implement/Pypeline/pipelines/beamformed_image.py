@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python*
 
 """Example script showing how to use the imager.
 

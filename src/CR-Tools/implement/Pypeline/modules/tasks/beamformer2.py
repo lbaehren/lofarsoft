@@ -397,7 +397,7 @@ class BeamFormer2(tasks.Task):
                     if (self.plotspec or not self.calc_timeseries) and self.avspec:
                         self.avspec[self.mainbeam].plot()
                     elif self.calc_timeseries:
-                        self.data_shifted[self.plot_antennas,...,self.plot_start:self.plot_end].plot()
+                        self.data_shifted[self.plot_antennas,...,self.plot_start:self.plot_end].plot(title="Shifted Time Series in Direction of Main Beam")
                     self.plot_finish(name=self.__taskname__)
                     plt.draw()
                 if self.verbose:
@@ -459,17 +459,18 @@ class BeamFormer2(tasks.Task):
             width=int(ceil(sqrt(npanels)))
             height=int(ceil(npanels/float(width)))
             plt.clf()
+            plt.subplots_adjust(hspace=0.4,wspace=0.4)
             for n in range(npanels):
                 plt.subplot(width,height,n+1)
                 if plotspec:
-                    beams.par.avspec[n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
+                    beams.par.avspec[n].plot(clf=False,xlabel="",title=str(n)+".",xlim=xlim,ylim=ylim)
                 else:
-                    self.tbeams[n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
+                    self.tbeams[n].plot(clf=False,xlabel="",title=str(n)+".",xlim=xlim,ylim=ylim)
         else:
             if plotspec:
-                beams.par.avspec[...].plot(clf=True,xlim=xlim,ylim=ylim)
+                beams.par.avspec[...].plot(clf=True,xlim=xlim,ylim=ylim,title="Beamformed spectrum around main direction")
             else:
-                self.tbeams[...].plot(clf=True,xlim=xlim,ylim=ylim)
+                self.tbeams[...].plot(clf=True,xlim=xlim,ylim=ylim,title="Beamformed time series around main direction")
 
     def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,smooth=0):
         """

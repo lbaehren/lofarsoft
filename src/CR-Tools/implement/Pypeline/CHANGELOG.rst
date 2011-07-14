@@ -1,4 +1,19 @@
-2011-07-11 - Rev 8101 - ongoing
+2011-07-14 - Rev 8101 - ongoing
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+ - writing of the parfiles of tasks can be controlled with the
+   parameters tasks.task_outputdir and tasks.task_write_parfiles
+
+- added a plotfinish class, who's instances are called after each plot
+  to write figues to disk and pause for user interaction if desired.
+
+- cr_event writes output into one common subdirectory and creates a
+  summary html file
+
+
+ 2011-07-11 - Rev 8101 
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
@@ -6,7 +21,7 @@
 - added testcr4.py to do an almost end-to-end radio-only CR pipeline
 - AverageSpectrum revised to use new data reader
  
-2011-07-07 - Rev 8083 - ongoing
+2011-07-07 - Rev 8083
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
