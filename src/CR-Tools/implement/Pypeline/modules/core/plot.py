@@ -4,6 +4,7 @@
 #pdb.set_trace()
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 
 from hftools import *
@@ -71,24 +72,34 @@ class plotfinish:
             pp("Try again")
             -> Nothing happens (i.e. no pause)....
     """
-    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="gif"):
+    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="gif",counter=0):
         self.plot_pause=plotpause
         self.doplot=doplot
         self.refresh=refresh
         self.filename=filename
         self.filetype=filetype
         self.files=[]
-    def __call__(self,txt="",name="",filename="",filetype="",savefig=False):
+        self.counter=counter
+    def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,savefig=False):
         if self.doplot:
             if not filename: filename=self.filename
             if not filetype: filetype=self.filetype
+            (fdir,fname)=os.path.split(filename)
+            if setcounter>0:
+                self.counter=setcounter
+            else:
+                self.counter+=1
             if filename:
-                f=filename+("-" if name else "")+name+"."+filetype
+                if name:
+                    f="{0:s}-{1:04d}-{2:s}-{3:s}.{4:s}".format(os.path.join(fdir,"pycrfig"),self.counter,fname,name,filetype)
+                else:
+                    f="{0:s}-{1:04d}-{2:s}.{3:s}".format(os.path.join(fdir,"pycrfig"),counter,fname,filetype)
                 self.files.append(f)
                 fig=plt.gcf()
 #                dpi=fig.get_dpi()
 #                fig.set_dpi(200)
 #                fig.set_size_inches(10,10)
+
                 fig.savefig(f,dpi=200)
 #               fig.set_dpi(dpi)
                 print "Saved plot in -->",f

@@ -52,6 +52,7 @@ results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for
 **Example: **
 
 Command line use:
+
 $PYP/pipelines/cr_event.py  ~/LOFAR/work/CR/LORAweekdump--2-15.h5 --lofarmode=LBA_INNER --outputdir=/Users/falcke/LOFAR/work/ --block=93 --polarization=0
 ------------------------------------------------------------------------
 
@@ -63,6 +64,16 @@ LORA estimate: 229.1 degrees, 62.4 degrees
 Event-0, LBA_INNER: 
 Azimuth (Eastwards from North) 9.4 degrees, Elevation 61.0 degrees
 LORA estimate: 17.2 degrees, 62.9 degrees
+
+                       Az=360-phi??
+
+Event ID		Theta	Phi		Core pos.(X,Y) m        Energy (eV)                       Az?
+-----------------------------------------------------------------------------------------------
+1307920753		62.4	129.9	        (63.5, 176.4)       2.57e+17 (underestimated)     230    
+1307923194		59.0	51.7	        (84.6, -61.5)		9.88e+15                      308
+1307942115		62.9	342.8	        (-31.7 -114.5)		1.8e+17 (underestimated)      17.2
+1309126700		74.2	335.7	        (-94.8, 34.7)		2.64e+16                      24
+-----------------------------------------------------------------------------------------------
 
 Revision History:
 V1.0 created by H. Falcke, July 2011
@@ -92,11 +103,11 @@ parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,hel
 #------------------------------------------------------------------------
 if not parser.get_prog_name()=="cr_event.py":
 #   Program was run from within python
+    filename="~/LOFAR/work/CR/lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
     filename="~/LOFAR/work/CR/LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
-    filename="~/LOFAR/work/CR/lora-event-2-station-2.h5"; lofarmode="LBA_OUTER"
 
     outputdir="/Users/falcke/LOFAR/work/"
-    polarization=1 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
+    polarization=0 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
     block_with_peak=93
     blocksize=2**16
     plotpause=False
@@ -144,7 +155,7 @@ tasks.task_outputdir=outputdir
 nparfiles = len(tasks.task_parfiles)
 
 #Removing old parfiles, if they exist
-[os.remove(f) for f in listFiles([os.path.join(outputdir,"*.par"),os.path.join(outputdir,"*.par.txt")])]
+[os.remove(f) for f in listFiles([os.path.join(outputdir,"*.par"),os.path.join(outputdir,"*.par.txt"),os.path.join(outputdir,"*.gif")])]
 
 print "filename    -->",filename
 print "filedir     -->",filedir
@@ -193,7 +204,7 @@ par=dict(
         ),
     FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
     LocatePulseTrain = dict(nsigma=6,maxgap=5,minlen=64,minpulselen=3),  #nisgma=7  
-    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0),
+    DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0),
     ApplyBaseline=dict(rmsfactor=7)
     )
 #------------------------------------------------------------------------
@@ -274,10 +285,9 @@ fitbaseline=trerun("FitBaseline","",averagespectrum_good_antennas,extendfit=0.5,
 print "---> Calculate a smooth version of the spectrum which is later used to set amplitudes."
 calcbaseline1=trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
 amplitudes=hArray(copy=calcbaseline1.baseline)
-amplitudes.sqrt()
 
 print "---> Calculate it again, but now to flatten the spectrum."
-calcbaseline2=trerun("CalcBaseline",2,averagespectrum_good_antennas,pardict=par,doplot=Pause.doplot)
+calcbaseline2=trerun("CalcBaseline",2,averagespectrum_good_antennas,pardict=par,invert=True,doplot=Pause.doplot)
     
 ########################################################################
 #RFI identification in sum of all antennas (incoherent station spectrum)
@@ -404,17 +414,23 @@ print " "
 #Now fit the direction and iterate over cable delays to get a stable
 #solution
 
-cabledelays.negate()
+#cabledelays.negate()
 delays=hArray(copy=cabledelays)
+#cabledelays *= 2
 #delays.fill(0)
 
-direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=antenna_positions,timelags=hArray(maxima.lags),delays=delays,verbose=True,doplot=False)
+direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=antenna_positions,timelags=hArray(maxima.lags),cabledelays=cabledelays,verbose=True,doplot=True)
 print "========================================================================"
 print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
 print " "
-print "Delays =",direction.delays * 1e9
+print "Delays =",direction.total_delays * 1e9
 
 print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
+
+(direction.total_delays*1e9).plot()
+(direction.delays_history*1e9)[1].plot(clf=False)
+(cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [n]",title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
+Pause(name="fitted-cable-delays")
 
 if abs(direction.delta_delays_rms_history[0])>maximum_allowed_delay or abs(direction.delta_delays_mean_history[0])>maximum_allowed_delay:
     print "************************************************************************"
@@ -425,7 +441,12 @@ if abs(direction.delta_delays_rms_history[0])>maximum_allowed_delay or abs(direc
 else:
     print "#DirectionFitTriangles: OK!"
 
-trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.delays,sizes=50,names=good_antennas_index,title="Delay errors in station",plotlegend=True)
+#plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
+#Pause(name="sub-beam-directions")
+
+trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors=hArray(maxima.lags),sizes=hArray(maxima_power.maxy),sizes_min=0,names=good_antennas_index,title="Time Lags in Station",plotlegend=True)
+
+trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_index,title="Delay errors in station",plotlegend=True)
 
 print "\n--->Beamforming"
 
@@ -435,28 +456,30 @@ print "\n--->Beamforming"
 
 #Beamform short data set first for inspection (and possibly for
 #maximizing later)
-bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.total_delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
 
 #Use the above later also for maximizing peak Beam-formed timeseries
 #is in ---> bf.tbeams[bf.mainbeam]
 
 print "---> Plotting mosaic of beams around central direction"
 if Pause.doplot:
-    bf.tplot()
-Pause(name="beamformed-multiple-directions")
+    bf.tplot(smooth=9)
+    Pause(name="beamformed-multiple-directions")
 
-#timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut)
-#timeseries_power_shifted.square()
-#timeseries_power_shifted.runningaverage(5,hWEIGHTS.GAUSSIAN)
+timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut,name="Power(t)")
+timeseries_power_shifted.square()
+timeseries_power_shifted[...].runningaverage(9,hWEIGHTS.GAUSSIAN)
+if Pause.doplot:
+    timeseries_power_shifted[...].plot(title="E-Field^2 corrected for delays in beam direction per antenna",xlabel="Samples")
+    plt.legend(good_antennas,ncol=2,title="Antennas",prop=matplotlib.font_manager.FontProperties(family="Helvetica",size=7))
+    Pause(name="shifted-power-per-antenna")
 
-maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
-Pause(name="pulse-maxima-power")
-
+#matplotlib.font_manager.FontProperties(self, family=None, style=None, variant=None, weight=None, stretch=None, size=None, fname=None, _init=None)
 
 
 print "---> Plotting full beam-formed data set"
 #Beamform full data set (not really necessary, but fun).
-beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.total_delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
 
 ########################################################################
 #Data Analysis ... (to be expanded)

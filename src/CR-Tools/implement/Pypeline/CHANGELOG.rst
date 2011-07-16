@@ -9,6 +9,9 @@
 -  task averagespectrum can now also form an incoherent sum of time
    series data for all antennas
 
+- cr_event pipeline further developed, more graphs added, fixed
+   delay fitting
+
 2011-07-14 - Rev 8123
 =====================
 

@@ -279,8 +279,10 @@ class FitBaseline(tasks.Task):
         "plot_end":{default:lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),
                     doc:"End plotting before this sample number."},
 
-        "plot_finish":{default: lambda self:plotfinish(doplot=self.doplot),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        "plot_finish":{default: lambda self:plotfinish(doplot=self.doplot,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
 
+        "plot_name":{default:"",doc:"Extra name to be added to plot filename."},
+    
         "doplot":{doc:"""Plot progress information. If ``value > 1``, plot more information (the number of leves varies from task to task).""",
                   default:False}
     }
@@ -320,7 +322,7 @@ class FitBaseline(tasks.Task):
             self.small_spectrum[self.plot_antenna].plot(xvalues=self.freqs,clf=False,color="red")
             plt.subplot(2,1,1)
             self.small_spectrum[...].plot(xvalues=self.freqs,clf=False,title="Downsampled Spectra (all antennas)")
-            self.plot_finish(name=self.__taskname__+"-donwsampled_spectrum")
+            self.plot_finish(name=self.__taskname__+"-donwsampled_spectrum"+self.plot_name)
         #Normalize the spectrum to unity
         #self.meanspec=self.small_spectrum[...].mean()
         #Calculate RMS/amplitude for each bin
@@ -334,7 +336,7 @@ class FitBaseline(tasks.Task):
             self.ratio[...].plot(xvalues=self.freqs,title="RMS/Amplitude (per channel block)",logplot="y",clf=True)
             plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="red",logplot="y",linewidth=2)
             plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="red",logplot="y",linewidth=2,xlabel="Frequency [MHz]",ylabel="RMS/Mean")
-            self.plot_finish("Plotted relative RMS of downsampled spectrum (doplot>=2)",name=self.__taskname__+"-rms_div_mean")
+            self.plot_finish("Plotted relative RMS of downsampled spectrum (doplot>=2)",name=self.__taskname__+"-rms_div_mean"+self.plot_name)
         #Now select bins where the ratio between RMS and amplitude is within the limits
         self.nselected_bins=self.selected_bins[...,1:].findbetween(self.ratio[...,1:-1],self.limit1,self.limit2)
         self.selected_bins+=1; # We started the search only at bin #1 in self.ratio, so the indices returned are off by one
@@ -342,7 +344,7 @@ class FitBaseline(tasks.Task):
         self.nselected_bins+=2 # add the two endpoints
         self.selected_bins[...,0].fill(0)
         self.endpoints=hArray(int,[self.nofAntennas,1],fill=self.nselected_bins-1)
-        self.selected_bins[...].set(self.endpoints,len(self.freqs)-1)
+        self.selected_bins[...].set(self.endpoints[...],len(self.freqs)-1)
         #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
         self.clean_bins_x[...].copy(self.freqs,self.selected_bins[...],asvec(self.nselected_bins))
         self.clean_bins_y[...].copy(self.small_spectrum[...],self.selected_bins[...],asvec(self.nselected_bins))
@@ -385,7 +387,7 @@ class FitBaseline(tasks.Task):
             self.clean_bins_y[self.plot_antenna,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,color="red",logplot=False)
             plt.subplot(2,1,1)
             self.clean_bins_y[...,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,logplot=False)
-            self.plot_finish("Plotted downsampled and cleaned spectrum with baseline fit.",name=self.__taskname__+"-clean_spectrum");
+            self.plot_finish("Plotted downsampled and cleaned spectrum with baseline fit.",name=self.__taskname__+"-clean_spectrum"+self.plot_name);
             if wasinteractive: plt.ion()
         self.spectrum.setHeader(FitBaseline=self.ws.getParameters())
         if self.save_output:
@@ -416,6 +418,7 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
      'plot_start',
      'plot_end',
      'plot_finish',
+     'plot_name',
      'plot_filename',
      'plot_center'
      ]])
@@ -553,7 +556,6 @@ class CalcBaseline(tasks.Task):
         #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
         #Left end
         if self.addHanning:
-#            import pdb; pdb.set_trace()
             self.height_ends[0,...].copy(self.work_baseline[...,self.numin_i])
             self.height_ends[1,...].copy(self.work_baseline[...,self.numax_i-1])
             self.factor=hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
@@ -584,7 +586,7 @@ class CalcBaseline(tasks.Task):
                 print "#Plotting the calculated baselines of all antennas."
                 plt.subplot(2,1,1)
                 self.work_baseline[...,self.plot_start:self.plot_end].plot(title="Baseline (all antennas)",clf=False)
-            self.plot_finish(name=self.__taskname__)
+            self.plot_finish(name=self.__taskname__+self.plot_name)
             if wasinteractive: plt.ion()
         if self.invert:
             self.work_baseline.inverse() # -> 1/baseline
@@ -622,6 +624,7 @@ ApplyBaselineParameters = dict(
      'plot_start',
      'plot_end',
      'plot_filename',
+     'plot_name',
      'plot_finish',
      'plot_center'
          ]
@@ -756,5 +759,5 @@ class ApplyBaseline(tasks.Task):
             print time.clock()-self.t0,"s: Done ApplyBaseline."
         if self.doplot:
             self.work_spectrum[self.plotchannel,self.plot_start:self.plot_end].plot(color='blue',clf=False)
-            self.plot_finish(name=self.__taskname__)
+            self.plot_finish(name=self.__taskname__+self.plot_name)
             if wasinteractive: plt.ion()
