@@ -491,7 +491,10 @@ CalcBaselineParameters.update({
                  default:True},
 
     "normalize":{doc:"If **True**, normalize the baseline to have a total sum of unity.",
-                 default:True}
+                 default:True},
+    
+    "powerlaw":{doc:"Multiply gain curve with a powerlaw depending on value. 'GalacticT': return a powerlaw according to Galactic radio emission in Kelvin; alpha (i.e. a number): multiply with powerlaw of form \nu^\alpha.",
+                 default:False}
 
     })
 
@@ -552,6 +555,24 @@ class CalcBaseline(tasks.Task):
         else:
 #            self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
             self.work_baseline[...,[self.numin_i]:[self.numax_i]].bsplinecalc(self.frequency[self.numin_i:self.numax_i],self.work_coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+
+        if self.powerlaw:
+            if isinstance(self.powerlaw,(int,long,float)):
+                alpha=-self.powerlaw # if self.invert else self.powerlaw
+                a=1./self.frequency[self.numin_i]**alpha
+            elif self.powerlaw=="GalacticT":
+                alpha=-2.5
+                nu0=408e6/{"T":1e12,"G":1e9,"M":1e6,"k":1e3,"":1}[self.frequency.getUnitPrefix()]
+                a = 32* (self.frequency[self.numin_i]/nu0)**-2.5  # Falcke & Gorham 2004
+            else:
+                raise TypeError("CalcBaseline - powerlaw parameter has wrong type")
+            if self.invert:
+                a=1/a; alpha=-alpha
+            if self.logfit:
+                a=log10(a); alpha=alpha/log(10.)
+                self.work_baseline[...,self.numin_i:self.numax_i].loglinearfunctionadd(self.frequency[self.numin_i:self.numax_i],a,alpha)
+            else:
+                self.work_baseline[...,self.numin_i:self.numax_i].powerlawmul(self.frequency[self.numin_i:self.numax_i],a,alpha)
 
         #Now add nice ends (Hanning Filters) to the frequency range to suppress the noise outside the usuable bandwidth
         #Left end

@@ -1,4 +1,4 @@
-2011-07-14 - Rev ongoing
+2011-07-14 - Rev 8133
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
@@ -7,10 +7,14 @@
   without recreating them 
 
 -  task averagespectrum can now also form an incoherent sum of time
-   series data for all antennas
+   series data for all antennas, fixed some bugs
 
 - cr_event pipeline further developed, more graphs added, fixed
-   delay fitting
+   delay fitting, normalized to Galactic powerlaw shape
+
+- added functions hPowerlawMul, hPowerlawAdd, hLinearFunctionMul,
+  hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
+
 
 2011-07-14 - Rev 8123
 =====================

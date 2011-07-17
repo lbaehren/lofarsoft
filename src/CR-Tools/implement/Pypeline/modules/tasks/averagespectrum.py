@@ -373,7 +373,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                      "Sample length in raw data set.",
                      "s"),
 
-        "blocksize":p_(lambda ws:min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0]),"The desired blocksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``blocksize_used` for the actual blocksize used."),
+        "blocksize":p_(lambda ws:int(min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0])),"The desired blocksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``blocksize_used` for the actual blocksize used."),
         
         "blocksize_used":p_(lambda ws:ws.blocklen*ws.nblocks,"The blocksize one would use for a single FFT."),
 

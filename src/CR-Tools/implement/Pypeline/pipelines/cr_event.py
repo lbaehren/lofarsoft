@@ -204,7 +204,8 @@ par=dict(
         ),
     FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
     LocatePulseTrain = dict(nsigma=6,maxgap=5,minlen=64,minpulselen=3),  #nisgma=7  
-    DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0),
+#    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once
+    DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0), # determine delays iteratively
     ApplyBaseline=dict(rmsfactor=7)
     )
 #------------------------------------------------------------------------
@@ -286,8 +287,10 @@ print "---> Calculate a smooth version of the spectrum which is later used to se
 calcbaseline1=trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
 amplitudes=hArray(copy=calcbaseline1.baseline)
 
+#raise TypeError("I don't like your type .... (just for debugging)")
+
 print "---> Calculate it again, but now to flatten the spectrum."
-calcbaseline2=trerun("CalcBaseline",2,averagespectrum_good_antennas,pardict=par,invert=True,doplot=Pause.doplot)
+calcbaseline_flat=trerun("CalcBaseline","flat",averagespectrum_good_antennas,pardict=par,invert=True,doplot=Pause.doplot)
     
 ########################################################################
 #RFI identification in sum of all antennas (incoherent station spectrum)
@@ -296,8 +299,8 @@ calcbaseline2=trerun("CalcBaseline",2,averagespectrum_good_antennas,pardict=par,
 #curve for RFI detection
 
 print "---> Flatten spectrum and find channels with RFI spikes"
-station_gaincurve=hArray(dimensions=calcbaseline2.baseline.shape()[-1],fill=0,properties=calcbaseline2.baseline,name="Station Spectrum")
-calcbaseline2.baseline[...].addto(station_gaincurve)
+station_gaincurve=hArray(dimensions=calcbaseline_flat.baseline.shape()[-1],fill=0,properties=calcbaseline_flat.baseline,name="Station Spectrum")
+calcbaseline_flat.baseline[...].addto(station_gaincurve)
 station_gaincurve /= ndipoles
 
 station_spectrum=hArray(dimensions=averagespectrum_good_antennas.shape()[-1],fill=0,properties=averagespectrum_good_antennas,name="Station Spectrum")
@@ -350,10 +353,18 @@ fft_data.par.xvalues.setUnit("M","")
 hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
 
 ########################################################################
-#RFI excision
+#RFI excision 
 ########################################################################
 fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
-fft_data.mul(calcbaseline2.baseline)
+
+########################################################################
+#Gain calibration of data
+########################################################################
+print "---> Calculate a baseline with Galactic powerlaw"
+calcbaseline_galactic=trerun("CalcBaseline","galactic",averagespectrum_good_antennas,pardict=par,invert=True,powerlaw=0.5,doplot=Pause.doplot)
+
+# and apply
+fft_data.mul(calcbaseline_galactic.baseline)
 
 #Plotting just for quality control
 power=hArray(float,properties=fft_data)

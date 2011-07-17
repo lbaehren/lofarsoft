@@ -967,6 +967,187 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 //$ENDITERATE
 
+//========================================================================
+//$ITERATE MFUNC Mul,Add
+//========================================================================
+
+
+//$DOCSTRING: Creates a power law of the form amplitude*x_i^/alpha and multiplies or adds it (here $MFUNC) to a vector, where the x_i's are given in a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPowerLaw{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric output vector containing the powerlaw")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(xvec)()("The x values to be potentiated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(amplitude)()("Amplitude of the powerlaw")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HFPP_TEMPLATED_4)(exponent)()("Exponent of the powerlaw")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+      vec.powerlawmul(xvec,A,alpha) -> vec=[vec_0*A*xvec_0^alpha,vec_1*A*xvec_1^alpha,...,vec_n*A*xvec_n^alpha ]
+      vec.powerlawadd(xvec,A,alpha) -> vec=[vec_0+A*xvec_0^alpha,vec_1+A*xvec_1^alpha,...,vec_n+A*xvec_n^alpha ]
+
+  Description:
+  If the second vector is shorter, it will wrap around. 
+
+  See also:
+  hPowerlawMul, hPowerlawAdd, hLinearFunctionMul, hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
+
+  Example:
+  ary=hArray(float,5,fill=1); x=hArray(range(5)); ary.powerlawmul(x,0.5,2)
+
+  #ary -> hArray(float, [5L], fill=[0,0.5,2,4.5,8]) # len=5 slice=[0:5]
+*/
+template <class Iter,class Iter2, class S, class T>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter2 xvec, const Iter2 xvec_end, const S amplitude, const T exponent)
+{
+      // Declaration of variables
+      typedef IterValueType U;
+      Iter it=vec;
+      Iter2 itx=xvec;
+
+      // Sanity check
+      HInteger l=vec_end - vec;
+      if (l<0) ERROR_RETURN("Illegal size of vec");
+      if (l==0) return;
+
+      l=xvec_end - xvec;
+      if (l<0) ERROR_RETURN("Illegal size of xvec");
+      if (l==0) return;
+
+      // Vector operation
+      while (it != vec_end) {
+        *it HFPP_OPERATOR_INPLACE_$MFUNC hfcast<U>(amplitude*pow(*itx,exponent));  // operator_inplace is *= or += here
+        ++it; ++itx;
+        if (itx==xvec_end) itx=xvec;
+      };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Creates a linear function of the form a*x_i+b and multiplies or adds it (here $MFUNC) to a vector, where the x_i's are given in a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLinearFunction{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric output vector containing the powerlaw")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(xvec)()("The x values to be potentiated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(a)()("Offset along y-axis of function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HFPP_TEMPLATED_4)(m)()("Slope of linear function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+      vec.linearfunctionmul(xvec,a,m) -> vec=[vec_0*(a+xvec_0*m),vec_1*(a+xvec_1*m),...,vec_n*(a+xvec_n*m)]
+      vec.linearfunctionadd(xvec,a,m) -> vec=[vec_0+a+xvec_0*m,vec_1+a+xvec_1*m,...,vec_n+a+xvec_n*m]
+
+  Description:
+  If the second vector is shorter, it will wrap around. 
+
+  See also:
+  hPowerlawMul, hPowerlawAdd, hLinearFunctionMul, hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
+
+  Example:
+  ary=hArray(float,5,fill=1); x=hArray(range(5)); ary.powerlawmul(x,0.5,2)
+
+  #ary -> hArray(float, [5L], fill=[0,0.5,2,4.5,8]) # len=5 slice=[0:5]
+*/
+template <class Iter,class Iter2, class S, class T>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter2 xvec, const Iter2 xvec_end, const S a, const T m)
+{
+      // Declaration of variables
+      typedef IterValueType U;
+      Iter it=vec;
+      Iter2 itx=xvec;
+
+      // Sanity check
+      HInteger l=vec_end - vec;
+      if (l<0) ERROR_RETURN("Illegal size of vec");
+      if (l==0) return;
+
+      l=xvec_end - xvec;
+      if (l<0) ERROR_RETURN("Illegal size of xvec");
+      if (l==0) return;
+
+      // Vector operation
+      while (it != vec_end) {
+        *it HFPP_OPERATOR_INPLACE_$MFUNC hfcast<U>(a+m*(*itx));  // operator_inplace is *= or += here
+        ++it; ++itx;
+        if (itx==xvec_end) itx=xvec;
+      };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Creates a log linear function of the form a*log(x_i)+b and multiplies or adds it (here $MFUNC) to a vector, where the x_i's are given in a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLogLinearFunction{$MFUNC}
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Numeric output vector containing the powerlaw")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(xvec)()("The x values to be potentiated.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_3)(a)()("Offset along y-axis of function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HFPP_TEMPLATED_4)(m)()("Slope of linear function")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+      vec.linearfunctionmul(xvec,a,m) -> vec=[vec_0*(a+xvec_0*m),vec_1*(a+xvec_1*m),...,vec_n*(a+xvec_n*m)]
+      vec.linearfunctionadd(xvec,a,m) -> vec=[vec_0+a+xvec_0*m,vec_1+a+xvec_1*m,...,vec_n+a+xvec_n*m]
+
+  Description:
+
+  This is quite useful for plotting a log linear graph of a powerlaw:
+  log10(a*\nu^\alpha) = (ln(a)+\alpha*ln(\nu))/ln(10.)
+
+
+  If the second vector is shorter, it will wrap around. 
+
+
+  See also:
+  hPowerlawMul, hPowerlawAdd, hLinearFunctionMul, hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
+
+  Example:
+  ary=hArray(float,5,fill=1); x=hArray(range(5)); ary.powerlawmul(x,0.5,2)
+
+  #ary -> hArray(float, [5L], fill=[0,0.5,2,4.5,8]) # len=5 slice=[0:5]
+*/
+template <class Iter,class Iter2, class S, class T>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter2 xvec, const Iter2 xvec_end, const S a, const T m)
+{
+      // Declaration of variables
+      typedef IterValueType U;
+      Iter it=vec;
+      Iter2 itx=xvec;
+
+      // Sanity check
+      HInteger l=vec_end - vec;
+      if (l<0) ERROR_RETURN("Illegal size of vec");
+      if (l==0) return;
+
+      l=xvec_end - xvec;
+      if (l<0) ERROR_RETURN("Illegal size of xvec");
+      if (l==0) return;
+
+      // Vector operation
+      while (it != vec_end) {
+        *it HFPP_OPERATOR_INPLACE_$MFUNC hfcast<U>(a+m*log(*itx));  // operator_inplace is *= or += here
+        ++it; ++itx;
+        if (itx==xvec_end) itx=xvec;
+      };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$ENDITERATE
+
 
 //$DOCSTRING: Take the inverse of the values in a vector, i.e. 1/vec
 //$COPY_TO HFILE START --------------------------------------------------
