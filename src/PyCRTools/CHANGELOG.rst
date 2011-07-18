@@ -1,18 +1,18 @@
-2011-07-14 - Rev 8133
+2011-07-17 - Rev 8133
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
 - added :func:`trerun` to store and rerun task instances (like trun)
-  without recreating them 
+  without recreating them
 
--  task averagespectrum can now also form an incoherent sum of time
-   series data for all antennas, fixed some bugs
+- task averagespectrum can now also form an incoherent sum of time
+  series data for all antennas, fixed some bugs
 
 - cr_event pipeline further developed, more graphs added, fixed
-   delay fitting, normalized to Galactic powerlaw shape
+  delay fitting, normalized to Galactic powerlaw shape
 
-- added functions hPowerlawMul, hPowerlawAdd, hLinearFunctionMul,
+- added functions hPowerLawMul, hPowerLawAdd, hLinearFunctionMul,
   hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
 
 
@@ -22,7 +22,7 @@
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
 - writing of the parfiles of tasks can be controlled with the
-   parameters tasks.task_outputdir and tasks.task_write_parfiles
+  parameters tasks.task_outputdir and tasks.task_write_parfiles
 
 - added a plotfinish class, who's instances are called after each plot
   to write figues to disk and pause for user interaction if desired.
@@ -31,25 +31,25 @@
   summary html file
 
 
- 2011-07-11 - Rev 8101 
+2011-07-11 - Rev 8101
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
 - added testcr4.py to do an almost end-to-end radio-only CR pipeline
 - AverageSpectrum revised to use new data reader
- 
+
 2011-07-07 - Rev 8083
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
- - created new tasks PlotDirectionTriangles, PlotAntennaLayout
- - added Vec__rmul__, etc. to also allow vectors/arrays to be on the
-   right hand  of an operand like *, -,/,+
-- added a vec_p->reserve() operation in harray.cc to avoid creating
+- created new tasks PlotDirectionTriangles, PlotAntennaLayout
+- added ``Vec.__rmul__``, etc. to also allow vectors/arrays to be on the
+  right hand  of an operand like ``*``, ``-``, ``/``, ``+``
+- added a ``vec_p->reserve()`` operation in harray.cc to avoid creating
   vectors with unitialized storage (and hence null pointers ...)
- 
+
 2011-06-22 - Rev 7944
 =====================
 
