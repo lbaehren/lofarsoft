@@ -1,8 +1,15 @@
-2011-07-18 - Rev 81??
+2011-07-18 - Rev 8151
+
+   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+
+- changed import in grid.py to be gregoriandata2jd instead of gregorian2jd  
+
+2011-07-18 - Rev 8150
 
    :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
 
 - added pow(hnumber, long int) in core.h to get hPowerLaw functions on some linux systems including the CEP I cluster
+
 
 
 2011-07-17 - Rev 8133
