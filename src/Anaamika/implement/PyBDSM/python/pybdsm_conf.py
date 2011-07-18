@@ -143,8 +143,8 @@ print "  par = val ........... : Set a parameter (par = '' sets it to default)"
 print '                          Autocomplete (with TAB) works for par and val'
 print '  go .................. : Run the current task'
 print '  default ............. : Set current task parameters to default values'
-print "  tput ................ : Save parameters values"
-print "  tget ................ : Load parameters values"
+print "  tput ................ : Save parameter values"
+print "  tget ................ : Load parameter values"
 print 'PyBDSM tasks'
 print '  process_image ....... : Process an image: find sources, etc.'
 print '  show_fit ............ : Show the results of a fit'

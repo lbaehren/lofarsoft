@@ -988,7 +988,7 @@ class Opts(object):
                                  "indices (if image was processed with "\
                                  "spectralindex_do = True). "\
                                  "Sources may be chosen by ID with the 'c' key "\
-                                 "or, if islands = True, by picking a source with "\
+                                 "or, if ch0_islands = True, by picking a source with "\
                                  "the mouse",
                              group="hidden")
 
