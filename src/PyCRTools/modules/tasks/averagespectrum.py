@@ -53,9 +53,9 @@ Usage::
 #import pdb; pdb.set_trace()
 
 from pycrtools import *
-from pycrtools.tasks.shortcuts import *
-import pycrtools.tasks as tasks
-import pycrtools.qualitycheck as qualitycheck
+from pycrtools.tasks import shortcuts as sc
+from pycrtools import tasks
+from pycrtools import qualitycheck
 import time
 #from pycrtools import IO
 
@@ -125,330 +125,336 @@ def averagespectrum_getfile(ws):
 class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
     """
     """
-    parameters = {
+    parameters = dict(
 
-        "filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
-                        "Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
+        filefilter = sc.p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
+                           "Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
 
-        "file_start_number":{default:0,
-                    doc:"Integer number pointing to the first file in the ``filenames`` list with which to start. Can be changed to restart a calculation."},
+        file_start_number = dict(default=0,
+                                 doc="Integer number pointing to the first file in the ``filenames`` list with which to start. Can be changed to restart a calculation."),
 
-        "load_if_file_exists":{default:False,
-                    doc:"If average spectrum file (``spectrumfile``) already exists, skip calculation and load existing file."},
+        load_if_file_exists = dict(default=False,
+                                   doc="If average spectrum file (``spectrumfile``) already exists, skip calculation and load existing file."),
 
-        "datafile":{default:averagespectrum_getfile,export:False,
-                    doc:"Data file object pointing to raw data."},
+        datafile = dict(default=averagespectrum_getfile,
+                        export=False,
+                        doc="Data file object pointing to raw data."),
 
-        "lofarmode":{default:"LBA_OUTER",
-                     doc:"Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."},
+        lofarmode = dict(default="LBA_OUTER",
+                         doc="Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."),
 
+        addantennas = dict(default=True,
+                           doc="If True, add all antennas into one average spectrum, otherwise keep them separate in memory per file."),
 
-        "addantennas":{default:True,
-                  doc:"If True, add all antennas into one average spectrum, otherwise keep them separate in memory per file."},
+        doplot = dict(default=False,
+                      doc="Plot current spectrum while processing."),
 
-        "doplot":{default:False,
-                  doc:"Plot current spectrum while processing."},
+        plotlen = dict(default=2**12,
+                       doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
 
-        "plotlen":{default:2**12,
-                   doc:"How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."},
+        plotskip = dict(default=1,
+                        doc="Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."),
 
-        "plotskip":{default:1,
-                    doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
+        stride_n = sc.p_(0,
+                         "if >0 then divide the FFT processing in ``n=2**stride_n blocks``. This is slower but uses less memory."),
 
-        "lofarmode":{default:"LBA_OUTER",
-                     doc:"Which LOFAR mode was used (``HBA``/``LBA_OUTER``/``LBA_INNER``)"},
+        doublefft = dict(default=False,
+                         doc="if True split the FFT into two, thereby saving memory."),
 
-        "stride_n":p_(0,
-                      "if >0 then divide the FFT processing in ``n=2**stride_n blocks``. This is slower but uses less memory."),
+        calc_incoherent_sum = dict(default=False,
+                                   doc="Calculate the incoherent sum of all antennas (doublefft=False). See incoherent_sum for result."),
 
-        "doublefft":{default:False,
-                     doc:"if True split the FFT into two, thereby saving memory."},
+        ntimeseries_data_added_per_chunk = dict(default=lambda ws:hArray(int,[ws.nchunks]),
+                                                doc="Number of chunks added in each bin for incoherent sum"),
 
-        "calc_incoherent_sum":{default:False,
-                     doc:"Calculate the incoherent sum of all antennas (doublefft=False). See incoherent_sum for result."},
+        delta_nu = dict(default=1000,
+                        doc="Frequency resolution",
+                        unit="Hz"),
 
-        "ntimeseries_data_added_per_chunk":{default:lambda ws:hArray(int,[ws.nchunks]),doc:"Number of chunks added in each bin for incoherent sum"},
-        
-        "delta_nu":{default:1000,
-                    doc:"Frequency resolution",
-                    unit:"Hz"},
+        blocklen = dict(default=lambda ws:2**int(round(log(ws.blocksize,2))/2),
+                        doc="The size of a block being read in if stride>1, otherwise ``self.blocklen*self.nblocks`` is the blocksize."),
 
-        "blocklen":{default:lambda ws:2**int(round(log(ws.blocksize,2))/2),
-                    doc:"The size of a block being read in if stride>1, otherwise ``self.blocklen*self.nblocks`` is the blocksize."},
+        maxnchunks = dict(default=-1,
+                          doc="Maximum number of chunks of raw data to integrate spectrum over (-1 = all)."),
 
-        "maxnchunks":{default:-1,
-                      doc:"Maximum number of chunks of raw data to integrate spectrum over (-1 = all)."},
+        maxblocksflagged = dict(default=0,
+                                doc="Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded. If =0 then flag a chunk if any block is deviant."),
 
-        "maxblocksflagged":{default:0,
-                            doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded. If =0 then flag a chunk if any block is deviant."},
+        stride = dict(default=lambda ws: 2**ws.stride_n if ws.doublefft else 1,
+                      doc="If ``stride>1`` divide the FFT processing in ``n=stride`` blocks."),
 
-        "stride":{default:lambda ws: 2**ws.stride_n if ws.doublefft else 1,
-                  doc:"If ``stride>1`` divide the FFT processing in ``n=stride`` blocks."},
+        tmpfileext = dict(default=".pcr",
+                          doc="Extension of filename for temporary data files (e.g., used if ``stride > 1``.)"),
 
-        "tmpfileext":{default:".pcr",
-                      doc:"Extension of filename for temporary data files (e.g., used if ``stride > 1``.)"},
+        tmpfilename = dict(default="tmp",
+                           doc="Root filename for temporary data files."),
 
-        "tmpfilename":{default:"tmp",
-                       doc:"Root filename for temporary data files."},
+        filenames = dict(default=lambda ws:listFiles(ws.filefilter),
+                         doc="List of filenames of data file to read raw data from."),
 
-        "filenames":{default:lambda ws:listFiles(ws.filefilter),
-                    doc:"List of filenames of data file to read raw data from."},
+        output_dir = dict(default="",
+                          doc="Directory where output file is to be written to."),
 
-        "output_dir":{default:"",doc:"Directory where output file is to be written to."},
-    
-        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".spec"+self.tmpfileext,
-                         doc:"Filename (without directory, see output_dir) to store the final spectrum."},
+        output_filename = dict(default=lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".spec"+self.tmpfileext,
+                               doc="Filename (without directory, see output_dir) to store the final spectrum."),
 
-        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
-                         doc:"Complete filename including directory to store the final spectrum."},
+        spectrum_file = dict(default=lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
+                             doc="Complete filename including directory to store the final spectrum."),
 
-        "qualitycheck":{default:True,doc:"Perform basic qualitychecking of raw data and flagging of bad data sets."},
+        qualitycheck = dict(default=True,
+                            doc="Perform basic qualitychecking of raw data and flagging of bad data sets."),
 
-        "quality_db_filename":{default:"qualitydatabase",
-                               doc:"Root filename of log file containing the derived antenna quality values (uses '.py' and '.txt' extension)."},
+        quality_db_filename = dict(default="qualitydatabase",
+                                   doc="Root filename of log file containing the derived antenna quality values (uses '.py' and '.txt' extension)."),
 
-        "quality":{default:[],
-                   doc:"A list containing quality check information about every large chunk of data that was read in. Use ``Task.qplot(Entry#,flaggedblock=nn)`` to plot blocks in question.",
-                   export:False,
-                   output:True},
+        quality = dict(default=[],
+                       doc="A list containing quality check information about every large chunk of data that was read in. Use ``Task.qplot(Entry#,flaggedblock=nn)`` to plot blocks in question.",
+                       export=False,
+                       output=True),
 
-        "antennacharacteristics":{default:{},
-                                  doc:"A dict with antenna IDs as key, containing quality information about every antenna.",
-                                  export:False,
-                                  output:True},
+        antennacharacteristics = dict(default={},
+                                      doc="A dict with antenna IDs as key, containing quality information about every antenna.",
+                                      export=False,
+                                      output=True),
 
-        "mean_antenna":{default:lambda self: hArray(float,[self.nantennas], name="Mean per Antenna"),
-                        doc:"Mean value of time series per antenna.",
-                        output:True},
+        mean_antenna = dict(default=lambda self: hArray(float,[self.nantennas], name="Mean per Antenna"),
+                            doc="Mean value of time series per antenna.",
+                            output=True),
 
-        "rms_antenna":{default: lambda self: hArray(float,[self.nantennas], name="RMS per Antenna"),
-                       doc:"RMS value of time series per antenna.",
-                       output:True},
+        rms_antenna = dict(default= lambda self: hArray(float,[self.nantennas], name="RMS per Antenna"),
+                           doc="RMS value of time series per antenna.",
+                           output=True),
 
-        "npeaks_antenna":{default: lambda self: hArray(float,[self.nantennas], name="Number of Peaks per Antenna"),
-                          doc:"Number of peaks of time series per antenna.",
-                          output:True},
+        npeaks_antenna = dict(default= lambda self: hArray(float,[self.nantennas], name="Number of Peaks per Antenna"),
+                              doc="Number of peaks of time series per antenna.",
+                              output=True),
 
-        "mean":{default:0,
-                doc:"Mean of mean time series values of all antennas.",
-                output:True},
+        mean = dict(default=0,
+                    doc="Mean of mean time series values of all antennas.",
+                    output=True),
 
-        "mean_rms":{default:0,
-                    doc:"RMS of mean of mean time series values of all antennas.",
-                    output:True},
+        mean_rms = dict(default=0,
+                        doc="RMS of mean of mean time series values of all antennas.",
+                        output=True),
 
-        "npeaks":{default:0,
-                  doc:"Mean of number of peaks all antennas.",
-                  output:True},
+        npeaks = dict(default=0,
+                      doc="Mean of number of peaks all antennas.",
+                      output=True),
 
-        "npeaks_rms":{default:0,
-                      doc:"RMS of npeaks over all antennas.",
-                      output:True},
+        npeaks_rms = dict(default=0,
+                          doc="RMS of npeaks over all antennas.",
+                          output=True),
 
-        "rms":{default:0,
-               doc:"Mean of RMS time series values of all antennas.",
-               output:True},
+        rms = dict(default=0,
+                   doc="Mean of RMS time series values of all antennas.",
+                   output=True),
 
-        "rms_rms":{default:0,
-                   doc:"RMS of rms of mean time series values of all antennas.",
-                   output:True},
+        rms_rms = dict(default=0,
+                       doc="RMS of rms of mean time series values of all antennas.",
+                       output=True),
 
-        "homogeneity_factor":{default:0,
-                              doc:"``=1-(rms_rms/rms+ npeaks_rms/npeaks)/2`` - this describes the homogeneity of the data processed. A ``homogeneity_factor = 1`` means that all antenna data were identical, a low factor should make one wonder if something went wrong.",
-                              output:True},
+        homogeneity_factor = dict(default=0,
+                                  doc="``=1-(rms_rms/rms+ npeaks_rms/npeaks)/2`` - this describes the homogeneity of the data processed. A ``homogeneity_factor = 1`` means that all antenna data were identical, a low factor should make one wonder if something went wrong.",
+                                  output=True),
 
-        "maxpeak":{default:7,doc:"Maximum height of the maximum in each block (in sigma,i.e. relative to rms) before quality is failed."},
+        maxpeak = dict(default=7,
+                       doc="Maximum height of the maximum in each block (in sigma,i.e. relative to rms) before quality is failed."),
 
-        "spikeexcess":dict(default=20,
+        spikeexcess = dict(default=20,
                            doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
 
-        "rmsfactor":dict(default=3,
+        rmsfactor = dict(default=3,
                          doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
 
-        "rmsrange":dict(default=None,
-                         doc="Tuple with absolute min/max values of the rms of the time series that are allowed before a block is flagged. Will be igrored if None."),
+        rmsrange = dict(default=None,
+                        doc="Tuple with absolute min/max values of the rms of the time series that are allowed before a block is flagged. Will be igrored if None."),
 
-        "meanfactor":dict(default=3,
+        meanfactor = dict(default=3,
                           doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
 
-        "randomize_peaks":{default:True,
-                           doc:"Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."},
+        randomize_peaks = dict(default=True,
+                           doc="Replace all peaks in time series data which are 'rmsfactor' above or below the mean with some random number in the same range."),
 
-        "peak_rmsfactor":dict(default=5,
+        peak_rmsfactor = dict(default=5,
                               doc="At how many sigmas above the mean will a peak be randomized."),
 
-        "start_frequency":{default:lambda ws:ws.freqs[0],
-                           doc:"Start frequency of spectrum",
-                           unit:"Hz"},
+        start_frequency = dict(default=lambda ws:ws.freqs[0],
+                               doc="Start frequency of spectrum",
+                               unit="Hz"),
 
-        "end_frequency":{default:lambda ws:ws.freqs[-1],
-                         doc:"End frequency of spectrum",
-                         unit:"Hz"},
+        end_frequency = dict(default=lambda ws:ws.freqs[-1],
+                             doc="End frequency of spectrum",
+                             unit="Hz"),
 
-        "delta_frequency":p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),
-                             "Separation of two subsequent channels in final spectrum"),
+        delta_frequency = sc.p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),
+                                "Separation of two subsequent channels in final spectrum"),
 
-        "delta_band":{default:lambda ws:(ws.end_frequency-ws.start_frequency)/ws.stride*2,
-                      doc:"Frequency width of one section/band of spectrum",
-                      unit:"Hz"},
+        delta_band = dict(default=lambda ws:(ws.end_frequency-ws.start_frequency)/ws.stride*2,
+                          doc="Frequency width of one section/band of spectrum",
+                          unit="Hz"),
 
-        "full_blocklen":{default:lambda ws:ws.blocklen*ws.stride,
-                         doc:"Full block length",
-                         unit:"Samples"},
+        full_blocklen = dict(default=lambda ws:ws.blocklen*ws.stride,
+                             doc="Full block length",
+                             unit="Samples"),
 
-        "fullsize":p_(lambda ws:ws.nblocks*ws.full_blocklen,
-                      "The full length of the raw time series data used for one spectral chunk."),
+        fullsize = sc.p_(lambda ws:ws.nblocks*ws.full_blocklen,
+                         "The full length of the raw time series data used for one spectral chunk."),
 
-        "nblocks":{default:lambda ws:2**int(round(log(ws.blocksize/ws.full_blocklen,2))),
-                   doc:"Number of blocks of lenght ``blocklen`` the time series data set is split in. The blocks are also used for quality checking."},
+        nblocks = dict(default=lambda ws:2**int(round(log(ws.blocksize/ws.full_blocklen,2))),
+                       doc="Number of blocks of lenght ``blocklen`` the time series data set is split in. The blocks are also used for quality checking."),
 
-        "nbands":{default:lambda ws:(ws.stride+1)/2,
-                  doc:"Number of bands in spectrum which are separately written to disk, if ``stride > 1``. This is one half of stride, since only the lower half of the spectrum is written to disk."},
+        nbands = dict(default=lambda ws:(ws.stride+1)/2,
+                      doc="Number of bands in spectrum which are separately written to disk, if ``stride > 1``. This is one half of stride, since only the lower half of the spectrum is written to disk."),
 
-        "subspeclen":{default:lambda ws:ws.blocklen*ws.nblocks,
-                      doc:"Size of one section/band of the final spectrum"},
+        subspeclen = dict(default=lambda ws:ws.blocklen*ws.nblocks,
+                          doc="Size of one section/band of the final spectrum"),
 
-        "nsamples_data":{default:lambda ws:float(ws.fullsize)/10**6,
-                         doc:"Number of samples in raw antenna file",
-                         unit:"MSamples"},
+        nsamples_data = dict(default=lambda ws:float(ws.fullsize)/10**6,
+                             doc="Number of samples in raw antenna file",
+                             unit="MSamples"),
 
-        "size_data":{default:lambda ws:float(ws.fullsize)/1024/1024*16,
-                     doc:"Number of samples in raw antenna file",
-                     unit:"MBytes"},
+        size_data = dict(default=lambda ws:float(ws.fullsize)/1024/1024*16,
+                         doc="Number of samples in raw antenna file",
+                         unit="MBytes"),
 
-        "nantennas":{default:lambda ws:len(ws.antennas),
-                     doc:"The number of antennas to be calculated in one file."},
-    
-        "nantennas_file":{default:lambda ws:ws.datafile["NOF_DIPOLE_DATASETS"],
-                     doc:"The actual number of antennas available for calculation in the file."},
+        nantennas = dict(default=lambda ws:len(ws.antennas),
+                         doc="The number of antennas to be calculated in one file."),
 
-        "antennas_start":{default:0,
-                     doc:"Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."},
+        nantennas_file = dict(default=lambda ws:ws.datafile["NOF_DIPOLE_DATASETS"],
+                              doc="The actual number of antennas available for calculation in the file."),
 
-        "antennas_end":{default:-1,
-                        doc:"Maximum antenna number (plus one, zero based ...) to use in each file."},
+        antennas_start = dict(default=0,
+                              doc="Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."),
 
-        "antennas_stride":{default:1,
-                     doc:"Take only every *n*-th antenna from antennas list (see also ``antennas_start``). Use 2 to select odd/even."},
+        antennas_end = dict(default=-1,
+                            doc="Maximum antenna number (plus one, zero based ...) to use in each file."),
 
-        "antennas":p_(lambda ws:hArray(range(min(ws.antennas_start,ws.nantennas_file-1),ws.nantennas_file if ws.antennas_end<0 else min(ws.antennas_end,ws.nantennas_file),ws.antennas_stride)),
-                      "Antennas of index numbers for antennas to be processed from the current file."),
+        antennas_stride = dict(default=1,
+                               doc="Take only every *n*-th antenna from antennas list (see also ``antennas_start``). Use 2 to select odd/even."),
 
-        "antenna_list":{default:{},
-                     doc:"List of antenna indices used as input from each filename.",
-                        output:True},
+        antennas = sc.p_(lambda ws:hArray(range(min(ws.antennas_start,ws.nantennas_file-1),ws.nantennas_file if ws.antennas_end<0 else min(ws.antennas_end,ws.nantennas_file),ws.antennas_stride)),
+                         "Array of index numbers for antennas to be processed from the current file."),
 
-        "antennaIDs":p_(lambda ws:hArray(ws.datafile["DIPOLE_NAMES"]),"Antenna IDs from the current file."),
+        antenna_list = dict(default={},
+                            doc="List of antenna indices used as input from each filename.",
+                            output=True),
 
-        "antennas_used":p_(lambda ws:set(),
-                           "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
-                           output=True),
+        antennaIDs = sc.p_(lambda ws:hArray(ws.datafile["DIPOLE_NAMES"]),
+                           "Antenna IDs from the current file."),
 
-        "nantennas_total":p_(0,
-                             "Total number of antennas that were processed (flagged or not) in this run.",
-                             output=True),
+        antennas_used = sc.p_(lambda ws:set(),
+                              "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
+                              output=True),
 
-        "nchunks_max":{default:lambda ws:float(ws.datafile["DATA_LENGTH"][0])/ws.fullsize,
-                       doc:"Maximum number of spectral chunks to average"},
+        nantennas_total = sc.p_(0,
+                                "Total number of antennas that were processed (flagged or not) in this run.",
+                                output=True),
 
-        "nchunks":{default:lambda ws:min(ws.datafile["DATA_LENGTH"][0]/ws.fullsize,ws.maxnchunks) if ws.maxnchunks>0 else ws.datafile["DATA_LENGTH"][0]/ws.fullsize,
-                   doc:"Number of spectral chunks that are averaged"},
+        nchunks_max = dict(default=lambda ws:float(ws.datafile["DATA_LENGTH"][0])/ws.fullsize,
+                           doc="Maximum number of spectral chunks to average"),
 
-        "nspectraadded":p_(lambda ws:0,
-                           "Number of spectra added at the end.",
-                           output=True),
+        nchunks = dict(default=lambda ws:min(ws.datafile["DATA_LENGTH"][0]/ws.fullsize,ws.maxnchunks) if ws.maxnchunks>0 else ws.datafile["DATA_LENGTH"][0]/ws.fullsize,
+                       doc="Number of spectral chunks that are averaged"),
 
-        "nspectraadded_per_antenna":p_(lambda ws:Vector(int,ws.nantennas,fill=0),
-                           "Number of spectra added per antenna.",
-                           output=True),
+        nspectraadded = sc.p_(lambda ws:0,
+                              "Number of spectra added at the end.",
+                              output=True),
 
-        "nspectraflagged":p_(lambda ws:0,
-                             "Number of spectra flagged and not used.",
-                             output=True),
+        nspectraadded_per_antenna = sc.p_(lambda ws:Vector(int,ws.nantennas,fill=0),
+                                          "Number of spectra added per antenna.",
+                                          output=True),
 
-        "nspectraflagged_per_antenna":p_(lambda ws:Vector(int,ws.nantennas,fill=0),
-                           "Number of spectra flagged and not used per antenna.",
-                           output=True),
-        "delta_t":p_(lambda ws:ws.datafile["SAMPLE_INTERVAL"][0],
-                     "Sample length in raw data set.",
-                     "s"),
+        nspectraflagged = sc.p_(lambda ws:0,
+                                "Number of spectra flagged and not used.",
+                                output=True),
 
-        "blocksize":p_(lambda ws:int(min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0])),"The desired blocksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``blocksize_used` for the actual blocksize used."),
-        
-        "blocksize_used":p_(lambda ws:ws.blocklen*ws.nblocks,"The blocksize one would use for a single FFT."),
+        nspectraflagged_per_antenna = sc.p_(lambda ws:Vector(int,ws.nantennas,fill=0),
+                                         "Number of spectra flagged and not used per antenna.",
+                                         output=True),
 
-        "blocklen_section":p_(lambda ws:ws.blocklen/ws.stride),
+        delta_t = sc.p_(lambda ws:ws.datafile["SAMPLE_INTERVAL"][0],
+                        "Sample length in raw data set.",
+                        "s"),
 
-        "nsubblocks":p_(lambda ws:ws.stride*ws.nblocks),
+        blocksize = sc.p_(lambda ws:int(min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0])),
+                          "The desired blocksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``blocksize_used` for the actual blocksize used."),
 
-        "nblocks_section":p_(lambda ws:ws.nblocks/ws.stride),
+        blocksize_used = sc.p_(lambda ws:ws.blocklen*ws.nblocks,
+                               "The blocksize one would use for a single FFT."),
 
-        "speclen":p_(lambda ws:ws.fullsize/2+1),
+        blocklen_section = sc.p_(lambda ws:ws.blocklen/ws.stride),
 
-        "header":p_(lambda ws:ws.datafile.getHeader(),
-                    "Header of datafile",
-                    export=False),
+        nsubblocks = sc.p_(lambda ws:ws.stride*ws.nblocks),
 
-        "freqs":p_(lambda ws:ws.datafile["FREQUENCY_DATA"],
-                   export=False),
+        nblocks_section = sc.p_(lambda ws:ws.nblocks/ws.stride),
+
+        speclen = sc.p_(lambda ws:ws.fullsize/2+1),
+
+        header = sc.p_(lambda ws:ws.datafile.getHeader(),
+                       "Header of datafile",
+                       export=False),
+
+        freqs = sc.p_(lambda ws:ws.datafile["FREQUENCY_DATA"],
+                      export=False),
 
 
 #Now define all the work arrays used internally
 
-        "frequencies":{workarray:True,
-                       doc:"Frequency axis for final power spectrum.",
-                       default:lambda ws:hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)},
+        frequencies = dict(workarray=True,
+                           doc="Frequency axis for final power spectrum.",
+                           default=lambda ws:hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)),
 
-        "power_size":{default:lambda ws:ws.subspeclen/2 if ws.stride==1 else ws.subspeclen,doc:"Size of the output spectrum in the vector power"},
+        power_size = dict(default=lambda ws:ws.subspeclen/2 if ws.stride==1 else ws.subspeclen,
+                          doc="Size of the output spectrum in the vector power"),
 
-        "power":{workarray:True,
-                 doc:"Resulting average power spectrum (or part thereof if ``stride > 1``)",
-                 default:lambda ws:hArray(float,[ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies) if ws.addantennas else hArray(float,[ws.nantennas,ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)},
+        power = dict(workarray=True,
+                     doc="Resulting average power spectrum (or part thereof if ``stride > 1``)",
+                     default=lambda ws:hArray(float,[ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies) if ws.addantennas else hArray(float,[ws.nantennas,ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)),
 
-#                hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)},
+#                hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)),
 #Need to cerate frequencies, taking current subspec (stride) into account
 
-        "fdata":{workarray:True,
-                 doc:"main input and work array",
-                 default:lambda ws:hArray(float,[ws.nblocks,ws.blocklen],name="fdata",header=ws.header)},
+        fdata = dict(workarray=True,
+                     doc="main input and work array",
+                     default=lambda ws:hArray(float,[ws.nblocks,ws.blocklen],name="fdata",header=ws.header)),
 
-        "incoherent_sum":{doc:"Incoherent sum of the power in all antennas (timeseries data).",
-                 default:lambda ws:hArray(float,[ws.nchunks,ws.blocksize],name="Power(t)",header=ws.header)},
+        incoherent_sum = dict(doc="Incoherent sum of the power in all antennas (timeseries data).",
+                              default=lambda ws:hArray(float,[ws.nchunks,ws.blocksize],name="Power(t)",header=ws.header)),
 
-        "cdata":{workarray:True,
-                 doc:"main input and work array",
-                 default:lambda ws:hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)},
+        cdata = dict(workarray=True,
+                     doc="main input and work array",
+                     default=lambda ws:hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)),
 
-        "cdata2":{workarray:True,
-                 doc:"main input and work array",
-                 default:lambda ws:hArray(complex,[ws.nblocks*ws.blocklen/2+1],name="cdata2",header=ws.header)},
+        cdata2 = dict(workarray=True,
+                      doc="main input and work array",
+                      default=lambda ws:hArray(complex,[ws.nblocks*ws.blocklen/2+1],name="cdata2",header=ws.header)),
 
-        "cdataT":{workarray:True,
-                  doc:"Secondary input and work array",
-                  default:lambda ws:hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)},
+        cdataT = dict(workarray=True,
+                      doc="Secondary input and work array",
+                      default=lambda ws:hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)),
 
 #Note, that all the following arrays have the same memory als cdata and cdataT
 
-        "tmpspecT":{workarray:True,
-                    doc:"Wrapper array for ``cdataT``",
-                    default:lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)},
+        tmpspecT = dict(workarray=True,
+                        doc="Wrapper array for ``cdataT``",
+                        default=lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)),
 
-        "tmpspec":{workarray:True,
-                   doc:"Wrapper array for ``cdata``",
-                   default:lambda ws:hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)},
+        tmpspec = dict(workarray=True,
+                       doc="Wrapper array for ``cdata``",
+                       default=lambda ws:hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)),
 
-        "specT":{workarray:True,
-                 doc:"Wrapper array for ``cdataT``",
-                 default:lambda ws:hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)},
+        specT = dict(workarray=True,
+                     doc="Wrapper array for ``cdataT``",
+                     default=lambda ws:hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)),
 
-        "specT2":{workarray:True,
-                  doc:"Wrapper array for ``cdataT``",
-                  default:lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)},
+        specT2 = dict(workarray=True,
+                      doc="Wrapper array for ``cdataT``",
+                      default=lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)),
 
-        "spec":{workarray:True,
-                doc:"Wrapper array for ``cdata``",
-                default:lambda ws:hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header)}
-        }
+        spec = dict(workarray=True,
+                    doc="Wrapper array for ``cdata``",
+                    default=lambda ws:hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header))
+        )
 
 
 #    files = [f for f in files if test.search(f)]
@@ -457,7 +463,7 @@ class AverageSpectrum(tasks.Task):
     """
     The function will calculate an average spectrum from a list of
     files and a series of antennas (all averaged into one
-    spectrum). 
+    spectrum).
 
     The task will do a basic quality check of each time series data
     set and only average good data.
@@ -508,7 +514,7 @@ class AverageSpectrum(tasks.Task):
 
     Quality Checking
     ================
-    
+
     To avoid the spectrum being influenced by spikes in the time
     series, those spikes can be replaced by random numbers, before the
     FFT is taken (see ``randomize_peaks``).
@@ -573,6 +579,7 @@ class AverageSpectrum(tasks.Task):
         #Nothing to do
         return
 
+
     def run(self):
         """Run the program.
         """
@@ -611,7 +618,7 @@ class AverageSpectrum(tasks.Task):
             self.ntimeseries_data_added_per_chunk.fill(0)
             self.incoherent_sum.fill(0)
             self.power.par.incoherent_sum=self.incoherent_sum
-            
+
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         clearfile=True
@@ -619,7 +626,7 @@ class AverageSpectrum(tasks.Task):
         initialround=True
 
         fftplan = FFTWPlanManyDftR2c(self.blocklen*self.nblocks, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
-        
+
         if self.doplot:
             plt.ioff()
 
@@ -813,6 +820,7 @@ class AverageSpectrum(tasks.Task):
         if self.doplot:
             plt.ion()
 
+
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
         If you see an output line like this::
@@ -874,7 +882,7 @@ class AverageSpectrum(tasks.Task):
 #     """
 #     Documentation of task - parameters will be added automatically
 #     """
-#     parameters = {"x":p_(None,"x-value - a positional parameter",positional=True),"y":p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
+#     parameters = {x = sc.p_(None,"x-value - a positional parameter",positional=True),y = sc.p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
 #     def init(self):
 #         print "Calling optional initialization routine - Nothing to do here."
 #     def run(self):
