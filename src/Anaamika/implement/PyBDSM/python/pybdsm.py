@@ -552,9 +552,9 @@ class bdsmDocHelper(pydoc.Helper):
 pydoc.help = bdsmDocHelper(sys.stdin, sys.stdout)
 
     
-# Now run the IPython shell with this namespace and the customisations
+# Now run the IPython shell with this namespace and the customized autocompleter
 # in the pybdsm_conf.py file
 _set_current_cmd(process_image)
 ipshell = IPShellEmbed(['-prompt_in1','BDSM <\#>: ','-autocall','2'], user_ns=locals())
-ipshell.IP.runlines('import pybdsm_conf')
+ipshell.IP.runsource('import pybdsm_conf')
 ipshell()

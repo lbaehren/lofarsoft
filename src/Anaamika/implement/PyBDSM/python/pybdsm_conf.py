@@ -11,16 +11,8 @@ import ipy_defaults
 import IPython.ipapi
 
 ip = IPython.ipapi.get()
-o = ip.options
 
-# Enable autocalling, so that parentheses are not needed
-# for commands (as in casapy).
-# o.autocall = 2
-
-# Customize the prompt
-# o.prompt_in1 = 'BDSM [\#]: '
-
-# Add custom autocomplete. 
+# Add custom autocompleter
 def opts_completer(self, event):
     """ Returns a list of strings with possible completions."""
     import os
@@ -155,3 +147,4 @@ print '  help command/task ... : Get help on a command or task'
 print '                          (e.g., help process_image)'
 print "  help 'par' .......... : Get help on a parameter (e.g., help 'rms_box')"
 print '_' * 72
+
