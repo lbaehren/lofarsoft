@@ -4,7 +4,7 @@ Task: Average spectrum
 
 Usage::
 
-  >>> sp=hArrayRead('tmpspec.dat')
+  >>> sp=cr.hArrayRead('tmpspec.dat')
   >>> make_frequencies(sp)
   >>> t=task()
   >>> r=t(sp)
@@ -52,7 +52,8 @@ Usage::
 # in averagespectrum_getfile(ws): crfile -> open
 #import pdb; pdb.set_trace()
 
-from pycrtools import *
+#from pycrtools import *
+import pycrtools as cr
 from pycrtools.tasks import shortcuts as sc
 from pycrtools import tasks
 from pycrtools import qualitycheck
@@ -76,7 +77,7 @@ def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
     else:
         l=len(spectrum)
     if frequencies==None:
-        frequencies=hArray(float,[l*mult],name="Frequency",units=("M","Hz"),header=hdr)
+        frequencies=cr.hArray(float,[l*mult],name="Frequency",units=("M","Hz"),header=hdr)
     frequencies.fillrange((hdr["start_frequency"]+offset*hdr["delta_band"])/10**6,hdr["delta_frequency"]/10**6)
     if setxvalues:
         spectrum.par.xvalues=frequencies
@@ -164,7 +165,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         calc_incoherent_sum = dict(default=False,
                                    doc="Calculate the incoherent sum of all antennas (doublefft=False). See incoherent_sum for result."),
 
-        ntimeseries_data_added_per_chunk = dict(default=lambda ws:hArray(int,[ws.nchunks]),
+        ntimeseries_data_added_per_chunk = dict(default=lambda ws:cr.hArray(int,[ws.nchunks]),
                                                 doc="Number of chunks added in each bin for incoherent sum"),
 
         delta_nu = dict(default=1000,
@@ -217,15 +218,15 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                                       export=False,
                                       output=True),
 
-        mean_antenna = dict(default=lambda self: hArray(float,[self.nantennas], name="Mean per Antenna"),
+        mean_antenna = dict(default=lambda self: cr.hArray(float,[self.nantennas], name="Mean per Antenna"),
                             doc="Mean value of time series per antenna.",
                             output=True),
 
-        rms_antenna = dict(default= lambda self: hArray(float,[self.nantennas], name="RMS per Antenna"),
+        rms_antenna = dict(default= lambda self: cr.hArray(float,[self.nantennas], name="RMS per Antenna"),
                            doc="RMS value of time series per antenna.",
                            output=True),
 
-        npeaks_antenna = dict(default= lambda self: hArray(float,[self.nantennas], name="Number of Peaks per Antenna"),
+        npeaks_antenna = dict(default= lambda self: cr.hArray(float,[self.nantennas], name="Number of Peaks per Antenna"),
                               doc="Number of peaks of time series per antenna.",
                               output=True),
 
@@ -332,14 +333,14 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         antennas_stride = dict(default=1,
                                doc="Take only every *n*-th antenna from antennas list (see also ``antennas_start``). Use 2 to select odd/even."),
 
-        antennas = sc.p_(lambda ws:hArray(range(min(ws.antennas_start,ws.nantennas_file-1),ws.nantennas_file if ws.antennas_end<0 else min(ws.antennas_end,ws.nantennas_file),ws.antennas_stride)),
+        antennas = sc.p_(lambda ws:cr.hArray(range(min(ws.antennas_start,ws.nantennas_file-1),ws.nantennas_file if ws.antennas_end<0 else min(ws.antennas_end,ws.nantennas_file),ws.antennas_stride)),
                          "Array of index numbers for antennas to be processed from the current file."),
 
         antenna_list = dict(default={},
                             doc="List of antenna indices used as input from each filename.",
                             output=True),
 
-        antennaIDs = sc.p_(lambda ws:hArray(ws.datafile["DIPOLE_NAMES"]),
+        antennaIDs = sc.p_(lambda ws:cr.hArray(ws.datafile["DIPOLE_NAMES"]),
                            "Antenna IDs from the current file."),
 
         antennas_used = sc.p_(lambda ws:set(),
@@ -402,58 +403,58 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         frequencies = dict(workarray=True,
                            doc="Frequency axis for final power spectrum.",
-                           default=lambda ws:hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)),
+                           default=lambda ws:cr.hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)),
 
         power_size = dict(default=lambda ws:ws.subspeclen/2 if ws.stride==1 else ws.subspeclen,
                           doc="Size of the output spectrum in the vector power"),
 
         power = dict(workarray=True,
                      doc="Resulting average power spectrum (or part thereof if ``stride > 1``)",
-                     default=lambda ws:hArray(float,[ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies) if ws.addantennas else hArray(float,[ws.nantennas,ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)),
+                     default=lambda ws:cr.hArray(float,[ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies) if ws.addantennas else cr.hArray(float,[ws.nantennas,ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)),
 
-#                hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)),
+#                cr.hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)),
 #Need to cerate frequencies, taking current subspec (stride) into account
 
         fdata = dict(workarray=True,
                      doc="main input and work array",
-                     default=lambda ws:hArray(float,[ws.nblocks,ws.blocklen],name="fdata",header=ws.header)),
+                     default=lambda ws:cr.hArray(float,[ws.nblocks,ws.blocklen],name="fdata",header=ws.header)),
 
         incoherent_sum = dict(doc="Incoherent sum of the power in all antennas (timeseries data).",
-                              default=lambda ws:hArray(float,[ws.nchunks,ws.blocksize],name="Power(t)",header=ws.header)),
+                              default=lambda ws:cr.hArray(float,[ws.nchunks,ws.blocksize],name="Power(t)",header=ws.header)),
 
         cdata = dict(workarray=True,
                      doc="main input and work array",
-                     default=lambda ws:hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)),
+                     default=lambda ws:cr.hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)),
 
         cdata2 = dict(workarray=True,
                       doc="main input and work array",
-                      default=lambda ws:hArray(complex,[ws.nblocks*ws.blocklen/2+1],name="cdata2",header=ws.header)),
+                      default=lambda ws:cr.hArray(complex,[ws.nblocks*ws.blocklen/2+1],name="cdata2",header=ws.header)),
 
         cdataT = dict(workarray=True,
                       doc="Secondary input and work array",
-                      default=lambda ws:hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)),
+                      default=lambda ws:cr.hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)),
 
 #Note, that all the following arrays have the same memory als cdata and cdataT
 
         tmpspecT = dict(workarray=True,
                         doc="Wrapper array for ``cdataT``",
-                        default=lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)),
+                        default=lambda ws:cr.hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)),
 
         tmpspec = dict(workarray=True,
                        doc="Wrapper array for ``cdata``",
-                       default=lambda ws:hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)),
+                       default=lambda ws:cr.hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)),
 
         specT = dict(workarray=True,
                      doc="Wrapper array for ``cdataT``",
-                     default=lambda ws:hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)),
+                     default=lambda ws:cr.hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)),
 
         specT2 = dict(workarray=True,
                       doc="Wrapper array for ``cdataT``",
-                      default=lambda ws:hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)),
+                      default=lambda ws:cr.hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)),
 
         spec = dict(workarray=True,
                     doc="Wrapper array for ``cdata``",
-                    default=lambda ws:hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header))
+                    default=lambda ws:cr.hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header))
         )
 
 
@@ -489,7 +490,7 @@ class AverageSpectrum(tasks.Task):
     usually the case. This means that the last channel is missing!!
 
     The resulting spectrum is stored in the array ``Task.power`` (only
-    complete for ``stride=1``) and written to disk as an hArray with
+    complete for ``stride=1``) and written to disk as an cr.hArray with
     parameters stored in the header dict (use
     ``getHeader('AverageSpectrum')`` to retrieve this.)
 
@@ -590,7 +591,7 @@ class AverageSpectrum(tasks.Task):
         #Skip calculation if file already exists and is asked for
         if self.load_if_file_exists and os.path.exists(self.spectrum_file):
             print "#AverageSpectrum: File",self.spectrum_file,"exists. Skipping calculation Loading Task.power from file!"
-            self.power=hArrayRead(self.spectrum_file)
+            self.power=cr.hArrayRead(self.spectrum_file)
             return
 
         self.quality=[]
@@ -718,7 +719,7 @@ class AverageSpectrum(tasks.Task):
                                     #print "#    Offset",offset
                                     self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
                                     #This transpose it to make sure the blocks are properly interleaved
-                                    hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
+                                    cr.hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
                                 self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
                                 if self.dostride:
                                     ofile=self.tmpfilename+str(offset)+"b"+self.tmpfileext
@@ -734,7 +735,7 @@ class AverageSpectrum(tasks.Task):
                                 if self.dostride:
                                     #print "#    Offset",offset
                                     self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
-                                    hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
+                                    cr.hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
                                     if self.nspectraadded>1:
                                         self.spec/=float(self.nspectraadded)
                                     self.power.spectralpower(self.spec)
@@ -816,7 +817,7 @@ class AverageSpectrum(tasks.Task):
             print "Quality factor =",self.homogeneity_factor * 100,"%"
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'"
-        print "To read back the spectrum type: sp=hArrayRead('"+self.spectrum_file+"')"
+        print "To read back the spectrum type: sp=cr.hArrayRead('"+self.spectrum_file+"')"
         if self.doplot:
             plt.ion()
 
