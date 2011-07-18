@@ -43,7 +43,7 @@
 #include "mMath.h"
 #include "mFFT.h"
 
-#include "casacore/scimath/Mathematics/FFTServer.h"
+#include "scimath/Mathematics/FFTServer.h"
 
 #include <fftw3.h>
 

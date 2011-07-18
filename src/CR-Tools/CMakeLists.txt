@@ -45,7 +45,6 @@ option (CR_WITH_GLISH           "Support for Glish applications?"            NO 
 option (CR_WITH_PYCR            "Support for Python applications?"           NO  )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
 option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
-option (CR_WITH_PYPELINE        "Build the Pypeline library?"                YES )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 option (CR_WITH_CASAPY          "Build Pyline library against CASApy?"       NO  )
 option (CR_WITH_OPENMP          "Enable OpenMP support?"                     NO  )
@@ -76,7 +75,6 @@ macro (cr_process_awk _file _script)
     ${CR_SOURCE_DIR}/implement
     PATH_SUFFIXES
     GUI
-    Pypeline
     NO_DEFAULT_PATH
     )
 
@@ -94,7 +92,6 @@ macro (cr_process_awk _file _script)
     ${CR_SOURCE_DIR}/implement
     PATH_SUFFIXES
     GUI
-    Pypeline
     NO_DEFAULT_PATH
     )
 
@@ -389,50 +386,15 @@ if (CR_WITH_GUI)
 
 endif (CR_WITH_GUI)
 
-##____________________________________________________________________
-## Handle option: Create Python pipeline module? ON/OFF
-
-if (CR_WITH_PYPELINE)
-
-  ## Check for system tools to process the source code
-  if (NOT awk_executable)
-    set (CR_WITH_PYPELINE NO)
-    message (STATUS "[CR-Tools] Unable to build Pypeline - missing awk!")
-  endif (NOT awk_executable)
-
-  ## Check for Boost.Python and Python
-  if (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
-    set (CR_WITH_PYPELINE YES)
-  else (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
-    set (CR_WITH_PYPELINE NO)
-    message (STATUS "[CR-Tools] Unable to build Pypeline - missing Python!")
-  endif (BOOST_LIBRARIES AND PYTHON_LIBRARIES)
-
-  ## Check for DAL and underlying libraries
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
-    set (CR_WITH_PYPELINE YES)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
-    set (CR_WITH_PYPELINE NO)
-    message (STATUS "[CR-Tools] Unable to build Pypeline - missing DAL!")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CASA_LIBRARIES)
-
-else (CR_WITH_PYPELINE)
-  set (CR_WITH_GUI NO)
-endif (CR_WITH_PYPELINE)
-
-##____________________________________________________________________
-## Handle option: Build Pyline library against CASApy [on/off]
-
-if (CR_WITH_CASAPY)
-  include_find_module (CASApy YES)
-#  include_find_module (CASApy ${CR_VERBOSE_CONFIGURE})
-endif (CR_WITH_CASAPY)
-
 ## =============================================================================
 ##
 ##  Installation
 ##
 ## =============================================================================
+
+## Install header files
+install (FILES ${PROJECT_BINARY_DIR}/crtools.h
+         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/crtools)
 
 ## No relinking and full RPATH for the install tree
 ## (http://www.cmake.org/Wiki/CMake_RPATH_handling)

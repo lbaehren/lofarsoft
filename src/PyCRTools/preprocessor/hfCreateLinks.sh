@@ -4,7 +4,7 @@ src_d=$1
 dst_d=$2
 
 # Overwrite command line values for testing
-#src_d=${LOFARSOFT}/src/CR-Tools/implement/Pypeline/modules/
+#src_d=${LOFARSOFT}/src/pycrtools/modules/
 #dst_d=${LOFARSOFT}/release/lib/python/pycrtools/
 
 # Check if source directory exists

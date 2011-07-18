@@ -255,12 +255,12 @@ BOOST_PYTHON_MODULE(_hftools)
 
   def("trackHistory",&hArray_trackHistory);
 
-  //#include "../../../../build/cr/implement/Pypeline/mArray.def.h"
+  //#include "../../../../build/pycrtools/mArray.def.h"
 
 // ________________________________________________________________________
 //                                                                   Vector
 
-#include "../../../../build/cr/implement/Pypeline/mVector.def.h"
+#include "../../../../build/pycrtools/mVector.def.h"
 
   HString (*hWriteRawVectorHInteger)(std::vector<HInteger>&) = hWriteRawVector;
   HString (*hWriteRawVectorHNumber)(std::vector<HNumber>&) = hWriteRawVector;
@@ -287,17 +287,17 @@ BOOST_PYTHON_MODULE(_hftools)
     .value("GAUSSIAN", WEIGHTS_GAUSSIAN);
 
 
-#include "../../../../build/cr/implement/Pypeline/mMath.def.h"
+#include "../../../../build/pycrtools/mMath.def.h"
 
 // ________________________________________________________________________
 //                                                                      FFT
 
-#include "../../../../build/cr/implement/Pypeline/mFFT.def.h"
+#include "../../../../build/pycrtools/mFFT.def.h"
 
 // ________________________________________________________________________
 //                                                                     FFTW
 
-#include "../../../../build/cr/implement/Pypeline/mFFTW.def.h"
+#include "../../../../build/pycrtools/mFFTW.def.h"
 
   class_<FFTWPlanManyDft>("FFTWPlanManyDft", init<int, int, int, int, int, int, enum fftw_sign, enum fftw_flags>())
     ;
@@ -323,12 +323,12 @@ BOOST_PYTHON_MODULE(_hftools)
 // ________________________________________________________________________
 //                                                                   Filter
 
-#include "../../../../build/cr/implement/Pypeline/mFilter.def.h"
+#include "../../../../build/pycrtools/mFilter.def.h"
 
 // ________________________________________________________________________
 //                                                                  Fitting
 
-#include "../../../../build/cr/implement/Pypeline/mFitting.def.h"
+#include "../../../../build/pycrtools/mFitting.def.h"
 
 // ________________________________________________________________________
 //                                                                  Imaging
@@ -358,7 +358,7 @@ BOOST_PYTHON_MODULE(_hftools)
     //! Time
     .value("Time",CR::CoordinateType::Time);
 
-#include "../../../../build/cr/implement/Pypeline/mImaging.def.h"
+#include "../../../../build/pycrtools/mImaging.def.h"
 
 // ________________________________________________________________________
 //                                                                       IO
@@ -366,7 +366,7 @@ BOOST_PYTHON_MODULE(_hftools)
   def("hgetFiletype",hgetFiletype);
   def("hgetFileExtension",hgetFileExtension);
 
-#include "../../../../build/cr/implement/Pypeline/mIO.def.h"
+#include "../../../../build/pycrtools/mIO.def.h"
 
   class_<CR::DataReader>("DataReader")
     .def("get",&hFileGetParameter)
@@ -395,18 +395,18 @@ BOOST_PYTHON_MODULE(_hftools)
 // ________________________________________________________________________
 //                                                                       RF
 
-#include "../../../../build/cr/implement/Pypeline/mRF.def.h"
+#include "../../../../build/pycrtools/mRF.def.h"
 
 // ________________________________________________________________________
 //                                                        EndPointRadiation
 
-#include "../../../../build/cr/implement/Pypeline/mEndPointRadiation.def.h"
+#include "../../../../build/pycrtools/mEndPointRadiation.def.h"
 
 
 // ________________________________________________________________________
 //                                                                      TBB
 
-#include "../../../../build/cr/implement/Pypeline/mTBB.def.h"
+#include "../../../../build/pycrtools/mTBB.def.h"
 
   class_<TBBData>("TBBData", init<std::string>())
     .def("summary", &TBBData::python_summary)

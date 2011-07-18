@@ -1,34 +1,63 @@
+## Name of the project
+project (PyCRTools)
 
-message (STATUS "[CR-Tools] Adding implement/Pypeline ...")
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.8)
+
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+if (NOT LUS_ROOT)
+  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS
+    ${PYCRTOOLS_SOURCE_DIR}
+    ${PYCRTOOLS_SOURCE_DIR}/..
+    ${PYCRTOOLS_SOURCE_DIR}/../..
+    ${PYCRTOOLS_SOURCE_DIR}/../../..
+    ENV LOFARSOFT
+    )
+
+  if (LUS_ROOT)
+    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (LUS_ROOT)
+endif (NOT LUS_ROOT)
 
 ##-------------------------------------------------------------------------------
 ## Find libraries
-include (FindPython)
 include (FindBoost)
+include (FindHDF5)
+include (FindDAL)
+include (FindCASACORE)
+include (FindFFTW3)
+include (FindGSL)
+include (FindSphinx)
+include (FindPython)
 include (FindNumPy)
 include (FindNumUtil)
 include (FindOpenMP)
 include (FindAERA)
 include (FindTMF)
+include (FindCRTools)
+include (FindWCSLIB)
+include (FindCFITSIO)
 
 ##-------------------------------------------------------------------------------
 ## Options
 
-option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile Pypeline with compiler warnings enabled." ON)
-option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile Pypeline with runtime warnings enabled." ON)
-option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile Pypeline with debug symbols." ON)
-option (PYCRTOOLS_WITH_OPTIMIZATION "Compile Pypeline with optimization flags turned on." OFF)
-option (PYCRTOOLS_WITH_CPU_OPTIMIZATION "Compile Pypeline with optimization for CPU architecture." OFF)
-
-option (PYCRTOOLS_WITH_WARNINGS "" ON)
-option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support" ON)
-option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support" ON)
-option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support" ON)
-option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support" ON)
-option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support" ON)
-# option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support" OFF)
-set (PYCRTOOLS_WITH_OPENMP ${CR_WITH_OPENMP})
-set (PYCRTOOLS_WITH_AERA ${CR_WITH_AERA})
+option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?" ON)
+option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile PyCRTools with runtime warnings enabled?" ON)
+option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile PyCRTools with debug symbols?" ON)
+option (PYCRTOOLS_WITH_OPTIMIZATION "Compile PyCRTools with optimization flags turned on?" OFF)
+option (PYCRTOOLS_WITH_CPU_OPTIMIZATION "Compile PyCRTools with optimization for CPU architecture?" OFF)
+option (PYCRTOOLS_WITH_OPENMP "Compile PyCRTools with OpenMP support?" OFF)
+option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support?" ON)
+option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support?" ON)
+option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support?" ON)
+option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support?" ON)
+option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support?" ON)
+option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support?" OFF)
 
 # Debug level
 set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
@@ -99,7 +128,6 @@ endif (PYCRTOOLS_WITH_AERA)
 ## _____________________________________________________________________________
 ## Configuration of source files
 
-# Configuration file
 configure_file (
     ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/pycrtools_config.h
@@ -135,16 +163,12 @@ set (PYCRTOOLS_CPP_MODULES
 
 list (APPEND PYCRTOOLS_CPP_MODULES Bindings)
 
-foreach (include ${PYCRTOOLS_INCLUDES})
-  set (PYCRTOOLS_INCLUDE_FLAGS "-I${include} ${PYCRTOOLS_INCLUDE_FLAGS}")
-endforeach (include ${PYCRTOOLS_INCLUDES})
-
 string (STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
 string (STRIP "${PYCRTOOLS_CPP_FLAGS}" PYCRTOOLS_CPP_FLAGS)
 string (STRIP "${PYCRTOOLS_CXX_FLAGS}" PYCRTOOLS_CXX_FLAGS)
 
-message (STATUS "Preprocessing Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYCRTOOLS_CPP_FLAGS}")
-message (STATUS "Compiling Pypeline with flags: ${CMAKE_CXX_FLAGS} ${PYCRTOOLS_CXX_FLAGS}")
+message (STATUS "Preprocessing PyCRTools with flags: ${CMAKE_CXX_FLAGS} ${PYCRTOOLS_CPP_FLAGS}")
+message (STATUS "Compiling PyCRTools with flags: ${CMAKE_CXX_FLAGS} ${PYCRTOOLS_CXX_FLAGS}")
 
 ##_______________________________________________________________________________
 ## Perform Wrapper Preprocessing of module files
@@ -200,7 +224,7 @@ foreach (FILE ${PYCRTOOLS_CPP_MODULES})
             ${CMAKE_CURRENT_SOURCE_DIR}/numpy_ptr.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}Module.h
             ${PYCRTOOLS_PREPROCESSOR_DIR}/crtools_newline_parser.py
-    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP ${PYCRTOOLS_CPP_FLAGS} -w -I${WCSLIB_INCLUDES} -I${FFTW3_INCLUDES} -I${DAL_INCLUDES}/.. -I${CFITSIO_INCLUDES} -I${HDF5_INCLUDES}  -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CMAKE_CURRENT_BINARY_DIR} -I${CR_SOURCE_DIR}/implement/Pypeline -I${CR_SOURCE_DIR}/implement -I${CR_BINARY_DIR} -I${NUM_UTIL_INCLUDES} -I${NUMPY_INCLUDES} ${PYCRTOOLS_INCLUDE_FLAGS} ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.pp.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.wpp.cc
+    COMMAND ${CMAKE_CXX_COMPILER} -E -P -DH_DEBUG_CPP ${PYCRTOOLS_CPP_FLAGS} -w -I${FFTW3_INCLUDES} -I${DAL_INCLUDES} -I${PYTHON_INCLUDES} -I${BOOST_INCLUDES} -I${TMF_INCLUDES} -I${CASACORE_INCLUDES} -I${CMAKE_CURRENT_BINARY_DIR} -I${NUM_UTIL_INCLUDES} -I${NUMPY_INCLUDES} -I${WCSLIB_INCLUDES} -I${CFITSIO_INCLUDES} -I${CRTOOLS_INCLUDES} -I${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.pp.cc > ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.wpp.cc
     COMMAND python ${PYCRTOOLS_PREPROCESSOR_DIR}/crtools_newline_parser.py ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.wpp.cc ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.cc
     COMMAND rm -r ${CMAKE_CURRENT_BINARY_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}${FILE}.wpp.cc
     COMMENT "Wrapper preprocessing module ${FILE}: Executing wrapper preprocessor"
@@ -212,11 +236,19 @@ endforeach (FILE ${PYCRTOOLS_CPP_MODULES})
 ## Create the library
 
 include_directories (
-  ${CR_SOURCE_DIR}/implement/Pypeline
+  ${FFTW3_INCLUDES}
+  ${DAL_INCLUDES}
+  ${PYTHON_INCLUDES}
+  ${BOOST_INCLUDES}
+  ${TMF_INCLUDES}
+  ${CASACORE_INCLUDES}
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${NUMPY_INCLUDES}
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${NUM_UTIL_INCLUDES}
-  ${PYCRTOOLS_INCLUDES}
+  ${NUMPY_INCLUDES}
+  ${WCSLIB_INCLUDES}
+  ${CFITSIO_INCLUDES}
+  ${CRTOOLS_INCLUDES}
   )
 
 # Core files
@@ -241,7 +273,7 @@ add_library (hftools MODULE
   )
 
 target_link_libraries (hftools
-  cr
+  ${CRTOOLS_LIBRARIES}
   ${TMF_LIBRARIES}
   ${DAL_LIBRARIES}
   ${HDF5_LIBRARIES}
@@ -252,6 +284,8 @@ target_link_libraries (hftools
   ${GSL_LIBRARIES}
   ${NUM_UTIL_LIBRARIES}
   ${PYCRTOOLS_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
   )
 
 ##to speed up computations use -g -O2 or -g0 -O3 if no debuggng is needed.
@@ -301,7 +335,7 @@ install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLin
 ## =============================================================================
 
 message (STATUS "============================================================")
-message (STATUS "  CR-Tools: PyCRTools")
+message (STATUS "  PyCRTools")
 message (STATUS "------------------------------------------------------------")
 
 if (PYCRTOOLS_WITH_AERA)

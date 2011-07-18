@@ -309,6 +309,13 @@ if (CR_WITH_GUI)
 endif (CR_WITH_GUI)
 
 ##____________________________________________________________________
+##                                                           PyCRTools 
+
+build_package (pycrtools src/PyCRTools)
+
+add_dependencies (pycrtools cr dal casacore fftw3 gsl tmf aera)
+
+##____________________________________________________________________
 ##                                       LASA (LOFAR Air-Shower Array)
 
 build_package (lasa src/LASA)

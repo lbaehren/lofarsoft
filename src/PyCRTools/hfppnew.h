@@ -11,7 +11,7 @@ Then call gcc, just executing the preprocessor and leaving comments in
 place (works for the test file also without the HFLAGS if one adds
 -I$LOFARSOFT/release/include):
 
-gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/CR-Tools/implement/Pypeline/hfppnew-test.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hfppnew.doc.txt
+gcc -E -C -P -D H_DEBUG_CPP $HFLAGS -I. $LOFARSOFT/src/pycrtools/hfppnew-test.cc | gawk '{gsub(" *\\<_H_NL_\\> *","\n"); print}' > hfppnew.doc.txt
 */
 
 #ifndef HFPP_H

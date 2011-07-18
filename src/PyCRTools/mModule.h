@@ -25,6 +25,6 @@
 
 #include "core.h"
 
-#include <Pypeline/hfppnew.h>
+#include <hfppnew.h>
 
 #endif /* CR_PIPELINE_MODULE_H */
