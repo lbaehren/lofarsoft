@@ -2,11 +2,12 @@
 A number of tools useful in calibrating radio data
 """
 
-from math import *
+import math
 import pycrtools as cr
 
-deg=pi/180.
-pi2=pi/2.
+deg=math.pi/180.
+pi2=math.pi/2.
+
 
 def makeAZELRDictGrid(AZ,EL,Distance,nx=3,ny=3,offset=5*deg):
     """
@@ -16,11 +17,12 @@ def makeAZELRDictGrid(AZ,EL,Distance,nx=3,ny=3,offset=5*deg):
     """
     return [dict(az=AZ+(x-nx/2)*offset, el=EL+(y-ny/2)*offset,r=Distance) for y in range(ny)  for x in range(nx)]
 
+
 def TimeBeamIncoherent(timeseries_data,incoherent_sum=None):
     """
     **Usage:**
 
-    ``TimeBeamIncoherent(timeseries_data[nAntennas,blocklen],incoherent_sum=None) -> incoherent_sum.squareadd(timeseries_data)''
+    ``TimeBeamIncoherent(timeseries_data[nAntennas,blocklen],incoherent_sum=None) -> incoherent_sum.squareadd(timeseries_data)``
 
     returns ``incoherent_sum[blocklen]``
 
@@ -32,11 +34,13 @@ def TimeBeamIncoherent(timeseries_data,incoherent_sum=None):
 
     **Example:**
     ::
-    file=cr.open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
-    file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
-    file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
-    timeseries_data=TimeBeamIncoherent(file["TIMESERIES_DATA"])
-    timeseries_data.plot()
+
+        file = cr.open('/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5') #
+        file['BLOCKSIZE'] = 2**int(round(log(file['DATA_LENGTH'][0],2)))
+        file['SELECTED_DIPOLES']=[f for f in file['DIPOLE_NAMES'] if int(f)%2==1] # select uneven antenna IDs
+        timeseries_data = TimeBeamIncoherent(file['TIMESERIES_DATA'])
+        timeseries_data.plot()
+
     """
     dims=timeseries_data.shape()
     if not incoherent_sum:
