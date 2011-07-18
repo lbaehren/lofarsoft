@@ -1,4 +1,4 @@
-.. _template:
+.. _imaging_pipeline:
 
 Running the imaging pipeline
 ============================
