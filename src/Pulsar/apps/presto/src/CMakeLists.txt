@@ -138,7 +138,7 @@ add_dependencies (presto
   psrcat_install
   psrdada_install
   psrchive_install
-#  tempo2_install
+  tempo2_install
   fftw_install
   tempo_install
 #  bf2presto_install
