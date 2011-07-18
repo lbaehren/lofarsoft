@@ -23,12 +23,12 @@ def savefits(filename, array, overwrite=True, **kwargs):
 
     # Create new FITS structure (array needs to be transposed for FITS convention)
     hdu = pyfits.PrimaryHDU(array.transpose())
-    
+
     # Create FITS header
     hdr = hdu.header
 
     for key in sorted(kwargs.iterkeys()):
-        
+
         # NAXIS are calculated by pyfits and need to match
         if not "NAXIS" in key:
 
@@ -47,58 +47,63 @@ def savefits(filename, array, overwrite=True, **kwargs):
         os.remove(filename)
     hdu.writeto(filename)
 
+
 class Imager(Task):
     """Imager task documentation.
     """
 
-    parameters = {
-        'data' : { "default" : None, "positional" : 1 },
-        'image' : { "default" : None },
-        'output' : { "default" : "out.fits" },
-        'startblock' : { "default" : 0 },
-        'nblocks' : { "default" : 1 },
-        'ntimesteps' : { "default" : lambda self : self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"]) },
-        'intgrfreq' : { "default" : False, "doc" : "Output frequency integrated image." },
-        'inversefft' : { "default" : False },
-        'mask' : { "default" : None },
-        'FREQMIN' : { "default" : None },
-        'FREQMAX' : { "default" : None },
-        'OBSTIME' : { "default" : lambda self : self.data["TIME"][0] },
-        'DM' : { "default" : None },
-        'OBSLON' : { "default" : pytmf.deg2rad(6.869837540), "doc" : "Observer longitude in radians" },
-        'OBSLAT' : { "default" : pytmf.deg2rad(52.915122495), "doc" : "Observer latitude in radians" },
-        'NAXIS' : { "default" : 4 },
-        'NAXIS1' : { "default" : 90 },
-        'NAXIS2' : { "default" : 90 },
-        'NAXIS3' : { "default" : 1 },
-        'NAXIS4' : { "default" : 1 },
-        'LONPOLE' : { "default" : 0. },
-        'LATPOLE' : { "default" : 90. },
-        'CTYPE1' : { "default" : 'ALON-STG' },
-        'CTYPE2' : { "default" : 'ALAT-STG' },
-        'CTYPE3' : { "default" : 'FREQ' },
-        'CTYPE4' : { "default" : 'TIME' },
-        'CRVAL1' : { "default" : 180. },
-        'CRVAL2' : { "default" : 90. },
-        'CRVAL3' : { "default" : 0. },
-        'CRVAL4' : { "default" : 0. },
-        'CRPIX1' : { "default" : lambda self : float(self.NAXIS1) / 2 },
-        'CRPIX2' : { "default" : lambda self : float(self.NAXIS2) / 2 },
-        'CRPIX3' : { "default" : 0. },
-        'CRPIX4' : { "default" : 0. },
-        'CDELT1' : { "default" : 2.566666603088E+00 },
-        'CDELT2' : { "default" : 2.566666603088E+00 },
-        'CDELT3' : { "default" : lambda self : self.data["FREQUENCY_INTERVAL"][0] },
-        'CDELT4' : { "default" : lambda self : self.nblocks * self.data["BLOCKSIZE"] * self.data["SAMPLE_INTERVAL"][0] },
-        'CUNIT1' : { "default" : 'deg' },
-        'CUNIT2' : { "default" : 'deg' },
-        'CUNIT3' : { "default" : 'Hz' },
-        'CUNIT4' : { "default" : 's' },
-        'PC001001' : { "default" : 1.000000000000E+00 },
-        'PC002001' : { "default" : 0.000000000000E+00 },
-        'PC001002' : { "default" : 0.000000000000E+00 },
-        'PC002002' : { "default" : 1.000000000000E+00 }
-    }
+    parameters = dict(
+        data = dict( default = None,
+                     positional = 1 ),
+        image = dict( default = None ),
+        output = dict( default = "out.fits" ),
+        startblock = dict( default = 0 ),
+        nblocks = dict( default = 1 ),
+        ntimesteps = dict( default = lambda self : self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"]) ),
+        intgrfreq = dict( default = False,
+                          doc = "Output frequency integrated image." ),
+        inversefft = dict( default = False ),
+        mask = dict( default = None ),
+        FREQMIN = dict( default = None ),
+        FREQMAX = dict( default = None ),
+        OBSTIME = dict( default = lambda self : self.data["TIME"][0] ),
+        DM = dict( default = None ),
+        OBSLON = dict( default = pytmf.deg2rad(6.869837540),
+                       doc = "Observer longitude in radians" ),
+        OBSLAT = dict( default = pytmf.deg2rad(52.915122495),
+                       doc = "Observer latitude in radians" ),
+        NAXIS = dict( default = 4 ),
+        NAXIS1 = dict( default = 90 ),
+        NAXIS2 = dict( default = 90 ),
+        NAXIS3 = dict( default = 1 ),
+        NAXIS4 = dict( default = 1 ),
+        LONPOLE = dict( default = 0. ),
+        LATPOLE = dict( default = 90. ),
+        CTYPE1 = dict( default = 'ALON-STG' ),
+        CTYPE2 = dict( default = 'ALAT-STG' ),
+        CTYPE3 = dict( default = 'FREQ' ),
+        CTYPE4 = dict( default = 'TIME' ),
+        CRVAL1 = dict( default = 180. ),
+        CRVAL2 = dict( default = 90. ),
+        CRVAL3 = dict( default = 0. ),
+        CRVAL4 = dict( default = 0. ),
+        CRPIX1 = dict( default = lambda self : float(self.NAXIS1) / 2 ),
+        CRPIX2 = dict( default = lambda self : float(self.NAXIS2) / 2 ),
+        CRPIX3 = dict( default = 0. ),
+        CRPIX4 = dict( default = 0. ),
+        CDELT1 = dict( default = 2.566666603088E+00 ),
+        CDELT2 = dict( default = 2.566666603088E+00 ),
+        CDELT3 = dict( default = lambda self : self.data["FREQUENCY_INTERVAL"][0] ),
+        CDELT4 = dict( default = lambda self : self.nblocks * self.data["BLOCKSIZE"] * self.data["SAMPLE_INTERVAL"][0] ),
+        CUNIT1 = dict( default = 'deg' ),
+        CUNIT2 = dict( default = 'deg' ),
+        CUNIT3 = dict( default = 'Hz' ),
+        CUNIT4 = dict( default = 's' ),
+        PC001001 = dict( default = 1.000000000000E+00 ),
+        PC002001 = dict( default = 0.000000000000E+00 ),
+        PC001002 = dict( default = 0.000000000000E+00 ),
+        PC002002 = dict( default = 1.000000000000E+00 )
+    )
 
     def init(self):
         """Initialize imager.
@@ -185,6 +190,7 @@ class Imager(Task):
             else:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
+
     def run(self):
         """Run the imager.
         """
@@ -236,7 +242,7 @@ class Imager(Task):
             self.image = np.rollaxis(self.image, 0, 4)
 
         if self.inversefft:
-            savefits(self.output, self.image, 
+            savefits(self.output, self.image,
                         OBSLON=self.OBSLON,
                         OBSLAT=self.OBSLAT,
                         CTYPE1=self.CTYPE1,
@@ -260,9 +266,9 @@ class Imager(Task):
                         PC002001=self.PC002001,
                         PC001002=self.PC001002,
                         PC002002=self.PC002002)
-    
+
         else:
-            savefits(self.output, self.image, 
+            savefits(self.output, self.image,
                         OBSLON=self.OBSLON,
                         OBSLAT=self.OBSLAT,
                         CTYPE1=self.CTYPE1,
