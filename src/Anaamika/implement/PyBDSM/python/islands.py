@@ -134,7 +134,7 @@ from image import *
 class Island(object):
     """Instances of this class represent islands of emission in the image.
 
-    It's primary use is a container for all kinds of data describing island.
+    Its primary use is a container for all kinds of data describing island.
     """
     bbox        = List(Instance(slice(0), or_none=False),
                        doc = "Bounding box of the island")

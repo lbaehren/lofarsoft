@@ -15,10 +15,10 @@ o = ip.options
 
 # Enable autocalling, so that parentheses are not needed
 # for commands (as in casapy).
-o.autocall = 2
+# o.autocall = 2
 
 # Customize the prompt
-o.prompt_in1 = 'BDSM [\#]: '
+# o.prompt_in1 = 'BDSM [\#]: '
 
 # Add custom autocomplete. 
 def opts_completer(self, event):

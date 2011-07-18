@@ -336,6 +336,7 @@ def process_image(**kwargs):
     if success:
         _set_current_cmd(cur_cmd)
         tput(quiet=True)
+        
 task_list = _img.opts.get_names()
 process_image.arg_list = task_list
 process_image.use_groups = True
@@ -349,18 +350,24 @@ def show_fit(**kwargs):
     the controls at the bottom of the plot window.
 
     In addition, the following commands are available:
-      Press "i" ........ : Get integrated fluxes and mean rms values'
-                           for the visible portion of the image'
-      Press "m" ........ : Change min and max scaling values'
-      Press "0" ........ : Reset scaling to default'
-
+      Press "i" ........ : Get integrated fluxes and mean rms values
+                           for the visible portion of the image
+      Press "m" ........ : Change min and max scaling values
+      Press "n" ........ : Show / hide island IDs
+      Press "0" ........ : Reset scaling to default
+      Press "c" ........ : Change source for SED plot
+      Click Gaussian ... : Print Gaussian and source IDs (zoom_rect mode, 
+                           toggled with the "zoom" button and indicated in 
+                           the lower right corner, must be off)
+                           The SED plot will also show the chosen source.
+                           
     Parameters: ch0_image, rms_image, mean_image, ch0_islands,
                 gresid_image, sresid_image, gmodel_image,
                 smodel_image, pyramid_srcs, source_seds,
                 ch0_flagged
 
     For more information about a parameter, use help.  E.g.,
-      > help 'ch0_show'
+      > help 'ch0_image'
       
     """
     global _img
@@ -392,12 +399,12 @@ def write_gaul(**kwargs):
     included in the output file varies with the format used. Use
     "help 'format'" for more information.
 
-    Parameters: outfile, format, srcroot, bbs_patches, incl_wavelet
+    Parameters: outfile, format, srcroot, bbs_patches, incl_wavelet, clobber
 
     For more information about a parameter, use help.  E.g.,
       > help 'bbs_patches'
 
-    The ASCII and FITS output files will contain the following columns:
+    The ASCII and FITS output files contain the following columns:
     
       1. Gaus_id - Gaussian id number : starting from zero.
       2. Isl_id - Island id number : the id of the island the Gaussian
@@ -473,7 +480,7 @@ write_gaul.use_groups = False
 def export_image(**kwargs):
     """Write one or more images to a file.
 
-    Parameters: filename, img_type, img_format
+    Parameters: filename, img_type, img_format, incl_wavelet, clobber
 
     For more information about a parameter, use help.  E.g.,
       > help 'img_type'
@@ -548,6 +555,6 @@ pydoc.help = bdsmDocHelper(sys.stdin, sys.stdout)
 # Now run the IPython shell with this namespace and the customisations
 # in the pybdsm_conf.py file
 _set_current_cmd(process_image)
-ipshell = IPShellEmbed([''], user_ns=locals())
+ipshell = IPShellEmbed(['-prompt_in1','BDSM <\#>: ','-autocall','2'], user_ns=locals())
 ipshell.IP.runlines('import pybdsm_conf')
 ipshell()
