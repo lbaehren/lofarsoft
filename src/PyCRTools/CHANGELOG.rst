@@ -1,3 +1,10 @@
+2011-07-18 - Rev 81??
+
+   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+
+- added pow(hnumber, long int) in core.h to get hPowerLaw functions on some linux systems including the CEP I cluster
+
+
 2011-07-17 - Rev 8133
 =====================
 

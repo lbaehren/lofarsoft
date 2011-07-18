@@ -330,6 +330,7 @@ inline HPointer int2ptr(HInteger v){return reinterpret_cast<HPointer>(v);}
 template<class T> inline HString hf2string(T v){std::ostringstream os; os << v; return os.str();}
 
 inline HNumber pow(HNumber a, long long int x){return pow(a,(int)x);}
+inline HNumber pow(HNumber a, long int x){return pow(a,(int)x);}
 
 inline HComplex operator*(HInteger i, HComplex c) {return hfcast<HComplex>(i)*c;}
 inline HComplex operator*(HComplex c, HInteger i) {return hfcast<HComplex>(i)*c;}
