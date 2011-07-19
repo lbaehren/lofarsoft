@@ -29,8 +29,8 @@ def convert(fromvalue,totype):
 
 LOFARSOFT=os.environ["LOFARSOFT"]
 PYCRBIN=LOFARSOFT+"/release/bin/python/"
-PYCR=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/scripts/"
-PYP=LOFARSOFT+"/src/CR-Tools/implement/Pypeline/"
+PYCR=LOFARSOFT+"/src/PyCRTools/scripts/"
+PYP=LOFARSOFT+"/src/PyCRTools/"
 
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"

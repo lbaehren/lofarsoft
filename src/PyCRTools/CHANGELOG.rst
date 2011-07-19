@@ -941,7 +941,7 @@ Todo
   :func:`nyquistflip`).
 - Use ``shutils rmtree`` for :func:`hArray_write` to remove old file
   directory.
-- :func:`hCoorindateConvert` can only do AZELR -> XYZ and not vice versa. Use
+- :func:`hCoordinateConvert` can only do AZELR -> XYZ and not vice versa. Use
   pytmf to do that (and check other conversions as well), also,
   autmatically loop over all 3-tuples in vector.
 

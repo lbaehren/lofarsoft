@@ -3,6 +3,29 @@ Dynamic spectrum documentation
 ==============================
 """
 
+
+
+"""
+# ************************************************************************
+# Replacements for new tbb.py
+# ************************************************************************
+(query-replace "nofAntennas" "NOF_DIPOLE_DATASETS" nil (point-at-eol) (point-max))
+(query-replace "AntennaIDs" "DIPOLE_NAMES" nil (point-at-eol) (point-max))
+(query-replace "sampleInterval" "SAMPLE_INTERVAL" nil (point-at-eol) (point-max))
+ datafile["SAMPLE_INTERVAL"] -> datafile["SAMPLE_INTERVAL"][0]
+(query-replace "datafile.hdr" "datafile.getHeader()" nil (point-at-eol) (point-max))
+(query-replace "fftLength" "FFTSIZE" nil (point-at-eol) (point-max))
+(query-replace "blocksize" "BLOCKSIZE" nil (point-at-eol) (point-max))
+(query-replace "block" "BLOCK" 1 (point-at-eol) (point-max))
+(query-replace "[\"Fx\"]" "[\"TIMESERIES_DATA\"]" nil (point-at-eol) (point-max))
+(query-replace "[\"Time\"]" "[\"TIME_DATA\"]" nil (point-at-eol) (point-max))
+(query-replace "[\"selectedAntennasID\"]" "[\"SELECTED_DIPOLES\"]" nil (point-at-eol) (point-max))
+(query-replace "[\"selectedAntennas\"]" "[\"SELECTED_DIPOLES\"]" nil (point-at-eol) (point-max))
+(query-replace "[\"Frequency\"]" "[\"FREQUENCY_DATA\"]" nil (point-at-eol) (point-max))
+(query-replace "datafile.filesize" "datafile[\"DATA_LENGTH\"][0]" nil (point-at-eol) (point-max))
+
+
+"""
 #import pdb; pdb.set_trace()
 
 from pycrtools import *
@@ -21,7 +44,11 @@ def dynamicspectrum_getfile(ws):
     To produce an error message in case the file does not exist
     """
     if ws.file_start_number < len(ws.filenames):
-        return crfile(ws.filenames[ws.file_start_number])
+        f=open(ws.filenames[ws.file_start_number])
+        if ws.lofarmode:
+            print "Setting ANTENNA_SET=",ws.lofarmode,"in the data file!"
+            f["ANTENNA_SET"]=ws.lofarmode
+        return f
     else:
         print "ERROR: File "+ws.filefilter+" not found!"
         return None
@@ -139,6 +166,11 @@ class DynamicSpectrum(tasks.Task):
 
          "plot_end":{default:lambda self: min(int(self.speclen*self.plot_center)+self.plotlen,self.speclen),
                      doc:"End plotting before this sample number."},
+
+        "plot_finish":{default: lambda self:plotfinish(doplot=self.doplot,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+
+        "plot_name":{default:"",doc:"Extra name to be added to plot filename."},
+
 
          "delta_nu":{default:10**4,
                      doc:"Desired frequency resolution - will be rounded off to get powers of 2x ``blocklen``",
@@ -266,11 +298,11 @@ class DynamicSpectrum(tasks.Task):
                      "Length of one spectrum.",
                      "Channels"),
 
-        "samplerate":p_(lambda self:self.datafile["sampleInterval"],
+        "samplerate":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0],
                         "Length in time of one sample in raw data set.",
                         "s"),
 
-        "filesize":p_(lambda self:getattr(self.datafile,"filesize"),
+        "filesize":p_(lambda self:self.datafile["DATA_LENGTH"][0],
                       "Length of file.",
                       "Samples"),
 
@@ -352,25 +384,25 @@ class DynamicSpectrum(tasks.Task):
                              "Number of spectra flagged per chunk.",
                              output=True),
 
-        "antennas":p_(lambda self:hArray(range(min(self.datafile["nofAntennas"],self.maxnantennas))),
+        "antennas":p_(lambda self:hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"],self.maxnantennas))),
                       "Antennas from which to select initially for the current file."),
 
         "antennas_used":p_(lambda self:set(),
                            "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
                            output=True),
 
-        "antennaIDs":p_(lambda self:ashArray(hArray(self.datafile["AntennaIDs"])[self.antennas]),
+        "antennaIDs":p_(lambda self:ashArray(hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
                         "Antenna IDs to be selected from for current file."),
 
         "nantennas_total":p_(0,
                              "Total number of antennas that were processed (flagged or not) in this run.",
                              output=True),
 
-        "header":p_(lambda self:self.datafile.hdr,
+        "header":p_(lambda self:self.datafile.getHeader(),
                     "Header of datafile.",
                     export=False),
 
-        "freqs":p_(lambda self:self.datafile["Frequency"],
+        "freqs":p_(lambda self:self.datafile["FREQUENCY_DATA"],
                    export=False),
 
         "lofarmode":{default:"LBA_OUTER",
@@ -419,7 +451,6 @@ class DynamicSpectrum(tasks.Task):
         self.count=0
         self.nofAntennas=0
         self.nantennas_total=0
-        self.dynspec.getHeader("increment")[1]=self.delta_frequency
         self.dynspec.par.avspec=self.avspec
         self.dynspec.par.cleanspec=self.cleanspec
         self.updateHeader(self.dynspec,["nofAntennas","nspectraadded","filenames","antennas_used","nchunks"],delta_t="delta_t_used",delta_nu="delta_nu_used",fftLength="speclen",blocksize="blocklen",filename="spectrum_file")
@@ -427,6 +458,8 @@ class DynamicSpectrum(tasks.Task):
         dataok=True
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
+
+        fftplan = FFTWPlanManyDftR2c(self.blocklen, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
 
         if self.doplot:
             plt.ioff()
@@ -436,20 +469,20 @@ class DynamicSpectrum(tasks.Task):
         for fname in self.filenames[self.file_start_number:]:
             print "# Start File",str(self.file_start_number)+":",fname
             self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
-            self.datafile["blocksize"]=self.blocklen #Setting initial block size
+            self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
             self.antenna_list[fname]=range(self.nantennas_start,self.nantennas, self.nantennas_stride)
             for iantenna in self.antenna_list[fname]:
                 antenna=self.antennas[iantenna]
                 rms=0; mean=0; npeaks=0
-                self.datafile["selectedAntennas"]=[antenna]
+                self.datafile["SELECTED_DIPOLES"]=[antenna]
                 antennaID=self.antennaIDs[iantenna]
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):"
                 for nchunk in range(self.nchunks):
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
-                    self.data[...].read(self.datafile,"Fx",blocks)
+                    self.data[...].read(self.datafile,"TIMESERIES_DATA",blocks)
                     if self.qualitycheck:
                         self.count=len(self.quality)
-                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=self.count,blockoffset=nchunk*self.blocks_per_sect))
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=nchunk,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
                         if not self.quality_db_filename=="":
                             qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
                         mean+=self.quality[self.count]["mean"]
@@ -468,7 +501,8 @@ class DynamicSpectrum(tasks.Task):
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.data.randomizepeaks(lower_limit,upper_limit)
-                        self.fftdata[...].fftw(self.data[...])
+                        hFFTWExecutePlan(self.fftdata[...], self.data[...], fftplan)
+                        #self.fftdata[...].fftw(self.data[...])
                         if self.nspectraadded[nchunk]>1:
                             self.fftdata/=float(self.nspectraadded[nchunk])
                         self.dynspec[nchunk:nchunk+1] *= (self.nspectraadded[nchunk]-1.0)/(self.nspectraadded[nchunk])
@@ -478,7 +512,7 @@ class DynamicSpectrum(tasks.Task):
                         if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
                             self.dynspec[nchunk,self.plot_start:self.plot_end].plot()
                             print "RMS of plotted spectrum=",self.dynspec[nchunk,self.plot_start:self.plot_end].stddev()
-                            plt.draw(); plt.show()
+                            plt.draw();
                      #End for nchunk
                 if self.doplot>1:
                     self.avspec.fill(0.0)
@@ -486,6 +520,8 @@ class DynamicSpectrum(tasks.Task):
                     self.cleanspec.copy(self.dynspec)
                     self.cleanspec /= self.avspec
                     self.dynplot(self.dynspec)
+                    plt.draw()
+
                 print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
                 if self.qualitycheck:
                     mean/=self.nchunks
@@ -527,7 +563,8 @@ class DynamicSpectrum(tasks.Task):
         print "To plot the spectrum, use 'Task.dynplot(dsp)'."
         if self.doplot:
             self.dynplot(self.dynspec)
-            plt.ion()
+            self.plot_finish(name=self.__taskname__+self.plot_name)
+
 
     def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):
         """
@@ -559,6 +596,7 @@ class DynamicSpectrum(tasks.Task):
         np.log(npdynspec,npdynspec)
         if cleanspec:
             plt.subplot(1,2,1)
+        plt.title("CDynamic Spectrum")
         plt.imshow(npdynspec,aspect='auto',cmap=plt.cm.hot,origin='lower',vmin=dmin,vmax=dmax,
                    extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
         print "dynspec: min=",log(dynspec.min().val()),"max=",log(dynspec.max().val()),"rms=",log(dynspec.stddev().val())
@@ -567,26 +605,29 @@ class DynamicSpectrum(tasks.Task):
         if cleanspec:
             hCopy(npcleanspec,cleanspec)
             plt.subplot(1,2,2)
+            plt.title("Cleaned Dynamic Spectrum")
             plt.imshow(npcleanspec,aspect='auto',cmap=plt.cm.hot,origin='lower',vmin=cmin,vmax=cmax,
                     extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
             print "cleanspec: min=",cleanspec.min().val(),"max=",cleanspec.max().val(),"rms=",cleanspec.stddev().val()
             plt.xlabel("Frequency [MHz]")
             plt.ylabel("+/- Time [ms]")
-        plt.draw(); plt.show()
+        plt.draw();
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
         If you see an output line like this::
 
           # Start antenna = 0 (ID= 2000000) - 375 passes:
-          #Flagged: chunk= 0 , Block    14: mean= 121.68, rel. rms= 970.1, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
-          #Flagged: chunk= 0 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: #0 chunk= 0 , Block    14: mean= 121.68, rel. rms= 970.1, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: #0 chunk= 0 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
+          #Flagged: #2 chunk= 2 , Block    15: mean= 139.70, rel. rms=1049.7, npeaks=    0, spikyness=  -1.00, spikeexcess=  0.00   ['rms', 'mean']
           # Data flagged!
           # End   antenna = 0  Time = 14.825337 s  nspectraadded = 374 nspectraflagged = 1
 
         this will tell you that Antenna 2000000 was worked on (the 1st
-        antenna in the data file) and the chunk 0 (blocks 14 and 15)
-        contained some suspicious data (with and rms and mean which fluctuated too much). If you want
+        antenna in the data file) and the chunk 0 (blocks 14 and 15
+        within that chunk) and chunk 2 contained some suspicious data
+        (with and rms and mean which fluctuated too much). If you want
         to inspect this, you can call::
 
           >>> Task.qplot(0)
@@ -594,7 +635,7 @@ class DynamicSpectrum(tasks.Task):
         This will plot the chunk and highlight the first flagged block
         (#14) in that chunk::
 
-          >>> Task.qplot(186,1)
+          >>> Task.qplot(0,1)
 
         would highlight the second flagged block (#15)
 
@@ -604,9 +645,8 @@ class DynamicSpectrum(tasks.Task):
         """
         quality_entry=self.quality[entry]
         filename=quality_entry["filename"]
-        datafile=crfile(filename)
-        iantenna=datafile["Antennas"].find(quality_entry["antenna"])
-        datafile["selectedAntennas"]=[iantenna]
+        datafile=open(filename)
+        datafile["SELECTED_DIPOLES"]=[quality_entry["antenna"]]
         if block<0 and flaggedblock<len(quality_entry["flaggedblocks"]):
             block=quality_entry["flaggedblocks"][flaggedblock]
             s="flaggedblock # "+str(flaggedblock)+"/"+str(len(quality_entry["flaggedblocks"])-1)
@@ -614,16 +654,15 @@ class DynamicSpectrum(tasks.Task):
             s=""
         print "Filename:",filename,"block =",block,"blocksize =",quality_entry["blocksize"],s
         if all:
-            datafile["blocksize"]=quality_entry["size"]
-            datafile["block"]=quality_entry["offset"]*quality_entry["blocksize"]/quality_entry["size"]
-            y0=datafile["Fx"]
-            y0.par.xvalues=datafile["Time"]
+            datafile["BLOCKSIZE"]=quality_entry["size"]
+            datafile["BLOCK"]=quality_entry["chunk"]
+            y0=datafile["TIMESERIES_DATA"]
+            y0.par.xvalues=datafile["TIME_DATA"]
             y0.par.xvalues.setUnit("mu","")
             y0.plot()
-        datafile["blocksize"]=quality_entry["blocksize"]
-        datafile["block"]=block
-        y=datafile["Fx"]
-        y.par.xvalues=datafile["Time"]
+        datafile["BLOCKSIZE"]=quality_entry["blocksize"]
+        datafile["BLOCK"]=block
+        y=datafile["TIMESERIES_DATA"]
+        y.par.xvalues=datafile["TIME_DATA"]
         y.par.xvalues.setUnit("mu","")
         y.plot(clf=not all)
-

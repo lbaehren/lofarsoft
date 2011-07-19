@@ -5,6 +5,10 @@
 #import core
 
 # Make core functionality available in local namespace
+from math import *
+import os
+import sys
+
 from core import *
 import tasks
 import rftools as rf

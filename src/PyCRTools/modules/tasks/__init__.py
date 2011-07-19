@@ -413,6 +413,7 @@ Here is an example of using it::
 task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2","pulsecal"]
 
 import os
+import math
 import shelve
 import types
 import time
@@ -931,6 +932,62 @@ class Task(object):
 #########################################################################
 #                             Workspaces
 #########################################################################
+
+
+def printindent_string(txt,indentlen,width=80,prefix="# "):
+    """
+    Usage:
+
+    printindent_string(txt,indentlen,width=80,prefix='# ')
+    
+    Description:
+    
+    Return a string to print a text as a block of with indentation and maximum width.
+    
+    Example:
+    ::
+    
+        tasks.printindent_string('Hallo lieber Leser, dies ist ein Text, der umgebrochen werden soll!',10,width=20)
+
+        # Hallo
+        # lieber
+        # Leser,
+        # dies
+        # ist ein
+        # Text,
+        # der
+        # umgebroc
+        # hen
+        # werden
+        # soll!
+    """
+    textsize=len(txt)
+    blockwidth=width-indentlen-len(prefix)
+    indentstr="                                                                                                                                                                                                        "[:indentlen]
+    start=0; end=blockwidth
+    outstr=""
+    while start<textsize:
+        if end>=textsize:
+            if start>0:
+                outstr+=indentstr+prefix+txt[start:textsize]+"\n"
+            else:
+                outstr+=prefix+txt[start:end]+"\n"
+            return outstr
+        space_end=txt[start:end].rfind(" ")
+        if space_end>=0:
+            end=start+space_end
+        if start>0:
+            outstr+=indentstr+prefix+txt[start:end]+"\n"
+        else:
+            outstr+=prefix+txt[start:end]+"\n"
+        if space_end>=0:
+            start=end+1;
+        else:
+            start=end
+        end=start+blockwidth
+    return outstr
+
+    
 class WorkSpaceType(type):
 #    def __init__(cls, name, bases, dct):
 #       """ Create a new class.
@@ -1597,7 +1654,7 @@ class WorkSpace(object):
          by ws.par=value.
         """
 #        variables=set(Task.run.func_code.co_names)
-        s="#-----------------------------------------------------------------------\n# WorkSpace of "+self.__taskname__+"("+",".join(self.getPositionalParameters())+")\n#-----------------------------------------------------------------------\n"
+        s="#-------------------------------------------------------------------------------------------------------------------------\n# WorkSpace of "+self.__taskname__+"("+",".join(self.getPositionalParameters())+")\n#-------------------------------------------------------------------------------------------------------------------------\n"
         s0=""; s1=""; s2=""
         pars=self.parameter_properties.items()
         pars.sort()
@@ -1609,50 +1666,26 @@ class WorkSpace(object):
 	    if type(val) in hAllContainerTypes:
 		val=val.__repr__(8)
             if (v.has_key(positional)) and (v[positional]):
-                if version_info > (2,5,9):
-                    s+="# {0:s} = {1!r} - {2:s}\n".format(p,val,v[doc])
-                else:
-                    s+=str((p,val,v[doc]))
+                s+="# {0:s} = {1!r} - {2:s}".format(p,val,printindent_string(v[doc],66,width=120,prefix="# "))
             if (v.has_key(export)) and (not v[export]):
                 continue
             if p in self.getInputParameters():
-                if (v[unit]==""): 
-                    if version_info > (2,5,9):
-                        s0+="{0:<22} = {1!r:30} #         {2:s}\n".format(p,val,v[doc])
-                    else:
-                        s0+=str((p,val,v[doc]))
-                else: 
-                    if version_info > (2,5,9):
-                        s0+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}\n".format(p,val,v[unit],v[doc])
-                    else:
-                        s0+=str((p,val,v[unit],v[doc]))
+                if (v[unit]==""): s0+="{0:<22} = {1!r:30} #         {2:s}".format(p,val,printindent_string(v[doc],66,width=120,prefix="# "))
+                else: s0+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p,val,v[unit],printindent_string(v[doc],66,width=120,prefix="# "))
             elif (v.has_key(workarray)) and (v[workarray]):
                 if workarrays:
                     if v.has_key(dependencies):
                         deps=" <- ["+", ".join(v[dependencies])+"]"
                     else:
                         deps=""
-                        
-                if version_info > (2,5,9):
-                    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps+"\n").format(p,val,v[doc])
-                else:
-                    s2+=str((p,val,v[doc]))
+		    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps).format(p,val,printindent_string(v[doc],66,width=120,prefix="# "))
             elif noninputparameters:
                 if v.has_key(dependencies):
                     deps=" <- ["+", ".join(v[dependencies])+"]"
                 else:
                     deps=""
-                if (v[unit]==""): 
-                    if version_info > (2,5,9):
-                        s1+=("# {0:>20} = {1!r:30} - {2:s}"+deps+"\n").format(p,val,v[doc])
-                    else:
-                        s1+=str((p,val,v[doc]))
-                else: 
-                    if version_info > (2,5,9):
-                        s1+=("# {0:>20} = {1:<30} - {2:s}"+deps+"\n").format(p,str(val)+" "+v[unit],v[doc])
-                    else:
-                        s1+=str((p,val,v[unit],v[doc]))
-
+                if (v[unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}").format(p,val,printindent_string(v[doc]+deps,66,width=120,prefix="# "))
+                else: s1+=("# {0:>20} = {1:<30} - {2:s}").format(p,str(val)+" "+v[unit],printindent_string(v[doc]+deps,66,width=120,prefix="# "))
         s+=s0
         if not s1=="": s+="#------------------------Output Parameters------------------------------\n"+s1
         if not s2=="": s+="#---------------------------Work Arrays---------------------------------\n"+s2
