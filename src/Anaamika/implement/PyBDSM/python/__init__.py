@@ -27,6 +27,11 @@ import graphix
 import mylogger
 from interface import in_ipython
 __version__ = '1.0' # placeholder version number
+# Get svn revision number as well. To do this, one also
+# needs to do "svn propset svn:keywords Revision
+# src/Anaamika/implement/PyBDSM/python/__init__.py" from
+# the LOFARSOFT directory. Then, the revision number is
+# added automatically with each update.
 __revision__ = filter(str.isdigit, "$Revision$")
 
 default_chain = [Op_readimage(),
