@@ -58,6 +58,7 @@ from pycrtools.tasks import shortcuts as sc
 from pycrtools import tasks
 from pycrtools import qualitycheck
 import time
+import os
 #from pycrtools import IO
 
 #Defining the workspace parameters
@@ -190,7 +191,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         tmpfilename = dict(default="tmp",
                            doc="Root filename for temporary data files."),
 
-        filenames = dict(default=lambda ws:listFiles(ws.filefilter),
+        filenames = dict(default=lambda ws:cr.listFiles(ws.filefilter),
                          doc="List of filenames of data file to read raw data from."),
 
         output_dir = dict(default="",
@@ -589,7 +590,7 @@ class AverageSpectrum(tasks.Task):
         #print "Time:",time.clock()-self.ws.t0,"s for set-up."
 
         #Skip calculation if file already exists and is asked for
-        if self.load_if_file_exists and os.path.exists(self.spectrum_file):
+        if self.load_if_file_exists and cr.os.path.exists(self.spectrum_file):
             print "#AverageSpectrum: File",self.spectrum_file,"exists. Skipping calculation Loading Task.power from file!"
             self.power=cr.hArrayRead(self.spectrum_file)
             return
