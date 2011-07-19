@@ -94,7 +94,7 @@ def averagespectrum_getfile(ws):
     To produce an error message in case the file does not exist
     """
     if ws.file_start_number < len(ws.filenames):
-        f=open(ws.filenames[ws.file_start_number])
+        f=cr.open(ws.filenames[ws.file_start_number])
         if ws.lofarmode:
             print "Setting ANTENNA_SET=",ws.lofarmode,"in the data file!"
             f["ANTENNA_SET"]=ws.lofarmode
@@ -362,7 +362,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                               "Number of spectra added at the end.",
                               output=True),
 
-        nspectraadded_per_antenna = sc.p_(lambda ws:Vector(int,ws.nantennas,fill=0),
+        nspectraadded_per_antenna = sc.p_(lambda ws:cr.Vector(int,ws.nantennas,fill=0),
                                           "Number of spectra added per antenna.",
                                           output=True),
 
@@ -370,7 +370,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                                 "Number of spectra flagged and not used.",
                                 output=True),
 
-        nspectraflagged_per_antenna = sc.p_(lambda ws:Vector(int,ws.nantennas,fill=0),
+        nspectraflagged_per_antenna = sc.p_(lambda ws:cr.Vector(int,ws.nantennas,fill=0),
                                          "Number of spectra flagged and not used per antenna.",
                                          output=True),
 
@@ -630,7 +630,7 @@ class AverageSpectrum(tasks.Task):
         fftplan = FFTWPlanManyDftR2c(self.blocklen*self.nblocks, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
 
         if self.doplot:
-            plt.ioff()
+            cr.plt.ioff()
 
         npass = self.nchunks*self.stride
         original_file_start_number=self.file_start_number
@@ -718,7 +718,7 @@ class AverageSpectrum(tasks.Task):
                             for offset in range(self.stride):
                                 if self.dostride:
                                     #print "#    Offset",offset
-                                    self.tmpspecT[...].readfilebinary(Vector(ofiles),Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
+                                    self.tmpspecT[...].readfilebinary(cr.Vector(ofiles),cr.Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
                                     #This transpose it to make sure the blocks are properly interleaved
                                     cr.hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
                                 self.specT.doublefft2(self.tmpspec,self.nblocks_section,self.full_blocklen)
@@ -735,7 +735,7 @@ class AverageSpectrum(tasks.Task):
                                     self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)
                                 if self.dostride:
                                     #print "#    Offset",offset
-                                    self.specT2[...].readfilebinary(Vector(ofiles2),Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
+                                    self.specT2[...].readfilebinary(cr.Vector(ofiles2),cr.Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
                                     cr.hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
                                     if self.nspectraadded>1:
                                         self.spec/=float(self.nspectraadded)
@@ -751,7 +751,7 @@ class AverageSpectrum(tasks.Task):
                                 if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
                                     #print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
-                                    plt.draw()
+                                    cr.plt.draw()
                         else: # doublefft - i.e. here do just a single FFT
                             if self.addantennas:
                                 if self.nspectraadded>1:
@@ -762,7 +762,7 @@ class AverageSpectrum(tasks.Task):
                                 if self.doplot and self.nspectraadded%self.plotskip==0:
                                     self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot()
                                     print "mean=",self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean()
-                                    plt.draw()
+                                    cr.plt.draw()
                             else: #keep antennas separately
                                 if self.nspectraadded_per_antenna[antenna_processed]>1:
                                     self.cdata2/=float(self.nspectraadded_per_antenna[antenna_processed])
@@ -774,7 +774,7 @@ class AverageSpectrum(tasks.Task):
                                             self.nspectraadded_per_antenna[antenna_processed],
                                             self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean().val(),
                                             self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].stddev().val()))
-                                    plt.draw()
+                                    cr.plt.draw()
                             if self.calc_incoherent_sum:
                                 self.incoherent_sum[nchunk].squareadd(self.fdata)
                                 self.ntimeseries_data_added_per_chunk[nchunk]+=1
@@ -820,7 +820,7 @@ class AverageSpectrum(tasks.Task):
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'"
         print "To read back the spectrum type: sp=cr.hArrayRead('"+self.spectrum_file+"')"
         if self.doplot:
-            plt.ion()
+            cr.plt.ion()
 
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
@@ -855,7 +855,7 @@ class AverageSpectrum(tasks.Task):
         """
         quality_entry=self.quality[entry]
         filename=quality_entry["filename"]
-        datafile=open(filename)
+        datafile=cr.open(filename)
         datafile["SELECTED_DIPOLES"]=[quality_entry["antenna"]]
         if block<0 and flaggedblock<len(quality_entry["flaggedblocks"]):
             block=quality_entry["flaggedblocks"][flaggedblock]
