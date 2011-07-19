@@ -59,7 +59,7 @@ from pycrtools import tasks
 from pycrtools import qualitycheck
 import time
 import os
-from math import log
+from math import * # Needs fixing
 #from pycrtools import IO
 
 #Defining the workspace parameters
@@ -167,15 +167,15 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         calc_incoherent_sum = dict(default=False,
                                    doc="Calculate the incoherent sum of all antennas (doublefft=False). See incoherent_sum for result."),
 
-        ntimeseries_data_added_per_chunk = dict(default=lambda ws:cr.hArray(int,[ws.nchunks]),
+        ntimeseries_data_added_per_chunk = dict(default=lambda self:cr.hArray(int,[self.nchunks]),
                                                 doc="Number of chunks added in each bin for incoherent sum"),
 
         delta_nu = dict(default=1000,
                         doc="Frequency resolution",
                         unit="Hz"),
 
-        blocklen = dict(default=lambda ws:2**int(round(log(ws.blocksize,2))/2),
-                        doc="The size of a block being read in if stride>1, otherwise ``self.blocklen*self.nblocks`` is the blocksize."),
+        blocklen = dict(default=lambda self:2**int(floor(log(self.chunksize,2))/2),
+                        doc="The size of a block being read in if stride>1, otherwise ``self.blocklen*self.nblocks`` is the chunksize."),
 
         maxnchunks = dict(default=-1,
                           doc="Maximum number of chunks of raw data to integrate spectrum over (-1 = all)."),
@@ -183,7 +183,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         maxblocksflagged = dict(default=0,
                                 doc="Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded. If =0 then flag a chunk if any block is deviant."),
 
-        stride = dict(default=lambda ws: 2**ws.stride_n if ws.doublefft else 1,
+        stride = dict(default=lambda self: 2**self.stride_n if self.doublefft else 1,
                       doc="If ``stride>1`` divide the FFT processing in ``n=stride`` blocks."),
 
         tmpfileext = dict(default=".pcr",
@@ -192,7 +192,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         tmpfilename = dict(default="tmp",
                            doc="Root filename for temporary data files."),
 
-        filenames = dict(default=lambda ws:cr.listFiles(ws.filefilter),
+        filenames = dict(default=lambda self:cr.listFiles(self.filefilter),
                          doc="List of filenames of data file to read raw data from."),
 
         output_dir = dict(default="",
@@ -281,49 +281,49 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         peak_rmsfactor = dict(default=5,
                               doc="At how many sigmas above the mean will a peak be randomized."),
 
-        start_frequency = dict(default=lambda ws:ws.freqs[0],
+        start_frequency = dict(default=lambda self:self.freqs[0],
                                doc="Start frequency of spectrum",
                                unit="Hz"),
 
-        end_frequency = dict(default=lambda ws:ws.freqs[-1],
+        end_frequency = dict(default=lambda self:self.freqs[-1],
                              doc="End frequency of spectrum",
                              unit="Hz"),
 
-        delta_frequency = sc.p_(lambda ws:(ws.end_frequency-ws.start_frequency)/(ws.speclen-1.0),
+        delta_frequency = sc.p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),
                                 "Separation of two subsequent channels in final spectrum"),
 
-        delta_band = dict(default=lambda ws:(ws.end_frequency-ws.start_frequency)/ws.stride*2,
+        delta_band = dict(default=lambda self:(self.end_frequency-self.start_frequency)/self.stride*2,
                           doc="Frequency width of one section/band of spectrum",
                           unit="Hz"),
 
-        full_blocklen = dict(default=lambda ws:ws.blocklen*ws.stride,
-                             doc="Full block length",
+        full_blocklen = dict(default=lambda self:self.blocklen*self.stride,
+                             doc="Full block length (blocklen*stride)",
                              unit="Samples"),
 
-        fullsize = sc.p_(lambda ws:ws.nblocks*ws.full_blocklen,
-                         "The full length of the raw time series data used for one spectral chunk."),
+        fullsize = sc.p_(lambda self:self.nblocks*self.full_blocklen,
+                         "The full length of the raw time series data used for one spectral chunk (nblocks*blocklen*stride)."),
 
-        nblocks = dict(default=lambda ws:2**int(round(log(ws.blocksize/ws.full_blocklen,2))),
+        nblocks = dict(default=lambda self:2**int(floor(log(self.chunksize/self.full_blocklen,2))),
                        doc="Number of blocks of lenght ``blocklen`` the time series data set is split in. The blocks are also used for quality checking."),
 
-        nbands = dict(default=lambda ws:(ws.stride+1)/2,
+        nbands = dict(default=lambda self:(self.stride+1)/2,
                       doc="Number of bands in spectrum which are separately written to disk, if ``stride > 1``. This is one half of stride, since only the lower half of the spectrum is written to disk."),
 
-        subspeclen = dict(default=lambda ws:ws.blocklen*ws.nblocks,
+        subspeclen = dict(default=lambda self:self.blocklen*self.nblocks,
                           doc="Size of one section/band of the final spectrum"),
 
-        nsamples_data = dict(default=lambda ws:float(ws.fullsize)/10**6,
+        nsamples_data = dict(default=lambda self:float(self.fullsize)/10**6,
                              doc="Number of samples in raw antenna file",
                              unit="MSamples"),
 
-        size_data = dict(default=lambda ws:float(ws.fullsize)/1024/1024*16,
+        size_data = dict(default=lambda self:float(self.fullsize)/1024/1024*16,
                          doc="Number of samples in raw antenna file",
                          unit="MBytes"),
 
-        nantennas = dict(default=lambda ws:len(ws.antennas),
+        nantennas = dict(default=lambda self:len(self.antennas),
                          doc="The number of antennas to be calculated in one file."),
 
-        nantennas_file = dict(default=lambda ws:ws.datafile["NOF_DIPOLE_DATASETS"],
+        nantennas_file = dict(default=lambda self:self.datafile["NOF_DIPOLE_DATASETS"],
                               doc="The actual number of antennas available for calculation in the file."),
 
         antennas_start = dict(default=0,
@@ -335,17 +335,17 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         antennas_stride = dict(default=1,
                                doc="Take only every *n*-th antenna from antennas list (see also ``antennas_start``). Use 2 to select odd/even."),
 
-        antennas = sc.p_(lambda ws:cr.hArray(range(min(ws.antennas_start,ws.nantennas_file-1),ws.nantennas_file if ws.antennas_end<0 else min(ws.antennas_end,ws.nantennas_file),ws.antennas_stride)),
+        antennas = sc.p_(lambda self:cr.hArray(range(min(self.antennas_start,self.nantennas_file-1),self.nantennas_file if self.antennas_end<0 else min(self.antennas_end,self.nantennas_file),self.antennas_stride)),
                          "Array of index numbers for antennas to be processed from the current file."),
 
         antenna_list = dict(default={},
                             doc="List of antenna indices used as input from each filename.",
                             output=True),
 
-        antennaIDs = sc.p_(lambda ws:cr.hArray(ws.datafile["DIPOLE_NAMES"]),
+        antennaIDs = sc.p_(lambda self:cr.hArray(self.datafile["DIPOLE_NAMES"]),
                            "Antenna IDs from the current file."),
 
-        antennas_used = sc.p_(lambda ws:set(),
+        antennas_used = sc.p_(lambda self:set(),
                               "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
                               output=True),
 
@@ -353,51 +353,52 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                                 "Total number of antennas that were processed (flagged or not) in this run.",
                                 output=True),
 
-        nchunks_max = dict(default=lambda ws:float(ws.datafile["DATA_LENGTH"][0])/ws.fullsize,
+        nchunks_max = dict(default=lambda self:float(self.datalength)/self.fullsize,
                            doc="Maximum number of spectral chunks to average"),
 
-        nchunks = dict(default=lambda ws:min(ws.datafile["DATA_LENGTH"][0]/ws.fullsize,ws.maxnchunks) if ws.maxnchunks>0 else ws.datafile["DATA_LENGTH"][0]/ws.fullsize,
+        nchunks = dict(default=lambda self:min(self.datalength/self.fullsize,self.maxnchunks) if self.maxnchunks>0 else self.datalength/self.fullsize,
                        doc="Number of spectral chunks that are averaged"),
 
-        nspectraadded = sc.p_(lambda ws:0,
+        nspectraadded = sc.p_(lambda self:0,
                               "Number of spectra added at the end.",
                               output=True),
 
-        nspectraadded_per_antenna = sc.p_(lambda ws:cr.Vector(int,ws.nantennas,fill=0),
+        nspectraadded_per_antenna = sc.p_(lambda self:cr.Vector(int,self.nantennas,fill=0),
                                           "Number of spectra added per antenna.",
                                           output=True),
 
-        nspectraflagged = sc.p_(lambda ws:0,
+        nspectraflagged = sc.p_(lambda self:0,
                                 "Number of spectra flagged and not used.",
                                 output=True),
 
-        nspectraflagged_per_antenna = sc.p_(lambda ws:cr.Vector(int,ws.nantennas,fill=0),
+        nspectraflagged_per_antenna = sc.p_(lambda self:cr.Vector(int,self.nantennas,fill=0),
                                          "Number of spectra flagged and not used per antenna.",
                                          output=True),
 
-        delta_t = sc.p_(lambda ws:ws.datafile["SAMPLE_INTERVAL"][0],
+        samplerate = sc.p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0],
                         "Sample length in raw data set.",
                         "s"),
 
-        blocksize = sc.p_(lambda ws:int(min(1./ws.delta_nu/ws.delta_t,ws.datafile["DATA_LENGTH"][0])),
-                          "The desired blocksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``blocksize_used` for the actual blocksize used."),
+        datalength = dict(default=lambda self: self.datafile["DATA_LENGTH"][0],
+                         doc="The (maximum) length of one full data set of one antenna per file."),
 
-        blocksize_used = sc.p_(lambda ws:ws.blocklen*ws.nblocks,
-                               "The blocksize one would use for a single FFT."),
+        chunksize = sc.p_(lambda self:int(min(1./self.delta_nu/self.samplerate,self.datalength)),
+                          "The desired chunksize for a single FFT. Can be set directly, otherwise estimated from delta_nu. The actual size will be rounded to give a power of two, hence, see ``chunksize_used` for the actual chunksize used."),
 
-        blocklen_section = sc.p_(lambda ws:ws.blocklen/ws.stride),
+        chunksize_used = sc.p_(lambda self:self.blocklen*self.nblocks,
+                               "The chunksize one would use for a single FFT."),
 
-        nsubblocks = sc.p_(lambda ws:ws.stride*ws.nblocks),
+        blocklen_section = sc.p_(lambda self:self.blocklen/self.stride),
 
-        nblocks_section = sc.p_(lambda ws:ws.nblocks/ws.stride),
+        nsubblocks = sc.p_(lambda self:self.stride*self.nblocks),
 
-        speclen = sc.p_(lambda ws:ws.fullsize/2+1),
+        nblocks_section = sc.p_(lambda self:self.nblocks/self.stride),
 
-        header = sc.p_(lambda ws:ws.datafile.getHeader(),
+        header = sc.p_(lambda self:self.datafile.getHeader(),
                        "Header of datafile",
                        export=False),
 
-        freqs = sc.p_(lambda ws:ws.datafile["FREQUENCY_DATA"],
+        freqs = sc.p_(lambda self:self.datafile["FREQUENCY_DATA"],
                       export=False),
 
 
@@ -405,58 +406,116 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         frequencies = dict(workarray=True,
                            doc="Frequency axis for final power spectrum.",
-                           default=lambda ws:cr.hArray(float,[ws.subspeclen/2 if ws.stride==1 else ws.subspeclen],name="Frequency",units=("M","Hz"),header=ws.header)),
+                           default=lambda self:cr.hArray(float,[self.subspeclen/2 if self.stride==1 else self.subspeclen],name="Frequency",units=("M","Hz"),header=self.header)),
 
-        power_size = dict(default=lambda ws:ws.subspeclen/2 if ws.stride==1 else ws.subspeclen,
-                          doc="Size of the output spectrum in the vector power"),
+        power_size = dict(default=lambda self:(self.subspeclen/2 if self.stride==1 else self.subspeclen) if self.doublefft else self.speclen,
+                          doc="Size of the output spectrum in the vector ``power``"),
+
+        speclen = dict(default=lambda self:self.chunksize_used/2+1,
+                       doc="The length of the spectrum for a single FFT"),
 
         power = dict(workarray=True,
                      doc="Resulting average power spectrum (or part thereof if ``stride > 1``)",
-                     default=lambda ws:cr.hArray(float,[ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies) if ws.addantennas else cr.hArray(float,[ws.nantennas,ws.power_size],name="Spectral Power",par=dict(logplot="y"),header=ws.header,xvalues=ws.frequencies)),
+                     default=lambda self:cr.hArray(float,[self.power_size],name="Spectral Power",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies) if self.addantennas else cr.hArray(float,[self.nantennas,self.power_size],name="Spectral Power",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)),
 
-#                cr.hArray(float,[ws.subspeclen],name="Spectral Power",xvalues=ws.frequencies,par=[("logplot","y")],header=ws.header)),
+#                cr.hArray(float,[self.subspeclen],name="Spectral Power",xvalues=self.frequencies,par=[("logplot","y")],header=self.header)),
 #Need to cerate frequencies, taking current subspec (stride) into account
 
         fdata = dict(workarray=True,
-                     doc="main input and work array",
-                     default=lambda ws:cr.hArray(float,[ws.nblocks,ws.blocklen],name="fdata",header=ws.header)),
+                     doc="Array to read time series data in",
+                     default=lambda self:cr.hArray(float,[self.nblocks,self.blocklen],name="fdata",header=self.header)),
 
         incoherent_sum = dict(doc="Incoherent sum of the power in all antennas (timeseries data).",
-                              default=lambda ws:cr.hArray(float,[ws.nchunks,ws.blocksize],name="Power(t)",header=ws.header)),
+                              default=lambda self:cr.hArray(float,[self.nchunks,self.chunksize],name="Power(t)",header=self.header)),
 
         cdata = dict(workarray=True,
-                     doc="main input and work array",
-                     default=lambda ws:cr.hArray(complex,[ws.nblocks,ws.blocklen],name="cdata",header=ws.header)),
+                     doc="Complex array holding the FFT of the time series data and other things",
+                     default=lambda self:cr.hArray(complex,[self.nblocks,self.blocklen],name="cdata",header=self.header)),
 
         cdata2 = dict(workarray=True,
-                      doc="main input and work array",
-                      default=lambda ws:cr.hArray(complex,[ws.nblocks*ws.blocklen/2+1],name="cdata2",header=ws.header)),
+                      doc="Supplementary complex array holding the FFT of the time series for a single FFT",
+                      default=lambda self:cr.hArray(complex,[self.speclen],name="cdata2",header=self.header)),
 
         cdataT = dict(workarray=True,
-                      doc="Secondary input and work array",
-                      default=lambda ws:cr.hArray(complex,[ws.blocklen,ws.nblocks],name="cdataT",header=ws.header)),
+                      doc="Complex array holding the FFT of the time series data and other things transposed.",
+                      default=lambda self:cr.hArray(complex,[self.blocklen,self.nblocks],name="cdataT",header=self.header)),
 
 #Note, that all the following arrays have the same memory als cdata and cdataT
 
         tmpspecT = dict(workarray=True,
                         doc="Wrapper array for ``cdataT``",
-                        default=lambda ws:cr.hArray(ws.cdataT.vec(),[ws.stride,ws.nblocks_section,ws.blocklen],header=ws.header)),
+                        default=lambda self:cr.hArray(self.cdataT.vec(),[self.stride,self.nblocks_section,self.blocklen],header=self.header)),
 
         tmpspec = dict(workarray=True,
                        doc="Wrapper array for ``cdata``",
-                       default=lambda ws:cr.hArray(ws.cdata.vec(),[ws.nblocks_section,ws.full_blocklen],header=ws.header)),
+                       default=lambda self:cr.hArray(self.cdata.vec(),[self.nblocks_section,self.full_blocklen],header=self.header)),
 
         specT = dict(workarray=True,
                      doc="Wrapper array for ``cdataT``",
-                     default=lambda ws:cr.hArray(ws.cdataT.vec(),[ws.full_blocklen,ws.nblocks_section],header=ws.header)),
+                     default=lambda self:cr.hArray(self.cdataT.vec(),[self.full_blocklen,self.nblocks_section],header=self.header)),
 
         specT2 = dict(workarray=True,
                       doc="Wrapper array for ``cdataT``",
-                      default=lambda ws:cr.hArray(ws.cdataT.vec(),[ws.stride,ws.blocklen,ws.nblocks_section],header=ws.header)),
+                      default=lambda self:cr.hArray(self.cdataT.vec(),[self.stride,self.blocklen,self.nblocks_section],header=self.header)),
 
         spec = dict(workarray=True,
                     doc="Wrapper array for ``cdata``",
-                    default=lambda ws:cr.hArray(ws.cdata.vec(),[ws.blocklen,ws.nblocks],header=ws.header))
+                    default=lambda self:cr.hArray(self.cdata.vec(),[self.blocklen,self.nblocks],header=self.header)),
+
+# Parameters to calculate a dynamic spectrum - not yet functional
+
+        calc_dynspec = dict(default=False,doc="Calculate a dynamic spectrum as well (if no doublefft)"),
+
+        dynspec=dict(workarray=True,
+                   doc="Dynamic spectrum of all antennas (if no doublefft and calc_dynspec=True).",
+                   default=lambda self:cr.hArray(float,[self.nchunks,self.speclen],fill=0.0,name="Dynamic Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)),
+
+        cleanspec=dict(workarray=True,
+                     doc="Cleaned dynamic spectrum.",
+                     default=lambda self:cr.hArray(float,[self.nchunks,self.speclen],fill=0.0,name="Clean Dynamic Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)),
+
+        avspec=dict(workarray=True,
+                    doc="Average spectrum over all times, used for plotting ...?",
+                    default=lambda self:cr.hArray(float,[self.speclen],fill=0.0,name="Average Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)),
+
+        npcleanspec=dict(workarray=True,
+                         doc="Clean dynamic spectrum in a numpy array for plotting.",
+                         default=lambda self:np.zeros([self.nchunks,self.speclen])),
+
+        t_int=dict(default=10**-3,
+                   doc="Desired intergration time per spectrum for dynamic spectrum - will be rounded off to get integer number of spectral chunks",
+                   unit="s"),
+
+        t_int_used=dict(default=lambda self:self.sectduration,
+                        doc="Actual time resolution of dynamic spectrum",
+                        unit="s"),
+
+        chunkduration=dict(default=lambda self:self.chunksize*self.samplerate,
+                           doc="Length (duration) of one chunk of data.",
+                           unit="s"),
+
+        sectlen=dict(default=lambda self:self.chunksize*self.chunks_per_sect,
+                     doc="Length of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
+                     unit="Samples"),
+
+        nsectlen=dict(default=lambda self:self.datalength/self.sectlen,
+                      doc="Number of sections in the data file",
+                      unit="Samples"),
+
+        sectduration=dict(default=lambda self:self.sectlen*self.samplerate,
+                          doc="Length in time units of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
+                          unit="s"),
+
+        end_time=dict(default=lambda self:self.sectduration*self.nchunks,
+                      doc="End of time axis for dynamic spectrum.",
+                      unit="s"),
+
+        start_time=dict(default=0,
+                        doc="Start of time axis for dynamic spectrum.",
+                        unit="s"),
+
+        chunks_per_sect=dict(default=lambda self:max(int(round(self.t_int/self.chunkduration)),1),
+                             doc="Number of chunks per section of data."),
         )
 
 
@@ -486,7 +545,7 @@ class AverageSpectrum(tasks.Task):
     The desired frequency resolution is provided with the parameter
     ``delta_nu``, but this will be rounded off to the nearest value
     using channel numbers of a power of 2. For single FFTs you can
-    also set the parameter ``blocksize``.
+    also set the parameter ``chunksize``.
 
     Note: the spectrum has N/2 channels and not N/2+1 channels as is
     usually the case. This means that the last channel is missing!!
@@ -504,8 +563,8 @@ class AverageSpectrum(tasks.Task):
     This spectrum can be read back and a baseline can be fitted with
     ``FitBaseline``.
 
-    Incoherent Beam
-    ================
+
+    **Incoherent Beam**
 
     With the option ``calc_incoherent_sum`` one can add the square of
     all time series data of all antennas into one long time series
@@ -515,8 +574,8 @@ class AverageSpectrum(tasks.Task):
     [nchunks,chunksize=blocksize]. It will be saved on disk in
     sp.par.incoherent_sum.
 
-    Quality Checking
-    ================
+
+    **Quality Checking**
 
     To avoid the spectrum being influenced by spikes in the time
     series, those spikes can be replaced by random numbers, before the
@@ -530,7 +589,7 @@ class AverageSpectrum(tasks.Task):
     ``Task.homogeneity_factor`` - the latter is printend and is a useful
     hint if something is wrong)
 
-    One can specify the maimum number of blocks in a chunk that are
+    One can specify the maximum number of blocks in a chunk that are
     allowed to fail a quality criterium (``maxblocksflagged``), before
     the entrie chunk is discarded. The way quality checking (see
     module :func:qualitycheck) works, is that each chunk is divided
@@ -570,6 +629,14 @@ class AverageSpectrum(tasks.Task):
 
       >>> Task.qplot(186,all=False).
 
+
+    **Sections, Chunks, Blocks**
+
+    The terminology is as follows: the smallest unit is a block. If
+    stride>1 only every nth block will be read in to do a double fft.
+
+    stride*blocks will be one chunk of data. The size of a chunk
+    determines the resolution of an FFT.
     """
     WorkSpace = WorkSpace
 
@@ -591,7 +658,7 @@ class AverageSpectrum(tasks.Task):
         #print "Time:",time.clock()-self.ws.t0,"s for set-up."
 
         #Skip calculation if file already exists and is asked for
-        if self.load_if_file_exists and cr.os.path.exists(self.spectrum_file):
+        if self.load_if_file_exists and os.path.exists(self.spectrum_file):
             print "#AverageSpectrum: File",self.spectrum_file,"exists. Skipping calculation Loading Task.power from file!"
             self.power=cr.hArrayRead(self.spectrum_file)
             return
@@ -631,7 +698,7 @@ class AverageSpectrum(tasks.Task):
         fftplan = cr.FFTWPlanManyDftR2c(self.blocklen*self.nblocks, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         if self.doplot:
-            cr.plt.ioff()
+            plt.ioff()
 
         npass = self.nchunks*self.stride
         original_file_start_number=self.file_start_number
@@ -640,7 +707,7 @@ class AverageSpectrum(tasks.Task):
             print "# Start File",str(self.file_start_number)+":",fname
             self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
             if self.stride==1:
-                self.datafile["BLOCKSIZE"]=self.blocklen*self.nblocks #Setting initial block size
+                self.datafile["BLOCKSIZE"]=self.chunksize_used #Setting initial block size
             else:
                 self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
             #self.antenna_list[fname]=self.antennas
@@ -752,7 +819,7 @@ class AverageSpectrum(tasks.Task):
                                 if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
                                     #print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
-                                    cr.plt.draw()
+                                    plt.draw()
                         else: # doublefft - i.e. here do just a single FFT
                             if self.addantennas:
                                 if self.nspectraadded>1:
@@ -763,7 +830,7 @@ class AverageSpectrum(tasks.Task):
                                 if self.doplot and self.nspectraadded%self.plotskip==0:
                                     self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot()
                                     print "mean=",self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean()
-                                    cr.plt.draw()
+                                    plt.draw()
                             else: #keep antennas separately
                                 if self.nspectraadded_per_antenna[antenna_processed]>1:
                                     self.cdata2/=float(self.nspectraadded_per_antenna[antenna_processed])
@@ -775,7 +842,7 @@ class AverageSpectrum(tasks.Task):
                                             self.nspectraadded_per_antenna[antenna_processed],
                                             self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean().val(),
                                             self.power[antenna_processed,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].stddev().val()))
-                                    cr.plt.draw()
+                                    plt.draw()
                             if self.calc_incoherent_sum:
                                 self.incoherent_sum[nchunk].squareadd(self.fdata)
                                 self.ntimeseries_data_added_per_chunk[nchunk]+=1
@@ -806,12 +873,12 @@ class AverageSpectrum(tasks.Task):
         if self.calc_incoherent_sum:
             self.incoherent_sum[...] /= self.ntimeseries_data_added_per_chunk.vec()
         if self.qualitycheck:
-            self.mean=asvec(self.mean_antenna[:self.nantennas_total]).mean()
-            self.mean_rms=asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
-            self.rms=asvec(self.rms_antenna[:self.nantennas_total]).mean()
-            self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
-            self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
-            self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
+            self.mean=cr.asvec(self.mean_antenna[:self.nantennas_total]).mean()
+            self.mean_rms=cr.asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
+            self.rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).mean()
+            self.rms_rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
+            self.npeaks=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
+            self.npeaks_rms=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
             self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
             print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
             print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
@@ -821,7 +888,7 @@ class AverageSpectrum(tasks.Task):
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'"
         print "To read back the spectrum type: sp=cr.hArrayRead('"+self.spectrum_file+"')"
         if self.doplot:
-            cr.plt.ion()
+            plt.ion()
 
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
