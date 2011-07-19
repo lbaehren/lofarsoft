@@ -1,3 +1,14 @@
+2011-7-19  - Rev 8162
+=====================
+
+   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+
+- Added a python version test for the .format statement. This is not available
+  in python 2.5 (i.e. at Cep I cluster). Format will print a tuple instead. It's
+  ugly, but then the software works
+
+- Fixed averagespectrum.py to work with import pycrtools as cr
+
 2011-07-18 - Rev 8151
 
    :Author: Sander ter Veen <S.terVeen@astro.ru.nl>

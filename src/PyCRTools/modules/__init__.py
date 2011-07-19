@@ -267,7 +267,11 @@ class tlist_class(t_class):
         print "Available Tasks:"
         print "------------------------------------------------------------"
         for tpl in zip(range(len(tasks.task_allloaded)),tasks.task_allloaded.keys(),tasks.task_allloaded.values()):
-            print "{0:2}: {1:30s} ({2})".format(*tpl)
+            from sys import version_info
+            if version_info > (2,5,9):
+                print "{0:2}: {1:30s} ({2})".format(*tpl)
+            else:
+                print tpl
 
 tlist = tlist_class()
 
