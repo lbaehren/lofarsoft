@@ -59,6 +59,7 @@ from pycrtools import tasks
 from pycrtools import qualitycheck
 import time
 import os
+from math import log
 #from pycrtools import IO
 
 #Defining the workspace parameters
@@ -627,7 +628,7 @@ class AverageSpectrum(tasks.Task):
         dataok=True
         initialround=True
 
-        fftplan = FFTWPlanManyDftR2c(self.blocklen*self.nblocks, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
+        fftplan = cr.FFTWPlanManyDftR2c(self.blocklen*self.nblocks, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         if self.doplot:
             cr.plt.ioff()
@@ -700,7 +701,7 @@ class AverageSpectrum(tasks.Task):
                             self.cdataT.doublefft1(self.cdata,self.fullsize,self.nblocks,self.blocklen,offset)
                         else:
                             #self.cdataT.fftw(self.cdata)
-                            hFFTWExecutePlan(self.cdata2, self.fdata, fftplan)
+                            cr.hFFTWExecutePlan(self.cdata2, self.fdata, fftplan)
                         #            print "Time:",time.clock()-self.t0,"s for 1st FFT."
                         if self.dostride and self.doublefft:
                             ofile=self.tmpfilename+str(offset)+"a"+self.tmpfileext
