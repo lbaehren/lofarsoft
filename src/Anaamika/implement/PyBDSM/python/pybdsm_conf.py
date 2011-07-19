@@ -1,12 +1,11 @@
-# IPython configuration file. This file initializes the IPython
-# shell for everything needed by PyBDSM. It is called on the
+# IPython configuration file. This file defines the custom
+# autocompleter used by PyBDSM and a welcome banner with
+# useful reminders to the user. It is called on the
 # start-up of the IPython shell by pybdsm.py.
 #
 # Note that we adopt the convention for this UI of using
 # lines of 72 characters max for doc strings and the
-# start-up banner. However, the parameter list will fill
-# the entire available terminal width to consume as few
-# vertical lines as possible.
+# start-up banner. 
 import ipy_defaults
 import IPython.ipapi
 
@@ -22,7 +21,8 @@ def opts_completer(self, event):
     opts = img.opts.get_names()
 
     # Split the command entered by user when TAB was pressed
-    # and check for up to three components (from e.g. "par = val")
+    # and check for up to three components (from e.g. "par = val",
+    # which gives cmd1 = "par", cmd2 = "=", and cmd3 = "val")
     cmd1 = (event.line).rsplit(None)[0]
     if len((event.line).rsplit(None)) > 1:
         cmd2 = (event.line).rsplit(None)[1]

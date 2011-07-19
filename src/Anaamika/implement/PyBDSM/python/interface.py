@@ -1228,15 +1228,21 @@ def export_image(self, outfile=None, img_format='fits',
     import os
     import functions as func
 
-    if hasattr(self, 'ngaus')==False:
+    if hasattr(self, 'ngaus') == False and 'gaus' in img_type:
+        print 'Gaussians have not been fit. Please run process_image first.'
+        return False    
+    elif self.opts.shapelet_do == False and 'shap' in img_type:
+        print 'Shapelets have not been fit. Please run process_image first.'
+        return False    
+    elif hasattr(self, 'mean') == False:
         print 'Image has not been processed. Please run process_image first.'
         return False    
     format = img_format.lower()
     if (format in ['fits', 'casa']) == False:
-        print '\n\033[91mERROR\033[0m: format must be "fits" or "casa"'
+        print '\n\033[91mERROR\033[0m: img_format must be "fits" or "casa"'
         return False 
     if format == 'casa':
-        print "Sorry, only format = 'fits' is supported at the moment"
+        print "Sorry, only img_format = 'fits' is supported at the moment"
         return False 
     filename = outfile
     if filename == None or filename == '':
