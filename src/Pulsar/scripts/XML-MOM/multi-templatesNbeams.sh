@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=1.4
+VERSION=1.5
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -563,7 +563,7 @@ else  # IM data
 	       CHAN_SUBS=$CHAN_SUBS_LBA_IM
 	       INTERVAL=$INTEG_LBA
 	   else
-	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBA, HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
+	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
 	      exit 1
 	   fi
 	fi   
@@ -893,7 +893,7 @@ do
 						      echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
 						      exit 1
 						   fi
-                       else
+                       else # BF
 						   if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
 						   then
 						       ANT_SHORT=HBA
@@ -995,7 +995,7 @@ do
 				    then
 				       ANTENNA=`echo $line | awk '{print $3}'`
 				       
-                       if [[ $INSWITCH == 1 ]] # BF
+                       if [[ $INSWITCH == 2 ]] # IM
                        then
 						   if [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
 						   then
@@ -1007,7 +1007,7 @@ do
 						      echo "ERROR: Antenna must be set to any of these values IM: HBALow, HBAMid, HBAHigh, LBA, LBALow, LBAHigh"
 						      exit 1
 						   fi
-                       else
+                       else  # BF
 						   if [[ $ANTENNA == "HBA" ]] || [[ $ANTENNA == "HBALow" ]] || [[ $ANTENNA == "HBAMid" ]] || [[ $ANTENNA == "HBAHigh" ]]
 						   then
 						       ANT_SHORT=HBA
