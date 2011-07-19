@@ -525,6 +525,96 @@ class CalcBaseline(tasks.Task):
     interpolation has wiggles. In this case the exponent of a large
     number is calculated, yielding a numerical error. In this case
     switch set ``logfit=False`` (to see what is going on).
+
+
+    Gain Calibration (DRFAT!)
+    =========================
+
+    Knowing that the antenna is exposed to a noise with a certain
+    power, one can use this to make a rough estimate of the absolute
+    gain of the antenna. E.g., in case for LOFAR antennas the spectrum
+    measured in one antenna should follow a \nu^{-0.5} power law due
+    to emission from the Galaxy (Milky Way). Hence, one can multiply
+    the baseline one has fitted to the measured spectrum with a power
+    law, so that after dividing the gain curve one reproduces the
+    expected behaviour (i.e., Galactic noise). Note: if one wants to
+    use calcbaseline for gain calibration one obviously has to provide
+    a power law that is the inverse of the desired function.
+
+    Powerlaws can be specified with the ``Task.powerlaw``parameter,
+    which is either just the power law index, or a tuple with
+    amplitude and index, or a keyword (e.g., 'Galactic', of
+    'GalacticT').
+
+
+    The noise temperature of an antenna is:
+    
+    Tnoise = Power [Watts] /Bandwidth [Hz] / kb (Boltzmann constant) = 7.24296*10^22 K
+
+    The sky tempertature is according to Falcke & Gorham (2004)
+     roughly: T_sky = 32*( (freq/408e6)^-2.5 ) (T_sky in K, freq in
+     Hz)
+
+
+     The recevied power of an antenna is Prec = Aeff * S, where S is
+     the power density (in W/m^2).
+
+     The effective area is
+
+     Aeff = gain* lambda^2/(4 pi)
+
+     The power density is S=E^2/R (i.e., Electric field^2 / free space
+     impedance (376.7 Ohm))
+
+
+     The System Equivalent Flux Density (SEFD) is
+
+     Flux density for bandwidth limlied pulses can be rougly converted
+     to Field strength through
+
+     Snu= Enu epsilon_0 c Bandwidth (Enu in Volt/Meter/MHz in SI units
+     ..., check this formula)
+     
+     to be continued ....
+     
+    In the following a short description from Andreas Horneffer (in
+    German) on how to do a simple gain correction.
+    
+Unter der Annahme, dass der ganze Himmel eine konstante, und bekannte
+Strahlungstemperatur hat, das gemessene Rauschen davon dominiert ist,
+und man das Gain (die Richtwirkung) der Antennen kennt.
+
+Die Strahlungstemperatur des Himmels ist nach Falcke & Gorham (2002) etwa:
+T_sky = 32*( (freq/408e6)^-2.5 );
+(T_sky in K, freq in Hz)
+
+Die gemessene "Rauschtemperatur" ist:
+T_noise = P_noise / dNu / kB
+(T_noise in K, P_noise in W, dNu (Bandbreite) in Hz, kB die Boltzmann-Konstante)
+
+Die Rauschleistung ist: P_noise = V^2/R (P_noise in W, V (gemessene
+Spannung) in V, R (angenommene ADC-Impedanz) in Ohm) Die ADC-Impedanz
+kuertzt sich nachher weg. Wenn Du die Rauschleistung als Funktion der
+Frequenz nach der FFT fuers Kalibrieren verwenden willst, aber die
+Kalibration fuer die Zeitreihe nutzen willst, musst du noch die
+Normierung der FFT korrigieren. (Haengt von der verwendeten
+FFT-Routine ab.)
+
+Die Verstaerkung der Elektronik ist dann: K = T_sky / T_noise (K ist
+einheitenloses Verhaeltnis der Leistungen)
+
+Die Feldstaerke an der Antenne ist dann:
+
+E = sqrt( 4*pi*freq^2*mu0 / G(d,freq) * K * V^2/R )
+
+(E in V/m, mu0 die magnetische Feldkonstante,
+G(d,freq) das Gain der Antennen in die Richtung d, bei Frequenz freq
+als einheitenloses Verhaeltnis der Empfindlichkeit der Antennen zu der
+Empfindlichkeit eine isotropen Strahlers)
+
+Als Gain der LOFAR Antennen kann man vermutlich einfach das Gain der LOPES
+Antennen verwenden. (Natuerlich fuer die Ausrichtung der Dipole rotiert.)
+
     """
     parameters=CalcBaselineParameters
 
