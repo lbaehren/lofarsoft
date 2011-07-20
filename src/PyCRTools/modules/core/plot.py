@@ -21,7 +21,7 @@ doplot=True
 class plotfinish:
     """
     Usage:
-      
+
     Class creating a function to be called after a plotting
     command. If ``plotpause.plotpause = True`` it will pause and ask
     for user input whether and how to continue calculation and
@@ -32,7 +32,7 @@ class plotfinish:
     The following parameters can be specified during initialization of
     the class or during a call to the instance of the plotfinish
     class.
-    
+
     =========== ========  =====================================================
     *plotpause* = True    Pause for manual input after each plot.
 
@@ -43,7 +43,7 @@ class plotfinish:
 
     *filename*  = ""      If set, save figure to this file (w/o extension)
 
-    *filetype*  = "gif"   Extension of the figure file to also determine format.
+    *filetype*  = "png"   Extension of the figure file to also determine format.
 
     *txt*       = ""      Text to print after plotting and before user input
                           (parameter not available at initialization)
@@ -51,20 +51,20 @@ class plotfinish:
     name        = ""      Name identifying current plot. Will also be appended
                           to filename. (parameter not available at initialization)
     =========== ========  =====================================================
-    
+
     May modify ``plotpause`` and ``doplot``, depending on user input.
 
     Filename of the image file will be filename+("-"+name+)"."+filetype
 
     All filenames that were written to disk can be retrieved as a list
     from the attribute ``self.files``.
-    
+
     Example:
         ::
             pp=plotfinish(filename="test")
             pp("Test","a")
             -> (a) Test
-            -> Saved plot in --> Test-a.gif
+            -> Saved plot in --> Test-a.png
             -> Press [return] to continue. Press [q]+[return] to proceed without pausing, [n]+[return] to continue without plotting...q
             -> Continue without pausing from now on.
 
@@ -72,7 +72,7 @@ class plotfinish:
             pp("Try again")
             -> Nothing happens (i.e. no pause)....
     """
-    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="gif",counter=0):
+    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0):
         self.plot_pause=plotpause
         self.doplot=doplot
         self.refresh=refresh
@@ -112,7 +112,7 @@ class plotfinish:
                 if k=="q":
                     self.plot_pause=False
                     self.refresh=False
-                    print "Continue without pausing from now on." 
+                    print "Continue without pausing from now on."
                 elif k=="d":
                     self.plot_pause=False
                     self.refresh=True
@@ -176,7 +176,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     *plotarg1*       =..., plotarg2=...: you can add any plotting parameter
                      that is understood by ``.plot`` of scipy, e.g. color = 'green'
                      (see following parameters)
-                     
+
     *color*          = scipy name of plotting color (e.g. 'green')
     *linestyle*      = scipy style of line plotting (e.g. 'dashed', or '' for none)
     *marker*         = scipy style for data points (e.g. 'x' or 'o')
