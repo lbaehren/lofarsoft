@@ -9,11 +9,10 @@ Usage::
 """
 
 from pycrtools import *
-from pycrtools.tasks.shortcuts import *
-import pycrtools.tasks as tasks
+from pycrtools import tasks
+from pycrtools.tasks import shortcuts as sc
 import time
 import os
-#from pycrtools import IO
 
 """
   =========== ===== ========================================================
@@ -38,25 +37,32 @@ import os
 def fitbaseline_calc_freqs(self):
     """
     """
-    val=hArray(float,dimensions=[self.nbins],name="Frequency",units=("M","Hz"))
+    val = hArray(float,dimensions=[self.nbins], name="Frequency", units=("M","Hz"))
     val.downsample(self.frequency[self.numin_i:self.numax_i])
     return val
+
 
 def fitbaseline_calc_numin_i(self):
     """
     """
-    if self.numin>0: numin_i=self.frequency.findlowerbound(self.numin).val()
-    else: numin_i=2
-    numin_i=max(numin_i-int(numin_i*self.extendfit),2)
+    if self.numin > 0:
+        numin_i = self.frequency.findlowerbound(self.numin).val()
+    else:
+        numin_i=2
+    numin_i = max(numin_i - int(numin_i * self.extendfit), 2)
     return numin_i
+
 
 def fitbaseline_calc_numax_i(self):
     """
     """
-    if self.numax>0: numax_i=self.frequency.findlowerbound(self.numax).val()
-    else: numax_i=len(self.frequency)
-    numax_i=min(numax_i+int((len(self.frequency)-numax_i)*self.extendfit),len(self.frequency)-1)
+    if self.numax>0:
+        numax_i = self.frequency.findlowerbound(self.numax).val()
+    else:
+        numax_i=len(self.frequency)
+    numax_i = min(numax_i + int((len(self.frequency) - numax_i) * self.extendfit), len(self.frequency) - 1)
     return numax_i
+
 
 class FitBaseline(tasks.Task):
     """
@@ -97,200 +103,202 @@ class FitBaseline(tasks.Task):
 
     or in a mix of the two. Otherwise default values are used.
     """
-    parameters = {
 
-        "filename":{default:lambda self: "tmpspec.pcr" if not self.spectrum.hasHeader("FILENAME") else self.spectrum.getHeader("FILENAME"),
-            doc: "Filename to write output to"},    
+    parameters = dict(
 
-        "save_output":{default:False,
-                       doc:"If **True** save the results in the header files of the input spectrum with file name given in ``filename``"},
+        filename = dict(default=lambda self: "tmpspec.pcr" if not self.spectrum.hasHeader("FILENAME") else self.spectrum.getHeader("FILENAME"),
+                        doc="Filename to write output to"),
 
-        "nbins":{doc:"The number of bins in the downsampled spectrum used to fit the baseline.",
-                 default: lambda self:max(self.nofChannels/256,min(256,self.nofChannels/8))},
+        save_output = dict(default=False,
+                           doc="If **True** save the results in the header files of the input spectrum with file name given in ``filename``"),
 
-        "polyorder":{doc:"Order of the polynomial to fit. (output only)",
-                     default:lambda self:self.ncoeffs-1,
-                     output:True},
+        nbins = dict(doc="The number of bins in the downsampled spectrum used to fit the baseline.",
+                     default=lambda self:max(self.nofChannels/256,min(256,self.nofChannels/8))),
 
-        "rmsfactor":{doc:"Factor above and below the RMS in each bin at which a bin is no longer considered due to too many spikes.",
-                     default:3.0},
+        polyorder = dict(doc="Order of the polynomial to fit. (output only)",
+                         default=lambda self:self.ncoeffs-1,
+                         output=True),
 
-        "logfit":{doc:"Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).",
-                  default:True},
+        rmsfactor = dict(doc="Factor above and below the RMS in each bin at which a bin is no longer considered due to too many spikes.",
+                         default=3.0),
 
-        "fittype":{doc:"""Determine which type of fit to do: ``fittype='POLY'`` - do a polynomial fit, else ('BSPLINE') do a basis spline fit (default).""",
-                   default:"BSPLINE"},
+        logfit = dict(doc="Actually fit the polynomial to the log of the (downsampled) data. (Hence you need to .exp the baseline afterwards).",
+                      default=True),
 
-        "nofAntennas":{doc:"""Number of antennas in input spectrum.""",
-                       default:lambda self:1 if len(self.dim_spectrum)==1 else self.dim_spectrum[0]},
+        fittype = dict(doc="""Determine which type of fit to do: ``fittype='POLY'`` - do a polynomial fit, else ('BSPLINE') do a basis spline fit (default).""",
+                       default="BSPLINE"),
 
-        "nofChannels":{doc:"""Number of channels in input spectrum.""",
-                       default:lambda self:self.dim_spectrum[0] if len(self.dim_spectrum)==1 else self.dim_spectrum[1]},
+        nofAntennas = dict(doc="""Number of antennas in input spectrum.""",
+                           default=lambda self:1 if len(self.dim_spectrum)==1 else self.dim_spectrum[0]),
 
-        "nofChannelsUsed":{doc:"""Number of channels remaining after downsampling and ignoring edges.""",
-                           default:lambda self:self.numax_i-self.numin_i},
+        nofChannels = dict(doc="""Number of channels in input spectrum.""",
+                           default=lambda self:self.dim_spectrum[0] if len(self.dim_spectrum)==1 else self.dim_spectrum[1]),
 
-        "dim_spectrum":{doc:"""Dimension of input spectrum (typically *n* antennas times *m* spectral points) or just one dimensional for one antenna.""",
-                        default:lambda self:self.spectrum.getDim()},
+        nofChannelsUsed = dict(doc="""Number of channels remaining after downsampling and ignoring edges.""",
+                               default=lambda self:self.numax_i-self.numin_i),
 
-        "ncoeffs":{doc:"""Number of coefficients for the polynomial.""",
-                   default:18},
+        dim_spectrum = dict(doc="""Dimension of input spectrum (typically *n* antennas times *m* spectral points) or just one dimensional for one antenna.""",
+                            default=lambda self:self.spectrum.getDim()),
 
-        "splineorder":{doc:"""Order of the polynomial to fit for the BSpline, ``splineorder=3`` is a bicubic spline.""",
-                       default:3},
+        ncoeffs = dict(doc="""Number of coefficients for the polynomial.""",
+                       default=18),
 
-        "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
-                 default:-1},
+        splineorder = dict(doc="""Order of the polynomial to fit for the BSpline, ``splineorder=3`` is a bicubic spline.""",
+                           default=3),
 
-        "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
-                 default:-1},
+        numin = dict(doc="""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
+                     default=-1),
 
-        "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to ``numin_i`` (output)""",
-                       default:lambda self:self.frequency[self.numin_i]},
+        numax = dict(doc="""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
+                     default=-1),
 
-        "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to ``numax_i`` (output)""",
-                       default:lambda self:self.frequency[self.numax_i]},
+        numin_val_i = dict(doc="""Minimum frequency of useable bandwidth corresponding to ``numin_i`` (output)""",
+                           default=lambda self:self.frequency[self.numin_i]),
 
-        "numin_i":{doc:"""Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.""",
-                   default:fitbaseline_calc_numin_i,
-                   output:True},
+        numax_val_i = dict(doc="""Maximum frequency of useable bandwidth corresponding to ``numax_i`` (output)""",
+                           default=lambda self:self.frequency[self.numax_i]),
 
-        "numax_i":{doc:"""Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.""",
-                   default:fitbaseline_calc_numax_i,
-                   output:True},
+        numin_i = dict(doc="""Channel number in spectrum of the minimum frequency of the useable bandwidth. Negative if to be ignored.""",
+                       default=fitbaseline_calc_numin_i,
+                       output=True),
 
-        "extendfit":{doc:"""Extend the fit by this factor at both ends beyond ``numax`` and ``numin``. The factor is relative to the unused bandwidth. Use this to make sure there is a stable solution at least between ``numax``/``numin``, i.e. avoid wiggles at the endpoint.""",
-                     default:0.1},
+        numax_i = dict(doc="""Channel number in spectrum of the maximum frequency of the useable bandwidth. Negative if to be ignored.""",
+                       default=fitbaseline_calc_numax_i,
+                       output=True),
 
-        "freqs":{doc:"""Array of frequency values of the downsampled spectrum. (work vector)""",
-                 default:fitbaseline_calc_freqs,
-                 workarray:False},
+        extendfit = dict(doc="""Extend the fit by this factor at both ends beyond ``numax`` and ``numin``. The factor is relative to the unused bandwidth. Use this to make sure there is a stable solution at least between ``numax``/``numin``, i.e. avoid wiggles at the endpoint.""",
+                         default=0.1),
 
-        "small_spectrum":{doc:"""Array of power values holding the downsampled spectrum. (work vector)""",
-                          default:lambda self:hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),
-                          workarray:True},
+        freqs = dict(doc="""Array of frequency values of the downsampled spectrum. (work vector)""",
+                     default=fitbaseline_calc_freqs,
+                     workarray=False),
 
-        "rms":{doc:"""Array of RMS values of the downsampled spectrum. (work vector)""",
-               default:lambda self:hArray(properties=self.small_spectrum, name="RMS of Spectrum"),
-               workarray:True},
+        small_spectrum = dict(doc="""Array of power values holding the downsampled spectrum. (work vector)""",
+                              default=lambda self:hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),
+                              workarray=True),
 
-        "minmean":{doc:"Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-                   default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),
-                   output:True},
+        rms = dict(doc="""Array of RMS values of the downsampled spectrum. (work vector)""",
+                   default=lambda self:hArray(properties=self.small_spectrum, name="RMS of Spectrum"),
+                   workarray=True),
 
-        "minrms":{doc:"RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-                  default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),
-                  output:True},
+        minmean = dict(doc="Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
+                       default=lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+                       output=True),
 
-        "minrms_blen":{doc:"Block length within downsampled data to look for the cleanest part of the spectrum.",
-                       default:lambda self:min(64,max(self.nbins/16,4))},
+        minrms = dict(doc="RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
+                      default=lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+                      output=True),
 
-        "chisquare":{doc:"""Returns the :math`\\chi^2` of the baseline fit. (output only)""",
-                     default:0,
-                     output:True},
+        minrms_blen = dict(doc="Block length within downsampled data to look for the cleanest part of the spectrum.",
+                           default=lambda self:min(64,max(self.nbins/16,4))),
 
-        "weights":{doc:"""Array of weight values for the fit. (work vector)""",
-                   default:lambda self:hArray(properties=self.small_spectrum, name="Fit Weights"),
-                   workarray:True},
+        chisquare = dict(doc="""Returns the :math:`\\chi^2` of the baseline fit. (output only)""",
+                         default=0,
+                         output=True),
 
-        "ratio":{doc:"""Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)""",
-                 default:lambda self:hArray(properties=self.small_spectrum,name="RMS/Amplitude",par=("logplot",False)),
-                 workarray:True},
+        weights = dict(doc="""Array of weight values for the fit. (work vector)""",
+                       default=lambda self:hArray(properties=self.small_spectrum, name="Fit Weights"),
+                       workarray=True),
 
-        "covariance":{doc:"""Array containing the covariance matrix of the fit. (output only)""",
-                      default:lambda self:hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs]),
-                      output:True},
+        ratio = dict(doc="""Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)""",
+                     default=lambda self:hArray(properties=self.small_spectrum,name="RMS/Amplitude",par=("logplot",False)),
+                     workarray=True),
 
-        "bwipointer":{doc:"""Pointer to the internal BSpline workspace as integer. Don't change! """,
-                      default:0,
-                      export:False,
-                      output:True},
+        covariance = dict(doc="""Array containing the covariance matrix of the fit. (output only)""",
+                          default=lambda self:hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs]),
+                          output=True),
 
-        "clean_bins_x":{doc:"""Array holding the frequencies of the clean bins. (work vector)""",
-                        default:lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Frequency"),
-                        workarray:True},
+        bwipointer = dict(doc="""Pointer to the internal BSpline workspace as integer. Don't change! """,
+                          default=0,
+                          export=False,
+                          output=True),
 
-        "clean_bins_y":{doc:"""Array holding the powers of the clean bins. (work vector)""",
-                        default:lambda self:self.small_spectrum,
-                        workarray:True},
+        clean_bins_x = dict(doc="""Array holding the frequencies of the clean bins. (work vector)""",
+                            default=lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Frequency"),
+                            workarray=True),
 
-        "xpowers":{doc:"Array holding the *x*-values and their powers for calculating the baseline fit.",
-                   default:lambda self:hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
-                   workarray:True},
+        clean_bins_y = dict(doc="""Array holding the powers of the clean bins. (work vector)""",
+                            default=lambda self:self.small_spectrum,
+                            workarray=True),
 
-        "powers":{doc:"Array of integers, containing the powers to fit in the polynomial. (work vector)",
-                  default:lambda self:hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),
-                  workarray:True},
+        xpowers = dict(doc="Array holding the *x*-values and their powers for calculating the baseline fit.",
+                       default=lambda self:hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
+                       workarray=True),
 
-        "nselected_bins":{doc:"""Number of clean bins after RFI removal. (output only)""",
-                          default:0,
-                          output:True},
+        powers = dict(doc="Array of integers, containing the powers to fit in the polynomial. (work vector)",
+                      default=lambda self:hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),
+                      workarray=True),
 
-        "selected_bins":{doc:"""Array of indices pointing to clean bins, i.e. with low RFI. (work vector)""",
-                         default:lambda self:hArray(int,self.small_spectrum,name="Selected bins"),
-                         workarray:True},
+        nselected_bins = dict(doc="""Number of clean bins after RFI removal. (output only)""",
+                              default=0,
+                              output=True),
 
-        "coeffs":{doc:"""Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas,ncoeffs]`` (output vector)""",
-                  default:lambda self:hArray(float,[self.nofAntennas,self.ncoeffs]),
-                  output:True},
+        selected_bins = dict(doc="""Array of indices pointing to clean bins, i.e. with low RFI. (work vector)""",
+                             default=lambda self:hArray(int,self.small_spectrum,name="Selected bins"),
+                             workarray=True),
 
-        "frequency":{doc:"Frequency values in Hz for each spectral channel (dimension: ``[nchannels]``)",
-                     unit:"Hz",
-                     workarray:True,
-                     default:lambda self:hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues},
+        coeffs = dict(doc="""Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas,ncoeffs]`` (output vector)""",
+                      default=lambda self:hArray(float,[self.nofAntennas,self.ncoeffs]),
+                      output=True),
 
-        "spectrum":{doc:"Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"},
+        frequency = dict(doc="Frequency values in Hz for each spectral channel (dimension: ``[nchannels]``)",
+                         unit="Hz",
+                         workarray=True,
+                         default=lambda self:hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues),
+
+        spectrum = dict(doc="""Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"""),
 
 
-#        "work_frequency":{doc:"Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
-#                      default:lambda self:hArray(asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export:False},
+        #        work_frequency = dict(doc="Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
+        #                      default=lambda self:hArray(asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export=False),
 
-        "work_spectrum":{doc:"Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
-             default:lambda self:hArray(asvec(self.spectrum),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),export:False},
-        
-        "meanrms":{doc:"""Estimate the mean rms in the spectrum per antenna. (output vector)""",
-           default:0,output:True},
+        work_spectrum = dict(doc="Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
+                             default=lambda self:hArray(asvec(self.spectrum),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),
+                             export=False),
 
-        "iteration":{doc:"If zero or False, then this is the first iteration, of the fitting otherwise the nth iteration (information only at this point).",default:0},
+        meanrms = dict(doc="""Estimate the mean RMS in the spectrum per antenna. (output vector)""",
+                       default=0,
+                       output=True),
 
-        "meanrms":{doc:"""Estimate the mean RMS in the spectrum per antenna. (output vector)""",
-                   default:0,
-                   output:True},
+        iteration = dict(doc="If 0 or **False**, then this is the first iteration, of the fitting otherwise the *n*-th iteration (information only at this point).",
+                         default=0),
 
-        "iteration":{doc:"If 0 or **False**, then this is the first iteration, of the fitting otherwise the *n*-th iteration (information only at this point).",
-                     default:0},
+        verbose = dict(doc="""Print progress information.""",
+                       default=True),
 
-        "verbose":{doc:"""Print progress information.""",
-                   default:True},
+        plotlen = dict(default=2**17,
+                       doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
 
-        "plotlen":{default:2**17,
-                   doc:"How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."},
+        plot_filename = dict(default="",
+                             doc="Base filename to store plot in."),
 
-        "plot_filename":{default:"",doc:"Base filename to store plot in."},
+        plot_antenna = dict(default=0,
+                            doc="Which antenna to plot?"),
 
-        "plot_antenna":{default:0,doc:"Which antenna to plot?"},
+        plot_center = dict(default=0.5,
+                           doc="Center plot at this relative distance from start of vector (0=left end, 1=right end)."),
 
-        "plot_center":{default:0.5,
-                       doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
+        plot_start = dict(default=lambda self: max(int(self.nofChannels*self.plot_center)-self.plotlen,0),
+                          doc="Start plotting from this sample number."),
 
-        "plot_start":{default:lambda self: max(int(self.nofChannels*self.plot_center)-self.plotlen,0),
-                      doc:"Start plotting from this sample number."},
+        plot_end = dict(default=lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),
+                        doc="End plotting before this sample number."),
 
-        "plot_end":{default:lambda self: min(int(self.nofChannels*self.plot_center)+self.plotlen,self.nofChannels),
-                    doc:"End plotting before this sample number."},
+        plot_finish = dict(default=lambda self:plotfinish(doplot=self.doplot,plotpause=False),
+                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
 
-        "plot_finish":{default: lambda self:plotfinish(doplot=self.doplot,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        plot_name = dict(default="",
+                         doc="Extra name to be added to plot filename."),
 
-        "plot_name":{default:"",doc:"Extra name to be added to plot filename."},
-    
-        "doplot":{doc:"""Plot progress information. If ``value > 1``, plot more information (the number of leves varies from task to task).""",
-                  default:False}
-    }
+        doplot = dict(doc="""Plot progress information. If ``value > 1``, plot more information (the number of leves varies from task to task).""",
+                      default=False)
+    )
 
     def call(self,spectrum):
         """
         """
         pass
+
 
     def run(self):
         """Run the program.
@@ -302,7 +310,7 @@ class FitBaseline(tasks.Task):
         if self.doplot:
             wasinteractive=plt.isinteractive()
             plt.ioff();
-        
+
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
         #Donwsample spectrum
         if self.nbins>self.nofChannelsUsed/8:
@@ -394,109 +402,110 @@ class FitBaseline(tasks.Task):
             self.spectrum.writeheader(self.filename)
             print "Written spectrum to file, to read it back: sp=hArrayRead('"+self.filename+"')"
 
+
 CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
-    ['selected_bins',
-     'filename',
-     'save_output',
-     'logfit',
-     'verbose',
-     'nofChannels',
-     'doplot',
-     'spectrum',
-     'dim_spectrum',
-     'powers',
-     'work_spectrum',
-#     'work_frequency',
-     'frequency',
-     'numin_val_i',
-     'numax_val_i',
-     'nofAntennas',
-     'polyorder',
-     'fittype',
-     'plotlen',
-     'plot_antenna',
-     'plot_start',
-     'plot_end',
-     'plot_finish',
-     'plot_name',
-     'plot_filename',
-     'plot_center'
-     ]])
+                               ['selected_bins',
+                                'filename',
+                                'save_output',
+                                'logfit',
+                                'verbose',
+                                'nofChannels',
+                                'doplot',
+                                'spectrum',
+                                'dim_spectrum',
+                                'powers',
+                                'work_spectrum',
+                                #     'work_frequency',
+                                'frequency',
+                                'numin_val_i',
+                                'numax_val_i',
+                                'nofAntennas',
+                                'polyorder',
+                                'fittype',
+                                'plotlen',
+                                'plot_antenna',
+                                'plot_start',
+                                'plot_end',
+                                'plot_finish',
+                                'plot_name',
+                                'plot_filename',
+                                'plot_center'
+                                ]])
 
-CalcBaselineParameters.update({
-    "baseline":{doc:"Array containing the calculated baseline with the same dimensions as ``spectrum`` - can be provided as spectrum.par.baseline (will be created if not).",
-                #       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else hArray(float,dimensions=self.spectrum,name="Baseline"),
-                default:None
-                },
+CalcBaselineParameters.update(dict(
+    baseline = dict(doc="Array containing the calculated baseline with the same dimensions as ``spectrum`` - can be provided as spectrum.par.baseline (will be created if not).",
+                    #       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else hArray(float,dimensions=self.spectrum,name="Baseline"),
+                    default=None),
 
-    "addHanning":{default: True,
-                  doc:"Add a Hanning filter above ``nu_max`` and below ``nu_min`` to suppress out-of-band emission smoothly."},
+    addHanning = dict(default=True,
+                      doc="Add a Hanning filter above ``nu_max`` and below ``nu_min`` to suppress out-of-band emission smoothly."),
 
-    "logfit":{default:lambda self:True if self.FitParameters==None else self.FitParameters["logfit"]},
+    logfit = dict(default=lambda self:True if self.FitParameters==None else self.FitParameters["logfit"]),
 
-    "fittype":{default:lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]},
+    fittype = dict(default=lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]),
 
-    "work_baseline":{doc:"Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
-             default:lambda self:hArray(asvec(self.baseline),dimensions=[self.nofAntennas,self.nofChannels],properties=self.baseline,xvalues=self.frequency),export:False},
+    work_baseline = dict(doc="Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
+                         default=lambda self:hArray(asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, xvalues=self.frequency),
+                         export=False),
 
-    "FitParameters":{doc:"Parameters of the baseline fitting routine.",
-                     default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
+    FitParameters = dict(doc="Parameters of the baseline fitting routine.",
+                         default=lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None),
 
-    "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
-             default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
+    numin = dict(doc="""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
+                 default=lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]),
 
-    "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
-             default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
+    numax = dict(doc="""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
+                 default=lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]),
 
-    "numin_val_i":{doc:"""Minimum frequency of useable bandwidth corresponding to ``numin_i`` (output)""",
-                   default:lambda self:self.frequency[self.numin_i] if self.FitParameters==None else self.FitParameters["numin_val_i"]},
+    numin_val_i = dict(doc="""Minimum frequency of useable bandwidth corresponding to ``numin_i`` (output)""",
+                       default=lambda self:self.frequency[self.numin_i] if self.FitParameters==None else self.FitParameters["numin_val_i"]),
 
-    "numax_val_i":{doc:"""Maximum frequency of useable bandwidth corresponding to ``numax_i`` (output)""",
-                   default:lambda self:self.frequency[self.numax_i] if self.FitParameters==None else self.FitParameters["numax_val_i"]},
+    numax_val_i = dict(doc="""Maximum frequency of useable bandwidth corresponding to ``numax_i`` (output)""",
+                       default=lambda self:self.frequency[self.numax_i] if self.FitParameters==None else self.FitParameters["numax_val_i"]),
 
-    "numin_i":{doc:"""Channel number in spectrum of the minium frequency where to calculate baseline. Apply hanning taper below.""",
-               default: lambda self:max(self.frequency.findlowerbound(self.numin).val(),0) if self.numin>0 else 0,
-               output:True},
+    numin_i = dict(doc="""Channel number in spectrum of the minium frequency where to calculate baseline. Apply hanning taper below.""",
+                   default=lambda self:max(self.frequency.findlowerbound(self.numin).val(),0) if self.numin>0 else 0,
+                   output=True),
 
-    "numax_i":{doc:"""Channel number in spectrum of the maxium frequency where to calculate baseline. Apply hanning taper above.""",
-               default: lambda self:min(self.frequency.findlowerbound(self.numax).val(),self.nofChannels) if self.numax>0 else self.nofChannels,
-               output:True},
+    numax_i = dict(doc="""Channel number in spectrum of the maxium frequency where to calculate baseline. Apply hanning taper above.""",
+                   default=lambda self:min(self.frequency.findlowerbound(self.numax).val(),self.nofChannels) if self.numax>0 else self.nofChannels,
+                   output=True),
 
-    "height_ends":{doc:"""The heights of the baseline at the left and right endpoints of the usable bandwidth where a hanning function is smoothly added.""",
-                   default:lambda self:hArray(float,[2,self.nofAntennas])},
+    height_ends = dict(doc="""The heights of the baseline at the left and right endpoints of the usable bandwidth where a hanning function is smoothly added.""",
+                       default=lambda self:hArray(float,[2,self.nofAntennas])),
 
-    "coeffs":{doc:"Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas, ncoeffs]`` or ``[ncoeffs]``",
-              #input:True,
-              default:lambda self:hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]},
+    coeffs = dict(doc="Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas, ncoeffs]`` or ``[ncoeffs]``",
+                  #input=True,
+                  default=lambda self:hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]),
 
-    "dim_coeffs":{doc:"Dimension of the coefficients array (which should be ``[nofAntennas, ncoeff]`` or ``[ncoeff]`` for ``nofAntennas==1``)",
-                  default:lambda self:self.coeffs.getDim()},
+    dim_coeffs = dict(doc="Dimension of the coefficients array (which should be ``[nofAntennas, ncoeff]`` or ``[ncoeff]`` for ``nofAntennas==1``)",
+                      default=lambda self:self.coeffs.getDim()),
 
-    "nofAntennasCoeffs":{doc:"Number of antennas in coeffcient array.",
-                         default:lambda self:1 if len(self.dim_coeffs)==1 else self.dim_coeffs[0]},
+    nofAntennasCoeffs = dict(doc="Number of antennas in coeffcient array.",
+                             default=lambda self:1 if len(self.dim_coeffs)==1 else self.dim_coeffs[0]),
 
-    "ncoeffs":{doc:"Number of coefficients for the polynomial.",
-               default:lambda self:self.dim_coeffs[1] if len(self.dim_coeffs)>=2 else self.dim_coeffs[0]},
+    ncoeffs = dict(doc="Number of coefficients for the polynomial.",
+                   default=lambda self:self.dim_coeffs[1] if len(self.dim_coeffs)>=2 else self.dim_coeffs[0]),
 
-    "splineorder":{doc:"Order of the polynomial to fit for the BSpline, ``splineorder=3`` is a bicubic spline.",
-                   default: lambda self:3 if self.FitParameters==None else self.FitParameters["splineorder"]},
+    splineorder = dict(doc="Order of the polynomial to fit for the BSpline, ``splineorder=3`` is a bicubic spline.",
+                       default=lambda self:3 if self.FitParameters==None else self.FitParameters["splineorder"]),
 
-    "work_coeffs":{doc:"Array with coefficients in the form ``[nofAntennas, ncoeff]``",
-           default:lambda self:hArray(asvec(self.coeffs),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])},
+    work_coeffs = dict(doc="Array with coefficients in the form ``[nofAntennas, ncoeff]``",
+                       default=lambda self:hArray(asvec(self.coeffs),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])),
 
-    "invert":{doc:"Invert the baseline so that it can later simply be multiplied to take out the gain variations.",
-              default:True},
+    invert = dict(doc="Invert the baseline so that it can later simply be multiplied to take out the gain variations.",
+                  default=True),
 
-    "HanningUp":{doc:"Let the Hanning filter at the ends go up rather than down (useful if one wants to divide by baseline and suppress out-of-band-noise)",
-                 default:True},
+    HanningUp = dict(doc="Let the Hanning filter at the ends go up rather than down (useful if one wants to divide by baseline and suppress out-of-band-noise)",
+                     default=True),
 
-    "normalize":{doc:"If **True**, normalize the baseline to have a total sum of unity.",
-                 default:True},
-    
-    "powerlaw":{doc:"Multiply gain curve with a powerlaw depending on value. 'GalacticT': return a powerlaw according to Galactic radio emission in Kelvin; alpha (i.e. a number): multiply with powerlaw of form \nu^\alpha.",
-                 default:False}
+    normalize = dict(doc="If **True**, normalize the baseline to have a total sum of unity.",
+                     default=True),
 
-    })
+    powerlaw = dict(doc="Multiply gain curve with a powerlaw depending on value. 'GalacticT': return a powerlaw according to Galactic radio emission in Kelvin; alpha (i.e. a number): multiply with powerlaw of form :math`:\nu^\alpha`.",
+                    default=False)
+
+    ))
 
 
 class CalcBaseline(tasks.Task):
@@ -527,8 +536,7 @@ class CalcBaseline(tasks.Task):
     switch set ``logfit=False`` (to see what is going on).
 
 
-    Gain Calibration (DRFAT!)
-    =========================
+    **Gain Calibration (DRAFT!)**
 
     Knowing that the antenna is exposed to a noise with a certain
     power, one can use this to make a rough estimate of the absolute
@@ -548,7 +556,7 @@ class CalcBaseline(tasks.Task):
 
 
     The noise temperature of an antenna is:
-    
+
     Tnoise = Power [Watts] /Bandwidth [Hz] / kb (Boltzmann constant) = 7.24296*10^22 K
 
     The sky tempertature is according to Falcke & Gorham (2004)
@@ -574,12 +582,12 @@ class CalcBaseline(tasks.Task):
 
      Snu= Enu epsilon_0 c Bandwidth (Enu in Volt/Meter/MHz in SI units
      ..., check this formula)
-     
+
      to be continued ....
-     
+
     In the following a short description from Andreas Horneffer (in
     German) on how to do a simple gain correction.
-    
+
 Unter der Annahme, dass der ganze Himmel eine konstante, und bekannte
 Strahlungstemperatur hat, das gemessene Rauschen davon dominiert ist,
 und man das Gain (die Richtwirkung) der Antennen kennt.
@@ -620,6 +628,7 @@ Antennen verwenden. (Natuerlich fuer die Ausrichtung der Dipole rotiert.)
 
     def call(self,spectrum):
         pass
+
 
     def run(self):
         if not type(self.spectrum) in hAllArrayTypes:
@@ -742,62 +751,62 @@ ApplyBaselineParameters = dict(
      ]
     )
 
-ApplyBaselineParameters.update({
+ApplyBaselineParameters.update(dict(
 
-    "filename":{default:lambda self: "tmpspec.clean.pcr" if not self.spectrum.hasHeader("filename") else root_filename(self.spectrum.getHeader("filename"))+".clean",
-                doc: "Filename to write output to."},
+    filename = dict(default=lambda self: "tmpspec.clean.pcr" if not self.spectrum.hasHeader("filename") else root_filename(self.spectrum.getHeader("filename"))+".clean",
+                    doc="Filename to write output to."),
 
-    # "FitParameters":{doc:"Parameters of the baseline fitting routine.",
-    #                  default: lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None},
+    # FitParameters = dict(doc="Parameters of the baseline fitting routine.",
+    #                      default= lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None),
 
-    # "numin":{doc:"""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
-    #         default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]},
+    # numin = dict(doc="""Minimum frequency of useable bandwidth. Negative if to be ignored.""",
+    #              default=lambda self: -1 if self.FitParameters==None else self.FitParameters["numin"]),
 
-    # "numax":{doc:"""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
-    #          default:lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]},
+    # numax = dict(doc="""Maximum frequency of useable bandwidth. Negative if to be ignored.""",
+    #              default=lambda self: -1 if self.FitParameters==None else self.FitParameters["numax"]),
 
-    "plotchannel":{doc:"Which channel to plot.",
-                   default:0},
+    plotchannel = dict(doc="Which channel to plot.",
+                       default=0),
 
-    "adaptive_peak_threshold":{doc:"If **True** then calculate the threshold above which to cut peaks in ``nbins`` separate bins and thus let it vary over the spectrum",
-                               default:False},
+    adaptive_peak_threshold = dict(doc="If **True** then calculate the threshold above which to cut peaks in ``nbins`` separate bins and thus let it vary over the spectrum",
+                                   default=False),
 
-    "apply_baseline":{doc:"If **True** then divide spectrum by baseline before removing peaks.",
-                      default: True},
+    apply_baseline = dict(doc="If **True** then divide spectrum by baseline before removing peaks.",
+                          default=True),
 
-    "mean":{doc:"Median mean value of blocks in downsampled spectrum - used to replace flagged data with (output only)",
-            default:1},
+    mean = dict(doc="Median mean value of blocks in downsampled spectrum - used to replace flagged data with (output only)",
+                default=1),
 
-    "rms":{doc:"Median RMS value of blocks in downsampled spectrum - used to calculate threshold for cutting peaks (output only)",
-           default:lambda self:Vector(float,[self.nofAntennas],fill=0.0),
-           output:True},
+    rms = dict(doc="Median RMS value of blocks in downsampled spectrum - used to calculate threshold for cutting peaks (output only)",
+               default=lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+               output=True),
 
-    "means":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),
-             doc:"Mean value per block in input spectrum"},
+    means = dict(default=lambda self:hArray(float,[self.nofAntennas,self.nbins]),
+                 doc="Mean value per block in input spectrum"),
 
-    "stddevs":{default:lambda self:hArray(float,[self.nofAntennas,self.nbins]),
-               doc:"Standard deviation per block in input spectrum"},
+    stddevs = dict(default=lambda self:hArray(float,[self.nofAntennas,self.nbins]),
+                   doc="Standard deviation per block in input spectrum"),
 
-    "nofChannelsUsed":{doc:"""Number of channels remaining after downsampling and ignoring edges.""",
-                       default:lambda self:self.numax_i-self.numin_i},
+    nofChannelsUsed = dict(doc="""Number of channels remaining after downsampling and ignoring edges.""",
+                           default=lambda self:self.numax_i-self.numin_i),
 
-    "rmsfactor":{doc:"""Factor above the RMS in each channel at which a channel is considered poluted by RFI.""",
-                 default:5.0},
+    rmsfactor = dict(doc="""Factor above the RMS in each channel at which a channel is considered poluted by RFI.""",
+                     default=5.0),
 
-    "nbins":{doc:"""The number of bins to be used to subdivide spectrum for selecting the best RMS.""",
-             default: lambda self:max(self.nofChannelsUsed/256,min(256,self.nofChannelsUsed/8))},
+    nbins = dict(doc="""The number of bins to be used to subdivide spectrum for selecting the best RMS.""",
+                 default=lambda self:max(self.nofChannelsUsed/256,min(256,self.nofChannelsUsed/8))),
 
-    "blocklen":{doc:"""The block length of one bin used to subdivide spectrum for selecting the best RMS.""",
-                default: lambda self:self.nofChannelsUsed/self.nbins},
+    blocklen = dict(doc="""The block length of one bin used to subdivide spectrum for selecting the best RMS.""",
+                    default=lambda self:self.nofChannelsUsed/self.nbins),
 
-    "ndirty_channels":{doc:"""Number of dirty channels to be removed as RFI. (output only)""",
-                       default:0,
-                       output:True},
+    ndirty_channels = dict(doc="""Number of dirty channels to be removed as RFI. (output only)""",
+                           default=0,
+                           output=True),
 
-    "dirty_channels":{doc:"""Array of indices pointing to dirty bins, i.e. with high RFI. (work vector)""",
-                      default:lambda self:hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),
-                      workarray:True}
-    })
+    dirty_channels = dict(doc="""Array of indices pointing to dirty bins, i.e. with high RFI. (work vector)""",
+                          default=lambda self:hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),
+                          workarray=True)
+    ))
 
 
 class ApplyBaseline(tasks.Task):
@@ -814,6 +823,7 @@ class ApplyBaseline(tasks.Task):
 
     def call(self,spectrum):
         pass
+
 
     def run(self):
         self.t0=time.clock()
