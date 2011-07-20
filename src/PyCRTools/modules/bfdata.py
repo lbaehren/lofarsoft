@@ -21,13 +21,15 @@ def getpar(parameters,keyword):
 class BFDataReader():
     """Class to read in beamformed data"""
 
-    def __init__(self,obsID):
+    def __init__(self,obsID,datadir=None,obsIDisParsetfilename=False):
         """Constructor
         Initializes the array
         """
 
-        self.par=get_parameters_new(obsID)
+        self.par=get_parameters_new(obsID,obsIDisParsetfilename)
         self.files=[]
+        if datadir:
+            self.par["files"]=[datadir+"/"+f for f in self.par["files"]]
         for file in self.par["files"]:
             if os.path.isfile(file):
                 self.files.append(open(file))
