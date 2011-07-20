@@ -5,12 +5,14 @@ Spectrum documentation
 
 Usage::
 
-  >>> sp=hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
+  >>> sp=cr.hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
 """
 
-from pycrtools import *
+import pycrtools as cr
 from pycrtools import tasks
 from pycrtools.tasks import shortcuts as sc
+from matplotlib import pyplot as plt
+from math import log, log10
 import time
 import os
 
@@ -37,7 +39,7 @@ import os
 def fitbaseline_calc_freqs(self):
     """
     """
-    val = hArray(float,dimensions=[self.nbins], name="Frequency", units=("M","Hz"))
+    val = cr.hArray(float,dimensions=[self.nbins], name="Frequency", units=("M","Hz"))
     val.downsample(self.frequency[self.numin_i:self.numax_i])
     return val
 
@@ -79,7 +81,7 @@ class FitBaseline(tasks.Task):
     dimension ``[nofAntennas,nofChannels]`` or just ``[nofChannels]`` for a
     single spectrum. Note that the frequency values for the array are
     expected to be provided as
-    ``input_spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)``
+    ``input_spectrum.par.xvalues=cr.hArray(float,[nofChannels],fill=...)``
     the same you would use to provide xvalues for plotting. You can
     also provide the frequencies explicitly in the keyword
     ``frequency``, otherwise a simple numbering is assumed
@@ -174,19 +176,19 @@ class FitBaseline(tasks.Task):
                      workarray=False),
 
         small_spectrum = dict(doc="""Array of power values holding the downsampled spectrum. (work vector)""",
-                              default=lambda self:hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),
+                              default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),
                               workarray=True),
 
         rms = dict(doc="""Array of RMS values of the downsampled spectrum. (work vector)""",
-                   default=lambda self:hArray(properties=self.small_spectrum, name="RMS of Spectrum"),
+                   default=lambda self:cr.hArray(properties=self.small_spectrum, name="RMS of Spectrum"),
                    workarray=True),
 
         minmean = dict(doc="Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-                       default=lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+                       default=lambda self:cr.Vector(float,[self.nofAntennas],fill=0.0),
                        output=True),
 
         minrms = dict(doc="RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-                      default=lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+                      default=lambda self:cr.Vector(float,[self.nofAntennas],fill=0.0),
                       output=True),
 
         minrms_blen = dict(doc="Block length within downsampled data to look for the cleanest part of the spectrum.",
@@ -197,15 +199,15 @@ class FitBaseline(tasks.Task):
                          output=True),
 
         weights = dict(doc="""Array of weight values for the fit. (work vector)""",
-                       default=lambda self:hArray(properties=self.small_spectrum, name="Fit Weights"),
+                       default=lambda self:cr.hArray(properties=self.small_spectrum, name="Fit Weights"),
                        workarray=True),
 
         ratio = dict(doc="""Array holding the ratio between RMS and power of the downsampled spectrum. (work vector)""",
-                     default=lambda self:hArray(properties=self.small_spectrum,name="RMS/Amplitude",par=("logplot",False)),
+                     default=lambda self:cr.hArray(properties=self.small_spectrum,name="RMS/Amplitude",par=("logplot",False)),
                      workarray=True),
 
         covariance = dict(doc="""Array containing the covariance matrix of the fit. (output only)""",
-                          default=lambda self:hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs]),
+                          default=lambda self:cr.hArray(float,[self.nofAntennas,self.ncoeffs,self.ncoeffs]),
                           output=True),
 
         bwipointer = dict(doc="""Pointer to the internal BSpline workspace as integer. Don't change! """,
@@ -214,7 +216,7 @@ class FitBaseline(tasks.Task):
                           output=True),
 
         clean_bins_x = dict(doc="""Array holding the frequencies of the clean bins. (work vector)""",
-                            default=lambda self:hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Frequency"),
+                            default=lambda self:cr.hArray(dimensions=[self.nofAntennas,self.nbins],properties=self.freqs,name="Frequency"),
                             workarray=True),
 
         clean_bins_y = dict(doc="""Array holding the powers of the clean bins. (work vector)""",
@@ -222,11 +224,11 @@ class FitBaseline(tasks.Task):
                             workarray=True),
 
         xpowers = dict(doc="Array holding the *x*-values and their powers for calculating the baseline fit.",
-                       default=lambda self:hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
+                       default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
                        workarray=True),
 
         powers = dict(doc="Array of integers, containing the powers to fit in the polynomial. (work vector)",
-                      default=lambda self:hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),
+                      default=lambda self:cr.hArray(int,[self.nofAntennas,self.ncoeffs],range(self.ncoeffs)),
                       workarray=True),
 
         nselected_bins = dict(doc="""Number of clean bins after RFI removal. (output only)""",
@@ -234,26 +236,26 @@ class FitBaseline(tasks.Task):
                               output=True),
 
         selected_bins = dict(doc="""Array of indices pointing to clean bins, i.e. with low RFI. (work vector)""",
-                             default=lambda self:hArray(int,self.small_spectrum,name="Selected bins"),
+                             default=lambda self:cr.hArray(int,self.small_spectrum,name="Selected bins"),
                              workarray=True),
 
         coeffs = dict(doc="""Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas,ncoeffs]`` (output vector)""",
-                      default=lambda self:hArray(float,[self.nofAntennas,self.ncoeffs]),
+                      default=lambda self:cr.hArray(float,[self.nofAntennas,self.ncoeffs]),
                       output=True),
 
         frequency = dict(doc="Frequency values in Hz for each spectral channel (dimension: ``[nchannels]``)",
                          unit="Hz",
                          workarray=True,
-                         default=lambda self:hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues),
+                         default=lambda self:cr.hArray(float,[self.nofChannels],name="Frequency").fillrange(0.,1.) if not hasattr(self.spectrum.par,"xvalues") else self.spectrum.par.xvalues),
 
-        spectrum = dict(doc="""Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"""),
+        spectrum = dict(doc="""Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=cr.hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"""),
 
 
         #        work_frequency = dict(doc="Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
-        #                      default=lambda self:hArray(asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export=False),
+        #                      default=lambda self:cr.hArray(cr.asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export=False),
 
         work_spectrum = dict(doc="Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
-                             default=lambda self:hArray(asvec(self.spectrum),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),
+                             default=lambda self:cr.hArray(cr.asvec(self.spectrum),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),
                              export=False),
 
         meanrms = dict(doc="""Estimate the mean RMS in the spectrum per antenna. (output vector)""",
@@ -303,8 +305,8 @@ class FitBaseline(tasks.Task):
     def run(self):
         """Run the program.
         """
-        if not type(self.spectrum) in hAllArrayTypes:
-            print "ERROR: please provide an hArray as input for the positional argument 'spectrum'!"
+        if not type(self.spectrum) in cr.hAllArrayTypes:
+            print "ERROR: please provide an cr.hArray as input for the positional argument 'spectrum'!"
             return
 
         if self.doplot:
@@ -326,6 +328,12 @@ class FitBaseline(tasks.Task):
             plt.clf()
             plt.subplots_adjust(hspace=0.4)
             plt.subplot(2,1,0)
+            # mvda_a = self.work_spectrum
+            # print "plot_antenna %d" %(self.plot_antenna)
+            # print "plot start, end = %d, %d" %(self.plot_start, self.plot_end)
+            # print mvda_a[self.plot_antenna,self.plot_start:self.plot_end].vec()
+            # mvda_a[self.plot_antenna,self.plot_start:self.plot_end].plot()
+            # import pdb; pdb.set_trace()
             self.work_spectrum[self.plot_antenna,self.plot_start:self.plot_end].plot(color="blue",clf=False,title="Downsampled & Original Spectrum (antennas #"+str(self.plot_antenna)+")")
             self.small_spectrum[self.plot_antenna].plot(xvalues=self.freqs,clf=False,color="red")
             plt.subplot(2,1,1)
@@ -336,14 +344,14 @@ class FitBaseline(tasks.Task):
         #Calculate RMS/amplitude for each bin
         self.ratio[...].div(self.rms[...],self.small_spectrum[...])
         #Get the RMS of the part of the spectrum where it is lowest (i.e. which is least affected by RFI)
-        self.minblk=self.ratio[...].minstddevblock(Vector(int,[self.nbins],fill=self.minrms_blen),self.minrms,self.minmean)
+        self.minblk=self.ratio[...].minstddevblock(cr.Vector(int,[self.nbins],fill=self.minrms_blen),self.minrms,self.minmean)
         #Set limits for which spikes to ignore
         self.limit2=self.minmean+self.minrms*self.rmsfactor
         self.limit1=self.minmean-self.minrms*self.rmsfactor
         if self.doplot>1:
             self.ratio[...].plot(xvalues=self.freqs,title="RMS/Amplitude (per channel block)",logplot="y",clf=True)
-            plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="red",logplot="y",linewidth=2)
-            plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="red",logplot="y",linewidth=2,xlabel="Frequency [MHz]",ylabel="RMS/Mean")
+            cr.plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="red",logplot="y",linewidth=2)
+            cr.plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="red",logplot="y",linewidth=2,xlabel="Frequency [MHz]",ylabel="RMS/Mean")
             self.plot_finish("Plotted relative RMS of downsampled spectrum (doplot>=2)",name=self.__taskname__+"-rms_div_mean"+self.plot_name)
         #Now select bins where the ratio between RMS and amplitude is within the limits
         self.nselected_bins=self.selected_bins[...,1:].findbetween(self.ratio[...,1:-1],self.limit1,self.limit2)
@@ -351,11 +359,11 @@ class FitBaseline(tasks.Task):
         #Make sure the endpoints are part of it
         self.nselected_bins+=2 # add the two endpoints
         self.selected_bins[...,0].fill(0)
-        self.endpoints=hArray(int,[self.nofAntennas,1],fill=self.nselected_bins-1)
+        self.endpoints=cr.hArray(int,[self.nofAntennas,1],fill=self.nselected_bins-1)
         self.selected_bins[...].set(self.endpoints[...],len(self.freqs)-1)
         #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-        self.clean_bins_x[...].copy(self.freqs,self.selected_bins[...],asvec(self.nselected_bins))
-        self.clean_bins_y[...].copy(self.small_spectrum[...],self.selected_bins[...],asvec(self.nselected_bins))
+        self.clean_bins_x[...].copy(self.freqs,self.selected_bins[...],cr.asvec(self.nselected_bins))
+        self.clean_bins_y[...].copy(self.small_spectrum[...],self.selected_bins[...],cr.asvec(self.nselected_bins))
         #    self.weights.copy(self.clean_bins_y)
         if self.logfit:
             self.clean_bins_y[...,[0]:self.nselected_bins].log()
@@ -400,7 +408,7 @@ class FitBaseline(tasks.Task):
         self.spectrum.setHeader(FitBaseline=self.ws.getParameters())
         if self.save_output:
             self.spectrum.writeheader(self.filename)
-            print "Written spectrum to file, to read it back: sp=hArrayRead('"+self.filename+"')"
+            print "Written spectrum to file, to read it back: sp=cr.hArrayRead('"+self.filename+"')"
 
 
 CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
@@ -434,7 +442,7 @@ CalcBaselineParameters=  dict([(p,FitBaseline.parameters[p]) for p in
 
 CalcBaselineParameters.update(dict(
     baseline = dict(doc="Array containing the calculated baseline with the same dimensions as ``spectrum`` - can be provided as spectrum.par.baseline (will be created if not).",
-                    #       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else hArray(float,dimensions=self.spectrum,name="Baseline"),
+                    #       default:lambda self:self.spectrum.par.baseline if hasattr(self.spectrum,"par") and hasattr(self.spectrum.par,"baseline") else cr.hArray(float,dimensions=self.spectrum,name="Baseline"),
                     default=None),
 
     addHanning = dict(default=True,
@@ -445,7 +453,7 @@ CalcBaselineParameters.update(dict(
     fittype = dict(default=lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]),
 
     work_baseline = dict(doc="Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
-                         default=lambda self:hArray(asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, xvalues=self.frequency),
+                         default=lambda self:cr.hArray(cr.asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, xvalues=self.frequency),
                          export=False),
 
     FitParameters = dict(doc="Parameters of the baseline fitting routine.",
@@ -472,11 +480,11 @@ CalcBaselineParameters.update(dict(
                    output=True),
 
     height_ends = dict(doc="""The heights of the baseline at the left and right endpoints of the usable bandwidth where a hanning function is smoothly added.""",
-                       default=lambda self:hArray(float,[2,self.nofAntennas])),
+                       default=lambda self:cr.hArray(float,[2,self.nofAntennas])),
 
     coeffs = dict(doc="Polynomial coefficients of the baseline fit with the dimension ``[nofAntennas, ncoeffs]`` or ``[ncoeffs]``",
                   #input=True,
-                  default=lambda self:hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]),
+                  default=lambda self:cr.hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]),
 
     dim_coeffs = dict(doc="Dimension of the coefficients array (which should be ``[nofAntennas, ncoeff]`` or ``[ncoeff]`` for ``nofAntennas==1``)",
                       default=lambda self:self.coeffs.getDim()),
@@ -491,7 +499,7 @@ CalcBaselineParameters.update(dict(
                        default=lambda self:3 if self.FitParameters==None else self.FitParameters["splineorder"]),
 
     work_coeffs = dict(doc="Array with coefficients in the form ``[nofAntennas, ncoeff]``",
-                       default=lambda self:hArray(asvec(self.coeffs),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])),
+                       default=lambda self:cr.hArray(cr.asvec(self.coeffs),dimensions=[self.nofAntennasCoeffs,self.ncoeffs])),
 
     invert = dict(doc="Invert the baseline so that it can later simply be multiplied to take out the gain variations.",
                   default=True),
@@ -631,19 +639,19 @@ Antennen verwenden. (Natuerlich fuer die Ausrichtung der Dipole rotiert.)
 
 
     def run(self):
-        if not type(self.spectrum) in hAllArrayTypes:
-            print "ERROR: please provide an hArray as input for the positional argument 'spectrum'!"
+        if not type(self.spectrum) in cr.hAllArrayTypes:
+            print "ERROR: please provide an cr.hArray as input for the positional argument 'spectrum'!"
             return
 
         self.t0=time.clock()
         if not hasattr(self.spectrum,"par"):
-            setattr(self.spectrum,"par",hArray_par())
+            setattr(self.spectrum,"par",cr.hArray_par())
 
-        if not type(self.baseline) in hAllArrayTypes:
+        if not type(self.baseline) in cr.hAllArrayTypes:
             if hasattr(self.spectrum.par,"baseline"):
                 self.baseline=self.spectrum.par.baseline
             else:
-                self.spectrum.par.baseline=hArray(float,properties=self.spectrum,name="Baseline")
+                self.spectrum.par.baseline=cr.hArray(float,properties=self.spectrum,name="Baseline")
                 self.baseline=self.spectrum.par.baseline
         else:
             self.spectrum.par.baseline=self.baseline
@@ -678,16 +686,16 @@ Antennen verwenden. (Natuerlich fuer die Ausrichtung der Dipole rotiert.)
         if self.addHanning:
             self.height_ends[0,...].copy(self.work_baseline[...,self.numin_i])
             self.height_ends[1,...].copy(self.work_baseline[...,self.numax_i-1])
-            self.factor=hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
+            self.factor=cr.hArray(float,self.nofAntennas,fill=6.9) # Factor 1000 in log
             if not self.logfit:
                 self.factor.fill(self.height_ends[0])
                 self.factor *= 1000.0
-            self.work_baseline[...,0:self.numin_i].gethanningfilterhalf(Vector(self.factor),asvec(self.height_ends[0])-(0 if self.HanningUp else asvec(self.factor)),Vector(bool,self.nofAntennas,fill=self.HanningUp))
+            self.work_baseline[...,0:self.numin_i].gethanningfilterhalf(cr.Vector(self.factor),cr.asvec(self.height_ends[0])-(0 if self.HanningUp else cr.asvec(self.factor)),cr.Vector(bool,self.nofAntennas,fill=self.HanningUp))
             #Right end
             if not self.logfit:
                 self.factor.fill(self.height_ends[1])
                 self.factor *= 1000.0
-            self.work_baseline[...,self.numax_i:].gethanningfilterhalf(Vector(self.factor),asvec(self.height_ends[1])-(0 if self.HanningUp else asvec(self.factor)),Vector(bool,self.nofAntennas,fill=not self.HanningUp))
+            self.work_baseline[...,self.numax_i:].gethanningfilterhalf(cr.Vector(self.factor),cr.asvec(self.height_ends[1])-(0 if self.HanningUp else cr.asvec(self.factor)),cr.Vector(bool,self.nofAntennas,fill=not self.HanningUp))
         if self.logfit:
             self.work_baseline.min(40)# avoid numerical trouble
             self.work_baseline.max(-40)# avoid numerical trouble
@@ -714,7 +722,7 @@ Antennen verwenden. (Natuerlich fuer die Ausrichtung der Dipole rotiert.)
             self.work_baseline[...] /= self.work_baseline[...,self.numin_i:self.numax_i].mean()
         if self.save_output:
             self.spectrum.writeheader(self.filename)
-            print "Written spectrum to file, to read it back: sp=hArrayRead('"+self.filename+"')"
+            print "Written spectrum to file, to read it back: sp=cr.hArrayRead('"+self.filename+"')"
         if self.verbose:
             print time.clock()-self.t0,"s: Done CalcBaseline."
 
@@ -750,7 +758,7 @@ ApplyBaselineParameters = dict(
          ]
      ]
     )
-
+2
 ApplyBaselineParameters.update(dict(
 
     filename = dict(default=lambda self: "tmpspec.clean.pcr" if not self.spectrum.hasHeader("filename") else root_filename(self.spectrum.getHeader("filename"))+".clean",
@@ -778,13 +786,13 @@ ApplyBaselineParameters.update(dict(
                 default=1),
 
     rms = dict(doc="Median RMS value of blocks in downsampled spectrum - used to calculate threshold for cutting peaks (output only)",
-               default=lambda self:Vector(float,[self.nofAntennas],fill=0.0),
+               default=lambda self:cr.Vector(float,[self.nofAntennas],fill=0.0),
                output=True),
 
-    means = dict(default=lambda self:hArray(float,[self.nofAntennas,self.nbins]),
+    means = dict(default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins]),
                  doc="Mean value per block in input spectrum"),
 
-    stddevs = dict(default=lambda self:hArray(float,[self.nofAntennas,self.nbins]),
+    stddevs = dict(default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins]),
                    doc="Standard deviation per block in input spectrum"),
 
     nofChannelsUsed = dict(doc="""Number of channels remaining after downsampling and ignoring edges.""",
@@ -804,7 +812,7 @@ ApplyBaselineParameters.update(dict(
                            output=True),
 
     dirty_channels = dict(doc="""Array of indices pointing to dirty bins, i.e. with high RFI. (work vector)""",
-                          default=lambda self:hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),
+                          default=lambda self:cr.hArray(int,dimensions=self.work_spectrum,name="Dirty bins"),
                           workarray=True)
     ))
 
@@ -828,12 +836,12 @@ class ApplyBaseline(tasks.Task):
     def run(self):
         self.t0=time.clock()
 
-        if not type(self.spectrum) in hAllArrayTypes:
-            print "ERROR: please provide an hArray as input for the positional argument 'spectrum'!"
+        if not type(self.spectrum) in cr.hAllArrayTypes:
+            print "ERROR: please provide an cr.hArray as input for the positional argument 'spectrum'!"
             return
 
         if not hasattr(self.work_spectrum,"par"):
-            setattr(self.spectrum,"par",hArray_par())
+            setattr(self.spectrum,"par",cr.hArray_par())
 
         if hasattr(self.spectrum.par,"baseline") and self.baseline==None:
             self.baseline=self.spectrum.par.baseline
@@ -842,13 +850,13 @@ class ApplyBaseline(tasks.Task):
             self.work_spectrum *= self.work_baseline
 
         # Some ugly way to fool the python bindings, since right now they down return data in the argument variables
-        #self.minblk=self.work_spectrum[...,self.numin_i:self.numax_i].minstddevblock(Vector(int,[self.nofAntennas],fill=self.blocklen),self.minrms,self.minmean)
+        #self.minblk=self.work_spectrum[...,self.numin_i:self.numax_i].minstddevblock(cr.Vector(int,[self.nofAntennas],fill=self.blocklen),self.minrms,self.minmean)
 
 
         if self.adaptive_peak_threshold:
             self.means[...].downsamplespikydata(self.stddevs[...],self.work_spectrum[...],1.0);
             self.mean=self.work_spectrum[...,self.numin_i:self.numax_i].mean().val()
-            self.limit=hArray(properties=self.work_baseline,name="Threshold",fill=0.0)
+            self.limit=cr.hArray(properties=self.work_baseline,name="Threshold",fill=0.0)
             self.limit[...].upsample(self.stddevs[...])
             self.limit *= self.rmsfactor
             self.limit[...].upsample(self.means[...])
@@ -864,18 +872,18 @@ class ApplyBaseline(tasks.Task):
             if self.adaptive_peak_threshold:
                 self.limit[self.plotchannel,self.plot_start:self.plot_end].plot(clf=False,color="green",logplot="y")
             else:
-                plotconst(self.frequency[self.plot_start:self.plot_end],self.limit[self.plotchannel]).plot(clf=False,color="green",logplot="y")
+                cr.plotconst(self.frequency[self.plot_start:self.plot_end],self.limit[self.plotchannel]).plot(clf=False,color="green",logplot="y")
         #Now select bins where the ratio between RMS and amplitude is within the limits
         if self.adaptive_peak_threshold:
             self.ndirty_channels=self.dirty_channels[...].findgreaterthanvec(self.work_spectrum[...],self.limit[...])
         else:
             self.ndirty_channels=self.dirty_channels[...].findgreaterthan(self.work_spectrum[...],self.limit)
         #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
-        self.work_spectrum[...,self.dirty_channels[...,[0]:asvec(self.ndirty_channels)]]=self.mean
+        self.work_spectrum[...,self.dirty_channels[...,[0]:cr.asvec(self.ndirty_channels)]]=self.mean
         if self.save_output:
             self.spectrum.setHeader(filename=self.filename)
             self.spectrum.write(self.filename)
-            print "Written spectrum to file, to read it back: sp=hArrayRead('"+self.filename+"')"
+            print "Written spectrum to file, to read it back: sp=cr.hArrayRead('"+self.filename+"')"
         if self.verbose:
             print time.clock()-self.t0,"s: Done ApplyBaseline."
         if self.doplot:
