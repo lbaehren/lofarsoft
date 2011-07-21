@@ -4,14 +4,16 @@ A number of tools useful in calibrating radio data
 """
 
 import pycrtools as cr
-import pycrtools.tasks as tasks
+from pycrtools import tasks
+from pycrtools.tasks import shortcuts as sc
+from pycrtools import rftools as rf
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
 import pytmf
-from pycrtools.tasks.shortcuts import *
-from math import *
-import pycrtools.rftools as rf
+import math
 
-deg=pi/180.
-pi2=pi/2.
+deg=math.pi/180.
+pi2=math.pi/2.
 
 
 class LocatePulseTrain(tasks.Task):
@@ -49,7 +51,7 @@ class LocatePulseTrain(tasks.Task):
 
     ::
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
-        file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
+        file["BLOCKSIZE"]=2**int(round(math.log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=["017000001", "017000002", "017000005", "017000007", "017001009", "017001010", "017001012", "017001015", "017002017", "017002019", "017002020", "017002023", "017003025", "017003026", "017003029", "017003031", "017004033", "017004035", "017004037", "017004039", "017005041", "017005043", "017005045", "017005047", "017006049", "017006051", "017006053", "017006055", "017007057", "017007059", "017007061", "017007063", "017008065", "017008066", "017008069", "017008071", "017009073", "017009075", "017009077", "017009079", "017010081", "017010083", "017010085", "017010087", "017011089", "017011091", "017011093", "017011095"]
         pulse=trun('LocatePulseTrain',file["TIMESERIES_DATA"])
         #(pulse.start,pulse.end) -> (65806L, 65934L)
@@ -58,24 +60,24 @@ class LocatePulseTrain(tasks.Task):
 
     """
     parameters=dict(
-        nblocks=p_(16,"The time series data is subdivided in ``nblock`` blocks where the one with the lowest RMS is used to determine the threshold level for finding peaks."),
-        nsigma=p_(7,"Pulse has to be ``nsigma`` above the noise."),
-        maxgap=p_(7,"Maximum gap length allowed in a pulse where data is not above the threshold"),
-        minpulselen=p_(7,"Minimum width of pulse."),
-        maxlen=p_(1024,"Maximum length allowed for the pulse train to be returned."),
-        minlen=p_(32,"Minimum length allowed for cutting the time time series data."),
-        prepulselen=p_(16,"Safety margin to add before the start of the pulse for cutting and ``start``."),
-        docut=p_(True,"Cut the time series around the pulse and return it in ``timeseries_data_cut``."),
-        cut_to_power_of_two=p_(True,"Cut the time series to a length which is a power of two?"),
-        maxnpeaks=p_(256,"Naximum number of train peaks to look for in data"),
-        start=p_(0,"Start index of the strongest pulse train",output=True),
-        end=p_(32,"End index of the strongest pulse train",output=True),
-        npeaks=p_(0,"Number of peaks found in data",output=True),
-        maxima=p_(None,"Values of the maxima of the pulse trains",output=True),
-        indexlist=p_(lambda self:cr.hArray(int,[self.maxnpeaks,2]),"Original locations of the peaks found in the data",output=True),
-        cutlen=p_(None,"Length of the cut-out data.",output=True),
-        timeseries_data_sum=p_(None,"Incoherent (squared) sum of all antennas."),
-        timeseries_data_cut=p_(lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]),"Contains the time series data cut out around the pulse.",output=True)
+        nblocks=sc.p_(16,"The time series data is subdivided in ``nblock`` blocks where the one with the lowest RMS is used to determine the threshold level for finding peaks."),
+        nsigma=sc.p_(7,"Pulse has to be ``nsigma`` above the noise."),
+        maxgap=sc.p_(7,"Maximum gap length allowed in a pulse where data is not above the threshold"),
+        minpulselen=sc.p_(7,"Minimum width of pulse."),
+        maxlen=sc.p_(1024,"Maximum length allowed for the pulse train to be returned."),
+        minlen=sc.p_(32,"Minimum length allowed for cutting the time time series data."),
+        prepulselen=sc.p_(16,"Safety margin to add before the start of the pulse for cutting and ``start``."),
+        docut=sc.p_(True,"Cut the time series around the pulse and return it in ``timeseries_data_cut``."),
+        cut_to_power_of_two=sc.p_(True,"Cut the time series to a length which is a power of two?"),
+        maxnpeaks=sc.p_(256,"Naximum number of train peaks to look for in data"),
+        start=sc.p_(0,"Start index of the strongest pulse train",output=True),
+        end=sc.p_(32,"End index of the strongest pulse train",output=True),
+        npeaks=sc.p_(0,"Number of peaks found in data",output=True),
+        maxima=sc.p_(None,"Values of the maxima of the pulse trains",output=True),
+        indexlist=sc.p_(lambda self:cr.hArray(int,[self.maxnpeaks,2]),"Original locations of the peaks found in the data",output=True),
+        cutlen=sc.p_(None,"Length of the cut-out data.",output=True),
+        timeseries_data_sum=sc.p_(None,"Incoherent (squared) sum of all antennas."),
+        timeseries_data_cut=sc.p_(lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]),"Contains the time series data cut out around the pulse.",output=True)
         )
 
     def call(self,timeseries_data):
@@ -101,7 +103,7 @@ class LocatePulseTrain(tasks.Task):
 
         self.start=self.indexlist[self.maxseq,0]
         self.end=self.indexlist[self.maxseq,1]
-        self.cutlen=int(2**ceil(log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
+        self.cutlen=int(2**math.ceil(math.log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
 
         self.start-=self.prepulselen; self.end=self.start+self.cutlen
 
@@ -153,12 +155,12 @@ class CrossCorrelateAntennas(tasks.Task):
     ::
 
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
-        file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
+        file["BLOCKSIZE"]=2**int(round(math.log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
         timeseries_data=file["TIMESERIES_DATA"]
         (start,end)=trun("LocatePulseTrain",rf.TimeBeamIncoherent(timeseries_data),nsigma=7,maxgap=3)
         start-=16
-        end=start+int(2**ceil(log(end-start,2)));
+        end=start+int(2**math.ceil(math.log(end-start,2)));
         timeseries_data_cut=hArray(float,[timeseries_data.shape()[-2],end-start])
         timeseries_data_cut[...].copy(timeseries_data[...,start:end])
         timeseries_data_cut[...]-=timeseries_data_cut[...].mean()
@@ -172,21 +174,51 @@ class CrossCorrelateAntennas(tasks.Task):
 
     """
     parameters=dict(
-        refant=p_(0,doc="Which data set in ``data`` to use as reference data set if no ``reference_data`` provided."),
-        oversamplefactor=p_(1,"Oversample the final cross-correlation by so many sub-steps. If equal to one then no oversampling."),
-        dim=p_(lambda self:self.timeseries_data.shape(),doc="Dimension of input array.",output=True),
-        dimfft=p_(lambda self:self.fft_data.shape(),doc="Dimension of fft array.",output=True),
-        reference_data=p_(None,doc="Reference data set to cross-correlate data with. If ``None`` then use data from reference antenna ``refant``."),
-        fft_data=p_(lambda self:cr.hArray(complex,[self.dim[-2],self.dim[-1]/2+1]),doc="FFT of the input timeseries data",workarray=True),
-        fft_reference_data=p_(lambda self:cr.hArray(complex,[self.dimfft[-1]]),
-                              doc="FFT of the reference data, dimensions ``[N data sets, (data length)/2+1]``. If no extra reference antenna array is provided, cross correlate with reference antenna in data set",workarray=True),
-        crosscorr_data_orig=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2]),
-                                                     "Scratch cross correlation vector in original size to hold intermediate results",workarray=True),
-        crosscorr_data=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2*max(self.oversamplefactor,1)]),
-                          doc="Output array of dimensions ``[N data sets, data length * oversamplefactor]`` containing the cross correlation.",output=True),
-        blocksize = p_(lambda self:self.timeseries_data.shape()[-1],"Length of the data for each antenna"),
-        fftplan = p_(lambda self:cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),"Memory and plan for FFT",output=False,workarray=True),
-        invfftplan = p_(lambda self:cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),"Memory and plan for inverse FFT",output=False,workarray=True)
+        refant = sc.p_(0,
+                       "Which data set in ``data`` to use as reference data set if no ``reference_data`` provided."),
+
+        oversamplefactor=sc.p_(1,
+                               "Oversample the final cross-correlation by so many sub-steps. If equal to one then no oversampling."),
+
+        dim=sc.p_(lambda self:self.timeseries_data.shape(),
+                  "Dimension of input array.",
+                  output=True),
+
+        dimfft=sc.p_(lambda self:self.fft_data.shape(),
+                     "Dimension of fft array.",
+                     output=True),
+
+        reference_data=sc.p_(None,
+                             "Reference data set to cross-correlate data with. If ``None`` then use data from reference antenna ``refant``."),
+
+        fft_data=sc.p_(lambda self:cr.hArray(complex,[self.dim[-2],self.dim[-1]/2+1]),
+                       "FFT of the input timeseries data",
+                       workarray=True),
+
+        fft_reference_data=sc.p_(lambda self:cr.hArray(complex,[self.dimfft[-1]]),
+                                 "FFT of the reference data, dimensions ``[N data sets, (data length)/2+1]``. If no extra reference antenna array is provided, cross correlate with reference antenna in data set",
+                                 workarray=True),
+
+        crosscorr_data_orig=sc.p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2]),
+                                  "Scratch cross correlation vector in original size to hold intermediate results",
+                                  workarray=True),
+
+        crosscorr_data=sc.p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2*max(self.oversamplefactor,1)]),
+                             "Output array of dimensions ``[N data sets, data length * oversamplefactor]`` containing the cross correlation.",
+                             output=True),
+
+        blocksize = sc.p_(lambda self:self.timeseries_data.shape()[-1],
+                          "Length of the data for each antenna"),
+
+        fftplan = sc.p_(lambda self:cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
+                        "Memory and plan for FFT",
+                        output=False,
+                        workarray=True),
+
+        invfftplan = sc.p_(lambda self:cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
+                           "Memory and plan for inverse FFT",
+                           output=False,
+                           workarray=True)
         )
 
     def call(self,timeseries_data):
@@ -244,12 +276,12 @@ class FitMaxima(tasks.Task):
     ::
 
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
-        file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
+        file["BLOCKSIZE"]=2**int(round(math.log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=[f for f in file["DIPOLE_NAMES"] if int(f)%2==1] # select uneven antenna IDs
         timeseries_data=file["TIMESERIES_DATA"]
         (start,end)=trun("LocatePulseTrain",rf.TimeBeamIncoherent(timeseries_data),nsigma=7,maxgap=3)
         start-=16
-        end=start+int(2**ceil(log(end-start,2)));
+        end=start+int(2**math.ceil(math.log(end-start,2)));
         timeseries_data_cut=hArray(float,[timeseries_data.shape()[-2],end-start])
         timeseries_data_cut[...].copy(timeseries_data[...,start:end])
         timeseries_data_cut[...]-=timeseries_data_cut[...].mean()
@@ -264,29 +296,29 @@ class FitMaxima(tasks.Task):
 
     """
     parameters=dict(
-        peak_width=p_(20,doc="Width of the data over which to fit the peak."),
-        nsubsamples=p_(16,doc="Divide each original sample into that many finer pixels. Determines maximum resolution of fit."),
-        ncoeffs=p_(lambda self:self.peak_width/2,doc="Number of breakpoints to fit spline polynomial around the peak."),
-        splineorder=p_(3,doc="Order of spline to fit. 3=cubic spline."),
-        refant=p_(None,"Reference antenna who's maximum determines the zero point of the x-axis (e.g., to get relative delays)."),
-        sampleinterval=p_(None,"Separation of two subsequent samples on the x-axis in desired units - used to return lags in proper units."),
-        doplot=p_(False,"Plot results."),
-        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        figure=p_(None,"The matplotlib figure containing the plot",output=True),
-        plotend=p_(4,doc="Stop plotting at this data set."),
-        plotstart=p_(0, doc="Start plotting at this data set."),
-        legend=p_(None,doc="List containing labels for each antenna data set for plotting the label"),
-        dim2=p_(lambda self:self.data.shape()[-2]),
-        coeffs=p_(lambda self:cr.hArray(float,[self.dim2,self.ncoeffs],name="Spline Coefficients"),doc="Coefficients of spline fit.",output=True),
-        fits_xdata=p_(lambda self:cr.hArray(dimensions=[self.dim2,(self.peak_width-1)*(self.nsubsamples)+1],properties=self.data,name="x"),workarray=True),
-        fits_ydata=p_(lambda self:cr.hArray(dimensions=[self.dim2,(self.peak_width-1)*(self.nsubsamples)+1],properties=self.data,xvalues=self.fits_xdata,name="Fit"),workarray=True),
-        covariance=p_(lambda self:cr.hArray(float,[self.dim2,self.ncoeffs,self.ncoeffs]),workarray=True,name="covariance"),
-        xpowers=p_(lambda self:cr.hArray(float,[self.dim2,self.peak_width,self.ncoeffs]),workarray=True,name="Spline xpowers"),
-        xdata=p_(lambda self:cr.hArray(float,[self.dim2,self.peak_width]),doc="x-axis value for the fit"),
-        xvalues=p_(lambda self:cr.hArray(float,[self.data.shape()[-1]],fill=range(self.data.shape()[-1])),doc="Samplenumber for the time series data"),
-        maxy=p_(None,"Y-values of fitted maxima",output=True),
-        maxx=p_(None,"X-values of fitted maxima",output=True,unit="Samplenumber"),
-        lags=p_(None,"X-values of fitted maxima",output=True,unit="User Units")
+        peak_width=sc.p_(20,"Width of the data over which to fit the peak."),
+        nsubsamples=sc.p_(16,"Divide each original sample into that many finer pixels. Determines maximum resolution of fit."),
+        ncoeffs=sc.p_(lambda self:self.peak_width/2,"Number of breakpoints to fit spline polynomial around the peak."),
+        splineorder=sc.p_(3,"Order of spline to fit. 3=cubic spline."),
+        refant=sc.p_(None,"Reference antenna who's maximum determines the zero point of the x-axis (e.g., to get relative delays)."),
+        sampleinterval=sc.p_(None,"Separation of two subsequent samples on the x-axis in desired units - used to return lags in proper units."),
+        doplot=sc.p_(False,"Plot results."),
+        newfigure=sc.p_(True,"Create a new figure for plotting for each new instance of the task."),
+        figure=sc.p_(None,"The matplotlib figure containing the plot",output=True),
+        plotend=sc.p_(4,"Stop plotting at this data set."),
+        plotstart=sc.p_(0, "Start plotting at this data set."),
+        legend=sc.p_(None,"List containing labels for each antenna data set for plotting the label"),
+        dim2=sc.p_(lambda self:self.data.shape()[-2]),
+        coeffs=sc.p_(lambda self:cr.hArray(float,[self.dim2,self.ncoeffs],name="Spline Coefficients"),"Coefficients of spline fit.",output=True),
+        fits_xdata=sc.p_(lambda self:cr.hArray(dimensions=[self.dim2,(self.peak_width-1)*(self.nsubsamples)+1],properties=self.data,name="x"),workarray=True),
+        fits_ydata=sc.p_(lambda self:cr.hArray(dimensions=[self.dim2,(self.peak_width-1)*(self.nsubsamples)+1],properties=self.data,xvalues=self.fits_xdata,name="Fit"),workarray=True),
+        covariance=sc.p_(lambda self:cr.hArray(float,[self.dim2,self.ncoeffs,self.ncoeffs]),workarray=True,name="covariance"),
+        xpowers=sc.p_(lambda self:cr.hArray(float,[self.dim2,self.peak_width,self.ncoeffs]),workarray=True,name="Spline xpowers"),
+        xdata=sc.p_(lambda self:cr.hArray(float,[self.dim2,self.peak_width]),"x-axis value for the fit"),
+        xvalues=sc.p_(lambda self:cr.hArray(float,[self.data.shape()[-1]],fill=range(self.data.shape()[-1])),"Samplenumber for the time series data"),
+        maxy=sc.p_(None,"Y-values of fitted maxima",output=True),
+        maxx=sc.p_(None,"X-values of fitted maxima",output=True,unit="Samplenumber"),
+        lags=sc.p_(None,"X-values of fitted maxima",output=True,unit="User Units")
         )
 
     def call(self,data):
@@ -444,49 +476,156 @@ class DirectionFitTriangles(tasks.Task):
 
     """
     parameters=dict(
-        positions={doc:"hArray with Cartesian coordinates of the antenna positions",unit:"m"},
-        timelags={doc:"hArray with the measured time lags for each event and each antenna",unit:"s"},
-        expected_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),"Exact time lags expected for each antenna for a given source position",unit="s"),
-        measured_geometric_timelags=p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),"Time lags minus cable delay = pure geometric delay if no error",unit="s"),
-        cabledelays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Cable Delays",fill=0),"Know (fixed) cable delays that one needs to correct measured delays for.",unit="s"),
-        total_delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Total Delays"),"Total instrumental (residual+cable) delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",unit="s"),
-        residual_delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Residual Delays"),"Residual delays needed to calibrate the array after correction for known cable delays. Will be subtracted from the measured lags (correced for cable delays) or added to the expected. The array will be updated during iteration",unit="s"),
-        delta_delays=p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),"Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",unit="s"),
-        delta_delays_mean_history=p_([],"Mean of the difference between expected and currently calibrated measured delays for each iteration",unit="s",output=True),
-        delta_delays_rms_history=p_([],"RMS of the difference between expected and currently calibrated measured delays for each iteration",unit="s",output=True),
-        delays_history=p_(lambda self:cr.hArray(float,[self.maxiter,self.NAnt],name="Delays"),"Instrumental delays for each iteration (for plotting)",unit="s"),
-        delays_historyT=p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),"Instrumental delays for each iteration (for plotting)",unit="s"),
-        maxiter=p_(1,"if >1 iterate (maximally tat many times) position and delays until solution converges."),
-        delay_error=p_(1e-12,"Target for the RMS of the delta delays where iteration can stop.",unit="s"),
-        rmsfactor=p_(3.,"How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
-        minrmsfactor=p_(1.,"Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
-        unitscalefactor=p_(1e-9,"Scale factor to apply for printing and plotting."),
-        unitname=p_("ns","Unit corresponding to scale factor."),
-        doplot=p_(False,"Plot results."),
-        plotant_start=p_(0,"First antenna to plot."),
-        plotant_end=p_(lambda self:self.NAnt,"Last antenna to plot plus one."),
-        verbose=p_(False,"Print progress information."),
-        refant=p_(0,"Reference antenna for which geometric delay is zero."),
-        solution=p_(1,"Can be ``+/-1``, determine whether to take the upper or the lower ('into the ground') solution."),
-        NAnt=p_(lambda self: self.timelags.shape()[-1],"Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
-        NTriangles=p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,"Number of Triangles ``= NAnt*(NAnt-1)*(NAnt-2)/6``."),
-        directions=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Directions"),"Cartesian direction vector for each triangle"),
-        centers=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Centers of Triangles"),"Cartesian coordinates of center for each triangle.",unit="m"),
-        errors=p_(lambda self:cr.hArray(float,[self.NTriangles],name="Closure Errors"),"Closure errors for each triangle (nor error if = 0)."),
-        triangles_size=p_(lambda self:cr.hArray(float,[self.NTriangles],name="Triangle Size"),"Average size for each triangle.",unit="m"),
-        index=p_(lambda self:cr.hArray(int,[self.NTriangles],name="Index"),"Index array of good triangles.",workarray=True),
-        error_tolerance=p_(1e-10,"Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
-        ngood=p_(0,"Number of good triangles (i.e., without closure errors)",output=True),
-        ngooddelays=p_(0,"Number of good delays (i.e., with only minor deviation)",output=True),
-        delayindex=p_(lambda self:cr.hArray(int,[self.NAnt],name="Delay index"),"Index array of good delays.",workarray=True),
-        meandirection=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean direction from all good triangles",output=True),
-        meancenter=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean central position of all good triangles",output=True),
-        goodones=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),"Scratch array to hold good directions.",unit="m"),
-        meandirection_spherical=p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),"Mean direction in spherical coordinates."),
-        meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth (``N->E``), Elevation tuple."),
-        meandirection_azel_deg=p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),"Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
-        plot_finish={default: lambda self:plotfinish(dopause=False,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"},
-        plot_name={default:"",doc:"Extra name to be added to plot filename."}
+        positions = dict(doc="hArray with Cartesian coordinates of the antenna positions",
+                         unit="m"),
+
+        timelags = dict(doc="hArray with the measured time lags for each event and each antenna",
+                        unit="s"),
+
+        expected_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),
+                                "Exact time lags expected for each antenna for a given source position",
+                                unit="s"),
+
+        measured_geometric_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),
+                                          "Time lags minus cable delay = pure geometric delay if no error",
+                                          unit="s"),
+
+        cabledelays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Cable Delays",fill=0),
+                          "Know (fixed) cable delays that one needs to correct measured delays for.",
+                          unit="s"),
+
+        total_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Total Delays"),
+                           "Total instrumental (residual+cable) delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",
+                           unit="s"),
+
+        residual_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Residual Delays"),
+                              "Residual delays needed to calibrate the array after correction for known cable delays. Will be subtracted from the measured lags (correced for cable delays) or added to the expected. The array will be updated during iteration",
+                              unit="s"),
+
+        delta_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),
+                           "Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",
+                           unit="s"),
+
+        delta_delays_mean_history=sc.p_([],
+                                        "Mean of the difference between expected and currently calibrated measured delays for each iteration",
+                                        unit="s",
+                                        output=True),
+
+        delta_delays_rms_history=sc.p_([],
+                                       "RMS of the difference between expected and currently calibrated measured delays for each iteration",
+                                       unit="s",
+                                       output=True),
+
+        delays_history=sc.p_(lambda self:cr.hArray(float,[self.maxiter,self.NAnt],name="Delays"),
+                             "Instrumental delays for each iteration (for plotting)",
+                             unit="s"),
+
+        delays_historyT=sc.p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),
+                              "Instrumental delays for each iteration (for plotting)",
+                              unit="s"),
+
+        maxiter=sc.p_(1,
+                      "if >1 iterate (maximally tat many times) position and delays until solution converges."),
+
+        delay_error=sc.p_(1e-12,
+                          "Target for the RMS of the delta delays where iteration can stop.",
+                          unit="s"),
+
+        rmsfactor=sc.p_(3.,
+                        "How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
+
+        minrmsfactor=sc.p_(1.,
+                           "Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
+
+        unitscalefactor=sc.p_(1e-9,
+                              "Scale factor to apply for printing and plotting."),
+
+        unitname=sc.p_("ns",
+                       "Unit corresponding to scale factor."),
+
+        doplot=sc.p_(False,
+                     "Plot results."),
+
+        plotant_start=sc.p_(0,
+                            "First antenna to plot."),
+
+        plotant_end=sc.p_(lambda self:self.NAnt,
+                          "Last antenna to plot plus one."),
+
+        verbose=sc.p_(False,
+                      "Print progress information."),
+
+        refant=sc.p_(0,
+                     "Reference antenna for which geometric delay is zero."),
+
+        solution=sc.p_(1,
+                       "Can be ``+/-1``, determine whether to take the upper or the lower ('into the ground') solution."),
+
+        NAnt=sc.p_(lambda self: self.timelags.shape()[-1],
+                   "Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
+
+        NTriangles=sc.p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,
+                         "Number of Triangles ``= NAnt*(NAnt-1)*(NAnt-2)/6``."),
+
+        directions=sc.p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Directions"),
+                         "Cartesian direction vector for each triangle"),
+
+        centers=sc.p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Centers of Triangles"),
+                      "Cartesian coordinates of center for each triangle.",
+                      unit="m"),
+
+        errors=sc.p_(lambda self:cr.hArray(float,[self.NTriangles],name="Closure Errors"),
+                     "Closure errors for each triangle (nor error if = 0)."),
+
+        triangles_size=sc.p_(lambda self:cr.hArray(float,[self.NTriangles],name="Triangle Size"),
+                             "Average size for each triangle.",
+                             unit="m"),
+
+        index=sc.p_(lambda self:cr.hArray(int,[self.NTriangles],name="Index"),
+                    "Index array of good triangles.",
+                    workarray=True),
+
+        error_tolerance=sc.p_(1e-10,
+                              "Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
+
+        ngood=sc.p_(0,
+                    "Number of good triangles (i.e., without closure errors)",
+                    output=True),
+
+        ngooddelays=sc.p_(0,
+                          "Number of good delays (i.e., with only minor deviation)",
+                          output=True),
+
+        delayindex=sc.p_(lambda self:cr.hArray(int,[self.NAnt],name="Delay index"),
+                         "Index array of good delays.",
+                         workarray=True),
+
+        meandirection=sc.p_(lambda self:cr.hArray(float,[3]),
+                            "Cartesian coordinates of mean direction from all good triangles",
+                            output=True),
+
+        meancenter=sc.p_(lambda self:cr.hArray(float,[3]),
+                         "Cartesian coordinates of mean central position of all good triangles",
+                         output=True),
+
+        goodones=sc.p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),
+                       "Scratch array to hold good directions.",
+                       unit="m"),
+
+        meandirection_spherical = sc.p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),
+                                        "Mean direction in spherical coordinates."),
+
+        meandirection_azel=sc.p_(lambda self:(math.pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),
+                                 "Mean direction as Azimuth (``N->E``), Elevation tuple."),
+
+        meandirection_azel_deg = sc.p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),
+                                       "Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
+
+        plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
+                           doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
+
+        plot_name = dict(default="",
+                         doc="Extra name to be added to plot filename.")
         )
 
     def call(self):
@@ -594,8 +733,6 @@ class DirectionFitTriangles(tasks.Task):
 
 
 #Needed for Task PlotDirectionTriangles
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
 
 class PlotDirectionTriangles(tasks.Task):
     """
@@ -653,13 +790,13 @@ class PlotDirectionTriangles(tasks.Task):
         p=trun("PlotDirectionTriangles",centers=direction.centers,positions=direction.positions,directions=direction.directions,title=filename)
     """
     parameters=dict(
-        positions = dict(doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",
+        positions = dict(doc="hArray of dimension ``[NAnt,3]`` with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",
                          unit="m"),
 
-        centers = dict(doc="hArray of dimension [NTriangles,3] with Cartesian coordinates of the centers of each triangle (x0,y0,z0,...)",
+        centers = dict(doc="hArray of dimension ``[NTriangles,3]`` with Cartesian coordinates of the centers of each triangle (x0,y0,z0,...)",
                        unit="m"),
 
-        directions = dict(doc="hArray of dimension [NTriangles,3] with Cartesian coordinates of the direction each triangle has given (x0,y0,z0,...)",
+        directions = dict(doc="hArray of dimension ``[NTriangles,3]`` with Cartesian coordinates of the direction each triangle has given (x0,y0,z0,...)",
                           unit="m"),
 
         title = dict(default=False,
@@ -668,30 +805,30 @@ class PlotDirectionTriangles(tasks.Task):
         plotlegend = dict(default=False,
                           doc="Plot a legend"),
 
-        newfigure = p_(True,
-                       "Create a new figure for plotting for each new instance of the task."),
+        newfigure = sc.p_(True,
+                          "Create a new figure for plotting for each new instance of the task."),
 
         direction_arrow_length = dict(default=10.,
                                       doc="Relative length of the direction arrows relative to the maximum size of the array"),
 
-        positionsT = p_(lambda self:cr.hArray_transpose(self.positions),
-                        "hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
-                        unit="m",
-                        workarray=True),
+        positionsT = sc.p_(lambda self:cr.hArray_transpose(self.positions),
+                           "hArray with transposed Cartesian coordinates of the antenna positions (x0, x1,..., y0, y1,..., z0, z1,....)",
+                           unit="m",
+                           workarray=True),
 
-        NAnt = p_(lambda self: self.positions.shape()[-2],
-                  "Number of antennas.",
-                  output=True),
+        NAnt = sc.p_(lambda self: self.positions.shape()[-2],
+                     "Number of antennas.",
+                     output=True),
 
-        SubArrayFactor = p_(lambda self:0.5,
-                            "Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
+        SubArrayFactor = sc.p_(lambda self:0.5,
+                               "Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
 
-        NSubArrays = p_(lambda self:int(self.NAnt*self.SubArrayFactor),
-                        "Number of subarrays for which to average the direction from triangles"),
+        NSubArrays = sc.p_(lambda self:int(self.NAnt*self.SubArrayFactor),
+                           "Number of subarrays for which to average the direction from triangles"),
 
-        NTriangles = p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,
-                        "Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6 ``= length of directions.",
-                        output=True)
+        NTriangles = sc.p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,
+                           "Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6`` = length of directions.",
+                           output=True)
         )
 
     def call(self):
@@ -713,7 +850,7 @@ class PlotDirectionTriangles(tasks.Task):
 
         self.azelr=cr.hArray(float,[self.NSubArrays,3])
         self.xyz=cr.hArray(float,[self.NSubArrays,3])
-        self.azelr.fillrangevec(cr.hArray([0.0,0.0,self.triangle_distances_max]),cr.hArray([2.*pi/self.NSubArrays,0.0,0.]))
+        self.azelr.fillrangevec(cr.hArray([0.0,0.0,self.triangle_distances_max]),cr.hArray([2.*math.pi/self.NSubArrays,0.0,0.]))
         cr.hCoordinateConvert(self.azelr[...],cr.CoordinateTypes.AzElRadius,self.xyz[...],cr.CoordinateTypes.Cartesian,False)
         self.xyz+=self.meancenter
 
@@ -811,7 +948,7 @@ class PlotAntennaLayout(tasks.Task):
         title = dict(default=False,
                      doc="Title for the plot (e.g., event or filename)"),
 
-        newfigure = p_(True,
+        newfigure = sc.p_(True,
                        "Create a new figure for plotting for each new instance of the task."),
 
         plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
@@ -823,14 +960,14 @@ class PlotAntennaLayout(tasks.Task):
         plotlegend = dict(default=False,
                           doc="Plot a legend"),
 
-        positionsT = p_(lambda self:cr.hArray_transpose(self.positions),
-                        "hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
-                        unit="m",
-                        workarray=True),
+        positionsT = sc.p_(lambda self:cr.hArray_transpose(self.positions),
+                           "hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
+                           unit="m",
+                           workarray=True),
 
-        NAnt = p_(lambda self: self.positions.shape()[-2],
-                  "Number of antennas.",
-                  output=True),
+        NAnt = sc.p_(lambda self: self.positions.shape()[-2],
+                     "Number of antennas.",
+                     output=True),
         )
 
     def call(self):
