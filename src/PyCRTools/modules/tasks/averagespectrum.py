@@ -2,9 +2,6 @@
 Task: Average spectrum
 ======================
 
-Usage::
-
-
 
 """
 
@@ -34,7 +31,7 @@ from pycrtools import qualitycheck
 import numpy as np
 import time
 import os
-from math import * # Needs fixing
+import math
 
 #Defining the workspace parameters
 
@@ -112,7 +109,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         current_file_number = dict(default=0,output=True,
                                  doc="Integer number pointing to the current file in the ``filenames`` list."),
-        
+
         load_if_file_exists = dict(default=False,
                                    doc="If average spectrum file (``spectrumfile``) already exists, skip calculation and load existing file."),
 
@@ -156,7 +153,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                         doc="Frequency resolution",
                         unit="Hz"),
 
-        blocklen = dict(default=lambda self:2**int(floor(log(self.chunksize_estimated,2))/2),
+        blocklen = dict(default=lambda self:2**int(math.floor(math.log(self.chunksize_estimated,2))/2),
                         doc="The size of a block being read in if stride>1, otherwise ``self.blocklen*self.nblocks`` is the chunksize."),
 
         maxnchunks = dict(default=-1,
@@ -185,7 +182,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         nfiles = dict(default=lambda self:len(self.filenames),
                          doc="Number of data files to process."),
-        
+
         output_dir = dict(default="",
                           doc="Directory where output file is to be written to (look for filename.dir there)."),
 
@@ -202,7 +199,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         dynspec_file = dict(default=lambda self:os.path.join(self.output_subdir,self.root_filename+"-dynspec"+self.fileext),
                             doc="Complete filename including directory to store the final dynamic spectrum."),
-        
+
         all_dynspec_file = dict(default=lambda self:os.path.join(self.output_dir,self.root_filename+"-alldynspec"+self.fileext),
                             doc="Complete filename including directory to store the final dynamic spectrum of all files."),
 
@@ -211,7 +208,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         output_files = dict(default=lambda self:dict(all_dynamic_spectrum=[],dynamic_spectrum=[],incoherent_sum=[],average_spectrum=[]),output=True,
                             doc="Dict containing the outpufiles created in the task. Keywords are 'dynamic_spectrum', 'incohrent_sum', 'average_spectrum', which in turn return listsof filenames"),
-        
+
         qualitycheck = dict(default=True,
                             doc="Perform basic qualitychecking of raw data and flagging of bad data sets."),
 
@@ -311,7 +308,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         fullsize = sc.p_(lambda self:self.nblocks*self.full_blocklen,
                          "The full length of the raw time series data used for one spectral chunk (nblocks*blocklen*stride)."),
 
-        nblocks = dict(default=lambda self:2**int(floor(log(self.chunksize_estimated/self.full_blocklen,2))),
+        nblocks = dict(default=lambda self:2**int(math.floor(math.log(self.chunksize_estimated/self.full_blocklen,2))),
                        doc="Number of blocks of lenght ``blocklen`` the time series data set is split in. The blocks are also used for quality checking."),
 
         nbands = dict(default=lambda self:(self.stride+1)/2,
@@ -389,7 +386,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
 
         starttime_unix = dict(default=lambda self:self.datafile["TIME"][0],output=True,
                         doc="Unix time stamp of start time.",
-                        unit="s"),        
+                        unit="s"),
         starttime_local = dict(default=lambda self:time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(self.starttime_unix)),output=True,
                                doc="Start time of the observation in local time"),
         starttime_UTC = dict(default=lambda self:time.strftime("%Y-%m-%d %H:%M:%S",time.gmtime(self.starttime_unix)),output=True,
@@ -635,7 +632,7 @@ class AverageSpectrum(tasks.Task):
     divide the data sets into sections of length ``t_int`` within
     which all chunks of data are intergated. The section is the one
     time-step in the dynamic spectrum. The result is provided in
-    `Task.dynspec`` and ``Task.cleanspec`` (where the dynamic spectrum
+    ``Task.dynspec`` and ``Task.cleanspec`` (where the dynamic spectrum
     is divided by an average spectrum, stored in
     ``Task.avspec``). Avspec and cleanspec are also par-array of
     dynspec (i.e., ``Task.dynspsc.par.cleanspec``). The dynamic
@@ -708,7 +705,7 @@ class AverageSpectrum(tasks.Task):
     The terminology is as follows: the smallest unit is a block. If
     stride>1 only every nth block will be read in to do a double fft.
 
-    stride*blocks will be one chunk of data. The size of a chunk
+    ``stride*blocks`` will be one chunk of data. The size of a chunk
     determines the resolution of an FFT.
     """
     WorkSpace = WorkSpace
@@ -736,7 +733,7 @@ class AverageSpectrum(tasks.Task):
             print "#AverageSpectrum: File",self.spectrum_file,"exists. Skipping calculation Loading Task.power from file!"
             self.power=cr.hArrayRead(self.spectrum_file)
             return
-        
+
         del self.output_files
         del self.starttimes_unix
         del self.starttimes_local
@@ -797,14 +794,14 @@ class AverageSpectrum(tasks.Task):
             self.count=0
             self.nofAntennas=0
             self.nantennas_total=0
-            
+
             print "# Using File",str(self.current_file_number)+":",self.filename
             if self.stride==1:
                 self.datafile["BLOCKSIZE"]=self.chunksize_used #Setting initial block size
             else:
                 self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
 
-            
+
             #Creating output directory, if needed
             if not os.path.exists(self.output_subdir):
                 print "# AverageSpectrum: creating new output directory",self.output_subdir
@@ -831,7 +828,7 @@ class AverageSpectrum(tasks.Task):
 
                     #Loop over strides within chunk, if spectrum is too large
                     for offset in range(self.stride):
-                        
+
                         #Read data in: either one block, or several strided blocks
                         if self.stride==1:
                             self.tdata.read(self.datafile,"TIMESERIES_DATA",nchunk)
@@ -897,7 +894,7 @@ class AverageSpectrum(tasks.Task):
                             self.nofAntennas+=1
 
                         # do second step of double fft, if required
-                        if self.doublefft:  
+                        if self.doublefft:
                             #Now sort the different blocks together (which requires a transpose over passes/strides)
                             for offset in range(self.stride):
                                 if self.dostride:
@@ -956,16 +953,16 @@ class AverageSpectrum(tasks.Task):
                                             self.power2[antenna_output_index,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean().val(),
                                             self.power2[antenna_output_index,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].stddev().val()))
                                     cr.plt.draw()
-                                    
+
                             if self.calc_dynspec:
                                 self.current_time_step=nchunk/self.chunks_per_sect
                                 self.dynspec[self.current_time_step].spectralpower(self.fftdata)
                                 self.dynspec_nspectra_added[self.current_time_step]+=1
-                                
+
                             if self.calc_incoherent_sum:
                                 self.incoherent_sum[nchunk].squareadd(self.tdata)
                                 self.ntimeseries_data_added_per_chunk[nchunk]+=1
-                    
+
                     else: #data not ok
                         self.nspectraflagged+=1
                         self.nspectraflagged_per_antenna[antenna_output_index]+=1
@@ -988,10 +985,10 @@ class AverageSpectrum(tasks.Task):
                     f=open(self.quality_db_filename+".py","a")
                     f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
                     f.close()
-                    
+
                 self.nantennas_total+=1
                 #End loop over antennas
-                
+
             # Now prepare writing the output for the different spectra
             self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
 
@@ -1000,7 +997,7 @@ class AverageSpectrum(tasks.Task):
                 self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","quality"],
                                   fftLength="speclen",blocksize="fullsize")
                 self.power.write(self.spectrum_file)# same as power2, just nicer dimensions
-                self.output_files["average_spectrum"].append(self.spectrum_file) 
+                self.output_files["average_spectrum"].append(self.spectrum_file)
 
             if self.calc_incoherent_sum:
                 #Normalize the incoherent time series power
@@ -1018,7 +1015,7 @@ class AverageSpectrum(tasks.Task):
                 self.cleanspec.copy(self.dynspec)
                 self.cleanspec /= self.avspec
                 self.dynspec.write(self.dynspec_file)
-                self.output_files["dynamic_spectrum"].append(self.dynspec_file) 
+                self.output_files["dynamic_spectrum"].append(self.dynspec_file)
 
                 if self.doplot:
                     self.dynplot()
@@ -1040,7 +1037,7 @@ class AverageSpectrum(tasks.Task):
                 print "Quality factor =",self.homogeneity_factor * 100,"%"
 
             print "# End File",str(self.current_file_number)+":",self.filename
-        
+
 
         if self.calc_all_dynspec:
             import pdb; pdb.set_trace()
@@ -1049,8 +1046,8 @@ class AverageSpectrum(tasks.Task):
             self.all_cleanspec.copy(self.all_dynspec)
             self.all_cleanspec /= self.all_avspec
             self.all_dynspec.write(self.all_dynspec_file)
-            self.output_files["all_dynamic_spectrum"].append(self.all_dynspec_file) 
-            
+            self.output_files["all_dynamic_spectrum"].append(self.all_dynspec_file)
+
         print "Finished - total time used:",time.clock()-self.t0,"s."
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'"
         print "These output files were created, use the folowing lines to read them back in:"
@@ -1090,6 +1087,7 @@ class AverageSpectrum(tasks.Task):
         If the chunks are too long to be entirely plotted, use::
 
           >>> Task.qplot(186,all=False).
+
         """
         quality_entry=self.quality[entry]
         filename=quality_entry["filename"]
@@ -1133,16 +1131,17 @@ class AverageSpectrum(tasks.Task):
           >>> tload "AverageSpectrum"; go
           >>> dsp=hArrayRead("Saturn.h5.dynspec.pcr")
           >>> Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
+
         """
         if not dynspec:
             dynspec=self.dynspec
-            
+
         if hasattr(dynspec,"par") and hasattr(dynspec.par,"cleanspec") and not plot_cleanspec==False:
             cleanspec=dynspec.par.cleanspec
             npcleanspec=np.zeros(cleanspec.getDim())
         else:
             cleanspec=None
-            
+
         hdr=dynspec.getHeader("AverageSpectrum")
         npdynspec=np.zeros(dynspec.getDim())
         cr.hCopy(npdynspec,dynspec)
@@ -1152,7 +1151,7 @@ class AverageSpectrum(tasks.Task):
         cr.plt.title("Dynamic Spectrum")
         cr.plt.imshow(npdynspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=dmin,vmax=dmax,
                    extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
-        print "dynspec: min=",log(dynspec.min().val()),"max=",log(dynspec.max().val()),"rms=",log(dynspec.stddev().val())
+        print "dynspec: min=",math.log(dynspec.min().val()),"max=",math.log(dynspec.max().val()),"rms=",math.log(dynspec.stddev().val())
         cr.plt.xlabel("Frequency [MHz]")
         cr.plt.ylabel("+/- Time [ms]")
         if cleanspec:

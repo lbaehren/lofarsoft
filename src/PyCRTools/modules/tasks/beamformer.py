@@ -3,6 +3,7 @@ Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
 Example::
+
   file=crfile(LOFARSOFT+"/data/lopes/example.event")
   tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
   tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
@@ -35,6 +36,7 @@ Example::
   self.beams[...,0].nyquistswap(self.NyquistZone)
   fxb=cr.hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
   fxb[...].plot(clf=True); cr.plt.show()
+
 """
 
 

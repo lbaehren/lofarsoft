@@ -48,7 +48,6 @@ class LocatePulseTrain(tasks.Task):
     **Example**
 
     ::
-
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
         file["BLOCKSIZE"]=2**int(round(log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=["017000001", "017000002", "017000005", "017000007", "017001009", "017001010", "017001012", "017001015", "017002017", "017002019", "017002020", "017002023", "017003025", "017003026", "017003029", "017003031", "017004033", "017004035", "017004037", "017004039", "017005041", "017005043", "017005045", "017005047", "017006049", "017006051", "017006053", "017006055", "017007057", "017007059", "017007061", "017007063", "017008065", "017008066", "017008069", "017008071", "017009073", "017009075", "017009077", "017009079", "017010081", "017010083", "017010085", "017010087", "017011089", "017011091", "017011093", "017011095"]
@@ -56,6 +55,7 @@ class LocatePulseTrain(tasks.Task):
         #(pulse.start,pulse.end) -> (65806L, 65934L)
         pulse.timeseries_data_sum.plot(highlight=(pulse.start,pulse.end),nhighlight=1)
         pulse.timeseries_data_cut[0].plot()
+
     """
     parameters=dict(
         nblocks=p_(16,"The time series data is subdivided in ``nblock`` blocks where the one with the lowest RMS is used to determine the threshold level for finding peaks."),
@@ -148,7 +148,7 @@ class CrossCorrelateAntennas(tasks.Task):
     :class:`LocatePulseTrain`,
     :class:`FitMaxima`
 
-    **Example:**
+    **Example**
 
     ::
 
@@ -169,6 +169,7 @@ class CrossCorrelateAntennas(tasks.Task):
         crosscorr_data.abs()
         crosscorr_data[...].runningaverage(15,hWEIGHTS.GAUSSIAN)
         crosscorr_data[0:4,...].plot()
+
     """
     parameters=dict(
         refant=p_(0,doc="Which data set in ``data`` to use as reference data set if no ``reference_data`` provided."),
@@ -178,11 +179,11 @@ class CrossCorrelateAntennas(tasks.Task):
         reference_data=p_(None,doc="Reference data set to cross-correlate data with. If ``None`` then use data from reference antenna ``refant``."),
         fft_data=p_(lambda self:cr.hArray(complex,[self.dim[-2],self.dim[-1]/2+1]),doc="FFT of the input timeseries data",workarray=True),
         fft_reference_data=p_(lambda self:cr.hArray(complex,[self.dimfft[-1]]),
-                              doc="FFT of the reference data, dimensions [N data sets, (data length)/2+1]. If no extra reference antenna array is provided, cross correlate with reference antenna in data set",workarray=True),
+                              doc="FFT of the reference data, dimensions ``[N data sets, (data length)/2+1]``. If no extra reference antenna array is provided, cross correlate with reference antenna in data set",workarray=True),
         crosscorr_data_orig=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2]),
                                                      "Scratch cross correlation vector in original size to hold intermediate results",workarray=True),
         crosscorr_data=p_(lambda self:cr.hArray(float,[self.dimfft[-2],(self.dimfft[-1]-1)*2*max(self.oversamplefactor,1)]),
-                          doc="Output array of dimensions [N data sets, data length * oversamplefactor] containing the cross correlation.",output=True),
+                          doc="Output array of dimensions ``[N data sets, data length * oversamplefactor]`` containing the cross correlation.",output=True),
         blocksize = p_(lambda self:self.timeseries_data.shape()[-1],"Length of the data for each antenna"),
         fftplan = p_(lambda self:cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),"Memory and plan for FFT",output=False,workarray=True),
         invfftplan = p_(lambda self:cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),"Memory and plan for inverse FFT",output=False,workarray=True)
@@ -320,7 +321,7 @@ class FitMaxima(tasks.Task):
             self.lags*=self.sampleinterval
         if not self.refant==None:
             self.lags-=self.lags[self.refant]
-            
+
 
 class DirectionFitTriangles(tasks.Task):
     """
@@ -375,7 +376,7 @@ class DirectionFitTriangles(tasks.Task):
     ``measured timelag - (cable delay + residual delay + delta delays[i]) - expected geometric delay = 0``
 
     with a delta delay that is determined at each step and then subsumed into the residual delay.
-    
+
     **Output:**
 
     The main result will be in ``Task.meandirection`` which contains
@@ -397,7 +398,7 @@ class DirectionFitTriangles(tasks.Task):
     - For spherical coordindates Az/phi is defined as East (0 degree)
       through North (90 degree) and theta running from 0 degree at the
       zenith to 90 degree at the horizon
-    
+
     **See also:**
 
     :class:`CrossCorrelateAntennas`,
@@ -457,8 +458,8 @@ class DirectionFitTriangles(tasks.Task):
         delays_historyT=p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),"Instrumental delays for each iteration (for plotting)",unit="s"),
         maxiter=p_(1,"if >1 iterate (maximally tat many times) position and delays until solution converges."),
         delay_error=p_(1e-12,"Target for the RMS of the delta delays where iteration can stop.",unit="s"),
-        rmsfactor=p_(3.,"How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until minrsmfactor)."),
-        minrmsfactor=p_(1.,"Minimum rmsfactor (see ``rmsfactor) for selecting bad antennas."),
+        rmsfactor=p_(3.,"How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
+        minrmsfactor=p_(1.,"Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
         unitscalefactor=p_(1e-9,"Scale factor to apply for printing and plotting."),
         unitname=p_("ns","Unit corresponding to scale factor."),
         doplot=p_(False,"Plot results."),
@@ -466,9 +467,9 @@ class DirectionFitTriangles(tasks.Task):
         plotant_end=p_(lambda self:self.NAnt,"Last antenna to plot plus one."),
         verbose=p_(False,"Print progress information."),
         refant=p_(0,"Reference antenna for which geometric delay is zero."),
-        solution=p_(1,"Can be +/-1, determine whether to take the upper or the lower ('into the ground') solution."),
+        solution=p_(1,"Can be ``+/-1``, determine whether to take the upper or the lower ('into the ground') solution."),
         NAnt=p_(lambda self: self.timelags.shape()[-1],"Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
-        NTriangles=p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,"Number of Triangles = NAnt*(NAnt-1)*(NAnt-2)/6."),
+        NTriangles=p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,"Number of Triangles ``= NAnt*(NAnt-1)*(NAnt-2)/6``."),
         directions=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Directions"),"Cartesian direction vector for each triangle"),
         centers=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Centers of Triangles"),"Cartesian coordinates of center for each triangle.",unit="m"),
         errors=p_(lambda self:cr.hArray(float,[self.NTriangles],name="Closure Errors"),"Closure errors for each triangle (nor error if = 0)."),
@@ -482,9 +483,9 @@ class DirectionFitTriangles(tasks.Task):
         meancenter=p_(lambda self:cr.hArray(float,[3]),"Cartesian coordinates of mean central position of all good triangles",output=True),
         goodones=p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),"Scratch array to hold good directions.",unit="m"),
         meandirection_spherical=p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),"Mean direction in spherical coordinates."),
-        meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth (N->E), Elevation tuple."),
-        meandirection_azel_deg=p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),"Mean direction as Azimuth (N->E), Elevation tuple in degrees."),
-        plot_finish={default: lambda self:plotfinish(dopause=False,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        meandirection_azel=p_(lambda self:(pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),"Mean direction as Azimuth (``N->E``), Elevation tuple."),
+        meandirection_azel_deg=p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),"Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
+        plot_finish={default: lambda self:plotfinish(dopause=False,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"},
         plot_name={default:"",doc:"Extra name to be added to plot filename."}
         )
 
@@ -539,7 +540,7 @@ class DirectionFitTriangles(tasks.Task):
 
             self.delta_delays_rms_history.append(self.delta_delays_rms)
             self.delta_delays_mean_history.append(self.delta_delays_mean)
-            
+
             rfac=max(self.rmsfactor*(1.0-float(it)/(self.maxiter)),self.minrmsfactor)
             self.ngooddelays=self.delayindex.findbetween(self.delta_delays,self.delta_delays_mean-self.delta_delays_rms*rfac,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
             if self.ngooddelays>0:
@@ -652,18 +653,45 @@ class PlotDirectionTriangles(tasks.Task):
         p=trun("PlotDirectionTriangles",centers=direction.centers,positions=direction.positions,directions=direction.directions,title=filename)
     """
     parameters=dict(
-        positions={doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit:"m"},
-        centers={doc:"hArray of dimension [NTriangles,3] with Cartesian coordinates of the centers of each triangle (x0,y0,z0,...)",unit:"m"},
-        directions={doc:"hArray of dimension [NTriangles,3] with Cartesian coordinates of the direction each triangle has given (x0,y0,z0,...)",unit:"m"},
-        title={default:False,doc:"Title for the plot (e.g., event or filename)"},
-        plotlegend={default:False,doc:"Plot a legend"},
-        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        direction_arrow_length={default:10.,doc:"Relative length of the direction arrows relative to the maximum size of the array"},
-        positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
-        NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
-        SubArrayFactor=p_(lambda self:0.5,"Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
-        NSubArrays=p_(lambda self:int(self.NAnt*self.SubArrayFactor),"Number of subarrays for which to average the direction from triangles"),
-        NTriangles=p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,"Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6 ``= length of directions.",output=True)
+        positions = dict(doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",
+                         unit="m"),
+
+        centers = dict(doc="hArray of dimension [NTriangles,3] with Cartesian coordinates of the centers of each triangle (x0,y0,z0,...)",
+                       unit="m"),
+
+        directions = dict(doc="hArray of dimension [NTriangles,3] with Cartesian coordinates of the direction each triangle has given (x0,y0,z0,...)",
+                          unit="m"),
+
+        title = dict(default=False,
+                     doc="Title for the plot (e.g., event or filename)"),
+
+        plotlegend = dict(default=False,
+                          doc="Plot a legend"),
+
+        newfigure = p_(True,
+                       "Create a new figure for plotting for each new instance of the task."),
+
+        direction_arrow_length = dict(default=10.,
+                                      doc="Relative length of the direction arrows relative to the maximum size of the array"),
+
+        positionsT = p_(lambda self:cr.hArray_transpose(self.positions),
+                        "hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
+                        unit="m",
+                        workarray=True),
+
+        NAnt = p_(lambda self: self.positions.shape()[-2],
+                  "Number of antennas.",
+                  output=True),
+
+        SubArrayFactor = p_(lambda self:0.5,
+                            "Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
+
+        NSubArrays = p_(lambda self:int(self.NAnt*self.SubArrayFactor),
+                        "Number of subarrays for which to average the direction from triangles"),
+
+        NTriangles = p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,
+                        "Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6 ``= length of directions.",
+                        output=True)
         )
 
     def call(self):
@@ -711,7 +739,7 @@ class PlotDirectionTriangles(tasks.Task):
         self.subpoints2=cr.hArray(copy=self.subdirections)
         self.subpoints2 *= self.triangle_distances_max*self.direction_arrow_length
         self.subpoints2 += self.suborigins
-        
+
         self.meanpoint2=cr.hArray(copy=self.meandirection)
         self.meanpoint2 *= self.triangle_distances_max*self.direction_arrow_length
         self.meanpoint2 += self.meancenter
@@ -754,22 +782,55 @@ class PlotAntennaLayout(tasks.Task):
         layout=trun("PlotAntennaLayout",positions=positions,sizes=range(48),names=range(48))
    """
     parameters=dict(
-        positions={doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit:"m"},
-        size={default:300,doc:"Size of largest point."},
-        sizes_min={default:None,doc:"If set, then use this as the minimum scale for the sizes, when normalizing."},
-        sizes_max={default:None,doc:"If set, then use this as the maximum scale for the sizes, when normalizing."},
-        normalize_sizes={default:True,doc:"Normalize the sizes to run from 0-1."},
-        normalize_colors={default:True,doc:"Normalize the colors to run from 0-1."},
-        sizes={default:20,doc:"hArray of dimension [NAnt] with the values for the size of the plot"},
-        colors={default:'b',doc:"hArray of dimension [NAnt] with the values for the colors of the plot"},
-        names={default:False,doc:"hArray of dimension [NAnt] with the names or IDs of the antennas"},
-        title={default:False,doc:"Title for the plot (e.g., event or filename)"},
-        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        plot_finish={default: lambda self:plotfinish(dopause=False,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
-        plot_name={default:"",doc:"Extra name to be added to plot filename."},
-        plotlegend={default:False,doc:"Plot a legend"},
-        positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
-        NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
+        positions = dict(doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",
+                         unit="m"),
+
+        size = dict(default=300,
+                    doc="Size of largest point."),
+
+        sizes_min = dict(default=None,
+                         doc="If set, then use this as the minimum scale for the sizes, when normalizing."),
+        sizes_max = dict(default=None,
+                         doc="If set, then use this as the maximum scale for the sizes, when normalizing."),
+
+        normalize_sizes = dict(default=True,
+                               doc="Normalize the sizes to run from 0-1."),
+
+        normalize_colors = dict(default=True,
+                                doc="Normalize the colors to run from 0-1."),
+
+        sizes = dict(default=20,
+                     doc="hArray of dimension [NAnt] with the values for the size of the plot"),
+
+        colors = dict(default='b',
+                      doc="hArray of dimension [NAnt] with the values for the colors of the plot"),
+
+        names = dict(default=False,
+                     doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
+
+        title = dict(default=False,
+                     doc="Title for the plot (e.g., event or filename)"),
+
+        newfigure = p_(True,
+                       "Create a new figure for plotting for each new instance of the task."),
+
+        plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
+                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
+
+        plot_name = dict(default="",
+                         doc="Extra name to be added to plot filename."),
+
+        plotlegend = dict(default=False,
+                          doc="Plot a legend"),
+
+        positionsT = p_(lambda self:cr.hArray_transpose(self.positions),
+                        "hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
+                        unit="m",
+                        workarray=True),
+
+        NAnt = p_(lambda self: self.positions.shape()[-2],
+                  "Number of antennas.",
+                  output=True),
         )
 
     def call(self):

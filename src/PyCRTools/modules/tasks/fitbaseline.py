@@ -6,6 +6,7 @@ Spectrum documentation
 Usage::
 
   >>> sp=cr.hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
+
 """
 
 import pycrtools as cr
@@ -17,6 +18,7 @@ import time
 import os
 
 """
+
   =========== ===== ========================================================
   *default*         contains a default value or a function that will be
                     assigned when the parameter is accessed the first time
@@ -34,6 +36,7 @@ import os
                     large amount of memory and is listed separately and
                     not written to file.
   =========== ===== ========================================================
+
 """
 
 def fitbaseline_calc_freqs(self):
@@ -510,7 +513,7 @@ CalcBaselineParameters.update(dict(
     normalize = dict(doc="If **True**, normalize the baseline to have a total sum of unity.",
                      default=True),
 
-    powerlaw = dict(doc="Multiply gain curve with a powerlaw depending on value. 'GalacticT': return a powerlaw according to Galactic radio emission in Kelvin; alpha (i.e. a number): multiply with powerlaw of form :math`:\nu^\alpha`.",
+    powerlaw = dict(doc="Multiply gain curve with a powerlaw depending on value. 'GalacticT': return a powerlaw according to Galactic radio emission in Kelvin; alpha (i.e. a number): multiply with powerlaw of form :math`:\\nu^\\alpha`.",
                     default=False)
 
     ))

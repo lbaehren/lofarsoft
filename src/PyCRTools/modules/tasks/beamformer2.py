@@ -2,13 +2,12 @@
 Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
-Example:
-::
+**Example**::
 
-self=Task
-self.beams[...,0].nyquistswap(self.NyquistZone)
-fxb=cr.hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
-fxb[...].plot(clf=True); cr.plt.show()
+  self=Task
+  self.beams[...,0].nyquistswap(self.NyquistZone)
+  fxb=cr.hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
+  fxb[...].plot(clf=True); cr.plt.show()
 
 """
 
@@ -87,7 +86,7 @@ class BeamFormer2(tasks.Task):
 
     The resulting beam is stored in the array Task.beam and written to
     disk as an hArray with parameters stored in the header dict (use
-    getHeader('BeamFormer2') to retrieve this.)
+    ``getHeader('BeamFormer2')`` to retrieve this.)
 
     The incoherent and beamed average spectra are stored in
     Task.avspec_incoherent and Task.avspec respectively. They are also
@@ -101,7 +100,7 @@ class BeamFormer2(tasks.Task):
 #Beamformer parameters:
 #------------------------------------------------------------------------
         pointings = dict(default=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)],
-                         doc="List of coordinate dicts ({'az':az1,'el':elevation value}) containing pointing directions for each beam on the sky."),
+                         doc="List of coordinate dicts (``{'az':az1,'el':elevation value}``) containing pointing directions for each beam on the sky."),
 
         phase_center = dict(default=[0,0,0],
                             doc="List or vector containing the X,Y,Z positions of the phase center of the array.",
@@ -118,7 +117,7 @@ class BeamFormer2(tasks.Task):
 #------------------------------------------------------------------------
 
         filefilter = sc.p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
-                           "Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
+                           "Unix style filter (i.e., with ``*,~, $VARIABLE``, etc.), to describe all the files to be processed."),
 
         file_start_number = dict(default=0,
                                  doc="Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."),
@@ -173,7 +172,7 @@ class BeamFormer2(tasks.Task):
                         doc="End plotting before this sample number."),
 
         plot_finish = dict(default= lambda self:plotfinish(doplot=self.doplot),
-                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
+                           doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
 
         delta_nu = dict(default=1,
                         doc="Desired frequency resolution - will be rounded off to get powers of 2 blocklen. Alternatively set blocklen directly.",
@@ -314,7 +313,7 @@ class BeamFormer2(tasks.Task):
                         unit="Sample"),
 
         cable_delays = dict(default=lambda self:cr.hArray(float,[self.nantennas],name="Cable Delays",units=("","s")),
-                            doc="An hArray containing 'cable' delays for each selected antenna in seconds as values. These delays will be added to the geometrical delays.",
+                            doc="An ``hArray`` containing 'cable' delays for each selected antenna in seconds as values. These delays will be added to the geometrical delays.",
                             unit="s"),
 
 #------------------------------------------------------------------------
@@ -521,13 +520,13 @@ class BeamFormer2(tasks.Task):
         caclulated it will only be recalculated if explicitly asked
         for with recalc=True.
 
-        *beams* = None - Input array. Take self.beams from task, if None.
-        *recalc*= False - If true force a recalculation of the time series beam if it exists
+        *beams* = ``None`` - Input array. Take self.beams from task, if None.
+        *recalc*= ``False`` - If true force a recalculation of the time series beam if it exists
         *block* = 0 - Which  block to plot, or Ellipsis ('...') for all
         *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
-        *doabs* = True - Take the absolute of the timeseries before plotting.
+        *doabs* = ``True`` - Take the absolute of the timeseries before plotting.
         *smooth* = 0 - If > 0 smooth data with a Gaussian kernel of that size.
-        *plotspec* = False - If True plot the average spectrum instead.
+        *plotspec* = ``False`` - If True plot the average spectrum instead.
         *xlim*       tuple with minimum and maximum limits for the *x*-axis.
         *ylim*       tuple with minimum and maximum limits for the *y*-axis.
 
