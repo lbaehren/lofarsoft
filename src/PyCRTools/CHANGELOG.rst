@@ -1,3 +1,12 @@
+2011-07-21 - Rev 8177
+=====================
+
+  :Author: Martin van den Akker <martinva@astro.ru.nl>
+
+- Added shortcuts to sc namespace for tasks
+- Added pycrtools to cr namespace for tasks
+
+
 2011-07-21 - Rev 8176
 =====================
 

@@ -13,7 +13,7 @@ pipeline or as complex tasks to be called interactively by a user.
 The main parts of a pipeline are a 'run' function that performs the
 main computations, and optional initialization part that is called
 before the first time execution of the task, and a *workspace* which
-holds all the input and output parameters of the task. The workspace
+holds all the input and outputsc.output parameters of the task. The workspace
 can also hold large scratch arrays and derived parameters, which are
 only calculated when needed.
 
@@ -40,11 +40,11 @@ Executing tasks
 
 The tasks are autmatically load when importing the pycrtools, e.g::
 
-    from pycrtools import *
+    import pycrtools as cr
 
 The list of available tasks can be viewed with 'tlist' and a specific
 task is loaded via ``tload tasknumber`` or ``tload taskname``. The
-task stored last will be reloaded when the interactive session is 
+task stored last will be reloaded when the interactive session is
 restarted the next time.
 
 In general tasks can then be called in the conventional way simply
@@ -207,9 +207,9 @@ A simple example is given below::
       Documentation of task - parameters will be added automatically
       \"""
       parameters = {
-          "x":{default:None,doc:"x-value - a positional parameter",positional:1},
-          "y":{default:2, doc:"y-value - a normal keyword parameter"},
-          "xy":{default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
+          "x":{sc.default:None,doc:"x-value - a positional parameter",sc.positional:1},
+          "y":{sc.default:2, doc:"y-value - a normal keyword parameter"},
+          "xy":{sc.default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
       def init(self):
           print "Calling optional initialization routine - Nothing to do here."
       def run(self):
@@ -260,12 +260,12 @@ positional
   would be ``self`` which cannot be used)
 
 
-To simplify input one can use the helper function p_(default,doc,unit,**kwargs) which will turn
+To simplify input one can use the helper function sc.p_(default,doc,unit,**kwargs) which will turn
 its arguments into a parameter dict. E.g. the above parameters dict could have been defined as::
 
-    parameters = {"x":p_(None,"x-value - a positional parameter",positional=1),
-                  "y":p_(2,"y-value - a normal keyword parameter"),
-                  "xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
+    parameters = {"x":sc.p_(None,"x-value - a positional parameter",sc.positional=1),
+                  "y":sc.p_(2,"y-value - a normal keyword parameter"),
+                  "xy":sc.p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
 
 Yet another, and perhaps more recognizable form of defining input
 parameters is to provide a dummy call function will all input
@@ -419,8 +419,7 @@ import types
 import time
 
 from pycrtools import *
-#from pycrtools.tasks.shortcuts import *
-from shortcuts import *
+import shortcuts as sc
 from sys import version_info
 
 #import pdb
@@ -522,12 +521,12 @@ class TaskInit(type):
         for p,v in sorted(dct.items()):
             par_doc = newline + "*" + p + "*"
             # Check for default values
-            if (v.has_key(default) and
-                (not type(v[default]) == types.FunctionType)):
-                par_doc_default = str(v[default]).strip()
+            if (v.has_key(sc.default) and
+                (not type(v[sc.default]) == types.FunctionType)):
+                par_doc_default = str(v[sc.default]).strip()
                 par_doc += " [default value: "
                 # Print string values in quotes
-                if isinstance(v[default],(str, unicode, basestring)):
+                if isinstance(v[sc.default],(str, unicode, basestring)):
                     par_doc += "'" + par_doc_default + "'"
                 else:
                    if par_doc_default:
@@ -535,13 +534,13 @@ class TaskInit(type):
                 par_doc += "]"
             par_doc += newline
             # Check for documentation
-            if v.has_key(doc):
-                par_doc += "  " + v[doc].strip() + newline*2
+            if v.has_key(sc.doc):
+                par_doc += "  " + v[sc.doc].strip() + newline*2
             else:
                 par_doc += newline
             # Add parameter documentation to input- or output parameter documentation.
-            if ((v.has_key(default) and (type(v[default]) == types.FunctionType)) or
-                (v.has_key(output) and v[output])):
+            if ((v.has_key(sc.default) and (type(v[sc.default]) == types.FunctionType)) or
+                (v.has_key(sc.output) and v[sc.output])):
                 par_doc_output += par_doc
             else:
                 par_doc_input += par_doc
@@ -575,7 +574,7 @@ class Task(object):
     same
 
     Task.ws -> return workspace (and print all the pararameters)
-    
+
     Parameters for calling the Task:
 
     *init* = False - force the initalisation to run again
@@ -629,15 +628,15 @@ class Task(object):
                 for p in positional_pars:
                     npos+=1
                     if property_dict.has_key(p):
-                        property_dict[p].update({default:None,export:False,positional:npos})
+                        property_dict[p].update({sc.default:None,sc.export:False,sc.positional:npos})
                     else:
-                        property_dict[p]={default:None,export:False,positional:npos}
+                        property_dict[p]={sc.default:None,sc.export:False,sc.positional:npos}
                 if n_named_pars>0:
                     for p,v in zip(named_pars,self.call.im_func.func_defaults):
                         if property_dict.has_key(p):
-                            property_dict[p].update({default:v})
+                            property_dict[p].update({sc.default:v})
                         else:
-                            property_dict[p]={default:v}
+                            property_dict[p]={sc.default:v}
             self.WorkSpace=WorkSpace(self.__taskname__,parameters=property_dict) # This creates the work space class that is used to create the actual ws instance
 
         if ws==None:
@@ -919,10 +918,10 @@ class Task(object):
             k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
             if k=="q":
                 self.plot_pause=False
-                print "Continue without pausing in this task (other tasks not affected)." 
+                print "Continue without pausing in this task (other tasks not affected)."
             elif k=="n":
                 self.doplot=False
-                print "Continue without plotting in this task (other tasks not affected)." 
+                print "Continue without plotting in this task (other tasks not affected)."
                 plt.ion()
             else:
                 print "Continue."
@@ -939,27 +938,16 @@ def printindent_string(txt,indentlen,width=80,prefix="# "):
     Usage:
 
     printindent_string(txt,indentlen,width=80,prefix='# ')
-    
+
     Description:
-    
+
     Return a string to print a text as a block of with indentation and maximum width.
-    
+
     Example:
     ::
-    
+
         tasks.printindent_string('Hallo lieber Leser, dies ist ein Text, der umgebrochen werden soll!',10,width=20)
 
-        # Hallo
-        # lieber
-        # Leser,
-        # dies
-        # ist ein
-        # Text,
-        # der
-        # umgebroc
-        # hen
-        # werden
-        # soll!
     """
     textsize=len(txt)
     blockwidth=width-indentlen-len(prefix)
@@ -987,7 +975,7 @@ def printindent_string(txt,indentlen,width=80,prefix="# "):
         end=start+blockwidth
     return outstr
 
-    
+
 class WorkSpaceType(type):
 #    def __init__(cls, name, bases, dct):
 #       """ Create a new class.
@@ -1031,17 +1019,17 @@ class WorkSpaceType(type):
         obj=type(taskname+cls.__name__,cls.__bases__,cls.__dict__.copy())
 
         for k,v in readParfiles(parfile).items():
-            parameters[k]={default:v}
+            parameters[k]={sc.default:v}
 
         for k,v in kwargs.items():
-            parameters[k]={default:v}
+            parameters[k]={sc.default:v}
         obj.parameters = parameters
         obj.__taskname__=taskname
 
         return obj
 
 """
-wsc=WorkSpace("MyTask",x={default:1},y={default:2})
+wsc=WorkSpace("MyTask",x={sc.default:1},y={sc.default:2})
 wsc=WorkSpace("MyTask",x=1,y=2)
 ws=wsc(x=3)
 """
@@ -1080,8 +1068,8 @@ class WorkSpace(object):
         self._parameterlist=set()
         self._positionals=[]
         self._modified_parameters=set()
-        self._default_parameter_definition={doc:"", unit:"", default:None, workarray:False, export:True}
-        self._default_parameter_order=(default,doc,unit)
+        self._default_parameter_definition={sc.doc:"", sc.unit:"", sc.default:None, sc.workarray:False, sc.export:True}
+        self._default_parameter_order=(sc.default,sc.doc,sc.unit)
         self._known_methods=set()
         self._known_methods.update(set(dir(self)))
         self.addParameters(self.parameter_properties)
@@ -1183,8 +1171,8 @@ class WorkSpace(object):
         if hasattr(self,"_"+par):   # Return locally stored value
             return getattr(self,"_"+par)
         elif self.parameter_properties.has_key(par):
-            if self.parameter_properties[par].has_key(default):   #return default value or function
-                f_or_val=self.parameter_properties[par][default]
+            if self.parameter_properties[par].has_key(sc.default):   #return default value or function
+                f_or_val=self.parameter_properties[par][sc.default]
                 if type(f_or_val)==types.FunctionType:
                     setattr(self,"_"+par,f_or_val(self))
                 else:
@@ -1224,7 +1212,7 @@ class WorkSpace(object):
                 if getattr(self,"_"+par) is value: return  # don't assign or considered modified if it is the same value
                 delattr(self,"_"+par) # Delete first in case it contains a large array which blocks memory
             setattr(self,"_"+par,value)
-            self.parameter_properties[par][default]=value
+            self.parameter_properties[par][sc.default]=value
         else:
             setattr(self,"_"+par,value) # create new parameter with default parameters
             self.parameter_properties[par]=self._default_parameter_definition
@@ -1270,8 +1258,8 @@ class WorkSpace(object):
             if self.parameters.has_key(name): #OK that is a pre-defined parameter
                 self.parameter_properties[name]=self._default_parameter_definition.copy()
                 self.parameter_properties[name].update(self.parameters[name]) # restore the properties with original properties
-                if self.parameter_properties[name].has_key(default) and type(self.parameter_properties[name][default])==types.FunctionType: # this is a function
-                    self.parameter_properties[name][dependencies]=self.parameterlist.intersection(self.parameter_properties[name][default].func_code.co_names) #reset dependencies
+                if self.parameter_properties[name].has_key(sc.default) and type(self.parameter_properties[name][sc.default])==types.FunctionType: # this is a function
+                    self.parameter_properties[name][sc.dependencies]=self.parameterlist.intersection(self.parameter_properties[name][sc.default].func_code.co_names) #reset dependencies
             else: # parameter was added later, thus will be removed completely
                 if self.parameter_properties.has_key(name):
                     del self.parameter_properties[name]
@@ -1376,10 +1364,10 @@ class WorkSpace(object):
         self.parameterlist.add(par)
         self._parameterlist.add("_"+par)
         self.addProperty(par,lambda ws:ws[par],lambda ws,x:ws.__setitem__(par,x),lambda ws:ws.delx(par),self.getParameterDoc(par))
-        if properties.has_key(positional) and properties[positional]:
+        if properties.has_key(sc.positional) and properties[sc.positional]:
             self._positionals.append(par)
-        if properties.has_key(default) and type(properties[default])==types.FunctionType: # this is a function
-            properties[dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names) #check the variables it depends on
+        if properties.has_key(sc.default) and type(properties[sc.default])==types.FunctionType: # this is a function
+            properties[sc.dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names) #check the variables it depends on
         self.addParameterDefinition(par,properties)
 
 
@@ -1399,9 +1387,9 @@ class WorkSpace(object):
         derivedparameters=set()
         for p in self.parameterlist:
             properties=self.parameter_properties[p]
-            if ((properties.has_key(default) and (type(properties[default])==types.FunctionType)) # default is a function
-                and (nonexport or ((not properties.has_key(export)) or properties[export]))  #export is true
-                or (workarrays and (properties.has_key(workarray) and properties[workarray]))): # not a workarray if requested
+            if ((properties.has_key(sc.default) and (type(properties[sc.default])==types.FunctionType)) # default is a function
+                and (nonexport or ((not properties.has_key(sc.export)) or properties[sc.export]))  #export is true
+                or (workarrays and (properties.has_key(sc.workarray) and properties[sc.workarray]))): # not a workarray if requested
                 derivedparameters.add(p) # then it is a derived parameter
         return derivedparameters
 
@@ -1414,8 +1402,8 @@ class WorkSpace(object):
         """
         l=set(self.getDerivedParameters(workarrays=False,nonexport=False))
         for p,v in self.parameter_properties.items():
-            if (v.has_key(output) and v[output]):
-                if workarrays or not (v.has_key(workarray) and v[workarray]):
+            if (v.has_key(sc.output) and v[sc.output]):
+                if workarrays or not (v.has_key(sc.workarray) and v[sc.workarray]):
                     l.add(p)
         return l
 
@@ -1427,7 +1415,7 @@ class WorkSpace(object):
         """
         l1={}
         for p,v in self.parameter_properties.items():
-            if (v.has_key(positional) and v[positional]): l1[p]=v[positional]
+            if (v.has_key(sc.positional) and v[sc.positional]): l1[p]=v[sc.positional]
         l2=range(len(l1))
         for p,v in l1.items():
             l2[v-1]=p
@@ -1444,10 +1432,10 @@ class WorkSpace(object):
         inputparameters=set()
         for p in self.parameterlist:
             properties=self.parameter_properties[p]
-            if ((properties.has_key(default) and (not type(properties[default])==types.FunctionType)) # is not a function
-            and ((not properties.has_key(export)) or properties[export]) #export is true
-            and ((not properties.has_key(workarray)) or (not properties[workarray])) #not a workarray
-            and ((not properties.has_key(output)) or (not properties[output]))): #not explicitly defined as output
+            if ((properties.has_key(sc.default) and (not type(properties[sc.default])==types.FunctionType)) # is not a function
+            and ((not properties.has_key(sc.export)) or properties[sc.export]) #export is true
+            and ((not properties.has_key(sc.workarray)) or (not properties[sc.workarray])) #not a workarray
+            and ((not properties.has_key(sc.output)) or (not properties[sc.output]))): #not explicitly defined as output
                 inputparameters.add(p) # then it is an input parameter
         return inputparameters
 
@@ -1535,9 +1523,9 @@ class WorkSpace(object):
         if par in self._modified_parameters: return True
         if par in self.checkedalready: return False # to avoid infinite loops
         self.checkedalready.add(par);
-        if self.parameter_properties[par].has_key(dependencies) and len(self.parameter_properties[par][dependencies])>0:
+        if self.parameter_properties[par].has_key(sc.dependencies) and len(self.parameter_properties[par][sc.dependencies])>0:
 #            print "Modified parameter -> ",par
-            modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p,firstcall=False),self.parameter_properties[par][dependencies]))
+            modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p,firstcall=False),self.parameter_properties[par][sc.dependencies]))
             if modified: self._modified_parameters.add(par)
             return modified
         return False
@@ -1560,7 +1548,7 @@ class WorkSpace(object):
         """
         pars=[]
         for p in self.getDerivedParameters(): # first make sure all modified parameters are identified
-            if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][default])==types.FunctionType) and (workarrays or ((not self.parameter_properties[p].has_key(workarray)) or not self.parameter_properties[p][workarray])):
+            if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][sc.default])==types.FunctionType) and (workarrays or ((not self.parameter_properties[p].has_key(sc.workarray)) or not self.parameter_properties[p][sc.workarray])):
                 delattr(self,"_"+p) # delete buffered value so that it will be recalculated
                 pars.append(p)
         for p in pars:
@@ -1580,7 +1568,7 @@ class WorkSpace(object):
          not.
 
         """
-        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][default])==types.FunctionType)):
+        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][sc.default])==types.FunctionType)):
             delattr(self,"_"+p) # delete buffered value so that it will be recalculated
             self[p] # recalculate the parameters where the local value was deleted
             self.clearModification(p)
@@ -1589,8 +1577,8 @@ class WorkSpace(object):
         """
         If parameter was defined in parameter_properties return the "doc" keyword, otherwise a default string.
         """
-        if self.parameter_properties.has_key(name) and self.parameter_properties[name].has_key(doc):
-            return self.parameter_properties[name][doc]
+        if self.parameter_properties.has_key(name) and self.parameter_properties[name].has_key(sc.doc):
+            return self.parameter_properties[name][sc.doc]
         else:
             return "This is parameter "+name+"."
 
@@ -1637,8 +1625,8 @@ class WorkSpace(object):
             excludenonexports=False
         plist=[]
         for p in self.parameterlist:
-            if ((excludenonexports and self.parameter_properties[p].has_key(export) and (not self.parameter_properties[p][export])) or
-                (excludeworkarrays and self.parameter_properties[p].has_key(workarray) and self.parameter_properties[p][workarray])):
+            if ((excludenonexports and self.parameter_properties[p].has_key(sc.export) and (not self.parameter_properties[p][sc.export])) or
+                (excludeworkarrays and self.parameter_properties[p].has_key(sc.workarray) and self.parameter_properties[p][sc.workarray])):
                 pass # do not return parameter since it is a work array or is explicitly excluded
             else:
                 plist.append(p)
@@ -1668,27 +1656,27 @@ class WorkSpace(object):
 		val="'UNDEFINED'"
 	    if type(val) in hAllContainerTypes:
 		val=val.__repr__(8)
-            if (v.has_key(positional)) and (v[positional]):
-                s+="# {0:s} = {1!r} - {2:s}".format(p,val,printindent_string(v[doc],66,width=120,prefix="# "))
-            if (v.has_key(export)) and (not v[export]):
+            if (v.has_key(sc.positional)) and (v[sc.positional]):
+                s+="# {0:s} = {1!r} - {2:s}".format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
+            if (v.has_key(sc.export)) and (not v[sc.export]):
                 continue
             if p in self.getInputParameters():
-                if (v[unit]==""): s0+="{0:<22} = {1!r:30} #         {2:s}".format(p,val,printindent_string(v[doc],66,width=120,prefix="# "))
-                else: s0+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p,val,v[unit],printindent_string(v[doc],66,width=120,prefix="# "))
-            elif (v.has_key(workarray)) and (v[workarray]):
+                if (v[sc.unit]==""): s0+="{0:<22} = {1!r:30} #         {2:s}".format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
+                else: s0+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p,val,v[sc.unit],printindent_string(v[sc.doc],66,width=120,prefix="# "))
+            elif (v.has_key(sc.workarray)) and (v[sc.workarray]):
                 if workarrays:
-                    if v.has_key(dependencies):
-                        deps=" <- ["+", ".join(v[dependencies])+"]"
+                    if v.has_key(sc.dependencies):
+                        deps=" <- ["+", ".join(v[sc.dependencies])+"]"
                     else:
                         deps=""
-		    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps).format(p,val,printindent_string(v[doc],66,width=120,prefix="# "))
+		    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps).format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
             elif noninputparameters:
-                if v.has_key(dependencies):
-                    deps=" <- ["+", ".join(v[dependencies])+"]"
+                if v.has_key(sc.dependencies):
+                    deps=" <- ["+", ".join(v[sc.dependencies])+"]"
                 else:
                     deps=""
-                if (v[unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}").format(p,val,printindent_string(v[doc]+deps,58,width=120,prefix="# "))
-                else: s1+=("# {0:>20} = {1:<30} - {2:s}").format(p,str(val)+" "+v[unit],printindent_string(v[doc]+deps,58,width=120,prefix="# "))
+                if (v[sc.unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}").format(p,val,printindent_string(v[sc.doc]+deps,58,width=120,prefix="# "))
+                else: s1+=("# {0:>20} = {1:<30} - {2:s}").format(p,str(val)+" "+v[sc.unit],printindent_string(v[sc.doc]+deps,58,width=120,prefix="# "))
         s+=s0
         if not s1=="": s+="#------------------------Output Parameters------------------------------\n"+s1
         if not s2=="": s+="#---------------------------Work Arrays---------------------------------\n"+s2
