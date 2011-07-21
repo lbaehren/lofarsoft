@@ -13,7 +13,7 @@ import pycrtools as cr
 from pycrtools import tasks
 from pycrtools.tasks import shortcuts as sc
 from matplotlib import pyplot as plt
-from math import log, log10
+import math
 import time
 import os
 
@@ -685,7 +685,7 @@ class CalcBaseline(tasks.Task):
             if self.invert:
                 a=1/a; alpha=-alpha
             if self.logfit:
-                a=log10(a); alpha=alpha/log(10.)
+                a=math.log10(a); alpha=alpha/math.log(10.)
                 self.work_baseline[...,self.numin_i:self.numax_i].loglinearfunctionadd(self.frequency[self.numin_i:self.numax_i],a,alpha)
             else:
                 self.work_baseline[...,self.numin_i:self.numax_i].powerlawmul(self.frequency[self.numin_i:self.numax_i],a,alpha)
