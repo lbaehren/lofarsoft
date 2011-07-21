@@ -2,38 +2,42 @@
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
- 
 
--revised averagespectrum to also produce dynamic spectra and run over
-multiple files separately (adn produce anverage and dynamic spectra
-from all files).
-- fixed a bug in hCopy
-- minor buf in firbaseline (vector size was defined with list as argument)
+- Revised :func:`averagespectrum` to also produce dynamic spectra and
+  run over multiple files separately (adn produce anverage and dynamic
+  spectra from all files).
+- Fixed a bug in :func:`hCopy`.
+- Minor bug in :func:`fitbaseline` (vector size was defined with list
+  as argument).
 
 
 2011-7-19  - Rev 8162
 =====================
 
-   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+  :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
 
-- Added a python version test for the .format statement. This is not available
+- Added a python version test for the ``.format`` statement. This is not available
   in python 2.5 (i.e. at Cep I cluster). Format will print a tuple instead. It's
-  ugly, but then the software works
+  ugly, but then the software works.
+- Fixed :module:`averagespectrum.py` to work with import pycrtools as cr
 
-- Fixed averagespectrum.py to work with import pycrtools as cr
 
 2011-07-18 - Rev 8151
+=====================
 
-   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+  :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
 
-- changed import in grid.py to be gregoriandata2jd instead of gregorian2jd  
+- Changed import in ``grid.py`` to be :func:`gregoriandata2jd` instead
+  of gregorian2jd.
+
 
 2011-07-18 - Rev 8150
+=====================
 
-   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+  :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
 
-- added pow(hnumber, long int) in core.h to get hPowerLaw functions on some linux systems including the CEP I cluster
-
+- Added ``pow(hnumber, long int)`` in ``core.h`` to get ``hPowerLaw``
+  functions on some linux systems including the CEP I cluster.
 
 
 2011-07-17 - Rev 8133
