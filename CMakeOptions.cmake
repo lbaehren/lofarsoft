@@ -38,12 +38,39 @@ set (CR_WITH_PLOTTING ${CR_WITH_PLOTTING} CACHE BOOL
   "Support for generation of plots?"                                  )
 set (CR_WITH_GUI ${CR_WITH_GUI} CACHE BOOL
   "Build the graphical interface?"                                    )
-set (CR_WITH_PYPELINE ${CR_WITH_PYPELINE} CACHE BOOL
-  "Build the Pypeline library?"                                       )
 set (CR_WITH_STARTOOLS ${CR_WITH_STARTOOLS} CACHE BOOL
   "Enable using routines from LOPES-Star?"                            )
 set (CR_WITH_CASAPY ${CR_WITH_CASAPY} CACHE BOOL
   "Build Pyline library against CASApy?"                              )
+
+## === PyCRTools =================================================================
+
+option (PYCRTOOLS_ENABLE_TESTING ${PYCRTOOLS_ENABLE_TESTING} CACHE BOOL
+  "Enable testing for the PyCRTools?"                                 )
+option (PYCRTOOLS_WITH_COMPILER_WARNINGS ${PYCRTOOLS_WITH_COMPILER_WARNINGS} CACHE BOOL
+  "Compile PyCRTools with compiler warnings enabled?"                 )
+option (PYCRTOOLS_WITH_RUNTIME_WARNINGS ${PYCRTOOLS_WITH_RUNTIME_WARNINGS} CACHE BOOL 
+  "Compile PyCRTools with runtime warnings enabled?"                  )
+option (PYCRTOOLS_WITH_DEBUG_SYMBOLS ${PYCRTOOLS_WITH_DEBUG_SYMBOLS} CACHE BOOL 
+  "Compile PyCRTools with debug symbols?"                             )
+option (PYCRTOOLS_WITH_OPTIMIZATIYES ${PYCRTOOLS_WITH_OPTIMIZATIYES} CACHE BOOL 
+  "Compile PyCRTools with optimization flags turned on?"              )
+option (PYCRTOOLS_WITH_CPU_OPTIMIZATIYES ${PYCRTOOLS_WITH_CPU_OPTIMIZATIYES} CACHE BOOL 
+  "Compile PyCRTools with optimization for CPU architecture?"         )
+option (PYCRTOOLS_WITH_OPENMP ${PYCRTOOLS_WITH_OPENMP} CACHE BOOL 
+  "Compile PyCRTools with OpenMP support?"                            )
+option (PYCRTOOLS_WITH_NUMPY ${PYCRTOOLS_WITH_NUMPY} CACHE BOOL 
+  "Compile PyCRTools with numpy support?"                             )
+option (PYCRTOOLS_WITH_CASACORE ${PYCRTOOLS_WITH_CASACORE} CACHE BOOL 
+  "Compile PyCRTools with casacore support?"                          )
+option (PYCRTOOLS_WITH_DAL ${PYCRTOOLS_WITH_DAL} CACHE BOOL 
+  "Compile PyCRTools with DAL support?"                               )
+option (PYCRTOOLS_WITH_GSL ${PYCRTOOLS_WITH_GSL} CACHE BOOL 
+  "Compile PyCRTools with GSL support?"                               )
+option (PYCRTOOLS_WITH_FFTW ${PYCRTOOLS_WITH_FFTW} CACHE BOOL 
+  "Compile PyCRTools with FFTW support?"                              )
+option (PYCRTOOLS_WITH_AERA ${PYCRTOOLS_WITH_AERA} CACHE BOOL 
+  "Compile PyCRTools with AERA data support?"                         )
 
 ## === DAL ======================================================================
 

@@ -47,7 +47,7 @@ include (FindCFITSIO)
 ##-------------------------------------------------------------------------------
 ## Testing
 
-option (PYCRTOOLS_ENABLE_TESTING "Enable testing for the PyCRTools?" ON)
+option (PYCRTOOLS_ENABLE_TESTING "Enable testing for the PyCRTools?" YES)
 
 if (PYCRTOOLS_ENABLE_TESTING)
   ## Include CTest module
@@ -60,18 +60,18 @@ endif (PYCRTOOLS_ENABLE_TESTING)
 ##-------------------------------------------------------------------------------
 ## Options
 
-option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?" ON)
-option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile PyCRTools with runtime warnings enabled?" ON)
-option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile PyCRTools with debug symbols?" ON)
-option (PYCRTOOLS_WITH_OPTIMIZATION "Compile PyCRTools with optimization flags turned on?" OFF)
-option (PYCRTOOLS_WITH_CPU_OPTIMIZATION "Compile PyCRTools with optimization for CPU architecture?" OFF)
-option (PYCRTOOLS_WITH_OPENMP "Compile PyCRTools with OpenMP support?" OFF)
-option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support?" ON)
-option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support?" ON)
-option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support?" ON)
-option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support?" ON)
-option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support?" ON)
-option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support?" OFF)
+option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?" YES)
+option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile PyCRTools with runtime warnings enabled?" YES)
+option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile PyCRTools with debug symbols?" YES)
+option (PYCRTOOLS_WITH_OPTIMIZATIYES "Compile PyCRTools with optimization flags turned on?" NO)
+option (PYCRTOOLS_WITH_CPU_OPTIMIZATIYES "Compile PyCRTools with optimization for CPU architecture?" NO)
+option (PYCRTOOLS_WITH_OPENMP "Compile PyCRTools with OpenMP support?" NO)
+option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support?" YES)
+option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support?" YES)
+option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support?" YES)
+option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support?" YES)
+option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support?" YES)
+option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support?" NO)
 
 # Debug level
 set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
