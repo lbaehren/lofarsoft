@@ -26,6 +26,7 @@ endif (NOT LUS_ROOT)
 
 ##-------------------------------------------------------------------------------
 ## Find libraries
+
 include (FindBoost)
 include (FindHDF5)
 include (FindDAL)
@@ -42,6 +43,19 @@ include (FindTMF)
 include (FindCRTools)
 include (FindWCSLIB)
 include (FindCFITSIO)
+
+##-------------------------------------------------------------------------------
+## Testing
+
+option (PYCRTOOLS_ENABLE_TESTING "Enable testing for the PyCRTools?" ON)
+
+if (PYCRTOOLS_ENABLE_TESTING)
+  ## Include CTest module
+  include (CTest)
+  enable_testing()
+  ## Control parameters for running the tests
+  set (DART_TESTING_TIMEOUT 500)
+endif (PYCRTOOLS_ENABLE_TESTING)
 
 ##-------------------------------------------------------------------------------
 ## Options
