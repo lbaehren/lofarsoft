@@ -11,12 +11,12 @@ fxb=hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw
 fxb[...].plot(clf=True); plt.show()
 
 """
-                     
+
 #import pdb; pdb.set_trace()
 
 from pycrtools import *
-from pycrtools.tasks.shortcuts import *
-import pycrtools.tasks as tasks
+from pycrtools.tasks import shortcuts as sc
+from pycrtools import tasks
 import time
 import pytmf
 
@@ -79,7 +79,7 @@ class BeamFormer2(tasks.Task):
 
     It can also be called without a datafile and just hArrays as
     input. In this case provide the following information:
-    
+
     ``Task(data=timeseries_data, antennas=file["SELECTED_DIPOLES"], antpos=file["ANTENNA_POSITIONS"], sample_interval=file["SAMPLE_INTERVAL"][0], pointings=[dict(az=143.4092*deg,el= 81.7932*deg, r=600.3)])``
 
     The desired frequency resolution is provided with the parameter
@@ -99,210 +99,299 @@ class BeamFormer2(tasks.Task):
     with Task.tplot.
 
    """
-    parameters = {
+    parameters = dict(
 #Beamformer parameters:
 #------------------------------------------------------------------------
-        "pointings":{default:[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)], doc:"List of coordinate dicts ({'az':az1,'el':elevation value}) containing pointing directions for each beam on the sky."},
-        "phase_center":{default:[0,0,0],doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
-        "FarField":{default:True,doc:"Form a beam towards the far field, i.e. no distance."},
-        "NyquistZone":{default:1,doc:"In which Nyquist zone was the data taken (e.g. NyquistZone=2 if data is from 100-200 MHz for 200 MHz sampling rate)."},
-#------------------------------------------------------------------------        
+        pointings = dict(default=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)],
+                         doc="List of coordinate dicts ({'az':az1,'el':elevation value}) containing pointing directions for each beam on the sky."),
+
+        phase_center = dict(default=[0,0,0],
+                            doc="List or vector containing the X,Y,Z positions of the phase center of the array.",
+                            unit="m"),
+
+        FarField = dict(default=True,
+                        doc="Form a beam towards the far field, i.e. no distance."),
+
+        NyquistZone = dict(default=1,
+                           doc="In which Nyquist zone was the data taken (e.g. NyquistZone=2 if data is from 100-200 MHz for 200 MHz sampling rate)."),
+
+#------------------------------------------------------------------------
 #Some standard parameters
-#------------------------------------------------------------------------        
-        "filefilter":p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
-                        "Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
+#------------------------------------------------------------------------
 
-        "file_start_number":{default:0,
-                    doc:"Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."},
+        filefilter = sc.p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
+                           "Unix style filter (i.e., with *,~, $VARIABLE, etc.), to describe all the files to be processed."),
 
-        "start_block":{default:0,doc:"Block number to start with. Will be used to to read the first block from file (if provided) and to calculate time."},
+        file_start_number = dict(default=0,
+                                 doc="Integer number pointing to the first file in the 'filenames' list with which to start. Can be changed to restart a calculation."),
 
-        "datafile":{default:getfile,export:False,doc:"Data file object pointing to raw data."},
+        start_block = dict(default=0,
+                           doc="Block number to start with. Will be used to to read the first block from file (if provided) and to calculate time."),
 
-        "calc_timeseries":{default:False,doc:"If True also do the inverse FFT of all antennas and return the shifted time series for each antenna in data_shifted."},
+        datafile = dict(default=getfile,
+                        export=False,
+                        doc="Data file object pointing to raw data."),
 
-        "calc_tbeams":{default:True,doc:"Calculate the inverse FFT of all beams and return the shifted and beamformed time series for each beam in Task.tbeams"},
+        calc_timeseries = dict(default=False,
+                               doc="If True also do the inverse FFT of all antennas and return the shifted time series for each antenna in data_shifted."),
 
-        "doabs":{default:True,doc:"Take the absolute of the tbeam."},
+        calc_tbeams = dict(default=True,
+                           doc="Calculate the inverse FFT of all beams and return the shifted and beamformed time series for each beam in Task.tbeams"),
 
-        "smooth_width":{default:0,doc:"Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",unit:"Samples"},
+        doabs = dict(default=True,
+                     doc="Take the absolute of the tbeam."),
 
-        "newfigure":p_(True,"Create a new figure for plotting for each new instance of the task."),
+        smooth_width = dict(default=0,
+                            doc="Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",
+                            unit="Samples"),
 
-        "figure":p_(None,"The matplotlib figure containing the plot",output=True),
+        newfigure = sc.p_(True,"Create a new figure for plotting for each new instance of the task."),
 
-        "doplot":{default:False,doc:"Plot current spectrum while processing."},
+        figure = sc.p_(None,"The matplotlib figure containing the plot",
+                       output=True),
 
-        "plotspec":{default:True,doc:"If True plot the beamformed average spectrum at the end, otherwise the time series."},
+        doplot = dict(default=False,
+                      doc="Plot current spectrum while processing."),
 
-        "plotlen":{default:2**12,doc:"How many channels +/- the center value to plot during the calculation (to allow progress checking)."},
+        plotspec = dict(default=True,
+                        doc="If True plot the beamformed average spectrum at the end, otherwise the time series."),
 
-        "plotskip":{default:1,doc:"Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."},
+        plotlen = dict(default=2**12,
+                       doc="How many channels +/- the center value to plot during the calculation (to allow progress checking)."),
 
-        "plot_antennas":{default:lambda self:range(self.nantennas),doc:"A list of antenna indices (from 0 to nantennas, i.e. relative to the selected antennas and not necessarily the same indices as in the file!) for which to plot the time series (if doplot>1)."},
+        plotskip = dict(default=1,
+                        doc="Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."),
 
-        "plot_center":{default:0.5,doc:"Center plot at this relative distance from start of vector (0=left end, 1=right end)."},
-        
-        "plot_start":{default:lambda self: max(int(self.blocklen*self.plot_center)-self.plotlen,0),doc:"Start plotting from this sample number."},
-        
-        "plot_end":{default:lambda self: min(int(self.blocklen*self.plot_center)+self.plotlen,self.blocklen),doc:"End plotting before this sample number."},
+        plot_antennas = dict(default=lambda self:range(self.nantennas),
+                             doc="A list of antenna indices (from 0 to nantennas, i.e. relative to the selected antennas and not necessarily the same indices as in the file!) for which to plot the time series (if doplot>1)."),
 
-        "plot_finish":{default: lambda self:plotfinish(doplot=self.doplot),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        plot_center = dict(default=0.5,
+                           doc="Center plot at this relative distance from start of vector (0=left end, 1=right end)."),
 
-        "delta_nu":{default:1,doc:"Desired frequency resolution - will be rounded off to get powers of 2 blocklen. Alternatively set blocklen directly.",unit:"Hz"},
-         
-        "maxnantennas":{default:96,doc:"Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."},
+        plot_start = dict(default=lambda self: max(int(self.blocklen*self.plot_center)-self.plotlen,0),
+                          doc="Start plotting from this sample number."),
 
-        "maxblocksflagged":{default:2,doc:"Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."},
+        plot_end = dict(default=lambda self: min(int(self.blocklen*self.plot_center)+self.plotlen,self.blocklen),
+                        doc="End plotting before this sample number."),
 
-        "stride":{default:1, doc:"If stride>1 skip (stride-1) blocks."},
-         
-        "tmpfileext":{default:".pcr",
-                      doc:"Extension of filename for temporary data files (e.g., used if stride>1.)",export:False},
+        plot_finish = dict(default= lambda self:plotfinish(doplot=self.doplot),
+                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
 
-        "tmpfilename":{default:"tmp",
-                       doc:"Root filename for temporary data files.",export:False},
+        delta_nu = dict(default=1,
+                        doc="Desired frequency resolution - will be rounded off to get powers of 2 blocklen. Alternatively set blocklen directly.",
+                        unit="Hz"),
 
-        "filenames":{default:lambda self:listFiles(self.filefilter),
-                    doc:"List of filenames of data file to read raw data from."},
+        maxnantennas = dict(default=96,
+                            doc="Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."),
 
-        "output_dir":{default:"",doc:"Directory where output file is to be written to."},
-    
-        "output_filename":{default:lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "beamformer2")+".beams"+self.tmpfileext,
-                         doc:"Filename (without directory, see output_dir) to store the final spectrum."},
+        maxblocksflagged = dict(default=2,
+                                doc="Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."),
 
-        "spectrum_file":{default:lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
-                         doc:"Complete filename including directory to store the final spectrum."},
-                
-        "nantennas":{default:lambda self:len(self.antennas),
-                     doc:"The actual number of antennas available for calculation in the file (<maxnantennas)."},
+        stride = dict(default=1,
+                      doc="If stride>1 skip (stride-1) blocks."),
 
-        "nantennas_start":{default:0,
-                     doc:"Start with the nth antenna in each file (see also natennas_stride). Can be used for selecting odd/even antennas."},
+        tmpfileext = dict(default=".pcr",
+                          doc="Extension of filename for temporary data files (e.g., used if stride>1.)",
+                          export=False),
 
-        "antenna_list":{default:{},
-                     doc:"List of antenna indices used as input from each filename.",output:True},
+        tmpfilename = dict(default="tmp",
+                           doc="Root filename for temporary data files.",
+                           export=False),
 
-        "nantennas_stride":{default:1,
-                     doc:"Take only every nth antenna from antennas list (see also natennas_start). Use 2 to select odd/even."},
+        filenames = dict(default=lambda self:listFiles(self.filefilter),
+                         doc="List of filenames of data file to read raw data from."),
 
-        "nspectraadded":p_(lambda self:hArray(int,[self.nblocks],fill=0,name="Spectra added"),"Number of spectra added per block.",output=True),
+        output_dir = dict(default="",
+                          doc="Directory where output file is to be written to."),
 
-        "nspectraflagged":p_(lambda self:hArray(int,[self.nblocks],fill=0,name="Spectra flagged"),"Number of spectra flagged per block.",output=True),
+        output_filename = dict(default=lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "beamformer2")+".beams"+self.tmpfileext,
+                               doc="Filename (without directory, see output_dir) to store the final spectrum."),
 
-        "nofAntennas":{default:lambda self:self.datafile["NOF_DIPOLE_DATASETS"] if self.datafile else self.data.shape()[-2],output:True},
+        spectrum_file = dict(default=lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
+                             doc="Complete filename including directory to store the final spectrum."),
 
-        "antennas":p_(lambda self:range(max(self.nantennas_start,0),min(self.nofAntennas,self.maxnantennas),self.nantennas_stride),"Antennas from which to select initially for the current file."),
+        nantennas = dict(default=lambda self:len(self.antennas),
+                         doc="The actual number of antennas available for calculation in the file (<maxnantennas)."),
 
-        "antennas_used":p_(lambda self:set(),"A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",output=True),
+        nantennas_start = dict(default=0,
+                               doc="Start with the nth antenna in each file (see also natennas_stride). Can be used for selecting odd/even antennas."),
 
-        "header":p_(lambda self:self.datafile.getHeader() if self.datafile else {},"Header of datafile",export=False),
-        
-        "lofarmode":{default:"LBA_OUTER",
-                     doc:"Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."},
+        antenna_list = dict(default={},
+                            doc="List of antenna indices used as input from each filename.",
+                            output=True),
 
-        "verbose":{default:True,doc:"Print progress information."},
+        nantennas_stride = dict(default=1,
+                                doc="Take only every nth antenna from antennas list (see also natennas_start). Use 2 to select odd/even."),
+
+        nspectraadded = sc.p_(lambda self:hArray(int,[self.nblocks],fill=0,name="Spectra added"),
+                              "Number of spectra added per block.",
+                              output=True),
+
+        nspectraflagged = sc.p_(lambda self:hArray(int,[self.nblocks],fill=0,name="Spectra flagged"),
+                                "Number of spectra flagged per block.",
+                                output=True),
+
+        nofAntennas = dict(default=lambda self:self.datafile["NOF_DIPOLE_DATASETS"] if self.datafile else self.data.shape()[-2],
+                           output=True),
+
+        antennas = sc.p_(lambda self:range(max(self.nantennas_start,0),min(self.nofAntennas,self.maxnantennas),self.nantennas_stride),
+                         "Antennas from which to select initially for the current file."),
+
+        antennas_used = sc.p_(lambda self:set(),
+                              "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
+                              output=True),
+
+        header = sc.p_(lambda self:self.datafile.getHeader() if self.datafile else {},
+                       "Header of datafile",
+                       export=False),
+
+        lofarmode = dict(default="LBA_OUTER",
+                         doc="Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."),
+
+        verbose = dict(default=True,
+                       doc="Print progress information."),
+
 #----------------------------------------------------------------------t--
 # Derived parameters
 
-        "nbeams":{default:lambda self:len(self.pointings),doc:"Number of beams to calculate."},
+        nbeams = dict(default=lambda self:len(self.pointings),
+                      doc="Number of beams to calculate."),
 
-        "mainbeam":{default:lambda self:self.nbeams/2,doc:"The main beam which is used to plot things. Default: nbeams/2."},
+        mainbeam = dict(default=lambda self:self.nbeams/2,
+                        doc="The main beam which is used to plot things. Default= nbeams/2."),
 
-        "phase_center_array":{default:lambda self:hArray(list(self.phase_center),name="Phase Center",units=("","m")),doc:"List or vector containing the X,Y,Z positions of the phase center of the array.",unit:"m"},
-        
-        "block_duration":{default:lambda self:self.sample_interval*self.blocklen,doc:"The length of a block in time units.",unit:"s"},
-        
-        "speclen":p_(lambda self:self.blocklen/2+1,"Length of one spectrum.","Channels"),
+        phase_center_array = dict(default=lambda self:hArray(list(self.phase_center),name="Phase Center",units=("","m")),
+                                  doc="List or vector containing the X,Y,Z positions of the phase center of the array.",
+                                  unit="m"),
 
-        "sample_interval":p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0] if datafile else 1,"Length in time of one sample in raw data set.","s"),
+        block_duration = dict(default=lambda self:self.sample_interval*self.blocklen,
+                              doc="The length of a block in time units.",
+                              unit="s"),
 
-        "filesize":p_(lambda self:self.datafile["DATA_LENGTH"][0] if self.datafile else self.data.shape()[-1],"Length of file for one antenna.","Samples"),
+        speclen = sc.p_(lambda self:self.blocklen/2+1,
+                        "Length of one spectrum.",
+                        "Channels"),
 
-        "delta_nu_used":{default:lambda self:1/(self.sample_interval*self.blocklen),doc:"Actual frequency resolution of dynamic spectrum",unit:"Hz"},
+        sample_interval = sc.p_(lambda self:self.datafile["SAMPLE_INTERVAL"][0] if datafile else 1,"Length in time of one sample in raw data set.","s"),
 
-        "max_nblocks":{default:lambda self:int(floor(self.filesize/self.stride/self.blocklen)),doc:"Maximum number of blocks in file."},
+        filesize = sc.p_(lambda self:self.datafile["DATA_LENGTH"][0] if self.datafile else self.data.shape()[-1],
+                         "Length of file for one antenna.",
+                         "Samples"),
 
-        "nblocks":{default:lambda self:int(min(max(round((self.filesize-self.start_block*self.blocklen*self.stride)/self.stride/self.blocklen),1),self.max_nblocks)),
-                   doc:"Number of blocks to read in."},
+        delta_nu_used = dict(default=lambda self:1/(self.sample_interval*self.blocklen),
+                             doc="Actual frequency resolution of dynamic spectrum",
+                             unit="Hz"),
 
-        "blockduration":{default:lambda self:self.blocklen*self.sample_interval,
-                   doc:"Length in time units of one block of data, i.e. on time step in dynamic spectrum.", unit:"s"},
+        max_nblocks = dict(default=lambda self:int(floor(self.filesize/self.stride/self.blocklen)),
+                           doc="Maximum number of blocks in file."),
 
-        "end_time":{default:lambda self:self.blockduration*self.nblocks*self.stride, doc:"End of time axis.", unit:"s"},
+        nblocks = dict(default=lambda self:int(min(max(round((self.filesize-self.start_block*self.blocklen*self.stride)/self.stride/self.blocklen),1),self.max_nblocks)),
+                       doc="Number of blocks to read in."),
 
-        "start_time":{default:lambda self:self.start_block*self.blockduration,doc:"Start of time axis.", unit:"s"},
+        blockduration = dict(default=lambda self:self.blocklen*self.sample_interval,
+                             doc="Length in time units of one block of data, i.e. on time step in dynamic spectrum.",
+                             unit="s"),
 
-        "start_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][0] if self.datafile else ((self.NyquistZone-1)/self.sample_interval/2.0), doc:"Start frequency of spectrum",unit:"Hz"},
+        end_time = dict(default=lambda self:self.blockduration*self.nblocks*self.stride,
+                        doc="End of time axis.",
+                        unit="s"),
 
-        "end_frequency":{default:lambda self:self.datafile["FREQUENCY_RANGE"][0][1] if self.datafile else (self.NyquistZone/self.sample_interval/2.0), doc:"End frequency of spectrum",unit:"Hz"},
+        start_time = dict(default=lambda self:self.start_block*self.blockduration,
+                          doc="Start of time axis.",
+                          unit="s"),
 
-        "delta_frequency":p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),"Separation of two subsequent channels in final spectrum"),
+        start_frequency = dict(default=lambda self:self.datafile["FREQUENCY_RANGE"][0][0] if self.datafile else ((self.NyquistZone-1)/self.sample_interval/2.0),
+                               doc="Start frequency of spectrum",
+                               unit="Hz"),
 
-        "blocklen":{default:lambda self:min(2**int(round(log(1./self.delta_nu/self.sample_interval,2))),2**int(round(log(self.filesize/self.stride,2)))) if self.datafile else self.data.shape()[-1],doc:"The size of a block used for the FFT, limited by filesize.",unit:"Sample"},
+        end_frequency = dict(default=lambda self:self.datafile["FREQUENCY_RANGE"][0][1] if self.datafile else (self.NyquistZone/self.sample_interval/2.0),
+                             doc="End frequency of spectrum",
+                             unit="Hz"),
 
-        "cable_delays":{default:lambda self:hArray(float,[self.nantennas],name="Cable Delays",units=("","s")),doc:"An hArray containing 'cable' delays for each selected antenna in seconds as values. These delays will be added to the geometrical delays.",unit:"s"},
+        delta_frequency = sc.p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),
+                                "Separation of two subsequent channels in final spectrum"),
+
+        blocklen = dict(default=lambda self:min(2**int(round(log(1./self.delta_nu/self.sample_interval,2))),2**int(round(log(self.filesize/self.stride,2)))) if self.datafile else self.data.shape()[-1],
+                        doc="The size of a block used for the FFT, limited by filesize.",
+                        unit="Sample"),
+
+        cable_delays = dict(default=lambda self:hArray(float,[self.nantennas],name="Cable Delays",units=("","s")),
+                            doc="An hArray containing 'cable' delays for each selected antenna in seconds as values. These delays will be added to the geometrical delays.",
+                            unit="s"),
 
 #------------------------------------------------------------------------
 
 #Now define all the work arrays used internally
-        "data":{workarray:True,
-                 doc:"Main input array of raw data - can be set directly instead of providing a data file.",default:lambda self:
-                 hArray(float,[self.nantennas if self.datafile else 1,self.blocklen if self.datafile else 2**8],name="E-Field",xvalues=self.times,header=self.header)},
+        data = dict(workarray=True,
+                    doc="Main input array of raw data - can be set directly instead of providing a data file.",
+                    default=lambda self: hArray(float,[self.nantennas if self.datafile else 1,self.blocklen if self.datafile else 2**8],name="E-Field",xvalues=self.times,header=self.header)),
 
-        "data_shifted":{workarray:True,
-                 doc:"Array for plotting the shifted e-field of main beam",default:lambda self:
-                 hArray(float,[self.nantennas,self.blocklen],name="shifted E-field",xvalues=self.times,header=self.header)},
+        data_shifted = dict(workarray=True,
+                            doc="Array for plotting the shifted e-field of main beam",
+                            default=lambda self: hArray(float,[self.nantennas,self.blocklen],name="shifted E-field",xvalues=self.times,header=self.header)),
 
-        "fftdata":{workarray:True,
-                 doc:"main input array of raw data",default:lambda self:
-                 hArray(complex,[self.nantennas,self.speclen],name="fftdata",header=self.header)},
+        fftdata = dict(workarray=True,
+                       doc="main input array of raw data",
+                       default=lambda self: hArray(complex,[self.nantennas,self.speclen],name="fftdata",header=self.header)),
 
-        "avspec":{workarray:True,
-                 doc:"Average spectrum in each beam over multiple blocks.",default:lambda self:
-                 hArray(float,[self.nbeams,self.speclen],name="Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
+        avspec = dict(workarray=True,
+                      doc="Average spectrum in each beam over multiple blocks.",
+                      default=lambda self: hArray(float,[self.nbeams,self.speclen],name="Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        "avspec_incoherent":{workarray:True,
-                 doc:"The average spectrum of all blocks in an incoherent beam (i.e. squaring before adding).",default:lambda self:
-                 hArray(float,[self.speclen],name="Incoherent Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
+        avspec_incoherent = dict(workarray=True,
+                                 doc="The average spectrum of all blocks in an incoherent beam (i.e. squaring before adding).",
+                                 default=lambda self:hArray(float,[self.speclen],name="Incoherent Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        "tbeam_incoherent":{workarray:True,
-                 doc:"Contains the power as a function of time of an incorehent beam of all antennas (simply the sqaure of the ADC values added).",default:lambda self:
-                 hArray(float,[self.nblocks,self.blocklen],name="Incoherent Time Beam",header=self.header)},
+        tbeam_incoherent = dict(workarray=True,
+                                doc="Contains the power as a function of time of an incorehent beam of all antennas (simply the sqaure of the ADC values added).",
+                                default=lambda self:hArray(float,[self.nblocks,self.blocklen],name="Incoherent Time Beam",header=self.header)),
 
-        "beams":{workarray:True,
-                 doc:"Output array containing the FFTed data for each beam.",default:lambda self:
-                 hArray(complex,[self.nbeams,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)},
+        beams = dict(workarray=True,
+                     doc="Output array containing the FFTed data for each beam.",
+                     default=lambda self:hArray(complex,[self.nbeams,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        "pointingsXYZ":{default:lambda self:hArray(float,[self.nbeams,3],fill=[item for sublist in [convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"), doc:"Array of shape [nbeams,3] with x,y,z positions for each beam on the sky."},
+        pointingsXYZ = dict(default=lambda self:hArray(float,[self.nbeams,3],fill=[item for sublist in [convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
+                            doc="Array of shape [nbeams,3] with x,y,z positions for each beam on the sky."),
 
-        "phases":{workarray:True,
-                 doc:"Complex phases for each beam and each freqeuncy channel used to calculate complex weights for beamforming.",default:lambda self:
-                 hArray(float,[self.nbeams,self.nantennas,self.speclen],name="Phases",header=self.header)},
+        phases = dict(workarray=True,
+                      doc="Complex phases for each beam and each freqeuncy channel used to calculate complex weights for beamforming.",
+                      default=lambda self:hArray(float,[self.nbeams,self.nantennas,self.speclen],name="Phases",header=self.header)),
 
-        "weights":{workarray:True,
-                 doc:"Complex weights for each beam and each freqeuncy channel used to calculate beams.",default:lambda self:
-                 hArray(complex,[self.nbeams,self.nantennas,self.speclen],name="Weights",header=self.header)},
+        weights = dict(workarray=True,
+                       doc="Complex weights for each beam and each freqeuncy channel used to calculate beams.",
+                       default=lambda self:hArray(complex,[self.nbeams,self.nantennas,self.speclen],name="Weights",header=self.header)),
 
-        "delays":{workarray:True,
-                 doc:"Contains the geometric delays for the current antenna for each beam",default:lambda self:
-                 hArray(float,[self.nantennas,self.nbeams],name="Delays",header=self.header)},
+        delays = dict(workarray=True,
+                      doc="Contains the geometric delays for the current antenna for each beam",
+                      default=lambda self:hArray(float,[self.nantennas,self.nbeams],name="Delays",header=self.header)),
 
-        "antpos":{workarray:True,
-                 doc:"Cartesian coordinates of the current antenna relative to the phase center of the array.",default:lambda self:
-                 hArray(float,[self.nantennas,3],name="Delays",header=self.header,units=("","m")),unit:"m"},
+        antpos = dict(workarray=True,
+                      doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
+                      default=lambda self:hArray(float,[self.nantennas,3],name="Delays",header=self.header,units=("","m")),
+                      unit="m"),
 
-        "frequencies":{workarray:True,
-                       doc:"Frequency axis for final power spectrum.",default:lambda self:
-                       hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header)},
+        frequencies = dict(workarray=True,
+                           doc="Frequency axis for final power spectrum.",
+                           default=lambda self:hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header)),
 
-        "times":{workarray:True,
-                       doc:"Time axis for data.",default:lambda self:
-                       hArray(float,[self.blocklen],name="Time",units=("","s"),header=self.header)},
-        "blocksize":p_(lambda self:self.data.shape()[-1],"Length of the data for each antenna"),
-        "fftplan":p_(lambda self:FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE),"Memory and plan for FFT",output=False,workarray=True),
-        "invfftplan":p_(lambda self:FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE),"Memory and plan for inverse FFT",output=False,workarray=True)
-}
+        times = dict(workarray=True,
+                     doc="Time axis for data.",
+                     default=lambda self:
+                     hArray(float,[self.blocklen],name="Time",units=("","s"),header=self.header)),
+
+        blocksize = sc.p_(lambda self:self.data.shape()[-1],
+                          "Length of the data for each antenna"),
+
+        fftplan = sc.p_(lambda self:FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE),
+                        "Memory and plan for FFT",
+                        output=False,
+                        workarray=True),
+
+        invfftplan = sc.p_(lambda self:FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE),
+                           "Memory and plan for inverse FFT",
+                           output=False,
+                           workarray=True)
+)
 
     def run(self):
         """Run the program.
@@ -313,16 +402,16 @@ class BeamFormer2(tasks.Task):
         self.beams.par.avspec=self.avspec
         self.beams.par.avspec_incoherent=self.avspec_incoherent
         self.beams.par.tbeam_incoherent=self.tbeam_incoherent
-        
+
         self.updateHeader(self.beams,["nspectraadded","filenames","antennas_used"],delta_nu="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",filename="spectrum_file")
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
 
         clearfile=True
-        
+
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         #fftplan = FFTWPlanManyDftR2c(self.data.shape()[-1], 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
-        
+
         if self.doplot:
             wasinteractive=plt.isinteractive()
             plt.ioff()
@@ -354,12 +443,12 @@ class BeamFormer2(tasks.Task):
                     self.datafile["BLOCK"]=block
                 if self.verbose:
                     print "# Start block =",block
-                
+
                 #Calculate the geometrical delays needed for beamforming
                 hGeometricDelays(self.delays,self.antpos,self.pointingsXYZ, self.FarField)
 
                 #Add the cable/calibration delay
-                self.delays.add(ashArray(self.cable_delays)); 
+                self.delays.add(ashArray(self.cable_delays));
 
                 self.phases.delaytophase(self.frequencies,self.delays)
                 self.weights.phasetocomplex(self.phases)
@@ -374,12 +463,12 @@ class BeamFormer2(tasks.Task):
                 #self.fftdata[...].fftw(self.data[...])
                 self.fftdata[...].nyquistswap(self.NyquistZone)
                 if self.avspec_incoherent:
-                    self.avspec_incoherent.squareadd(self.fftdata[...]) 
+                    self.avspec_incoherent.squareadd(self.fftdata[...])
                 if  self.tbeam_incoherent:
                     self.tbeam_incoherent[block].squareadd(self.data[...])
                 if self.nspectraadded[block]>self.nantennas:
                     self.fftdata/=float(self.nspectraadded[block])
-    
+
                 if self.file_count>1:
                     if self.spectrum_file:
                         self.beams.readfilebinary(self.spectrum_file_bin,block*self.speclen*self.nbeams*self.nantennas)
@@ -425,7 +514,7 @@ class BeamFormer2(tasks.Task):
         if self.doplot:
             plt.ion()
             if wasinteractive: plt.ion()
-            
+
     def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
         """
         Take the result of the BeamForm task, i.e. an array of
@@ -526,15 +615,15 @@ class BeamFormer2(tasks.Task):
          spectrum (provided as dynspec.par.cleanspec).
 
          *dmin* - Minimum z-value (intensity) in dynamic spectrum to plot
-         
+
          *dmax* - Maximum z-value (intensity) in dynamic spectrum to plot
-         
+
          *cmin* - Minimum z-value (intensity) in clean dynamic spectrum to plot
-         
+
          *cmax* - Maximum z-value (intensity) in clean dynamic spectrum to plot
 
          Example:
-         
+
          tload "DynamicSpectrum"
          dsp=hArrayRead("Saturn.h5.dynspec.pcr")
          Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
