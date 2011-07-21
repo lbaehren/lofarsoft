@@ -36,7 +36,7 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
       ``complex``, ``str``.
 
     ``Vector(Type,size)``
-      will create an vector of type ``Type``, with length ``size``.
+      will create an vector of type ``Type``, with length ``size``. 
 
     ``Vector(Type,size,fill)``
       will create an vector of type ``Type``, with length ``size`` and

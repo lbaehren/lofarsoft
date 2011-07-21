@@ -1033,7 +1033,9 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
   HInteger lenIn  = std::distance(vecin, vecin_end);
   HInteger lenOut = std::distance(vecout, vecout_end);
 
-  if (lenIn < lenOut) {
+  if ((lenIn <= 0) or (lenOut <= 0)) return;
+ 
+  if (lenIn >= lenOut) {
     // Fast copying (no looping required)
     while (itout != vecout_end) {
       *itout=hfcast<T>(*itin);

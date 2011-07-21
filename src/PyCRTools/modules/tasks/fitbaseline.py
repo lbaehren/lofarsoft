@@ -184,11 +184,11 @@ class FitBaseline(tasks.Task):
                    workarray=True),
 
         minmean = dict(doc="Mean value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-                       default=lambda self:cr.Vector(float,[self.nofAntennas],fill=0.0),
+                       default=lambda self:cr.Vector(float,self.nofAntennas,fill=0.0),
                        output=True),
 
         minrms = dict(doc="RMS value of data in the part of downsampled spectrum with the smallest RMS (output only)",
-                      default=lambda self:cr.Vector(float,[self.nofAntennas],fill=0.0),
+                      default=lambda self:cr.Vector(float,self.nofAntennas,fill=0.0),
                       output=True),
 
         minrms_blen = dict(doc="Block length within downsampled data to look for the cleanest part of the spectrum.",
@@ -344,14 +344,14 @@ class FitBaseline(tasks.Task):
         #Calculate RMS/amplitude for each bin
         self.ratio[...].div(self.rms[...],self.small_spectrum[...])
         #Get the RMS of the part of the spectrum where it is lowest (i.e. which is least affected by RFI)
-        self.minblk=self.ratio[...].minstddevblock(cr.Vector(int,[self.nbins],fill=self.minrms_blen),self.minrms,self.minmean)
+        self.minblk=self.ratio[...].minstddevblock(cr.Vector(int,self.nbins,fill=self.minrms_blen),self.minrms,self.minmean)
         #Set limits for which spikes to ignore
         self.limit2=self.minmean+self.minrms*self.rmsfactor
         self.limit1=self.minmean-self.minrms*self.rmsfactor
         if self.doplot>1:
             self.ratio[...].plot(xvalues=self.freqs,title="RMS/Amplitude (per channel block)",logplot="y",clf=True)
-            cr.plotconst(self.freqs,(self.limit1).val()).plot(clf=False,color="red",logplot="y",linewidth=2)
-            cr.plotconst(self.freqs,(self.limit2).val()).plot(clf=False,color="red",logplot="y",linewidth=2,xlabel="Frequency [MHz]",ylabel="RMS/Mean")
+            cr.plotconst(self.freqs,self.limit1.mean()).plot(clf=False,color="red",logplot="y",linewidth=2)
+            cr.plotconst(self.freqs,self.limit2.mean()).plot(clf=False,color="red",logplot="y",linewidth=2,xlabel="Frequency [MHz]",ylabel="RMS/Mean")
             self.plot_finish("Plotted relative RMS of downsampled spectrum (doplot>=2)",name=self.__taskname__+"-rms_div_mean"+self.plot_name)
         #Now select bins where the ratio between RMS and amplitude is within the limits
         self.nselected_bins=self.selected_bins[...,1:].findbetween(self.ratio[...,1:-1],self.limit1,self.limit2)
@@ -786,7 +786,7 @@ ApplyBaselineParameters.update(dict(
                 default=1),
 
     rms = dict(doc="Median RMS value of blocks in downsampled spectrum - used to calculate threshold for cutting peaks (output only)",
-               default=lambda self:cr.Vector(float,[self.nofAntennas],fill=0.0),
+               default=lambda self:cr.Vector(float,self.nofAntennas,fill=0.0),
                output=True),
 
     means = dict(default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins]),

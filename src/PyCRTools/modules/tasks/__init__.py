@@ -1265,7 +1265,8 @@ class WorkSpace(object):
         if name in self.parameterlist:
             if hasattr(self,"_"+name):
                 delattr(self,"_"+name)
-                self._parameterlist.remove("_"+name)
+                if "_"+name in self._parameterlist:
+                    self._parameterlist.remove("_"+name)
             if self.parameters.has_key(name): #OK that is a pre-defined parameter
                 self.parameter_properties[name]=self._default_parameter_definition.copy()
                 self.parameter_properties[name].update(self.parameters[name]) # restore the properties with original properties
@@ -1405,7 +1406,7 @@ class WorkSpace(object):
         return derivedparameters
 
 
-    def getOutputParameters(self):
+    def getOutputParameters(self,workarrays=True):
         """
         Return all parameters that are considered output parameters,
         i.e. those which are 'derived' parameters and those explicitly
@@ -1413,7 +1414,9 @@ class WorkSpace(object):
         """
         l=set(self.getDerivedParameters(workarrays=False,nonexport=False))
         for p,v in self.parameter_properties.items():
-            if (v.has_key(output) and v[output]): l.add(p)
+            if (v.has_key(output) and v[output]):
+                if workarrays or not (v.has_key(workarray) and v[workarray]):
+                    l.add(p)
         return l
 
 
@@ -1684,8 +1687,8 @@ class WorkSpace(object):
                     deps=" <- ["+", ".join(v[dependencies])+"]"
                 else:
                     deps=""
-                if (v[unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}").format(p,val,printindent_string(v[doc]+deps,66,width=120,prefix="# "))
-                else: s1+=("# {0:>20} = {1:<30} - {2:s}").format(p,str(val)+" "+v[unit],printindent_string(v[doc]+deps,66,width=120,prefix="# "))
+                if (v[unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}").format(p,val,printindent_string(v[doc]+deps,58,width=120,prefix="# "))
+                else: s1+=("# {0:>20} = {1:<30} - {2:s}").format(p,str(val)+" "+v[unit],printindent_string(v[doc]+deps,58,width=120,prefix="# "))
         s+=s0
         if not s1=="": s+="#------------------------Output Parameters------------------------------\n"+s1
         if not s2=="": s+="#---------------------------Work Arrays---------------------------------\n"+s2

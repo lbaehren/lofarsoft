@@ -1,3 +1,16 @@
+2011-07-21 - Rev 8176
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+ 
+
+-revised averagespectrum to also produce dynamic spectra and run over
+multiple files separately (adn produce anverage and dynamic spectra
+from all files).
+- fixed a bug in hCopy
+- minor buf in firbaseline (vector size was defined with list as argument)
+
+
 2011-7-19  - Rev 8162
 =====================
 

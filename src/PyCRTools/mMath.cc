@@ -3100,8 +3100,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin, const Iter vecin_end, const HInteger 
 
   // Sanity check
   if (lenIn <= 0) {
-    throw PyCR::ValueError("Size of input vector <= 0.");
-    return 0.0;
+    ERROR_RETURN_VALUE("Size of input vector <= 0.",0.0);
   }
   if (blen>lenIn) blen=lenIn;
 

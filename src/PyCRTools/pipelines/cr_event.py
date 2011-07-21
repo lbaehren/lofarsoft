@@ -107,7 +107,7 @@ if not parser.get_prog_name()=="cr_event.py":
     filename="~/LOFAR/work/CR/LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
 
     outputdir="/Users/falcke/LOFAR/work/"
-    polarization=0 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
+    polarization=1 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
     block_with_peak=93
     blocksize=2**16
     plotpause=False
@@ -190,13 +190,14 @@ par=dict(
     AverageSpectrum = dict(
         calc_incoherent_sum=True,
         addantennas=False,
+        output_subdir=outputdir,
         filefilter=os.path.join(filedir,filename),
         lofarmode=lofarmode,
         antennas_start=polarization,
         antennas_stride=2,maxpeak=7,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=7,
         blocklen=4096, # only used for quality checking within one block
 #        delta_nu=3000, # -> blocksize=2**16
-        blocksize=blocksize, # -> blocksize=2**16
+        chunksize_estimated=blocksize, # -> blocksize=2**16
         rmsrange=(0.5,50) #Range of RMS that is allowed in timeseries
                           #before flagging. RMS is related to power,
                           #hence we check for power excesses or
@@ -220,7 +221,7 @@ par=dict(
 ########################################################################
 #Getting the average spectrum and quality flags
 ########################################################################
-print "---> Calculating average spectrum of all (odd/even) antennas"
+print "---> Calculating average spectrum of all antennas"
 avspectrum=trerun("AverageSpectrum","",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
 calblocksize=avspectrum.power.getHeader("blocksize")
 speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
