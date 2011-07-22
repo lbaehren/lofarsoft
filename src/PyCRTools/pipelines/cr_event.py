@@ -222,7 +222,7 @@ par=dict(
 #Getting the average spectrum and quality flags
 ########################################################################
 print "---> Calculating average spectrum of all antennas"
-avspectrum=trerun("AverageSpectrum","",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
+avspectrum=trerun("AverageSpectrum","cr_event",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
 calblocksize=avspectrum.power.getHeader("blocksize")
 speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
 

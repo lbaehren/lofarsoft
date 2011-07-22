@@ -20,8 +20,13 @@ doplot=True
 
 class plotfinish:
     """
-    Usage:
+    **Usage:**
+    
+    ``plot_finish_instance=plotfinish(name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0,plotfiles=[])``
 
+    ``plot_finish_instance(txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False)`
+
+    **Description**
     Class creating a function to be called after a plotting
     command. If ``plotpause.plotpause = True`` it will pause and ask
     for user input whether and how to continue calculation and
@@ -51,10 +56,16 @@ class plotfinish:
     *plotfiles* = []      Provide a list, which contains the plotfiles generated so far.
                           (parameter not available at initialization)
                           
-    *same_row*   If true, then put the next plotfile in the
+    *same_row*            If true, then put the next plotfile in the
                           same 'row' as the previous, i.e. create a sub list. Can be used
                           for output formatting.
                           (parameter only available during call)
+
+    *setcounter*          Reset the counter for the plotfiles (added to names)
+                          to this value (parameter only available during call)
+
+    *counter*             Temporarily set the counter for the plotfiles (added to names)
+                          to this value (parameter only available during call)
 
     name        = ""      Name identifying current plot. Will also be appended
                           to filename. (parameter not available at initialization)
@@ -89,7 +100,16 @@ class plotfinish:
         self.plotfiles=plotfiles
         self.counter=counter
         
-    def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,savefig=False,same_row=False):
+    def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False):
+        """
+        Usage:
+
+        plot_finish_instance(txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False)
+
+        Description:
+
+        Call this after ever plot to save output and ask for user input.
+        """
         if self.doplot:
             if not filename: filename=self.filename
             if not filetype: filetype=self.filetype
@@ -100,9 +120,9 @@ class plotfinish:
                 self.counter+=1
             if filename:
                 if name:
-                    f="{0:s}-{1:04d}-{2:s}-{3:s}.{4:s}".format(os.path.join(fdir,"pycrfig"),self.counter,fname,name,filetype)
+                    f="{0:s}-{1:04d}-{2:s}-{3:s}.{4:s}".format(os.path.join(fdir,"pycrfig"),counter if not counter==None else self.counter,fname,name,filetype)
                 else:
-                    f="{0:s}-{1:04d}-{2:s}.{3:s}".format(os.path.join(fdir,"pycrfig"),counter,fname,filetype)
+                    f="{0:s}-{1:04d}-{2:s}.{3:s}".format(os.path.join(fdir,"pycrfig"),counter if not counter==None else self.counter,fname,filetype)
                 if same_row and len(self.plotfiles)>0:
                     if isinstance(self.plotfiles[-1],list):
                         self.plotfiles[-1].append(f)

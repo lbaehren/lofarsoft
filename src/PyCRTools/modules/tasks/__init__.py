@@ -1040,14 +1040,16 @@ class Task(object):
         if parfiles: htmlfile.write("<h2>Parfiles</h2>\n".format())
         for parfile in parfiles:
             if os.path.exists(parfile):
+                if os.path.exists(parfile+".txt"):
+                    os.remove(parfile+".txt")
                 os.symlink(parfile,parfile+".txt")
-                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(parfile,os.path.split(parfile)[-1]))
+                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(relpath(output_dir,parfile),os.path.split(parfile)[-1]))
 
         #Write logfile links
         if logfiles: htmlfile.write("<h2>Logfiles</h2>\n".format())
         for logfile in logfiles:
             if os.path.exists(logfile):
-                htmlfile.write('<a type="text/http" href="{0:s}">{1:s}</a><br>\n'.format(logfile,os.path.split(logfile)[-1]))
+                htmlfile.write('<a type="text/http" href="{0:s}">{1:s}</a><br>\n'.format(relpath(output_dir,logfile),os.path.split(logfile)[-1]))
 
         #Include text log
         if text:
@@ -1066,9 +1068,9 @@ class Task(object):
                 htmlfile.write('<tr>'.format())
                 if isinstance(plotfile,list):
                     for plotfile_i in plotfile:
-                        htmlfile.write('<td><a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(os.path.split(plotfile_i)[-1]))
+                        htmlfile.write('  <td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>\n'.format(relpath(output_dir,plotfile_i),os.path.split(plotfile_i)[-1]))
                 else:
-                    htmlfile.write('<td><a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(os.path.split(plotfile)[-1]))
+                    htmlfile.write('<td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(relpath(output_dir,plotfile_i),os.path.split(plotfile)[-1]))
                     htmlfile.write('</tr>\n'.format())
                     
             htmlfile.write('</table>\n'.format())

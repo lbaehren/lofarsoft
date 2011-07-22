@@ -1,4 +1,13 @@
 
+2011-07-22 - Rev 8193 
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- added tbb_spectra.py with command line options (optparse sucks ...)
+  to make dynamic and average spectra
+
+
 2011-07-22 - Rev 8188 
 =====================
 
