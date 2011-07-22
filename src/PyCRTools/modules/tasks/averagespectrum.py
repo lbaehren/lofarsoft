@@ -61,18 +61,18 @@ def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
 #    """
 
 
-def averagespectrum_getfile(self):
+def averagespectrum_getfile(current_file_number,filenames,nfiles,lofarmode,filefilter):
     """
     To produce an error message in case the file does not exist
     """
-    if self.current_file_number < self.nfiles:
-        f=cr.open(self.filenames[self.current_file_number])
-        if self.lofarmode:
-            print "Setting ANTENNA_SET=",self.lofarmode,"in the data file!"
-            f["ANTENNA_SET"]=self.lofarmode
+    if current_file_number < nfiles:
+        f=cr.open(filenames[current_file_number])
+        if lofarmode:
+            print "Setting ANTENNA_SET=",lofarmode,"in the data file!"
+            f["ANTENNA_SET"]=lofarmode
         return f
     else:
-        print "ERROR: File "+self.filefilter+" not found!"
+        print "ERROR: File "+filefilter+" not found!"
         return None
 
 """
@@ -113,7 +113,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         load_if_file_exists = dict(default=False,
                                    doc="If average spectrum file (``spectrumfile``) already exists, skip calculation and load existing file."),
 
-        datafile = dict(default=averagespectrum_getfile,
+        datafile = dict(default=lambda self:averagespectrum_getfile(self.current_file_number,self.filenames,self.nfiles,self.lofarmode,self.filefilter),
                         export=False,
                         doc="Data file object pointing to raw data."),
 
@@ -123,8 +123,17 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         addantennas = dict(default=True,
                            doc="If True, add all antennas into one average spectrum, otherwise keep them separate in memory per file."),
 
+        write_html = dict(default=False, doc="Write an html file summarizing the input"),
+
+        logfile = dict(default=lambda self:os.path.join(self.output_dir,"logfile.txt"),
+                       doc="Write output also to a logfile."),
+
+        hprint = dict(default=lambda self:cr.hPrint(textbuffer=[] if self.write_html else None,logfile=self.logfile),
+                      doc="Instance of the hprint class that writes output to stdout and a logfile and stores it for html output.",
+                      export=False),
+
         doplot = dict(default=False,
-                      doc="Plot current spectrum while processing."),
+                      doc="Produce output plots. If doplot>1 plot while processing."),
 
         plotlen = dict(default=2**12,
                        doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
@@ -132,10 +141,24 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         plotskip = dict(default=1,
                         doc="Plot only every 'plotskip'-th spectrum, skip the rest (should not be smaller than 1)."),
 
-        plot_finish = dict(default = lambda self:cr.plotfinish(doplot=self.doplot,plotpause=False),
+        plot_finish = dict(default = lambda self:cr.plotfinish(filename=self.plot_filename,doplot=self.doplot,plotpause=True),
                        doc ="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
 
         plot_name = dict(default="",doc="Extra name to be added to plot filename."),
+
+        plot_filename = dict(default="",
+                             doc="Base filename to store plot in."),
+
+        plot_antenna = dict(default=0,
+                            doc="Which antenna to plot?"),
+
+        plot_zoom_x = dict(default=False,
+                            doc="(nu1,nu2) - If a tuple with two numbers is provided use this to plot an additional graph zoomed into the region between these frequencies on the x-axis"),
+
+        plot_zoom_slice = dict(default=lambda self: slice(self.frequencies.findlowerbound(self.plot_zoom_x[0]).val(),
+                                                  self.frequencies.findlowerbound(self.plot_zoom_x[1]).val())
+                                                  if isinstance(self.plot_zoom_x,tuple) else False,
+                            doc="slice(n1,n2) - If a slice is provided use this to plot an additional graph zoomed into the region between these channels along the x-axis"),
 
         stride_n = sc.p_(0,
                          "if >0 then divide the FFT processing in ``n=2**stride_n blocks``. This is slower but uses less memory."),
@@ -187,7 +210,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                           doc="Directory where output file is to be written to (look for filename.dir there)."),
 
         output_subdir = dict(default=lambda self: os.path.join(self.output_dir,self.root_filename+".dir"),
-                          doc="Directory where output file is to be written to."),
+                          doc="Directory where output data files are being written to."),
 
         root_filename = dict(default=lambda self:
                              (os.path.split(self.filenames[self.current_file_number])[1].replace(self.infileext,"")
@@ -225,17 +248,17 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                                       export=False,
                                       output=True),
 
-        mean_antenna = dict(default=lambda self: cr.hArray(float,[self.nantennas], name="Mean per Antenna"),
+        mean_antenna = dict(default=lambda self: cr.hArray(float,[self.nantennas*self.nfiles], name="Mean per Antenna"),
                             doc="Mean value of time series per antenna.",
-                            output=True),
+                            output=True,workarray=True),
 
-        rms_antenna = dict(default= lambda self: cr.hArray(float,[self.nantennas], name="RMS per Antenna"),
+        rms_antenna = dict(default= lambda self: cr.hArray(float,[self.nantennas*self.nfiles], name="RMS per Antenna"),
                            doc="RMS value of time series per antenna.",
-                           output=True),
+                           output=True,workarray=True),
 
-        npeaks_antenna = dict(default= lambda self: cr.hArray(float,[self.nantennas], name="Number of Peaks per Antenna"),
+        npeaks_antenna = dict(default= lambda self: cr.hArray(float,[self.nantennas*self.nfiles], name="Number of Peaks per Antenna"),
                               doc="Number of peaks of time series per antenna.",
-                              output=True),
+                              output=True,workarray=True),
 
         mean = dict(default=0,
                     doc="Mean of mean time series values of all antennas.",
@@ -445,7 +468,7 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                      doc="Array to read time series data in",
                      default=lambda self:cr.hArray(float,[self.nblocks,self.blocklen],name="tdata",header=self.header)),
 
-        incoherent_sum = dict(doc="Incoherent sum of the power in all antennas (timeseries data).",
+        incoherent_sum = dict(workarray=True,doc="Incoherent sum of the power in all antennas (timeseries data).",
                               default=lambda self:cr.hArray(float,[self.nchunks,self.chunksize_used],name="Power(t)",header=self.header)),
 
         cdata = dict(workarray=True,
@@ -527,10 +550,6 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                     doc="Average spectrum over all times and all files, used for plotting ...?",
                     default=lambda self:cr.hArray(float,[self.power_size],fill=0.0,name="Average Spectrum",par=dict(logplot="y"),header=self.header,xvalues=self.frequencies)),
 
-
-        npcleanspec=dict(workarray=True,
-                         doc="Clean dynamic spectrum in a numpy array for plotting.",
-                         default=lambda self:np.zeros([self.nsects,self.power_size])),
 
         t_int=dict(default=10**-3,
                    doc="Desired intergration time per spectrum for dynamic spectrum - will be rounded off to get integer number of spectral chunks",
@@ -724,9 +743,7 @@ class AverageSpectrum(tasks.Task):
     def run(self):
         """Run the program.
         """
-        #crfile=IO.open(filenames)
 
-        #print "Time:",time.clock()-self.self.t0,"s for set-up."
 
         #Skip calculation if file already exists and is asked for
         if self.load_if_file_exists and os.path.exists(self.spectrum_file):
@@ -739,13 +756,16 @@ class AverageSpectrum(tasks.Task):
         del self.starttimes_local
         del self.starttimes_UTC
 
+        hprint = self.hprint.open()
+        hprint.textbuffer=[]
+        
         self.quality=[]
         self.antennas_used=set()
         self.antennacharacteristics={}
         self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
         self.dostride=(self.stride>1)
         if not self.addantennas and (self.stride>1 or self.doublefft):
-            print "ERROR: averagespectrum - Can't use'addantennas=True with self.stride>1 or doublefft=True"
+            hprint("ERROR: averagespectrum - Can't use'addantennas=True with self.stride>1 or doublefft=True")
             return
 #        self.power.getHeader()["FREQUENCY_INTERVAL"]=self.delta_frequency
 #        self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","antennas","antenna_list"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
@@ -753,10 +773,19 @@ class AverageSpectrum(tasks.Task):
             self.frequencies.fillrange(self.start_frequency/10**6,self.delta_frequency/10**6)
         if self.stride>1 or self.doublefft:
             if self.calc_incoherent_sum: self.calc_incoherent_sum=False
+
         if self.calc_incoherent_sum:
             self.ntimeseries_data_added_per_chunk.fill(0)
             self.incoherent_sum.fill(0)
             self.power.par.incoherent_sum=self.incoherent_sum
+
+        if self.calc_dynspec:
+            if self.stride>1 or self.doublefft:
+                hprint("ERROR: averagespectrum - Can't calculate dynspec with self.stride>1 or doublefft=True")
+                return
+            self.all_dynspec.fill(0)
+            self.all_cleanspec.fill(0)
+            self.all_avspec.fill(0)
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
@@ -768,12 +797,16 @@ class AverageSpectrum(tasks.Task):
 
         if self.doplot:
             cr.plt.ioff()
+            self.plot_finish.plotfiles=[]        
 
         npass = self.nchunks*self.stride
 
+        self.nantennas_total_last_file = 0
+        self.nantennas_total = 0
+
         for fnumber in range(self.file_start_number,self.nfiles):
             self.current_file_number = fnumber
-            self.ws.update(workarrays=False) # since the current_file_number was changed, make an update to get the correct file, etc.
+            self.ws.update(workarrays=False,nonexport=False) # since the current_file_number was changed, make an update to get the correct file, etc.
 
             self.starttimes_unix.append(self.starttime_unix)
             self.starttimes_local.append(self.starttime_local)
@@ -783,19 +816,22 @@ class AverageSpectrum(tasks.Task):
             self.nspectraadded=0
             self.nspectraadded_per_antenna.fill(0)
             self.nspectraflagged_per_antenna.fill(0)
+
             if self.calc_dynspec:
-                if self.stride>1 or self.doublefft:
-                    print "ERROR: averagespectrum - Can't calculate dynspec with self.stride>1 or doublefft=True"
-                    return
                 self.dynspec.fill(0)
                 self.cleanspec.fill(0)
                 self.dynspec_time.fillrange(0,self.t_int_used)
                 self.dynspec_nspectra_added.fill(0)
+                
             self.count=0
             self.nofAntennas=0
-            self.nantennas_total=0
 
-            print "# Using File",str(self.current_file_number)+":",self.filename
+            if self.doplot:
+                self.plot_finish.filename=os.path.join(
+                    self.output_dir,self.root_filename+self.__taskname__+
+                    ("-"+self.plot_name+"-" if self.plot_name else ""))
+                
+            hprint("# Using File",str(self.current_file_number)+":",self.filename)
             if self.stride==1:
                 self.datafile["BLOCKSIZE"]=self.chunksize_used #Setting initial block size
             else:
@@ -804,7 +840,7 @@ class AverageSpectrum(tasks.Task):
 
             #Creating output directory, if needed
             if not os.path.exists(self.output_subdir):
-                print "# AverageSpectrum: creating new output directory",self.output_subdir
+                hprint("# AverageSpectrum: creating new output directory",self.output_subdir)
                 os.makedirs(self.output_subdir)
 
 
@@ -819,7 +855,7 @@ class AverageSpectrum(tasks.Task):
                 rms=0; mean=0; npeaks=0
                 self.datafile["SELECTED_DIPOLES"]=[int(antenna)]
                 antennaID=self.antennaIDs[antenna]
-                print "# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:"
+                hprint("# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:")
 
                 #Loop over all chunks (determining spectal resolution)
                 for nchunk in range(self.nchunks):
@@ -858,14 +894,14 @@ class AverageSpectrum(tasks.Task):
                                 )
                             if not self.quality_db_filename=="":
                                 qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
+                                
                             mean+=self.quality[self.count]["mean"]
                             rms+=self.quality[self.count]["rms"]
                             npeaks+=self.quality[self.count]["npeaks"]
                             dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
 
-
                         if not dataok:
-                            print " # Data flagged!"
+                            hprint(" # Data flagged!")
                             break
 
                         #Randomize peaks in the time series data, if desired
@@ -885,7 +921,6 @@ class AverageSpectrum(tasks.Task):
                                 ofiles+=[ofile]
                                 self.cdata.writefilebinary(ofile)  # output of doublefft1 is in cdata ...
 
-
                     if dataok:
                         self.nspectraadded+=1
                         self.nspectraadded_per_antenna[antenna_output_index]+=1
@@ -898,7 +933,7 @@ class AverageSpectrum(tasks.Task):
                             #Now sort the different blocks together (which requires a transpose over passes/strides)
                             for offset in range(self.stride):
                                 if self.dostride:
-                                    #print "#    Offset",offset
+                                    #hprint("#    Offset",offset)
                                     self.tmpspecT[...].readfilebinary(cr.Vector(ofiles),cr.Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
                                     #This transpose is to make sure the blocks are properly interleaved
                                     cr.hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
@@ -907,7 +942,7 @@ class AverageSpectrum(tasks.Task):
                                     ofile=self.tmpfilename+str(offset)+"b"+self.fileext
                                     self.specT.writefilebinary(ofile)
                                     ofiles2+=[ofile]
-                                #print "Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."                            for offset in range(self.nbands):
+                                #hprint("Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."                            for offset in range(self.nbands):)
                                 if (self.nspectraadded==1): # first chunk
                                     self.power.fill(0.0)
                                 else: #2nd or higher chunk, so read data in and add new spectrum to it
@@ -915,7 +950,7 @@ class AverageSpectrum(tasks.Task):
                                         self.power.readfilebinary(self.spectrum_file_bin,self.subspeclen*offset)
                                     self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)
                                 if self.dostride:
-                                    #print "#    Offset",offset
+                                    #hprint("#    Offset",offset)
                                     self.specT2[...].readfilebinary(cr.Vector(ofiles2),cr.Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
                                     cr.hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
                                     if self.nspectraadded>1:
@@ -929,9 +964,9 @@ class AverageSpectrum(tasks.Task):
                                 self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraflagged","antennas_used","quality"])
                                 self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)
                                 clearfile=False
-                                if self.doplot and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
+                                if self.doplot>1 and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].plot()
-                                    #print "mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean()
+                                    #hprint("mean=",self.power[max(len(self.power)/2-self.plotlen,0):min(len(self.power)/2+self.plotlen,len(self.power))].mean())
                                     cr.plt.draw()
 
 
@@ -946,7 +981,7 @@ class AverageSpectrum(tasks.Task):
 #                                    self.fftdata/=float(self.nspectraadded_per_antenna[antenna_output_index])
 #                                self.power2[antenna_output_index] *= (self.nspectraadded_per_antenna[antenna_output_index]-1.0)/(self.nspectraadded_per_antenna[antenna_output_index])
                                 self.power2[antenna_output_index].spectralpower(self.fftdata)
-                                if self.doplot and antenna_output_index==0 and self.nspectraadded_per_antenna[antenna_output_index]%self.plotskip==0:
+                                if self.doplot>1 and antenna_output_index==0 and self.nspectraadded_per_antenna[antenna_output_index]%self.plotskip==0:
                                     self.power2[antenna_output_index,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot(
                                         title="nspec={0:5d}, mean={1:8.3f}, rms={2:8.3f}".format(
                                             self.nspectraadded_per_antenna[antenna_output_index],
@@ -966,11 +1001,11 @@ class AverageSpectrum(tasks.Task):
                     else: #data not ok
                         self.nspectraflagged+=1
                         self.nspectraflagged_per_antenna[antenna_output_index]+=1
-                        #print "#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged
+                        #hprint("#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged)
 
                     #end loop over chunks
 
-                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged
+                hprint("# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged)
 
                 # Now prepare writing the output for the different spectra
 
@@ -981,7 +1016,7 @@ class AverageSpectrum(tasks.Task):
                     self.rms_antenna[self.nantennas_total]=rms
                     self.npeaks_antenna[self.nantennas_total]=npeaks
                     self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-                    print "#          mean =",mean,"rms =",rms,"npeaks =",npeaks
+                    hprint("#          mean =",mean,"rms =",rms,"npeaks =",npeaks)
                     f=open(self.quality_db_filename+".py","a")
                     f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
                     f.close()
@@ -998,7 +1033,13 @@ class AverageSpectrum(tasks.Task):
                                   fftLength="speclen",blocksize="fullsize")
                 self.power.write(self.spectrum_file)# same as power2, just nicer dimensions
                 self.output_files["average_spectrum"].append(self.spectrum_file)
-
+                if self.doplot:
+                    title=("Spectrum of Antenna #"+str(self.plot_antenna) if not self.addantennas else "Average Spectrum of Antennas")+"\n"+self.root_filename
+                    self.power[self.plot_antenna,1:].plot(title=title)
+                    self.plot_finish(name="-average_spectrum",same_row=False)
+                    if self.plot_zoom_slice:
+                        self.power[self.plot_antenna,self.plot_zoom_slice].plot(title=title)
+                        self.plot_finish(name="-average_spectrum_slice",same_row=True)
             if self.calc_incoherent_sum:
                 #Normalize the incoherent time series power
                 self.incoherent_sum[...] /= self.ntimeseries_data_added_per_chunk.vec()
@@ -1018,45 +1059,89 @@ class AverageSpectrum(tasks.Task):
                 self.output_files["dynamic_spectrum"].append(self.dynspec_file)
 
                 if self.doplot:
+                    title="Average Spectrum of all Antennas"+"\n"+self.root_filename
+                    self.avspec[1:].plot(title=title)
+                    self.plot_finish(name="-average_spectrum_all_antennas",same_row=True)
                     self.dynplot()
-
+                    self.plot_finish(name="-dynamic_spectrum",same_row=True)
+                    if self.plot_zoom_slice:
+                        self.avspec[self.plot_zoom_slice].plot(title=title)
+                        self.plot_finish(name="-average_spectrum_all_antennas_zoom",same_row=True)
+                        self.dynplot(zoom_slice=self.plot_zoom_slice,zoom_x=self.plot_zoom_x)
+                        self.plot_finish(name="-dynamic_spectrum",same_row=True)
+                        
                 if self.calc_all_dynspec:
                     self.all_avspec += self.avspec
                     self.all_dynspec[fnumber].copy(self.avspec)
+            
             if self.qualitycheck and self.nantennas_total>1:
-                self.mean=cr.asvec(self.mean_antenna[:self.nantennas_total]).mean()
-                self.mean_rms=cr.asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
-                self.rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).mean()
-                self.rms_rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
-                self.npeaks=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
-                self.npeaks_rms=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
+                self.mean=cr.asvec(self.mean_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
+                self.mean_rms=cr.asvec(self.mean_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.mean)
+                self.rms=cr.asvec(self.rms_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
+                self.rms_rms=cr.asvec(self.rms_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.rms)
+                self.npeaks=cr.asvec(self.npeaks_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
+                self.npeaks_rms=cr.asvec(self.npeaks_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.npeaks)
                 self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
-                print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
-                print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
-                print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
-                print "Quality factor =",self.homogeneity_factor * 100,"%"
+                hprint("Mean values for all antennas in file: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
+                hprint("RMS values for all antennas in file: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
+                hprint("NPeaks values for all antennas in file: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")
+                hprint("Quality factor =",self.homogeneity_factor * 100,"%")
 
-            print "# End File",str(self.current_file_number)+":",self.filename
+            self.nantennas_total_last_file = self.nantennas_total
+            
+            hprint("# End File",str(self.current_file_number)+":",self.filename)
+        if self.qualitycheck and self.nantennas_total>1:
+            self.mean=cr.asvec(self.mean_antenna[:self.nantennas_total]).mean()
+            self.mean_rms=cr.asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
+            self.rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).mean()
+            self.rms_rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
+            self.npeaks=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
+            self.npeaks_rms=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
+            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
+            hprint("Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
+            hprint("RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
+            hprint("NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")
+            hprint("Quality factor =",self.homogeneity_factor * 100,"%")
 
 
         if self.calc_all_dynspec:
-            import pdb; pdb.set_trace()
             self.updateHeader(self.all_dynspec,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","quality","nfiles"],fftLength="speclen",blocksize="fullsize")
             self.all_avspec /= self.nfiles
             self.all_cleanspec.copy(self.all_dynspec)
             self.all_cleanspec /= self.all_avspec
             self.all_dynspec.write(self.all_dynspec_file)
-            self.output_files["all_dynamic_spectrum"].append(self.all_dynspec_file)
+            self.output_files["all_dynamic_spectrum"].append(self.all_dynspec_file) 
 
-        print "Finished - total time used:",time.clock()-self.t0,"s."
-        print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'"
-        print "These output files were created, use the folowing lines to read them back in:"
+            if self.doplot:
+                title="Average Spectrum of all Antennas"
+                self.dynplot(dynspec=self.all_dynspec,ylabel="Dataset #",
+                             extent=(self.frequencies[0],self.frequencies[-1],0,self.nfiles))
+                self.plot_finish(name="-dynamic_spectrum_all_files",same_row=False)
+                self.all_avspec[1:].plot(title=title)
+                self.plot_finish(name="-average_spectrum_all_files",same_row=True)
+
+                if self.plot_zoom_slice:
+                    self.dynplot(dynspec=self.all_dynspec,ylabel="Dataset #",
+                                 extent=(self.plot_zoom_x[0],self.plot_zoom_x[1],0,self.nfiles),
+                                 zoom_slice=self.plot_zoom_slice)
+                    self.plot_finish(name="-dynamic_spectrum_all_files_zoom",same_row=True)
+                    self.all_avspec[self.plot_zoom_slice].plot(title=title)
+                    self.plot_finish(name="-average_spectrum_all_files_zoom",same_row=True)
+
+                cr.plt.ion()
+
+        if self.write_html:
+            self.writehtml(text=hprint.textbuffer)
+            
+        hprint("Finished - total time used:",time.clock()-self.t0,"s.")
+        hprint("To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'")
+        hprint("These output files were created, use the folowing lines to read them back in:")
         for k,v in self.output_files.items():
             for f in v:
-                print "f =",k,"= hArrayRead('"+f+"')"
-        if self.doplot:
-            cr.plt.ion()
+                hprint("f =",k,"= hArrayRead('"+f+"')")
 
+        hprint.clear() # make sure the file is closed and textbuffer is emptied
+        
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
@@ -1113,7 +1198,8 @@ class AverageSpectrum(tasks.Task):
         y.par.xvalues.setUnit("mu","")
         y.plot(clf=not all)
 
-    def dynplot(self,dynspec=None,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):
+
+    def dynplot(self,dynspec=None,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None,ylabel=None,xlabel=None,extent=None,zoom_slice=None,zoom_x=None):
         """
         Plot the dynamic spectrum. Provide the dynamic spectrum
         computed by the Task AverageSpectrum as input.
@@ -1124,6 +1210,10 @@ class AverageSpectrum(tasks.Task):
         *dmax*                Maximum z-value (intensity) in dynamic spectrum to plot.
         *cmin*                Minimum z-value (intensity) in clean dynamic spectrum to plot.
         *cmax*                Maximum z-value (intensity) in clean dynamic spectrum to plot.
+        *y/xlabel*            Label of y and x-axis.
+        *extent*              (x0,x1,y0,y1) = define extent/range of x and y axis (just for labelling)
+        *zoom_slice*          slice(n0,n1) - Zoom into this slice of the data 
+        *zoom_x*              (nu0,nu1) - zoom_slice slice corresponds to these frequencies
         ================ ==== ==============================================================================
 
         Example::
@@ -1138,55 +1228,61 @@ class AverageSpectrum(tasks.Task):
 
         if hasattr(dynspec,"par") and hasattr(dynspec.par,"cleanspec") and not plot_cleanspec==False:
             cleanspec=dynspec.par.cleanspec
-            npcleanspec=np.zeros(cleanspec.getDim())
         else:
             cleanspec=None
 
         hdr=dynspec.getHeader("AverageSpectrum")
-        npdynspec=np.zeros(dynspec.getDim())
-        cr.hCopy(npdynspec,dynspec)
+
+        if not ylabel:
+            ylabel="+/- Time [ms]"
+
+        if not xlabel:
+            xlabel="Frequency [MHz]"
+
+        if not extent:
+            if zoom_slice:
+                extent=zoom_x+(hdr["start_time"]*1000,hdr["end_time"]*1000)
+            else:
+                extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000)
+
+        dim = dynspec.shape()
+        
+        if zoom_slice:
+            dim=(dim[-2],zoom_slice.stop-zoom_slice.start)
+            scratch_array=cr.hArray(float,dim)
+
+        npdynspec=np.zeros(dim)
+        npcleanspec=np.zeros(dim)
+
+        if zoom_slice:
+            cr.hCopy(scratch_array[...],cleanspec[...,zoom_slice])
+            cr.hCopy(npcleanspec,scratch_array)
+            cr.hCopy(scratch_array[...],dynspec[...,zoom_slice])
+            cr.hCopy(npdynspec,scratch_array)
+        else:
+            cr.hCopy(npcleanspec,cleanspec)
+            cr.hCopy(npdynspec,dynspec)
+
         np.log(npdynspec,npdynspec)
+
         if cleanspec:
             cr.plt.subplot(1,2,1)
+            
         cr.plt.title("Dynamic Spectrum")
-        cr.plt.imshow(npdynspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=dmin,vmax=dmax,
-                   extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
+        cr.plt.imshow(npdynspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=dmin,vmax=dmax,extent=extent)
+        cr.plt.xlabel(xlabel)
+        cr.plt.ylabel(ylabel)
+
         print "dynspec: min=",math.log(dynspec.min().val()),"max=",math.log(dynspec.max().val()),"rms=",math.log(dynspec.stddev().val())
-        cr.plt.xlabel("Frequency [MHz]")
-        cr.plt.ylabel("+/- Time [ms]")
+        
         if cleanspec:
-            cr.hCopy(npcleanspec,cleanspec)
             cr.plt.subplot(1,2,2)
             cr.plt.title("Cleaned Dynamic Spectrum")
-            cr.plt.imshow(npcleanspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=cmin,vmax=cmax,
-                    extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
+            cr.plt.imshow(npcleanspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=cmin,vmax=cmax,extent=extent)
+            cr.plt.xlabel(xlabel)
+            cr.plt.ylabel(ylabel)
+
             print "cleanspec: min=",cleanspec.min().val(),"max=",cleanspec.max().val(),"rms=",cleanspec.stddev().val()
-            cr.plt.xlabel("Frequency [MHz]")
-            cr.plt.ylabel("+/- Time [ms]")
+            
         cr.plt.draw();
-
-
-
-# class test1(tasks.Task):
-#     """
-#     Documentation of task - parameters will be added automatically
-#     """
-#     parameters = {x = sc.p_(None,"x-value - a positional parameter",positional=True),y = sc.p_(2,"y-value - a normal keyword parameter"),"xy":p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
-#     def init(self):
-#         print "Calling optional initialization routine - Nothing to do here."
-#     def run(self):
-#         print "Calling Run Function."
-#         print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
-
-# class test2(tasks.Task):
-#     """
-#     Documentation of task - parameters will be added automatically
-#     """
-#     def call(self,x,y=2,xy=lambda ws:ws.x*ws.y):
-#         pass
-#     def init(self):
-#         print "Calling optional initialization routine - Nothing to do here."
-#     def run(self):
-#         print "Calling Run Function."
-#         print "self.x=",self.x,"self.y=",self.y,"self.xz=",self.xy
 

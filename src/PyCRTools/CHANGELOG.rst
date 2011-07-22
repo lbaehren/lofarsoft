@@ -1,3 +1,20 @@
+
+2011-07-22 - Rev 8188 
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- created a new core file: utils.py
+
+- added a class hPrint which allows one to create hprint functions
+  that can be used to reroute output also to a logfile and to an
+  internal texbuffer
+
+- averagespectrum mow produces pretty output in an html file
+
+- Tasks have a method ``writehtml``which allows one to produce pretty
+  output automatically.
+ 
 2011-07-21 - Rev 8177
 =====================
 
@@ -18,7 +35,6 @@
 - Fixed a bug in :func:`hCopy`.
 - Minor bug in :func:`fitbaseline` (vector size was defined with list
   as argument).
-
 
 2011-7-19  - Rev 8162
 =====================

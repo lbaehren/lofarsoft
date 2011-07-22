@@ -13,6 +13,7 @@ from vector import *
 from harray import *
 from plot import *
 from math import *
+from utils import *
 
 # Import datareader class overloaded methods
 from datareader import *

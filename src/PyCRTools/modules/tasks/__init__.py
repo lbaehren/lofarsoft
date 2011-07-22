@@ -672,10 +672,10 @@ class Task(object):
         the option parfile=filename (e.g., tpar parfile=filename)
         """
         if not task_write_parfiles: return
-        fn=os.path.join(task_outputdir,self.oparfile)
-        if len(task_parfiles)==0 or not task_parfiles[-1]==fn:
-            task_parfiles.append(fn)
-        f=open(task_parfiles[-1],"w")
+        self.parfile=os.path.join(task_outputdir,self.oparfile)
+        if len(task_parfiles)==0 or not task_parfiles[-1]==self.parfile:
+            task_parfiles.append(self.parfile)
+        f=open(self.parfile,"w")
         f.write("# Task: "+self.__modulename__+" saved on "+time.strftime("%Y-%m-%d %H:%M:%S")+"\n# File: "+self.oparfile+"\n")
         f.write(self.ws.__repr__(internals=False,workarrays=False))
         f.close()
@@ -738,7 +738,8 @@ class Task(object):
 
         self._starttime=time.strftime("%Y-%m-%d_%H:%M:%S")
         self.oparfile=self.__taskname__+"_"+self._starttime+".par"
-        self.ws.t0=time.clock()
+        self.ws.addParameterDefinition("t0",dict(default=time.clock(),doc="Unix start time of task",unit="s",output=True))
+        self.ws.addParameterDefinition("tduration",dict(default=-1,doc="Execution time of task",unit="s",output=True))
 
         self.callinit(forceinit=init) #Call initialization if not yet done
 
@@ -758,6 +759,7 @@ class Task(object):
         self.ws.update() # make sure all parameters are now up-to-date
         self.saveOutputFile()
         retval=self.run()
+        self["tduration"]=time.clock()-self["t0"] # Execution time of task
         self.saveOutputFile() # to store final values
 	if retval==None:
 	    return self
@@ -925,6 +927,156 @@ class Task(object):
                 plt.ion()
             else:
                 print "Continue."
+
+    def writehtml(self,results=None,parfiles=None,plotfiles=None,text=None,logfiles=None,output_dir=None,htmlfilename="index.html",filename=None, tduration=-1):
+        """
+        **Usage:**
+        
+        Task.writehtml(self,results=None,parfiles=None,plotfiles=None,text=[],logfile=None,output_dir=None,htmlfilename="index.html",filename=None, tduration=-1):
+
+        **Description:**
+
+        Will write an informative html page containing plots and output parameters from the task.
+
+        The following parameters are availaible. Typically none of
+        them needs to be specified, they will be automatically deduced
+        from the task parameters.
+        
+        **Parameters:**
+        
+
+        *results* - a dict containing all results as keyword value
+         pairs (will be printed as table). By default all output
+         parameters are listed here
+
+        *output_dir* - where to write the html file (use
+         self['output_dir'] if exist and is not provide with the
+         function)
+
+        *text* - a list of strings that will be included in the html file as such
+
+        *htmlfilename* - root file name of the output file (typically
+          index.html)
+
+        *filename* - data filename this html page belongs to
+
+        *parfiles* - a list of parfile names that were produced by the task
+
+        *logfiles* - a list of logfiles produced by the task
+
+        *plotfiles* - a list of images that were plotted by the
+         task. If an entry if a list of images, the put those in one
+         row.
+
+        *tduration* - execution time of task
+        
+        """
+
+        if not results:
+            results={}
+            for parameter_name in self.ws.getOutputParameters(workarrays=False,nonexport=True):
+                if hasattr(self.ws,"_"+parameter_name): # Take only those which have a value already defined
+                    res=self[parameter_name]
+                    if isinstance(res,tuple(hAllContainerTypes)):
+                        res=list(res)
+                    results[parameter_name] = res
+
+        if not output_dir:
+            if hasattr(self,"output_dir"):
+                output_dir = self["output_dir"]
+            else:
+                output_dir = ""
+
+        if not filename:
+            if hasattr(self,"filename"):
+                filename = self["filename"]
+            else:
+                filename = ""
+
+        if not text:
+            if hasattr(self,"hprint"):
+                text = self.hprint.textbuffer
+            else:
+                text = []
+
+        if tduration<0 and hasattr(self,"t0"):
+            tduration=time.clock()-self["t0"]
+
+        if not parfiles:
+            if hasattr(self,"parfile"):
+                parfiles=[self.parfile]
+            else:
+                parfiles=[]
+
+        if not plotfiles:
+            if hasattr(self,"plot_finish"):
+                plotfiles=self.plot_finish.plotfiles
+            else:
+                plotfiles=[]
+
+        if not logfiles:
+            if hasattr(self,"logfile") and self.logfile:
+                logfiles=[self.logfile]
+            else:
+                logfiles=[]
+
+        #Header information
+        htmlfile=open(os.path.join(output_dir,htmlfilename),"w")
+        htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(filename))
+        htmlfile.write("<h1>{0:s}</h1>\n".format(filename))
+        htmlfile.write("<h2>Parameters</h2>\n".format())
+        htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><br>\n".format(
+            time.strftime("%A, %Y-%m-%d at %H:%M:%S"),os.getlogin(),tduration))
+
+        #Write results parameter dict
+        l=results.items(); l.sort()
+        
+        htmlfile.write('<table border="1">\n'.format())
+        for k,v in l:
+            htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
+        htmlfile.write("</table>\n".format())
+
+        #Write parfile links
+        if parfiles: htmlfile.write("<h2>Parfiles</h2>\n".format())
+        for parfile in parfiles:
+            if os.path.exists(parfile):
+                os.symlink(parfile,parfile+".txt")
+                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(parfile,os.path.split(parfile)[-1]))
+
+        #Write logfile links
+        if logfiles: htmlfile.write("<h2>Logfiles</h2>\n".format())
+        for logfile in logfiles:
+            if os.path.exists(logfile):
+                htmlfile.write('<a type="text/http" href="{0:s}">{1:s}</a><br>\n'.format(logfile,os.path.split(logfile)[-1]))
+
+        #Include text log
+        if text:
+            htmlfile.write("<h2>Output</h2>\n".format())
+            htmlfile.write("<XMP>\n".format())
+            for txt in text:
+                htmlfile.write("{0:s}\n".format(txt))
+            htmlfile.write("</XMP>\n".format())
+
+        #Include plotfiles
+        if plotfiles:
+            htmlfile.write("<h2>Plotfiles</h2>\n".format())
+            htmlfile.write('<table>\n'.format())
+
+            for plotfile in plotfiles:
+                htmlfile.write('<tr>'.format())
+                if isinstance(plotfile,list):
+                    for plotfile_i in plotfile:
+                        htmlfile.write('<td><a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(os.path.split(plotfile_i)[-1]))
+                else:
+                    htmlfile.write('<td><a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(os.path.split(plotfile)[-1]))
+                    htmlfile.write('</tr>\n'.format())
+                    
+            htmlfile.write('</table>\n'.format())
+
+        htmlfile.write("</body></html>\n")
+        htmlfile.close()    
+    
+
 
 
 
@@ -1375,7 +1527,7 @@ class WorkSpace(object):
         """
         Return a python set which contains the parameters that are
         derived from input parameters through a default function at
-        initialization. This are those parameters which were defined
+        initialization. These are the parameters which were defined
         before initialization in ws.parameters and which do have a
         function as default value. Note, that the value is not
         recalculated again even if the input parameters changed! One
@@ -1388,24 +1540,36 @@ class WorkSpace(object):
         for p in self.parameterlist:
             properties=self.parameter_properties[p]
             if ((properties.has_key(sc.default) and (type(properties[sc.default])==types.FunctionType)) # default is a function
-                and (nonexport or ((not properties.has_key(sc.export)) or properties[sc.export]))  #export is true
-                or (workarrays and (properties.has_key(sc.workarray) and properties[sc.workarray]))): # not a workarray if requested
-                derivedparameters.add(p) # then it is a derived parameter
+                and (not nonexport or not (properties.has_key(sc.export) and not properties[sc.export]))  #export is true
+                and (not (properties.has_key(sc.workarray) and properties[sc.workarray]) or workarrays)): # not a workarray if requested
+                derivedparameters.add(p) # then it is a derived parameter we want to see
         return derivedparameters
 
-
-    def getOutputParameters(self,workarrays=True):
+    def getOutputParameters(self,workarrays=False,nonexport=True):
         """
         Return all parameters that are considered output parameters,
-        i.e. those which are 'derived' parameters and those explicitly
+        i.e., those which are 'derived' parameters and those explicitly
         labelled as output.
         """
-        l=set(self.getDerivedParameters(workarrays=False,nonexport=False))
+        l=set(self.getDerivedParameters(workarrays=workarrays,nonexport=nonexport))
         for p,v in self.parameter_properties.items():
             if (v.has_key(sc.output) and v[sc.output]):
-                if workarrays or not (v.has_key(sc.workarray) and v[sc.workarray]):
+                if ((workarrays or not (v.has_key(sc.workarray) and v[sc.workarray]))
+                    and (not nonexport or not (v.has_key(sc.export) and not v[sc.export]))):
                     l.add(p)
         return l
+
+# """
+# p="quality"
+# v=self.parameter_properties[p]
+# workarray="workarray"
+# default="default"
+# export="export"
+# import types
+# derivedparameters=set()
+# self=Task.ws
+# nonexport=True
+# """
 
 
     def getPositionalParameters(self):
@@ -1530,7 +1694,7 @@ class WorkSpace(object):
             return modified
         return False
 
-    def update(self,forced=False,workarrays=True):
+    def update(self,forced=False,workarrays=True,nonexport=False):
         """
         Recalculates all existing derived parameters and assigns them
         their default values if they depend on a value that was
@@ -1547,7 +1711,7 @@ class WorkSpace(object):
 
         """
         pars=[]
-        for p in self.getDerivedParameters(): # first make sure all modified parameters are identified
+        for p in self.getDerivedParameters(workarrays=workarrays,nonexport=nonexport): # first make sure all modified parameters are identified
             if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][sc.default])==types.FunctionType) and (workarrays or ((not self.parameter_properties[p].has_key(sc.workarray)) or not self.parameter_properties[p][sc.workarray])):
                 delattr(self,"_"+p) # delete buffered value so that it will be recalculated
                 pars.append(p)

@@ -48,6 +48,14 @@ class plotfinish:
     *txt*       = ""      Text to print after plotting and before user input
                           (parameter not available at initialization)
 
+    *plotfiles* = []      Provide a list, which contains the plotfiles generated so far.
+                          (parameter not available at initialization)
+                          
+    *same_row*   If true, then put the next plotfile in the
+                          same 'row' as the previous, i.e. create a sub list. Can be used
+                          for output formatting.
+                          (parameter only available during call)
+
     name        = ""      Name identifying current plot. Will also be appended
                           to filename. (parameter not available at initialization)
     =========== ========  =====================================================
@@ -72,15 +80,16 @@ class plotfinish:
             pp("Try again")
             -> Nothing happens (i.e. no pause)....
     """
-    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0):
+    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0,plotfiles=[]):
         self.plot_pause=plotpause
         self.doplot=doplot
         self.refresh=refresh
         self.filename=filename
         self.filetype=filetype
-        self.files=[]
+        self.plotfiles=plotfiles
         self.counter=counter
-    def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,savefig=False):
+        
+    def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,savefig=False,same_row=False):
         if self.doplot:
             if not filename: filename=self.filename
             if not filetype: filetype=self.filetype
@@ -94,7 +103,13 @@ class plotfinish:
                     f="{0:s}-{1:04d}-{2:s}-{3:s}.{4:s}".format(os.path.join(fdir,"pycrfig"),self.counter,fname,name,filetype)
                 else:
                     f="{0:s}-{1:04d}-{2:s}.{3:s}".format(os.path.join(fdir,"pycrfig"),counter,fname,filetype)
-                self.files.append(f)
+                if same_row and len(self.plotfiles)>0:
+                    if isinstance(self.plotfiles[-1],list):
+                        self.plotfiles[-1].append(f)
+                    else:
+                        self.plotfiles[-1]=[self.plotfiles[-1],f]
+                else:
+                    self.plotfiles.append(f)
                 fig=plt.gcf()
 #                dpi=fig.get_dpi()
 #                fig.set_dpi(200)
