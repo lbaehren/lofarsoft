@@ -6,6 +6,9 @@ Pipeline script to calculate average and dynamic spectra from all TBB files.
 Usage:
   tbb_spectra.py --filefilter 'datarate-2011-07-10-*.h5' --antennas_start=4 --plot_zoom_x1=87 --plot_zoom_x2=95
 
+  cd /data/smilde
+  run $LOFARSOFT/src/PyCRTools/pipelines/tbb_spectra.py  --filefilter '/data/sandertv/smilde/*.h5' --plot_zoom_x1=87 --plot_zoom_x2=95 --antennas_start=4 --output_dir=/data/smilde --maxnchunks=26
+
 For quick testing: 
    run $PYP/pipelines/tbb_spectra.py --filefilter 'datarate-2011-07-10-*.h5' --plot_zoom_x1=87 --plot_zoom_x2=95 --antennas_start=4 --maxnchunks=4 --nfiles=2 --antennas_end=6
 """

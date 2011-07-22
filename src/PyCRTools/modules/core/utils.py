@@ -133,6 +133,7 @@ listFiles(["$LOFARSOFT/*.txt","~/.ema*"])
     for l in asList(unix_style_filter):
         ll += glob.glob(os.path.expandvars(os.path.expanduser(l)))
     if ll.count("."): del ll[ll.index(".")]
+    ll.sort()
     return ll
 
 
