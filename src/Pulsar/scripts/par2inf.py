@@ -178,6 +178,57 @@ class infodata:
         ofile.write(" Any additional notes:                     \n")
         ofile.write(" %s\n"%self.notes)
 
+def ra_rad2hms(ra_rad):
+    '''
+    Convert right ascension in radians to a string in hh:mm:ss.ssss notation.
+    '''
+    ra_rad = float(ra_rad)
+
+    hour_fr = 12 * ra_rad / math.pi
+    hour = int(hour_fr)
+    minute_fr = 60 * (hour_fr - hour)
+    minute = int(minute_fr)
+    second_fr = 60 * (minute_fr - minute)
+    second_str = '%07.4f' % second_fr
+    
+    if second_str[0] == '6':
+        second_str = '0' + second_str[1:]
+        minute += 1
+        if minute >= 60:
+            minute -= 60
+            hour += 1
+            if hour >= 24:
+                hour -= 24
+
+    return '%02d:%02d:' % (hour, minute) + second_str
+
+def dec_rad2dms(dec_rad):
+    '''
+    Convert declination in radians to dd:mm:ss.ssss notation.
+    '''
+    dec_rad = float(dec_rad)
+
+    degree_fr = 180 * dec_rad / math.pi
+    if degree_fr >= 0:
+        sign_str = ''
+    else:
+        sign_str = '-'
+    degree_fr = abs(degree_fr)
+    degree = int(degree_fr)
+    minute_fr = 60 * (degree_fr - degree)
+    minute = int(minute_fr)
+    second_fr = 60 * (minute_fr - minute)
+
+    second_str = '%07.4f' % second_fr
+    if second_str[0] == '6':
+        second_str = '0' + second_str[1:]
+        minute += 1
+        if minute >= 60:
+            minute -= 60
+            degree += 1
+
+    return sign_str + '%02d:%02d:' % (degree, minute) + second_str
+
 parser = OptionParser()
 
 
@@ -274,17 +325,19 @@ if (options.nsamples):
 
 
 #  Calculate the RA and Dec of the source
-rad = float(par.rar) * 180.0 / math.pi
-rah = int(24.0 * rad / 360.0)
-ram = int((24.0 * rad / 360.0 - rah) * 60.0)
-ras = 60.0*(((24.0 * rad / 360.0 - rah) * 60.0) - ram)
-id.RA = "%02d:%02d:%07.4f" % (rah,ram,ras)
+# rad = float(par.rar) * 180.0 / math.pi
+# rah = int(24.0 * rad / 360.0)
+# ram = int((24.0 * rad / 360.0 - rah) * 60.0)
+# ras = 60.0*(((24.0 * rad / 360.0 - rah) * 60.0) - ram)
+# id.RA = "%02d:%02d:%07.4f" % (rah,ram,ras)
+id.RA = ra_rad2hms(par.rar)
 
-decd = float(par.decr) * 180.0 / math.pi
-decdi = int(decd)
-decm  = int((decd - decdi) * 60.0)
-decs  = (((decd - decdi) * 60.0) - decm)*60.0
-id.DEC = "%02d:%02d:%07.4f" % (decdi,abs(decm),abs(decs))
+# decd = float(par.decr) * 180.0 / math.pi
+# decdi = int(decd)
+# decm  = int((decd - decdi) * 60.0)
+# decs  = (((decd - decdi) * 60.0) - decm)*60.0
+# id.DEC = "%02d:%02d:%07.4f" % (decdi,abs(decm),abs(decs))
+id.DEC = dec_rad2dms(par.decr)
 
 # Calculate the MJD of the observation.
 
