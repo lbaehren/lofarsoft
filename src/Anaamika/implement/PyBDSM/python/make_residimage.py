@@ -131,7 +131,7 @@ class Op_make_residimage(Op):
         from math import ceil, sqrt, log
         A = g.peak_flux
         S = g.size_pix[0]
-        if A <= thresh:
+        if thresh/A >= 1.0 or thresh/A <= 0.0:
             return ceil(S*1.5)
         return ceil(S*sqrt(-2*log(thresh/A)))
 
