@@ -1227,7 +1227,9 @@ do
                             fi
 		                elif [ $user_subbands_lbalow == 1 ] && [ $ANTENNA == "LBALow" ]
 		                then
+		                    needs_expand=""
                             needs_expand=`echo $SUBBANDS_LBALow | grep "," | grep ".."`
+                            echo "A2, 1 - $needs_expand"
 				            if [ $needs_expand != "" ]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBALow" | expand_sblist.py`
@@ -1341,7 +1343,9 @@ do
                             fi
 		                elif [ $user_subbands_lbalow == 1 ] && [ $ANTENNA == "LBALow" ]
 		                then
+		                	needs_expand=""
                             needs_expand=`echo $SUBBANDS_LBALow | grep "," | grep ".."`
+                            echo "A2, 2 - $needs_expand"
 				            if [ $needs_expand != "" ]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBALow" | expand_sblist.py`
@@ -1366,12 +1370,18 @@ do
 		          echo "WARNING: Multi-beam specification must have total subbands <= 244;"
 		          echo "         Input has $total_subbands;  splitting subbands by $nbeams beams"
 		          split_subs=`echo $total_subbands / $nbeams | bc`
+		       else
+		          split_subs=$total_subbands
 		       fi
 		       SUBBANDS_ORIG=`echo $SUBBANDS | expand_sblist.py`
 		    fi
 		    if (( $MULTI == 1 )) && (( $SUBBANDS_SET == 0 )) && (( $nbeams > 1 ))
 		    then
 		          if (( $beam == 1 ))
+		          then
+		             min_range=1
+		             max_range=$split_subs
+		          elif [[  $user_subbands_hba == 1  &&  $ANTENNA == "HBA"  ]] ||  [[  $user_subbands_hbahigh == 1  &&  $ANTENNA == "HBAHigh"  ]] ||  [[  $user_subbands_hbamid == 1  &&  $ANTENNA == "HBAMid"  ]] ||   [[  $user_subbands_hbalow == 1  &&  $ANTENNA == "HBALow"  ]] ||   [[  $user_subbands_lba == 1  &&  $ANTENNA == "LBA"  ]] || [[  $user_subbands_lbahigh == 1  &&  $ANTENNA == "LBAHigh"  ]] ||  [[ $user_subbands_lbalow == 1  &&  $ANTENNA == "LBALow"  ]] 
 		          then
 		             min_range=1
 		             max_range=$split_subs
