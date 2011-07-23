@@ -129,9 +129,9 @@ endif (UNIX)
 add_custom_target (tempo2_install
   COMMAND make install
   COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
-  COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so.0.0.0 ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so
-  COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so.0.0.0 ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so
-  COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so.0.0.0 ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ ; ln -s libtempo2pred.so.0.0.0 libtempo2pred.so
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ ; ln -s libtempo2.so.0.0.0 libtempo2.so
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ ; ln -s libsofa.so.0.0.0 libsofa.so
 #  COMMAND make plugins-install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
   COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
@@ -328,6 +328,7 @@ add_custom_target (dspsr_unpack
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
   COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
   )
+add_dependencies (dspsr_unpack tempo2_install psrchive_install psrdada_install psrcat_install)
 
 add_custom_target (dspsr_bootstrap
   COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada
