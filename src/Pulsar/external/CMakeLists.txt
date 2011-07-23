@@ -128,6 +128,10 @@ endif (UNIX)
 
 add_custom_target (tempo2_install
   COMMAND make install
+  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
+  COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so.0.0.0 ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so
+  COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so.0.0.0 ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so
+  COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so.0.0.0 ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
 #  COMMAND make plugins-install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
   COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
