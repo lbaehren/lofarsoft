@@ -111,14 +111,14 @@ add_custom_target (tempo2_unpack
 if (UNIX)
  if (APPLE)
 add_custom_target (tempo2_configure
-  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local 
+  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local --enable-shared
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name} 
   COMMENT "Configuring project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name} ..."
   )
 add_dependencies (tempo2_configure tempo2_unpack)
  else (APPLE)
 add_custom_target (tempo2_configure
-  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local LOGIN_ARCH=linux
+  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local LOGIN_ARCH=linux --enable-shared
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name} 
   COMMENT "Configuring project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name} ..."
   )
@@ -126,17 +126,31 @@ add_dependencies (tempo2_configure tempo2_unpack)
  endif (APPLE)
 endif (UNIX)
 
-add_custom_target (tempo2_install
+add_custom_target (tempo2_build
   COMMAND make install
-  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ ; ln -s libtempo2pred.so.0.0.0 libtempo2pred.so
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ ; ln -s libtempo2.so.0.0.0 libtempo2.so
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ ; ln -s libsofa.so.0.0.0 libsofa.so
+#  COMMAND cp ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/.libs/* ${CMAKE_INSTALL_PREFIX}/lib/
+#  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2pred.so.0.0.0 libtempo2pred.so 
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2.so.0.0.0 libtempo2.so 
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libsofa.so.0.0.0 libsofa.so 
 #  COMMAND make plugins-install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
   COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
   )
-add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
+add_dependencies (tempo2_build tempo2_configure tempo2_unpack)
+
+add_custom_target (tempo2_install
+  COMMAND cp ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/.libs/lib* ${CMAKE_INSTALL_PREFIX}/lib/
+  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2*.o
+#  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2pred.so.0.0.0 libtempo2pred.so 
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2.so.0.0.0 libtempo2.so 
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libsofa.so.0.0.0 libsofa.so 
+#  COMMAND make plugins-install
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/.libs/
+  COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
+  )
+add_dependencies (tempo2_install tempo2_build tempo2_configure tempo2_unpack)
 
 ## ==============================================================================
 ##
@@ -200,8 +214,8 @@ set (psrchive_name "psrchive-${psrchive_version}")
 set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
 
 add_custom_target (psrchive_unpack
-  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
-  COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
+#  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
+  COMMAND cp -ru ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
   COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
   )
@@ -216,7 +230,7 @@ add_custom_target (psrchive_unpack
 if (UNIX)
  if (APPLE)
 add_custom_target (psrchive_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib --enable-shared
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
@@ -224,7 +238,7 @@ add_custom_target (psrchive_configure
 add_dependencies (psrchive_configure psrchive_unpack)
  else (APPLE)
 add_custom_target (psrchive_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux --enable-shared
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
@@ -304,8 +318,8 @@ add_custom_target (psrdada_install
   COMMAND make install prefix=${CMAKE_INSTALL_PREFIX}/psrdada
   COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && find ./ -type l -exec rm {} "\;"
   COMMAND cd ${CMAKE_INSTALL_PREFIX}/include && find ../psrdada/include "\\(" -iname \"*.h\" -not -iname \"ascii_header.h\" "\\)" -exec ln -s {} . "\;"
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && find ./ -type l "\\(" -not -iname \"libfftw3f*\" "\\)" -exec rm {} "\;"
-  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && ln -s ../psrdada/lib/* .
+#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && find ./ -type l "\\(" -not -iname \"libfftw3f*\" "\\)" -exec rm {} "\;"
+  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib && ln -sf ../psrdada/lib/* .
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrdada_name}
   COMMENT "Install project psrdada into ${CMAKE_INSTALL_PREFIX}/psrdada..."
   )
@@ -331,7 +345,7 @@ add_custom_target (dspsr_unpack
 add_dependencies (dspsr_unpack tempo2_install psrchive_install psrdada_install psrcat_install)
 
 add_custom_target (dspsr_bootstrap
-  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada
+  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada  
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name} 
   COMMENT "Running bootstrap for project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
@@ -340,14 +354,14 @@ add_dependencies (dspsr_bootstrap dspsr_unpack)
 if (UNIX)
  if (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl 
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (darwin) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
 add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
  else (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl 
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (linux) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
@@ -360,14 +374,24 @@ add_custom_target (dspsr_build
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Building project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name}..."
   )
-add_dependencies (dspsr_build dspsr_configure dspsr_unpack)
+add_dependencies (dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+
+add_custom_target (dspsr_preinstall
+  COMMAND make install prefix=${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build -I${CMAKE_INSTALL_PREFIX}/psrdada/include 
+#  COMMAND make install prefix=${CMAKE_INSTALL_PREFIX} -I${CMAKE_INSTALL_PREFIX}/psrdada/include
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMENT "Install project dspsr first into ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build..."
+  )
+add_dependencies (dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
 add_custom_target (dspsr_install
-  COMMAND make install prefix=${CMAKE_INSTALL_PREFIX} -I${CMAKE_INSTALL_PREFIX}/psrdada/include 
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+  COMMAND cp -r bin/* ${CMAKE_INSTALL_PREFIX}/bin/
+  COMMAND cp -r include/* ${CMAKE_INSTALL_PREFIX}/include/
+  COMMAND cp -r lib/* ${CMAKE_INSTALL_PREFIX}/lib/
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
-add_dependencies (dspsr_install dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
 ## ==============================================================================
 ##
