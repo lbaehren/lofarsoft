@@ -1,3 +1,9 @@
+2011-07-25 - Rev 8206
+=====================
+
+  :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
+
+- added lora.loraInfo(UTC_sec,datadir) to read in loradata in a dictionary 
 
 2011-07-22 - Rev 8193 
 =====================
