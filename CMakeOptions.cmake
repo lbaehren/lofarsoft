@@ -74,24 +74,24 @@ option (PYCRTOOLS_WITH_AERA ${PYCRTOOLS_WITH_AERA} CACHE BOOL
 
 ## === DAL ======================================================================
 
-set (DAL_BUILD_TESTS ${DAL_BUILD_TESTS} CACHE BOOL
-  "Build the test programs?"                                          )
-set (DAL_BUILD_APPS ${DAL_BUILD_APPS} CACHE BOOL
-  "Build the applications?"                                           )
+set (DOCUMENTATION_ONLY ${DOCUMENTATION_ONLY} CACHE BOOL
+  "Configure for building documentation only?")
+set (DAL_WITH_DOCUMENTATION ${DAL_WITH_DOCUMENTATION} CACHE BOOL
+  "Generate documentation for the DAL?")
+set (DAL_SHARED_LIBRARY ${DAL_SHARED_LIBRARY} CACHE BOOL
+  "Build DAL as shared library?")
 set (DAL_ENABLE_TESTING ${DAL_ENABLE_TESTING} CACHE BOOL
-  "Build the test programs?"                                          )
-set (DAL_ENABLE_DASHBOARD ${DAL_ENABLE_DASHBOARD} CACHE BOOL
-  "Send a build report to the Dashboard server?"                      )
+  "Build and enable test programs?")
 set (DAL_COMPILER_WARNINGS ${DAL_COMPILER_WARNINGS} CACHE BOOL
-  "Enable standard set of compiler warnings?"                         )
-set (DAL_HDF5_MACROS ${DAL_HDF5_MACROS} CACHE BOOL
-  "HDF5 compatibility macros version"                                 )
+  "Enable standard set of compiler warnings?")
 set (DAL_PYTHON_BINDINGS ${DAL_PYTHON_BINDINGS} CACHE BOOL
-  "Create python bindings?"                                           )
+  "Create python bindings?")
 set (DAL_DEBUGGING_MESSAGES ${DAL_DEBUGGING_MESSAGES} CACHE BOOL
-  "Print debugging information?"                                      )
+  "Print debugging information?")
 set (DAL_VERBOSE_CONFIGURE ${DAL_VERBOSE_CONFIGURE} CACHE BOOL
-  "Verbose output during configuration?"                              )
+  "Verbose output during configuration?")
+set (DAL_WITH_MYSQL ${DAL_WITH_MYSQL} CACHE BOOL
+  "Build with support for MySQL database?")
 
 ## === RM Synthesis =============================================================
 
