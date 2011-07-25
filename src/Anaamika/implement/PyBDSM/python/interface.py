@@ -26,6 +26,7 @@ def process(img, **kwargs):
     if hasattr(img, 'use_io'): del img.use_io
     if hasattr(img, 'source'): del img.source
     if hasattr(img, 'gaussians'): del img.gaussians
+    if hasattr(img, 'atrous_gaussians'): del img.atrous_gaussians
     if hasattr(img, 'islands'): del img.islands
 
     # Start up logger. We need to initialize it each time process() is

@@ -293,7 +293,7 @@ def pybdsm2fbdsm(img, incl_wavelet=True):
             g_list += ag
     for g in g_list:
         gidx = g.gaus_num
-        iidx = g.island_id+1
+        iidx = g.island_id
         widx = g.wavelet_j
         A = g.peak_flux
         T = g.total_flux

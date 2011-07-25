@@ -301,9 +301,9 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             gline.gaus_id = gidx
                             gline.src_id = atrg.source_id
                             gline.jlevel = atrg.jlevel
-                            gline.isl_id = g.island_id
-                            gline.tflux = g.total_flux
-                            gline.pflux = g.peak_flux
+                            gline.isl_id = atrg.island_id
+                            gline.tflux = atrg.total_flux
+                            gline.pflux = atrg.peak_flux
             if 'Flagged' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
                     xb, yb = _isl2border(img, isl)
