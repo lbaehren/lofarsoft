@@ -126,31 +126,28 @@ add_dependencies (tempo2_configure tempo2_unpack)
  endif (APPLE)
 endif (UNIX)
 
-add_custom_target (tempo2_build
-  COMMAND make install
-#  COMMAND cp ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/.libs/* ${CMAKE_INSTALL_PREFIX}/lib/
-#  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
-#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2pred.so.0.0.0 libtempo2pred.so 
-#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2.so.0.0.0 libtempo2.so 
-#  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libsofa.so.0.0.0 libsofa.so 
-#  COMMAND make plugins-install
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
-  COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
-  )
-add_dependencies (tempo2_build tempo2_configure tempo2_unpack)
-
 add_custom_target (tempo2_install
-  COMMAND cp ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/.libs/lib* ${CMAKE_INSTALL_PREFIX}/lib/
-  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2*.o
+  COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/plugins
+  COMMAND make install
+  COMMAND make plugins-install
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
+  COMMENT "Building and installing project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
+  )
+add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
+
+#add_custom_target (tempo2_install
+#  COMMAND cp .libs/lib* ${CMAKE_INSTALL_PREFIX}/lib/
+#  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2*.o
+#  COMMAND ln -sf ${CMAKE_INSTALL_PREFIX}/plugins ${CMAKE_INSTALL_PREFIX}/bin/plugins
 #  COMMAND rm ${CMAKE_INSTALL_PREFIX}/lib/libtempo2pred.so ${CMAKE_INSTALL_PREFIX}/lib/libtempo2.so ${CMAKE_INSTALL_PREFIX}/lib/libsofa.so
 #  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2pred.so.0.0.0 libtempo2pred.so 
 #  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libtempo2.so.0.0.0 libtempo2.so 
 #  COMMAND cd ${CMAKE_INSTALL_PREFIX}/lib/ && ln -sf libsofa.so.0.0.0 libsofa.so 
 #  COMMAND make plugins-install
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/.libs/
-  COMMENT "Building project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/..."
-  )
-add_dependencies (tempo2_install tempo2_build tempo2_configure tempo2_unpack)
+#  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/
+#  COMMENT "Installaing project Tempo2 and plugins in ${CMAKE_INSTALL_PREFIX} in lib and bin..."
+#  )
+#add_dependencies (tempo2_install tempo2_build tempo2_configure tempo2_unpack)
 
 ## ==============================================================================
 ##
