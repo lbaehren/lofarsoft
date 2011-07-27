@@ -230,24 +230,92 @@ def determine_numout(n_bins):
 # -- whether they are python modules or system calls does not matter).      --
 # ----------------------------------------------------------------------------
 
-def run_rfifind(subband_globpattern, result_dir, basename, bad_channels):
-    '''Get the commandline for rfifind. '''
-    files = subband_globpattern
-    # Jump to the results directory to run rfifind.
-    current_dir = os.getcwd()
-    os.chdir(result_dir)
-  
-    options = {
-        '-blocks' : str(512),
-        '-o' : basename,
-    }
+def symlink_matching(from_dir, to_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
 
-    if bad_channels:
-        options['-zapchan'] = ','.join([str(idx) for idx in bad_channels]) 
+    files = os.listdir(from_dir)
+    print 'Trying to match %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            os.symlink(join(from_dir, f), join(to_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Symlinked %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
 
-    status = run_command('rfifind', options, [files])
-    os.chdir(current_dir)
-    return status
+def remove_matching(target_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+    files = os.listdir(target_dir)
+    print 'Trying to match %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            os.remove(join(target_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Removed %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+    
+def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
+    '''
+    Run PRESTO rfifind.
+    '''
+    bad_channels = kwargs.get('bad_channels', None)
+    clean_up = kwargs.get('clean_up', True)
+    # temporarily store the working directory
+    CWD = os.getcwd()
+    try:
+        # jump to rfifind working directory (create if necessary)
+        if not os.path.exists(work_dir):
+            try:
+                os.makedirs(work_dir)
+            except:
+                print 'Creating the working directory for rfifind failed!'
+                raise
+        os.chdir(work_dir)
+        # symlink subband files to rfifind working dir
+        try:
+            symlink_matching(subband_dir, work_dir, '^' + re.escape(basename) + '\.sub\d+$')
+        except OSError:
+            print 'Could not symlink subband files to working rfifind working directory.'
+            raise
+        # symlink .inf file to rfifind working dir
+        try:
+            symlink_matching(subband_dir, work_dir, '^' + re.escape(basename) + '\.sub\.inf$')
+        except OSError:
+            print 'Could not symlink .sub.inf file to rfifind working directory.'
+            raise
+        # create a globpattern to pass to rfifind that grabs all the subband files
+        subband_globpattern = basename + '.sub[0-9]???'
+        # set all the commandline options
+        options = {
+            '-blocks' : str(512),
+            '-o' : basename,
+        }
+        if bad_channels:
+            options['-zapchan'] = ','.join([str(idx) for idx in bad_channels]) 
+        # run rfifind (taking care to check the exit status)
+        status = run_command('rfifind', options, [subband_globpattern])
+        if status != 0:
+            raise Exception('There was a problem running rfifind.')
+        # remove the now unused symlinks
+        if clean_up:
+            try:
+                remove_matching(work_dir, '^' + re.escape(basename) + '\.sub\d+$')
+                remove_matching(work_dir, '^' + re.escape(basename) + '\.sub\d+$')
+            except:
+                print 'Failure whilst cleaning up rfifind working directory.'
+                raise
+    finally:
+        # jump back to previous working directory
+        os.chdir(CWD)
+
+    return
 
 def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
     basename, mask_file, numout, zero_dm=False):
@@ -566,27 +634,21 @@ class SearchRun(object):
                 os.path.split(par_file)[1]))
 
         # Perform rfifind if at all needed
+        rfifind_dir = join(self.work_dir, 'RFIFIND')
         if not self.rfifind_input_dir:
-            t_rfifind_start = time.time()
-            rfifind_status = run_rfifind(
-                self.get_subband_globpattern(), 
-                join(self.work_dir, 'RFIFIND'), 
-                self.basename, bad_channels
-            )
-            t_rfifind_end = time.time()
-            # Do some exit status checking on rfifind
-            if rfifind_status != 0:
-                print 'rfifind failed, exiting'
-                sys.exit(1)
-            print 'Running rfifind took %.2f seconds.' % \
-                (t_rfifind_end - t_rfifind_start)
+            t0 = time.time()
+            run_rfifind(self.in_dir, self.basename, rfifind_dir, 
+                bad_channels=bad_channels)
+            t1 = time.time()
+            print 'Running rfifind took %.2f seconds.' % (t1 - t0)
         else:
+            print 'COPYING CACHED RFIFIND RESULTS'
+            # TODO : rewrite to copy_matching 
             # copy over the old rfifind output
             rfifind_input_files = crawler.find_rfifind_output(
                 self.rfifind_input_dir, self.basename)
             for f in rfifind_input_files:
-                shutil.copy(join(self.rfifind_input_dir, f),
-                    join(self.work_dir, 'RFIFIND'))
+                shutil.copy(join(self.rfifind_input_dir, f), rfifind_dir)
 
 
         # Store the location of the rfifind mask file (used by other PRESTO
