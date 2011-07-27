@@ -64,14 +64,9 @@ option (PYCRTOOLS_ENABLE_TESTING "Enable testing for the PyCRTools?" YES)
 option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?" YES)
 option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile PyCRTools with runtime warnings enabled?" YES)
 option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile PyCRTools with debug symbols?" YES)
-option (PYCRTOOLS_WITH_OPTIMIZATIYES "Compile PyCRTools with optimization flags turned on?" NO)
-option (PYCRTOOLS_WITH_CPU_OPTIMIZATIYES "Compile PyCRTools with optimization for CPU architecture?" NO)
+option (PYCRTOOLS_WITH_OPTIMIZATIONS "Compile PyCRTools with optimization flags turned on?" NO)
+option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO)
 option (PYCRTOOLS_WITH_OPENMP "Compile PyCRTools with OpenMP support?" NO)
-option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support?" YES)
-option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support?" YES)
-option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support?" YES)
-option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support?" YES)
-option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support?" YES)
 option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support?" NO)
 
 option (DOCUMENTATION_ONLY     "Configure for building documentation only?"  NO  )
@@ -322,7 +317,10 @@ endif (CR_WITH_GUI)
 
 build_package (pycrtools src/PyCRTools)
 
-add_dependencies (pycrtools cr dal casacore fftw3 gsl tmf aera)
+add_dependencies (pycrtools cr dal casacore fftw3 gsl tmf)
+if (PYCRTOOLS_WITH_AERA)
+  add_dependencies (pycrtools aera)
+endif (PYCRTOOLS_WITH_AERA)
 
 ##____________________________________________________________________
 ##                                       LASA (LOFAR Air-Shower Array)
