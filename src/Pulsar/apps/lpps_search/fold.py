@@ -199,14 +199,15 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
         print 'In directory %s there are no candidate files.' % cand_dir
         print 'Skipping any further processing of accelsearch results.'
         return
-#        assert len(sifted_candidates) > 0
-    
+
     bright_pulsars = knownpulsar.load_bright_pulsar_catalog()
     # Make histograms of candidate period and candidate frequency before and
     # after sifting.
-    
+
     histogram_dir = os.path.join(fold_dir, 'CANIDATE_HISTOGRAMS')
     os.mkdir(histogram_dir)
+    print '%d unsifted candidates and %d sifted ones, plotting histograms' % \
+        (len(unsifted_candidates), len(sifted_candidates))
     try:
         if unsifted_candidates: 
             plot_p_histogram(unsifted_candidates, 
@@ -222,9 +223,12 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
                 os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
             plot_p_dm(sifted_candidates, bright_pulsars, 
                 os.path.join(histogram_dir, 'after.pdf'))
+    # TODO : print tracebacks without crashing
     except AttributeError, e:
         print 'You are probably using the wrong version of Matplotlib.'
-        # TODO : print traceback without crashing
+        print 'No plots created.'
+    except ValueError, e:
+        print 'Problem occured during plotting (too few candidates?).'
         print 'No plots created.'
 
     # spit out a file with the candidates that survived the sifting
