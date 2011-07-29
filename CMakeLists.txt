@@ -332,7 +332,7 @@ build_package (lasa src/LASA)
 
 build_package (pulsar src/Pulsar)
 
-add_dependencies (pulsar cfitsio wcstools)
+add_dependencies (pulsar cfitsio wcstools swig)
 
 ##____________________________________________________________________
 ##                                                                  RM
