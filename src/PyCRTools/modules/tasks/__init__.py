@@ -410,7 +410,7 @@ Here is an example of using it::
 """
 
 #Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2","pulsecal"]
+task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2","pulsecal","ldf","plotfootprint"]
 
 import os
 import math
