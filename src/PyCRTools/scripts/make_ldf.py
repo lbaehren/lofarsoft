@@ -1,11 +1,28 @@
 import pycrtools as cr
 from pycrtools import lora
 import os
+import sys
 
+
+try:
+    topdir = sys.argv[1]
+    candiates = sys.argv[2]
+except IndexError:
+  raise SystemExit("Usage of this script: run make_ldf.py topdir candidates which\n\n topdir: where to find files\n candidates: list of event ids\n which: specify index of candidates, if candiates > 1\n ")    
+
+
+try:
+    nr = sys.argv[3] 
+except IndexError:
+    nr = 0   
+
+print nr
+    
 #topdir='/Volumes/Data/sandertv/VHECR/LORAtriggered/results/'
-topdir='/Volumes/Data/VHECR/LORAtriggered/results/'
-candidates=["VHECR_LORA-20110714T174749.986Z","VHECR_LORA-20110716T094509.665Z","VHECR_LORA-20110716T025339.597Z"]
-nr=1
+#topdir='/Volumes/Data/VHECR/LORAtriggered/results/'
+#candidates=["VHECR_LORA-20110714T174749.986Z","VHECR_LORA-20110716T094509.665Z","VHECR_LORA-20110716T025339.597Z"]
+#nr=1
+
 datadirs=[topdir+d[0:-8] for d in os.listdir(topdir) if ".dir" in d and candidates[nr] in d]
 
 
