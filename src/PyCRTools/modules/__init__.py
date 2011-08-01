@@ -250,16 +250,44 @@ tinit = tinit_class()
 
 class thelp_class(t_class):
     """
+    **Usage:**
+
+    thelp what 
+
+    **Description:**
+    
     Print documentation of tasks
+
+    **Parameters:**
+
+    *what* - 0 = help on current task, 1 = help on tasks
+             'taskname' - help on named task
+
     """
     def __call__(self,what=0):
         import pycrtools.tasks
         if what == 0:
             print  tasks.task_instance.__doc__
-            print """\nTo get help on tasks type 'thelp 1'"""
-        if what == 1:
+            print """\nTo get help on tasks in general type: thelp 1"""
+            print """\nTo get help on a specific task type: thelp 'taskname'"""
+        elif what == 1:
             print pycrtools.tasks.__doc__
-            print """\nTo get help on current task type 'thelp 0'"""
+            print """\nTo get help on current task type: thelp"""
+            print """\nTo get help on a specific task type: thelp 'taskname'"""
+        elif isinstance(what,str):
+            if not what in tasks.task_allloaded.keys():
+                print "ERROR: thelp - Task name",name,"unknown. See 'tlist' for full list."
+                return
+            taskclass=eval(tasks.task_allloaded[what]+"."+what)
+
+            print  taskclass.__doc__
+            print """\nTo get help on current task type: thelp"""
+            print """\nTo get help on tasks in general type: thelp 1"""
+        else:
+            print """ERROR: thelp - wrong input."""
+            print """\nTo get help on current task type: thelp"""
+            print """\nTo get help on tasks in general type: thelp 1"""
+            print """\nTo get help on a specific task type: thelp 'taskname'"""
 
 thelp = thelp_class()
 

@@ -10,9 +10,6 @@ import pycrtools.tasks as tasks
 import pytmf
 from pycrtools.tasks.shortcuts import *
 
-
-
-
 class ldf(tasks.Task):
 
     parameters = dict(
@@ -27,7 +24,6 @@ class ldf(tasks.Task):
               loradirectionuncertainties = {default:cr.hArray([1.,1.,0.]),doc:"hArray of uncertainties of direction [eAz,eEl,cov]",unit:"degrees"},
               eventid = {default:None, doc:"EventId for LOFAR Event"},
               logplot={default:True, doc:"Draw y-axis logarithmically"}
-              
               )
     
     ## Functions used ##

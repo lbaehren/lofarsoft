@@ -53,7 +53,7 @@ results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for
 
 Command line use:
 
-$PYP/pipelines/cr_event.py  ~/LOFAR/work/CR/LORAweekdump--2-15.h5 --lofarmode=LBA_INNER --outputdir=/Users/falcke/LOFAR/work/ --block=93 --polarization=0
+$PYP/pipelines/cr_event.py  ~/LOFAR/work/CR/LORAweekdump--2-15.h5 --lofarmode=LBA_INNER --outputdir=/Users/falcke/LOFAR/work/ --block=93 -x30000 -X55000 --polarization=0
 ------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
@@ -93,6 +93,8 @@ parser.add_option("-o","--outputdir", type="str", default="",help="directory whe
 parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=0,help="either 0 or 1 for selecting even or odd antennas")
 parser.add_option("-b","--block", type="int", default=93,help="in which block do you expect the peak")
+parser.add_option("-x","--search_window_x0", type="int", default=-1,help="Start search window for peak at this sample")
+parser.add_option("-X","--search_window_x1", type="int", default=-1,help="End search window for peak at this sample")
 parser.add_option("-s","--blocksize", type="int", default=2**16,help="Blocksize with which to read blocks of data.")
 parser.add_option("-q","--nopause", action="store_true",help="Do not pause after each plot and display each figure interactively")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot.")
@@ -112,6 +114,7 @@ if not parser.get_prog_name()=="cr_event.py":
     blocksize=2**16
     plotpause=False
     refresh=True
+    search_window=False
     maximum_allowed_delay=1e-8 # maximum differential mean cable delay
                                # that the expected positions can differ
                                # from the measured ones, before we
@@ -134,6 +137,9 @@ else:
     plotpause = not options.nopause
     refresh = not options.norefresh
     maximum_allowed_delay = options.maximum_allowed_delay
+    search_window=False
+    if options.search_window_x0>=0 or options.search_window_x1>0:
+        search_window=(options.search_window_x0,options.search_window_x1)
 
 #------------------------------------------------------------------------
 plt.ioff()
@@ -204,7 +210,7 @@ par=dict(
                           #deficits in an antenna.
         ),
     FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
-    LocatePulseTrain = dict(nsigma=6,maxgap=5,minlen=64,minpulselen=3),  #nisgma=7  
+    LocatePulseTrain = dict(nsigma=4,maxgap=5,minlen=64,minpulselen=3,search_window=search_window),  #nisgma=7  
 #    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once
     DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0), # determine delays iteratively
     ApplyBaseline=dict(rmsfactor=7)
@@ -217,16 +223,9 @@ par=dict(
 #reallocated, if eventually one loops over events - but that needs
 #checking).
 
-
 ########################################################################
-#Getting the average spectrum and quality flags
-########################################################################
-print "---> Calculating average spectrum of all antennas"
-avspectrum=trerun("AverageSpectrum","cr_event",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
-calblocksize=avspectrum.power.getHeader("blocksize")
-speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
-
 #Allocating the memory for the fft, if it doesn't exist yet
+########################################################################
 if globals().has_key("fftplan") or locals().has_key("fftplan"):
     print "#fftplan exists - reusing old one!"
 else:
@@ -236,6 +235,15 @@ if globals().has_key("invfftplan") or locals().has_key("invfftplan"):
     print "#invfftplan exists - reusing old one!"
 else:
     invfftplan = FFTWPlanManyDftC2r(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
+
+########################################################################
+#Calculating the average spectrum and quality flags
+########################################################################
+print "---> Calculating average spectrum of all antennas"
+avspectrum=trerun("AverageSpectrum","cr_event",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
+calblocksize=avspectrum.power.getHeader("blocksize")
+speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
+
 
 ########################################################################
 #Flagging antennas 
@@ -250,8 +258,8 @@ antenna_index={} # names of antennas and their position within the array
 for i in range(len(antennalist)): antenna_index[antennalist[i]]=i
 
 # Now, select all atennas where the interesting chunk (where the peak
-# is) has two flagged blocks (one flagged block is OK, since this is
-# where the peak sits)
+# is) has two flagged (sub-)blocks (one flagged (sub-)block is OK,
+# since this is where the peak sits)
 
 #Select bad antennas
 flaglist=[i for i in quality if i["chunk"]==block_with_peak and i["nblocksflagged"]>1]
@@ -265,7 +273,6 @@ good_antennas_index=[antenna_index[i] for i in good_antennas] # get the index nu
 ndipoles=len(good_antennas)
 
 #Create new average spectrum with only good antennas
-
 if len(bad_antennas)>0:
     print "# Antenna Flagging:",len(bad_antennas),"bad antennas!"
     print "# Bad Antennas:",bad_antennas
@@ -275,7 +282,7 @@ else:
     print "# Antenna Flagging: All antennas OK!"
     averagespectrum_good_antennas=avspectrum.power
     
-#raise KeyboardInterrupt("Forced end of Execution!")
+#raise KeyboardInterrupt("Forced end of execution!")
 
 ########################################################################
 #Baseline Fitting 
@@ -291,7 +298,7 @@ amplitudes=hArray(copy=calcbaseline1.baseline)
 #raise TypeError("I don't like your type .... (just for debugging)")
 
 print "---> Calculate it again, but now to flatten the spectrum."
-calcbaseline_flat=trerun("CalcBaseline","flat",averagespectrum_good_antennas,pardict=par,invert=True,doplot=Pause.doplot)
+calcbaseline_flat=trerun("CalcBaseline","flat",averagespectrum_good_antennas,pardict=par,invert=True,normalize=False,doplot=Pause.doplot)
     
 ########################################################################
 #RFI identification in sum of all antennas (incoherent station spectrum)
@@ -362,7 +369,7 @@ fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.
 #Gain calibration of data
 ########################################################################
 print "---> Calculate a baseline with Galactic powerlaw"
-calcbaseline_galactic=trerun("CalcBaseline","galactic",averagespectrum_good_antennas,pardict=par,invert=True,powerlaw=0.5,doplot=Pause.doplot)
+calcbaseline_galactic=trerun("CalcBaseline","galactic",averagespectrum_good_antennas,pardict=par,invert=True,normalize=False,powerlaw=0.5,doplot=Pause.doplot)
 
 # and apply
 fft_data.mul(calcbaseline_galactic.baseline)
@@ -391,7 +398,7 @@ Pause("Plotted time series data. ",name="calibrated-imeseries")
 ########################################################################
 #First determine where the pulse is in a simple incoherent sum of all time series data
 print "---> Now add all antennas in the time domain, locate pulse and cut time series around it"
-pulse=trerun("LocatePulseTrain","",timeseries_data2,pardict=par)
+pulse=trerun("LocatePulseTrain","",timeseries_data2,pardict=par,doplot=Pause.doplot)
 
 print "#LocatePulse: ",pulse.npeaks,"pulses found."
 if pulse.npeaks==0:

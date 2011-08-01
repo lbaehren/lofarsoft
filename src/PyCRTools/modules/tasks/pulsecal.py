@@ -36,10 +36,17 @@ class LocatePulseTrain(tasks.Task):
     of the pulse train (i.e., this is the maximum separation of
     individual pulses to be considered part of the pulse train.).
 
+    With the parameter ``search_window`` the search can be limited to
+    the range of samples between those two numbers.
+
+   **Results:**
     Returns start and end index of the strongest pulse in
     ``Task.start`` and ``Task.end``. The cut-out time series is
     returned in ``Task.timeseries_data_cut``.
-
+    
+    The summed time series from all data sets (if a 2D array was
+    provided) is returned in ``Task.timeseries_data_sum``
+    
     See :func:`hFindSequenceGreaterThan` for a description of the other
     parameters.
 
@@ -77,7 +84,19 @@ class LocatePulseTrain(tasks.Task):
         indexlist=sc.p_(lambda self:cr.hArray(int,[self.maxnpeaks,2]),"Original locations of the peaks found in the data",output=True),
         cutlen=sc.p_(None,"Length of the cut-out data.",output=True),
         timeseries_data_sum=sc.p_(None,"Incoherent (squared) sum of all antennas."),
-        timeseries_data_cut=sc.p_(lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]),"Contains the time series data cut out around the pulse.",output=True)
+        timeseries_data_cut=sc.p_(lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]),"Contains the time series data cut out around the pulse.",output=True),
+
+        search_window = dict(default=False,doc="False - if set to a tuple with two integer indices (start, end), pointing to locations in the array, only the strongest peak between those two locations are being considered. Use -1 for start=0 or end=len(array)."),
+        
+        doplot = dict(default=False,doc="Produce output plots."),
+
+        plot_finish = dict(default = lambda self:cr.plotfinish(filename=self.plot_filename,doplot=self.doplot,plotpause=True),
+                       doc ="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
+
+        plot_name = dict(default="",doc="Extra name to be added to plot filename."),
+
+        plot_filename = dict(default="",doc="Base filename to store plot in.")
+
         )
 
     def call(self,timeseries_data):
@@ -89,14 +108,25 @@ class LocatePulseTrain(tasks.Task):
             self.timeseries_data_sum=self.timeseries_data
         else:
             self.timeseries_data_sum=rf.TimeBeamIncoherent(self.timeseries_data)
+            self.timeseries_data_sum.sqrt()
 
         self.minrms=cr.Vector(float,1)
         self.minmean=cr.Vector(float,1)
         self.blen=cr.Vector(int,1,fill=max(self.timeseries_data_sum.getSize()/self.nblocks,8))
         self.timeseries_data_sum.minstddevblock(self.blen,self.minrms,self.minmean)
-        self.npeaks=self.indexlist.findsequencegreaterthan(self.timeseries_data_sum,self.minmean[0]+self.nsigma*self.minrms[0],self.maxgap,self.minpulselen).first()
+        if self.search_window:
+            if hasattr(self.search_window,"__getitem__") and len(self.search_window)==2 and isinstance(self.search_window[0],(long,int)) and isinstance(self.search_window[1],(long,int)):
+                self.search_window_x0=max(min(len(self.timeseries_data_sum),self.search_window[0]),0) if self.search_window[0]>=0 else 0
+                self.search_window_x1=max(min(len(self.timeseries_data_sum),self.search_window[1]),1) if self.search_window[1]>0 else len(self.timeseries_data_sum)
+                self.npeaks=self.indexlist.findsequencegreaterthan(self.timeseries_data_sum[self.search_window_x0:self.search_window_x1],self.minmean[0]+self.nsigma*self.minrms[0],self.maxgap,self.minpulselen).first()
+                self.indexlist += self.search_window_x0
+            else:
+                raise ValueError("ERROR: LocatePulseTrain.search_window needs to be a tuple or list of two integers.")
+        else:
+            self.npeaks=self.indexlist.findsequencegreaterthan(self.timeseries_data_sum,self.minmean[0]+self.nsigma*self.minrms[0],self.maxgap,self.minpulselen).first()
         if self.npeaks <= 0:
             return
+
         self.maxima=cr.hArray(float,[self.npeaks])
         self.maxima.maxinsequences(self.timeseries_data_sum,self.indexlist,self.npeaks)
         self.maxseq=self.maxima.maxpos().first()
@@ -106,6 +136,17 @@ class LocatePulseTrain(tasks.Task):
         self.cutlen=int(2**math.ceil(math.log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
 
         self.start-=self.prepulselen; self.end=self.start+self.cutlen
+
+        if self.doplot:
+            if self.search_window:
+                self.timeseries_data_sum.plot(color="green",label="search window",nhighlight=self.npeaks,highlight=self.indexlist,highlightcolor="orange",title="Peak search: Incoherent sum of timeseries data",highlightlabel="peaks found")
+                self.timeseries_data_sum[:self.search_window_x0].plot(clf=False,color="blue",label="Incoherent sum")
+                self.timeseries_data_sum[self.search_window_x1:].plot(clf=False,color="blue",xvalues=cr.hArray(range(self.search_window_x1,len(self.timeseries_data_sum))))
+            else:
+                self.timeseries_data_sum.plot(nhighlight=self.npeaks,highlight=self.indexlist,color="blue",highlightcolor="orange",title="Peak search: incoherent sum of timeseries data",label="incoherent sum",highlightlabel="peaks found")
+            self.timeseries_data_sum[self.start:self.end].plot(clf=False,color="red",xvalues=cr.hArray(range(self.start,self.end)),label="peak region")
+            cr.plt.legend(loc=2)
+            self.plot_finish(name=self.__taskname__+self.plot_name)
 
         #Cut the data around the main pulse
         if self.docut:

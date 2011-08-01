@@ -160,7 +160,7 @@ class plotfinish:
 
 
 
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,**plotargs):
+def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,highlightlabel=None,**plotargs):
     """
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
@@ -202,6 +202,8 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
                        'xy'  -> loglog plot
 
     *highlightcolor* color (e.g. 'red'), used to highlight sections of the plot
+
+    *highlighlabel*  text used to label the highlighted regions in a legend
 
     *nhighlight*     determines how many (if any) sections of the data to highlight.
 
@@ -287,6 +289,10 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         else: exec(var+"="+str(dflt.__repr__()))
+    var="highlightlabel"; dflt=(None); val=eval(var);
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec(var+"="+str(dflt.__repr__()))
     var="nhighlight"; dflt=[1]; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
@@ -319,7 +325,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
             ha=hArray(hv,[len(hv)/2,2])
             for n in range(nhighlight[loop]): #how many sections are to be highlighted?
                 slc=slice(ha[n,0],ha[n,1]+1)
-                _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor)
+                _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor,label=highlightlabel if n==0 else False)
         xvalues.next()
         iterate=self.next().doLoopAgain()
         loop+=1;

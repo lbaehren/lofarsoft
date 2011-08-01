@@ -1,3 +1,14 @@
+2011-08-02 - Rev 8218
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- LocatePulseTrain now makes plots, accepts a narrowed search-window,
+  and use the sqrt of the power (i.e. E-field) for searching for pulses
+- cr_event pipeline accepts search window as parameter (-x/-X) and
+  normalizes all stations to the same level.
+- thelp accepts a taskname as parameter to get help on a task
+ 
 2011-07-25 - Rev 8206
 =====================
 
@@ -27,7 +38,7 @@
 
 - averagespectrum mow produces pretty output in an html file
 
-- Tasks have a method ``writehtml``which allows one to produce pretty
+- Tasks have a method ``writehtml`` which allows one to produce pretty
   output automatically.
  
 2011-07-21 - Rev 8177
@@ -59,7 +70,7 @@
 - Added a python version test for the ``.format`` statement. This is not available
   in python 2.5 (i.e. at Cep I cluster). Format will print a tuple instead. It's
   ugly, but then the software works.
-- Fixed :module:`averagespectrum.py` to work with import pycrtools as cr
+- Fixed `averagespectrum.py` to work with import pycrtools as cr
 
 
 2011-07-18 - Rev 8151
@@ -162,12 +173,6 @@
 - Added pycrtools configuration to CMake.
 - Moved Numpy functionality to Math and Vector modules.
 - Moved AERA_IO functionality to IO module.
-
-TODO:
------
-
-- Make naming consistent: rename pypeline -> pycrtools.
-
 
 
 2011-05-14 - Rev 7703
