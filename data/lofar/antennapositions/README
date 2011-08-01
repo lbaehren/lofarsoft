@@ -1,0 +1,3 @@
+Antenna positions in ITRF mapped per AntennaSet for all Core and Remote stations. The file contains for each dipole:
+dipoleid X Y Z
+
