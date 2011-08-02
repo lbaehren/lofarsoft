@@ -1,5 +1,6 @@
 """LORA
 """
+import pycrtools as cr
 
 def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, samplenumber, clockoffset = 1e4, blocksize = 2**16):
     """Calculates block number corresponding to LORA timestamp.
@@ -39,25 +40,27 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     # Get filename
         timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(lora_second))
         filename="LORAdata-"+timestr+".dat"
+        print os.path.isfile(datadir+filename)
         if not os.path.isfile(datadir+filename):
+            print "check"
             if checkSurroundingSecond:
-	       if not silent:
-	          print "Unable to find file, looking at neighbouring seconds"
+               if not silent:
+                   print "Unable to find file, looking at neighbouring seconds"
                timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(lora_second+1))
                filename="LORAdata-"+timestr+".dat"
                if not silent:
-	          print "file was not there. Now checking file",datadir+filename
+                  print "file was not there. Now checking file",datadir+filename
                if not os.path.isfile(datadir+filename):
                   timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(lora_second-1))
                   filename="LORAdata-"+timestr+".dat"
                   if not silent:
-	             print "file was not there. Now checking file",datadir+filename
+                     print "file was not there. Now checking file",datadir+filename
                   if not os.path.isfile(datadir+filename):
                      print "File does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file"
                      return None
-        else:
-	    print "File",datadir+filename,"does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file. If the timestamp is just one second off you can try it again with set checkSurroundingSeconds = True"
-	    return None
+            else:
+	        print "1 File",datadir+filename,"does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file. If the timestamp is just one second off you can try it again with set checkSurroundingSeconds = True" 
+                return None
     else:
         filename=lora_second          
     file=open(datadir+filename)         
@@ -72,11 +75,11 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         assert a==b
         loradata[a]=float(c)
     detectorindex=lines[3].strip('/').split()
-    detectorreference=['Det_no.','X_Cord(m)','Y_Cord(m)','Z_Cord(m)','UTC_time','(10*nsecs)','Particle_Density']
+    detectorreference=['Det_no.','X_Cord(m)','Y_Cord(m)','Z_Cord(m)','UTC_time','(10*nsecs)','Particle_Density(/m2)']
     for (a,b) in zip(detectorindex,detectorreference):
         # "Check if data format is still as defined" 
-        assert a==b
-    detectorkeys=["detectorid","posX","posY","posZ","time","10*nsec","particle_density"]
+        assert b==a 
+    detectorkeys=["detectorid","posX","posY","posZ","time","10*nsec","particle_density(/m2)"]
     for k in detectorkeys:
         loradata[k]=[]
     for l in lines[4:]:
@@ -84,8 +87,27 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         for a,b in zip(detectorkeys[0:-1],info[0:-1]):
             loradata[a].append(int(b))
         loradata[detectorkeys[-1]].append(float(info[-1]))    
+    loradata["core"]=cr.hArray([loradata["Core(X)"],loradata["Core(Y)"],0.],name="shower core parameters from lora",unit="m")
+    loradata["energy"]=loradata["Energy(eV)"]
+    loradata["direction"]=cr.hArray([loradata["Az"],loradata["El"]],name="shower direction from lora",unit="degrees")
+    
     return loradata
 
-   
+def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
+    f=open(logfile,'r')
+    lines=f.readlines()
+    p={}
+    for l in lines:
+        lspl=l.split()
+        p[int(lspl[0])]=int(lspl[1])
+    if lora_second in p.keys():
+       return (lora_second,p[lora_second])
+    elif lora_second-1 in p.keys():
+       return (lora_second-1,p[lora_second-1])
+    elif lora_second+1 in p.keys():
+       return (lora_second+1,p[lora_second+1])
+    else:
+       return (None,None)
+
         
 
