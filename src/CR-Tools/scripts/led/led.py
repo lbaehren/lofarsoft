@@ -189,6 +189,7 @@ class ApplicationWindow(QtGui.QMainWindow):
             self.display.ax.set_rscale('log')
         
         self.display.ax.set_ylim(self.rlim)
+        self.display.ax.set_yticks(range(0,90,15))
 
     def resetBuffers(self):
         """Set or reset data buffers"""
@@ -268,7 +269,7 @@ class ApplicationWindow(QtGui.QMainWindow):
             if values[lineDescriptorKey] == 'FitResult:':
                 if len(values) < 5:
                     print 'Unexpected number of parameters: ', values
-                elif float(values[varianceKey]) < 50.0:
+                elif float(values[varianceKey]) < 30.0:
                     # Check if this is the first event received and if so starts
                     # the timer controlling updates to the display, also sets the
                     # reference time
@@ -347,12 +348,14 @@ class ApplicationWindow(QtGui.QMainWindow):
         if self.distancePlot:
             self.display.ax.set_rscale('log')
         self.display.ax.set_ylim(self.rlim)
-  
+        self.display.ax.set_yticks(range(0,90,15))
+        
+        self.display.ax.set_xticklabels(['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'])
 #        self.display.ax.set_xlim(360.0)
         # Display time
 #        for the time being hacked out 'UTC'
         #self.display.ax.set_title(time.ctime(self.ctime*1e-3)+" UTC")
-        self.display.ax.set_title(time.ctime(self.ctime*1e-3) )
+        self.display.ax.set_title('')#time.ctime(self.ctime*1e-3) )
 
         # Draw plot on display
         self.display.draw()
