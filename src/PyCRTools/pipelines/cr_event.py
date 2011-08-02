@@ -183,6 +183,8 @@ else:
     print "# Using existing output directory",outputdir
 
 Pause=plotfinish(filename=os.path.join(outputdir,outfilename),plotpause=plotpause,refresh=refresh)
+Pause.plotfiles=[]
+Pause.count=0
 
 ########################################################################
 #Setting the parameter block with parameters for tasks
@@ -540,6 +542,8 @@ results=dict(
     DATA_LENGTH=datafile["DATA_LENGTH"][0],
     SAMPLE_INTERVAL=sample_interval,
     FILENAME=filename,
+    TIME=datafile["TIME"][0],
+    SAMPLE_NUMBER=datafile["SAMPLE_NUMBER"][0],
     BLOCK=block_with_peak,
     BLOCKSIZE=blocksize,
     polarization=polarization,
