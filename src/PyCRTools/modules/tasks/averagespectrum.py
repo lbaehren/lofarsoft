@@ -910,7 +910,8 @@ class AverageSpectrum(tasks.Task):
                                     )
                                 )
                             if not self.quality_db_filename=="":
-                                qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
+                                outfilepath = os.path.join(self.output_dir, self.quality_db_filename + ".txt")
+                                qualitycheck.CRDatabaseWrite(outfilepath, self.quality[self.count])
                                 
                             mean+=self.quality[self.count]["mean"]
                             rms+=self.quality[self.count]["rms"]
