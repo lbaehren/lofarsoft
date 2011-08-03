@@ -246,6 +246,38 @@ def symlink_matching(from_dir, to_dir, file_regexp):
     print 'Symlinked %d files (%d non-matching files).' % (n_matched, n_not_matched)
     return  
 
+def move_matching(from_dir, to_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+
+    files = os.listdir(from_dir)
+    print 'Trying to match %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            shutil.move(join(from_dir, f), join(to_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Moved %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+
+def copy_matching(from_dir, to_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+
+    files = os.listdir(from_dir)
+    print 'Trying to match %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            shutil.copy(join(from_dir, f), join(to_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Copied %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+
 def remove_matching(target_dir, file_regexp):
     file_pattern = re.compile(file_regexp)
     files = os.listdir(target_dir)
@@ -260,7 +292,8 @@ def remove_matching(target_dir, file_regexp):
             n_not_matched += 1
     print 'Removed %d files (%d non-matching files).' % (n_matched, n_not_matched)
     return  
-    
+
+ 
 def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
     '''
     Run PRESTO rfifind.
@@ -317,6 +350,8 @@ def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
 
     return
 
+
+
 def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
     basename, mask_file, numout, zero_dm=False):
     '''
@@ -369,63 +404,121 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
 
     return status
 
-def get_fourier_and_correct_commands(work_dir, basename, dm, bary_v, zap_file):
-    '''Get PRESTO realfft and rednoise commands.'''
-    # TODO : add exception handling.
-    # TODO : add zapbirds support (ask about zap files)
+def analyze_dm_trial(source_dir, basename, dm, work_dir, *args, **kwargs):
+    '''
+    Run accelsearch and singlepulse search on a given DM trial.
 
-    cmds = ['cd %s' % work_dir]
-    cmds.append('cp %s %s' % (zap_file, work_dir))
+    zap_file, dat_dir and work_dir should be full paths.
+    If run in parallel, make sure it is in different directories.
+    '''
+    do_accelsearch = kwargs.get('do_accelsearch', True)
+    do_singlepulsesearch = kwargs.get('do_singlepulsesearch', True)
+    bary_v = kwargs.get('bary_v', None)
+    zap_file_fullpath = kwargs.get('zap_file_fullpath', None)
+    z_values = kwargs.get('z_values', [50])
+    if not (do_accelsearch or do_singlepulsesearch):
+        return
+    CWD = os.getcwd()
+    try:
+        # create working directory if it does not exists
+        if not os.path.exists(work_dir):
+            os.makedirs(work_dir)
+        os.chdir(work_dir)
 
-    dat_file = basename + '_DM%.2f' % dm + '.dat'
-    fft_file = basename + '_DM%.2f' % dm + '.fft'
-    red_fft_file = basename + '_DM%.2f' % dm + '_red.fft'    
+        # symlink .dat and .inf files (for now all of them)
+        dat_file = basename + '_DM%.2f.dat' % dm
+        inf_file = basename + '_DM%.2f.inf' % dm
+        fft_file = basename + '_DM%.2f.fft' % dm
+        red_fft_file = basename + '_DM%.2f_red.fft' % dm 
+        os.symlink(join(source_dir, dat_file), join(work_dir, dat_file))
+        os.symlink(join(source_dir, inf_file), join(work_dir, inf_file))
 
-    # Fourier transform takes place in the same directory as the .dat file.
-    cmds.append(get_command('realfft', {'-outdir' : '.'}, [dat_file]))
-    
-    # Run zapbirds if zap_file is available
-    tmp = os.path.split(zap_file)[1]
-    if zap_file:
-        cmds.append(get_command('zapbirds', {
+        if zap_file_fullpath:
+            zap_file_dir, zap_file = os.path.split(zap_file_fullpath)
+            if not os.path.exists(join(work_dir, zap_file)):
+                os.symlink(zap_file_fullpath, join(work_dir, zap_file))
+        else:
+            zap_file = ''
+        
+        if do_accelsearch:
+            # perform fourier transform and appropriate corrections:
+            run_realfft_zapbirds_rednoise(work_dir, basename, dm, bary_v, zap_file)
+            # TODO add loop over z_max
+            for z in z_values:
+                run_accelsearch(fft_file, z)
+            
+        if do_singlepulsesearch:
+            # run single pulse search
+            run_single_pulse_search(work_dir, basename, dm)
+        # remove symlinks to data files
+        os.remove(join(work_dir, dat_file))
+        os.remove(join(work_dir, inf_file))
+        if dm != 0:
+            os.remove(join(work_dir, fft_file)) 
+    finally:
+        os.chdir(CWD)
+
+    return
+
+def run_realfft_zapbirds_rednoise(work_dir, basename, dm, bary_v, zap_file):
+    '''
+    Get PRESTO realfft and rednoise commands.
+
+    Assumes workdir contains zap_file!
+    '''
+
+    CWD = os.getcwd()
+    try:
+        os.chdir(work_dir)
+
+        dat_file = basename + '_DM%.2f' % dm + '.dat'
+        fft_file = basename + '_DM%.2f' % dm + '.fft'
+        red_fft_file = basename + '_DM%.2f' % dm + '_red.fft'    
+
+        # Fourier transform takes place in the same directory as the .dat file.
+        realfft_status = run_command('realfft', {'-outdir' : '.'}, [dat_file]) 
+        # Run zapbirds if zap_file is available
+        if zap_file:
+            zapbirds_status = run_command('zapbirds', {
                 '-zap' : '',
-                '-zapfile' : tmp,
+                '-zapfile' : zap_file,
                 '-baryv' : '%6g' % bary_v,
-            }, [fft_file])
-        )
-        cmds.append(get_command('rednoise', {}, [fft_file]))
-    # Run rednoise correction.
-    cmds.append(get_command('rednoise', {}, [fft_file])) 
-    # copy rednoise corrected fft back to the normal fft
-    cmds.append(get_command('mv', {}, [red_fft_file, fft_file]))
-    
-    return cmds
-  
- 
-def get_accelsearch_command(work_dir, basename, dm, z_max):
-    '''Get PRESTO accelsearch command.'''
+            }, [fft_file]) 
+        # Run rednoise correction.
+        rednoise_status = run_command('rednoise', {}, [fft_file]) 
+        # copy rednoise corrected fft back to the normal fft
+        shutil.move(red_fft_file, fft_file)
+    finally:
+        os.chdir(CWD) 
 
-    ACCELSEARCH_OPTIONS = {
-        # like Vishal's script
+    return
+
+ 
+def run_accelsearch(fft_file, z_max):
+    '''Get PRESTO accelsearch command.'''
+    # TODO : add way of propagating extra options to accelsearch
+
+    OPTIONS = {
         '-numharm' : str(8),
         '-sigma' : str(6),
         '-flo' : '%.2f' % 1,
         '-zmax' : '%d' % z_max,
     }
-    fft_file = basename + '_DM%.2f' % dm + '.fft'
+    accelsearch_status = run_command('accelsearch', OPTIONS, [fft_file])
 
-    cmds = ['cd %s' % work_dir]
-    cmds.append(get_command('accelsearch', ACCELSEARCH_OPTIONS, [fft_file]))
+    if accelsearch_status != 0:
+        print 'Failure for accelsearch on %s in directory %s.'
+        raise Exception('accelsearch failure')
 
-    return cmds
+    return
 
-def get_single_pulse_search_command(work_dir, basename, dm):
+def run_single_pulse_search(work_dir, basename, dm):
     '''Run PRESTO single_pulse_search.py for searching.'''
 
     dat_file = join(work_dir, basename + '_DM%.2f' % dm + '.dat')
-    cmd = get_command('single_pulse_search.py', {'-p' : ''}, [dat_file])
+    singlepulse_status = run_command('single_pulse_search.py', {'-p' : ''}, [dat_file])
 
-    return [cmd]
+    return
 
 def run_single_pulse_search_plotter(work_dir, basename):
     '''Run PRESTO single_pulse_search.py for plotting.'''
@@ -439,7 +532,49 @@ def run_single_pulse_search_plotter(work_dir, basename):
     }, [])
 
     return status
-   
+    
+def fold_on_known_ephemeris(source_dir, basename, dm, work_dir, 
+    par_file_fullpaths, *args, **kwargs):
+
+    '''Fold for known ephemeris provided as .par file.'''
+    mask_file_fullpath = kwargs.get('mask_file_fullpath', '')
+    CWD = os.getcwd()
+    try:
+        os.chdir(work_dir)
+        # link .dat/.inf files to working directory
+        dat_file = basename + '_DM%.2f' % dm + '.dat'
+        inf_file = basename + '_DM%.2f' % dm + '.inf'
+        os.symlink(join(source_dir, dat_file), join(work_dir, dat_file))
+        os.symlink(join(source_dir, inf_file), join(work_dir, inf_file))
+        for par_file_fullpath in par_file_fullpaths:
+            # if necessary copy .par files to working directory
+            par_file = os.path.split(par_file_fullpath)[1]
+            if not os.path.exists(join(work_dir, par_file)):
+                shutil.copy(par_file_fullpath, join(work_dir, par_file))
+            mask_file = os.path.split(mask_file_fullpath)[1]
+            tmp = join(work_dir, mask_file)
+            # link rfifind output to working directory
+            if mask_file_fullpath and not os.path.exists(tmp):
+                os.symlink(mask_file_fullpath, tmp)
+            # run folding for known ephemeris (twice!)
+            bin, options, parameters = get_folding_command_ke(
+                basename, dm, basename + '_DM%.2f' % dm + '.dat', 
+                mask_file, par_file, False
+            )
+            prepfold_status = run_command(bin, options, parameters)
+            bin, options, parameters = get_folding_command_ke(
+                basename, dm, basename + '_DM%.2f' % dm + '.dat', 
+                mask_file, par_file, True 
+            )
+            prepfold_status = run_command(bin, options, parameters)
+        # Clean up the data files (leaving the .par files and rfifind output).
+        os.remove(join(work_dir, dat_file))
+        os.remove(join(work_dir, inf_file))
+    finally:
+        os.chdir(CWD)
+
+    return  
+
 # ----------------------------------------------------------------------------
 
 class SearchRun(object):
@@ -670,136 +805,72 @@ class SearchRun(object):
             t_prepsubband_end = time.time()
             ddplan.prepsubband_time = t_prepsubband_end - t_prepsubband_start
 
-            
-
+            print '=' * 70
+            print 'BEGINNING THE PER DM SEARCH LOOP, IN PARALLEL'
             t_search_start = time.time() 
-            command_list = [[] for i in range(n_cores)]
             for i, dm in enumerate(ddplan.get_dms()):
-                # determine which core the command is for:
+                print '=' * 70
+                print 'ANALYZING DM TRIAL DM = %.2f' % dm
+                # NEW STYLE SEARCH LOOP (use subdirectories per core for everything)
+                # in a directory per CORE, do the following:
                 core_index = i % n_cores
-                # Append all the per DM processing commands to the appropriate
-                # list of commands:
-                if not no_accel:
-                    # fourier transform + rednoise correction:
-                    command_list[core_index].extend(
-                        get_fourier_and_correct_commands(
-                            self.work_dir, self.basename, dm, self.bary_v, 
-                            self.zap_file,
-                        )
-                    )
-                    # acceleration search for each z value:
-                    for z_max in z_values:
-                        command_list[core_index].extend(
-                            get_accelsearch_command(self.work_dir, 
-                                self.basename, dm, z_max)
-                        )
+                core_work_dir = join(self.work_dir, 'CORE_%d' % core_index)
+                core_log_file = join(self.work_dir, 'SEARCH_LOG_CORE_%d_STEP_%d.log.txt' % (core_index, ddplan_i))
+                print 'WORKING DIRECTORY %s' % core_work_dir
 
-                if not no_singlepulse:                   
-                    # Run PRESTO single pulse search (not the plotting or SSPS part):
-                    command_list[core_index].extend(
-                        get_single_pulse_search_command(
-                            self.work_dir, self.basename, dm
-                            )
-                        )
+                # SEARCH:
+                # Perform fft + corrections, accelsearch, single pulse search
+                analyze_dm_trial(self.work_dir, self.basename, dm, 
+                    join(self.work_dir, 'CORE_0'), z_values=z_values,
+                    zap_file_fullpath=self.zap_file, bary_v=self.bary_v,
+                    do_accelsearch=not no_accel,
+                    do_singlepulsesearch=not no_singlepulse)
 
                 # Known ephemeris folding:
                 for par_file in par_files:
-                    # use the local copy of the TEMPO .par file (so as not to
-                    # run into file name length problems).
-                    par_file = os.path.split(par_file)[1]
-                    command_list[core_index].append(
-                        get_command('cd', {}, 
-                            [join(self.work_dir, 'CORE_%d' % core_index)]))
-                    command_list[core_index].append(
-                        get_command(*get_folding_command_ke(self.basename, dm, 
-                            join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
-                            rfifind_mask_file, 
-                            par_file, False)
-                        )
-                    )
-                    command_list[core_index].append(
-                        get_command(*get_folding_command_ke(self.basename, dm, 
-                            join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
-                            rfifind_mask_file, 
-                            par_file, True)
-                        )
-                    )
-                    command_list[core_index].append(get_command('cp', {}, 
-                        ['*.pfd.bestprof', join(self.out_dir, 'KNOWN_EPHEMERIS')]))
-                    command_list[core_index].append(get_command('cp', {}, 
-                        ['*.pfd.ps', join(self.out_dir, 'KNOWN_EPHEMERIS')]))
-                    command_list[core_index].append(
-                        get_command('cd', {}, [self.work_dir]))
-               
+                    fold_on_known_ephemeris(self.work_dir, self.basename, dm,
+                        core_work_dir, par_files)
+ 
+                # CLEAN UP:
                 # Copy the DM 0 files to the output directories.
                 if dm == 0:
-                    command_list[core_index].append(
-                        get_command('cp', {}, [self.basename + '_DM0.00.*',
-                        join(self.out_dir, 'DM0.00')])
-                    )
-                
-              
+                    file_regexp = r'^' + re.escape(self.basename) +r'_DM0\.00\.\S+$'
+                    copy_matching(core_work_dir, 
+                        join(self.out_dir, 'DM0.00'), file_regexp)
+                    # Also copy over the .inf and .dat files
+                    copy_matching(self.work_dir, join(self.out_dir, 'DM0.00'), file_regexp)
+
+                # TODO : see whether this stuff can be run outside of the search loop (less
+                # talking to the disks, but larger disk use during the search).
                 if not no_accel:
                     # remove datafiles that are no longer necessary
-                    command_list[core_index].append(
-                        get_command('rm', {}, [join(self.work_dir, 
-                            self.basename + '_DM%.2f' % dm + '.fft')]
-                        )
+                    remove_matching(core_work_dir, '^\S+\.fft')
+                    # move the search output to the top level working directory
+                    move_matching(core_work_dir, self.work_dir,
+                        '(^\S+\_ACCEL_\d+$|^\S+\_ACCEL_\d+\.cand$|^\S+\_ACCEL_\d+\.txtcand$)'
+                    )
+
+                if not no_singlepulse:
+                    move_matching(
+                        core_work_dir, self.work_dir, '^\S+\.singlepulse$'
                     )
 
                 if save_timeseries:
                     # copy timeseries to output directory
                     # This can fail miserably if there is not enough disk!
-                    command_list[core_index].append(
-                        get_command('mv', {}, [join(self.work_dir,
-                            self.basename + '_DM%.2f' % dm + '.dat'),
-                            join(self.out_dir, 'TIMESERIES')]
-                        )
-                    )
+                    shutil.move(join(core_work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
+                        join(self.out_dir, 'TIMESERIES'))
                 else:
                     # remove dedispersed timeseries (.dat files)
-                    command_list[core_index].append(
-                        get_command('rm', {}, [join(self.work_dir,
-                            self.basename + '_DM%.2f' % dm + '.dat')]
-                        )
-                    )
-                if par_files:
-                    # clean up after the known ephemeris folding
-                    command_list[core_index].append(
-                        get_command('rm', {}, [join(self.work_dir, 'CORE_%d' % core_index, '*.pfd*')])
-                    )
-                    command_list[core_index].append(
-                        get_command('rm', {}, [join(self.work_dir, 'CORE_%d' % core_index, '*.lis')])
-                    )
-                    command_list[core_index].append(
-                        get_command('rm', {}, [join(self.work_dir, 'CORE_%d' % core_index, '*.tmp')])
-                    )
-             
-            # Run the per DM analysis in a paralellized fashion.
-            print 'Running per DM analysis'
-            popen_objects = []            
+                    os.remove(join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'))
 
-            for core_index in range(n_cores):
-                if not command_list[core_index]: continue
-                script_filename = join(self.work_dir, 
-                    'per_dm_analysis_core%d_step%d.sh' % \
-                    (core_index, ddplan_i))
-                log_filename = join(self.work_dir, 
-                    'per_dm_analysis_core%d_step%d.log.txt' % \
-                    (core_index, ddplan_i))
-                try:
-                    p = run_as_script(command_list[core_index], script_filename,
-                        log_filename)
-                except:
-                    print 'Failed to run %s' % script_filename
-                    raise
-                else:    
-                    print script_filename
-                    popen_objects.append(p) 
-            
-            # wait for all the scripts to finish
-            for p in popen_objects:
-                p.wait()
+                for par_file in par_files:
+                    move_matching(core_work_dir, 
+                        join(self.out_dir, 'KNOWN_EPHEMERIS'), r'^\S+\.pfd\.(bestprof|ps)')
+             
+            if par_files:
+                # delete parfiles
+                pass
             t_search_end = time.time()
             ddplan.search_time = t_search_end - t_search_start
 
@@ -997,7 +1068,7 @@ if __name__ == '__main__':
         default='[0,50]', metavar='Z_LIST', 
         help='List of integer z values, default [0,50] - don\'t use spaces.')
     parser.add_option('--ncores', dest='ncores', type='int',
-        default=8, help='Number of cores to use (default 8).')
+        default=1, help='Number of cores to use (default 1).')
     parser.add_option('--ns', dest='ns', help='Run no single pulse search.',
         action='store_true', default=False)
     parser.add_option('--na', dest='na', help='Run no acceleration search.',
