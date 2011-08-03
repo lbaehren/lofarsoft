@@ -13,6 +13,7 @@ import pycrtools as cr
 from pycrtools import tasks
 from pycrtools.tasks import shortcuts as sc
 from matplotlib import pyplot as plt
+import matplotlib
 import math
 import time
 import os
@@ -71,10 +72,11 @@ def fitbaseline_calc_numax_i(self):
 
 class FitBaseline(tasks.Task):
     """
-    Usage::
+    **Usage:**
 
-      >>> FitBaseline(input_spectrum, **keywords)
+    FitBaseline(input_spectrum, **keywords)
 
+    **Description:**
     Function to fit a baseline using a polynomial function
     (``fittype='POLY'``) or a basis spine fit (default: ``fittype='BSPLINE'``)
     to a spectrum while trying to ignore positive spikes in the fit
@@ -90,8 +92,25 @@ class FitBaseline(tasks.Task):
     ``frequency``, otherwise a simple numbering is assumed
     ``frequency=[0,1,2,3...]``.
 
-    Returns its own workspace.
+    *RFI Treatment*
+    
+    The spectra are then downsampled and checked which bins have a
+    large RMS (when divided by the mean in each bin). Those bins are
+    affected by interference and are ignored for the fitting. The
+    final fit is done to the clean bins only.
 
+    *Quality check:*
+
+    At the end the fitted baselines are compared to each other
+    (divided by the average spectrum of all antennas) and a list of
+    deviant antennas is returned in ``Task.badantennas``.
+    
+
+    **Results:**
+    The main results are the fit coefficients ``Task.coeffs``.
+
+    Bad antennas are listed in ``Task.badantennas``.
+    
     Use ``baseline.polynomial(task.frequency,task.coeffs,task.powers)`` to caluclate the
     baseline from the coefficients for the polynomial fit, or::
 
@@ -182,6 +201,10 @@ class FitBaseline(tasks.Task):
                               default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.freqs,par=("logplot","y")),
                               workarray=True),
 
+        small_average_spectrum = dict(doc="""Array of power values holding the average (fitted) downsampled spectrum. (work vector)""",
+                              default=lambda self:cr.hArray(float,[self.nbins],name="Binned Spectrum",units="a.u.",xvalues=self.fitted_bins_x,par=("logplot","y")),
+                              workarray=True),
+
         rms = dict(doc="""Array of RMS values of the downsampled spectrum. (work vector)""",
                    default=lambda self:cr.hArray(properties=self.small_spectrum, name="RMS of Spectrum"),
                    workarray=True),
@@ -225,6 +248,32 @@ class FitBaseline(tasks.Task):
         clean_bins_y = dict(doc="""Array holding the powers of the clean bins. (work vector)""",
                             default=lambda self:self.small_spectrum,
                             workarray=True),
+
+        fitted_bins_y = dict(doc="""Array holding the fitted, binned spectrum - for plotting and control. (work vector)""",
+                            default=lambda self:cr.hArray(properties=self.small_spectrum,xvalues=self.fitted_bins_x,name="Fitted and binned spectrum"),
+                            workarray=True),
+        flattened_bins_y = dict(doc="""Array holding the binned spectrum of each antenna divided by the mean spectrum of all antennas - for plotting and control. (work vector)""",
+                            default=lambda self:cr.hArray(properties=self.small_spectrum,xvalues=self.fitted_bins_x,name="Fitted and binned spectrum"),
+                            workarray=True),
+
+        fitted_bins_x = dict(doc="""Array holding the frequency values for the fitted, binned spectrum - for plotting and control. (work vector)""",
+                            default=lambda self:cr.hArray(properties=self.freqs),
+                            workarray=True),
+
+        qualitycontrol = dict(doc="If True then select bad antennas (How many sigma can the rms of the difference spectrum deviate from those of others antennas)",
+                      default=True),
+
+        nsigma = dict(doc="Used to select bad antennas (How many sigma can the rms of the difference spectrum deviate from those of others antennas)",
+                      default=3),
+
+        badantennas = dict(doc="List of bad antennas (where the rms of the difference spectrum deviated from those of others antennas)",
+                      default=[],output=True),
+
+        goodantennas = dict(doc="List of bad antennas (where the rms of the difference spectrum deviated from those of others antennas)",
+                      default=[],output=True),
+
+        nbadantennas = dict(doc="Number of bad antennas (where the rms of the difference spectrum deviated from those of others antennas)",
+                      default=0,output=True),
 
         xpowers = dict(doc="Array holding the *x*-values and their powers for calculating the baseline fit.",
                        default=lambda self:cr.hArray(float,[self.nofAntennas,self.nbins,self.ncoeffs],name="Powers of Frequency"),
@@ -317,7 +366,7 @@ class FitBaseline(tasks.Task):
             plt.ioff();
 
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
-        #Donwsample spectrum
+        #Downsample spectrum
         if self.nbins>self.nofChannelsUsed/8:
             print "Requested number of downsampled bins (",self.nbins,") too large for the number of frequency channels (",self.nofChannelsUsed,"):"
             self.nbins=max(self.nofChannelsUsed/8,2)
@@ -341,7 +390,7 @@ class FitBaseline(tasks.Task):
             self.small_spectrum[self.plot_antenna].plot(xvalues=self.freqs,clf=False,color="red")
             plt.subplot(2,1,1)
             self.small_spectrum[...].plot(xvalues=self.freqs,clf=False,title="Downsampled Spectra (all antennas)")
-            self.plot_finish(name=self.__taskname__+"-donwsampled_spectrum"+self.plot_name)
+            self.plot_finish(name=self.__taskname__+"-downsampled_spectrum"+self.plot_name)
         #Normalize the spectrum to unity
         #self.meanspec=self.small_spectrum[...].mean()
         #Calculate RMS/amplitude for each bin
@@ -388,26 +437,61 @@ class FitBaseline(tasks.Task):
         #Calculate an estimate of the average RMS of the clean spectrum after baseline division
         self.ratio[...].copy(self.ratio,self.selected_bins[...],self.nselected_bins)
         meanrms=self.ratio[...,[0]:self.nselected_bins].meaninverse()
+
+        #Now some quality control: check if some antenna fits deviate from the average
+        if self.qualitycontrol and self.nofAntennas>2:
+            self.goodantennas=range(self.nofAntennas)
+            self.fitted_bins_y.fill(0.0)
+            self.fitted_bins_x.fillrange(self.numin,float(self.numax-self.numin)/(self.nbins-1))
+            self.small_average_spectrum.fill(0.0)
+            if self.fittype=="POLY":
+                self.fitted_bins_y[...].polynomial(self.fitted_bins_x,self.coeffs[...],self.powers[...])
+            else:
+                self.fitted_bins_y[...].bsplinecalc(self.fitted_bins_x,self.coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
+
+            keep_iterating=True
+            nbandantennas_old=0; iteration=0
+            while keep_iterating:
+                iteration+=1
+                self.fitted_bins_y[self.goodantennas,...].addto(self.small_average_spectrum)
+                self.flattened_bins_y.copy(self.fitted_bins_y)
+                self.flattened_bins_y /= self.small_average_spectrum
+                self.ant_mean=cr.hArray(self.flattened_bins_y[...].mean())
+                self.ant_rms=cr.hArray(self.flattened_bins_y[...].stddev(self.ant_mean.vec()))
+                self.ant_mean_mean=self.ant_mean[self.goodantennas].mean().val()
+                self.ant_mean_rms=self.ant_rms[self.goodantennas].mean().val()
+                self.ant_rms_rms=self.ant_rms[self.goodantennas].stddev(self.ant_mean_rms).val()
+                self.ant_rms.Find('outside',self.ant_mean_rms-self.nsigma*self.ant_rms_rms,self.ant_mean_rms+self.nsigma*self.ant_rms_rms)
+                self.badantennas=list(self.ant_rms.Find('outside',self.ant_mean_rms-self.nsigma*self.ant_rms_rms,self.ant_mean_rms+self.nsigma*self.ant_rms_rms))
+                self.nbadantennas = len(self.badantennas)
+                keep_iterating = not nbandantennas_old == self.nbadantennas
+                nbandantennas_old = self.nbadantennas
+                self.goodantennas = [i  for i in range(self.nofAntennas) if not i in self.badantennas]
+                if self.nbadantennas>0:
+                    print "#FITBASELINE - qualitycontrol iteration #",iteration,"-",self.nbadantennas,"bad antennas found:",self.badantennas
+                else: 
+                    print "#FITBASELINE - qualitycontrol iteration #",iteration,"- all antennas are good."
+            print "#FITBASELINE - end qualitycontrol."
+            
+            if self.doplot:
+                plt.clf()
+                plt.subplots_adjust(hspace=0.4)
+                plt.subplot(2,1,2)
+                self.clean_bins_y[self.plot_antenna,0:self.nselected_bins[self.plot_antenna]].plot(xvalues=self.clean_bins_x[0,0:self.nselected_bins[self.plot_antenna]],logplot=False,color="blue",clf=False,title="Fitted baseline to downsampled spectrum (antenna #"+str(self.plot_antenna)+")")
+                self.fitted_bins_y[self.plot_antenna].plot(clf=False,color="red",logplot=False)
+                plt.subplot(2,1,1)
+                self.clean_bins_y[...,[0]:self.nselected_bins].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins],logplot=False,clf=False,title="Fitted baseline to downsampled spectrum (all antennas)")
+                self.fitted_bins_y[...].plot(clf=False,logplot=False)
+                self.plot_finish("Plotted downsampled and cleaned spectrum with baseline fit.",name=self.__taskname__+"-clean_spectrum"+self.plot_name);
+                if wasinteractive: plt.ion()
+                self.flattened_bins_y[self.goodantennas,...].plot(title="Log of Fitted spetcra divided by average of (log of) all spectra",logplot=False)
+                if self.badantennas: self.flattened_bins_y[self.badantennas,...].plot(clf=False,logplot=False,linestyle="-.")
+                plt.legend(self.goodantennas+self.badantennas,ncol=2,title="Antenna #",prop=matplotlib.font_manager.FontProperties(family="Helvetica",size=7))
+                self.plot_finish("Plotted fitted spectra of each antennas divided by average spectra of all antennas.",name=self.__taskname__+"-difference_spectrum"+self.plot_name);
+
         if self.verbose:
             print time.clock()-self.t0,"s: Done fitting baseline."
-        if self.doplot:
-            plt.clf()
-            plt.subplots_adjust(hspace=0.4)
-            plt.subplot(2,1,0)
-            self.clean_bins_y[self.plot_antenna,0:self.nselected_bins[self.plot_antenna]].plot(xvalues=self.clean_bins_x[0,0:self.nselected_bins[self.plot_antenna]],logplot=False,color="blue",clf=False,title="Fitted baseline to downsampled spectrum (antenna #"+str(self.plot_antenna)+")")
-            plt.subplot(2,1,1)
-            self.clean_bins_y[...,[0]:self.nselected_bins].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins],logplot=False,clf=False,title="Fitted baseline to downsampled spectrum (all antennas)")
-            self.clean_bins_y.fill(0.0)
-            if self.fittype=="POLY":
-                self.clean_bins_y[...,[0]:self.nselected_bins].polynomial(self.clean_bins_x[...,[0]:self.nselected_bins],self.coeffs[...],self.powers[...])
-            else:
-                self.clean_bins_y[...,[0]:self.nselected_bins].bsplinecalc(self.clean_bins_x[...,[0]:(self.nselected_bins)],self.coeffs[...],self.numin_val_i,self.numax_val_i,self.splineorder+1)
-            plt.subplot(2,1,0)
-            self.clean_bins_y[self.plot_antenna,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,color="red",logplot=False)
-            plt.subplot(2,1,1)
-            self.clean_bins_y[...,[0]:self.nselected_bins-1].plot(xvalues=self.clean_bins_x[...,[0]:self.nselected_bins-1],clf=False,logplot=False)
-            self.plot_finish("Plotted downsampled and cleaned spectrum with baseline fit.",name=self.__taskname__+"-clean_spectrum"+self.plot_name);
-            if wasinteractive: plt.ion()
+
         self.spectrum.setHeader(FitBaseline=self.ws.getParameters())
         if self.save_output:
             self.spectrum.writeheader(self.filename)

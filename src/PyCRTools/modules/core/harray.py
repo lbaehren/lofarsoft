@@ -1224,7 +1224,7 @@ def hArray_Find(self,operator,threshold1=None,threshold2=None):
     elif threshold2 == None:
         n = hArray_Find_functions[operator][0](self,threshold1)
     else:
-        n = hArray_Find_functions["operator"][0](self,threshold1,threshold2)
+        n = hArray_Find_functions[operator][0](self,threshold1,threshold2)
 
     #Now create a fitting vector or hArray with the right size
     if type(self) in hAllVectorTypes:

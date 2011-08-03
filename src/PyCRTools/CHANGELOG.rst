@@ -15,6 +15,14 @@
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
+- cr_event.py loops over polarizations as well 
+- additional flagging in fitbaseline and cr_event to check for unusual spectra
+
+2011-08-03 - Rev 8224
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
 - cr_event.py now: 
    - loops over files
    - adheres to new sub-directory structure TIMESTAMP/pol/station/

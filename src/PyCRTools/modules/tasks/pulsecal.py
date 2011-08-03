@@ -523,6 +523,21 @@ class DirectionFitTriangles(tasks.Task):
         timelags = dict(doc="hArray with the measured time lags for each event and each antenna",
                         unit="s"),
 
+        good_positions = dict(doc="hArray with Cartesian coordinates of the antenna positions for good antennas",
+                              default=lambda self:cr.hArray(properties=self.positions),
+                              unit="m",output=True),
+
+        n_timelags = dict(doc="Number of time lags provided",default=lambda self:len(self.timelags),output=True),
+
+        n_good_antennas = dict(doc="Number of good antenna time lags",default=lambda self:len(self.timelags),output=True),
+
+        good_timelags = dict(doc="hArray the measured time lags for each event and all good antennas",
+                              default=lambda self:cr.hArray(properties=self.timelags),
+                              unit="s",output=True),
+
+        good_antennas = dict(doc="List of integer indices pointing to the good antennas in the original list",
+                             default=lambda self:range(n_timelags),output=True),
+
         expected_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),
                                 "Exact time lags expected for each antenna for a given source position",
                                 unit="s"),
@@ -632,6 +647,9 @@ class DirectionFitTriangles(tasks.Task):
 
         error_tolerance=sc.p_(1e-10,
                               "Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
+        
+        max_delay=dict(default=15*10**-9,
+                       doc="Maximum allowed delay. If a delay for an antenna is larger than this it will be flagged and igrnored"),
 
         ngood=sc.p_(0,
                     "Number of good triangles (i.e., without closure errors)",
@@ -689,7 +707,7 @@ class DirectionFitTriangles(tasks.Task):
         self.cabledelays -= self.cabledelays[self.refant]
         if self.doplot:
             cr.plt.clf()
-            cr.plt.polar(0,90,marker=".",color="white")
+            cr.plt.polar(0,90,marker=".",color="white") # Note, we are fooling the system, .polar plots actually phi, radius and not Az,El.
             if isinstance(self.direction_guess,(tuple,list)) and len(self.direction_guess)==2:
                 cr.plt.polar((90-self.direction_guess[0])*deg,90-self.direction_guess[1],marker="o",color="blue",label=self.direction_guess_label,markersize=10)
 
