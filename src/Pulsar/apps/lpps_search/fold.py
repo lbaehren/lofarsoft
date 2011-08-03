@@ -177,6 +177,8 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     metadata = kwargs.get('metadata', None)
     no_fold = kwargs.get('no_fold', False)
 
+    print '=' * 70
+    print 'START SIFTING THE ACCELERATION CANDIDATES'
     # Check that the directories are available and that the output directory
     # is empty and writable.
     cand_dir = os.path.abspath(canddir)
@@ -238,6 +240,8 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     sifting.write_candlist(sifted_candidates, candidates_out_file)
 
     if not no_fold:
+        print '=' * 70
+        print 'FOLDING THE ACCELERATION CANDIDATES'
         # using knowledge about the directory layout:
         subband_globpattern = os.path.join(subb_dir, basename + '.sub[0-9]???')
 
@@ -259,6 +263,7 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
             except Exception, e:
                 print 'Cannot make per core folding output directories'
                 raise
+        sys.stdout.flush()
         pids = []
         for i in range(n_cores):
             script_filename = os.path.join(fold_dir, 'CORE_%d' % i, 'script.sh')

@@ -802,6 +802,8 @@ class SearchRun(object):
         
         ddplan_i = -1 
         for ddplan, n_cores_to_use in self.annotated_ddplans:
+            print '=' * 70
+            print 'DEDISPERSING FROM DM %.2f TO DM %.2f' % (ddplan.lodm, ddplan.get_dms()[-1])
             ddplan_i += 1
             # Note : Check whether data needs downsampling (and how GBT does
             # it).
