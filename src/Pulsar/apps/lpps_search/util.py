@@ -6,6 +6,7 @@ in the LPPS search, folding and singlepulse scripts.
 import subprocess
 import os
 import stat
+import sys
 
 # ----------------------------------------------------------------------------
 # -- Some useful Exception classes                                          --
@@ -58,18 +59,24 @@ def get_command(program, options_dict, parameters):
     cmd = ' '.join(cmd)
     return cmd
 
-def run_command(program, options_dict, parameters):
+def run_command(program, options_dict, parameters, *args, **kwargs):
     '''
     Construct and run system calls using subprocess module.
 
     Note: calls to subprocess.Popen use shell=True (as the commandlines can
     then easily be logged).    
     '''
+    stdout = kwargs.get('stdout', sys.stdout)
+    stderr = kwargs.get('stderr', sys.stderr)
+
     cmd_ln = get_command(program, options_dict, parameters)
     # TODO : consider doing something to the return codes
+    print '-' * 70
     print 'Running command :', cmd_ln
-    p = subprocess.Popen(cmd_ln, shell=True)
+    stdout.flush()
+    p = subprocess.Popen(cmd_ln, shell=True, stderr=stderr, stdout=stdout)
     output, error = p.communicate()
+    print '-' * 70
     return p.returncode
 
 # ----------------------------------------------------------------------------
