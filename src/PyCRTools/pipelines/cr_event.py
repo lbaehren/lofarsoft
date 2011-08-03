@@ -54,7 +54,7 @@ results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for
 
 Command line use:
 
-$PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-*.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --lora_logfile /Users/falcke/LOFAR/work/data/LORAtime4 --search_window_width=5000 --nsigma=3 -q -R
+$PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-*.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=5000 --nsigma=3 -q -R
 ------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
@@ -185,8 +185,8 @@ for current_polarization in polarizations:
     #    full_filename=os.path.expandvars(os.path.expanduser(filename))
         (filedir,filename)=os.path.split(full_filename)
 
-        if not lora_logfile:
-            lora_logfile=os.path.join(filedir,"LORAtime4")
+        if not lora_logfile or not os.path.isfile(lora_logfile):
+            lora_logfile=os.path.join(loradir,"LORAtime4")
 
         (rootfilename,fileextensions)=os.path.splitext(filename)
 
@@ -259,7 +259,7 @@ for current_polarization in polarizations:
         else:
             print "WARNING: No LORA logfile found - ",lora_logfile
 
-        lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=filedir,checkSurroundingSecond=True,silent=False)
+        lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
         lora_direction=False; lora_energy=False; lora_core=False
         if lora_event_info:
