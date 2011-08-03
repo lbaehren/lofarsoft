@@ -1,3 +1,15 @@
+2011-08-03 - Rev 8230
+=====================
+
+  :Author: Sander ter Veen <s.terveen@astro.ru.nl>
+
+- cr_event.py now:
+   - specify lora directory seperate from filedir (defaults to altair directories) (--loradir)
+
+- tasks/plotfootprint.py 
+   - runs with specification of filefilter and polarisation only
+   - output plot by default in eventname/pol?/ directory
+
 2011-08-03 - Rev 8224
 =====================
 

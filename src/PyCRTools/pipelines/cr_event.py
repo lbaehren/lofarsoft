@@ -54,7 +54,7 @@ results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for
 
 Command line use:
 
-$PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-*.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --lora_logfile /Users/falcke/LOFAR/work/data/LORAtime4 --search_window_width=5000 --nsigma=3 y-q --polarization=0 
+$PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-*.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile=LORAtime4 --search_window_width=5000 --nsigma=3 y-q --polarization=0 
 ------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
@@ -93,6 +93,7 @@ parser = OptionParser(usage=usage)
 
 parser.add_option("-o","--outputdir", type="str", default="",help="directory where to store the final results (will be stored in a subdirectory filename.dir/ within that directory)")
 parser.add_option("-L","--lora_logfile", type="str", default="LORAtime4",help="LORA logfile (LORAtime4)")
+parser.add_option("--loradir", type="str", default="/data/VHECR/LORAtriggered/LORA/",help="Directory to find LORA information")
 parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=0,help="either 0 or 1 for selecting even or odd antennas")
 parser.add_option("-t","--nsigma", type="float", default=4.0,help="Threshold for identifying peaks")
@@ -146,6 +147,7 @@ else:
     filefilter = args
     lofarmode = options.lofarmode
     lora_logfile=options.lora_logfile
+    loradir=options.loradir
     outputdir = options.outputdir
     polarization = options.polarization
     timestamp = options.timestamp
@@ -179,8 +181,9 @@ for full_filename in files:
 #    full_filename=os.path.expandvars(os.path.expanduser(filename))
     (filedir,filename)=os.path.split(full_filename)
 
-    if not lora_logfile:
-        lora_logfile=os.path.join(filedir,"LORAtime4")
+    if not lora_logfile or not os.path.isfile(lora_logfile):
+        lora_logfile=os.path.join(loradir,"LORAtime4")
+
 
     (rootfilename,fileextensions)=os.path.splitext(filename)
 
@@ -253,7 +256,7 @@ for full_filename in files:
     else:
         print "WARNING: No LORA logfile found - ",lora_logfile
 
-    lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=filedir,checkSurroundingSecond=True,silent=False)
+    lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
     lora_direction=False; lora_energy=False; lora_core=False
     if lora_event_info:
