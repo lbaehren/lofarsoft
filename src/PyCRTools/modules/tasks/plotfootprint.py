@@ -1,5 +1,4 @@
-"""
-A tool to plot the footprint of a cosmic ray event with the superterp as background.
+"""A tool to plot the footprint of a cosmic ray event with the superterp as background.
 
 """
 
@@ -37,6 +36,12 @@ def gatherresults(filefilter,pol):
 
 
         for datadir in datadirs:
+            if not os.path.isfile(os.path.join(datadir,"results.py")):
+                continue
+            resfile=open(os.path.join(datadir,"results.py"))
+            if "nan" in resfile.read():
+                print "WARNING nan found. skipping file", resfile.name
+                continue
             res={}
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
@@ -51,6 +56,8 @@ def gatherresults(filefilter,pol):
 #timelags[res["polarization"]].extend(stationtimelags)
             timelags[res["polarization"]].extend(res["pulses_timelags_ns"])
 
+    if "res" not in dir():
+        return None
     antset=res["ANTENNA_SET"]
     if "TIME" not in res.keys():
         assert False
@@ -150,8 +157,8 @@ class plotfootprint(tasks.Task):
         plotnames={default:False,doc:"plot names of dipoles"},
         title=p_(lambda self:obtainvalue(self.results,"title"),doc="Title for the plot (e.g., event or filename)"),
         newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        plot_finish={default: lambda self:cr.plotfinish(doplot=False,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
-        plot_name={default:"",doc:"Extra name to be added to plot filename."},
+        plot_finish={default: lambda self:cr.plotfinish(doplot=True,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        plot_name={default:"footprint",doc:"Extra name to be added to plot filename."},
         plotlegend={default:False,doc:"Plot a legend"},
         positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
         NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
@@ -231,7 +238,8 @@ class plotfootprint(tasks.Task):
                 print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
         if self.title:
             cr.plt.title(self.title)
-        cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.scolors,marker=self.lofarshape)
+        if self.positions:
+            cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.scolors,marker=self.lofarshape)
         cbar=cr.plt.colorbar()
         if self.plotlora:
             if isinstance(self.lorapower,(list)):
@@ -272,4 +280,6 @@ class plotfootprint(tasks.Task):
         cr.plt.xlabel("meters East")
         cr.plt.ylabel("meters North")
         cr.plt.text(100,-220,"Size denotes signal power")
-        self.plot_finish(name=self.__taskname__+self.plot_name)
+        if self.filefilter:
+            self.plot_name=self.filefilter+"/"+"pol"+str(self.pol)+"/"+self.plot_name
+        self.plot_finish(filename=self.plot_name)
