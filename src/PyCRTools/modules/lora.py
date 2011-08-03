@@ -3,11 +3,13 @@
 import pycrtools as cr
 
 def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, samplenumber, clockoffset = 1e4, blocksize = 2**16):
-    """Calculates block number corresponding to LORA timestamp.
-    The LORA timestamp is given in *lora_seconds* and *lora_nanoseconds*.
-    From the LOFAR TBB event you need the *starttime* in seconds, the
-    corresponding *samplenumber*, the *clockoffset* between LORA and LOFAR.
-    Finally you need the *blocksize* used for reading the LOFAR data.
+    """Calculates block number corresponding to LORA timestamp and the
+    sample number within that block (i.e. returns a tuple
+    (``blocknumber``,``samplenumber``)).  The LORA timestamp is given
+    in *lora_seconds* and *lora_nanoseconds*.  From the LOFAR TBB
+    event you need the *starttime* in seconds, the corresponding
+    *samplenumber*, the *clockoffset* between LORA and LOFAR.  Finally
+    you need the *blocksize* used for reading the LOFAR data.
     """
 
     lora_samplenumber = (lora_nanoseconds - clockoffset) / 5
@@ -16,8 +18,9 @@ def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, sample
 
     if value < 0:
         raise ValueError("Event not in file.")
+        
+    return (int(value / blocksize),int(value % blocksize))
 
-    return int(value / blocksize)
 
 def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurroundingSecond=True,silent=False):
     """ Reads in a file from LORA and returns a dictionary with important parameters. Az(imuth) is defined in degrees from North through East. El(evation) is in degrees from the horizon upwards.

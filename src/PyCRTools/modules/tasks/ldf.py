@@ -8,22 +8,21 @@ last edited July 29th
 import pycrtools as cr
 import pycrtools.tasks as tasks
 import pytmf
-from pycrtools.tasks.shortcuts import *
 
 class ldf(tasks.Task):
 
     parameters = dict(
-              positions={doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit:"m"},
-              signalsNS={doc:"hArray of dimension [NAnt,1] with signals in antennas, polNS",unit:"a.u."},
-              signalsEW={doc:"hArray of dimension [NAnt,1] with signals in antennas, polEW",unit:"a.u."},
-              signaluncertaintiesNS={default:None, doc:"hArray of dimension [NAnt,1], signaluncertainties in NS", unit:"a.u."},
-              signaluncertaintiesEW={default:None, doc:"hArray of dimension [NAnt,1], signaluncertainties in EW", unit:"a.u."},
-              loracore = {doc:"hArray of core position [x,y,z] as provided by Lora ",unit:"m"},
-              loradirection = {doc:"hArray of shower direction [az, el] as provided by Lora. Azimuth is eastwards from north and elevation is up from horizon.", unit:"degrees"},
-              loracoreuncertainties = {default:cr.hArray([1.,1.,0.]),doc:"hArray of uncertainties of core position [ex,ey,cov]",unit:"m"},
-              loradirectionuncertainties = {default:cr.hArray([1.,1.,0.]),doc:"hArray of uncertainties of direction [eAz,eEl,cov]",unit:"degrees"},
-              eventid = {default:None, doc:"EventId for LOFAR Event"},
-              logplot={default:True, doc:"Draw y-axis logarithmically"}
+              positions=dict(doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit="m"),
+              signalsNS=dict(doc="hArray of dimension [NAnt,1] with signals in antennas, polNS",unit="a.u."),
+              signalsEW=dict(doc="hArray of dimension [NAnt,1] with signals in antennas, polEW",unit="a.u."),
+              signaluncertaintiesNS=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in NS", unit="a.u."),
+              signaluncertaintiesEW=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in EW", unit="a.u."),
+              loracore = dict(doc="hArray of core position [x,y,z] as provided by Lora ",unit="m"),
+              loradirection = dict(doc="hArray of shower direction [az, el] as provided by Lora. Azimuth is eastwards from north and elevation is up from horizon.", unit="degrees"),
+              loracoreuncertainties = dict(default=cr.hArray([1.,1.,0.]),doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
+              loradirectionuncertainties = dict(default=cr.hArray([1.,1.,0.]),doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
+              eventid = dict(default=None, doc="EventId for LOFAR Event"),
+              logplot=dict(default=True, doc="Draw y-axis logarithmically")
               )
     
     ## Functions used ##

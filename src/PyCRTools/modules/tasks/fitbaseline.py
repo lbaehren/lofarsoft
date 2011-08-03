@@ -455,9 +455,9 @@ CalcBaselineParameters.update(dict(
 
     fittype = dict(default=lambda self:'BSPLINE' if self.FitParameters==None else self.FitParameters["fittype"]),
 
-    work_baseline = dict(doc="Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
-                         default=lambda self:cr.hArray(cr.asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, xvalues=self.frequency),
-                         export=False),
+#    work_baseline = dict(doc="Wrapper to baseline with dimension ``[nofAntennas,nchannels]`` even for a single spectrum.",
+#                         default=lambda self:cr.hArray(cr.asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, #xvalues=self.frequency),
+#                         export=False),
 
     FitParameters = dict(doc="Parameters of the baseline fitting routine.",
                          default=lambda self: self.spectrum.getHeader("FitBaseline") if self.spectrum.hasHeader("FitBaseline") else None),
@@ -665,6 +665,8 @@ class CalcBaseline(tasks.Task):
         else:
             self.spectrum.par.baseline=self.baseline
 
+        self.work_baseline = cr.hArray(cr.asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, xvalues=self.frequency)
+
         if self.fittype=="POLY":
 #            self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial(self.work_frequency[...,[self.numin_i]:[self.numax_i]],self.work_coeffs[...],self.powers[...])
             self.work_baseline[...,[self.numin_i]:[self.numax_i]].polynomial(self.frequency[self.numin_i:self.numax_i],self.work_coeffs[...],self.powers[...])
@@ -745,7 +747,7 @@ ApplyBaselineParameters = dict(
 #     'work_frequency',
      'work_spectrum',
      'baseline',
-     'work_baseline',
+#     'work_baseline',
      'filename',
      'save_output',
      'numax_i',
@@ -855,6 +857,7 @@ class ApplyBaseline(tasks.Task):
         if hasattr(self.spectrum.par,"baseline") and self.baseline==None:
             self.baseline=self.spectrum.par.baseline
 
+        self.work_baseline = cr.hArray(cr.asvec(self.baseline), dimensions=[self.nofAntennas, self.nofChannels], properties=self.baseline, xvalues=self.frequency)
         if self.apply_baseline:
             self.work_spectrum *= self.work_baseline
 

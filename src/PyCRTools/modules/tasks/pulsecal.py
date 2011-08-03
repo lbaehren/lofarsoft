@@ -530,6 +530,10 @@ class DirectionFitTriangles(tasks.Task):
         measured_geometric_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),
                                           "Time lags minus cable delay = pure geometric delay if no error",
                                           unit="s"),
+        
+        direction_guess = dict(default=False,doc="If a tuple of two numbers (azimut, elevation) then this is an initial guess for the direction (currently only for plotting).",unit="degree"),
+
+        direction_guess_label = dict(default="direction guess",doc="A label for plotting indicating where the direction guess was coming from."),
 
         cabledelays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Cable Delays",fill=0),
                           "Know (fixed) cable delays that one needs to correct measured delays for.",
@@ -686,6 +690,8 @@ class DirectionFitTriangles(tasks.Task):
         if self.doplot:
             cr.plt.clf()
             cr.plt.polar(0,90,marker=".",color="white")
+            if isinstance(self.direction_guess,(tuple,list)) and len(self.direction_guess)==2:
+                cr.plt.polar((90-self.direction_guess[0])*deg,90-self.direction_guess[1],marker="o",color="blue",label=self.direction_guess_label,markersize=10)
 
         for it in range(self.maxiter):
             #Calculate directions from all triangles
@@ -992,7 +998,9 @@ class PlotAntennaLayout(tasks.Task):
         newfigure = sc.p_(True,
                        "Create a new figure for plotting for each new instance of the task."),
 
-        plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
+        plot_clf = dict(default=True,doc="Clean window before plotting?"),
+
+        plot_finish = dict(default=lambda self:cr.plotfinish(doplot=True,plotpause=False),
                            doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
 
         plot_name = dict(default="",
@@ -1040,9 +1048,9 @@ class PlotAntennaLayout(tasks.Task):
         else:
             raise TypeError("PlotAntennaLayout: parameter 'colos' needs to be string or an hArray thereof.")
 
-        if self.newfigure and not self.figure:
+        if self.newfigure and not hasattr(self,"figure"):
             self.figure=cr.plt.figure()
-        cr.plt.clf()
+        if self.plot_clf: cr.plt.clf()
         if self.title:
             cr.plt.title(self.title)
         cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.colors)

@@ -1,3 +1,21 @@
+2011-08-03 - Rev 8224
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- cr_event.py now: 
+   - loops over files
+   - adheres to new sub-directory structure TIMESTAMP/pol/station/
+   - uses information from lora and saves it in results.py
+   - has a couple of bugs fixed (e.g. baseline mutiplication)
+   - new parameter nsigma for peak finding
+
+- make_ldf2 is a slightly cleaner version for ldf plotting, making use of
+the new information in results.py and using the new directory
+structure   
+
+- loraTimestampToBlocknumber  now returns block AND samplenumber as a tuple
+
 2011-08-02 - Rev 8218
 =====================
 
