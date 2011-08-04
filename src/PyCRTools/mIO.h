@@ -27,9 +27,6 @@
 #include "mImaging.h"
 #include "mModule.h"
 
-#include "IO/LopesEventIn.h"
-#include "IO/LOFAR_TBB.h"
-#include <Calibration/CalTableReader.h>
 
 // ________________________________________________________________________
 //                                                       AERA include files
@@ -40,34 +37,6 @@
 #include "aera/Data/LocalStation.h"
 
 #endif /* PYCRTOOLS_WITH_AERA */
-
-
-// ========================================================================
-//  Definitions
-// ========================================================================
-
-typedef CR::DataReader* DataReaderPointer; // Used in wrapper preprocessor
-typedef CR::DataReader CRDataReader; // Used in wrapper preprocessor
-
-template<class T> inline T hfcast(CR::DataReader v){return hfcast<T>((HInteger)((void*)&v));}
-template<> inline HString hf2string(CR::DataReader v){return hf2string((HInteger)((void*)&v));}
-
-//========================================================================
-//                             I/O Functions
-//========================================================================
-
-HIntPointer hOpenFile(HString Filename);
-void hCloseFile(HIntPointer iptr);
-
-HString hgetFiletype(HString filename);
-HString hgetFileExtension(HString filename);
-
-void hFileSummary(CRDataReader & dr);
-CRDataReader& hFileOpen(HString Filename);
-HPyObject hFileGetParameter(CRDataReader &dr, HString key);
-bool hFileSetParameter(CRDataReader &dr, HString key, HPyObjectPtr pyob);
-HPyObjectPtr hCalTable(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
-std::vector<HNumber> hCalTableVector(HString filename, HString keyword, HInteger date, HPyObjectPtr pyob);
 
 
 // ========================================================================

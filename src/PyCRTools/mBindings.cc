@@ -363,15 +363,7 @@ BOOST_PYTHON_MODULE(_hftools)
 // ________________________________________________________________________
 //                                                                       IO
 
-  def("hgetFiletype",hgetFiletype);
-  def("hgetFileExtension",hgetFileExtension);
-
 #include "../../../../build/pycrtools/mIO.def.h"
-
-  class_<CR::DataReader>("DataReader")
-    .def("get",&hFileGetParameter)
-    .def("summary",&hFileSummary)
-    ;
 
 #ifdef PYCRTOOLS_WITH_AERA
   class_<AERA::Datareader>("AERADatareader")

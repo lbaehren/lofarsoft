@@ -370,10 +370,6 @@ inline bool operator<=(HComplex c, HComplex i) {return ( real(c) <= real(i) );}
 //========================================================================
 
 void hInit();
-HString hgetFiletype(HString filename);
-HString hgetFileExtension(HString filename);
-
-
 
 //========================================================================
 //                 Casting & Conversion Functions

@@ -15,9 +15,6 @@ from plot import *
 from math import *
 from utils import *
 
-# Import datareader class overloaded methods
-from datareader import *
-
 # Import structure modules
 from workspaces import *
 
