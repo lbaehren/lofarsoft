@@ -757,13 +757,15 @@ class DirectionFitTriangles(tasks.Task):
                 self.delta_delays.set(self.delayindex[:self.ngooddelays],0.0)
             self.residual_delays+=self.delta_delays
 
+            self.ws.updateParameter("meandirection_spherical",forced=True)
+            self.ws.updateParameter("meandirection_azel_deg",forced=True)
+            self.ws.updateParameter("meandirection_azel",forced=True)
+
             if self.verbose:
                 print "------------------------------------------------------------------------"
-                badantennas=allantennas.difference(set(self.delayindex[:self.ngooddelays])) if self.ngooddelays>0 else allantennas
+                badantennas=allantennas.difference(set(cr.asvec(self.delayindex[:self.ngooddelays]))) if self.ngooddelays>0 else allantennas
                 if self.maxiter>1:
                     print "Iteration #",it,", rms factor =",rfac
-                self.ws.updateParameter("meandirection_spherical",forced=True)
-                self.ws.updateParameter("meandirection_azel_deg",forced=True)
                 print "Triangle Fit Az/EL -> ", self.meandirection_azel_deg,"deg"
                 print "Triangle Fit Az/EL -> ", self.meandirection
                 print "Mean delta delays ["+self.unitname+"] =",self.delta_delays_mean/self.unitscalefactor,"+/-",self.delta_delays_rms/self.unitscalefactor," (number bad antennas =",self.NAnt-self.ngooddelays,")"

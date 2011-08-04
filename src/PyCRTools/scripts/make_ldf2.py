@@ -13,6 +13,8 @@ import sys
 #execfile PYP+'/scripts/make_ldf2.py'
 topdir='~/LOFAR/work/results'
 events=["VHECR_LORA-20110716T094509.665Z"]
+events=["VHECR_LORA-20110714T174749.986Z"]
+
 eventdirs=cr.listFiles([os.path.join(topdir,event) for event in events])
 
 for eventdir in eventdirs:
@@ -23,7 +25,7 @@ for eventdir in eventdirs:
     positions={0:[],1:[]}
     positions2={0:[],1:[]}
     ndipoles={0:0,1:0}
-    pol=0
+    pol=1
 
     datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 #    datadirs.remove('/Users/falcke/LOFAR/work/results/VHECR_LORA-20110716T094509.665Z/pol1/005')

@@ -541,6 +541,8 @@ for current_polarization in polarizations:
         timeseries_data_cut_pulse_width=12
         timeseries_data_cut_to_pulse=hArray(float,[ndipoles,timeseries_data_cut_pulse_width],properties=pulse.timeseries_data_cut)
         timeseries_data_cut_to_pulse_offsets=hArray(int,ndipoles,fill=(maxima_power.maxx+0.5-timeseries_data_cut_pulse_width/2))
+        timeseries_data_cut_to_pulse_delays=hArray(float,copy=timeseries_data_cut_to_pulse_offsets)
+        timeseries_data_cut_to_pulse_delays *= sample_interval
         timeseries_data_cut_to_pulse[...].copy(pulse.timeseries_data_cut[..., timeseries_data_cut_to_pulse_offsets:timeseries_data_cut_to_pulse_offsets+timeseries_data_cut_pulse_width])
         
 
@@ -554,7 +556,8 @@ for current_polarization in polarizations:
         maxima_cc=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-crosscorr")
 
-        time_lags=maxima_power.lags+maxima_cc.lags
+        #The actual delays are those from the (rounded) peak locations plus the delta form the cross correlation
+        time_lags=(timeseries_data_cut_to_pulse_delays.vec()+maxima_cc.lags)
         
         print "Time lag [ns]: ", time_lags 
         print " "
