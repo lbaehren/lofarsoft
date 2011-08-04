@@ -83,6 +83,11 @@ set (DAL_VERBOSE_CONFIGURE ${DAL_VERBOSE_CONFIGURE} CACHE BOOL
 set (DAL_WITH_MYSQL ${DAL_WITH_MYSQL} CACHE BOOL
   "Build with support for MySQL database?")
 
+## === WCSLIB ======================================================================
+
+set (WCSLIB_PYTHON_WRAPPER ${WCSLIB_PYTHON_WRAPPER} CACHE BOOL
+  "Generate Python wrapper for WCSLIB?")
+
 ## === RM Synthesis =============================================================
 
 set (RM_ENABLE_ITPP ${RM_ENABLE_ITPP} CACHE BOOL

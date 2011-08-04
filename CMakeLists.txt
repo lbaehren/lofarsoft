@@ -79,6 +79,8 @@ option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                NO 
 option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"        NO  )
 option (DAL_WITH_MYSQL         "Build with support for MySQL database?"      NO  )
 
+option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
+
 option (RM_ENABLE_ITPP       "Enable using IT++ library?"                  NO  )
 option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"             YES )
 
