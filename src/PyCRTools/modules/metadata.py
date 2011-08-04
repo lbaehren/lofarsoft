@@ -8,6 +8,10 @@ import numpy as np
 import struct
 import os
 import pycrtools as cr
+    
+    
+lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
+ITRFCS002=cr.hArray([3826577.109500000,461022.916000,5064892.758])
 
 def mapAntennasetKeyword(antennaset):
     """Ugly fix to map correct antenna names in input to wrong antenna names
@@ -784,8 +788,6 @@ def getAntennaPositions(station,antennaset,return_as_hArray=False):
     """
 
     itrfpos=getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=True)
-    lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
-    ITRFCS002=cr.hArray([3826577.09500000,461022.916010,5064892.767])
     returnpos=convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002)
 
     if not return_as_hArray:
@@ -931,7 +933,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
 
     return stationpos
 
-def convertITRFToLocal(itrfpos,refpos,reflonlat):
+def convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002):
     """.. todo:: Document :func:`~metadata.convertITRFToLocal`.
     """
 
@@ -943,6 +945,11 @@ def convertITRFToLocal(itrfpos,refpos,reflonlat):
     Arg0=cr.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
     Arg1=cr.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
     Arg2=cr.hArray([0.0,cos(lat),sin(lat)])
+    
+    #Arg0=cr.hArray([-0.1195950000,  -0.7919540000,   0.5987530000]) 
+    #Arg1=cr.hArray([0.9928230000,  -0.0954190000,   0.0720990000]) 
+    #Arg2=cr.hArray([0.0000330000,   0.6030780000,   0.7976820000])
+
 
     itrfpos.sub(refpos)
 
