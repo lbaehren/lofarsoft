@@ -41,8 +41,9 @@ for eventdir in eventdirs:
 
 
     print "Number of dipoles found:",ndipoles
-    
-    par["loracore"]=cr.hArray(res["pulse_core_lora"])
+
+    corepos=cr.hArray(res["pulse_core_lora"])
+    par["loracore"]=corepos
     par["loradirection"]=cr.hArray(res["pulse_direction_lora"])
     par["loraenergy"]=res["pulse_energy_lora"]
     ##ATTENTION: You cannot assume that you always have an identical list of antennas in both polarisations!!
@@ -55,8 +56,16 @@ for eventdir in eventdirs:
     par["signalsNS"]=cr.hArray(signal[pol])*100000.
     par["signalsEW"]=cr.hArray(signal[pol])*100000.
 
+    corepos3D=hArray(float,3,fill=corepos)
+    corepos3D[2]=par["positions"][0,2]
+
     cr.plt.clf()
-    cr.plt.subplot(1,2,1)
+    cr.plt.subplot(1,3,1)
     layout=cr.trun("PlotAntennaLayout",pardict=par,positions=par["positions"],colors=par["signalsEW"],sizes=par["signalsEW"],sizes_min=0,title="Pulse Strength Power",plotlegend=False,newfigure=False,plot_clf=False)
-    cr.plt.subplot(1,2,2)
+    cr.plt.plot(corepos[0],corepos[1],marker="x",color="blue",markersize=20,markeredgewidth=4)
+    cr.plt.subplot(1,3,2)
     ldf=cr.trun("ldf",pardict=par)
+    cr.plt.subplot(1,3,3)
+    dist=hArray(float,par["positions"].shape()[0])
+    dist.vectorseparation(corepos3D,par["positions"])
+    par["signalsEW"].plot(xvalues=dist,marker="o",linestyle='None',clf=False,logplot="y")

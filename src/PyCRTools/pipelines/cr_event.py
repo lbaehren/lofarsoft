@@ -169,12 +169,13 @@ else:
 
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
+timeseries_data_cut_pulse_width=12
 
 #------------------------------------------------------------------------
 plt.ioff()
 
 ########################################################################
-#Loop over all files and polarisations
+#Loop over all files and polarizations
 ########################################################################
 
 polarizations=[0,1] if polarization<0 else [polarization]
@@ -300,7 +301,7 @@ for current_polarization in polarizations:
                 ),
             FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
             CalcBaseline = dict(baseline=False), # Make sure baseline is recreated when the task is run a second time
-            LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=64,minpulselen=3),  #nisgma=7  
+            LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=128,minpulselen=3,maxlen=128,prepulselen=32),  #nisgma=7  
         #    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once
             DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
             ApplyBaseline=dict(rmsfactor=7)
@@ -538,7 +539,6 @@ for current_polarization in polarizations:
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-power")
 
-        timeseries_data_cut_pulse_width=12
         timeseries_data_cut_to_pulse=hArray(float,[ndipoles,timeseries_data_cut_pulse_width],properties=pulse.timeseries_data_cut)
         timeseries_data_cut_to_pulse_offsets=hArray(int,ndipoles,fill=(maxima_power.maxx+0.5-timeseries_data_cut_pulse_width/2))
         timeseries_data_cut_to_pulse_delays=hArray(float,copy=timeseries_data_cut_to_pulse_offsets)

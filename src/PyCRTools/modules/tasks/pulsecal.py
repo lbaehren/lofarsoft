@@ -140,7 +140,8 @@ class LocatePulseTrain(tasks.Task):
         self.start=self.indexlist[self.maxseq,0]
         self.end=self.indexlist[self.maxseq,1]
         self.cutlen=int(2**math.ceil(math.log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
-
+        self.update()
+        
         self.start-=self.prepulselen; self.end=self.start+self.cutlen
 
         if self.doplot:
