@@ -782,7 +782,7 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
     return;
   };
 
-  HComplex phase_fraction=HComplex(0.0,-CR::_2pi/full_size);
+  HComplex phase_fraction=HComplex(0.0,-(2*M_PI)/full_size);
   Iter it=vec;
   HInteger row=offset*blocklen, col=0;
   while (it!=vec_end) {
@@ -823,7 +823,7 @@ void HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const HInteger full_size
     return;
   };
 
-  HComplex phase_fraction=HComplex(0.0,-CR::_2pi/full_size);
+  HComplex phase_fraction=HComplex(0.0,-(2*M_PI)/full_size);
   Iter it=vec;
   HInteger row=offset*blocklen, col=0;
   while (it<vec_end) {

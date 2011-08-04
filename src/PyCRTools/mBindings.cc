@@ -53,11 +53,12 @@
 #include "mFFTW.h"
 #include "mFilter.h"
 #include "mFitting.h"
-#include "mImaging.h"
 #include "mIO.h"
 #include "mRF.h"
 #include "mEndPointRadiation.h"
 #include "mTBB.h"
+#include "legacy.h"
+#include "mImaging.h"
 
 // ========================================================================
 //

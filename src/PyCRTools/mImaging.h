@@ -29,14 +29,9 @@
 #include "mMath.h"
 #include "mModule.h"
 
-#include <Coordinates/CoordinateType.h>
-
-
 // ========================================================================
 //  Definitions
 // ========================================================================
-
-typedef CR::CoordinateType::Types CRCoordinateType;
 
 // ========================================================================
 //  Wrapper declarations

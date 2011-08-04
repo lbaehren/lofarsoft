@@ -24,9 +24,7 @@
 
 #include "core.h"
 #include "mArray.h"
-#include "mImaging.h"
 #include "mModule.h"
-
 
 // ________________________________________________________________________
 //                                                       AERA include files

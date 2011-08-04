@@ -75,8 +75,6 @@
 // ________________________________________________________________________
 //                                                       LOFAR header files
 
-#include <crtools.h>
-#include "Math/Constants.h"
 #include "pycrtools_config.h"
 
 using namespace std;
@@ -113,6 +111,7 @@ using namespace std;
 
 //-------------------------------------------
 
+typedef unsigned int uint;
 typedef int64_t longint; /* should be at least 64 bits */
 typedef H_NATIVE_WORD_SIZE HIntPointer; /* This should be an integer that has the same length as a Pointer*/
 

@@ -38,10 +38,9 @@
 // ========================================================================
 
 #include "core.h"
+#include "legacy.h"
 #include "mMath.h"
 #include "mImaging.h"
-
-#include "Math/VectorConversion.h"
 
 #include <tmf.h>
 
@@ -1014,7 +1013,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       for (k=Nfrequencies; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
-        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));
+        *it_im_inner += (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * delay));
         ++it_im_inner;
         ++it_fft;
         ++it_freq;
@@ -1113,7 +1112,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       for (k=Nfrequencies; k!=0; --k)
       {
         // Multiply by geometric weight and add to image
-        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * (*it_delays)));
+        *it_im_inner += (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * (*it_delays)));
         ++it_im_inner;
         ++it_fft;
         ++it_freq;
@@ -1245,7 +1244,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
         it_freq += *it_step;
 
         // Multiply by geometric weight and add to image
-        *it_im_inner += (*it_fft) * polar(1.0, CR::_2pi*((*it_freq) * delay));
+        *it_im_inner += (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * delay));
 
         // Set frequency channel step for next iteration
         ++it_step;
