@@ -23,9 +23,10 @@ for eventdir in eventdirs:
     positions={0:[],1:[]}
     positions2={0:[],1:[]}
     ndipoles={0:0,1:0}
+    pol=0
 
-#    datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol0"),"*"))
     datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
+#    datadirs.remove('/Users/falcke/LOFAR/work/results/VHECR_LORA-20110716T094509.665Z/pol1/005')
     for datadir in datadirs:
         print "    Processing data results directory:",datadir
         res={}
@@ -33,7 +34,7 @@ for eventdir in eventdirs:
         res=res["results"]
         antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
         positions2[res["polarization"]].extend(res["antenna_positions_ITRF_m"])
-        signal[res["polarization"]].extend(res["pulses_maxima_y"])
+        signal[res["polarization"]].extend(res["pulses_strength"])
         ndipoles[res["polarization"]]+=res["ndipoles"]
 
 
@@ -44,11 +45,13 @@ for eventdir in eventdirs:
     par["loraenergy"]=res["pulse_energy_lora"]
     ##ATTENTION: You cannot assume that you always have an identical list of antennas in both polarisations!!
 
-    par["positions"]=cr.metadata.get("AntennaPositions",antid[0],res["ANTENNA_SET"],return_as_hArray=True)
-    par["positions2"]=cr.hArray(float,[ndipoles[0],3],positions2[0],name="Antenna Positions",units="m")
+
+    par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],res["ANTENNA_SET"],return_as_hArray=True)
+    par["positions2"]=cr.hArray(float,[ndipoles[pol],3],positions2[pol],name="Antenna Positions",units="m")
     #par["signalsNS"]=cr.hArray(signal[1])
-    par["signalsNS"]=cr.hArray(signal[0])
-    par["signalsEW"]=cr.hArray(signal[0])
+    #par["signalsEW"]=cr.hArray(signal[0])
+    par["signalsNS"]=cr.hArray(signal[pol])
+    par["signalsEW"]=cr.hArray(signal[pol])
 
     cr.plt.clf()
     cr.plt.subplot(1,2,1)

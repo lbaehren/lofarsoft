@@ -260,6 +260,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterT fillvec, cons
   Example:
   vec=hArray(range(10))
   indx=hArray([2,4])
+  vec.set(indx,99)
   vec -> hArray(int, [10], fill=[0, 1, 99, 3, 99, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
 
   See also:
@@ -285,6 +286,47 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
     }
     ++itidx;
   };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Sets a certain element specified by an index to a constant value.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSet
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Vector of in which to set elements.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(index)()("Index  containing the positions of the elements to be set.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(val)()("Value to assign to the indexed elements.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vec.set(index,val) -> set element in vec at the positions given by index to value 'val'
+
+  Example:
+  vec=hArray(range(10))
+  indx=2
+  vec.set(indx,99)
+  vec -> hArray(int, [10], fill=[0, 1, 99, 3, 4, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
+
+  See also:
+  hFill, hCopy
+*/
+template <class Iter, class T>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HInteger index, const T val)
+{
+  // Sanity check
+  if (vec >= vec_end) ERROR_RETURN("Corrupted input vector");
+  if ((index<0) or (index>=vec_end-vec)) ERROR_RETURN("Index is too large or too small");
+
+  // Variables
+  Iter it;
+  IterValueType val_t=hfcast<IterValueType>(val);
+
+  *(vec + index)=val_t;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

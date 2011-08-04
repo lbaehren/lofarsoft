@@ -107,6 +107,8 @@ parser.add_option("-q","--nopause", action="store_true",help="Do not pause after
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot.")
 parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
+flag_delays = False
+
 #------------------------------------------------------------------------
 # Main input parameters
 #------------------------------------------------------------------------
@@ -557,7 +559,7 @@ for current_polarization in polarizations:
 
         (direction.total_delays*1e9).plot()
         (direction.delays_history*1e9)[1].plot(clf=False)
-        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [n]",title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
+        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
 
         if abs(direction.delta_delays_rms_history[0])>maximum_allowed_delay or abs(direction.delta_delays_mean_history[0])>maximum_allowed_delay:
@@ -568,11 +570,20 @@ for current_polarization in polarizations:
             print "#DirectionFitTriangles: ERROR!"
         else:
             print "#DirectionFitTriangles: OK!"
+            
+        print "---> Checking and flagging delays which are larger than +/-"+str(maximum_allowed_delay)
+        flagged_residual_delays=hArray(copy=direction.residual_delays)
+        flagged_delays=direction.residual_delays.Find('outside',-maximum_allowed_delay,maximum_allowed_delay)
+        if len(flagged_delays)>0 and flag_delays:
+            flagged_residual_delays.set(flagged_delays,0)
+            print "#Delay flagging - flagged these delays:",flagged_delays
+        else:
+            print "#Delay flagging - all delays seem OK."
+        flagged_cable_delays=flagged_residual_delays+direction.cabledelays
+
 
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
-
-        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors=hArray(maxima.lags),sizes=hArray(maxima_power.maxy),sizes_min=0,names=good_antennas_index,title="Time Lags in Station",plotlegend=True)
 
         trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_index,title="Delay errors in station",plotlegend=True)
 
@@ -584,7 +595,7 @@ for current_polarization in polarizations:
 
         #Beamform short data set first for inspection (and possibly for
         #maximizing later)
-        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=direction.total_delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=flagged_cable_delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
 
         #Use the above later also for maximizing peak Beam-formed timeseries
         #is in ---> bf.tbeams[bf.mainbeam]
@@ -607,7 +618,7 @@ for current_polarization in polarizations:
 
         print "---> Plotting full beam-formed data set"
         #Beamform full data set (not really necessary, but fun).
-        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=direction.total_delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=flagged_cable_delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
 
         ########################################################################
         #Data Analysis ... (to be expanded)
@@ -636,6 +647,15 @@ for current_polarization in polarizations:
         print "# Peak found at sample {0:8.2f} ({1:11.8f} ms = {2:d} ms + {3:9.5f} mus) with height {4:8.2f} units.".format(beam_maxima.maxx.val(),pulse_time_ms,int(pulse_time_ms),(pulse_time_ms%1)*1000,beam_maxima.maxy.val())
 
         ########################################################################
+        #Determinig the pulse strength in the shifted time series
+        #at the main peak location and plot
+        ########################################################################
+        pulses_strength=timeseries_power_shifted[...].elem(min(max(int(round(beam_maxima.maxx.val()-pulse.start)),0),pulse.cutlen-1))
+        
+        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors=hArray(maxima.lags),sizes=pulses_strength,sizes_min=0,names=good_antennas_index,title="Time Lags in Station",plotlegend=True)
+
+
+        ########################################################################
         #Preparing and writing results record
         ########################################################################
 
@@ -653,6 +673,7 @@ for current_polarization in polarizations:
             SAMPLE_NUMBER=tbb_samplenumber,
             BLOCK=block_number,
             pulse_predicted=sample_number,
+            pulse_offset=sample_number-beam_maxima.maxx.val(),
             BLOCKSIZE=blocksize,
             polarization=current_polarization,
             plotfiles=Pause.plotfiles,
@@ -661,7 +682,11 @@ for current_polarization in polarizations:
             antennas=good_antennas,
             antenna_positions_XYZ_m=list(antenna_positions.vec()),
             antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
+            flagged_delays=list(flagged_delays.vec()),
+            flagged_cable_delays=list(flagged_cable_delays.vec()),
             bad_antennas=bad_antennas,
+            pulse_location=beam_maxima.maxx.val(),
+            pulses_strength=list(pulses_strength.vec()),
             pulses_maxima_x=list(maxima_power.maxx),
             pulses_maxima_y=list(maxima_power.maxy),
             npeaks_found=pulse.npeaks,

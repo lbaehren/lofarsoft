@@ -10,13 +10,18 @@
    - runs with specification of filefilter and polarisation only
    - output plot by default in eventname/pol?/ directory
 
-2011-08-03 - Rev 8224
+2011-08-03 - Rev 8233
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
 - cr_event.py loops over polarizations as well 
-- additional flagging in fitbaseline and cr_event to check for unusual spectra
+- additional flagging in fitbaseline and cr_event to check for unusual
+  spectra
+- flagging of delays implemented, new parameters pulses_strength
+  (read from a fixed location in shifted and smoothed time series
+  data), pulse_location, etc. in
+  results.py of cr_event.py 
 
 2011-08-03 - Rev 8224
 =====================
