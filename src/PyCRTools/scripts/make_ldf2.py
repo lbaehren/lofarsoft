@@ -50,8 +50,8 @@ for eventdir in eventdirs:
     par["positions2"]=cr.hArray(float,[ndipoles[pol],3],positions2[pol],name="Antenna Positions",units="m")
     #par["signalsNS"]=cr.hArray(signal[1])
     #par["signalsEW"]=cr.hArray(signal[0])
-    par["signalsNS"]=cr.hArray(signal[pol])
-    par["signalsEW"]=cr.hArray(signal[pol])
+    par["signalsNS"]=cr.hArray(signal[pol])*100000.
+    par["signalsEW"]=cr.hArray(signal[pol])*100000.
 
     cr.plt.clf()
     cr.plt.subplot(1,2,1)

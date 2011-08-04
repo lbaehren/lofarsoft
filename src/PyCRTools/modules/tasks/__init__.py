@@ -87,6 +87,7 @@ command prompt in ipython:
                                                    - parname is the name of the parameter
 ``Task(par1,par2,...)``                            run the task with parameters ``par1,par2,...``
 ``tlist``                                          to view the available tasks
+``tlog``                                           list the log of recently run tasks, including execution times.
 ``tload 2``                                        to load the task #2 (can also provide a name)
 ``tload "averagespectrum"``                        i.e., this is safer in code since the task
                                                    number can change with time
@@ -175,8 +176,13 @@ task, the input has changed. So, always COPY from an input array to a
 work vector if you need to make such modifications, don't just assign
 them the input array (you will just create a reference in this case)!
 
-Basic logging and performance evaluation is not yet built in, but that
-is relatively easy to do...
+**Logging:**
+
+Some basic logging and performance evaluation is built in. The
+variable ``tasks.task_logger`` will contain a list of dicts with
+recently run tasks, their names, start and execution times.
+
+To reset the logger simply set ``tasks.task_logger=[]``.
 
 
 How to program tasks?
@@ -452,6 +458,7 @@ task_list = set()
 task_outputdir = "" # Where to write the .par files
 task_write_parfiles = True # Write parfile during execution of a task
 task_parfiles = [] # List of all parfiles created since launch of session
+task_logger = [] # List of all parfiles created since launch of session
 
 class TaskInit(type):
     """Metaclass for tasks.
@@ -740,7 +747,8 @@ class Task(object):
         self.oparfile=self.__taskname__+"_"+self._starttime+".par"
         self.ws.addParameterDefinition("t0",dict(default=time.clock(),doc="Unix start time of task",unit="s",output=True))
         self.ws.addParameterDefinition("tduration",dict(default=-1,doc="Execution time of task",unit="s",output=True))
-
+        self["t0"]=time.clock()
+        
         self.callinit(forceinit=init) #Call initialization if not yet done
 
         if not ws==None:
@@ -761,6 +769,15 @@ class Task(object):
         retval=self.run()
         self["tduration"]=time.clock()-self["t0"] # Execution time of task
         self.saveOutputFile() # to store final values
+
+        #Add logging information
+        task_logger.append(dict(name=self.__taskname__,
+                                version=str(self._version_name) if hasattr(self,"_version_name") else "",
+                                start_time=" ".join(self._starttime.split("_")),
+                                start_time_cpu=self["t0"],
+                                execution_time=self["tduration"])
+                           )
+        
 	if retval==None:
 	    return self
 	else:

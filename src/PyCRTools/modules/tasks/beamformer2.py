@@ -68,10 +68,11 @@ class BeamFormer2(tasks.Task):
 
     The function will calculate multiple beams for a list of files and
     a series of antennas (all integrated into one compex spectrum per
-    beam).
+    beam). Also incoherent beams can be calculated and the sifted time
+    series of each antenna can be retrieved.
 
     This beamformer will read all selected antennas at once into
-    memory and hence is optimized for shot datasets with many antennas
+    memory and hence is optimized for short datasets with many antennas
     (e.g. cosmic ray event ).
 
     It can also be called without a datafile and just hArrays as
@@ -79,11 +80,17 @@ class BeamFormer2(tasks.Task):
 
     ``Task(data=timeseries_data, antennas=file["SELECTED_DIPOLES"], antpos=file["ANTENNA_POSITIONS"], sample_interval=file["SAMPLE_INTERVAL"][0], pointings=[dict(az=143.4092*deg,el= 81.7932*deg, r=600.3)])``
 
+    If the FFT of the time series data is already available, it can be
+    provided with the parameter ``fft_data`` (in addition to the time
+    series that - at this moment - is still required). You then have
+    to also set ``dofft=False`` to avoid the FFT being recalculated.
+
     The desired frequency resolution is provided with the parameter
     delta_nu, but by default this will be rounded off to the nearest
     value using channel numbers of a power of 2. This will then set
     the block size for reading in the data.
 
+    **Results**
     The resulting beam is stored in the array Task.beam and written to
     disk as an hArray with parameters stored in the header dict (use
     ``getHeader('BeamFormer2')`` to retrieve this.)
@@ -92,8 +99,10 @@ class BeamFormer2(tasks.Task):
     Task.avspec_incoherent and Task.avspec respectively. They are also
     available as attributes to Task.bf.par (also when stored to disk).
 
-    The beam can be FFTed back to time using Task.tcalc and viewed
-    with Task.tplot.
+    The incoherent beam is found in ``Task.tbeam_incoherent``.
+    
+    The beam can be FFTed back to time using ``Task.tcalc`` and viewed
+    with ``Task.tplot``.
 
    """
     parameters = dict(
@@ -138,6 +147,9 @@ class BeamFormer2(tasks.Task):
         doabs = dict(default=True,
                      doc="Take the absolute of the tbeam."),
 
+        dofft = dict(default=True,
+                     doc="If False do not take the fft of the timeseries data. In this case it is assumed that the user has provided the array ``fft_data``, which already contains the fft",),
+
         smooth_width = dict(default=0,
                             doc="Do a Gaussian smoothing of the beamformed time-series data in Task.tbeam with this width.",
                             unit="Samples"),
@@ -171,7 +183,7 @@ class BeamFormer2(tasks.Task):
         plot_end = dict(default=lambda self: min(int(self.blocklen*self.plot_center)+self.plotlen,self.blocklen),
                         doc="End plotting before this sample number."),
 
-        plot_finish = dict(default= lambda self:plotfinish(doplot=self.doplot),
+        plot_finish = dict(default= lambda self:cr.plotfinish(doplot=self.doplot),
                            doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
 
         delta_nu = dict(default=1,
@@ -340,8 +352,8 @@ class BeamFormer2(tasks.Task):
                                  default=lambda self:cr.hArray(float,[self.speclen],name="Incoherent Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
         tbeam_incoherent = dict(workarray=True,
-                                doc="Contains the power as a function of time of an incorehent beam of all antennas (simply the sqaure of the ADC values added).",
-                                default=lambda self:cr.hArray(float,[self.nblocks,self.blocklen],name="Incoherent Time Beam",header=self.header)),
+                                doc="Contains the power as a function of time of an incoherent beam (in the direction of the pointing) of all antennas (simply the square of the ADC values of the siffted time series data added).",
+                                default=lambda self:cr.hArray(float,[self.nbeams,self.nblocks,self.blocklen],name="Incoherent Time Beam",header=self.header)),
 
         beams = dict(workarray=True,
                      doc="Output array containing the FFTed data for each beam.",
@@ -455,16 +467,13 @@ class BeamFormer2(tasks.Task):
                 self.times.fillrange(self.start_time,self.sample_interval)
                 self.times.setUnit("mu","")
                 self.nspectraadded[block]+=self.nantennas
-                cr.hFFTWExecutePlan(self.fftdata[...], self.data[...], self.fftplan)
-                #self.fftdata[...].fftw(self.data[...])
-                self.fftdata[...].nyquistswap(self.NyquistZone)
+                if self.dofft:
+                    cr.hFFTWExecutePlan(self.fftdata[...], self.data[...], self.fftplan)
+                    self.fftdata[...].nyquistswap(self.NyquistZone)
                 if self.avspec_incoherent:
                     self.avspec_incoherent.squareadd(self.fftdata[...])
-                if  self.tbeam_incoherent:
-                    self.tbeam_incoherent[block].squareadd(self.data[...])
                 if self.nspectraadded[block]>self.nantennas:
                     self.fftdata/=float(self.nspectraadded[block])
-
                 if self.file_count>1:
                     if self.spectrum_file:
                         self.beams.readfilebinary(self.spectrum_file_bin,block*self.speclen*self.nbeams*self.nantennas)
@@ -481,7 +490,8 @@ class BeamFormer2(tasks.Task):
                     self.fftdata.mul(self.weights[self.mainbeam])
                     self.fftdata[...].nyquistswap(self.NyquistZone)
                     cr.hFFTWExecutePlan(self.data_shifted[...], self.fftdata[...], self.invfftplan)
-                    #self.data_shifted[...].invfftw(self.fftdata[...])
+                    if  self.tbeam_incoherent:
+                        self.tbeam_incoherent[block].squareadd(self.data_shifted[...])
                 if self.doplot>1 and self.nspectraadded[block]%self.plotskip==0:
                     if (self.plotspec or not self.calc_timeseries) and self.avspec:
                         self.avspec[self.mainbeam].plot()

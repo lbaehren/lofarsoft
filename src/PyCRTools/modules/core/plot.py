@@ -83,7 +83,7 @@ class plotfinish:
             pp=plotfinish(filename="test")
             pp("Test","a")
             -> (a) Test
-            -> Saved plot in --> Test-a.png
+            -> Saved plot in Test-a.png
             -> Press [return] to continue. Press [q]+[return] to proceed without pausing, [n]+[return] to continue without plotting...q
             -> Continue without pausing from now on.
 
@@ -137,7 +137,7 @@ class plotfinish:
 
                 fig.savefig(f,dpi=200)
 #               fig.set_dpi(dpi)
-                print "Saved plot in -->",f
+                print "Saved plot in",f
             if txt:
                 print (("("+name+") ") if name else "")+txt
             if self.refresh:

@@ -12,8 +12,10 @@ pi2=math.pi/2.
 def makeAZELRDictGrid(AZ,EL,Distance,nx=3,ny=3,offset=5*deg):
     """
     Make a list containing direction dicts that represent a grid of
-    ``nx * ny`` pointings around a central value specified by
-    azimuth, elevation (in radians), and distance (in meter).
+    ``nx * ny`` pointings around a central value specified by azimuth,
+    elevation (in radians), and distance (in meter). ``offset`` is the
+    offset between the pointings in radians (default: 5*deg).
+    
     """
     return [dict(az=AZ+(x-nx/2)*offset, el=EL+(y-ny/2)*offset,r=Distance) for y in range(ny)  for x in range(nx)]
 

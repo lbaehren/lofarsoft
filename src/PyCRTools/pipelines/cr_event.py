@@ -85,6 +85,8 @@ from optparse import OptionParser
 from pycrtools import lora
 
 t0=time.clock()
+tasks.task_logger=[]
+
 #------------------------------------------------------------------------
 #Command line options
 #------------------------------------------------------------------------
@@ -243,6 +245,7 @@ for current_polarization in polarizations:
         datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
         tbb_starttime=datafile["TIME"][0]
         tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
+        sample_interval=datafile["SAMPLE_INTERVAL"][0]
 
         ########################################################################
         #Getting information from LORA if present
@@ -395,11 +398,14 @@ for current_polarization in polarizations:
             [good_antennas.remove(i) for i in bad_antennas] # remove the bad antennas
             good_antennas_index=[antenna_index[i] for i in good_antennas] # get the index numbers of good antennas pointing to position in array
             ndipoles=len(good_antennas)
+
             #Create new average spectrum with only good antennas
             print "# Antenna Flagging:",len(bad_antennas),"bad antennas!"
             print "# Bad Antennas:",bad_antennas
             averagespectrum_good_antennas=hArray(dimensions=[ndipoles,speclen],properties=avspectrum.power)
             averagespectrum_good_antennas[...].copy(avspectrum.power[good_antennas_index,...])
+
+        good_antennas_IDs=hArray(good_antennas_index)*2+polarization
 
         print "---> Calculate a smooth version of the spectrum which is later used to set amplitudes."
         calcbaseline1=trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
@@ -435,19 +441,17 @@ for current_polarization in polarizations:
         ########################################################################
 
         print "---> Load the block with the peak"
-        datafile["SELECTED_DIPOLES"]=good_antennas
-        sample_interval=datafile["SAMPLE_INTERVAL"][0]
-        antenna_positions=datafile["ANTENNA_POSITIONS"]
         datafile["BLOCKSIZE"]=blocksize #2**16
         datafile["BLOCK"]=block_number #93
+
+        datafile["SELECTED_DIPOLES"]=good_antennas
+        antenna_positions=datafile["ANTENNA_POSITIONS"]
 
         #Getting original cabledelays
         cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
         cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
-
         cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
         cabledelays=hArray(cabledelays)
-
 
         ########################################################################
         #Read block with peak and FFT
@@ -506,17 +510,26 @@ for current_polarization in polarizations:
         #Locate pulse and cut data around it
         ########################################################################
         #First determine where the pulse is in a simple incoherent sum of all time series data
-        print "---> Now add all antennas in the time domain, locate pulse and cut time series around it"
         if sample_number>=0 and search_window_width>0:
             search_window=(sample_number-search_window_width/2,sample_number+search_window_width/2)
-        pulse=trerun("LocatePulseTrain","",timeseries_data2,pardict=par,doplot=Pause.doplot,search_window=search_window)
+
+        if lora_direction:
+            print "---> Now make an incoherent beam in the LORA direction, locate pulse, and cut time series around it."
+            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_data2,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1),cable_delays=cabledelays,calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
+            tbeam_incoherent=hArray(beamformer_full.tbeam_incoherent.vec(),[blocksize])#make this a one-dimensional array to not confuse LocatePulseTrain ...
+        else:
+            print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
+            tbeam_incoherent=None
+
+        pulse=trerun("LocatePulseTrain","",timeseries_data2,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window)
 
         print "#LocatePulse: ",pulse.npeaks,"pulses found."
         if pulse.npeaks==0:
             print "************************************************************************"
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"
-            raise ValueError("LocatePulseTrain: No pulses found!")
+            print "ERROR: LocatePulseTrain: No pulses found!"
+            break
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
@@ -525,17 +538,25 @@ for current_polarization in polarizations:
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-power")
 
+        timeseries_data_cut_pulse_width=12
+        timeseries_data_cut_to_pulse=hArray(float,[ndipoles,timeseries_data_cut_pulse_width],properties=pulse.timeseries_data_cut)
+        timeseries_data_cut_to_pulse_offsets=hArray(int,ndipoles,fill=(maxima_power.maxx+0.5-timeseries_data_cut_pulse_width/2))
+        timeseries_data_cut_to_pulse[...].copy(pulse.timeseries_data_cut[..., timeseries_data_cut_to_pulse_offsets:timeseries_data_cut_to_pulse_offsets+timeseries_data_cut_pulse_width])
+        
+
         ########################################################################
-        #Cross correlate and get time lags
+        #Now refine this by cross correlating around the peak maxima
         ########################################################################
         print "---> Cross correlate pulses, get time lags, and determine direction of pulse."
         #Now cross correlate all pulses with each other 
-        crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",pulse.timeseries_data_cut,pardict=par,oversamplefactor=10)
+        crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",timeseries_data_cut_to_pulse,pardict=par,oversamplefactor=10)
         #And determine the relative offsets between them
-        maxima=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
+        maxima_cc=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-crosscorr")
 
-        print "Time lag [ns]: ", maxima.lags 
+        time_lags=maxima_power.lags+maxima_cc.lags
+        
+        print "Time lag [ns]: ", time_lags 
         print " "
 
         ########################################################################
@@ -549,7 +570,7 @@ for current_polarization in polarizations:
         #cabledelays *= 2
         #delays.fill(0)
 
-        direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=antenna_positions,timelags=hArray(maxima.lags),cabledelays=cabledelays,verbose=True,doplot=True)
+        direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=antenna_positions,timelags=hArray(time_lags),cabledelays=cabledelays,verbose=True,doplot=True)
         print "========================================================================"
         print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
         print " "
@@ -557,9 +578,10 @@ for current_polarization in polarizations:
 
         print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
 
-        (direction.total_delays*1e9).plot()
-        (direction.delays_history*1e9)[1].plot(clf=False)
-        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
+        
+        (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs)
+        (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs)
+        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
 
         if abs(direction.delta_delays_rms_history[0])>maximum_allowed_delay or abs(direction.delta_delays_mean_history[0])>maximum_allowed_delay:
@@ -585,7 +607,7 @@ for current_polarization in polarizations:
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
 
-        trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_index,title="Delay errors in station",plotlegend=True)
+        trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_IDs,title="Delay errors in station",plotlegend=True)
 
         print "\n--->Beamforming"
 
@@ -607,7 +629,7 @@ for current_polarization in polarizations:
 
         timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut,name="Power(t)")
         timeseries_power_shifted.square()
-        timeseries_power_shifted[...].runningaverage(9,hWEIGHTS.GAUSSIAN)
+        timeseries_power_shifted[...].runningaverage(5,hWEIGHTS.GAUSSIAN)
         if Pause.doplot:
             timeseries_power_shifted[...].plot(title="E-Field^2 corrected for delays in beam direction per antenna",xlabel="Samples")
             plt.legend(good_antennas,ncol=2,title="Antennas",prop=matplotlib.font_manager.FontProperties(family="Helvetica",size=7))
@@ -645,6 +667,7 @@ for current_polarization in polarizations:
         print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
         print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.start]/1000.,"-",timeseries_data.par.xvalues[pulse.end]/1000.,"ms (i.e., {0:d} ms + {1:6.3f}-{2:6.3f} mus)".format(int(timeseries_data.par.xvalues[pulse.start]/1000),round(timeseries_data.par.xvalues[pulse.start] % 1000.,3),round(timeseries_data.par.xvalues[pulse.end] % 1000.,3))
         print "# Peak found at sample {0:8.2f} ({1:11.8f} ms = {2:d} ms + {3:9.5f} mus) with height {4:8.2f} units.".format(beam_maxima.maxx.val(),pulse_time_ms,int(pulse_time_ms),(pulse_time_ms%1)*1000,beam_maxima.maxy.val())
+        print "# Peak height:",beam_maxima.maxy
 
         ########################################################################
         #Determinig the pulse strength in the shifted time series
@@ -652,7 +675,7 @@ for current_polarization in polarizations:
         ########################################################################
         pulses_strength=timeseries_power_shifted[...].elem(min(max(int(round(beam_maxima.maxx.val()-pulse.start)),0),pulse.cutlen-1))
         
-        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors=hArray(maxima.lags),sizes=pulses_strength,sizes_min=0,names=good_antennas_index,title="Time Lags in Station",plotlegend=True)
+        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors=hArray(time_lags),sizes=pulses_strength,sizes_min=0,names=good_antennas_IDs,title="Time Lags in Station",plotlegend=True)
 
 
         ########################################################################
@@ -690,7 +713,7 @@ for current_polarization in polarizations:
             pulses_maxima_x=list(maxima_power.maxx),
             pulses_maxima_y=list(maxima_power.maxy),
             npeaks_found=pulse.npeaks,
-            pulses_timelags_ns=list(maxima.lags),
+            pulses_timelags_ns=list(time_lags),
             pulse_start_sample=pulse.start,
             pulse_end_sample=pulse.end,
             pulse_time_ms=pulse_time_ms,
@@ -719,9 +742,16 @@ for current_polarization in polarizations:
         htmlfile=open(htmlfilename,"w")
         htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
         htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
-        htmlfile.write("<h2>Parameters</h2>\n".format())
-        htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><br>\n".format(
+        htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><p>\n".format(
             time.strftime("%A, %Y-%m-%d at %H:%M:%S"),os.getlogin(),time.clock()-t0))
+
+
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parfiles"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Logger"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><p>\n".format("Plotfiles"))
+        
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parameters"))
 
         l=results.items(); l.sort()
         htmlfile.write('<table border="1">\n'.format())
@@ -729,19 +759,25 @@ for current_polarization in polarizations:
             htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
         htmlfile.write("</table>\n".format())
 
-        htmlfile.write("<h2>Parfiles</h2>\n".format())
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parfiles"))
         for i in range(nparfiles,len(tasks.task_parfiles)):
             if os.path.exists(tasks.task_parfiles[i]):
                 os.rename(tasks.task_parfiles[i],tasks.task_parfiles[i]+".txt")
                 htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
 
-        htmlfile.write("<h2>Plotfiles</h2>\n".format())
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Logger"))
+        htmlfile.write("<PRE>\n"+tlog(doprint=False)+"</PRE>\n")
+
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
         for f in results["plotfiles"]:
             htmlfile.write('<a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><p>\n'.format(os.path.split(f)[-1]))
 
         htmlfile.write("</body></html>\n")
         htmlfile.close()    
 
+        #print logfile
+        tlog()
+        
         print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
         print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
         print "which can be found in `results.py`(use, e.g., execfile)."

@@ -50,6 +50,7 @@ Task(par1,par2,...)     # run the task with parameters par1,par2,....
 trun "taskname", pars   # run the task with name "taskname" and assign it to the global variable `Task``
 trerun "taskname", pars # like trun, but store task and do not reload it during a 2nd call, but rerun. 
 tlist                   # to view the available tasks
+tlog                    # list the log of recently run tasks, including execution times.
 tload 2                 # to load the task #2 (can also provide a name)
 tload "taskname"        # i.e., this is safer in code since the task number can change with time
 tpars                   # to list all parameters
@@ -109,6 +110,7 @@ def trerun(name,version,*args,**kwargs):
         tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
         tasks.task_instance=tasks.task_class()
         tasks.task_instances[taskinstancename]=tasks.task_instance
+    tasks.task_instance._version_name=version
     tasks.set_globals("Task",tasks.task_instance)
     return tasks.task_instance(*args,**kwargs)
 
@@ -294,6 +296,7 @@ thelp = thelp_class()
 class tlist_class(t_class):
     """
     Class to let the user list the available tasks that can be loaded with tload.
+
     """
     def __call__(self):
         print "Available Tasks:"
@@ -306,6 +309,60 @@ class tlist_class(t_class):
                 print tpl
 
 tlist = tlist_class()
+
+
+class tlog_class(t_class):
+    """
+    Class to let the user list the log of recently run tasks, including execution times.
+
+    **Parameter:**
+
+    *n* = 20 - Display the last 20 entries. n=-1 means display all
+    *doprint* = True - print the result otherwise return the string to be printed
+    *loglist* = None - If provided use this list of log entries
+
+    x=[{'execution_time': 0.22922900000000002,
+  'name': 'AverageSpectrum',
+  'start_time': '2011-08-04 14:24:19',
+  'start_time_cpu': 0.71958299999999997,
+  'version': 'cr_event'},
+ {'execution_time': 4.6105419999999997,
+  'name': 'FitBaseline',
+  'start_time': '2011-08-04 14:24:19',
+  'start_time_cpu': 0.97520499999999999,
+  'version': ''}]
+
+    """
+    def __call__(self,n=20,doprint=True,loglist=None,colsep=" | "):
+        s=""
+        s="Log of recently run Tasks:\n\n"
+        if not loglist:
+            loglist=tasks.task_logger
+        l=len(loglist)
+        if l==0: return
+        if n>0 and n<l:
+            loglist=loglist[-n:]
+            
+        keys=('name','version', 'start_time', 'start_time_cpu','execution_time','cummulative_time')
+        size=(25,10,19,14,14,16)
+        format_keys=("s","s","s",".3f",".3f",".3f")
+        nkeys=len(keys)
+        
+        s+= " | ".join([("{0:"+str(size[i])+"s}").format(keys[i]) for i in range(nkeys)]) + "\n"
+        s+= "".join(["-" for i in range(Vector(size).sum()+len(colsep)*nkeys)])  + "\n"
+        format_string=colsep.join([("{"+str(i)+":"+str(size[i])+format_keys[i]+"}") for i in range(nkeys)])
+        summed_time=0
+        for d in loglist:
+            summed_time+=d["execution_time"]
+            d["cummulative_time"]=summed_time
+            values=[d[keys[i]] for i in range(nkeys)]
+            s+= format_string.format(*values)  + "\n"
+        if doprint:
+            print s
+        else:
+            return s
+        
+tlog = tlog_class()
 
 class tget_class(t_class):
     """

@@ -1,3 +1,17 @@
+2011-08-04 - Rev 8240
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- added a task_logger which keeps track of execution times, use 'tlog'
+  to view
+
+- cr-event - deal with weaker pulses
+   -  localize pulses firs in incoherent beam towards lora position, if present
+   -  made a two-step approach for getting directions: first
+  from maxima in pulses, then from cross correlations
+
+
 2011-08-03 - Rev 8230
 =====================
 

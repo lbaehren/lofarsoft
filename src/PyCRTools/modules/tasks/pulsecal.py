@@ -20,7 +20,7 @@ class LocatePulseTrain(tasks.Task):
     """
     **Usage**
 
-    ``LocatePulseTrain()(timeseries_data[blocklen],nsigma=7,maxgap=7,minpulselen=7) -> Task.start, Task.end, Task.time_series_cut``
+    ``LocatePulseTrain()(timeseries_data[nantennas,blocklen],timeseries_data_sum[blocklen]=None,nsigma=7,maxgap=7,minpulselen=7) -> Task.start, Task.end, Task.time_series_cut``
 
     **Description**
 
@@ -39,6 +39,11 @@ class LocatePulseTrain(tasks.Task):
     With the parameter ``search_window`` the search can be limited to
     the range of samples between those two numbers.
 
+    If the parameter ``timeseries_data_sum`` is provided (a 1D array
+    with a time series, e.g. an incoherent beam of all antennas) then
+    the peak will be searched in that time series and not
+    recalculated.
+    
    **Results:**
     Returns start and end index of the strongest pulse in
     ``Task.start`` and ``Task.end``. The cut-out time series is
@@ -104,11 +109,12 @@ class LocatePulseTrain(tasks.Task):
 
     def run(self):
         #Sum all antennas, if more than one antenna is present
-        if len(self.timeseries_data.shape())==1:
-            self.timeseries_data_sum=self.timeseries_data
-        else:
-            self.timeseries_data_sum=rf.TimeBeamIncoherent(self.timeseries_data)
-            self.timeseries_data_sum.sqrt()
+        if not self.timeseries_data_sum:
+            if len(self.timeseries_data.shape())==1:
+                self.timeseries_data_sum=self.timeseries_data
+            else:
+                self.timeseries_data_sum=rf.TimeBeamIncoherent(self.timeseries_data)
+                self.timeseries_data_sum.sqrt()
 
         self.minrms=cr.Vector(float,1)
         self.minmean=cr.Vector(float,1)
