@@ -319,7 +319,7 @@ endif (CR_WITH_GUI)
 
 build_package (pycrtools src/PyCRTools)
 
-add_dependencies (pycrtools dal casacore fftw3 gsl tmf)
+add_dependencies (pycrtools dal casacore fftw3 gsl tmf num_util)
 if (PYCRTOOLS_WITH_AERA)
   add_dependencies (pycrtools aera)
 endif (PYCRTOOLS_WITH_AERA)
