@@ -1,0 +1,20 @@
+from pycrtools import *
+from pycrtools import lora
+import os
+datadir="/data/VHECR/LORAtriggered/data/"
+candidates=["VHECR_LORA-20110716T094509.665Z","VHECR_LORA-20110716T025339.597Z","VHECR_LORA-20110714T174749.986Z","VHECR_LORA-20110612T231913.199Z","VHECR_LORA-20110612T235954.184Z","VHECR_LORA-20110626T221820.368Z"]
+plt.clf()
+blocksize=65536
+myoutputdir="/data/sandertv/VHECR/LORAtriggered/results/"
+#myoutputdir="/data/VHECR/LORAtriggered/results/"
+fname=""
+for cand in candidates[0:1]:
+	fname+=datadir+cand+"*002.h5"+" "
+
+lofarmode="LBA_OUTER"
+run $PYP/pipelines/cr_event.py $fname --lofarmode=$lofarmode --outputdir=$myoutputdir --blocksize=$blocksize --search_window_width=5000 --nsigma=3  
+
+#lofarmode="LBA_INNER"
+#fname=datadir+"VHECR_LORA-20110613T051515.914Z*.h5"
+#run $PYP/pipelines/cr_event.py $fname --lofarmode=$lofarmode --outputdir=$myoutputdir --nopause --blocksize=$blocksize --search_window_width=5000 --nsigma=3 y-q 
+
