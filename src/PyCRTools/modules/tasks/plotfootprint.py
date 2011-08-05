@@ -50,11 +50,12 @@ def gatherresults(filefilter,pol):
 
             signal[res["polarization"]].extend(res["pulses_maxima_y"])
             ndipoles[res["polarization"]]+=res["ndipoles"]
-            #pulseoffset=res["SAMPLE_NUMBER"]+res["pulse_start_sample"]+res["BLOCKSIZE"]
-            #pulseoffset/=res["SAMPLE_FREQUENCY"]
-            #stationtimelags=[l+pulseoffset for l in res["pulses_timelags_ns"]]
-#timelags[res["polarization"]].extend(stationtimelags)
-            timelags[res["polarization"]].extend(res["pulses_timelags_ns"])
+            pulseoffset=res["SAMPLE_NUMBER"]+res["pulse_start_sample"]+res["BLOCKSIZE"]
+            pulseoffset/=res["SAMPLE_FREQUENCY"]
+            
+            stationtimelags=[l+pulseoffset for l in res["pulses_timelags_ns"]]
+            timelags[res["polarization"]].extend(stationtimelags)
+            #timelags[res["polarization"]].extend(res["pulses_timelags_ns"])
 
     if "res" not in dir():
         return None
@@ -83,7 +84,7 @@ def gatherresults(filefilter,pol):
 #nrgrt=cr.hFindGreaterThan(indexvec,par["power"],1.0e15)
 #zerovec=cr.hArray(float,dimensions=nrgrt.val(),fill=1e-5)
 #par["power"][indexvec[0:3]]=par["power"].min()
-    par["arrivaltime"]=cr.hArray(timelags[pol])
+    par["arrivaltime"]=cr.hArray(timelags[pol])+clockcorrection
 #par["loracolor"]="time"
     par["title"]="Footprint of CR event "+res["FILENAME"].split('-')[1]
     par["names"]=[str(a)[:-6]+","+str(a)[-3:] for a in antid]
