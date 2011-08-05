@@ -406,7 +406,7 @@ for current_polarization in polarizations:
             averagespectrum_good_antennas=hArray(dimensions=[ndipoles,speclen],properties=avspectrum.power)
             averagespectrum_good_antennas[...].copy(avspectrum.power[good_antennas_index,...])
 
-        good_antennas_IDs=hArray(good_antennas_index)*2+polarization
+        good_antennas_IDs=hArray(good_antennas_index)*2+current_polarization
 
         print "---> Calculate a smooth version of the spectrum which is later used to set amplitudes."
         calcbaseline1=trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
@@ -705,9 +705,10 @@ for current_polarization in polarizations:
             plotfiles=Pause.plotfiles,
             filedir=filedir,
             ndipoles=ndipoles,
-            antennas=good_antennas,
-            antenna_positions_XYZ_m=list(antenna_positions.vec()),
+            antennas=dict(zip(range(ndipoles),good_antennas)),
+            antenna_positions_station_XYZ_m=list(antenna_positions.vec()),
             antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
+            antenna_positions_array_XYZ_m=list(metadata.convertITRFToLocal(datafile["ITRFANTENNA_POSITIONS"]).vec()),
             flagged_delays=list(flagged_delays.vec()),
             flagged_cable_delays=list(flagged_cable_delays.vec()),
             bad_antennas=bad_antennas,

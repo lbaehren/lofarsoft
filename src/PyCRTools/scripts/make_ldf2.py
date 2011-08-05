@@ -12,7 +12,7 @@ import sys
 
 #execfile PYP+'/scripts/make_ldf2.py'
 topdir='~/LOFAR/work/results'
-events=["VHECR_LORA-20110716T094509.665Z"]
+#events=["VHECR_LORA-20110716T094509.665Z"]
 events=["VHECR_LORA-20110714T174749.986Z"]
 
 eventdirs=cr.listFiles([os.path.join(topdir,event) for event in events])
@@ -23,9 +23,9 @@ for eventdir in eventdirs:
     antid={0:[],1:[]}
     signal={0:[],1:[]}
     positions={0:[],1:[]}
-    positions2={0:[],1:[]}
+ #   positions2={0:[],1:[]}
     ndipoles={0:0,1:0}
-    pol=1
+    pol=0
 
     datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 #    datadirs.remove('/Users/falcke/LOFAR/work/results/VHECR_LORA-20110716T094509.665Z/pol1/005')
@@ -35,7 +35,7 @@ for eventdir in eventdirs:
         execfile(os.path.join(datadir,"results.py"),res)
         res=res["results"]
         antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
-        positions2[res["polarization"]].extend(res["antenna_positions_ITRF_m"])
+        positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])
         signal[res["polarization"]].extend(res["pulses_strength"])
         ndipoles[res["polarization"]]+=res["ndipoles"]
 
@@ -49,8 +49,9 @@ for eventdir in eventdirs:
     ##ATTENTION: You cannot assume that you always have an identical list of antennas in both polarisations!!
 
 
-    par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],res["ANTENNA_SET"],return_as_hArray=True)
-    par["positions2"]=cr.hArray(float,[ndipoles[pol],3],positions2[pol],name="Antenna Positions",units="m")
+#    par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],res["ANTENNA_SET"],return_as_hArray=True)
+#    par["positions2"]=cr.hArray(float,[ndipoles[pol],3],positions2[pol],name="Antenna Positions",units="m")
+    par["positions"]=cr.hArray(float,[ndipoles[pol],3],fill=positions[pol],name="Antenna Positions",units="m")
     #par["signalsNS"]=cr.hArray(signal[1])
     #par["signalsEW"]=cr.hArray(signal[0])
     par["signalsNS"]=cr.hArray(signal[pol])*100000.
