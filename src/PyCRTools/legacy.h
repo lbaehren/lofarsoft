@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <casa/Arrays.h>
-#include <casa/Vector.h>
+#include <casa/vector.h>
 #include <casa/Exceptions/Error.h>
 #include <measures/Measures.h>
 #include <measures/Measures/MDirection.h>
