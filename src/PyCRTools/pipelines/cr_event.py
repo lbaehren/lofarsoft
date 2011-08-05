@@ -50,11 +50,14 @@ results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for
 
 
 
-**Example: **
+**Example:**
 
-Command line use:
+*Command line use:*
+::
+    chmod a+x $PYP/pipelines/cr_event.py
 
-$PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-*.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=5000 --nsigma=3 -q -R
+    $PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=5000 --nsigma=3 -R -p0
+
 ------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
@@ -79,13 +82,7 @@ Event ID		Theta	Phi		Core pos.(X,Y) m        Energy (eV)                       A
 Revision History:
 V1.0 created by H. Falcke, July 2011
 """
-
-from pycrtools import *
 from optparse import OptionParser
-from pycrtools import lora
-
-t0=time.clock()
-tasks.task_logger=[]
 
 #------------------------------------------------------------------------
 #Command line options
@@ -106,10 +103,24 @@ parser.add_option("-s","--blocksize", type="int", default=2**16,help="Blocksize 
 parser.add_option("-T","--timestamp", type="str", default="",help="Timestamp of observation for creating output directory (if not to be deduced from filename)")
 parser.add_option("-S","--station", type="str", default="",help="Station name for data set for creating output directory (if not to be deduced from filename)")
 parser.add_option("-q","--nopause", action="store_true",help="Do not pause after each plot and display each figure interactively")
-parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot.")
+parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
 flag_delays = False
+
+if parser.get_prog_name()=="cr_event.py":
+    (options, args) = parser.parse_args()
+    if options.norefresh:
+        import matplotlib
+        matplotlib.use('Agg')
+        
+
+from pycrtools import *
+from pycrtools import lora
+plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
+
+t0=time.clock()
+tasks.task_logger=[]
 
 #------------------------------------------------------------------------
 # Main input parameters
@@ -141,7 +152,6 @@ if not parser.get_prog_name()=="cr_event.py":
                                # consisder something to be wrong
 else:
     #   Program was started from command line
-    (options, args) = parser.parse_args()
 
     # Filenames
     if not args:
@@ -160,8 +170,8 @@ else:
     nsigma = options.nsigma
     sample_number = options.sample_number
     blocksize = options.blocksize
-    plotpause = not options.nopause
     refresh = not options.norefresh
+    plotpause = (not options.nopause and refresh)
     maximum_allowed_delay = options.maximum_allowed_delay
     search_window=False
     search_window_width=options.search_window_width
@@ -522,7 +532,15 @@ for current_polarization in polarizations:
             print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
             tbeam_incoherent=None
 
-        pulse=trerun("LocatePulseTrain","",timeseries_data2,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window)
+        pulses=trerun("LocatePulseTrain","separate",timeseries_data2,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
+        antennas_with_peaks=list(hArray(good_antennas)[pulses.peaks_found_list].vec())
+        print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
+        print "#LocatePulses - antennas with pulses:",
+
+        if lora_direction:
+            pulse=trerun("LocatePulseTrain","",timeseries_data2,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
+        else:
+            pulse=pulses
 
         print "#LocatePulse: ",pulse.npeaks,"pulses found."
         if pulse.npeaks==0:
@@ -712,6 +730,7 @@ for current_polarization in polarizations:
             flagged_delays=list(flagged_delays.vec()),
             flagged_cable_delays=list(flagged_cable_delays.vec()),
             bad_antennas=bad_antennas,
+            antennas_with_peaks=antennas_with_peaks,
             pulse_location=beam_maxima.maxx.val(),
             pulses_strength=list(pulses_strength.vec()),
             pulses_maxima_x=list(maxima_power.maxx),

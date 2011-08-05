@@ -1280,6 +1280,38 @@ def hArray_Select(self,*args,**kwargs):
     """
     return self[self.Find(*args,**kwargs)]
 
+def hArray_Set(self,value,*args,**kwargs):
+    """
+    **Usage:**
+
+    ``ary.Set(value,'operator',threshold1,(threshold2)) -> [ary_i=value if ary_i </=/> threshold]``
+
+    **Description:**
+
+    This function will set values in array where the elements the
+    input array fulfill the search criterion (i.e. to be equal, or
+    above/below a threshold value).
+
+    *operator* = '=','>','<','>=','<=','between','outside','even','odd'
+
+    *threshold1* = the threshold to compare vector values with (for  '=','>','<','>=','<=')
+
+    *threshold2* = the second threshold if applicable (for between, outside)
+
+    'even','odd' don't take any additional argument.
+
+    **See also:**
+
+    hArray_Find, hArray_Set, hArray_Select
+    
+    **Example::**
+
+        v=hArray(range(10)) # -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
+        v.Set(-99,">",7) # -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,-99,-99]) # len=10 slice=[0:10])
+
+    """
+    self.set(self.Find(*args,**kwargs),value)
+    return self
 
 # Fourier Transforms
 setattr(FloatArray,"fft",hFFTCasa)
@@ -1323,6 +1355,7 @@ for v in hAllArrayTypes:
 for v in hAllContainerTypes:
     setattr(v,"Find",hArray_Find)
     setattr(v,"Select",hArray_Select)
+    setattr(v,"Set",hArray_Set)
     for s in hAllContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hAllContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."

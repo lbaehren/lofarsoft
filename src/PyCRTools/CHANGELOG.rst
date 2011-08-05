@@ -1,3 +1,18 @@
+2011-08-05 - Rev 8245
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- cr_event.py can be run in batch mode without window, if run from
+  command line with -R
+
+- LocatePulseTrain can now optionally search in individual antennas
+  for pulses
+
+- cr_event.py uses the above option in case no LORA information is
+  present, this should improve recovery of fainter pulses
+
+
 2011-08-04 - Rev 8240
 =====================
 

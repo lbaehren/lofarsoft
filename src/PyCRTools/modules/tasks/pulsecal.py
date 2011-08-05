@@ -28,7 +28,8 @@ class LocatePulseTrain(tasks.Task):
     determine its location, and cut out the time series data around
     the pulse. If the input array has multiple dimensions (multiple
     antennnas are present), then sum the antennas first and search the
-    pulse in the sum of all antennas.
+    pulse in the sum of all antennas or look for the mean pulse
+    location for all antennas.
 
     The task calculates noise and threshold level above which to find
     pulse trains. A pulse train can have gaps of some `N=maxgaps`
@@ -43,6 +44,12 @@ class LocatePulseTrain(tasks.Task):
     with a time series, e.g. an incoherent beam of all antennas) then
     the peak will be searched in that time series and not
     recalculated.
+
+    If ``search_per_antenna=True`` then the peaks are searched in each
+    antenna. From all antennas where a peak was found the median peak
+    location and length is taken.
+    
+
     
    **Results:**
     Returns start and end index of the strongest pulse in
@@ -51,6 +58,16 @@ class LocatePulseTrain(tasks.Task):
     
     The summed time series from all data sets (if a 2D array was
     provided) is returned in ``Task.timeseries_data_sum``
+
+    For ``search_per_antenna=True`` the list ``Task.peaks_found_list``
+    contains the indices of all antennas where a peak was found. The
+    number of antennas with peaks is ``self.npeaks_found``. Start and
+    end of the pulses for each antenna with peak are found are in
+    ``self.maxsequences``. The smallest and largest start location of
+    all antennas can be found in ``Task.start_min``,
+    ``Task.start_max``. See also ``Task.lengths_min``,
+    ``Task.lengths_max``, and ``Task.lengths_median`` for information
+    on the width of these peaks.
     
     See :func:`hFindSequenceGreaterThan` for a description of the other
     parameters.
@@ -72,35 +89,43 @@ class LocatePulseTrain(tasks.Task):
 
     """
     parameters=dict(
-        nblocks=sc.p_(16,"The time series data is subdivided in ``nblock`` blocks where the one with the lowest RMS is used to determine the threshold level for finding peaks."),
-        nsigma=sc.p_(7,"Pulse has to be ``nsigma`` above the noise."),
-        maxgap=sc.p_(7,"Maximum gap length allowed in a pulse where data is not above the threshold"),
-        minpulselen=sc.p_(7,"Minimum width of pulse."),
-        maxlen=sc.p_(1024,"Maximum length allowed for the pulse train to be returned."),
-        minlen=sc.p_(32,"Minimum length allowed for cutting the time time series data."),
-        prepulselen=sc.p_(16,"Safety margin to add before the start of the pulse for cutting and ``start``."),
-        docut=sc.p_(True,"Cut the time series around the pulse and return it in ``timeseries_data_cut``."),
-        cut_to_power_of_two=sc.p_(True,"Cut the time series to a length which is a power of two?"),
-        maxnpeaks=sc.p_(256,"Naximum number of train peaks to look for in data"),
-        start=sc.p_(0,"Start index of the strongest pulse train",output=True),
-        end=sc.p_(32,"End index of the strongest pulse train",output=True),
-        npeaks=sc.p_(0,"Number of peaks found in data",output=True),
-        maxima=sc.p_(None,"Values of the maxima of the pulse trains",output=True),
-        indexlist=sc.p_(lambda self:cr.hArray(int,[self.maxnpeaks,2]),"Original locations of the peaks found in the data",output=True),
-        cutlen=sc.p_(None,"Length of the cut-out data.",output=True),
-        timeseries_data_sum=sc.p_(None,"Incoherent (squared) sum of all antennas."),
-        timeseries_data_cut=sc.p_(lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]),"Contains the time series data cut out around the pulse.",output=True),
+        nblocks=dict(default=16, doc="The time series data is subdivided in ``nblock`` blocks where the one with the lowest RMS is used to determine the threshold level for finding peaks."),
+        nsigma=dict(default=7, doc="Pulse has to be ``nsigma`` above the noise."),
+        maxgap=dict(default=7, doc="Maximum gap length allowed in a pulse where data is not above the threshold"),
+        minpulselen=dict(default=7, doc="Minimum width of pulse."),
+        maxlen=dict(default=1024, doc="Maximum length allowed for the pulse train to be returned."),
+        minlen=dict(default=32, doc="Minimum length allowed for cutting the time time series data."),
+        prepulselen=dict(default=16, doc="Safety margin to add before the start of the pulse for cutting and ``start``."),
+        docut=dict(default=True, doc="Cut the time series around the pulse and return it in ``timeseries_data_cut``."),
+        cut_to_power_of_two=dict(default=True, doc="Cut the time series to a length which is a power of two?"),
+        maxnpeaks=dict(default=256, doc="Naximum number of train peaks to look for in data"),
+        start=dict(default=0, doc="Start index of the strongest pulse train",output=True),
+        end=dict(default=32, doc="End index of the strongest pulse train",output=True),
+        npeaks=dict(default=0, doc="Number of peaks found in data",output=True),
+        maxima=dict(default=None, doc="Values of the maxima of the pulse trains",output=True),
 
-        search_window = dict(default=False,doc="False - if set to a tuple with two integer indices (start, end), pointing to locations in the array, only the strongest peak between those two locations are being considered. Use -1 for start=0 or end=len(array)."),
+        indexlist=dict(default=lambda self:cr.hArray(int,[self.nantennas if self.search_per_antenna else 1,self.maxnpeaks,2]), doc="Original locations of the peaks found in the data",output=True),
+
+        cutlen=dict(default=None, doc="Length of the cut-out data.",output=True),
+        timeseries_data_sum=dict(default=None, doc="Incoherent (squared) sum of all antennas."),
+        timeseries_data_cut=dict(default=lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]), doc="Contains the time series data cut out around the pulse.",output=True),
         
-        doplot = dict(default=False,doc="Produce output plots."),
+        timeseries_length = dict(default=lambda self:self.timeseries_data.shape()[-1], doc="Length of the full input time series."),
+
+        nantennas = dict(default=lambda self:self.timeseries_data.shape()[-2] if len(self.timeseries_data.shape())>1 else 1, doc="Number of antennas in data file."),
+
+        search_window = dict(default=False, doc="False - if set to a tuple with two integer indices (start, end), pointing to locations in the array, only the strongest peak between those two locations are being considered. Use -1 for start=0 or end=len(array)."),
+        
+        search_per_antenna = dict(default=False, doc="Search pulses per antennas and then return the average of all peaks found."),
+
+        doplot = dict(default=False, doc="Produce output plots."),
 
         plot_finish = dict(default = lambda self:cr.plotfinish(filename=self.plot_filename,doplot=self.doplot,plotpause=True),
                        doc ="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
 
-        plot_name = dict(default="",doc="Extra name to be added to plot filename."),
+        plot_name = dict(default="", doc="Extra name to be added to plot filename."),
 
-        plot_filename = dict(default="",doc="Base filename to store plot in.")
+        plot_filename = dict(default="", doc="Base filename to store plot in.")
 
         )
 
@@ -116,43 +141,78 @@ class LocatePulseTrain(tasks.Task):
                 self.timeseries_data_sum=rf.TimeBeamIncoherent(self.timeseries_data)
                 self.timeseries_data_sum.sqrt()
 
-        self.minrms=cr.Vector(float,1)
-        self.minmean=cr.Vector(float,1)
-        self.blen=cr.Vector(int,1,fill=max(self.timeseries_data_sum.getSize()/self.nblocks,8))
-        self.timeseries_data_sum.minstddevblock(self.blen,self.minrms,self.minmean)
+        self.minrms=cr.Vector(float,self.nantennas)
+        self.minmean=cr.Vector(float,self.nantennas)
+        self.blen=cr.Vector(int,self.nantennas,fill=max(self.timeseries_length/self.nblocks,8))
         if self.search_window:
             if hasattr(self.search_window,"__getitem__") and len(self.search_window)==2 and isinstance(self.search_window[0],(long,int)) and isinstance(self.search_window[1],(long,int)):
                 self.search_window_x0=max(min(len(self.timeseries_data_sum),self.search_window[0]),0) if self.search_window[0]>=0 else 0
                 self.search_window_x1=max(min(len(self.timeseries_data_sum),self.search_window[1]),1) if self.search_window[1]>0 else len(self.timeseries_data_sum)
-                self.npeaks=self.indexlist.findsequencegreaterthan(self.timeseries_data_sum[self.search_window_x0:self.search_window_x1],self.minmean[0]+self.nsigma*self.minrms[0],self.maxgap,self.minpulselen).first()
-                self.indexlist += self.search_window_x0
             else:
                 raise ValueError("ERROR: LocatePulseTrain.search_window needs to be a tuple or list of two integers.")
         else:
-            self.npeaks=self.indexlist.findsequencegreaterthan(self.timeseries_data_sum,self.minmean[0]+self.nsigma*self.minrms[0],self.maxgap,self.minpulselen).first()
-        if self.npeaks <= 0:
-            return
+            self.search_window_x0=0;
+            self.search_window_x1=self.timeseries_length
 
-        self.maxima=cr.hArray(float,[self.npeaks])
-        self.maxima.maxinsequences(self.timeseries_data_sum,self.indexlist,self.npeaks)
-        self.maxseq=self.maxima.maxpos().first()
+        if self.search_per_antenna:
+            self.timeseries_data[...].minstddevblock(self.blen,self.minrms,self.minmean)
+            self.npeaks_list=self.indexlist[...].findsequencegreaterthan(self.timeseries_data[...,[self.search_window_x0]:[self.search_window_x1]],self.minmean+self.nsigma*self.minrms,cr.asvec(self.maxgap),cr.asvec(self.minpulselen))
+            self.peaks_found_list=self.npeaks_list.Find(">",0)
+            self.peaks_found_list=list(self.peaks_found_list)
+            self.npeaks=len(self.peaks_found_list)
+            if self.npeaks <= 0:
+                print "LocatePulesTrain: No pulses found in any antenna!"
+                return
+            self.npeaks_greater_zero=cr.asvec(cr.hArray(self.npeaks_list)[self.peaks_found_list])
+            self.indexlist[self.peaks_found_list,...,[0]:self.npeaks_greater_zero] += self.search_window_x0
+            self.maxima=cr.hArray(float,[self.nantennas,max(self.npeaks_list.max(),1)],fill=-99)
+            self.maxima[...].maxinsequences(self.timeseries_data[...],self.indexlist[...],self.npeaks_list) # get the maxima in each sequence
+            self.maxpos=self.maxima[self.peaks_found_list,...,[0]:self.npeaks_greater_zero].maxpos() # find the strongest maximum of all sequences (per antenna), (i.e. the nth sequence contains the strongest peak)
+            self.maxsequences=cr.hArray(int,[self.npeaks,2])  # get the list of the start/end indices for the strongest maxima in each antenna
+            self.maxsequences[...].copy(self.indexlist[self.peaks_found_list,...,self.maxpos:self.maxpos+1])
+            self.maxstarts=self.maxsequences[...].elem(0) # get the start positions
+            self.sequence_lengths=cr.hArray(int,[self.npeaks,1])
+            self.sequence_lengths[...].sub(self.maxsequences[...,1],self.maxsequences[...,0])
+            self.start_min=self.maxstarts.min()
+            self.start_max=self.maxstarts.max()
+            self.lengths_min=self.sequence_lengths.min().val()
+            self.lengths_max=self.sequence_lengths.max().val()
+            self.lengths_median=self.sequence_lengths.median()
+            self.start=self.maxstarts.median()
+            self.start_rms=self.maxstarts.stddev(self.start)
+            self.end=self.start+self.lengths_median
+        else:
+            self.timeseries_data_sum.minstddevblock(self.blen,self.minrms,self.minmean)
+            self.npeaks=self.indexlist[0].findsequencegreaterthan(self.timeseries_data_sum[self.search_window_x0:self.search_window_x1],
+                                                                  self.minmean[0]+self.nsigma*self.minrms[0],self.maxgap,self.minpulselen).first()
+            if self.npeaks <= 0:
+                print "LocatePulesTrain: No pulses found!"
+                return
+            self.indexlist += self.search_window_x0
+            self.maxima=cr.hArray(float,[1,self.npeaks])
+            self.maxima.maxinsequences(self.timeseries_data_sum,self.indexlist,self.npeaks)
+            self.maxpos=self.maxima.maxpos().first()
+            self.start=self.indexlist[0,self.maxpos,0]
+            self.end=self.indexlist[0,self.maxpos,1]
 
-        self.start=self.indexlist[self.maxseq,0]
-        self.end=self.indexlist[self.maxseq,1]
+
         self.cutlen=int(2**math.ceil(math.log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
         self.update()
         
         self.start-=self.prepulselen; self.end=self.start+self.cutlen
 
         if self.doplot:
-            if self.search_window:
-                self.timeseries_data_sum.plot(color="green",label="search window",nhighlight=self.npeaks,highlight=self.indexlist,highlightcolor="orange",title="Peak search: Incoherent sum of timeseries data",highlightlabel="peaks found")
-                self.timeseries_data_sum[:self.search_window_x0].plot(clf=False,color="blue",label="Incoherent sum")
-                self.timeseries_data_sum[self.search_window_x1:].plot(clf=False,color="blue",xvalues=cr.hArray(range(self.search_window_x1,len(self.timeseries_data_sum))))
+            if self.search_per_antenna:
+                self.timeseries_data[self.peaks_found_list,...,self.search_window_x0:self.search_window_x1].plot(nhighlight=self.npeaks_greater_zero,highlight=(self.indexlist-self.search_window_x0)[self.peaks_found_list,...,[0]:self.npeaks_greater_zero],highlightcolor="red",title="Peak search per antenna",highlightlabel="peaks found",label=self.peaks_found_list)
             else:
-                self.timeseries_data_sum.plot(nhighlight=self.npeaks,highlight=self.indexlist,color="blue",highlightcolor="orange",title="Peak search: incoherent sum of timeseries data",label="incoherent sum",highlightlabel="peaks found")
-            self.timeseries_data_sum[self.start:self.end].plot(clf=False,color="red",xvalues=cr.hArray(range(self.start,self.end)),label="peak region")
-            cr.plt.legend(loc=2)
+                if self.search_window:
+                    self.timeseries_data_sum.plot(color="green",label="search window",nhighlight=self.npeaks,highlight=self.indexlist,highlightcolor="orange",title="Peak search: Incoherent sum of timeseries data",highlightlabel="peaks found")
+                    self.timeseries_data_sum[:self.search_window_x0].plot(clf=False,color="blue",label="Incoherent sum")
+                    self.timeseries_data_sum[self.search_window_x1:].plot(clf=False,color="blue",xvalues=cr.hArray(range(self.search_window_x1,len(self.timeseries_data_sum))))
+                else:
+                    self.timeseries_data_sum.plot(nhighlight=self.npeaks,highlight=self.indexlist,color="blue",highlightcolor="orange",title="Peak search: incoherent sum of timeseries data",label="incoherent sum",highlightlabel="peaks found")
+                self.timeseries_data_sum[self.start:self.end].plot(clf=False,color="red",xvalues=cr.hArray(range(self.start,self.end)),label="peak region")
+                cr.plt.legend(loc=2)
             self.plot_finish(name=self.__taskname__+self.plot_name)
 
         #Cut the data around the main pulse

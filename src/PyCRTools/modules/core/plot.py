@@ -326,6 +326,8 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
             for n in range(nhighlight[loop]): #how many sections are to be highlighted?
                 slc=slice(ha[n,0],ha[n,1]+1)
                 _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor,label=highlightlabel if n==0 else False)
+        if highlight:
+            highlight.next()
         xvalues.next()
         iterate=self.next().doLoopAgain()
         loop+=1;
