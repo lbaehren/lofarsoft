@@ -552,7 +552,7 @@ for current_polarization in polarizations:
 
         results["ndipoles"]=ndipoles
         if ndipoles<minimum_number_good_antennas:
-            print "#ERROR: To few good antennas ("+str(ndipoles)+")
+            print "#ERROR: To few good antennas ("+str(ndipoles)+")"
             finish_file(status="TOO FEW ANTENNAS")
             continue
 
@@ -580,7 +580,7 @@ for current_polarization in polarizations:
 
             results["ndipoles"]=ndipoles
             if ndipoles<minimum_number_good_antennas:
-                print "#ERROR: To few good antennas ("+str(ndipoles)+")
+                print "#ERROR: To few good antennas ("+str(ndipoles)+")"
                 finish_file(status="TOO FEW ANTENNAS")
                 continue
 
