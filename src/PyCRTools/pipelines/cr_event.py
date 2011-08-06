@@ -195,6 +195,103 @@ timeseries_data_cut_pulse_width=12
 #------------------------------------------------------------------------
 plt.ioff()
 
+
+
+def finish_file(status="OK"):
+    ########################################################################
+    #Writing summary output to html file
+    ########################################################################
+
+    if not os.path.exists(summaryfilename):
+        summaryfile=open(summaryfilename,"w")
+        summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
+        summaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format(topdir_name))
+        summaryfile.write("<i>File created on {0:s} by user {1:s}.</i><br>\n".format(file_time,os.getlogin()))
+        summaryfile.write("Directories: <a href=pol0>pol0</a>, <a href=pol1>pol1</a><p>\n")
+        summaryfile.close()
+
+    if not os.path.exists(topsummaryfilename):
+        topsummaryfile=open(topsummaryfilename,"w")
+        topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of good events"))
+        topsummaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format("CR Pipeline Summary FILE of good events"))
+        topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
+        topsummaryfile.close()
+
+    if not os.path.exists(allsummaryfilename):
+        topsummaryfile=open(topsummaryfilename,"w")
+        topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of all events"))
+        topsummaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format("CR Pipeline Summary FILE of all events"))
+        topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
+        topsummaryfile.close()
+
+    summaryfile=open(summaryfilename,"a")
+    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    summaryfile.close()
+
+    if delay_quality_error<1:
+        topsummaryfile=open(topsummaryfilename,"a")
+        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+        topsummaryfile.close()
+
+    topsummaryfile=open(allsummaryfilename,"a")
+    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    topsummaryfile.close()
+
+    htmlfile=open(htmlfilename,"w")
+    htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
+    htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
+    htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
+    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+
+    htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
+    htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
+    htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parfiles"))
+    htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Logger"))
+    htmlfile.write("<a href=#{0:s}>{0:s}</a><p>\n".format("Plotfiles"))
+    htmlfile.write(", ".join(['<a href=#{0:s}>{1:s}</a>'.format(os.path.split(f)[-1],os.path.split(f)[-1].split("pol"+str(current_polarization)+"-")[-1][:-4]) for f in results["plotfiles"]]))
+
+
+    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parameters"))
+
+    l=results.items(); l.sort()
+    htmlfile.write(", ".join(["<a href=#{0:s}>{0:s}</a>".format(k) for k,v in l])+"<p>\n")
+    htmlfile.write('<table border="1">\n'.format())
+    for k,v in l:
+        htmlfile.write("<tr><td><b><a name={0:s}>{0:s}</a></b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
+    htmlfile.write("</table>\n".format())
+
+    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parfiles"))
+    for i in range(nparfiles,len(tasks.task_parfiles)):
+        if os.path.exists(tasks.task_parfiles[i]):
+            os.rename(tasks.task_parfiles[i],tasks.task_parfiles[i]+".txt")
+            htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
+
+    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Logger"))
+    htmlfile.write("<PRE>\n"+tlog(doprint=False)+"</PRE>\n")
+
+    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
+    for f in results["plotfiles"]:
+        htmlfile.write('<a name="{0:s}" href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><a href=#top>(back to top)</a><p>\n'.format(os.path.split(f)[-1]))
+
+    htmlfile.write("</body></html>\n")
+    htmlfile.close()    
+
+    #print logfile
+    tlog()
+
+    print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
+    print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
+    print "which can be found in `results.py`(use, e.g., execfile)."
+    print "Shifted time series data of all antennas is in event.par.time_series."
+    print "Open",htmlfilename,"in your browser to get a summary."
+    print "-----------------------------------------------------------------------------------------------------------"
+    print "Finished cr_event after",time.clock()-t0,"seconds."
+    print "-----------------------------------------------------------------------------------------------------------\n"
+    plt.ion()
+    
+
+
+
 ########################################################################
 #Loop over all files and polarizations
 ########################################################################
@@ -238,6 +335,7 @@ for current_polarization in polarizations:
         htmlfilename=os.path.join(outputdir_with_subdirectories,"index.html")
         summaryfilename=os.path.join(outputdir_event,"index.html")
         topsummaryfilename=os.path.join(outputdir,"summary.html")
+        allsummaryfilename=os.path.join(outputdir,"summary-all.html")
 
         tasks.task_write_parfiles=True
         tasks.task_outputdir=outputdir_with_subdirectories
@@ -282,20 +380,40 @@ for current_polarization in polarizations:
             datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
         except RuntimeError:
             print "ERROR opening file - skipping this file!"
+            finish_file(status="OPEN FAILED")
             continue
 
-        if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
-            print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
-            continue
-
-        if min(datafile["DATA_LENGTH"])<min_data_length:
-            print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
-            continue
 
         tbb_starttime=datafile["TIME"][0]
         tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
-            
+
+        results=dict(
+            TELESCOPE=datafile["TELESCOPE"],
+            ANTENNA_SET=datafile["ANTENNA_SET"],
+            NYQUIST_ZONE=datafile["NYQUIST_ZONE"][0],
+            SAMPLE_FREQUENCY=datafile["SAMPLE_FREQUENCY"][0],
+            FREQUENCY_RANGE=datafile["FREQUENCY_RANGE"][0],
+            NOF_DIPOLE_DATASETS=datafile["NOF_DIPOLE_DATASETS"],
+            DATA_LENGTH=datafile["DATA_LENGTH"][0],
+            SAMPLE_INTERVAL=sample_interval,
+            FILENAME=filename,
+            TIME=tbb_starttime,
+            SAMPLE_NUMBER=tbb_samplenumber,
+            polarization=current_polarization,
+            filedir=filedir,
+            plotfiles=Pause.plotfiles
+            )
+
+        if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
+            print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
+            finish_file(status="FILE TOO LARGE")
+            continue
+
+        if min(datafile["DATA_LENGTH"])<min_data_length:
+            print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
+            finish_file(status="FILE TOO SMALL")
+            continue
 
         ########################################################################
         #Getting information from LORA if present
@@ -322,6 +440,12 @@ for current_polarization in polarizations:
                 lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
                 lora_energy=lora_event_info["Energy(eV)"]
 
+        results.update(dict(
+            pulse_direction_lora=lora_direction,
+            pulse_energy_lora=lora_energy,
+            pulse_core_lora=lora_core
+            ))
+        
         ########################################################################
         #Setting the parameter block with parameters for tasks
         ########################################################################
@@ -497,6 +621,16 @@ for current_polarization in polarizations:
         datafile["SELECTED_DIPOLES"]=good_antennas
         antenna_positions=datafile["ANTENNA_POSITIONS"]
 
+        results.update(dict(
+            BLOCK=block_number,
+            ndipoles=ndipoles,
+            antennas=dict(zip(range(ndipoles),good_antennas)),
+            bad_antennas=bad_antennas,
+            antenna_positions_station_XYZ_m=list(antenna_positions.vec()),
+            antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
+            antenna_positions_array_XYZ_m=list(metadata.convertITRFToLocal(datafile["ITRFANTENNA_POSITIONS"]).vec())
+            ))
+        
         #Getting original cabledelays
         cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
         cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
@@ -511,7 +645,9 @@ for current_polarization in polarizations:
             timeseries_data.read(datafile,"TIMESERIES_DATA")
         except RuntimeError:
             print "Error reading file - skipping this file"
+            finish_file(status="READ ERROR")
             continue
+        
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
         timeseries_data.par.xvalues.setUnit("","s")
@@ -587,11 +723,17 @@ for current_polarization in polarizations:
             pulse=pulses
 
         print "#LocatePulse: ",pulse.npeaks,"pulses found."
+
+        results.update(dict(
+            npeaks_found=pulse.npeaks
+            ))
+        
         if pulse.npeaks==0:
             print "************************************************************************"
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"
             print "ERROR: LocatePulseTrain: No pulses found!"
+            finish_file(status="NO PULSE")
             continue
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
@@ -755,40 +897,15 @@ for current_polarization in polarizations:
         pulse_height=beam_maxima.maxy.val()
         pulse_direction=direction.meandirection_azel_deg
 
-        results=dict(
-            TELESCOPE=datafile["TELESCOPE"],
-            ANTENNA_SET=datafile["ANTENNA_SET"],
-            NYQUIST_ZONE=datafile["NYQUIST_ZONE"][0],
-            SAMPLE_FREQUENCY=datafile["SAMPLE_FREQUENCY"][0],
-            FREQUENCY_RANGE=datafile["FREQUENCY_RANGE"][0],
-            NOF_DIPOLE_DATASETS=datafile["NOF_DIPOLE_DATASETS"],
-            DATA_LENGTH=datafile["DATA_LENGTH"][0],
-            SAMPLE_INTERVAL=sample_interval,
-            FILENAME=filename,
-            TIME=tbb_starttime,
-            SAMPLE_NUMBER=tbb_samplenumber,
-            BLOCK=block_number,
-            pulse_predicted=sample_number,
-            pulse_offset=sample_number-beam_maxima.maxx.val(),
-            BLOCKSIZE=blocksize,
-            polarization=current_polarization,
-            plotfiles=Pause.plotfiles,
-            filedir=filedir,
-            ndipoles=ndipoles,
-            antennas=dict(zip(range(ndipoles),good_antennas)),
-            antenna_positions_station_XYZ_m=list(antenna_positions.vec()),
-            antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
-            antenna_positions_array_XYZ_m=list(metadata.convertITRFToLocal(datafile["ITRFANTENNA_POSITIONS"]).vec()),
+        results.update(dict(
             flagged_delays=list(flagged_delays.vec()),
             flagged_cable_delays=list(flagged_cable_delays.vec()),
-            bad_antennas=bad_antennas,
             antennas_with_peaks=antennas_with_peaks,
             delay_quality_error=delay_quality_error,
             pulse_location=beam_maxima.maxx.val(),
             pulses_strength=list(pulses_strength.vec()),
             pulses_maxima_x=list(maxima_power.maxx),
             pulses_maxima_y=list(maxima_power.maxy),
-            npeaks_found=pulse.npeaks,
             pulses_timelags_ns=list(time_lags),
             pulse_start_sample=pulse.start,
             pulse_end_sample=pulse.end,
@@ -796,12 +913,9 @@ for current_polarization in polarizations:
             pulse_height=pulse_height,
             pulse_normalized_height=pulse_normalized_height,
             pulse_direction=pulse_direction,
-            pulse_direction_lora=lora_direction,
-            pulse_energy_lora=lora_energy,
-            pulse_core_lora=lora_core,
             pulse_direction_delta_delays_start=direction.delta_delays_mean_history[0],
             pulse_direction_delta_delays_final=direction.delta_delays_mean_history[-1]
-            )
+            ))
 
         event.par.quality=quality
         event.par.timeseries_data=pulse.timeseries_data_cut
@@ -813,76 +927,4 @@ for current_polarization in polarizations:
         f.write("#"+outfilename+"\nresults="+str(results))
         f.close()
 
-        ########################################################################
-        #Writing summary output to html file
-        ########################################################################
-
-        if not os.path.exists(summaryfilename):
-            summaryfile=open(summaryfilename,"w")
-            summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
-            summaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format(topdir_name))
-            summaryfile.write("<i>File created on {0:s} by user {1:s}.</i><br>\n".format(file_time,os.getlogin()))
-            summaryfile.write("Directories: <a href=pol0>pol0</a>, <a href=pol1>pol1</a><p>\n")
-            summaryfile.close()
-            
-        summaryfile=open(summaryfilename,"a")
-        summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}<br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1]))
-        summaryfile.close()
-
-        if delay_quality_error<1:
-            topsummaryfile=open(topsummaryfilename,"a")
-            topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}<br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1]))
-            topsummaryfile.close()
-
-        htmlfile=open(htmlfilename,"w")
-        htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
-        htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
-        htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
-        htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2} eV, norm. pulse={norm:6.2f}<p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1]))
-
-        htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
-        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
-        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parfiles"))
-        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Logger"))
-        htmlfile.write("<a href=#{0:s}>{0:s}</a><p>\n".format("Plotfiles"))
-        htmlfile.write(", ".join(['<a href=#{0:s}>{1:s}</a>'.format(os.path.split(f)[-1],os.path.split(f)[-1].split("pol"+str(current_polarization)+"-")[-1][:-4]) for f in results["plotfiles"]]))
-
-        
-        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parameters"))
-
-        l=results.items(); l.sort()
-        htmlfile.write(", ".join(["<a href=#{0:s}>{0:s}</a>".format(k) for k,v in l])+"<p>\n")
-        htmlfile.write('<table border="1">\n'.format())
-        for k,v in l:
-            htmlfile.write("<tr><td><b><a name={0:s}>{0:s}</a></b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
-        htmlfile.write("</table>\n".format())
-
-        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parfiles"))
-        for i in range(nparfiles,len(tasks.task_parfiles)):
-            if os.path.exists(tasks.task_parfiles[i]):
-                os.rename(tasks.task_parfiles[i],tasks.task_parfiles[i]+".txt")
-                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
-
-        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Logger"))
-        htmlfile.write("<PRE>\n"+tlog(doprint=False)+"</PRE>\n")
-
-        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
-        for f in results["plotfiles"]:
-            htmlfile.write('<a name="{0:s}" href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><a href=#top>(back to top)</a><p>\n'.format(os.path.split(f)[-1]))
-
-        htmlfile.write("</body></html>\n")
-        htmlfile.close()    
-
-        #print logfile
-        tlog()
-        
-        print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
-        print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
-        print "which can be found in `results.py`(use, e.g., execfile)."
-        print "Shifted time series data of all antennas is in event.par.time_series."
-        print "Open",htmlfilename,"in your browser to get a summary."
-        print "-----------------------------------------------------------------------------------------------------------"
-        print "Finished cr_event after",time.clock()-t0,"seconds."
-        print "-----------------------------------------------------------------------------------------------------------\n"
-        plt.ion()
-    
+        finish_file(status="OK" if delay_quality_error<1 else "BAD")
