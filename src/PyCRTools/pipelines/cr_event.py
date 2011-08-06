@@ -110,6 +110,7 @@ parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh p
 parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
 flag_delays = False
+minimum_number_good_antennas=8
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -549,7 +550,11 @@ for current_polarization in polarizations:
             print "# Antenna Flagging: All antennas OK!"
             averagespectrum_good_antennas=avspectrum.power
 
-        #raise KeyboardInterrupt("Forced end of execution!")
+        results["ndipoles"]=ndipoles
+        if ndipoles<minimum_number_good_antennas:
+            print "#ERROR: To few good antennas ("+str(ndipoles)+")
+            finish_file(status="TOO FEW ANTENNAS")
+            continue
 
         ########################################################################
         #Baseline Fitting 
@@ -572,6 +577,12 @@ for current_polarization in polarizations:
             [good_antennas.remove(i) for i in bad_antennas] # remove the bad antennas
             good_antennas_index=[antenna_index[i] for i in good_antennas] # get the index numbers of good antennas pointing to position in array
             ndipoles=len(good_antennas)
+
+            results["ndipoles"]=ndipoles
+            if ndipoles<minimum_number_good_antennas:
+                print "#ERROR: To few good antennas ("+str(ndipoles)+")
+                finish_file(status="TOO FEW ANTENNAS")
+                continue
 
             #Create new average spectrum with only good antennas
             print "# Antenna Flagging:",len(bad_antennas),"bad antennas!"
@@ -623,7 +634,6 @@ for current_polarization in polarizations:
 
         results.update(dict(
             BLOCK=block_number,
-            ndipoles=ndipoles,
             antennas=dict(zip(range(ndipoles),good_antennas)),
             bad_antennas=bad_antennas,
             antenna_positions_station_XYZ_m=list(antenna_positions.vec()),
