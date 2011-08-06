@@ -191,7 +191,7 @@ else:
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
 timeseries_data_cut_pulse_width=12
-
+delay_quality_error=99
 #------------------------------------------------------------------------
 plt.ioff()
 
