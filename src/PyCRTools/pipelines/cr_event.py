@@ -211,17 +211,17 @@ def finish_file(status="OK"):
         summaryfile.write("Directories: <a href=pol0>pol0</a>, <a href=pol1>pol1</a><p>\n")
         summaryfile.close()
 
-    if not os.path.exists(topsummaryfilename):
-        topsummaryfile=open(topsummaryfilename,"w")
+    if not os.path.exists(goodsummaryfilename):
+        topsummaryfile=open(goodsummaryfilename,"w")
         topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of good events"))
-        topsummaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format("CR Pipeline Summary FILE of good events"))
+        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary FILE of good events"))
         topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
         topsummaryfile.close()
 
     if not os.path.exists(allsummaryfilename):
-        topsummaryfile=open(topsummaryfilename,"w")
+        topsummaryfile=open(allsummaryfilename,"w")
         topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of all events"))
-        topsummaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format("CR Pipeline Summary FILE of all events"))
+        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary FILE of all events"))
         topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
         topsummaryfile.close()
 
@@ -230,7 +230,7 @@ def finish_file(status="OK"):
     summaryfile.close()
 
     if delay_quality_error<1:
-        topsummaryfile=open(topsummaryfilename,"a")
+        topsummaryfile=open(goodsummaryfilename,"a")
         topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
 
@@ -335,8 +335,8 @@ for current_polarization in polarizations:
         result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
         htmlfilename=os.path.join(outputdir_with_subdirectories,"index.html")
         summaryfilename=os.path.join(outputdir_event,"index.html")
-        topsummaryfilename=os.path.join(outputdir,"summary.html")
-        allsummaryfilename=os.path.join(outputdir,"summary-all.html")
+        goodsummaryfilename=os.path.join(outputdir,"summary-good.html")
+        allsummaryfilename=os.path.join(outputdir,"summary.html")
 
         tasks.task_write_parfiles=True
         tasks.task_outputdir=outputdir_with_subdirectories
@@ -540,6 +540,12 @@ for current_polarization in polarizations:
         good_antennas_index=[antenna_index[i] for i in good_antennas] # get the index numbers of good antennas pointing to position in array
         ndipoles=len(good_antennas)
 
+        results["ndipoles"]=ndipoles
+        if ndipoles<minimum_number_good_antennas:
+            print "#ERROR: To few good antennas ("+str(ndipoles)+")"
+            finish_file(status="TOO FEW ANTENNAS")
+            continue
+
         #Create new average spectrum with only good antennas
         if len(bad_antennas)>0:
             print "# Antenna Flagging:",len(bad_antennas),"bad antennas!"
@@ -549,12 +555,6 @@ for current_polarization in polarizations:
         else:
             print "# Antenna Flagging: All antennas OK!"
             averagespectrum_good_antennas=avspectrum.power
-
-        results["ndipoles"]=ndipoles
-        if ndipoles<minimum_number_good_antennas:
-            print "#ERROR: To few good antennas ("+str(ndipoles)+")"
-            finish_file(status="TOO FEW ANTENNAS")
-            continue
 
         ########################################################################
         #Baseline Fitting 
