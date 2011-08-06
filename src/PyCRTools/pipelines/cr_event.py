@@ -193,12 +193,12 @@ else:
 #------------------------------------------------------------------------
 # Initialization of some parameters
 #------------------------------------------------------------------------
-delay_quality_error=99
+delay_quality_error=99.
 file_time_short=""
-lora_direction=False; lora_energy=-1.0; lora_core=(0,0)
-pulse_normalized_height=-1
-pulse_height=-1
-pulse_direction=(-99,-99)
+lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0)
+pulse_normalized_height=-1.0
+pulse_height=-1.0
+pulse_direction=(-99.,-99.)
 pulse_npeaks=-1
 tasks.task_logger=[]
 
