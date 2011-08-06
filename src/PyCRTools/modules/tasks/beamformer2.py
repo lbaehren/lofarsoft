@@ -518,7 +518,6 @@ class BeamFormer2(tasks.Task):
             print "To read back the beam formed data type: bm=cr.hArrayRead('"+self.spectrum_file+"')"
             print "To calculate or plot the invFFTed times series of one block, use 'Task.tcalc(bm)' or 'Task.tplot(bm)'."
         if self.doplot:
-            cr.plt.ion()
             if wasinteractive: cr.plt.ion()
 
     def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):

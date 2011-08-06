@@ -109,8 +109,6 @@ parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip f
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
-flag_delays = False
-minimum_number_good_antennas=8
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -125,13 +123,17 @@ from pycrtools import lora
 
 #plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
 
-t0=time.clock()
-start_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
-tasks.task_logger=[]
+
 
 #------------------------------------------------------------------------
 # Main input parameters
 #------------------------------------------------------------------------
+t0=time.clock()
+flag_delays = False
+minimum_number_good_antennas=8
+timeseries_data_cut_pulse_width=12
+start_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
+
 if not parser.get_prog_name()=="cr_event.py":
 #   Program was run from within python
     filefilter="~/LOFAR/work/CR/lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
@@ -188,13 +190,23 @@ else:
     min_data_length=options.min_data_length
 
 
+#------------------------------------------------------------------------
+# Initialization of some parameters
+#------------------------------------------------------------------------
+delay_quality_error=99
+file_time_short=""
+lora_direction=False; lora_energy=-1.0; lora_core=(0,0)
+pulse_normalized_height=-1
+pulse_height=-1
+pulse_direction=(-99,-99)
+pulse_npeaks=-1
+tasks.task_logger=[]
 
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
-timeseries_data_cut_pulse_width=12
-delay_quality_error=99
-#------------------------------------------------------------------------
+
 plt.ioff()
+#------------------------------------------------------------------------
 
 
 
@@ -214,35 +226,35 @@ def finish_file(status="OK"):
     if not os.path.exists(goodsummaryfilename):
         topsummaryfile=open(goodsummaryfilename,"w")
         topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of good events"))
-        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary FILE of good events"))
+        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary File of Good Events"))
         topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
         topsummaryfile.close()
 
     if not os.path.exists(allsummaryfilename):
         topsummaryfile=open(allsummaryfilename,"w")
         topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of all events"))
-        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary FILE of all events"))
+        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary File of All Events"))
         topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
         topsummaryfile.close()
 
     summaryfile=open(summaryfilename,"a")
-    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     summaryfile.close()
 
     if delay_quality_error<1:
         topsummaryfile=open(goodsummaryfilename,"a")
-        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
 
     topsummaryfile=open(allsummaryfilename,"a")
-    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     topsummaryfile.close()
 
     htmlfile=open(htmlfilename,"w")
     htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
     htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
     htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
-    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
 
     htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
     htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
@@ -435,7 +447,6 @@ for current_polarization in polarizations:
 
         lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
-        lora_direction=False; lora_energy=-1.0; lora_core=(0,0)
         if lora_event_info:
                 lora_direction=(lora_event_info["Az"],lora_event_info["El"])
                 lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
@@ -732,13 +743,14 @@ for current_polarization in polarizations:
         else:
             pulse=pulses
 
-        print "#LocatePulse: ",pulse.npeaks,"pulses found."
+        pulse_npeaks=pulse.npeaks
+        print "#LocatePulse: ",pulse_npeaks,"pulses found."
 
         results.update(dict(
-            npeaks_found=pulse.npeaks
+            npeaks_found=pulse_npeaks
             ))
         
-        if pulse.npeaks==0:
+        if pulse_npeaks==0:
             print "************************************************************************"
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"

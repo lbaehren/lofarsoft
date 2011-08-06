@@ -808,7 +808,6 @@ class AverageSpectrum(tasks.Task):
         fftplan = cr.FFTWPlanManyDftR2c(self.blocklen*self.nblocks, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         if self.doplot:
-            cr.plt.ioff()
             self.plot_finish.plotfiles=[]        
 
         npass = self.nchunks*self.stride
@@ -1162,8 +1161,6 @@ class AverageSpectrum(tasks.Task):
                     self.plot_finish(name="-dynamic_spectrum_all_files_zoom",same_row=True)
                     self.all_avspec[self.plot_zoom_slice].plot(title=title)
                     self.plot_finish(name="-average_spectrum_all_files_zoom",same_row=True)
-
-                cr.plt.ion()
 
         #Final HTML output
         if self.write_html:
