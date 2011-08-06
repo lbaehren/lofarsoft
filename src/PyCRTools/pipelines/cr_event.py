@@ -238,23 +238,23 @@ def finish_file(status="OK"):
         topsummaryfile.close()
 
     summaryfile=open(summaryfilename,"a")
-    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2f} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     summaryfile.close()
 
     if delay_quality_error<1:
         topsummaryfile=open(goodsummaryfilename,"a")
-        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2f} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
 
     topsummaryfile=open(allsummaryfilename,"a")
-    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2f} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     topsummaryfile.close()
 
     htmlfile=open(htmlfilename,"w")
     htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
     htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
     htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
-    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2f} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
 
     htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
     htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
