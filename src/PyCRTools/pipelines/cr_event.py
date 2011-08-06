@@ -190,18 +190,6 @@ else:
     min_data_length=options.min_data_length
 
 
-#------------------------------------------------------------------------
-# Initialization of some parameters
-#------------------------------------------------------------------------
-delay_quality_error=99.
-file_time_short=""
-lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0)
-pulse_normalized_height=-1.0
-pulse_height=-1.0
-pulse_direction=(-99.,-99.)
-pulse_npeaks=-1
-tasks.task_logger=[]
-
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
 
@@ -318,6 +306,18 @@ for current_polarization in polarizations:
     for full_filename in files:
         file_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
         file_time_short=time.strftime("%Y-%m-%d  %H:%M:%S")
+        #------------------------------------------------------------------------
+        # Initialization of some parameters
+        #------------------------------------------------------------------------
+        file_time_short=""
+        delay_quality_error=99.
+        lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0)
+        pulse_normalized_height=-1.0
+        pulse_height=-1.0
+        pulse_direction=(-99.,-99.)
+        pulse_npeaks=-1
+        tasks.task_logger=[]
+
 
         ########################################################################
         #Setting filenames and directories
@@ -435,7 +435,12 @@ for current_polarization in polarizations:
         if os.path.exists(lora_logfile):
             (tbb_starttime_sec,tbb_starttime_nsec)=lora.nsecFromSec(tbb_starttime,logfile=lora_logfile)
             if tbb_starttime_sec:
-                (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
+                try:
+                    (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
+                except ValueError:
+                    print "#ERROR - LORA trigger information not found"
+                    finish_file(status="NO TRIGGER")
+                    continue
                 print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
                 if block_number<0:
                     block_number=block_number_lora
@@ -444,7 +449,7 @@ for current_polarization in polarizations:
                 print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
         else:
             print "WARNING: No LORA logfile found - ",lora_logfile
-
+            
         lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
         if lora_event_info:
