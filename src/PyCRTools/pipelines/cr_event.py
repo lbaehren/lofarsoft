@@ -268,7 +268,8 @@ def finish_file(status="OK"):
             htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
 
     htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Logger"))
-    htmlfile.write("<PRE>\n"+tlog(doprint=False)+"</PRE>\n")
+    logstring=tlog(doprint=False)
+    if logstring: htmlfile.write("<PRE>\n"+logstring+"</PRE>\n")
 
     htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
     for f in results["plotfiles"]:
@@ -286,9 +287,8 @@ def finish_file(status="OK"):
     print "Shifted time series data of all antennas is in event.par.time_series."
     print "Open",htmlfilename,"in your browser to get a summary."
     print "-----------------------------------------------------------------------------------------------------------"
-    print "Finished cr_event after",time.clock()-t0,"seconds."
+    print "Finished cr_event after",time.clock()-t0,"seconds at",time.strftime("%A, %Y-%m-%d at %H:%M:%S")
     print "-----------------------------------------------------------------------------------------------------------\n"
-    plt.ion()
     
 
 
@@ -317,7 +317,7 @@ for current_polarization in polarizations:
         pulse_direction=(-99.,-99.)
         pulse_npeaks=-1
         tasks.task_logger=[]
-
+        
 
         ########################################################################
         #Setting filenames and directories
@@ -357,6 +357,7 @@ for current_polarization in polarizations:
         #Removing old parfiles, if they exist
         [os.remove(f) for f in listFiles([os.path.join(outputdir_with_subdirectories,"*.par"),os.path.join(outputdir_with_subdirectories,"*.par.txt"),os.path.join(outputdir_with_subdirectories,"*.gif"),os.path.join(outputdir_with_subdirectories,"*.png")])]
 
+        print "Start Time:",file_time
         print "filename    -->",filename
         print "filedir     -->",filedir
         print "outfilename -->",outfilename
@@ -955,3 +956,5 @@ for current_polarization in polarizations:
         f.close()
 
         finish_file(status="OK" if delay_quality_error<1 else "BAD")
+
+plt.ion()
