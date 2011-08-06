@@ -1127,7 +1127,9 @@ class AverageSpectrum(tasks.Task):
             self.rms_rms=cr.asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
             self.npeaks=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
             self.npeaks_rms=cr.asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
-            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
+            self.homogeneity_factor=-self.npeaks_rms/2./self.npeaks if self.npeaks>0 else 0.5
+            self.homogeneity_factor-=self.rms_rms/2./self.rms if self.rms>0 else 0.5
+            self.homogeneity_factor+=1
             hprint("Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
             hprint("RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
             hprint("NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")

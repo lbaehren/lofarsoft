@@ -3,7 +3,7 @@ On Altair:
 
 sudo chmod a+x $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py
 
-$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py /data/VHECR/LORAtriggered/data/VHECR_LORA-*.h5 --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/results/20100704 --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=16777216 --min_data_length=1 --skip_existing_files --search_window_width=2000 --nsigma=3 -R > logfile.txt &
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py /data/VHECR/LORAtriggered/data/VHECR_LORA-*.h5 --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/results/20100704 --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=16777216 --min_data_length=1 --skip_existing_files --search_window_width=2000 --nsigma=3 -R >& logfile.txt &
 
 tail -f logfile.txt
 
