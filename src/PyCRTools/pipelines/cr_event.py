@@ -56,7 +56,7 @@ results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for
 ::
     chmod a+x $PYP/pipelines/cr_event.py
 
-    $PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=5000 --nsigma=3 -R -p0
+    $PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=5000 --nsigma=3 --max_data_length=16777216 -R -p0
 
 ------------------------------------------------------------------------
 
@@ -100,9 +100,12 @@ parser.add_option("-b","--block", type="int", default=-1,help="in which block do
 parser.add_option("-w","--search_window_width", type="int", default=-1,help="Width of search window for peak around sample_number (in samples)")
 parser.add_option("-n","--sample_number", type="int", default=-1,help="Sample number wherer peak is expected")
 parser.add_option("-s","--blocksize", type="int", default=2**16,help="Blocksize with which to read blocks of data.")
+parser.add_option("--max_data_length", type="int", default=-1,help="Maximum length the file is allowed to have (avoid hangups for corrupted files)")
+parser.add_option("--min_data_length", type="int", default=-1,help="Minimum length the file should have (sanity check)")
 parser.add_option("-T","--timestamp", type="str", default="",help="Timestamp of observation for creating output directory (if not to be deduced from filename)")
 parser.add_option("-S","--station", type="str", default="",help="Station name for data set for creating output directory (if not to be deduced from filename)")
 parser.add_option("-q","--nopause", action="store_true",help="Do not pause after each plot and display each figure interactively")
+parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip file if results directory already exists")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
@@ -117,9 +120,12 @@ if parser.get_prog_name()=="cr_event.py":
 
 from pycrtools import *
 from pycrtools import lora
-plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
+
+
+#plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
 
 t0=time.clock()
+start_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
 tasks.task_logger=[]
 
 #------------------------------------------------------------------------
@@ -170,12 +176,17 @@ else:
     nsigma = options.nsigma
     sample_number = options.sample_number
     blocksize = options.blocksize
+    skip_existing_files = options.skip_existing_files
     refresh = not options.norefresh
     plotpause = (not options.nopause and refresh)
     maximum_allowed_delay = options.maximum_allowed_delay
     search_window=False
     search_window_width=options.search_window_width
     sample_number=options.sample_number
+    max_data_length=options.max_data_length
+    min_data_length=options.min_data_length
+
+
 
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
@@ -192,7 +203,11 @@ polarizations=[0,1] if polarization<0 else [polarization]
 
 for current_polarization in polarizations:
     files = listFiles(filefilter)
+    if not files:
+        print "ERROR: No files found - ",filefilter
     for full_filename in files:
+        file_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
+        file_time_short=time.strftime("%Y-%m-%d  %H:%M:%S")
 
         ########################################################################
         #Setting filenames and directories
@@ -212,11 +227,17 @@ for current_polarization in polarizations:
         time_stamp=filename_split[-2] if not timestamp else timestamp
 
         outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
-        outputdir_with_subdirectories=os.path.join(outputdir_expanded,projectname+"-"+time_stamp,"pol"+str(current_polarization),station_name)
+        topdir_name=projectname+"-"+time_stamp
+        reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)  
+        reldir_from_top = os.path.join(topdir_name,"pol"+str(current_polarization),station_name)  
+        outputdir_event=os.path.join(outputdir_expanded,topdir_name)
+        outputdir_with_subdirectories=os.path.join(outputdir_event,reldir_from_event)
         outfilename=rootfilename+"-pol"+str(current_polarization)
 
         result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
         htmlfilename=os.path.join(outputdir_with_subdirectories,"index.html")
+        summaryfilename=os.path.join(outputdir_event,"index.html")
+        topsummaryfilename=os.path.join(outputdir,"summary.html")
 
         tasks.task_write_parfiles=True
         tasks.task_outputdir=outputdir_with_subdirectories
@@ -241,7 +262,11 @@ for current_polarization in polarizations:
             print "# Creating output directory",outputdir_with_subdirectories
             os.makedirs(outputdir_with_subdirectories)
         else:
-            print "# Using existing output directory",outputdir_with_subdirectories
+            if skip_existing_files:
+                print "# Output directory already exists - skipping file:",outputdir_with_subdirectories
+                continue
+            else:
+                print "# Using existing output directory",outputdir_with_subdirectories
 
         #Reset the Pause instance, which will pause (or not) after each plot and write the plotfiles
         Pause.plotfiles=[]
@@ -253,10 +278,24 @@ for current_polarization in polarizations:
         #Open the data file
         ########################################################################
         print "---> Open data file",full_filename
-        datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
+        try:
+            datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
+        except RuntimeError:
+            print "ERROR opening file - skipping this file!"
+            continue
+
+        if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
+            print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
+            continue
+
+        if min(datafile["DATA_LENGTH"])<min_data_length:
+            print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
+            continue
+
         tbb_starttime=datafile["TIME"][0]
         tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
+            
 
         ########################################################################
         #Getting information from LORA if present
@@ -277,7 +316,7 @@ for current_polarization in polarizations:
 
         lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
-        lora_direction=False; lora_energy=False; lora_core=False
+        lora_direction=False; lora_energy=-1.0; lora_core=(0,0)
         if lora_event_info:
                 lora_direction=(lora_event_info["Az"],lora_event_info["El"])
                 lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
@@ -468,7 +507,11 @@ for current_polarization in polarizations:
         #Read block with peak and FFT
         ########################################################################
         timeseries_data=datafile["EMPTY_TIMESERIES_DATA"]
-        timeseries_data.read(datafile,"TIMESERIES_DATA")
+        try:
+            timeseries_data.read(datafile,"TIMESERIES_DATA")
+        except RuntimeError:
+            print "Error reading file - skipping this file"
+            continue
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
         timeseries_data.par.xvalues.setUnit("","s")
@@ -533,9 +576,10 @@ for current_polarization in polarizations:
             tbeam_incoherent=None
 
         pulses=trerun("LocatePulseTrain","separate",timeseries_data2,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
-        antennas_with_peaks=list(hArray(good_antennas)[pulses.peaks_found_list].vec())
-        print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
-        print "#LocatePulses - antennas with pulses:",
+        if pulses.npeaks>0:
+            antennas_with_peaks=list(asvec(hArray(good_antennas)[pulses.peaks_found_list]))
+            print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
+            print "#LocatePulses - antennas with pulses:",
 
         if lora_direction:
             pulse=trerun("LocatePulseTrain","",timeseries_data2,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
@@ -548,7 +592,7 @@ for current_polarization in polarizations:
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"
             print "ERROR: LocatePulseTrain: No pulses found!"
-            break
+            continue
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
@@ -605,7 +649,11 @@ for current_polarization in polarizations:
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
 
-        if abs(direction.delta_delays_rms_history[0])>maximum_allowed_delay or abs(direction.delta_delays_mean_history[0])>maximum_allowed_delay:
+        scrt=direction.residual_delays.vec(); scrt.abs();
+        delay_quality_error=scrt.median()/maximum_allowed_delay
+        print "#Delay Quality Error:",delay_quality_error
+
+        if delay_quality_error>1:
             print "************************************************************************"
             print "********ATTENTION: Fitted delays deviate too strongly!******************"
             print "********            check antennna positions          ******************"
@@ -703,6 +751,10 @@ for current_polarization in polarizations:
         #Preparing and writing results record
         ########################################################################
 
+        pulse_normalized_height=beam_maxima.maxy.val()/lora_energy*10**17 if lora_energy>0 else -1.0 #Need Horneffer formula here
+        pulse_height=beam_maxima.maxy.val()
+        pulse_direction=direction.meandirection_azel_deg
+
         results=dict(
             TELESCOPE=datafile["TELESCOPE"],
             ANTENNA_SET=datafile["ANTENNA_SET"],
@@ -731,6 +783,7 @@ for current_polarization in polarizations:
             flagged_cable_delays=list(flagged_cable_delays.vec()),
             bad_antennas=bad_antennas,
             antennas_with_peaks=antennas_with_peaks,
+            delay_quality_error=delay_quality_error,
             pulse_location=beam_maxima.maxx.val(),
             pulses_strength=list(pulses_strength.vec()),
             pulses_maxima_x=list(maxima_power.maxx),
@@ -740,8 +793,9 @@ for current_polarization in polarizations:
             pulse_start_sample=pulse.start,
             pulse_end_sample=pulse.end,
             pulse_time_ms=pulse_time_ms,
-            pulse_height=beam_maxima.maxy.val(),
-            pulse_direction=direction.meandirection_azel_deg,
+            pulse_height=pulse_height,
+            pulse_normalized_height=pulse_normalized_height,
+            pulse_direction=pulse_direction,
             pulse_direction_lora=lora_direction,
             pulse_energy_lora=lora_energy,
             pulse_core_lora=lora_core,
@@ -762,24 +816,45 @@ for current_polarization in polarizations:
         ########################################################################
         #Writing summary output to html file
         ########################################################################
+
+        if not os.path.exists(summaryfilename):
+            summaryfile=open(summaryfilename,"w")
+            summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
+            summaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format(topdir_name))
+            summaryfile.write("<i>File created on {0:s} by user {1:s}.</i><br>\n".format(file_time,os.getlogin()))
+            summaryfile.write("Directories: <a href=pol0>pol0</a>, <a href=pol1>pol1</a><p>\n")
+            summaryfile.close()
+            
+        summaryfile=open(summaryfilename,"a")
+        summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}<br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1]))
+        summaryfile.close()
+
+        if delay_quality_error<1:
+            topsummaryfile=open(topsummaryfilename,"a")
+            topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2} eV, norm. pulse={6:6.2f}<br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1]))
+            topsummaryfile.close()
+
         htmlfile=open(htmlfilename,"w")
         htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
         htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
-        htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><p>\n".format(
-            time.strftime("%A, %Y-%m-%d at %H:%M:%S"),os.getlogin(),time.clock()-t0))
+        htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
+        htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2} eV, norm. pulse={norm:6.2f}<p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse.npeaks,az=pulse_direction[0],el=pulse_direction[1]))
 
-
+        htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
         htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
         htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parfiles"))
         htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Logger"))
         htmlfile.write("<a href=#{0:s}>{0:s}</a><p>\n".format("Plotfiles"))
+        htmlfile.write(", ".join(['<a href=#{0:s}>{1:s}</a>'.format(os.path.split(f)[-1],os.path.split(f)[-1].split("pol"+str(current_polarization)+"-")[-1][:-4]) for f in results["plotfiles"]]))
+
         
         htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parameters"))
 
         l=results.items(); l.sort()
+        htmlfile.write(", ".join(["<a href=#{0:s}>{0:s}</a>".format(k) for k,v in l])+"<p>\n")
         htmlfile.write('<table border="1">\n'.format())
         for k,v in l:
-            htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
+            htmlfile.write("<tr><td><b><a name={0:s}>{0:s}</a></b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
         htmlfile.write("</table>\n".format())
 
         htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parfiles"))
@@ -793,7 +868,7 @@ for current_polarization in polarizations:
 
         htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
         for f in results["plotfiles"]:
-            htmlfile.write('<a href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><p>\n'.format(os.path.split(f)[-1]))
+            htmlfile.write('<a name="{0:s}" href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><a href=#top>(back to top)</a><p>\n'.format(os.path.split(f)[-1]))
 
         htmlfile.write("</body></html>\n")
         htmlfile.close()    
