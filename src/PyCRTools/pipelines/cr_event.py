@@ -380,8 +380,8 @@ for current_polarization in polarizations:
             print "# Creating output directory",outputdir_with_subdirectories
             os.makedirs(outputdir_with_subdirectories)
         else:
-            if skip_existing_files:
-                print "# Output directory already exists - skipping file:",outputdir_with_subdirectories
+            if skip_existing_files and os.path.exists(htmlfilename):
+                print "# Resultfile ("+htmlfilename+") already exists - skipping file:",outputdir_with_subdirectories
                 continue
             else:
                 print "# Using existing output directory",outputdir_with_subdirectories
