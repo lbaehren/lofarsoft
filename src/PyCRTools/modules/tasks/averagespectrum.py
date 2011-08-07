@@ -1044,6 +1044,23 @@ class AverageSpectrum(tasks.Task):
             # Now prepare writing the output for the different spectra
             self.frequencies.fillrange((self.start_frequency)/10**6,self.delta_frequency/10**6)
 
+            if self.qualitycheck and self.nantennas_total>1:
+                self.mean=cr.asvec(self.mean_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
+                self.mean_rms=cr.asvec(self.mean_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.mean)
+                self.rms=cr.asvec(self.rms_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
+                self.rms_rms=cr.asvec(self.rms_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.rms)
+                self.npeaks=cr.asvec(self.npeaks_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
+                self.npeaks_rms=cr.asvec(self.npeaks_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.npeaks)
+                self.homogeneity_factor=-self.npeaks_rms/2./self.npeaks if self.npeaks>0 else 0.5
+                self.homogeneity_factor-=self.rms_rms/2./self.rms if self.rms>0 else 0.5
+                self.homogeneity_factor+=1
+                hprint("Mean values for all antennas in file: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
+                hprint("RMS values for all antennas in file: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
+                hprint("NPeaks values for all antennas in file: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")
+                hprint("Quality factor =",self.homogeneity_factor * 100,"%")
+                self.updateHeader(self.power,["mean","mean_rms","rms","rms_rms","npeaks","npeaks_rms","homogeneity_factor","rms_antenna","npeaks_antenna","antennacharacteristics"],
+                                  fftLength="speclen",blocksize="fullsize")
+
             if self.calc_averagespectrum:
                 self.nspectraadded_per_antenna.max(1)
                 self.power2[...] /= self.nspectraadded_per_antenna.vec()
@@ -1058,6 +1075,7 @@ class AverageSpectrum(tasks.Task):
                     if self.plot_zoom_slice:
                         self.power2[self.plot_antenna,self.plot_zoom_slice].plot(title=title)
                         self.plot_finish(name="-average_spectrum_slice",same_row=True)
+                        
             if self.calc_incoherent_sum:
                 #Normalize the incoherent time series power
                 self.ntimeseries_data_added_per_chunk.max(1)
@@ -1097,21 +1115,6 @@ class AverageSpectrum(tasks.Task):
                     self.all_avspec += self.avspec
                     self.all_dynspec[fnumber].copy(self.avspec)
             
-            if self.qualitycheck and self.nantennas_total>1:
-                self.mean=cr.asvec(self.mean_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
-                self.mean_rms=cr.asvec(self.mean_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.mean)
-                self.rms=cr.asvec(self.rms_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
-                self.rms_rms=cr.asvec(self.rms_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.rms)
-                self.npeaks=cr.asvec(self.npeaks_antenna[self.nantennas_total_last_file:self.nantennas_total]).mean()
-                self.npeaks_rms=cr.asvec(self.npeaks_antenna[self.nantennas_total_last_file:self.nantennas_total]).stddev(self.npeaks)
-                self.homogeneity_factor=-self.npeaks_rms/2./self.npeaks if self.npeaks>0 else 0.5
-                self.homogeneity_factor-=self.rms_rms/2./self.rms if self.rms>0 else 0.5
-                self.homogeneity_factor+=1
-                hprint("Mean values for all antennas in file: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
-                hprint("RMS values for all antennas in file: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
-                hprint("NPeaks values for all antennas in file: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")
-                hprint("Quality factor =",self.homogeneity_factor * 100,"%")
-
             self.nantennas_total_last_file = self.nantennas_total
 
             #Write hmtl results file already now.

@@ -31,32 +31,35 @@ beamforming.
                         consider something to be wrong
 ======================= =================================================================
 
+For more help on more parameters run ``cr_event.py --help``.
+
 **Results:**
 
 Data and results are stored in an hArray and its header. This can be
 read back with ``event=hArrayRead(filename-polN.results)``, (filename
-without the .h5 ending) in the ``outputdir/filename.dir`` directory
-where all output can be found.
+without the .h5 ending) in the ``outputdir/project-timestamp/polN/NNNN`` directory where all
+output for station NNN can be found.
 
 Some basic results are stored in the ``event.par.results`` dict. The
 quality information dict is in ``event.par.quality``.  The shifted
 time series data (corrected for time travel and cable delay) of all
 antennas is in ``event.par.timeseries_data``. A summary of the ouput
 with all figures can be viwed with a web browser from 
-outputdir/filename.dir/index.html.
+outputdir/project-timestamp/polN/NNNN/index.html.
 
 The results dict can also be read stand-alone from the file
 results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for ``results``.
 
-
+There is also a summary of the results ``summary.html`` and
+``summary-good.html``in the top level results directory.
 
 **Example:**
 
 *Command line use:*
 ::
-    chmod a+x $PYP/pipelines/cr_event.py
+    chmod a+x $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py
 
-    $PYP/pipelines/cr_event.py '~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5' --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=5000 --nsigma=3 --max_data_length=16777216 -R -p0
+    $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=2000 --nsigma=3 --max_data_length=12289024 -R -p0
 
 ------------------------------------------------------------------------
 
@@ -128,7 +131,6 @@ from pycrtools import lora
 #------------------------------------------------------------------------
 # Main input parameters
 #------------------------------------------------------------------------
-t0=time.clock()
 flag_delays = False
 minimum_number_good_antennas=8
 timeseries_data_cut_pulse_width=12
@@ -188,7 +190,7 @@ else:
     sample_number=options.sample_number
     max_data_length=options.max_data_length
     min_data_length=options.min_data_length
-
+    maxnchunks=max_data_length/blocksize
 
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
@@ -198,11 +200,14 @@ plt.ioff()
 
 
 
-def finish_file(status="OK"):
+def finish_file(laststatus=""):
     ########################################################################
     #Writing summary output to html file
     ########################################################################
 
+    if laststatus: statuslist.append(laststatus)
+    status="/".join(statuslist)
+        
     if not os.path.exists(summaryfilename):
         summaryfile=open(summaryfilename,"w")
         summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
@@ -226,23 +231,23 @@ def finish_file(status="OK"):
         topsummaryfile.close()
 
     summaryfile=open(summaryfilename,"a")
-    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2f} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     summaryfile.close()
 
     if delay_quality_error<1:
         topsummaryfile=open(goodsummaryfilename,"a")
-        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2f} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
 
     topsummaryfile=open(allsummaryfilename,"a")
-    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2f} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     topsummaryfile.close()
 
     htmlfile=open(htmlfilename,"w")
     htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
     htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
     htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
-    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2f} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2g} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
 
     htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
     htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
@@ -304,12 +309,12 @@ for current_polarization in polarizations:
     if not files:
         print "ERROR: No files found - ",filefilter
     for full_filename in files:
+        t0=time.clock()
         file_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
         file_time_short=time.strftime("%Y-%m-%d  %H:%M:%S")
         #------------------------------------------------------------------------
         # Initialization of some parameters
         #------------------------------------------------------------------------
-        file_time_short=""
         delay_quality_error=99.
         lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0)
         pulse_normalized_height=-1.0
@@ -317,6 +322,7 @@ for current_polarization in polarizations:
         pulse_direction=(-99.,-99.)
         pulse_npeaks=-1
         tasks.task_logger=[]
+        statuslist=[]
         
 
         ########################################################################
@@ -394,7 +400,8 @@ for current_polarization in polarizations:
             datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
         except RuntimeError:
             print "ERROR opening file - skipping this file!"
-            finish_file(status="OPEN FAILED")
+            statuslist.append("OPEN FAILED")
+            finish_file()
             continue
 
 
@@ -421,12 +428,13 @@ for current_polarization in polarizations:
 
         if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
             print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
-            finish_file(status="FILE TOO LARGE")
-            continue
+            statuslist.appen("DATA_LENGTH BAD")
+#            finish_file(status="FILE TOO LARGE")
+#            continue
 
         if min(datafile["DATA_LENGTH"])<min_data_length:
             print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
-            finish_file(status="FILE TOO SMALL")
+            finish_file(laststatus="FILE TOO SMALL")
             continue
 
         ########################################################################
@@ -440,7 +448,7 @@ for current_polarization in polarizations:
                     (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
                 except ValueError:
                     print "#ERROR - LORA trigger information not found"
-                    finish_file(status="NO TRIGGER")
+                    finish_file(laststatus="NO TRIGGER")
                     continue
                 print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
                 if block_number<0:
@@ -474,6 +482,7 @@ for current_polarization in polarizations:
             plot_finish=Pause,
             output_dir=outputdir_with_subdirectories,
             AverageSpectrum = dict(
+                maxnchunks=maxnchunks, #To avoid too many empty blocks being read in, if DATA_LENGTH is wrong
                 calc_incoherent_sum=True,
                 addantennas=False,
                 output_subdir=outputdir_with_subdirectories,
@@ -523,9 +532,18 @@ for current_polarization in polarizations:
         ########################################################################
         print "---> Calculating average spectrum of all antennas"
         avspectrum=trerun("AverageSpectrum","cr_event",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
-        calblocksize=avspectrum.power.getHeader("blocksize")
+        calblocksize=avspectrum.power.getHeader("blocksize")        
         speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
 
+        print "Note: You can get all antenna properties from ``antennacharacteristics=avspectrum.power.getHeader('antennacharacteristics')``"
+            
+        results.update(dict(
+            antennas_timeseries_rms=avspectrum.power.getHeader("rms_antenna"),
+            antennas_timeseries_npeaks=avspectrum.power.getHeader("npeaks_antenna"),
+            station_timeseries_rms=avspectrum.power.getHeader("rms"),
+            station_timeseries_npeaks=avspectrum.power.getHeader("npeaks"),
+            station_antennas_homogeneity_factor=avspectrum.power.getHeader("homogeneity_factor") #how similar are the antennas
+            ))
         #Make sure baseline is not left over from previous file, we want to recalculate this here
         if hasattr(avspectrum.power.par,"baseline"):
             del avspectrum.power.par.baseline
@@ -560,7 +578,7 @@ for current_polarization in polarizations:
         results["ndipoles"]=ndipoles
         if ndipoles<minimum_number_good_antennas:
             print "#ERROR: To few good antennas ("+str(ndipoles)+")"
-            finish_file(status="TOO FEW ANTENNAS")
+            finish_file(laststatus="TOO FEW ANTENNAS")
             continue
 
         #Create new average spectrum with only good antennas
@@ -598,7 +616,7 @@ for current_polarization in polarizations:
             results["ndipoles"]=ndipoles
             if ndipoles<minimum_number_good_antennas:
                 print "#ERROR: To few good antennas ("+str(ndipoles)+")"
-                finish_file(status="TOO FEW ANTENNAS")
+                finish_file(laststatus="TOO FEW ANTENNAS")
                 continue
 
             #Create new average spectrum with only good antennas
@@ -612,6 +630,16 @@ for current_polarization in polarizations:
         print "---> Calculate a smooth version of the spectrum which is later used to set amplitudes."
         calcbaseline1=trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
         amplitudes=hArray(copy=calcbaseline1.baseline)
+
+        #Get a measure of the total power (actually sqrt thereof)
+        #received in each antenna (without RFI) and in the entire
+        #station.
+        
+        antennas_power=amplitudes[...].mean()
+        results.update(dict(
+            antennas_spectral_power=list(antennas_power),
+            station_spectral_power=antennas_power.mean()
+            ))
 
         #raise TypeError("I don't like your type .... (just for debugging)")
 
@@ -672,7 +700,7 @@ for current_polarization in polarizations:
             timeseries_data.read(datafile,"TIMESERIES_DATA")
         except RuntimeError:
             print "Error reading file - skipping this file"
-            finish_file(status="READ ERROR")
+            finish_file(laststatus="READ ERROR")
             continue
         
         timeseries_data.setUnit("","ADC Counts")
@@ -713,14 +741,18 @@ for current_polarization in polarizations:
         ########################################################################
         #Back to time domain
         ########################################################################
-        timeseries_data2=hArray(properties=timeseries_data)
+        timeseries_calibrated_data=hArray(properties=timeseries_data)
         fft_data[...,0]=0 # take out zero offset (-> offset/mean==0)
-        hFFTWExecutePlan(timeseries_data2[...], fft_data[...], invfftplan)
+        hFFTWExecutePlan(timeseries_calibrated_data[...], fft_data[...], invfftplan)
 
-        #timeseries_data2[...].invfftw(fft_data[...])
-        timeseries_data2 /= blocksize # normalize back to original value
+        timeseries_calibrated_data /= blocksize # normalize back to original value
 
-        if Pause.doplot: timeseries_data2[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
+        timeseries_calibrated_data_rms=timeseries_calibrated_data.stddev(0.0).val()
+        results.update(dict(
+            pulse_height_rms=timeseries_calibrated_data_rms
+            ))
+
+        if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
         Pause("Plotted time series data. ",name="calibrated-imeseries")
 
         ########################################################################
@@ -732,20 +764,20 @@ for current_polarization in polarizations:
 
         if lora_direction:
             print "---> Now make an incoherent beam in the LORA direction, locate pulse, and cut time series around it."
-            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_data2,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1),cable_delays=cabledelays,calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
+            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1),cable_delays=cabledelays,calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
             tbeam_incoherent=hArray(beamformer_full.tbeam_incoherent.vec(),[blocksize])#make this a one-dimensional array to not confuse LocatePulseTrain ...
         else:
             print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
             tbeam_incoherent=None
 
-        pulses=trerun("LocatePulseTrain","separate",timeseries_data2,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
+        pulses=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
         if pulses.npeaks>0:
             antennas_with_peaks=list(asvec(hArray(good_antennas)[pulses.peaks_found_list]))
             print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
             print "#LocatePulses - antennas with pulses:",
 
         if lora_direction:
-            pulse=trerun("LocatePulseTrain","",timeseries_data2,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
+            pulse=trerun("LocatePulseTrain","",timeseries_calibrated_data,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
         else:
             pulse=pulses
 
@@ -753,7 +785,7 @@ for current_polarization in polarizations:
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
 
         results.update(dict(
-            npeaks_found=pulse_npeaks
+            npeaks_found=pulse_npeaks,
             ))
         
         if pulse_npeaks==0:
@@ -761,15 +793,19 @@ for current_polarization in polarizations:
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"
             print "ERROR: LocatePulseTrain: No pulses found!"
-            finish_file(status="NO PULSE")
+            finish_file(laststatus="NO PULSE")
             continue
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
-        timeseries_power.square()
+        timeseries_power.abs()
         timeseries_power.runningaverage(5,hWEIGHTS.GAUSSIAN)
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-power")
+
+        results.update(dict(
+            pulses_snr=maxima_power.maxy/timeseries_calibrated_data_rms
+            ))
 
         timeseries_data_cut_to_pulse=hArray(float,[ndipoles,timeseries_data_cut_pulse_width],properties=pulse.timeseries_data_cut)
         timeseries_data_cut_to_pulse_offsets=hArray(int,ndipoles,fill=(maxima_power.maxx+0.5-timeseries_data_cut_pulse_width/2))
@@ -777,7 +813,6 @@ for current_polarization in polarizations:
         timeseries_data_cut_to_pulse_delays *= sample_interval
         timeseries_data_cut_to_pulse[...].copy(pulse.timeseries_data_cut[..., timeseries_data_cut_to_pulse_offsets:timeseries_data_cut_to_pulse_offsets+timeseries_data_cut_pulse_width])
         
-
         ########################################################################
         #Now refine this by cross correlating around the peak maxima
         ########################################################################
@@ -955,6 +990,6 @@ for current_polarization in polarizations:
         f.write("#"+outfilename+"\nresults="+str(results))
         f.close()
 
-        finish_file(status="OK" if delay_quality_error<1 else "BAD")
+        finish_file(laststatus="OK" if delay_quality_error<1 else "BAD")
 
 plt.ion()
