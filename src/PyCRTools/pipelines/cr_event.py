@@ -428,7 +428,7 @@ for current_polarization in polarizations:
 
         if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
             print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
-            statuslist.appen("DATA_LENGTH BAD")
+            statuslist.append("DATA_LENGTH BAD")
 #            finish_file(status="FILE TOO LARGE")
 #            continue
 
@@ -803,6 +803,8 @@ for current_polarization in polarizations:
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-power")
 
+        results["pulses_snr"]=list(maxima_power.maxy/timeseries_calibrated_data_rms)
+        
         results.update(dict(
             pulses_snr=maxima_power.maxy/timeseries_calibrated_data_rms
             ))
