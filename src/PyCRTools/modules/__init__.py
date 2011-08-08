@@ -1,8 +1,29 @@
 """A Python library for analyzing LOFAR TBB data.
 """
+import global_space
 
-# Import core functionality
-#import core
+#Now store the interactive namespace in tasks, so that we can assign to global variables in the interactive session
+if __builtins__.has_key("get_ipython"):
+    print "IPython 0.11 detected - importing user namespace"
+    global_space.globals=__builtins__["get_ipython"]().user_ns
+elif __builtins__.has_key("__IPYTHON__"):
+    print "IPython 0.10 detected - importing user namespace"
+    global_space.globals=__IPYTHON__.user_ns
+else:
+    import sys
+    if sys.modules.has_key("__main__") and hasattr(sys.modules["__main__"],"__builtins__"):
+        print "Python detected - importing user namespace"
+        global_space.globals=sys.modules["__main__"]#.__builtins__.globals()
+    else:
+        print "Unknown Python version detected - not importing user namespace into tasks module."
+
+import matplotlib
+if global_space.globals.has_key("nogui") and global_space.globals["nogui"]:
+    print "PyCRTools: 'nogui=True' detected - using no plotting GUI!" 
+    matplotlib.use('Agg')
+else:
+    print "PyCRTools: Starting with plotting GUI. To run in batch mode use 'nogui=True' before importing pycrtools."
+    
 
 # Make core functionality available in local namespace
 from math import *
@@ -23,20 +44,8 @@ from io import open
 
 #import pdb; pdb.set_trace()
 
-#Now store the interactive namespace in tasks, so that we can assign to global variables in the interactive session
-if __builtins__.has_key("get_ipython"):
-    print "IPython 0.11 detected - importing user namespace"
-    tasks.globals=__builtins__["get_ipython"]().user_ns
-elif __builtins__.has_key("__IPYTHON__"):
-    print "IPython 0.10 detected - importing user namespace"
-    tasks.globals=__IPYTHON__.user_ns
-else:
-    import sys
-    if sys.modules.has_key("__main__") and hasattr(sys.modules["__main__"],"__builtins__"):
-        print "Python detected - importing user namespace"
-        tasks.globals=sys.modules["__main__"]#.__builtins__.globals()
-    else:
-        print "Unknown Python version detected - not importing user namespace into tasks module."
+tasks.globals=global_space.globals
+
 """
 Some info on tasks:
 
@@ -92,7 +101,7 @@ def trerun(name,version,*args,**kwargs):
     Run the taks with the given task name and with the parameters provided as argument list.
 
     *name*       - task name to load (see :func:`tlist`)
-    *version*    - assign the task a unique version number or ID, so that you can store
+    *version*    - assign the task a unique version ID, so that you can store
                  and rerun different instances of the same task
                  
     The task itself will be available via the global variable ``Task`` afterwards.
@@ -110,6 +119,35 @@ def trerun(name,version,*args,**kwargs):
         tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
         tasks.task_instance=tasks.task_class()
         tasks.task_instances[taskinstancename]=tasks.task_instance
+    tasks.task_instance._version_name=version
+    tasks.set_globals("Task",tasks.task_instance)
+    return tasks.task_instance(*args,**kwargs)
+
+def tnorerun(name,version,*args,**kwargs):
+    """
+    Usage:
+
+    ``tnorerun(taskname,version,parameters,keyword1=....)``
+
+    Like trerun, just don't reload the task - for testing purposes only ...
+
+    Run the taks with the given task name and with the parameters provided as argument list.
+
+    *name*       - task name to load (see :func:`tlist`)
+    *version*    - assign the task a unique version ID, so that you can store
+                 and rerun different instances of the same task
+                 
+    The task itself will be available via the global variable ``Task`` afterwards.
+
+    All stored tasks can be found in the dict tasks.task_instances.    
+    """
+    if not name in tasks.task_allloaded.keys():
+        print "ERROR: trerun - Task name",name,"unknown. See 'tlist' for full list."
+        return
+    taskinstancename=name+str(version)
+    tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
+    tasks.task_instance=tasks.task_class()
+    tasks.task_instances[taskinstancename]=tasks.task_instance
     tasks.task_instance._version_name=version
     tasks.set_globals("Task",tasks.task_instance)
     return tasks.task_instance(*args,**kwargs)

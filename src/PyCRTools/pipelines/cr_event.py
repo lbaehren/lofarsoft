@@ -59,7 +59,7 @@ There is also a summary of the results ``summary.html`` and
 ::
     chmod a+x $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py
 
-    $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=2000 --nsigma=3 --max_data_length=12289024 -R -p0
+    $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R -p0
 
 ------------------------------------------------------------------------
 
@@ -134,6 +134,7 @@ from pycrtools import lora
 flag_delays = False
 minimum_number_good_antennas=8
 timeseries_data_cut_pulse_width=12
+min_number_of_antennas_with_pulses=8
 start_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
 
 if not parser.get_prog_name()=="cr_event.py":
@@ -179,6 +180,7 @@ else:
     station = options.station
     block_number = options.block
     nsigma = options.nsigma
+    pulses_sigma = options.nsigma
     sample_number = options.sample_number
     blocksize = options.blocksize
     skip_existing_files = options.skip_existing_files
@@ -207,7 +209,9 @@ def finish_file(laststatus=""):
 
     if laststatus: statuslist.append(laststatus)
     status="/".join(statuslist)
-        
+
+    results["status"]=status
+    
     if not os.path.exists(summaryfilename):
         summaryfile=open(summaryfilename,"w")
         summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
@@ -231,22 +235,26 @@ def finish_file(laststatus=""):
         topsummaryfile.close()
 
     summaryfile=open(summaryfilename,"a")
+    if not old_time_stamp == time_stamp: summaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
     summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     summaryfile.close()
 
     if delay_quality_error<1:
         topsummaryfile=open(goodsummaryfilename,"a")
+        if not old_time_stamp == time_stamp: topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
         topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
 
     topsummaryfile=open(allsummaryfilename,"a")
+    if not old_time_stamp == time_stamp: topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
     topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     topsummaryfile.close()
 
     htmlfile=open(htmlfilename,"w")
     htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
     htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
-    htmlfile.write("<i>File processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
+    htmlfile.write("<b><i>"+pretty_time_stamp+": </i></b>")
+    htmlfile.write("<i>processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
     htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2g} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
 
     htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
@@ -296,19 +304,20 @@ def finish_file(laststatus=""):
     print "-----------------------------------------------------------------------------------------------------------\n"
     
 
-
-
 ########################################################################
 #Loop over all files and polarizations
 ########################################################################
 
+time_stamp=""
 polarizations=[0,1] if polarization<0 else [polarization]
-
-for current_polarization in polarizations:
-    files = listFiles(filefilter)
-    if not files:
-        print "ERROR: No files found - ",filefilter
-    for full_filename in files:
+files = listFiles(filefilter)
+if not files:
+    print "ERROR: No files found - ",filefilter
+else:
+    print "Processing the following files:",files
+    
+for full_filename in files:
+    for current_polarization in polarizations:
         t0=time.clock()
         file_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
         file_time_short=time.strftime("%Y-%m-%d  %H:%M:%S")
@@ -328,7 +337,6 @@ for current_polarization in polarizations:
         ########################################################################
         #Setting filenames and directories
         ########################################################################
-    #    full_filename=os.path.expandvars(os.path.expanduser(filename))
         (filedir,filename)=os.path.split(full_filename)
 
         if not lora_logfile or not os.path.isfile(lora_logfile):
@@ -339,8 +347,10 @@ for current_polarization in polarizations:
         filename_split=rootfilename.split("-")
         projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
 
-        station_name=filename_split[-1] if not station else station      
+        station_name=filename_split[-1] if not station else station
+        old_time_stamp=time_stamp
         time_stamp=filename_split[-2] if not timestamp else timestamp
+        pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
 
         outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
         topdir_name=projectname+"-"+time_stamp
@@ -350,7 +360,9 @@ for current_polarization in polarizations:
         outputdir_with_subdirectories=os.path.join(outputdir_event,reldir_from_event)
         outfilename=rootfilename+"-pol"+str(current_polarization)
 
+        calibrated_timeseries_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries")
         result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
+        
         htmlfilename=os.path.join(outputdir_with_subdirectories,"index.html")
         summaryfilename=os.path.join(outputdir_event,"index.html")
         goodsummaryfilename=os.path.join(outputdir,"summary-good.html")
@@ -503,7 +515,8 @@ for current_polarization in polarizations:
             CalcBaseline = dict(baseline=False), # Make sure baseline is recreated when the task is run a second time
             LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=128,minpulselen=3,maxlen=128,prepulselen=32),  #nisgma=7  
         #    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once
-            DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
+ #           DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
+            DirectionFitTriangles = dict(maxiter=3,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
             ApplyBaseline=dict(rmsfactor=7)
             )
         #------------------------------------------------------------------------
@@ -538,8 +551,8 @@ for current_polarization in polarizations:
         print "Note: You can get all antenna properties from ``antennacharacteristics=avspectrum.power.getHeader('antennacharacteristics')``"
             
         results.update(dict(
-            antennas_timeseries_rms=avspectrum.power.getHeader("rms_antenna"),
-            antennas_timeseries_npeaks=avspectrum.power.getHeader("npeaks_antenna"),
+            antennas_timeseries_rms=list(avspectrum.power.getHeader("rms_antenna")),
+            antennas_timeseries_npeaks=list(avspectrum.power.getHeader("npeaks_antenna")),
             station_timeseries_rms=avspectrum.power.getHeader("rms"),
             station_timeseries_npeaks=avspectrum.power.getHeader("npeaks"),
             station_antennas_homogeneity_factor=avspectrum.power.getHeader("homogeneity_factor") #how similar are the antennas
@@ -641,9 +654,7 @@ for current_polarization in polarizations:
             station_spectral_power=antennas_power.mean()
             ))
 
-        #raise TypeError("I don't like your type .... (just for debugging)")
-
-        print "---> Calculate it again, but now to flatten the spectrum."
+        print "---> Calculate baseline again, but now for multiplication with data to flatten the spectrum."
         calcbaseline_flat=trerun("CalcBaseline","flat",averagespectrum_good_antennas,pardict=par,invert=True,normalize=False,doplot=Pause.doplot)
 
         ########################################################################
@@ -752,6 +763,9 @@ for current_polarization in polarizations:
             pulse_height_rms=timeseries_calibrated_data_rms
             ))
 
+        print "---> Saving calibrated time series to",calibrated_timeseries_file
+        timeseries_calibrated_data.write(calibrated_timeseries_file)
+
         if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
         Pause("Plotted time series data. ",name="calibrated-imeseries")
 
@@ -770,15 +784,21 @@ for current_polarization in polarizations:
             print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
             tbeam_incoherent=None
 
+        #Get a list of pulses in the search window
         pulses=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
+
+        #How many antennas have pulses? Also: determine a finer window where the pulses are
         if pulses.npeaks>0:
             antennas_with_peaks=list(asvec(hArray(good_antennas)[pulses.peaks_found_list]))
             print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
-            print "#LocatePulses - antennas with pulses:",
+            print "#LocatePulses - antennas with pulses:",antennas_with_peaks
 
+        #If we had a pre-determined direction use this to find the dominant peak and cut out the time series around it
         if lora_direction:
             pulse=trerun("LocatePulseTrain","",timeseries_calibrated_data,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
-        else:
+
+        # Otherwise take the previously found window with the most pulses
+        else: 
             pulse=pulses
 
         pulse_npeaks=pulse.npeaks
@@ -803,26 +823,46 @@ for current_polarization in polarizations:
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-power")
 
-        results["pulses_snr"]=list(maxima_power.maxy/timeseries_calibrated_data_rms)
+        ########################################################################
+        #Determine antennas that have pulses with a high enough SNR for beamforming
+        ########################################################################
+        pulses_snr=maxima_power.maxy/timeseries_calibrated_data_rms
+        pulses_refant=pulses_snr.maxpos()
+
+        antennas_with_strong_pulses=list(pulses_snr.Find(">",pulses_sigma))
+        nantennas_with_strong_pulses=len(antennas_with_strong_pulses)
         
         results.update(dict(
-            pulses_snr=maxima_power.maxy/timeseries_calibrated_data_rms
+            pulses_sigma=pulses_sigma,
+            pulses_snr=list(pulses_snr),
+            pulses_refant=pulses_refant,
+            antennas_with_strong_pulses=antennas_with_strong_pulses,
+            nantennas_with_strong_pulses=nantennas_with_strong_pulses
             ))
 
+        if nantennas_with_strong_pulses<min_number_of_antennas_with_pulses:
+            print "ERROR: LocatePulseTrain: Not enough pulses found for beam forming!"
+            finish_file(laststatus="TOO FEW PULSES")
+            continue
+
+        
+        ########################################################################
+        #Now refine pulse location by cross correlating around the peak maxima
+        ########################################################################
         timeseries_data_cut_to_pulse=hArray(float,[ndipoles,timeseries_data_cut_pulse_width],properties=pulse.timeseries_data_cut)
         timeseries_data_cut_to_pulse_offsets=hArray(int,ndipoles,fill=(maxima_power.maxx+0.5-timeseries_data_cut_pulse_width/2))
         timeseries_data_cut_to_pulse_delays=hArray(float,copy=timeseries_data_cut_to_pulse_offsets)
         timeseries_data_cut_to_pulse_delays *= sample_interval
         timeseries_data_cut_to_pulse[...].copy(pulse.timeseries_data_cut[..., timeseries_data_cut_to_pulse_offsets:timeseries_data_cut_to_pulse_offsets+timeseries_data_cut_pulse_width])
-        
-        ########################################################################
-        #Now refine this by cross correlating around the peak maxima
-        ########################################################################
+
         print "---> Cross correlate pulses, get time lags, and determine direction of pulse."
+
         #Now cross correlate all pulses with each other 
         crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",timeseries_data_cut_to_pulse,pardict=par,oversamplefactor=10)
+
         #And determine the relative offsets between them
-        maxima_cc=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3)
+        maxima_cc=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3,refant=pulses_refant)
+
         Pause(name="pulse-maxima-crosscorr")
 
         #The actual delays are those from the (rounded) peak locations plus the delta form the cross correlation
@@ -842,7 +882,13 @@ for current_polarization in polarizations:
         #cabledelays *= 2
         #delays.fill(0)
 
-        direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=antenna_positions,timelags=hArray(time_lags),cabledelays=cabledelays,verbose=True,doplot=True)
+        #Only take those lags of pulses with a high-enough SNR
+        good_pulse_lags=hArray(time_lags)[antennas_with_strong_pulses]
+        good_pulse_antenna_positions=hArray(float,[nantennas_with_strong_pulses,3])
+        good_pulse_antenna_positions[...].copy(antenna_positions[antennas_with_strong_pulses,...,0:3])
+        good_pulse_cabledelays=cabledelays[antennas_with_strong_pulses]
+        
+        direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags,cabledelays=good_pulse_cabledelays,verbose=True,doplot=True)
         print "========================================================================"
         print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
         print " "
@@ -851,9 +897,9 @@ for current_polarization in polarizations:
         print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
 
         
-        (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs)
-        (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs)
-        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["total delay","1st step","cable delay"]))
+        (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="x")
+        (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
+        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
 
         scrt=direction.residual_delays.vec(); scrt.abs();
@@ -870,20 +916,24 @@ for current_polarization in polarizations:
             print "#DirectionFitTriangles: OK!"
             
         print "---> Checking and flagging delays which are larger than +/-"+str(maximum_allowed_delay)
-        flagged_residual_delays=hArray(copy=direction.residual_delays)
-        flagged_delays=direction.residual_delays.Find('outside',-maximum_allowed_delay,maximum_allowed_delay)
-        if len(flagged_delays)>0 and flag_delays:
-            flagged_residual_delays.set(flagged_delays,0)
-            print "#Delay flagging - flagged these delays:",flagged_delays
+
+        final_residual_delays=hArray(float,[ndipoles],fill=0)
+        final_residual_delays[antennas_with_strong_pulses,...]=direction.residual_delays[...]
+        flagged_delays=final_residual_delays.Find('outside',-maximum_allowed_delay,maximum_allowed_delay)
+        if len(flagged_delays)>0:
+            print "#Delay flagging - these residual delays are suspicious:",flagged_delays
+            if flag_delays:
+                print "#Delay flagging - setting them to zero!"
+                final_residual_delays.set(flagged_delays,0)
         else:
             print "#Delay flagging - all delays seem OK."
-        flagged_cable_delays=flagged_residual_delays+direction.cabledelays
+        final_cable_delays=final_residual_delays+cabledelays
 
 
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
 
-        trerun("PlotAntennaLayout","Delays",pardict=par,positions=antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_IDs,title="Delay errors in station",plotlegend=True)
+        trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
         print "\n--->Beamforming"
 
@@ -893,7 +943,7 @@ for current_polarization in polarizations:
 
         #Beamform short data set first for inspection (and possibly for
         #maximizing later)
-        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=flagged_cable_delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=final_cable_delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
 
         #Use the above later also for maximizing peak Beam-formed timeseries
         #is in ---> bf.tbeams[bf.mainbeam]
@@ -904,19 +954,18 @@ for current_polarization in polarizations:
             Pause(name="beamformed-multiple-directions")
 
         timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut,name="Power(t)")
-        timeseries_power_shifted.square()
+        timeseries_power_shifted.abs()
         timeseries_power_shifted[...].runningaverage(5,hWEIGHTS.GAUSSIAN)
         if Pause.doplot:
-            timeseries_power_shifted[...].plot(title="E-Field^2 corrected for delays in beam direction per antenna",xlabel="Samples")
+            timeseries_power_shifted[...].plot(title="abs(E-Field) corrected for delays in beam direction per antenna",xlabel="Samples")
             plt.legend(good_antennas,ncol=2,title="Antennas",prop=matplotlib.font_manager.FontProperties(family="Helvetica",size=7))
             Pause(name="shifted-power-per-antenna")
 
         #matplotlib.font_manager.FontProperties(self, family=None, style=None, variant=None, weight=None, stretch=None, size=None, fname=None, _init=None)
 
-
         print "---> Plotting full beam-formed data set"
         #Beamform full data set (not really necessary, but fun).
-        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=flagged_cable_delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=final_cable_delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
 
         ########################################################################
         #Data Analysis ... (to be expanded)
@@ -950,8 +999,10 @@ for current_polarization in polarizations:
         #at the main peak location and plot
         ########################################################################
         pulses_strength=timeseries_power_shifted[...].elem(min(max(int(round(beam_maxima.maxx.val()-pulse.start)),0),pulse.cutlen-1))
+        pulse_height_incoherent=pulses_strength.mean()
         
-        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors=hArray(time_lags),sizes=pulses_strength,sizes_min=0,names=good_antennas_IDs,title="Time Lags in Station",plotlegend=True)
+        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors="w",sizes=pulses_strength,sizes_min=0,names=good_antennas_IDs,title="Time Lags in Station",plotlegend=False,plot_clf=True,plot_finish=plot_draw)
+        trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=good_pulse_antenna_positions,colors=hArray(time_lags)[antennas_with_strong_pulses],sizes=hArray(pulses_strength)[antennas_with_strong_pulses],names=good_antennas_IDs[antennas_with_strong_pulses],sizes_min=0,title="Time Lags in Station",plotlegend=True,plot_clf=False)
 
 
         ########################################################################
@@ -963,8 +1014,8 @@ for current_polarization in polarizations:
         pulse_direction=direction.meandirection_azel_deg
 
         results.update(dict(
-            flagged_delays=list(flagged_delays.vec()),
-            flagged_cable_delays=list(flagged_cable_delays.vec()),
+            antennas_flagged_delays=list(flagged_delays.vec()),
+            antennas_final_cable_delays=list(final_cable_delays.vec()),
             antennas_with_peaks=antennas_with_peaks,
             delay_quality_error=delay_quality_error,
             pulse_location=beam_maxima.maxx.val(),
@@ -976,6 +1027,7 @@ for current_polarization in polarizations:
             pulse_end_sample=pulse.end,
             pulse_time_ms=pulse_time_ms,
             pulse_height=pulse_height,
+            pulse_height_incoherent=pulse_height_incoherent,
             pulse_normalized_height=pulse_normalized_height,
             pulse_direction=pulse_direction,
             pulse_direction_delta_delays_start=direction.delta_delays_mean_history[0],

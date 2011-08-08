@@ -4,7 +4,7 @@
 #pdb.set_trace()
 
 import numpy as np
-import matplotlib
+import matplotlib    
 import matplotlib.pyplot as plt
 
 from hftools import *
@@ -17,6 +17,15 @@ from harray import *
 #======================================================================
 plot_pause=True
 doplot=True
+
+class plot_draw_class():
+    """Just calls plt.draw - can be used in place of plotfinish in tasks to just plot and do nothing fancy"""
+    def __init__(self,*args,**kwargs):
+        pass
+    def __call__(self,*args,**kwargs):
+        plt.draw()
+
+plot_draw=plot_draw_class()
 
 class plotfinish:
     """

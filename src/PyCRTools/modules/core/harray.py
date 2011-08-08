@@ -565,7 +565,7 @@ def hArray_read(self,datafile,key,block=-1,antenna=-1):
     self.addHistory("read","Reading data from file "+self.par.filename)
     if type(block) in [int,long]: block=Vector([block])
     if type(block) in [list,tuple]: block=Vector(block)
-    self.par.file=self
+#    self.par.file=self ??????
 #    datafile.read(key,self,block,antenna)
     datafile.read(key,self,block)
     return self

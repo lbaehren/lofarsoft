@@ -1,3 +1,13 @@
+2011-08-08 - Rev 8266
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- better treatment of direction fitting in cr_events.py - only pulses
+  with enough SNR are taken into account.
+
+- various bugfixes
+
 2011-08-05 - Rev 8249
 =====================
 

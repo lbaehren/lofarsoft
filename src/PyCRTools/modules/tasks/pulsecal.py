@@ -1125,8 +1125,10 @@ class PlotAntennaLayout(tasks.Task):
         else:
             raise TypeError("PlotAntennaLayout: parameter 'sizes' needs to be a number or an hArray of numbers.")
 
+        plotlegend=True
         if isinstance(self.colors, (str, int, long, float)):
             self.scolors=self.colors
+            plotlegend=False
         elif isinstance(self.colors,tuple(cr.hAllContainerTypes)):
             if self.normalize_colors:
                 self.scolors=cr.hArray(copy=self.colors)
@@ -1144,6 +1146,6 @@ class PlotAntennaLayout(tasks.Task):
         if self.names:
             for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
                 cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
-        if self.plotlegend:
+        if self.plotlegend and plotlegend:
             cr.plt.colorbar()
         self.plot_finish(name=self.__taskname__+self.plot_name)

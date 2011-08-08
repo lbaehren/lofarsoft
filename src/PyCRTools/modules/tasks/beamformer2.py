@@ -490,6 +490,7 @@ class BeamFormer2(tasks.Task):
                     self.fftdata.mul(self.weights[self.mainbeam])
                     self.fftdata[...].nyquistswap(self.NyquistZone)
                     cr.hFFTWExecutePlan(self.data_shifted[...], self.fftdata[...], self.invfftplan)
+                    self.data_shifted /= self.blocklen
                     if  self.tbeam_incoherent:
                         self.tbeam_incoherent[block].squareadd(self.data_shifted[...])
                 if self.doplot>1 and self.nspectraadded[block]%self.plotskip==0:

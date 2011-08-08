@@ -5,10 +5,9 @@ sudo chmod a+x $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py
 
 $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py /data/VHECR/LORAtriggered/data/VHECR_LORA-*.h5 --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/results/20100704 --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=2000 --nsigma=3 -R >& logfile.txt &
 
-
 tail -f logfile.txt
 
-to restart you can use: VHECR_LORA-20110613T051515.914Z
+to restart you can use: 
 
 """
 
