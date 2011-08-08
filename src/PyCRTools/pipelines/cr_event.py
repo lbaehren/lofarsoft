@@ -552,8 +552,8 @@ for full_filename in files:
         print "Note: You can get all antenna properties from ``antennacharacteristics=avspectrum.power.getHeader('antennacharacteristics')``"
             
         results.update(dict(
-            antennas_timeseries_rms=list(avspectrum.power.getHeader("rms_antenna")),
-            antennas_timeseries_npeaks=list(avspectrum.power.getHeader("npeaks_antenna")),
+            antennas_timeseries_rms=list(avspectrum.power.getHeader("rms_antenna")) if avspectrum.power.getHeader("rms_antenna") else None,
+            antennas_timeseries_npeaks=list(avspectrum.power.getHeader("npeaks_antenna")) if avspectrum.power.getHeader("npeaks_antenna") else None),
             station_timeseries_rms=avspectrum.power.getHeader("rms"),
             station_timeseries_npeaks=avspectrum.power.getHeader("npeaks"),
             station_antennas_homogeneity_factor=avspectrum.power.getHeader("homogeneity_factor") #how similar are the antennas
