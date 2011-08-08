@@ -1,5 +1,8 @@
 """A Python library for analyzing LOFAR TBB data.
 """
+from math import *
+import os
+import sys
 import global_space
 
 #Now store the interactive namespace in tasks, so that we can assign to global variables in the interactive session
@@ -10,10 +13,9 @@ elif __builtins__.has_key("__IPYTHON__"):
     print "IPython 0.10 detected - importing user namespace"
     global_space.globals=__IPYTHON__.user_ns
 else:
-    import sys
     if sys.modules.has_key("__main__") and hasattr(sys.modules["__main__"],"__builtins__"):
         print "Python detected - importing user namespace"
-        global_space.globals=sys.modules["__main__"]#.__builtins__.globals()
+        global_space.globals=sys.modules["__main__"].__builtins__.globals()
     else:
         print "Unknown Python version detected - not importing user namespace into tasks module."
 
@@ -26,9 +28,6 @@ else:
     
 
 # Make core functionality available in local namespace
-from math import *
-import os
-import sys
 
 from core import *
 import tasks

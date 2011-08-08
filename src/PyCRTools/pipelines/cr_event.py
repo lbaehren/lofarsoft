@@ -116,6 +116,7 @@ parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,hel
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
     if options.norefresh:
+        nogui=True
         import matplotlib
         matplotlib.use('Agg')
         
