@@ -96,6 +96,7 @@ parser = OptionParser(usage=usage)
 parser.add_option("-o","--outputdir", type="str", default="",help="directory where to store the final results (will be stored in a subdirectory filename.dir/ within that directory)")
 parser.add_option("-L","--lora_logfile", type="str", default="LORAtime4",help="LORA logfile (LORAtime4)")
 parser.add_option("--loradir", type="str", default="/data/VHECR/LORAtriggered/LORA/",help="Directory to find LORA information")
+parser.add_option("-d","--datadir", type="str", default="",help="Will be added to each of the filename arguments (hence, use quotations for the main arguments if you use this option and have asterisks in the argument!)")
 parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=-1,help="either 0 or 1 for selecting even or odd antennas, or -1 for both")
 parser.add_option("-t","--nsigma", type="float", default=4.0,help="Threshold for identifying peaks")
@@ -110,7 +111,7 @@ parser.add_option("-S","--station", type="str", default="",help="Station name fo
 parser.add_option("-q","--nopause", action="store_true",help="Do not pause after each plot and display each figure interactively")
 parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip file if results directory already exists")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
-parser.add_option("-d","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
+parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
 
 if parser.get_prog_name()=="cr_event.py":
@@ -171,7 +172,8 @@ else:
         print "Error: No HDF5 files specified for input"
         sys.exit(1)
 
-    filefilter = args
+    datadir = options.datadir
+    filefilter = [os.path.join(datadir,f) for f in args]
     lofarmode = options.lofarmode
     lora_logfile=options.lora_logfile
     loradir=options.loradir
