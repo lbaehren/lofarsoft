@@ -2,7 +2,7 @@
 #include "mask.h"
 #include "sigproc_fb.h"
 
-#define MAXNUMCHAN 2048
+#define MAXNUMCHAN 4096
 #define BLOCKLEN   512
 
 /* All of the following have an _st to indicate static */
@@ -319,6 +319,9 @@ int read_filterbank_header(sigprocfb * fb, FILE * inputfile)
          totalbytes += sizeof(int);
       } else if(strings_equal(string, "ibeam")) {
          chkfread(&(fb->ibeam),sizeof(int),1,inputfile);
+         totalbytes += sizeof(int);
+      } else if(strings_equal(string, "barycentric")) {
+         chkfread(&itmp,sizeof(int),1,inputfile);
          totalbytes += sizeof(int);
       } else if (expecting_rawdatafile) {
          strcpy(fb->inpfile, string);
