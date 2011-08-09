@@ -30,24 +30,27 @@ def GetInformationFromFile(topdir, events):
         ndipoles={0:0,1:0}
     
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
+
+        import pdb; pdb.set_trace()
         
         for datadir in datadirs:
             if not os.path.isfile(os.path.join(datadir,"results.py")):
                 continue
             resfile=open(os.path.join(datadir,"results.py"))
-            if "nan" in resfile.read():
-                print "WARNING nan found. skipping file", resfile.name
-                continue
-            print "    Processing data results directory:",datadir
+#            if "nan" in resfile.read():
+#                print "WARNING nan found. skipping file", resfile.name
+#                continue
+            print "Processing data results directory:",datadir
             res={}
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
             antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
             
-            positions2[res["polarization"]].extend(res["antenna_positions_ITRF_m"])  
-            #positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  "in newer version of pipeline available"
- 
+            positions[res["polarization"]].extend(res["antenna_positions_ITRF_m"])  
             
+            # No conversion needed for: Available in more recent version of pipeline:" 
+            #positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
+
             # check, which pulse definition most suitable for LDF ploting
             
             signal[res["polarization"]].extend(res["pulses_maxima_y"])  
@@ -58,6 +61,9 @@ def GetInformationFromFile(topdir, events):
     
         print "Number of dipoles found:",ndipoles
         
+        par["eventid"]="LOFAR "+res["FILENAME"].split('-')[1]
+        
+ 
         # LORA parameters
         # current fix for LORA core only being propagated with two coordinates instead of three
         
@@ -74,18 +80,18 @@ def GetInformationFromFile(topdir, events):
         par["loradirection"]=cr.hArray(res["pulse_direction_lora"])
         par["loraenergy"]=res["pulse_energy_lora"]
         
-        # check, which polarization (0,1) corresponds to NS, EW resp., if use XYZ positions, change conversion here
+        # if use XYZ positions, change conversion here
 
-        posEW=cr.hArray(float,[ndipoles[0],3],positions2[0],name="Antenna Positions",units="m") 
-        par["positionsEW"]=cr.metadata.convertITRFToLocal(posEW)
+        pos0=cr.hArray(float,[ndipoles[0],3],positions[0],name="Antenna Positions",units="m") 
+        par["positions0"]=cr.metadata.convertITRFToLocal(pos0)
   
-        posNS=cr.hArray(float,[ndipoles[1],3],positions2[1],name="Antenna Positions",units="m")
-        par["positionsNS"]=cr.metadata.convertITRFToLocal(posNS)
+        pos1=cr.hArray(float,[ndipoles[1],3],positions[1],name="Antenna Positions",units="m")
+        par["positions1"]=cr.metadata.convertITRFToLocal(pos1)
         
         # check normalization of signal (to be confirmed with respect to signal calibration)
         
-        par["signalsNS"]=cr.hArray(signal[1])*65536*100
-        par["signalsEW"]=cr.hArray(signal[0])*65536*100
+        par["signals1"]=cr.hArray(signal[1])*65536*100
+        par["signals0"]=cr.hArray(signal[0])*65536*100
 
     return par
 
@@ -113,22 +119,23 @@ class ldf(tasks.Task):
               topdir=dict(default="/data/VHECR/LORAtriggered/results",doc="provide topdir",unit=""),
               events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="provide events in topdir",unit=""),
               results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.events),doc="Provide task with topdirectory",unit=""),
-              positionsNS=dict(default=lambda self:self.results["positionsNS"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit="m"),
-              positionsEW=dict(default=lambda self:self.results["positionsEW"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)",unit="m"),
-              signalsNS=dict(default=lambda self:self.results["signalsNS"],doc="hArray of dimension [NAnt,1] with signals in antennas, polNS",unit="a.u."),
-              signalsEW=dict(default=lambda self:self.results["signalsEW"],doc="hArray of dimension [NAnt,1] with signals in antennas, polEW",unit="a.u."),
-              signaluncertaintiesNS=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in NS", unit="a.u."),
-              signaluncertaintiesEW=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in EW", unit="a.u."),
+              positions1=dict(default=lambda self:self.results["positions1"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 1 (x0,y0,z0,...)",unit="m"),
+              positions0=dict(default=lambda self:self.results["positions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 0 (x0,y0,z0,...)",unit="m"),
+              signals1=dict(default=lambda self:self.results["signals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
+              signals0=dict(default=lambda self:self.results["signals0"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 0",unit="a.u."),
+              signaluncertainties1=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 1", unit="a.u."),
+              signaluncertainties0=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 0", unit="a.u."),
               loracore = dict(default=lambda self:self.results["loracore"],doc="hArray of core position [x,y,z] as provided by Lora ",unit="m"),
-              loradirection = dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Azimuth is eastwards from north and elevation is up from horizon.", unit="degrees"),
-              loracoreuncertainties = dict(default=cr.hArray([1.,1.,0.]),doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
-              loradirectionuncertainties = dict(default=cr.hArray([1.,1.,0.]),doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
-              eventid = dict(default=None, doc="EventId for LOFAR Event"),
-              logplot=dict(default=True, doc="Draw y-axis logarithmically")
+              loradirection = dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees"),
+              loracoreuncertainties = dict(default=None, doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
+              loradirectionuncertainties = dict(default=None, doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
+              eventid = dict(default=lambda self:self.results["eventid"], doc="EventId for LOFAR Event"),
+              logplot=dict(default=True, doc="Draw y-axis logarithmically"),
+              plot_clf = dict(default=True,doc="Clean window before plotting?")
               )
 
-## Functions for shower geometry##
 
+    ## Functions for shower geometry and uncertainty propagation
 
     def GetDistance(self,loracore,loradirection,positions):        
         
@@ -148,15 +155,67 @@ class ldf(tasks.Task):
         return dist  
         
     
-    def GetTotalDistanceUncertainty(self,loracore,loracoreuncertainties,positions,loradirections,loradirectionuncertainties,distances): 
+    def GetTotalDistanceUncertainty(self,loracore,loracoreuncertainties,positions,loradirection,loradirectionuncertainties,distances): 
         
-        uncertainties = cr.hArray(float,dimensions=len(distances),fill=5.)
+        # Assuming differences in z-coordinates = 0
         
-        print "Warning: Propagation of distance uncertainties not yet implemented!"
+        dist = distances.vec()
         
-        return uncertainties 
+        pos1 = cr.hArray_transpose(positions)[0].vec()
+        pos2 = cr.hArray_transpose(positions)[1].vec()
         
-        #     Old implementation for AERA: to be converted to LOFAR standards   
+        core1 = float(loracore[0])
+        core2 = float(loracore[1])
+        
+        phi = cr.radians(450 -loradirection[0])        # recalculate to 0 = east counter-clockwise
+        theta = cr.radians(loradirection[1])           # spherical coordinates: 0 = horizon, 90 = vertical
+        
+        
+        ecore1 = float(loracoreuncertainties[0])        
+        ecore2 = float(loracoreuncertainties[1])
+        covcore = float(loracoreuncertainties[2])
+        
+        ephi = cr.radians(float(loradirectionuncertainties[0]))
+        etheta = cr.radians(float(loradirectionuncertainties[1]))
+        covangles = float(loradirectionuncertainties[2])
+        
+        # short cuts
+        
+        cost = cr.cos(theta)  
+        sint = cr.sin(theta)
+        cos2t = cr.cos(theta)**2
+        sin2t = cr.sin(theta)**2
+        cosp = cr.cos(phi)
+        sinp = cr.sin(phi)
+        cos2p = cr.cos(phi)**2
+        sin2p = cr.sin(phi)**2
+        
+        m1 = pos1 - core1
+        m2 = pos2 - core2
+        
+        sqrfac = 0.5/dist
+ 
+        # partical derivatives
+        
+        diffc1 = -2.*(m1*sin2t + m1*cos2t*sin2p - m2*cos2t*sinp*cosp) * sqrfac  
+        diffc2 = -2.*(m2*sin2t + m2*cos2t*cos2p - m1*cos2t*sinp*cosp) * sqrfac    
+        diffp = 2.*(m1*m1*cos2t*sinp*cosp - m2*m2*cos2t*cosp*sinp- m1*m2*cos2t*(cos2p-sin2p)) *sqrfac
+        
+        difft = 2.*((m2*m2)*sint*cost + (m1*m1)*sint*cost - (m1*m1)*sin2p*cost*sint - (m2*m2)*cos2p*cost*sint + m1*m2*sint*cost*sinp*cosp) * sqrfac
+        
+        # adding contributions
+        
+        err =        diffc1*diffc1 * ecore1*ecore1      
+        err = err +  diffc2*diffc2 * ecore2*ecore2
+        err = err +  diffp*diffp * ephi*ephi
+        err = err +  difft*difft * etheta*etheta
+        err = err + 2* difft*diffp *covangles
+        err = err + 2* diffc1*diffc2 *covcore
+
+        err.sqrt()
+                
+        return err 
+ 
    
    
     
@@ -167,40 +226,48 @@ class ldf(tasks.Task):
         pass
     
     def run(self):
-       
         
-        DistancesEW = self.GetDistance(self.loracore,self.loradirection,self.positionsEW)
-        DistancesNS = self.GetDistance(self.loracore,self.loradirection,self.positionsNS)
+        if self.loracoreuncertainties == None:
+            self.loracoreuncertainties = cr.hArray([5.,5.,0.])
+            print "Warning: Using default for core uncertainties!"
         
-        DistUncertaintiesNS = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positionsNS,self.loradirection,self.loradirectionuncertainties,DistancesNS)
-        DistUncertaintiesEW = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positionsNS,self.loradirection,self.loradirectionuncertainties,DistancesEW)
+        if self.loradirectionuncertainties == None:
+            self.loradirectionuncertainties = cr.hArray([1.,1.,0])
+            print "Warning: Using default for direction uncertainties!"      
         
+        Distances0 = self.GetDistance(self.loracore,self.loradirection,self.positions0)
+        Distances1 = self.GetDistance(self.loracore,self.loradirection,self.positions1)
+        
+        DistUncertainties0 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions0,self.loradirection,self.loradirectionuncertainties,Distances0)
+        DistUncertainties1 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions1,self.loradirection,self.loradirectionuncertainties,Distances1)
 
-        
-        if self.signaluncertaintiesEW:            
-            if self.signaluncertaintiesNS:
+        if self.plot_clf: cr.plt.clf()
+
+        if self.signaluncertainties0:            
+            if self.signaluncertainties1:
                 
-                cr.plt.errorbar(DistancesEW.vec(),self.signalsEW.vec(),self.signaluncertaintiesEW.vec(),DistUncertaintiesEW.vec(),'g',linestyle="None",label="pol 0")
-                cr.plt.errorbar(DistancesNS.vec(),self.signalsNS.vec(),self.signaluncertaintiesNS.vec(),DistUncertaintiesNS.vec(),'b',linestyle="None",label="pol 1")
-                cr.plt.legend(('pol 0','pol 1'),loc='upper right', shadow=False)
-                
+                cr.plt.errorbar(Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),DistUncertainties0.vec(),'g',linestyle="None",label="pol 0")
+                cr.plt.errorbar(Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),DistUncertainties1.vec(),'b',linestyle="None",label="pol 1")
+                cr.plt.legend(('pol 0','pol 1'),loc='upper right', shadow=False, numpoints=1)
                 
                 cr.plt.xlabel("Distance to shower axis [m]")
                 cr.plt.ylabel("Power [a.u.]")
+                cr.plt.axis(xmin=0,xmax=400)
+                
         else:
-            print "Warning, uncertainties on signals used are default! Provide information for correct calculation"
+            print "Warning: Using default for signals uncertainties!"
             
-            self.signaluncertaintiesEW = cr.hArray(float,dimensions=len(DistancesEW),fill=100) 
-            self.signaluncertaintiesNS = cr.hArray(float,dimensions=len(DistancesNS),fill=100)
+            self.signaluncertainties0 = cr.hArray(float,dimensions=len(Distances0),fill=1000) 
+            self.signaluncertainties1 = cr.hArray(float,dimensions=len(Distances1),fill=1000)
           
                 
-            cr.plt.errorbar(DistancesEW.vec(),self.signalsEW.vec(),self.signaluncertaintiesEW.vec(),DistUncertaintiesEW.vec(),'rs',linestyle="None",label="pol 0")
-            cr.plt.errorbar(DistancesNS.vec(),self.signalsNS.vec(),self.signaluncertaintiesNS.vec(),DistUncertaintiesNS.vec(),'bo',linestyle="None",label="pol 1")
+            cr.plt.errorbar(Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),DistUncertainties0.vec(),'rs',linestyle="None",label="pol 0")
+            cr.plt.errorbar(Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),DistUncertainties1.vec(),'bo',linestyle="None",label="pol 1")
             cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
-            
-            
+
             cr.plt.xlabel("Distance to shower axis [m]")
             cr.plt.ylabel("Power [a.u.]")  
+            cr.plt.axis(xmin=0,xmax=400)
         
         if self.logplot:
 
@@ -208,7 +275,9 @@ class ldf(tasks.Task):
             cr.plt.axis(xmin=0,xmax=400)
             
         if self.eventid:
-            cr.plt.title(str(self.title))  
+
+            cr.plt.title(str(self.eventid))
+              
 
     
             
