@@ -20,7 +20,7 @@ beamforming.
 *outputdir*             directory where to store the final results (will be stored in a
                         subdirectory filename.dir/ within that directory) 
             
-*block*                 (or block_number) - in which block do you expect the peak
+*block*                 (or blocknumber) - in which block do you expect the peak
 
 *plotpause*             pause and display each figure interactively?
 
@@ -100,9 +100,9 @@ parser.add_option("-d","--datadir", type="str", default="",help="Will be added t
 parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=-1,help="either 0 or 1 for selecting even or odd antennas, or -1 for both")
 parser.add_option("-t","--nsigma", type="float", default=4.0,help="Threshold for identifying peaks")
-parser.add_option("-b","--block", type="int", default=-1,help="in which block do you expect the peak")
-parser.add_option("-w","--search_window_width", type="int", default=-1,help="Width of search window for peak around sample_number (in samples)")
-parser.add_option("-n","--sample_number", type="int", default=-1,help="Sample number wherer peak is expected")
+parser.add_option("-b","--block", type="int", default=-1,help="in which block do you expect the peak  (use LORA guess if -1 or central block if no guess is present)")
+parser.add_option("-w","--search_window_width", type="int", default=-1,help="Width of search window for peak around sample_number (in samples) - full block if not given")
+parser.add_option("-n","--sample_number", type="int", default=-1,help="Sample number within block where peak is expected (use LORA guess if -1 or center if no guess is present)")
 parser.add_option("-s","--blocksize", type="int", default=2**16,help="Blocksize with which to read blocks of data.")
 parser.add_option("--max_data_length", type="int", default=-1,help="Maximum length the file is allowed to have (avoid hangups for corrupted files)")
 parser.add_option("--min_data_length", type="int", default=-1,help="Minimum length the file should have (sanity check)")
@@ -149,14 +149,13 @@ if not parser.get_prog_name()=="cr_event.py":
     outputdir="/Users/falcke/LOFAR/work/results"
     lora_logfile="/Users/falcke/LOFAR/work/data/LORAtime4"
     polarization=1 # either 1 or 0 for odd or even antennapolarization=1 # either 1 or 0 for odd or even antenna
-    block_number=93
+    blocknumber=93
     blocksize=2**16
     nsigma=4
     timestamp=""
     station=""
     plotpause=False
     refresh=True
-    search_window=False
     search_window_width=-1
     sample_number=-1
     
@@ -181,16 +180,15 @@ else:
     polarization = options.polarization
     timestamp = options.timestamp
     station = options.station
-    block_number = options.block
+    blocknumber = options.block
     nsigma = options.nsigma
     pulses_sigma = options.nsigma
-    sample_number = options.sample_number
+    samplenumber = options.sample_number
     blocksize = options.blocksize
     skip_existing_files = options.skip_existing_files
     refresh = not options.norefresh
     plotpause = (not options.nopause and refresh)
     maximum_allowed_delay = options.maximum_allowed_delay
-    search_window=False
     search_window_width=options.search_window_width
     sample_number=options.sample_number
     max_data_length=options.max_data_length
@@ -335,6 +333,8 @@ for full_filename in files:
         pulse_npeaks=-1
         tasks.task_logger=[]
         statuslist=[]
+        block_number=blocknumber
+        sample_number=samplenumber
         
 
         ########################################################################
@@ -423,7 +423,8 @@ for full_filename in files:
         tbb_starttime=datafile["TIME"][0]
         tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
-
+        data_length=datafile["DATA_LENGTH"][0]
+        
         results=dict(
             TELESCOPE=datafile["TELESCOPE"],
             ANTENNA_SET=datafile["ANTENNA_SET"],
@@ -431,7 +432,8 @@ for full_filename in files:
             SAMPLE_FREQUENCY=datafile["SAMPLE_FREQUENCY"][0],
             FREQUENCY_RANGE=datafile["FREQUENCY_RANGE"][0],
             NOF_DIPOLE_DATASETS=datafile["NOF_DIPOLE_DATASETS"],
-            DATA_LENGTH=datafile["DATA_LENGTH"][0],
+            DATA_LENGTH=data_length,
+            DATA_LENGTH_ms=data_length*sample_interval*1000,
             SAMPLE_INTERVAL=sample_interval,
             FILENAME=filename,
             TIME=tbb_starttime,
@@ -452,6 +454,11 @@ for full_filename in files:
             finish_file(laststatus="FILE TOO SMALL")
             continue
 
+        if blocknumber<0:
+            block_number=data_length/blocksize
+        if samplenumber<0:
+            sample_number=blocksize/2
+            
         ########################################################################
         #Getting information from LORA if present
         ########################################################################
@@ -466,9 +473,9 @@ for full_filename in files:
                     finish_file(laststatus="NO TRIGGER")
                     continue
                 print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
-                if block_number<0:
+                if blocknumber<0:
                     block_number=block_number_lora
-                if sample_number<0:
+                if samplenumber<0:
                     sample_number=sample_number_lora
                 print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
         else:
@@ -519,7 +526,7 @@ for full_filename in files:
             LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=128,minpulselen=3,maxlen=128,prepulselen=32),  #nisgma=7  
         #    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once
  #           DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
-            DirectionFitTriangles = dict(maxiter=3,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
+            DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
             ApplyBaseline=dict(rmsfactor=7)
             )
         #------------------------------------------------------------------------
@@ -776,8 +783,10 @@ for full_filename in files:
         #Locate pulse and cut data around it
         ########################################################################
         #First determine where the pulse is in a simple incoherent sum of all time series data
-        if sample_number>=0 and search_window_width>0:
+        if search_window_width>0:
             search_window=(sample_number-search_window_width/2,sample_number+search_window_width/2)
+        else:
+            search_window=False
 
         if lora_direction:
             print "---> Now make an incoherent beam in the LORA direction, locate pulse, and cut time series around it."
@@ -804,7 +813,7 @@ for full_filename in files:
         else: 
             pulse=pulses
 
-        pulse_npeaks=pulse.npeaks
+        pulse_npeaks=pulses.npeaks
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
 
         results.update(dict(
