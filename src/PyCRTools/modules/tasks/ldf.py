@@ -31,8 +31,6 @@ def GetInformationFromFile(topdir, events):
     
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 
-        import pdb; pdb.set_trace()
-        
         for datadir in datadirs:
             if not os.path.isfile(os.path.join(datadir,"results.py")):
                 continue
