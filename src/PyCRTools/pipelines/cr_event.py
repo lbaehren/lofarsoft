@@ -1070,7 +1070,7 @@ for full_filename in files:
         f.close()
 
         # Writing results to XML file
-        xmldict.dump("results.xml", results)
+        xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
 
         finish_file(laststatus="OK" if delay_quality_error<1 else "BAD")
 
