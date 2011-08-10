@@ -1,0 +1,37 @@
+dict {
+ display: table;
+ margin: 1em;
+ border-collapse: collapse;
+ border-spacing: 0;
+}
+
+name {
+ display: table-caption;
+ text-align: center;
+ font-weight: bold;
+}
+
+item {
+ display: table-row;
+}
+
+item:nth-child(odd) {
+  background: #f4f4f4;
+}
+
+key, value {
+ display: table-cell;
+ padding: 0.3em;
+ border: 1px solid gray;
+ vertical-align: top;
+ text-align: left;
+}
+
+key {
+ font-weight: bold;
+}
+
+binary {
+ display: none;
+}
+
