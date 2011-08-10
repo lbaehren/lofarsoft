@@ -124,7 +124,7 @@ if parser.get_prog_name()=="cr_event.py":
 
 from pycrtools import *
 from pycrtools import lora
-
+from pycrtools import xmldict
 
 #plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
 
@@ -1055,6 +1055,9 @@ for full_filename in files:
         f=open(os.path.join(outputdir_with_subdirectories,"results.py"),"w")
         f.write("#"+outfilename+"\nresults="+str(results))
         f.close()
+
+        # Writing results to XML file
+        xmldict.dump("results.xml", results)
 
         finish_file(laststatus="OK" if delay_quality_error<1 else "BAD")
 
