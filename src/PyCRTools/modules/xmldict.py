@@ -112,7 +112,9 @@ def dump(filename, *args, **kwargs):
 
     # Add stylesheet information
     pi = dom.createProcessingInstruction('xml-stylesheet', 'type="text/css" href="shelve.css"')
+    dom.insertBefore(pi, dom.firstChild)
 
+    pi = dom.createProcessingInstruction('xml-stylesheet', 'type="text/css" href="/layout/shelve.css"')
     dom.insertBefore(pi, dom.firstChild)
 
     # Store to file
