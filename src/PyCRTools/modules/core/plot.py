@@ -169,7 +169,7 @@ class plotfinish:
 
 
 
-def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,highlightlabel=None,**plotargs):
+def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,highlightlabel=None,**plotargs):
     """
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
@@ -190,6 +190,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     ================ ======================================================================
     *xvalues*        an array with corresponding *x* values, if ``None``
                      numbers from 0 to length of the array are used.
+    *xerr/yerr*      if not None, errors in along x and y-axis for each point.
     *xlabel*         the *x*-axis label, if not specified, use the ``name``
                      keyword of the ``xvalues`` array - units will be added
                      automatically.
@@ -265,6 +266,14 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         else: exec(var+"="+str(dflt.__repr__()))
+    var="xerr"; dflt="None"; val=eval(var);
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec(var+"="+str(dflt.__repr__()))
+    var="yerr"; dflt="None"; val=eval(var);
+    if val==None:
+        if hasattr(self.par,var): exec(var+"=self.par."+var)
+        else: exec(var+"="+str(dflt.__repr__()))
     var="xlabel"; dflt=""; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
@@ -328,6 +337,7 @@ def hPlot_plot(self,xvalues=None,xlabel=None,ylabel=None,title=None,clf=True,log
             _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
         else:
             _plot(xvalues.vec(),self.vec(),**plotargs)
+#        if yerr or xerr: self.plt.errorbar(xvalues.vec()[:ylen],self.vec(),yerr=yerr,xerr=xerr,fmt="-")
         if not highlight==None:
             if type(nhighlight) in [int,long]: nhighlight=[nhighlight]
             hv=ashArray(highlight).vec()

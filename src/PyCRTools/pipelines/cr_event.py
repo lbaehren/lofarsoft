@@ -61,6 +61,8 @@ There is also a summary of the results ``summary.html`` and
 
     $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R -p0
 
+run  $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-*.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R
+
 ------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
@@ -127,8 +129,6 @@ from pycrtools import lora
 from pycrtools import xmldict
 
 #plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
-
-
 
 #------------------------------------------------------------------------
 # Main input parameters
@@ -824,7 +824,7 @@ for full_filename in files:
 
         timeseries_calibrated_data_antennas_rms=timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
         results.update(dict(
-            pulses_rms=timeseries_calibrated_data_antennas_rms,
+            timeseries_rms=list(timeseries_calibrated_data_antennas_rms),
             npeaks_found=pulse_npeaks
             ))
         
@@ -842,16 +842,18 @@ for full_filename in files:
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
-        timeseries_power.abs()
-        timeseries_power.runningaverage(5,hWEIGHTS.GAUSSIAN)
+        timeseries_power.square()
+        timeseries_power.runningaverage(7,hWEIGHTS.GAUSSIAN)
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+        timeseries_power_mean=timeseries_power[...,0:pulse.start].mean()
+        timeseries_power_rms=timeseries_power[...,0:pulse.start].stddev(timeseries_power_mean)
         Pause(name="pulse-maxima-power")
 
 
         ########################################################################
         #Determine antennas that have pulses with a high enough SNR for beamforming
         ########################################################################
-        pulses_snr=maxima_power.maxy/timeseries_calibrated_data_rms
+        pulses_snr=maxima_power.maxy/timeseries_power_rms
         pulses_refant=pulses_snr.maxpos()
 
         antennas_with_strong_pulses=list(pulses_snr.Find(">",pulses_sigma))
@@ -859,7 +861,9 @@ for full_filename in files:
         
         results.update(dict(
             pulses_sigma=pulses_sigma,
-            pulses_snr=list(pulses_snr),
+            timeseries_power_mean=list(timeseries_power_mean),
+            timeseries_power_rms=list(timeseries_power_rms),
+            pulses_power_snr=list(pulses_snr),
             pulses_refant=pulses_refant,
             antennas_with_strong_pulses=antennas_with_strong_pulses,
             nantennas_with_strong_pulses=nantennas_with_strong_pulses
@@ -979,7 +983,7 @@ for full_filename in files:
             Pause(name="beamformed-multiple-directions")
 
         timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut,name="Power(t)")
-        timeseries_power_shifted.abs()
+        timeseries_power_shifted.square()
         timeseries_power_shifted[...].runningaverage(9,hWEIGHTS.GAUSSIAN)
         if Pause.doplot:
             timeseries_power_shifted[...].plot(title="abs(E-Field) corrected for delays in beam direction per antenna",xlabel="Samples")

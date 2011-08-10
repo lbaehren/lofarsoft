@@ -14,7 +14,7 @@ import pytmf
 import os
 
 
-def GetInformationFromFile(topdir, events):
+def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
 
     eventdirs=cr.listFiles([os.path.join(topdir,event) for event in events])
     
@@ -51,8 +51,8 @@ def GetInformationFromFile(topdir, events):
 
             # check, which pulse definition most suitable for LDF ploting
             
-            signal[res["polarization"]].extend(res["pulses_maxima_y"])  
-            #signal[res["polarization"]].extend(res["pulses_strength"])
+#            signal[res["polarization"]].extend(res["pulses_maxima_y"])  
+            signal[res["polarization"]].extend(res[plot_parameter])
             
             ndipoles[res["polarization"]]+=res["ndipoles"]
     
@@ -88,8 +88,8 @@ def GetInformationFromFile(topdir, events):
         
         # check normalization of signal (to be confirmed with respect to signal calibration)
         
-        par["signals1"]=cr.hArray(signal[1])*65536*100
-        par["signals0"]=cr.hArray(signal[0])*65536*100
+        par["signals1"]=cr.hArray(signal[1])
+        par["signals0"]=cr.hArray(signal[0])
 
     return par
 
@@ -113,26 +113,28 @@ class ldf(tasks.Task):
 
 
     parameters = dict(
-    
-              topdir=dict(default="/data/VHECR/LORAtriggered/results",doc="provide topdir",unit=""),
-              events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="provide events in topdir",unit=""),
-              results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.events),doc="Provide task with topdirectory",unit=""),
-              positions1=dict(default=lambda self:self.results["positions1"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 1 (x0,y0,z0,...)",unit="m"),
-              positions0=dict(default=lambda self:self.results["positions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 0 (x0,y0,z0,...)",unit="m"),
-              signals1=dict(default=lambda self:self.results["signals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
-              signals0=dict(default=lambda self:self.results["signals0"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 0",unit="a.u."),
-              signaluncertainties1=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 1", unit="a.u."),
-              signaluncertainties0=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 0", unit="a.u."),
-              loracore = dict(default=lambda self:self.results["loracore"],doc="hArray of core position [x,y,z] as provided by Lora ",unit="m"),
-              loradirection = dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees"),
-              loracoreuncertainties = dict(default=None, doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
-              loradirectionuncertainties = dict(default=None, doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
-              eventid = dict(default=lambda self:self.results["eventid"], doc="EventId for LOFAR Event"),
-              logplot=dict(default=True, doc="Draw y-axis logarithmically"),
-              plot_clf = dict(default=True,doc="Clean window before plotting?"),
-              plot_xmin = dict(default=0,doc="Mininum value of x-axis"),
-              plot_xmax = dict(default=400,doc="Maximum value of x-axis")
-              )
+        topdir=dict(default="/data/VHECR/LORAtriggered/results",doc="provide topdir",unit=""),
+        eventslist=dict(default=lambda self:self.events if isinstance(self.events,list) else [self.events],doc="list with event names to process (directories in topdir)",unit=""),
+        events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="Event directories in topdir - either as list or as single string",unit=""),
+        results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.eventslist,plot_parameter=self.plot_parameter),doc="Provide task with topdirectory",unit=""),
+        positions1=dict(default=lambda self:self.results["positions1"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 1 (x0,y0,z0,...)",unit="m"),
+        positions0=dict(default=lambda self:self.results["positions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 0 (x0,y0,z0,...)",unit="m"),
+        signals1=dict(default=lambda self:self.results["signals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
+        signals0=dict(default=lambda self:self.results["signals0"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 0",unit="a.u."),
+        signaluncertainties1=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 1", unit="a.u."),
+        signaluncertainties0=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 0", unit="a.u."),
+        loracore = dict(default=lambda self:self.results["loracore"],doc="hArray of core position [x,y,z] as provided by Lora ",unit="m"),
+        loradirection = dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees"),
+        loracoreuncertainties = dict(default=None, doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
+        loradirectionuncertainties = dict(default=None, doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
+        eventid = dict(default=lambda self:self.results["eventid"], doc="EventId for LOFAR Event"),
+        square=dict(default=False, doc="Square the data (to get power) before plotting."),
+        plot_parameter=dict(default="pulses_maxima_y", doc="Which parameter of the results-dict to plot: 'pulses_strength' or 'pulses_maxima_y'"),
+        logplot=dict(default=True, doc="Draw y-axis logarithmically"),
+        plot_clf = dict(default=True,doc="Clean window before plotting?"),
+        plot_xmin = dict(default=0,doc="Mininum value of x-axis"),
+        plot_xmax = dict(default=400,doc="Maximum value of x-axis")
+        )
 
 
     ## Functions for shower geometry and uncertainty propagation
@@ -240,7 +242,11 @@ class ldf(tasks.Task):
 
         self.signals0.par.xvalues=cr.hArray(self.Distances0)
         self.signals1.par.xvalues=cr.hArray(self.Distances1)
-        
+
+        if self.square:
+            self.signals0.square()
+            self.signals1.square()
+            
         self.DistUncertainties0 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions0,self.loradirection,self.loradirectionuncertainties,self.Distances0)
         self.DistUncertainties1 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions1,self.loradirection,self.loradirectionuncertainties,self.Distances1)
 
