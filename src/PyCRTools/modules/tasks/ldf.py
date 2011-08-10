@@ -129,7 +129,9 @@ class ldf(tasks.Task):
               loradirectionuncertainties = dict(default=None, doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
               eventid = dict(default=lambda self:self.results["eventid"], doc="EventId for LOFAR Event"),
               logplot=dict(default=True, doc="Draw y-axis logarithmically"),
-              plot_clf = dict(default=True,doc="Clean window before plotting?")
+              plot_clf = dict(default=True,doc="Clean window before plotting?"),
+              plot_xmin = dict(default=0,doc="Mininum value of x-axis"),
+              plot_xmax = dict(default=400,doc="Maximum value of x-axis")
               )
 
 
@@ -233,47 +235,40 @@ class ldf(tasks.Task):
             self.loradirectionuncertainties = cr.hArray([1.,1.,0])
             print "Warning: Using default for direction uncertainties!"      
         
-        Distances0 = self.GetDistance(self.loracore,self.loradirection,self.positions0)
-        Distances1 = self.GetDistance(self.loracore,self.loradirection,self.positions1)
+        self.Distances0 = self.GetDistance(self.loracore,self.loradirection,self.positions0)
+        self.Distances1 = self.GetDistance(self.loracore,self.loradirection,self.positions1)
+
+        self.signals0.par.xvalues=cr.hArray(self.Distances0)
+        self.signals1.par.xvalues=cr.hArray(self.Distances1)
         
-        DistUncertainties0 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions0,self.loradirection,self.loradirectionuncertainties,Distances0)
-        DistUncertainties1 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions1,self.loradirection,self.loradirectionuncertainties,Distances1)
+        self.DistUncertainties0 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions0,self.loradirection,self.loradirectionuncertainties,self.Distances0)
+        self.DistUncertainties1 = self.GetTotalDistanceUncertainty(self.loracore,self.loracoreuncertainties,self.positions1,self.loradirection,self.loradirectionuncertainties,self.Distances1)
 
-        if self.plot_clf: cr.plt.clf()
+        if self.plot_clf:
+            cr.plt.clf()
 
-        if self.signaluncertainties0:            
+        if self.signals0:
+            if self.signaluncertainties0:
+                cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color='r',linestyle="None",label="pol 0")
+            else:
+                self.signals0.plot(color='r',linestyle="None",marker="o",label="pol 0",clf=False)           
+
+        if self.signals1:
             if self.signaluncertainties1:
-                
-                cr.plt.errorbar(Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),DistUncertainties0.vec(),'g',linestyle="None",label="pol 0")
-                cr.plt.errorbar(Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),DistUncertainties1.vec(),'b',linestyle="None",label="pol 1")
-                cr.plt.legend(('pol 0','pol 1'),loc='upper right', shadow=False, numpoints=1)
-                
-                cr.plt.xlabel("Distance to shower axis [m]")
-                cr.plt.ylabel("Power [a.u.]")
-                cr.plt.axis(xmin=0,xmax=400)
-                
-        else:
-            print "Warning: Using default for signals uncertainties!"
-            
-            self.signaluncertainties0 = cr.hArray(float,dimensions=len(Distances0),fill=1000) 
-            self.signaluncertainties1 = cr.hArray(float,dimensions=len(Distances1),fill=1000)
-          
-                
-            cr.plt.errorbar(Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),DistUncertainties0.vec(),'rs',linestyle="None",label="pol 0")
-            cr.plt.errorbar(Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),DistUncertainties1.vec(),'bo',linestyle="None",label="pol 1")
-            cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
+                cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),self.DistUncertainties0.vec(),color='b',linestyle="None",label="pol 2")
+            else:
+                self.signals1.plot(color='b',linestyle="None",marker="o",label="pol 1",clf=False)           
 
-            cr.plt.xlabel("Distance to shower axis [m]")
-            cr.plt.ylabel("Power [a.u.]")  
-            cr.plt.axis(xmin=0,xmax=400)
-        
+        cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
+        cr.plt.xlabel("Distance to Shower Axis [m]")
+        cr.plt.ylabel("Power [a.u.]")
+        cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+                
         if self.logplot:
-
             cr.plt.yscale("log")
-            cr.plt.axis(xmin=0,xmax=400)
+            cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
             
         if self.eventid:
-
             cr.plt.title(str(self.eventid))
               
 
