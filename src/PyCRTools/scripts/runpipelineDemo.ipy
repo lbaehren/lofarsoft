@@ -9,11 +9,26 @@ tail -f logfile.txt
 
 Just for the good guys:
 
-$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110716T094509.665Z*.h5' 'VHECR_LORA-20110716T025339.597Z*.h5' 'VHECR_LORA-20110714T174749.986Z*.h5' 'VHECR_LORA-20110612T231913.199Z*.h5' 'VHECR_LORA-20110612T235954.184Z*.h5' 'VHECR_LORA-20110626T221820.368Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile1.txt &
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110716T094509.665Z*.h5' 'VHECR_LORA-20110716T025339.597Z*.h5' 'VHECR_LORA-20110714T174749.986Z*.h5' 'VHECR_LORA-20110612T231913.199Z*.h5' 'VHECR_LORA-20110612T235954.184Z*.h5' 'VHECR_LORA-20110626T221820.368Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=2.5 -R >& logfile-good-b.txt &
 
-$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110714T174749.986Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile1c.txt &
 
-$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110613T051515.914Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_INNER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile2.txt &
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110613T051515.914Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_INNER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile-good.txt &
+
+Interactive plotting of LDF in python (or use trun):
+
+tload "ldf"
+tpar topdir="/data/VHECR/LORAtriggered/newresults"
+tpar events=["VHECR_LORA-20110714T174749.986Z"]
+go
+
+
+VHECR_LORA-20110612T231913.199Z
+VHECR_LORA-20110612T235954.184Z
+VHECR_LORA-20110613T051515.914Z
+VHECR_LORA-20110626T221820.368Z
+VHECR_LORA-20110714T174749.986Z
+VHECR_LORA-20110716T025339.597Z
+VHECR_LORA-20110716T094509.665Z
 
 """
 

@@ -201,7 +201,7 @@ Pause=plotfinish(plotpause=plotpause,refresh=refresh)
 plt.ioff()
 #------------------------------------------------------------------------
 
-
+good_old_time_stamp = "None"
 
 def finish_file(laststatus=""):
     ########################################################################
@@ -240,9 +240,12 @@ def finish_file(laststatus=""):
     summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
     summaryfile.close()
 
+    global good_old_time_stamp
     if delay_quality_error<1:
         topsummaryfile=open(goodsummaryfilename,"a")
-        if not old_time_stamp == time_stamp: topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
+        if not good_old_time_stamp == time_stamp:
+            topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
+            good_old_time_stamp = time_stamp
         topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
 
@@ -309,6 +312,7 @@ def finish_file(laststatus=""):
 #Loop over all files and polarizations
 ########################################################################
 
+old_time_stamp = None
 time_stamp=""
 polarizations=[0,1] if polarization<0 else [polarization]
 files = listFiles(filefilter)
@@ -365,6 +369,8 @@ for full_filename in files:
 
         calibrated_timeseries_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries")
         result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
+        calibrated_timeseries_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries-cut")
+        calibrated_fft_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-fft-cut")
         
         htmlfilename=os.path.join(outputdir_with_subdirectories,"index.html")
         summaryfilename=os.path.join(outputdir_event,"index.html")
@@ -816,8 +822,10 @@ for full_filename in files:
         pulse_npeaks=pulses.npeaks
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
 
+        timeseries_calibrated_data_antennas_rms=timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
         results.update(dict(
-            npeaks_found=pulse_npeaks,
+            pulses_rms=timeseries_calibrated_data_antennas_rms,
+            npeaks_found=pulse_npeaks
             ))
         
         if pulse_npeaks==0:
@@ -828,12 +836,17 @@ for full_filename in files:
             finish_file(laststatus="NO PULSE")
             continue
 
+        #Store the small version of the calibrated timeseries, e.g. for the imager
+        print "---> Saving ",calibrated_timeseries_cut_file
+        pulse.timeseries_data_cut.write(calibrated_timeseries_cut_file)
+
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
         timeseries_power.abs()
         timeseries_power.runningaverage(5,hWEIGHTS.GAUSSIAN)
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         Pause(name="pulse-maxima-power")
+
 
         ########################################################################
         #Determine antennas that have pulses with a high enough SNR for beamforming
@@ -967,7 +980,7 @@ for full_filename in files:
 
         timeseries_power_shifted=hArray(fill=bf.data_shifted,properties=pulse.timeseries_data_cut,name="Power(t)")
         timeseries_power_shifted.abs()
-        timeseries_power_shifted[...].runningaverage(5,hWEIGHTS.GAUSSIAN)
+        timeseries_power_shifted[...].runningaverage(9,hWEIGHTS.GAUSSIAN)
         if Pause.doplot:
             timeseries_power_shifted[...].plot(title="abs(E-Field) corrected for delays in beam direction per antenna",xlabel="Samples")
             plt.legend(good_antennas,ncol=2,title="Antennas",prop=matplotlib.font_manager.FontProperties(family="Helvetica",size=7))
