@@ -276,6 +276,159 @@ void hMin(const Iter vec,const Iter vec_end, const T min_value)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: For each element in a vector replace its value by the minimum of the element value in the vector itself and the element value in the second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMinimum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec0)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end)
+{
+  Iter it0(vec0);
+  Iter it1(vec1);
+
+  while (it0!=vec0_end && it1!=vec1_end) {
+    if (*it1 < *it0) *it0=*it1;
+    ++it0; ++it1;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: For each element in a vector replace its value by the minimum of the element value in the vector itself and the element value in the second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMinimum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec0)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_1)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end, const Iter vec2, const Iter vec2_end)
+{
+  Iter it0(vec0);
+  Iter it1(vec1);
+  Iter it2(vec2);
+
+  while (it0!=vec0_end && it1!=vec1_end && it2!=vec2_end) {
+    *it0 = *it2 < *it1 ? *it2 : *it1;
+
+    ++it0; ++it1; ++it2;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: For each element in two input vectors get the minimum and maximum in the output vectors
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMinimumAndMaximum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec0)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_1)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HFPP_TEMPLATED_1)(vec3)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end, const Iter vec2, const Iter vec2_end, const Iter vec3, const Iter vec3_end)
+{
+  Iter it0(vec0);
+  Iter it1(vec1);
+  Iter it2(vec2);
+  Iter it3(vec3);
+
+  while (it0!=vec0_end && it1!=vec1_end && it2!=vec2_end && it3!=vec3_end) {
+    if (*it3 < *it2)
+    {
+      *it0 = *it3;
+      *it1 = *it2;
+    }
+    else
+    {
+      *it0 = *it2;
+      *it1 = *it3;
+    }
+    ++it0; ++it1; ++it2; ++it3;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: For each element in a vector replace its value by the maximum of the element value in the vector itself and the element value in the second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaximum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec0)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_1)(vec2)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end, const Iter vec2, const Iter vec2_end)
+{
+  Iter it0(vec0);
+  Iter it1(vec1);
+  Iter it2(vec2);
+
+  while (it0!=vec0_end && it1!=vec1_end && it2!=vec2_end) {
+    *it0 = *it2 > *it1 ? *it2 : *it1;
+
+    ++it0; ++it1; ++it2;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: For each element in a vector replace its value by the maximum of the element value in the vector itself and the element value in the second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaximum
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec0)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_1)(vec1)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec0, const Iter vec0_end, const Iter vec1, const Iter vec1_end)
+{
+  Iter it0(vec0);
+  Iter it1(vec1);
+
+  while (it0!=vec0_end && it1!=vec1_end) {
+    if (*it1 > *it0) *it0=*it1;
+    ++it0; ++it1;
+  };
+  return;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Return the position of the maximum value in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
