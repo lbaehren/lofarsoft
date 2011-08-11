@@ -768,6 +768,7 @@ class DirectionFitTriangles(tasks.Task):
         self.delta_delays_mean_history=[]
         self.delta_delays_rms_history=[]
         self.enditer=False
+        self.residual_delays.fill(0)
         if self.verbose:
             allantennas=set(range(self.NAnt))
 
@@ -812,7 +813,7 @@ class DirectionFitTriangles(tasks.Task):
             self.delta_delays_rms_history.append(self.delta_delays_rms)
             self.delta_delays_mean_history.append(self.delta_delays_mean)
 
-            rfac=max(self.rmsfactor*(1.0-float(it)/(self.maxiter)),self.minrmsfactor)
+            rfac=max(self.rmsfactor*(1.0-float(it)/(self.maxiter-1)),self.minrmsfactor)
             self.ngooddelays=self.delayindex.findbetween(self.delta_delays,self.delta_delays_mean-self.delta_delays_rms*rfac,self.delta_delays_mean+self.delta_delays_rms*rfac).val()
             if self.ngooddelays>0:
                 self.delta_delays.set(self.delayindex[:self.ngooddelays],0.0)
