@@ -50,8 +50,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             #positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
 
             # check, which pulse definition most suitable for LDF ploting
-            
-#            signal[res["polarization"]].extend(res["pulses_maxima_y"])  
+              
             signal[res["polarization"]].extend(res[plot_parameter])
             
             ndipoles[res["polarization"]]+=res["ndipoles"]
