@@ -264,7 +264,7 @@ class ldf(tasks.Task):
                 if self.logplot:
                     #exception for too large errorbars in logplot (reaching negative numbers)
                     sig_lower0 = cr.hArray(copy=self.signaluncertainties0)
-                    sig_lower0.fill(0.0001)
+                    sig_lower0.fill(0.00001)
                     cr.hMaximum(sig_lower0,self.signals0 - self.signaluncertainties0)
                     sig_uncer0 = self.signals0 - sig_lower0
                     
@@ -283,7 +283,7 @@ class ldf(tasks.Task):
                 if self.logplot:
                     #exception for too large errorbars in logplot (reaching negative numbers)
                     sig_lower1 = cr.hArray(copy=self.signaluncertainties1)
-                    sig_lower1.fill(0.0001)
+                    sig_lower1.fill(0.00001)
                     cr.hMaximum(sig_lower1,self.signals1 - self.signaluncertainties1)
                     sig_uncer1 = self.signals1 - sig_lower1
                     
