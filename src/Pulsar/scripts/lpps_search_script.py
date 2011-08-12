@@ -36,6 +36,7 @@ from __future__ import division
 import optparse
 import sys
 import os
+import errno
 from os.path import join
 import re
 import copy
@@ -304,10 +305,10 @@ def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
     CWD = os.getcwd()
     try:
         # jump to rfifind working directory (create if necessary)
-        if not os.path.exists(work_dir):
-            try:
-                os.makedirs(work_dir)
-            except:
+        try:
+            os.makedirs(work_dir)
+        except OSError, e:
+            if e.errno != errno.EEXIST:
                 print 'Creating the working directory for rfifind failed!'
                 raise
         os.chdir(work_dir)
@@ -420,8 +421,11 @@ def analyze_dm_trial(source_dir, basename, dm, work_dir, *args, **kwargs):
     CWD = os.getcwd()
     try:
         # create working directory if it does not exists
-        if not os.path.exists(work_dir):
+        try:
             os.makedirs(work_dir)
+        except OSError, e:
+            if e.errno != errno.EEXIST:
+                raise
         os.chdir(work_dir)
 
         # symlink .dat and .inf files (for now all of them)
@@ -434,8 +438,11 @@ def analyze_dm_trial(source_dir, basename, dm, work_dir, *args, **kwargs):
 
         if zap_file_fullpath:
             zap_file_dir, zap_file = os.path.split(zap_file_fullpath)
-            if not os.path.exists(join(work_dir, zap_file)):
+            try:
                 os.symlink(zap_file_fullpath, join(work_dir, zap_file))
+            except OSError, e:
+                if e.errno != errno.EEXIST:
+                    raise
         else:
             zap_file = ''
         
@@ -559,12 +566,19 @@ def fold_on_known_ephemeris(source_dir, basename, dm, work_dir,
             # if necessary copy .par files to working directory
             par_file = os.path.split(par_file_fullpath)[1]
             if not os.path.exists(join(work_dir, par_file)):
+                # Probably does not need a try except block (as one can 
+                # repeatedly copy a file using shutil.copy without
+                # exceptions being raised. XXX
                 shutil.copy(par_file_fullpath, join(work_dir, par_file))
             mask_file = os.path.split(mask_file_fullpath)[1]
             tmp = join(work_dir, mask_file)
             # link rfifind output to working directory
-            if mask_file_fullpath and not os.path.exists(tmp):
-                os.symlink(mask_file_fullpath, tmp)
+            if mask_file_fullpath:
+                try:
+                    os.symlink(mask_file_fullpath, tmp)
+                except OSError, e:
+                    if e.errno != errno.EEXIST:
+                        raise
             # run folding for known ephemeris (twice!)
             bin, options, parameters = get_folding_command_ke(
                 basename, dm, basename + '_DM%.2f' % dm + '.dat', 
@@ -851,7 +865,7 @@ class SearchRun(object):
                         # SEARCH:
                         # Perform fft + corrections, accelsearch, single pulse search
                         analyze_dm_trial(self.work_dir, self.basename, dm, 
-                            join(self.work_dir, 'CORE_0'), z_values=z_values,
+                            core_work_dir, z_values=z_values,
                             zap_file_fullpath=self.zap_file, bary_v=self.bary_v,
                             do_accelsearch=not no_accel,
                             do_singlepulsesearch=not no_singlepulse,
@@ -875,7 +889,10 @@ class SearchRun(object):
                         # talking to the disks, but larger disk use during the search).
                         if not no_accel:
                             # remove datafiles that are no longer necessary
-                            remove_matching(core_work_dir, '^\S+\.fft')
+# MAYBE REMOVING THE .fft FILES IS DONE WRONG:
+#                            remove_matching(core_work_dir, '^\S+\.fft')
+                            file_regexp = r'^' + re.escape(self.basename) + r'_DM%.2f\.fft$' % dm
+                            remove_matching(core_work_dir, file_regexp)
                             # move the search output to the top level working directory
                             move_matching(core_work_dir, self.work_dir,
                                 '(^\S+\_ACCEL_\d+$|^\S+\_ACCEL_\d+\.cand$|^\S+\_ACCEL_\d+\.txtcand$)'
@@ -889,7 +906,7 @@ class SearchRun(object):
                         if save_timeseries:
                             # copy timeseries to output directory
                             # This can fail miserably if there is not enough disk!
-                            shutil.move(join(core_work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
+                            shutil.move(join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'),
                                 join(self.out_dir, 'TIMESERIES'))
                         else:
                             # remove dedispersed timeseries (.dat files)
