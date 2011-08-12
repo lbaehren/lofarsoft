@@ -25,6 +25,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         par={}
         antid={0:[],1:[]}
         signal={0:[],1:[]}
+        rms={0:[],1:[]}
         positions={0:[],1:[]}
         positions2={0:[],1:[]}
         ndipoles={0:0,1:0}
@@ -43,15 +44,14 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
             antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
-            
-            positions[res["polarization"]].extend(res["antenna_positions_ITRF_m"])  
-            
-            # No conversion needed for: Available in more recent version of pipeline:" 
-            #positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
+             
+            positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
 
             # check, which pulse definition most suitable for LDF ploting
               
             signal[res["polarization"]].extend(res[plot_parameter])
+            
+            rms[res["polarization"]].extend(res["timeseries_power_rms"])
             
             ndipoles[res["polarization"]]+=res["ndipoles"]
     
@@ -77,18 +77,25 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         par["loradirection"]=cr.hArray(res["pulse_direction_lora"])
         par["loraenergy"]=res["pulse_energy_lora"]
         
-        # if use XYZ positions, change conversion here
+        # if use ITRF positions, change conversion here
 
-        pos0=cr.hArray(float,[ndipoles[0],3],positions[0],name="Antenna Positions",units="m") 
-        par["positions0"]=cr.metadata.convertITRFToLocal(pos0)
+#        pos0=cr.hArray(float,[ndipoles[0],3],positions[0],name="Antenna Positions",units="m") 
+#        par["positions0"]=cr.metadata.convertITRFToLocal(pos0)
+#  
+#        pos1=cr.hArray(float,[ndipoles[1],3],positions[1],name="Antenna Positions",units="m")
+#        par["positions1"]=cr.metadata.convertITRFToLocal(pos1)
+
+        par["positions0"]=cr.hArray(float,[ndipoles[0],3],positions[0],name="Antenna Positions",units="m") 
   
-        pos1=cr.hArray(float,[ndipoles[1],3],positions[1],name="Antenna Positions",units="m")
-        par["positions1"]=cr.metadata.convertITRFToLocal(pos1)
+        par["positions1"]=cr.hArray(float,[ndipoles[1],3],positions[1],name="Antenna Positions",units="m")
         
         # check normalization of signal (to be confirmed with respect to signal calibration)
         
         par["signals1"]=cr.hArray(signal[1])
         par["signals0"]=cr.hArray(signal[0])
+        
+        par["signaluncertainties0"] = cr.hArray(rms[0])
+        par["signaluncertainties1"] = cr.hArray(rms[1])
 
     return par
 
@@ -120,8 +127,8 @@ class ldf(tasks.Task):
         positions0=dict(default=lambda self:self.results["positions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 0 (x0,y0,z0,...)",unit="m"),
         signals1=dict(default=lambda self:self.results["signals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
         signals0=dict(default=lambda self:self.results["signals0"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 0",unit="a.u."),
-        signaluncertainties1=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 1", unit="a.u."),
-        signaluncertainties0=dict(default=None, doc="hArray of dimension [NAnt,1], signaluncertainties in pol 0", unit="a.u."),
+        signaluncertainties1=dict(default=lambda self:self.results["signaluncertainties1"], doc="hArray of dimension [NAnt,1], signaluncertainties in pol 1", unit="a.u."),
+        signaluncertainties0=dict(default=lambda self:self.results["signaluncertainties0"], doc="hArray of dimension [NAnt,1], signaluncertainties in pol 0", unit="a.u."),
         loracore = dict(default=lambda self:self.results["loracore"],doc="hArray of core position [x,y,z] as provided by Lora ",unit="m"),
         loradirection = dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees"),
         loracoreuncertainties = dict(default=None, doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
@@ -254,25 +261,45 @@ class ldf(tasks.Task):
 
         if self.signals0:
             if self.signaluncertainties0:
-                cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color='r',linestyle="None",label="pol 0")
+                if self.logplot:
+                    #exception for too large errorbars in logplot (reaching negative numbers)
+                    sig_lower0 = cr.hArray(copy=self.signaluncertainties0)
+                    sig_lower0.fill(0.0001)
+                    cr.hMaximum(sig_lower0,self.signals0 - self.signaluncertainties0)
+                    sig_uncer0 = self.signals0 - sig_lower0
+                    
+                    cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),yerr=[sig_uncer0.vec(),self.signaluncertainties0.vec()],xerr=self.DistUncertainties0.vec(),color='r',marker='o',linestyle="None",label="pol 0")
+                    cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+                    cr.plt.yscale("log")
+                
+                else:
+                    cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color='r',marker='o',linestyle="None",label="pol 0")
+           
             else:
                 self.signals0.plot(color='r',linestyle="None",marker="o",label="pol 0",clf=False)           
 
         if self.signals1:
             if self.signaluncertainties1:
-                cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),self.DistUncertainties0.vec(),color='b',linestyle="None",label="pol 2")
+                if self.logplot:
+                    #exception for too large errorbars in logplot (reaching negative numbers)
+                    sig_lower1 = cr.hArray(copy=self.signaluncertainties1)
+                    sig_lower1.fill(0.0001)
+                    cr.hMaximum(sig_lower1,self.signals1 - self.signaluncertainties1)
+                    sig_uncer1 = self.signals1 - sig_lower1
+                    
+                    cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),yerr=[sig_uncer1.vec(),self.signaluncertainties1.vec()],xerr=self.DistUncertainties1.vec(),color='b',marker="s",linestyle="None",label="pol 1")
+                    cr.plt.yscale("log")
+                    cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+                else:
+                    cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),self.DistUncertainties1.vec(),color='b',marker="s",linestyle="None",label="pol 1")
             else:
-                self.signals1.plot(color='b',linestyle="None",marker="o",label="pol 1",clf=False)           
+                self.signals1.plot(color='b',linestyle="None",marker="s",label="pol 1",clf=False)           
 
         cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
         cr.plt.xlabel("Distance to Shower Axis [m]")
         cr.plt.ylabel("Power [a.u.]")
         cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
-                
-        if self.logplot:
-            cr.plt.yscale("log")
-            cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
-            
+     
         if self.eventid:
             cr.plt.title(str(self.eventid))
               
