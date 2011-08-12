@@ -531,9 +531,11 @@ def hArray_setitem(self,dims,fill):
 
     """
     if type(fill) in [list,tuple]:
-        fill=hVector(fill)
+        fill=Vector(fill)
+
     if type(dims) in [int,long]:
         hFill(hArray_getSlicedArray(self,dims),fill)
+        return
     elif type(dims)==tuple:# (multi-d index)
         if type(dims[-1]) in [list,IntVec]:
             hSet(hArray_getSlicedArray(self,dims[:-1]),hArray(dims[-1]),fill)
@@ -541,7 +543,12 @@ def hArray_setitem(self,dims,fill):
             hSet(hArray_getSlicedArray(self,dims[:-1]),dims[-1],fill)
         else:
             hFill(hArray_getSlicedArray(self,dims),fill)
-    elif type(dims) in [list,IntVec]:
+        return
+
+    if type(fill) in hAllVectorTypes:
+        fill=hArray(fill)
+
+    if type(dims) in [list,IntVec]:
         self.set(hArray(dims),fill)
     elif type(dims) == IntArray:
         self.set(dims,fill)
@@ -694,6 +701,26 @@ def ishArray(ary):
     """
     return type(ary) in hAllArrayTypes
 
+
+def asharray(self):
+    """
+    Return the argument as an hArray, if possible, otherwise as list. If None, return None.
+    """
+    typ=type(self)
+    if typ in hAllArrayTypes:
+        return self
+    elif typ in hAllVectorTypes:
+        return hArray(self)
+    elif typ in hBaseTypes:
+        return hArray([self])
+    elif typ==list:
+        return hArray(self)
+    elif typ in [set,tuple]:
+        return hArray(list(self))
+    elif self==None:
+        return self
+    else:
+        return [self]
 
 def hArray_toNumpy(self):
     """Returns a copy of the array as a numpy.ndarray object with the correct dimensions."""

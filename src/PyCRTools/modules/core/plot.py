@@ -228,6 +228,12 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
     *linestyle*      = scipy style of line plotting (e.g. 'dashed', or '' for none)
     *marker*         = scipy style for data points (e.g. 'x' or 'o')
     ================ ======================================================================
+
+    Example:
+
+    #Plotting an hArray with errorbars
+    a=hArray(float,10,fill=range(1,11));  b=hArray(copy=a,yerr=a,xerr=a,logplot="y"); a*=0.1; b.plot()
+    
     """
 #    if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
 #        EDP64bug=self.plt.EDP64bug
@@ -255,7 +261,8 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
             else:
                 xvalues=self.par.xvalues
         else:
-            xvalues=hArray(range(len(self.vec())))
+            xvalues=hArray(float,len(self.vec()))
+            xvalues.fillrange(0.,1.)
     xunit=xvalues.getUnit().replace("\\mu","$\\mu$")
     if not xunit=="": xunit=" ["+xunit+"]"
     yunit=self.getUnit().replace("\\mu","$\\mu$")
@@ -266,11 +273,11 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         else: exec(var+"="+str(dflt.__repr__()))
-    var="xerr"; dflt="None"; val=eval(var);
+    var="xerr"; dflt=None; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         else: exec(var+"="+str(dflt.__repr__()))
-    var="yerr"; dflt="None"; val=eval(var);
+    var="yerr"; dflt=None; val=eval(var);
     if val==None:
         if hasattr(self.par,var): exec(var+"=self.par."+var)
         else: exec(var+"="+str(dflt.__repr__()))
@@ -335,14 +342,17 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
     while (iterate):
         if ylen<xlen:
             _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
+            if yerr or xerr:
+                self.plt.errorbar(xvalues.vec()[:ylen],self.vec(),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
         else:
             _plot(xvalues.vec(),self.vec(),**plotargs)
-#        if yerr or xerr: self.plt.errorbar(xvalues.vec()[:ylen],self.vec(),yerr=yerr,xerr=xerr,fmt="-")
+            if yerr or xerr:
+                self.plt.errorbar(asvec(xvalues),asvec(self),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
         if not highlight==None:
             if type(nhighlight) in [int,long]: nhighlight=[nhighlight]
             hv=ashArray(highlight).vec()
             ha=hArray(hv,[len(hv)/2,2])
-            for n in range(nhighlight[loop]): #how many sections are to be highlighted?
+            for n in xrange(nhighlight[loop]): #how many sections are to be highlighted?
                 slc=slice(ha[n,0],ha[n,1]+1)
                 _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor,label=highlightlabel if n==0 else False)
         if highlight:

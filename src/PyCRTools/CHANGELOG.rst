@@ -1,3 +1,13 @@
+2011-08-13 - Rev 8292
+=====================
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+- added a variant of hSet where one can set elements in an array to
+  elements in another array (using a index list) array[[i_0,I1,..]]=[e_0,e_1,....]
+- plot and hArray can now accept errobars with the keywords yerr, and
+  xerr
+ 
 2011-08-08 - Rev 8266
 =====================
 
@@ -8,7 +18,6 @@
 
 - various bugfixes
 
-2011-08-05 - Rev 8249
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>

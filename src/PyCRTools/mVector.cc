@@ -289,6 +289,61 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Sets certain elements specified in an indexlist to values in seconde list
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSet
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec)()("Vector of in which to set elements.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(indexlist)()("Index list containing the positions of the elements to be set, (e.g. [0,2,4,...] will set every second element).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HFPP_TEMPLATED_2)(vecfrom)()("Value to assign to the indexed elements from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vec.set(indexlist,[a_0,a_i,...]) -> set elements in vec at the positions given in indexlist to the values in the last argument. 
+
+  Description:
+  If 'fromvec' is too short it will wrap around until all values are filled.
+
+  Example:
+  vec=hArray(range(10))
+  indx=hArray([2,4])
+  vec.set(indx,99)
+  vec -> hArray(int, [10], fill=[0, 1, 99, 3, 99, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
+
+  See also:
+  hFill, hCopy
+*/
+template <class Iter, class IterI, class IterT>
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const IterI index_end, const IterT fromvec, const IterT fromvec_end)
+{
+  // Sanity check
+  if (index == index_end) return;
+  if (index > index_end) ERROR_RETURN("Illegal size of index vector.");
+  if (vec >= vec_end) ERROR_RETURN("Illegal size of first vector.");
+  if (fromvec >= fromvec_end) ERROR_RETURN("Illegal size of from-vector.");
+
+  // Variables
+  Iter it;
+  IterT itfrom(fromvec);
+  IterI itidx(index);
+
+  while (itidx != index_end) {
+    it = vec + *itidx;
+    if ((it < vec_end) && (it >= vec)) {
+      *it=hfcast<IterValueType>(*itfrom);
+    };
+    ++itidx;
+    ++itfrom;
+    if (itfrom==fromvec_end) itfrom=fromvec; 
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Sets a certain element specified by an index to a constant value.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hSet

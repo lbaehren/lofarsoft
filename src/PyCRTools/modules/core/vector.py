@@ -128,19 +128,21 @@ def multiply_list(l):
 
 def asvec(self):
     """
-    Return the argument as a vector, if possible, otherwise as list
+    Return the argument as a vector, if possible, otherwise as list. If None, return None.
     """
     typ=type(self)
     if typ in hAllVectorTypes:
         return self
+    elif typ in hAllArrayTypes:
+        return self.vec()
     elif typ in hBaseTypes:
         return Vector([self])
     elif typ==list:
         return Vector(self)
     elif typ in [set,tuple]:
         return Vector(list(self))
-    elif typ in hAllArrayTypes:
-        return self.vec()
+    elif self==None:
+        return self
     else:
         return [self]
 
