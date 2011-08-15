@@ -27,8 +27,11 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         signal={0:[],1:[]}
         rms={0:[],1:[]}
         positions={0:[],1:[]}
-        positions2={0:[],1:[]}
         ndipoles={0:0,1:0}
+        meanpos = {0:[],1:[]}
+        meansignal = {0:[],1:[]}
+        names0 = []
+        names1 = []
     
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 
@@ -54,8 +57,27 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             rms[res["polarization"]].extend(res["timeseries_power_rms"])
             
             ndipoles[res["polarization"]]+=res["ndipoles"]
-    
-    
+            
+            # Average Station data
+            
+            MPos = cr.hArray(float,[3])
+            MSig = cr.hArray(float,[1]) 
+            postemp = cr.hArray(float,[res["ndipoles"],3],res["antenna_positions_array_XYZ_m"])
+            sigtemp = cr.hArray(float,[res["ndipoles"],1],res[plot_parameter])
+            MPos.mean(postemp)
+            MSig.mean(sigtemp)
+            stationname = int(res["FILENAME"].split('-')[2].rstrip("h5").rstrip('.'))
+            
+            
+            meansignal[res["polarization"]].extend(MSig)
+            meanpos[res["polarization"]].extend(MPos)
+            
+            if res["polarization"] == 0:
+                names0.append(stationname)
+            else:
+                names1.append(stationname)    
+
+        
         print "Number of dipoles found:",ndipoles
         
         par["eventid"]="LOFAR "+res["FILENAME"].split('-')[1]
@@ -96,6 +118,16 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         
         par["signaluncertainties0"] = cr.hArray(rms[0])
         par["signaluncertainties1"] = cr.hArray(rms[1])
+        
+        par["meansignals0"] = cr.hArray(meansignal[0])
+        par["meansignals1"] = cr.hArray(meansignal[1])
+        
+        
+        par["meanpositions0"] = cr.hArray(float,[len(names0),3],meanpos[0])
+        par["meanpositions1"] = cr.hArray(float,[len(names1),3],meanpos[1])
+        
+        par["stationnames0"] = names0
+        par["stationnames1"] = names1
 
     return par
 
@@ -139,7 +171,14 @@ class ldf(tasks.Task):
         logplot=dict(default=True, doc="Draw y-axis logarithmically"),
         plot_clf = dict(default=True,doc="Clean window before plotting?"),
         plot_xmin = dict(default=0,doc="Mininum value of x-axis"),
-        plot_xmax = dict(default=400,doc="Maximum value of x-axis")
+        plot_xmax = dict(default=400,doc="Maximum value of x-axis"),
+        meanpositions0 = dict(default=lambda self:self.results["meanpositions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the station positions in pol 0 (x0,y0,z0,...)",unit="m"),
+        meanpositions1 = dict(default=lambda self:self.results["meanpositions1"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the station positions in pol 1 (x0,y0,z0,...)",unit="m"),
+        meansignals0 = dict(default=lambda self:self.results["meansignals0"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 0",unit="a.u."),
+        meansignals1 = dict(default=lambda self:self.results["meansignals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
+        stationnames0 = dict(default=lambda self:self.results["stationnames0"],doc="Stations in run in pol 0."),
+        stationnames1 = dict(default=lambda self:self.results["stationnames1"],doc="Stations in run in pol 1."),
+        draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF")
         )
 
 
@@ -241,13 +280,20 @@ class ldf(tasks.Task):
         
         if self.loradirectionuncertainties == None:
             self.loradirectionuncertainties = cr.hArray([1.,1.,0])
-            print "Warning: Using default for direction uncertainties!"      
+            print "Warning: Using default for direction uncertainties!"    
+              
         
         self.Distances0 = self.GetDistance(self.loracore,self.loradirection,self.positions0)
         self.Distances1 = self.GetDistance(self.loracore,self.loradirection,self.positions1)
+        
+        self.stationDistances0 = self.GetDistance(self.loracore,self.loradirection,self.meanpositions0)
+        self.stationDistances1 = self.GetDistance(self.loracore,self.loradirection,self.meanpositions1) 
 
         self.signals0.par.xvalues=cr.hArray(self.Distances0)
         self.signals1.par.xvalues=cr.hArray(self.Distances1)
+        
+        self.meansignals0.par.xvalues = cr.hArray(self.stationDistances0)
+        self.meansignals1.par.xvalues = cr.hArray(self.stationDistances1)
 
         if self.square:
             self.signals0.square()
@@ -271,6 +317,8 @@ class ldf(tasks.Task):
                     cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),yerr=[sig_uncer0.vec(),self.signaluncertainties0.vec()],xerr=self.DistUncertainties0.vec(),color='r',marker='o',linestyle="None",label="pol 0")
                     cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
                     cr.plt.yscale("log")
+                    
+                    
                 
                 else:
                     cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color='r',marker='o',linestyle="None",label="pol 0")
@@ -290,6 +338,8 @@ class ldf(tasks.Task):
                     cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),yerr=[sig_uncer1.vec(),self.signaluncertainties1.vec()],xerr=self.DistUncertainties1.vec(),color='b',marker="s",linestyle="None",label="pol 1")
                     cr.plt.yscale("log")
                     cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+                        
+                    
                 else:
                     cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),self.DistUncertainties1.vec(),color='b',marker="s",linestyle="None",label="pol 1")
             else:
@@ -299,7 +349,26 @@ class ldf(tasks.Task):
         cr.plt.xlabel("Distance to Shower Axis [m]")
         cr.plt.ylabel("Power [a.u.]")
         cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
-     
+        
+        if self.draw_global:
+        
+            self.meansignals1.plot(color='b',marker='h',markersize = 10,linestyle="None",clf=False)
+            self.meansignals0.plot(color='r',marker='h',linestyle="None",markersize = 10,clf=False)
+            cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+            
+            for i in  xrange(len(self.stationnames0)):
+                station = "Station "+str(self.stationnames0[i])
+                ycoord = self.meansignals0[i]
+                xcoord = self.stationDistances0[i]
+                cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 15),xycoords='data',textcoords='offset points',size='x-large',color='r')
+            
+            for i in  xrange(len(self.stationnames1)):
+                station = "Station "+str(self.stationnames1[i])
+                ycoord = self.meansignals1[i]
+                xcoord = self.stationDistances1[i]
+
+                cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 20),xycoords='data',textcoords='offset points',size='x-large',color='b')
+                     
         if self.eventid:
             cr.plt.title(str(self.eventid))
               
