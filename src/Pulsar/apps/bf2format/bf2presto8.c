@@ -21,6 +21,7 @@ int CHANNELS = 1;
 int STOKES = 1;	
 int STOKES_SWITCH = 0;
 int TRANSPOSE = 0;
+int H5 = 0;
 int SUBBANDS=1;
 int collapse = 0;
 int writefloats = 0;
@@ -55,9 +56,11 @@ void usage(){
   puts("-B\tNumber of BlockGroups to convert (Default = All)");
   puts("-c\tNumber of Channels (Default = 1)");
   puts("-C\tCollapse all channels in MS to a single .sub file");
+  puts("-d\t Turns on debugging - which turns on STDOUT messages when reading and writing data");
   puts("-f\tNumber of the Base Subband (Default = 200)");
   puts("-F\tWrite Floats");
   puts("-h\tShow this Help Screen");
+  puts("-H\tHDF5 Data Mode (1=CS 2=IS)");
   puts("-L <parset>\tuse fiLterbank format (8/32 bit, 1 beam, stokes I, no collapse), with header info from <parset>");
   puts("-n\tNumber of Samples per Stokes Integration (Default = 1)");
   puts("-N\tNumber of Samples in block (Default = 768)");
@@ -67,7 +70,6 @@ void usage(){
   puts("-S\tStokes Parameter to write out (Default = StokesI):\n\t 0 = StokesI\n\t 1 = StokesQ\n\t 2 = StokesU\n\t 3 = StokesV");
   puts("-r\tData further than <r>*sigma from the mean will be clipped (Default = 7)");
   puts("-t\tINCOHERENT data in Second Transpose mode");
-  puts("-d\t Turns on debugging - which turns on STDOUT messages when reading and writing data");
   puts("-T <number of subbands>\t COHERENT data in Second Transpose mode");
 }
 
@@ -538,6 +540,248 @@ void secondTranspose( FILE **inputfiles, int beamnr)
   free(stokesdata);
 }//end of secondTranspose()
 
+void coherentH5( FILE **inputfiles, int beamnr)
+{
+  struct stokesdata_struct {
+    float	samples[BEAMS][SAMPLES|2][SUBBANDS][CHANNELS][STOKES];
+  };
+  
+  struct stokesdata_struct *stokesdata;
+  unsigned output_samples = 0;
+  unsigned nul_samples = 0;
+  unsigned toobig = 0, toosmall = 0;
+  double scale;
+  double offset;
+  int x = 0;
+  
+  stokesdata = (struct stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(struct stokesdata_struct) );
+  
+  input = inputfiles[0]; 
+  fseek( input, 0, SEEK_SET ); 
+  while( !feof( input ) ) {
+    if (x == NUM_BLOCKGROUPS) break; // switch so you can choose only to read in x blocks
+    unsigned num = 0;
+    unsigned i,f,n_simult_files, sub;
+    char buf[2048], buf2[2048];
+    int index=0;
+
+    /* read data */
+    num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
+    
+    for( sub = 0; sub < SUBBANDS; sub ++ ){
+      unsigned t, chan, s = STOKES_SWITCH;
+      for( chan = 0; chan < CHANNELS; chan++ ){
+	FILE *outputfile[CHANNELS]; 
+	sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
+	if ( BEAMS > 1 || FLYS_EYE == 1 ) {
+	     sprintf(buf2, "beam_%d/%s", beamnr, buf ); /* prepend beam name */
+	} 
+    if (debug)
+	   fprintf(stderr,"SUBBAND: %d CHANNEL %d BLOCK: %d -> %s\n", sub, chan, x, buf2);
+	index++;
+	if( x == 0 ){
+	  outputfile[chan] = fopen( buf2, "wb" );
+	} else {
+	  outputfile[chan] = fopen( buf2, "ab" );
+	}
+	double average = 0;
+	double rms = 0;
+	int validsamples = 0;
+	int N;
+	
+	for( i = 0; i < num; i++ ) { 
+	  for( t = 0; t < SAMPLES; t++ ){ 
+	    //first pass to compute statistics
+	    floatSwap( &stokesdata[i].samples[beamnr][t][sub][chan][s] );
+	    if( !isnan(stokesdata[i].samples[beamnr][t][sub][chan][s]) ){
+	      average += stokesdata[i].samples[beamnr][t][sub][chan][s]; 
+	      rms += stokesdata[i].samples[beamnr][t][sub][chan][s]*stokesdata[i].samples[beamnr][t][sub][chan][s];
+	      validsamples++;
+	    }
+	  }	 
+	}
+	//calculate scale and offset for the block
+	N = validsamples?validsamples:1;
+	average = average/N;
+	rms = sqrt((rms - (N*average*average))/(N-1));
+	if( eightBit==1 ){ //8-bit mode
+	  scale = 256.0/(N_sigma*2*rms);
+	  offset = average;
+	} else if( writefloats==1 ){ //float mode (no scale or offset)
+	  scale = 1;
+	  offset = 0;
+	} else { //16-bit scaling
+	  scale = 65536.0/(N_sigma*2*rms);
+	  offset = average;
+	}
+	
+	for( i = 0; i < num; i++ ) {    
+	  float value;
+	  signed short shvalue;
+	  signed char ivalue;
+	  
+	  //write data
+	    for( t = 0; t < SAMPLES; t++ ){
+	      value = floor((stokesdata[i].samples[beamnr][t][sub][chan][s]-offset)*scale);
+	      if( isnan(value)) {
+		value = 0;
+		nul_samples++;
+	      }
+	      
+	      if( eightBit==1 ){ //8-bit mode
+		if( value >= 128 ) {
+		  value = 127;
+		  toobig++;
+		}
+		if( value < -128 ) {
+		  value =  -128;
+		  toosmall++;
+		}
+		ivalue = value;
+		fwrite(&ivalue, sizeof ivalue, 1, outputfile[chan]);
+		
+	      } else if( writefloats==1 ){ //float mode
+		fwrite(&value, sizeof value, 1, outputfile[chan]);
+		
+	      } else { // 16-bit mode
+		if( value >= 32768 ) {
+		  value = 32767;
+		  toobig++;
+		}
+		if( value < -32768 ) {
+		  value =  -32768;
+		  toosmall++;
+		}
+		shvalue = value;
+		fwrite(&shvalue, sizeof shvalue, 1, outputfile[chan]);
+	      }
+	      output_samples++;
+	    }//for( t = 0; t < SAMPLES; t++ )
+	}//for( i = 0; i < num; i++ )
+	fclose( outputfile[chan] );
+      }//for( chan = 0; chan < 1; chan++ )
+    }//for( sub = 0; sub < SUBBANDS; subb++ );
+    x++;
+  }//while( !feof( input ) )
+  fprintf(stderr,"%u samples in output, %.2f%% bad samples, %.2f%% too big, %.2f%% too small %d Blocks\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples, x);
+  fprintf(stderr,"%.10f seconds per sample\n",SAMPLEDURATION);
+  free(stokesdata);
+}//end of secondTranspose()
+
+
+void incoherentH5( FILE **inputfiles, FILE **outputfile, int beamnr, int writefb, int n_infiles)
+{
+  struct stokesdata_struct {
+    float	samples[BEAMS][STOKES][CHANNELS][SAMPLES|2];
+  };
+  
+  struct stokesdata_struct *stokesdata;
+  static int current_file=0;
+  unsigned output_samples = 0;
+  unsigned nul_samples = 0;
+  unsigned toobig = 0, toosmall = 0;
+  double scale;
+  double offset;
+  int x = 0;
+  
+  stokesdata = (struct stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(struct stokesdata_struct) );
+  
+  input = inputfiles[current_file];
+  current_file++;
+  fseek( input, 0, SEEK_SET ); 
+  while( !feof( input ) ) {
+    if (x == NUM_BLOCKGROUPS) break; // switch so you can choose only to read in x blocks
+    x++;
+    unsigned num = 0;
+    unsigned i,f,n_simult_files;
+    
+    /* read data */
+    num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
+    unsigned t, chan, s = STOKES_SWITCH;
+    for( chan = 0; chan < CHANNELS; chan++ ){
+      double average = 0;
+      double rms = 0;
+      int validsamples = 0;
+      int N;
+      
+      for( i = 0; i < num; i++ ) { 
+	
+	for( t = 0; t < SAMPLES; t++ ){ 
+	  //first pass to compute statistics
+	  floatSwap( &stokesdata[i].samples[beamnr][s][chan][t]);
+	  if( !isnan(stokesdata[i].samples[beamnr][s][chan][t]) ){
+	   average += stokesdata[i].samples[beamnr][s][chan][t]; 
+	   rms += stokesdata[i].samples[beamnr][s][chan][t]*stokesdata[i].samples[beamnr][s][chan][t];
+	   validsamples++;
+	  }
+	}	 
+      }
+
+      //calculate scale and offset for the block
+      N = validsamples?validsamples:1;
+      average = average/N;
+      rms = sqrt((rms - (N*average*average))/(N-1));
+      if( eightBit==1 ){ //8-bit mode
+	scale = 256.0/(N_sigma*2*rms);
+	offset = average;
+      } else if( writefloats==1 ){ //float mode (no scale or offset)
+	scale = 1;
+	offset = 0;
+      } else { //16-bit scaling
+	scale = 65536.0/(N_sigma*2*rms);
+	offset = average;
+      }
+      
+      for( i = 0; i < num; i++ ) {    
+	float value;
+	signed short shvalue;
+	signed char ivalue;
+	
+	  //write data
+	  for( t = 0; t < SAMPLES; t++ ){
+	    value = floor((stokesdata[i].samples[beamnr][s][chan][t]-offset)*scale);
+	    if( isnan(value)) {
+	      value = 0;
+	      nul_samples++;
+	    }
+	    
+	    if( eightBit==1 ){ //8-bit mode
+	      if( value >= 128 ) {
+		value = 127;
+		toobig++;
+	      }
+	      if( value < -128 ) {
+		value =  -128;
+		toosmall++;
+	      }
+	      ivalue = value;
+	      fwrite(&ivalue, sizeof ivalue, 1, outputfile[chan]);
+	      
+	    } else if( writefloats==1 ){ //float mode
+	      fwrite(&value, sizeof value, 1, outputfile[chan]);
+
+	    } else { // 16-bit mode
+	      if( value >= 32768 ) {
+		value = 32767;
+		toobig++;
+	      }
+	      if( value < -32768 ) {
+		value =  -32768;
+		toosmall++;
+	      }
+	      shvalue = value;
+	      fwrite(&shvalue, sizeof shvalue, 1, outputfile[chan]);
+	    }
+	    output_samples++;
+	  }//for( t = 0; t < SAMPLES; t++ )
+      }//for( i = 0; i < num; i++ )
+    }//for( chan = 0; chan < 1; chan++ )
+  }//while( !feof( input ) )
+  fprintf(stderr,"%u samples in output, %.2f%% bad samples, %.2f%% too big, %.2f%% too small %d Blocks\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples, x);
+  fprintf(stderr,"%.10f seconds per sample\n",SAMPLEDURATION);
+  free(stokesdata);
+}//end of secondTranspose_inc()
+
 void secondTranspose_inc( FILE **inputfiles, FILE **outputfile, int beamnr, int writefb, int n_infiles)
 {
   struct stokesdata_struct {
@@ -1003,21 +1247,27 @@ int main( int argc, char **argv ) {
   char buf[2048],buf2[2048];
   int i=0;
 
-  while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:T:t8hCFM")) != -1)
+  while (( c = getopt(argc, argv, "r:b:B:n:N:A:c:s:p:o:f:S:L:T:t8hCFMH")) != -1)
     {
       i++;
-      switch (c)
-	{
+      switch (c){
+
+	case '8':
+	  eightBit = 1;
+	  break;	  
+
+	case 'A':
+	  if (sscanf(optarg, "%d", &AVERAGE_OVER) != 1) {
+	    fprintf(stderr,"ERROR: Number of Samples to average over = %s\n", optarg);
+	    exit(-1);
+	  }
+	  break;
+	  
 	case 'b':
 	  if (sscanf(optarg, "%d", &BEAMS) != 1) {
 	    fprintf(stderr,"ERROR: Number of Beams = %s\n", optarg);
 	    exit(-1);
 	  }
-	  break;
-	  
-	case 'M':
-	  FLYS_EYE= 1;
-	  puts("FLY'S EYE MODE");
 	  break;
 
 	case 'B':
@@ -1026,11 +1276,62 @@ int main( int argc, char **argv ) {
 	    exit(-1);
 	  }
 	  break;
+
+      	case 'c':
+	  if (sscanf(optarg, "%d", &CHANNELS) != 1) {
+	    fprintf(stderr,"ERROR: Number of Channels = %s\n", optarg);
+	    exit(-1);
+	  }
+	  break;
 	  
 	case 'C':
 	  collapse = 1;
 	  break;
+	  	  
+	case 'd':
+	  debug = 1;
+	  fprintf(stderr,"Debug/STDOUT messages turned on\n");
+	  break; 
 	  
+       	case 'f':
+	  if (sscanf(optarg, "%d", &BASESUBBAND) != 1) {
+	    fprintf(stderr, "ERROR: Basesubband = %d\n", optarg);
+	    exit(-1);
+	  }
+	  if (BASESUBBAND > 99999 || BASESUBBAND < 0){
+	    fprintf(stderr, "ERROR: Lowest subband = %d\n", BASESUBBAND);
+	    exit(-1);
+	  }
+	  
+ 	  break;
+	  
+	case 'F':
+	  writefloats = 1;
+	  break;
+	
+	case 'h':
+	  usage();
+	  exit(1);
+	  break;
+  
+	case 'H':
+	  puts("COHERENT H5 DATA FORMAT");
+	  H5=1;
+	  break;
+
+	case 'L':
+	  writefb = 1;
+	  if (sscanf(optarg, "%1000s", &parsetfile) != 1) {
+	    fprintf(stderr, "ERROR: Could not set parsetfile = %s\n", optarg);
+	    exit(-1);
+	  }
+	  break;
+	  
+	case 'M':
+	  FLYS_EYE= 1;
+	  puts("FLY'S EYE MODE");
+	  break;
+	
 	case 'n':
 	  if (sscanf(optarg, "%d", &SAMPLESPERSTOKESINTEGRATION) != 1) {
 	    fprintf(stderr,"ERROR: Number of Samples per Stokes = %s\n", optarg);
@@ -1044,61 +1345,6 @@ int main( int argc, char **argv ) {
 	    exit(-1);
 	  }
 	  break;
-	  
-	case 'A':
-	  if (sscanf(optarg, "%d", &AVERAGE_OVER) != 1) {
-	    fprintf(stderr,"ERROR: Number of Samples to average over = %s\n", optarg);
-	    exit(-1);
-	  }
-	  break;
-	  
-	case 'F':
-	  writefloats = 1;
-	  break;
-	  
-      	case 'c':
-	  if (sscanf(optarg, "%d", &CHANNELS) != 1) {
-	    fprintf(stderr,"ERROR: Number of Channels = %s\n", optarg);
-	    exit(-1);
-	  }
-	  break;
-	  
-	case 's':
-	  if (sscanf(optarg, "%d", &STOKES) != 1) {
-	    fprintf(stderr,"ERROR: Number of Stokes = %s\n", optarg);
-	    exit(-1);
-	  }
-	  if (STOKES > 4 || STOKES < 1){
-	    fprintf(stderr, "ERROR: Number of Stokes = %d\n", STOKES);
-	    exit(-1);
-	  }
-	  break;
-	  
-	case 'L':
-	  writefb = 1;
-	  if (sscanf(optarg, "%1000s", &parsetfile) != 1) {
-	    fprintf(stderr, "ERROR: Could not set parsetfile = %s\n", optarg);
-	    exit(-1);
-	  }
-	  break;
-	  
-	case '8':
-	  eightBit = 1;
-	  break;
-	  
-	case 'T':
-	  if (sscanf(optarg, "%d", &SUBBANDS) != 1) {
-	    fprintf(stderr,"ERROR: Number of Subbands = %s\n", optarg);
-	    exit(-1);
-	  }
-	  TRANSPOSE = 1;
-	  fprintf(stderr,"COHERENT SECOND TRANSPOSE MODE\n");
-	  break; 
-	  
-	case 't':
-	  TRANSPOSE = 2;
-	  fprintf(stderr,"INCOHERENT SECOND TRANSPOSE MODE\n");
-	  break; 
 
 	case 'o':
 	  if (sscanf(optarg, "%99s", &OUTNAME) != 1) {
@@ -1108,30 +1354,7 @@ int main( int argc, char **argv ) {
 	  if (sscanf(OUTNAME,optarg)==-1){
 	    fprintf(stderr, "Output Name shortened to: %s\n",OUTNAME);
 	  }
- 	  break;
-	  
-	case 'f':
-	  if (sscanf(optarg, "%d", &BASESUBBAND) != 1) {
-	    fprintf(stderr, "ERROR: Basesubband = %d\n", optarg);
-	    exit(-1);
-	  }
-	  if (BASESUBBAND > 99999 || BASESUBBAND < 0){
-	    fprintf(stderr, "ERROR: Lowest subband = %d\n", BASESUBBAND);
-	    exit(-1);
-	  }
-	  
- 	  break;
-	  
-	case 'S':
-	  if (sscanf(optarg, "%d", &STOKES_SWITCH) != 1){
-	    fprintf(stderr, "ERROR: Please choose stokes parameter to output\n 0 = StokesI\n 1 = StokesQ\n 2 = StokesU\n 3 = StokesV\n ", optarg);
-	    exit(-1);
-	  }
-	  if (STOKES_SWITCH>4||STOKES_SWITCH<0){
-	    fprintf(stderr, "ERROR: Please choose stokes parameter to output\n 0 = StokesI\n 1 = StokesQ\n 2 = StokesU\n 3 = StokesV\n");
-	    exit(-1);
-	  }
- 	  break;
+ 	  break;	  
 	  
 	case 'r':
 	  if (sscanf(optarg, "%f", &N_sigma) != 1){
@@ -1144,17 +1367,45 @@ int main( int argc, char **argv ) {
 	  }
 	  break;
 
-    case 'd':
-      debug = 1;
-      fprintf(stderr,"Debug/STDOUT messages turned on\n");
-      break; 
-	  
-	case 'h':
-	  usage();
-	  exit(1);
+	case 's':
+	  if (sscanf(optarg, "%d", &STOKES) != 1) {
+	    fprintf(stderr,"ERROR: Number of Stokes = %s\n", optarg);
+	    exit(-1);
+	  }
+	  if (STOKES > 4 || STOKES < 1){
+	    fprintf(stderr, "ERROR: Number of Stokes = %d\n", STOKES);
+	    exit(-1);
+	  }
 	  break;
-	}
-    } 
+	  
+	case 'S':
+	  if (sscanf(optarg, "%d", &STOKES_SWITCH) != 1){
+	    fprintf(stderr, "ERROR: Please choose stokes parameter to output\n 0 = StokesI\n 1 = StokesQ\n 2 = StokesU\n 3 = StokesV\n ", optarg);
+	    exit(-1);
+	  }
+	  if (STOKES_SWITCH>4||STOKES_SWITCH<0){
+	    fprintf(stderr, "ERROR: Please choose stokes parameter to output\n 0 = StokesI\n 1 = StokesQ\n 2 = StokesU\n 3 = StokesV\n");
+	    exit(-1);
+	  }
+ 	  break;
+	  
+	case 't':
+	  TRANSPOSE = 2;
+	  fprintf(stderr,"INCOHERENT SECOND TRANSPOSE MODE\n");
+	  break; 
+
+	case 'T':
+	  if (sscanf(optarg, "%d", &SUBBANDS) != 1) {
+	    fprintf(stderr,"ERROR: Number of Subbands = %s\n", optarg);
+	    exit(-1);
+	  }
+	  TRANSPOSE = 1;
+	  fprintf(stderr,"COHERENT SECOND TRANSPOSE MODE\n");
+	  break; 
+	  
+      }
+    }
+
   FILE *input[MAXNOINPUTFILES], *outputfile[CHANNELS]; 
   c=0;
   
@@ -1202,8 +1453,7 @@ int main( int argc, char **argv ) {
     	perror( argv[f] );
     exit(1);
      }
-    }
-    
+    }    
 
     /* open output file(s), do conversion */
     
@@ -1219,18 +1469,19 @@ int main( int argc, char **argv ) {
 	exit(1);
       }
       /* do the conversion */     
-      convert_filterBank( input, outputfile, b, writefb, n_infiles ); // where writefb==1
+      convert_filterBank( input, outputfile, b, writefb, n_infiles ); 
+      // where writefb==1
       /* close outfile */
       fclose( outputfile[0] );
       
 
     //COHERENT SECOND TRANSPOSE MODE
-    } else if ( TRANSPOSE==1 ){ 
+    } else if ( TRANSPOSE==1 && H5 == 0){ 
       /* do the conversion */     
       secondTranspose( input, b ); // takes file **input; writefb==0
     
     //INCOHERENT SECOND TRANSPOSE MODE
-    } else if ( TRANSPOSE==2 ){ 
+    } else if ( TRANSPOSE==2  && H5 == 0){ 
       for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
 	for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
 	  sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
@@ -1254,8 +1505,38 @@ int main( int argc, char **argv ) {
 	  fclose( outputfile[c] );
 	}
       }
-    
-      //NORMAL MODE
+
+    // COHERENT HDF5 MODE
+    } else if (H5 ==1){ 
+      coherentH5( input, b ); // takes file **input; writefb==0
+
+    //INCOHERENT HDF5 MODE
+    } else if (H5 ==2){ 
+      for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
+	for ( c = 0; c < n_outfiles; c++ ) { /* make CHANNEL output files */
+	  sprintf( buf, "%s.sub%04d", OUTNAME, index  || !INITIALSUBBANDS ? index + BASESUBBAND : 0 );
+	  if ( BEAMS > 1 || FLYS_EYE == 1 ) {
+	    sprintf(buf2, "beam_%d/%s", b, buf ); /* prepend beam name */
+	  } else {
+	    sprintf(buf2, "%s", buf);
+	  }
+	  fprintf(stderr,"%s -> %s\n", argv[optind+f], buf2); 
+	  /*open file */
+	  index++;
+	  outputfile[c] = fopen( buf2, "wb" );
+	  if( !outputfile[c] ) {
+	    perror( buf2 );
+	    exit(1);
+	  }
+	}
+	/* do the conversion */     
+	incoherentH5( input, outputfile, b, writefb, n_infiles); // takes file **input; writefb==0
+	for ( c = 0; c < n_outfiles; c++ ) { /* close CHANNEL output files */
+	  fclose( outputfile[c] );
+	}
+      }
+
+    //NORMAL MODE
     } else {
       /* create CHANNELS subband files*/
       for( f = 0; f < n_infiles; f++ ) { /* loop over input files */
@@ -1277,9 +1558,11 @@ int main( int argc, char **argv ) {
 	}
 	/* do the conversion */     
 	if (collapse==0) { /* default, write all channels */
-	  convert_nocollapse( input, outputfile, b, writefb, n_infiles ); // takes file **input; writefb==0
+	  convert_nocollapse( input, outputfile, b, writefb, n_infiles ); 
+	  // takes file **input; writefb==0
 	} else {
-	  convert_collapse( input[f], outputfile, b );	// takes file *input for input
+	  convert_collapse( input[f], outputfile, b );	
+	  // takes file *input for input
 	}
 	for ( c = 0; c < n_outfiles; c++ ) { /* close CHANNEL output files */
 	  fclose( outputfile[c] );
