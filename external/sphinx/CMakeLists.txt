@@ -25,7 +25,7 @@ option (SPHINX_VERBOSE_BUILD     "Be verbose during build process?"          NO 
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
 find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
+  PATHS
   ${SPHINX_SOURCE_DIR}
   ${SPHINX_SOURCE_DIR}/..
   ${SPHINX_SOURCE_DIR}/../..
@@ -70,10 +70,10 @@ endif (SPHINX_API_VERSION)
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
-  
+
   include (ExternalProject)
 
-  set (SPHINX_VERSION     "1.0.4")
+  set (SPHINX_VERSION     "1.0.7")
   set (SPHINX_DIRECTORY   "Sphinx-${SPHINX_VERSION}")
   set (SPHINX_TAR_ARCHIVE "${SPHINX_DIRECTORY}.tar.gz")
 
@@ -89,7 +89,8 @@ if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
       SOURCE_DIR ${SPHINX_BINARY_DIR}/source
       BUILD_IN_SOURCE 1
       URL ${have_sphinx_tgz}
-      URL_MD5 d4067e42e75525ecf108ece471ce97bb
+#      URL_MD5 d4067e42e75525ecf108ece471ce97b
+      URL_MD5 42c722d48e52d4888193965dd473adb5
       CONFIGURE_COMMAND echo "No configuration needed"
       BUILD_COMMAND echo "Not building anything"
       INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SPHINX_BINARY_DIR}/source/setup.py install --home=${LUS_INSTALL_PREFIX}
@@ -100,16 +101,16 @@ if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
 
   ##__________________________________________________________________
   ## Configuration summary
-  
+
   if (SPHINX_VERBOSE_CONFIGURE)
     message ("-------------------------------------------------------------")
     message (STATUS "[Sphinx] Summary of configuration status.")
     message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
     message ("-------------------------------------------------------------")
   endif (SPHINX_VERBOSE_CONFIGURE)
-  
+
   ## <-- end build condition ----------------------------------------------------->
-  
+
 else (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
   add_custom_target (sphinx
     WORKING_DIRECTORY ${BOOST_BINARY_DIR}
