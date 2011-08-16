@@ -1,4 +1,3 @@
-
 """
 Spectrum documentation
 ======================
@@ -72,11 +71,12 @@ def fitbaseline_calc_numax_i(self):
 
 class FitBaseline(tasks.Task):
     """
-    **Usage:**
+    **Usage**::
 
-    FitBaseline(input_spectrum, **keywords)
+      FitBaseline(input_spectrum, **keywords)
 
-    **Description:**
+    **Description**:
+
     Function to fit a baseline using a polynomial function
     (``fittype='POLY'``) or a basis spine fit (default: ``fittype='BSPLINE'``)
     to a spectrum while trying to ignore positive spikes in the fit
@@ -92,25 +92,25 @@ class FitBaseline(tasks.Task):
     ``frequency``, otherwise a simple numbering is assumed
     ``frequency=[0,1,2,3...]``.
 
-    *RFI Treatment*
-    
+    *RFI Treatment*:
+
     The spectra are then downsampled and checked which bins have a
     large RMS (when divided by the mean in each bin). Those bins are
     affected by interference and are ignored for the fitting. The
     final fit is done to the clean bins only.
 
-    *Quality check:*
+    *Quality check*:
 
     At the end the fitted baselines are compared to each other
     (divided by the average spectrum of all antennas) and a list of
     deviant antennas is returned in ``Task.badantennas``.
-    
 
-    **Results:**
+    **Results**:
+
     The main results are the fit coefficients ``Task.coeffs``.
 
     Bad antennas are listed in ``Task.badantennas``.
-    
+
     Use ``baseline.polynomial(task.frequency,task.coeffs,task.powers)`` to caluclate the
     baseline from the coefficients for the polynomial fit, or::
 
@@ -302,9 +302,9 @@ class FitBaseline(tasks.Task):
 
         spectrum = dict(doc="""Array with input spectrum either of dimension ``[nofAntennas,nchannels]`` or just ``[nchannels]`` for a single spectrum. Note that the frequency values for the array are expected to be provided as ``spectrum.par.xvalues=cr.hArray(float,[nofChannels],fill=...)`` otherwise provide the frequencies explicitly in ``frequency``"""),
 
-
-        #        work_frequency = dict(doc="Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
-        #                      default=lambda self:cr.hArray(cr.asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),export=False),
+        # work_frequency = dict(doc="Wrapper to frequencies with dimension ``[1,nchannels]`` even for a single spectrum.",
+        #                       default=lambda self:cr.hArray(cr.asvec(self.frequency),dimensions=[1,self.nofChannels],properties=self.frequency),
+        #                       export=False),
 
         work_spectrum = dict(doc="Wrapper to input spectrum with dimension [nofAntennas,nchannels] even for a single spectrum.",
                              default=lambda self:cr.hArray(cr.asvec(self.spectrum),dimensions=[self.nofAntennas,self.nofChannels],properties=self.spectrum,xvalues=self.frequency),
@@ -469,10 +469,10 @@ class FitBaseline(tasks.Task):
                 self.goodantennas = [i  for i in range(self.nofAntennas) if not i in self.badantennas]
                 if self.nbadantennas>0:
                     print "#FITBASELINE - qualitycontrol iteration #",iteration,"-",self.nbadantennas,"bad antennas found:",self.badantennas
-                else: 
+                else:
                     print "#FITBASELINE - qualitycontrol iteration #",iteration,"- all antennas are good."
             print "#FITBASELINE - end qualitycontrol."
-            
+
             if self.doplot:
                 plt.clf()
                 plt.subplots_adjust(hspace=0.4)

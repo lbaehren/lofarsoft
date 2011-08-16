@@ -4,7 +4,7 @@
 #pdb.set_trace()
 
 import numpy as np
-import matplotlib    
+import matplotlib
 import matplotlib.pyplot as plt
 
 from hftools import *
@@ -30,12 +30,13 @@ plot_draw=plot_draw_class()
 class plotfinish:
     """
     **Usage:**
-    
+
     ``plot_finish_instance=plotfinish(name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0,plotfiles=[])``
 
-    ``plot_finish_instance(txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False)`
+    ``plot_finish_instance(txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False)``
 
     **Description**
+
     Class creating a function to be called after a plotting
     command. If ``plotpause.plotpause = True`` it will pause and ask
     for user input whether and how to continue calculation and
@@ -47,58 +48,61 @@ class plotfinish:
     the class or during a call to the instance of the plotfinish
     class.
 
-    =========== ========  =====================================================
-    *plotpause* = True    Pause for manual input after each plot.
+    ============= ========= ====================================================================
+    *plotpause*   = True    Pause for manual input after each plot.
 
-    *doplot*    = True    Plot at all.
+    *doplot*      = True    Plot at all.
 
-    *refresh*   = True    Refresh (redraw) plot window after each plotting command
-                          also in batch mode.
+    *refresh*     = True    Refresh (redraw) plot window after each plotting command
+                            also in batch mode.
 
-    *filename*  = ""      If set, save figure to this file (w/o extension)
+    *filename*    = ""      If set, save figure to this file (w/o extension)
 
-    *filetype*  = "png"   Extension of the figure file to also determine format.
+    *filetype*    = "png"   Extension of the figure file to also determine format.
 
-    *txt*       = ""      Text to print after plotting and before user input
-                          (parameter not available at initialization)
+    *txt*         = ""      Text to print after plotting and before user input
+                            (parameter not available at initialization)
 
-    *plotfiles* = []      Provide a list, which contains the plotfiles generated so far.
-                          (parameter not available at initialization)
-                          
-    *same_row*            If true, then put the next plotfile in the
-                          same 'row' as the previous, i.e. create a sub list. Can be used
-                          for output formatting.
-                          (parameter only available during call)
+    *plotfiles*   = []      Provide a list, which contains the plotfiles generated so far.
+                            (parameter not available at initialization)
 
-    *setcounter*          Reset the counter for the plotfiles (added to names)
-                          to this value (parameter only available during call)
+    *same_row*              If true, then put the next plotfile in the
+                            same 'row' as the previous, i.e. create a sub list. Can be used
+                            for output formatting.
+                            (parameter only available during call)
 
-    *counter*             Temporarily set the counter for the plotfiles (added to names)
-                          to this value (parameter only available during call)
+    *setcounter*            Reset the counter for the plotfiles (added to names)
+                            to this value (parameter only available during call)
 
-    name        = ""      Name identifying current plot. Will also be appended
-                          to filename. (parameter not available at initialization)
-    =========== ========  =====================================================
+    *counter*               Temporarily set the counter for the plotfiles (added to names)
+                            to this value (parameter only available during call)
+
+    *name*        = ""      Name identifying current plot. Will also be appended
+                            to filename. (parameter not available at initialization)
+    ============= ========= ====================================================================
 
     May modify ``plotpause`` and ``doplot``, depending on user input.
 
-    Filename of the image file will be filename+("-"+name+)"."+filetype
+    Filename of the image file will be ``filename+("-"+name+)"."+filetype``
 
     All filenames that were written to disk can be retrieved as a list
     from the attribute ``self.files``.
 
-    Example:
-        ::
-            pp=plotfinish(filename="test")
-            pp("Test","a")
-            -> (a) Test
-            -> Saved plot in Test-a.png
-            -> Press [return] to continue. Press [q]+[return] to proceed without pausing, [n]+[return] to continue without plotting...q
-            -> Continue without pausing from now on.
+    Example::
 
-            pp.plotpause -> False
-            pp("Try again")
-            -> Nothing happens (i.e. no pause)....
+      >>> pp=plotfinish(filename="test")
+      >>> pp("Test","a")
+      -> (a) Test
+      -> Saved plot in Test-a.png
+      -> Press [return] to continue. Press [q]+[return] to proceed without pausing, [n]+[return] to continue without plotting...q
+      -> Continue without pausing from now on.
+
+      >>> pp.plotpause
+      -> False
+
+      >>> pp("Try again")
+      -> Nothing happens (i.e. no pause)....
+
     """
     def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0,plotfiles=[]):
         self.plot_pause=plotpause
@@ -108,7 +112,7 @@ class plotfinish:
         self.filetype=filetype
         self.plotfiles=plotfiles
         self.counter=counter
-        
+
     def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False):
         """
         Usage:
@@ -233,7 +237,7 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
 
     #Plotting an hArray with errorbars
     a=hArray(float,10,fill=range(1,11));  b=hArray(copy=a,yerr=a,xerr=a,logplot="y"); a*=0.1; b.plot()
-    
+
     """
 #    if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
 #        EDP64bug=self.plt.EDP64bug
