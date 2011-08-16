@@ -89,7 +89,6 @@ if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
       SOURCE_DIR ${SPHINX_BINARY_DIR}/source
       BUILD_IN_SOURCE 1
       URL ${have_sphinx_tgz}
-#      URL_MD5 d4067e42e75525ecf108ece471ce97b
       URL_MD5 42c722d48e52d4888193965dd473adb5
       CONFIGURE_COMMAND echo "No configuration needed"
       BUILD_COMMAND echo "Not building anything"
