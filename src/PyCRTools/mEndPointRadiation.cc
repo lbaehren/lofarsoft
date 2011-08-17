@@ -138,14 +138,14 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
   )
 
 {
-  //Define the iterators you work with, they point to the current
-  //location in the vector.
+  // Define the iterators you work with, they point to the current
+  // location in the vector.
   Iter Ex_it(Ex),Ey_it(Ey),Ez_it(Ez);
   FIter frequency_it(frequency);
 
-  //An asterisks in front points to the value, i.e. *Ex_it = *Ey_it
-  //assigns the location pointed to by the Ex vector iterator the
-  //value that is pointed to by the Ey vector iterator.
+  // An asterisks in front points to the value, i.e. *Ex_it = *Ey_it
+  // assigns the location pointed to by the Ex vector iterator the
+  // value that is pointed to by the Ey vector iterator.
 
   static std::vector<HNumber> v_tmp(3);
   static std::vector<HNumber> pol(3);
@@ -154,16 +154,16 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
   static std::vector<HNumber> beta(3);
 
 
-  //Determine length of frequency vector
-  HInteger length=frequency_end-frequency;
+  // Determine length of frequency vector
+  HInteger length = frequency_end - frequency;
 
   //Some sanity check.
-  if (length<=0) throw PyCR::ValueError("hEndPointRadiation: Frequency vector has illegal size.");
-  if ((Ex_end-Ex) != length) throw PyCR::ValueError("hEndPointRadiation: Ex vector has different size than frequency vector.");
-  if ((Ey_end-Ey) != length) throw PyCR::ValueError("hEndPointRadiation: Ey vector has different size than frequency vector.");
-  if ((Ez_end-Ez) != length) throw PyCR::ValueError("hEndPointRadiation: Ez vector has different size than frequency vector.");
-  //Needs to calculate x_q-x_O and R and n and beta and
+  if (length <= 0) throw PyCR::ValueError("hEndPointRadiation: Frequency vector has illegal size.");
+  if ((Ex_end - Ex) != length) throw PyCR::ValueError("hEndPointRadiation: Ex vector has different size than frequency vector.");
+  if ((Ey_end - Ey) != length) throw PyCR::ValueError("hEndPointRadiation: Ey vector has different size than frequency vector.");
+  if ((Ez_end - Ez) != length) throw PyCR::ValueError("hEndPointRadiation: Ez vector has different size than frequency vector.");
 
+  // Needs to calculate x_q-x_O and R and n and beta and
   if ((xq_end-xq) != 3) throw PyCR::ValueError("x_q should have length 3");
   if ((vq_end-vq) != 3) throw PyCR::ValueError("v_q should have length 3");
   if ((xobs_end-xobs) != 3) throw PyCR::ValueError("x_obs should have length 3");
@@ -171,9 +171,8 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
   //--------------------------------------------------------------------------------------
   //Initial calculations
 
-  hSub(temp1.begin(),temp1.end(), xobs,xobs_end,xq,xq_end);//vector pointing from charge to obs
-  HNumber R = 0.;
-  R=sqrt(hMulSum(temp1,temp1)); //Length of vector between charge and observer
+  hSub(temp1.begin(),temp1.end(), xobs,xobs_end,xq,xq_end); // Vector pointing from charge to obs
+  HNumber R = hVectorLength(temp1); // Length of vector between charge and observer
   if (abs(R) < 0.00001) {
     R = 0.00001;
   }
@@ -183,11 +182,9 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
   hDivAdd(beta.begin(),beta.end(),vq,vq_end,(HNumber)SPEED_OF_LIGHT);
 
   HNumber eta = 0.;
-  eta = (1-n*hDotProduct(beta.begin(),beta.end(),r.begin(),r.end()));//Doppler factor
-  HNumber som = 0.;//Sum of the elements of R. Need this for the phase.
-  som = hSum(temp1);
+  eta = (1 - n * hDotProduct(beta.begin(),beta.end(),r.begin(),r.end())); // Doppler factor
   HNumber ksi = 0.;
-  ksi= 2*M_PI*(-t+(n/SPEED_OF_LIGHT) *(R));//Phase for the endpoint (well this needs to multiplied with omega for that. Minus sign! Times 2 pi.
+  ksi= 2 * M_PI * (-t + (n * R) / (HNumber)SPEED_OF_LIGHT); // Phase for the endpoint (well this needs to multiplied with omega for that. Minus sign! Times 2 pi.
 
   //-------------------------------------------------------------------------------
   //Crossproduct (r cross (r cross beta)) gives the vector behaviour of E
@@ -200,18 +197,17 @@ void HFPP_FUNC_NAME(const Iter Ex,const Iter Ex_end,
   }
   amplitude = acceleration * alpha / (eta * R);
 
-//now loop from beginning until end of frequency vector
   HNumber phase(0.);
 
-  //now loop from beginning until end of frequency vector
-  while (frequency_it != frequency_end){
-    //add values to the current E-field element
+  // Loop from beginning until end of frequency vector
+  while (frequency_it != frequency_end) {
+    // Add values to the current E-field element
     phase = *frequency_it * ksi;
     *Ex_it += amplitude * pol[0] * hPhaseToComplex(phase);
     *Ey_it += amplitude * pol[1] * hPhaseToComplex(phase);
     *Ez_it += amplitude * pol[2] * hPhaseToComplex(phase);
-    ++frequency_it; //increase frequency iterator, point to next element
-    ++Ex_it; ++Ey_it; ++Ez_it; //increase E-field iterators, point to next element
+    ++frequency_it; // Increase frequency iterator, point to next element
+    ++Ex_it; ++Ey_it; ++Ez_it; // Increase E-field iterators, point to next element
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
