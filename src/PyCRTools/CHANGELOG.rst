@@ -1,13 +1,23 @@
+2011-08-17
+==========
+
+  :Author: Martin van den Akker <martinva@astro.ru.nl>
+
+- Added functionality of Endpoint radiation methods as implemented by
+  Koert Poelman.
+
+
+
 2011-08-13 - Rev 8292
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
 - added a variant of hSet where one can set elements in an array to
-  elements in another array (using a index list) array[[i_0,I1,..]]=[e_0,e_1,....]
+  elements in another array (using a index list) ``array[[i_0,I1,..]]=[e_0,e_1,....]``
 - plot and hArray can now accept errobars with the keywords yerr, and
   xerr
- 
+
 2011-08-08 - Rev 8266
 =====================
 
@@ -59,7 +69,7 @@
 - cr_event.py now:
    - specify lora directory seperate from filedir (defaults to altair directories) (--loradir)
 
-- tasks/plotfootprint.py 
+- tasks/plotfootprint.py
    - runs with specification of filefilter and polarisation only
    - output plot by default in eventname/pol?/ directory
 
@@ -68,20 +78,20 @@
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
-- cr_event.py loops over polarizations as well 
+- cr_event.py loops over polarizations as well
 - additional flagging in fitbaseline and cr_event to check for unusual
   spectra
 - flagging of delays implemented, new parameters pulses_strength
   (read from a fixed location in shifted and smoothed time series
   data), pulse_location, etc. in
-  results.py of cr_event.py 
+  results.py of cr_event.py
 
 2011-08-03 - Rev 8224
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
-- cr_event.py now: 
+- cr_event.py now:
    - loops over files
    - adheres to new sub-directory structure TIMESTAMP/pol/station/
    - uses information from lora and saves it in results.py
@@ -90,7 +100,7 @@
 
 - make_ldf2 is a slightly cleaner version for ldf plotting, making use of
 the new information in results.py and using the new directory
-structure   
+structure
 
 - loraTimestampToBlocknumber  now returns block AND samplenumber as a tuple
 
@@ -104,15 +114,15 @@ structure
 - cr_event pipeline accepts search window as parameter (-x/-X) and
   normalizes all stations to the same level.
 - thelp accepts a taskname as parameter to get help on a task
- 
+
 2011-07-25 - Rev 8206
 =====================
 
   :Author: Sander ter Veen <S.terVeen@astro.ru.nl>
 
-- added lora.loraInfo(UTC_sec,datadir) to read in loradata in a dictionary 
+- added lora.loraInfo(UTC_sec,datadir) to read in loradata in a dictionary
 
-2011-07-22 - Rev 8193 
+2011-07-22 - Rev 8193
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
@@ -121,7 +131,7 @@ structure
   to make dynamic and average spectra
 
 
-2011-07-22 - Rev 8188 
+2011-07-22 - Rev 8188
 =====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
@@ -136,7 +146,7 @@ structure
 
 - Tasks have a method ``writehtml`` which allows one to produce pretty
   output automatically.
- 
+
 2011-07-21 - Rev 8177
 =====================
 
