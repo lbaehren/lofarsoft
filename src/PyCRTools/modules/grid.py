@@ -233,9 +233,9 @@ class CoordinateGrid(object):
         s += "LONPOLE " + str(self.lonpole) + " "
         s += "LATPOLE " + str(self.latpole) + " "
         s += "OBSTIME " + str(self.obstime) + " "
-        s += "UT1_UTC " + str(self.obstime) + " "
-        s += "L " + str(self.obstime) + " "
-        s += "PHI " + str(self.obstime)
+        s += "UT1_UTC " + str(self.ut1_utc) + " "
+        s += "L " + str(self.L) + " "
+        s += "PHI " + str(self.phi)
         s += ")"
 
         return s

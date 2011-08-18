@@ -416,7 +416,7 @@ Here is an example of using it::
 """
 
 #Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","beamformer","beamformer2","pulsecal","ldf","plotfootprint"]
+task_modules = ["averagespectrum","dynamicspectrum","fitbaseline","imager","crimager","beamformer","beamformer2","pulsecal","ldf","plotfootprint"]
 
 import os
 import math
@@ -749,8 +749,6 @@ class Task(object):
         self.ws.addParameterDefinition("tduration",dict(default=-1,doc="Execution time of task",unit="s",output=True))
         self["t0"]=time.clock()
         
-        self.callinit(forceinit=init) #Call initialization if not yet done
-
         if not ws==None:
             self.ws=ws           # Updating WorkSpace
         self.ws(**kwargs)
@@ -765,6 +763,8 @@ class Task(object):
                 self.ws[p]=v
 
         self.ws.update() # make sure all parameters are now up-to-date
+        self.callinit(forceinit=init) #Call initialization if not yet done
+
         self.saveOutputFile()
         retval=self.run()
         self["tduration"]=time.clock()-self["t0"] # Execution time of task
