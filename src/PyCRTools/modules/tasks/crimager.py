@@ -61,6 +61,7 @@ class CRImager(Task):
         nf = dict ( default = lambda self : self.blocksize / 2 + 1 ),
         nantennas = dict ( default = lambda self : self.antpos.shape()[0] ),
         nyquist_zone = dict( default = 1 ),
+        sample_frequency = dict( default = 200.e6 ),
         image = dict( default = lambda self : np.zeros(shape=(self.blocksize, self.NAXIS1, self.NAXIS2), dtype=float),
             doc = "Array to hold output image, needs to be a numpy array because otherwise conversion to FITS will require twice the memory." ),
         frequency_domain_image = dict( default = lambda self : cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nf), fill=0.) ),
@@ -85,7 +86,7 @@ class CRImager(Task):
         CRPIX3 = dict( default = 0. ),
         CDELT1 = dict( default = -1. ),
         CDELT2 = dict( default = 1. ),
-        CDELT3 = dict( default = 5.e-9 ),
+        CDELT3 = dict( default = lambda self : 1. / self.sample_frequency ),
         CUNIT1 = dict( default = 'deg' ),
         CUNIT2 = dict( default = 'deg' ),
         CUNIT3 = dict( default = 's' ),
@@ -123,6 +124,11 @@ class CRImager(Task):
                                  PC001002=self.PC001002,
                                  PC002002=self.PC002002)
         print self.grid
+
+        # Calculate frequencies if not given
+        if self.frequencies is None:
+            frequencies=cr.hArray(float, nf)
+            cr.hFFTFrequencies(frequencies, self.sample_frequency, self.nyquist_zone)
 
         # Calculate geometric delays for all sky positions for all antennas
         self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))

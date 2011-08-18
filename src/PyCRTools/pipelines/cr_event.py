@@ -965,6 +965,13 @@ for full_filename in files:
 
         trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
+        print "\n--->Imaging"
+
+        ########################################################################
+        #Imaging
+        ########################################################################
+        im=trerun("CRImager", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], antpos = antenna_positions, output=os.path.join(outputdir_with_subdirectories,"crimage.fits"))
+
         print "\n--->Beamforming"
 
         ########################################################################
