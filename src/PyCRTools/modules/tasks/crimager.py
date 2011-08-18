@@ -127,8 +127,8 @@ class CRImager(Task):
 
         # Calculate frequencies if not given
         if self.frequencies is None:
-            frequencies=cr.hArray(float, nf)
-            cr.hFFTFrequencies(frequencies, self.sample_frequency, self.nyquist_zone)
+            self.frequencies=cr.hArray(float, self.nf)
+            cr.hFFTFrequencies(self.frequencies, self.sample_frequency, self.nyquist_zone)
 
         # Calculate geometric delays for all sky positions for all antennas
         self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
