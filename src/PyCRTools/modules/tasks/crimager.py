@@ -146,7 +146,7 @@ class CRImager(Task):
 
         # Make sure image array is contiguous
         if not self.image.flags["C_CONTIGUOUS"]:
-            np.ascontiguousarray(self.image)
+            self.image = np.ascontiguousarray(self.image)
 
         # Go to frequency domain
         if self.fftdata is None:
