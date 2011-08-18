@@ -970,7 +970,7 @@ for full_filename in files:
         ########################################################################
         #Imaging
         ########################################################################
-        im=trerun("CRImager", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], antpos = antenna_positions, output=os.path.join(outputdir_with_subdirectories,"crimage.fits"))
+        im=trerun("CRImager", "im", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], antpos = antenna_positions, output=os.path.join(outputdir_with_subdirectories,"crimage.fits"))
 
         print "\n--->Beamforming"
 
