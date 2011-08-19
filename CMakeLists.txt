@@ -58,16 +58,20 @@ option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
 option (CR_WITH_GUI             "Build the graphical interface?"           NO  )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"   YES )
 option (CR_WITH_CASAPY          "Build Pyline library against CASApy?"     NO  )
-option (CR_WITH_AERA            "Build CR with support for AERA datareader" NO )
 
-option (PYCRTOOLS_ENABLE_TESTING "Enable testing for the PyCRTools?" YES)
-option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?" YES)
-option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile PyCRTools with runtime warnings enabled?" YES)
-option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile PyCRTools with debug symbols?" YES)
-option (PYCRTOOLS_WITH_OPTIMIZATIONS "Compile PyCRTools with optimization flags turned on?" NO)
-option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO)
-option (PYCRTOOLS_WITH_OPENMP "Compile PyCRTools with OpenMP support?" NO)
-option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support?" NO)
+option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         YES )
+option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?"         YES )
+option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO )
+option (PYCRTOOLS_WITH_DEBUG_SYMBOLS     "Compile PyCRTools with debug symbols?"                     YES )
+option (PYCRTOOLS_WITH_OPTIMIZATIONS     "Compile PyCRTools with optimization flags turned on?"      NO )
+option (PYCRTOOLS_WITH_RUNTIME_WARNINGS  "Compile PyCRTools with runtime warnings enabled?"          YES )
+option (PYCRTOOLS_WITH_AERA              "Compile PyCRTools with AERA data support?"                 NO )
+option (PYCRTOOLS_WITH_CASACORE          "Compile PyCRTools with CASACore support?"                  YES )
+option (PYCRTOOLS_WITH_DAL               "Compile PyCRTools with DAL support?"                       YES )
+option (PYCRTOOLS_WITH_FFTW              "Compile PyCRTools with FFTW support?"                      YES )
+option (PYCRTOOLS_WITH_GSL               "Compile PyCRTools with GSL support?"                       YES )
+option (PYCRTOOLS_WITH_NUMPY             "Compile PyCRTools with Numpy support?"                     YES )
+option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP support?"                    NO )
 
 option (DOCUMENTATION_ONLY     "Configure for building documentation only?"  NO  )
 option (DAL_WITH_DOCUMENTATION "Generate documentation for the DAL?"         YES )
@@ -316,7 +320,7 @@ if (CR_WITH_GUI)
 endif (CR_WITH_GUI)
 
 ##____________________________________________________________________
-##                                                           PyCRTools 
+##                                                           PyCRTools
 
 build_package (pycrtools src/PyCRTools)
 

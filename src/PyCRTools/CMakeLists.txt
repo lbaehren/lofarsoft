@@ -38,7 +38,6 @@ include (FindPython)
 include (FindNumPy)
 include (FindNumUtil)
 include (FindOpenMP)
-include (FindAERA)
 include (FindTMF)
 include (FindCRTools)
 include (FindWCSLIB)
@@ -47,7 +46,8 @@ include (FindCFITSIO)
 ##-------------------------------------------------------------------------------
 ## Testing
 
-option (PYCRTOOLS_ENABLE_TESTING "Enable testing for the PyCRTools?" YES)
+message (STATUS "PYCRTOOLS_ENABLE_TESTING: ${PYCRTOOLS_ENABLE_TESTING}")
+message (STATUS "PYCRTOOLS_WITH_GSL: ${PYCRTOOLS_WITH_GSL}")
 
 if (PYCRTOOLS_ENABLE_TESTING)
   ## Include CTest module
@@ -59,19 +59,6 @@ endif (PYCRTOOLS_ENABLE_TESTING)
 
 ##-------------------------------------------------------------------------------
 ## Options
-
-option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?" YES)
-option (PYCRTOOLS_WITH_RUNTIME_WARNINGS "Compile PyCRTools with runtime warnings enabled?" YES)
-option (PYCRTOOLS_WITH_DEBUG_SYMBOLS "Compile PyCRTools with debug symbols?" YES)
-option (PYCRTOOLS_WITH_OPTIMIZATIONS "Compile PyCRTools with optimization flags turned on?" NO)
-option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO)
-option (PYCRTOOLS_WITH_OPENMP "Compile PyCRTools with OpenMP support?" NO)
-option (PYCRTOOLS_WITH_NUMPY "Compile PyCRTools with numpy support?" YES)
-option (PYCRTOOLS_WITH_CASACORE "Compile PyCRTools with casacore support?" YES)
-option (PYCRTOOLS_WITH_DAL "Compile PyCRTools with DAL support?" YES)
-option (PYCRTOOLS_WITH_GSL "Compile PyCRTools with GSL support?" YES)
-option (PYCRTOOLS_WITH_FFTW "Compile PyCRTools with FFTW support?" YES)
-option (PYCRTOOLS_WITH_AERA "Compile PyCRTools with AERA data support?" NO)
 
 # Debug level
 set (PYCRTOOLS_DEBUG_LEVEL 0 CACHE STRING "PyCRTools debugging level")
@@ -103,17 +90,17 @@ else (PYCRTOOLS_WITH_DEBUG_SYMBOLS)
   set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} -g0")
 endif (PYCRTOOLS_WITH_DEBUG_SYMBOLS)
 
-if (PYCRTOOLS_WITH_OPTIMIZATION)
+if (PYCRTOOLS_WITH_OPTIMIZATIONS)
   set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} -O2")
-  if (PYCRTOOLS_WITH_CPU_OPTIMIZATION)
+  if (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS)
     message (STATUS "Attempting to find best optimization settings for current CPU architecture.")
 
     include (OptimizeForArchitecture)
     OptimizeForArchitecture()
 
     set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} -ftree-vectorize")
-  endif (PYCRTOOLS_WITH_CPU_OPTIMIZATION)
-endif (PYCRTOOLS_WITH_OPTIMIZATION)
+  endif (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS)
+endif (PYCRTOOLS_WITH_OPTIMIZATIONS)
 
 ##-------------------------------------------------------------------------------
 ## Optional dependencies
@@ -130,6 +117,7 @@ if (PYCRTOOLS_WITH_OPENMP)
 endif (PYCRTOOLS_WITH_OPENMP)
 
 if (PYCRTOOLS_WITH_AERA)
+  include (FindAERA)
   if (AERA_FOUND)
     message (STATUS "[PyCRTools] AERA support requested and enabled")
     list (APPEND PYCRTOOLS_INCLUDES ${AERA_INCLUDES})
@@ -287,6 +275,10 @@ add_library (hftools MODULE
   ${PREPROCESSED_FILES}
   )
 
+# if (PYCRTOOLS_WITH_AERA AND AERA_FOUND)
+#   add_dependencies(hftools aera)
+# endif(PYCRTOOLS_WITH_AERA AND AERA_FOUND)
+
 target_link_libraries (hftools
   ${CRTOOLS_LIBRARIES}
   ${TMF_LIBRARIES}
@@ -353,6 +345,14 @@ message (STATUS "============================================================")
 message (STATUS "  PyCRTools")
 message (STATUS "------------------------------------------------------------")
 
+message (STATUS "  Compiler warnings........ : " ${PYCRTOOLS_WITH_COMPILER_WARNINGS})
+message (STATUS "  Runtime warnings..........: " ${PYCRTOOLS_WITH_RUNTIME_WARNINGS})
+message (STATUS "  Debug symbols.............: " ${PYCRTOOLS_WITH_DEBUG_SYMBOLS})
+message (STATUS "  Optimizations.............: " ${PYCRTOOLS_WITH_OPTIMIZATIONS})
+message (STATUS "  CPU optimizations.........: " ${PYCRTOOLS_WITH_CPU_OPTIMIZATIONS})
+
+message (STATUS "------------------------------------------------------------")
+
 if (PYCRTOOLS_WITH_AERA)
   message (STATUS "  AERA..................... : " ${AERA_FOUND})
 endif (PYCRTOOLS_WITH_AERA)
@@ -360,11 +360,12 @@ message (STATUS "  OpenMP................... : " ${OPENMP_FOUND})
 
 message (STATUS "------------------------------------------------------------")
 
-message (STATUS "  Compiler warnings........ : " ${PYCRTOOLS_WITH_COMPILER_WARNINGS})
-message (STATUS "  Runtime warnings..........: " ${PYCRTOOLS_WITH_RUNTIME_WARNINGS})
-message (STATUS "  Debug symbols.............: " ${PYCRTOOLS_WITH_DEBUG_SYMBOLS})
-message (STATUS "  Optimization..............: " ${PYCRTOOLS_WITH_OPTIMIZATION})
-message (STATUS "  CPU optimization..........: " ${PYCRTOOLS_WITH_CPU_OPTIMIZATION})
+message (STATUS "  AERA data support.........: " ${PYCRTOOLS_WITH_AERA} )
+message (STATUS "  CASACore support..........: " ${PYCRTOOLS_WITH_CASACORE} )
+message (STATUS "  DAL support...............: " ${PYCRTOOLS_WITH_DAL} )
+message (STATUS "  FFTW support..............: " ${PYCRTOOLS_WITH_FFTW} )
+message (STATUS "  GSL support...............: " ${PYCRTOOLS_WITH_GSL} )
+message (STATUS "  Numpy support.............: " ${PYCRTOOLS_WITH_NUMPY} )
+message (STATUS "  OpenMP support............: " ${PYCRTOOLS_WITH_OPENMP} )
 
 message (STATUS "------------------------------------------------------------")
-

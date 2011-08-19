@@ -42,7 +42,7 @@ if (NOT FIND_AERA_CMAKE)
 
   find_path (AERA_INCLUDES Datareader.h
     PATHS ${include_locations}
-    PATH_SUFFIXES AERA
+    PATH_SUFFIXES aera
     )
 
   ##_____________________________________________________________________________
