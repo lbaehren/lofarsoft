@@ -6,7 +6,7 @@ pycrtools.core.harray
 pycrtools.core.vector
 pycrtools.core.plot
 pycrtools.core.workspaces
-pycrtools.core.hftools.mArray
+# pycrtools.core.hftools.mArray
 pycrtools.core.hftools.mVector
 pycrtools.core.hftools.mMath
 pycrtools.core.hftools.mFitting

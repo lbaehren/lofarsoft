@@ -7,7 +7,6 @@
   Koert Poelman.
 
 
-
 2011-08-13 - Rev 8292
 =====================
 
@@ -58,7 +57,7 @@
 - cr-event - deal with weaker pulses
    -  localize pulses firs in incoherent beam towards lora position, if present
    -  made a two-step approach for getting directions: first
-  from maxima in pulses, then from cross correlations
+      from maxima in pulses, then from cross correlations
 
 
 2011-08-03 - Rev 8230
@@ -99,8 +98,8 @@
    - new parameter nsigma for peak finding
 
 - make_ldf2 is a slightly cleaner version for ldf plotting, making use of
-the new information in results.py and using the new directory
-structure
+  the new information in results.py and using the new directory
+  structure
 
 - loraTimestampToBlocknumber  now returns block AND samplenumber as a tuple
 
