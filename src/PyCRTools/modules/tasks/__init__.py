@@ -749,7 +749,7 @@ class Task(object):
         self.ws.addParameterDefinition("t0",dict(default=time.clock(),doc="Unix start time of task",unit="s",output=True))
         self.ws.addParameterDefinition("tduration",dict(default=-1,doc="Execution time of task",unit="s",output=True))
         self["t0"]=time.clock()
-        self.callinit(forceinit=init) #Call initialization if not yet done
+
         if not ws==None:
             self.ws=ws           # Updating WorkSpace
         self.ws(**kwargs)
