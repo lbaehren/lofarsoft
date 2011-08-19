@@ -424,7 +424,8 @@ import shelve
 import types
 import time
 
-from pycrtools import *
+import pycrtools as cr
+
 import shortcuts as sc
 from sys import version_info
 
@@ -615,7 +616,7 @@ class Task(object):
         task_name=self.__taskname__
         task_instance=self
 
-        margs=readParfiles(parfile) #Reading parameters from a file
+        margs=cr.readParfiles(parfile) #Reading parameters from a file
         margs.update(**kwargs)
 
         if not hasattr(self,"WorkSpace"): #Create a Default WorkSpace class if it does not exist yet
@@ -748,7 +749,7 @@ class Task(object):
         self.ws.addParameterDefinition("t0",dict(default=time.clock(),doc="Unix start time of task",unit="s",output=True))
         self.ws.addParameterDefinition("tduration",dict(default=-1,doc="Execution time of task",unit="s",output=True))
         self["t0"]=time.clock()
-        
+        self.callinit(forceinit=init) #Call initialization if not yet done
         if not ws==None:
             self.ws=ws           # Updating WorkSpace
         self.ws(**kwargs)
@@ -777,7 +778,7 @@ class Task(object):
                                 start_time_cpu=self["t0"],
                                 execution_time=self["tduration"])
                            )
-        
+
 	if retval==None:
 	    return self
 	else:
@@ -948,7 +949,7 @@ class Task(object):
     def writehtml(self,results=None,parfiles=None,plotfiles=None,text=None,logfiles=None,output_dir=None,htmlfilename="index.html",filename=None, tduration=-1):
         """
         **Usage:**
-        
+
         Task.writehtml(self,results=None,parfiles=None,plotfiles=None,text=[],logfile=None,output_dir=None,htmlfilename="index.html",filename=None, tduration=-1):
 
         **Description:**
@@ -958,9 +959,9 @@ class Task(object):
         The following parameters are availaible. Typically none of
         them needs to be specified, they will be automatically deduced
         from the task parameters.
-        
+
         **Parameters:**
-        
+
 
         *results* - a dict containing all results as keyword value
          pairs (will be printed as table). By default all output
@@ -986,7 +987,7 @@ class Task(object):
          row.
 
         *tduration* - execution time of task
-        
+
         """
 
         if not results:
@@ -1047,7 +1048,7 @@ class Task(object):
 
         #Write results parameter dict
         l=results.items(); l.sort()
-        
+
         htmlfile.write('<table border="1">\n'.format())
         for k,v in l:
             htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
@@ -1089,12 +1090,12 @@ class Task(object):
                 else:
                     htmlfile.write('<td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(relpath(output_dir,plotfile_i),os.path.split(plotfile)[-1]))
                     htmlfile.write('</tr>\n'.format())
-                    
+
             htmlfile.write('</table>\n'.format())
 
         htmlfile.write("</body></html>\n")
-        htmlfile.close()    
-    
+        htmlfile.close()
+
 
 
 
@@ -1189,7 +1190,7 @@ class WorkSpaceType(type):
 #        obj=type(taskname+cls.name,cls.bases,cls.dct)
         obj=type(taskname+cls.__name__,cls.__bases__,cls.__dict__.copy())
 
-        for k,v in readParfiles(parfile).items():
+        for k,v in cr.readParfiles(parfile).items():
             parameters[k]={sc.default:v}
 
         for k,v in kwargs.items():
@@ -1319,7 +1320,7 @@ class WorkSpace(object):
         """
         self.setParFromDict(pardict,root=True, taskname=self.__taskname__, follow_tree=True)
 
-        margs=readParfiles(parfile) #Reading parameters from a file
+        margs=cr.readParfiles(parfile) #Reading parameters from a file
         margs.update(**args)
 
         for k,v in margs.items():
