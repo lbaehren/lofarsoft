@@ -995,7 +995,7 @@ class Task(object):
             for parameter_name in self.ws.getOutputParameters(workarrays=False,nonexport=True):
                 if hasattr(self.ws,"_"+parameter_name): # Take only those which have a value already defined
                     res=self[parameter_name]
-                    if isinstance(res,tuple(hAllContainerTypes)):
+                    if isinstance(res,tuple(cr.hAllContainerTypes)):
                         res=list(res)
                     results[parameter_name] = res
 
@@ -1838,7 +1838,7 @@ class WorkSpace(object):
 		val=getattr(self,"_"+p)
             else:
 		val="'UNDEFINED'"
-	    if type(val) in hAllContainerTypes:
+	    if type(val) in cr.hAllContainerTypes:
 		val=val.__repr__(8)
             if (v.has_key(sc.positional)) and (v[sc.positional]):
                 s+="# {0:s} = {1!r} - {2:s}".format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
