@@ -165,6 +165,7 @@ class ldf(tasks.Task):
         loradirection = dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees"),
         loracoreuncertainties = dict(default=None, doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
         loradirectionuncertainties = dict(default=None, doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
+        loraenergy = dict(default=lambda self:self.results["loraenergy"],unit="eV?"),
         eventid = dict(default=lambda self:self.results["eventid"], doc="EventId for LOFAR Event"),
         square=dict(default=False, doc="Square the data (to get power) before plotting."),
         plot_parameter=dict(default="pulses_maxima_y", doc="Which parameter of the results-dict to plot: 'pulses_strength' or 'pulses_maxima_y'"),
@@ -178,7 +179,8 @@ class ldf(tasks.Task):
         meansignals1 = dict(default=lambda self:self.results["meansignals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
         stationnames0 = dict(default=lambda self:self.results["stationnames0"],doc="Stations in run in pol 0."),
         stationnames1 = dict(default=lambda self:self.results["stationnames1"],doc="Stations in run in pol 1."),
-        draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF")
+        draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF"),
+        CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization")
         )
 
 
@@ -371,7 +373,10 @@ class ldf(tasks.Task):
                      
         if self.eventid:
             cr.plt.title(str(self.eventid))
-              
+            
+        if self.CalcHorneffer:
+            print "Not yet implemented"
+         
 
     
             
