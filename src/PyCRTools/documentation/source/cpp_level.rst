@@ -656,7 +656,7 @@ Example 2: hVectorLength
 Input code
 ~~~~~~~~~~
 
-The code below shows the wrapper code for of the \verb|hVectorLength|
+The code below shows the wrapper code for of the :func:`hVectorLength`
 function.
 
 This is a templated function where the input parameter is a vector of
