@@ -14,7 +14,7 @@ Masked images aren't handled properly yet.
 import numpy as N
 from image import Op, Image, NArray
 from math import sqrt,pi,log
-from scipy.stats import erfc
+from scipy.special import erfc
 import const
 import mylogger
 

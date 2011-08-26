@@ -3,9 +3,9 @@
 Import all standard operations, define default chain of
 operations and provide function 'execute', which can
 execute chain of operations properly. Also define the
-'process_image' convienence function which can take
-options as arguments rather than as a dictionary as
-required by 'execute'.
+'process_image' convienence function that can take
+options as arguments rather than as a dictionary (as
+required by 'execute').
 """
 from readimage import Op_readimage
 from collapse import Op_collapse

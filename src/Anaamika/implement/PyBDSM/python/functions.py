@@ -1057,8 +1057,12 @@ def read_image_from_file(filename, img, indir, quiet=False):
         xmin, xmax, ymin, ymax = img.trim_box
         if xmin < 0: xmin = 0
         if ymin < 0: ymin = 0
-        if xmax > data.shape[0]: xmax = data.shape[0]
-        if ymax > data.shape[1]: ymax = data.shape[1]
+        if len(data.shape) == 3:
+            if xmax > data.shape[1]: xmax = data.shape[1]
+            if ymax > data.shape[2]: ymax = data.shape[2]
+        else:
+            if xmax > data.shape[0]: xmax = data.shape[0]
+            if ymax > data.shape[1]: ymax = data.shape[1]                
         if xmin >= xmax or ymin >= ymax:
             raise RuntimeError("The trim_box option does not specify a valid part of the image.")          
         if len(data.shape) == 3:

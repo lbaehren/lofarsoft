@@ -1,7 +1,9 @@
 # IPython configuration file. This file defines the custom
 # autocompleter used by PyBDSM and a welcome banner with
 # useful reminders to the user. It is called on the
-# start-up of the IPython shell by pybdsm.py.
+# start-up of the IPython shell by pybdsm.py. Note that
+# it is only used for IPython versions < 0.11, as 0.11
+# uses a different system.
 #
 # Note that we adopt the convention for this UI of using
 # lines of 72 characters max for doc strings and the

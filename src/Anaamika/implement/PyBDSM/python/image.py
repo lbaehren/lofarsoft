@@ -3,7 +3,7 @@
 Instances of class Image are a primary data-holders for all PyBDSM
 operations. They store the image itself together with some meta-information
 (such as headers), options for processing modules and all data generated during
-processing. A few convienience methods are also defined here for interactive
+processing. A few convenience methods are also defined here for interactive
 use: to allow viewing and output of the most important data, to allow listing
 and setting of options, and to allow re-processing of Images (these methods are
 used by the interactive IPython shell made by pybdsm.py).
