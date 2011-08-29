@@ -71,7 +71,7 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     file.close()
     firstline=lines[0].strip('/').split()
     secondline=lines[1].strip('/').split()
-    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'El', 'Az', 'Energy(eV)']
+    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)']
     loradata={}
     for (a,b,c) in zip(firstline,reference,secondline):
         # "Check if data format is still as defined" 
@@ -88,11 +88,12 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     for l in lines[4:]:
         info=l.split()
         for a,b in zip(detectorkeys[0:-1],info[0:-1]):
-            loradata[a].append(int(b))
+            print a,b
+            loradata[a].append(float(b))
         loradata[detectorkeys[-1]].append(float(info[-1]))    
     loradata["core"]=cr.hArray([loradata["Core(X)"],loradata["Core(Y)"],0.],name="shower core parameters from lora",unit="m")
     loradata["energy"]=loradata["Energy(eV)"]
-    loradata["direction"]=cr.hArray([loradata["Az"],loradata["El"]],name="shower direction from lora",unit="degrees")
+    loradata["direction"]=cr.hArray([loradata["Azimuth"],loradata["Elevation"]],name="shower direction from lora",unit="degrees")
     
     return loradata
 

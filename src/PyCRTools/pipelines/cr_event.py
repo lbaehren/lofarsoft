@@ -490,7 +490,7 @@ for full_filename in files:
         lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
         if lora_event_info:
-                lora_direction=(lora_event_info["Az"],lora_event_info["El"])
+                lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
                 lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
                 lora_energy=lora_event_info["Energy(eV)"]
 
