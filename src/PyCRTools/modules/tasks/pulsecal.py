@@ -48,14 +48,14 @@ class LocatePulseTrain(tasks.Task):
     If ``search_per_antenna=True`` then the peaks are searched in each
     antenna. From all antennas where a peak was found the median peak
     location and length is taken.
-    
 
-    
+
+
    **Results:**
     Returns start and end index of the strongest pulse in
     ``Task.start`` and ``Task.end``. The cut-out time series is
     returned in ``Task.timeseries_data_cut``.
-    
+
     The summed time series from all data sets (if a 2D array was
     provided) is returned in ``Task.timeseries_data_sum``
 
@@ -68,7 +68,7 @@ class LocatePulseTrain(tasks.Task):
     ``Task.start_max``. See also ``Task.lengths_min``,
     ``Task.lengths_max``, and ``Task.lengths_median`` for information
     on the width of these peaks.
-    
+
     See :func:`hFindSequenceGreaterThan` for a description of the other
     parameters.
 
@@ -79,6 +79,7 @@ class LocatePulseTrain(tasks.Task):
     **Example**
 
     ::
+
         file=open("/Users/falcke/LOFAR/usg/data/lofar/oneshot_level4_CS017_19okt_no-9.h5") #
         file["BLOCKSIZE"]=2**int(round(math.log(file["DATA_LENGTH"][0],2)))
         file["SELECTED_DIPOLES"]=["017000001", "017000002", "017000005", "017000007", "017001009", "017001010", "017001012", "017001015", "017002017", "017002019", "017002020", "017002023", "017003025", "017003026", "017003029", "017003031", "017004033", "017004035", "017004037", "017004039", "017005041", "017005043", "017005045", "017005047", "017006049", "017006051", "017006053", "017006055", "017007057", "017007059", "017007061", "017007063", "017008065", "017008066", "017008069", "017008071", "017009073", "017009075", "017009077", "017009079", "017010081", "017010083", "017010085", "017010087", "017011089", "017011091", "017011093", "017011095"]
@@ -109,13 +110,13 @@ class LocatePulseTrain(tasks.Task):
         cutlen=dict(default=None, doc="Length of the cut-out data.",output=True),
         timeseries_data_sum=dict(default=None, doc="Incoherent (squared) sum of all antennas."),
         timeseries_data_cut=dict(default=lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]), doc="Contains the time series data cut out around the pulse.",output=True),
-        
+
         timeseries_length = dict(default=lambda self:self.timeseries_data.shape()[-1], doc="Length of the full input time series."),
 
         nantennas = dict(default=lambda self:self.timeseries_data.shape()[-2] if len(self.timeseries_data.shape())>1 else 1, doc="Number of antennas in data file."),
 
         search_window = dict(default=False, doc="False - if set to a tuple with two integer indices (start, end), pointing to locations in the array, only the strongest peak between those two locations are being considered. Use -1 for start=0 or end=len(array)."),
-        
+
         search_per_antenna = dict(default=False, doc="Search pulses per antennas and then return the average of all peaks found."),
 
         doplot = dict(default=False, doc="Produce output plots."),
@@ -198,7 +199,7 @@ class LocatePulseTrain(tasks.Task):
 
         self.cutlen=int(2**math.ceil(math.log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
         self.update()
-        
+
         self.start-=self.prepulselen; self.end=self.start+self.cutlen
 
         if self.doplot:
@@ -612,7 +613,7 @@ class DirectionFitTriangles(tasks.Task):
         measured_geometric_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),
                                           "Time lags minus cable delay = pure geometric delay if no error",
                                           unit="s"),
-        
+
         direction_guess = dict(default=False,doc="If a tuple of two numbers (azimut, elevation) then this is an initial guess for the direction (currently only for plotting).",unit="degree"),
 
         direction_guess_label = dict(default="direction guess",doc="A label for plotting indicating where the direction guess was coming from."),
@@ -714,7 +715,7 @@ class DirectionFitTriangles(tasks.Task):
 
         error_tolerance=sc.p_(1e-10,
                               "Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
-        
+
         max_delay=dict(default=15*10**-9,
                        doc="Maximum allowed delay. If a delay for an antenna is larger than this it will be flagged and igrnored"),
 
@@ -888,6 +889,7 @@ class PlotDirectionTriangles(tasks.Task):
     **Example:**
 
     ::
+
         filename="oneshot_level4_CS017_19okt_no-9.h5"
         file=open("$LOFARSOFT/data/lofar/"+filename)
         file["ANTENNA_SET"]="LBA_OUTER"
@@ -1047,6 +1049,7 @@ class PlotAntennaLayout(tasks.Task):
     **Example:**
 
     ::
+
         file=open("$LOFARSOFT/data/lofar/oneshot_level4_CS017_19okt_no-9.h5")
         file["ANTENNA_SET"]="LBA_OUTER"
         file["SELECTED_DIPOLES"]="odd"

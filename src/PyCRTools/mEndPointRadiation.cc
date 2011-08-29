@@ -117,7 +117,7 @@ using namespace std;
   >>> vq=hArray(float, 3, [1.,1.,1.])
   >>> xobs=hArray(float, 3, [0.,0.,0.])
   >>> acceleration=1.0
-  >>> hEndPointRadiation(Ex,Ey,Ez,frequencies,xq,vq,n,xobs,acceleration)
+  >>> hEndPointRadiation(Ex, Ey, Ez, frequencies, xq, vq, t, n, xobs, acceleration)
   >>> total_power.spectralpower2(Ex) #add square of complex spectrum to total power
   >>> total_power.spectralpower2(Ey)
   >>> total_power.spectralpower2(Ez)
