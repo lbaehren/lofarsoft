@@ -12,6 +12,18 @@ def sb2str(sb):
     else:
         return str(sb)
 
+
+def sb2freq(sb,clockfreq,filter):
+    offset=0
+    if filter=='HBA_110_190':
+        offset=1e8
+    elif filter=='HBA_170_230':
+        offset=1.6e8
+    elif filter=='HBA_210_250':
+        offset=2e8
+    freq=clockfreq*1.e6/1024*sb+offset
+    return freq
+
 def getpar(parameters,keyword):
     if keyword in parameters.keys():
         return parameters[keyword]
@@ -28,6 +40,7 @@ class BFDataReader():
 
         self.par=get_parameters_new(obsID,obsIDisParsetfilename)
         self.files=[]
+        self.h5=self.par["h5"]
         if datadir:
             self.par["files"]=[datadir+"/"+f for f in self.par["files"]]
         for file in self.par["files"]:
@@ -97,8 +110,12 @@ class BFDataReader():
                     self.datatype="CoherentStokesI"
                     self.files=[]
                     for file in self.par["files"]:
-                         if '.raw' in file and  os.path.isfile(file):
-                              self.files.append(open(file))
+                        if '.raw' in file and  os.path.isfile(file):
+                            self.files.append(open(file))
+                    if self.h5:
+                        for file in self.par["files"]:
+                            if '.h5' in file and os.path.isfile(file[0:-3]+'.raw'):
+                                self.files.append(open(file[0:-3]+'.raw'))   
                     self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))     
                 elif self.par["stokestype"]=="IQUV":
                     print "Changing datatype to: coherentstokes IQUV"
@@ -107,6 +124,10 @@ class BFDataReader():
                     for file in self.par["files"]:
                          if '.raw' in file and  os.path.isfile(file):
                               self.files.append(open(file))
+                    if self.h5:
+                        for file in self.par["files"]:
+                            if '.h5' in file and os.path.isfile(file[0:-3]+'.raw'):
+                                self.files.append(open(file[0:-3]+'.raw'))   
             elif type == "complexvoltage":
                 self.datatype="ComplexVoltage"
                 self.samples=self.par["samples"]
@@ -128,14 +149,14 @@ class BFDataReader():
                 self.data[:,:,num*self.channels:(num+1)*self.channels]=get_stokes_data(file,block,self.channels,self.samples,1,type=self.datatype).swapaxes(1,2)
         elif self.datatype is "CoherentStokesI":
             for num, file in enumerate(self.files):
-                self.data[num]=get_stokes_data(file,block,self.channels,self.samples,self.nrsubbands,type=self.datatype,noSubbandAxis=True)
+                self.data[num]=get_stokes_data(file,block,self.channels,self.samples,self.nrsubbands,type=self.datatype,noSubbandAxis=True,h5=self.h5)
         else:
             return "Can't read data"
 
         return self.data
 
 
-def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False):
+def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False,h5=False):
     """Get a lofar datablock from stokes (I or IQUV) raw data format.
     Returns a array of data(nrstokes,channels,samples) (IncoherentStokes)
                     or data(samples,subbands,channels) (CoherentStokes,subbands>1)
@@ -167,7 +188,10 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
         assert False
 
     # Calculate how large the datablock is.
-    n=channels*(samples|2)*nrStokes*nrsubbands
+    if not h5:
+        n=channels*(samples|2)*nrStokes*nrsubbands
+    else:
+        n=channels*samples*nrStokes*nrsubbands
 
     # Format string for header (sequence number, padding)  (Big endian)
     fmtH='>I508x'
@@ -177,14 +201,19 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
 
     # Size represented by format string in bytes
     szH=struct.calcsize(fmtH)
+    if h5:
+        szH=0
     szD=struct.calcsize(fmtD)
-    sz=szH+szD
+    if not h5:
+        sz=szH+szD
+    else:
+        sz=szD
 
     dt=np.dtype(np.float32)
     dt=dt.newbyteorder('>')
 
     if block>=0:
-        if not put_file_at_sequence(file,block,szD): #searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
+        if not put_file_at_sequence(file,block,szD,h5): #searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
             if bCoherent:
                  if noSubbandAxis:
                       data=np.zeros((samples,channels*nrsubbands))
@@ -202,9 +231,15 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     #t=struct.unpack(fmt,x)
     if bCoherent:
         if noSubbandAxis:
-            data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,channels*nrsubbands)[0:samples,:]
+            if h5:
+                data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples,channels*nrsubbands)
+            else:
+                data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,channels*nrsubbands)[0:samples,:]
         else:
-            data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,nrsubbands,channels)[0:samples,:,:]
+            if h5:
+                data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples,nrsubbands,channels)
+            else:
+                data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,nrsubbands,channels)[0:samples,:,:]
     else:
         data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(nrStokes,channels,samples|2)[:,:,0:samples]
 
@@ -213,7 +248,7 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     return data
     #np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrStokes)[:,:,0:samples|2,:]
 
-def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
+def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2,h5=False):
     """Get a lofar datablock from raw voltage complex data.
     Returns a array of data(stations,channels,samples,nrpol,(real,imag)).
 
@@ -266,7 +301,7 @@ def get_rawvoltage_data(file, block, channels, samples, nrstations=1, nrpol=2):
     return np.asarray(t[1:]).reshape(nrstations,channels,samples|2,nrpol,2)[:,:,0:samples|2,:,:]
 
 
-def put_file_at_sequence(file,seq_nr,szD):
+def put_file_at_sequence(file,seq_nr,szD,h5=False):
     # puts file pointer after the header of block with sequence number seq_nr
 
     # Format string for header (sequence number, padding)  (Big endian)
@@ -278,9 +313,13 @@ def put_file_at_sequence(file,seq_nr,szD):
     max_size = filesize/(szH+szD);
     corr_seq_nr=seq_nr
     if seq_nr >= max_size:
-#        print "larger than maxsize, resetting to",max_size;
-        corr_seq_nr = max_size-1;
-    file.seek((szH+szD)*corr_seq_nr);
+        print "larger than maxsize, no data available",max_size;
+        return False
+    if h5:
+        file.seek(szD*corr_seq_nr)
+        return True
+    else:
+        file.seek((szH+szD)*corr_seq_nr);
 
     x=file.read(szH)
     # unpack struct into intermediate data
@@ -302,7 +341,7 @@ def put_file_at_sequence(file,seq_nr,szD):
 
 
 
-def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstations=1):
+def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstations=1,h5=False):
     """Get a lofar datablock from raw voltage complex data.
     Returns a array of data(stations,channels,samples,nrpol,(real,imag)).
 
@@ -353,7 +392,7 @@ def get_rawvoltage_data_new(file, block, channels, samples, nrsubbands, nrstatio
 
 
 
-def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI"):
+def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI",h5=False):
     """Checks if the first two blocks have a continuous sequence number.
 
     *file* opened data file
@@ -394,7 +433,7 @@ def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI")
 
     return t1[0]-t0[0] == 1
 
-def get_data_size(channels, samples, nrstations=1, type="StokesI",nrsubbands=1):
+def get_data_size(channels, samples, nrstations=1, type="StokesI",nrsubbands=1,h5=False):
     """Get the size in bytes of a lofar data block.
 
     *channels* nr of channels per subband
@@ -425,7 +464,7 @@ def get_data_size(channels, samples, nrstations=1, type="StokesI",nrsubbands=1):
 
     return sz
 
-def get_sequence_number(file, block, channels, samples, nrstations=1, type="StokesI", nrsubbands=1):
+def get_sequence_number(file, block, channels, samples, nrstations=1, type="StokesI", nrsubbands=1,h5=False):
     """Get a lofar datablock from stokesI raw data format.
     Returns a tuple of sequence number and data(channels,samples).
     Note that the internal data format is data(channels,samples|2).
@@ -772,7 +811,7 @@ def get_parameters(obsid, useFilename=False):
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
     parameters["filterselection"]=allparameters["Observation.bandFilter"]
-    parameters["clockfrequency"]=allparameters["Observation.sampleClock"]
+    parameters["clockfrequency"]=float(allparameters["Observation.sampleClock"])
     obsid2=allparameters["Observation.ObsID"]
     while len(obsid2) < 5:
         obsid2 = '0' + obsid2
@@ -974,7 +1013,7 @@ def get_parameters_new(obsid, useFilename=False):
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
     parameters["filterselection"]=allparameters["Observation.bandFilter"]
-    parameters["clockfrequency"]=allparameters["Observation.sampleClock"]
+    parameters["clockfrequency"]=float(allparameters["Observation.sampleClock"])
     obsid2=allparameters["Observation.ObsID"]
     while len(obsid2) < 5:
         obsid2 = '0' + obsid2
@@ -1155,6 +1194,8 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["files"]=names
     parameters["locations"]=fullnames
 
+
+    parameters["h5"]=True in ['h5' in t for t in parameters["locations"]]
     # Get beams information
     nrbeams=int(allparameters["Observation.nrBeams"])
     parameters["nrbeams"]=nrbeams
@@ -1170,6 +1211,10 @@ def get_parameters_new(obsid, useFilename=False):
         parameters["beam"][beam]["startTime"]=allparameters["Observation.Beam["+str(beam)+"].startTime"]
         parameters["beam"][beam]["target"]=allparameters["Observation.Beam["+str(beam)+"].target"]
 
+    startfreq=float(parameters['subbands'].strip('[]').split('..')[0])
+    endfreq=float(parameters['subbands'].strip('[]').split('..')[1])
+    parameters["frequencies"]=np.arange(sb2freq(startfreq-.5,parameters['clockfrequency'],parameters['filterselection']),sb2freq(endfreq+0.5,parameters['clockfrequency'],parameters['filterselection']),parameters["clockfrequency"]*1.e6/1024./parameters["channels"])
+    parameters["timeresolution"]=parameters["timeintegration"]*parameters["channels"]*1024/(parameters["clockfrequency"]*1.e6)
 
 
 
