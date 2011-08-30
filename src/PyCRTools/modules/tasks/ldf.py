@@ -84,7 +84,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         
  
         # LORA parameters
-        # current fix for LORA core only being propagated with two coordinates instead of three
+        # check for LORA core only being propagated with two coordinates instead of three
         
         lorcore=cr.hArray(res["pulse_core_lora"])        
         Dim = lorcore.getDim()
@@ -180,7 +180,8 @@ class ldf(tasks.Task):
         stationnames0 = dict(default=lambda self:self.results["stationnames0"],doc="Stations in run in pol 0."),
         stationnames1 = dict(default=lambda self:self.results["stationnames1"],doc="Stations in run in pol 1."),
         draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF"),
-        CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization")
+        CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization"),
+        Draw3D = dict(default=False,doc="Draw 2D LDF")
         )
 
 
@@ -375,7 +376,92 @@ class ldf(tasks.Task):
             cr.plt.title(str(self.eventid))
             
         if self.CalcHorneffer:
-            print "Not yet implemented"
+            print "Horneffer Formula: Not yet implemented"
+            
+        if self.Draw3D:
+
+                from mpl_toolkits.mplot3d import Axes3D
+                
+                # Polarization 0 
+                
+                fig0 = cr.plt.figure()
+                ax0 = Axes3D(fig0)
+                
+                pos0 = cr.hArray(copy = self.positions0) 
+                posX0 = cr.hArray_transpose(pos0)[0].vec()
+                posY0 = cr.hArray_transpose(pos0)[1].vec()
+                
+                sig0 = cr.hArray(copy=self.signals0)
+                
+                core = cr.hArray(copy=self.loracore)
+                
+                posX0 = posX0 - core[0]
+                posY0 = posY0 - core[1]
+                
+                alpha0 = posY0/posX0
+
+                alpha0.atan()
+
+                sinalpha0 = cr.hArray(copy = alpha0)
+                sinalpha0.sin()
+                cosalpha0 = cr.hArray(copy=alpha0)
+                cosalpha0.cos()
+                
+                Dist0 = cr.hArray(self.Distances0)
+
+                cosalpha0.mul(Dist0)
+                sinalpha0.mul(Dist0)
+                
+                ax0.scatter(cosalpha0, sinalpha0, sig0, c='r', marker='o')
+                
+                ax0.set_xlabel('East')
+                ax0.set_ylabel('North')
+                ax0.w_zaxis.set_scale("log")
+                ax0.set_zlabel('Power [a.u.]')                
+                
+                # Polarization 1 
+                
+                fig1 = cr.plt.figure()
+                ax1 = Axes3D(fig1)
+                
+                pos1 = cr.hArray(copy = self.positions1) 
+                posX1 = cr.hArray_transpose(pos1)[0].vec()
+                posY1 = cr.hArray_transpose(pos1)[1].vec()
+                
+                sig1 = cr.hArray(copy=self.signals1)
+                
+                core = cr.hArray(copy=self.loracore)
+                
+                posX1 = posX1 - core[0]
+                posY1 = posY1 - core[1]
+                
+                alpha1 = posY1/posX1
+
+                alpha1.atan()
+
+                sinalpha1 = cr.hArray(copy = alpha1)
+                sinalpha1.sin()
+                cosalpha1 = cr.hArray(copy=alpha1)
+                cosalpha1.cos()
+                
+                Dist1 = cr.hArray(self.Distances1)
+
+                cosalpha1.mul(Dist1)
+                sinalpha1.mul(Dist1)
+                
+                ax1.scatter(cosalpha1, sinalpha1, sig1, c='b', marker='s')
+                
+                ax1.set_xlabel('East')
+                ax1.set_ylabel('North')
+                ax1.w_zaxis.set_scale("log")
+                ax1.set_zlabel('Power [a.u.]')
+                
+
+                
+                    
+                
+
+               
          
 
     
