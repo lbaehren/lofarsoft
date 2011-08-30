@@ -707,6 +707,7 @@ for full_filename in files:
 
         results.update(dict(
             BLOCK=block_number,
+            BLOCKSIZE=blocksize,
             antennas=dict(zip(range(ndipoles),good_antennas)),
             bad_antennas=bad_antennas,
             antenna_positions_station_XYZ_m=list(antenna_positions.vec()),
