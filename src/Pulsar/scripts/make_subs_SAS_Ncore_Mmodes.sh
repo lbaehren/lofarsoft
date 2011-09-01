@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.14
+VERSION=2.15
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -1612,14 +1612,22 @@ do
 					do
                        if (( $TiedArray == 0 ))
                        then
-						   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-						   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+                           INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
+                           echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${ii} > ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
+                           sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${ii} > ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+                           rm ${ii}
+#						   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+#						   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
 						   jj=`expr $jj + 1`
 					   else
 					       for jjj in $beams
 					       do 
-							   echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-							   cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+	                           INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
+	                           echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${ii} > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
+	                           sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${ii} > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+                               rm ${ii}
+#							   echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+#							   cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
 							   jj=`expr $jj + 1`
 						   done 
 					   fi
@@ -1638,8 +1646,13 @@ do
 					
 					# move result (single file) to the correct location
 					result=`ls -1 test*.inf`
-					echo mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf >> $log
-					mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf
+
+                    INFNAME=${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}
+                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${result} > ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf" >> $log
+                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${result} > ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf 
+                    rm ${result}
+#					echo mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf >> $log
+#					mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf
 			     fi # end if (( $nrBeams == 1 ))
 
 				beam_counter=$(( $beam_counter + 1 ))
@@ -1668,14 +1681,22 @@ do
                 if (( $TiedArray == 0 ))
                 then
 	                result=`ls -1 test*.inf`
-	                echo mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
-	                mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}
+                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
+                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
+                    rm ${result}
+#	                echo mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
+#	                mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
 		         else
 		             for jjj in $beams
 		             do
 		                result=`ls -1 test*.inf`
-		                echo cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
-		                cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+	                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}
+	                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
+	                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
+                        rm ${result}
+#		                echo cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
+#		                cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
 		             done		         
 	             fi
             done
@@ -1691,8 +1712,11 @@ do
 			    for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
 			    do
 			       #cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
-			       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-			       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+                   INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
+                   echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
+                   sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+#			       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+#			       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
 			       jj=`expr $jj + 1`
 			    done
 		    done
@@ -1746,8 +1770,14 @@ do
 	then 
 	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
 	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset
-	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf >> $log
-	     mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf
+
+         INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA
+         echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' `ls test*.inf` > ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf" >> $log
+         sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" `ls test*.inf` > ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf 
+         rm `ls test*.inf`
+#	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf >> $log
+#	     mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf
+
 #	elif (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 1 ))
 #    then
 #    	for jjj in $beams_init
@@ -2460,6 +2490,11 @@ do
 			      new_name=`echo $filename | sed   -e "s/_RSP.*PSR/$NAME1/g"  -e "s/_RSP.*\./$NAME2\./g" -e "s/_RSP.*_/$NAME3/g"`
 			      mv $filename $new_name
 			   done < name_change.list
+			   inf_file=`/bin/ls *.inf`
+			   sed   -e "s/_RSP.*/$NAME2/g" $inf_file > $$.inf
+			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+			   mv $$.inf $new_inf_file
+			   rm $inf_file
 			done
 		done
 		cd ${location}	    
@@ -2483,6 +2518,11 @@ do
 			echo "rename 's/RSP$ii/RSP$NAME/g' *" >> $log
 			echo "rename 's/RSP$ii/RSP$NAME/g' *"
 			rename "s/RSP$ii/RSP$NAME/g" *
+		    inf_file=`/bin/ls *.inf`
+		    sed -e 's/RSP$ii/RSP$NAME/g'  $inf_file > $$.inf
+			new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+		    mv $$.inf $new_inf_file
+		    rm $inf_file
 		done
 		cd ${location}/${STOKES}/tmp$$/
 		mv * ../
