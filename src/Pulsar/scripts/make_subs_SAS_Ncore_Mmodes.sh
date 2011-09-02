@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.15
+VERSION=2.16
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -2538,6 +2538,20 @@ do
     then 
        cat $master_list | awk -v NODE_NAME=`uname -n` '{print NODE_NAME " " $1}' > $location/${STOKES}/beam_process_node.txt
     fi
+
+	#create a delete list of subband files for future clean up
+	if [[ $STOKES == "incoherentstokes" ]] 
+	then
+	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" > IS_delete_sub.list
+	else
+       if (( $flyseye == 0 )) 
+       then
+	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" > CS_delete_sub.list
+       else
+	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" > FE_delete_sub.list
+       fi	
+	fi
+	
 done # for loop over modes in $mode_str 
 
 if [[ $proc != 0 ]]
