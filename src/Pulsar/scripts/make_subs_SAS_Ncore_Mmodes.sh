@@ -2542,13 +2542,13 @@ do
 	#create a delete list of subband files for future clean up
 	if [[ $STOKES == "incoherentstokes" ]] 
 	then
-	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" > IS_delete_sub.list
+	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "rm -rf "$1}' > IS_delete_sub.list
 	else
        if (( $flyseye == 0 )) 
        then
-	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" > CS_delete_sub.list
+	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "rm -rf "$1}' > CS_delete_sub.list
        else
-	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" > FE_delete_sub.list
+	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "rm -rf "$1}' > FE_delete_sub.list
        fi	
 	fi
 	
