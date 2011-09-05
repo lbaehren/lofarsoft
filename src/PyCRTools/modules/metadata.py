@@ -413,7 +413,7 @@ def idToStationName(station_id):
             station_name="DE"+str(station_nr)
     elif digit1==1:
         station_nr=digit1*100+(digit2/2)*100+np.mod(digit2,2)*10+digit3
-        if digit3<=2:
+        if digit3<=2 or digit3==3 and digit2==0:
             station_name="CS"+str(station_nr)
         else:
             station_name="RS"+str(station_nr)
