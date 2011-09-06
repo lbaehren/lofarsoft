@@ -1,243 +1,104 @@
-
 """Module output.
 
-Writes results of source detection in a variety of formats.
+Defines functions that write the results of source detection in a 
+variety of formats. These are then used as methods of Image objects
+and/or are called by the outlist operation if output_all is True.
 """
-
 from image import Op
-import os
-import pyfits
-import fbdsm_fitstable_stuff as stuff
-import mylogger
 
 class Op_outlist(Op):
     """Write out list of gaussians
 
-    Currently 5 output formats are supported:
+    Currently 6 output formats are supported:
     - BBS list
     - fbdsm gaussian list
     - star list
     - kvis annotations
-    - ascii
+    - ascii list
+    - ds9 region list
 
     All output lists are generated atm.
     """
     def __call__(self, img):
         if img.opts.output_all:
+            import os
             dir = img.basedir + '/catalogues/'
-            if not os.path.exists(dir): os.mkdir(dir)
+            if not os.path.exists(dir): 
+                os.mkdir(dir)
             self.write_bbs(img, dir)
             self.write_gaul(img, dir)
-            self.write_star(img, dir)
-            self.write_kvis_ann(img, dir)
-            self.write_opts(img, img.basedir + '/misc/')
+            self.write_aips(img, dir)
+            self.write_kvis(img, dir)
+            self.write_ds9(img, dir)
             self.write_gaul_FITS(img, dir)
+            if not os.path.exists(img.basedir + '/misc/'): 
+                os.mkdir(img.basedir + '/misc/')
+            self.write_opts(img, img.basedir + '/misc/')
 
 
     def write_bbs(self, img, dir):
         """ Writes the gaussian list as a bbs-readable file"""
-        import numpy as N
-        from const import fwsig
-        import functions as func
-
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
-
         prefix = ''
-        if img.extraparams.has_key('bbsprefix'): prefix = img.extraparams['bbsprefix']+'_'
+        if img.extraparams.has_key('bbsprefix'): 
+            prefix = img.extraparams['bbsprefix']+'_'
         if img.extraparams.has_key('bbsname'):
             name = img.extraparams['bbsname']
         else:
             name = img.imagename
         fnames = [dir + name + '.sky_in']
         if img.extraparams.has_key('bbsprefix'): 
-          fnames.append(dir + img.parentname + '.pybdsm' + '.total.sky_in')
+            fnames.append(dir + img.parentname + '.pybdsm' + '.total.sky_in')
         else:
-          fnames.append(dir + name + '.total.sky_in')
-            
-        if img.opts.spectralindex_do: freq = "%.5e " % img.freq0
-        else: freq = "%.5e" % img.cfreq
-        bbs_patches = img.opts.bbs_patches
-        if bbs_patches == None: 
-          patch_s = ''
-          patchname = ''
-        else:
-          patch_s = 'Patch, '
-        type = 'GAUSSIAN'
-        sep = ', '
-        if img.opts.srcroot == None:
-            sname = img.imagename.split('.')[0]
-        else:
-            sname = img.opts.srcroot
-        ### sort them in descending order of flux
-        max = [] 
-        for src in img.source: max.append(src.total_flux)
-        ind = list(N.argsort(max)); ind.reverse()
-        p_nums = N.arange(len(ind)) + img.bbspatchnum + 1
-        img.bbspatchnum = img.bbspatchnum + len(ind)
-        type = 'GAUSSIAN'  # if you include POINT you need to change the code which writes *.total.sky_in
+            fnames.append(dir + name + '.total.sky_in')
 
-        for fno, fname in enumerate(fnames):
-          if not img.extraparams.has_key('bbsappend'): img.extraparams['bbsappend'] = False
-          old = os.path.exists(fname)
-          if fno == 1: 
-            f = open(fname, 'a')
-          else:
-            if img.extraparams['bbsappend']:
-              f = open(fname, 'a')
-            else:
-              f = open(fname, 'w')
-              mylog.info('Writing ' + fname)
-
-          if not old:
-            str1 = "# (Name, Type, "+patch_s+"Ra, Dec, I, Q, U, V, ReferenceFrequency='"+freq+"', SpectralIndexDegree='0', " \
-                  + "SpectralIndex:0='0.0', MajorAxis, MinorAxis, Orientation) = format\n"
-            f.write(str1)
-
-          if bbs_patches == 'single': 
-            patchname = 'patch_'+img.parentname+', '
-            str1 =  ', , patch_'+img.parentname+', 00:00:00, +00.00.00 \n' 
-            if (prefix == '' and fno == 0) or prefix == 'w1_':
-              f.write(str1)
-
-          for iii, ii in enumerate(ind):
-            src = img.source[ii]
-            if bbs_patches == 'source' and src.ngaus > 0: 
-              str1 = ', , patch_'+img.parentname+'_'+str(p_nums[iii])+', 00:00:00, +00.00.00 \n'; 
-              f.write(str1)
-              patchname = 'patch_'+img.parentname+'_'+str(p_nums[iii])+', '
-            for g in src.gaussians:
-              src = sname + '_' + prefix + str(g.gaus_num)
-              ra, dec = g.centre_sky
-              ra = ra2hhmmss(ra)
-              sra = str(int(ra[0]))+':'+str(int(ra[1]))+':'+str("%.3f" % (ra[2]))
-              dec= dec2ddmmss(dec)
-              decsign = ('-' if dec[3] < 0 else '+')
-              sdec = decsign+str(int(dec[0]))+'.'+str(int(dec[1]))+'.'+str("%.3f" % (dec[2]))
-              total = str("%.3e" % (g.total_flux))
-              pol = '0.0, 0.0, 0.0, '
-              deconv = g.deconv_size_sky
-              deconv1 = str("%.5e" % (deconv[0]*3600.0))   # in arcsec
-              deconv2 = str("%.5e" % (deconv[1]*3600.0)) 
-              deconv3 = str("%.5e" % (deconv[2])) 
-              deconv = deconv1 + ', ' + deconv2 + ', ' + deconv3
-              specin = '-0.8'
-              if img.opts.spectralindex_do: 
-                specin = "%.2f" % g.spin1[1]
-                total = str("%.3e" % (g.spin1[0]))
-                
-              str1 = src+ sep+ type+ sep+ patchname + sra+ sep+ sdec+sep+ total+ sep+ pol+ \
-                              freq+ sep + '0'+ sep+ specin + sep+ deconv + '\n'
-              f.write(str1)
-          f.close()
+        # Write Gaussian list without wavelet Gaussians
+        write_bbs_gaul(img, filename=fnames[0], srcroot=img.opts.srcroot, 
+                       patch=img.opts.bbs_patches, incl_primary=True, incl_wavelet=False, 
+                       sort_by='flux', clobber=True)
+        # Write Gaussian list with wavelet Gaussians (if any)
+        write_bbs_gaul(img, filename=fnames[1], srcroot=img.opts.srcroot, 
+                       patch=img.opts.bbs_patches, incl_primary=True, incl_wavelet=True, 
+                       sort_by='flux', clobber=True)
   
 
     def write_gaul(self, img, dir):
-            
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output    ")
-        fname = img.imagename + '.gaul'
-        f = open(dir+fname, "w")
-        mylog.info('Writing '+dir+fname)
+        """ Writes the gaussian list as an ASCII file"""            
+        fname = dir + img.imagename + '.gaul'
+        write_ascii_gaul(img, filename=fname, incl_wavelet=True, sort_by='indx',
+                         clobber=True)
 
-        for g in img.gaussians:
-            gidx = g.gaus_num-1  # python numbering
-            iidx = g.island_id
-            A = g.total_flux
-            ra, dec = g.centre_sky
-            x, y = g.centre_pix
-            shape = g.size_sky
-            eA = g.total_fluxE
-            era, edec = g.centre_skyE
-            ex, ey = g.centre_pixE
-            eshape = g.size_skyE
-            rms = g.rms
+    def write_aips(self, img, dir):
+        """ Writes the gaussian list an AIPS STAR file"""            
+        fname = dir + img.imagename + '.star'
+        write_star(img, filename=fname, sort_by='indx', incl_wavelet=True,
+                   clobber=True)
 
-            str = "%3d  %4d  %d    %10g %5g   %10g %5g   " \
-                  "%10g %5g   %10g %5g   %10g %5g   %10g %5g   " \
-                  "%10g %5g   %10g %5g   %10g %5g  %10g\n" % \
-                  (gidx, iidx, 0,    0, 0,     A,  eA, \
-                   ra, era,     dec, edec,    x, ex,  y, ey, \
-                   shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2], rms)
-            f.write(str)
-
-        f.close()
-
-    def write_star(self, img, dir):
-
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output    ")
-        fname = img.imagename + '.star'
-        f = open(dir+fname, 'w')
-        mylog.info('Writing '+dir+fname)
-
-        for g in img.gaussians:#():
-            A = g.peak_flux
-            ra, dec = g.centre_sky
-            shape = g.size_sky
-            ### convert to canonical representation
-            ra = ra2hhmmss(ra)
-            dec= dec2ddmmss(dec)
-            decsign = ('-' if dec[3] < 0 else '+')
-
-            str = '%2i %2i %6.3f ' \
-                  '%c%2i %2i %6.3f ' \
-                  '%9.4f %9.4f %7.2f ' \
-                  '%2i %13.7f %10s\n' % \
-                   (ra[0], ra[1], ra[2], 
-                    decsign, dec[0], dec[1], dec[2],
-                    shape[0]*3600, shape[1]*3600, shape[2],
-                    4, A, '')
-
-            f.write(str)
-
-        f.close()
-
-    def write_kvis_ann(self, img, dir):
-
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output    ")
-        fname = img.imagename + '.kvis.ann'
-        f = open(dir+fname, 'w')
-        mylog.info('Writing '+dir+fname)
-        f.write("### KVis annotation file\n\n")
-	f.write("color green\n\n")
-
-        for g in img.gaussians:#():
-            iidx = g.island_id
-            A = g.peak_flux
-            ra, dec = g.centre_sky
-            shape = g.size_sky
-            cross = (3*img.wcs_obj.acdelt[0], 3*img.wcs_obj.acdelt[1])
-
-            str = 'text   %10.5f %10.5f   %d\n' % \
-                (ra, dec, iidx)
-            f.write(str)
-            str = 'cross   %10.5f %10.5f   %10.7f %10.7f\n' % \
-                (ra, dec, abs(cross[0]), abs(cross[1]))
-            #f.write(str)
-            str = 'ellipse %10.5f %10.5f   %10.7f %10.7f %10.4f\n' % \
-                (ra, dec, shape[0], shape[1], shape[2])
-            f.write(str)
-
-        f.close()
-
+    def write_kvis(self, img, dir):
+        """ Writes the gaussian list as a kvis file"""            
+        fname = dir + img.imagename + '.kvis.ann'
+        write_kvis_ann(img, filename=fname, sort_by='indx', incl_wavelet=True,
+                       clobber=True)
+  
+    def write_ds9(self, img, dir):
+        """ Writes the gaussian list as a ds9 region file"""            
+        fname = dir + img.imagename + '.ds9.reg'
+        write_ds9_gaul(img, filename=fname, srcroot=img.opts.srcroot, incl_wavelet=True,
+                       clobber=True, deconvolve=False)
   
     def write_gaul_FITS(self, img, dir, incl_wavelet=True):
-        """ Write as FITS binary table. """
-        cnames, cunit, cformat = stuff.cnames, stuff.cunit, stuff.cformat
-        fbdsm_list = pybdsm2fbdsm(img)
-        col_list = []
-        for ind, col in enumerate(fbdsm_list):
-          list1 = pyfits.Column(name=cnames[ind], format=cformat[ind], unit=cunit[ind], array=fbdsm_list[ind])
-          col_list.append(list1)
-        tbhdu = pyfits.new_table(col_list)
-        tbhdu.writeto(dir + img.imagename+'.gaul.FITS', clobber=True)
-
+        """ Writes the gaussian list as FITS binary table"""
+        fname = dir + img.imagename+'.gaul.FITS'
+        write_fits_gaul(img, filename=fname, sort_by='indx', incl_wavelet=True,
+                        clobber=True)
+                    
     def write_opts(self, img, dir):
-        """ Write input parameters """
+        """ Writes input parameters to a text file."""
         import inspect
         import types
         import numpy as N
+        import mylogger
 
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output    ")
-        if not os.path.exists(dir): os.mkdir(dir)
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
         fname = 'parameters_used'
         f = open(dir+fname, 'w')
         mylog.info('Writing '+dir+fname)
@@ -347,8 +208,700 @@ def pybdsm2fbdsm(img, incl_wavelet=True):
     return fbdsm
 
 
+def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
+                   incl_primary=True, incl_wavelet=True, sort_by='flux',
+                   clobber=False):
+    """Writes Gaussian list to a BBS sky model"""
+    import numpy as N
+    from const import fwsig
+    import mylogger
+    import os
+
+    mylog = mylogger.logging.getLogger("PyBDSM.write_gaul")
+    if int(img.equinox) != 2000 and int(img.equinox) != 1950:
+        mylog.warning('Equinox of input image is not J2000 or B1950. '\
+                          'Sky model may not be appropriate for BBS.')
+    if int(img.equinox) == 1950:
+        mylog.warning('Equinox of input image is B1950. Coordinates '\
+                          'will be precessed to J2000.')
+
+    outl, outn, patl = list_and_sort_gaussians(img, patch=patch,
+                                               root=srcroot, sort_by=sort_by)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=patch,
+                                                            root=srcroot,
+                                                            wavelet=True,
+                                                            sort_by=sort_by)
+    else:
+        wavoutl = []
+    if not incl_primary and not incl_wavelet:
+        print '\033[31;1mERROR\033[0m: incl_primary and incl_wavelet cannot both be False.'
+        return
+    if incl_primary:
+        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+            outstr_list = make_bbs_str(img, outl+wavoutl, outn+wavoutn, patl+wavpatl)
+        else:
+            outstr_list = make_bbs_str(img, outl, outn, patl)
+    else:
+        if len(wavoutl) > 0:
+            outstr_list = make_bbs_str(img, wavoutl, wavoutn, wavpatl)
+        else:
+            return
+    if filename == None:    
+        filename = img.imagename + '.sky_in'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    mylog.info('Writing ' + filename)
+    f = open(filename, 'w')
+    for s in outstr_list:
+        f.write(s)
+    f.close()
+    return filename
+
+def write_ds9_gaul(img, filename=None, srcroot=None, deconvolve=False,
+                   incl_wavelet=True, clobber=False):
+    """Writes Gaussian list to a ds9 region file"""
+    import numpy as N
+    from const import fwsig
+    import mylogger
+    import os
+
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True)
+        outl += wavoutl
+        outn += wavoutn
+    outstr_list = make_ds9_str(img, outl, outn, deconvolve=deconvolve)
+    if filename == None:
+        filename = img.imagename + '.reg'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    mylog.info('Writing ' + filename)
+    f = open(filename, "w")
+    for s in outstr_list:
+        f.write(s)
+    f.close()
+    return filename
+
+        
+def write_ascii_gaul(img, filename=None, incl_wavelet=True, sort_by='indx',
+                     clobber=False):
+    """Writes Gaussian list to an ASCII file"""
+    import mylogger
+    import os
+
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True,
+                                                            sort_by=sort_by)
+        outl += wavoutl
+    outstr_list = make_ascii_str(img, outl)
+    if filename == None:
+        filename = img.imagename + '.gaul'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    mylog.info('Writing ' + filename)
+    f = open(filename, "w")
+    for s in outstr_list:
+        f.write(s)
+    f.close()
+    return filename
+
+  
+def write_casa_gaul(img, filename=None, incl_wavelet=True, clobber=False):
+    """Writes a clean box file for use in casapy"""
+    import mylogger
+    import os
+  
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True)
+        outl += wavoutl
+    outstr_list = make_casa_str(img, outl)
+    if filename == None:
+        filename = img.imagename + '.box'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    mylog.info('Writing ' + filename)
+    f = open(filename, "w")
+    for s in outstr_list:
+        f.write(s)
+    f.close()
+    return filename
+
+def write_fits_gaul(img, filename=None, sort_by='indx',
+                    incl_wavelet=True, clobber=False):
+    """ Write as FITS binary table.
+
+    incl_wavelet not yet implemented.
+    """
+    import mylogger
+    import pyfits
+    import os
+    import numpy as N
+
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True,
+                                                            sort_by=sort_by)
+        outl += wavoutl
+    cnames = N.array(['Gaus_id','Isl_id', 'Souce_id', 'Wave_id', 'Total', 
+                  'E_Total','Peak','E_Peak','RA','E_RA', 
+                  'DEC','E_DEC','Xposn','E_xposn','Yposn','E_yposn','Bmaj', 
+                  'E_Bmaj','Bmin','E_Bmin','Bpa','E_Bpa', 
+                  'DC_Bmaj','E_DC_Bmaj','DC_Bmin', 
+                  'E_DC_Bmin','DC_Bpa','E_DC_Bpa','I_rms', 
+                  'I_mean','I_R_rms','I_R_mean','S_code','Spec_indx',
+                  'Err_spec_indx'])
+    cformat = N.array(['1J','1J','1J','1J','1D',
+                       '1D','1D','1D','1D','1D',
+                       '1D','1D','1D','1D','1D','1D','1D',
+                       '1D','1D','1D','1D','1D',
+                       '1D','1D','1D',
+                       '1D','1D','1D','1D',
+                       '1D','1D','1D','1A','1D','1D'])
+    cunit = N.array([' ',' ',' ',' ','Jy','Jy','Jy/beam','Jy/beam','deg','deg','deg', 
+                     'deg','pix','pix','pix','pix','arcsec','arcsec','arcsec', 
+                     'arcsec','deg','deg','arcsec','arcsec','arcsec','arcsec', 
+                     'deg','deg','Jy/beam','Jy/beam','Jy/beam','Jy/beam',' ',
+                     ' ',' '])
+    out_list = make_fits_list(img, outl)
+    col_list = []
+    for ind, col in enumerate(out_list):
+      list1 = pyfits.Column(name=cnames[ind], format=cformat[ind],
+                            unit=cunit[ind], array=out_list[ind])
+      col_list.append(list1)
+    tbhdu = pyfits.new_table(col_list)
+    if filename == None:
+        filename = img.imagename + '.fits'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    mylog.info('Writing ' + filename)
+    tbhdu.writeto(filename, clobber=True)
+    return filename
+
+def write_kvis_ann(img, filename=None, sort_by='indx', incl_wavelet=True,
+                   clobber=False):
+    import mylogger
+    import os
+
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+    if filename == None:
+        filename = img.imagename + '.kvis.ann'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    f = open(filename, 'w')
+    mylog.info('Writing '+filename)
+    f.write("### KVis annotation file\n\n")
+    f.write("color green\n\n")
+
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True,
+                                                            sort_by=sort_by)
+        outl += wavoutl
+
+    for g in outl[0]:
+        iidx = g.island_id
+        ra, dec = g.centre_sky
+        shape = g.size_sky
+
+        str = 'text   %10.5f %10.5f   %d\n' % \
+            (ra, dec, iidx)
+        f.write(str)
+        str = 'ellipse %10.5f %10.5f   %10.7f %10.7f %10.4f\n' % \
+            (ra, dec, shape[0], shape[1], shape[2])
+        f.write(str)
+    f.close()
+    return filename
+
+def write_star(img, filename=None, sort_by='indx', incl_wavelet=False,
+               clobber=False):
+    from output import ra2hhmmss, dec2ddmmss
+    import mylogger
+    import os
+
+    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+    if filename == None:
+        filename = img.imagename + '.star'
+    if os.path.exists(filename) and clobber == False:
+        return None
+    f = open(filename, 'w')
+    mylog.info('Writing '+filename)
+
+    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                            wavelet=True,
+                                                            sort_by=sort_by)
+        outl += wavoutl
+
+    for g in outl[0]:
+        A = g.peak_flux
+        ra, dec = g.centre_sky
+        shape = g.size_sky
+        ### convert to canonical representation
+        ra = ra2hhmmss(ra)
+        dec= dec2ddmmss(dec)
+        decsign = ('-' if dec[3] < 0 else '+')
+
+        str = '%2i %2i %6.3f ' \
+              '%c%2i %2i %6.3f ' \
+              '%9.4f %9.4f %7.2f ' \
+              '%2i %13.7f %10s\n' % \
+              (ra[0], ra[1], ra[2], 
+               decsign, dec[0], dec[1], dec[2],
+               shape[0]*3600, shape[1]*3600, shape[2],
+               4, A, '')
+
+        f.write(str)
+    f.close()
+    return filename
+
+def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
+                            sort_by='index'):
+    """Returns sorted lists of Gaussians and their names and patch names.
+
+    wavelet - if True, use only wavelet Gaussians; if False, use only
+              primary Gaussians
+    
+    Returns (outlist, outnames, patchnames)
+    outlist is [[g1, g2, g3], [g4], ...]
+    outnames is [['root_i2_s1_g1', 'root_i2_s1_g2', 'root_i2_s1_g3'], ...]
+    patchnames is ['root_patch_s1', 'root_patch_s2', ...]
+         
+    The names are root_iXX_sXX_gXX (or wXX_iXX_sXX_gXX for wavelet Gaussians)
+    """
+    import numpy as N
+
+    # Define lists
+    if root == None:
+        root = img.parentname
+    gauslist = []
+    gausname = []
+    outlist = []
+    outnames = []
+    patchnames = []
+    patchnames_sorted = []
+    gausflux = [] # fluxes of Gaussians
+    gausindx = [] # indices of Gaussians
+    patchflux = [] # total flux of each patch
+    patchindx = [] # indices of sources
+    if wavelet:
+        if hasattr(img, 'atrous_gaussians'):
+            src_list = []
+            for sl in img.atrous_sources:
+                src_list += sl
+        else:
+            return ([], [], [])
+    else:
+        src_list = img.source
+    for src in src_list:
+        for g in src.gaussians:
+            gauslist.append(g)
+            gausflux.append(g.total_flux)
+            gausindx.append(g.gaus_num-1)
+            if wavelet:
+                jstr = '_w' + str(g.wavelet_j)
+            else:
+                jstr = ''
+            gausname.append(root + jstr + '_i' + str(src.island_id) + '_s' +
+                            str(src.source_id) + '_g' + str(g.gaus_num-1))
+            if patch == 'gaussian':
+                outlist.append(gauslist)
+                outnames.append(gausname)
+                patchnames.append(root + '_patch' + jstr + '_g' + str(g.gaus_num-1))
+                patchflux.append(N.sum(gausflux))
+                patchindx.append(g.gaus_num-1)
+                gauslist = [] # reset for next Gaussian
+                gausname = []
+                gausflux = []
+                gausindx = []
+        if patch == 'source':
+            sorted_gauslist = list(gauslist)
+            sorted_gausname = list(gausname)
+            if sort_by == 'flux':
+                # Sort Gaussians by flux within each source
+                indx = range(len(gausflux))
+                indx.sort(lambda x,y: cmp(gausflux[x],gausflux[y]), reverse=True)
+            elif sort_by == 'index':
+                # Sort Gaussians by index within each source
+                indx = range(len(gausindx))
+                indx.sort(lambda x,y: cmp(gausindx[x],gausindx[y]), reverse=False)
+            else:
+                # Unrecognized property --> Don't sort
+                indx = range(len(gausindx))
+            for i, si in enumerate(indx):
+                sorted_gauslist[i] = gauslist[si]
+                sorted_gausname[i] = gausname[si]
+                
+            outlist.append(sorted_gauslist)
+            outnames.append(sorted_gausname)
+            patchnames.append(root + '_patch' + jstr + '_s' + str(src.source_id))
+            patchflux.append(N.sum(gausflux))
+            patchindx.append(src.source_id)
+            gauslist = [] # reset for next source
+            gausname = []
+            gausflux = []
+
+    # Sort
+    if patch == 'single' or patch == None:
+        outlist = [list(gauslist)]
+        outlist_sorted = [list(gauslist)]
+        outnames = [list(gausname)]
+        outnames_sorted = [list(gausname)]
+        if patch == 'single':
+            patchnames = [root + '_patch']
+        else:
+            patchnames = [None]
+        if sort_by == 'flux':
+            # Sort by Gaussian flux
+            indx = range(len(gauslist))
+            indx.sort(lambda x,y: cmp(gausflux[x],gausflux[y]), reverse=True)
+        elif sort_by == 'index':
+            # Sort by Gaussian index
+            indx = range(len(gausindx))
+            indx.sort(lambda x,y: cmp(gausindx[x],gausindx[y]), reverse=False)
+        else:
+            # Unrecognized property --> Don't sort
+            indx = range(len(gausindx))
+        for i, si in enumerate(indx):
+                outlist_sorted[0][i] = outlist[0][si]
+                outnames_sorted[0][i] = outnames[0][si]
+                patchnames_sorted = list(patchnames)
+    else:
+        outlist_sorted = list(outlist)
+        outnames_sorted = list(outnames)
+        patchnames_sorted = list(patchnames)
+        if sort_by == 'flux':
+            # Sort by patch flux
+            indx = range(len(patchflux))
+            indx.sort(lambda x,y: cmp(patchflux[x],patchflux[y]), reverse=True)
+        elif sort_by == 'index':
+            # Sort by source index
+            indx = range(len(patchindx))
+            indx.sort(lambda x,y: cmp(patchindx[x],patchindx[y]), reverse=False)
+        else:
+            # Unrecognized property --> Don't sort
+            indx = range(len(gausindx))
+           
+        for i, si in enumerate(indx):
+            outlist_sorted[i] = outlist[si]
+            outnames_sorted[i] = outnames[si]
+            patchnames_sorted[i] = patchnames[si]
+
+    return (outlist_sorted, outnames_sorted, patchnames_sorted)
+
+
+def make_bbs_str(img, glist, gnames, patchnames):
+    """Makes a list of string entries for a BBS sky model."""
+    from output import ra2hhmmss
+    from output import dec2ddmmss
+    from libs import B1950toJ2000
+
+    outstr_list = []
+    if img.opts.spectralindex_do: 
+        freq = "%.5e" % img.freq0
+    else:
+        freq = "%.5e" % img.cfreq
+    if patchnames[0] == None:
+        outstr_list.append("format = Name, Type, Ra, Dec, I, Q, U, V, "\
+                               "MajorAxis, MinorAxis, Orientation, "\
+                               "ReferenceFrequency='"+freq+"', "\
+                               "SpectralIndex='[]'\n\n")
+    else:
+        outstr_list.append("format = Name, Type, Patch, Ra, Dec, I, Q, U, V, "\
+                               "MajorAxis, MinorAxis, Orientation, "\
+                               "ReferenceFrequency='"+freq+"', "\
+                               "SpectralIndex='[]'\n\n")
+    patchname_last = ''
+    for pindx, patch_name in enumerate(patchnames): # loop over patches
+      if patch_name != None and patch_name != patchname_last:
+          outstr_list.append(', , ' + patch_name + ', 00:00:00, +00.00.00\n')
+          patchname_last = patch_name
+      gaussians_in_patch = glist[pindx]
+      names_in_patch = gnames[pindx]
+      for gindx, g in enumerate(gaussians_in_patch):
+          src_name = names_in_patch[gindx]
+          ra, dec = g.centre_sky
+          if img.equinox == 1950:
+              ra, dec = B1950toJ2000([ra, dec])
+          ra = ra2hhmmss(ra)
+          sra = str(ra[0]).zfill(2)+':'+str(ra[1]).zfill(2)+':'+str("%.3f" % (ra[2])).zfill(6)
+          dec = dec2ddmmss(dec)
+          decsign = ('-' if dec[3] < 0 else '+')
+          sdec = decsign+str(dec[0]).zfill(2)+'.'+str(dec[1]).zfill(2)+'.'+str("%.3f" % (dec[2])).zfill(6)
+          total = str("%.3e" % (g.total_flux))
+          deconv = g.deconv_size_sky
+          if deconv[0] == 0.0  and deconv[1] == 0.0:
+              stype = 'POINT'
+              deconv[2] = 0.0
+          else:
+              stype = 'GAUSSIAN'
+          deconv1 = str("%.5e" % (deconv[0]*3600.0)) 
+          deconv2 = str("%.5e" % (deconv[1]*3600.0)) 
+          deconv3 = str("%.5e" % (deconv[2])) 
+          deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
+          specin = '-0.8'
+          if hasattr(g, 'spin1'):
+              src = get_src(img.source, g.source_id)
+              spin1 = src.spin1
+              if spin1 != None:
+                  specin = str("%.3e" % (spin1[1]))
+          sep = ', '
+          if img.opts.polarisation_do:
+              src = get_src(img.source, g.source_id)
+              Q_flux = str("%.3e" % (src.total_flux_Q))
+              U_flux = str("%.3e" % (src.total_flux_U))
+              V_flux = str("%.3e" % (src.total_flux_V))
+          else:
+              Q_flux = '0.0'
+              U_flux = '0.0'
+              V_flux = '0.0'
+          if patch_name == None:
+              outstr_list.append(src_name + sep + stype + sep + sra + sep +
+                                 sdec + sep + total + sep + Q_flux + sep +
+                                 U_flux + sep + V_flux + sep +
+                                 deconvstr + sep + freq + sep +
+                                 '[' + specin + ']\n')
+          else:
+              outstr_list.append(src_name + sep + stype + sep + patch_name +
+                                 sep + sra + sep + sdec + sep + total + sep +
+                                 Q_flux + sep + U_flux + sep + V_flux + sep +
+                                 deconvstr + sep + freq + sep +
+                                 '[' + specin + ']\n') 
+    return outstr_list
+
+
+def make_ds9_str(img, glist, gnames, deconvolve=False):
+    """Makes a list of string entries for a ds9 region file."""
+    outstr_list = []
+    if img.opts.spectralindex_do: 
+        freq = "%.5e" % img.freq0
+    else:
+        freq = "%.5e" % img.cfreq
+    if img.equinox == None:
+        equinox = 'fk5'
+    else:
+        if int(img.equinox) == 2000:
+            equinox = 'fk5'
+        elif int(img.equinox) == 1950:
+            equinox = 'fk4'
+        else:
+            mylog.warning('Equinox of input image is not J2000 or B1950. '\
+                                  'Regions may not be correct.')
+            equinox = 'fk5'
+                
+    outstr_list.append('# Region file format: DS9 version 4.0\nglobal color=green '\
+                           'font="helvetica 10 normal" select=1 highlite=1 edit=1 '\
+                           'move=1 delete=1 include=1 fixed=0 source\n'+equinox+'\n')
+
+    for gindx, g in enumerate(glist[0]):
+        src_name = gnames[0][gindx]
+        ra, dec = g.centre_sky
+        if deconvolve:
+            deconv = g.deconv_size_sky
+        else:
+            deconv = g.size_sky
+        if deconv[0] == 0.0 and deconv[1] == 0.0:
+            stype = 'POINT'
+            deconv[2] = 0.0
+            region = 'point(' + str(ra) + ',' + str(dec) + \
+                ') # point=cross width=2 text={' + src_name + '}\n'
+        else:
+            # ds9 can't handle 1-D Gaussians, so make sure they are 2-D
+            if deconv[0] < 1.0/3600.0: deconv[0] = 1.0/3600.0
+            if deconv[1] < 1.0/3600.0: deconv[1] = 1.0/3600.0
+            stype = 'GAUSSIAN'
+            region = 'ellipse(' + str(ra) + ',' + str(dec) + ',' + \
+                str(deconv[0]*3600.0) + '",' + str(deconv[1]*3600.0) + \
+                '",' + str(deconv[2]+90.0) + ') # text={' + src_name + '}\n'
+        outstr_list.append(region)
+    return outstr_list
+
+
+def make_ascii_str(img, glist):
+    """Makes a list of string entries for an ascii region file."""
+    outstr_list = []
+    if img.opts.spectralindex_do: 
+        freq = "%.5e" % img.freq0
+    else:
+        freq = "%.5e" % img.cfreq
+
+    outstr_list.append('# PyBDSM Gaussian list for '+img.filename+'\n')
+    outstr_list.append('# Reference frequency : %s Hz\n' % freq)
+    outstr_list.append('# Equinox : %s \n\n' % img.equinox)
+    if img.opts.spectralindex_do:
+        outstr_list.append('#  Gaus_id  Isl_id  Source_id  Wave_id  Total  '\
+                               'E_Total  Peak  E_Peak  '\
+                               'RA  E_RA  DEC  E_DEC  Xposn  E_Xposn  '\
+                               'Yposn  E_Yposn  Bmaj  '\
+                               'E_Bmaj  Bmin  E_Bmin  Bpa  '\
+                               'E_Bpa  DC_Bmaj E_DC_Bmaj  '\
+                               'DC_Bmin  E_DC_Bmin  '\
+                               'DC_Bpa  E_DC_Bpa  I_rms  I_mean  I_R_rms  '\
+                               'I_R_mean  S_code  Spec_indx  Err_spec_indx\n')
+    else:           
+        outstr_list.append('#   Gaus_id  Isl_id  Source_id  Wave_id  Total  '\
+                               'E_Total  Peak  E_Peak  '\
+                               'RA  E_RA  DEC  E_DEC  Xposn  E_Xposn  '\
+                               'Yposn  E_Yposn  Bmaj  '\
+                               'E_Bmaj  Bmin  E_Bmin  Bpa  '\
+                               'E_Bpa  DC_Bmaj E_DC_Bmaj  '\
+                               'DC_Bmin  E_DC_Bmin  '\
+                               'DC_Bpa  E_DC_Bpa  I_rms  I_mean  I_R_rms  '\
+                               'I_R_mean  S_code\n')
+    for g in glist[0]:
+        gidx = g.gaus_num-1  # python numbering
+        iidx = g.island_id  # python numbering
+        widx = g.wavelet_j
+        sidx = g.source_id
+        F = g.flag
+        A = g.peak_flux
+        T = g.total_flux
+        ra, dec = g.centre_sky
+        x, y = g.centre_pix
+        shape = g.size_sky
+        shape_deconv = g.deconv_size_sky
+        eA = g.peak_fluxE
+        eT = g.total_fluxE
+        era, edec = g.centre_skyE
+        ex, ey = g.centre_pixE
+        irms = g.rms
+        imean = g.mean
+        eshape = g.size_skyE
+        eshape_deconv = g.deconv_size_skyE
+        src = img.source[sidx]
+        scode = src.code
+        if img.opts.spectralindex_do:
+            spin1 = g.spin1
+            espin1 = g.espin1
+            if spin1 == None:
+                specin = 0.0
+                especin = 0.0
+            else:                       
+                specin = spin1[1]
+                especin = espin1[1]
+            outstr_list.append("%4d  %4d  %4d   %4d   %10f  %10f  %10f  %10f  %10f  %10f " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %2s   %10f  %10f\n" % 
+                               (gidx, iidx, sidx, widx, T, eT, A, eA,
+                                ra, era, dec, edec, x, ex,  y, ey, 
+                                shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2],
+                                shape_deconv[0], eshape_deconv[0], shape_deconv[1],
+                                eshape_deconv[1],  shape_deconv[2], eshape_deconv[2], irms,
+                                imean, irms, imean, scode, specin, especin))
+        else:                
+            outstr_list.append("%4d  %4d  %4d   %4d   %10f  %10f  %10f  %10f  %10f  %10f " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %10f  %10f  %10f  %10f  " \
+                                   "%10f  %10f  %2s\n" % 
+                               (gidx, iidx, sidx, widx, T, eT, A, eA,
+                                ra, era, dec, edec, x, ex,  y, ey, 
+                                shape[0], eshape[0], shape[1], eshape[1],  shape[2], eshape[2],
+                                shape_deconv[0], eshape_deconv[0], shape_deconv[1],
+                                eshape_deconv[1],  shape_deconv[2], eshape_deconv[2], irms,
+                                imean, irms, imean, scode))
+    return outstr_list
+        
+def make_fits_list(img, glist):
+    import functions as func
+
+    out_list = []
+    for g in glist[0]:
+        gidx = g.gaus_num-1
+        iidx = g.island_id
+        widx = g.wavelet_j
+        A = g.peak_flux
+        T = g.total_flux
+        ra, dec = g.centre_sky
+        x, y = g.centre_pix
+        shape = g.size_sky
+        deconv_shape = g.deconv_size_sky
+        eA = g.peak_fluxE
+        eT = g.total_fluxE
+        era, edec = g.centre_skyE
+        ex, ey = g.centre_pixE
+        eshape = g.size_skyE
+        deconv_eshape = g.deconv_size_skyE
+        isl_idx = g.island_id
+        isl = img.islands[isl_idx]
+        isl_rms = isl.rms
+        isl_av = isl.mean
+        sidx = g.source_id
+        src = img.source[sidx]
+        scode = src.code
+        src_rms = src.rms_isl
+        src_av = isl.mean
+        flag = g.flag
+        grms = g.rms
+        x, y = g.centre_pix
+        xsize, ysize, ang = g.size_pix # FWHM
+    
+        specin = 0.0
+        especin = 0.0
+        if img.opts.spectralindex_do:
+            spin1 = g.spin1
+            espin1 = g.espin1
+            if spin1 == None:
+                specin = 0.0
+                especin = 0.0
+            else:                       
+                specin = spin1[1]
+                especin = espin1[1]
+
+        list1 = [gidx, iidx, sidx, widx, T, eT, A, eA, ra, era, dec, edec, x, ex, y,
+                 ey, shape[0], eshape[0], shape[1], eshape[1], shape[2],
+                 eshape[2], deconv_shape[0], deconv_eshape[0],
+                 deconv_shape[1], deconv_eshape[1], deconv_shape[2],
+                 deconv_eshape[2], src_rms, src_av, isl_rms, isl_av, scode,
+                 specin, especin]
+        out_list.append(list1)
+    out_list = func.trans_gaul(out_list)
+    return out_list
+
+def make_casa_str(img, glist):
+    """Makes a list of string entries for a casa clean box file."""
+    import functions as func
+    outstr_list = []
+    sep = ' '
+    scale = 2.0
+    for gindx, g in enumerate(glist[0]):
+        x, y = g.centre_pix
+        xsize, ysize, ang = g.size_pix # FWHM
+        ellx, elly = func.drawellipse(g)
+        blc = [int(min(ellx)), int(min(elly))]
+        trc = [int(max(ellx)), int(max(elly))]
+
+        blc[0] -= (x - blc[0]) * scale
+        blc[1] -= (y - blc[1]) * scale
+        trc[0] += (trc[0] - x) * scale
+        trc[1] += (trc[1] - y) * scale
+        # Format is: <id> <blcx> <blcy> <trcx> <trcy>
+        # Note that we use gindx rather than g.gaus_num so that
+        # all Gaussians will have a unique id, even if wavelet
+        # Gaussians are included.
+        outstr_list.append(str(gindx+1) + sep + str(blc[0]) + sep +
+                           str(blc[1]) + sep + str(trc[0]) + sep +
+                           str(trc[1]) +'\n')
+    return outstr_list
+
+
 def write_islands(img):
     import numpy as N
+    import os
 
     ### write out island properties for reference since achaar doesnt work.
     filename = img.basedir + '/misc/'
@@ -371,4 +924,10 @@ def write_islands(img):
 
     f.close()
 
+def get_src(src_list, srcid):
+    """Returns the source for srcid or None if not found"""
+    for src in src_list:
+        if src.source_id == srcid:
+            return src
+    return None
 
