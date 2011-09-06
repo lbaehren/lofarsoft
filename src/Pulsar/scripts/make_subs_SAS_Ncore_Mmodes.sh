@@ -1,10 +1,10 @@
-#!/bin/ksh
+#!/bin/ksh 
 #Convert raw LOFAR data
 #Workes on incoherent, coherent and fly's eye data.
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.16
+VERSION=2.17
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -2542,13 +2542,13 @@ do
 	#create a delete list of subband files for future clean up
 	if [[ $STOKES == "incoherentstokes" ]] 
 	then
-	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "rm -rf "$1}' > IS_delete_sub.list
+	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > IS_delete_sub.list
 	else
        if (( $flyseye == 0 )) 
        then
-	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "rm -rf "$1}' > CS_delete_sub.list
+	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > CS_delete_sub.list
        else
-	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "rm -rf "$1}' > FE_delete_sub.list
+	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > FE_delete_sub.list
        fi	
 	fi
 	
