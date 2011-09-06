@@ -155,47 +155,113 @@ class Op_readimage(Op):
 
         Thanks to transpose operation done to image earlier we can use
         p2s & s2p transforms directly.
+        
+        Both WCSLIB (from LOFAR svn) and PyWCS (http://stsdas.stsci.edu/
+        astrolib/pywcs/, available from https://trac6.assembla.com/astrolib) 
+        are supported.
         """
-        import wcslib
+        try:
+            import wcslib
+            img.use_wcs = 'wcslib'
+        except ImportError:
+            try:
+                import pywcs    
+                img.use_wcs = 'pywcs'
+            except ImportError:
+                raise RuntimeError('Either WCSLIB or PyWCS is required.')
         from math import pi
 
         hdr = img.header
-        t = wcslib.wcs()
+        if img.use_wcs == 'wcslib':
+            t = wcslib.wcs()
+        elif img.use_wcs == 'pywcs':
+            t = pywcs.WCS(naxis=2)   
+             
         if img.use_io == 'fits':
-          t.crval = (hdr['crval1'], hdr['crval2'])
+          crval = [hdr['crval1'], hdr['crval2']]
           if img.opts.trim_box != None:
               xmin, xmax, ymin, ymax = img.trim_box
-              t.crpix = (hdr['crpix1']-xmin, hdr['crpix2']-ymin)
+              crpix = [hdr['crpix1']-xmin, hdr['crpix2']-ymin]
           else:
-              t.crpix = (hdr['crpix1'], hdr['crpix2'])
-          t.cdelt = (hdr['cdelt1'], hdr['cdelt2'])
-          t.acdelt = (abs(hdr['cdelt1']), abs(hdr['cdelt2']))
-          t.ctype = (hdr['ctype1'], hdr['ctype2'])
+              crpix = [hdr['crpix1'], hdr['crpix2']]
+          cdelt = [hdr['cdelt1'], hdr['cdelt2']]
+          acdelt = [abs(hdr['cdelt1']), abs(hdr['cdelt2'])]
+          ctype = [hdr['ctype1'], hdr['ctype2']]
           if hdr.has_key('crota1'): 
-            t.crota = (hdr['crota1'], hdr['crota2'])
+            crota = [hdr['crota1'], hdr['crota2']]
+          else:
+            crota = []
           if hdr.has_key('cunit1'): 
-            t.cunit = (hdr['cunit1'], hdr['cunit2'])
+            cunit = [hdr['cunit1'], hdr['cunit2']]
+          else:
+            cunit = []
 
         if img.use_io == 'rap':
           wcs_dict = hdr['coordinates']['direction0']
           coord_dict = {'degree' : 1.0, 'arcsec' : 1.0/3600, 'rad' : 180.0/pi}
           co_conv = [coord_dict[wcs_dict['units'][i]] for i in range(2)]
           n = 2
-          t.crval = tuple([wcs_dict.get('crval')[i]*co_conv[i] for i in range(n)])
-          t.crpix = tuple([wcs_dict.get('crpix')[i] for i in range(n)])
-          t.cdelt = tuple([wcs_dict.get('cdelt')[i]*co_conv[i] for i in range(n)])
-          t.acdelt = tuple([abs(wcs_dict.get('cdelt')[i])*co_conv[i] for i in range(n)])
-          t.ctype = ('RA---' + wcs_dict.get('projection'), 'DEC--' + wcs_dict.get('projection'))
+          crval = [wcs_dict.get('crval')[i]*co_conv[i] for i in range(n)]
+          crpix = [wcs_dict.get('crpix')[i] for i in range(n)]
+          cdelt = [wcs_dict.get('cdelt')[i]*co_conv[i] for i in range(n)]
+          acdelt = [abs(wcs_dict.get('cdelt')[i])*co_conv[i] for i in range(n)]
+          ctype = ['RA---' + wcs_dict.get('projection'), 'DEC--' + wcs_dict.get('projection')]
           if wcs_dict.has_key('crota1'):
-            t.crota = tuple([wcs_dict.get('crota')[i] for i in range(n)])
+            crota = [wcs_dict.get('crota')[i] for i in range(n)]
           if wcs_dict.has_key('cunit1'): 
-            t.cunit = tuple([wcs_dict.get('cunit')[i] for i in range(n)])
+            cunit = [wcs_dict.get('cunit')[i] for i in range(n)]
 
-        t.wcsset()
+        if img.use_wcs == 'wcslib':
+            t.crval = tuple(crval)
+            t.crpix = tuple(crpix)
+            t.cdelt = tuple(cdelt)
+            t.acdelt = tuple(acdelt)
+            t.ctype = tuple(ctype)
+            if crota != []:
+                t.crota = tuple(crota)
+            if cunit != []:
+                t.cunit = tuple(cunit)
+            t.wcsset()
+            img.wcs_obj = t
+            img.pix2sky = t.p2s
+            img.sky2pix = t.s2p
+        elif img.use_wcs == 'pywcs':
+            # Here we define new p2s and s2p methods to match those of wcslib
+            def p2s(self, xy):
+                xy_arr = N.array([xy])
+                sky = self.wcs_pix2sky(xy_arr, 0, ra_dec_order=True)
+                return sky.tolist()[0]
+            def s2p(self, rd):
+                rd_arr = N.array([rd])
+                pix = self.wcs_sky2pix(rd_arr, 0, ra_dec_order=True)
+                return pix.tolist()[0]
+            instancemethod = type(t.wcs_pix2sky)
+            t.p2s = instancemethod(p2s, t, pywcs.WCS)
+            instancemethod = type(t.wcs_sky2pix)
+            t.s2p = instancemethod(s2p, t, pywcs.WCS)
+          
+            t.wcs.crval = crval
+            t.wcs.crpix = crpix
+            t.wcs.cdelt = cdelt
+            t.wcs.ctype = ctype
+            if crota != []:
+                t.wcs.crota = crota
+            if cunit != []:
+                t.wcs.cunit = cunit
 
-        img.wcs_obj = t
-        img.pix2sky = t.p2s
-        img.sky2pix = t.s2p
+            img.wcs_obj = t
+            img.wcs_obj.acdelt = acdelt
+            img.wcs_obj.crval = crval
+            img.wcs_obj.crpix = crpix
+            img.wcs_obj.cdelt = cdelt
+            img.wcs_obj.ctype = ctype
+            if crota != []:
+                img.wcs_obj.crota = crota
+            if cunit != []:
+                img.wcs_obj.cunit = cunit
+            
+            img.pix2sky = t.p2s
+            img.sky2pix = t.s2p
 
     def init_beam(self, img):
         """Initialize beam parameters, and conversion routines

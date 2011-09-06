@@ -7,6 +7,7 @@ import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import functions as func
 import os
+from matplotlib.widgets import Button
 
 def _isl2border(img, isl):
     """From all valid island pixels, generate the border. """
@@ -352,8 +353,11 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                     "ind[1]+isl.origin[1], '.', color=col)"
                 exec cmd
            
-    pl.connect('key_press_event', on_press)
-    pl.connect('pick_event', on_pick)
+    fig.canvas.mpl_connect('key_press_event', on_press)
+    fig.canvas.mpl_connect('pick_event', on_pick)
+#     axPlay = pl.axes([0.02, 0.05, 0.1, 0.075])
+#     bPlay = Button(axPlay, 'Play')  
+#     bPlay.on_clicked(on_press)
     pl.show()
 
 def on_pick(event):
@@ -410,6 +414,7 @@ def on_press(event):
     global pixels_per_beam, vmin, vmax, vmin_cur, vmax_cur
     global ch0min, ch0max, low, fig, images, src_list, srcid_cur
     global markers
+#     print 'Testing...'
     if event.key == '0':
         print 'Resetting limits to defaults (%.4f -- %.4f Jy/beam)' \
             % (pow(10, vmin)-low,

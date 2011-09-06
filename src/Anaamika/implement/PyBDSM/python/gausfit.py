@@ -588,6 +588,7 @@ class Gaussian(object):
         """
         import functions as func
         from const import fwsig
+        import numpy as N
 
         self.gaussian_idx = g_idx
         self.island_id = isl_idx
@@ -615,7 +616,11 @@ class Gaussian(object):
 
         if flag == 0:
           errors = func.get_errors(img, p+[tot], img.islands[isl_idx].rms)
-          self.centre_sky = img.pix2sky(p[1:3])
+          if img.use_wcs == 'wcslib':
+              self.centre_sky = img.pix2sky(p[1:3])
+          elif img.use_wcs == 'pywcs':
+              self.centre_sky = img.pix2sky(p[1:3])
+#              self.centre_sky = img.pix2sky(N.array([p[1:3]]), 0)
         else:
           errors = [0]*7
           self.centre_sky = [0., 0.]
