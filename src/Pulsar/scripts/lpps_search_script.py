@@ -826,9 +826,6 @@ class SearchRun(object):
                             # remove dedispersed timeseries (.dat files)
                             os.remove(join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'))
 
-#                        for par_file in par_files:
-#                            move_matching(core_work_dir, 
-#                                join(self.out_dir, 'KNOWN_EPHEMERIS'), r'^\S+\.pfd\.(bestprof|ps)')
                         move_matching(core_work_dir, 
                             join(self.out_dir, 'KNOWN_EPHEMERIS'), r'^\S+\.pfd\.(bestprof|ps)')
                         remove_matching(core_work_dir, r'^\S+\.pfd$')
@@ -982,7 +979,7 @@ if __name__ == '__main__':
     parser.add_option('--na', dest='na', help='Run no acceleration search.',
         action='store_true', default=False)
     parser.add_option('--par', dest='par_list', type='string',
-        metavar='PAR_LIST', 
+        metavar='PAR_LIST', default='',
         help='List of TEMPO .par files parfile1,parfile2 - don\'t use spaces.')
     parser.add_option('--rfidir', dest='rfi_dir', type='string', 
         metavar='RFI_DIR', default='',
