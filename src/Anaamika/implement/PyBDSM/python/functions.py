@@ -1131,8 +1131,9 @@ def make_fits_image(imagedata, wcsobj, beam, freq):
     header.update('CDELT2', wcsobj.cdelt[1])
     header.update('CRPIX1', wcsobj.crpix[0])
     header.update('CRPIX2', wcsobj.crpix[1])
-    header.update('CROTA1', wcsobj.crota[0])
-    header.update('CROTA2', wcsobj.crota[1])
+    if hasattr(wcsobj, 'crota'):
+        header.update('CROTA1', wcsobj.crota[0])
+        header.update('CROTA2', wcsobj.crota[1])
     header.update('BMAJ', beam[0])
     header.update('BMIN', beam[1])
     header.update('BPA', beam[2])
