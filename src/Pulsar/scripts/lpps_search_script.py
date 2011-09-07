@@ -992,7 +992,8 @@ if __name__ == '__main__':
     # parse list of z values:
     # TODO : refactor list parsing code
     z_values = []
-    tmp = options.z_list[1:-1].split(',')
+    tmp = options.z_list.split(',')
+    print tmp
     try:
         for z_str in tmp:
             z_values.append(int(z_str))
@@ -1002,7 +1003,7 @@ if __name__ == '__main__':
 
     # parse list of filenames for TEMPO .par files
     par_files = []
-    tmp = options.par_list[1:-1].split(',')
+    tmp = options.par_list.split(',')
     try:
         for par_file in tmp:
             par_files.append(os.path.abspath(par_file))
