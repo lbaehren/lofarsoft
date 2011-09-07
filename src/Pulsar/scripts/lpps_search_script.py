@@ -303,7 +303,7 @@ def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
         if clean_up:
             try:
                 remove_matching(work_dir, '^' + re.escape(basename) + '\.sub\d+$')
-                remove_matching(work_dir, '^' + re.escape(basename) + '\.sub\d+$')
+                remove_matching(work_dir, '^' + re.escape(basename) + '\.sub\.inf$')
             except:
                 print 'Failure whilst cleaning up rfifind working directory.'
                 raise
