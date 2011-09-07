@@ -475,7 +475,8 @@ def run_accelsearch(fft_file, z_max, *args, **kwargs):
         stderr=stderr, stdout=stdout)
 
     if accelsearch_status != 0:
-        print 'Failure for accelsearch on %s in directory %s.'
+        print 'Failure for accelsearch on %s in directory %s.' % (fft_file,
+            os.getcwd())
         raise Exception('accelsearch failure')
 
     return
