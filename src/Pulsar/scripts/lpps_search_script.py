@@ -73,6 +73,81 @@ from lpps_search import crawler
 from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+MAX_BATCH_SIZE = 1000
+MAX_BATCH_SIZE_MPI = 1000
+
+class DedispersionPlan(object):
+    def __init__(self, *args, **kwargs):
+        self.batches = []
+        self.name = kwargs.get('name', 'NOT NAMED')
+
+    def add_batch(self, lo_dm, dm_step, n_dms, downfact, n_sub):
+        self.batches.append((lo_dm, dm_step, n_dms, downfact, n_sub))
+
+    def get_dms(self):
+        out = []
+        for lo_dm, dm_step, n_dms, downfact, n_sub in self.batches:
+            for i in range(n_dms):
+                out.append(lo_dm + i * dm_step)
+        return out
+
+def create_batches(dedispersion_plan, n_cores):
+    '''
+    Take a DedispersionPlan instance and return DMBatch instances.
+    '''
+    if n_cores > 1:
+        use_mpi = True
+        n_available = n_cores - 1
+    else:
+        use_mpi = False
+        n_available = 1
+
+    if use_mpi:
+        dms_per_batch = (MAX_BATCH_SIZE_MPI // n_available) * n_available
+    else:
+        dms_per_batch = MAX_BATCH_SIZE
+
+    out = []
+    for lo_dm, dm_step, n_dms, downfact, n_sub in dedispersion_plan.batches:
+        while n_dms >= dms_per_batch:
+            nb = DMBatch(lo_dm, dm_step, dms_per_batch, downfact, n_sub,
+                n_available, use_mpi)
+            out.append(nb)
+            lo_dm += dm_step * dms_per_batch
+            n_dms -= dms_per_batch
+        if use_mpi and n_dms >= n_available:
+            n = n_dms // n_available            
+            nb = DMBatch(lo_dm, dm_step, n * n_available, downfact, n_sub, 
+                n_available, use_mpi)
+            out.append(nb)
+            lo_dm += n * n_available * dm_step
+            n_dms -= n * n_available
+        if n_dms > 0:
+            nb = DMBatch(lo_dm, dm_step, n_dms, downfact, n_sub, n_dms, use_mpi)
+            out.append(nb)
+    return out 
+
+class DMBatch(object):
+    def __init__(self, lo_dm, dm_step, n_dms, downfact, n_sub, n_cores, 
+        use_mpi):
+
+        self.lo_dm = lo_dm
+        self.dm_step = dm_step
+        self.n_dms = n_dms
+        self.downfact = downfact
+        self.n_sub = n_sub
+        self.n_cores = n_cores
+        self.use_mpi = use_mpi
+
+        self.dedispersion_time = 0
+        self.search_time = 0
+
+    def get_dms(self):
+        return [self.lo_dm + i * self.dm_step for i in range(self.n_dms)]
+
+
+# ----------------------------------------------------------------------------
 N_CANDIDATES_CUTOFF = 20
 MINIMUM_DM_CUTOFF = 0
 # ----------------------------------------------------------------------------
@@ -353,7 +428,7 @@ def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
 
 
 
-def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
+def run_prepsubband(batch, n_cores, subband_globpattern, result_dir,
     basename, mask_file, numout, zero_dm=False):
     '''
     Run the (mpi)prepsubband commandline given a DDplan instance.
@@ -363,19 +438,20 @@ def run_prepsubband(ddplan, n_cores, subband_globpattern, result_dir,
     ddplan.numpasses == 1 and an appropriate ddplan.dmsperpass --- exactly
     what this function expects).
     '''
-    new_numout = numout / ddplan.downsamp
+    new_numout = numout / batch.downfact
 #    print numout, ddplan.downsamp, new_numout
-    assert numout % ddplan.downsamp == 0
+    assert numout % batch.downfact == 0
     new_numout = int(new_numout)
     prepsubband_options = {
         '-noclip' : '',
         '-mask' : mask_file, 
         '-o' : join(result_dir, basename),
-        '-lodm' : '%.2f' % ddplan.lodm,
-        '-numdms' : str(ddplan.dmsperpass),
-        '-downsamp' : str(ddplan.downsamp),
-        '-dmstep' : '%.2f' % ddplan.dmstep,
+        '-lodm' : '%.2f' % batch.lo_dm,
+        '-numdms' : str(batch.n_dms),
+        '-downsamp' : str(batch.downfact),
+        '-dmstep' : '%.2f' % batch.dm_step,
         '-numout' : str(new_numout),
+        '-nsub' : str(batch.n_sub),
         '-runavg' : '', 
     }
     
@@ -748,7 +824,8 @@ class SearchRun(object):
         if par_files == None:
             par_files = []
 
-        self.annotated_ddplans = self.rebatch(ddplans, n_cores)
+#        self.annotated_ddplans = self.rebatch(ddplans, n_cores)
+        self.batches = create_batches(ddplans, n_cores)
         m = self.determine_channel_frequency_range_mapping()
         
         print 'frequency mapping:'
@@ -815,20 +892,21 @@ class SearchRun(object):
             self.basename + '_rfifind.mask')
         
         ddplan_i = -1 
-        for ddplan, n_cores_to_use in self.annotated_ddplans:
+#        for ddplan, n_cores_to_use in self.annotated_ddplans:
+        for batch in self.batches:
             print '=' * 70
-            print 'DEDISPERSING FROM DM %.2f TO DM %.2f' % (ddplan.lodm, ddplan.get_dms()[-1])
+            print 'DEDISPERSING FROM DM %.2f TO DM %.2f' % (batch.lo_dm, batch.get_dms()[-1])
             ddplan_i += 1
             # Note : Check whether data needs downsampling (and how GBT does
             # it).
 
             t_prepsubband_start = time.time() 
-            prepsubband_status = run_prepsubband(ddplan, n_cores_to_use,
+            prepsubband_status = run_prepsubband(batch, batch.n_cores,
                 self.get_subband_globpattern(), self.work_dir, self.basename,
                 rfifind_mask_file, determine_numout(self.metadata.n_bins), 
                 zero_dm)
             t_prepsubband_end = time.time()
-            ddplan.prepsubband_time = t_prepsubband_end - t_prepsubband_start
+            batch.prepsubband_time = t_prepsubband_end - t_prepsubband_start
 
             print '=' * 70
             print 'BEGINNING THE PER DM SEARCH LOOP'
@@ -854,7 +932,7 @@ class SearchRun(object):
                     print 'CHILD_PID', child_pid
 
                     # SEARCH LOOP:
-                    for i, dm in enumerate(ddplan.get_dms()):
+                    for i, dm in enumerate(batch.get_dms()):
                         # NEW STYLE SEARCH LOOP (use subdirectories per core for everything)
                         # in a directory per CORE, do the following:
                         if i % n_cores != core_index: continue
@@ -925,7 +1003,7 @@ class SearchRun(object):
             for cp in child_pids:
                 os.waitpid(cp, 0)
             t_search_end = time.time()
-            ddplan.search_time = t_search_end - t_search_start
+            batch.search_time = t_search_end - t_search_start
             print 'DONE!'
         print '=' * 70
         print 'DONE SEARCHING FULL DEDISPERSION PLAN - MOVING ON'
@@ -1202,60 +1280,83 @@ if __name__ == '__main__':
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
         options.rfi_file, zap_file, options.rfi_dir)  
 
+#            DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+    ddplan_test = DedispersionPlan('TEST')
+    ddplan_test.add_batch(0, 1, 7, 1, 128)
+    ddplan_test.add_batch(7, 1, 2, 1, 128)
+    ddplan_test.add_batch(9, 1, 7, 1, 128)
+    ddplan_test.add_batch(16, 1, 2, 1, 128)
+
+    ddplan_lpps = DedispersionPlan('LPPS')
+    ddplan_lpps.add_batch(0, 0.05, 1196, 1, 128)
+    ddplan_lpps.add_batch(59.8, 0.10, 408, 2, 128)
+    ddplan_lpps.add_batch(100.60, 0.20, 449, 4, 128)
+    ddplan_lpps.add_batch(190.40, 0.50, 442, 8, 128)
+    ddplan_lpps.add_batch(411.4, 1, 89, 16, 128)
+    
     PREDEFINED_DEDISPERSION_PLANS = {
-        'LPPS' : [
-            DedispPlan(lodm=0, dmstep=0.05, dmsperpass=1196, 
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
-            DedispPlan(lodm=59.8, dmstep=0.10, dmsperpass=408,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
-            DedispPlan(lodm=100.60, dmstep=0.20, dmsperpass=449,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
-            DedispPlan(lodm=190.40, dmstep=0.50, dmsperpass=442,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
-            DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
-        ],
-        'LOTAS' : [
-        # DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
-        # Do some tests to see how fast this dedispersion plan is and whether
-        # some resolution should be traded for processing speed.
-            DedispPlan(lodm=0, dmstep=0.02, dmsperpass=6647, 
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
-            DedispPlan(lodm=132.940, dmstep=0.03, dmsperpass=2454,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
-            DedispPlan(lodm=206.560, dmstep=0.05, dmsperpass=3258,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
-            DedispPlan(lodm=369.460, dmstep=0.10, dmsperpass=3576,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
-            DedispPlan(lodm=727.060, dmstep=0.30, dmsperpass=910,
-                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
-        ],
-        'LoMASS' : [
-            DedispPlan(lodm=0, dmstep=0.01, dmsperpass=601, numpasses=1,
-                numsub=SR.metadata.n_channels, downsamp=2),
-            DedispPlan(lodm=6.010, dmstep=0.01, dmsperpass=171, numpasses=1,
-                numsub=SR.metadata.n_channels, downsamp=4),
-            DedispPlan(lodm=7.720, dmstep=0.02, dmsperpass=376, numpasses=1,
-                numsub=SR.metadata.n_channels, downsamp=8),
-            DedispPlan(lodm=15.240, dmstep=0.03, dmsperpass=399, numpasses=1,
-                numsub=SR.metadata.n_channels, downsamp=16),
-            DedispPlan(lodm=27.210, dmstep=0.05, dmsperpass=46, numpasses=1,
-                numsub=SR.metadata.n_channels, downsamp=32),
-        ],
-        'TEST' : [
-            DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
-                numsub=SR.metadata.n_channels, downsamp=1),
-            DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
-                numsub=SR.metadata.n_channels, downsamp=1),
-            DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
-                numsub=SR.metadata.n_channels, downsamp=1),
-            DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
-                numsub=SR.metadata.n_channels, downsamp=1),
-        ],
-        'LOTASTEST' : [
-            DedispPlan(lodm=0, dmstep=0.5, dmsperpass=50, numpasses=1, 
-                numsub=SR.metadata.n_channels, downsamp=1),
-        ],
+#        'LPPS' : [
+#            DedispPlan(lodm=0, dmstep=0.05, dmsperpass=1196, 
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=59.8, dmstep=0.10, dmsperpass=408,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
+#            DedispPlan(lodm=100.60, dmstep=0.20, dmsperpass=449,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
+#            DedispPlan(lodm=190.40, dmstep=0.50, dmsperpass=442,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
+#            DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
+#        ],
+#        'LOTAS' : [
+#        # DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
+#        # Do some tests to see how fast this dedispersion plan is and whether
+#        # some resolution should be traded for processing speed.
+#            DedispPlan(lodm=0, dmstep=0.02, dmsperpass=6647, 
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=132.940, dmstep=0.03, dmsperpass=2454,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
+#            DedispPlan(lodm=206.560, dmstep=0.05, dmsperpass=3258,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
+#            DedispPlan(lodm=369.460, dmstep=0.10, dmsperpass=3576,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
+#            DedispPlan(lodm=727.060, dmstep=0.30, dmsperpass=910,
+#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
+#        ],
+#        'LoMASS' : [
+#            DedispPlan(lodm=0, dmstep=0.01, dmsperpass=601, numpasses=1,
+#                numsub=SR.metadata.n_channels, downsamp=2),
+#            DedispPlan(lodm=6.010, dmstep=0.01, dmsperpass=171, numpasses=1,
+#                numsub=SR.metadata.n_channels, downsamp=4),
+#            DedispPlan(lodm=7.720, dmstep=0.02, dmsperpass=376, numpasses=1,
+#                numsub=SR.metadata.n_channels, downsamp=8),
+#            DedispPlan(lodm=15.240, dmstep=0.03, dmsperpass=399, numpasses=1,
+#                numsub=SR.metadata.n_channels, downsamp=16),
+#            DedispPlan(lodm=27.210, dmstep=0.05, dmsperpass=46, numpasses=1,
+#                numsub=SR.metadata.n_channels, downsamp=32),
+#        ],
+#        'TEST' : [
+#            DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#            DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#        ],
+#        'LOTASTEST' : [
+#            DedispPlan(lodm=0, dmstep=0.5, dmsperpass=50, numpasses=1, 
+#                numsub=SR.metadata.n_channels, downsamp=1),
+#        ],
+        'TEST' : ddplan_test,
+        'LPPS' : ddplan_lpps,
     }
     try:
         ddplans = PREDEFINED_DEDISPERSION_PLANS[options.plan]
@@ -1274,13 +1375,13 @@ if __name__ == '__main__':
     print '\n=== TIMINGS ==='
     search_time = 0
     dedisperse_time = 0 
-    for ddplan, n_cores in SR.annotated_ddplans:
-        print 'From DM %.2f to DM %.2f' %(ddplan.lodm,
-             ddplan.lodm + ddplan.dmstep * ddplan.dmsperpass) 
+    for batch in SR.batches:
+        print 'From DM %.2f to DM %.2f' % (batch.lo_dm,
+             batch.lo_dm + batch.dm_step * batch.n_dms) 
         print 'Dedispersing cost %.2f seconds and searching cost %.2f seconds' % \
-            (ddplan.prepsubband_time, ddplan.search_time)
-        dedisperse_time += ddplan.prepsubband_time
-        search_time += ddplan.search_time
+            (batch.dedispersion_time, batch.search_time)
+        dedisperse_time += batch.dedispersion_time
+        search_time += batch.search_time
     t_total = t_end - t_start
     print '\nTotal time spent dedispersing %.2f' % dedisperse_time
     print 'Total time spent searching %.2f' % search_time
