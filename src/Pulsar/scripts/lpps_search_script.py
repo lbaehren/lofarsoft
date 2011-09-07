@@ -843,6 +843,16 @@ class SearchRun(object):
                 os.waitpid(cp, 0)
             t_search_end = time.time()
             batch.search_time = t_search_end - t_search_start
+            # extra clean up pass just in case the search child processes failed:
+            print 'Extra clean-up pass:'
+            remove_matching(self.work_dir, r'^\S+\.dat')
+            for core_index in range(n_cores):
+                core_work_dir = join(self.work_dir, 'CORE_%d' % core_index) 
+                remove_matching(core_work_dir, r'^\S+\.dat')
+                remove_matching(core_work_dir, r'^\S+\.inf')
+                remove_matching(core_work_dir, r'^\S+\.fft')
+
+
             print 'DONE!'
         print '=' * 70
         print 'DONE SEARCHING FULL DEDISPERSION PLAN - MOVING ON'
@@ -963,7 +973,7 @@ if __name__ == '__main__':
     parser.add_option('--plan', dest='plan', type='string', default='LPPS', 
         metavar='PLAN', help='Dedispersion plan to be used (default=LPPS)'),
     parser.add_option('--z_list', dest='z_list', type='string',
-        default='[0,50]', metavar='Z_LIST', 
+        default='0,50', metavar='Z_LIST', 
         help='List of integer z values, default 0,50 - don\'t use spaces.')
     parser.add_option('--ncores', dest='ncores', type='int',
         default=8, help='Number of cores to use (default 8).')
