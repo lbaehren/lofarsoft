@@ -1007,6 +1007,7 @@ if __name__ == '__main__':
     tmp = options.z_list.split(',')
     try:
         for z_str in tmp:
+            if not z_str: continue
             z_values.append(int(z_str))
     except ValueError, e:
         print 'List of z values not specified correctly.'
@@ -1017,6 +1018,7 @@ if __name__ == '__main__':
     tmp = options.par_list.split(',')
     try:
         for par_file in tmp:
+            if not par_file: continue
             par_files.append(os.path.abspath(par_file))
     except Exception, e:
         print 'Problem occured parsing list of TEMPO .par files'
