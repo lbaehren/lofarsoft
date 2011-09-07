@@ -13,6 +13,7 @@ import optparse
 import glob
 import stat
 import subprocess
+import traceback
 # PRESTO imports
 import sifting
 # LOFAR PILOT PULSAR SURVEY imports
@@ -225,13 +226,18 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
                 os.path.join(histogram_dir, 'after_sifting_frequencies.pdf'))
             plot_p_dm(sifted_candidates, bright_pulsars, 
                 os.path.join(histogram_dir, 'after.pdf'))
-    # TODO : print tracebacks without crashing
     except AttributeError, e:
         print 'You are probably using the wrong version of Matplotlib.'
-        print 'No plots created.'
+        print 'No plots created, traceback is below, continuing the script.'
+        traceback.print_exc(file=sys.stdout)
     except ValueError, e:
         print 'Problem occured during plotting (too few candidates?).'
-        print 'No plots created.'
+        print 'No plots created, traceback is below, continuing the script.'
+        traceback.print_exc(file=sys.stdout)
+    except Exception, e:
+        print 'Problem occured during plotting.'
+        print 'No plots created, traceback is below, continuing the script.'
+        traceback.print_exc(file=sys.stdout)
 
     # spit out a file with the candidates that survived the sifting
     txt_out_dir = os.path.join(fold_dir, 'SIFTED_CANDIDATES')

@@ -44,28 +44,26 @@ def plot_f_histogram(candidates, full_path):
     pyplot.clf()
 
 def plot_p_dm(candidates, bright_pulsars, full_path):
-    c_dms = [c.DM for c in candidates]
-    c_ps = [c.p for c in candidates]
+    c_dms = [c.DM for c in candidates if c.DM > 0]
+    c_ps = [c.p for c in candidates if c.DM > 0]
     bp_dms = [bp.dm for bp in bright_pulsars]
     bp_ps = [bp.p0 for bp in bright_pulsars]
     pyplot.clf()
-    pyplot.scatter(bp_ps, bp_dms, marker='s')
-    pyplot.scatter(c_ps, c_dms, marker='x')
-    pyplot.xlabel('Period (s)')
-    pyplot.ylabel('Dispersion measure (cm^-3 pc)')
+    pyplot.loglog(bp_ps, bp_dms, marker='s', linestyle='')
+    pyplot.loglog(c_ps, c_dms, marker='x', linestyle='')
+    pyplot.xlabel('log Period (s)')
+    pyplot.ylabel('log Dispersion measure (cm^-3 pc)')
     pyplot.savefig(full_path)
     pyplot.clf()
-
-# TODO : check the layout of the zaplist files < - DONE (with Jason)
-# Assumption is now:
-# column 0 : center frequency
-# column 1 : frequency width (f_width = f_hi - f_lo)
-
 
 def read_zaplist_file(zaplist_file):
     '''
     Read the contents of a zaplist file.
     '''
+    # Assumption is now:
+    # column 0 : center frequency
+    # column 1 : frequency width (f_width = f_hi - f_lo)
+
     birdies = []
     try:
         f = open(zaplist_file)

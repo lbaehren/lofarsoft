@@ -41,7 +41,6 @@ from lpps_search.inf import inf_reader, ra2ascii, dec2ascii
 import lpps_search.crawler as crawler
 import lpps_search.fold as folder
 from lpps_search.fold import get_folding_command_ke
-from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
 from lpps_search.util import copy_matching, remove_matching, move_matching
@@ -898,13 +897,18 @@ class SearchRun(object):
                     if tmp_chi_sq > peak_chi_sq:
                         peak_chi_sq = tmp_chi_sq
                         peak_dm = tmp_dm
-                pyplot.clf()
-                pyplot.scatter(tmp_graphs[pulsar][0], tmp_graphs[pulsar][1])
-                pyplot.title('Chi square for %s (peak at DM = %.2f)' % (pulsar, peak_dm))
-                pyplot.xlabel('DM pc cm^-3')
-                pyplot.ylabel('chi square')
-                pyplot.savefig(join(self.out_dir, 'KNOWN_EPHEMERIS', pulsar + '.pdf'))
-                pyplot.clf()
+                try:
+                    pyplot.clf()
+                    pyplot.scatter(tmp_graphs[pulsar][0], tmp_graphs[pulsar][1])
+                    pyplot.title('Chi square for %s (peak at DM = %.2f)' % (pulsar, peak_dm))
+                    pyplot.xlabel('DM pc cm^-3')
+                    pyplot.ylabel('chi square')
+                    pyplot.savefig(join(self.out_dir, 'KNOWN_EPHEMERIS', pulsar + '.pdf'))
+                    pyplot.clf()
+                except Exception, e:
+                    print 'Problem plotting known ephemeris fold results.'
+                    print 'Traceback below, continuing the script.'
+                    traceback.print_exc(file=sys.stdout)
             # Also provide copies of the par files in the output directory
             # for future reference.
             for par_file in par_files:
@@ -993,7 +997,6 @@ if __name__ == '__main__':
     # TODO : refactor list parsing code
     z_values = []
     tmp = options.z_list.split(',')
-    print tmp
     try:
         for z_str in tmp:
             z_values.append(int(z_str))
