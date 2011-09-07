@@ -7,6 +7,9 @@ import subprocess
 import os
 import stat
 import sys
+import shutil
+import re
+from os.path import join
 
 # ----------------------------------------------------------------------------
 # -- Some useful Exception classes                                          --
@@ -123,6 +126,75 @@ def create_script(command_list, filename):
     except Exception, e:
         print 'Failed to make script executable.'
         raise
+
+# ----------------------------------------------------------------------------
+# -- Helper functions for copying/symlinking/moving/removing files          --
+# ----------------------------------------------------------------------------
+
+def symlink_matching(from_dir, to_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+
+    files = os.listdir(from_dir)
+    print 'Symlink matching %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            os.symlink(join(from_dir, f), join(to_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Symlinked %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+
+def move_matching(from_dir, to_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+
+    files = os.listdir(from_dir)
+    print 'Move matching %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            shutil.move(join(from_dir, f), join(to_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Moved %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+
+def copy_matching(from_dir, to_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+
+    files = os.listdir(from_dir)
+    print 'Copy matching %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            shutil.copy(join(from_dir, f), join(to_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Copied %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+
+def remove_matching(target_dir, file_regexp):
+    file_pattern = re.compile(file_regexp)
+    files = os.listdir(target_dir)
+    print 'Remove matching %s' % file_regexp
+    n_matched = 0
+    n_not_matched = 0
+    for f in files:
+        if file_pattern.match(f):
+            n_matched += 1
+            os.remove(join(target_dir, f))
+        else:
+            n_not_matched += 1
+    print 'Removed %d files (%d non-matching files).' % (n_matched, n_not_matched)
+    return  
+
+
 
 if __name__ == '__main__':
     print 'Running tests.'

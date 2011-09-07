@@ -3,32 +3,7 @@
 MSSS pulsar search script, based on the search script for the GBT driftscan
 and Vishal Gajjar's work on blind searching of LOFAR data. 
 
-By Thijs Coenen (october 2010)
-
-
-This module contains a class SearchRun that implements the pulsar search
-pipeline. When you instantiate it, it will check whether the input data 
-matches expectation (the input data directory should point to one of the 
-RSP* directories containing the .subXXXX files and a .sub.inf file), 
-whether the output and working directories are empty and writeable.
-
-You make a list of DedispPlan instances describing your desired dedipersion
-plan and pass that to the run_search method of your SearchRun instance. The 
-run_search method also take the number of available processor cores as an
-optional argument. The run_search method then does all the work. The first
-thing it does is call the rebatch method that figures out how to call 
-prepsubband and mpiprepsubband, this step creates a new list of DedispPlan 
-instances with all the constraints that prepsubband and mpiprepsubband put om
-a dedispersion plan taken into account (the actual logic that figure out the
-constraints is in the mpiprepsubband_helper and prepsubband_helper functions).
-Each step in the pulsar search pipeline  can be found in the run_search method
-and each step that corresponds to a call out to a PRESTO executable is wrapped
-in a Python function (see for instance the run_rfifind and run_prepsubband 
-functions). 
-
-The way commandlines are actually built can be found in the get_command and 
-run_command functions. 
-
+By Thijs Coenen (october 2010 - august 2011)
 '''
 
 # Standard library imports:
@@ -69,25 +44,39 @@ from lpps_search.fold import get_folding_command_ke
 from lpps_search.util import create_script, run_as_script
 from lpps_search.util import get_command, run_command
 from lpps_search.util import DirectoryNotEmpty, WrongPermissions
+from lpps_search.util import copy_matching, remove_matching, move_matching
+from lpps_search.util import symlink_matching
 from lpps_search import crawler
 from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
-# ----------------------------------------------------------------------------
+N_CANDIDATES_CUTOFF = 20
+MINIMUM_DM_CUTOFF = 0
 MAX_BATCH_SIZE = 1000
 MAX_BATCH_SIZE_MPI = 1000
+# ----------------------------------------------------------------------------
 
 class DedispersionPlan(object):
     def __init__(self, *args, **kwargs):
+        '''
+        Dedispersion plan, describes which trial DMs need to be created.
+
+        Note : Current implementation is only appropriate for the LPPS survey 
+        where the input data are in subband format. Once .fits and .fil 
+        support gets implemented, this class needs to be extended.
+        '''
+        # TODO add handling of -nsub parameter, number of passes and 
+        # dmsperpass to this classs (and the other code involved with the
+        # creation of prepsubband command lines).
         self.batches = []
         self.name = kwargs.get('name', 'NOT NAMED')
 
-    def add_batch(self, lo_dm, dm_step, n_dms, downfact, n_sub):
-        self.batches.append((lo_dm, dm_step, n_dms, downfact, n_sub))
+    def add_batch(self, lo_dm, dm_step, n_dms, downfact):
+        self.batches.append((lo_dm, dm_step, n_dms, downfact))
 
     def get_dms(self):
         out = []
-        for lo_dm, dm_step, n_dms, downfact, n_sub in self.batches:
+        for lo_dm, dm_step, n_dms, downfact in self.batches:
             for i in range(n_dms):
                 out.append(lo_dm + i * dm_step)
         return out
@@ -109,34 +98,31 @@ def create_batches(dedispersion_plan, n_cores):
         dms_per_batch = MAX_BATCH_SIZE
 
     out = []
-    for lo_dm, dm_step, n_dms, downfact, n_sub in dedispersion_plan.batches:
+    for lo_dm, dm_step, n_dms, downfact in dedispersion_plan.batches:
         while n_dms >= dms_per_batch:
-            nb = DMBatch(lo_dm, dm_step, dms_per_batch, downfact, n_sub,
-                n_available, use_mpi)
+            nb = DMBatch(lo_dm, dm_step, dms_per_batch, downfact, n_cores,
+                use_mpi)
             out.append(nb)
             lo_dm += dm_step * dms_per_batch
             n_dms -= dms_per_batch
         if use_mpi and n_dms >= n_available:
             n = n_dms // n_available            
-            nb = DMBatch(lo_dm, dm_step, n * n_available, downfact, n_sub, 
-                n_available, use_mpi)
+            nb = DMBatch(lo_dm, dm_step, n * n_available, downfact, n_cores, 
+                use_mpi)
             out.append(nb)
             lo_dm += n * n_available * dm_step
             n_dms -= n * n_available
         if n_dms > 0:
-            nb = DMBatch(lo_dm, dm_step, n_dms, downfact, n_sub, n_dms, use_mpi)
+            nb = DMBatch(lo_dm, dm_step, n_dms, downfact, n_dms + 1, use_mpi)
             out.append(nb)
     return out 
 
 class DMBatch(object):
-    def __init__(self, lo_dm, dm_step, n_dms, downfact, n_sub, n_cores, 
-        use_mpi):
-
+    def __init__(self, lo_dm, dm_step, n_dms, downfact, n_cores, use_mpi):
         self.lo_dm = lo_dm
         self.dm_step = dm_step
         self.n_dms = n_dms
         self.downfact = downfact
-        self.n_sub = n_sub
         self.n_cores = n_cores
         self.use_mpi = use_mpi
 
@@ -148,42 +134,7 @@ class DMBatch(object):
 
 
 # ----------------------------------------------------------------------------
-N_CANDIDATES_CUTOFF = 20
-MINIMUM_DM_CUTOFF = 0
-# ----------------------------------------------------------------------------
 # -- Utility functions from GBT or Vishal's scripts --------------------------
-
-class DedispPlan(object):
-    """
-    class dedisp_plan(lodm, dmstep, dmsperpass, numpasses, numsub, downsamp)
-       A class describing a de-dispersion plan for prepsubband in detail. 
-       Imported from GBT_search pipe-line.       
-    """
-    def __init__(self, lodm, dmstep, dmsperpass, numpasses, numsub, downsamp):
-        self.lodm = float(lodm)
-        self.dmstep = float(dmstep)
-        self.dmsperpass = int(dmsperpass)
-        self.numpasses = int(numpasses)
-        self.numsub = int(numsub)
-        self.downsamp = int(downsamp)
-        self.sub_dmstep = self.dmsperpass * self.dmstep
-        self.dmlist = []  # These are strings for comparison with filenames
-        self.subdmlist = []
-        for ii in range(self.numpasses):
-             self.subdmlist.append("%.2f"%(self.lodm + (ii+0.5)*self.sub_dmstep))
-             lodm = self.lodm + ii * self.sub_dmstep
-             dmlist = ["%.2f"%dm for dm in \
-                       numpy.arange(self.dmsperpass)*self.dmstep + lodm]
-             self.dmlist.append(dmlist)
-
-        self.prepsubband_time = None
-        self.search_time = None
-
-    def get_dms(self):
-        '''
-        Return a list of dm values covered by this DedispPlan instance.
-        '''
-        return [self.lodm + self.dmstep * i  for i in range(self.dmsperpass)]
 
 def get_baryv(ra, dec, mjd, T, obs="LF"):
     """ 
@@ -306,69 +257,6 @@ def determine_numout(n_bins):
 # -- whether they are python modules or system calls does not matter).      --
 # ----------------------------------------------------------------------------
 
-def symlink_matching(from_dir, to_dir, file_regexp):
-    file_pattern = re.compile(file_regexp)
-
-    files = os.listdir(from_dir)
-    print 'Symlink matching %s' % file_regexp
-    n_matched = 0
-    n_not_matched = 0
-    for f in files:
-        if file_pattern.match(f):
-            n_matched += 1
-            os.symlink(join(from_dir, f), join(to_dir, f))
-        else:
-            n_not_matched += 1
-    print 'Symlinked %d files (%d non-matching files).' % (n_matched, n_not_matched)
-    return  
-
-def move_matching(from_dir, to_dir, file_regexp):
-    file_pattern = re.compile(file_regexp)
-
-    files = os.listdir(from_dir)
-    print 'Move matching %s' % file_regexp
-    n_matched = 0
-    n_not_matched = 0
-    for f in files:
-        if file_pattern.match(f):
-            n_matched += 1
-            shutil.move(join(from_dir, f), join(to_dir, f))
-        else:
-            n_not_matched += 1
-    print 'Moved %d files (%d non-matching files).' % (n_matched, n_not_matched)
-    return  
-
-def copy_matching(from_dir, to_dir, file_regexp):
-    file_pattern = re.compile(file_regexp)
-
-    files = os.listdir(from_dir)
-    print 'Copy matching %s' % file_regexp
-    n_matched = 0
-    n_not_matched = 0
-    for f in files:
-        if file_pattern.match(f):
-            n_matched += 1
-            shutil.copy(join(from_dir, f), join(to_dir, f))
-        else:
-            n_not_matched += 1
-    print 'Copied %d files (%d non-matching files).' % (n_matched, n_not_matched)
-    return  
-
-def remove_matching(target_dir, file_regexp):
-    file_pattern = re.compile(file_regexp)
-    files = os.listdir(target_dir)
-    print 'Remove matching %s' % file_regexp
-    n_matched = 0
-    n_not_matched = 0
-    for f in files:
-        if file_pattern.match(f):
-            n_matched += 1
-            os.remove(join(target_dir, f))
-        else:
-            n_not_matched += 1
-    print 'Removed %d files (%d non-matching files).' % (n_matched, n_not_matched)
-    return  
-
  
 def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
     '''
@@ -428,18 +316,12 @@ def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
 
 
 
-def run_prepsubband(batch, n_cores, subband_globpattern, result_dir,
+def run_prepsubband(batch, subband_globpattern, result_dir,
     basename, mask_file, numout, zero_dm=False):
     '''
-    Run the (mpi)prepsubband commandline given a DDplan instance.
-
-    Note : only use with the DDplan instances that are created by the 
-    rebatch member fuction of the SearchRun class (since they always have
-    ddplan.numpasses == 1 and an appropriate ddplan.dmsperpass --- exactly
-    what this function expects).
+    Run the (mpi)prepsubband commandline given a DMBatch instance.
     '''
     new_numout = numout / batch.downfact
-#    print numout, ddplan.downsamp, new_numout
     assert numout % batch.downfact == 0
     new_numout = int(new_numout)
     prepsubband_options = {
@@ -451,7 +333,6 @@ def run_prepsubband(batch, n_cores, subband_globpattern, result_dir,
         '-downsamp' : str(batch.downfact),
         '-dmstep' : '%.2f' % batch.dm_step,
         '-numout' : str(new_numout),
-        '-nsub' : str(batch.n_sub),
         '-runavg' : '', 
     }
     
@@ -464,13 +345,13 @@ def run_prepsubband(batch, n_cores, subband_globpattern, result_dir,
 
     prepsubband_parameters =  [subband_globpattern]
 
-    if n_cores > 1:
+    if batch.n_cores > 1:
         if zero_dm: # -zerodm is only in mpiprepsubband
             prepsubband_options['-zerodm'] = ''
         tmp = get_command('mpiprepsubband', prepsubband_options,
             prepsubband_parameters)
         mpirun_options = copy.copy(MPIRUN_OPTIONS)
-        mpirun_options['-np'] = str(n_cores)
+        mpirun_options['-np'] = str(batch.n_cores)
         status = run_command('mpirun', mpirun_options, [tmp])
     else:
         status = run_command('prepsubband', prepsubband_options,
@@ -785,61 +666,33 @@ class SearchRun(object):
             )
         return mapping
    
-    def rebatch(self, ddplans, n_cores):
-        '''
-        Take the dedispersion plan and cut it in manageable pieces. 
-        
-        Note : This needs to happen because of the extra logic that deals
-        with mpiprepsubband's extra constraints, and the dedispersion plans
-        in Vishal's code that have ddplan.dmsperpass > 1000 DM steps per pass.
-        '''
-        annotated_ddplans = []
-        
-        for ddplan in ddplans:
-            downsample = ddplan.downsamp
-            if n_cores > 1:
-                rebatched = mpiprepsubband_helper(ddplan, n_cores)
-            else:
-                rebatched = prepsubband_helper(ddplan)
-            
-            for chunk in rebatched: 
-                new_ddplan = DedispPlan(chunk[0], ddplan.dmstep, chunk[1], 1, 
-                    self.metadata.n_channels, downsample)
-                annotated_ddplans.append((new_ddplan, chunk[2]))
-        
-        return annotated_ddplans
 
     def run_search(self, ddplans, z_values, n_cores = None, 
             no_singlepulse = False, no_accel = False, save_timeseries = False, 
             par_files = None, no_fold = False, zero_dm = False):
-        # The GBT drift scan survey uses dedispersion plans as units
-        # of work. Because our use of mpiprepsubband (has extra constraints
-        # on the number of DM trials it can write) and the fact that
-        # Vishal's script contains a ddplan with more than a 1000 DM trials
-        # that get created in one go we need to split the work into some
-        # smaller units than specified in the dedipersion plan. We create new 
-        # DDplans to that take the constraints into account.
         print 'No accelsearch', no_accel
         print 'No single pulse search', no_singlepulse
         if par_files == None:
             par_files = []
 
-#        self.annotated_ddplans = self.rebatch(ddplans, n_cores)
         self.batches = create_batches(ddplans, n_cores)
         m = self.determine_channel_frequency_range_mapping()
         
-        print 'frequency mapping:'
-        print m
+        print 'Channel Number to Frequency mapping:'
+        pprint.pprint(m)
         print 'Reading the master.rfi file.'
         bad_freq_ranges = read_bad_observing_frequencies(self.rfi_file)
-        print 'bad frequency ranges:'
-        print bad_freq_ranges
+        print 'Bad frequency ranges:'
+        pprint.pprint(bad_freq_ranges)
 
 
         bad_channels  = []
 
         for fr in bad_freq_ranges:
             bad_channels.extend(intersect_channel_map_with_freq_range(m, fr))
+        print 'Bad channels (or more precisely their numbers):'
+        print bad_channels
+
 
         # Create 
         try:
@@ -857,16 +710,6 @@ class SearchRun(object):
         except Exception, e:
             raise e
 
-        # Make copies of the TEMPO .par files (if any were given) to the 
-        # directories that will be used for folding on a known ephemeris.
-        for par_file in par_files:
-            assert os.path.split(par_file)[0] != self.out_dir
-            for i in range(n_cores):
-                shutil.copy(par_file, join(self.work_dir, 'CORE_%d' % i))
-            # Also provide copies of the par files in the output directory
-            # for future reference.
-            shutil.copy(par_file, join(self.out_dir, 'KNOWN_EPHEMERIS', 
-                os.path.split(par_file)[1]))
 
         # Perform rfifind if at all needed
         rfifind_dir = join(self.work_dir, 'RFIFIND')
@@ -891,22 +734,18 @@ class SearchRun(object):
         rfifind_mask_file = join(self.work_dir, 'RFIFIND', 
             self.basename + '_rfifind.mask')
         
-        ddplan_i = -1 
-#        for ddplan, n_cores_to_use in self.annotated_ddplans:
-        for batch in self.batches:
+        for batch_i, batch in enumerate(self.batches):
             print '=' * 70
             print 'DEDISPERSING FROM DM %.2f TO DM %.2f' % (batch.lo_dm, batch.get_dms()[-1])
-            ddplan_i += 1
-            # Note : Check whether data needs downsampling (and how GBT does
-            # it).
-
+            # TODO add exit status checking to (mpi)prepsubband
+            # TODO add symlinking of subband files
             t_prepsubband_start = time.time() 
-            prepsubband_status = run_prepsubband(batch, batch.n_cores,
+            prepsubband_status = run_prepsubband(batch,
                 self.get_subband_globpattern(), self.work_dir, self.basename,
                 rfifind_mask_file, determine_numout(self.metadata.n_bins), 
                 zero_dm)
             t_prepsubband_end = time.time()
-            batch.prepsubband_time = t_prepsubband_end - t_prepsubband_start
+            batch.dedispersion_time = t_prepsubband_end - t_prepsubband_start
 
             print '=' * 70
             print 'BEGINNING THE PER DM SEARCH LOOP'
@@ -917,7 +756,7 @@ class SearchRun(object):
             for core_index in range(n_cores):
                 child_pid = os.fork()
                 core_work_dir = join(self.work_dir, 'CORE_%d' % core_index)
-                core_log_file = join(self.work_dir, 'SEARCH_LOG_CORE_%d_STEP_%d.log.txt' % (core_index, ddplan_i))
+                core_log_file = join(self.work_dir, 'SEARCH_LOG_CORE_%d_STEP_%d.log.txt' % (core_index, batch_i))
                 if child_pid == 0: # run search loop
                     try:
                         LOG = open(core_log_file, 'w')
@@ -967,8 +806,6 @@ class SearchRun(object):
                         # talking to the disks, but larger disk use during the search).
                         if not no_accel:
                             # remove datafiles that are no longer necessary
-# MAYBE REMOVING THE .fft FILES IS DONE WRONG:
-#                            remove_matching(core_work_dir, '^\S+\.fft')
                             file_regexp = r'^' + re.escape(self.basename) + r'_DM%.2f\.fft$' % dm
                             remove_matching(core_work_dir, file_regexp)
                             # move the search output to the top level working directory
@@ -990,9 +827,12 @@ class SearchRun(object):
                             # remove dedispersed timeseries (.dat files)
                             os.remove(join(self.work_dir, self.basename + '_DM%.2f' % dm + '.dat'))
 
-                        for par_file in par_files:
-                            move_matching(core_work_dir, 
-                                join(self.out_dir, 'KNOWN_EPHEMERIS'), r'^\S+\.pfd\.(bestprof|ps)')
+#                        for par_file in par_files:
+#                            move_matching(core_work_dir, 
+#                                join(self.out_dir, 'KNOWN_EPHEMERIS'), r'^\S+\.pfd\.(bestprof|ps)')
+                        move_matching(core_work_dir, 
+                            join(self.out_dir, 'KNOWN_EPHEMERIS'), r'^\S+\.pfd\.(bestprof|ps)')
+                        remove_matching(core_work_dir, r'^\S+\.pfd$')
 
                     LOG.close()
                     sys.exit(0)
@@ -1065,6 +905,11 @@ class SearchRun(object):
                 pyplot.ylabel('chi square')
                 pyplot.savefig(join(self.out_dir, 'KNOWN_EPHEMERIS', pulsar + '.pdf'))
                 pyplot.clf()
+            # Also provide copies of the par files in the output directory
+            # for future reference.
+            for par_file in par_files:
+                shutil.copy(par_file, join(self.out_dir, 'KNOWN_EPHEMERIS', 
+                    os.path.split(par_file)[1]))
 
 
         print '=' * 70
@@ -1096,101 +941,9 @@ class SearchRun(object):
         shutil.move(join(self.work_dir, 'RFIFIND'), 
             join(self.out_dir, 'RFIFIND'))
 
-def mpiprepsubband_helper(ddplan, n_cores):
-    '''
-    Determine mpiprepsubband options based on ddplan.
-
-    Note : This is a helper function don't call this directly, call
-    SearchRun.rebatch instead.
-    
-    returns a list like:
-    [(<lowest DM>, <number of DM trials>, <number of CPU cores>), ...]    
-    '''
-    MAX_N_DMS = 1000 # Some limitation of ?prepsubband
-   
-    # Do the math on the number of DM trials to make per prepsubband call,
-    # which needs to be a multiple of the (number of cores -1).
-    max_n_dms = min(
-        (MAX_N_DMS // (n_cores - 1)) * (n_cores - 1),
-        (ddplan.dmsperpass // (n_cores - 1)) * (n_cores - 1)
-    )
-    
-    # Deal with the corner case where you want fewer DM trials than there
-    # are cores - 1 available:
-    if ddplan.dmsperpass < (n_cores - 1):
-        return [(ddplan.lodm, ddplan.dmsperpass, ddplan.dmsperpass + 1)]
- 
-    # This loop calculates how many times mpiprepsubband needs to be
-    # called, how many DM trials it should create for each call and how 
-    # many cores should be used for each call.
-    out = []
-    for i in range(ddplan.numpasses):
-        cum_n_dms = 0         
-        # read cum_n_dms as cumulative number of DM trials (this pass)
-        while cum_n_dms < ddplan.dmsperpass:
-            lowest_dm = cum_n_dms * ddplan.dmstep + ddplan.lodm + \
-                i * ddplan.dmsperpass * ddplan.dmstep
-            # Figure out how many cores to use and how many DM trials to this
-            # (mpi)prepsubband call.
-            if cum_n_dms + max_n_dms > ddplan.dmsperpass:
-                n_dms = ddplan.dmsperpass - cum_n_dms
-                # For the last few DM trials fewer cores should be used since
-                # mpiprepsubband only works if:
-                # number of DM trials % (number of cores - 1) == 0
-                tmp = (n_dms // (n_cores - 1))
-                if tmp > 0:
-                    out.append((lowest_dm, tmp * (n_cores - 1), n_cores))
-                    lowest_dm += tmp * (n_cores - 1) * ddplan.dmstep
-                    n_dms -= tmp * (n_cores -1)
-                assert n_dms < n_cores
-                out.append((lowest_dm, n_dms, n_dms + 1))
-            else:
-                # For the normal case we use the maximum number of cores 
-                # available.
-                n_dms = max_n_dms
-                out.append((lowest_dm, n_dms, n_cores))            
-            cum_n_dms += max_n_dms            
-        return out
-
-def prepsubband_helper(ddplan):
-    '''
-    Determine prepsubband options based on ddplan. 
-    
-    Note : This is a helper function don't call this directly, call
-    SearchRun.rebatch instead.
-
-    returns a list like:
-    [(<lowest DM>, <number of DM trials>, 1), ...]    
-    '''
-    MAX_N_DMS = 1000 # Some limitation of ?prepsubband
-   
-    # Do the math on the number of DM trials to make per prepsubband call,
-    # which needs to be a multiple of the (number of cores -1).
-    max_n_dms = min(MAX_N_DMS, ddplan.dmsperpass)
-   
-    # This loop calculates how many times mpiprepsubband needs to be
-    # called, how many DM trials it should create for each call and how 
-    # many cores should be used for each call.
-    out = []
-
-    for i in range(ddplan.numpasses):
-        cum_n_dms = 0 # read cum_n_dms as cumulative number of DM trials     
-        # read cum_n_dms as cumulative number of DM trials (this pass)
-        while cum_n_dms < ddplan.dmsperpass:
-            lowest_dm = cum_n_dms * ddplan.dmstep + ddplan.lodm + \
-                i * ddplan.dmsperpass * ddplan.dmstep 
-            # Figure out how many DM trials to make this prepsubband call.
-            if cum_n_dms + max_n_dms > ddplan.dmsperpass:
-                n_dms = ddplan.dmsperpass - cum_n_dms
-                out.append((lowest_dm, n_dms, 1))
-            else:
-                n_dms = max_n_dms
-                out.append((lowest_dm, n_dms, 1))            
-            cum_n_dms += max_n_dms 
-        return out
-
 
 if __name__ == '__main__':
+    print 'Pulsar search script run with command :', sys.argv
     parser = optparse.OptionParser()
     parser.add_option('--zap_file', dest='zap_file', type='string',
         default='', metavar='ZAP_LIST', 
@@ -1266,6 +1019,8 @@ if __name__ == '__main__':
         pass
 
     # Add basic logging right here.
+    # TODO : look into the logging situation (lots of it is going to standard
+    # out at the moment).
     logging.basicConfig(
         format='%(asctime)-15s - %(name)s - %(levelname)s - %(message)s',
         level=logging.DEBUG,
@@ -1280,83 +1035,43 @@ if __name__ == '__main__':
     SR = SearchRun(options.in_dir, options.work_dir, options.out_dir, 
         options.rfi_file, zap_file, options.rfi_dir)  
 
-#            DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
+    # Predefined dedispersion plans for the various surveys.
+    # Dedispersion plan for quick script consistency tests.
     ddplan_test = DedispersionPlan('TEST')
-    ddplan_test.add_batch(0, 1, 7, 1, 128)
-    ddplan_test.add_batch(7, 1, 2, 1, 128)
-    ddplan_test.add_batch(9, 1, 7, 1, 128)
-    ddplan_test.add_batch(16, 1, 2, 1, 128)
+    ddplan_test.add_batch(0, 1, 7, 1)
+    ddplan_test.add_batch(7, 1, 2, 1)
+    ddplan_test.add_batch(9, 1, 7, 1)
+    ddplan_test.add_batch(16, 1, 2, 1)
 
+    # LPPS dedispersion plan
     ddplan_lpps = DedispersionPlan('LPPS')
-    ddplan_lpps.add_batch(0, 0.05, 1196, 1, 128)
-    ddplan_lpps.add_batch(59.8, 0.10, 408, 2, 128)
-    ddplan_lpps.add_batch(100.60, 0.20, 449, 4, 128)
-    ddplan_lpps.add_batch(190.40, 0.50, 442, 8, 128)
-    ddplan_lpps.add_batch(411.4, 1, 89, 16, 128)
+    ddplan_lpps.add_batch(0, 0.05, 1196, 1)
+    ddplan_lpps.add_batch(59.8, 0.10, 408, 2)
+    ddplan_lpps.add_batch(100.60, 0.20, 449, 4)
+    ddplan_lpps.add_batch(190.40, 0.50, 442, 8)
+    ddplan_lpps.add_batch(411.4, 1, 89, 16)
     
+    # For LOTAS: DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
+    ddplan_lotas = DedispersionPlan('LOTAS')
+    ddplan_lotas.add_batch(0, 0.02, 6647, 1)
+    ddplan_lotas.add_batch(132.940, 0.03, 2454, 2)
+    ddplan_lotas.add_batch(206.560, 0.05, 3258, 4)
+    ddplan_lotas.add_batch(369.460, 0.10, 3576, 8)
+    ddplan_lotas.add_batch(727.060, 0.30, 910, 16)
+
+    # For LoMASS Claire Gilpin provided the dedispersion plan.
+    ddplan_lomass = DedispersionPlan('LoMASS')
+    ddplan_lomass.add_batch(0, 0.01, 601, 2)
+    ddplan_lomass.add_batch(6.010, 0.01, 171, 4)
+    ddplan_lomass.add_batch(7.720, 0.02, 376, 8)
+    ddplan_lomass.add_batch(15.240, 0.03, 399, 16)
+    ddplan_lomass.add_batch(27.210, 0.05, 46, 32)
+
     PREDEFINED_DEDISPERSION_PLANS = {
-#        'LPPS' : [
-#            DedispPlan(lodm=0, dmstep=0.05, dmsperpass=1196, 
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=59.8, dmstep=0.10, dmsperpass=408,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
-#            DedispPlan(lodm=100.60, dmstep=0.20, dmsperpass=449,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
-#            DedispPlan(lodm=190.40, dmstep=0.50, dmsperpass=442,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
-#            DedispPlan(lodm=411.4, dmstep=1.0, dmsperpass=89,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
-#        ],
-#        'LOTAS' : [
-#        # DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
-#        # Do some tests to see how fast this dedispersion plan is and whether
-#        # some resolution should be traded for processing speed.
-#            DedispPlan(lodm=0, dmstep=0.02, dmsperpass=6647, 
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=132.940, dmstep=0.03, dmsperpass=2454,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=2),
-#            DedispPlan(lodm=206.560, dmstep=0.05, dmsperpass=3258,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=4),
-#            DedispPlan(lodm=369.460, dmstep=0.10, dmsperpass=3576,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=8),
-#            DedispPlan(lodm=727.060, dmstep=0.30, dmsperpass=910,
-#                numpasses=1, numsub=SR.metadata.n_channels, downsamp=16),
-#        ],
-#        'LoMASS' : [
-#            DedispPlan(lodm=0, dmstep=0.01, dmsperpass=601, numpasses=1,
-#                numsub=SR.metadata.n_channels, downsamp=2),
-#            DedispPlan(lodm=6.010, dmstep=0.01, dmsperpass=171, numpasses=1,
-#                numsub=SR.metadata.n_channels, downsamp=4),
-#            DedispPlan(lodm=7.720, dmstep=0.02, dmsperpass=376, numpasses=1,
-#                numsub=SR.metadata.n_channels, downsamp=8),
-#            DedispPlan(lodm=15.240, dmstep=0.03, dmsperpass=399, numpasses=1,
-#                numsub=SR.metadata.n_channels, downsamp=16),
-#            DedispPlan(lodm=27.210, dmstep=0.05, dmsperpass=46, numpasses=1,
-#                numsub=SR.metadata.n_channels, downsamp=32),
-#        ],
-#        'TEST' : [
-#            DedispPlan(lodm=0, dmstep=1, dmsperpass=7, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=7, dmstep=1, dmsperpass=2, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=9, dmstep=1, dmsperpass=7, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#            DedispPlan(lodm=16, dmstep=1, dmsperpass=2, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#        ],
-#        'LOTASTEST' : [
-#            DedispPlan(lodm=0, dmstep=0.5, dmsperpass=50, numpasses=1, 
-#                numsub=SR.metadata.n_channels, downsamp=1),
-#        ],
         'TEST' : ddplan_test,
         'LPPS' : ddplan_lpps,
+        'LOTAS' : ddplan_lotas,
+        'LoMASS' : ddplan_lomass,
     }
     try:
         ddplans = PREDEFINED_DEDISPERSION_PLANS[options.plan]
