@@ -1,9 +1,9 @@
-#! /usr/bin/python
-# Custom IPython shell for interactive PyBDSM use.
-# try:
-#     from IPython.Shell import IPShellEmbed
-# except ImportError:
-#     import IPython.embed as IPShellEmbed
+"""Interactive PyBDSM shell.
+
+This module initializes the interactive PyBDSM shell, which is a customized
+ipython enviroment. It should be called from the terminal prompt using the
+"pybdsm" shell script in apps/PyBDSM/ or as "python pybdsm.py".
+"""
 import bdsm
 from bdsm.image import Image
 import pydoc
@@ -53,7 +53,7 @@ def go(cur_cmd=None):
 
     If a task is given as an argument, go executes the given task,
     even if it is not the current task. The current task is not
-    changed.
+    changed in this case.
     """
     global _img
     success = _set_pars_from_prompt()
@@ -116,8 +116,8 @@ def tget(filename=None):
         if os.path.isfile('pybdsm.last'):
             filename = 'pybdsm.last'
         else:
-            print '\033[31;1mERROR\033[0m: No file name given and "pybdsm.last" not found.\n'\
-                'Please specify a file to load.'
+            print '\033[31;1mERROR\033[0m: No file name given and '\
+                  '"pybdsm.last" not found.\nPlease specify a file to load.'
             return
         
     if os.path.isfile(filename):
@@ -129,7 +129,8 @@ def tget(filename=None):
             _replace_vals_in_namespace()
             print "--> Loaded parameters from file '" + filename + "'."
         except:
-            print "\033[31;1mERROR\033[0m: Could not read file '" + filename + "'."
+            print "\033[31;1mERROR\033[0m: Could not read file '" + \
+                  filename + "'."
     else:
         print "\033[31;1mERROR\033[0m: File '" + filename + "' not found."
         
@@ -212,7 +213,8 @@ def _set_pars_from_prompt():
         k = err_msg[indx1:indx2]
         orig_opt_val = opts[k]
         f_dict[k] = orig_opt_val
-        print '\033[31;1mERROR\033[0m: ' + str(err) + ' Resetting to previous value.'
+        print '\033[31;1mERROR\033[0m: ' + str(err) + \
+              ' Resetting to previous value.'
         return False
 
     
@@ -247,6 +249,7 @@ def _set_current_cmd(cmd):
     _img._current_cmd_desc = cmd_name.upper() + ': ' + doc.split('\n')[0] 
     _img._current_cmd_arg_list = cmd.arg_list
     _img._current_cmd_use_groups = cmd.use_groups
+
 
 ###############################################################################
 # Next, we define the tasks such that they may be called directly by
@@ -383,8 +386,9 @@ def show_fit(**kwargs):
         # that in _img
         img_kwargs[k] = kwargs[k]
     try:
-        _img.show_fit(**img_kwargs)
-        tput(quiet=True)
+        success = _img.show_fit(**img_kwargs)
+        if success:
+            tput(quiet=True)
     except KeyboardInterrupt:
         print "\n\033[31;1mAborted\033[0m"
         
@@ -470,8 +474,9 @@ def write_gaul(**kwargs):
         # that in _img
         img_kwargs[k] = kwargs[k]
     try:
-        _img.write_gaul(**img_kwargs)
-        tput(quiet=True)
+        success = _img.write_gaul(**img_kwargs)
+        if success:
+            tput(quiet=True)
     except KeyboardInterrupt:
         print "\n\033[31;1mAborted\033[0m"
 
@@ -499,8 +504,9 @@ def export_image(**kwargs):
         # that in _img
         img_kwargs[k] = kwargs[k]
     try:
-        _img.export_image(**img_kwargs)
-        tput(quiet=True)
+        success = _img.export_image(**img_kwargs)
+        if success:
+            tput(quiet=True)
     except KeyboardInterrupt:
         print "\n\033[31;1mAborted\033[0m"
         
@@ -520,7 +526,9 @@ def _get_task_kwargs(task):
 
 
 ###############################################################################
-# Customize the help system for PyBDSM
+# Customize the help system for PyBDSM. The user can type "help task" to get
+# help on a task (it prints the doc string) or "help 'opt'" to get help on 
+# a option (it prints the doc string defined in opts.py).  
 class bdsmDocHelper(pydoc.Helper):
     def help(self, request):
         global _img
@@ -555,9 +563,12 @@ class bdsmDocHelper(pydoc.Helper):
 pydoc.help = bdsmDocHelper(sys.stdin, sys.stdout)
 
     
-# Now run the IPython shell with this namespace and the customized autocompleter
-# in the pybdsm_conf.py file
-# Add custom autocompleter
+# Now run the IPython shell with this namespace and a customized autocompleter.
+# The custom autocompleter is below. It adds task, command, and option names and
+# a few common values to ipython's autocompleter. It also adds files in the
+# local directory when they might be needed (but only if the user has started
+# to enter a string -- this behavior is to help avoid entering filenames as
+# non-strings; this is also done for the help autocomplete).
 def _opts_completer(self, event):
     """ Returns a list of strings with possible completions."""
     import os
@@ -674,7 +685,8 @@ def _opts_completer(self, event):
 from bdsm import __version__, __revision__
 divider1 = '=' * 72 + '\n'
 divider2 = '_' * 72 + '\n'
-banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + __revision__ + ')\n'\
+banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + \
+         __revision__ + ')\n'\
 + divider1 + 'PyBDSM commands\n'\
 '  inp task ............ : Set current task and list parameters\n'\
 "  par = val ........... : Set a parameter (par = '' sets it to default)\n"\
@@ -694,8 +706,14 @@ banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + __revision__ + 
 "  help 'par' .......... : Get help on a parameter (e.g., help 'rms_box')\n"\
 + divider2
 
+# Go ahead and set the current task to process_image, so that the user does not
+# need to enter "inp process_image" as the first step, but rather only "inp"
+# (the first task needed after startup will almost always be process_image).
 _set_current_cmd(process_image)
 
+# Now start the ipython shell. Due to (non-backward-compatible) changes in 
+# ipython with version 0.11, we must support both versions until 0.11 or 
+# greater is in common use.
 try:
     # ipython >= 0.11
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
@@ -709,6 +727,6 @@ except ImportError:
     # ipython < 0.11
     from IPython.Shell import IPShellEmbed
     argv = ['-prompt_in1','BDSM <\#>: ','-autocall','2']
-    ipshell = IPShellEmbed(argv=argv, user_ns=locals())
-    ipshell.IP.runsource('import pybdsm_conf')
+    ipshell = IPShellEmbed(argv=argv, banner=banner, user_ns=locals())
+    ipshell.IP.set_hook('complete_command', _opts_completer, re_key = '.*')
 ipshell()

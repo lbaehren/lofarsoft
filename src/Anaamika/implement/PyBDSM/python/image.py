@@ -92,8 +92,9 @@ class Image(object):
         import plotresults
         if not hasattr(self, 'nisl'):
             print 'Image has not been processed. Please run process_image first.'
-            return
+            return False
         plotresults.plotresults(self, **kwargs)
+        return True
         
     def export_image(self, **kwargs):
           """Export an internal image to a file."""

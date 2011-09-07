@@ -509,7 +509,7 @@ def round_list_of_tuples(val):
 def export_image(self, outfile=None, img_format='fits',
                  img_type='resid_gaus', incl_wavelet=True,
                  clobber=False):
-    """Write an image to a file.
+    """Write an image to a file. Returns True if successful, False if not. 
 
     outfile - name of resulting file; if None, file is
     named automatically.
@@ -626,7 +626,8 @@ def export_image(self, outfile=None, img_format='fits',
 
 def write_gaul(self, outfile=None, format='bbs', srcroot=None,
                bbs_patches=None, incl_wavelet=True, clobber=False):
-    """Write the Gaussian list to a file.
+    """Write the Gaussian list to a file. Returns True if successful, 
+    False if not. 
 
     filename - name of resulting file; if None, file is
                named automatically.
