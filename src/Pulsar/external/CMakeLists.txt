@@ -491,4 +491,61 @@ add_custom_target (psrcat_install
   )
 add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 
+## ==============================================================================
+##
+##  Handle configuration and build of PSRFITS_UTILS
+##
+## ==============================================================================
+
+set (psrfits_version "utils-525dbed")
+set (psrfits_name "psrfits_${psrfits_version}")
+set (psrfits_directory "psrfits_utils/psrfits_${psrfits_version}")
+
+add_custom_target (psrfits_unpack
+  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+  COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} ${PULSAR_BINARY_DIR}/apps/
+  COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+  COMMENT "Copying psrfits from ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} to ${PULSAR_BINARY_DIR}/apps/${psrfits_name}"
+  )
+
+add_custom_target (psrfits_prepare
+  COMMAND ./prepare 
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name} 
+  COMMENT "Running prepare for project psrfits in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
+  )
+add_dependencies (psrfits_prepare psrfits_unpack)
+
+if (UNIX)
+ if (APPLE)
+add_custom_target (psrfits_configure
+  COMMAND ./configure LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include --bindir=${CMAKE_INSTALL_PREFIX}/bin --libdir=${CMAKE_INSTALL_PREFIX}/lib --includedir=${CMAKE_INSTALL_PREFIX}/include --prefix=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+  COMMENT "Configuring project psrfits (darwin) in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
+  )
+add_dependencies (psrfits_configure psrfits_prepare psrfits_unpack)
+ else (APPLE)
+add_custom_target (psrfits_configure
+  COMMAND ./configure LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include --bindir=${CMAKE_INSTALL_PREFIX}/bin --libdir=${CMAKE_INSTALL_PREFIX}/lib --includedir=${CMAKE_INSTALL_PREFIX}/include --prefix=${CMAKE_INSTALL_PREFIX}
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+  COMMENT "Configuring project psrfits (linux) in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
+  )
+add_dependencies (psrfits_configure psrfits_prepare psrfits_unpack)
+ endif (APPLE)
+endif (UNIX)
+
+add_custom_target (psrfits_build
+  COMMAND make prefix=${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+  COMMENT "Building project psrfits in ${PULSAR_BINARY_DIR}/apps/${psrfits_name}..."
+  )
+add_dependencies (psrfits_build psrfits_configure psrfits_prepare psrfits_unpack)
+
+add_custom_target (psrfits_install
+  COMMAND make install 
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+  COMMENT "Install project psrfits into ${CMAKE_INSTALL_PREFIX}..."
+  )
+add_dependencies (psrfits_install psrfits_build psrfits_configure psrfits_prepare psrfits_unpack)
+
 
