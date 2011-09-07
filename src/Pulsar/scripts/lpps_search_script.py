@@ -960,7 +960,7 @@ if __name__ == '__main__':
         metavar='PLAN', help='Dedispersion plan to be used (default=LPPS)'),
     parser.add_option('--z_list', dest='z_list', type='string',
         default='[0,50]', metavar='Z_LIST', 
-        help='List of integer z values, default [0,50] - don\'t use spaces.')
+        help='List of integer z values, default 0,50 - don\'t use spaces.')
     parser.add_option('--ncores', dest='ncores', type='int',
         default=8, help='Number of cores to use (default 8).')
     parser.add_option('--ns', dest='ns', help='Run no single pulse search.',
@@ -968,7 +968,8 @@ if __name__ == '__main__':
     parser.add_option('--na', dest='na', help='Run no acceleration search.',
         action='store_true', default=False)
     parser.add_option('--par', dest='par_list', type='string',
-        metavar='PAR_LIST', help='List of TEMPO .par files [file1,file2]')
+        metavar='PAR_LIST', 
+        help='List of TEMPO .par files parfile1,parfile2 - don\'t use spaces.')
     parser.add_option('--rfidir', dest='rfi_dir', type='string', 
         metavar='RFI_DIR', default='',
         help='Directory containing rfifind output for current data set.') 
@@ -991,32 +992,23 @@ if __name__ == '__main__':
     # parse list of z values:
     # TODO : refactor list parsing code
     z_values = []
-    if options.z_list[0] == '[' and options.z_list[-1] == ']':
-        tmp = options.z_list[1:-1].split(',')
-        try:
-            for z_str in tmp:
-                z_values.append(int(z_str))
-        except ValueError, e:
-            print 'List of z values not specified correctly.'
-            raise
-    else:
-        print 'Z values list needs to be inside of [] and contain no spaces.'
-        raise Exception()
+    tmp = options.z_list[1:-1].split(',')
+    try:
+        for z_str in tmp:
+            z_values.append(int(z_str))
+    except ValueError, e:
+        print 'List of z values not specified correctly.'
+        raise
 
     # parse list of filenames for TEMPO .par files
     par_files = []
-    if options.par_list and options.par_list[0] == '[' and options.par_list[-1] == ']':
-        print 'first check ok!'
-        tmp = options.par_list[1:-1].split(',')
-        print tmp
-        try:
-            for par_file in tmp:
-                par_files.append(os.path.abspath(par_file))
-        except Exception, e:
-            print 'Problem occured parsing list of TEMPO .par files'
-            raise
-    else:
-        pass
+    tmp = options.par_list[1:-1].split(',')
+    try:
+        for par_file in tmp:
+            par_files.append(os.path.abspath(par_file))
+    except Exception, e:
+        print 'Problem occured parsing list of TEMPO .par files'
+        raise
 
     # Add basic logging right here.
     # TODO : look into the logging situation (lots of it is going to standard
