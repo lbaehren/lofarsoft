@@ -23,16 +23,7 @@ from polarisation import Op_polarisation
 from wavelet_atrous import Op_wavelet_atrous
 from psf_vary import Op_psf_vary
 from cleanup import Op_cleanup
-import graphix
-import mylogger
-from interface import in_ipython
-__version__ = '1.0' # placeholder version number
-# Get svn revision number as well. To do this, one also
-# needs to do "svn propset svn:keywords Revision
-# src/Anaamika/implement/PyBDSM/python/__init__.py" from
-# the LOFARSOFT directory. Then, the revision number is
-# added automatically with each update.
-__revision__ = filter(str.isdigit, "$Revision$")
+from _version import __version__, __revision__
 
 default_chain = [Op_readimage(),
                  Op_collapse(),

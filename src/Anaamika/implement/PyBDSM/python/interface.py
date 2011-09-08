@@ -1,11 +1,10 @@
 """Interface module.
 
 The interface module handles all functions typically needed by the user in an
-interactive environment such as IPython. Many are also used by the pybdsm.py
-custom IPython shell. 
+interactive environment such as IPython. Many are also used by the 
+custom IPython shell defined in pybdsm.py. 
 
 """
-import exceptions
 
 def process(img, **kwargs):
     """Find and measure sources in an image.
@@ -15,8 +14,8 @@ def process(img, **kwargs):
     to allow reprocessing of existing Image objects with the command
     img.process().
 
-    Any options given as keyword arguments will override existing ones.
-
+    Any options given as keyword arguments will override existing ones stored
+    in img.opts.
     """
     from bdsm import default_chain, _run_op_list
     from image import Image
@@ -60,7 +59,13 @@ def process(img, **kwargs):
         return False
         
 def get_op_chain(img):
-    """Determines the optimal Op chain for an Image object"""
+    """Determines the optimal Op chain for an Image object.
+    
+    This is useful when reprocessing an Image object. For example,
+    if Gaussians were already fit, but the user now wants to use
+    shapelets, we do not need to re-run Op_gausfit, etc. At the 
+    moment, this just returns the default Op chain from __init__.py.
+    """
     from bdsm import default_chain
     
     return default_chain
@@ -236,7 +241,7 @@ def group_opts(opts):
 def print_opts(grouped_opts_list, img, banner=None):
     """Print options to screen.
     
-    Options can be sorted by group (defined in opts.py) previously by
+    Options can be sorted by group (defined in opts.py) previously defined by
     group_opts. Output of grouped items is suppressed if parent option is
     False. The layout is as follows:
     

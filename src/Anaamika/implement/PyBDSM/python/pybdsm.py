@@ -563,6 +563,7 @@ class bdsmDocHelper(pydoc.Helper):
 pydoc.help = bdsmDocHelper(sys.stdin, sys.stdout)
 
     
+###############################################################################
 # Now run the IPython shell with this namespace and a customized autocompleter.
 # The custom autocompleter is below. It adds task, command, and option names and
 # a few common values to ipython's autocompleter. It also adds files in the
@@ -681,8 +682,8 @@ def _opts_completer(self, event):
         opts.append('export_image')
         return opts
 
-# Finally, print a welcome banner
-from bdsm import __version__, __revision__
+# Define the welcome banner to print on startup
+from bdsm._version import __version__, __revision__
 divider1 = '=' * 72 + '\n'
 divider2 = '_' * 72 + '\n'
 banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + \
@@ -707,8 +708,8 @@ banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + \
 + divider2
 
 # Go ahead and set the current task to process_image, so that the user does not
-# need to enter "inp process_image" as the first step, but rather only "inp"
-# (the first task needed after startup will almost always be process_image).
+# need to enter "inp process_image" as the first step (the first task needed 
+# after startup will almost always be process_image).
 _set_current_cmd(process_image)
 
 # Now start the ipython shell. Due to (non-backward-compatible) changes in 
@@ -721,7 +722,8 @@ try:
     cfg = Config()
     cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
     cfg.InteractiveShellEmbed.autocall = 2
-    ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, user_ns=locals())
+    ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, 
+                                    user_ns=locals())
     ipshell.set_hook('complete_command', _opts_completer, re_key = '.*')
 except ImportError:
     # ipython < 0.11

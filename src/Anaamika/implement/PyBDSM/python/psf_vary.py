@@ -414,17 +414,18 @@ class Op_psf_vary(Op):
                 flag[i] = 1
                 flag[indi[1]] = 1
             else:
-              if dist[1]+dist[2] < frac*dist[3]: # for 3 close-by sources
-                in1=indi[1]
-                in2=indi[2]
-                if flag[in1]+flag[in2]+flag[i] == 0: # not already deleted from others
-                  tile_list.append([i, in1, in2])
-                  tile_coord.append((coord[i]*snrgen[i]+coord[in1]*snrgen[in1]+coord[in2]*snrgen[in2]) \
-                             /(snrgen[i]+snrgen[in1]+snrgen[in2]))
-                  tile_snr.append(snrgen[i]+snrgen[in1]+snrgen[in2])
-                  flag[i] = 1
-                  flag[in1] = 1
-                  flag[in2] = 1
+              if len(dist) > 3:
+                if dist[1]+dist[2] < frac*dist[3]: # for 3 close-by sources
+                  in1=indi[1]
+                  in2=indi[2]
+                  if flag[in1]+flag[in2]+flag[i] == 0: # not already deleted from others
+                    tile_list.append([i, in1, in2])
+                    tile_coord.append((coord[i]*snrgen[i]+coord[in1]*snrgen[in1]+coord[in2]*snrgen[in2]) \
+                               /(snrgen[i]+snrgen[in1]+snrgen[in2]))
+                    tile_snr.append(snrgen[i]+snrgen[in1]+snrgen[in2])
+                    flag[i] = 1
+                    flag[in1] = 1
+                    flag[in2] = 1
               else:
                 tile_list.append([i])
                 tile_coord.append(coord[i])

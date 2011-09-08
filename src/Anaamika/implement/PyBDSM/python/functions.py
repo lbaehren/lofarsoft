@@ -457,7 +457,10 @@ def std(y):
 
     l=len(y)
     s=N.std(y)
-    return s*sqrt(float(l)/(l-1))
+    if l == 1:
+        return s
+    else:
+        return s*sqrt(float(l)/(l-1))
 
 def imageshift(image, shift):
     """ Shifts a 2d-image by the tuple (shift). Positive shift is to the right and upwards. 
