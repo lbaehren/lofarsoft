@@ -69,7 +69,7 @@ using namespace std;
   \param filename -- Name of the file from which to read in the data
 */
 TBBData::TBBData (std::string const &filename)
-  : DAL::TBB_Timeseries (filename)
+  : DAL::TBB_Timeseries (filename, DAL::IO_Mode::ReadOnly)
 {
 }
 
