@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.17
+VERSION=2.18
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -950,6 +950,7 @@ do
 	    
 	    nodename=`uname -n`
 	    is_cep2=`echo $nodename | grep locus`
+	    create_dummies=0
    		if [[ $STOKES == "incoherentstokes" ]] && [[ $is_cep2 != "" ]]
    		then
               # on cep2, there are missing subbands;  create dummy files for missing numbers
@@ -965,6 +966,7 @@ do
 	              rootname=`head -1 $master_list | sed -e "s/\// /g" -e "s/.* //g" -e "s/_SB.*//g"`
 	              while (( $ii < $nfiles ))
 	              do
+	                 create_dummies=1
 	                 sb=`echo $ii | awk '{printf("%03d",$1)}'`
 	                 filename=`grep _SB$sb $master_list`
 	                 #sb=`echo $filename | sed -e "s/^.*_SB/ /g" -e "s/_.*//g"`
@@ -979,6 +981,7 @@ do
 	                 fi  
 	                 ii=$(( $ii + 1 )) 
 	              done 
+	           chmod -R 777 /data/$OBSID
 		       ls /data/$OBSID/*incoherentstokes | sort -t B -g -k 2 > $master_list
 		       echo "Created new master list" 
 		       echo "Created new master list" >> $log
@@ -1474,6 +1477,12 @@ do
 	       fi 
 
 	    fi
+
+       # clean up dummy files
+       if [[ $create_dummies == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
+       then
+          rm -rf /data/$OBSID
+       fi
 
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
