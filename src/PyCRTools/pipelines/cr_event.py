@@ -462,15 +462,18 @@ for full_filename in files:
 
         if blocknumber<0:
             block_number=data_length/blocksize
-        if samplenumber<0:
-            sample_number=blocksize/2
-            
+#       Only use sample_number to indicate a 'good' pulse position
+#        if samplenumber<0:
+#            sample_number=blocksize/2
+
         ########################################################################
         #Getting information from LORA if present
         ########################################################################
         print "---> Reading information from LORA, if present"
+        lora_event_info = 0 # to check with 'if lora_event_info:'
         if os.path.exists(lora_logfile):
             (tbb_starttime_sec,tbb_starttime_nsec)=lora.nsecFromSec(tbb_starttime,logfile=lora_logfile)
+            
             if tbb_starttime_sec:
                 try:
                     (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
@@ -484,10 +487,11 @@ for full_filename in files:
                 if samplenumber<0:
                     sample_number=sample_number_lora
                 print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
+                lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
         else:
             print "WARNING: No LORA logfile found - ",lora_logfile
-            
-        lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
+        
+        #lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
         if lora_event_info:
                 lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
@@ -748,6 +752,7 @@ for full_filename in files:
 
         #FFT
         hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
+        fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
 
         ########################################################################
         #RFI excision 
@@ -759,10 +764,10 @@ for full_filename in files:
         ########################################################################
         print "---> Calculate a baseline with Galactic powerlaw"
         calcbaseline_galactic=trerun("CalcBaseline","galactic",averagespectrum_good_antennas,pardict=par,invert=True,normalize=False,powerlaw=0.5,doplot=Pause.doplot)
-
+        #import pdb; pdb.set_trace()
         # and apply
         fft_data.mul(calcbaseline_galactic.baseline)
-
+        
         #Plotting just for quality control
         power=hArray(float,properties=fft_data)
         power.spectralpower(fft_data)
@@ -773,27 +778,26 @@ for full_filename in files:
         #Back to time domain
         ########################################################################
         timeseries_calibrated_data=hArray(properties=timeseries_data)
-        fft_data[...,0]=0 # take out zero offset (-> offset/mean==0)
+        #fft_data[...,0]=0 # take out zero offset (-> offset/mean==0)
         hFFTWExecutePlan(timeseries_calibrated_data[...], fft_data[...], invfftplan)
 
         timeseries_calibrated_data /= blocksize # normalize back to original value
-
+        
         timeseries_calibrated_data_rms=timeseries_calibrated_data.stddev(0.0).val()
         results.update(dict(
             pulse_height_rms=timeseries_calibrated_data_rms
             ))
 
-        print "---> Saving calibrated time series to",calibrated_timeseries_file
-        timeseries_calibrated_data.write(calibrated_timeseries_file)
-
-        if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
-        Pause("Plotted time series data. ",name="calibrated-imeseries")
-
+        # Note: to finish calibration, we have to know the pulse location first
+        # Then we divide out by the rms per antenna in this block, while excluding the pulse region.
+        # so we use [0:pulse.start] ( and [pulse.end:] to be implemented).
+        
         ########################################################################
         #Locate pulse and cut data around it
         ########################################################################
         #First determine where the pulse is in a simple incoherent sum of all time series data
-        if search_window_width>0:
+        if (search_window_width > 0) and (sample_number > 0):
+            # only narrow the search window if we have a 'good' guess for sample_number...
             search_window=(sample_number-search_window_width/2,sample_number+search_window_width/2)
         else:
             search_window=False
@@ -808,7 +812,6 @@ for full_filename in files:
 
         #Get a list of pulses in the search window
         pulses=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
-
         #How many antennas have pulses? Also: determine a finer window where the pulses are
         if pulses.npeaks>0:
             antennas_with_peaks=list(asvec(hArray(good_antennas)[pulses.peaks_found_list]))
@@ -822,11 +825,33 @@ for full_filename in files:
         # Otherwise take the previously found window with the most pulses
         else: 
             pulse=pulses
-
         pulse_npeaks=pulses.npeaks
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
 
+# Finish gain calibration - also apply gain calibration on time series data in 'pulse' result workspace.       
+        timeseries_calibrated_data_gainnormalisation = timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
+        # improve to also use [pulse.end:]
+        timeseries_calibrated_data[:,...].div(timeseries_calibrated_data_gainnormalisation) 
         timeseries_calibrated_data_antennas_rms=timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
+        # this now must contain all 1.0's
+        
+#        pulse.timeseries_data[:,...].div(timeseries_calibrated_data_gainnormalisation)
+        # Note: pulse.timeseries_data is the same array (by ref) as timeseries_calibrated_data.
+        
+        pulse.timeseries_data_cut[:,...].div(timeseries_calibrated_data_gainnormalisation)
+        # this is a copied array so needs to be normalised as well
+# calibration complete.
+        print "---> Saving calibrated time series to",calibrated_timeseries_file
+        timeseries_calibrated_data.write(calibrated_timeseries_file)
+
+        if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
+        Pause("Plotted time series data. ",name="calibrated-imeseries")
+        
+        #a = timeseries_calibrated_data.toNumpy()
+        #plt.plot(a[:][pulse.start:pulse.end])
+        
+        print 'PULSE START = '
+        print pulse.start
         results.update(dict(
             timeseries_rms=list(timeseries_calibrated_data_antennas_rms),
             npeaks_found=pulse_npeaks
