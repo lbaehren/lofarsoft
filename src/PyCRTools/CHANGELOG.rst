@@ -1,3 +1,18 @@
+2011-09-08
+==========
+
+  :Author: Arthur Corstanje <a.corstanje@astro.ru.nl>
+  
+- Apply gain calibration normalizing the RMS noise level inside the data block to 1.0. 
+  This fixes a possible remaining spread of 5-10% in noise power as seen after processing some event files.
+- Don't break on valid LORA file but missing entry for this event.
+- Don't assume the pulse is right in the middle of the block when no sample number is given.
+- Do DC offset removal before calculating baselines. 
+- Calculate average spectrum by taking average power (i.e. abs-square of FFT), then square root.
+  The difference with taking a mean-absolute spectrum is small as long as all the added spectra 
+  are all close to each other.
+
+
 2011-08-17
 ==========
 
