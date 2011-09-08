@@ -997,7 +997,8 @@ class AverageSpectrum(tasks.Task):
 #                                if self.nspectraadded_per_antenna[antenna_output_index]>1:
 #                                    self.fftdata/=float(self.nspectraadded_per_antenna[antenna_output_index])
 #                                self.power2[antenna_output_index] *= (self.nspectraadded_per_antenna[antenna_output_index]-1.0)/(self.nspectraadded_per_antenna[antenna_output_index])
-                                self.power2[antenna_output_index].spectralpower(self.fftdata)
+                                # AC: change spectralpower to spectralpower2. Take proper power (squaring), later sqrt
+                                self.power2[antenna_output_index].spectralpower2(self.fftdata)
                                 if self.doplot>1 and antenna_output_index==0 and self.nspectraadded_per_antenna[antenna_output_index]%self.plotskip==0:
                                     self.power2[antenna_output_index,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot(
                                         title="nspec={0:5d}, mean={1:8.3f}, rms={2:8.3f}".format(
@@ -1064,6 +1065,8 @@ class AverageSpectrum(tasks.Task):
             if self.calc_averagespectrum:
                 self.nspectraadded_per_antenna.max(1)
                 self.power2[...] /= self.nspectraadded_per_antenna.vec()
+                # AC: take square root to get RMS spectrum
+                self.power2[...].sqrt() # dimensions?
                 self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","quality"],
                                   fftLength="speclen",blocksize="fullsize")
                 self.power.write(self.spectrum_file)# same as power2, just nicer dimensions
