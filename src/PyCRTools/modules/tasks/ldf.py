@@ -46,6 +46,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             res={}
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
+            
             antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
              
             positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
@@ -82,7 +83,8 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         
         par["eventid"]="LOFAR "+res["FILENAME"].split('-')[1]
         
- 
+        par["antenna_set"] = res["ANTENNA_SET"]
+        
         # LORA parameters
         # check for LORA core only being propagated with two coordinates instead of three
         
@@ -172,7 +174,12 @@ class ldf(tasks.Task):
         logplot=dict(default=True, doc="Draw y-axis logarithmically"),
         plot_clf = dict(default=True,doc="Clean window before plotting?"),
         plot_xmin = dict(default=0,doc="Mininum value of x-axis"),
-        plot_xmax = dict(default=400,doc="Maximum value of x-axis"),
+        plot_xmax = dict(default=300,doc="Maximum value of x-axis"),
+        antenna_set = dict(default=lambda self:self.results["antenna_set"],doc="determines labelling of polarizations"),
+        color_pol0 = dict(default='#B30424',doc="color pol 0"),
+        color_pol1 = dict(default='#68C8F7',doc="color pol 1"),
+        marker_pol0 = dict(default='s'),
+        marker_pol1 = dict(default='o'),
         meanpositions0 = dict(default=lambda self:self.results["meanpositions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the station positions in pol 0 (x0,y0,z0,...)",unit="m"),
         meanpositions1 = dict(default=lambda self:self.results["meanpositions1"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the station positions in pol 1 (x0,y0,z0,...)",unit="m"),
         meansignals0 = dict(default=lambda self:self.results["meansignals0"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 0",unit="a.u."),
@@ -181,7 +188,8 @@ class ldf(tasks.Task):
         stationnames1 = dict(default=lambda self:self.results["stationnames1"],doc="Stations in run in pol 1."),
         draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF"),
         CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization"),
-        Draw3D = dict(default=False,doc="Draw 2D LDF")
+        Draw3D = dict(default=True,doc="Draw 2D LDF")
+        
         )
 
 
@@ -307,6 +315,13 @@ class ldf(tasks.Task):
 
         if self.plot_clf:
             cr.plt.clf()
+            
+        if self.antenna_set == "LBA_OUTER":
+            labelpol0 = "Polarization NW-SE"
+            labelpol1 = "Polarization NE-SW"
+        else:   
+            labelpol0 = "pol 0"
+            labelpol1 = "pol 1"    
 
         if self.signals0:
             if self.signaluncertainties0:
@@ -317,17 +332,17 @@ class ldf(tasks.Task):
                     cr.hMaximum(sig_lower0,self.signals0 - self.signaluncertainties0)
                     sig_uncer0 = self.signals0 - sig_lower0
                     
-                    cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),yerr=[sig_uncer0.vec(),self.signaluncertainties0.vec()],xerr=self.DistUncertainties0.vec(),color='r',marker='o',linestyle="None",label="pol 0")
+                    cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),yerr=[sig_uncer0.vec(),self.signaluncertainties0.vec()],xerr=self.DistUncertainties0.vec(),color=self.color_pol0,marker=self.marker_pol0,linestyle="None",label=labelpol0)
                     cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
                     cr.plt.yscale("log")
                     
                     
                 
                 else:
-                    cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color='r',marker='o',linestyle="None",label="pol 0")
+                    cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color=self.color_pol0,marker=self.marker_pol0,linestyle="None",label="pol 0")
            
             else:
-                self.signals0.plot(color='r',linestyle="None",marker="o",label="pol 0",clf=False)           
+                self.signals0.plot(color='m',linestyle="None",marker=self.marker_pol0,label=labelpol0,clf=False)           
 
         if self.signals1:
             if self.signaluncertainties1:
@@ -338,7 +353,7 @@ class ldf(tasks.Task):
                     cr.hMaximum(sig_lower1,self.signals1 - self.signaluncertainties1)
                     sig_uncer1 = self.signals1 - sig_lower1
                     
-                    cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),yerr=[sig_uncer1.vec(),self.signaluncertainties1.vec()],xerr=self.DistUncertainties1.vec(),color='b',marker="s",linestyle="None",label="pol 1")
+                    cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),yerr=[sig_uncer1.vec(),self.signaluncertainties1.vec()],xerr=self.DistUncertainties1.vec(),color=self.color_pol1,marker=self.marker_pol1,linestyle="None",label=labelpol1) #
                     cr.plt.yscale("log")
                     cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
                         
@@ -346,31 +361,40 @@ class ldf(tasks.Task):
                 else:
                     cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),self.signaluncertainties1.vec(),self.DistUncertainties1.vec(),color='b',marker="s",linestyle="None",label="pol 1")
             else:
-                self.signals1.plot(color='b',linestyle="None",marker="s",label="pol 1",clf=False)           
+                self.signals1.plot(color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1,clf=False)           
 
         cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
         cr.plt.xlabel("Distance to Shower Axis [m]")
-        cr.plt.ylabel("Power [a.u.]")
+        if self.plot_parameter == "pulses_maxima_y":
+            cr.plt.ylabel("Peak Power [a.u.]")
+        else:
+            cr.plt.ylabel("Power [a.u.]")
+            
         cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
         
         if self.draw_global:
         
-            self.meansignals1.plot(color='b',marker='h',markersize = 10,linestyle="None",clf=False)
-            self.meansignals0.plot(color='r',marker='h',linestyle="None",markersize = 10,clf=False)
+            self.meansignals1.plot(color=color_pol1,marker='h',markersize = 10,linestyle="None",clf=False)
+            self.meansignals0.plot(color=color_pol0,marker='h',linestyle="None",markersize = 10,clf=False)
             cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
             
             for i in  xrange(len(self.stationnames0)):
                 station = "Station "+str(self.stationnames0[i])
                 ycoord = self.meansignals0[i]
                 xcoord = self.stationDistances0[i]
-                cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 15),xycoords='data',textcoords='offset points',size='x-large',color='r')
+                cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 15),xycoords='data',textcoords='offset points',size='x-large',color=self.color_pol0)
             
             for i in  xrange(len(self.stationnames1)):
                 station = "Station "+str(self.stationnames1[i])
                 ycoord = self.meansignals1[i]
                 xcoord = self.stationDistances1[i]
 
-                cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 20),xycoords='data',textcoords='offset points',size='x-large',color='b')
+                cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 20),xycoords='data',textcoords='offset points',size='x-large',color=self.color_pol1)
+            cr.plt.xlabel("Distance to Shower Axis [m]")
+            if self.plot_parameter == "pulses_maxima_y":
+                cr.plt.ylabel("Peak Power [a.u.]")
+            else:
+                cr.plt.ylabel("Power [a.u.]")
                      
         if self.eventid:
             cr.plt.title(str(self.eventid))
@@ -381,11 +405,13 @@ class ldf(tasks.Task):
         if self.Draw3D:
 
                 from mpl_toolkits.mplot3d import Axes3D
+                from matplotlib import cm
                 
                 # Polarization 0 
                 
                 fig0 = cr.plt.figure()
                 ax0 = Axes3D(fig0)
+                #ax0 = fig0.gca(projection='3d')
                 
                 pos0 = cr.hArray(copy = self.positions0) 
                 posX0 = cr.hArray_transpose(pos0)[0].vec()
@@ -412,7 +438,8 @@ class ldf(tasks.Task):
                 cosalpha0.mul(Dist0)
                 sinalpha0.mul(Dist0)
                 
-                ax0.scatter(cosalpha0, sinalpha0, sig0, c='r', marker='o')
+                ax0.scatter(cosalpha0, sinalpha0, sig0, color=self.color_pol0, marker=self.marker_pol0)
+                #ax0.contour(cosalpha0, sinalpha0, sig0)
                 
                 ax0.set_xlabel('East')
                 ax0.set_ylabel('North')
@@ -449,12 +476,22 @@ class ldf(tasks.Task):
                 cosalpha1.mul(Dist1)
                 sinalpha1.mul(Dist1)
                 
-                ax1.scatter(cosalpha1, sinalpha1, sig1, c='b', marker='s')
+                ax1.scatter(cosalpha1, sinalpha1, sig1, color=self.color_pol1, marker=self.marker_pol1)
                 
                 ax1.set_xlabel('East')
                 ax1.set_ylabel('North')
                 ax1.w_zaxis.set_scale("log")
                 ax1.set_zlabel('Power [a.u.]')
+
+                
+                # Possibly implement errorbars
+                
+#                
+#                #plot errorbars
+#                for i in np.arange(0, len(fx)):
+#                    ax.plot([fx[i]+xerror[i], fx[i]-xerror[i]], [fy[i], fy[i]], [fz[i], fz[i]], marker="_")
+#                    ax.plot([fx[i], fx[i]], [fy[i]+yerror[i], fy[i]-yerror[i]], [fz[i], fz[i]], marker="_")
+#                    ax.plot([fx[i], fx[i]], [fy[i], fy[i]], [fz[i]+zerror[i], fz[i]-zerror[i]], marker="_")
                 
 
                 
