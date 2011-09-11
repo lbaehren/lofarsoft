@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.18
+VERSION=2.19
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -192,9 +192,9 @@ then
 fi
 echo "    Using N=$core cores for processing (change with '-core N' command line option)"
 
-if [ $core -lt 1 ] || [ $core -gt 50 ]
+if [ $core -lt 1 ] || [ $core -gt 128 ]
 then
-   echo "ERROR: Number of cores must be 1 >= N <= 50 ;  currently requested $core cores."
+   echo "ERROR: Number of cores must be 1 >= N <= 128 ;  currently requested $core cores."
    exit 1
 fi
 
@@ -805,20 +805,20 @@ do
 	   echo "WARNING: 2nd Transpose CoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams."
 	   echo "WARNING: 2nd Transpose CoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams." >> $log
 	   core=$nrBeams
-	elif [[ $transpose == 1 ]] && [[ $STOKES == 'stokes' ]] && [[ $flyseye == 1 ]] && [[ $NBEAMS -gt 50 ]]
+	elif [[ $transpose == 1 ]] && [[ $STOKES == 'stokes' ]] && [[ $flyseye == 1 ]] && [[ $NBEAMS -gt 128 ]]
 	then
-	   echo "ERROR: Pipeline is currently unable to handle more than 50 beams FE mode;  there are $NBEAMS in this observation."
-	   echo "ERROR: Pipeline is currently unable to handle more than 50 beams FE mode;  there are $NBEAMS in this observation."  >> $log
+	   echo "ERROR: Pipeline is currently unable to handle more than 128 beams FE mode;  there are $NBEAMS in this observation."
+	   echo "ERROR: Pipeline is currently unable to handle more than 128 beams FE mode;  there are $NBEAMS in this observation."  >> $log
 	   exit 1
-	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 1 ]] && [[ $nrBeams -le 50 ]] 
+	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 1 ]] && [[ $nrBeams -le 128 ]] 
 	then
 	   echo "WARNING: 2nd Transpose IncoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams."
 	   echo "WARNING: 2nd Transpose IncoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams." >> $log
 	   core=$nrBeams
-	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 50 ]]
+	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 128 ]]
 	then
-	   echo "ERROR: Pipeline is currently unable to handle more than 50 Incoherent beams;  there are $nrBeams in this observation."
-	   echo "ERROR: Pipeline is currently unable to handle more than 50 Incoherent beams;  there are $nrBeams in this observation."  >> $log
+	   echo "ERROR: Pipeline is currently unable to handle more than 128 Incoherent beams;  there are $nrBeams in this observation."
+	   echo "ERROR: Pipeline is currently unable to handle more than 128 Incoherent beams;  there are $nrBeams in this observation."  >> $log
 	   exit 1
 	else 
 	   core=$user_core
