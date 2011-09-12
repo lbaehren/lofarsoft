@@ -366,7 +366,7 @@ class ldf(tasks.Task):
         cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
         cr.plt.xlabel("Distance to Shower Axis [m]")
         if self.plot_parameter == "pulses_maxima_y":
-            cr.plt.ylabel("Peak Power [a.u.]")
+            cr.plt.ylabel("Pulse Power [a.u.]")
         else:
             cr.plt.ylabel("Power [a.u.]")
             
@@ -392,7 +392,7 @@ class ldf(tasks.Task):
                 cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 20),xycoords='data',textcoords='offset points',size='x-large',color=self.color_pol1)
             cr.plt.xlabel("Distance to Shower Axis [m]")
             if self.plot_parameter == "pulses_maxima_y":
-                cr.plt.ylabel("Peak Power [a.u.]")
+                cr.plt.ylabel("Pulse Power [a.u.]")
             else:
                 cr.plt.ylabel("Power [a.u.]")
                      
