@@ -14,7 +14,7 @@ import pycrtools.rftools as rf
 deg=pi/180.
 pi2=pi/2.
 
-def gatherresults(filefilter,pol):
+def gatherresults(filefilter,pol,excludelist):
     """This function returns a dictionary with selected results from file in the subdirectories (/pol?/*/) of the filedir that are needed for the plotfootprint task."""
     if not filefilter:
         return None
@@ -38,18 +38,21 @@ def gatherresults(filefilter,pol):
         for datadir in datadirs:
             if not os.path.isfile(os.path.join(datadir,"results.py")):
                 continue
+            if excludelist:
+                if True in [st in datadir for st in excludelist]:
+                    continue
             resfile=open(os.path.join(datadir,"results.py"))
-            if "nan" in resfile.read():
-                print "WARNING nan found. skipping file", resfile.name
-                continue
             res={}
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
-            antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
+            antid[res["polarization"]].extend([int(v) for v in res["antennas"].values()])
             positions2[res["polarization"]].extend(res["antenna_positions_ITRF_m"])
 
             signal[res["polarization"]].extend(res["pulses_maxima_y"])
             ndipoles[res["polarization"]]+=res["ndipoles"]
+            if not "BLOCKSIZE" in res.keys():
+                print "Warning blocksize not provided, using default of 65536"
+                res["BLOCKSIZE"]=65536
             pulseoffset=res["SAMPLE_NUMBER"]+res["pulse_start_sample"]+res["BLOCKSIZE"]
             pulseoffset/=res["SAMPLE_FREQUENCY"]
             
@@ -79,12 +82,15 @@ def gatherresults(filefilter,pol):
 
     clockcorrection=cr.metadata.get("ClockCorrection",antid[pol],antset,return_as_hArray=True)
     par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],antset,return_as_hArray=True)
+    #par["positions"]=cr.metadata.get("RelativeAntennaPositions",antid[pol],antset,return_as_hArray=True)
     par["power"]=cr.hArray(signal[pol])
 #indexvec=cr.hArray(int,dimensions=par["power"])
 #nrgrt=cr.hFindGreaterThan(indexvec,par["power"],1.0e15)
 #zerovec=cr.hArray(float,dimensions=nrgrt.val(),fill=1e-5)
 #par["power"][indexvec[0:3]]=par["power"].min()
     par["arrivaltime"]=cr.hArray(timelags[pol])+clockcorrection
+    par["arrivaltime"]-=min(par["arrivaltime"])
+    par["arrivaltime"]*=1e9
 #par["loracolor"]="time"
     par["title"]="Footprint of CR event "+res["FILENAME"].split('-')[1]
     par["names"]=[str(a)[:-6]+","+str(a)[-3:] for a in antid]
@@ -145,7 +151,8 @@ class plotfootprint(tasks.Task):
     parameters=dict(
         filefilter={default:None,doc:"Obtains results from subdirectories of these files (from results.py)"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
-        results=p_(lambda self:gatherresults(self.filefilter,self.pol),"hArray with BLAAT transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
+        excludelist={default:None,doc:"List with stations not to take into account when making the footprint"},
+        results=p_(lambda self:gatherresults(self.filefilter,self.pol,self.excludelist),"hArray with BLAAT transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
         positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
         size={default:300,doc:"Size of largest point."},
         sizes_min={default:None,doc:"If set, then use this as the minimum scale for the sizes, when normalizing and plotting."},
@@ -164,6 +171,7 @@ class plotfootprint(tasks.Task):
         positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
         NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
         figure={default:None,doc:"No startplot"},
+        colormap={default:"autumn",doc:"colormap to use for LOFAR timing"},
         plotlora={default:True,doc:"Plot the LORA data when positions are present?"},
         loracore=p_(lambda self:obtainvalue(self.results,"loracore"),doc="Shower core position in hArray(float(X,Y,0))",unit="m"),
         loradirection=p_(lambda self:obtainvalue(self.results,"loradirection"),doc="Shower direction hArray(float,(Azimuth,Elevation)). Azimuth defined from North Eastwards. Elevation defined from horizon up",unit="degrees"),
@@ -172,8 +180,9 @@ class plotfootprint(tasks.Task):
         loraarrivaltimes=p_(lambda self:obtainvalue(self.results,"loraarrivaltimes"),doc="hArray with arrival time of LORA events"),
         lorashape={default:"p",doc:"Shape of LORA detectors. e.g. 's' for square, 'p' for pentagram, 'h' for hexagon"},
         lofarshape={default:"o",doc:"Shape of LOFAR antennas. e.g. 'o' for circle, '^' for triangle"},
-        loracolor={default:"#BE311A",doc:"Color used for LORA plots. If set to 'time' uses the arrival time" },
-        plotlayout={default:True,doc:"Plot the LOFAR layout of the stations as the background"}
+        loracolor={default:"#730909",doc:"Color used for LORA plots. If set to 'time' uses the arrival time" },
+        plotlayout={default:True,doc:"Plot the LOFAR layout of the stations as the background"},
+        filetype={default:"png",doc:"extension/type of output file"}
         
         )
         
@@ -229,10 +238,11 @@ class plotfootprint(tasks.Task):
             from os import environ
             from os.path import isfile
             if "LOFARSOFT" in environ.keys():
-                bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
+                bgimname=environ["HOME"]+"/Pictures/lofarlayoutRound.png"
+                #bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
                 if isfile(bgimname):
                     bgim=cr.plt.imread(bgimname)
-                    cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=0.2)
+                    cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
                 else:
                     print "WARNING Cannot plot layout. Image file not found. Run an svn update?"
             else:
@@ -240,8 +250,9 @@ class plotfootprint(tasks.Task):
         if self.title:
             cr.plt.title(self.title)
         if self.positions:
-            cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.scolors,marker=self.lofarshape)
-        cbar=cr.plt.colorbar()
+            cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.scolors,marker=self.lofarshape,cmap=self.colormap)
+        self.cbar=cr.plt.colorbar()
+        self.cbar.set_label("Time of arrival (ns)")
         if self.plotlora:
             if isinstance(self.lorapower,(list)):
                 self.lorapower=cr.hArray(self.lorapower)
@@ -280,7 +291,7 @@ class plotfootprint(tasks.Task):
             cr.plt.colorbar()
         cr.plt.xlabel("meters East")
         cr.plt.ylabel("meters North")
-        cr.plt.text(100,-220,"Size denotes signal power")
-        if self.filefilter:
+        #cr.plt.text(100,-220,"Size denotes signal power")
+        if self.filefilter and self.plot_name == "footprint":
             self.plot_name=self.filefilter+"/"+"pol"+str(self.pol)+"/"+self.plot_name
-        self.plot_finish(filename=self.plot_name)
+        self.plot_finish(filename=self.plot_name,filetype=self.filetype)
