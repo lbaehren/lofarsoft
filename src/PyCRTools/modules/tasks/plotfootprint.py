@@ -238,8 +238,7 @@ class plotfootprint(tasks.Task):
             from os import environ
             from os.path import isfile
             if "LOFARSOFT" in environ.keys():
-                bgimname=environ["HOME"]+"/Pictures/lofarlayoutRound.png"
-                #bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
+                bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
                 if isfile(bgimname):
                     bgim=cr.plt.imread(bgimname)
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
