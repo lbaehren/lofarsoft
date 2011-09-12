@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.19
+VERSION=2.20
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -1086,13 +1086,13 @@ do
 
         if (( $TiedArray == 1 )) 
         then 
-			echo split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_"
-			echo split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_" >> $log
-			split -a 2 -d -l 1 $master_list ${STOKES}/$$"_split_"
+			echo split -a 3 -d -l 1 $master_list ${STOKES}/$$"_split_"
+			echo split -a 3 -d -l 1 $master_list ${STOKES}/$$"_split_" >> $log
+			split -a 3 -d -l 1 $master_list ${STOKES}/$$"_split_"
         else
-			echo split -a 2 -d -l $div_files $master_list ${STOKES}/$$"_split_"
-			echo split -a 2 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
-			split -a 2 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+			echo split -a 3 -d -l $div_files $master_list ${STOKES}/$$"_split_"
+			echo split -a 3 -d -l $div_files $master_list ${STOKES}/$$"_split_" >> $log
+			split -a 3 -d -l $div_files $master_list ${STOKES}/$$"_split_"
         fi
         
 		status=$?
@@ -1247,6 +1247,10 @@ do
 			do
 			  if (( $ii < 10 ))
 			  then 
+			     echo mv ${STOKES}/$$"_split_00"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
+			     mv ${STOKES}/$$"_split_00"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
+			  elif (( $ii < 100 ))
+			  then
 			     echo mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list" >> $log
 			     mv ${STOKES}/$$"_split_0"$ii ${STOKES}/"RSP"${ii}/"RSP"${ii}".list"
 			  else
@@ -1262,6 +1266,10 @@ do
 			for jjj in $beams
 			do
 			  if (( $counter < 10 ))
+			  then 
+				  echo cp ${STOKES}/$$"_split_00"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list" >> $log
+				  cp ${STOKES}/$$"_split_00"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list"
+			  elif (( $counter < 100 ))
 			  then 
 				  echo cp ${STOKES}/$$"_split_0"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list" >> $log
 				  cp ${STOKES}/$$"_split_0"$counter ${STOKES}/"RSP"${ii}/${jjj}/"RSP"${ii}".list"
