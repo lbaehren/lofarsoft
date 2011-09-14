@@ -55,7 +55,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
               
             signal[res["polarization"]].extend(res[plot_parameter])
             
-            rms[res["polarization"]].extend(res["timeseries_power_rms"])
+            rms[res["polarization"]].extend(res["timeseries_rms"])
             
             ndipoles[res["polarization"]]+=res["ndipoles"]
             
