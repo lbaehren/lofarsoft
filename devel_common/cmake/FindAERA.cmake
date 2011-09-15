@@ -30,8 +30,6 @@ if (NOT FIND_AERA_CMAKE)
 
   set (FIND_AERA_CMAKE TRUE)
 
-  set (AERA_REQUIRED_VERSION "1.0.4")
-
   ##_____________________________________________________________________________
   ## Search locations
 
@@ -57,6 +55,28 @@ if (NOT FIND_AERA_CMAKE)
 
   if (AERA_INCLUDES AND AERA_LIBRARIES)
     set (AERA_FOUND TRUE)
+
+    ## ________________________________________________________________________
+    ##                                                     Find library version
+
+    find_path (AERA_CONFIG_H Datareader_config.h
+      PATHS ${include_locations}
+      PATH_SUFFIXES aera
+      )
+    if (AERA_CONFIG_H)
+      file (STRINGS "${AERA_CONFIG_H}" AERA_H REGEX "^#define AERA_DATAREADER_VERSION .*$")
+      string (REGEX REPLACE "^.*AERA_DATAREADER_VERSION ([0-9]+).*$" "\\1" AERA_VERSION_MAJOR "${AERA_H}")
+      string (REGEX REPLACE "^.*AERA_DATAREADER_VERSION [0-9]+\\.([0-9]+).*$" "\\1" AERA_VERSION_MINOR "${AERA_H}")
+      string (REGEX REPLACE "^.*AERA_DATAREADER_VERSION [0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" AERA_VERSION_PATCH "${AERA_H}")
+    else (AERA_CONFIG_H)
+      # Fall back to latest version without version checking support.
+      set (AERA_VERSION_MAJOR 1)
+      set (AERA_VERSION_MINOR 0)
+      set (AERA_VERSION_PATCH 4)
+    endif (AERA_CONFIG_H)
+
+    set (AERA_VERSION "${AERA_VERSION_MAJOR}.${AERA_VERSION_MINOR}.${AERA_VERSION_PATCH}")
+
   else (AERA_INCLUDES AND AERA_LIBRARIES)
     set (AERA_FOUND FALSE)
     if (NOT AERA_FIND_QUIETLY)
@@ -74,6 +94,7 @@ if (NOT FIND_AERA_CMAKE)
       message (STATUS "Found components for AERA")
       message (STATUS "AERA_INCLUDES  = ${AERA_INCLUDES}")
       message (STATUS "AERA_LIBRARIES = ${AERA_LIBRARIES}")
+      message (STATUS "AERA_VERSION   = ${AERA_VERSION}")
     endif (NOT AERA_FIND_QUIETLY)
   else (AERA_FOUND)
     if (AERA_FIND_REQUIRED)

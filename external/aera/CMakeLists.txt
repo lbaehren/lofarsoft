@@ -1,9 +1,24 @@
 
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.8)
+
 ## Name of the project
 project (AERA)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+# Project version (major.minor.patch)
+set (AERA_VERSION_MAJOR 1 )
+set (AERA_VERSION_MINOR 1 )
+set (AERA_VERSION_PATCH 0 )
+set (AERA_VERSION_ID "")
+set (AERA_SOURCE_VERSION "${AERA_VERSION_MAJOR}.${AERA_VERSION_MINOR}.${AERA_VERSION_PATCH}" )
+
+if (AERA_VERSION_ID)
+  set (AERA_SOURCE_VERSION "${AERA_SOURCE_VERSION}-${AERA_VERSION_ID}")
+endif (AERA_VERSION_ID)
+
+set (AERA_SOURCE_ARCHIVE "AERA_Datareader-${AERA_SOURCE_VERSION}.tar.gz" )
+set (AERA_URL         "" )
+
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
@@ -41,41 +56,52 @@ if (NOT AERA_VERBOSE_CONFIGURE)
   set (AERA_FIND_QUIETLY     YES )
 endif (NOT AERA_VERBOSE_CONFIGURE)
 
+set (AERA_FOUND FALSE)
 include (FindAERA)
+
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_AERA OR AERA_FORCE_BUILD)
+if (${AERA_FOUND})
+  if (${AERA_SOURCE_VERSION} VERSION_GREATER ${AERA_VERSION})
+    set (AERA_FORCE_BUILD TRUE)
 
-  set (AERA_VERSION     "1.0.4" )
-  set (AERA_TAR_ARCHIVE "AERA_Datareader-${AERA_VERSION}.tar.gz" )
-  set (AERA_URL         "" )
+  endif (${AERA_SOURCE_VERSION} VERSION_GREATER ${AERA_VERSION})
+endif (${AERA_FOUND})
+
+message (STATUS "AERA_FORCE_BUILD: ${AERA_FORCE_BUILD}")
+if (NOT AERA_FOUND OR AERA_FORCE_BUILD)
 
   ##__________________________________________________________________
   ## Build the project
 
   include (ExternalProject)
 
-  find_file (HAVE_AERA_SOURCE ${AERA_TAR_ARCHIVE}  ${AERA_SOURCE_DIR})
+  find_file (AERA_FOUND_SOURCE ${AERA_SOURCE_ARCHIVE} ${AERA_SOURCE_DIR})
 
-  if (NOT HAVE_AERA_SOURCE)
-    set (HAVE_AERA_SOURCE ${AERA_URL})
-  endif (NOT HAVE_AERA_SOURCE)
+  message (STATUS "AERA_SOURCE_ARCHIVE: ${AERA_SOURCE_ARCHIVE}")
+  message (STATUS "AERA_SOURCE_DIR: ${AERA_SOURCE_DIR}")
+
+  if (NOT AERA_FOUND_SOURCE)
+    set (AERA_FOUND_SOURCE ${AERA_URL})
+  endif (NOT AERA_FOUND_SOURCE)
+
+  message (STATUS "AERA_FOUND_SOURCE: ${AERA_FOUND_SOURCE}")
 
   ExternalProject_Add (aera
     PREFIX ${PROJECT_BINARY_DIR}
     DOWNLOAD_DIR ${PROJECT_BINARY_DIR}/download
     SOURCE_DIR ${PROJECT_BINARY_DIR}/source
-    URL ${HAVE_AERA_SOURCE}
+    URL ${AERA_FOUND_SOURCE}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     )
 
   ## <-- end build condition ----------------------------------------------------->
 
-else (NOT HAVE_AERA OR AERA_FORCE_BUILD)
+else (NOT AERA_FOUND OR AERA_FORCE_BUILD)
   add_custom_target (aera
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[AERA] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_AERA OR AERA_FORCE_BUILD)
+endif (NOT AERA_FOUND OR AERA_FORCE_BUILD)
