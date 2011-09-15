@@ -64,7 +64,7 @@ if (NOT FIND_AERA_CMAKE)
       PATH_SUFFIXES aera
       )
     if (AERA_CONFIG_H)
-      file (STRINGS "${AERA_CONFIG_H}" AERA_H REGEX "^#define AERA_DATAREADER_VERSION .*$")
+      file (STRINGS "${AERA_CONFIG_H}/Datareader_config.h" AERA_H REGEX "^#define AERA_DATAREADER_VERSION .*$")
       string (REGEX REPLACE "^.*AERA_DATAREADER_VERSION ([0-9]+).*$" "\\1" AERA_VERSION_MAJOR "${AERA_H}")
       string (REGEX REPLACE "^.*AERA_DATAREADER_VERSION [0-9]+\\.([0-9]+).*$" "\\1" AERA_VERSION_MINOR "${AERA_H}")
       string (REGEX REPLACE "^.*AERA_DATAREADER_VERSION [0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" AERA_VERSION_PATCH "${AERA_H}")

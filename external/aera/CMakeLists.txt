@@ -25,9 +25,9 @@ set (AERA_URL         "" )
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (AERA_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (AERA_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (AERA_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+option (AERA_FORCE_BUILD       "Force rebuild and local installation?"    NO )
+option (AERA_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO )
+option (AERA_VERBOSE_BUILD     "Be verbose during build process?"         NO )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -53,7 +53,7 @@ endif (LUS_ROOT)
 ## Check if the program/package/library is already available
 
 if (NOT AERA_VERBOSE_CONFIGURE)
-  set (AERA_FIND_QUIETLY     YES )
+  set (AERA_FIND_QUIETLY TRUE)
 endif (NOT AERA_VERBOSE_CONFIGURE)
 
 set (AERA_FOUND FALSE)
@@ -69,7 +69,6 @@ if (${AERA_FOUND})
   endif (${AERA_SOURCE_VERSION} VERSION_GREATER ${AERA_VERSION})
 endif (${AERA_FOUND})
 
-message (STATUS "AERA_FORCE_BUILD: ${AERA_FORCE_BUILD}")
 if (NOT AERA_FOUND OR AERA_FORCE_BUILD)
 
   ##__________________________________________________________________
@@ -79,14 +78,9 @@ if (NOT AERA_FOUND OR AERA_FORCE_BUILD)
 
   find_file (AERA_FOUND_SOURCE ${AERA_SOURCE_ARCHIVE} ${AERA_SOURCE_DIR})
 
-  message (STATUS "AERA_SOURCE_ARCHIVE: ${AERA_SOURCE_ARCHIVE}")
-  message (STATUS "AERA_SOURCE_DIR: ${AERA_SOURCE_DIR}")
-
   if (NOT AERA_FOUND_SOURCE)
     set (AERA_FOUND_SOURCE ${AERA_URL})
   endif (NOT AERA_FOUND_SOURCE)
-
-  message (STATUS "AERA_FOUND_SOURCE: ${AERA_FOUND_SOURCE}")
 
   ExternalProject_Add (aera
     PREFIX ${PROJECT_BINARY_DIR}
