@@ -134,14 +134,14 @@ if (UNIX)
 endif (UNIX)
 
 add_dependencies (presto
-#  dspsr_install
-#  psrcat_install
-#  psrdada_install
-#  psrchive_install
+  dspsr_install
+  psrcat_install
+  psrdada_install
+  psrchive_install
   tempo2_install
   fftw_install
   tempo_install
-#  bf2presto_install
+#  bf2format_install
   scripts_install
   see_install
   presto_includes
