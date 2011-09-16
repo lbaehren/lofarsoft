@@ -208,8 +208,12 @@ class Op_readimage(Op):
           ctype = ['RA---' + wcs_dict.get('projection'), 'DEC--' + wcs_dict.get('projection')]
           if wcs_dict.has_key('crota1'):
             crota = [wcs_dict.get('crota')[i] for i in range(n)]
+          else:
+            crota = []
           if wcs_dict.has_key('cunit1'): 
             cunit = [wcs_dict.get('cunit')[i] for i in range(n)]
+          else:
+            cunit = []
 
         if img.use_wcs == 'wcslib':
             t.crval = tuple(crval)
