@@ -25,20 +25,34 @@ def convert(fromvalue,totype):
                 r=1
             return pytmf.spherical2cartesian(r,pi2-fromvalue["el"],pi2-fromvalue["az"])
 
+
 def revisionnr(filedir):
     """
-    This function obtains the svn revision number by executing an svn info command and parsing the output.
+
     """
     import subprocess
-    revnr=None
-    proc=subprocess.Popen(["svn","info",filedir],stdout=subprocess.PIPE)
-    lines=proc.stdout.readlines()
-    for l in lines:
-        if "Revision" in l:
-            revnr=int(l.split()[1])
 
-    return revnr
+    revision_nr = 0
+    process = None
 
+    lofarsoft = os.environ["LOFARSOFT"]
+    uses_svn = os.path.exists(lofarsoft+"/.svn")
+    uses_git = os.path.exists(lofarsoft+"/.git")
+
+    print "filedir: %s" %(filedir)
+
+    if (uses_svn):
+        process = subprocess.Popen(["svn","info",filedir],stdout=subprocess.PIPE)
+    elif(uses_git):
+        process = subprocess.Popen(["git","svn","info"], stdout=subprocess.PIPE, cwd=filedir)
+
+    if (process):
+        lines = process.stdout.readlines()
+        for line in lines:
+            if "Revision" in line:
+                revision_nr = int(line.split()[1])
+
+    return revision_nr
 
 
 
