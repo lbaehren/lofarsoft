@@ -144,7 +144,7 @@ class Op_collapse(Op):
       image = img.ch0
       img.blankpix = N.sum(mask)
       frac_blank = round(float(img.blankpix)/float(image.shape[0]*image.shape[1]),3)
-      mylogger.userinfo(mylog, "Blank pixels in the image", str(img.blankpix)
+      mylogger.userinfo(mylog, "Number of blank pixels", str(img.blankpix)
                         +' ('+str(frac_blank*100.0)+'%)')
 
  

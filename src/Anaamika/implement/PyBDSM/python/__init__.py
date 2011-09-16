@@ -187,4 +187,3 @@ def process_image(input_file, **kwargs):
     # override those read in from the parameter save file.
     img.process(**kwargs)
     return img
-    

@@ -86,10 +86,6 @@ class Op_wavelet_atrous(Op):
             im_new[pix_masked] = N.nan  # since fftconvolve wont work with blanked pixels
             w=im_old-im_new
             im_old=im_new
-            #if j == jmax+1: 
-            #  suffix = 'cJ'
-            #else:
-            #  suffix = 'w'+`j`
             suffix = 'w'+`j`
             filename = img.imagename + '.atrous.'+suffix+'.fits'
             if img.opts.output_all:
@@ -122,6 +118,7 @@ class Op_wavelet_atrous(Op):
               wimg.pixel_beam = (wopts['beam'][0]/fwsig/cdelt[0], wopts['beam'][1]/fwsig/cdelt[1], wopts['beam'][2])
               wimg.pixel_beamarea = 1.1331*wimg.pixel_beam[0]*wimg.pixel_beam[1]*fwsig*fwsig
               wimg.pixel_restbeam = img.pixel_restbeam
+              #wimg.opts.minpix_isl = wimg.pixel_beamarea
               wimg.log = 'Wavelet.'
               wimg.basedir = img.basedir
               wimg.extraparams['bbsprefix'] = suffix
@@ -129,7 +126,8 @@ class Op_wavelet_atrous(Op):
               wimg.extraparams['bbsappend'] = True
               wimg.bbspatchnum = img.bbspatchnum
               wimg.waveletimage = True
-              wimg.j = j
+              wimg.use_wcs = img.use_wcs
+              wimg.j = j             
               self.FITS_simple(wimg, img, w, '.atrous.'+suffix)
               for op in wchain:
                 op(wimg)
@@ -243,7 +241,18 @@ class Op_wavelet_atrous(Op):
         wimg.imagename = img.imagename+name+'.pybdsm'
         wimg.pix2sky = img.pix2sky; wimg.sky2pix = img.sky2pix; wimg.pix2beam = img.pix2beam
         wimg.beam2pix = img.beam2pix; wimg.pix2coord = img.pix2coord; wimg.beam = img.beam
-        wimg.mask = img.mask
+        # Mask regions that are outside of islands in the original image.
+        # This prevents fitting of Gaussians to wavelet images in these 
+        # regions.
+        if img.opts.atrous_orig_isl:
+            mask = N.ones(img.ch0.shape, dtype=bool)
+            for isl in img.islands:
+                mask[isl.bbox] = isl.mask_active
+            wimg.rms_mask = img.mask # mask only for rms/mean map calculation
+        else:
+            mask = img.mask
+        wimg.masked = True
+        wimg.mask = mask
         wimg.use_io = img.use_io
 
 #######################################################################################################

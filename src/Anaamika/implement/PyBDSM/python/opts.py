@@ -338,7 +338,7 @@ class Opts(object):
                                  "image is greater than 0.1), the image is assumed to be "\
                                  "confused and hence the background mean is put to zero.",
                              group="advanced_opts")
-    spline_rank     =   Enum(3, 3,
+    spline_rank     =   Enum(3, 1, 2, 4,
                              doc="Rank of the interpolating function for rms/mean map\n"\
                                  "This is an integer and is the order of the interpolating "\
                                  "spline function to interpolate the background rms and "\
@@ -432,6 +432,14 @@ class Opts(object):
                                  "Unless this is set to True, the image cannot be "\
                                  "decomposed into a Pyramidal set of sources for "\
                                  "morphological transforms.",
+                             group="atrous_do")
+    atrous_orig_isl  =   Bool(True,
+                             doc="Restrict wavelet Gaussians to islands found in original "\
+                                 "image\n"\
+                                 "If True, Gaussians will only be fit to the wavelet "\
+                                 "images inside islands found in the original image. "
+                                 "If False, wavelet Gaussians can be fit to any part of the "\
+                                 "wavelet image.",
                              group="atrous_do")
 
     

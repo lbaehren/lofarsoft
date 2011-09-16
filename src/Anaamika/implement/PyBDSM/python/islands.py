@@ -120,12 +120,11 @@ class Op_islands(Op):
             isl_maxposn = tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+\
                           N.array((s[0].start, s[1].start)))
             if (isl_size >= minsize) and (isl_peak - mean[isl_maxposn])/thresh_pix > rms[isl_maxposn]:
-              isl = Island(image, mask, mean, rms, labels, s, idx)
-              res.append(isl)
-              pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
+                isl = Island(image, mask, mean, rms, labels, s, idx)
+                res.append(isl)
+                pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
 
         #if saverank: func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
-
         return res
 
 

@@ -16,20 +16,34 @@ import functions as func
 import statusbar
 
 ### Insert attributes into Source class
-Source.total_flux_Q        = Float(doc="Total flux(Jy), Stokes Q")
-Source.total_fluxE_Q       = Float(doc="Error in total flux (Jy), Stokes Q")
-Source.total_flux_U        = Float(doc="Total flux (Jy), Stokes U")
-Source.total_fluxE_U       = Float(doc="Error in total flux (Jy), Stokes U")
-Source.total_flux_V        = Float(doc="Total flux (Jy), Stokes V")
-Source.total_fluxE_V       = Float(doc="Error in total flux (Jy), Stokes V")
-Source.lpol_fraction       = Float(doc="Linear polarisation fraction")
-Source.lpol_fraction_err   = Float(doc="Linear polarisation fraction error")
-Source.cpol_fraction       = Float(doc="Circular polarisation fraction")
-Source.cpol_fraction_err   = Float(doc="Circular polarisation fraction error")
-Source.tpol_fraction       = Float(doc="Total polarisation fraction")
-Source.tpol_fraction_err   = Float(doc="Total polarisation fraction error")
-Source.lpol_angle          = Float(doc="Polarisation angle (deg from North towards East)")
-Source.lpol_angle_err      = Float(doc="Polarisation angle error (deg)")
+Source.total_flux_Q        = Float(doc="Total flux(Jy), Stokes Q", colname='Total_Q',
+                                   units='Jy')
+Source.total_fluxE_Q       = Float(doc="Error in total flux (Jy), Stokes Q", colname='E_Total_Q',
+                                   units='Jy')
+Source.total_flux_U        = Float(doc="Total flux (Jy), Stokes U", colname='Total_U',
+                                   units='Jy')
+Source.total_fluxE_U       = Float(doc="Error in total flux (Jy), Stokes U", colname='E_Total_U',
+                                   units='Jy')
+Source.total_flux_V        = Float(doc="Total flux (Jy), Stokes V", colname='Total_V',
+                                   units='Jy')
+Source.total_fluxE_V       = Float(doc="Error in total flux (Jy), Stokes V", colname='E_Total_V',
+                                   units='Jy')
+Source.lpol_fraction       = Float(doc="Linear polarisation fraction", 
+                                   colname='Linear_Pol_frac', units=None)
+Source.lpol_fraction_err   = Float(doc="Linear polarisation fraction error", 
+                                   colname='E_Linear_Pol_frac', units=None)
+Source.cpol_fraction       = Float(doc="Circular polarisation fraction", 
+                                   colname='Circ_Pol_Frac', units=None)
+Source.cpol_fraction_err   = Float(doc="Circular polarisation fraction error", 
+                                   colname='E_Circ_Pol_Frac', units=None)
+Source.tpol_fraction       = Float(doc="Total polarisation fraction", 
+                                   colname='Total_Pol_Frac', units=None)
+Source.tpol_fraction_err   = Float(doc="Total polarisation fraction error", 
+                                   colname='E_Total_Pol_Frac', units=None)
+Source.lpol_angle          = Float(doc="Polarisation angle (deg from North towards East)", 
+                                   colname='Linear_Pol_Ang', units='deg')
+Source.lpol_angle_err      = Float(doc="Polarisation angle error (deg)",
+                                   colname='E_Linear_Pol_Ang', units='deg')
 
 class Op_polarisation(Op):
     """ Finds the flux in each Stokes and calculates the polarisation fraction and angle.

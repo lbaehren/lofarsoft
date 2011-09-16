@@ -31,10 +31,10 @@ freq = NArray(doc = "Freqs of unaveraged cube")
 case = String(doc = "Case of source")
 freq_av = NArray(doc = "Freqs of averaged cube")
 freq0 = Float(doc = "Fiducial frequency for calculating spectral indices")
-spin1 = NArray(doc = "spectral index (1st order in log)")
-espin1 = NArray(doc = "error in spectral index (1st order in log)")
-spin2 = NArray(doc = "spectral index (2nd order in log)")
-espin2 = NArray(doc = "error in spectral index (2nd order in log)")
+spin1 = Float(doc = "spectral index (1st order in log)", colname='Spec_Indx1', units=None)
+espin1 = Float(doc = "error in spectral index (1st order in log)", colname='E_Spec_Indx1', units=None)
+spin2 = Float(doc = "spectral index (2nd order in log)", colname='Spec_Indx2', units=None)
+espin2 = Float(doc = "error in spectral index (2nd order in log)", colname='E_Spec_Indx2', units=None)
 take2nd = Bool(doc = "spectral index fit with 2nd order in log makes sense or not")
 spec_descr = String(doc = "Description of source, if multiple")
 specind_win_size = Int(doc = "Size of averaging window for spectral index of M sources")
@@ -106,8 +106,7 @@ class Op_spectralindex(Op):
             case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
             src.case = str(case)
             para, epara, q_spec, spin_para = self.msource(img, src, rms_spec, avimage, casepara, nchan)
-            # Why are the above para, etc. not stored?
-
+            
           if bar2.started:
             bar2.increment()
   

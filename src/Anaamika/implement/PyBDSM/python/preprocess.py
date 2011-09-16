@@ -79,7 +79,7 @@ class Op_preprocess(Op):
           mylogger.userinfo(mylog, "Determining the pixels outside the universe")
           noutside_univ = self.outside_univ(img)
           img.noutside_univ = noutside_univ
-          mylogger.userinfo(mylog, "Blanked additional pixels", str(noutside_univ))
+          mylogger.userinfo(mylog, "Number of additional pixels blanked", str(noutside_univ))
         else:
           mylog.info("Not checking to see if there are pixels outside the universe")
 
@@ -113,7 +113,7 @@ class Op_preprocess(Op):
                                             / gfactor**2
             im_flux = N.nansum(img.ch0)/pixels_per_beam # Jy
             img.ch0_sum_jy = im_flux
-            mylogger.userinfo(mylog, 'Flux from sum of pixels in image',
+            mylogger.userinfo(mylog, 'Flux from sum of (non-blank) pixels',
                               '%.3f Jy' % (im_flux,))
         
         ### if image seems confused, then take background mean as zero instead
@@ -122,7 +122,7 @@ class Op_preprocess(Op):
           n = (image >= 5.*crms).sum()
           if n <= 0: 
             n = 1
-            mylog.warning('No pixels in image > 5sigma.')
+            mylog.warning('No pixels in image > 5-sigma.')
             mylog.warning('Either clipped rms is wrong or the image is pure gaussian noise?')
             mylog.info('Taking number of pixels above 5-sigma as 1.')
           img.bmpersrc_th = N.product(shape)/((alpha_sourcecounts-1.)*n)

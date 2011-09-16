@@ -27,6 +27,18 @@ def process(img, **kwargs):
     if hasattr(img, 'gaussians'): del img.gaussians
     if hasattr(img, 'atrous_gaussians'): del img.atrous_gaussians
     if hasattr(img, 'islands'): del img.islands
+    if hasattr(img, 'ch0'): del img.ch0
+    if hasattr(img, 'image'): del img.image
+    if hasattr(img, 'rms'): del img.rms
+    if hasattr(img, 'mean'): del img.mean
+    if hasattr(img, 'rms_QUV'): del img.rms_QUV
+    if hasattr(img, 'mean_QUV'): del img.mean_QUV
+    if hasattr(img, 'resid_gaus'): del img.resid_gaus
+    if hasattr(img, 'model_gaus'): del img.model_gaus
+    if hasattr(img, 'resid_shap'): del img.resid_shap
+    if hasattr(img, 'model_shap'): del img.model_shap
+    if hasattr(img, 'mask'): del img.mask
+
 
     # Start up logger. We need to initialize it each time process() is
     # called, in case the quiet or debug options have changed

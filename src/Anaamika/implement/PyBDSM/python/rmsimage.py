@@ -39,7 +39,10 @@ class Op_rmsimage(Op):
         else:
             pols = ['I'] # assume I is always present
             
-        mask = img.mask
+        if hasattr(img, 'rms_mask'):
+            mask = img.rms_mask
+        else:
+            mask = img.mask
         opts = img.opts
         map_opts = (opts.kappa_clip, opts.rms_box, opts.spline_rank)
         ch0_images = [img.ch0, img.ch0_Q, img.ch0_U, img.ch0_V]
@@ -149,18 +152,18 @@ class Op_rmsimage(Op):
         rms_map=None, whether to take the map (if variance 
         is significant) or a constant value
         """
-	from math import sqrt
+    	from math import sqrt
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkrms  ")
         cdelt = img.wcs_obj.acdelt[:2]
-	bm = (img.beam[0], img.beam[1])
-	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
-	stdsub = N.std(rms)
+    	bm = (img.beam[0], img.beam[1])
+    	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
+    	stdsub = N.std(rms)
 
-	rms_expect = img.clipped_rms/sqrt(2)/img.rms_box[0]*fw_pix
+    	rms_expect = img.clipped_rms/sqrt(2)/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of rms image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
-	if stdsub > 1.1*rms_expect:
+    	if stdsub > 1.1*rms_expect:
             img.use_rms_map = True
             mylogger.userinfo(mylog, 'Variation in rms image significant')
         else:
@@ -174,18 +177,18 @@ class Op_rmsimage(Op):
         mean_map=None, whether to take the map (if variance 
         is significant) or a constant value
         """
-	from math import sqrt
-
+    	from math import sqrt
+    	
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Rmsimage.Checkmean ")
-        cdelt = N.array(img.wcs_obj.acdelt[:2])
-	bm = (img.beam[0], img.beam[1])
-	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
-	stdsub = N.std(mean)
-
-	rms_expect = img.clipped_rms/img.rms_box[0]*fw_pix
+        cdelt = img.wcs_obj.acdelt[:2]
+        bm = (img.beam[0], img.beam[1])
+        fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
+        stdsub = N.std(mean)
+        
+        rms_expect = img.clipped_rms/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of mean image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
-	if stdsub > 1.1*rms_expect:
+        if stdsub > 1.1*rms_expect:
           img.mean_map_type = 'map'
           mylogger.userinfo(mylog, 'Variation in mean image significant')
         else:

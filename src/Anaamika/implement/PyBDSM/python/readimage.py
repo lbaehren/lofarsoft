@@ -96,12 +96,12 @@ class Op_readimage(Op):
         if len(img.image.shape) == 3:
             mylogger.userinfo(mylog, 'Image size',
                               str(img.image.shape[-2:])+' pixels')
-            mylogger.userinfo(mylog, 'Number of channels in image',
+            mylogger.userinfo(mylog, 'Number of channels',
                               '%i' % img.image.shape[0])
         else:
             mylogger.userinfo(mylog, 'Image size',
                               str(img.image.shape)+' pixels')
-            mylogger.userinfo(mylog, 'Number of channels in image',
+            mylogger.userinfo(mylog, 'Number of channels',
                               '1')
 
         ### initialize wcs conversion routines

@@ -2,7 +2,10 @@
 
 
 It's quite basic and limited implementation tailored specifically
-for use in the PyBDSM user-options.
+for use in the PyBDSM user-options and derived properties. For a
+user option, one can define a group that is used when listing the
+options to the screen. For a property (e.g., flux), one can define
+the column name to be used on output and the associated units.
 
 For a much more generic and capable implementation I can recommend
 to look at Enthought Traits package: 
@@ -47,7 +50,6 @@ v.intval = "failure"   # FAILS
 v.op_type= "op2"       # OK
 v.op_type= "op3"       # FAILS
 """
-
 import exceptions
 import types
 
@@ -61,21 +63,21 @@ _basic_types = (types.BooleanType, types.IntType, types.LongType,
 ############################################################
 ## Wrappers around TC to simplify it's usage for end-users
 ############################################################
-def Int(value=0, doc=None, group=None):
+def Int(value=0, doc=None, group=None, colname=None, units=None):
     """Create tc-value of type int"""
-    return TC(value, tcCType(int), doc, group)
+    return TC(value, tcCType(int), doc, group, colname, units)
 
-def Float(value=0., doc=None, group=None):
+def Float(value=0., doc=None, group=None, colname=None, units=None):
     """Create tc-value of type float"""
-    return TC(value, tcCType(float), doc, group)
+    return TC(value, tcCType(float), doc, group, colname, units)
 
 def Bool(value=False, doc=None, group=None):
     """Create tc-value of type bool"""
     return TC(value, tcCType(bool), doc, group)
 
-def String(value='', doc=None, group=None):
+def String(value='', doc=None, group=None, colname=None, units=None):
     """Create tc-value of type string"""
-    return TC(value, tcCType(str), doc, group)
+    return TC(value, tcCType(str), doc, group, colname, units)
 
 def Tuple(*values, **kws):
     """Create tc-value of type tuple.
@@ -92,12 +94,10 @@ def Tuple(*values, **kws):
     Examples:
     Tuple((1,2,3))          # tuple of 3 integers, default = (1,2,3)
     Tuple(Int(3), Float(2)) # tuple of int&float, default = (3, 2.0)
-    Tuple((1,2), Int(3), Float(2)) # tuple of int+float, 
-                                         default = (1, 2.0)
+    Tuple((1,2), Int(3), Float(2)) # tuple of int+float, default = (1, 2.0)
     """
     doc = kws.pop('doc', None)
     group = kws.pop('group', None)
-
     if len(values) == 0:
         return TC((), tcTuple(), doc, group)
 
@@ -168,7 +168,8 @@ def NArray(value=None, or_none=True, doc=None, group=None):
 
     return Instance(value, N.ndarray, or_none, doc, group)
 
-def Instance(value, type=None, or_none=True, doc=None, group=None):
+def Instance(value, type=None, or_none=True, doc=None, group=None, 
+             colname=None, units=None):
     """Creates tc-value which holds instances of specific class.
 
     Parameters:
@@ -187,7 +188,7 @@ def Instance(value, type=None, or_none=True, doc=None, group=None):
         else:
             type = value.__class__
 
-    return TC(value, tcInstance(type, or_none), doc, group)
+    return TC(value, tcInstance(type, or_none), doc, group, colname, units)
 
 def tInstance(type, or_none=False):
     """Create tc-handler for values which are instances of
@@ -213,7 +214,7 @@ def tInstance(type, or_none=False):
 
     return tcInstance(type, or_none)
 
-def List(value, type=None, doc=None, group=None):
+def List(value, type=None, doc=None, group=None, colname=None, units=None):
     """Creates tc-value which represents a list, where each element
     obeys specific type-constrains.
 
@@ -245,7 +246,7 @@ def List(value, type=None, doc=None, group=None):
     if type is None:
         value, type = [], tc_from(value)
 
-    return TC(value, tcList(type), doc, group)
+    return TC(value, tcList(type), doc, group, colname, units)
 
 def Any(value=None, doc=None, group=None):
     """Creates tc-value of arbitrary type
@@ -288,7 +289,8 @@ class TC(object):
     or 'type'. And the attribute should be defined in the
     class of the object.
     """
-    def __init__(self, value, _type=None, doc=None, group=None):
+    def __init__(self, value, _type=None, doc=None, group=None, colname=None,
+                 units=None):
         """Create typed-checked object.
 
         Parameters:
@@ -306,6 +308,8 @@ class TC(object):
         self._name = None # name is unknown atm
         self._group = group
         self._doc = doc
+        self._colname = colname
+        self._units = units
 
         self.__doc__ = "default value is %s (%s)" % \
                 (str(self._default), self._type.info())
@@ -358,6 +362,14 @@ class TC(object):
     def group(self):
         """Return group designation of tc-value"""
         return self._group
+
+    def colname(self):
+        """Return column name designation of tc-value"""
+        return self._colname
+
+    def units(self):
+        """Return units designation of tc-value"""
+        return self._units
 
     @staticmethod
     def set_property_names(klass):

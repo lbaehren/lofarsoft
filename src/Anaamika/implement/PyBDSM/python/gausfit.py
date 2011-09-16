@@ -22,7 +22,6 @@ import misc
 import _cbdsm
 import pylab as pl
 
-gaus_num = Int(doc="Serial number of the gaussian for the image")
 ngaus = Int(doc="Total number of gaussians extracted")
 total_flux_gaus = Float(doc="Total flux in the Gaussians extracted")
 
@@ -140,7 +139,7 @@ class Op_gausfit(Op):
             m = 0
             for g in isl.gaul:
                 n += 1; m += 1
-                g.gaus_num = n
+                g.gaus_num = n - 1
                 g.wavelet_j = j
                 tot_flux += g.total_flux
             isl.ngaus = m
@@ -219,7 +218,7 @@ class Op_gausfit(Op):
           ng1 = len(gaul); ngmax = ng1+2
         while iter < 5:
             iter += 1
-            fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr1, iter, img.opts.ini_gausfit, ngmax, verbose)
+            fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr2, iter, img.opts.ini_gausfit, ngmax, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
                                               beam, thr2, peak, shape)
             ng1 = len(gaul)
@@ -553,28 +552,42 @@ class Gaussian(object):
     extracted gaussians in a structured way.
     """
     gaussian_idx = Int(doc="Serial number of the gaussian within island")
-    island_id    = Int(doc="Serial number of the island")
-
-    flag = Int(doc="Flag associated with gaussian")
-
+    gaus_num = Int(doc="Serial number of the gaussian for the image", colname='Gaus_id')
+    island_id   = Int(doc="Serial number of the island", colname='Isl_id')
+    flag        = Int(doc="Flag associated with gaussian", colname='Flag')
     parameters  = List(Float(), doc="Raw gaussian parameters")
-
-    ## should we use tuples for value + error ??
-    total_flux  = Float(doc="Total flux, in Jy")
-    total_fluxE = Float(doc="Total flux error")
-    peak_flux   = Float(doc="Peak flux density, Jy/beam")
-    peak_fluxE  = Float()
-    centre_sky  = List(Float(), doc="Sky coordinates of gaussian centre")
-    centre_skyE = List(Float())
-    centre_pix  = List(Float(), doc="Pixel coordinates of gaussian centre")
-    centre_pixE = List(Float())
-    size_sky   = List(Float(), doc="Shape of the gaussian FWHM, BPA, arcsec")
-    size_skyE  = List(Float())
-    deconv_size_sky = List(Float(), doc="Deconvolved shape of the gaussian FWHM, BPA, arcsec")
-    deconv_size_skyE = List(Float())
+    total_flux  = Float(doc="Total flux density, Jy", colname='Total', units='Jy')
+    total_fluxE = Float(doc="Total flux density error, Jy", colname='E_Total', 
+                        units='Jy')
+    peak_flux   = Float(doc="Peak flux density/beam, Jy/beam", colname='Peak', 
+                        units='Jy/beam')
+    peak_fluxE  = Float(doc="Peak flux density/beam error, Jy/beam", 
+                        colname='E_Peak', units='Jy/beam')
+    centre_sky  = List(Float(), doc="Sky coordinates of gaussian centre", 
+                       colname=['RA', 'DEC'], units=['deg', 'deg'])
+    centre_skyE = List(Float(), doc="Error on sky coordinates of gaussian centre", 
+                       colname=['E_RA', 'E_DEC'], units=['deg', 'deg'])
+    centre_pix  = List(Float(), doc="Pixel coordinates of gaussian centre", 
+                       colname=['Xposn', 'Yposn'], units=['pix', 'pix'])
+    centre_pixE = List(Float(), doc="Error on pixel coordinates of gaussian centre", 
+                       colname=['E_Xposn', 'E_Yposn'], units=['pix', 'pix'])
+    size_sky   = List(Float(), doc="Shape of the gaussian FWHM, BPA, deg",
+                      colname=['Bmin', 'Bmaj', 'Bpa'], units=['deg', 'deg',
+                      'deg'])
+    size_skyE  = List(Float(), doc="Error on shape of the gaussian FWHM, BPA, deg",
+                      colname=['E_Bmin', 'E_Bmaj', 'E_Bpa'], units=['deg', 'deg',
+                      'deg'])
+    deconv_size_sky = List(Float(), doc="Deconvolved shape of the gaussian FWHM, BPA, deg",
+                      colname=['DC_Bmin', 'DC_Bmaj', 'DC_Bpa'], units=['deg', 'deg',
+                      'deg'])
+    deconv_size_skyE = List(Float(), doc="Error on deconvolved shape of the gaussian FWHM, BPA, deg",
+                      colname=['E_DC_Bmin', 'E_DC_Bmaj', 'E_DC_Bpa'], units=['deg', 'deg',
+                      'deg'])
     size_pix   = List(Float(), doc="Shape of the gaussian FWHM, pixel units")
-    size_pixE  = List(Float())
-    rms        = Float(doc="Island rms Jy/beam")
+    size_pixE  = List(Float(), doc="Error on shape of the gaussian FWHM, pixel units")
+    rms        = Float(doc="Island rms Jy/beam", colname='I_rms', units='Jy/beam')
+    mean       = Float(doc="Island mean Jy/beam", colname='I_mean', units='Jy/beam')
+    wavelet_j  = Int(doc="Wavelet number to which Gaussian belongs", colname='Wave_id')
 
     def __init__(self, img, gaussian, isl_idx, g_idx, flag=0):
         """Initialize Gaussian object from fitting data
@@ -591,6 +604,7 @@ class Gaussian(object):
         import numpy as N
 
         self.gaussian_idx = g_idx
+        self.gaus_num = 0 # stored later
         self.island_id = isl_idx
         self.jlevel = img.j
         self.flag = flag
@@ -620,11 +634,12 @@ class Gaussian(object):
               self.centre_sky = img.pix2sky(p[1:3])
           elif img.use_wcs == 'pywcs':
               self.centre_sky = img.pix2sky(p[1:3])
-#              self.centre_sky = img.pix2sky(N.array([p[1:3]]), 0)
         else:
           errors = [0]*7
           self.centre_sky = [0., 0.]
         self.total_flux = tot
+        self.total_flux_name = 'Total'
+        self.total_flux_unit = 'Jy'
         self.total_fluxE = errors[6]
 
         self.peak_fluxE = errors[0]

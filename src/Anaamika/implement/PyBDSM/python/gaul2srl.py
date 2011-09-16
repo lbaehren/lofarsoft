@@ -17,12 +17,13 @@ Also, each island object of img.islands list has the source object island.source
 
 from image import *
 from islands import *
+from gausfit import Gaussian
 import mylogger
 import output_fbdsm_files as opf
 
 nsrc = Int(doc="Number of sources in the image")
-source_id = Int(doc="Source number of a gaussian")
-
+Gaussian.source_id = Int(doc="Source number of a gaussian", colname='Source_id')
+Gaussian.code = String(doc='Source code S, C, or M', colname='S_Code')
 
 class Op_gaul2srl(Op):
     """  
@@ -86,6 +87,7 @@ class Op_gaul2srl(Op):
 
         src_index += 1
         g.source_id = src_index
+        g.code = code
         source.source_id = src_index
 
         return src_index, source
@@ -338,6 +340,7 @@ class Op_gaul2srl(Op):
         src_index += 1
         for g in g_sublist:
             g.source_id = src_index
+            g.code = 'M'
         source.source_id = src_index
 
         return src_index, source

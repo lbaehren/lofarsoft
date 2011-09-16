@@ -264,7 +264,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             style = styles[isrc/6 % 3]
                             src = isl.source[isrc]
                             for g in src.gaussians:
-                                gidx = g.gaus_num - 1
+                                gidx = g.gaus_num
                                 ellx, elly = func.drawellipse(g)
                                 gline, = ax.plot(ellx, elly, color = col,
                                                  linestyle = style, picker=3)
@@ -280,7 +280,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             col = colours[isrc % 6]
                             style = styles[isrc/6 % 3]
                             for g in isl.gaul:
-                                gidx = g.gaus_num - 1
+                                gidx = g.gaus_num
                                 ellx, elly = func.drawellipse(g)
                                 gline, = ax.plot(ellx, elly, color = col,
                                                  linestyle = style, picker=3)
@@ -293,7 +293,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                 if hasattr(img, 'atrous_gaussians'):
                     for jindx, atrgaus in enumerate(img.atrous_gaussians):
                         for atrg in atrgaus:
-                            gidx = atrg.gaus_num - 1
+                            gidx = atrg.gaus_num
                             col = 'r'
                             style = '-'
                             ellx, elly = func.drawellipse(atrg)
