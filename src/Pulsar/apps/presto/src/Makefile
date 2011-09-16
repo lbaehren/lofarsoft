@@ -20,9 +20,6 @@ else
 	LOCDIR = /sw
 endif
 
-# Path to pulsar database files
-DATABASE = "$(PRESTO)/lib"
-
 # Path to PGPLOT includes
 PGPLOTINCDIR = -I$(PGPLOT_DIR)
 # Path to PGPLOT libraries
@@ -46,15 +43,15 @@ FFTLIBDIR = -L$(LOCDIR)/lib
 FFTLINK = $(FFTLIBDIR) -lfftw3f
 
 # Other include directories (i.e. glib.h)
-OTHERINCDIR = -I$(SYSDIR)/include/glib-2.0 -I$(SYSDIR)/lib/glib-2.0/include
-# Other link directories (i.e. libcfitsio)
-OTHERLIBDIR = -L.
+OTHERINCDIR = -I$(SYSDIR)/include/glib-2.0 -I$(SYSDIR)/lib/glib-2.0/include -I$(SYSDIR)/lib/i386-linux-gnu/glib-2.0/include/
+# Other link directories (i.e. libcfitsio if in different location)
+OTHERLIBDIR =
 
 # The standard PRESTO libraries to link into executables
-PRESTOLINK = -L$(PRESTO)/lib -lpresto $(FFTLINK)
+PRESTOLINK = $(OTHERLIBDIR) -L$(PRESTO)/lib -lpresto $(FFTLINK)
 
 # When modifying the CLIG files, the is the location of the clig binary
-CLIG = /usr/bin/clig
+CLIG = clig
 
 # For Pentium IVs, use -march=pentium4
 # For Opterons, use -march=opteron
@@ -64,15 +61,14 @@ CC = gcc
 FC = gfortran
 #FC = g77
 CFLAGS = -I$(PRESTO)/include $(OTHERINCDIR) $(PGPLOTINCDIR) $(FFTINCDIR) \
-	-DDATABASE='$(DATABASE)' -D$(FFTTYPE) -DUSEMMAP \
-	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
+	-D$(FFTTYPE) -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
 	-O3 -ffast-math -Wall -W -fPIC
 #	-g -Wall -W
 CLINKFLAGS = $(CFLAGS)
 # NOTE:  Be careful of upping the optimization on the
 #        FFLAGs.  Certain compilers (i.e. on Intel Macs) will
 #        cause errors for the code in least_squares.f
-FFLAGS = -g -O -fPIC
+FFLAGS = -g -fPIC
 FLINKFLAGS = $(FFLAGS)
 LINKCOMMAND1 = $(CC) $(LIBCMD) -o
 LINKCOMMAND2 = ar rcs
@@ -97,7 +93,7 @@ PRESTOOBJS = amoeba.o atwood.o barycenter.o birdzap.o cand_output.o\
 	rzinterp.o rzwinterp.o select.o sorter.o swapendian.o\
 	transpose.o twopass.o twopass_real_fwd.o\
 	twopass_real_inv.o vectors.o multifiles.o mask.o\
-	fitsfile.o hget.o hput.o imio.o prepsubband_mod.o
+	fitsfile.o hget.o hput.o imio.o
 
 INSTRUMENTOBJS = multibeam.o bpp.o gmrt.o spigot.o sigproc_fb.o\
 	wapp.o wapp_head_parse.o wapp_y.tab.o psrfits.o
@@ -112,15 +108,16 @@ BINARIES = makedata makeinf mjd2cal realfft quicklook\
 	dat2sdat sdat2dat downsample rednoise un_sc_td bincand\
 	dump_spigot_zerolag spigot2filterbank\
 	spigotSband2filterbank GBT350filterbank\
-	psrorbit window plotbincand prepfold prepfold_mod show_pfd\
-	rfifind zapbirds explorefft exploredat weight_psrfits prepsubband_mod
+	psrorbit window plotbincand prepfold show_pfd\
+	rfifind zapbirds explorefft exploredat\
+	weight_psrfits fitsdelrow fitsdelcol psrfits_dumparrays
 
 all: libpresto slalib binaries
 
 # Default indentation is K&R style with no-tabs,
-# an indentation level of 3, and a line-length of 85
+# an indentation level of 4 (default), and a line-length of 85
 indent:
-	indent -kr -nut -i3 -l85 *.c
+	indent -kr -nut -l85 *.c
 	rm *.c~
 
 prep:
@@ -164,7 +161,7 @@ mpiprepsubband: mpiprepsubband_cmd.c mpiprepsubband_cmd.o mpiprepsubband_utils.o
 	mpicc $(CLINKFLAGS) -o $(PRESTO)/bin/$@ mpiprepsubband_cmd.o mpiprepsubband_utils.o mpiprepsubband.o $(INSTRUMENTOBJS) $(PRESTOLINK) -lcfitsio -lm
 
 accelsearch: accelsearch_cmd.c accelsearch_cmd.o accel_utils.o accelsearch.o zapping.o
-	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ accelsearch_cmd.o accel_utils.o accelsearch.o zapping.o $(PRESTOLINK) $(OTHERLIB) -lglib-2.0 -lm
+	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ accelsearch_cmd.o accel_utils.o accelsearch.o zapping.o $(PRESTOLINK) -lglib-2.0 -lm
 
 bary: bary.o
 	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ bary.o $(PRESTOLINK) -lm
@@ -208,14 +205,8 @@ prepdata: prepdata_cmd.c prepdata_cmd.o prepdata.o $(INSTRUMENTOBJS)
 prepsubband: prepsubband_cmd.c prepsubband_cmd.o prepsubband.o $(INSTRUMENTOBJS)
 	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ prepsubband.o prepsubband_cmd.o $(INSTRUMENTOBJS) $(PRESTOLINK) -lcfitsio -lm
 
-prepsubband_mod: prepsubband_cmd.c prepsubband_cmd.o prepsubband_mod.o $(INSTRUMENTOBJS)
-	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ prepsubband_mod.o prepsubband_cmd.o $(INSTRUMENTOBJS) $(PRESTOLINK) -lcfitsio -lm
-
 prepfold: prepfold_cmd.c prepfold_cmd.o prepfold.o prepfold_utils.o prepfold_plot.o least_squares.o polycos.o readpar.o $(INSTRUMENTOBJS) $(PLOT2DOBJS)
 	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ prepfold.o prepfold_utils.o prepfold_plot.o prepfold_cmd.o least_squares.o polycos.o readpar.o $(PLOT2DOBJS) $(INSTRUMENTOBJS) $(LAPACKLINK) $(PRESTOLINK) $(PGPLOTLINK) -lcfitsio -lm
-
-prepfold_mod: prepfold_cmd.c prepfold_cmd.o prepfold_mod.o prepfold_utils.o prepfold_plot.o least_squares.o polycos.o readpar.o $(INSTRUMENTOBJS) $(PLOT2DOBJS)
-        $(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ prepfold_mod.o prepfold_utils.o prepfold_plot.o prepfold_cmd.o least_squares.o polycos.o readpar.o $(PLOT2DOBJS) $(INSTRUMENTOBJS) $(LAPACKLINK) $(PRESTOLINK) $(PGPLOTLINK) -lcfitsio -lm
 
 dump_spigot_zerolag: dump_spigot_zerolag.o spigot.o
 	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ dump_spigot_zerolag.o spigot.o $(PRESTOLINK) -lm
@@ -290,7 +281,7 @@ window: window.o $(PLOT2DOBJS)
 	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ $(PLOT2DOBJS) window.o $(PRESTOLINK) $(PGPLOTLINK) -lm
 
 zapbirds: zapbirds_cmd.c zapbirds_cmd.o zapbirds.o zapping.o $(PLOT2DOBJS)
-	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ zapbirds_cmd.o zapbirds.o zapping.o $(PLOT2DOBJS) $(PRESTOLINK) $(PGPLOTLINK) $(OTHERLIB) -lglib-2.0 -lm
+	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ zapbirds_cmd.o zapbirds.o zapping.o $(PLOT2DOBJS) $(PRESTOLINK) $(PGPLOTLINK) -lglib-2.0 -lm
 
 explorefft: explorefft.o $(PLOT2DOBJS)
 	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ explorefft.o $(PLOT2DOBJS) $(PRESTOLINK) $(PGPLOTLINK) -lm
@@ -300,6 +291,15 @@ exploredat: exploredat.o $(PLOT2DOBJS)
 
 weight_psrfits: weight_psrfits.o psrfits.o $(PLOT2DOBJS)
 	$(FC) $(FLINKFLAGS) -o $(PRESTO)/bin/$@ weight_psrfits.o psrfits.o $(PRESTOLINK) -lcfitsio -lm
+
+psrfits_dumparrays: psrfits_dumparrays.o
+	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ psrfits_dumparrays.o $(OTHERLIBDIR) -lcfitsio -lm
+
+fitsdelrow: fitsdelrow.o
+	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ fitsdelrow.o $(OTHERLIBDIR) -lcfitsio -lm
+
+fitsdelcol: fitsdelcol.o
+	$(CC) $(CLINKFLAGS) -o $(PRESTO)/bin/$@ fitsdelcol.o $(OTHERLIBDIR) -lcfitsio -lm
 
 clean:
 	rm -f *.o *~ *#

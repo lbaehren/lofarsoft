@@ -352,11 +352,6 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
    double perr, pderr, pdderr;
    double pfold, pdfold, pddfold = 0.0;
    float *ftmparr1;
-/*   FILE *fp1;
-   if((fp1 = fopen("single_pulses_prepfold.asc","wb"))==NULL) {
-        printf("error in openning single pulse file\n");
-	exit(0);
-   }*/
    foldstats currentstats, beststats;
    /* Best Fold Plot */
    double *dbestprof = NULL;
@@ -723,15 +718,6 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
                    levels, &x1, &x2, &y1, &y2, tr);
          cpgimag(timeprofs, nc, nr, 0 + 1, nc, 0 + 1, nr, bg, fg, tr);
          free(levels);
-/*         if(flags->asc == 1){
-           for(ii = 0 ; ii < nr ; ii++ )
-           {
-	     fprintf(fp1,"# 0.0 0.0 0.0 0 0 0 %d 0 0 0\n",nr);
-             for(jj = 0 ; jj < nc ; jj++)
-	         fprintf(fp1,"%d\t %f\n",jj,(float)timeprofs[jj + ii*nc]);        
-           } 
-         }*/
-//         printf("NR and NC %d %d\n",nr,nc);
       }
       if (1) {                  /* if 0 skip the chi-squared vs time plot */
          cpgbox("BCNST", 0.0, 0, "BNST", 0.0, 0);
@@ -810,7 +796,8 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
                   ttot /= search->bary.p1;
                else
                   ttot /= search->topo.p1;
-               cpgerr1(5, 1.0, min - over, ttot, 2);
+               // Following is 0.5 * ttot since cpgerr1 gives +/- err in plot
+               cpgerr1(5, 1.0, min - over, 0.5*ttot, 2);
             }
          }
       }
@@ -839,7 +826,7 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
             cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
             cpgmtxt("L", 2.0, 0.5, 0.5, "Reduced \\gx\\u2\\d");
             cpgsch(0.8);
-            cpgmtxt("B", 2.6, 0.5, 0.5, "DM");
+            cpgmtxt("B", 2.6, 0.5, 0.5, "DM (pc/cm\\u3\\d)");
             ftmparr1 = gen_fvect(search->numdms);
             double2float(search->dms, ftmparr1, search->numdms);
             cpgline(search->numdms, ftmparr1, dmchi);
@@ -1251,7 +1238,7 @@ void prepfold_plot(prepfoldinfo * search, plotflags * flags, int xwin, float *pp
 
                cpgtext(0.0, 0.8, out);
                if (search->nsub > 1) {
-                  sprintf(out, "Dispersion Measure (DM) = %.3f", search->bestdm);
+                  sprintf(out, "Dispersion Measure (DM; pc/cm\\u3\\d) = %.3f", search->bestdm);
                   cpgtext(0.0, 0.7, out);
                } else {
                   sprintf(out, "Dispersion Measure (DM) = N/A");

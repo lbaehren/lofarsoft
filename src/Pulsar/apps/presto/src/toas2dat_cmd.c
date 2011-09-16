@@ -853,7 +853,7 @@ usage(void)
   fprintf(stderr,"%s","      -sec: TOA unit is seconds (default is days)\n");
   fprintf(stderr,"%s","      file: Input TOA file name\n");
   fprintf(stderr,"%s","            1 value\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","  version: 12Mar10\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }

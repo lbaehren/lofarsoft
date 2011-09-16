@@ -787,7 +787,7 @@ usage(void)
   fprintf(stderr,"%s","             1 char* value\n");
   fprintf(stderr,"%s","       file: Input '.dat' or '.sdat' file name\n");
   fprintf(stderr,"%s","             1 value\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","  version: 12Mar10\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }

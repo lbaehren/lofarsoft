@@ -67,7 +67,7 @@ set (presto_binaries
 )
 
 set (presto_glib_binaries
-  accelsearch
+  accelsearch fitsdelrow fitsdelcol psrfits_dumparrays
 )
 
 set (presto_fc_binaries
@@ -134,10 +134,10 @@ if (UNIX)
 endif (UNIX)
 
 add_dependencies (presto
-  dspsr_install
-  psrcat_install
-  psrdada_install
-  psrchive_install
+#  dspsr_install
+#  psrcat_install
+#  psrdada_install
+#  psrchive_install
   tempo2_install
   fftw_install
   tempo_install
@@ -151,6 +151,7 @@ add_dependencies (presto
   presto_cat_install
   ssps_install
   lpps_install
+  psrfits_install
   )
 
 ##__________________________________________________________
@@ -416,6 +417,18 @@ add_executable (weight_psrfits
   
 add_executable (makewisdom
   makewisdom.c
+  )
+
+add_executable (fitsdelcol
+  fitsdelcol.c 
+  )
+
+add_executable (fitsdelrow
+  fitsdelrow.c 
+  )
+
+add_executable (psrfits_dumparrays
+  psrfits_dumparrays.c 
   )
 
 ## linker instructions

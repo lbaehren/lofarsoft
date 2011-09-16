@@ -800,7 +800,7 @@ usage(void)
   fprintf(stderr,"%s","                 default: `6'\n");
   fprintf(stderr,"%s","           file: Input '.fft' file.\n");
   fprintf(stderr,"%s","                 1 value\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","  version: 12Mar10\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }

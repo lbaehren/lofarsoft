@@ -4,7 +4,7 @@ import Pgplot, ppgplot, bisect, sinc_interp
 from scipy.stats import histogram
 from scipy.special import ndtr, ndtri, chdtrc, chdtri, fdtr, i0, kolmogorov
 from scipy.optimize import leastsq
-from scipy.optimize.minpack import bisection
+import scipy.optimize.zeros as zeros
 from psr_constants import *
 
 isintorlong = lambda x: type(x) == type(0) or type(x) == type(0L)
@@ -337,7 +337,7 @@ def mass_funct2(mp, mc, i):
             'i' is the orbital inclination (rad).
         Note:  An 'average' orbit has cos(i) = 0.5, or i = 60 deg
     """
-    return (mc * Num.sin(i))**3 / (mc + mp)**2
+    return (mc * Num.sin(i))**3.0 / (mc + mp)**2.0
 
 def asini_c(pb, mf):
     """
@@ -369,6 +369,21 @@ def bins_to_accel(rdot, T, f=[1.0, 1000.0], device="/XWIN"):
     else:
         return accels
 
+def pulsar_mass(pb, x, mc, inc):
+    """
+    pulsar_mass(pb, x, mc, inc):
+        Return the pulsar mass (in solar mass units) for a binary
+        system with the following characteristics:
+            'pb' is the binary period in days.
+            'x' is the projected semi-major axis in lt-sec.
+            'inc' is the orbital inclination in degrees.
+            'mc' is the mass of the companion in solar mass units.
+    """
+    massfunct = mass_funct(pb, x)
+    def localmf(mp, mc=mc, mf=massfunct, i=inc*DEGTORAD):
+        return mass_funct2(mp, mc, i) - mf
+    return zeros.bisect(localmf, 0.0, 1000.0)
+        
 def companion_mass(pb, x, inc=60.0, mpsr=1.4):
     """
     companion_mass(pb, x, inc=60.0, mpsr=1.4):
@@ -381,8 +396,8 @@ def companion_mass(pb, x, inc=60.0, mpsr=1.4):
     """
     massfunct = mass_funct(pb, x)
     def localmf(mc, mp=mpsr, mf=massfunct, i=inc*DEGTORAD):
-        return (mc*Num.sin(i))**3.0/(mp + mc)**2.0 - mf
-    return bisection(localmf, 0.0, 1000.0)
+        return mass_funct2(mp, mc, i) - mf
+    return zeros.bisect(localmf, 0.0, 1000.0)
         
 def companion_mass_limit(pb, x, mpsr=1.4):
     """
@@ -444,7 +459,17 @@ def GAMMA_to_Mc(gamma, porb, e, Mp):
     """
     def funct(mc, mp=Mp, porb=porb, e=e, gamma=gamma):
         return GAMMA(porb, e, mp, mc) - gamma
-    return bisection(funct, 0.01, 20.0)
+    return zeros.bisect(funct, 0.01, 20.0)
+
+def shklovskii_effect(pm, D):
+    """
+    shklovskii_effect(pm, D):
+        Return the 'acceleration' due to the transverse Doppler effect
+        (i.e. the Shklovskii Effect) given the proper motion (pm) in mas/yr
+        and the distance (D) in kpc.  Note:  What is returned is a_pm/C,
+        or equivalently, Pdot_pm/P.
+    """
+    return (pm/1000.0*ARCSECTORAD/SECPERJULYR)**2.0 * KMPERKPC*D / (C/1000.0)
 
 def beam_halfwidth(obs_freq, dish_diam):
     """
@@ -584,6 +609,17 @@ def delay_from_DM(DM, freq_emitted):
     else:
         return Num.where(freq_emitted > 0.0,
                          DM/(0.000241*freq_emitted*freq_emitted), 0.0)
+
+def delay_from_foffsets(df, dfd, dfdd, times):
+    """
+    Return the delays in phase caused by offsets in
+    frequency (df), and two frequency derivatives (dfd, dfdd)
+    at the given times in seconds.
+    """
+    f_delays = df * times
+    fd_delays = dfd * times**2 / 2.0
+    fdd_delays = dfdd * times**3 / 6.0
+    return (f_delays + fd_delays + fdd_delays)
 
 def smear_plot(dm=[1.0,1000.0], dmstep=1.0, subdmstep=10.0, freq=1390.0,
                numchan=512, numsub=32, chanwidth=0.5, dt=0.000125,
@@ -813,6 +849,17 @@ def corr(profile, template):
         Cross-correlate (using FFTs) a 'profile' and a 'template'.
     """
     return FFT.irfft(FFT.rfft(template) * Num.conjugate(FFT.rfft(profile)))
+
+def autocorr(x):
+    """
+    autocorr(x):
+        Circular normalized auto-correlation of the (real) function x
+        using FFTs.  Returns only N/2+1 points as the remaining N/2-1
+        points are symmetric (corresponding to negative lags).
+    """
+    fftx = FFT.rfft(x)
+    acf = FFT.irfft(fftx * Num.conjugate(fftx))[:len(x)/2+1]
+    return acf / acf[0]
 
 def maxphase(profile, template):
     """
@@ -1550,3 +1597,12 @@ def psr_info(porf, pdorfd, time=None, input=None):
     print " Characteristic Age = %g years" % age
     print "          Assumed I = %g g cm^2" % I
     print ""
+
+def doppler(freq_observed, voverc):
+    """doppler(freq_observed, voverc):
+        This routine returns the frequency emitted by a pulsar 
+        (in MHz) given that we observe the pulsar at frequency 
+        freq_observed (MHz) while moving with radial velocity 
+        (in units of v/c) of voverc wrt the pulsar.
+    """
+    return freq_observed * (1.0 + voverc)

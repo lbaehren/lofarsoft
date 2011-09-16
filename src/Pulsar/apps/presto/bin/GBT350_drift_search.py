@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import glob, os, os.path, shutil, socket, struct, tarfile
+import glob, os, os.path, shutil, socket, struct, tarfile, stat
 import numpy, sys, presto, time, sigproc, sifting
 import psr_utils as pu
 
@@ -253,6 +253,7 @@ def main(fil_filenm, workdir, ddplans):
     # Make sure the output directory (and parent directories) exist
     try:
         os.makedirs(job.outputdir)
+        os.chmod(job.outputdir, stat.S_IRWXU | stat.S_IRWXG | S_IROTH | S_IXOTH)
     except: pass
 
     # Make sure the tmp directory (in a tmpfs mount) exists
@@ -293,9 +294,9 @@ def main(fil_filenm, workdir, ddplans):
             subbasenm = "%s_DM%s"%(job.basefilenm, ddplan.subdmlist[passnum])
 
             # Now de-disperse 
-            cmd = "prepsubband -mask %s -lodm %.2f -dmstep %.2f -numdms %d -numout %d -o %s/%s %s"%\
+            cmd = "prepsubband -mask %s -lodm %.2f -dmstep %.2f -nsub %d -numdms %d -numout %d -o %s/%s %s"%\
                   (maskfilenm, ddplan.lodm+passnum*ddplan.sub_dmstep, ddplan.dmstep,
-                   ddplan.dmsperpass, job.N/ddplan.downsamp,
+                   ddplan.numsub, ddplan.dmsperpass, job.N/ddplan.downsamp,
                    tmpdir, job.basefilenm, fil_filenm)
             job.dedispersing_time += timed_execute(cmd)
             
@@ -477,7 +478,7 @@ def main(fil_filenm, workdir, ddplans):
         for infile in glob.glob(tar_glob):
             tf.add(infile)
             os.remove(infile)
-    tf.close()
+        tf.close()
             
     # Remove all the downsampled .fil files
 
@@ -502,7 +503,7 @@ def main(fil_filenm, workdir, ddplans):
     job.write_report(os.path.join(job.outputdir, job.basefilenm+".report"))
 
     # Move all the important stuff to the output directory
-    cmd = "mv *rfifind.[bimors]* *out.gz *.tgz *.ps.gz *.png *.report "+\
+    cmd = "mv *rfifind.[bimors]* *.tgz *.ps.gz *.png *.report "+\
           job.outputdir
     os.system(cmd)
 

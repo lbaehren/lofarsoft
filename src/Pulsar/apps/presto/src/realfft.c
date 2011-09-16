@@ -155,9 +155,6 @@ int main(int argc, char *argv[])
    for (ii = 0; ii < numfiles; ii++)
       printf("   %d:  '%s'\n", ii + 1, datfile->filenames[ii]);
    numdata = datfile->length / sizeof(float);
-   if(numdata % 2){
-      numdata = numdata - 1;       // TO make the number of FFT points to be even number - vishal //
-   }                 
    if (isign == -1) {
       if (datfile->length % sizeof(float)) {
          printf("\nInput file does not contain the correct number of\n");

@@ -18,6 +18,9 @@ Flag   -bcpm    bcpm    {Raw data in Berkeley-Caltech Pulsar Machine (BPP) forma
 Flag   -spigot  spigot  {Raw data in Caltech-NRAO Spigot Card format}
 Flag   -filterbank  filterbank  {Raw data in SIGPROC filterbank format}
 Flag   -psrfits     psrfits     {Raw data in PSRFITS format}
+Flag   -noweights  noweights  {Do not apply PSRFITS weights}
+Flag   -noscales   noscales   {Do not apply PSRFITS scales}
+Flag   -nooffsets  nooffsets  {Do not apply PSRFITS offsets}
 Flag   -wapp    wapp    {Raw data in Wideband Arecibo Pulsar Processor (WAPP) format}
 Flag   -window  window  {Window correlator lags with a Hamming window before FFTing}
 Int    -numwapps numwapps  {Number of WAPPs used with contiguous frequencies} \
@@ -27,6 +30,7 @@ Int    -if      ifs     {A specific IF to use if available (summed IFs is the de
 Float  -clip    clip    {Time-domain sigma to use for clipping (0.0 = no clipping, 6.0 = default} \
 	-r 0 1000.0  -d 6.0
 Flag   -noclip  noclip  {Do not clip the data.  (The default is to _always_ clip!)}
+Flag   -runavg  runavg  {Running mean subtraction from the input data}
 Flag   -sub     sub     {Write subbands instead of de-dispersed data}
 Double -subdm   subdm   {The DM to use when de-dispersing subbands for -sub} \
 	-r 0 4000.0  -d 0.0
@@ -49,4 +53,4 @@ String -mask    maskfile {File containing masking information to use}
 # Rest of command line:
 
 Rest infile {Input data file name.  If the data is not in a known raw format, it should be a single channel of single-precision floating point data.  In this case a '.inf' file with the same root filename must also exist (Note that this means that the input data file must have a suffix that starts with a period)} \
-        -c 1 1024
+        -c 1 16384

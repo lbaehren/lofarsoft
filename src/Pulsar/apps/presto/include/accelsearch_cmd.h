@@ -1,7 +1,3 @@
-/*!
-  \ingroup presto
-*/
-
 #ifndef __accelsearch_cmd__
 #define __accelsearch_cmd__
 /*****
@@ -47,6 +43,10 @@ typedef struct s_Cmdline {
   int fhiC;
   /***** -photon: Data is poissonian so use freq 0 as power normalization */
   char photonP;
+  /***** -median: Use block-median power normalization (default) */
+  char medianP;
+  /***** -locpow: Use double-tophat local-power normalization (not usually recommended) */
+  char locpowP;
   /***** -zaplist: A file of freqs+widths to zap from the FFT (only if the input file is a *.[s]dat file) */
   char zaplistP;
   char* zaplist;
@@ -55,6 +55,12 @@ typedef struct s_Cmdline {
   char baryvP;
   double baryv;
   int baryvC;
+  /***** -harmpolish: Constrain harmonics to be harmonically related during polishing (on by default) */
+  char harmpolishP;
+  /***** -noharmpolish: Do not use 'harmpolish' by default */
+  char noharmpolishP;
+  /***** -noharmremove: Do not remove harmonically related candidates (never removed for numharm = 1) */
+  char noharmremoveP;
   /***** uninterpreted command line parameters */
   int argc;
   /*@null*/char **argv;

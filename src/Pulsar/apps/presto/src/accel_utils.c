@@ -365,7 +365,7 @@ GSList *eliminate_harmonics(GSList * cands, int *numcands)
 {
    GSList *currentptr, *otherptr, *toocloseptr;
    accelcand *current_cand, *other_cand;
-   int ii, maxharm = 16;
+   int ii, maxharm = 16, numremoved = 0;
    double tooclose = 1.5;
 
    currentptr = cands;
@@ -419,6 +419,7 @@ GSList *eliminate_harmonics(GSList * cands, int *numcands)
          }
          /* Remove the "other" cand */
          if (remove) {
+            numremoved++;
             toocloseptr = otherptr;
             otherptr = otherptr->next;
             free_accelcand(other_cand, NULL);
@@ -432,35 +433,80 @@ GSList *eliminate_harmonics(GSList * cands, int *numcands)
       if (currentptr->next)
          currentptr = currentptr->next;
    }
+   if (numremoved) {
+       printf("Removed %d likely harmonically related candidates.\n", numremoved);
+   }
    return cands;
 }
 
 
-
+// FIXME: this shouldn't be a #define, or it shouldn't be here
 void optimize_accelcand(accelcand * cand, accelobs * obs)
 {
    int ii;
+   int *r_offset;
+   fcomplex **data;
+   double r, z;
 
    cand->pows = gen_dvect(cand->numharm);
    cand->hirs = gen_dvect(cand->numharm);
    cand->hizs = gen_dvect(cand->numharm);
+   r_offset = (int*) malloc(sizeof(int)*cand->numharm);
+   data = (fcomplex**) malloc(sizeof(fcomplex*)*cand->numharm);
    cand->derivs = (rderivs *) malloc(sizeof(rderivs) * cand->numharm);
-   for (ii = 0; ii < cand->numharm; ii++) {
-      if (obs->mmap_file || obs->dat_input)
-         cand->pows[ii] = max_rz_arr(obs->fft,
-                                     obs->numbins,
-                                     cand->r * (ii + 1) - obs->lobin,
-                                     cand->z * (ii + 1),
-                                     &(cand->hirs[ii]),
-                                     &(cand->hizs[ii]), &(cand->derivs[ii]));
-      else
-         cand->pows[ii] = max_rz_file(obs->fftfile,
-                                      cand->r * (ii + 1) - obs->lobin,
-                                      cand->z * (ii + 1),
-                                      &(cand->hirs[ii]),
-                                      &(cand->hizs[ii]), &(cand->derivs[ii]));
-      cand->hirs[ii] += obs->lobin;
+
+   if (obs->use_harmonic_polishing) {
+       if (obs->mmap_file || obs->dat_input) {
+           for(ii=0;ii<cand->numharm;ii++) {
+               r_offset[ii]=obs->lobin;
+               data[ii] = obs->fft;
+           }
+           max_rz_arr_harmonics(data,
+                                cand->numharm,
+                                r_offset,
+                                obs->numbins,
+                                cand->r-obs->lobin,
+                                cand->z,
+                                &r,
+                                &z,
+                                cand->derivs,
+                                cand->pows);
+       } else {
+           max_rz_file_harmonics(obs->fftfile,
+                                 cand->numharm,
+                                 obs->lobin,
+                                 cand->r-obs->lobin,
+                                 cand->z,
+                                 &r,
+                                 &z,
+                                 cand->derivs,
+                                 cand->pows);
+       }
+       for(ii=0;ii<cand->numharm;ii++) {
+           cand->hirs[ii]=(r+obs->lobin)*(ii+1);
+           cand->hizs[ii]=z*(ii+1);
+       }
+   } else {
+       for (ii = 0; ii < cand->numharm; ii++) {
+          if (obs->mmap_file || obs->dat_input)
+             cand->pows[ii] = max_rz_arr(obs->fft,
+                                         obs->numbins,
+                                         cand->r * (ii + 1) - obs->lobin,
+                                         cand->z * (ii + 1),
+                                         &(cand->hirs[ii]),
+                                         &(cand->hizs[ii]), &(cand->derivs[ii]));
+          else
+             cand->pows[ii] = max_rz_file(obs->fftfile,
+                                          cand->r * (ii + 1) - obs->lobin,
+                                          cand->z * (ii + 1),
+                                          &(cand->hirs[ii]),
+                                          &(cand->hizs[ii]), &(cand->derivs[ii]));
+          cand->hirs[ii] += obs->lobin;
+       }
    }
+   free(r_offset);
+   free(data);
+
    cand->sigma = candidate_sigma(cand->power, cand->numharm,
                                  obs->numindep[twon_to_index(cand->numharm)]);
 }
@@ -530,7 +576,7 @@ void output_fundamentals(fourierprops * props, GSList * list,
    /* Close the old work file and open the cand file */
 
    if (!obs->dat_input)
-      fclose(obs->workfile);
+      fclose(obs->workfile); /* Why is this here? -A */
    obs->workfile = chkfopen(obs->accelnm, "w");
 
    /* Set our candidate notes to all spaces */
@@ -594,6 +640,8 @@ void output_fundamentals(fourierprops * props, GSList * list,
          double phs0, phscorr, amp;
          rderivs harm;
 
+         /* These phase calculations assume the fundamental is best */
+         /* Better to irfft them and check the amplitude */
          phs0 = cand->derivs[0].phs;
          for (jj = 0; jj < cand->numharm; jj++) {
             harm = cand->derivs[jj];
@@ -658,7 +706,7 @@ void output_harmonics(GSList * list, accelobs * obs, infodata * idata)
    int ii, jj, numcols = 13, numcands;
    int widths[13] = { 5, 4, 5, 15, 11, 18, 13, 12, 9, 12, 10, 10, 20 };
    int errors[13] = { 0, 0, 0, 2, 0, 2, 0, 2, 0, 2, 2, 2, 0 };
-   char tmpstr[30], ctrstr[30], command[200], notes[21];
+   char tmpstr[30], ctrstr[30], notes[21], *command;
    accelcand *cand;
    GSList *listptr;
    fourierprops props;
@@ -760,8 +808,10 @@ void output_harmonics(GSList * list, accelobs * obs, infodata * idata)
    }
    fprintf(obs->workfile, "\n\n");
    fclose(obs->workfile);
+   command = malloc(strlen(obs->rootfilenm) + strlen(obs->accelnm) + 20);
    sprintf(command, "cat %s.inf >> %s", obs->rootfilenm, obs->accelnm);
    system(command);
+   free(command);
 }
 
 
@@ -777,14 +827,24 @@ void print_accelcand(gpointer data, gpointer user_data)
 
 fcomplex *get_fourier_amplitudes(int lobin, int numbins, accelobs * obs)
 {
-   if (obs->mmap_file || obs->dat_input) {
-      if (lobin - obs->lobin < -ACCEL_PADDING)
-         printf
-             ("\nWARNING!!!:  Accessing memory before the beginning of the FFT!\n");
-      return (fcomplex *) obs->fft + (lobin - obs->lobin);
-   } else {
-      return read_fcomplex_file(obs->fftfile, lobin - obs->lobin, numbins);
-   }
+    if (obs->mmap_file || obs->dat_input) {
+        fcomplex *tmpdata = gen_cvect(numbins);
+        int offset = 0;
+        // zero-pad if we try to read before the beginning of the FFT
+        if (lobin - obs->lobin < 0) {
+            fcomplex zeros = {0.0, 0.0};
+            int ii;
+            offset = abs(lobin - obs->lobin);
+            for (ii = 0 ; ii < offset ; ii++)
+                tmpdata[ii] = zeros;
+        }            
+        memcpy(tmpdata + offset, 
+               (fcomplex *) (obs->fft + (lobin - obs->lobin) + offset),
+               sizeof(fcomplex) * (numbins - offset));
+        return tmpdata;
+    } else {
+        return read_fcomplex_file(obs->fftfile, lobin - obs->lobin, numbins);
+    }
 }
 
 
@@ -792,10 +852,10 @@ ffdotpows *subharm_ffdot_plane(int numharm, int harmnum,
                                double fullrlo, double fullrhi,
                                subharminfo * shi, accelobs * obs)
 {
-   int ii, lobin, hibin, numdata, nrs, fftlen, binoffset;
+   int ii, lobin, hibin, numdata, nice_numdata, nrs, fftlen, binoffset;
    static int numrs_full = 0, numzs_full = 0;
    float powargr, powargi;
-   double drlo, drhi, norm, harm_fract;
+   double drlo, drhi, harm_fract;
    ffdotpows *ffdot;
    fcomplex *data, **result;
    presto_datainf datainf;
@@ -845,20 +905,50 @@ ffdotpows *subharm_ffdot_plane(int numharm, int harmnum,
    lobin = ffdot->rlo - binoffset;
    hibin = (int) ceil(drhi) + binoffset;
    numdata = hibin - lobin + 1;
-   data = get_fourier_amplitudes(lobin - obs->lobin, numdata, obs);
+   nice_numdata = next2_to_n(numdata);  // for FFTs
+   data = get_fourier_amplitudes(lobin, nice_numdata, obs);
+   if (!obs->mmap_file && !obs->dat_input && 0)
+       printf("This is newly malloc'd!\n");
 
-   /* Determine the mean local power level (via median) */
+   // Normalize the Fourier amplitudes
 
-   if (obs->nph > 0.0) {        /* Unless freq 0 normalization is requested */
-      norm = 1.0 / obs->nph;
+   if (obs->nph > 0.0) {
+       //  Use freq 0 normalization if requested (i.e. photons)
+       double norm = 1.0 / sqrt(obs->nph);
+       for (ii = 0; ii < numdata; ii++) {
+           data[ii].r *= norm;
+           data[ii].i *= norm;
+       }
+   } else if (obs->norm_type == 0) {
+       //  old-style block median normalization
+       float *powers;
+       double norm;
+
+       powers = gen_fvect(numdata);
+       for (ii = 0; ii < numdata; ii++)
+           powers[ii] = POWER(data[ii].r, data[ii].i);
+       norm = 1.0 / sqrt(median(powers, numdata)/log(2.0));
+       free(powers);
+       for (ii = 0; ii < numdata; ii++) {
+           data[ii].r *= norm;
+           data[ii].i *= norm;
+       }
    } else {
-      float *powers;
+       //  new-style running double-tophat local-power normalization
+       float *powers, *loc_powers;
 
-      powers = gen_fvect(numdata);
-      for (ii = 0; ii < numdata; ii++)
-         powers[ii] = POWER(data[ii].r, data[ii].i);
-      norm = 1.0 / (1.442695 * median(powers, numdata));
-      free(powers);
+       powers = gen_fvect(nice_numdata);
+       for (ii = 0; ii < nice_numdata; ii++) {
+           powers[ii] = POWER(data[ii].r, data[ii].i);
+       }
+       loc_powers = corr_loc_pow(powers, nice_numdata);
+       for (ii = 0; ii < numdata; ii++) {
+           float norm = invsqrt(loc_powers[ii]);
+           data[ii].r *= norm;
+           data[ii].i *= norm;
+       }
+       free(powers);
+       free(loc_powers);
    }
 
    /* Perform the correlations */
@@ -872,14 +962,15 @@ ffdotpows *subharm_ffdot_plane(int numharm, int harmnum,
                          ACCEL_NUMBETWEEN, binoffset, CORR);
       datainf = SAME;
    }
-   if (!obs->mmap_file && !obs->dat_input)
-      free(data);
+
+   // Always free data
+   free(data);
 
    /* Convert the amplitudes to normalized powers */
 
    ffdot->powers = gen_fmatrix(ffdot->numzs, ffdot->numrs);
    for (ii = 0; ii < (ffdot->numzs * ffdot->numrs); ii++)
-      ffdot->powers[0][ii] = POWER(result[0][ii].r, result[0][ii].i) * norm;
+      ffdot->powers[0][ii] = POWER(result[0][ii].r, result[0][ii].i);
    free(result[0]);
    free(result);
    return ffdot;
@@ -952,8 +1043,8 @@ GSList *search_ffdotpows(ffdotpows * ffdot, int numharm,
 
             pow = ffdot->powers[ii][jj];
             sig = candidate_sigma(pow, numharm, numindep);
-            rr = (ffdot->rlo + jj * ACCEL_DR) / numharm;
-            zz = (ffdot->zlo + ii * ACCEL_DZ) / numharm;
+            rr = (ffdot->rlo + jj * (double) ACCEL_DR) / (double) numharm;
+            zz = (ffdot->zlo + ii * (double) ACCEL_DZ) / (double) numharm;
             cands = insert_new_accelcand(cands, pow, sig, numharm, rr, zz, &added);
             if (added && !obs->dat_input)
                fprintf(obs->workfile,
@@ -1068,6 +1159,11 @@ void create_accelobs(accelobs * obs, infodata * idata, Cmdline * cmd, int usemma
       }
    }
 
+   if (cmd->noharmpolishP)
+       obs->use_harmonic_polishing = 0;
+   else
+       obs->use_harmonic_polishing = 1;  // now default
+
    /* Read the info file */
 
    readinf(idata, obs->rootfilenm);
@@ -1148,9 +1244,7 @@ void create_accelobs(accelobs * obs, infodata * idata, Cmdline * cmd, int usemma
    if (!obs->dat_input) {
       obs->fftfile = chkfopen(cmd->argv[0], "rb");
       obs->numbins = chkfilelen(obs->fftfile, sizeof(fcomplex));
-      if (usemmap) 
-      {
-#ifdef USEMMAP
+      if (usemmap) {
          fclose(obs->fftfile);
          obs->fftfile = NULL;
          printf("Memory mapping the input FFT.  This may take a while...\n");
@@ -1162,10 +1256,13 @@ void create_accelobs(accelobs * obs, infodata * idata, Cmdline * cmd, int usemma
          }
          obs->fft = (fcomplex *) mmap(0, sizeof(fcomplex) * obs->numbins, PROT_READ,
                                       MAP_SHARED, obs->mmap_file, 0);
-#endif
-      }
-      else 
-      {
+         if (obs->fft == MAP_FAILED) {
+            perror("\nError in mmap() in accel_utils.c");
+            printf("Falling back to a non-mmaped approach\n");
+            obs->fftfile = chkfopen(cmd->argv[0], "rb");
+            obs->mmap_file = 0;
+         }
+      } else {
          obs->mmap_file = 0;
       }
    }
@@ -1189,6 +1286,16 @@ void create_accelobs(accelobs * obs, infodata * idata, Cmdline * cmd, int usemma
       /* For short FFTs insure that we don't pick up the DC */
       /* or Nyquist component as part of the interpolation  */
       /* for higher frequencies.                            */
+      if (cmd->locpowP) {
+          obs->norm_type = 1;
+          printf("Normalizing powers using local-power determination.\n\n");
+      } else if (cmd->medianP) {
+          obs->norm_type = 0;
+          printf("Normalizing powers using median-blocks.\n\n");
+      } else {
+          obs->norm_type = 0;
+          printf("Normalizing powers using median-blocks (default).\n\n");
+      }
       if (obs->dat_input) {
          obs->fft[0].r = 1.0;
          obs->fft[0].i = 1.0;

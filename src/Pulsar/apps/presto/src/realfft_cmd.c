@@ -829,7 +829,7 @@ usage(void)
   fprintf(stderr,"%s","             1 char* value\n");
   fprintf(stderr,"%s","    infiles: Input data file(s)\n");
   fprintf(stderr,"%s","             1...16 values\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","  version: 12Mar10\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }

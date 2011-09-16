@@ -8,6 +8,9 @@
 long long next2_to_n(long long x);
 /* Return the first value of 2^n >= x */
 
+float invsqrt(float x);
+// See http://en.wikipedia.org/wiki/Fast_inverse_square_root
+
 int gcd(int a, int b);
 /* Return the greatest common divisor of a and b */
 
@@ -39,6 +42,11 @@ int split_root_suffix(char *input, char **root, char **suffix);
 void strtofilename(char *string);
 /* Trim spaces off the end of *input and convert */
 /* all other spaces into underscores.            */
+
+void telescope_to_tempocode(char *inname, char *outname, char*obscode);
+// Return the 2 character TEMPO string for an observatory
+// whose name is in the string "inname".  Return a nice
+// name in "outname".
 
 float *gen_freqs(long numfreqs, double lof, double df);
 /* This routine generates a float vector of length numfreqs */

@@ -17,6 +17,9 @@ Flag   -bcpm    bcpm    {Raw data in Berkeley-Caltech Pulsar Machine (BPP) forma
 Flag   -spigot  spigot  {Raw data in Caltech-NRAO Spigot Card format}
 Flag   -filterbank  filterbank  {Raw data in SIGPROC filterbank format}
 Flag   -psrfits     psrfits     {Raw data in PSRFITS format}
+Flag   -noweights  noweights  {Do not apply PSRFITS weights}
+Flag   -noscales   noscales   {Do not apply PSRFITS scales}
+Flag   -nooffsets  nooffsets  {Do not apply PSRFITS offsets}
 Flag   -wapp    wapp    {Raw data in Wideband Arecibo Pulsar Processor (WAPP) format}
 Flag   -window  window  {Window correlator lags with a Hamming window before FFTing}
 Flag   -topo    topo    {Fold the data topocentrically (i.e. don't barycenter)}
@@ -124,4 +127,4 @@ Double -offset offset {A time offset to add to the 1st event in the same units a
 # Rest of command line:
 
 Rest infile {Input data file name.  If the data is not in a regognized raw data format, it should be a file containing a time series of single-precision floats or short ints.  In this case a '.inf' file with the same root filename must also exist (Note that this means that the input data file must have a suffix that starts with a period)} \
-        -c 1 1024
+        -c 1 16384

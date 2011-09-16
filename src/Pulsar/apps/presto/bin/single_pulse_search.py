@@ -2,7 +2,6 @@
 import bisect, os, sys, getopt, infodata, glob
 import scipy, scipy.signal, ppgplot
 import numpy as Num
-from sets import *
 from presto import rfft
 from psr_utils import coord_to_string
 from optparse import OptionParser
@@ -66,7 +65,7 @@ def prune_related1(hibins, hivals, downfact):
     # but less significant.  This one works on the raw 
     # candidate arrays and uses the single downfact
     # that they were selected with.
-    toremove = Set()
+    toremove = set()
     for ii in range(0, len(hibins)-1):
         if ii in toremove:  continue
         xbin, xsigma = hibins[ii], hivals[ii]
@@ -93,7 +92,7 @@ def prune_related2(dm_candlist, downfacts):
     # but less significant.  This one works on the candidate 
     # instances and looks at the different downfacts of the
     # the different candidates.
-    toremove = Set()
+    toremove = set()
     for ii in range(0, len(dm_candlist)-1):
         if ii in toremove:  continue
         xx = dm_candlist[ii]
@@ -122,7 +121,7 @@ def prune_border_cases(dm_candlist, offregions):
     # Ignore those that are locate in a half-width
     # of the boundary between data and padding
     #print offregions
-    toremove = Set()
+    toremove = set()
     for ii in range(len(dm_candlist))[::-1]:
         cand = dm_candlist[ii]
         loside = cand.bin-cand.downfact/2
@@ -287,8 +286,8 @@ def main():
                 downfacts = [x for x in default_downfacts if x*dt <= opts.maxwidth]
             else:
                 downfacts = [x for x in default_downfacts if x <= max_downfact]
-#            if len(downfacts) == 0:
-#                downfacts = [default_downfacts[0]]
+            if len(downfacts) == 0:
+                downfacts = [default_downfacts[0]]
             if (filenm == args[0]):
                 orig_N = N
                 orig_dt = dt
@@ -365,7 +364,7 @@ def main():
                 loind, hiind = bad_block*detrendlen, (bad_block+1)*detrendlen
                 timeseries[loind:hiind] = 0.0
             # Convert to a set for faster lookups below
-            bad_blocks = Set(bad_blocks)
+            bad_blocks = set(bad_blocks)
 
             # Step through the data
             dm_candlist = []
@@ -384,7 +383,7 @@ def main():
 
                 # Make a set with the current block numbers
                 lowblock = blocks_per_chunk * chunknum
-                currentblocks = Set(Num.arange(blocks_per_chunk) + lowblock)
+                currentblocks = set(Num.arange(blocks_per_chunk) + lowblock)
                 localgoodblocks = Num.asarray(list(currentblocks -
                                                    bad_blocks)) - lowblock
                 # Search this chunk if it is not all bad
@@ -447,8 +446,7 @@ def main():
             # Now walk through the dm_candlist and remove the ones that
             # are within the downsample proximity of a higher
             # signal-to-noise pulse
-            if len(downfacts) != 0:
-                dm_candlist = prune_related2(dm_candlist, downfacts)
+            dm_candlist = prune_related2(dm_candlist, downfacts)
             print "  Found %d pulse candidates"%len(dm_candlist)
             
             # Get rid of those near padding regions
@@ -471,13 +469,13 @@ def main():
 
         # Step through the candidates to make a SNR list
         DMs.sort()
-        maxsnr = 0.0
         snrs = []
         for cand in candlist:
             snrs.append(cand.sigma)
-            if cand.sigma > maxsnr:
-                maxsnr = cand.sigma
-        maxsnr = int(maxsnr) + 3
+        if snrs:
+            maxsnr = max(int(max(snrs)), int(opts.threshold)) + 3
+        else:
+            maxsnr = int(opts.threshold) + 3
 
         # Generate the SNR histogram
         snrs = Num.asarray(snrs)
@@ -523,7 +521,8 @@ def main():
 
         # plot the DM histogram
         ppgplot.pgsvp(0.39, 0.64, 0.6, 0.87)
-        ppgplot.pgswin(min(DMs)-0.5, max(DMs)+0.5, 0.0, 1.1*max(num_v_DM))
+        # Add [1] to num_v_DM in YMAX below so that YMIN != YMAX when max(num_v_DM)==0
+        ppgplot.pgswin(min(DMs)-0.5, max(DMs)+0.5, 0.0, 1.1*max(num_v_DM+[1]))
         ppgplot.pgsch(0.8)
         ppgplot.pgbox("BCNST", 0, 0, "BCNST", 0, 0)
         ppgplot.pgmtxt('B', 2.5, 0.5, 0.5, "DM (pc cm\u-3\d)")

@@ -844,7 +844,7 @@ usage(void)
   fprintf(stderr,"%s","    -fftnorm: Use local powers from '.fft' file to get 'norm'\n");
   fprintf(stderr,"%s","      infile: Input data file name (without a suffix) of floating point data.  A '.inf' file of the same name must also exist\n");
   fprintf(stderr,"%s","              1 value\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","  version: 12Mar10\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }

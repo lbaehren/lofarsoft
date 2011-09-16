@@ -25,6 +25,12 @@ typedef struct s_Cmdline {
   char filterbankP;
   /***** -psrfits: Raw data in PSRFITS format */
   char psrfitsP;
+  /***** -noweights: Do not apply PSRFITS weights */
+  char noweightsP;
+  /***** -noscales: Do not apply PSRFITS scales */
+  char noscalesP;
+  /***** -nooffsets: Do not apply PSRFITS offsets */
+  char nooffsetsP;
   /***** -wapp: Raw data in Wideband Arecibo Pulsar Processor (WAPP) format */
   char wappP;
   /***** -window: Window correlator lags with a Hamming window before FFTing */
@@ -43,6 +49,10 @@ typedef struct s_Cmdline {
   int clipC;
   /***** -noclip: Do not clip the data.  (The default is to _always_ clip!) */
   char noclipP;
+  /***** -runavg: Running mean subtraction from the input data */
+  char runavgP;
+  /***** -zerodm: Subtract the mean of all channels from each sample (i.e. remove zero DM) */
+  char zerodmP;
   /***** -numout: Output this many values.  If there are not enough values in the original data file, will pad the output file with the average value */
   char numoutP;
   int numout;
@@ -75,10 +85,6 @@ typedef struct s_Cmdline {
   char maskfileP;
   char* maskfile;
   int maskfileC;
-  /***** -runavg: Running mean subtraction from the .dat file */
-  int runavgint;
-  /***** -zerodm: Remove zero-DM (average of channels) */
-  int zerodm;
   /***** uninterpreted command line parameters */
   int argc;
   /*@null*/char **argv;

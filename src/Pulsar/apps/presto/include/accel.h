@@ -1,7 +1,3 @@
-/*!
-  \ingroup presto
-*/
-
 #include <glib.h>
 #include "presto.h"
 #include "accelsearch_cmd.h"
@@ -37,6 +33,7 @@ typedef struct accelobs{
   int numzap;          /* Number of birdies to zap */
   int dat_input;       /* The input file is a short time series */
   int mmap_file;       /* The file number if using MMAP */
+  int norm_type;       /* 0 = old-style block median, 1 = local-means power norm */
   double dt;           /* Data sample length (s) */           
   double T;            /* Total observation length */
   double rlo;          /* Minimum fourier freq to search */
@@ -45,7 +42,7 @@ typedef struct accelobs{
   double zlo;          /* Minimum fourier fdot to search */
   double zhi;          /* Maximum fourier fdot to search */
   double dz;           /* Stepsize in fourier fdot */
-//  double baryv;        /* Average barycentric velocity during observation */
+  double baryv;        /* Average barycentric velocity during observation */
   float nph;           /* Freq 0 level if requested, 0 otherwise */
   float sigma;         /* Cutoff sigma to choose a candidate */
   float *powcut;       /* Cutoff powers to choose a cand (per harmsummed) */
@@ -59,6 +56,7 @@ typedef struct accelobs{
   char *candnm;        /* The fourierprop save file for the fundamentals */
   char *accelnm;       /* The filename of the final candidates in text */
   char *workfilenm;    /* The filename of the working candidates in text */
+  int use_harmonic_polishing; /* Should we force harmonics to be related */
 } accelobs;
 
 typedef struct accelcand{

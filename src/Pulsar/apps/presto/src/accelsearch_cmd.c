@@ -56,6 +56,10 @@ static Cmdline cmd = {
   /* fhiC = */ 1,
   /***** -photon: Data is poissonian so use freq 0 as power normalization */
   /* photonP = */ 0,
+  /***** -median: Use block-median power normalization (default) */
+  /* medianP = */ 0,
+  /***** -locpow: Use double-tophat local-power normalization (not usually recommended) */
+  /* locpowP = */ 0,
   /***** -zaplist: A file of freqs+widths to zap from the FFT (only if the input file is a *.[s]dat file) */
   /* zaplistP = */ 0,
   /* zaplist = */ (char*)0,
@@ -64,6 +68,12 @@ static Cmdline cmd = {
   /* baryvP = */ 1,
   /* baryv = */ 0.0,
   /* baryvC = */ 1,
+  /***** -harmpolish: Constrain harmonics to be harmonically related during polishing (on by default) */
+  /* harmpolishP = */ 0,
+  /***** -noharmpolish: Do not use 'harmpolish' by default */
+  /* noharmpolishP = */ 0,
+  /***** -noharmremove: Do not remove harmonically related candidates (never removed for numharm = 1) */
+  /* noharmremoveP = */ 0,
   /***** uninterpreted rest of command line */
   /* argc = */ 0,
   /* argv = */ (char**)0,
@@ -870,6 +880,20 @@ showOptionValues(void)
     printf("-photon found:\n");
   }
 
+  /***** -median: Use block-median power normalization (default) */
+  if( !cmd.medianP ) {
+    printf("-median not found.\n");
+  } else {
+    printf("-median found:\n");
+  }
+
+  /***** -locpow: Use double-tophat local-power normalization (not usually recommended) */
+  if( !cmd.locpowP ) {
+    printf("-locpow not found.\n");
+  } else {
+    printf("-locpow found:\n");
+  }
+
   /***** -zaplist: A file of freqs+widths to zap from the FFT (only if the input file is a *.[s]dat file) */
   if( !cmd.zaplistP ) {
     printf("-zaplist not found.\n");
@@ -893,6 +917,27 @@ showOptionValues(void)
       printf("  value = `%.40g'\n", cmd.baryv);
     }
   }
+
+  /***** -harmpolish: Constrain harmonics to be harmonically related during polishing (on by default) */
+  if( !cmd.harmpolishP ) {
+    printf("-harmpolish not found.\n");
+  } else {
+    printf("-harmpolish found:\n");
+  }
+
+  /***** -noharmpolish: Do not use 'harmpolish' by default */
+  if( !cmd.noharmpolishP ) {
+    printf("-noharmpolish not found.\n");
+  } else {
+    printf("-noharmpolish found:\n");
+  }
+
+  /***** -noharmremove: Do not remove harmonically related candidates (never removed for numharm = 1) */
+  if( !cmd.noharmremoveP ) {
+    printf("-noharmremove not found.\n");
+  } else {
+    printf("-noharmremove found:\n");
+  }
   if( !cmd.argc ) {
     printf("no remaining parameters in argv\n");
   } else {
@@ -908,39 +953,44 @@ showOptionValues(void)
 void
 usage(void)
 {
-  fprintf(stderr,"%s","   [-lobin lobin] [-numharm numharm] [-zmax zmax] [-sigma sigma] [-rlo rlo] [-rhi rhi] [-flo flo] [-fhi fhi] [-photon] [-zaplist zaplist] [-baryv baryv] [--] infile\n");
+  fprintf(stderr,"%s","   [-lobin lobin] [-numharm numharm] [-zmax zmax] [-sigma sigma] [-rlo rlo] [-rhi rhi] [-flo flo] [-fhi fhi] [-photon] [-median] [-locpow] [-zaplist zaplist] [-baryv baryv] [-harmpolish] [-noharmpolish] [-noharmremove] [--] infile\n");
   fprintf(stderr,"%s","      Search an FFT or short time series for pulsars using a Fourier domain acceleration search with harmonic summing.\n");
-  fprintf(stderr,"%s","      -lobin: The first Fourier frequency in the data file\n");
-  fprintf(stderr,"%s","              1 int value between 0 and oo\n");
-  fprintf(stderr,"%s","              default: `0'\n");
-  fprintf(stderr,"%s","    -numharm: The number of harmonics to sum (power-of-two)\n");
-  fprintf(stderr,"%s","              1 int value between 1 and 16\n");
-  fprintf(stderr,"%s","              default: `8'\n");
-  fprintf(stderr,"%s","       -zmax: The max (+ and -) Fourier freq deriv to search\n");
-  fprintf(stderr,"%s","              1 int value between 0 and 1200\n");
-  fprintf(stderr,"%s","              default: `200'\n");
-  fprintf(stderr,"%s","      -sigma: Cutoff sigma for choosing candidates\n");
-  fprintf(stderr,"%s","              1 float value between 1.0 and 30.0\n");
-  fprintf(stderr,"%s","              default: `2.0'\n");
-  fprintf(stderr,"%s","        -rlo: The lowest Fourier frequency to search\n");
-  fprintf(stderr,"%s","              1 double value between 0.0 and oo\n");
-  fprintf(stderr,"%s","        -rhi: The highest Fourier frequency to search\n");
-  fprintf(stderr,"%s","              1 double value between 0.0 and oo\n");
-  fprintf(stderr,"%s","        -flo: The lowest frequency (Hz) (of the highest harmonic!) to search\n");
-  fprintf(stderr,"%s","              1 double value between 0.0 and oo\n");
-  fprintf(stderr,"%s","              default: `1.0'\n");
-  fprintf(stderr,"%s","        -fhi: The highest frequency (Hz) (of the highest harmonic!) to search\n");
-  fprintf(stderr,"%s","              1 double value between 0.0 and oo\n");
-  fprintf(stderr,"%s","              default: `10000.0'\n");
-  fprintf(stderr,"%s","     -photon: Data is poissonian so use freq 0 as power normalization\n");
-  fprintf(stderr,"%s","    -zaplist: A file of freqs+widths to zap from the FFT (only if the input file is a *.[s]dat file)\n");
-  fprintf(stderr,"%s","              1 char* value\n");
-  fprintf(stderr,"%s","      -baryv: The radial velocity component (v/c) towards the target during the obs\n");
-  fprintf(stderr,"%s","              1 double value between -0.1 and 0.1\n");
-  fprintf(stderr,"%s","              default: `0.0'\n");
-  fprintf(stderr,"%s","      infile: Input file name of the floating point .fft or .[s]dat file.  A '.inf' file of the same name must also exist\n");
-  fprintf(stderr,"%s","              1 value\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","           -lobin: The first Fourier frequency in the data file\n");
+  fprintf(stderr,"%s","                   1 int value between 0 and oo\n");
+  fprintf(stderr,"%s","                   default: `0'\n");
+  fprintf(stderr,"%s","         -numharm: The number of harmonics to sum (power-of-two)\n");
+  fprintf(stderr,"%s","                   1 int value between 1 and 16\n");
+  fprintf(stderr,"%s","                   default: `8'\n");
+  fprintf(stderr,"%s","            -zmax: The max (+ and -) Fourier freq deriv to search\n");
+  fprintf(stderr,"%s","                   1 int value between 0 and 1200\n");
+  fprintf(stderr,"%s","                   default: `200'\n");
+  fprintf(stderr,"%s","           -sigma: Cutoff sigma for choosing candidates\n");
+  fprintf(stderr,"%s","                   1 float value between 1.0 and 30.0\n");
+  fprintf(stderr,"%s","                   default: `2.0'\n");
+  fprintf(stderr,"%s","             -rlo: The lowest Fourier frequency to search\n");
+  fprintf(stderr,"%s","                   1 double value between 0.0 and oo\n");
+  fprintf(stderr,"%s","             -rhi: The highest Fourier frequency to search\n");
+  fprintf(stderr,"%s","                   1 double value between 0.0 and oo\n");
+  fprintf(stderr,"%s","             -flo: The lowest frequency (Hz) (of the highest harmonic!) to search\n");
+  fprintf(stderr,"%s","                   1 double value between 0.0 and oo\n");
+  fprintf(stderr,"%s","                   default: `1.0'\n");
+  fprintf(stderr,"%s","             -fhi: The highest frequency (Hz) (of the highest harmonic!) to search\n");
+  fprintf(stderr,"%s","                   1 double value between 0.0 and oo\n");
+  fprintf(stderr,"%s","                   default: `10000.0'\n");
+  fprintf(stderr,"%s","          -photon: Data is poissonian so use freq 0 as power normalization\n");
+  fprintf(stderr,"%s","          -median: Use block-median power normalization (default)\n");
+  fprintf(stderr,"%s","          -locpow: Use double-tophat local-power normalization (not usually recommended)\n");
+  fprintf(stderr,"%s","         -zaplist: A file of freqs+widths to zap from the FFT (only if the input file is a *.[s]dat file)\n");
+  fprintf(stderr,"%s","                   1 char* value\n");
+  fprintf(stderr,"%s","           -baryv: The radial velocity component (v/c) towards the target during the obs\n");
+  fprintf(stderr,"%s","                   1 double value between -0.1 and 0.1\n");
+  fprintf(stderr,"%s","                   default: `0.0'\n");
+  fprintf(stderr,"%s","      -harmpolish: Constrain harmonics to be harmonically related during polishing (on by default)\n");
+  fprintf(stderr,"%s","    -noharmpolish: Do not use 'harmpolish' by default\n");
+  fprintf(stderr,"%s","    -noharmremove: Do not remove harmonically related candidates (never removed for numharm = 1)\n");
+  fprintf(stderr,"%s","           infile: Input file name of the floating point .fft or .[s]dat file.  A '.inf' file of the same name must also exist\n");
+  fprintf(stderr,"%s","                   1 value\n");
+  fprintf(stderr,"%s","  version: 03Jul11\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }
@@ -1038,6 +1088,16 @@ parseCmdline(int argc, char **argv)
       continue;
     }
 
+    if( 0==strcmp("-median", argv[i]) ) {
+      cmd.medianP = 1;
+      continue;
+    }
+
+    if( 0==strcmp("-locpow", argv[i]) ) {
+      cmd.locpowP = 1;
+      continue;
+    }
+
     if( 0==strcmp("-zaplist", argv[i]) ) {
       int keep = i;
       cmd.zaplistP = 1;
@@ -1053,6 +1113,21 @@ parseCmdline(int argc, char **argv)
       cmd.baryvC = i-keep;
       checkDoubleLower("-baryv", &cmd.baryv, cmd.baryvC, 0.1);
       checkDoubleHigher("-baryv", &cmd.baryv, cmd.baryvC, -0.1);
+      continue;
+    }
+
+    if( 0==strcmp("-harmpolish", argv[i]) ) {
+      cmd.harmpolishP = 1;
+      continue;
+    }
+
+    if( 0==strcmp("-noharmpolish", argv[i]) ) {
+      cmd.noharmpolishP = 1;
+      continue;
+    }
+
+    if( 0==strcmp("-noharmremove", argv[i]) ) {
+      cmd.noharmremoveP = 1;
       continue;
     }
 

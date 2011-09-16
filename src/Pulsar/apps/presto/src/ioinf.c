@@ -1,4 +1,4 @@
-#include "makeinf.h"
+#include "presto.h"
 #include "vectors.h"
 
 char bands[NUMBANDS][40] = { "Radio", "IR", "Optical", "UV", "X-ray", "Gamma" };
@@ -11,12 +11,14 @@ char scopes[NUMSCOPES][40] =
 
 void readinf(infodata * data, char *filenm)
 {
-   char tmp1[100], tmp2[100], infofilenm[100];
+   char tmp1[100], tmp2[100], *infofilenm;
    int ii;
    FILE *infofile;
 
+   infofilenm = malloc(strlen(filenm)+5);
    sprintf(infofilenm, "%s.inf", filenm);
    infofile = chkfopen(infofilenm, "r");
+   free(infofilenm);
 
    fscanf(infofile, "%*[^=]= %s", data->name);
    fscanf(infofile, "%*[^=]= %[^\n]\n", data->telescope);
@@ -27,9 +29,11 @@ void readinf(infodata * data, char *filenm)
 
       fscanf(infofile, "%*[^=]= %[^\n]\n", data->instrument);
       fscanf(infofile, "%*[^=]= %[^\n]\n", data->object);
-      fscanf(infofile, "%*[^=]= %d:%d:%lf\n", &data->ra_h, &data->ra_m, &data->ra_s);
-      fscanf(infofile, "%*[^=]= %d:%d:%lf\n", &data->dec_d,
-             &data->dec_m, &data->dec_s);
+      
+      fscanf(infofile, "%*[^=]= %s\n", tmp1);
+      ra_dec_from_string(tmp1, &data->ra_h, &data->ra_m, &data->ra_s);
+      fscanf(infofile, "%*[^=]= %s\n", tmp1);
+      ra_dec_from_string(tmp1, &data->dec_d, &data->dec_m, &data->dec_s);
       fscanf(infofile, "%*[^=]= %[^\n]\n", data->observer);
       fscanf(infofile, "%*[^=]= %d.%s", &data->mjd_i, tmp1);
       sprintf(tmp2, "0.%s", tmp1);
@@ -112,13 +116,14 @@ void readinf(infodata * data, char *filenm)
 
 void writeinf(infodata * data)
 {
-   char tmp1[100], tmp2[100];
-   char infofilenm[100];
+   char tmp1[100], tmp2[100], *infofilenm;
    int itmp, ii;
    FILE *infofile;
 
+   infofilenm = malloc(strlen(data->name)+5);
    sprintf(infofilenm, "%s.inf", data->name);
    infofile = chkfopen(infofilenm, "w");
+   free(infofilenm);
 
    fprintf(infofile, " Data file name without suffix          =  %s\n", data->name);
    fprintf(infofile,
@@ -130,24 +135,10 @@ void writeinf(infodata * data)
               " Instrument used                        =  %s\n", data->instrument);
       fprintf(infofile,
               " Object being observed                  =  %s\n", data->object);
-      if (data->ra_s >= 10.0) {
-         fprintf(infofile, " J2000 Right Ascension (hh:mm:ss.ssss)  ");
-         fprintf(infofile, "=  %.2d:%.2d:%.4f\n",
-                 data->ra_h, data->ra_m, data->ra_s);
-      } else {
-         fprintf(infofile, " J2000 Right Ascension (hh:mm:ss.ssss)  ");
-         fprintf(infofile, "=  %.2d:%.2d:0%.4f\n",
-                 data->ra_h, data->ra_m, data->ra_s);
-      }
-      if (data->dec_s >= 10.0) {
-         fprintf(infofile, " J2000 Declination     (dd:mm:ss.ssss)  ");
-         fprintf(infofile, "=  %.2d:%.2d:%.4f\n",
-                 data->dec_d, data->dec_m, data->dec_s);
-      } else {
-         fprintf(infofile, " J2000 Declination     (dd:mm:ss.ssss)  ");
-         fprintf(infofile, "=  %.2d:%.2d:0%.4f\n",
-                 data->dec_d, data->dec_m, data->dec_s);
-      }
+      ra_dec_to_string(tmp1, data->ra_h, data->ra_m, data->ra_s);
+      fprintf(infofile, " J2000 Right Ascension (hh:mm:ss.ssss)  =  %s\n", tmp1);
+      ra_dec_to_string(tmp1, data->dec_d, data->dec_m, data->dec_s);
+      fprintf(infofile, " J2000 Declination     (dd:mm:ss.ssss)  =  %s\n", tmp1);
       fprintf(infofile,
               " Data observed by                       =  %s\n", data->observer);
       sprintf(tmp1, "%.15f", data->mjd_f);

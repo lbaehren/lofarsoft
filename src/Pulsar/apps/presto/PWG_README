@@ -1,0 +1,163 @@
+# This file contains a list of all the source code which was edited by the PWG, on top of the presto distribution.
+
+
+{rfifind,prepfold,prepsubband,mpiprepsubband}_cmd.{c,cli} --------------------------
+/* JVL: Changed 1024 -> 16384 files in clig and *_cmd.c files */
+------------------------------------------------------------------------------------
+
+mpiprepsubband.c -------------------------------------------------------------------
+/* JVL: Update convert_suband subroutine to add masking  */
+/* JVL: Changed hostname query to gethostname() */
+------------------------------------------------------------------------------------
+
+misc_utils.c  ----------------------------------------------------------------------
+/* JVL: Added LOFAR to tempo telescopes  */
+------------------------------------------------------------------------------------
+
+mpiprepsubband.c, mpiprepsubband_cmd.{c,cli}  --------------------------------------
+/* JVL: Added -zerodm option plus code  */
+------------------------------------------------------------------------------------
+
+polycos.c --------------------------------------------
+/* VK: after line 83 this code is added: */ 
+} else if (strcmp(idata->telescope, "LOFAR") == 0) {
+   scopechar = 't';
+   tracklen = 12;
+-----------------------------------------------------
+
+sigproc_fb.c ----------------------------------------
+
+/* VK */
+- line 5:  4096 changed to 8192
+- lines 126-129 below are added (originally it was "case 9:" but in new Presto version a couple more telescopes were also added):
+    case 11:
+       strcpy(string, "LOFAR");
+       Tdiam = 999.0; // certainly not right, depends on config
+       break;
+
+- lines 167-169 below are added:
+   case 11:
+      strcpy(string, "BG/P");
+      break;
+-----------------------------------------------------
+
+include/prepsubband_cmd.h ------------------- adding -runavg ------------------
+/* VK & JVL */
+// lines 52-53, this code is added:
+  /***** -runavg: Running mean subtraction from the input data */
+  char runavgP;
+-------------------------------------------------------------------------------
+
+clig/prepsubband_cmd.cli & clig/mpiprepsubband_cmd.cli  -------------------- adding -runavg ----------------
+/* VK & JVL */
+// line 33 is added "Flag   -runavg  runavg  {Running mean subtraction from the input data}"
+-----------------------------------------------------------------------------
+
+prepsubband_cmd.c ----------------------- adding -runavg -----------------
+/* VK */
+// lines 65-66, this code added:
+  /***** -runavg : Running mean subtraction from the input data */
+  /* runavgP = */ 0,
+
+// lines 948-953, this code added:
+  /***** -runavg: Running mean substraction */
+  if( !cmd.runavgP ) {
+    printf("-runavg not found.\n");
+  } else {
+    printf("-runavg found:\n");
+  }
+
+// line 1086, "[-runavg]" is added to the command line help
+// line 1110, this line is added:
+  fprintf(stderr,"%s","        -runavg: Running mean substraction from the input data\n");
+
+// lines 1255-1258, this code is added:
+    if( 0==strcmp("-runavg", argv[i]) ) {
+      cmd.runavgP = 1; 
+      continue;
+    }    
+--------------------------------------------------------------------------
+
+prepsubband.c ------------------ adding -runavg ---------------------------
+/* VK */
+
+// line 968: added "double run_avg=0;"
+// lines 975-982, this code is added:
+      run_avg=0;
+
+      if(cmd->runavgP==1) {
+       for(jj = 0 ; jj < numread ; jj++)
+       run_avg += (float)subsdata[jj];
+
+       run_avg /= numread;
+      }    
+// line 985, line was changed to be "subbanddata[index] = (float) subsdata[jj] - run_avg;"
+
+---------------------------------------------------------------------------
+
+include/mpiprepsubband_cmd.h ------------------- adding -runavg ------------------
+/* VK & JVL */
+// lines 52-53, this code is added:
+  /***** -runavg: Running mean subtraction from the input data */
+  char runavgP;
+-------------------------------------------------------------------------------
+
+mpiprepsubband_cmd.c ---------------------- adding -runavg ---------------------
+/* VK */
+// lines 65-66, this code added:
+  /***** -runavg : Running mean subtraction from the input data */
+  /* runavgP = */ 0,
+
+// lines 942-947, this code added:
+  /***** -runavg: Running mean subtraction from the input data */
+  if( !cmd.runavgP ) {
+    printf("-runavg not found.\n");
+  } else {
+    printf("-runavg found:\n");
+  }
+
+// line 1061, "[-runavg]" is added to the command line help
+// line 1085, this line is added:
+  fprintf(stderr,"%s","        -runavg: Running mean substraction from the input data\n");
+
+// lines 1226-1229, this code is added:
+    if( 0==strcmp("-runavg", argv[i]) ) {
+      cmd.runavgP = 1; 
+      continue;
+    }    
+--------------------------------------------------------------------------------
+
+mpiprepsubband.c -------------------------- adding -runavg ----------------------
+/* VK */
+// line 1052 is added: "double run_avg = 0;"
+// line 1056 is added: "run_avg = 0;"
+// lines 1060-1068, this code is added:
+      if(cmd->runavgP==1){    
+             for(jj=0 ; jj < numread ; jj++)
+             run_avg += (float)subbanddata[jj+index];
+
+             run_avg /= numread;
+
+             for(jj=0 ; jj < numread ; jj++)
+             subbanddata[jj+index] = (float)subbanddata[jj+index] - run_avg;
+       }     
+
+---------------------------------------------------------------------------------
+
+
+bin/dat2tim.py --------------------
+/* VK */
+// line 6, Lofar is added '"LOFAR": 11'
+// line 10, Lofar backend BG/P is added '"BG/P": 11'
+-----------------------------------
+
+lib/python/barycenter.py ------------------
+/* VK */
+// line 163 is added: "obs['LF'] = [3826937.853, 460938.478, 5064630.667, '', 'LOFAR']"
+-------------------------------------------
+
+lib/python/sigproc.py ---------------------
+/* VK */
+// line 7, Lofar is added '"LOFAR": 11'
+// line 12, Blue Gene is added '"BG/P": 11'
+-------------------------------------------

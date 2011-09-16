@@ -14,7 +14,7 @@
 #define RAWDATA (cmd->pkmbP || cmd->bcpmP || cmd->wappP || cmd->gmrtP || cmd->spigotP || cmd->filterbankP || cmd->psrfitsP)
 
 /* This causes the barycentric motion to be calculated once per TDT sec */
-#define TDT 10.0
+#define TDT 20.0
 
 /* Simple linear interpolation macro */
 #define LININTERP(X, xlo, xhi, ylo, yhi) ((ylo)+((X)-(xlo))*((yhi)-(ylo))/((xhi)-(xlo)))
@@ -204,11 +204,8 @@ int main(int argc, char *argv[])
       printf("  '%s'\n", cmd->argv[ii]);
       infiles[ii] = chkfopen(cmd->argv[ii], "rb");
    }
-
    if (!cmd->numoutP)
-      {
-	cmd->numout = INT_MAX;
-      }
+      cmd->numout = INT_MAX;
 
    /* Determine the output file names and open them */
 
@@ -274,8 +271,7 @@ int main(int argc, char *argv[])
          if (strncmp(suffix, "sub", 3) == 0) {
             tmpname = calloc(strlen(root) + 6, 1);
             sprintf(tmpname, "%s.sub", root);
-            printf("Information will be read from the file : \n '%s.inf'\n",tmpname);
-	    readinf(&idata, tmpname);
+            readinf(&idata, tmpname);
             free(tmpname);
             free(root);
             free(suffix);
@@ -294,48 +290,22 @@ int main(int argc, char *argv[])
       }
       numchan = idata.num_chan;
       dsdt = cmd->downsamp * idata.dt;
-
-//      printf("downsamp is equal to %d and idata.dt is %lf hence dsdt is %lf subblocklend \n",cmd->downsamp,idata.dt,dsdt);
-      
       avgdm = idata.dm;
       blocklen = SUBSBLOCKLEN;
       BW_ddelay = delay_from_dm(maxdm, idata.freq) - 
-      delay_from_dm(maxdm, idata.freq + (idata.num_chan-1) * idata.chan_wid);
+         delay_from_dm(maxdm, idata.freq + (idata.num_chan-1) * idata.chan_wid);
       blocksperread = ((int) (BW_ddelay / idata.dt) / blocklen + 1);
       worklen = blocklen * blocksperread;
 
-      /* What telescope are we using? */
-      if (!strcmp(idata.telescope, "Arecibo")) {
-         strcpy(obs, "AO");
-      } else if (!strcmp(idata.telescope, "Parkes")) {
-         strcpy(obs, "PK");
-      } else if (!strcmp(idata.telescope, "Jodrell")) {
-         strcpy(obs, "JB");
-      } else if (!strcmp(idata.telescope, "Effelsberg")) {
-         strcpy(obs, "EF");
-      } else if (!strcmp(idata.telescope, "MMT")) {
-         strcpy(obs, "MT");
-      } else if (!strcmp(idata.telescope, "GBT")) {
-         strcpy(obs, "GB");
-      } else if (!strcmp(idata.telescope, "GMRT")) {
-         strcpy(obs, "GM");
-      } else if (!strcmp(idata.telescope, "LOFAR")) {
-         strcpy(obs, "LF");
-      } else {
-         printf("\nYou need to choose a telescope whose data is in\n");
-         printf("$TEMPO/obsys.dat.  Exiting.\n\n");
-         exit(1);
-      }
       /* The number of topo to bary time points to generate with TEMPO */
       numbarypts = (int) (idata.N * idata.dt * 1.1 / TDT + 5.5) + 1;
-//    printf("numbarypts %d idata.N %f TDT %f\n",numbarypts,(float)idata.N,(float)TDT);
-
    }
 
    if (RAWDATA) {
       double dt, T;
       int ptsperblock;
       long long N;
+
       /* Set-up values if we are using the Parkes multibeam */
       if (cmd->pkmbP) {
          printf("\nFilterbank input file information:\n");
@@ -345,16 +315,6 @@ int main(int argc, char *argv[])
          rewind(infiles[0]);
          PKMB_hdr_to_inf(&hdr, &idata);
          PKMB_update_infodata(numinfiles, &idata);
-         /* OBS code for TEMPO */
-         if (!strcmp(idata.telescope, "Parkes"))
-            strcpy(obs, "PK");
-         else if (!strcmp(idata.telescope, "Jodrell"))
-            strcpy(obs, "JB");
-         else {
-            printf
-                ("\nWARNING!!!:  I don't recognize the observatory (%s)!",
-                 idata.telescope);
-         }
       }
 
       /* Set-up values if we are using the GMRT Phased Array system */
@@ -366,8 +326,6 @@ int main(int argc, char *argv[])
          GMRT_hdr_to_inf(argv[1], &idata);
          GMRT_update_infodata(numinfiles, &idata);
          set_GMRT_padvals(padvals, good_padvals);
-         /* OBS code for TEMPO for the GMRT */
-         strcpy(obs, "GM");
       }
 
       /* Set-up values if we are using SIGPROC filterbank-style data */
@@ -385,24 +343,6 @@ int main(int argc, char *argv[])
                                   &N, &ptsperblock, &numchan, &dt, &T, 1);
          filterbank_update_infodata(numinfiles, &idata);
          set_filterbank_padvals(padvals, good_padvals);
-         /* What telescope are we using? */
-         if (!strcmp(idata.telescope, "Arecibo")) {
-            strcpy(obs, "AO");
-         } else if (!strcmp(idata.telescope, "Parkes")) {
-            strcpy(obs, "PK");
-         } else if (!strcmp(idata.telescope, "Jodrell")) {
-            strcpy(obs, "JB");
-         } else if (!strcmp(idata.telescope, "Effelsberg")) {
-            strcpy(obs, "EF");
-         } else if (!strcmp(idata.telescope, "GBT")) {
-            strcpy(obs, "GB");
-         } else if (!strcmp(idata.telescope, "LOFAR")) {
-            strcpy(obs, "LF");
-         } else {
-            printf("\nYou need to choose a telescope whose data is in\n");
-            printf("$TEMPO/obsys.dat.  Exiting.\n\n");
-            exit(1);
-         }
       }
 
       /* Set-up values if we are using the Berkeley-Caltech */
@@ -413,8 +353,6 @@ int main(int argc, char *argv[])
                            &ptsperblock, &numchan, &dt, &T, &idata, 1);
          BPP_update_infodata(numinfiles, &idata);
          set_BPP_padvals(padvals, good_padvals);
-         /* OBS code for TEMPO */
-         strcpy(obs, "GB");
       }
 
       /* Set-up values if we are using the NRAO-Caltech Spigot card */
@@ -430,17 +368,18 @@ int main(int argc, char *argv[])
                               &T, &idata, 1);
          SPIGOT_update_infodata(numinfiles, &idata);
          set_SPIGOT_padvals(padvals, good_padvals);
-         /* OBS code for TEMPO for the GBT */
-         strcpy(obs, "GB");
          free(spigots);
       }
 
       /* Set-up values if we are using search-mode PSRFITS data */
       if (cmd->psrfitsP) {
          struct spectra_info s;
-         char scope[40];
          
          printf("PSRFITS input file information:\n");
+          // -1 causes the data to determine if we use weights, scales, & offsets
+         s.apply_weight = (cmd->noweightsP) ? 0 : -1;
+         s.apply_scale  = (cmd->noscalesP) ? 0 : -1;
+         s.apply_offset = (cmd->nooffsetsP) ? 0 : -1;
          read_PSRFITS_files(cmd->argv, cmd->argc, &s);
          N = s.N;
          ptsperblock = s.spectra_per_subint;
@@ -451,21 +390,6 @@ int main(int argc, char *argv[])
                                &s, &idata, 1);
          PSRFITS_update_infodata(&idata);
          set_PSRFITS_padvals(padvals, good_padvals);
-         strncpy(scope, idata.telescope, 40);
-         strlower(scope);
-         /* OBS codes for TEMPO */
-         if (!strcmp(scope, "parkes")) {
-            strcpy(obs, "PK");
-         } else if (!strcmp(scope, "jodrell")) {
-            strcpy(obs, "JB");
-         } else if (!strcmp(scope, "gbt")) {
-            strcpy(obs, "GB");
-         } else if (!strcmp(scope, "arecibo")) {
-            strcpy(obs, "AO");
-         } else {
-            printf("\nWARNING!!!:  I don't recognize the observatory (%s)!",
-                   idata.telescope);
-         }
       }
 
       /* Set-up values if we are using the Arecobo WAPP */
@@ -476,8 +400,6 @@ int main(int argc, char *argv[])
                             &numchan, &dt, &T, &idata, 1);
          WAPP_update_infodata(numinfiles, &idata);
          set_WAPP_padvals(padvals, good_padvals);
-         /* OBS code for TEMPO */
-         strcpy(obs, "AO");
       }
 
       /* Finish setting up stuff common to all raw formats */
@@ -523,6 +445,13 @@ int main(int argc, char *argv[])
       numbarypts = (int) (T * 1.1 / TDT + 5.5) + 1;
    }
 
+   // Identify the TEMPO observatory code
+   {
+       char *outscope = (char *) calloc(40, sizeof(char));
+       telescope_to_tempocode(idata.telescope, outscope, obs);
+       free(outscope);
+   }
+
    if (cmd->nsub > numchan) {
       printf
           ("Warning:  The number of requested subbands (%d) is larger than the number of channels (%d).\n",
@@ -539,17 +468,12 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
-        
-     tlotoa = idata.mjd_i + idata.mjd_f;  /* Topocentric epoch */
-    
-//    printf("Topocentric Epoch %lf  %lf idata.mjd_i %f idata.mjd_f %f\n",tlotoa,idata.mjd_i+idata.mjd_f,(double)idata.mjd_i,(double)idata.mjd_f);
+   tlotoa = idata.mjd_i + idata.mjd_f;  /* Topocentric epoch */
 
    if (cmd->numoutP)
       totnumtowrite = cmd->numout;
    else
       totnumtowrite = (int) idata.N / cmd->downsamp;
-
-//   printf("Total num to write %d cmd->numout %d",(int)totnumtowrite,(int)cmd->numout);	
 
    if (cmd->nobaryP) {          /* Main loop if we are not barycentering... */
 
@@ -653,9 +577,8 @@ int main(int argc, char *argv[])
       ttoa = gen_dvect(numbarypts);
       voverc = gen_dvect(numbarypts);
       for (ii = 0; ii < numbarypts; ii++)
-        { ttoa[ii] = tlotoa + TDT * ii / SECPERDAY;
-	}
-   
+         ttoa[ii] = tlotoa + TDT * ii / SECPERDAY;
+
       /* Call TEMPO for the barycentering */
 
       printf("\nGenerating barycentric corrections...\n");
@@ -666,11 +589,11 @@ int main(int argc, char *argv[])
          if (voverc[ii] < minvoverc)
             minvoverc = voverc[ii];
          avgvoverc += voverc[ii];
-	}
+      }
       avgvoverc /= numbarypts;
       free(voverc);
       blotoa = btoa[0];
-     
+
       printf("   Average topocentric velocity (c) = %.7g\n", avgvoverc);
       printf("   Maximum topocentric velocity (c) = %.7g\n", maxvoverc);
       printf("   Minimum topocentric velocity (c) = %.7g\n\n", minvoverc);
@@ -685,29 +608,24 @@ int main(int argc, char *argv[])
 
       /* Dispersion delays (in bins).  The high freq gets no delay   */
       /* All other delays are positive fractions of bin length (dt)  */
-    	
+
       dispdt = subband_search_delays(numchan, cmd->nsub, avgdm,
                                      idata.freq, idata.chan_wid, avgvoverc);
       for (ii = 0; ii < numchan; ii++)
-         {
-	  dispdt[ii] /= idata.dt;
-	 }
+         dispdt[ii] /= idata.dt;
 
       /* The subband dispersion delays (see note above) */
 
       offsets = gen_imatrix(cmd->numdms, cmd->nsub);
       for (ii = 0; ii < cmd->numdms; ii++) {
          double *subdispdt;
-        
- 
-	 subdispdt = subband_delays(numchan, cmd->nsub, dms[ii],
+
+         subdispdt = subband_delays(numchan, cmd->nsub, dms[ii],
                                     idata.freq, idata.chan_wid, avgvoverc);
          dtmp = subdispdt[cmd->nsub - 1];
          for (jj = 0; jj < cmd->nsub; jj++)
-	    {
             offsets[ii][jj] = NEAREST_INT((subdispdt[jj] - dtmp) / dsdt);
-	    }
-	free(subdispdt);
+         free(subdispdt);
       }
 
       /* Convert the bary TOAs to differences from the topo TOAs in */
@@ -715,9 +633,7 @@ int main(int argc, char *argv[])
 
       dtmp = (btoa[0] - ttoa[0]);
       for (ii = 0; ii < numbarypts; ii++)
-         {
-		btoa[ii] = ((btoa[ii] - ttoa[ii]) - dtmp) * SECPERDAY / dsdt;
-	 }
+         btoa[ii] = ((btoa[ii] - ttoa[ii]) - dtmp) * SECPERDAY / dsdt;
 
       {                         /* Find the points where we need to add or remove bins */
 
@@ -725,7 +641,7 @@ int main(int argc, char *argv[])
          double lobin, hibin, calcpt;
 
          numdiffbins = abs(NEAREST_INT(btoa[numbarypts - 1])) + 1;
-	 diffbins = gen_ivect(numdiffbins);
+         diffbins = gen_ivect(numdiffbins);
          diffbinptr = diffbins;
          for (ii = 1; ii < numbarypts; ii++) {
             currentbin = NEAREST_INT(btoa[ii]);
@@ -746,11 +662,11 @@ int main(int argc, char *argv[])
                                                       btoa[ii], lobin, hibin));
                   diffbinptr++;
                   calcpt = (currentbin > 0) ? calcpt + 1.0 : calcpt - 1.0;
-		}
+               }
                oldbin = currentbin;
             }
          }
-         *diffbinptr = INT_MAX; /* Used as a marker */
+         *diffbinptr = cmd->numout; /* Used as a marker */
       }
       diffbinptr = diffbins;
 
@@ -770,11 +686,10 @@ int main(int argc, char *argv[])
          double block_avg, block_var;
 
          numread /= cmd->downsamp;
-
          /* Determine the approximate local average */
          avg_var(outdata[0], numread, &block_avg, &block_var);
          print_percent_complete(totwrote, totnumtowrite);
-	
+
          /* Simply write the data if we don't have to add or */
          /* remove any bins from this batch.                 */
          /* OR write the amount of data up to cmd->numout or */
@@ -792,7 +707,7 @@ int main(int argc, char *argv[])
          datawrote += numtowrite;
          totwrote += numtowrite;
          numwritten += numtowrite;
-	
+
          /* Update the statistics */
 
          if (!padding && !cmd->subP) {
@@ -807,7 +722,6 @@ int main(int argc, char *argv[])
             int skip, nextdiffbin;
 
             skip = numtowrite;
-
 
             do {  /* Write the rest of the data after adding/removing a bin  */
 
@@ -900,7 +814,7 @@ int main(int argc, char *argv[])
 
    /* Set the padded points equal to the average data point */
 
-   if (idata.numonoff > 1) {
+   if (idata.numonoff >= 1) {
       int index, startpad, endpad;
 
       for (ii = 0; ii < cmd->numdms; ii++) {
@@ -1051,26 +965,25 @@ static int read_subbands(FILE * infiles[], int numfiles,
    short subsdata[SUBSBLOCKLEN]; 
    double starttime;
    static int currentblock = 0;
-   double run_avg=0;	
+   double run_avg=0;
 
    if (obsmask->numchan) mask = 1;
-	
+   
    /* Read the data */
    for (ii = 0; ii < numfiles; ii++) {
       numread = chkfread(subsdata, sizeof(short), SUBSBLOCKLEN, infiles[ii]);
       run_avg=0;
 
-      if(cmd->runavgint==1) {
+      if(cmd->runavgP==1) {
        for(jj = 0 ; jj < numread ; jj++)
        run_avg += (float)subsdata[jj];
 
        run_avg /= numread;
-      }
+      }    
 
       for (jj = 0, index = ii; jj < numread; jj++, index += numfiles)
-        { 
-          subbanddata[index] = (float) subsdata[jj] - run_avg ;
-	}
+         subbanddata[index] = (float) subsdata[jj] - run_avg;
+
       for (jj = numread; jj < SUBSBLOCKLEN; jj++, index += numfiles)
          subbanddata[index] = 0.0;
       index += numread;
@@ -1082,7 +995,7 @@ static int read_subbands(FILE * infiles[], int numfiles,
    }
 
    /* Clip nasty RFI if requested and we're not masking all the channels*/
-      if ((clip_sigma > 0.0) && !(mask && (*nummasked == -1))){
+   if ((clip_sigma > 0.0) && !(mask && (*nummasked == -1))){
       subs_clip_times(subbanddata, SUBSBLOCKLEN, numfiles, clip_sigma, padvals);
    }
 

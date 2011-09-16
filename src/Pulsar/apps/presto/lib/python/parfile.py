@@ -45,10 +45,11 @@ float_keys = ["F", "F0", "F1", "F2", "F3", "F4", "F5", "F6",
               "P", "P0", "P1", "P2", "P3", "P4", "P5", "P6",
               "PEPOCH", "POSEPOCH", "DM", "START", "FINISH", "NTOA",
               "TRES", "TZRMJD", "TZRFRQ", "TZRSITE", "NITS",
-              "A1", "XDOT", "E", "EDOT", "T0", "PB", "PBDOT", "OM", "OMDOT",
+              "A1", "XDOT", "E", "ECC", "EDOT", "T0", "PB", "PBDOT", "OM", "OMDOT",
               "EPS1", "EPS2", "EPS1DOT", "EPS2DOT", "TASC", "LAMBDA", "BETA",
               "RA_RAD", "DEC_RAD", "GAMMA", "SINI", "M2", "MTOT",
-              "FB0", "FB1", "FB2", "ELAT", "ELONG", "LAMBDA", "BETA"]
+              "FB0", "FB1", "FB2", "ELAT", "ELONG", "LAMBDA", "BETA",
+              "PMRA", "PMDEC"]
 str_keys = ["FILE", "PSR", "RAJ", "DECJ", "EPHEM", "CLK", "BINARY"]
 
 class psr_par:
@@ -140,9 +141,13 @@ class psr_par:
             ecc = math.sqrt(self.EPS1 * self.EPS1 + self.EPS2 * self.EPS2)
             omega = math.atan2(self.EPS1, self.EPS2)
             setattr(self, 'E', ecc)
-            setattr(self, 'OM', omega)
-        if hasattr(self, 'PB') and hasattr(self, 'A1') and not hasattr(self, 'E'):
+            setattr(self, 'OM', omega * pu.RADTODEG)
+            setattr(self, 'T0', self.TASC + self.PB * omega/pu.TWOPI)
+        if hasattr(self, 'PB') and hasattr(self, 'A1') and not \
+               (hasattr(self, 'E') or hasattr(self, 'ECC')):
             setattr(self, 'E', 0.0)
+        if hasattr(self, 'T0') and not hasattr(self, 'TASC'):
+            setattr(self, 'TASC', self.T0 - self.PB * self.OM/360.0)
         pf.close()
     def __str__(self):
         out = ""

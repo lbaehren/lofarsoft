@@ -25,6 +25,12 @@ typedef struct s_Cmdline {
   char filterbankP;
   /***** -psrfits: Raw data in PSRFITS format */
   char psrfitsP;
+  /***** -noweights: Do not apply PSRFITS weights */
+  char noweightsP;
+  /***** -noscales: Do not apply PSRFITS scales */
+  char noscalesP;
+  /***** -nooffsets: Do not apply PSRFITS offsets */
+  char nooffsetsP;
   /***** -wapp: Raw data in Wideband Arecibo Pulsar Processor (WAPP) format */
   char wappP;
   /***** -window: Window correlator lags with a Hamming window before FFTing */
@@ -43,6 +49,8 @@ typedef struct s_Cmdline {
   int clipC;
   /***** -noclip: Do not clip the data.  (The default is to _always_ clip!) */
   char noclipP;
+  /***** -runavg: Running mean subtraction from the input data */
+  char runavgP;
   /***** -sub: Write subbands instead of de-dispersed data */
   char subP;
   /***** -subdm: The DM to use when de-dispersing subbands for -sub */
@@ -81,7 +89,6 @@ typedef struct s_Cmdline {
   char maskfileP;
   char* maskfile;
   int maskfileC;
-  int runavgint;
   /***** uninterpreted command line parameters */
   int argc;
   /*@null*/char **argv;

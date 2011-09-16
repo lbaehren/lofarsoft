@@ -2,10 +2,6 @@
 
 #define BLOCKSTOSKIP 100
 
-/* Patrick: increase the maximum nr of supported levels */
-#define maxnrsupportedlevels 10000
-
-
 /* NEW Clipping Routine (uses channel running averages) */
 int new_clip_times(unsigned char *rawdata, int ptsperblk, int numchan,
                    float clip_sigma, unsigned char *good_chan_levels)
@@ -16,23 +12,22 @@ int new_clip_times(unsigned char *rawdata, int ptsperblk, int numchan,
 /* averages of the channels are returned in good_chan_levels */
 /* (which must be pre-allocated).                            */
 {
-   static float chan_running_avg[maxnrsupportedlevels];
+   static float *chan_running_avg;
    static float running_avg = 0.0, running_std = 0.0;
-   static int blocksread = 0;
+   static int blocksread = 0, firsttime = 1;
    static long long current_point = 0;
    float *zero_dm_block, *median_temp;
-   double chan_avg_temp[2048];
+   double *chan_avg_temp;
    float current_med, trigger;
    double current_avg = 0.0, current_std = 0.0;
    unsigned char *powptr;
    int ii, jj, clipit = 0, clipped = 0;
 
-  /* Patrick: check to avoid segfaults when there are too many frequency channels */
-   if(numchan > maxnrsupportedlevels) {
-     fprintf(stderr, "Sorry, PRESTO has a stupid limit to the number of channels, need to hack source code and recompile, or install a later version of PRESTO.\n");
-     exit(0);
+   if (firsttime) {
+       chan_running_avg = gen_fvect(numchan);
+       firsttime = 0;
    }
-
+   chan_avg_temp = gen_dvect(numchan);
    zero_dm_block = gen_fvect(ptsperblk);
    median_temp = gen_fvect(ptsperblk);
 
@@ -129,6 +124,7 @@ int new_clip_times(unsigned char *rawdata, int ptsperblk, int numchan,
    }
    blocksread++;
 
+   free(chan_avg_temp);
    free(zero_dm_block);
    free(median_temp);
 
@@ -146,19 +142,18 @@ int clip_times(unsigned char *rawdata, int ptsperblk, int numchan,
 /* averages of the channels are returned in good_chan_levels */
 /* (which must be pre-allocated).                            */
 {
-  static float median_chan_levels[maxnrsupportedlevels];
+   static float *median_chan_levels;
    static float running_avg = 0.0, running_std = 0.0, median_sum = 0.0;
-   static int blocksread = 0;
+   static int blocksread = 0, firsttime = 1;
    float *zero_dm_block, *median_temp;
    float current_med, trigger, running_wgt = 0.05;
    double current_avg = 0.0, current_std = 0.0, scaling;
    unsigned char *powptr;
    int ii, jj, clipit = 0, clipped = 0;
 
-  /* Patrick: check to avoid segfaults when there are too many frequency channels */
-   if(numchan > maxnrsupportedlevels) {
-     fprintf(stderr, "Sorry, PRESTO has a stupid limit to the number of channels, need to hack source code and recompile, or install a later version of PRESTO.\n");
-     exit(0);
+   if (firsttime) {
+       median_chan_levels = gen_fvect(numchan);
+       firsttime = 0;
    }
 
    zero_dm_block = gen_fvect(ptsperblk);
@@ -224,22 +219,25 @@ int clip_times(unsigned char *rawdata, int ptsperblk, int numchan,
    /* Calculate the channel medians if required */
    if ((blocksread % BLOCKSTOSKIP == 0 && clipit == 0) || blocksread == 0) {
       median_sum = 0.0;
-     for (ii = 0; ii < numchan; ii++) {
+      for (ii = 0; ii < numchan; ii++) {
          powptr = rawdata + ii;
-         for (jj = 0; jj < ptsperblk; jj++) {
-           median_temp[jj] = *(powptr + jj * numchan);
-	 }
+         for (jj = 0; jj < ptsperblk; jj++)
+            median_temp[jj] = *(powptr + jj * numchan);
          median_chan_levels[ii] = median(median_temp, ptsperblk);
          median_sum += median_chan_levels[ii];
       }
    }
 
    /* Update the good channel levels */
-
    scaling = running_avg / median_sum;
-   for (ii = 0; ii < numchan; ii++)
-      good_chan_levels[ii] = (unsigned char) (median_chan_levels[ii] *
-                                              scaling + 0.5);
+   for (ii = 0; ii < numchan; ii++) {
+       unsigned char newlevel = (unsigned char) (median_chan_levels[ii] *
+                                                 scaling + 0.5);
+       if (!firsttime && abs((int)newlevel-(int)good_chan_levels[ii]) > 220) {
+           newlevel = (newlevel < good_chan_levels[ii]) ? 255 : 0; // Clip
+       }
+       good_chan_levels[ii] = newlevel;
+   }
 
    /* Replace the bad channel data with channel median values */
    /* that are scaled to equal the running_avg.               */
@@ -258,7 +256,7 @@ int clip_times(unsigned char *rawdata, int ptsperblk, int numchan,
    free(zero_dm_block);
    free(median_temp);
 
-  return clipped;
+   return clipped;
 }
 
 
@@ -273,24 +271,21 @@ int subs_clip_times(float *rawdata, int ptsperblk, int numchan,
 /* averages of the channels are returned in good_chan_levels */
 /* (which must be pre-allocated).                            */
 {
-   static float median_chan_levels[maxnrsupportedlevels];
+   static float *median_chan_levels;
    static float running_avg = 0.0, running_std = 0.0, median_sum = 0.0;
-   static int blocksread = 0;
+   static int blocksread = 0, firsttime = 1;
    float *zero_dm_block, *median_temp, *powptr;
    float current_med, trigger, running_wgt = 0.05;
    double current_avg = 0.0, current_std = 0.0, scaling;
    int ii, jj, clipit = 0, clipped = 0;
 
-  /* Patrick: check to avoid segfaults when there are too many frequency channels */
-   if(numchan > maxnrsupportedlevels) {
-     fprintf(stderr, "Sorry, PRESTO has a stupid limit to the number of channels, need to hack source code and recompile, or install a later version of PRESTO.\n");
-     exit(0);
+   if (firsttime) {
+       median_chan_levels = gen_fvect(numchan);
+       firsttime = 0;
    }
 
    zero_dm_block = gen_fvect(ptsperblk);
    median_temp = gen_fvect(ptsperblk);
-
-
 
    /* Calculate the zero DM time series */
    for (ii = 0; ii < ptsperblk; ii++) {

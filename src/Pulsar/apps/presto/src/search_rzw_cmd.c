@@ -939,7 +939,7 @@ usage(void)
   fprintf(stderr,"%s","     -photon: Data is poissonian so use freq 0 as power normalization\n");
   fprintf(stderr,"%s","      infile: Input file name (no suffix) of floating point fft data.  A '.inf' file of the same name must also exist\n");
   fprintf(stderr,"%s","              1 value\n");
-  fprintf(stderr,"%s","  version: 03Apr09\n");
+  fprintf(stderr,"%s","  version: 12Mar10\n");
   fprintf(stderr,"%s","  ");
   exit(EXIT_FAILURE);
 }
