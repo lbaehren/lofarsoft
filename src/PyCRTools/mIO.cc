@@ -48,6 +48,7 @@
 #include "aera/Datareader.h"
 #include "aera/Data/Header.h"
 #include "aera/Data/Event.h"
+#include "aera/Data/EventHeader.h"
 #include "aera/Data/LocalStation.h"
 #endif /* PYCRTOOLS_WITH_AERA */
 
@@ -486,6 +487,44 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 
 #ifdef PYCRTOOLS_WITH_AERA
 
+//$DOCSTRING: Function to open a file based on a filename and data format version and returning an AERA datareader object.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hAERAFileOpen
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (AERADatareader)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HString)(Filename)()("Filename of file to open including full directory name")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HInteger)(version)()("Version of the data format of file to open")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Example:
+
+  datapath = cr.LOFARSOFT + "/data/aera/"
+  datafile = "ad000538.f0001"
+  filename = datapath + datafile
+  version = 1
+  aerafile = cr.hAERAFileOpen(filename, version)
+*/
+AERA::Datareader& HFPP_FUNC_NAME (const HString Filename, const HInteger version)
+{
+  AERA::Datareader* dr_ptr = NULL;
+
+  dr_ptr = new AERA::Datareader(version);
+
+  if (dr_ptr != NULL) {
+    dr_ptr->open(Filename);
+    dr_ptr->read();
+  }
+
+  return *dr_ptr;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
 //$DOCSTRING: Function to open a file based on a filename and returning an AERA datareader object.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hAERAFileOpen
@@ -497,6 +536,13 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Example:
+
+  datapath = cr.LOFARSOFT + "/data/aera/"
+  datafile = "ad000413.f0001"
+  filename = datapath + datafile
+  aerafile = cr.hAERAFileOpen(filename)
 */
 AERA::Datareader& HFPP_FUNC_NAME (const HString Filename)
 {
@@ -526,6 +572,15 @@ AERA::Datareader& HFPP_FUNC_NAME (const HString Filename)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Example:
+
+  datapath = cr.LOFARSOFT + "/data/aera/"
+  datafile = "ad000413.f0001"
+  filename = datapath + datafile
+  aerafile = cr.hAERAFileOpen(filename)
+
+  cr.hAERAFileClose(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -553,47 +608,54 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
   $PARDOCSTRING
 
   Description:
-  The following keywords can be used
+  The following keywords can be used to obtain file information:
 
-    =============== ========================
-    File keyname    Description
-    --------------- ------------------------
-    filename        File name
-    nevents         Number of events
-    runnumber       Run number
-    runmode         Run mode
-    fileserialnr    File serial number
-    firsteventnr    First event number
-    firsteventtime  Time of first event
-    lasteventnr     Last event number
-    lasteventtime   Time of last event
-    =============== ========================
+    ===================  ========================
+    **File keyname**     **Description**
+    filename             File name
+    nevents              Number of events
+    runnumber            Run number
+    runmode              Run mode
+    fileserialnr         File serial number
+    firsteventnr         First event number
+    firsteventtime       Time of first event
+    lasteventnr          Last event number
+    lasteventtime        Time of last event
+    ===================  ========================
 
-    ================= ================================
-    Event keyname     Description
-    ----------------- --------------------------------
-    nlocalstations    Number of local stations
-    eventlength       Event length
-    eventid           Event ID
-    t3                T3 event ID
-    timestampsec      Timestamp in seconds
-    timestampnanosec  Nanosecond part of timestamp
-    eventtype         Type of event
-    ================= ================================
+  The following keywords can be used to obtain info about the *current* event:
 
-    ===================== ===============================
-    Localstation keyname  Description
-    --------------------- -------------------------------
-    bodylength            Length of the event body
-    localstationid        Local station ID
-    hardware              Hardware description
-    triggerflag           Trigger flag
-    triggerposition       Trigger position
-    samplingfreq          Sampling frequency
-    channelmask           Channel mask
-    adcresolution         ADC resolution
-    tracelength           Trace length
-    ===================== ===============================
+    =================== ================================
+    **Event keyname**   **Description**
+    nlocalstations      Number of local stations
+    eventlength         Event length
+    eventid             Event ID
+    t3                  T3 event ID
+    timestampsec        Timestamp in seconds
+    timestampnanosec    Nanosecond part of timestamp
+    eventtype           Type of event
+    =================== ================================
+
+  The following keywords can be used to obtain info about the *current* localstation:
+
+    ========================= ===============================
+    **Localstation keyname**  **Description**
+    bodylength                Length of the event body
+    eventnumber               Event number
+    localstationid            Local station ID
+    hardware                  Hardware description
+    headerlength              Header length
+    seconds                   Seconds
+    nanoseconds               Nanoseconds
+    triggerflag               Trigger flag
+    triggerposition           Trigger position
+    samplingfreq              Sampling frequency
+    channelmask               Channel mask
+    adcresolution             ADC resolution
+    tracelength               Trace length
+    version                   Data version
+    messageid                 Message ID
+    ========================= ===============================
 */
 HPyObject HFPP_FUNC_NAME (AERA::Datareader& dr, const std::string keyValue)
 {
@@ -681,32 +743,50 @@ HPyObject HFPP_FUNC_NAME (AERA::Datareader& dr, const std::string keyValue)
   if ( NULL != event_ptr ) {
     AERA::Data::LocalStation* ls_ptr = event_ptr->currentLocalStation();
     if ( NULL != ls_ptr ) {
-      if ( "bodylength" == keyName ) { //          Length of event body
+      if ( "bodylength" == keyName ) { // Length of event body
         UINT16 result = ls_ptr->getLength();
         return HPyObject(result);
-      } else if ( "localstationid" == keyName ) { //   Local station ID
+      } else if ( "eventnumber" == keyName ) { // Event number
+        UINT16 result = ls_ptr->getEventNumber();
+        return HPyObject(result);
+      } else if ( "localstationid" == keyName ) { // Local station ID
         UINT16 result = ls_ptr->getLocalStationID();
         return HPyObject(result);
-      } else if ( "hardware" == keyName ) { //     Hardware description
+      } else if ( "hardware" == keyName ) { // Hardware description
         std::string result = ls_ptr->getHardware();
         return HPyObject(result);
-      } else if ( "triggerflag" == keyName ) { //          Trigger flag
+      } else if ( "headerlength" == keyName ) { // Header length
+        UINT16 result = ls_ptr->getHeaderLength();
+        return HPyObject(result);
+      } else if ( "seconds" == keyName ) {     // Seconds
+        unsigned int result = ls_ptr->getSeconds();
+        return HPyObject(result);
+      } else if ( "nanoseconds" == keyName ) { // Nanoseconds
+        unsigned int result = ls_ptr->getNanoSeconds();
+        return HPyObject(result);
+      } else if ( "triggerflag" == keyName ) { // Trigger flag
         UINT16 result = ls_ptr->getTriggerFlag();
         return HPyObject(result);
-      } else if ( "triggerposition" == keyName ) { //  Trigger position
+      } else if ( "triggerposition" == keyName ) { // Trigger position
         UINT16 result = ls_ptr->getTriggerPosition();
         return HPyObject(result);
-      } else if ( "samplingfreq" == keyName ) { //   Sampling frequency
+      } else if ( "samplingfreq" == keyName ) { // Sampling frequency
         UINT16 result = ls_ptr->getSamplingFrequency();
         return HPyObject(result);
-      } else if ( "channelmask" == keyName ) { //          Channel mask
+      } else if ( "channelmask" == keyName ) { // Channel mask
         UINT16 result = ls_ptr->getChannelMask();
         return HPyObject(result);
-      } else if ( "adcresolution" == keyName ) { //      ADC resolution
+      } else if ( "adcresolution" == keyName ) { // ADC resolution
         UINT16 result = ls_ptr->getADCResolution();
         return HPyObject(result);
-      } else if ( "tracelength" == keyName ) { //          Trace length
+      } else if ( "tracelength" == keyName ) { // Trace length
         UINT16 result = ls_ptr->getTraceLength();
+        return HPyObject(result);
+      } else if ( "version" == keyName ) { // Version
+        UINT16 result = ls_ptr->getVersion();
+        return HPyObject(result);
+      } else if ( "messageid" == keyName ) { // Message ID
+        unsigned short result = ls_ptr->getMessageID();
         return HPyObject(result);
       }
     } else {
@@ -771,7 +851,7 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr,
     station_ptr = event_ptr->currentLocalStation();
     if ( NULL != station_ptr ) {
       tracelength = station_ptr->getTraceLength();
-      for (int channel = 0; channel < N_CHANNELS; ++channel) {
+      for (int channel = 0; channel < station_ptr->nChannels(); ++channel) {
         v_begin = vec + tracelength*channel;
         v_end = v_begin + tracelength;
         if ( (v_begin < vec_end) && (v_end <= vec_end) ) {
@@ -813,7 +893,7 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr,
   AERA::Data::LocalStation* station_ptr = NULL;
   Iter vec_it = vec;
 
-  if ( ( 0 <= channel ) && ( N_CHANNELS > channel ) ) {
+  if ( ( 0 <= channel ) && ( station_ptr->nChannels() > channel ) ) {
     if ( NULL != event_ptr ) {
       station_ptr = event_ptr->currentLocalStation();
       if ( NULL != station_ptr ) {
@@ -850,6 +930,9 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr,
 
   Description:
   Returns ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERAFirstEvent(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -880,6 +963,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Return ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERAPrevEvent(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -912,6 +998,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Returns ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERANextEvent(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -944,6 +1033,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Returns ``True`` if the event pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERALastEvent(aerafile)
 */
 
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
@@ -975,6 +1067,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Returns ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERAFirstLocalStation(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -1009,6 +1104,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Return ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERAPrevLocalStation(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -1045,6 +1143,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Returns ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERANextLocalStation(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -1081,6 +1182,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 
   Description:
   Returns ``True`` if the local station pointer was successfully changed, ``False`` otherwise.
+
+  Example:
+  status = cr.hAERALastLocalStation(aerafile)
 */
 HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -1112,6 +1216,9 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Example:
+  cr.hAERAFileSummary(aerafile)
 */
 void HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -1131,6 +1238,9 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Example:
+  cr.hAERAEventSummary(aerafile)
 */
 void HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
@@ -1154,6 +1264,9 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+
+  Example:
+  cr.hAERALocalStationSummary(aerafile)
 */
 void HFPP_FUNC_NAME (AERA::Datareader& dr)
 {
