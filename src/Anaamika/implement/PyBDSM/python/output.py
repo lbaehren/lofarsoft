@@ -726,19 +726,19 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
         for g in src.gaussians:
             gauslist.append(g)
             gausflux.append(g.total_flux)
-            gausindx.append(g.gaus_num-1)
+            gausindx.append(g.gaus_num)
             if wavelet:
                 jstr = '_w' + str(g.wavelet_j)
             else:
                 jstr = ''
             gausname.append(root + jstr + '_i' + str(src.island_id) + '_s' +
-                            str(src.source_id) + '_g' + str(g.gaus_num-1))
+                            str(src.source_id) + '_g' + str(g.gaus_num))
             if patch == 'gaussian':
                 outlist.append(gauslist)
                 outnames.append(gausname)
-                patchnames.append(root + '_patch' + jstr + '_g' + str(g.gaus_num-1))
+                patchnames.append(root + '_patch' + jstr + '_g' + str(g.gaus_num))
                 patchflux.append(N.sum(gausflux))
-                patchindx.append(g.gaus_num-1)
+                patchindx.append(g.gaus_num)
                 gauslist = [] # reset for next Gaussian
                 gausname = []
                 gausflux = []
