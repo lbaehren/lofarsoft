@@ -100,7 +100,7 @@ set (tempo2_archive "${tempo2_directory}.tar.gz")
 add_custom_target (tempo2_unpack
   COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${tempo2_name}
   COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo2_archive}
-  COMMAND echo lofar t LF >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/aliases
+  COMMAND echo lofar " t LF" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/aliases
   COMMAND echo "" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
   COMMAND echo " 3826937.853   460938.478       5064630.667      LOFAR               t" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
   COMMAND cp -r ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/* ${CMAKE_INSTALL_PREFIX}/
