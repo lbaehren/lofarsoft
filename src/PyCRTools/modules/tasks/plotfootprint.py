@@ -182,7 +182,8 @@ class plotfootprint(tasks.Task):
         lofarshape={default:"o",doc:"Shape of LOFAR antennas. e.g. 'o' for circle, '^' for triangle"},
         loracolor={default:"#730909",doc:"Color used for LORA plots. If set to 'time' uses the arrival time" },
         plotlayout={default:True,doc:"Plot the LOFAR layout of the stations as the background"},
-        filetype={default:"png",doc:"extension/type of output file"}
+        filetype={default:"png",doc:"extension/type of output file"},
+        usecolorbar={default:True,doc:"print the colorbar?"}
         
         )
         
@@ -250,8 +251,9 @@ class plotfootprint(tasks.Task):
             cr.plt.title(self.title)
         if self.positions:
             cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.scolors,marker=self.lofarshape,cmap=self.colormap)
-        self.cbar=cr.plt.colorbar()
-        self.cbar.set_label("Time of arrival (ns)")
+        if self.usecolorbar:
+            self.cbar=cr.plt.colorbar()
+            self.cbar.set_label("Time of arrival (ns)")
         if self.plotlora:
             if isinstance(self.lorapower,(list)):
                 self.lorapower=cr.hArray(self.lorapower)
