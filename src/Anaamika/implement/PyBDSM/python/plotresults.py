@@ -90,7 +90,10 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     img_mean = img.mean
     if img.opts.shapelet_do:
         img_shap_mod = img.model_shap
-        img_shap_resid = img.ch0 - img.model_shap
+        if img_shap_mod == None:
+            img_shap_resid = None
+        else:
+            img_shap_resid = img.ch0 - img.model_shap
     else:
         img_shap_mod = None
         img_shap_resid = None

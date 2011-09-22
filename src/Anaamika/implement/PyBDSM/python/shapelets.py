@@ -161,40 +161,43 @@ def shape_findcen(image, mask, basis, beta, nmax, beam_pix): # + check_cen_shape
     # in high snr area, get zero crossings for each horizontal and vertical line for c1, c2 resp
     tr_mask=mask.transpose()
     tr_cf21=cf21.transpose()
-    (x1,y1) = getzeroes_matrix(mask, cf12, ymax, xmax)         # y1 is array of zero crossings
-    (y2,x2) = getzeroes_matrix(tr_mask, tr_cf21, xmax, ymax)    # x2 is array of zero crossings
-
-    # find nominal intersection pt as integers
-    xind=N.where(x1==xmax)
-    yind=N.where(y2==ymax)
-    xind=xind[0][0]
-    yind=yind[0][0]
-
-    # now take 2 before and 2 after, fit straight lines, get proper intersection
-    ninter=5
-    if xind<3 or yind<3 or xind>n-2 or yind>m-2:
-        ninter = 3
-    xft1 = x1[xind-(ninter-1)/2:xind+(ninter-1)/2+1]
-    yft1 = y1[xind-(ninter-1)/2:xind+(ninter-1)/2+1]
-    xft2 = x2[yind-(ninter-1)/2:yind+(ninter-1)/2+1]
-    yft2 = y2[yind-(ninter-1)/2:yind+(ninter-1)/2+1]
-    sig  = N.ones(ninter, dtype=float)
-    smask1=N.array([r == 0 for r in yft1])
-    smask2=N.array([r == 0 for r in xft2])
-    cen=[0.]*2
-    if sum(smask1)<len(yft1) and sum(smask2)<len(xft2):
-      [c1, m1], errors = func.fit_mask_1d(xft1, yft1, sig, smask1, func.poly, do_err=False, order=1)
-      [c2, m2], errors = func.fit_mask_1d(xft2, yft2, sig, smask2, func.poly, do_err=False, order=1)
-      if m2-m1 == 0:
-        cen[0] = cen[1] = 0.0
-      else:
-        cen[0]=(c1-c2)/(m2-m1)
-        cen[1]=c1+m1*cen[0]
-    else:
-      cen[0] = cen[1] = 0.0
-
-    # check if estimated centre makes sense
-    error=shapelet_check_centre(image, mask, cen, beam_pix)
+    try:
+        (x1,y1) = getzeroes_matrix(mask, cf12, ymax, xmax)         # y1 is array of zero crossings
+        (y2,x2) = getzeroes_matrix(tr_mask, tr_cf21, xmax, ymax)    # x2 is array of zero crossings
+    
+        # find nominal intersection pt as integers
+        xind=N.where(x1==xmax)
+        yind=N.where(y2==ymax)
+        xind=xind[0][0]
+        yind=yind[0][0]
+    
+        # now take 2 before and 2 after, fit straight lines, get proper intersection
+        ninter=5
+        if xind<3 or yind<3 or xind>n-2 or yind>m-2:
+            ninter = 3
+        xft1 = x1[xind-(ninter-1)/2:xind+(ninter-1)/2+1]
+        yft1 = y1[xind-(ninter-1)/2:xind+(ninter-1)/2+1]
+        xft2 = x2[yind-(ninter-1)/2:yind+(ninter-1)/2+1]
+        yft2 = y2[yind-(ninter-1)/2:yind+(ninter-1)/2+1]
+        sig  = N.ones(ninter, dtype=float)
+        smask1=N.array([r == 0 for r in yft1])
+        smask2=N.array([r == 0 for r in xft2])
+        cen=[0.]*2
+        if sum(smask1)<len(yft1) and sum(smask2)<len(xft2):
+          [c1, m1], errors = func.fit_mask_1d(xft1, yft1, sig, smask1, func.poly, do_err=False, order=1)
+          [c2, m2], errors = func.fit_mask_1d(xft2, yft2, sig, smask2, func.poly, do_err=False, order=1)
+          if m2-m1 == 0:
+            cen[0] = cen[1] = 0.0
+          else:
+            cen[0]=(c1-c2)/(m2-m1)
+            cen[1]=c1+m1*cen[0]
+        else:
+          cen[0] = cen[1] = 0.0
+    
+        # check if estimated centre makes sense
+        error=shapelet_check_centre(image, mask, cen, beam_pix)
+    except:
+        error = 1
     if error > 0:
         #print 'Error '+str(error)+' in finding centre, will take 1st moment instead.'
         (m1, m2, m3) = func.moment(image, mask)
@@ -262,7 +265,9 @@ def shapelet_getroot(xfn, yfn, xco, xcen, ycen):
     root=None
     npoint=len(xfn)
     error=0
-    if yfn.max()*yfn.min() >= 0.:
+    if npoint == 0:
+        error = 1
+    elif yfn.max()*yfn.min() >= 0.:
         error=1
 
     minint=0; minintold=0

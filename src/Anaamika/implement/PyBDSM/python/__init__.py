@@ -107,11 +107,11 @@ def _run_op_list(img, chain):
         if isinstance(op, Op_gausfit) and img.opts.interactive:
             dc = '\033[34;1m'
             nc = '\033[0m'
-            print dc + 'Displaying islands and rms image...' + nc
+            print dc + '--> Displaying islands and rms image...' + nc
             img.show_fit(rms_image=True, mean_image=True,
                 ch0_islands=True, gresid_image=False, sresid_image=False,
                 gmodel_image=False, smodel_image=False, pyramid_srcs=False)
-            prompt = dc + "Press enter to continue or 'q' to quit    : " + nc
+            prompt = dc + "Press enter to continue or 'q' to quit .. : " + nc
             answ = raw_input_no_history(prompt)
             while answ != '':
                 if answ == 'q':
@@ -123,7 +123,18 @@ def _run_op_list(img, chain):
 
     if img.opts.interactive:
         print dc + 'Fitting complete. Displaying results...' + nc
-        img.show_fit()
+        if img.shapelet_do:
+            show_smod = True
+            show_sres = True
+        else:
+            show_smod = False
+            show_sres = False
+        if img.spectraindex_do:
+            show_spec = True
+        else:
+            show_spec = False
+        img.show_fit(smodel_image=show_smod, sresid_image=show_sres,
+                     source_seds=show_spec)
 
     if img.opts.print_timing:
         print "="*30
