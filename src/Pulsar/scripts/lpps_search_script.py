@@ -112,7 +112,10 @@ def create_batches(dedispersion_plan, n_cores):
             lo_dm += n * n_available * dm_step
             n_dms -= n * n_available
         if n_dms > 0:
-            nb = DMBatch(lo_dm, dm_step, n_dms, downfact, n_dms + 1, use_mpi)
+            if use_mpi:
+                nb = DMBatch(lo_dm, dm_step, n_dms, downfact, n_dms + 1, use_mpi)
+            else:
+                nb = DMBatch(lo_dm, dm_step, n_dms, downfact, 1, use_mpi)
             out.append(nb)
     return out 
 
@@ -130,6 +133,10 @@ class DMBatch(object):
 
     def get_dms(self):
         return [self.lo_dm + i * self.dm_step for i in range(self.n_dms)]
+
+    def __str__(self):
+        return 'lo_dm=%.2f dm_step=%.2f n_dms=%d downfact=%d n_cores=%d use_mpi=%s' % (
+            self.lo_dm, self.dm_step, self.n_dms, self.downfact, self.n_cores, str(self.use_mpi))
 
 
 # ----------------------------------------------------------------------------
