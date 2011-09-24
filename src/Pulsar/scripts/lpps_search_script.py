@@ -474,7 +474,7 @@ def run_accelsearch(fft_file, z_max, *args, **kwargs):
 
     OPTIONS = {
         '-numharm' : str(8),
-        '-sigma' : str(6),
+        '-sigma' : str(2),
         '-flo' : '%.2f' % 1,
         '-zmax' : '%d' % z_max,
     }
