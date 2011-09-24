@@ -111,16 +111,12 @@ int main(int argc, char *argv[])
       FILE *hostfile;
       char tmpname[100];
 
-      hostfile = fopen("/etc/hostname", "r");
-      if (hostfile != NULL) {
-	fscanf(hostfile, "%s\n", tmpname);
-	fclose(hostfile);
-      } else {
-	gethostname(tmpname, 100);
-      }
+      hostfile = chkfopen("/etc/hostname", "r");
       fscanf(hostfile, "%s\n", tmpname);
       hostname = (char *) calloc(strlen(tmpname) + 1, 1);
       memcpy(hostname, tmpname, strlen(tmpname));
+      fclose(hostfile);
+
    }
 
    /* Call usage() if we have no command line arguments */
