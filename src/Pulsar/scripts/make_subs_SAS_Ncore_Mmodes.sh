@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.20
+VERSION=2.21
 
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
@@ -1377,7 +1377,7 @@ do
                    pulsar_name=${PULSAR_ARRAY_PRIMARY[$ii]}
                 fi
 	
-		 	    echo 'Converting subbands: '`cat RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 
+#		 	    echo 'Converting subbands: '`cat RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 
 		 	    if [[ $transpose == 0 ]] 
 			    then
 			       echo ${converter_exe} ${extra_flags} ${COLLAPSE} -b ${NBEAMS} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
@@ -1591,8 +1591,8 @@ do
 				echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
 				cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 				#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-				echo "Running par2inf" 
-				echo "Running par2inf" >> $log
+				echo "Running par2inf 1" 
+				echo "Running par2inf 1" >> $log
 				
 				if (( $nrBeams == 1 ))
 				then
@@ -1711,7 +1711,8 @@ do
 	                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}
 	                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
 	                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
-                        rm ${result}
+#                        rm ${result}
+
 #		                echo cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
 #		                cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
 		             done		         
@@ -1732,6 +1733,8 @@ do
                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+                   #rm ${result}
+                   
 #			       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
 #			       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
 			       jj=`expr $jj + 1`
@@ -2095,7 +2098,7 @@ do
 				 done # end for fold_pulsar in $PULSAR_LIST	
 		    done # end for ii in $num_dir		
 		
-		fi # end if (( nrBeams == 1 ))
+		fi # end if (( $nrBeams == 1 ))
     fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]]
 
     # fold the RSPA location in non-multi-beam mode     
@@ -2145,13 +2148,13 @@ do
 			  index=$(( $index + 1 ))
 		  done # end for fold_pulsar in $PULSAR_LIST
 	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
-	fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+	fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 
 		
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] 
 	then
 		#Make a cumulative plot of the profiles
-		if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+		if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 		then
 			for fold_pulsar in $PULSAR_LIST
 			do
@@ -2170,6 +2173,7 @@ do
 					echo rm profiles.ps >> $log
 					rm profiles.ps
 				else
+				    # A2 - this needs to be fixed since the RSPN has to proceed ${jjj} location below
 				    for jjj in $beams
 				    do
 				        cd ${location}/${STOKES}/${jjj}
@@ -2187,7 +2191,7 @@ do
 					done	
 				fi
 			done # end for fold_pulsar in $PULSAR_LIST
-        fi # end if [[ nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+        fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 	    echo cd ${location} >> $log
 	    cd ${location}
 		
@@ -2497,32 +2501,49 @@ do
 		    for jjj in $loop_beams
 			do
 			   cd ${location}/${STOKES}/$NAME/${jjj}
-			   /bin/ls *_RSP${ii}* > name_change.list
-			   while read filename
-			   do
-#			      new_name=`echo $filename | sed -e "s/_RSP.*_/_$NAME_/g" -e "s/_RSP.*\./_$NAME./g"`
-                  NAME1="_"${NAME}"_PSR"
-                  NAME2="_"${NAME}
-                  NAME3="_"${NAME}"_"
-			      new_name=`echo $filename | sed   -e "s/_RSP.*PSR/$NAME1/g"  -e "s/_RSP.*\./$NAME2\./g" -e "s/_RSP.*_/$NAME3/g"`
-			      mv $filename $new_name
-			   done < name_change.list
+			   prev_name=RSP${ii}
+               new_name=$NAME
+			   if [[ RSP${ii} != $NAME ]]
+			   then
+			       echo rename "s/$prev_name/$new_name/" *
+			       echo rename "s/$prev_name/$new_name/" *  >> $log
+                   rename "s/$prev_name/$new_name/" *
+               fi
+
+#			   /bin/ls *_RSP${ii}* > name_change.list
+#			   while read filename
+#			   do
+##			      new_name=`echo $filename | sed -e "s/_RSP.*_/_$NAME_/g" -e "s/_RSP.*\./_$NAME./g"`
+#                  NAME1="_"${NAME}"_PSR"
+#                  NAME2="_"${NAME}
+#                  NAME3="_"${NAME}"_"
+#			      new_name=`echo $filename | sed   -e "s/_RSP.*PSR/$NAME1/g"  -e "s/_RSP.*\./$NAME2\./g" -e "s/_RSP.*_/$NAME3/g"`
+#			      mv $filename $new_name
+#			   done < name_change.list
+
 			   inf_file=`/bin/ls *.inf`
-			   sed   -e "s/_RSP.*/$NAME2/g" $inf_file > $$.inf
+			   if [[ RSP${ii} != $NAME ]]
+			   then
+			      sed   -e "s/$prev_name/$new_name/g" $inf_file > $$.inf
+			   else 
+			      cp $inf_file $$.inf
+			   fi
 			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+			   echo mv $$.inf $new_inf_file
+			   echo mv $$.inf $new_inf_file >> $log
 			   mv $$.inf $new_inf_file
 			   rm $inf_file
 			done
 		done
 		cd ${location}	    
 	#Rename the TA beams RSP0 to RSP<beam numner>
-    elif [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $STOKES == "stokes" ]] 
+    elif [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $STOKES == "stokes" ]] && [ $TiedArray == 0 ]
     then
         cd ${location}/${STOKES}/
 		for ii in $num_dir
 		do
 			N=$ii
-			N=`echo "$N+1" | bc`  #actual line number if one higher than the RSP number
+			N=`echo "$N+1" | bc`  #actual line number is one higher than the RSP number
             beam_index=`sed -n "$N"p SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
             echo "The beam_index is $beam_index" >> $log
             cd ${location}/${STOKES}/
@@ -2546,6 +2567,87 @@ do
 		cd ..
 		rmdir tmp$$
 		cd ${location}	
+    elif [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $STOKES == "stokes" ]] && [[ $TiedArray == 1 ]]
+    then
+        cd ${location}/${STOKES}/
+		for ii in $num_dir
+		do
+			N=$ii
+			N=`echo "$N+1" | bc`  #actual line number is one higher than the RSP number
+            beam_index=`sed -n "$N"p SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+            echo "The beam_index is $beam_index" >> $log
+            cd ${location}/${STOKES}/
+			#NAME=$beam_index
+			mkdir -p tmp$$
+			echo "mv RSP${ii} tmp$$/" >> $log
+			echo "mv RSP${ii} tmp$$/"
+			mv RSP${ii} tmp$$/
+			cd ${location}/${STOKES}/tmp$$/RSP${ii}
+            
+			counter=0
+			loop_beams=$beams
+			echo loop_beams == "$loop_beams"
+		    for jjj in $loop_beams
+			do
+			    cd ${location}/${STOKES}/tmp$$/RSP${ii}
+		        M=$counter
+				M=`echo "$M+1" | bc`  #actual line number is one higher than the RSP number
+	            beam_index=`sed -n "$M"p ${location}/${STOKES}/SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+	            echo "The M beam_index is $beam_index" >> $log
+                cd ${location}/${STOKES}/tmp$$/RSP${ii}/${jjj}
+                prev_name=RSP${ii}
+                new_name=RSP${beam_index}
+			    if (( $beam_index != $ii ))
+			    then
+			       echo rename "s/$prev_name/$new_name/" *
+			       echo rename "s/$prev_name/$new_name/" *  >> $log
+                   rename "s/$prev_name/$new_name/" *
+                fi
+#			    /bin/ls * > name_change.list
+#			    NAME=RSP${beam_index}
+#			    if (( $beam_index != $ii ))
+#			    then
+#			       #rename files
+#				   while read filename
+#				   do
+#				      # A2 fix the ORIG files which get changed to files without subband numbers
+#	#			      new_name=`echo $filename | sed -e "s/_RSP.*_/_$NAME_/g" -e "s/_RSP.*\./_$NAME./g"`
+#	                  NAME1="_"${NAME}"_PSR"
+#	                  NAME2="_"${NAME}
+#	                  NAME3="_"${NAME}"_"
+#				      new_name=`echo $filename | sed   -e "s/_RSP.*PSR/$NAME1/g"  -e "s/_RSP.*\./$NAME2\./g" -e "s/_RSP.*_/$NAME3/g"`
+#				      echo mv $filename $new_name
+#				      mv $filename $new_name
+#				   done < name_change.list
+#			   fi 
+			   inf_file=`/bin/ls *.inf`
+			   if (( $beam_index != $ii ))
+			   then
+			      sed   -e "s/$prev_name/$new_name/g" $inf_file > $$.inf
+			   else 
+			      cp $inf_file $$.inf
+			   fi
+			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+			   echo mv $$.inf $new_inf_file
+			   echo mv $$.inf $new_inf_file >> $log
+			   mv $$.inf $new_inf_file
+			   rm $inf_file
+               cd ..
+               echo mv ${jjj} ../../RSP${beam_index}
+               echo mv ${jjj} ../../RSP${beam_index} >> $log
+               mv ${jjj} ../../RSP${beam_index}
+		       counter=$(( $counter + 1 ))
+			done
+			cd ${location}/${STOKES}/tmp$$/RSP${ii}
+            echo mv * ../../
+            mv * ../../
+		done
+		cd ${location}/${STOKES}/tmp$$/
+		ls
+		rmdir RSP${ii}
+		cd ..
+		rmdir -p tmp$$
+		cd ${location}	
     fi
 
 	cd ${location}	
@@ -2561,7 +2663,7 @@ do
 	then
 	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > IS_delete_sub.list
 	else
-       if (( $flyseye == 0 )) 
+       if (( $flyseye == 0 )) || (( $TiedArray == 1 ))
        then
 	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > CS_delete_sub.list
        else
