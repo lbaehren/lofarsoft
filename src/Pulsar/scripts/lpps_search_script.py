@@ -49,7 +49,7 @@ from lpps_search import crawler
 from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
-N_CANDIDATES_CUTOFF = 20
+N_CANDIDATES_CUTOFF = 200
 MINIMUM_DM_CUTOFF = 0
 MAX_BATCH_SIZE = 1000
 MAX_BATCH_SIZE_MPI = 1000
@@ -297,7 +297,8 @@ def run_rfifind(subband_dir, basename, work_dir, *args, **kwargs):
         subband_globpattern = basename + '.sub[0-9]???'
         # set all the commandline options
         options = {
-            '-blocks' : str(512),
+            '-blocks' : '1024',
+            '-timesig' : '7',
             '-o' : basename,
         }
         if bad_channels:
@@ -473,10 +474,12 @@ def run_accelsearch(fft_file, z_max, *args, **kwargs):
     stdout = kwargs.get('stderr', sys.stderr)
 
     OPTIONS = {
-        '-numharm' : str(8),
-        '-sigma' : str(2),
+        '-numharm' : '16',
+        '-sigma' : '2',
         '-flo' : '%.2f' % 1,
         '-zmax' : '%d' % z_max,
+        '-locpow' : '',
+        '-harmpolish' : '',
     }
     accelsearch_status = run_command('accelsearch', OPTIONS, [fft_file], 
         stderr=stderr, stdout=stdout)
@@ -710,7 +713,6 @@ class SearchRun(object):
             os.mkdir(join(self.out_dir, 'SINGLEPULSE'))
             os.mkdir(join(self.out_dir, 'LOGS'))
             os.mkdir(join(self.out_dir, 'INF'))
-            os.mkdir(join(self.out_dir, 'RFIFIND'))
             os.mkdir(join(self.out_dir, 'ACCELSEARCH')) 
             os.mkdir(join(self.out_dir, 'DM0.00'))
             os.mkdir(join(self.out_dir, 'TIMESERIES'))
@@ -959,6 +961,18 @@ class SearchRun(object):
         # move the rfifind output
         shutil.move(join(self.work_dir, 'RFIFIND'), 
             join(self.out_dir, 'RFIFIND'))
+        # Copy birdslist to output location for future reference
+        if self.zap_file:
+            try:
+                shutil.copy(self.zap_file, join(self.out_dir, 'ACCELSEARCH'))
+            except:
+                print 'Failed to copy the birds list to output location.'
+        # Copy rfi file to output location for future reference
+        if self.rfi_file:
+            try:
+                shutil.copy(self.rfi_file, self.out_dir)
+            except:
+                print 'Failed to copy the birds list to output location.'
 
 
 if __name__ == '__main__':
@@ -1059,10 +1073,20 @@ if __name__ == '__main__':
     # LPPS dedispersion plan
     ddplan_lpps = DedispersionPlan('LPPS')
     ddplan_lpps.add_batch(0, 0.05, 1196, 1)
-    ddplan_lpps.add_batch(59.8, 0.10, 408, 2)
-    ddplan_lpps.add_batch(100.60, 0.20, 449, 4)
-    ddplan_lpps.add_batch(190.40, 0.50, 442, 8)
-    ddplan_lpps.add_batch(411.4, 1, 89, 16)
+    ddplan_lpps.add_batch(59.800, 0.10, 408, 2)
+    ddplan_lpps.add_batch(100.600, 0.30, 425, 4)
+    ddplan_lpps.add_batch(228.100, 0.50, 367, 8)
+    ddplan_lpps.add_batch(411.600, 1.00, 409, 16)
+    ddplan_lpps.add_batch(820.600, 2.00, 409, 32)
+    ddplan_lpps.add_batch(1638.600, 5.00, 273, 64)
+
+    # Old dedispersion plan for LPPS (Used for the first full analysis.)
+    ddplan_lpps_old = DedispersionPlan('LPPS_OLD')
+    ddplan_lpps_old.add_batch(0, 0.05, 1196, 1)
+    ddplan_lpps_old.add_batch(59.8, 0.10, 408, 2)
+    ddplan_lpps_old.add_batch(100.60, 0.20, 449, 4)
+    ddplan_lpps_old.add_batch(190.40, 0.50, 442, 8)
+    ddplan_lpps_old.add_batch(411.4, 1, 89, 16)
     
     # For LOTAS: DDplan.py -f 143.255615234375 -n 3904 -t 0.00131072 -b 47.65625
     ddplan_lotas = DedispersionPlan('LOTAS')
@@ -1085,6 +1109,7 @@ if __name__ == '__main__':
         'LPPS' : ddplan_lpps,
         'LOTAS' : ddplan_lotas,
         'LoMASS' : ddplan_lomass,
+        'LPPS_OLD' : ddplan_lpps_old,
     }
     try:
         ddplans = PREDEFINED_DEDISPERSION_PLANS[options.plan]
