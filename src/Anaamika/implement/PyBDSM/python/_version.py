@@ -24,6 +24,10 @@ change_log = """
 PyBDSM Change Log.
 -------------------------------------------------------------------------------
 
+2011/09/21 - Fixed issue with shapelet centering failing: it now falls back to
+             simple moment when this happens. Fixed issue with plotresults when
+             shapelets are fit.
+             
 2011/09/14 - Placed output column names and units in TC properties of Gaussians.
              This allows easy standardization of the column names and units.
              
