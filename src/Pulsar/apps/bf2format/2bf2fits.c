@@ -16,6 +16,8 @@ g++ -o bf2fits bf2fits.o -L/scratch/windmill_1/wltvrede/packages/lib -lcfitsio
 #include "patricklib.h"
 #include "patricklib_lofar.c"
 
+#define maxnrparsetlines  3000
+
 /* NOTE: for old data sets (before PBW5) there is no 512 byte alignment,
  so "pad" needs to be ignored (line 82) and also the data does not need to 
 be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
@@ -30,7 +32,7 @@ int collapse = 0;
 int writefloats = 0;
 int writefb     = 0;
 int eightBit = 0;
-char parsetfile[10000]; // for reading header info for filterbank file
+char parsetfile[1000]; // for reading header info for filterbank file
 int SAMPLESPERSTOKESINTEGRATION = 1;
 int SAMPLES = 768;
 int AVERAGE_OVER = 600;
@@ -724,7 +726,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
   /* open file */
   input[ss] = fopen(isfiles[ss], "rb");
   if(input == NULL) {
-   fprintf(stderr, "bf2fits: Cannot open input file\n");
+   fprintf(stderr, "2bf2fits: Cannot open input file\n");
    return 0;
   }
  } // s
@@ -1109,13 +1111,13 @@ int main( int argc, char **argv )
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
   FILE *fin;
-  char header_txt[10000][10000], *s_ptr, *txt[10000], dummy_string[1000], dummy_string2[1000];
+  char header_txt[maxnrparsetlines][1000], *s_ptr, *txt[1000], dummy_string[1000], dummy_string2[1000];
   int channellist[1000];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
   double lofreq;
-  initApplication(&application, "bf2fits", "[options] inputfiles");
+  initApplication(&application, "2bf2fits", "[options] inputfiles");
   application.switch_headerlist = 1;
   application.switch_header = 1;
   application.switch_verbose = 1;
@@ -1138,7 +1140,7 @@ int main( int argc, char **argv )
       }else if(strcmp(argv[i], "-A") == 0) {
 	j = sscanf(argv[i+1], "%d", &AVERAGE_OVER);
 	if(j != 1) {
-	  fprintf(stderr, "bf2fits: Error parsing %s option\n", argv[i]);
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
 	}
         i++;
@@ -1148,14 +1150,14 @@ int main( int argc, char **argv )
       }else if(strcmp(argv[i], "-nbits") == 0) {
 	j = sscanf(argv[i+1], "%d", &nrbits);
 	if(j != 1) {
-	  fprintf(stderr, "bf2fits: Error parsing %s option\n", argv[i]);
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
 	}
         i++;
       }else if(strcmp(argv[i], "-sigma") == 0) {
 	j = sscanf(argv[i+1], "%f", &sigma_limit);
 	if(j != 1) {
-	  fprintf(stderr, "bf2fits: Error parsing %s option\n", argv[i]);
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
 	}
         i++;
@@ -1168,7 +1170,7 @@ int main( int argc, char **argv )
       }else if(strcmp(argv[i], "-o") == 0) {
 	j = sscanf(argv[i+1], "%s", OUTNAME);
 	if(j != 1) {
-	  fprintf(stderr, "bf2fits: Error parsing %s option\n", argv[i]);
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
 	}
         i++;
@@ -1217,7 +1219,7 @@ int main( int argc, char **argv )
     return 0;
   }
   if(numberInApplicationFilenameList() == 0) {
-    fprintf(stderr, "bf2fits: No input files specified\n");
+    fprintf(stderr, "2bf2fits: No input files specified\n");
     return 0;
   }
 
@@ -1225,21 +1227,21 @@ int main( int argc, char **argv )
   if(readparset) {
     fin = fopen(argv[readparset], "r");
     if(fin == NULL) {
-      fprintf(stderr, "bf2fits: Cannot open %s\n", argv[readparset]);
+      fprintf(stderr, "2bf2fits: Cannot open %s\n", argv[readparset]);
       return 0;      
     }
 
     nrlines = 0;
     ret = 0;
-    for(i = 0; i < 10000; i++)
+    for(i = 0; i < maxnrparsetlines; i++)
       txt[i] = header_txt[i];
     do {
-      if(fgets(header_txt[nrlines], 10000, fin) != NULL)
+      if(fgets(header_txt[nrlines], 1000, fin) != NULL)
 	nrlines++;
       else
 	ret = 1;
-      if(nrlines > 9999) {
-	fprintf(stderr, "bf2fits: Too many lines in parset file\n");
+      if(nrlines >= maxnrparsetlines) {
+	fprintf(stderr, "2bf2fits: Too many lines in parset file\n");
 	return 0;
       }
     }while(ret == 0);
@@ -1250,21 +1252,21 @@ int main( int argc, char **argv )
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(SUBBANDS));
     }else {
-      fprintf(stderr, "bf2fits: OLAP.Storage.subbandsPerPart not set\n");
+      fprintf(stderr, "2bf2fits: OLAP.Storage.subbandsPerPart not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("OLAP.CNProc.integrationSteps", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(blocksperStokes));
     }else {
-      fprintf(stderr, "bf2fits: OLAP.CNProc.integrationSteps not set\n");
+      fprintf(stderr, "2bf2fits: OLAP.CNProc.integrationSteps not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("OLAP.Stokes.integrationSteps", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(integrationSteps));
     }else {
-      fprintf(stderr, "bf2fits: OLAP.Stokes.integrationSteps not set\n");
+      fprintf(stderr, "2bf2fits: OLAP.Stokes.integrationSteps not set\n");
       return 0;     
     }
     SAMPLES = blocksperStokes/integrationSteps;
@@ -1272,35 +1274,35 @@ int main( int argc, char **argv )
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(CHANNELS));
     }else {
-      fprintf(stderr, "bf2fits: Observation.channelsPerSubband not set\n");
+      fprintf(stderr, "2bf2fits: Observation.channelsPerSubband not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
     }else {
-      fprintf(stderr, "bf2fits: Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps not set\n");
+      fprintf(stderr, "2bf2fits: Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("Observation.Beam[0].angle1", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.ra));
     }else {
-      fprintf(stderr, "bf2fits: Observation.Beam[0].angle1 not set\n");
+      fprintf(stderr, "2bf2fits: Observation.Beam[0].angle1 not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("Observation.Beam[0].angle2", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.dec));
     }else {
-      fprintf(stderr, "bf2fits: Observation.Beam[0].angle1 not set\n");
+      fprintf(stderr, "2bf2fits: Observation.Beam[0].angle1 not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("Observation.Beam[0].target", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", (subintdata.psrname));
     }else {
-      fprintf(stderr, "bf2fits: Observation.Beam[0].target not set\n");
+      fprintf(stderr, "2bf2fits: Observation.Beam[0].target not set\n");
       return 0;     
     }
 
@@ -1310,14 +1312,14 @@ int main( int argc, char **argv )
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(clockparam));
     }else {
-      fprintf(stderr, "bf2fits: Observation.sampleClock not set\n");
+      fprintf(stderr, "2bf2fits: Observation.sampleClock not set\n");
       return 0;     
     }
     s_ptr = get_ptr_entry("Observation.bandFilter", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", subintdata.instrument);
     }else {
-      fprintf(stderr, "bf2fits: Observation.bandFilter not set\n");
+      fprintf(stderr, "2bf2fits: Observation.bandFilter not set\n");
       return 0;     
     }
     strcpy(buf, subintdata.instrument);
@@ -1330,16 +1332,16 @@ int main( int argc, char **argv )
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", dummy_string);
     }else {
-      fprintf(stderr, "bf2fits: Observation.Beam[0].subbandList not set\n");
+      fprintf(stderr, "2bf2fits: Observation.Beam[0].subbandList not set\n");
       return 0;     
     }
     /* Get the list of subbands which should be there. */
-    sprintf(dummy_string2, "echo \"%s\" | awk '{print substr($1,2,length($1)-2)}' | awk -F\\, '{for (i=1; i <= NF ; i++)  print $i}' | awk -F\\. '{var=$1; while (var <=$NF) { print var; var +=1 }}' > /tmp/bf2fits.channellist\n", dummy_string);
+    sprintf(dummy_string2, "echo \"%s\" | awk '{print substr($1,2,length($1)-2)}' | awk -F\\, '{for (i=1; i <= NF ; i++)  print $i}' | awk -F\\. '{var=$1; while (var <=$NF) { print var; var +=1 }}' > /tmp/2bf2fits.channellist\n", dummy_string);
     /*    printf(dummy_string2); */
     system(dummy_string2);
-    fin = fopen("/tmp/bf2fits.channellist", "r");
+    fin = fopen("/tmp/2bf2fits.channellist", "r");
     if(fin == NULL) {
-      fprintf(stderr, "bf2fits: Error generating channel list\n");
+      fprintf(stderr, "2bf2fits: Error generating channel list\n");
       perror("");
       return 0;
     } 
@@ -1350,7 +1352,7 @@ int main( int argc, char **argv )
     }
     fclose(fin);
     
-    system("rm /tmp/bf2fits.channellist");
+    system("rm /tmp/2bf2fits.channellist");
     subbandFirst = channellist[0];
 
     nsubbands = 512;
@@ -1392,7 +1394,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       /*      sscanf(s_ptr, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hour, &min, &sec);*/
       sscanf(s_ptr, "'%d-%d-%d %d:%d:%d'", &y, &m, &d, &hour, &min, &sec);
     }else {
-      fprintf(stderr, "bf2fits: Observation.startTime not set\n");
+      fprintf(stderr, "2bf2fits: Observation.startTime not set\n");
       return 0;     
     }
     sec_mid = hour * 3600.0 + min * 60.0 + sec;
@@ -1441,7 +1443,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
   subintdata.data = (float *)malloc(subintdata.NrBins*subintdata.nrFreqChan*subintdata.NrPols*sizeof(float));
   if(subintdata.data == NULL) {
-    fprintf(stderr, "bf2fits: Cannot allocate memory\n");
+    fprintf(stderr, "2bf2fits: Cannot allocate memory\n");
     return 0;
   }
 
@@ -1541,7 +1543,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       /* open file */
       fin = fopen(filename, "rb");
       if(fin == NULL) {
-	fprintf(stderr, "bf2fits: Cannot open input file\n");
+	fprintf(stderr, "2bf2fits: Cannot open input file\n");
 	return 0;
       }
       if (is_CS == 0)
