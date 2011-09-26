@@ -49,10 +49,11 @@ from lpps_search import crawler
 from lpps_search.bestprof import parse_pfd_bestprof_file 
 
 # ----------------------------------------------------------------------------
-N_CANDIDATES_CUTOFF = 200
-MINIMUM_DM_CUTOFF = 0
-MAX_BATCH_SIZE = 1000
-MAX_BATCH_SIZE_MPI = 1000
+N_CANDIDATES_CUTOFF = 200 # maximum number of candidates to fold for accelsearch
+MINIMUM_DM_CUTOFF = 2 # minimum dispersion measure for candidates (from accelsearch)
+MAX_BATCH_SIZE = 1000 # maximum number of trial DMs to create in one go with prepsubband
+MAX_BATCH_SIZE_MPI = 1000 # maximum number of trial DMs to create in one go with mpiprepsubband 
+MINIMUM_P_CUTOFF = 0.005 # minimum period in seconds
 # ----------------------------------------------------------------------------
 
 class DedispersionPlan(object):
@@ -882,6 +883,7 @@ class SearchRun(object):
                 minimum_dm_cutoff=MINIMUM_DM_CUTOFF,
                 metadata=self.metadata,
                 no_fold=no_fold,
+                minimum_p_cutoff=MINIMUM_P_CUTOFF,
             )
         if not no_singlepulse:
             # Deal with single pulse search plotting

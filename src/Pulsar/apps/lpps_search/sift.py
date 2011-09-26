@@ -139,6 +139,10 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
     minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 1)
     zaplist_file = kwargs.get('zaplist_file', '') 
     metadata = kwargs.get('metadata', None)
+    minimum_p_cutoff = kwargs.get('minimum_p_cutoff', None)
+
+    if minimum_p_cutoff and type(minimum_p_cutoff) in [type(1), type(1.)]:
+        sifting.short_period = minimum_p_cutoff
 
     crawl_results = crawler.find_accelsearch_output(cand_dir, basename)
     # Reorder the results to send them to PRESTO's sifting module (it needs a

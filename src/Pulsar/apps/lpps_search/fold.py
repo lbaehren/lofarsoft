@@ -175,6 +175,7 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     zaplist_file = kwargs.get('zaplist_file', '')
     n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 20)
     minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0)
+    minimum_p_cutoff = kwargs.get('minimum_p_cutoff', None)
     metadata = kwargs.get('metadata', None)
     no_fold = kwargs.get('no_fold', False)
 
@@ -196,8 +197,9 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
  
     # search for all the accelcand files and sift them
     unsifted_candidates, sifted_candidates = sift_accel_cands(cand_dir, basename,
-         zaplist_file=zaplist_file, n_candidates_cutoff=n_candidates_cutoff, 
-        minimum_dm_cutoff=minimum_dm_cutoff, metadata=metadata)
+        zaplist_file=zaplist_file, n_candidates_cutoff=n_candidates_cutoff, 
+        minimum_dm_cutoff=minimum_dm_cutoff, metadata=metadata,
+        minimum_p_cutoff=minimum_p_cutoff)
     if len(sifted_candidates) == 0:
         print 'In directory %s there are no candidate files.' % cand_dir
         print 'Skipping any further processing of accelsearch results.'
