@@ -30,7 +30,7 @@ int collapse = 0;
 int writefloats = 0;
 int writefb     = 0;
 int eightBit = 0;
-char parsetfile[1000]; // for reading header info for filterbank file
+char parsetfile[10000]; // for reading header info for filterbank file
 int SAMPLESPERSTOKESINTEGRATION = 1;
 int SAMPLES = 768;
 int AVERAGE_OVER = 600;
@@ -1109,7 +1109,7 @@ int main( int argc, char **argv )
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
   FILE *fin;
-  char header_txt[1000][1000], *s_ptr, *txt[1000], dummy_string[1000], dummy_string2[1000];
+  char header_txt[10000][10000], *s_ptr, *txt[10000], dummy_string[1000], dummy_string2[1000];
   int channellist[1000];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
@@ -1231,14 +1231,14 @@ int main( int argc, char **argv )
 
     nrlines = 0;
     ret = 0;
-    for(i = 0; i < 1000; i++)
+    for(i = 0; i < 10000; i++)
       txt[i] = header_txt[i];
     do {
-      if(fgets(header_txt[nrlines], 1000, fin) != NULL)
+      if(fgets(header_txt[nrlines], 10000, fin) != NULL)
 	nrlines++;
       else
 	ret = 1;
-      if(nrlines > 999) {
+      if(nrlines > 9999) {
 	fprintf(stderr, "bf2fits: Too many lines in parset file\n");
 	return 0;
       }
