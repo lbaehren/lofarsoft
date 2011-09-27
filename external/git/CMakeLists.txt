@@ -79,10 +79,13 @@ endif (SSL_LIBRARIES)
 
 if (NOT HAVE_GIT OR GIT_FORCE_BUILD)
   
-  set (GIT_VERSION 1.7.4)
+  set (GIT_VERSION 1.7.6)
   set (GIT_SOURCE_ARCHIVE git-${GIT_VERSION}.tar.gz)
-  set (GIT_URL http://kernel.org/pub/software/scm/git/${GIT_SOURCE_ARCHIVE})
-  
+  # kernel.org temporarily broken
+  #set (GIT_URL http://kernel.org/pub/software/scm/git/${GIT_SOURCE_ARCHIVE})
+
+  set (GIT_URL http://git-core.googlecode.com/files/git-1.7.6.4.tar.gz)
+
   ## locate source file to build from
   find_file (HAVE_GIT_SOURCE ${GIT_SOURCE_ARCHIVE}
     PATHS ${GIT_SOURCE_DIR}
