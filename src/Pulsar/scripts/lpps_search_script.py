@@ -1106,12 +1106,20 @@ if __name__ == '__main__':
     ddplan_lomass.add_batch(15.240, 0.03, 399, 16)
     ddplan_lomass.add_batch(27.210, 0.05, 46, 32)
 
+    # For search of M31
+    ddplan_m31 = DedispersionPlan('M31')
+    ddplan_m31.add_batch(0, 0.05, 5824, 1)
+    ddplan_m31.add_batch(219.200, 0.10, 1921, 2)
+    ddplan_m31.add_batch(483.300, 0.30, 1723, 4)
+    
+
     PREDEFINED_DEDISPERSION_PLANS = {
         'TEST' : ddplan_test,
         'LPPS' : ddplan_lpps,
         'LOTAS' : ddplan_lotas,
         'LoMASS' : ddplan_lomass,
         'LPPS_OLD' : ddplan_lpps_old,
+        'M31' : ddplan_m31,
     }
     try:
         ddplans = PREDEFINED_DEDISPERSION_PLANS[options.plan]
