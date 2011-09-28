@@ -50,11 +50,11 @@ message (STATUS "PYCRTOOLS_ENABLE_TESTING: ${PYCRTOOLS_ENABLE_TESTING}")
 message (STATUS "PYCRTOOLS_WITH_GSL: ${PYCRTOOLS_WITH_GSL}")
 
 if (PYCRTOOLS_ENABLE_TESTING)
-  ## Include CTest module
+  set (UPDATE_TYPE "svn")
+  set (CTEST_TESTING_TIMEOUT "500")
+  set (DART_TESTING_TIMEOUT 500)
   include (CTest)
   enable_testing()
-  ## Control parameters for running the tests
-  set (DART_TESTING_TIMEOUT 500)
 endif (PYCRTOOLS_ENABLE_TESTING)
 
 ##-------------------------------------------------------------------------------
