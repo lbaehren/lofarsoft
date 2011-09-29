@@ -7,6 +7,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] 
        [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug]
+       [-cat user_catalog_filename]
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -42,6 +43,9 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
                         (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).
        [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.
        [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).
+       [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog locations.
+                                          Positions must be specified in decimal degrees;  order is absolute in the format.
+                                          Can only be used with '-intype source' switch.
                 
        For help on Beam_formed input format and options, use '-help BF' switch
 
@@ -261,3 +265,5 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 -chansubsLBA 16
          > multi-templatesNbeams.sh -in obs_2col.txt -inswitch IM -intype position -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 -integLBA 7 -chansubsLBA 16 -sexages
          > multi-templatesNbeams.sh -in obs_2col.txt -inswitch IM -intype position -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -subsLBAHigh 10..45 -integLBA 7 -chansubsLBA 16 -sexages -debug 
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch IM -intype source -project MSSS -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -subsLBAHigh 10..45 -integLBA 7 -chansubsLBA 16 -cat mycatalog.txt
+         

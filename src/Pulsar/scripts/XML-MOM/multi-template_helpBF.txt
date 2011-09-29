@@ -8,6 +8,7 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
        [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug] 
        [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]
+       [-cat user_catalog_filename]
        
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -53,6 +54,9 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
        [[-nof_rings 1 | 2]] ==> Number of Tied-Array rings (generally set to 1 [7 beams] or 2 rings [19 beams]; default=0).
        [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg).
        [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).
+       [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog locations.
+                                          Positions must be specified in decimal degrees;  order is absolute in the format.
+                                          Can only be used with '-intype source' switch.
        
        For help on Imaging input format and options, use '-help IM' switch
 
@@ -284,4 +288,6 @@ Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]]
          > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all 
          > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -sexages 
          > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4  -sexages -debug
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4 -cat mycatalog.txt
+
 

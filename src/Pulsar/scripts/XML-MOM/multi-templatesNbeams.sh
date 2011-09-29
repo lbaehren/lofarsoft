@@ -1,7 +1,7 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 # Please update the version number when you edit this file:
-VERSION=1.5
+VERSION=1.6
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -16,7 +16,8 @@ USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] \n"\
 "       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug] \n"
+"       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug] \n"\
+"       [-cat user_catalog_filename] \n"
 
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
@@ -29,7 +30,8 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
 "       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
 "       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug]"\
-"       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]\n"
+"       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]\n"\
+"       [-cat user_catalog_filename] \n"
 
 USAGE3="Options: \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
@@ -68,7 +70,8 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.\n"\
 "         [[-nof_rings 1 | 2]] ==> Number of Tied-Array rings (generally set to 1 [7 beams] or 2 rings [19 beams]; default=0).\n"\
 "         [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg)\n"\
-"         [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).\n"
+"         [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).\n"\
+"         [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog positions. \n"
 
 USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
 "For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
@@ -173,6 +176,8 @@ debug=0
 clock=200
 NOF_RINGS=0
 RING_SIZE=0.0
+CAT=""
+user_cat=0
 input_string=$*
 
 while [ $# -gt 0 ]
@@ -218,6 +223,7 @@ do
      -clock)             clock=$2;;
      -nof_rings)         NOF_RINGS=$2; shift;;
      -ring_size)         RING_SIZE=$2; shift;;
+     -cat)               user_catfile=$2; user_cat=1; shift;;
        -*)
             print >&2 \
             "$USAGE1" \
@@ -346,6 +352,17 @@ if [ -f $outfile ]
 then
    echo "WARNING: $outfile exists; overwriting!"
    rm -rf $outfile
+fi
+
+if (( $user_cat == 1 ))
+then
+	if [ ! -f $user_catfile ]
+	then
+	   echo "ERROR: $user_catfile does not exist; if using '-cat filename', please specify correct input catalog"
+	   exit 1
+	else
+	   echo "Using user specified catalog;  position must be in degrees, format MUST be:  ra dec name"
+	fi
 fi
 
 # NAMECOL is generally used to push survey observations through this script.
@@ -622,6 +639,14 @@ then
       exit 1
    else
       echo "Using source catalog file $catalog"
+   fi
+
+   # combine user cat and script cat:
+   if (( $user_cat == 1 ))
+   then
+      echo "Combining user catalog and standard catalog: /tmp/$$_combinedcat.txt"
+      cat $user_catfile $catalog | grep -v "#" > /tmp/$$_combinedcat.txt
+      catalog=/tmp/$$_combinedcat.txt
    fi
 fi
 echo "Writing to output file $outfile"
@@ -1399,7 +1424,7 @@ do
 		                   
 		    if (( $INTYPE == 1 ))
 		    then
-			    found_OBJECT=`grep -i $OBJECT $catalog`
+			    found_OBJECT=`grep -i $OBJECT $catalog | head -1`
 			    if [[ $found_OBJECT == "" ]]
 			    then
 			       echo "WARNING: OBJECT $OBJECT not found in catalog $catalog."
@@ -1433,12 +1458,12 @@ do
 	        # Get the RA an DEG and convert to radians
 	        if (( $INTYPE == 1 )) && (( $INSWITCH == 1 ))
 	        then
-			    RA_DEG=`grep -i $OBJECT $catalog | awk '{print $1}'`
-			    DEC_DEG=`grep -i $OBJECT $catalog | awk '{print $2}'`
+			    RA_DEG=`grep -i $OBJECT $catalog  | head -1 | awk '{print $1}'`
+			    DEC_DEG=`grep -i $OBJECT $catalog  | head -1 | awk '{print $2}'`
 	        elif (( $INTYPE == 1 )) && (( $INSWITCH == 2 ))
 	        then
-		        RA_DEG=`grep -i "$OBJECT" $catalog | awk '{print $1}'`
-		        DEC_DEG=`grep -i "$OBJECT" $catalog | awk '{print $2}'`
+		        RA_DEG=`grep -i "$OBJECT" $catalog  | head -1 | awk '{print $1}'`
+		        DEC_DEG=`grep -i "$OBJECT" $catalog  | head -1 | awk '{print $2}'`
 		    fi
 		    if [[ $RA_DEG == "" ]] || [[ $DEC_DEG == "" ]] 
 		    then
@@ -1931,6 +1956,10 @@ then
    rm /tmp/$$xmltmp_namecol /tmp/$$xmltmp_datacol
 fi
 
+if (( $user_cat == 1 ))
+then
+   rm /tmp/$$_combinedcat.txt
+fi
 
 echo ""
 echo "DONE: output template is: $outfile" 
