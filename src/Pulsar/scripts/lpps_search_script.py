@@ -479,7 +479,7 @@ def run_accelsearch(fft_file, z_max, *args, **kwargs):
         '-sigma' : '2',
         '-flo' : '%.2f' % 1,
         '-zmax' : '%d' % z_max,
-        '-locpow' : '',
+#        '-locpow' : '', # Not used for LPPS reprocessing (after Jason's testing).
         '-harmpolish' : '',
     }
     accelsearch_status = run_command('accelsearch', OPTIONS, [fft_file], 
@@ -966,13 +966,18 @@ class SearchRun(object):
         # Copy birdslist to output location for future reference
         if self.zap_file:
             try:
-                shutil.copy(self.zap_file, join(self.out_dir, 'ACCELSEARCH'))
+                file_name = os.path.split(self.zap_file)[1] + '.backup'
+                shutil.copy(self.zap_file, join(self.out_dir, 'RFIFIND', file_name))
             except:
                 print 'Failed to copy the birds list to output location.'
         # Copy rfi file to output location for future reference
         if self.rfi_file:
             try:
-                shutil.copy(self.rfi_file, self.out_dir)
+                # The final copy of the Vlad's RFI report file has its 
+                # extension changed, so that it can never overwrite the output
+                # of PRESTO rfifind.
+                file_name = os.path.split(self.rfi_file)[1] + '.backup'
+                shutil.copy(self.rfi_file, join(self.out_dir, 'RFIFIND', file_name))
             except:
                 print 'Failed to copy the birds list to output location.'
 
