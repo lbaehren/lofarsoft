@@ -478,7 +478,7 @@ def run_accelsearch(fft_file, z_max, *args, **kwargs):
         '-numharm' : '16',
         '-sigma' : '2',
         '-flo' : '1.',
-        '-fhi', : '1000.',
+        '-fhi' : '1000.',
         '-zmax' : '%d' % z_max,
 #        '-locpow' : '', # Not used for LPPS reprocessing (after Jason's testing).
         '-harmpolish' : '',

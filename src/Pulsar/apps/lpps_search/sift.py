@@ -141,6 +141,8 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
     metadata = kwargs.get('metadata', None)
     minimum_p_cutoff = kwargs.get('minimum_p_cutoff', None)
 
+    print 'Minimum DM :', minimum_dm_cutoff
+
     # XXX yucky LPPS_HACK FIXME
 #    if minimum_p_cutoff and type(minimum_p_cutoff) in [type(1), type(1.)]:
 #        sifting.short_period = minimum_p_cutoff
