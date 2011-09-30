@@ -8,8 +8,13 @@
 #define CacheL2size           262144
 #define Cacheburst            32
 #define Maxblocksize          67108864
-#define MAXREALFFT            1000000000
-#define BIGFFTWSIZE           200000000
+/* these are the current presto setting for the sigproc-style files and FFT in memory */
+/* the values below cause makewisdom to run for 7 hours on the LOFAR clusters */
+/* therefore, the values have been reverted to older values which only take 30 minutes */
+/* #define MAXREALFFT            1000000000  */
+/* #define BIGFFTWSIZE           200000000   */
+#define MAXREALFFT            320000000
+#define BIGFFTWSIZE           2000000 
 #define KBF                   33554432
 #define Cachetreshold         32768
 #define Cacheburstblocksize   4
