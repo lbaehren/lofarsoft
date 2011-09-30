@@ -173,7 +173,9 @@ def main(folddir, subbdir, canddir, basename, **kwargs):
     mask_filename = kwargs.get('mask_filename', '')
     n_cores = kwargs.get('n_cores', 8)
     zaplist_file = kwargs.get('zaplist_file', '')
-    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 20)
+    # XXX yucky LPPS_HACK FIXME
+#    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 20)
+    n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 0)
     minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0)
     minimum_p_cutoff = kwargs.get('minimum_p_cutoff', None)
     metadata = kwargs.get('metadata', None)

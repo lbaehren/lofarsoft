@@ -50,7 +50,7 @@ from lpps_search.bestprof import parse_pfd_bestprof_file
 
 # ----------------------------------------------------------------------------
 N_CANDIDATES_CUTOFF = 200 # maximum number of candidates to fold for accelsearch
-MINIMUM_DM_CUTOFF = 2 # minimum dispersion measure for candidates (from accelsearch)
+MINIMUM_DM_CUTOFF = 0.5 # minimum dispersion measure for candidates (from accelsearch)
 MAX_BATCH_SIZE = 1000 # maximum number of trial DMs to create in one go with prepsubband
 MAX_BATCH_SIZE_MPI = 1000 # maximum number of trial DMs to create in one go with mpiprepsubband 
 MINIMUM_P_CUTOFF = 0.005 # minimum period in seconds
@@ -477,7 +477,8 @@ def run_accelsearch(fft_file, z_max, *args, **kwargs):
     OPTIONS = {
         '-numharm' : '16',
         '-sigma' : '2',
-        '-flo' : '%.2f' % 1,
+        '-flo' : '1.',
+        '-fhi', : '1000.',
         '-zmax' : '%d' % z_max,
 #        '-locpow' : '', # Not used for LPPS reprocessing (after Jason's testing).
         '-harmpolish' : '',
@@ -513,6 +514,7 @@ def run_single_pulse_search_plotter(work_dir, basename):
     globpattern = join(work_dir, basename + '_DM*.*.singlepulse')
     status = run_command('single_pulse_search.py', {
         '-g' : '"' + globpattern + '"',
+        '-t' : '5.5', 
     }, [])
 
     return status

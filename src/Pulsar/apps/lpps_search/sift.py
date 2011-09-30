@@ -136,13 +136,21 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
 
     # TODO : fix the line below to move the DM to some central settings area
     n_candidates_cutoff = kwargs.get('n_candidates_cutoff', 0)
-    minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 1)
+    minimum_dm_cutoff = kwargs.get('minimum_dm_cutoff', 0.5)
     zaplist_file = kwargs.get('zaplist_file', '') 
     metadata = kwargs.get('metadata', None)
     minimum_p_cutoff = kwargs.get('minimum_p_cutoff', None)
 
-    if minimum_p_cutoff and type(minimum_p_cutoff) in [type(1), type(1.)]:
-        sifting.short_period = minimum_p_cutoff
+    # XXX yucky LPPS_HACK FIXME
+#    if minimum_p_cutoff and type(minimum_p_cutoff) in [type(1), type(1.)]:
+#        sifting.short_period = minimum_p_cutoff
+    # Explicitly override the PRESTO sifting.py module's globals
+    sifting.short_period = 0.005
+    sifting.long_period = 15.
+    sifting.r_err = 1.1
+    sifting.sigma_threshold = 5.
+    c_pow_threshold = 100
+    harm_pow_cutoff = 8.
 
     crawl_results = crawler.find_accelsearch_output(cand_dir, basename)
     # Reorder the results to send them to PRESTO's sifting module (it needs a
@@ -160,12 +168,12 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
             except KeyError, e:
                 accel_cands_found_for[z_max] = [dm]
    
+    # Print the settings used for the PRESTO sifting.py module
+    sifting.print_sift_globals()
     # For each value of z_max, sift the candidates that were found and put
     # them all in one big list:
     unsifted_accelcands = []
     sifted_accelcands = []
-    # TODO : fix the case where the script crashes because there are not
-    # enough candidates.
     for z_max in accel_cands_found_for.keys():
         # Read all the acceleration candidates:
         files = glob.glob(os.path.join(cand_dir, 
@@ -230,7 +238,9 @@ def sift_accel_cands(cand_dir, basename, **kwargs):
         assert minimum_dm_cutoff >= 0
         sifted_accelcands = [c for c in sifted_accelcands if c.DM >= minimum_dm_cutoff]        
  
-    if n_candidates_cutoff:
+    # XXX yucky LPPS_HACK FIXME
+#    if n_candidates_cutoff:
+    if False:
         # We want an integer that is larger than 0 if a cutoff is specified.
         assert n_candidates_cutoff > 0 and (type(n_candidates_cutoff) == type(1))
         print 'Applying a cutoff on the number of candidates fo %d' % n_candidates_cutoff
