@@ -26,7 +26,7 @@ if test -d $src_d ; then
     #echo "dst: $dst_d"
 
     # Loop over files in source directory and create symlinks
-    for src_f in $(find $src_d -iname "*.py" -type f); do
+    for src_f in $(find $src_d -iname "*py" -type f); do
 	dst_f=$dst_d${src_f#$src_d}
 	#echo a $src_f
 	#echo b $dst_f

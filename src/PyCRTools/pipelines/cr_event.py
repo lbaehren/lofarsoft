@@ -18,8 +18,8 @@ beamforming.
 *polarization*          either 0 or 1 for selecting even or odd antennas
 
 *outputdir*             directory where to store the final results (will be stored in a
-                        subdirectory filename.dir/ within that directory) 
-            
+                        subdirectory filename.dir/ within that directory)
+
 *block*                 (or blocknumber) - in which block do you expect the peak
 
 *plotpause*             pause and display each figure interactively?
@@ -44,7 +44,7 @@ Some basic results are stored in the ``event.par.results`` dict. The
 quality information dict is in ``event.par.quality``.  The shifted
 time series data (corrected for time travel and cable delay) of all
 antennas is in ``event.par.timeseries_data``. A summary of the ouput
-with all figures can be viwed with a web browser from 
+with all figures can be viwed with a web browser from
 outputdir/project-timestamp/polN/NNNN/index.html.
 
 The results dict can also be read stand-alone from the file
@@ -70,7 +70,7 @@ filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
 Azimuth (Eastwards from North) 232 degrees, Elevation 62.5 degrees
 LORA estimate: 229.1 degrees, 62.4 degrees
 
-Event-0, LBA_INNER: 
+Event-0, LBA_INNER:
 Azimuth (Eastwards from North) 9.4 degrees, Elevation 61.0 degrees
 LORA estimate: 17.2 degrees, 62.9 degrees
 
@@ -78,7 +78,7 @@ LORA estimate: 17.2 degrees, 62.9 degrees
 
 Event ID		Theta	Phi		Core pos.(X,Y) m        Energy (eV)                       Az?
 -----------------------------------------------------------------------------------------------
-1307920753		62.4	129.9	        (63.5, 176.4)       2.57e+17 (underestimated)     230    
+1307920753		62.4	129.9	        (63.5, 176.4)       2.57e+17 (underestimated)     230
 1307923194		59.0	51.7	        (84.6, -61.5)		9.88e+15                      308
 1307942115		62.9	342.8	        (-31.7 -114.5)		1.8e+17 (underestimated)      17.2
 1309126700		74.2	335.7	        (-94.8, 34.7)		2.64e+16                      24
@@ -122,7 +122,7 @@ if parser.get_prog_name()=="cr_event.py":
         nogui=True
         import matplotlib
         matplotlib.use('Agg')
-        
+
 
 from pycrtools import *
 from pycrtools import lora
@@ -158,7 +158,7 @@ if not parser.get_prog_name()=="cr_event.py":
     refresh=True
     search_window_width=-1
     sample_number=-1
-    
+
     maximum_allowed_delay=1e-8 # maximum differential mean cable delay
                                # that the expected positions can differ
                                # from the measured ones, before we
@@ -212,7 +212,7 @@ def finish_file(laststatus=""):
     status="/".join(statuslist)
 
     results["status"]=status
-    
+
     if not os.path.exists(summaryfilename):
         summaryfile=open(summaryfilename,"w")
         summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
@@ -293,7 +293,7 @@ def finish_file(laststatus=""):
         htmlfile.write('<a name="{0:s}" href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><a href=#top>(back to top)</a><p>\n'.format(os.path.split(f)[-1]))
 
     htmlfile.write("</body></html>\n")
-    htmlfile.close()    
+    htmlfile.close()
 
     #print logfile
     tlog()
@@ -306,7 +306,7 @@ def finish_file(laststatus=""):
     print "-----------------------------------------------------------------------------------------------------------"
     print "Finished cr_event after",time.clock()-t0,"seconds at",time.strftime("%A, %Y-%m-%d at %H:%M:%S")
     print "-----------------------------------------------------------------------------------------------------------\n"
-    
+
 
 ########################################################################
 #Loop over all files and polarizations
@@ -320,7 +320,7 @@ if not files:
     print "ERROR: No files found - ",filefilter
 else:
     print "Processing the following files:",files
-    
+
 for full_filename in files:
     for current_polarization in polarizations:
         t0=time.clock()
@@ -339,7 +339,7 @@ for full_filename in files:
         statuslist=[]
         block_number=blocknumber
         sample_number=samplenumber
-        
+
 
         ########################################################################
         #Setting filenames and directories
@@ -361,8 +361,8 @@ for full_filename in files:
 
         outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
         topdir_name=projectname+"-"+time_stamp
-        reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)  
-        reldir_from_top = os.path.join(topdir_name,"pol"+str(current_polarization),station_name)  
+        reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)
+        reldir_from_top = os.path.join(topdir_name,"pol"+str(current_polarization),station_name)
         outputdir_event=os.path.join(outputdir_expanded,topdir_name)
         outputdir_with_subdirectories=os.path.join(outputdir_event,reldir_from_event)
         outfilename=rootfilename+"-pol"+str(current_polarization)
@@ -371,7 +371,7 @@ for full_filename in files:
         result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
         calibrated_timeseries_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries-cut")
         calibrated_fft_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-fft-cut")
-        
+
         htmlfilename=os.path.join(outputdir_with_subdirectories,"index.html")
         summaryfilename=os.path.join(outputdir_event,"index.html")
         goodsummaryfilename=os.path.join(outputdir,"summary-good.html")
@@ -430,7 +430,7 @@ for full_filename in files:
         tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
         data_length=datafile["DATA_LENGTH"][0]
-        
+
         results=dict(
             TELESCOPE=datafile["TELESCOPE"],
             ANTENNA_SET=datafile["ANTENNA_SET"],
@@ -473,7 +473,7 @@ for full_filename in files:
         lora_event_info = 0 # to check with 'if lora_event_info:'
         if os.path.exists(lora_logfile):
             (tbb_starttime_sec,tbb_starttime_nsec)=lora.nsecFromSec(tbb_starttime,logfile=lora_logfile)
-            
+
             if tbb_starttime_sec:
                 try:
                     (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
@@ -490,7 +490,7 @@ for full_filename in files:
                 lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
         else:
             print "WARNING: No LORA logfile found - ",lora_logfile
-        
+
         #lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
 
         if lora_event_info:
@@ -503,7 +503,7 @@ for full_filename in files:
             pulse_energy_lora=lora_energy,
             pulse_core_lora=lora_core
             ))
-        
+
         ########################################################################
         #Setting the parameter block with parameters for tasks
         ########################################################################
@@ -525,6 +525,7 @@ for full_filename in files:
                 antennas_stride=2,maxpeak=7,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=7,
                 blocklen=4096, # only used for quality checking within one block
         #        delta_nu=3000, # -> blocksize=2**16
+                quality_db_filename="",
                 chunksize_estimated=blocksize, # -> blocksize=2**16
                 rmsrange=(0.5,50) #Range of RMS that is allowed in timeseries
                                   #before flagging. RMS is related to power,
@@ -533,7 +534,7 @@ for full_filename in files:
                 ),
             FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
             CalcBaseline = dict(baseline=False), # Make sure baseline is recreated when the task is run a second time
-            LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=128,minpulselen=3,maxlen=128,prepulselen=32),  #nisgma=7  
+            LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=128,minpulselen=3,maxlen=128,prepulselen=32),  #nisgma=7
         #    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once
  #           DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
             DirectionFitTriangles = dict(maxiter=6,rmsfactor=2,minrmsfactor=0,direction_guess=lora_direction,direction_guess_label="LORA"), # determine delays iteratively
@@ -566,11 +567,11 @@ for full_filename in files:
         ########################################################################
         print "---> Calculating average spectrum of all antennas"
         avspectrum=trerun("AverageSpectrum","cr_event",pardict=par,load_if_file_exists=True,doplot=0 if Pause.doplot else False)
-        calblocksize=avspectrum.power.getHeader("blocksize")        
+        calblocksize=avspectrum.power.getHeader("blocksize")
         speclen=avspectrum.power.shape()[-1] # note: this is not blocksize/2+1 ... (the last channel is missing!)
 
         print "Note: You can get all antenna properties from ``antennacharacteristics=avspectrum.power.getHeader('antennacharacteristics')``"
-            
+
         results.update(dict(
             antennas_timeseries_rms=list(avspectrum.power.getHeader("rms_antenna")) if avspectrum.power.getHeader("rms_antenna") else None,
             antennas_timeseries_npeaks=list(avspectrum.power.getHeader("npeaks_antenna")) if avspectrum.power.getHeader("npeaks_antenna") else None,
@@ -583,7 +584,7 @@ for full_filename in files:
             del avspectrum.power.par.baseline
 
         ########################################################################
-        #Flagging antennas 
+        #Flagging antennas
         ########################################################################
         #Select from the quality list, produced by average spectrum, the ones
         #which contain flags indicating a potential problem
@@ -591,7 +592,7 @@ for full_filename in files:
         #Define some convenience lists and dicts
         quality=avspectrum.power.getHeader("quality")
         antennalist=[i["antenna"] for i in quality if i["chunk"]==0] # just the names of all antennas
-        antenna_index={} # names of antennas and their position within the array 
+        antenna_index={} # names of antennas and their position within the array
         for i in range(len(antennalist)): antenna_index[antennalist[i]]=i
 
         # Now, select all atennas where the interesting chunk (where the peak
@@ -626,7 +627,7 @@ for full_filename in files:
             averagespectrum_good_antennas=avspectrum.power
 
         ########################################################################
-        #Baseline Fitting 
+        #Baseline Fitting
         ########################################################################
 
         print "---> Fit a baseline to the average spectrum"
@@ -668,7 +669,7 @@ for full_filename in files:
         #Get a measure of the total power (actually sqrt thereof)
         #received in each antenna (without RFI) and in the entire
         #station.
-        
+
         antennas_power=amplitudes[...].mean()
         results.update(dict(
             antennas_spectral_power=list(antennas_power),
@@ -720,7 +721,7 @@ for full_filename in files:
             antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
             antenna_positions_array_XYZ_m=list(metadata.convertITRFToLocal(datafile["ITRFANTENNA_POSITIONS"]).vec())
             ))
-        
+
         #Getting original cabledelays
         cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
         cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
@@ -737,7 +738,7 @@ for full_filename in files:
             print "Error reading file - skipping this file"
             finish_file(laststatus="READ ERROR")
             continue
-        
+
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
         timeseries_data.par.xvalues.setUnit("","s")
@@ -755,7 +756,7 @@ for full_filename in files:
         fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
 
         ########################################################################
-        #RFI excision 
+        #RFI excision
         ########################################################################
         fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
 
@@ -767,7 +768,7 @@ for full_filename in files:
         #import pdb; pdb.set_trace()
         # and apply
         fft_data.mul(calcbaseline_galactic.baseline)
-        
+
         #Plotting just for quality control
         power=hArray(float,properties=fft_data)
         power.spectralpower(fft_data)
@@ -782,7 +783,7 @@ for full_filename in files:
         hFFTWExecutePlan(timeseries_calibrated_data[...], fft_data[...], invfftplan)
 
         timeseries_calibrated_data /= blocksize # normalize back to original value
-        
+
         timeseries_calibrated_data_rms=timeseries_calibrated_data.stddev(0.0).val()
         results.update(dict(
             pulse_height_rms=timeseries_calibrated_data_rms
@@ -791,7 +792,7 @@ for full_filename in files:
         # Note: to finish calibration, we have to know the pulse location first
         # Then we divide out by the rms per antenna in this block, while excluding the pulse region.
         # so we use [0:pulse.start] ( and [pulse.end:] to be implemented).
-        
+
         ########################################################################
         #Locate pulse and cut data around it
         ########################################################################
@@ -823,21 +824,21 @@ for full_filename in files:
             pulse=trerun("LocatePulseTrain","",timeseries_calibrated_data,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
 
         # Otherwise take the previously found window with the most pulses
-        else: 
+        else:
             pulse=pulses
         pulse_npeaks=pulses.npeaks
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
 
-# Finish gain calibration - also apply gain calibration on time series data in 'pulse' result workspace.       
+# Finish gain calibration - also apply gain calibration on time series data in 'pulse' result workspace.
         timeseries_calibrated_data_gainnormalisation = timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
         # improve to also use [pulse.end:]
-        timeseries_calibrated_data[:,...].div(timeseries_calibrated_data_gainnormalisation) 
+        timeseries_calibrated_data[:,...].div(timeseries_calibrated_data_gainnormalisation)
         timeseries_calibrated_data_antennas_rms=timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
         # this now must contain all 1.0's
-        
+
 #        pulse.timeseries_data[:,...].div(timeseries_calibrated_data_gainnormalisation)
         # Note: pulse.timeseries_data is the same array (by ref) as timeseries_calibrated_data.
-        
+
         pulse.timeseries_data_cut[:,...].div(timeseries_calibrated_data_gainnormalisation)
         # this is a copied array so needs to be normalised as well
 # calibration complete.
@@ -846,17 +847,17 @@ for full_filename in files:
 
         if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
         Pause("Plotted time series data. ",name="calibrated-imeseries")
-        
+
         #a = timeseries_calibrated_data.toNumpy()
         #plt.plot(a[:][pulse.start:pulse.end])
-        
+
         print 'PULSE START = '
         print pulse.start
         results.update(dict(
             timeseries_rms=list(timeseries_calibrated_data_antennas_rms),
             npeaks_found=pulse_npeaks
             ))
-        
+
         if pulse_npeaks==0:
             print "************************************************************************"
             print "********          ATTENTION: No pulses found          ******************"
@@ -887,7 +888,7 @@ for full_filename in files:
 
         antennas_with_strong_pulses=list(pulses_snr.Find(">",pulses_sigma))
         nantennas_with_strong_pulses=len(antennas_with_strong_pulses)
-        
+
         results.update(dict(
             pulses_sigma=pulses_sigma,
             timeseries_power_mean=list(timeseries_power_mean),
@@ -903,7 +904,7 @@ for full_filename in files:
             finish_file(laststatus="TOO FEW PULSES")
             continue
 
-        
+
         ########################################################################
         #Now refine pulse location by cross correlating around the peak maxima
         ########################################################################
@@ -915,7 +916,7 @@ for full_filename in files:
 
         print "---> Cross correlate pulses, get time lags, and determine direction of pulse."
 
-        #Now cross correlate all pulses with each other 
+        #Now cross correlate all pulses with each other
         crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",timeseries_data_cut_to_pulse,pardict=par,oversamplefactor=10)
 
         #And determine the relative offsets between them
@@ -925,8 +926,8 @@ for full_filename in files:
 
         #The actual delays are those from the (rounded) peak locations plus the delta form the cross correlation
         time_lags=(timeseries_data_cut_to_pulse_delays.vec()+maxima_cc.lags)
-        
-        print "Time lag [ns]: ", time_lags 
+
+        print "Time lag [ns]: ", time_lags
         print " "
 
         ########################################################################
@@ -945,7 +946,7 @@ for full_filename in files:
         good_pulse_antenna_positions=hArray(float,[nantennas_with_strong_pulses,3])
         good_pulse_antenna_positions[...].copy(antenna_positions[antennas_with_strong_pulses,...,0:3])
         good_pulse_cabledelays=cabledelays[antennas_with_strong_pulses]
-        
+
         direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags,cabledelays=good_pulse_cabledelays,verbose=True,doplot=True)
         print "========================================================================"
         print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
@@ -954,7 +955,7 @@ for full_filename in files:
 
         print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
 
-        
+
         (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="x")
         (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
@@ -972,7 +973,7 @@ for full_filename in files:
             print "#DirectionFitTriangles: ERROR!"
         else:
             print "#DirectionFitTriangles: OK!"
-            
+
         print "---> Checking and flagging delays which are larger than +/-"+str(maximum_allowed_delay)
 
         final_residual_delays=hArray(float,[ndipoles],fill=0)
@@ -1065,7 +1066,7 @@ for full_filename in files:
         ########################################################################
         pulses_strength=timeseries_power_shifted[...].elem(min(max(int(round(beam_maxima.maxx.val()-pulse.start)),0),pulse.cutlen-1))
         pulse_height_incoherent=pulses_strength.mean()
-        
+
         trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=antenna_positions,colors="w",sizes=pulses_strength,sizes_min=0,names=good_antennas_IDs,title="Time Lags in Station",plotlegend=False,plot_clf=True,plot_finish=plot_draw)
         trerun("PlotAntennaLayout","TimeLags",pardict=par,positions=good_pulse_antenna_positions,colors=hArray(time_lags)[antennas_with_strong_pulses],sizes=hArray(pulses_strength)[antennas_with_strong_pulses],names=good_antennas_IDs[antennas_with_strong_pulses],sizes_min=0,title="Time Lags in Station",plotlegend=True,plot_clf=False)
 

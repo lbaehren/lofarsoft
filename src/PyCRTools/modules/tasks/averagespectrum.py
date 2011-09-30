@@ -1035,9 +1035,10 @@ class AverageSpectrum(tasks.Task):
                     self.npeaks_antenna[self.nantennas_total]=npeaks
                     self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
                     hprint("#          mean =",mean,"rms =",rms,"npeaks =",npeaks)
-                    f=open(self.quality_db_filename+".py","a")
-                    f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
-                    f.close()
+                    if not self.quality_db_filename=="":
+                        f=open(self.quality_db_filename+".py","a")
+                        f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
+                        f.close()
 
                 self.nantennas_total+=1
                 #End loop over antennas

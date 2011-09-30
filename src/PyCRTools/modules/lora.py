@@ -18,13 +18,13 @@ def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, sample
 
     if value < 0:
         raise ValueError("Event not in file.")
-        
+
     return (int(value / blocksize),int(value % blocksize))
 
 
 def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurroundingSecond=True,silent=False):
     """ Reads in a file from LORA and returns a dictionary with important parameters. Az(imuth) is defined in degrees from North through East. El(evation) is in degrees from the horizon upwards.
-    
+
     Input parameters:
     * lora_second * UTC timestamp of LORA event or filename
     * datadir * Directory of LORA event files
@@ -62,26 +62,28 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
                      print "File does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file"
                      return None
             else:
-	        print "1 File",datadir+filename,"does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file. If the timestamp is just one second off you can try it again with set checkSurroundingSeconds = True" 
+	        print "1 File",datadir+filename,"does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file. If the timestamp is just one second off you can try it again with set checkSurroundingSeconds = True"
                 return None
     else:
-        filename=lora_second          
-    file=open(datadir+filename)         
+        filename=lora_second
+    file=open(datadir+filename)
     lines=file.readlines()
     file.close()
+    if len(lines) < 2:
+        return None
     firstline=lines[0].strip('/').split()
     secondline=lines[1].strip('/').split()
     reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)']
     loradata={}
     for (a,b,c) in zip(firstline,reference,secondline):
-        # "Check if data format is still as defined" 
+        # "Check if data format is still as defined"
         assert a==b
         loradata[a]=float(c)
     detectorindex=lines[3].strip('/').split()
     detectorreference=['Det_no.','X_Cord(m)','Y_Cord(m)','Z_Cord(m)','UTC_time','(10*nsecs)','Particle_Density(/m2)']
     for (a,b) in zip(detectorindex,detectorreference):
-        # "Check if data format is still as defined" 
-        assert b==a 
+        # "Check if data format is still as defined"
+        assert b==a
     detectorkeys=["detectorid","posX","posY","posZ","time","10*nsec","particle_density(/m2)"]
     for k in detectorkeys:
         loradata[k]=[]
@@ -90,11 +92,11 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         for a,b in zip(detectorkeys[0:-1],info[0:-1]):
             print a,b
             loradata[a].append(float(b))
-        loradata[detectorkeys[-1]].append(float(info[-1]))    
+        loradata[detectorkeys[-1]].append(float(info[-1]))
     loradata["core"]=cr.hArray([loradata["Core(X)"],loradata["Core(Y)"],0.],name="shower core parameters from lora",unit="m")
     loradata["energy"]=loradata["Energy(eV)"]
     loradata["direction"]=cr.hArray([loradata["Azimuth"],loradata["Elevation"]],name="shower direction from lora",unit="degrees")
-    
+
     return loradata
 
 def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
@@ -113,5 +115,5 @@ def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
     else:
        return (None,None)
 
-        
+
 

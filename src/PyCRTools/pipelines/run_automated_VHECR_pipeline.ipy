@@ -1,0 +1,143 @@
+"""
+On Altair this can be doen with a single line:
+
+sudo chmod a+x $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py
+
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py /data/VHECR/LORAtriggered/data/VHECR_LORA-*.h5 --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/results/20100704 --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile.txt &
+
+tail -f logfile.txt
+
+Just for the good guys:
+
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110716T094509.665Z*.h5' 'VHECR_LORA-20110716T025339.597Z*.h5' 'VHECR_LORA-20110714T174749.986Z*.h5' 'VHECR_LORA-20110612T231913.199Z*.h5' 'VHECR_LORA-20110612T235954.184Z*.h5' 'VHECR_LORA-20110626T221820.368Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile-good-b.txt &
+
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110716T094509.665Z*.h5' 'VHECR_LORA-20110716T025339.597Z*.h5' 'VHECR_LORA-20110714T174749.986Z*.h5' 'VHECR_LORA-20110626T221820.368Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_OUTER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile-good-b.txt &
+
+
+$LOFARSOFT/src/PyCRTools/pipelines/cr_event.py 'VHECR_LORA-20110613T051515.914Z*.h5' --datadir=/data/VHECR/LORAtriggered/data --lofarmode=LBA_INNER --outputdir=/data/VHECR/LORAtriggered/newresults --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& logfile-good.txt &
+
+Interactive plotting of LDF in python (or use trun):
+
+tload "ldf"
+tpar topdir="/data/VHECR/LORAtriggered/newresults"
+tpar events=["VHECR_LORA-20110714T174749.986Z"]
+go
+
+
+VHECR_LORA-20110612T231913.199Z
+VHECR_LORA-20110612T235954.184Z
+VHECR_LORA-20110613T051515.914Z
+VHECR_LORA-20110626T221820.368Z
+VHECR_LORA-20110714T174749.986Z
+VHECR_LORA-20110716T025339.597Z
+VHECR_LORA-20110716T094509.665Z
+
+"""
+nogui=True
+from pycrtools import *
+from pycrtools import lora
+from pycrtools import xmldict
+import os
+
+
+processall=False
+processnew=True
+reprocesslora=False
+includefilter=[]
+excludefilter=["20110613T051515.914","VHECR_LORA-1969","test","temp"]
+
+
+def get_results(filename,outputdir,pol=0):
+        current_polarization=pol
+        station=""
+        timestamp=""
+        time_stamp=""
+        (rootfilename,fileextensions)=os.path.splitext(filename)
+
+        filename_split=rootfilename.split("-")
+        projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
+
+        station_name=filename_split[-1] if not station else station
+        old_time_stamp=time_stamp
+        time_stamp=filename_split[-2] if not timestamp else timestamp
+        pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
+
+        outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
+        topdir_name=projectname+"-"+time_stamp
+        reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)
+        reldir_from_top = os.path.join(topdir_name,"pol"+str(current_polarization),station_name)
+        outputdir_event=os.path.join(outputdir_expanded,topdir_name)
+        outputdir_with_subdirectories=os.path.join(outputdir_event,reldir_from_event)
+        outfilename=rootfilename+"-pol"+str(current_polarization)
+
+        calibrated_timeseries_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries")
+        #result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
+        result_file=os.path.join(outputdir_with_subdirectories,"results.xml")
+        #calibrated_timeseries_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries-cut")
+        #calibrated_fft_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-fft-cut")
+        if os.path.isfile(result_file):
+            res=xmldict.load(result_file)
+            return res
+        else:
+            return None
+
+def isprocessed(filename,outputdir):
+    if get_results(filename,outputdir,0) and get_results(filename,outputdir,1):
+        return True
+    else:
+        return False
+
+def nowloradata(filename,outputdir):
+    res=get_results(filename,outputdir,0)
+    if res: #already processed
+        if not res["pulse_direction_lora"]: #No lora direction given
+             if lora.loraInfo(res["TIME"]): #lora data available
+                 return True
+    return False
+
+def infilter(filename,filter):
+    if not isinstance(filter,type([])):
+        if filter in filename:
+            return True
+    else:
+        return True in [f in filename for f in filter]
+
+
+
+datadir="/data/VHECR/LORAtriggered/data/"
+#candidates=["VHECR_LORA-20110716T094509.665Z","VHECR_LORA-20110716T025339.597Z","VHECR_LORA-20110714T174749.986Z","VHECR_LORA-20110612T231913.199Z","VHECR_LORA-20110612T235954.184Z","VHECR_LORA-20110626T221820.368Z"]
+blocksize=65536
+myoutputdir="/data/VHECR/LORAtriggered/results/"
+fname=""
+files=os.listdir(datadir)
+
+for f in files:
+    if infilter(f,excludefilter):
+        continue
+    if processall:
+        fname+=f+" "
+        continue
+    if infilter(f,includefilter):
+        fname+=f+" "
+        continue
+    else:
+	print fname
+        if isprocessed(f,myoutputdir):
+            if reprocesslora:
+                if nowloradata(f,myoutputdir):
+                    fname+=f+" "
+                    continue
+        else:
+            if processnew:
+                fname+=f+" "
+                continue
+
+
+print "About to process these files:", fname
+lofarmode="LBA_OUTER"
+run $PYP/pipelines/cr_event.py $fname -d $datadir --lofarmode=$lofarmode --outputdir=$myoutputdir --blocksize=$blocksize --search_window_width=5000 --nsigma=3  --nopause
+
+#lofarmode="LBA_INNER"
+#fname=datadir+"VHECR_LORA-20110613T051515.914Z*.h5"
+#run $PYP/pipelines/cr_event.py $fname --lofarmode=$lofarmode --outputdir=$myoutputdir --nopause --blocksize=$blocksize --search_window_width=5000 --nsigma=3 y-q
+
