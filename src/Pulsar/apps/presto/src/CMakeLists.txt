@@ -484,8 +484,8 @@ add_custom_target (presto_prep
 foreach (src ${presto_makewisdom_binaries})
   set_target_properties (${src}
     PROPERTIES
-    COMPILE_FLAGS "-fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
-    LINKER_FLAGS "-fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
+    COMPILE_FLAGS "-fPIC -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
+    LINKER_FLAGS "-fPIC -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
   )
   target_link_libraries(${src} ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a m)
 endforeach (src)
