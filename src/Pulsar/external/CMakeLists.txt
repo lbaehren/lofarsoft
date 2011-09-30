@@ -247,7 +247,7 @@ endif (UNIX)
 
 
 add_custom_target (psrchive_build
-  COMMAND make 
+  COMMAND make 1> ${PULSAR_BINARY_DIR}/apps/${psrchive_name}/make.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
   COMMENT "Building project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name}..."
   )
