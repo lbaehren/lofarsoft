@@ -4,8 +4,11 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.21
+VERSION=2.22
 
+#####################################################################
+# Usage #
+#####################################################################
 #Check the usage
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
@@ -51,7 +54,9 @@ fi
 
 #alias bf2presto8=/home/hassall/lofarsoft/release/share/pulsar/bin/bf2presto8
 
+#####################################################################
 #Get the input arguments
+#####################################################################
 OBSID=""
 PULSAR=""
 PULSAR_LIST=""
@@ -133,7 +138,9 @@ then
    set -x
 fi
 
+#####################################################################
 #check for minimum required input
+#####################################################################
 if [[ $PULSAR == "" ]]
 then 
    echo ""
@@ -159,7 +166,9 @@ then
    exit 1
 fi
 
+#####################################################################
 # Print the basic information about input parameters to STDOUT at start of pipeline run
+#####################################################################
 echo "Running make_subs_SAS_Ncore_Mmodes.sh with the following input arguments:"
 echo "    OBSID = $OBSID"
 echo "    PULSAR = $PULSAR"
@@ -249,7 +258,9 @@ then
    echo "    Will process using presto .subXXXX files instead of default psrfits." 
 fi
 
+#####################################################################
 #Check whether Output Processing Location already exists
+#####################################################################
 if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
 	if [ ! -d $location ] 
@@ -290,9 +301,26 @@ fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 #In the event that location is a specified relative path, put the absolute path as location
 location=`pwd`
 
+#Check that there is disk space in the location to be able to write
+touch test
+status=$?
+
+if [ $status -ne 0 ]
+then
+   echo "ERROR: Unable to write to designated location (permissions?);  check if there is enough disk space on device?"
+   echo "       Running 'df'..."
+   df .
+   exit 1
+else
+   rm test
+fi
+
 #Set these parameters by hand
 ###OBSID=L2010_06296
 
+#####################################################################
+#Set up the parset location:
+#####################################################################
 if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
     PARSET=$location/${OBSID}.parset
@@ -384,7 +412,9 @@ fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 ######################
 date_start=`date`
 
+#####################################################################
 #Set up generic pipeline version log file
+#####################################################################
 log=${location}/make_subs_SAS_Ncore_Mmodes.log
 if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 then
@@ -400,6 +430,10 @@ echo "Start date: $date_start" >> $log
 echo "PARSET:" $PARSET
 echo "PARSET:" $PARSET >> $log
 
+
+#####################################################################
+#Append to the parset some additional relevant info and calc TA beam locations
+#####################################################################
 hold_pythonpath=`echo $PYTHONPATH`
 
 if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
@@ -451,6 +485,10 @@ else
    fi
 fi  #end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
+
+#####################################################################
+#Some Parset names changed depending on the observation date;  read parset
+#####################################################################
 date_obs=`grep Observation.startTime *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
 date_seconds=`date -d "$date_obs"  "+%s"` 
 
@@ -518,6 +556,9 @@ fi
 #   fi
 #fi
 
+#####################################################################
+#Figure out pulsars in FOV if the -p position input switch was used
+#####################################################################
 # Pulsar = "position" indicates that the observation is based on a position setting;
 # figure out what the brightest/closest N Pulsars to the position (N=3)
 if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
@@ -670,7 +711,9 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 	done
 fi #end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 
-
+#####################################################################
+#Echo all the major parameters to stdout and log
+#####################################################################
 echo "ARRAY:" $ARRAY 
 echo "ARRAY:" $ARRAY >> $log
 echo "CHANNELS:" $CHAN 
@@ -695,6 +738,10 @@ echo "Starting Time" >> $log
 date
 date >> $log
 
+
+#####################################################################
+#Check the modes against what was requested by the user for processing
+#####################################################################
 #Default is incoherentstokes
 mode_str="incoherentstokes"
 nmodes=1
@@ -2553,14 +2600,19 @@ do
 			echo "mv RSP${ii} tmp$$/RSP$NAME"
 			mv RSP${ii} tmp$$/RSP${NAME}
 			cd ${location}/${STOKES}/tmp$$/RSP${NAME}
-			echo "rename 's/RSP$ii/RSP$NAME/g' *" >> $log
-			echo "rename 's/RSP$ii/RSP$NAME/g' *"
-			rename "s/RSP$ii/RSP$NAME/g" *
-		    inf_file=`/bin/ls *.inf`
-		    sed -e 's/RSP$ii/RSP$NAME/g'  $inf_file > $$.inf
-			new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
-		    mv $$.inf $new_inf_file
-		    rm $inf_file
+			if [[ RSP${ii} != RSP${NAME} ]]
+			then
+			   echo "rename 's/RSP$ii/RSP$NAME/g' *" >> $log
+			   echo "rename 's/RSP$ii/RSP$NAME/g' *"
+			   rename "s/RSP$ii/RSP$NAME/g" *
+			fi
+#		    inf_file=`/bin/ls *.inf`
+#		    sed -e 's/RSP$ii/RSP$NAME/g'  $inf_file > $$.inf
+#			new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+#		    echo mv $$.inf $new_inf_file >> $log
+#		    echo mv $$.inf $new_inf_file
+#		    mv $$.inf $new_inf_file
+#		    rm $inf_file
 		done
 		cd ${location}/${STOKES}/tmp$$/
 		mv * ../
