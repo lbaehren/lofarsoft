@@ -2568,18 +2568,18 @@ do
 #			      mv $filename $new_name
 #			   done < name_change.list
 
-			   inf_file=`/bin/ls *.inf`
-			   if [[ RSP${ii} != $NAME ]]
-			   then
-			      sed   -e "s/$prev_name/$new_name/g" $inf_file > $$.inf
-			   else 
-			      cp $inf_file $$.inf
-			   fi
-			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
-			   echo mv $$.inf $new_inf_file
-			   echo mv $$.inf $new_inf_file >> $log
-			   mv $$.inf $new_inf_file
-			   rm $inf_file
+#			   inf_file=`/bin/ls *.inf`
+#			   if [[ RSP${ii} != $NAME ]]
+#			   then
+#			      sed   -e "s/$prev_name/$new_name/g" $inf_file > $$.inf
+#			   else 
+#			      cp $inf_file $$.inf
+#			   fi
+#			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+#			   echo mv $$.inf $new_inf_file
+#			   echo mv $$.inf $new_inf_file >> $log
+#			   mv $$.inf $new_inf_file
+#			   rm $inf_file
 			done
 		done
 		cd ${location}	    
@@ -2672,18 +2672,19 @@ do
 #				      mv $filename $new_name
 #				   done < name_change.list
 #			   fi 
-			   inf_file=`/bin/ls *.inf`
-			   if (( $beam_index != $ii ))
-			   then
-			      sed   -e "s/$prev_name/$new_name/g" $inf_file > $$.inf
-			   else 
-			      cp $inf_file $$.inf
-			   fi
-			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
-			   echo mv $$.inf $new_inf_file
-			   echo mv $$.inf $new_inf_file >> $log
-			   mv $$.inf $new_inf_file
-			   rm $inf_file
+
+#			   inf_file=`/bin/ls *.inf`
+#			   if (( $beam_index != $ii ))
+#			   then
+#			      sed   -e "s/$prev_name/$new_name/g" $inf_file > $$.inf
+#			   else 
+#			      cp $inf_file $$.inf
+#			   fi
+#			   new_inf_file=`echo $inf_file | sed 's/\.inf/\.sub\.inf/'`
+#			   echo mv $$.inf $new_inf_file
+#			   echo mv $$.inf $new_inf_file >> $log
+#			   mv $$.inf $new_inf_file
+#			   rm $inf_file
                cd ..
                echo mv ${jjj} ../../RSP${beam_index}
                echo mv ${jjj} ../../RSP${beam_index} >> $log
