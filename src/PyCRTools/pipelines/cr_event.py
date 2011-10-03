@@ -127,6 +127,8 @@ if parser.get_prog_name()=="cr_event.py":
 from pycrtools import *
 from pycrtools import lora
 from pycrtools import xmldict
+import pickle
+
 
 #plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
 
@@ -723,10 +725,32 @@ for full_filename in files:
             ))
 
         #Getting original cabledelays
-        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
-        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
-        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
-        cabledelays=hArray(cabledelays)
+#        import pdb; pdb.set_trace()
+        nofChannels = len(datafile["CHANNEL_ID"]) # already noted somewhere else?
+        cabledelayList = [0.0] * nofChannels
+#        cabledelays = hArray(float, dimensions = [nofChannels]) 
+        # check if 'Cabledelays.pic' exists in results dir
+        delayfile = os.path.join(outputdir, 'Cabledelays.pic')
+        print delayfile
+        if os.path.isfile(delayfile):
+            print 'Reading cable delays'
+            infile = open(delayfile, 'rb')
+            cabledelay_database = pickle.load(infile)
+            n=0
+            for id in datafile["CHANNEL_ID"]:
+                key = str(id)
+                if key in cabledelay_database:
+                    cabledelayList[n] = cabledelay_database[str(id)]
+                n+=1 
+            print cabledelayList
+        else:
+            print 'Cable delays file does not exist yet.'
+        cabledelays = hArray(cabledelayList) # zeros if file isn't there
+        
+#        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
+#        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
+#        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
+#        cabledelays=hArray(cabledelays)
 
         ########################################################################
         #Read block with peak and FFT
@@ -841,6 +865,10 @@ for full_filename in files:
 
         pulse.timeseries_data_cut[:,...].div(timeseries_calibrated_data_gainnormalisation)
         # this is a copied array so needs to be normalised as well
+#        timeseries_raw_rms = hArray(dimensions=timeseries_calibrated_data_antennas_rms)
+        # get raw rms value to see how much calibration was done in total
+        timeseries_raw_rms = timeseries_data[..., 0:pulse.start].stddev() # no DC offset correction was done
+        
 # calibration complete.
         print "---> Saving calibrated time series to",calibrated_timeseries_file
         timeseries_calibrated_data.write(calibrated_timeseries_file)
@@ -855,6 +883,7 @@ for full_filename in files:
         print pulse.start
         results.update(dict(
             timeseries_rms=list(timeseries_calibrated_data_antennas_rms),
+            timeseries_raw_rms=list(timeseries_raw_rms),
             npeaks_found=pulse_npeaks
             ))
 
@@ -873,7 +902,9 @@ for full_filename in files:
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
         timeseries_power.square()
-        timeseries_power.runningaverage(7,hWEIGHTS.GAUSSIAN)
+#        import pdb; pdb.set_trace()
+        timeseries_power[...].runningaverage(7,hWEIGHTS.GAUSSIAN) # NB. [...] put in, want to ensure average per antenna... (AC)
+#        timeseries_power *= 10 # parameter...
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
         timeseries_power_mean=timeseries_power[...,0:pulse.start].mean()
         timeseries_power_rms=timeseries_power[...,0:pulse.start].stddev(timeseries_power_mean)
@@ -988,11 +1019,14 @@ for full_filename in files:
             print "#Delay flagging - all delays seem OK."
         final_cable_delays=final_residual_delays+cabledelays
 
-
+        # include average cable delays (as in cable delay database) in time lags per pulse
+        time_lags = hArray(time_lags)
+        time_lags -= cabledelays
+        
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
 
-        trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=direction.total_delays,sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
+        trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=final_residual_delays,sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
         print "\n--->Imaging"
 
