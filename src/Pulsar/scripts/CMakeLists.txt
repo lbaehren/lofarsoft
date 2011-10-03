@@ -21,6 +21,7 @@ add_custom_target (scripts_install
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/master.rfi ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/stations.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND chmod 755 ${CMAKE_INSTALL_PREFIX}/bin/*.py ${CMAKE_INSTALL_PREFIX}/bin/*.sh ${CMAKE_INSTALL_PREFIX}/bin/*.pl ${CMAKE_INSTALL_PREFIX}/bin/*.csh
+  COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/data/parfile
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/scripts
   COMMENT "Install extra processing scripts and LOFAR inf file into ${CMAKE_INSTALL_PREFIX}/bin and ${CMAKE_INSTALL_PREFIX}/data..."
   )
