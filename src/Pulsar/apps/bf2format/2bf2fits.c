@@ -1,10 +1,3 @@
-/* To compile as stand alone:
-
-gcc  -I/scratch/windmill_1/wltvrede/packages/include -c -Wall bf2fits.c
-g++ -o bf2fits bf2fits.o -L/scratch/windmill_1/wltvrede/packages/lib -lcfitsio 
-
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -66,6 +59,7 @@ void usage(){
   puts("-parset\t\tRead this parset file to obtain header parameters.");
   puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum.");
   puts("-CS\t\tInput data is CS data (one file, total I only)");
+  puts("-H\t\tHDF5 Data Mode, only working in combination with -CS");
   puts("-append\t\tfor IS data append output fits files together");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
@@ -395,6 +389,259 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 } // void convert_nocollapse()
 
 
+void *stokesdata_h5_ptr = NULL;
+
+/* Returns 1 if successful, 0 on error */
+/* Only for IS data */
+int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking)
+{
+
+  typedef struct {
+    float	samples[BEAMS][SAMPLES|2][SUBBANDS][CHANNELS][STOKES];
+  }stokesdata_h5_struct;
+  
+  stokesdata_h5_struct *stokesdata_h5;
+
+  
+ unsigned time;
+ unsigned output_samples = 0;
+ unsigned nul_samples = 0;
+ /* unsigned toobig = 0, toosmall = 0; */
+ unsigned num;
+ int x;
+ long filesize, currentblock;
+
+ if(stokesdata_h5_ptr == NULL) {
+   //   printf("XXXXX Alloc %ld\n",AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
+   stokesdata_h5 = (stokesdata_h5_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
+   if(stokesdata_h5 == NULL) {
+     fprintf(stderr, "convert_nocollapse_H5: Memory allocation error\n");
+     perror("");
+     return 0;
+   }
+   stokesdata_h5_ptr = (void *)stokesdata_h5;
+ }else {
+   stokesdata_h5 = (stokesdata_h5_struct *)stokesdata_h5_ptr;
+ }
+
+ currentblock = 0;
+ /* Only find out how many blocks (including gaps) are in the data, then quit function. */
+ if(findseq) {
+   fseek( input, 0, SEEK_SET );
+   num = fread( &stokesdata_h5[0], sizeof stokesdata_h5[0], 1, input );
+   if(num != 1) {
+     fprintf(stderr, "No data?\n");
+     return 0;
+   }
+   /* No sequence numbers anymore in H5 format */
+   *firstseq = 0;
+   fseek(input, 0, SEEK_END);
+   filesize = ftell(input);
+   if(verbose) printf("  File size %ld bytes = %ld blocks of %ld bytes\n", filesize, filesize/sizeof(stokesdata_h5_struct), sizeof(stokesdata_h5_struct));
+   filesize /= sizeof(stokesdata_h5_struct);
+   fseek(input, (filesize-1)*sizeof(stokesdata_h5_struct), SEEK_SET);
+   num = fread( &stokesdata_h5[0], sizeof stokesdata_h5[0], 1, input );
+   if(num != 1) {
+     fprintf(stderr, "Error reading file.\n");
+     return 0;
+   }
+   /* No sequence numbers anymore in H5 format */
+   *lastseq = filesize-1;
+   
+   return 1;
+ }
+
+
+ /* Allocate temporary memory for packed data */
+ unsigned char *packeddata;
+ float *scales, *offsets;
+ if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 1, 0) != 1) {
+   fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
+   return 0;
+ }
+
+ /* 
+    - Reads AVERAGE_OVER (10) blocks of data at the time from the input data. 
+    - Swap some bytes around
+    - Look if there is a gap in the data (sequence numbers are missing) and write zero's in gaps.
+ */
+ x = 0;
+ currentblock = 0;
+ fseek( input, 0, SEEK_SET );
+ while( !feof( input ) ) {
+   if (x == NUM_BLOCKGROUPS) break;
+   x++;
+   unsigned i,c;
+
+   /* read data */
+   num = fread( &stokesdata_h5[0], sizeof stokesdata_h5[0], AVERAGE_OVER, input );
+   currentblock += num;
+
+   /* i loops over the blocks of data read in */
+   for( i = 0; i < num; i++ ) {
+     for( c = 0; c < CHANNELS; c++ ) {
+       unsigned b,t,s;
+       b = beamnr;
+       for( t = 0; t < SAMPLES; t++ ) {
+         for( s = 0; s < STOKES; s++ ) {
+	   floatSwap( &stokesdata_h5[i].samples[b][t][subbandnr][c][s] );
+         }
+       }
+     }
+   }
+   
+   /* If no more data, sto while loop */
+   if( !num ) {
+     break;
+   }
+
+
+   /* Calculate average. RMS not used right now. */
+   float average[CHANNELS], rms[CHANNELS];
+   for( c = 0; c < CHANNELS; c++ ) {
+     float sum = 0.0f;
+     float ms = 0.0f;
+     int N = 0;
+     unsigned validsamples = 0;
+     float prev = stokesdata_h5[0].samples[beamnr][0][subbandnr][c][STOKES_SWITCH];
+     /* compute average */
+     for( i = 0; i < num; i++ ) {
+       for( time = 0; time < SAMPLES; time++ ) {
+         const float value = stokesdata_h5[i].samples[beamnr][time][subbandnr][c][STOKES_SWITCH];
+	 if(prev < 1){
+	   prev = value;
+	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
+           sum += value;
+	   ms += value*value;
+	   prev = value;
+           validsamples++;
+         }
+       }
+     }
+   
+     N = validsamples?validsamples:1;
+     average[c] = sum/N;
+     rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+   }
+ 
+  /* convert and write the data */
+   for( i = 0; i < num; i++ ) {
+
+     /*     fprintf(stderr, "XXXXXXXX %d - 2\n", i); */
+   
+       /* patrick */
+     if(sigmalimit > 0 && i == 0) {
+       for( c = 0; c < CHANNELS; c++ ) {
+	 /*
+	 0                         = ivalue(average[c]-sigmalimit*rms[c]);
+	 0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
+	 0                         = (average[c]-sigmalimit*rms[c] - offset);
+	 */
+	 offsets[c]                    = average[c]-sigmalimit*rms[c];
+
+	 /*
+	 pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
+	 pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
+	 */
+	 scales[c]  = (average[c]+sigmalimit*rms[c]-offsets[c])/(float)(pow(2,subintdata->NrBits)-1);
+	 if(debugpacking)
+	   fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[c], offsets[c], average[c], rms[c]);
+       }
+     }
+     /* process data */
+     for( c = 0; c < CHANNELS; c++ ) {
+       for( time = 0; time < SAMPLES; time++ ) {
+         float sum;
+         sum = stokesdata_h5[i].samples[beamnr][time][subbandnr][c][STOKES_SWITCH];
+	 
+	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
+	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
+	 if(sigmalimit > 0) {
+	   if(debugpacking)
+	     printf("value %e ", sum);
+	   sum = (sum - offsets[c])/scales[c];
+	   if(debugpacking)
+	     printf(" %e ", sum);
+	   if(sum < 0) {
+	     if(clipav)
+	       sum = (average[c] - offsets[c])/scales[c];
+	     else
+	       sum = 0;
+	     /*	     printf("Underflow! %e\n", sum); */
+	   }
+	   if(sum > pow(2,subintdata->NrBits)-1) {
+	     if(clipav)
+	       sum = (average[c] - offsets[c])/scales[c];
+	     else
+	       sum = pow(2,subintdata->NrBits)-1;
+	     /*	     printf("Overflow! %e\n", sum); */
+	   }
+	   if(debugpacking)
+	     printf(" %e \n", sum);
+
+	   /*	   printf("value %e\n", sum); */
+	 }
+	 
+	 /* patrick: put polarization to 0, assume only one pol
+	    written out. Think x is the current bin nr */
+	 if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
+	   fprintf(stderr, "Error writing to temporary memory\n");
+	   return 0;
+	 }
+	   /*	   fwrite( &sum, sizeof sum, 1, outputfile[c] ); */ /* single sample written to channel file*/
+	 output_samples++;
+	 if( sum == 0 ) nul_samples++;
+
+       } // for( time = 0; time < SAMPLES; time++ ) 
+     }
+
+     /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
+     if(verbose) {
+       //       printf(".");
+       printf("\rProcessed block %ld/%ld of subband %d/%d: %.3f%%", currentblock, fout.NrPulses, subbandnr, SUBBANDS, 100.0*(subbandnr+(currentblock/((float)fout.NrPulses)))/((float)SUBBANDS));
+       fflush(stdout);
+     }
+     /* Pack data */
+     if(sigmalimit > 0) {
+       if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 1, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
+       /*     for( c = 0; c < CHANNELS; c++ ) {
+       printf("XXXXX %e\n", scales[c]);
+       }*/
+     }else {
+       if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 0) != 1) {
+	 fprintf(stderr, "ERROR: Cannot construct subint data               \n");      
+	 return 0;
+       }
+     }
+     /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
+     /* Write out subint */
+     if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i, packeddata, scales, offsets) != 1) {
+       fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+       return 0;
+     }
+     /*     fprintf(stderr, "XXXXXXXX %d - 5\n", (x-1)*AVERAGE_OVER+i); */
+   }
+   /*   fprintf(stderr, "XXXXXXXX X - 6\n"); */
+
+ } //  while( !feof( input ) ) {
+ printf("\n");
+ // printf("Wait before destruction\n");  scanf("%d", &x);
+ if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 1) != 1) {
+   fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
+   return 0;
+ }
+ // printf("Wait after destruction\n");  scanf("%d", &x);
+
+ /* fprintf(stderr,"  %u samples in output, %.2f%% null values, %.2f%% too big, %.2f%% too small\n",output_samples,100.0*nul_samples/output_samples,100.0*toobig/output_samples,100.0*toosmall/output_samples); */
+ 
+ // printf("XXXXX Free\n");
+ // free(stokesdata_h5);    //  Patrick: No longer do the free, as the memory will be re-used in later calls. Freeing&reallocating the memory leads to big problems with large data sets.
+ return 1;
+} // void convert_nocollapse_H5()
+
 /* Returns 1 if successful, 0 on error */
 /* Only for CS data */
 int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking)
@@ -693,6 +940,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
  free(stokesdata);
  return 1;
 } // int convert_nocollapse_CS()
+
 
 /* Returns 1 if successful, 0 on error */
 /* Only for IS data in appending mode*/
@@ -1106,12 +1354,13 @@ int main( int argc, char **argv )
                 // array that will keep the seek offsets for input files due to possible differences 
                 // between firstseq (same for all subbands) and actual first sequence number of each file
   int is_CS = 0; // if 1 then input file is CS data
+  int is_H5 = 0; // if 1 then input file is H5 data
   int is_append = 0;  // if 1 then the single fits-file will be written for IS data
   char buf[1024], *filename, *dummy_ptr;
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
   FILE *fin;
-  char header_txt[maxnrparsetlines][1000], *s_ptr, *txt[1000], dummy_string[1000], dummy_string2[1000];
+  char header_txt[maxnrparsetlines][1001], *s_ptr, *txt[maxnrparsetlines], dummy_string[1000], dummy_string2[1000];
   int channellist[1000];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
@@ -1123,6 +1372,7 @@ int main( int argc, char **argv )
   application.switch_verbose = 1;
   readparset = 0;
   nrbits = 8;
+  subbandnr = 0;
 
   cleanPRSData(&subintdata);
 
@@ -1165,6 +1415,9 @@ int main( int argc, char **argv )
 	clipav = 1;
       }else if(strcmp(argv[i], "-CS") == 0) {
 	is_CS = 1;
+      }else if(strcmp(argv[i], "-H") == 0) {
+	puts("Enable H5 format.");
+	is_H5 = 1;
       }else if(strcmp(argv[i], "-append") == 0) {
 	is_append = 1;
       }else if(strcmp(argv[i], "-o") == 0) {
@@ -1215,6 +1468,7 @@ int main( int argc, char **argv )
     }
   }
 
+
   if(applicationFilenameList_checkConsecutive(argv) == 0) {
     return 0;
   }
@@ -1222,6 +1476,7 @@ int main( int argc, char **argv )
     fprintf(stderr, "2bf2fits: No input files specified\n");
     return 0;
   }
+
 
   lofreq = 0;
   if(readparset) {
@@ -1240,7 +1495,7 @@ int main( int argc, char **argv )
 	nrlines++;
       else
 	ret = 1;
-      if(nrlines >= maxnrparsetlines) {
+      if(nrlines >= maxnrparsetlines-1) {
 	fprintf(stderr, "2bf2fits: Too many lines in parset file\n");
 	return 0;
       }
@@ -1306,8 +1561,6 @@ int main( int argc, char **argv )
       return 0;     
     }
 
-
-
     s_ptr = get_ptr_entry("Observation.sampleClock", txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(clockparam));
@@ -1356,7 +1609,7 @@ int main( int argc, char **argv )
     subbandFirst = channellist[0];
 
     nsubbands = 512;
- 
+  
 
     printf("This is a %s obs at %f MHz (clock=%d subbandFirst=%d totalnrchannels=%d)\n", subintdata.instrument, lowerBandFreq, clockparam, subbandFirst, totalnrchannels);
     if (lowerBandFreq < 150.0 && lowerBandFreq > 100.0 && clockparam == 200) {
@@ -1410,7 +1663,8 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     printf("start=%d-%d-%d %d:%d:%d (%s %f)\n", y, m, d, hour, min, sec, s_ptr, subintdata.mjd);
     /*Observation.startTime = '2010-05-12 08:58:25' */
 
-  }
+  }  /* End of read parset */
+
 
   if (is_CS == 1) printf ("CS data: %d subbands\n", SUBBANDS);
   if (is_append == 1) printf ("IS data: append mode (%d subbands), single output file will be written\n", SUBBANDS);
@@ -1420,8 +1674,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
 
   subintdata.NrBins = SAMPLES;
-  if (is_CS == 0 && is_append == 0) subintdata.nrFreqChan = CHANNELS;
-   else subintdata.nrFreqChan = CHANNELS * SUBBANDS;
+  if ((is_CS == 0 && is_append == 0) || is_H5) 
+    subintdata.nrFreqChan = CHANNELS;
+  else 
+    subintdata.nrFreqChan = CHANNELS * SUBBANDS;
   subintdata.NrPols = 1;
   subintdata.NrBits = nrbits;
   subintdata.SampTime = SAMPLEDURATION;
@@ -1519,24 +1775,41 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   if (is_append == 0) {
   /* open files */
   char *sbpointer;
+  long subbandnr_h5, subbandnr_h5_first, subbandnr_h5_last;
+  if(is_H5) {
+    subbandnr_h5_first = 0;
+    subbandnr_h5_last = SUBBANDS - 1;
+  }else {
+    subbandnr_h5_first = 0;  /* Ignore loop if not H5 */
+    subbandnr_h5_last = 0;
+  }
+  fprintf(stderr, "Going to process subbands %ld to %ld\n", subbandnr_h5_first, subbandnr_h5_last);
   for( b = 0; b < BEAMS; b++ ) {
-
    /* loop over input files */
     while((filename = getNextFilenameFromList(&application, argv)) != NULL) {
       printf("Processing %s\n", filename);
+      for(subbandnr_h5 = subbandnr_h5_first; subbandnr_h5 <= subbandnr_h5_last; subbandnr_h5++) {
 
-      if (is_CS == 0) { // IS data
+      if(is_H5) {
+	subintdata.freq_cent = (double) lofreq + subbandnr_h5 * subintdata.bw;
+      }else if (is_CS == 0) { // IS data
          sbpointer = strstr (filename, "_SB");
          sscanf(sbpointer, "%*3c%d", &subbandnr);
          subintdata.freq_cent = (double) lofreq + subbandnr * subintdata.bw;
       } else { // CS data
 	subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
       }
-      printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
-
+      if(is_H5)
+	printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
+      else
+	printf("  This is subband number %ld at centre frequency %f MHz\n", subbandnr_h5, subintdata.freq_cent);
       /* create names */
-      if (is_CS == 0) sprintf( buf, "%s.sub%04d", OUTNAME, subbandnr);
-       else sprintf( buf, "%s.fits", OUTNAME);
+      if (is_CS == 0) 
+	sprintf( buf, "%s.sub%04d", OUTNAME, subbandnr);
+      else if(is_H5)
+	sprintf( buf, "%s.sub%04ld", OUTNAME, subbandnr_h5);
+      else 
+	sprintf( buf, "%s.fits", OUTNAME);
       if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
       fprintf(stderr,"  %s -> %s\n", filename, buf); 
 
@@ -1546,12 +1819,19 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	fprintf(stderr, "2bf2fits: Cannot open input file\n");
 	return 0;
       }
-      if (is_CS == 0)
-        if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+      if (is_CS == 0) {
+	if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	  return 0;
-      if (is_CS == 1)
-        if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
-	  return 0;
+      }
+      if (is_CS == 1) {
+        if(is_H5) {
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	    return 0;
+	}else {
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	    return 0;
+	}
+      }
       if(application.verbose) printf("  File contains sequence numbers %d - %d\n", firstseq, lastseq);
 
       /* Copy header parameters to output header */
@@ -1569,17 +1849,25 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	return 0;
 
       /* convert */
-      if (is_CS == 0)
-         if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+      if (is_CS == 0) {
+	if(convert_nocollapse(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	  return 0;
+      }
+      if (is_CS == 1) {
+	if(is_H5 == 0) {
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	    return 0;
-      if (is_CS == 1)
-         if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	}else {
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	    return 0;
+	}
+      }
 
       fclose(fin);
       closePSRData(&fout);
-    }
-  }
+      }// Subband_h5 loop
+    } //  Input filename loop
+  }   // BEAMS loop
   } // if (is_append == 0)
 
   closePSRData(&subintdata);
