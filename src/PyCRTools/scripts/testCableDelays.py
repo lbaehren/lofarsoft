@@ -25,20 +25,12 @@ print '**********'
 
 antid = []
 cabledelays = []
-
+timestamps = []
 cabledelays_database = dict()
 
 for eventdir in eventlist:
     
     print "Processing event in directory:",eventdir
-    par={}
-#    antid={0:[],1:[]}
-#    signal={0:[],1:[]}
-#    positions={0:[],1:[]}
-#    positions2={0:[],1:[]}
-#    ndipoles={0:0,1:0}
-#    timelags={0:[],1:[]}
-#    cabledelays = {0:[], 1:[]}
     datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
     print eventdir
     print datadirs
@@ -52,21 +44,62 @@ for eventdir in eventlist:
         res = res["results"]
         pol = res["polarization"]
         antid.extend([str(int(v)) for v in res["antennas"].values()])
+        # check: same ordering for ant-id's and cable delays??? Relying on that.
         cabledelays.extend(res["antennas_final_cable_delays"])  # make that 'total' cable delays, and have also 'residual' delays      
         # use antenna id as key in the database
+        timelist = [res["TIME"]] * len(res["antennas"])
+        timestamps.extend(timelist)
         
 count = dict()
 for i in range(len(antid)):
-    if antid[i] in cabledelays_database.keys():
-        cabledelays_database[antid[i]] += cabledelays[i]
-        count[antid[i]] += 1
-    else:
-        cabledelays_database[antid[i]] = cabledelays[i]
-        count[antid[i]] = 1
+    if not antid[i] in cabledelays_database.keys():
+        cabledelays_database[antid[i]] = dict(cabledelay = 0.0, spread = 0.0, delaylist = [], timelist = [])
+#    cabledelays_database[antid[i]] += cabledelays[i]
+#    count[antid[i]] += 1
+    cabledelays_database[antid[i]]["delaylist"].extend([cabledelays[i]])
+    cabledelays_database[antid[i]]["timelist"].extend([timestamps[i]])
+#    count[antid[i]] = 1
 
-for key in cabledelays_database.keys():
-    cabledelays_database[key] /= count[key]
+for key in cabledelays_database:
+    theseDelays = np.array(cabledelays_database[key]["delaylist"])
+    avg = theseDelays.mean()
+    spread = theseDelays.std()
+    
+    cabledelays_database[key]["cabledelay"] = avg
+    cabledelays_database[key]["spread"] = spread
 
 outfile = open(os.path.join(topdir, 'Cabledelays.pic'), 'wb')
 pickle.dump(cabledelays_database, outfile)
 outfile.close()
+
+# now plot cable delays (quick fix for 3 events)
+x = np.zeros((len(cabledelays_database), 3))
+for i in range(3):
+    x[:, i] = np.arange(len(cabledelays_database))
+
+y = np.zeros((len(cabledelays_database), 3))
+yerr = np.zeros(len(cabledelays_database))
+n=0
+for key in cabledelays_database:
+    thisAnt = cabledelays_database[key]
+#    y[n] = thisAnt["cabledelay"]
+    for k in range(len(thisAnt["delaylist"])):
+        y[n, k] = thisAnt["delaylist"][k]
+    yerr[n] = thisAnt["spread"]
+    n+=1
+    
+plt.scatter(x[:,0], y[:,0], c='b')
+plt.scatter(x[:,1], y[:,1], c='g')
+plt.scatter(x[:,2], y[:,2], c='r')
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
