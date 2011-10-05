@@ -34,6 +34,7 @@ class Op_outlist(Op):
             if not os.path.exists(img.basedir + '/misc/'): 
                 os.mkdir(img.basedir + '/misc/')
             self.write_opts(img, img.basedir + '/misc/')
+            self.save_opts(img, img.basedir + '/misc/')
 
 
     def write_bbs(self, img, dir):
@@ -95,7 +96,6 @@ class Op_outlist(Op):
         """ Writes input parameters to a text file."""
         import inspect
         import types
-        import numpy as N
         import mylogger
 
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
@@ -117,9 +117,18 @@ class Op_outlist(Op):
                                                            list)):
                       f.write('%-40s' % '    Value used')
                       f.write(repr(used)+'\n')
-
         f.close()
-              
+ 
+    def save_opts(self, img, dir):
+        """ Saves input parameters to a PyBDSM save file."""
+        import interface
+        import mylogger
+    
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
+        fname = 'parameters.sav'
+        mylog.info('Writing '+dir+fname)
+        interface.save_pars(img, dir+fname, quiet=True)
+             
 
 def ra2hhmmss(deg):
     """Convert RA coordinate (in degrees) to HH MM SS"""

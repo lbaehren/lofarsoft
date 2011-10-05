@@ -209,6 +209,7 @@ class Op_wavelet_atrous(Op):
         opts['savefits_normim'] = False
         opts['output_fbdsm'] = False
         opts['polarisation_do'] = False
+        opts['group_by_isl'] = img.opts.group_by_isl
 
         opts['flag_smallsrc'] = False
         opts['flag_minsnr'] = 0.5

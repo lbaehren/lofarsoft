@@ -24,7 +24,7 @@ class Op_shapelets(Op):
     
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Shapefit")
         global bar
-        bar = statusbar.StatusBar('Fitting islands with shapelets .......... : ', 0, img.nisl)
+        bar = statusbar.StatusBar('Decomposing islands into shapelets ...... : ', 0, img.nisl)
         if img.opts.shapelet_do:
             if img.opts.quiet == False:
                 bar.start()

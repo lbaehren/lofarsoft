@@ -24,6 +24,9 @@ change_log = """
 PyBDSM Change Log.
 -------------------------------------------------------------------------------
 
+2011/10/04 - Added option to force source grouping by island. Added saving of
+             parameters to a PyBDSM save file to Op_output.
+
 2011/09/21 - Fixed issue with shapelet centering failing: it now falls back to
              simple moment when this happens. Fixed issue with plotresults when
              shapelets are fit.

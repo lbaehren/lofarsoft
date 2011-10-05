@@ -115,7 +115,7 @@ def load_pars(filename):
     except:
         return None
         
-def save_pars(img, savefile=None):
+def save_pars(img, savefile=None, quiet=False):
     """Save parameters to a file.
     
     The save file is a "pickled" opts dictionary.
@@ -135,7 +135,8 @@ def save_pars(img, savefile=None):
     output = open(savefile, 'wb')
     pickle.dump(pars, output)
     output.close()
-    print "--> Saved parameters to file '" + savefile + "'."
+    if not quiet:
+        print "--> Saved parameters to file '" + savefile + "'."
 
 def list_pars(img, opts_list=None, banner=None, use_groups=True):
     """Lists all parameters for the Image object.
@@ -523,7 +524,7 @@ def round_list_of_tuples(val):
     valstr = '[' + ','.join(valstr_list_tot) + ']'  
     return valstr 
 
-def export_image(self, outfile=None, img_format='fits',
+def export_image(img, outfile=None, img_format='fits',
                  img_type='resid_gaus', incl_wavelet=True,
                  clobber=False):
     """Write an image to a file. Returns True if successful, False if not. 
@@ -548,13 +549,13 @@ def export_image(self, outfile=None, img_format='fits',
     import os
     import functions as func
 
-    if hasattr(self, 'ngaus') == False and 'gaus' in img_type:
+    if hasattr(img, 'ngaus') == False and 'gaus' in img_type:
         print 'Gaussians have not been fit. Please run process_image first.'
         return False    
-    elif self.opts.shapelet_do == False and 'shap' in img_type:
+    elif img.opts.shapelet_do == False and 'shap' in img_type:
         print 'Shapelets have not been fit. Please run process_image first.'
         return False    
-    elif hasattr(self, 'mean') == False:
+    elif hasattr(img, 'mean') == False:
         print 'Image has not been processed. Please run process_image first.'
         return False    
     format = img_format.lower()
@@ -566,7 +567,7 @@ def export_image(self, outfile=None, img_format='fits',
         return False 
     filename = outfile
     if filename == None or filename == '':
-        filename = self.imagename + '_' + img_type + '.' + format
+        filename = img.imagename + '_' + img_type + '.' + format
     if os.path.exists(filename) and clobber == False:
         print '\033[91mERROR\033[0m: File exists and clobber = False.'
         return False 
@@ -578,55 +579,55 @@ def export_image(self, outfile=None, img_format='fits',
     try:
         if img_type == 'ch0':
             func.write_image_to_file(use_io, filename,
-                                     self.ch0, self, bdir,
+                                     img.ch0, img, bdir,
                                      clobber=clobber)
         elif img_type == 'rms':
             func.write_image_to_file(use_io, filename,
-                                     self.rms, self, bdir,
+                                     img.rms, img, bdir,
                                      clobber=clobber)
         elif img_type == 'mean':
             func.write_image_to_file(use_io, filename,
-                                     self.mean, self, bdir,
+                                     img.mean, img, bdir,
                                      clobber=clobber)
         elif img_type == 'gaus_resid':
-            if hasattr(self, 'ngaus'):
-                if incl_wavelet and hasattr(self, 'atrous_gaussians'):
-                    im = self.resid_wavelets
+            if hasattr(img, 'ngaus'):
+                if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+                    im = img.resid_wavelets
                 else:
-                    im = self.resid_gaus
+                    im = img.resid_gaus
                 func.write_image_to_file(use_io, filename,
-                                         im, self, bdir,
+                                         im, img, bdir,
                                          clobber=clobber)
             else:
                 print 'Gaussians have not been fit. Please run '\
                     'process_image first.'
                 return False
         elif img_type == 'gaus_model':
-            if hasattr(self, 'ngaus'):
-                if incl_wavelet and hasattr(self, 'atrous_gaussians'):
-                    im = self.ch0 - self.resid_wavelets
+            if hasattr(img, 'ngaus'):
+                if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+                    im = img.ch0 - img.resid_wavelets
                 else:
-                    im = self.model_gaus
+                    im = img.model_gaus
                 func.write_image_to_file(use_io, filename,
-                                         im, self, bdir,
+                                         im, img, bdir,
                                          clobber=clobber)
             else:
                 print 'Gaussians have not been fit. Please run '\
                     'process_image first.'
                 return False
         elif img_type == 'shap_resid':
-            if hasattr(self, 'resid_shap') and self.opts.shapelet_do:
+            if hasattr(img, 'resid_shap') and img.opts.shapelet_do:
                 func.write_image_to_file(use_io, filename,
-                                         self.resid_shap, self, bdir,
+                                         img.resid_shap, img, bdir,
                                          clobber=clobber)
             else:
                 print 'Image has not been decomposed in shapelets. '\
                     'Please run process_image first.'
                 return False
         elif img_type == 'shap_model':
-            if hasattr(self, 'model_shap') and self.opts.shapelet_do:
+            if hasattr(img, 'model_shap') and img.opts.shapelet_do:
                 func.write_image_to_file(use_io, filename,
-                                         self.model_shap, self, bdir,
+                                         img.model_shap, img, bdir,
                                          clobber=clobber)
             else:
                 print 'Image has not been decomposed in shapelets. '\
@@ -641,7 +642,7 @@ def export_image(self, outfile=None, img_format='fits',
         print '\033[91mERROR\033[0m: File ' + filename + ' could not be written.'
         raise
 
-def write_gaul(self, outfile=None, format='bbs', srcroot=None,
+def write_gaul(img, outfile=None, format='bbs', srcroot=None,
                bbs_patches=None, incl_wavelet=True, clobber=False):
     """Write the Gaussian list to a file. Returns True if successful, 
     False if not. 
@@ -673,7 +674,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
     # write_catalog(), that can also handle source lists and shapelets
     import output
     
-    if hasattr(self, 'ngaus')==False:
+    if hasattr(img, 'ngaus')==False:
         print 'Gaussians have not been fit. Please run process_image first.'
         return False      
     format = format.lower()
@@ -690,12 +691,12 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
         print '\033[91mERROR\033[0m: patch must be None, '\
             '"gaussian", "source", or "single"'
         return False
-    if self.ngaus == 0:
+    if img.ngaus == 0:
         print 'No Gaussians were fit to image. Output file not written.'
         return False 
     if filename == '': filename = None
     if format == 'fits':
-        filename = output.write_fits_gaul(self, filename=filename,
+        filename = output.write_fits_gaul(img, filename=filename,
                                              incl_wavelet=incl_wavelet,
                                              clobber=clobber)
         if filename == None:
@@ -705,7 +706,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote FITS file ' + repr(filename)
             return True
     if format == 'ascii':
-        filename = output.write_ascii_gaul(self, filename=filename,
+        filename = output.write_ascii_gaul(img, filename=filename,
                                               incl_wavelet=incl_wavelet,
                                               sort_by='index',
                                               clobber=clobber)
@@ -716,7 +717,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote ascii file ' + repr(filename)
             return True
     if format == 'bbs':
-        filename = output.write_bbs_gaul(self, filename=filename,
+        filename = output.write_bbs_gaul(img, filename=filename,
                                             srcroot=srcroot,
                                             patch=patch,
                                             incl_wavelet=incl_wavelet,
@@ -729,7 +730,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote BBS sky model ' + repr(filename)
             return True
     if format == 'ds9':
-        filename = output.write_ds9_gaul(self, filename=filename,
+        filename = output.write_ds9_gaul(img, filename=filename,
                                             srcroot=srcroot,
                                             incl_wavelet=incl_wavelet,
                                             clobber=clobber)
@@ -740,7 +741,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote ds9 region file ' + repr(filename)
             return True
     if format == 'star':
-        filename = output.write_star(self, filename=filename,
+        filename = output.write_star(img, filename=filename,
                                         incl_wavelet=incl_wavelet,
                                         clobber=clobber)
         if filename == None:
@@ -750,7 +751,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote AIPS STAR file ' + repr(filename)
             return True
     if format == 'kvis':
-        filename = output.write_kvis_ann(self, filename=filename,
+        filename = output.write_kvis_ann(img, filename=filename,
                                             incl_wavelet=incl_wavelet,
                                             clobber=clobber)
         if filename == None:
@@ -760,7 +761,7 @@ def write_gaul(self, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote kvis file ' + repr(filename)
             return True
     # if format == 'casabox':
-    #     filename = output.write_casa_gaul(self, filename=filename,
+    #     filename = output.write_casa_gaul(img, filename=filename,
     #                                   incl_wavelet=incl_wavelet,
     #                                   clobber=clobber)
     #     if filename == None:

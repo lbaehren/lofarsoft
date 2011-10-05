@@ -232,8 +232,13 @@ class Op_gaul2srl(Op):
 
             return same_island
 
-        same_isl1_min, same_isl1_cont = same_island_min(pair, g_list, subim, delc)
-        same_isl2 = same_island_dist(pair, g_list)
+        if img.opts.group_by_isl:
+            same_isl1_min = True
+            same_isl1_cont = True
+            same_isl2 = True
+        else:
+            same_isl1_min, same_isl1_cont = same_island_min(pair, g_list, subim, delc)
+            same_isl2 = same_island_dist(pair, g_list)
 
         g1 = g_list[pair[0]]
 

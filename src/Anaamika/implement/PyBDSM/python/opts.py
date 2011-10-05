@@ -396,6 +396,18 @@ class Opts(object):
     stop_at         =   Enum(None, 'isl', 'fit', 'resid',
                              doc="Stops after step if 'isl' or 'fit' or 'resid'",
                              group="advanced_opts")
+    group_by_isl    =   Bool(False,
+                             doc="Group all Gaussians in each island into a single "\
+                                 "source\n"\
+                                 "If True, all Gaussians in the island belong to a "\
+                                 "single source. If False, sources are created by "\
+                                 "grouping nearby Gaussians as follows: (1) If the minimum "\
+                                 "value between two Gaussians in an island is more than "\
+                                 "thresh_isl * rms_clip, "\
+                                 "and (2) if the centres are seperated by a distance less "\
+                                 "than half the sum of their fwhms along the PA of the "\
+                                 "line joining them, they belong to the same island.",
+                             group="advanced_opts")
 
 
     
