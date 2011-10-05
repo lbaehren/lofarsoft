@@ -243,7 +243,7 @@ class Opts(object):
                                  "chosen.")
     thresh_isl      =  Float(3,
                              doc="Threshold for the island boundary in number of sigma "\
-                                 "above the mean.\n"\
+                                 "above the mean. Determines extent of island used for fitting.\n"\
                                  "This parameter determines the region to which fitting "\
                                  "is done. A higher value will produce smaller islands, "\
                                  "and hence smaller regions that are considered in the "\
@@ -258,7 +258,8 @@ class Opts(object):
                                  "and rms_map parameters to control the way "\
                                  "the mean and rms are determined.")
     thresh_pix      =  Float(5,
-                             doc="Threshold for the island peak in number of sigma "\
+                             doc="Source detection threshold: threshold for the "\
+                                 "island peak in number of sigma "\
                                  "above the mean. If "\
                                  "false detection rate thresholding is used, "\
                                  "this value is ignored and thresh_pix is "\
