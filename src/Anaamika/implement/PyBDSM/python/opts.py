@@ -243,7 +243,15 @@ class Opts(object):
                                  "chosen.")
     thresh_isl      =  Float(3,
                              doc="Threshold for the island boundary in number of sigma "\
-                                 "above the mean.\nOnly islands "\
+                                 "above the mean.\n"\
+                                 "This parameter determines the region to which fitting "\
+                                 "is done. A higher value will produce smaller islands, "\
+                                 "and hence smaller regions that are considered in the "\
+                                 "fits. A lower value will produce larger islands. "\
+                                 "Use the thresh_pix parameter to set the detection "
+                                 "threshold for sources. Generally, thresh_isl should "\
+                                 "be lower than thresh_pix.\n"
+                                 "Only regions "\
                                  "above the absolute threshold will be used. "\
                                  "The absolute threshold is calculated as abs_thr = "\
                                  "mean + thresh_isl * rms. Use the mean_map "\
@@ -254,7 +262,14 @@ class Opts(object):
                                  "above the mean. If "\
                                  "false detection rate thresholding is used, "\
                                  "this value is ignored and thresh_pix is "\
-                                 "calculated inside the program.\nOnly islands "\
+                                 "calculated inside the program.\n"\
+                                 "This parameter sets the overall detection threshold "\
+                                 "for islands (i.e. thresh_pix = 5 will find all sources "\
+                                 "with peak fluxes of 5-sigma or greater). Use the "\
+                                 "thresh_isl parameter to control how much of each island "\
+                                 "is used in fitting. Generally, thresh_pix should be larger "\
+                                 "than thresh_isl.\n"
+                                 "Only islands "\
                                  "with peaks above the absolute threshold will be used. "\
                                  "The absolute threshold is calculated as abs_thr = "\
                                  "mean + thresh_pix * rms. Use the mean_map "\
