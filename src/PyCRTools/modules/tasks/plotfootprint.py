@@ -30,10 +30,7 @@ def gatherresults(filefilter,pol,excludelist):
         positions2={0:[],1:[]}
         ndipoles={0:0,1:0}
         timelags={0:[],1:[]}
-
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
-
-
 
         for datadir in datadirs:
             if not os.path.isfile(os.path.join(datadir,"results.py")):
@@ -47,7 +44,6 @@ def gatherresults(filefilter,pol,excludelist):
             res=res["results"]
             antid[res["polarization"]].extend([int(v) for v in res["antennas"].values()])
             positions2[res["polarization"]].extend(res["antenna_positions_ITRF_m"])
-
             signal[res["polarization"]].extend(res["pulses_maxima_y"])
             ndipoles[res["polarization"]]+=res["ndipoles"]
             if not "BLOCKSIZE" in res.keys():
@@ -94,6 +90,7 @@ def gatherresults(filefilter,pol,excludelist):
 #par["loracolor"]="time"
     par["title"]="Footprint of CR event "+res["FILENAME"].split('-')[1]
     par["names"]=[str(a)[:-6]+","+str(a)[-3:] for a in antid]
+    par["antid"] = cr.hArray(antid[pol])
     return par
 
 def obtainvalue(par,key):
@@ -108,6 +105,7 @@ def obtainvalue(par,key):
         lorapower=100,
         lorapositions=None,
         arrivaltime='b',
+        antid=None,
         loradirection=None,
         names=False
     )
@@ -161,6 +159,7 @@ class plotfootprint(tasks.Task):
         normalize_colors={default:False,doc:"Normalize the colors to run from 0-1."},
         power=p_(lambda self:obtainvalue(self.results,"power"),doc="hArray of dimension [NAnt] with the values for the power of each lofar antenna. This gives the sizes of the plot"),
         arrivaltime=p_(lambda self:obtainvalue(self.results,"arrivaltime"),doc="hArray of dimension [NAnt] with the values of relative peak arrival time. This gives the colors of the plot"),
+        antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
         names=p_(lambda self:obtainvalue(self.results,"names"),doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
         plotnames={default:False,doc:"plot names of dipoles"},
         title=p_(lambda self:obtainvalue(self.results,"title"),doc="Title for the plot (e.g., event or filename)"),
