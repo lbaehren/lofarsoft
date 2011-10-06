@@ -123,13 +123,13 @@ def _run_op_list(img, chain):
 
     if img.opts.interactive:
         print dc + 'Fitting complete. Displaying results...' + nc
-        if img.shapelet_do:
+        if img.opts.shapelet_do:
             show_smod = True
             show_sres = True
         else:
             show_smod = False
             show_sres = False
-        if img.spectraindex_do:
+        if img.opts.spectralindex_do:
             show_spec = True
         else:
             show_spec = False
