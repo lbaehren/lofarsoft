@@ -20,30 +20,32 @@ __revision__ = filter(str.isdigit, "$Revision$")
 
 
 # Change log
-change_log = """
-PyBDSM Change Log.
--------------------------------------------------------------------------------
-
-2011/10/05 - Added output of source lists. Changed name of write_gaul method to 
-             write_catalog (more general).
-             
-2011/10/04 - Added option to force source grouping by island. Added saving of
-             parameters to a PyBDSM save file to Op_output.
-
-2011/09/21 - Fixed issue with shapelet centering failing: it now falls back to
-             simple moment when this happens. Fixed issue with plotresults when
-             shapelets are fit.
-             
-2011/09/14 - Placed output column names and units in TC properties of Gaussians.
-             This allows easy standardization of the column names and units.
-             
-2011/09/13 - Fixes to trim_box and resetting of Image objects in interface.process().
-             Changed thr1 --> thr2 in fit_iter in guasfit.py, as bright sources
-             are often "overfit" when using thr1, leading to large negative
-             residuals. Restricted fitting of Gaussians to wavelet images to be only
-             in islands found in the original image if opts.atrous_orig_isl is True. 
-
-2011/09/08 - Versioning system changed to use _version.py
-
-"""
-
+def changelog():
+    """
+    PyBDSM Change Log.
+    -------------------------------------------------------------------------------
+    
+    2011/10/05 - Added output of source lists. Changed name of write_gaul method to 
+                 write_catalog (more general).
+                 
+    2011/10/04 - Added option to force source grouping by island (group_by_isl). 
+                 Added saving of parameters to a PyBDSM save file to Op_output.
+    
+    2011/09/21 - Fixed issue with shapelet centering failing: it now falls back to
+                 simple moment when this happens. Fixed issue with plotresults when
+                 shapelets are fit.
+                 
+    2011/09/14 - Placed output column names and units in TC properties of Gaussians.
+                 This allows easy standardization of the column names and units.
+                 
+    2011/09/13 - Fixes to trim_box and resetting of Image objects in interface.process().
+                 Changed thr1 --> thr2 in fit_iter in guasfit.py, as bright sources
+                 are often "overfit" when using thr1, leading to large negative
+                 residuals. Restricted fitting of Gaussians to wavelet images to be only
+                 in islands found in the original image if opts.atrous_orig_isl is True. 
+    
+    2011/09/08 - Versioning system changed to use _version.py
+    
+    """
+    pass
+    

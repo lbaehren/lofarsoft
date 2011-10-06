@@ -673,7 +673,7 @@ def _opts_completer(self, event):
             # User has not started to enter a string:
             # Match to commands + tasks only
             cmds = ['process_image', 'write_catalog', 'export_image', 'show_fit',
-                    'go', 'inp', 'tget', 'tput', 'default']
+                    'go', 'inp', 'tget', 'tput', 'default', 'changelog']
             return cmds
     else:
         # Match to parameter, task, and command names only
@@ -693,7 +693,7 @@ def _opts_completer(self, event):
         return opts
 
 # Define the welcome banner to print on startup
-from bdsm._version import __version__, __revision__
+from bdsm._version import __version__, __revision__, changelog
 divider1 = '=' * 72 + '\n'
 divider2 = '_' * 72 + '\n'
 banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + \
@@ -715,6 +715,7 @@ banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + \
 '  help command/task ... : Get help on a command or task\n'\
 '                          (e.g., help process_image)\n'\
 "  help 'par' .......... : Get help on a parameter (e.g., help 'rms_box')\n"\
+'  help changelog ...... : See list of recent changes\n'\
 + divider2
 
 # Go ahead and set the current task to process_image, so that the user does not
