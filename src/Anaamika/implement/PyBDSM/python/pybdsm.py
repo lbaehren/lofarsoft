@@ -39,6 +39,9 @@ def inp(cur_cmd=None):
     if not success:
         return
     if cur_cmd != None:
+        if cur_cmd == write_gaul:
+            print 'This task has been deprecated. Please use "write_catalog" instead.'
+            return
         if not hasattr(cur_cmd, 'arg_list'):
             print '\033[31;1mERROR\033[0m: not a valid task'
             return
@@ -399,14 +402,15 @@ show_fit.arg_list = ['ch0_image', 'rms_image', 'mean_image', 'ch0_islands',
 show_fit.use_groups = False
 
     
-def write_gaul(**kwargs):
-    """Write the Gaussian list to a file.
+def write_catalog(**kwargs):
+    """Write the Gaussian, source, or shapelet list to a file.
 
-    The Gaussian list can be written in a number of formats. The information
+    The lists can be written in a number of formats. The information
     included in the output file varies with the format used. Use
     "help 'format'" for more information.
 
-    Parameters: outfile, format, srcroot, bbs_patches, incl_wavelet, clobber
+    Parameters: outfile, format, srcroot, bbs_patches, incl_wavelet, clobber,
+                catalog_type
 
     For more information about a parameter, use help.  E.g.,
       > help 'bbs_patches'
@@ -468,21 +472,27 @@ def write_gaul(**kwargs):
     success = _set_pars_from_prompt()
     if not success:
         return
-    img_kwargs = _get_task_kwargs(write_gaul)
+    img_kwargs = _get_task_kwargs(write_catalog)
     for k in kwargs:
         # If user enters an argument, use it instead of
         # that in _img
         img_kwargs[k] = kwargs[k]
     try:
-        success = _img.write_gaul(**img_kwargs)
+        success = _img.write_catalog(**img_kwargs)
         if success:
             tput(quiet=True)
     except KeyboardInterrupt:
         print "\n\033[31;1mAborted\033[0m"
 
-write_gaul.arg_list = ['bbs_patches', 'format', 'outfile', 'srcroot',
-                       'incl_wavelet', 'clobber']
-write_gaul.use_groups = False
+write_catalog.arg_list = ['bbs_patches', 'format', 'outfile', 'srcroot',
+                       'incl_wavelet', 'clobber', 'catalog_type']
+write_catalog.use_groups = False
+
+
+def write_gaul():
+    """Deprecated version of write_catalog"""
+    print 'This task has been deprecated. Please use "write_catalog" instead.'
+    return
 
 
 def export_image(**kwargs):
@@ -637,7 +647,7 @@ def _opts_completer(self, event):
         return par_vals
     elif cmd1 == 'inp' or cmd1 == 'go':
         # Match task names only
-        cmds = ['process_image', 'write_gaul', 'export_image', 'show_fit']
+        cmds = ['process_image', 'write_catalog', 'export_image', 'show_fit']
         return cmds
     elif cmd1 == 'cd' or cmd1 == 'tput' or cmd1 == 'tget':
         # Match to files in current directory (force use of ' or " with
@@ -662,7 +672,7 @@ def _opts_completer(self, event):
         else:
             # User has not started to enter a string:
             # Match to commands + tasks only
-            cmds = ['process_image', 'write_gaul', 'export_image', 'show_fit',
+            cmds = ['process_image', 'write_catalog', 'export_image', 'show_fit',
                     'go', 'inp', 'tget', 'tput', 'default']
             return cmds
     else:
@@ -678,7 +688,7 @@ def _opts_completer(self, event):
         # Add task names
         opts.append('process_image')
         opts.append('show_fit')
-        opts.append('write_gaul')
+        opts.append('write_catalog')
         opts.append('export_image')
         return opts
 
@@ -699,7 +709,7 @@ banner = '\nPyBDSM version ' + __version__ + ' (LUS revision ' + \
 'PyBDSM tasks\n'\
 '  process_image ....... : Process an image: find sources, etc.\n'\
 '  show_fit ............ : Show the results of a fit\n'\
-'  write_gaul .......... : Write out list of sources to a file\n'\
+'  write_catalog ....... : Write out list of sources to a file\n'\
 '  export_image ........ : Write residual/model/rms/mean image to a file\n'\
 'PyBDSM help\n'\
 '  help command/task ... : Get help on a command or task\n'\

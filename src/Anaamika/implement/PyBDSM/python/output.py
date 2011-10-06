@@ -27,10 +27,12 @@ class Op_outlist(Op):
                 os.mkdir(dir)
             self.write_bbs(img, dir)
             self.write_gaul(img, dir)
+            self.write_srl(img, dir)
             self.write_aips(img, dir)
             self.write_kvis(img, dir)
             self.write_ds9(img, dir)
             self.write_gaul_FITS(img, dir)
+            self.write_srl_FITS(img, dir)
             if not os.path.exists(img.basedir + '/misc/'): 
                 os.mkdir(img.basedir + '/misc/')
             self.write_opts(img, img.basedir + '/misc/')
@@ -65,8 +67,14 @@ class Op_outlist(Op):
     def write_gaul(self, img, dir):
         """ Writes the gaussian list as an ASCII file"""            
         fname = dir + img.imagename + '.gaul'
-        write_ascii_gaul(img, filename=fname, incl_wavelet=True, sort_by='indx',
-                         clobber=True)
+        write_ascii_list(img, filename=fname, incl_wavelet=True, sort_by='indx',
+                         clobber=True, objtype='gaul')
+
+    def write_srl(self, img, dir):
+        """ Writes the source list as an ASCII file"""            
+        fname = dir + img.imagename + '.srl'
+        write_ascii_list(img, filename=fname, incl_wavelet=True, sort_by='indx',
+                         clobber=True, objtype='srl')
 
     def write_aips(self, img, dir):
         """ Writes the gaussian list an AIPS STAR file"""            
@@ -89,8 +97,14 @@ class Op_outlist(Op):
     def write_gaul_FITS(self, img, dir, incl_wavelet=True):
         """ Writes the gaussian list as FITS binary table"""
         fname = dir + img.imagename+'.gaul.FITS'
-        write_fits_gaul(img, filename=fname, sort_by='indx', incl_wavelet=True,
-                        clobber=True)
+        write_fits_list(img, filename=fname, sort_by='indx', incl_wavelet=True,
+                        clobber=True, objtype='gaul')
+                    
+    def write_srl_FITS(self, img, dir, incl_wavelet=True):
+        """ Writes the source list as FITS binary table"""
+        fname = dir + img.imagename+'.srl.FITS'
+        write_fits_list(img, filename=fname, sort_by='indx', incl_wavelet=True,
+                        clobber=True, objtype='srl')
                     
     def write_opts(self, img, dir):
         """ Writes input parameters to a text file."""
@@ -213,7 +227,6 @@ def pybdsm2fbdsm(img, incl_wavelet=True):
                  specin, especin, src_idx, blc[0], blc[1], trc[0], trc[1], grms]
         fbdsm.append(list1)
     fbdsm = func.trans_gaul(fbdsm)
-
     return fbdsm
 
 
@@ -296,22 +309,28 @@ def write_ds9_gaul(img, filename=None, srcroot=None, deconvolve=False,
     return filename
 
         
-def write_ascii_gaul(img, filename=None, incl_wavelet=True, sort_by='indx',
-                     clobber=False):
+def write_ascii_list(img, filename=None, incl_wavelet=True, sort_by='indx',
+                     clobber=False, objtype='gaul'):
     """Writes Gaussian list to an ASCII file"""
     import mylogger
     import os
 
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
-    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                            wavelet=True,
-                                                            sort_by=sort_by)
-        outl += wavoutl
-    outstr_list = make_ascii_str(img, outl)
+    if objtype == 'gaul':
+        outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+            wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                                wavelet=True,
+                                                                sort_by=sort_by)
+            outl += wavoutl
+    elif objtype == 'srl':
+        outl = [img.source]
+    outstr_list = make_ascii_str(img, outl, objtype=objtype)
     if filename == None:
-        filename = img.imagename + '.gaul'
+        if objtype == 'gaul':
+            filename = img.imagename + '.gaul'
+        elif objtype == 'srl':
+            filename = img.imagename + '.srl'
     if os.path.exists(filename) and clobber == False:
         return None
     mylog.info('Writing ' + filename)
@@ -346,11 +365,9 @@ def write_casa_gaul(img, filename=None, incl_wavelet=True, clobber=False):
     return filename
 
 
-def write_fits_gaul(img, filename=None, sort_by='indx',
+def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
                     incl_wavelet=True, clobber=False):
     """ Write as FITS binary table.
-
-    incl_wavelet not yet implemented.
     """
     import mylogger
     import pyfits
@@ -359,14 +376,18 @@ def write_fits_gaul(img, filename=None, sort_by='indx',
     from _version import __version__, __revision__
 
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
-    outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                            wavelet=True,
-                                                            sort_by=sort_by)
-        outl += wavoutl
-    cvals, cnames, cformats, cunits = make_gaul_columns(outl[0][0], fits=True)
-    out_list = make_fits_list(img, outl)
+    if objtype == 'gaul':
+        outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
+        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+            wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                                wavelet=True,
+                                                                sort_by=sort_by)
+            outl += wavoutl
+    elif objtype == 'srl':
+        outl = [img.source]
+    cvals, cnames, cformats, cunits = make_output_columns(outl[0][0], fits=True,
+                                                          objtype=objtype)
+    out_list = make_fits_list(img, outl, objtype=objtype)
     col_list = []
     for ind, col in enumerate(out_list):
       list1 = pyfits.Column(name=cnames[ind], format=cformats[ind],
@@ -599,7 +620,7 @@ def make_ds9_str(img, glist, gnames, deconvolve=False):
     return outstr_list
 
 
-def make_ascii_str(img, glist):
+def make_ascii_str(img, glist, objtype='gaul'):
     """Makes a list of string entries for an ascii region file."""
     from _version import __version__, __revision__
     outstr_list = []
@@ -608,14 +629,18 @@ def make_ascii_str(img, glist):
     else:
         freq = "%.5e" % img.cfreq
 
-    outstr_list.append('# Gaussian list for '+img.filename+'\n')
+    if objtype == 'gaul':
+        outstr_list.append('# Gaussian list for '+img.filename+'\n')
+    elif objtype == 'srl':
+        outstr_list.append('# Source list for '+img.filename+'\n')
     outstr_list.append('# Generated by PyBDSM version %s (LUS revision %s)\n' 
                        % (__version__, __revision__))
     outstr_list.append('# Reference frequency : %s Hz\n' % freq)
     outstr_list.append('# Equinox : %s \n\n' % img.equinox)
     val_list = []
     for i, g in enumerate(glist[0]):
-        cvals, cnames, cformats, cunits = make_gaul_columns(g, fits=False)
+        cvals, cnames, cformats, cunits = make_output_columns(g, fits=False, 
+                                                              objtype=objtype)
         cformats[-1] += "\n"
         if i == 0:
             outstr_list.append("# " + " ".join(cnames) + "\n")
@@ -623,12 +648,12 @@ def make_ascii_str(img, glist):
     return outstr_list
         
         
-def make_fits_list(img, glist):
+def make_fits_list(img, glist, objtype='gaul'):
     import functions as func
 
     out_list = []
     for g in glist[0]:
-        cvals, ext1, ext2, ext3 = make_gaul_columns(g, fits=True)
+        cvals, ext1, ext2, ext3 = make_output_columns(g, fits=True, objtype=objtype)
         out_list.append(cvals)
     out_list = func.trans_gaul(out_list)
     return out_list
@@ -827,30 +852,46 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
 
     return (outlist_sorted, outnames_sorted, patchnames_sorted)
 
-def make_gaul_columns(g, fits=False):
-    """Returns a list of column names, formats, and units for the Gaussian list"""
+def make_output_columns(obj, fits=False, objtype='gaul'):
+    """Returns a list of column names, formats, and units for Gaussian or Source"""
     
     # First, define a list of columns in order desired, using the names of
-    # the attributes of the Gaussian object
-    names = ['gaus_num', 'island_id', 'source_id', 'wavelet_j', 'total_flux', 
-             'total_fluxE', 'peak_flux', 'peak_fluxE', 'centre_sky', 'centre_skyE',
-             'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 'deconv_size_sky',
-             'deconv_size_skyE', 'rms', 'mean', 'code', 'spin1', 
-             'espin1', 'total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
-             'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
-             'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
-             'lpol_angle', 'lpol_angle_err']
+    # the attributes of the Gaussian or Source object
+    if objtype == 'gaul':
+        names = ['gaus_num', 'island_id', 'source_id', 'wavelet_j', 'total_flux', 
+                 'total_fluxE', 'peak_flux', 'peak_fluxE', 'centre_sky', 'centre_skyE',
+                 'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 'deconv_size_sky',
+                 'deconv_size_skyE', 'rms', 'mean', 'code', 'spin1', 
+                 'espin1', 'total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
+                 'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
+                 'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
+                 'lpol_angle', 'lpol_angle_err']
+    elif objtype == 'srl':
+        names = ['source_id', 'island_id', 'wavelet_j', 'total_flux', 
+                 'total_fluxE', 'peak_flux_centroid', 'peak_flux_centroidE', 
+                 'peak_flux_max', 'peak_flux_maxE', 'posn_sky_centroid', 
+                 'posn_sky_centroidE','posn_sky_max', 'posn_sky_maxE', 
+                 'posn_pix_centroid', 'posn_pix_centroidE', 'posn_pix_max', 'posn_pix_maxE',
+                 'size_sky', 'size_skyE', 'deconv_size_sky',
+                 'deconv_size_skyE', 'rms_isl', 'mean_isl', 'code', 'spin1', 
+                 'espin1', 'total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
+                 'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
+                 'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
+                 'lpol_angle', 'lpol_angle_err']
+    else:
+        print 'Object type unrecongnized.'
+        return None
     cnames = []
     cformats = []
     cunits = []
     cvals = []
     skip_next = False
     for n, name in enumerate(names):
-        if hasattr(g, name):
+        if hasattr(obj, name):
             if not skip_next:
-                val = g.__getattribute__(name)
-                colname = g.__class__.__dict__[name]._colname
-                units = g.__class__.__dict__[name]._units
+                val = obj.__getattribute__(name)
+                colname = obj.__class__.__dict__[name]._colname
+                units = obj.__class__.__dict__[name]._units
                 if units == None:
                     units = ' '
                 if isinstance(val, list):
@@ -858,9 +899,9 @@ def make_gaul_columns(g, fits=False):
                     # entry will have the errors, and they are interleaved to be
                     # in the order (val, error).
                     next_name = names[n+1]
-                    val_next = g.__getattribute__(next_name)
-                    colname_next = g.__class__.__dict__[next_name]._colname
-                    units_next = g.__class__.__dict__[next_name]._units
+                    val_next = obj.__getattribute__(next_name)
+                    colname_next = obj.__class__.__dict__[next_name]._colname
+                    units_next = obj.__class__.__dict__[next_name]._units
                     if units_next == None:
                         units_next = ' '                 
                     for i in range(len(val)):

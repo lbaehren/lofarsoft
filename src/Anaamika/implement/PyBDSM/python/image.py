@@ -101,13 +101,12 @@ class Image(object):
           import interface
           interface.export_image(self, **kwargs)
           
-    def write_gaul(self, **kwargs):
-        """Write the Gaussian list to a file"""
-        # Eventually, it would be good to replace this function with
-        # write_catalog(), that can also handle source lists and shapelets
+    def write_catalog(self, **kwargs):
+        """Write the Gaussian, source, or shapelet list to a file"""
         import interface
-        interface.write_gaul(self, **kwargs)
-
+        interface.write_catalog(self, **kwargs)
+    write_gaul = write_catalog # for legacy scripts
+    
     # Deprecated methods. As a temporary measure, until people are used to the new
     # interactive shell, check for deprecated methods:
     def showfit(self, **kwargs):
@@ -134,6 +133,11 @@ class Image(object):
         """Deprecated method!"""
         print 'The "write_ch0_img()" method has been replaced with "export_image()"'
         return
+#     def write_catalog(self, **kwargs):
+#         """Deprecated method!"""
+#         print 'The "write_gaul()" method has been replaced with "write_catalog()"'
+#         return
+
 
 class Op(object):
     """Common base class for all PyBDSM operations.

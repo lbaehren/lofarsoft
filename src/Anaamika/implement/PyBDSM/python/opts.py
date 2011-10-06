@@ -936,16 +936,17 @@ class Opts(object):
                              doc="Overwrite existing file?",
                              group='hidden')
     format          =   Enum('bbs', 'ds9', 'fits', 'ascii', 'star', 'kvis',
-                             doc="Format of output Gaussian list: 'bbs', "\
+                             doc="Format of output catalog: 'bbs', "\
                                  "'ds9', 'fits', 'star', 'kvis', or 'ascii'\n"\
                                  "The following formats are supported:\n"\
-                                 "'bbs' - BlackBoard Selfcal sky model format\n"\
-                                 "'ds9' - ds9 region format\n"\
+                                 "'bbs' - BlackBoard Selfcal sky model format "\
+                                 "(Gaussian list only)\n"\
+                                 "'ds9' - ds9 region format (Gaussian list only)\n"\
                                  "'fits' - FITS catalog format, readable by many "\
                                  "software packages, including IDL, TOPCAT, Python, "\
                                  "fv, Aladin, etc.\n"\
-                                 "'star' - AIPS STAR format\n"\
-                                 "'kvis' - kvis format\n"\
+                                 "'star' - AIPS STAR format (Gaussian list only)\n"\
+                                 "'kvis' - kvis format (Gaussian list only)\n"\
                                  "'ascii' - simple text file\n"\
                                  "Catalogues with the 'fits' and 'ascii' formats "\
                                  "include all available information (see headers "\
@@ -954,7 +955,7 @@ class Opts(object):
                                  "information.",
                              group='hidden')
     srcroot         = Option(None, String(),
-                             doc="Root name for entries in the output Gaussian list. "\
+                             doc="Root name for entries in the output catalog. "\
                                  "None => use image file name",
                              group='hidden')
     incl_wavelet    =   Bool(True,
@@ -965,7 +966,7 @@ class Opts(object):
                              doc="Type of catalog to write:  'gaul' - Gaussian "\
                                  "list catalog, 'srl' - source catalog (formed "\
                                  "by grouping Gaussians), 'shap' - shapelet "\
-                                 "catalog.",
+                                 "catalog (not yet supported).",
                              group='hidden')
     img_format      =   Enum('fits', 'casa',
                              doc="Format of output image: 'fits' or "\

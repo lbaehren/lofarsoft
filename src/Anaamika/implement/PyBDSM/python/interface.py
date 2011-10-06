@@ -642,20 +642,24 @@ def export_image(img, outfile=None, img_format='fits',
         print '\033[91mERROR\033[0m: File ' + filename + ' could not be written.'
         raise
 
-def write_gaul(img, outfile=None, format='bbs', srcroot=None,
+def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='gaul',
                bbs_patches=None, incl_wavelet=True, clobber=False):
-    """Write the Gaussian list to a file. Returns True if successful, 
-    False if not. 
+    """Write the Gaussian, source, or shapelet list to a file. Returns True if 
+    successful, False if not. 
 
     filename - name of resulting file; if None, file is
                named automatically.
+    catalog_type - type of catalog
+        "gaul"  - Gaussian list
+        "srl"   - Source list
+        "shap"  - Shapelet list (not yet supported)
     format - format of output list. Supported formats are:
         "fits"  - FITS binary table
         "ascii" - ASCII text file
-        "bbs"   - BBS sky model
-        "ds9"   - ds9 region file
-        "star"  - AIPS STAR file
-        "kvis"  - kvis file
+        "bbs"   - BBS sky model (Gaussian list only)
+        "ds9"   - ds9 region file (Gaussian list only)
+        "star"  - AIPS STAR file (Gaussian list only)
+        "kvis"  - kvis file (Gaussian list only)
     srcroot - root for source and patch names (BBS/ds9 only);
               if None, the srcroot is chosen automatically
     bbs_patches - type of patches to use:
@@ -663,15 +667,14 @@ def write_gaul(img, outfile=None, format='bbs', srcroot=None,
         "gaussian" - each Gaussian gets its own patch
         "single"   - all Gaussians are put into a single
                      patch
-        "source"   - sources are group by source into patches
-    incl_wavelet - Include Gaussians from wavelet decomposition?
+        "source"   - sources are grouped by source into patches
+    incl_wavelet - Include Gaussians from wavelet decomposition
+                   (Gaussian list only)?
     sort_by - Property to sort output list by:
         "flux" - sort by total integrated flux, largest first
-        "indx" - sort by Gaussian and island index, smallest first
+        "indx" - sort by Gaussian and island or source index, smallest first
     clobber - Overwrite existing file?
     """
-    # Eventually, it would be good to replace this function with
-    # write_catalog(), that can also handle source lists and shapelets
     import output
     
     if hasattr(img, 'ngaus')==False:
@@ -691,14 +694,18 @@ def write_gaul(img, outfile=None, format='bbs', srcroot=None,
         print '\033[91mERROR\033[0m: patch must be None, '\
             '"gaussian", "source", or "single"'
         return False
+    if (catalog_type in ['gaul', 'srl', 'shap']) == False:
+        print '\033[91mERROR\033[0m: catalog_type must be "gaul", '\
+              '"srl", or "shap"'
+        return False
     if img.ngaus == 0:
         print 'No Gaussians were fit to image. Output file not written.'
         return False 
     if filename == '': filename = None
     if format == 'fits':
-        filename = output.write_fits_gaul(img, filename=filename,
+        filename = output.write_fits_list(img, filename=filename,
                                              incl_wavelet=incl_wavelet,
-                                             clobber=clobber)
+                                             clobber=clobber, objtype=catalog_type)
         if filename == None:
             print '\033[91mERROR\033[0m: File exists and clobber = False.'
             return False
@@ -706,10 +713,10 @@ def write_gaul(img, outfile=None, format='bbs', srcroot=None,
             print '--> Wrote FITS file ' + repr(filename)
             return True
     if format == 'ascii':
-        filename = output.write_ascii_gaul(img, filename=filename,
+        filename = output.write_ascii_list(img, filename=filename,
                                               incl_wavelet=incl_wavelet,
                                               sort_by='index',
-                                              clobber=clobber)
+                                              clobber=clobber, objtype=catalog_type)
         if filename == None:
             print '\033[91mERROR\033[0m: File exists and clobber = False.'
             return False
@@ -768,4 +775,3 @@ def write_gaul(img, outfile=None, format='bbs', srcroot=None,
     #         print '\033[91mERROR\033[0m: File exists and clobber=False.'
     #     else:
     #         print '--> Wrote CASA clean box file ' + filename
-        
