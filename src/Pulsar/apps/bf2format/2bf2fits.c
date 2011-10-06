@@ -9,7 +9,8 @@
 #include "patricklib.h"
 #include "patricklib_lofar.c"
 
-#define maxnrparsetlines  3000
+#define parsetmaxnrlines     3000
+#define parsetmaxlinelength  1000
 
 /* NOTE: for old data sets (before PBW5) there is no 512 byte alignment,
  so "pad" needs to be ignored (line 82) and also the data does not need to 
@@ -49,7 +50,7 @@ char *get_ptr_entry(char *str, char **txt, int nrlines, char *separator);
 
 void usage(){
   puts("Just wanted to make sure the new version is picked up.");
-  puts("Syntax: bf2presto8 [options] SB*.MS");
+  puts("Syntax: 2bf2fits [options] SB*.MS");
   puts("-A\t\tNumber of blocks to read in at the same time, which affects calc of running mean etc. (Default = 600)");
   puts("-clipav\t\tInstead of normal clipping, write out average");
   puts("-header\t\tChange something in the header");
@@ -392,8 +393,8 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 void *stokesdata_h5_ptr = NULL;
 
 /* Returns 1 if successful, 0 on error */
-/* Only for IS data */
-int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking)
+/* Only for H5 data */
+int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append)
 {
 
   typedef struct {
@@ -463,8 +464,17 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
  /* 
     - Reads AVERAGE_OVER (10) blocks of data at the time from the input data. 
     - Swap some bytes around
-    - Look if there is a gap in the data (sequence numbers are missing) and write zero's in gaps.
  */
+
+ long subbandnr_start, subbandnr_end, nsub;
+ if(is_append == 0) {
+   subbandnr_start = subbandnr;
+   subbandnr_end = subbandnr;
+ }else {
+   subbandnr_start = 0;
+   subbandnr_end = SUBBANDS-1;
+ }
+
  x = 0;
  currentblock = 0;
  fseek( input, 0, SEEK_SET );
@@ -479,13 +489,15 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
    /* i loops over the blocks of data read in */
    for( i = 0; i < num; i++ ) {
-     for( c = 0; c < CHANNELS; c++ ) {
-       unsigned b,t,s;
-       b = beamnr;
-       for( t = 0; t < SAMPLES; t++ ) {
-         for( s = 0; s < STOKES; s++ ) {
-	   floatSwap( &stokesdata_h5[i].samples[b][t][subbandnr][c][s] );
-         }
+     for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
+       for( c = 0; c < CHANNELS; c++ ) {
+	 unsigned b,t,s;
+	 b = beamnr;
+	 for( t = 0; t < SAMPLES; t++ ) {
+	   for( s = 0; s < STOKES; s++ ) {
+	     floatSwap( &stokesdata_h5[i].samples[b][t][nsub][c][s] );
+	   }
+	 }
        }
      }
    }
@@ -497,31 +509,48 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
 
    /* Calculate average. RMS not used right now. */
-   float average[CHANNELS], rms[CHANNELS];
-   for( c = 0; c < CHANNELS; c++ ) {
-     float sum = 0.0f;
-     float ms = 0.0f;
-     int N = 0;
-     unsigned validsamples = 0;
-     float prev = stokesdata_h5[0].samples[beamnr][0][subbandnr][c][STOKES_SWITCH];
-     /* compute average */
-     for( i = 0; i < num; i++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
-         const float value = stokesdata_h5[i].samples[beamnr][time][subbandnr][c][STOKES_SWITCH];
-	 if(prev < 1){
-	   prev = value;
-	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
-           sum += value;
-	   ms += value*value;
-	   prev = value;
-           validsamples++;
-         }
+   //   float average[CHANNELS], rms[CHANNELS];
+   float *average, *rms;
+   if(is_append) {
+     average = calloc(SUBBANDS*CHANNELS, sizeof(float));
+     rms = calloc(SUBBANDS*CHANNELS, sizeof(float));
+   }else {
+     average = calloc(CHANNELS, sizeof(float));
+     rms = calloc(CHANNELS, sizeof(float));
+   }
+   for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
+     for( c = 0; c < CHANNELS; c++ ) {
+       float sum = 0.0f;
+       float ms = 0.0f;
+       int N = 0;
+       unsigned validsamples = 0;
+       float prev;
+       prev = stokesdata_h5[0].samples[beamnr][0][nsub][c][STOKES_SWITCH];
+       /* compute average */
+       for( i = 0; i < num; i++ ) {
+	 for( time = 0; time < SAMPLES; time++ ) {
+	   float value;
+	   value = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
+	   if(prev < 1){
+	     prev = value;
+	   } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
+	     sum += value;
+	     ms += value*value;
+	     prev = value;
+	     validsamples++;
+	   }
+	 }
+       }
+   
+       N = validsamples?validsamples:1;
+       if(is_append) {
+	 average[nsub*CHANNELS+c] = sum/N;
+	 rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+       }else {
+	 average[c] = sum/N;
+	 rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
        }
      }
-   
-     N = validsamples?validsamples:1;
-     average[c] = sum/N;
-     rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
    }
  
   /* convert and write the data */
@@ -531,49 +560,74 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
    
        /* patrick */
      if(sigmalimit > 0 && i == 0) {
+       for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
        for( c = 0; c < CHANNELS; c++ ) {
 	 /*
 	 0                         = ivalue(average[c]-sigmalimit*rms[c]);
 	 0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
 	 0                         = (average[c]-sigmalimit*rms[c] - offset);
 	 */
-	 offsets[c]                    = average[c]-sigmalimit*rms[c];
-
-	 /*
-	 pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
-	 pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
-	 */
-	 scales[c]  = (average[c]+sigmalimit*rms[c]-offsets[c])/(float)(pow(2,subintdata->NrBits)-1);
-	 if(debugpacking)
-	   fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[c], offsets[c], average[c], rms[c]);
+	 if(is_append == 0) {
+	   offsets[c]                    = average[c]-sigmalimit*rms[c];
+	   /*
+	     pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
+	     pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
+	   */
+	   scales[c]  = (average[c]+sigmalimit*rms[c]-offsets[c])/(float)(pow(2,subintdata->NrBits)-1);
+	   if(debugpacking)
+	     fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[c], offsets[c], average[c], rms[c]);
+	 }else {
+	   offsets[nsub*CHANNELS+c]      = average[nsub*CHANNELS+c]-sigmalimit*rms[nsub*CHANNELS+c];
+	   scales[nsub*CHANNELS+c]  = (average[nsub*CHANNELS+c]+sigmalimit*rms[nsub*CHANNELS+c]-offsets[nsub*CHANNELS+c])/(float)(pow(2,subintdata->NrBits)-1);
+	   if(debugpacking)
+	     fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[nsub*CHANNELS+c], offsets[nsub*CHANNELS+c], average[nsub*CHANNELS+c], rms[nsub*CHANNELS+c]);
+	 }
+        }
        }
      }
      /* process data */
+     for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
      for( c = 0; c < CHANNELS; c++ ) {
        for( time = 0; time < SAMPLES; time++ ) {
          float sum;
-         sum = stokesdata_h5[i].samples[beamnr][time][subbandnr][c][STOKES_SWITCH];
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
-	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
+	 sum = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
+	 if(is_append) {
+	   sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[nsub*CHANNELS+c] : sum;
+	 }else {
+	   sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
+	 }
+	   
 	 if(sigmalimit > 0) {
 	   if(debugpacking)
 	     printf("value %e ", sum);
-	   sum = (sum - offsets[c])/scales[c];
+	   if(is_append)
+	     sum = (sum - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c];
+	   else
+	     sum = (sum - offsets[c])/scales[c];
 	   if(debugpacking)
 	     printf(" %e ", sum);
 	   if(sum < 0) {
-	     if(clipav)
-	       sum = (average[c] - offsets[c])/scales[c];
-	     else
+	     if(clipav) {
+	       if(is_append)
+		 sum = (average[nsub*CHANNELS+c] - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c];
+	       else
+		 sum = (average[c] - offsets[c])/scales[c];
+	     }else {
 	       sum = 0;
+	     }
 	     /*	     printf("Underflow! %e\n", sum); */
 	   }
 	   if(sum > pow(2,subintdata->NrBits)-1) {
-	     if(clipav)
-	       sum = (average[c] - offsets[c])/scales[c];
-	     else
+	     if(clipav) {
+	       if(is_append)
+		 sum = (average[nsub*CHANNELS+c] - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c];
+	       else
+		 sum = (average[c] - offsets[c])/scales[c];
+	     }else {
 	       sum = pow(2,subintdata->NrBits)-1;
+	     }
 	     /*	     printf("Overflow! %e\n", sum); */
 	   }
 	   if(debugpacking)
@@ -584,9 +638,16 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
-	 if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
-	   fprintf(stderr, "Error writing to temporary memory\n");
-	   return 0;
+	 if(is_append) {
+	   if(writePulsePSRData(*subintdata, 0, 0, nsub*CHANNELS+c, time, 1, &sum) == 0) { 
+	     fprintf(stderr, "Error writing to temporary memory\n");
+	     return 0;
+	   }
+	 }else {
+	   if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
+	     fprintf(stderr, "Error writing to temporary memory\n");
+	     return 0;
+	   }
 	 }
 	   /*	   fwrite( &sum, sizeof sum, 1, outputfile[c] ); */ /* single sample written to channel file*/
 	 output_samples++;
@@ -594,11 +655,16 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
        } // for( time = 0; time < SAMPLES; time++ ) 
      }
-
+     }
+   
      /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
      if(verbose) {
        //       printf(".");
-       printf("\rProcessed block %ld/%ld of subband %d/%d: %.3f%%", currentblock, fout.NrPulses, subbandnr, SUBBANDS, 100.0*(subbandnr+(currentblock/((float)fout.NrPulses)))/((float)SUBBANDS));
+       if(is_append) {
+	 printf("\rProcessed block %ld/%ld: %.3f%%", currentblock, fout.NrPulses, 100.0*((currentblock/((float)fout.NrPulses))));
+       }else {
+	 printf("\rProcessed block %ld/%ld of subband %d/%d: %.3f%%", currentblock, fout.NrPulses, subbandnr, SUBBANDS, 100.0*(subbandnr+(currentblock/((float)fout.NrPulses)))/((float)SUBBANDS));
+       }
        fflush(stdout);
      }
      /* Pack data */
@@ -670,6 +736,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 
  /* Only find out how many blocks (including gaps) are in the data, then quit function. */
  if(findseq) {
+
    fseek( input, 0, SEEK_SET );
    num = fread( &stokesdata[0], sizeof stokesdata[0], 1, input );
    if(num != 1) {
@@ -904,6 +971,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
        printf(".");
        fflush(stdout);
      }
+
      /* Pack data */
      if(sigmalimit > 0) {
        if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 1, 0, 0) != 1) {
@@ -1360,12 +1428,23 @@ int main( int argc, char **argv )
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
   FILE *fin;
-  char header_txt[maxnrparsetlines][1001], *s_ptr, *txt[maxnrparsetlines], dummy_string[1000], dummy_string2[1000];
+  char *s_ptr, dummy_string[parsetmaxlinelength], dummy_string2[parsetmaxlinelength];
   int channellist[1000];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
   double lofreq;
+
+  //  char header_txt[parsetmaxnrlines][1001], *txt[parsetmaxnrlines],;
+  char *header_txt[parsetmaxnrlines];
+  for(i = 0; i < parsetmaxnrlines; i++) {
+    header_txt[i] = calloc(parsetmaxlinelength+1, 1);
+    if(header_txt[i] == NULL) {
+      fprintf(stderr, "2bf2fits: Cannot allocate memory\n");
+      return 0;
+    }
+  }
+
   initApplication(&application, "2bf2fits", "[options] inputfiles");
   application.switch_headerlist = 1;
   application.switch_header = 1;
@@ -1488,36 +1567,36 @@ int main( int argc, char **argv )
 
     nrlines = 0;
     ret = 0;
-    for(i = 0; i < maxnrparsetlines; i++)
-      txt[i] = header_txt[i];
+    //    for(i = 0; i < parsetmaxnrlines; i++)
+    //      txt[i] = header_txt[i];
     do {
-      if(fgets(header_txt[nrlines], 1000, fin) != NULL)
+      if(fgets(header_txt[nrlines], parsetmaxlinelength, fin) != NULL)
 	nrlines++;
       else
 	ret = 1;
-      if(nrlines >= maxnrparsetlines-1) {
-	fprintf(stderr, "2bf2fits: Too many lines in parset file\n");
+      if(nrlines >= parsetmaxnrlines-1) {
+	fprintf(stderr, "2bf2fits: Too many lines in parset file (%d)\n", nrlines);
 	return 0;
       }
     }while(ret == 0);
     fclose(fin);    
     if(application.verbose) printf("Read %d lines from header.\n", nrlines);
 
-    s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(SUBBANDS));
     }else {
       fprintf(stderr, "2bf2fits: OLAP.Storage.subbandsPerPart not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("OLAP.CNProc.integrationSteps", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("OLAP.CNProc.integrationSteps", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(blocksperStokes));
     }else {
       fprintf(stderr, "2bf2fits: OLAP.CNProc.integrationSteps not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("OLAP.Stokes.integrationSteps", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(integrationSteps));
     }else {
@@ -1525,35 +1604,35 @@ int main( int argc, char **argv )
       return 0;     
     }
     SAMPLES = blocksperStokes/integrationSteps;
-    s_ptr = get_ptr_entry("Observation.channelsPerSubband", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.channelsPerSubband", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(CHANNELS));
     }else {
       fprintf(stderr, "2bf2fits: Observation.channelsPerSubband not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
     }else {
       fprintf(stderr, "2bf2fits: Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.Beam[0].angle1", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.Beam[0].angle1", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.ra));
     }else {
       fprintf(stderr, "2bf2fits: Observation.Beam[0].angle1 not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.Beam[0].angle2", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.Beam[0].angle2", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.dec));
     }else {
       fprintf(stderr, "2bf2fits: Observation.Beam[0].angle1 not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.Beam[0].target", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.Beam[0].target", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", (subintdata.psrname));
     }else {
@@ -1561,14 +1640,14 @@ int main( int argc, char **argv )
       return 0;     
     }
 
-    s_ptr = get_ptr_entry("Observation.sampleClock", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.sampleClock", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(clockparam));
     }else {
       fprintf(stderr, "2bf2fits: Observation.sampleClock not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.bandFilter", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.bandFilter", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", subintdata.instrument);
     }else {
@@ -1581,7 +1660,7 @@ int main( int argc, char **argv )
       dummy_ptr[0] = 0;
     sscanf(buf+4, "%f", &lowerBandFreq);
 
-    s_ptr = get_ptr_entry("Observation.Beam[0].subbandList", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.Beam[0].subbandList", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", dummy_string);
     }else {
@@ -1641,7 +1720,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
     int y, m, d, hour, min, sec;
     float sec_mid;
-    s_ptr = get_ptr_entry("Observation.startTime", txt, nrlines, "=");
+    s_ptr = get_ptr_entry("Observation.startTime", header_txt, nrlines, "=");
     y = 0;
     if(s_ptr != NULL) {
       /*      sscanf(s_ptr, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hour, &min, &sec);*/
@@ -1667,14 +1746,14 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
 
   if (is_CS == 1) printf ("CS data: %d subbands\n", SUBBANDS);
-  if (is_append == 1) printf ("IS data: append mode (%d subbands), single output file will be written\n", SUBBANDS);
+  if (is_append == 1) printf ("append mode (%d subbands), single output file will be written\n", SUBBANDS);
   printf( "%d channels %d beams %d samples %d stokes\n", CHANNELS, BEAMS, SAMPLES, STOKES );
   printf("Output Name: %s\n", OUTNAME);
   printf("Stokes Parameter: %d\n\n",STOKES_SWITCH);
 
 
   subintdata.NrBins = SAMPLES;
-  if ((is_CS == 0 && is_append == 0) || is_H5) 
+  if ((is_CS == 0 && is_append == 0) || (is_H5 && is_append == 0))
     subintdata.nrFreqChan = CHANNELS;
   else 
     subintdata.nrFreqChan = CHANNELS * SUBBANDS;
@@ -1712,7 +1791,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   }
 
   // processing with appending (only for one beam)
-  if (is_append == 1) {
+  if (is_append == 1 && is_H5 == 0) {
    int seqseek[SUBBANDS]; // only for IS data in append mode
                           // array that will keep the seek offsets for input files due to possible differences 
                           // between firstseq (same for all subbands) and actual first sequence number of each file
@@ -1772,11 +1851,11 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
   } // if (is_append == 1)
 
-  if (is_append == 0) {
+  if (is_append == 0 || is_H5) {
   /* open files */
   char *sbpointer;
   long subbandnr_h5, subbandnr_h5_first, subbandnr_h5_last;
-  if(is_H5) {
+  if(is_H5 && is_append == 0) {
     subbandnr_h5_first = 0;
     subbandnr_h5_last = SUBBANDS - 1;
   }else {
@@ -1791,7 +1870,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       for(subbandnr_h5 = subbandnr_h5_first; subbandnr_h5 <= subbandnr_h5_last; subbandnr_h5++) {
 
       if(is_H5) {
-	subintdata.freq_cent = (double) lofreq + subbandnr_h5 * subintdata.bw;
+	if(is_append == 0)
+	  subintdata.freq_cent = (double) lofreq + subbandnr_h5 * subintdata.bw;
+	else
+	  subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
       }else if (is_CS == 0) { // IS data
          sbpointer = strstr (filename, "_SB");
          sscanf(sbpointer, "%*3c%d", &subbandnr);
@@ -1799,16 +1881,19 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       } else { // CS data
 	subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
       }
-      if(is_H5)
-	printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
-      else
+      if(is_H5) {
+	if(is_append == 0) {
+	  printf("  This is file number %d at centre frequency %f MHz\n", subbandnr, subintdata.freq_cent);
+	}
+      }else {
 	printf("  This is subband number %ld at centre frequency %f MHz\n", subbandnr_h5, subintdata.freq_cent);
+      }
       /* create names */
       if (is_CS == 0) 
 	sprintf( buf, "%s.sub%04d", OUTNAME, subbandnr);
-      else if(is_H5)
+      else if(is_H5 && is_append == 0) {
 	sprintf( buf, "%s.sub%04ld", OUTNAME, subbandnr_h5);
-      else 
+      }else 
 	sprintf( buf, "%s.fits", OUTNAME);
       if ( BEAMS > 1  ) sprintf( buf, "beam_%d/%s", b, buf ); /* prepend beam name */
       fprintf(stderr,"  %s -> %s\n", filename, buf); 
@@ -1825,7 +1910,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
         if(is_H5) {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append) == 0)
 	    return 0;
 	}else {
 	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
@@ -1858,7 +1943,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append) == 0)
 	    return 0;
 	}
       }
