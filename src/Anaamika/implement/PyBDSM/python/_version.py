@@ -24,6 +24,9 @@ change_log = """
 PyBDSM Change Log.
 -------------------------------------------------------------------------------
 
+2011/10/05 - Added output of source lists. Changed name of write_gaul method to 
+             write_catalog (more general).
+             
 2011/10/04 - Added option to force source grouping by island. Added saving of
              parameters to a PyBDSM save file to Op_output.
 
