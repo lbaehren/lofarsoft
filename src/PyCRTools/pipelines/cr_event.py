@@ -740,12 +740,12 @@ for full_filename in files:
             for id in datafile["CHANNEL_ID"]:
                 key = str(id)
                 if key in cabledelay_database:
-                    cabledelayList[n] = cabledelay_database[str(id)]
+                    cabledelayList[n] = cabledelay_database[str(id)]["cabledelay"]
                 n+=1 
             print cabledelayList
         else:
             print 'Cable delays file does not exist yet.'
-        cabledelays = hArray(cabledelayList) # zeros if file isn't there
+        cabledelays = hArray(cabledelayList) # zeros if file isn't there. Other choice: take from metadata 
         
 #        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
 #        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
@@ -1116,6 +1116,7 @@ for full_filename in files:
         results.update(dict(
             antennas_flagged_delays=list(flagged_delays.vec()),
             antennas_final_cable_delays=list(final_cable_delays.vec()),
+            antennas_residual_cable_delays = list(final_residual_delays.vec()),
             antennas_with_peaks=antennas_with_peaks,
             delay_quality_error=delay_quality_error,
             pulse_location=beam_maxima.maxx.val(),
