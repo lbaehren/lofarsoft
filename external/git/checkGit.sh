@@ -28,6 +28,8 @@ GIT_VERSION_OK=0
 GIT_SOURCE_ARCHIVE=
 GIT_INSTALL_PREFIX=
 
+GIT_DOWNLOAD_URL="http://git-core.googlecode.com/files/git-1.7.7.tar.gz"
+
 ##_______________________________________________________________________________
 ##                                                                      git_check
 ## Description:
@@ -78,7 +80,7 @@ git_check ()
 
 git_fetch ()
 {
-    wget -c http://kernel.org/pub/software/scm/git/git-1.7.4.1.tar.gz
+    wget -c "${GIT_DOWNLOAD_URL}"
 }
 
 ##_______________________________________________________________________________
