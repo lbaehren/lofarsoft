@@ -10,13 +10,13 @@ import pycrtools as cr
 import pickle
 
 topdir = '/Users/acorstanje/triggering/CR/results_john/'
+event = 'VHECR_LORA-20110714T174749.986Z'
 
-filelist=cr.listFiles(topdir+'*')
+filelist=cr.listFiles(topdir+event+'*')
 eventlist=[]
-for event in filelist: # can this be done shorter / in listFiles?
-    print event
-    if os.path.isdir(event) == True:
-        eventlist.extend([event])
+for file in filelist: # can this be done shorter / in listFiles?
+    if os.path.isdir(file):
+        eventlist.extend([file])
         
 # need to use only event directories, not files
 
@@ -31,7 +31,12 @@ cabledelays_database = dict()
 for eventdir in eventlist:
     
     print "Processing event in directory:",eventdir
-    datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
+    if os.path.isdir(os.path.join(eventdir,"pol0")) or os.path.isdir(os.path.join(eventdir, "pol1")):
+        print 'have data adirs'
+        datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
+    else:
+        print 'no data dirs continue'
+        continue
     print eventdir
     print datadirs
     print '---'
@@ -71,8 +76,34 @@ for key in cabledelays_database:
 outfile = open(os.path.join(topdir, 'Cabledelays.pic'), 'wb')
 pickle.dump(cabledelays_database, outfile)
 outfile.close()
+print 'pickled done'
+
+# real fix: plot footprint of cable delays, correct for outliers... (logscale?)
+
+# get list of ant ids from plotfootprint task; needed to ensure correct ordering
+
+filefilter = os.path.join(topdir, event)
+print filefilter
+polarization = 0 # should do both
+fptask = cr.trerun("plotfootprint", "0", colormap = 'jet', filefilter = filefilter, pol=polarization) 
+print 'FP TAKS DONE'
+y = []
+yspread = []
+for antid in fptask.antid:
+    thisCableDelay = 1.0e9 * cabledelays_database[str(antid)]["cabledelay"]
+    if thisCableDelay > 50:
+        thisCableDelay = 0.0 # kick outliers
+    y.extend([thisCableDelay])
+    yspread.extend([cabledelays_database[str(antid)]["spread"]])
+
+cdelays = cr.hArray(y)
+cdelayspread = np.array(yspread)
+fptask = cr.trerun("plotfootprint", "1", colormap = 'jet', filefilter = filefilter, arrivaltime = cdelays, pol=polarization) 
 
 # now plot cable delays (quick fix for 3 events)
+
+plt.figure()
+
 x = np.zeros((len(cabledelays_database), 3))
 for i in range(3):
     x[:, i] = np.arange(len(cabledelays_database))
@@ -92,7 +123,9 @@ plt.scatter(x[:,0], y[:,0], c='b')
 plt.scatter(x[:,1], y[:,1], c='g')
 plt.scatter(x[:,2], y[:,2], c='r')
 
-    
+plt.figure()
+
+plt.scatter(x[:, 0], yerr)
     
     
     
