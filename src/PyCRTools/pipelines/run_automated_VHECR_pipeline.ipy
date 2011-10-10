@@ -43,9 +43,13 @@ import os
 processall=False
 processnew=True
 reprocesslora=False
-includefilter=[]
-excludefilter=["20110613T051515.914","VHECR_LORA-1969","test","temp"]
-
+includefilter=[""]
+# Add problematic eventto extrude list (this should eventually be put into a database/external list,
+# i.e. not hardcoded in pipeline)
+excludefilter=["20110610T","VHECR_LORA-1969","killed","test","temp","dump"]
+excludefilter.append("20110613T051515.914")
+excludefilter.append("20110813T190822.655") # Zero values cause exception when executing logplot
+excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception when executing logplot
 
 def get_results(filename,outputdir,pol=0):
         current_polarization=pol
@@ -72,35 +76,38 @@ def get_results(filename,outputdir,pol=0):
 
         calibrated_timeseries_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries")
         #result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
-        result_file=os.path.join(outputdir_with_subdirectories,"results.xml")
+        result_xml_file=os.path.join(outputdir_with_subdirectories,"results.xml")
+        result_html_file=os.path.join(outputdir_with_subdirectories,"index.html")
         #calibrated_timeseries_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries-cut")
         #calibrated_fft_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-fft-cut")
-        if os.path.isfile(result_file):
-            res=xmldict.load(result_file)
-            return res
+        if os.path.isfile(result_xml_file):
+            res=xmldict.load(result_xml_file)
+            return [True, res]
+        if os.path.isfile(result_html_file):
+            return [True, None]
         else:
-            return None
+            return [False, None]
 
 def isprocessed(filename,outputdir):
-    if get_results(filename,outputdir,0) and get_results(filename,outputdir,1):
+    if get_results(filename,outputdir,0)[0] and get_results(filename,outputdir,1)[0]:
         return True
     else:
         return False
 
 def nowloradata(filename,outputdir):
-    res=get_results(filename,outputdir,0)
+    res=get_results(filename,outputdir,0)[1]
     if res: #already processed
         if not res["pulse_direction_lora"]: #No lora direction given
              if lora.loraInfo(res["TIME"]): #lora data available
                  return True
     return False
 
-def infilter(filename,filter):
-    if not isinstance(filter,type([])):
+def infilter(filename,filters):
+    if not isinstance(filters,type([])):
         if filter in filename:
             return True
     else:
-        return True in [f in filename for f in filter]
+        return True in [f in filename for f in filters if len(f)>0]
 
 
 
@@ -109,6 +116,7 @@ datadir="/data/VHECR/LORAtriggered/data/"
 blocksize=65536
 myoutputdir="/data/VHECR/LORAtriggered/results/"
 fname=""
+fname2=""
 files=os.listdir(datadir)
 
 for f in files:
@@ -121,21 +129,22 @@ for f in files:
         fname+=f+" "
         continue
     else:
-	print fname
         if isprocessed(f,myoutputdir):
+	    print f
             if reprocesslora:
                 if nowloradata(f,myoutputdir):
                     fname+=f+" "
                     continue
         else:
             if processnew:
+	        print "new", f
                 fname+=f+" "
                 continue
 
 
-print "About to process these files:", fname
 lofarmode="LBA_OUTER"
-run $PYP/pipelines/cr_event.py $fname -d $datadir --lofarmode=$lofarmode --outputdir=$myoutputdir --blocksize=$blocksize --search_window_width=5000 --nsigma=3  --nopause
+
+run $PYP/pipelines/cr_event.py $fname -d $datadir --lofarmode=$lofarmode --outputdir=$myoutputdir --blocksize=$blocksize --search_window_width=5000 --nsigma=3  --nopause --max_data_length=12289024
 
 #lofarmode="LBA_INNER"
 #fname=datadir+"VHECR_LORA-20110613T051515.914Z*.h5"
