@@ -724,6 +724,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
 
     wavelet - if True, use only wavelet Gaussians; if False, use only
               primary Gaussians
+    patch - can be "single", "gaussian", "source", "island", or None
     
     Returns (outlist, outnames, patchnames)
     outlist is [[g1, g2, g3], [g4], ...]
@@ -802,8 +803,8 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
             patchindx.append(src.source_id)
             gauslist = [] # reset for next source
             gausname = []
-            gausflux = []
-
+            gausflux = []    
+    
     # Sort
     if patch == 'single' or patch == None:
         outlist = [list(gauslist)]

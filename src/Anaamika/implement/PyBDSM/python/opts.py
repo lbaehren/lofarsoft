@@ -964,9 +964,9 @@ class Opts(object):
                              group='hidden')
     catalog_type    =   Enum('gaul', 'shap', 'srl',
                              doc="Type of catalog to write:  'gaul' - Gaussian "\
-                                 "list catalog, 'srl' - source catalog (formed "\
+                                 "list, 'srl' - source list (formed "\
                                  "by grouping Gaussians), 'shap' - shapelet "\
-                                 "catalog (not yet supported).",
+                                 "list (not yet supported)",
                              group='hidden')
     img_format      =   Enum('fits', 'casa',
                              doc="Format of output image: 'fits' or "\

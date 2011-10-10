@@ -524,6 +524,8 @@ def round_list_of_tuples(val):
     valstr = '[' + ','.join(valstr_list_tot) + ']'  
     return valstr 
 
+# The following functions give convenient access to those in 
+# output.py
 def export_image(img, outfile=None, img_format='fits',
                  img_type='resid_gaus', incl_wavelet=True,
                  clobber=False):
@@ -678,7 +680,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
     import output
     
     if hasattr(img, 'ngaus')==False:
-        print 'Gaussians have not been fit. Please run process_image first.'
+        print 'Image has not been fit. Please run process_image first.'
         return False      
     format = format.lower()
     patch = bbs_patches
@@ -697,6 +699,9 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
     if (catalog_type in ['gaul', 'srl', 'shap']) == False:
         print '\033[91mERROR\033[0m: catalog_type must be "gaul", '\
               '"srl", or "shap"'
+        return False
+    if catalog_type == 'shap':
+        print '\033[91mERROR\033[0m: Shapelet list not yet supported'
         return False
     if img.ngaus == 0:
         print 'No Gaussians were fit to image. Output file not written.'
