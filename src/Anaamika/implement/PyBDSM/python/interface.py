@@ -524,7 +524,7 @@ def round_list_of_tuples(val):
     valstr = '[' + ','.join(valstr_list_tot) + ']'  
     return valstr 
 
-# The following functions give convenient access to those in 
+# The following functions give convenient access to the output functions in 
 # output.py
 def export_image(img, outfile=None, img_format='fits',
                  img_type='resid_gaus', incl_wavelet=True,

@@ -86,7 +86,7 @@ class Opts(object):
                              doc="Frequency in Hz of input image. "\
                                  "E.g., frequency = 74e6. None => get from header. "\
                                  "For more than one channel, use the frequency_sp "\
-                                 "parameter.\nIf the frequency is not given "\
+                                 "parameter\nIf the frequency is not given "\
                                  "by the user, then it is looked for in the "\
                                  "image header. If not found, then an error "\
                                  "is raised. PyBDSM will not work without the "\
@@ -108,7 +108,7 @@ class Opts(object):
     mean_map        =   Enum('default', 'zero', 'const', 'map',
                              doc="Background mean map: 'default' => calc whether "\
                                  "to use or not, 'zero' => 0, 'const' => "\
-                                 "clipped mean, 'map' => use 2-D map.\n"\
+                                 "clipped mean, 'map' => use 2-D map\n"\
                                  "This parameter determines "\
                                  "how the background mean map is computed "\
                                  "and how it is used further.\nIf 'const', then "\
@@ -243,7 +243,7 @@ class Opts(object):
                                  "chosen.")
     thresh_isl      =  Float(3,
                              doc="Threshold for the island boundary in number of sigma "\
-                                 "above the mean. Determines extent of island used for fitting.\n"\
+                                 "above the mean. Determines extent of island used for fitting\n"\
                                  "This parameter determines the region to which fitting "\
                                  "is done. A higher value will produce smaller islands, "\
                                  "and hence smaller regions that are considered in the "\
@@ -263,7 +263,7 @@ class Opts(object):
                                  "above the mean. If "\
                                  "false detection rate thresholding is used, "\
                                  "this value is ignored and thresh_pix is "\
-                                 "calculated inside the program.\n"\
+                                 "calculated inside the program\n"\
                                  "This parameter sets the overall detection threshold "\
                                  "for islands (i.e. thresh_pix = 5 will find all sources "\
                                  "with peak fluxes of 5-sigma or greater). Use the "\
@@ -289,7 +289,7 @@ class Opts(object):
                              group='advanced_opts')
     splitisl_maxsize = Float(50.0,
                             doc="If island size in beam area is more than this, "\
-                                "consider splitting island. Min value is 50.",
+                                "consider splitting island. Min value is 50",
                              group='advanced_opts')
     splitisl_size_extra5 = Float(0.1,
                                  doc="Fraction of island area for 5x5 opening to "\
@@ -671,7 +671,12 @@ class Opts(object):
                                  "all Gaussians are in a single patch, there are "\
                                  "no patches, all Gaussians for a given source "\
                                  "are in a separate patch, or each Gaussian gets "\
-                                 "its own patch.",
+                                 "its own patch.\n"\
+                                 "If you wish to have patches defined by island, "\
+                                 "then set group_by_isl=True (under advanced_opts) "\
+                                 "before fitting to force all Gaussians in an "\
+                                 "island to be in a single source. Then set "\
+                                 "bbs_patches='source' when writing the catalog.",
                              group="output_opts")
     solnname        = Option(None, String(),
                              doc="Name of the run, to be appended "\
@@ -746,7 +751,7 @@ class Opts(object):
                                  "estimate the PSFs.",
                              group="psf_vary_do")
     psf_snrcut      =  Float(10.0,
-                             doc = "Minimum SNR for statistics.\n"\
+                             doc = "Minimum SNR for statistics\n"\
                                  "Only Gaussians with SNR greater than this are "\
                                  "considered for processing. The minimum value is 10.0",
                              group="psf_vary_do")
@@ -846,7 +851,7 @@ class Opts(object):
     #-------------------------SPECTRAL INDEX OPTIONS--------------------------------
     specind_nchan0  =    Int(40,
                              doc='Rough number of channels to average '\
-                                 'cube to, before attempting to fit spectral index.\n'\
+                                 'cube to, before attempting to fit spectral index\n'\
                                  "If the total number of channels is more than twice "\
                                  "this number, then the data is averaged to roughly "\
                                  "(+/- 1-2 channels) specind_nchan0 channels before "\

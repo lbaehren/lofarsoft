@@ -649,7 +649,7 @@ def _opts_completer(self, event):
         # Match task names only
         cmds = ['process_image', 'write_catalog', 'export_image', 'show_fit']
         return cmds
-    elif cmd1 == 'cd' or cmd1 == 'tput' or cmd1 == 'tget':
+    elif cmd1 == 'cd' or cmd1 == 'tput' or cmd1 == 'tget' or '!' in cmd1:
         # Match to files in current directory (force use of ' or " with
         # tput and tget, as filename must be a string).
         files = []

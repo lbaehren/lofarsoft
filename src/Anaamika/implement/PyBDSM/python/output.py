@@ -404,7 +404,7 @@ def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
     tbhdu.header.add_comment('Reference frequency : %s Hz' % freq)
     tbhdu.header.add_comment('Equinox : %s' % img.equinox)
     if filename == None:
-        filename = img.imagename + '.fits'
+        filename = img.imagename + '.' + objtype + '.fits'
     if os.path.exists(filename) and clobber == False:
         return None
     mylog.info('Writing ' + filename)
@@ -724,7 +724,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
 
     wavelet - if True, use only wavelet Gaussians; if False, use only
               primary Gaussians
-    patch - can be "single", "gaussian", "source", "island", or None
+    patch - can be "single", "gaussian", "source", or None
     
     Returns (outlist, outnames, patchnames)
     outlist is [[g1, g2, g3], [g4], ...]
