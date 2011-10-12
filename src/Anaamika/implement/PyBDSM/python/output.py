@@ -386,7 +386,9 @@ def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
     elif objtype == 'srl':
         outl = [img.source]
     cvals, cnames, cformats, cunits = make_output_columns(outl[0][0], fits=True,
-                                                          objtype=objtype)
+                                                          objtype=objtype, 
+                                                          incl_spin=img.opts.spectralindex_do,
+                                                          incl_pol=img.opts.polarisation_do)
     out_list = make_fits_list(img, outl, objtype=objtype)
     col_list = []
     for ind, col in enumerate(out_list):
@@ -640,7 +642,9 @@ def make_ascii_str(img, glist, objtype='gaul'):
     val_list = []
     for i, g in enumerate(glist[0]):
         cvals, cnames, cformats, cunits = make_output_columns(g, fits=False, 
-                                                              objtype=objtype)
+                                                              objtype=objtype, 
+                                                              incl_spin=img.opts.spectralindex_do,
+                                                              incl_pol=img.opts.polarisation_do)
         cformats[-1] += "\n"
         if i == 0:
             outstr_list.append("# " + " ".join(cnames) + "\n")
@@ -653,7 +657,9 @@ def make_fits_list(img, glist, objtype='gaul'):
 
     out_list = []
     for g in glist[0]:
-        cvals, ext1, ext2, ext3 = make_output_columns(g, fits=True, objtype=objtype)
+        cvals, ext1, ext2, ext3 = make_output_columns(g, fits=True, objtype=objtype, 
+                                                      incl_spin=img.opts.spectralindex_do,
+                                                      incl_pol=img.opts.polarisation_do)
         out_list.append(cvals)
     out_list = func.trans_gaul(out_list)
     return out_list
@@ -853,7 +859,8 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
 
     return (outlist_sorted, outnames_sorted, patchnames_sorted)
 
-def make_output_columns(obj, fits=False, objtype='gaul'):
+def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
+                        incl_pol=False):
     """Returns a list of column names, formats, and units for Gaussian or Source"""
     
     # First, define a list of columns in order desired, using the names of
@@ -862,11 +869,7 @@ def make_output_columns(obj, fits=False, objtype='gaul'):
         names = ['gaus_num', 'island_id', 'source_id', 'wavelet_j', 'total_flux', 
                  'total_fluxE', 'peak_flux', 'peak_fluxE', 'centre_sky', 'centre_skyE',
                  'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 'deconv_size_sky',
-                 'deconv_size_skyE', 'rms', 'mean', 'code', 'spin1', 
-                 'espin1', 'total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
-                 'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
-                 'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
-                 'lpol_angle', 'lpol_angle_err']
+                 'deconv_size_skyE', 'rms', 'mean', 'code']
     elif objtype == 'srl':
         names = ['source_id', 'island_id', 'wavelet_j', 'total_flux', 
                  'total_fluxE', 'peak_flux_centroid', 'peak_flux_centroidE', 
@@ -874,14 +877,17 @@ def make_output_columns(obj, fits=False, objtype='gaul'):
                  'posn_sky_centroidE','posn_sky_max', 'posn_sky_maxE', 
                  'posn_pix_centroid', 'posn_pix_centroidE', 'posn_pix_max', 'posn_pix_maxE',
                  'size_sky', 'size_skyE', 'deconv_size_sky',
-                 'deconv_size_skyE', 'rms_isl', 'mean_isl', 'code', 'spin1', 
-                 'espin1', 'total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
-                 'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
-                 'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
-                 'lpol_angle', 'lpol_angle_err']
+                 'deconv_size_skyE', 'rms_isl', 'mean_isl', 'code']
     else:
         print 'Object type unrecongnized.'
         return None
+    if incl_spin:
+        names += ['spin1', 'espin1']
+    if incl_pol:    
+        names += ['total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
+                  'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
+                  'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
+                  'lpol_angle', 'lpol_angle_err']
     cnames = []
     cformats = []
     cunits = []

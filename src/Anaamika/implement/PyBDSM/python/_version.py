@@ -1,11 +1,11 @@
 """Version module.
 
 This module simply stores the version and svn revision numbers, as well
-as a change log. The svn revision number will be updated automatically
+as a changelog. The svn revision number will be updated automatically
 whenever there is a change to this file. However, if no change is made
 to this file, the revision number will get out of sync. Therefore, one
 must update this file with each (significant) update of the code: 
-adding to the change log will naturally do this.
+adding to the changelog will naturally do this.
 """
 
 # Version number
@@ -22,11 +22,18 @@ __revision__ = filter(str.isdigit, "$Revision$")
 # Change log
 def changelog():
     """
-    PyBDSM Change Log.
+    PyBDSM Changelog.
     -----------------------------------------------------------------------
+
+    2011/10/12 - Added errors to source properties (using a Monte Carlo
+                 method for M sources). Fixed bug in output column names.
     
     2011/10/11 - Tweaked autocomplete to support IPython shell commands
-                 (e.g., "!more file.txt").
+                 (e.g., "!more file.txt"). Fixed bug in gaul2srl that 
+                 resulted in some very nearby Gaussians being placed into
+                 different sources. Added group_tol option so that user
+                 can adjust the tolerance of how Gaussians are grouped
+                 into sources.
     
     2011/10/05 - Added output of source lists. Changed name of write_gaul 
                  method to write_catalog (more general).
@@ -51,7 +58,7 @@ def changelog():
                  only in islands found in the original image if 
                  opts.atrous_orig_isl is True. 
     
-    2011/09/08 - Versioning system changed to use _version.py
+    2011/09/08 - Versioning system changed to use _version.py.
     
     """
     pass

@@ -73,16 +73,14 @@ class Op_gaul2srl(Op):
         peak_flux_centroid = peak_flux_max = [g.peak_flux, g.peak_fluxE]
         posn_sky_centroid = posn_sky_max = [g.centre_sky, g.centre_skyE]
         size_sky = [g.size_sky, g.size_skyE]
-        #deconv_size_sky = [g.deconv_size_sky, g.deconv_size_skyE]
-        #rms_isl = 
-        #imrms = 
+        deconv_size_sky = [g.deconv_size_sky, g.deconv_size_skyE]
         bbox = img.islands[g.island_id].bbox
         ngaus = 1
         island_id = g.island_id
         gaussians = list([g])
         
         source_prop = list([code, total_flux, peak_flux_centroid, peak_flux_max, posn_sky_centroid, \
-             posn_sky_max, size_sky, bbox, ngaus, island_id, gaussians])
+             posn_sky_max, size_sky, deconv_size_sky, bbox, ngaus, island_id, gaussians])
         source = Source(img, source_prop)
 
         src_index += 1
@@ -154,7 +152,7 @@ class Op_gaul2srl(Op):
         """ Whether two gaussians belong to the same source or not. """
         import functions as func
 
-        def same_island_min(pair, g_list, subim, delc):
+        def same_island_min(pair, g_list, subim, delc, tol=0.5):
             """ If the minimum of the reconstructed fluxes along the line joining the peak positions 
                 is greater than thresh_isl times the rms_clip, they belong to different islands. """
 
@@ -202,13 +200,14 @@ class Op_gaul2srl(Op):
   
               if minind_p in (0, maxline-1) and maxind_p in (0, maxline-1): 
                 same_island_cont = True
-
-              if abs(min_pixval-min(flux1,flux2)) <= isl.rms*img.opts.thresh_isl:
+              if min_pixval >= min(flux1, flux2):
+                same_island_min = True
+              elif abs(min_pixval-min(flux1,flux2)) <= tol*isl.rms*img.opts.thresh_isl:
                 same_island_min = True
 
             return same_island_min, same_island_cont
 
-        def same_island_dist(pair, g_list):
+        def same_island_dist(pair, g_list, tol=0.5):
             """ If the centres are seperated by a distance less than half the sum of their 
                 fwhms along the PA of the line joining them, they belong to the same island. """
             from math import sqrt
@@ -225,7 +224,7 @@ class Op_gaul2srl(Op):
             dx = pix2[0]-pix1[0]; dy = pix2[1]-pix1[1]
             dist = sqrt(dy*dy + dx*dx)
 
-            if dist <= 0.5*(fwhm1+fwhm2):
+            if dist <= tol*(fwhm1+fwhm2):
               same_island = True
             else:
               same_island = False
@@ -237,8 +236,9 @@ class Op_gaul2srl(Op):
             same_isl1_cont = True
             same_isl2 = True
         else:
-            same_isl1_min, same_isl1_cont = same_island_min(pair, g_list, subim, delc)
-            same_isl2 = same_island_dist(pair, g_list)
+            tol = img.opts.group_tol
+            same_isl1_min, same_isl1_cont = same_island_min(pair, g_list, subim, delc, tol)
+            same_isl2 = same_island_dist(pair, g_list, tol/2.0)
 
         g1 = g_list[pair[0]]
 
@@ -326,20 +326,51 @@ class Op_gaul2srl(Op):
         sra, sdec = img.pix2sky([mompara[1]+delc[0], mompara[2]+delc[1]])
         mra, mdec = img.pix2sky(posn)
                                         # "deconvolve" the sizes
-        gaus_c = [mompara[3]/sqrt(cdeltsq)/fwsig, mompara[4]/sqrt(cdeltsq)/fwsig, mompara[5]]
-        gaus_bm = [bm_pix[0]/fwsig, bm_pix[1]/fwsig, bm_pix[2]]
-                ##############  ERRORS Not done yet
-        gaus_dc = func.deconv(gaus_c, gaus_bm)
+        gaus_c = [mompara[3], mompara[4], mompara[5]+90.0]
+        gaus_bm = [bm_pix[0], bm_pix[1], bm_pix[2]]
+        gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
+        deconv_size_sky = [img.pix2beam(gaus_dc), [0.0, 0.0, 0.0]]
 
                                         # update all objects etc
-        tot= 0.0
+        tot = 0.0
+        totE_sq = 0.0
         for g in g_sublist:
             tot += g.total_flux
+            totE_sq += g.total_fluxE
+        totE = sqrt(totE_sq)
         size_sky = [mompara[3]*sqrt(cdeltsq), mompara[4]*sqrt(cdeltsq), mompara[5]+90.0]
+        
+        # Estimate errors using Monte Carlo technique
+        nMC = 20
+        mompara0_MC = N.zeros(nMC, dtype=float)
+        mompara1_MC = N.zeros(nMC, dtype=float)
+        mompara2_MC = N.zeros(nMC, dtype=float)
+        mompara3_MC = N.zeros(nMC, dtype=float)
+        mompara4_MC = N.zeros(nMC, dtype=float)
+        mompara5_MC = N.zeros(nMC, dtype=float)
+        for i in range(nMC):
+            subim_src_MC = self.make_subim(subn, subm, g_sublist, delc) + \
+                        N.random.normal(loc=0.0, scale=isl.rms*sqrt(bmar_p), size=(subn, subm))
+            mompara_MC = func.momanalmask_gaus(subim_src_MC, mask, isrc, bmar_p, True)
+            mompara0_MC[i] = mompara_MC[0]
+            mompara1_MC[i] = mompara_MC[1]
+            mompara2_MC[i] = mompara_MC[2]
+            mompara3_MC[i] = mompara_MC[3]
+            mompara4_MC[i] = mompara_MC[4]
+            mompara5_MC[i] = mompara_MC[5]
+        mompara0E = N.std(mompara0_MC)
+        mompara1E = N.std(mompara1_MC)
+        mompara2E = N.std(mompara2_MC)
+        mompara3E = N.std(mompara3_MC)
+        mompara4E = N.std(mompara4_MC)
+        mompara5E = N.std(mompara5_MC)
+        size_skyE = [mompara3E*sqrt(cdeltsq), mompara4E*sqrt(cdeltsq), mompara5E]
+        sraE, sdecE = (mompara1E*sqrt(cdeltsq), mompara2E*sqrt(cdeltsq))
+        
         isl_id = isl.island_id
-        source_prop = list(['M', [tot, 0.0], [s_peak, 0.0], [maxpeak, 0.0], [[sra, sdec], \
-                      [0.0,0.0]], [[mra, mdec],[0,0]], [size_sky,[0,0,0]], isl.bbox,  \
-                      len(g_sublist), isl_id, g_sublist])
+        source_prop = list(['M', [tot, totE], [s_peak, isl.rms], [maxpeak, isl.rms], [[sra, sdec], 
+                      [sraE, sdecE]], [[mra, mdec], [sraE, sdecE]], [size_sky, size_skyE], 
+                      deconv_size_sky, isl.bbox, len(g_sublist), isl_id, g_sublist])
         source = Source(img, source_prop)
 
         src_index += 1
@@ -435,16 +466,16 @@ class Source(object):
     posn_pix_maxE       = List(Float(), doc="Error in position (pixels) of maximum emission of source", 
                                colname=['E_Xposn_max', 'E_Yposn_max'], units=['pix', 'pix'])
     size_sky            = List(Float(), doc="Shape of the source FWHM, BPA, deg",
-                               colname=['Bmin', 'Bmaj', 'Bpa'], units=['deg', 'deg',
+                               colname=['Bmaj', 'Bmin', 'Bpa'], units=['deg', 'deg',
                               'deg'])
     size_skyE           = List(Float(), doc="Error on shape of the source FWHM, BPA, deg",
-                               colname=['E_Bmin', 'E_Bmaj', 'E_Bpa'], units=['deg', 'deg',
+                               colname=['E_Bmaj', 'E_Bmin', 'E_Bpa'], units=['deg', 'deg',
                                'deg'])
     deconv_size_sky     = List(Float(), doc="Deconvolved shape of the gaussian FWHM, BPA, deg",
-                               colname=['DC_Bmin', 'DC_Bmaj', 'DC_Bpa'], units=['deg', 'deg',
+                               colname=['DC_Bmaj', 'DC_Bmin', 'DC_Bpa'], units=['deg', 'deg',
                               'deg'])
     deconv_size_skyE    = List(Float(), doc="Error on deconvolved shape of the gaussian FWHM, BPA, deg",
-                               colname=['E_DC_Bmin', 'E_DC_Bmaj', 'E_DC_Bpa'], units=['deg', 'deg',
+                               colname=['E_DC_Bmaj', 'E_DC_Bmin', 'E_DC_Bpa'], units=['deg', 'deg',
                               'deg'])
     rms_isl             = Float(doc="Island rms Jy/beam", colname='I_rms', units='Jy/beam')
     ngaus               = Int(doc='Number of gaussians in the source', colname='N_gaus')
@@ -455,7 +486,7 @@ class Source(object):
     def __init__(self, img, sourceprop):
     
         code, total_flux, peak_flux_centroid, peak_flux_max, posn_sky_centroid, \
-                     posn_sky_max, size_sky,bbox, ngaus, island_id, gaussians = sourceprop
+                     posn_sky_max, size_sky, deconv_size_sky, bbox, ngaus, island_id, gaussians = sourceprop
         self.code = code
         self.total_flux, self.total_fluxE = total_flux 
         self.peak_flux_centroid, self.peak_flux_centroidE = peak_flux_centroid 
@@ -463,6 +494,7 @@ class Source(object):
         self.posn_sky_centroid, self.posn_sky_centroidE = posn_sky_centroid 
         self.posn_sky_max, self.posn_sky_maxE = posn_sky_max 
         self.size_sky, self.size_skyE = size_sky
+        self.deconv_size_sky, self.deconv_size_skyE = deconv_size_sky
         self.bbox = bbox
         self.ngaus = ngaus 
         self.island_id = island_id

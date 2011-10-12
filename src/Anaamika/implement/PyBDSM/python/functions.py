@@ -493,7 +493,8 @@ def trans_gaul(q):
 def momanalmask_gaus(subim, mask, isrc, bmar_p, allpara=True):
     """ Compute 2d gaussian parameters from moment analysis, for an island with
         multiple gaussians. Compute only for gaussian with index (mask value) isrc.
-        Returns normalised peak, centroid, fwhm and P.A. assuming North is top. """
+        Returns normalised peak, centroid, fwhm and P.A. assuming North is top. 
+    """
 
     from math import sqrt, atan, pi
     from const import fwsig

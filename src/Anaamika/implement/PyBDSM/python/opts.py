@@ -416,15 +416,21 @@ class Opts(object):
                              doc="Group all Gaussians in each island into a single "\
                                  "source\n"\
                                  "If True, all Gaussians in the island belong to a "\
-                                 "single source. If False, sources are created by "\
+                                 "single source. If False, grouping is controlled "\
+                                 "by the group_tol parameter.",
+                             group="advanced_opts")
+    group_tol       =  Float(1.0,
+                             doc="Tolerance for grouping of Gaussians into sources: "\
+                                 "larger values will result in larger sources\n"\
+                                 "Sources are created by "\
                                  "grouping nearby Gaussians as follows: (1) If the minimum "\
                                  "value between two Gaussians in an island is more than "\
-                                 "thresh_isl * rms_clip, "\
+                                 "group_tol * thresh_isl * rms_clip, "\
                                  "and (2) if the centres are seperated by a distance less "\
-                                 "than half the sum of their fwhms along the PA of the "\
-                                 "line joining them, they belong to the same island.",
+                                 "than 0.5*group_tol of the sum of their fwhms along the "\
+                                 "PA of the line joining them, they belong to the "\
+                                 "same island.",
                              group="advanced_opts")
-
 
     
     #--------------------------------A-TROUS OPTIONS--------------------------------
