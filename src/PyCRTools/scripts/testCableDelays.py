@@ -10,9 +10,11 @@ import pycrtools as cr
 import pickle
 
 topdir = '/Users/acorstanje/triggering/CR/results_john/'
-event = 'VHECR_LORA-20110714T174749.986Z'
+#event = 'VHECR_LORA-20110612T231913.199Z'
+event = 'VHECR_LORA-20110714T174749.986Z' # for use with Plotfootprint
+#event = 'VHECR_LORA-20110716T094509.665Z'
 
-filelist=cr.listFiles(topdir+event+'*')
+filelist=cr.listFiles(topdir+'*') # hack to process only one event
 eventlist=[]
 for file in filelist: # can this be done shorter / in listFiles?
     if os.path.isdir(file):
@@ -50,7 +52,7 @@ for eventdir in eventlist:
         pol = res["polarization"]
         antid.extend([str(int(v)) for v in res["antennas"].values()])
         # check: same ordering for ant-id's and cable delays??? Relying on that.
-        cabledelays.extend(res["antennas_final_cable_delays"])  # make that 'total' cable delays, and have also 'residual' delays      
+        cabledelays.extend(res["antennas_residual_cable_delays"])  # make that 'total' cable delays, and have also 'residual' delays      
         # use antenna id as key in the database
         timelist = [res["TIME"]] * len(res["antennas"])
         timestamps.extend(timelist)
@@ -98,7 +100,14 @@ for antid in fptask.antid:
 
 cdelays = cr.hArray(y)
 cdelayspread = np.array(yspread)
-fptask = cr.trerun("plotfootprint", "1", colormap = 'jet', filefilter = filefilter, arrivaltime = cdelays, pol=polarization) 
+
+# get original cable delays from metadata
+cabledelays_full=cr.metadata.get("CableDelays", fptask.antid, res["ANTENNA_SET"], True)  # Obtain cabledelays
+#cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
+#        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
+#        cabledelays=hArray(cabledelays)
+
+fptask = cr.trerun("plotfootprint", "1", colormap = 'jet', filefilter = filefilter, arrivaltime = cdelays, power=cabledelays_full, size = 150,  pol=polarization) 
 
 # now plot cable delays (quick fix for 3 events)
 
@@ -109,22 +118,38 @@ for i in range(3):
     x[:, i] = np.arange(len(cabledelays_database))
 
 y = np.zeros((len(cabledelays_database), 3))
+ydiff = np.zeros((len(cabledelays_database), 3))
 yerr = np.zeros(len(cabledelays_database))
 n=0
 for key in cabledelays_database:
     thisAnt = cabledelays_database[key]
 #    y[n] = thisAnt["cabledelay"]
     for k in range(len(thisAnt["delaylist"])):
-        y[n, k] = thisAnt["delaylist"][k]
+        thisAvg = 1.0e9 * thisAnt["cabledelay"]
+        thisDelay = 1.0e9 * thisAnt["delaylist"][k]
+        thisDiff = thisDelay - thisAvg
+        y[n, k] = (30.0 * k + thisDelay) if thisDelay < 30.0 else (-10.0 + k)# remove outliers
+        ydiff[n, k] = (0.0 * k + thisDiff) #if thisDiff < 30.0 else (30.0 + k) 
     yerr[n] = thisAnt["spread"]
     n+=1
     
-plt.scatter(x[:,0], y[:,0], c='b')
-plt.scatter(x[:,1], y[:,1], c='g')
-plt.scatter(x[:,2], y[:,2], c='r')
+plt.scatter(x[:,0], ydiff[:,0], c='b')
+plt.scatter(x[:,1], ydiff[:,1], c='g')
+plt.scatter(x[:,2], ydiff[:,2], c='r')
+plt.ylabel('Delay offset from average [ns]')
+plt.xlabel('Antenna number (concatenated)')
+plt.title('Cable delays minus average for 3 selected events')
 
 plt.figure()
 
+plt.scatter(x[:,0], y[:,0], c='b')
+plt.scatter(x[:,1], y[:,1], c='g')
+plt.scatter(x[:,2], y[:,2], c='r')
+plt.ylabel('Cable delays [ns] + 30x event number')
+plt.xlabel('Antenna number (concatenated)')
+plt.title('Cable delays for 3 selected events\n(outliers above 30.0 ns put at y<0)')
+
+plt.figure()
 plt.scatter(x[:, 0], yerr)
     
     
