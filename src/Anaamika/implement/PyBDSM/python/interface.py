@@ -742,10 +742,10 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '--> Wrote BBS sky model ' + repr(filename)
             return True
     if format == 'ds9':
-        filename = output.write_ds9_gaul(img, filename=filename,
+        filename = output.write_ds9_list(img, filename=filename,
                                             srcroot=srcroot,
                                             incl_wavelet=incl_wavelet,
-                                            clobber=clobber)
+                                            clobber=clobber, objtype=catalog_type)
         if filename == None:
             print '\033[91mERROR\033[0m: File exists and clobber = False.'
             return False

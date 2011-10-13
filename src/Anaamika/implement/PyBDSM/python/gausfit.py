@@ -556,13 +556,13 @@ class Gaussian(object):
     island_id   = Int(doc="Serial number of the island", colname='Isl_id')
     flag        = Int(doc="Flag associated with gaussian", colname='Flag')
     parameters  = List(Float(), doc="Raw gaussian parameters")
-    total_flux  = Float(doc="Total flux density, Jy", colname='Total', units='Jy')
-    total_fluxE = Float(doc="Total flux density error, Jy", colname='E_Total', 
+    total_flux  = Float(doc="Total flux density, Jy", colname='Total_flux', units='Jy')
+    total_fluxE = Float(doc="Total flux density error, Jy", colname='E_Total_flux', 
                         units='Jy')
-    peak_flux   = Float(doc="Peak flux density/beam, Jy/beam", colname='Peak', 
+    peak_flux   = Float(doc="Peak flux density/beam, Jy/beam", colname='Peak_flux', 
                         units='Jy/beam')
     peak_fluxE  = Float(doc="Peak flux density/beam error, Jy/beam", 
-                        colname='E_Peak', units='Jy/beam')
+                        colname='E_Peak_flux', units='Jy/beam')
     centre_sky  = List(Float(), doc="Sky coordinates of gaussian centre", 
                        colname=['RA', 'DEC'], units=['deg', 'deg'])
     centre_skyE = List(Float(), doc="Error on sky coordinates of gaussian centre", 
@@ -571,17 +571,17 @@ class Gaussian(object):
                        colname=['Xposn', 'Yposn'], units=['pix', 'pix'])
     centre_pixE = List(Float(), doc="Error on pixel coordinates of gaussian centre", 
                        colname=['E_Xposn', 'E_Yposn'], units=['pix', 'pix'])
-    size_sky   = List(Float(), doc="Shape of the gaussian FWHM, BPA, deg",
-                      colname=['Bmaj', 'Bmin', 'Bpa'], units=['deg', 'deg',
+    size_sky   = List(Float(), doc="Shape of the gaussian FWHM, PA, deg",
+                      colname=['Maj', 'Min', 'PA'], units=['deg', 'deg',
                       'deg'])
-    size_skyE  = List(Float(), doc="Error on shape of the gaussian FWHM, BPA, deg",
-                      colname=['E_Bmaj', 'E_Bmin', 'E_Bpa'], units=['deg', 'deg',
+    size_skyE  = List(Float(), doc="Error on shape of the gaussian FWHM, PA, deg",
+                      colname=['E_Maj', 'E_Min', 'E_PA'], units=['deg', 'deg',
                       'deg'])
-    deconv_size_sky = List(Float(), doc="Deconvolved shape of the gaussian FWHM, BPA, deg",
-                      colname=['DC_Bmaj', 'DC_Bmin', 'DC_Bpa'], units=['deg', 'deg',
+    deconv_size_sky = List(Float(), doc="Deconvolved shape of the gaussian FWHM, PA, deg",
+                      colname=['DC_Maj', 'DC_Min', 'DC_PA'], units=['deg', 'deg',
                       'deg'])
-    deconv_size_skyE = List(Float(), doc="Error on deconvolved shape of the gaussian FWHM, BPA, deg",
-                      colname=['E_DC_Bmaj', 'E_DC_Bmin', 'E_DC_Bpa'], units=['deg', 'deg',
+    deconv_size_skyE = List(Float(), doc="Error on deconvolved shape of the gaussian FWHM, PA, deg",
+                      colname=['E_DC_Maj', 'E_DC_Min', 'E_DC_PA'], units=['deg', 'deg',
                       'deg'])
     size_pix   = List(Float(), doc="Shape of the gaussian FWHM, pixel units")
     size_pixE  = List(Float(), doc="Error on shape of the gaussian FWHM, pixel units")

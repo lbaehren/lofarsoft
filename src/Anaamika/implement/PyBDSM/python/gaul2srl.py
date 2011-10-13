@@ -326,7 +326,7 @@ class Op_gaul2srl(Op):
         sra, sdec = img.pix2sky([mompara[1]+delc[0], mompara[2]+delc[1]])
         mra, mdec = img.pix2sky(posn)
                                         # "deconvolve" the sizes
-        gaus_c = [mompara[3], mompara[4], mompara[5]+90.0]
+        gaus_c = [mompara[3], mompara[4], mompara[5]]
         gaus_bm = [bm_pix[0], bm_pix[1], bm_pix[2]]
         gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
         deconv_size_sky = [img.pix2beam(gaus_dc), [0.0, 0.0, 0.0]]
@@ -338,7 +338,7 @@ class Op_gaul2srl(Op):
             tot += g.total_flux
             totE_sq += g.total_fluxE
         totE = sqrt(totE_sq)
-        size_sky = [mompara[3]*sqrt(cdeltsq), mompara[4]*sqrt(cdeltsq), mompara[5]+90.0]
+        size_sky = [mompara[3]*sqrt(cdeltsq), mompara[4]*sqrt(cdeltsq), mompara[5]]
         
         # Estimate errors using Monte Carlo technique
         nMC = 20
@@ -438,17 +438,17 @@ class Source(object):
     """ Instances of this class store sources made from grouped gaussians. """
     source_id           = Int(doc="Source index", colname='Source_id')
     code                = String(doc='Source code S, C, or M', colname='S_Code')
-    total_flux          = Float(doc="Total flux (Jy)", colname='Total', units='Jy')
-    total_fluxE         = Float(doc="Error in total flux (Jy)", colname='E_Total', 
+    total_flux          = Float(doc="Total flux (Jy)", colname='Total_flux', units='Jy')
+    total_fluxE         = Float(doc="Error in total flux (Jy)", colname='E_Total_flux', 
                                 units='Jy')
     peak_flux_centroid  = Float(doc="Peak flux at centroid of emission (Jy/beam)",
-                                colname='Peak_centroid', units='Jy/beam')
+                                colname='Peak_flux_cen', units='Jy/beam')
     peak_flux_centroidE = Float(doc="Error in peak flux at centroid of emission (Jy/beam)",
-                                colname='E_Peak_centroid', units='Jy/beam')
+                                colname='E_Peak_flux_cen', units='Jy/beam')
     peak_flux_max       = Float(doc="Peak flux at posn of maximum emission (Jy/beam)",
-                                colname='Peak_max', units='Jy/beam')
+                                colname='Peak_flux', units='Jy/beam')
     peak_flux_maxE      = Float(doc="Error in peak flux at posn of max emission (Jy/beam)",
-                                colname='E_Peak_max', units='Jy/beam')
+                                colname='E_Peak_flux', units='Jy/beam')
     posn_sky_centroid   = List(Float(), doc="Posn (RA, Dec in deg) of centroid of source", 
                                colname=['RA', 'DEC'], units=['deg', 'deg'])
     posn_sky_centroidE  = List(Float(), doc="Error in posn (RA, Dec in deg) of centroid of source", 
@@ -466,16 +466,16 @@ class Source(object):
     posn_pix_maxE       = List(Float(), doc="Error in position (pixels) of maximum emission of source", 
                                colname=['E_Xposn_max', 'E_Yposn_max'], units=['pix', 'pix'])
     size_sky            = List(Float(), doc="Shape of the source FWHM, BPA, deg",
-                               colname=['Bmaj', 'Bmin', 'Bpa'], units=['deg', 'deg',
+                               colname=['Maj', 'Min', 'PA'], units=['deg', 'deg',
                               'deg'])
     size_skyE           = List(Float(), doc="Error on shape of the source FWHM, BPA, deg",
-                               colname=['E_Bmaj', 'E_Bmin', 'E_Bpa'], units=['deg', 'deg',
+                               colname=['E_Maj', 'E_Min', 'E_PA'], units=['deg', 'deg',
                                'deg'])
     deconv_size_sky     = List(Float(), doc="Deconvolved shape of the source FWHM, BPA, deg",
-                               colname=['DC_Bmaj', 'DC_Bmin', 'DC_Bpa'], units=['deg', 'deg',
+                               colname=['DC_Maj', 'DC_Min', 'DC_PA'], units=['deg', 'deg',
                               'deg'])
     deconv_size_skyE    = List(Float(), doc="Error on deconvolved shape of the source FWHM, BPA, deg",
-                               colname=['E_DC_Bmaj', 'E_DC_Bmin', 'E_DC_Bpa'], units=['deg', 'deg',
+                               colname=['E_DC_Maj', 'E_DC_Min', 'E_DC_PA'], units=['deg', 'deg',
                               'deg'])
     rms_isl             = Float(doc="Island rms Jy/beam", colname='I_rms', units='Jy/beam')
     ngaus               = Int(doc='Number of gaussians in the source', colname='N_gaus')

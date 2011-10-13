@@ -91,7 +91,7 @@ class Op_outlist(Op):
     def write_ds9(self, img, dir):
         """ Writes the gaussian list as a ds9 region file"""            
         fname = dir + img.imagename + '.ds9.reg'
-        write_ds9_gaul(img, filename=fname, srcroot=img.opts.srcroot, incl_wavelet=True,
+        write_ds9_list(img, filename=fname, srcroot=img.opts.srcroot, incl_wavelet=True,
                        clobber=True, deconvolve=False)
   
     def write_gaul_FITS(self, img, dir, incl_wavelet=True):
@@ -281,8 +281,8 @@ def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
     return filename
     
 
-def write_ds9_gaul(img, filename=None, srcroot=None, deconvolve=False,
-                   incl_wavelet=True, clobber=False):
+def write_ds9_list(img, filename=None, srcroot=None, deconvolve=False,
+                   incl_wavelet=True, clobber=False, objtype='gaul'):
     """Writes Gaussian list to a ds9 region file"""
     import numpy as N
     from const import fwsig
@@ -290,15 +290,24 @@ def write_ds9_gaul(img, filename=None, srcroot=None, deconvolve=False,
     import os
 
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
-    outl, outn, patl = list_and_sort_gaussians(img, patch=None)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                            wavelet=True)
-        outl += wavoutl
-        outn += wavoutn
+    if objtype == 'gaul':
+        outl, outn, patl = list_and_sort_gaussians(img, patch=None)
+        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+            wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
+                                                                wavelet=True)
+            outl += wavoutl
+            outn += wavoutn
+    elif objtype == 'srl': 
+        root = img.parentname       
+        outl = [img.source]
+        outn = []
+        for src in img.source:
+            outn.append(root + '_i' + str(src.island_id) + '_s' +
+                            str(src.source_id))
+        outn = [outn]
     outstr_list = make_ds9_str(img, outl, outn, deconvolve=deconvolve)
     if filename == None:
-        filename = img.imagename + '.reg'
+        filename = img.imagename + '.' + objtype + '.reg'
     if os.path.exists(filename) and clobber == False:
         return None
     mylog.info('Writing ' + filename)
@@ -606,7 +615,10 @@ def make_ds9_str(img, glist, gnames, deconvolve=False):
 
     for gindx, g in enumerate(glist[0]):
         src_name = gnames[0][gindx]
-        ra, dec = g.centre_sky
+        try:
+            ra, dec = g.centre_sky
+        except AttributeError:
+            ra, dec = g.posn_sky_centroid
         if deconvolve:
             deconv = g.deconv_size_sky
         else:
@@ -872,16 +884,19 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
     # First, define a list of columns in order desired, using the names of
     # the attributes of the Gaussian or Source object
     if objtype == 'gaul':
-        names = ['gaus_num', 'island_id', 'source_id', 'wavelet_j', 'total_flux', 
-                 'total_fluxE', 'peak_flux', 'peak_fluxE', 'centre_sky', 'centre_skyE',
-                 'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 'deconv_size_sky',
+        names = ['gaus_num', 'island_id', 'source_id', 'wavelet_j', 
+                 'centre_sky', 'centre_skyE', 'total_flux', 
+                 'total_fluxE', 'peak_flux', 'peak_fluxE',
+                 'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 
+                 'deconv_size_sky',
                  'deconv_size_skyE', 'rms', 'mean', 'code']
     elif objtype == 'srl':
-        names = ['source_id', 'island_id', 'wavelet_j', 'total_flux', 
-                 'total_fluxE', 'peak_flux_centroid', 'peak_flux_centroidE', 
-                 'peak_flux_max', 'peak_flux_maxE', 'posn_sky_centroid', 
-                 'posn_sky_centroidE','posn_sky_max', 'posn_sky_maxE', 
-                 'posn_pix_centroid', 'posn_pix_centroidE', 'posn_pix_max', 'posn_pix_maxE',
+        names = ['source_id', 'island_id', 'wavelet_j', 'posn_sky_centroid', 
+                 'posn_sky_centroidE', 'total_flux', 
+                 'total_fluxE', #'peak_flux_centroid', 'peak_flux_centroidE', 
+                 'peak_flux_max', 'peak_flux_maxE', 'posn_sky_max', 'posn_sky_maxE', 
+                 'posn_pix_centroid', 'posn_pix_centroidE', 'posn_pix_max', 
+                 'posn_pix_maxE',
                  'size_sky', 'size_skyE', 'deconv_size_sky',
                  'deconv_size_skyE', 'rms_isl', 'mean_isl', 'code']
     else:
@@ -892,8 +907,8 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
     if incl_pol:    
         names += ['total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
                   'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
-                  'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 'tpol_fraction_err',
-                  'lpol_angle', 'lpol_angle_err']
+                  'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 
+                  'tpol_fraction_err', 'lpol_angle', 'lpol_angle_err']
     cnames = []
     cformats = []
     cunits = []
