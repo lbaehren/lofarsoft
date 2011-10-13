@@ -42,9 +42,12 @@ if __name__ == '__main__':
             print 'Running command :', cmd
             os.system(cmd)
             tempname = '%s_%d-%ds_singlepulse.ps' % (basename, ts, te)
-            finalname = '%s_%d-%ds_DM%d_%d_singlepulse.ps' % (basename, ts, te, dm_lo, dm_hi)
-            cmd = 'mv %s %s' % (tempname, finalname)
+            psname = '%s_%d-%ds_DM%d_%d_singlepulse.ps' % (basename, ts, te, dm_lo, dm_hi)
+            pngname = '%s_%d-%ds_DM%d_%d_singlepulse.png' % (basename, ts, te, dm_lo, dm_hi)
+            cmd = 'mv %s %s' % (tempname, psname)
             print 'Running command :', cmd
+            os.system(cmd)
+            cmd = 'convert -matte %s %s' % (psname, pngname))
             os.system(cmd)
     os.chdir(cwd)
     remove_matching(os.path.join(sod, 'SINGLEPULSE'), r'\S+\.inf$')
