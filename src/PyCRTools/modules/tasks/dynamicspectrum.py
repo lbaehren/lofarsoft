@@ -555,7 +555,7 @@ class DynamicSpectrum(tasks.Task):
             self.rms_rms=asvec(self.rms_antenna[:self.nantennas_total]).stddev(self.rms)
             self.npeaks=asvec(self.npeaks_antenna[:self.nantennas_total]).mean()
             self.npeaks_rms=asvec(self.npeaks_antenna[:self.nantennas_total]).stddev(self.npeaks)
-            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + self.rms_rms/self.rms)/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms)
+            self.homogeneity_factor=1-(self.npeaks_rms/self.npeaks + (self.rms_rms/self.rms if self.rms>0 else 0))/2. if self.npeaks>0 else 1-(self.rms_rms/self.rms if self.rms>0 else 0)
             print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
             print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
             print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
