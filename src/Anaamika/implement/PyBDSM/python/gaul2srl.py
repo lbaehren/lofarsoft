@@ -471,10 +471,10 @@ class Source(object):
     size_skyE           = List(Float(), doc="Error on shape of the source FWHM, BPA, deg",
                                colname=['E_Bmaj', 'E_Bmin', 'E_Bpa'], units=['deg', 'deg',
                                'deg'])
-    deconv_size_sky     = List(Float(), doc="Deconvolved shape of the gaussian FWHM, BPA, deg",
+    deconv_size_sky     = List(Float(), doc="Deconvolved shape of the source FWHM, BPA, deg",
                                colname=['DC_Bmaj', 'DC_Bmin', 'DC_Bpa'], units=['deg', 'deg',
                               'deg'])
-    deconv_size_skyE    = List(Float(), doc="Error on deconvolved shape of the gaussian FWHM, BPA, deg",
+    deconv_size_skyE    = List(Float(), doc="Error on deconvolved shape of the source FWHM, BPA, deg",
                                colname=['E_DC_Bmaj', 'E_DC_Bmin', 'E_DC_Bpa'], units=['deg', 'deg',
                               'deg'])
     rms_isl             = Float(doc="Island rms Jy/beam", colname='I_rms', units='Jy/beam')

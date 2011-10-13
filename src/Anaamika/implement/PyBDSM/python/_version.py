@@ -25,6 +25,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/10/13 - Modified deconvolution to allow 1-D Gaussians and sources. 
+                 Added FREQ0, EQUINOX, INIMAGE keywords to output fits
+                 catalogs.
+
     2011/10/12 - Added errors to source properties (using a Monte Carlo
                  method for M sources). Fixed bug in output column names.
     
