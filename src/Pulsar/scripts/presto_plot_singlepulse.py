@@ -47,7 +47,7 @@ if __name__ == '__main__':
             cmd = 'mv %s %s' % (tempname, psname)
             print 'Running command :', cmd
             os.system(cmd)
-            cmd = 'convert -matte %s %s' % (psname, pngname))
+            cmd = 'convert -matte %s %s' % (psname, pngname)
             os.system(cmd)
     os.chdir(cwd)
     remove_matching(os.path.join(sod, 'SINGLEPULSE'), r'\S+\.inf$')
