@@ -77,6 +77,12 @@ class Op_make_residimage(Op):
             resid = resid[ind]
             isl.gresid_rms = N.std(resid)
             isl.gresid_mean = N.mean(resid)
+            for src in isl.sources:
+                src.gresid_rms = N.std(resid)
+                src.gresid_mean = N.mean(resid)
+                for g in src.gaussians:
+                    g.gresid_rms = N.std(resid)
+                    g.gresid_mean = N.mean(resid)
 
         # Now residual image for shapelets
         if img.opts.shapelet_do:
@@ -113,6 +119,12 @@ class Op_make_residimage(Op):
                 resid = resid[ind]
                 isl.sresid_rms = N.std(resid)
                 isl.sresid_mean = N.mean(resid)
+                for src in isl.sources:
+                    src.sresid_rms = N.std(resid)
+                    src.sresid_mean = N.mean(resid)
+                    for g in src.gaussians:
+                        g.sresid_rms = N.std(resid)
+                        g.sresid_mean = N.mean(resid)
 
         return img
 

@@ -23,7 +23,7 @@ def process(img, **kwargs):
 
     # First, reset img to initial state (in case img is being reprocessed)
     if hasattr(img, 'use_io'): del img.use_io
-    if hasattr(img, 'source'): del img.source
+    if hasattr(img, 'sources'): del img.sources
     if hasattr(img, 'gaussians'): del img.gaussians
     if hasattr(img, 'atrous_gaussians'): del img.atrous_gaussians
     if hasattr(img, 'islands'): del img.islands

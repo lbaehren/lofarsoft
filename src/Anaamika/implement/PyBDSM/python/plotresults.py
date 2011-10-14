@@ -164,7 +164,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
         if img.opts.spectralindex_do == False:
             print 'Source SEDs were not fit. Skipping source SED plots.'
         else:
-            src_list = img.source
+            src_list = img.sources
             sed_src = get_src(src_list, 0)
             if sed_src == None:
                 print 'No sources found. Skipping source SED plots.'
@@ -261,11 +261,11 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                     # draw the gaussians with one colour per source or island
                     # (if gaul2srl was not run)
                     if hasattr(img, 'nsrc'):
-                        nsrc = len(isl.source)
+                        nsrc = len(isl.sources)
                         for isrc in range(nsrc):
                             col = colours[isrc % 6]
                             style = styles[isrc/6 % 3]
-                            src = isl.source[isrc]
+                            src = isl.sources[isrc]
                             for g in src.gaussians:
                                 gidx = g.gaus_num
                                 ellx, elly = func.drawellipse(g)

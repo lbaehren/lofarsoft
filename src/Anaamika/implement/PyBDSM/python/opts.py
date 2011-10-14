@@ -952,7 +952,7 @@ class Opts(object):
                                  "The following formats are supported:\n"\
                                  "'bbs' - BlackBoard Selfcal sky model format "\
                                  "(Gaussian list only)\n"\
-                                 "'ds9' - ds9 region format (Gaussian list only)\n"\
+                                 "'ds9' - ds9 region format\n"\
                                  "'fits' - FITS catalog format, readable by many "\
                                  "software packages, including IDL, TOPCAT, Python, "\
                                  "fv, Aladin, etc.\n"\

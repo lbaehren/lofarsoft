@@ -52,9 +52,9 @@ class Op_gaul2srl(Op):
                 sources.extend(source)
                 isl_sources.extend(source)
 
-            isl.source = isl_sources
+            isl.sources = isl_sources
 
-        img.source = sources
+        img.sources = sources
         img.nsrc = src_index+1
         mylogger.userinfo(mylog, "Number of sources formed from Gaussians",
                           str(img.nsrc))
@@ -477,7 +477,17 @@ class Source(object):
     deconv_size_skyE    = List(Float(), doc="Error on deconvolved shape of the source FWHM, BPA, deg",
                                colname=['E_DC_Maj', 'E_DC_Min', 'E_DC_PA'], units=['deg', 'deg',
                               'deg'])
-    rms_isl             = Float(doc="Island rms Jy/beam", colname='I_rms', units='Jy/beam')
+    rms_isl             = Float(doc="Island rms Jy/beam", colname='Isl_rms', units='Jy/beam')
+    mean_isl            = Float(doc="Island mean Jy/beam", colname='Isl_mean', units='Jy/beam')
+    gresid_rms          = Float(doc="Island rms in Gaussian residual image Jy/beam", 
+                                colname='Resid_Isl_rms', units='Jy/beam')
+    gresid_mean         = Float(doc="Island mean in Gaussian residual image Jy/beam", 
+                                colname='Resid_Isl_mean', units='Jy/beam')
+    sresid_rms          = Float(doc="Island rms in Shapelet residual image Jy/beam", 
+                                colname='Resid_Isl_rms', units='Jy/beam')
+    sresid_mean         = Float(doc="Island mean in Shapelet residual image Jy/beam", 
+                                colname='Resid_Isl_mean', units='Jy/beam')
+    wavelet_j           = Int(doc="Wavelet number to which Gaussian belongs", colname='Wave_id')
     ngaus               = Int(doc='Number of gaussians in the source', colname='N_gaus')
     island_id           = Int(doc="Serial number of the island", colname='Isl_id')
     gaussians           = List(tInstance(Gaussian), doc="")
@@ -500,10 +510,11 @@ class Source(object):
         self.island_id = island_id
         self.gaussians = gaussians
         self.rms_isl = img.islands[island_id].rms
+        self.mean_isl = img.islands[island_id].mean
         self.jlevel = img.j
 
-Image.source = List(tInstance(Source), doc="List of Sources")
-Island.source = List(tInstance(Source), doc="List of Sources")
+Image.sources = List(tInstance(Source), doc="List of Sources")
+Island.sources = List(tInstance(Source), doc="List of Sources")
 
 
 

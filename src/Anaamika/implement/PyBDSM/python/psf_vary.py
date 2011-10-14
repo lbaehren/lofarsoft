@@ -47,7 +47,7 @@ class Op_psf_vary(Op):
         for i, g in enumerate(img.gaussians):#()):
           num[i] = i; peak[i] = g.peak_flux; xc[i] = g.centre_pix[0]; yc[i] = g.centre_pix[1]
           bmaj[i] = g.size_pix[0]; bmin[i] = g.size_pix[1]; bpa[i] = g.size_pix[2]
-          code[i] = img.source[g.source_id].code; rms[i] = img.islands[g.island_id].rms
+          code[i] = img.sources[g.source_id].code; rms[i] = img.islands[g.island_id].rms
         gauls = (num, peak, xc, yc, bmaj, bmin, bpa, code, rms)
         tr_gauls = self.trans_gaul(gauls)
 

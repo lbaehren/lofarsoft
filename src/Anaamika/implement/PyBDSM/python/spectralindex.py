@@ -89,7 +89,7 @@ class Op_spectralindex(Op):
         bar2 = statusbar.StatusBar('Calculating spectral indices for sources  : ', 0, img.nsrc)
         if img.opts.quiet == False:
             bar2.start()
-        for src in img.source:
+        for src in img.sources:
           if src.code in ['S', 'C']:
             isl = img.islands[src.island_id]
             case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
@@ -668,7 +668,7 @@ class Op_spectralindex(Op):
         chanmask = cp(img.avimage_flags); nchan = len(S_i)
         srcslice = [slice(0, nchan, None)]+src.bbox
         image = avimage[srcslice]
-        nsrc_in_isl = len(isl.source)
+        nsrc_in_isl = len(isl.sources)
         bm_pix = img.beam2pix(src.size_sky); n_bm_pix = 2.0*pi/2.3548/2.3548*bm_pix[0]*bm_pix[1]
         ngaus = len(src.gaussians)
         if nsrc_in_isl == 1:

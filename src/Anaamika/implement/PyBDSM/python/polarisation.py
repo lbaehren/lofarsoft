@@ -75,13 +75,13 @@ class Op_polarisation(Op):
               bar.start()
 
           for isl in img.islands:
-            nsrc_in_island = len(isl.source)
+            nsrc_in_island = len(isl.sources)
             # Cut out images for each island and find mean rms
             ch0_Q = img.ch0_Q[isl.bbox]
             ch0_U = img.ch0_U[isl.bbox]
             ch0_V = img.ch0_V[isl.bbox]
            
-            for i, src in enumerate(isl.source):
+            for i, src in enumerate(isl.sources):
               if nsrc_in_island == 1:
                 # Just one source in the island: add up all unmasked pixels
                 ind = N.where(~isl.mask_active)
@@ -98,7 +98,7 @@ class Op_polarisation(Op):
                 if i == 0: # only need to do this once per island
                   x1, x2 = N.mgrid[isl.bbox]
                   s_im = N.zeros((nsrc_in_island,isl.shape[0],isl.shape[1]), dtype=float)
-                  for j, src_in_isl in enumerate(isl.source):
+                  for j, src_in_isl in enumerate(isl.sources):
                     for g in src_in_isl.gaussians:
                       s_im[j,:,:] = s_im[j,:,:] + func.gaussian_fcn(g, x1, x2)
 

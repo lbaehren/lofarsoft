@@ -134,7 +134,7 @@ class Op_wavelet_atrous(Op):
                 img.atrous_opts.append(wimg.opts)
                 if isinstance(op,Op_islands): img.atrous_islands.append(wimg.islands)
                 if isinstance(op,Op_gausfit): img.atrous_gaussians.append(wimg.gaussians)
-                if isinstance(op,Op_gaul2srl): img.atrous_sources.append(wimg.source)
+                if isinstance(op,Op_gaul2srl): img.atrous_sources.append(wimg.sources)
               if hasattr(wimg, 'gaussians'): 
                 img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
               if img.opts.debug_figs_8_gaufit_wave: plotresults(wimg)

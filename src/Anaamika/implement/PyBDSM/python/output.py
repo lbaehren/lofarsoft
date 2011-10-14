@@ -196,7 +196,7 @@ def pybdsm2fbdsm(img, incl_wavelet=True):
         isl_rms = isl.rms
         isl_av = isl.mean
         src_idx = g.source_id
-        src = img.source[src_idx]
+        src = img.sources[src_idx]
         src_rms = src.rms_isl
         src_av = isl.mean
         flag = g.flag
@@ -299,9 +299,9 @@ def write_ds9_list(img, filename=None, srcroot=None, deconvolve=False,
             outn += wavoutn
     elif objtype == 'srl': 
         root = img.parentname       
-        outl = [img.source]
+        outl = [img.sources]
         outn = []
-        for src in img.source:
+        for src in img.sources:
             outn.append(root + '_i' + str(src.island_id) + '_s' +
                             str(src.source_id))
         outn = [outn]
@@ -333,7 +333,7 @@ def write_ascii_list(img, filename=None, incl_wavelet=True, sort_by='indx',
                                                                 sort_by=sort_by)
             outl += wavoutl
     elif objtype == 'srl':
-        outl = [img.source]
+        outl = [img.sources]
     outstr_list = make_ascii_str(img, outl, objtype=objtype)
     if filename == None:
         if objtype == 'gaul':
@@ -393,7 +393,7 @@ def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
                                                                 sort_by=sort_by)
             outl += wavoutl
     elif objtype == 'srl':
-        outl = [img.source]
+        outl = [img.sources]
     cvals, cnames, cformats, cunits = make_output_columns(outl[0][0], fits=True,
                                                           objtype=objtype, 
                                                           incl_spin=img.opts.spectralindex_do,
@@ -561,13 +561,13 @@ def make_bbs_str(img, glist, gnames, patchnames):
           deconvstr = deconv1 + ', ' + deconv2 + ', ' + deconv3
           specin = '-0.8'
           if hasattr(g, 'spin1'):
-              src = get_src(img.source, g.source_id)
+              src = get_src(img.sources, g.source_id)
               spin1 = src.spin1
               if spin1 != None:
                   specin = str("%.3e" % (spin1[1]))
           sep = ', '
           if img.opts.polarisation_do:
-              src = get_src(img.source, g.source_id)
+              src = get_src(img.sources, g.source_id)
               Q_flux = str("%.3e" % (src.total_flux_Q))
               U_flux = str("%.3e" % (src.total_flux_U))
               V_flux = str("%.3e" % (src.total_flux_V))
@@ -731,7 +731,7 @@ def write_islands(img):
               % (img.j, isl.island_id, isl.bbox[0].start, isl.bbox[0].stop, isl.bbox[1].start, isl.bbox[1].stop, \
               isl.origin[0], isl.origin[1], isl.shape[0], isl.shape[1], N.sum(~isl.mask_active), N.sum(~isl.mask_noisy), \
               isl.size_active, isl.mean, isl.rms, isl.max_value, len(isl.gaul), isl.gresid_mean, isl.gresid_rms, \
-              len(isl.source)))
+              len(isl.sources)))
 
     f.close()
 
@@ -780,7 +780,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
         else:
             return ([], [], [])
     else:
-        src_list = img.source
+        src_list = img.sources
     for src in src_list:
         for g in src.gaussians:
             gauslist.append(g)
@@ -889,7 +889,8 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
                  'total_fluxE', 'peak_flux', 'peak_fluxE',
                  'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 
                  'deconv_size_sky',
-                 'deconv_size_skyE', 'rms', 'mean', 'code']
+                 'deconv_size_skyE', 'rms', 'mean', 'gresid_rms', 'gresid_mean',
+                 'code']
     elif objtype == 'srl':
         names = ['source_id', 'island_id', 'wavelet_j', 'posn_sky_centroid', 
                  'posn_sky_centroidE', 'total_flux', 
@@ -898,7 +899,8 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
                  'posn_pix_centroid', 'posn_pix_centroidE', 'posn_pix_max', 
                  'posn_pix_maxE',
                  'size_sky', 'size_skyE', 'deconv_size_sky',
-                 'deconv_size_skyE', 'rms_isl', 'mean_isl', 'code']
+                 'deconv_size_skyE', 'rms_isl', 'mean_isl', 'gresid_rms', 
+                 'gresid_mean', 'code']
     else:
         print 'Object type unrecongnized.'
         return None

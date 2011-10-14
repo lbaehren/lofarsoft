@@ -25,6 +25,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/10/14 - Added residual rms and mean values to sources and source
+                 list catalogs. These values can be compared to background
+                 rms and mean values as a quick check of fit quality.
+
     2011/10/13 - Modified deconvolution to allow 1-D Gaussians and sources. 
                  Added FREQ0, EQUINOX, INIMAGE keywords to output fits
                  catalogs. Fixed bug in source position angles. Adjusted

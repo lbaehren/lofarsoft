@@ -73,11 +73,11 @@ def plotresults(img, **kwargs):
             donegaus = hasattr(img, 'ngaus')
             donesrc = hasattr(img, 'nsrc')
             if donegaus and donesrc:
-              nsrc = len(isl.source)
+              nsrc = len(isl.sources)
               for isrc in range(nsrc):
                 col = colours[isrc % 7]
                 style = styles[isrc/7 % 3]
-                src = isl.source[isrc]
+                src = isl.sources[isrc]
                 for g in src.gaussians:
                   ellx, elly = func.drawellipse(g)
                   pl.plot(ellx, elly, color = col, linestyle = style) 

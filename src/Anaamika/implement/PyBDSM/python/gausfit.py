@@ -585,8 +585,12 @@ class Gaussian(object):
                       'deg'])
     size_pix   = List(Float(), doc="Shape of the gaussian FWHM, pixel units")
     size_pixE  = List(Float(), doc="Error on shape of the gaussian FWHM, pixel units")
-    rms        = Float(doc="Island rms Jy/beam", colname='I_rms', units='Jy/beam')
-    mean       = Float(doc="Island mean Jy/beam", colname='I_mean', units='Jy/beam')
+    rms        = Float(doc="Island rms Jy/beam", colname='Isl_rms', units='Jy/beam')
+    mean       = Float(doc="Island mean Jy/beam", colname='Isl_mean', units='Jy/beam')
+    gresid_rms = Float(doc="Island rms in Gaussian residual image Jy/beam", colname='Resid_Isl_rms', units='Jy/beam')
+    gresid_mean= Float(doc="Island mean in Gaussian residual image Jy/beam", colname='Resid_Isl_mean', units='Jy/beam')
+    sresid_rms = Float(doc="Island rms in Shapelet residual image Jy/beam", colname='Resid_Isl_rms', units='Jy/beam')
+    sresid_mean= Float(doc="Island mean in Shapelet residual image Jy/beam", colname='Resid_Isl_mean', units='Jy/beam')
     wavelet_j  = Int(doc="Wavelet number to which Gaussian belongs", colname='Wave_id')
 
     def __init__(self, img, gaussian, isl_idx, g_idx, flag=0):
