@@ -11,9 +11,11 @@ import array as ar
 import os, os.path, stat, glob, sys, getopt
 import infodata as inf
 import math
+import scipy.stats as sc
 
 is_saveonly = False      # if True, script will save the dynamic spectrum in png file
 is_excludeonly = False   # if True, only completely bad subbands will be excluded
+is_psrfits = False       # if True, the input file is the single fits-file rather than *.sub
 threshold = 6 # threhold in sigmas to clip RFIs
 rfilimit = 10  # (in percents) if more, whole subband will be excluded
 samples2show = 0 #  size of window to show in seconds (if 0, show the whole file(s))
@@ -30,6 +32,7 @@ numposlarger=0
 # number of occasions when number of positive large peaks is smaller than number of negative ones
 numpossmaller=0
 
+
 def usage (prg):
         """ prints the usage info about the current program
         """
@@ -44,6 +47,7 @@ def usage (prg):
 	 --rfilimit <value>      - percent of RFI per subband allowed not to exclude whole subband (default: 10)\n\
          --statistics            - print info about fraction of large positive and negative samples\n\
 	 --saveonly              - only saves png file and exits\n\
+         --psrfits               - input data is the single fits-file instead of *.sub\n\
          -h, --help     - print this message\n" % (prg,)
 
 
@@ -55,7 +59,7 @@ def parsecmdline (prg, argv):
                 sys.exit()
         else:
                 try:
-                        opts, args = getopt.getopt (argv, "hn:t:w:l:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly", "win=", "offset=", "statistics"])
+                        opts, args = getopt.getopt (argv, "hn:t:w:l:", ["help", "nbins=", "threshold=", "rfilimit=", "excludeonly", "saveonly", "win=", "offset=", "statistics", "psrfits"])
                         for opt, arg in opts:
                                 if opt in ("-h", "--help"):
                                         usage (prg)
@@ -93,6 +97,14 @@ def parsecmdline (prg, argv):
 					global is_statistics
 					is_statistics = True
 
+                                if opt in ("--psrfits"):
+					global is_psrfits
+					is_psrfits = True
+					# we change xlow and xhigh because PSRFITS is 8-bit data
+					global xlow, xhigh
+					xlow = -256
+					xhigh = 255
+
                         if not args:
                                 print "No subband files!\n"
                                 usage (prg)
@@ -108,17 +120,17 @@ def parsecmdline (prg, argv):
                         sys.exit(2)
 	
 
-def setup_plot(x, title, colormap):
+def setup_plot(arr, title, colormap):
 	""" initializing dynamic spectrum plot
 	"""
 	global cax, cbar
 	plt.clf()
 	ax = fig.add_subplot (111)
 	ax.set_zorder(0.1)   # to make moise y-cursor to get values from this 'Subband' axis, rather then from axr 'Freq' axis
-	cax = ax.imshow(x, interpolation='nearest', aspect='auto', origin='lower', cmap=colormap)
+	cax = ax.imshow(arr, norm=colors.normalize(arr.min(), arr.max()), interpolation='nearest', aspect='auto', origin='lower', cmap=colormap)
 	cbar = fig.colorbar (cax, orientation='horizontal', spacing='uniform', pad=0.1)
 	fig.suptitle (title, fontsize=fs, y=0.94)
-        def printsub (x, pos=None): return '%d' % (subband_offset + x)
+        def printsub (val, pos=None): return '%d' % (subband_offset + val)
 	ax.yaxis.set_major_formatter(ticker.FuncFormatter(printsub))
 	for label in ax.get_yticklabels(): label.set_fontsize(fs)
 	plt.ylabel ("Channels", fontsize=fs)
@@ -127,21 +139,21 @@ def setup_plot(x, title, colormap):
 	axr = plt.twinx()
 	axr.yaxis.tick_right()
 	axr.yaxis.set_label_position("right")
-	axr.set_ylim(ymin=cfreq-chanbw/2., ymax=cfreq+totalbw-chanbw/2.)
+	axr.set_ylim(ymin=lofreq-chanbw/2., ymax=lofreq+totalbw-chanbw/2.)
 	for label in axr.get_yticklabels(): label.set_fontsize(fs)
 	plt.ylabel("Frequency (MHz)", fontsize=fs, rotation=-90)
 
-	def printtime (x, pos=None): return '%1.0f'%(float(samples_offset)*tsamp + float(x) * tsamp * Nbins)
+	def printtime (val, pos=None): return '%1.0f'%(float(samples_offset)*tsamp + float(val) * tsamp * Nbins)
 	ax.xaxis.set_major_formatter(ticker.FuncFormatter(printtime))
 	for label in ax.get_xticklabels(): label.set_fontsize(fs)
 
 	plt.draw()
 
-def plot_update(x):
+def plot_update(arr):
 	""" updating dynamic spectrum
 	"""
-	cax.set_data(x)
-	cbar.set_array(x)
+	cax.set_data(arr)
+	cbar.set_array(arr)
 	cbar.autoscale()
 	cax.changed()
 	plt.draw()
@@ -304,7 +316,7 @@ def plothist (series, selband, title):
 
 	plt.show()
 
-
+# ============================== M A I N =============================================
 if __name__=="__main__":
         parsecmdline (sys.argv[0].split("/")[-1], sys.argv[1:])
 	if is_saveonly:
@@ -315,136 +327,275 @@ if __name__=="__main__":
 
 	import matplotlib.pyplot as plt
 	import matplotlib.ticker as ticker
+	import matplotlib.colors as colors
 	import matplotlib.cm as cm
+
+	if is_psrfits:
+		import pyfits as py
+
+
+	# if input files are *.sub
+	if not is_psrfits:
 	
-	nfiles=len(subfiles)
-	# array of file sizes
-	sizes = [os.stat(file)[stat.ST_SIZE] / samplesize for file in subfiles]
-	# maximum size
-	size=max(sizes)
+		nfiles=len(subfiles)
+		# array of file sizes
+		sizes = [os.stat(file)[stat.ST_SIZE] / samplesize for file in subfiles]
+		# maximum size
+		size=max(sizes)
 
-        # reading inf-file to get corresponding info
-        inffile = subfiles[0].split(".sub")[0] + ".sub.inf"
-        id = inf.infodata(inffile)
-        cfreq = id.lofreq
-        chanbw = id.chan_width
-	totalbw = id.BW
-	tsamp = id.dt
+        	# reading inf-file to get corresponding info
+        	inffile = subfiles[0].split(".sub")[0] + ".sub.inf"
+        	id = inf.infodata(inffile)
+        	lofreq = id.lofreq
+        	chanbw = id.chan_width
+		totalbw = id.BW
+		tsamp = id.dt
 
-	# handle offset from the beginning
-	if samples_offset > 0:
-		samples_offset = int (samples_offset / tsamp)
-		if samples_offset > size - 2:
-			samples_offset = 0
-	# will show only samples2show number of bins (if chosen)
-	if samples2show > 0:
-		samples2show = int(samples2show / tsamp)	
-		if size-samples_offset > samples2show: 
-			size = samples2show
-			sizes = [value-samples_offset > samples2show and samples2show or value for value in sizes]
-		else:
-			if samples_offset > 0:
-				sizes = [value - samples_offset for value in sizes]
+		# handle offset from the beginning
+		if samples_offset > 0:
+			samples_offset = int (samples_offset / tsamp)
+			if samples_offset > size - 2:
+				samples_offset = 0
+		# will show only samples2show number of bins (if chosen)
+		if samples2show > 0:
+			samples2show = int(samples2show / tsamp)	
+			if size-samples_offset > samples2show: 
+				size = samples2show
+				sizes = [value-samples_offset > samples2show and samples2show or value for value in sizes]
+			else:
+				if samples_offset > 0:
+					sizes = [value - samples_offset for value in sizes]
 
-	# first subband number
-	subband_offset = int(subfiles[0].split(".sub")[-1])
+		# first subband number
+		subband_offset = int(subfiles[0].split(".sub")[-1])
 
-	if is_saveonly:
-		pngname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".png"
+		if is_saveonly:
+			pngname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".png"
 
-	# forming the array for having the dynamic spectrum
-	if int(size/Nbins) == 0:
-		print "Number of bins %d is larger than given size %d!" % (Nbins, size) 
-		sys.exit(1)	
-	spectrum=np.zeros((nfiles, int(size/Nbins)))
+		rfirepname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".rfirep"
 
-	# forming a mask file with samples to reject
-	mask=np.zeros((nfiles, int(size/Nbins)))
-	clipped=np.zeros((nfiles, int(size/Nbins)))  # clipped data (only for plotting)
-	mean=np.zeros((nfiles, int(size/Nbins)))     # 2D array of means
-	rms=np.zeros((nfiles, int(size/Nbins)))      # 2D array of rms's
-	levels=np.zeros((nfiles, int(size/Nbins)))   # 2D array of levels (samples in sigma)
+		isize=int(size/Nbins)
 
-	# dictionary with indices of RFI'ish samples to be clipped
-	clipindices = {}  # for not _very_ bad subbands
-	badbands = []     # list of completely bad subbands
+		# forming the array for having the dynamic spectrum
+		if isize == 0:
+			print "Number of bins %d is larger than given size %d!" % (Nbins, size) 
+			sys.exit(1)	
+		spectrum=np.zeros((nfiles, isize))
 
-	if is_saveonly == False:
-		plt.ion() # interactive plotting
-		fig=plt.figure()
-		fig.canvas.mpl_connect('key_press_event', press)
-		setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
-		plot_help()
+		# forming a mask file with samples to reject
+		mask=np.zeros((nfiles, isize))
+		clipped=np.zeros((nfiles, isize))  # clipped data (only for plotting)
+		mean=np.zeros((nfiles, isize))     # 2D array of means
+		rms=np.zeros((nfiles, isize))      # 2D array of rms's
+		levels=np.zeros((nfiles, isize))   # 2D array of levels (samples in sigma)
 
-	for i in np.arange(0, nfiles, 1):
-		f = open(subfiles[i], "rb")
-		data = ar.array('h')  # 'h' - for signed short
-		f.seek (samples_offset * samplesize)  # position to the first sample to read
-		data.read(f, sizes[i])
-		f.close()
-		ndata = np.array(data)
-		if sizes[i] == 0:
-			rfi_fraction = 100.
-			clipped[i] = np.zeros(int(size/Nbins))
-			print "subband %d will be excluded (blanked)" % (i+subband_offset,)
-			continue
-		spectrum[i] = [np.average(ndata[k*Nbins:(k+1)*Nbins]) for k in np.arange(0, int(size/Nbins), 1)]
-		# calculate mean and rms in the windows of Nbins size
-		# to exclude outliers we sort the values in Nbins interval first and then use only first half of it
-		mean[i] = [np.mean(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, int(size/Nbins), 1)]
-		rms[i] = [np.std(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, int(size/Nbins), 1)]
+		# dictionary with indices of RFI'ish samples to be clipped
+		clipindices = {}  # for not _very_ bad subbands
+		badbands = []     # list of completely bad subbands
+
+		if is_saveonly == False:
+			plt.ion() # interactive plotting
+			fig=plt.figure()
+			fig.canvas.mpl_connect('key_press_event', press)
+			setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
+			plot_help()
+
+		for i in np.arange(0, nfiles, 1):
+			f = open(subfiles[i], "rb")
+			data = ar.array('h')  # 'h' - for signed short
+			f.seek (samples_offset * samplesize)  # position to the first sample to read
+			data.read(f, sizes[i])
+			f.close()
+			ndata = np.array(data)
+			if sizes[i] == 0:
+				rfi_fraction = 100.
+				clipped[i] = np.zeros(isize)
+				print "subband %d will be excluded (blanked)" % (i+subband_offset,)
+				continue
+
+			spectrum[i] = [np.average(ndata[k*Nbins:(k+1)*Nbins]) for k in np.arange(0, isize, 1)]
+			# calculate mean and rms in the windows of Nbins size
+			# to exclude outliers we sort the values in Nbins interval first and then use only first half of it
+			mean[i] = [np.mean(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, isize, 1)]
+			rms[i] = [np.std(np.sort(ndata[k*Nbins:(k+1)*Nbins])[0:Nbins/2]) for k in np.arange(0, isize, 1)]
+			# getting statistics about fraction of positive/negative samples
+			if is_statistics == True:
+				condition=np.zeros(int(size/Nbins), dtype=bool)
+				lev = np.array([(spectrum[i][k]-mean[i][k])/rms[i][k] for k in np.arange(0, isize, 1)])
+				levsize=np.size(lev)
+				condition = condition | (lev > threshold)
+				pospeak = np.size(lev.compress(condition))
+				condition=np.zeros(isize, dtype=bool)
+				condition = condition | (lev < -threshold)
+				negpeak = np.size(lev.compress(condition))
+				if pospeak > negpeak:
+					numposlarger += 1
+				if pospeak < negpeak:
+					numpossmaller += 1
+
+				pospeak = float((pospeak * 100.)/levsize)
+				negpeak = float((negpeak * 100.)/levsize)
+
+			# check if all values in rms are zeros. If so, then exclude this subband
+			if np.size(np.trim_zeros(np.sort(rms[i]), 'bf')) != 0:
+#				sig = np.trim_zeros(np.sort(rms[i]), 'bf')[0]
+				# I should remove np.abs at some point, because it's not really correct. I am using it here
+				# to avoid really huge negative spikes
+#				av = np.trim_zeros(np.sort(np.abs(mean[i])), 'bf')[0]
+
+#				levels[i] = [np.abs((float(spectrum[i][k] - av))/sig) for k in np.arange(0, isize, 1)]
+				levels[i] = [np.abs((spectrum[i][k] - mean[i][k])/rms[i][k]) for k in np.arange(0, isize, 1)]
+				mask[i] = [(levels[i][k] > threshold and spectrum[i][k] or 0) for k in np.arange(0, isize, 1)]
+				clipped[i] = [(spectrum[i][k] - mask[i][k]) for k in np.arange(0, isize, 1)]
+				# are there many zeros?
+				condition=np.zeros(isize, dtype=bool)
+				condition=condition | (levels[i] > threshold)
+				rfi_fraction = (float(np.size(clipped[i].compress(condition)))/np.size(clipped[i]))*100.
+			else:
+				rfi_fraction = 100.
+
+			if rfi_fraction >= rfilimit:  # bad subband  
+				clipped[i] = np.zeros(isize)
+				badbands.append(i)
+				print "subband %d will be excluded (rfi fraction = %.2f%%)" % (i+subband_offset, rfi_fraction)
+			else:
+				clipindices[i] = np.where(levels[i] > threshold)[0]
+
+			if is_saveonly == False: plot_update(spectrum)
+		
+	# input file is single fits-file
+	else:
+		subband_offset = 0
+
+		fitsfile = subfiles[0]
+		hdu=py.open(fitsfile, 'readonly', memmap=1)
+		cfreq=hdu[0].header['obsfreq']
+		nchan=hdu[1].header['nchan']
+		chanbw=hdu[1].header['chan_bw']
+		totalbw=nchan*chanbw
+		lofreq=cfreq-0.5*totalbw+0.5*chanbw   # central freq of lowest channel
+		tsamp=hdu[1].header['tbin']
+		nsize=np.size(hdu[1].data[0]['data'])
+		nrows=hdu[1].header['naxis2']
+		size=(nsize/nchan) * nrows
+
+                # handle offset from the beginning
+                if samples_offset > 0:
+                        samples_offset = int (samples_offset / tsamp)
+                        if samples_offset > size - 2:
+                                samples_offset = 0
+		row_offset=int(samples_offset/(nsize/nchan) + 0.5)
+		samples_offset=row_offset*(nsize/nchan)
+                # will show only samples2show number of bins (if chosen)
+                if samples2show > 0:
+                        samples2show = int(samples2show / tsamp)
+			print samples2show
+                        if size-samples_offset > samples2show:
+                                nrows = int (samples2show/(nsize/nchan))
+				size=(nsize/nchan) * nrows
+
+		# updating Nbins 
+		nrows_step=int(Nbins/(nsize/nchan) + 0.5)
+		Nbins = nrows_step * (nsize/nchan)
+		if Nbins == 0:
+			Nbins = 1
+			nrows_step = 1
+		isize=int(nrows/nrows_step)
+
+		print "CFreq: ", cfreq, " MHz   BW: ", totalbw, " MHz   Flow: ", lofreq, " MHz"
+		print "Nchan: ", nchan, "   Channel bw: ", chanbw, " MHz   Sampling time: ", tsamp, " s"
+		print "Nrows: ", nrows, "   Number of samples: ", size, "   Averaged: ", isize, " (by %d bins = %.2f s" % (Nbins, Nbins * tsamp), ")"
+		print "Row offset: ", row_offset, "  Rows to use: ", nrows
+
+
+                if is_saveonly:
+			pngname = fitsfile.split(".fits")[0] + ".sp.png"
+
+		rfirepname = fitsfile.split(".fits")[0] + ".rfirep"
+
+		# forming the array for having the dynamic spectrum
+		if isize == 0:
+			print "Number of bins %d is larger than given size %d!" % (Nbins, size) 
+			sys.exit(1)	
+		spectrum=np.zeros((nchan, isize))
+		spectrum8=np.zeros((nchan, isize))
+
+		# forming a mask file with samples to reject
+		mask=np.zeros((nchan, isize))
+		clipped=np.zeros((nchan, isize))  # clipped data (only for plotting)
+		mean=np.zeros((nchan, isize))     # 2D array of means
+		rms=np.zeros((nchan, isize))      # 2D array of rms's
+		levels=np.zeros((nchan, isize))   # 2D array of levels (samples in sigma)
+		lev=np.zeros(nchan, dtype=float)
+
+		# dictionary with indices of RFI'ish samples to be clipped
+		clipindices = {}  # for not _very_ bad subbands
+		badbands = []     # list of completely bad subbands
+
+		scales = hdu[1].data.field('dat_scl')[row_offset:row_offset+nrows]
+		offsets = hdu[1].data.field('dat_offs')[row_offset:row_offset+nrows]
+		chandata = hdu[1].data.field('data')[row_offset:row_offset+nrows]
+
+		for ii in xrange(nrows / nrows_step):
+			print "row block: %d (%d)" % (ii, nrows / nrows_step)
+			rb=ii*nrows_step
+			re=(ii+1)*nrows_step
+			for ch in np.arange(nchan):
+				spectrum8[ch][ii] = np.average(chandata[rb:re,ch::nchan])
+#				mean[ch][ii] = np.mean(np.sort(chandata[rb:re,ch::nchan], axis=None, kind='quicksort')[0:Nbins/2])
+#				rms[ch][ii] = np.std(np.sort(chandata[rb:re,ch::nchan], axis=None, kind='quicksort')[0:Nbins/2])
+				spectrum[ch][ii] = np.mean(chandata[rb:re,ch::nchan] * scales[rb:re,ch][:,np.newaxis] + offsets[rb:re,ch][:,np.newaxis])
+				mean[ch][ii] = np.mean(np.sort(chandata[rb:re,ch::nchan] * scales[rb:re,ch][:,np.newaxis] + offsets[rb:re,ch][:,np.newaxis], axis=None, kind='quicksort')[0:Nbins/2])
+				rms[ch][ii] = np.std(np.sort(chandata[rb:re,ch::nchan] * scales[rb:re,ch][:,np.newaxis] + offsets[rb:re,ch][:,np.newaxis], axis=None, kind='quicksort')[0:Nbins/2])
+
+		# close input fits-file
+		hdu.close()
+
 		# getting statistics about fraction of positive/negative samples
 		if is_statistics == True:
-			condition=np.zeros(int(size/Nbins), dtype=bool)
-			lev = np.array([(spectrum[i][k]-mean[i][k])/rms[i][k] for k in np.arange(0, int(size/Nbins), 1)])
-			levsize=np.size(lev)
-			condition = condition | (lev > threshold)
-			pospeak = np.size(lev.compress(condition))
-			condition=np.zeros(int(size/Nbins), dtype=bool)
-			condition = condition | (lev < -threshold)
-			negpeak = np.size(lev.compress(condition))
-			if pospeak > negpeak:
-				numposlarger += 1
-			if pospeak < negpeak:
-				numpossmaller += 1
-
-			pospeak = float((pospeak * 100.)/levsize)
-			negpeak = float((negpeak * 100.)/levsize)
-#			print "Stat[%d]: [+%.1fs] = %.1f%%   [-%.1fs] = %.1f%%" % (i, threshold, pospeak, threshold, negpeak)
+			for i in np.arange(nchan):
+				lev[i] = [(spectrum[i][k] - mean[i][k])/rms[i][k] for k in np.arange(0, isize, 1)]	
+				levsize=np.size(lev[i])
+				condition = (lev[i] > threshold)
+				pospeak = np.size(lev[i].compress(condition))
+				condition = (lev[i] < -threshold)
+				negpeak = np.size(lev[i].compress(condition))
+				if pospeak > negpeak: numposlarger += 1
+				if pospeak < negpeak: numpossmaller += 1
 
 		# check if all values in rms are zeros. If so, then exclude this subband
-		if np.size(np.trim_zeros(np.sort(rms[i]), 'bf')) != 0:
-#			sig = np.trim_zeros(np.sort(rms[i]), 'bf')[0]
-			# I should remove np.abs at some point, because it's not really correct. I am using it here
-			# to avoid really huge negative spikes
-#			av = np.trim_zeros(np.sort(np.abs(mean[i])), 'bf')[0]
+		for i in np.arange(nchan):
+			if np.size(np.trim_zeros(np.sort(rms[i]), 'bf')) != 0:
+				levels[i] = [(spectrum[i][k] - mean[i][k])/rms[i][k] for k in np.arange(0, isize, 1)]
+                        	mask[i] = [(np.abs(levels[i][k]) > threshold and spectrum[i][k] or 0) for k in np.arange(0, isize, 1)]
+                        	clipped[i] = [(spectrum[i][k] - mask[i][k]) for k in np.arange(0, isize, 1)]
+				# are there many zeros?
+				condition=(np.abs(levels[i]) > threshold)
+				rfi_fraction = (float(np.size(clipped[i].compress(condition)))/np.size(clipped[i]))*100.
+			else:
+				rfi_fraction = 100.
 
-#			levels[i] = [np.abs((float(spectrum[i][k] - av))/sig) for k in np.arange(0, int(size/Nbins), 1)]
-			levels[i] = [np.abs((spectrum[i][k] - mean[i][k])/rms[i][k]) for k in np.arange(0, int(size/Nbins), 1)]
-			mask[i] = [(levels[i][k] > threshold and spectrum[i][k] or 0) for k in np.arange(0, int(size/Nbins), 1)]
-			clipped[i] = [(spectrum[i][k] - mask[i][k]) for k in np.arange(0, int(size/Nbins), 1)]
-			# are there many zeros?
-			condition=np.zeros(int(size/Nbins), dtype=bool)
-			condition=condition | (levels[i] > threshold)
-			rfi_fraction = (float(np.size(clipped[i].compress(condition)))/np.size(clipped[i]))*100.
-		else:
-			rfi_fraction = 100.
+			if rfi_fraction >= rfilimit:  # bad subband  
+				clipped[i] = np.zeros(isize)
+				badbands.append(i)
+				print "channel %d will be excluded (rfi fraction = %.2f%%)" % (i, rfi_fraction)
+			else:
+				clipindices[i] = np.where(np.abs(levels[i]) > threshold)[0]
 
-		if rfi_fraction >= rfilimit:  # bad subband  
-			clipped[i] = np.zeros(int(size/Nbins))
-			badbands.append(i)
-			print "subband %d will be excluded (rfi fraction = %.2f%%)" % (i+subband_offset, rfi_fraction)
-		else:
-			clipindices[i] = np.where(levels[i] > threshold)[0]
+		if is_saveonly == False:
+			plt.ion() # interactive plotting
+			fig=plt.figure()
+			fig.canvas.mpl_connect('key_press_event', press)
+			# normalizing
+			setup_plot(spectrum8, "Original dynamic spectrum", cm.jet)
+			plot_help()
+			plot_update(spectrum8)
 
-		if is_saveonly == False: plot_update(spectrum)
-		
 	if is_statistics == True:
 		numposlarger = "%.1f" % (float(numposlarger)/nfiles, )
 		numpossmaller = "%.1f" % (float(numpossmaller)/nfiles, )
 		print "Number of pos>neg AND neg>pos occasions:  %s   %s" % (numposlarger, numpossmaller)
-	badchanfreqs = [cfreq + float(sb) * chanbw for sb in badbands]
-	rfirepname = subfiles[0].split(".sub")[0] + ".sub" + str(subband_offset) + "-" + str(subband_offset+nfiles-1) + ".rfirep"
+	badchanfreqs = [lofreq + float(sb) * chanbw for sb in badbands]
 	np.savetxt("." + rfirepname, np.transpose((badbands, badchanfreqs)), fmt="%d\t\t%.6g")
 	rfirep = open (rfirepname, 'w')	
 	rfirep.write("# Subband	Freq (MHz)\n")
@@ -454,7 +605,10 @@ if __name__=="__main__":
 
 	if is_saveonly:
 		fig=plt.figure()
-		setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
+		if not is_psrfits: 
+			setup_plot(spectrum, "Original dynamic spectrum", cm.jet)
+		else:
+			setup_plot(spectrum8, "Original dynamic spectrum", cm.jet)
 		plt.savefig(pngname)
 
 	plt.show()
