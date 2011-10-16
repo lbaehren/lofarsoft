@@ -1,7 +1,7 @@
 #!/bin/ksh
 
 # Please update the version number when you edit this file:
-VERSION=1.6
+VERSION=1.7
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -684,7 +684,7 @@ then
       exit 1
    fi
 fi
-if [ $IS == 0 ] && [ $INSWITCH == 1 ]
+if [ $ISNOT == 0 ] && [ $IS == 0 ] && [ $INSWITCH == 1 ]
 then
    IS=1
    IS_TF=true
@@ -1838,7 +1838,7 @@ do
 				   do 
 				      if (( $counter == $jj ))
 				      then
-				         echo "Beam-Formed Incoherentstokes turned on (TRUE) for this Observation"
+				         echo "Beam-Formed Incoherentstokes (IS) turned on (TRUE) for this Observation"
 				         IS_TF=true
 				      fi
 				   done
@@ -1852,33 +1852,33 @@ do
 			   do 
 			      if (( $counter == $jj ))
 			      then
-			         echo "Beam-Formed Coherentstokes turned on (TRUE) for this Observation"
+			         echo "Beam-Formed Coherentstokes (CS) turned on (TRUE) for this Observation"
 			         CS_TF=true
 			      fi
 			   done
 			fi
 
 			FD_TF=false
-			if (( $CS == 1 )) 
+			if (( $FD == 1 )) 
 			then
 			   for jj in $FD_LIST
 			   do 
 			      if (( $counter == $jj ))
 			      then
-			         echo "Beam-Formed Filtered-Data turned on (TRUE) for this Observation"
+			         echo "Beam-Formed Filtered-Data (FD) turned on (TRUE) for this Observation"
 			         FD_TF=true
 			      fi
 			   done
 			fi
 
 			BF_TF=false
-			if (( $CS == 1 )) 
+			if (( $BF == 1 )) 
 			then
 			   for jj in $BF_LIST
 			   do 
 			      if (( $counter == $jj ))
 			      then
-			         echo "Beam-Formed (beam-formed data BF) turned on (TRUE) for this Observation"
+			         echo "Beam-Formed (beam-formed data 'BF') turned on (TRUE) for this Observation"
 			         BF_TF=true
 			      fi
 			   done
