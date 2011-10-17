@@ -81,7 +81,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         
         print "Number of dipoles found:",ndipoles
         
-        par["eventid"]="LOFAR "+res["FILENAME"].split('-')[1]
+        par["event_id"]=res["FILENAME"].split('-')[1]
         
         par["antenna_set"] = res["ANTENNA_SET"]
         
@@ -131,6 +131,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         par["stationnames0"] = names0
         par["stationnames1"] = names1
 
+        
     return par
 
 
@@ -168,7 +169,7 @@ class ldf(tasks.Task):
         loracoreuncertainties = dict(default=None, doc="hArray of uncertainties of core position [ex,ey,cov]",unit="m"),
         loradirectionuncertainties = dict(default=None, doc="hArray of uncertainties of direction [eAz,eEl,cov]",unit="degrees"),
         loraenergy = dict(default=lambda self:self.results["loraenergy"],unit="eV?"),
-        eventid = dict(default=lambda self:self.results["eventid"], doc="EventId for LOFAR Event"),
+        event_id = dict(default=lambda self:self.results["event_id"], doc="EventId for LOFAR Event"),
         square=dict(default=False, doc="Square the data (to get power) before plotting."),
         plot_parameter=dict(default="pulses_maxima_y", doc="Which parameter of the results-dict to plot: 'pulses_strength' or 'pulses_maxima_y'"),
         logplot=dict(default=True, doc="Draw y-axis logarithmically"),
@@ -188,10 +189,11 @@ class ldf(tasks.Task):
         stationnames1 = dict(default=lambda self:self.results["stationnames1"],doc="Stations in run in pol 1."),
         draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF"),
         CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization"),
-        Draw3D = dict(default=True,doc="Draw 2D LDF")
+        Draw3D = dict(default=True,doc="Draw 2D LDF"),
+        save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder")
         
         )
-
+        
 
     ## Functions for shower geometry and uncertainty propagation
 
@@ -372,6 +374,10 @@ class ldf(tasks.Task):
             
         cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
         
+        if self.save_images:
+            pic_ldf = str(self.topdir)+"/VHECR_LORA-"+str(self.event_id)+"/LDF.png"
+            cr.plt.savefig(pic_ldf)
+        
         if self.draw_global:
         
             self.meansignals1.plot(color=color_pol1,marker='h',markersize = 10,linestyle="None",clf=False)
@@ -396,8 +402,8 @@ class ldf(tasks.Task):
             else:
                 cr.plt.ylabel("Power [a.u.]")
                      
-        if self.eventid:
-            cr.plt.title(str(self.eventid))
+        if self.event_id:
+            cr.plt.title("LOFAR_"+str(self.event_id))
             
         if self.CalcHorneffer:
             print "Horneffer Formula: Not yet implemented"
