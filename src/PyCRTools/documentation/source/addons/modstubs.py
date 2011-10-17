@@ -1,4 +1,5 @@
 import os
+import types
 
 """Autogenerate module documentation in *modules* directory for all modules listed in *modules.lst*"""
 
@@ -43,14 +44,9 @@ def autogen(list,output_path):
             f.write('.. currentmodule:: '+m+'\n\n')
             f.write('.. autosummary::\n\n')
             for module_member in module_members:
-                if module_member[0] == "_":
-                    continue
-                try:
-                    exec ("dummy =  "+m+"."+module_member+".__package__")
-                except AttributeError:
-                    # Only non-packages should be added to the Autosummary
+                if isinstance(eval(m+"."+module_member), (types.ClassType, types.TypeType, types.FunctionType)):
                     f.write('   '+module_member+'\n')
-            f.write('\n')
+            f.write('\n\n')
 
             # Auto module
             f.write('.. automodule:: '+m+'\n')
