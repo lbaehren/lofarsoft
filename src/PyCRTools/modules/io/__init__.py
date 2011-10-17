@@ -5,7 +5,7 @@ types.
 
 """
 
-__all__ = ['tbb', 'interfaces']
+__all__ = ['tbb', 'interfaces', 'open']
 
 import os
 
@@ -15,8 +15,17 @@ import pycrtools as cr
 import __builtin__ # Needed because from io import * will cause overloading
 
 def open(filename, *args, **kwargs):
-    """Open a supported file type or fall back to Python built in open
-    function.
+    """Open a supported file type or fall back to Python built in open function.
+
+    ================== ==================================================
+    Filename extension File type
+    ================== ==================================================
+    h5                 LOFAR TBB file
+    event              LOPES file (**not functioning**)
+    fits               FITS file
+    *other*            Open with regular python :func:`open` function.
+    ================== ==================================================
+
     """
 
     filename=os.path.expandvars(os.path.expanduser(filename))
