@@ -12,7 +12,7 @@ Code development
 ================
 
 The C++ code for the pycrtools is located in the directory
-``$LOFARSOFT/src/CR-Tools/implement/Pypeline``. It consists of files
+``$LOFARSOFT/src/PyCRTools``. It consists of files
 providing core functionality (``core.cc`` , ``core.h``, ``hfppnew*``)
 and several modules, recognizable by their ``m`` prefix, consisting of
 a ``.cc`` and ``.h`` files that contain the main functionality of the

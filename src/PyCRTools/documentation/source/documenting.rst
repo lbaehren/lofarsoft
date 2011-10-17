@@ -40,8 +40,12 @@ For example::
             """Initializes the object.
 
             And its arguments:
-            *a* does nothing
-            *b* also does nothing
+            ========= ====================
+            Parameter Description
+            ========= ====================
+            *a*       Does nothing
+            *b*       Also does nothing
+            ========= ====================
             """
 
     def test(x, y):
@@ -50,8 +54,12 @@ For example::
         Really it does nothing.
 
         Arguments:
-        *x* can be anything
-        *y* can also be anything
+        ========= ====================
+        Parameter Description
+        ========= ====================
+        *x*       Can be anything
+        *y*       Can also be anything
+        ========= ====================
         """
 
 In order to format the documentation Sphinx uses `reStructuredText <http://sphinx.pocoo.org/rest.html>`_, a wiki like syntax that is both human readable and machine parsable.
