@@ -602,17 +602,20 @@ class SearchRun(object):
         self.metadata = inf_reader(join(self.in_dir, self.basename + \
             '.sub.inf')) 
 
-        # Old data sets have incorrect metadata, deal with that.
-        datafile_size = os.path.getsize(join(self.in_dir, 
-            self.basename + '.sub0000'))
-        if self.metadata.n_bins * 2 != datafile_size:
-            if self.metadata.n_bins == 999 and datafile_size % 2 == 0:
-                self.metadata.n_bins = datafile_size // 2
-                logging.info(
-                    'Overruled wrong metadata (timeseries length was 999)'
-                )
-            else:    
-                raise Exception('Metadata incorrect')
+# COMMENTED OUT FILE SIZE CHECKS, THEY TRIP UP PROCESSING ON HYDRA, BY
+# REQUEST OF BEN
+#
+#        # Old data sets have incorrect metadata, deal with that.
+#        datafile_size = os.path.getsize(join(self.in_dir, 
+#            self.basename + '.sub0000'))
+#        if self.metadata.n_bins * 2 != datafile_size:
+#            if self.metadata.n_bins == 999 and datafile_size % 2 == 0:
+#                self.metadata.n_bins = datafile_size // 2
+#                logging.info(
+#                    'Overruled wrong metadata (timeseries length was 999)'
+#                )
+#            else:    
+#                raise Exception('Metadata incorrect')
 
         if rfi_file:
             self.rfi_file = os.path.abspath(rfi_file)
@@ -887,14 +890,15 @@ class SearchRun(object):
                 no_fold=no_fold,
                 minimum_p_cutoff=MINIMUM_P_CUTOFF,
             )
-        if not no_singlepulse:
-            # Deal with single pulse search plotting
-            print '=' * 70
-            print 'LOOKING AT SINGLE PULSE SEARCH RESULTS'
-            d = os.getcwd()
-            os.chdir(self.work_dir)
-            status = run_single_pulse_search_plotter('.', self.basename)
-            os.chdir(d)
+# Below these lines are commented out because LPPS uses a post processing script
+#        if not no_singlepulse:
+#            # Deal with single pulse search plotting
+#            print '=' * 70
+#            print 'LOOKING AT SINGLE PULSE SEARCH RESULTS'
+#            d = os.getcwd()
+#            os.chdir(self.work_dir)
+#            status = run_single_pulse_search_plotter('.', self.basename)
+#            os.chdir(d)
 
         # create a plots of chi-squared versus DM for the output of the known
         # ephemeris search
