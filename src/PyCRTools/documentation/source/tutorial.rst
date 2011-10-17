@@ -712,7 +712,7 @@ in the paramter list and looping proceeds until the first array has
 reached the end. Hence, care has to be taken that the same slice
 looping is applied to all arrays in the parameter list.
 
-As an example we create a new array of the dimensions of a
+As an example we create a new array of the dimensions of ``a``::
 
     >>> x = hArray(int, a)
 
@@ -808,240 +808,131 @@ The keyword values can be retrieved using :meth:`getKey`::
 File I/O
 ========
 
+
 Opening and closing a file
 --------------------------
 
-Let us see how we can open a file. First define a filename, e.g.::
+Let us see how we can open a file. First define some variable names
+that represent the file names of the files we are going to use::
 
-    >>> filename_sun=LOFARSOFT+"/data/lopes/example.event"
-    >>> filename_lofar_big=LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
-    >>> filename_lofar=LOFARSOFT+"/data/lofar/trigger-2010-02-11/triggered-pulse-2010-02-11-TBB1.h5"
-    >>> filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
+    >>> filename_lofar = LOFARSOFT+"/data/lofar/rw_20080701_162002_0109.h5"
 
-We can create a new file object, using the :class:`crfile` class,
+We can create a new file object, using the :meth:`open` method ,
 which is an interface to the LOFAR CRTOOLS datareader class.
 
 The following will open a data file and return a :class:`DataReader`
 object::
 
-    >>> datafile=crfile(filename_lofar).set("blocksize",1024*2)
+    >>> datafile = open(filename_lofar)
 
 The associated filename can be retrieved with::
 
-    >>> datafile.filename
+    >>> datafile["FILENAME"]
 
-The file will be automatically closed (and the :class:`DataReader`
-object will be destroyed), whenever the :class:`crfile` object is
-deleted, e.g. with ``file=0``.
+The file will be automatically closed (and the object will be
+destroyed), whenever the :class:`open` object is deleted, e.g. with
+``datafile = 0``.
 
 
 Setting and retrieving metadata
 -------------------------------
 
-Now we need to access the metadata in the file. This is can be done in
-multiple ways. One way is by using the get method. This method
-actually calls the function :func:`hFileGetParameter` defined in the
-C++ code.
+Now we need to access the metadata in the file.
 
-To find the observatory we can type::
+This can be done by providing a keyword to the datafile object, e.g. type::
 
-    >>> datafile.get("observatory")
-    'LOFAR'
+    >>> datafile["FILENAME"]
 
-There are more keywords, of course. A list of implemented parameters
-we can access is obtained by::
+to obtain the filename of the datafile object. A list of valid
+keywords can be obtained by::
 
-    >>> datafile.get("help")
-    hFileGetParameter - available keywords: nofAntennas, nofSelectedChannels, nofSelectedAntennas, nofBaselines, block, blocksize, stride, fftLength, nyquistZone, sampleInterval, referenceTime, sampleFrequency, antennas, selectedAntennas, selectedChannels, positions, shift, increment, frequencyValues, frequencyRange, Date, Observatory, Filesize, presync, TL, LTL, EventClass, SampleFreq, StartSample, AntennaIDs, SAMPLE_OFFSET, SAMPLE_NUMBER, TIME, keywords, help
+    >>> datafile.keys()
 
 Note, that the results are returned as PythonObjects. Hence, this
-makes use of the power of Python with automatic typing. For, example::
+makes use of the power of Python with automatic typing. For example::
 
-    >>> datafile.get("frequencyRange")
+    >>> datafile["FREQUENCY_RANGE"]
 
-actually returns a vector.
+actually returns a list of frequency ranges.
 
-
-A second way do retreive data is to use square brackets, since
-``datafile[key]`` is equivalent to ``datafile.get(key)``::
-
-    >>> datafile["blocksize"]
-
-Just for fun let us define a number of variables that contain
+Just for convenience let us define a number of variables that contain
 essential parameters (we will later actually use different ones which
 are automatically stored in the datafile object)::
 
-    >>> obsdate   =datafile["Date"]
-    >>> filesize  =datafile["Filesize"]
-    >>> blocksize =datafile["blocksize"]
-    >>> nAntennas =datafile["nofAntennas"]
-    >>> antennas  =datafile["antennas"]
-    >>> antennaIDs=datafile["AntennaIDs"]
-    >>> selectedAntennas=datafile["selectedAntennas"]
-    >>> nofSelectedAntennas=datafile["nofSelectedAntennas"]
-    >>> fftlength =datafile["fftLength"]
-    >>> sampleFrequency =datafile["sampleFrequency"]
-    >>> maxblocksize=min(filesize,1024*1024);
-    >>> nBlocks=filesize/blocksize;
+    >>> obsdate = datafile["TIME"][0]          # Timestamp of the first event
+    >>> filesize  = datafile["DATA_LENGTH"][0] # number of samples per dipole
+    >>> blocksize = datafile["BLOCKSIZE"]      # Number of samples per block
+    >>> nAntennas = datafile["NOF_DIPOLE_DATASETS"] # Number of antennas
+    >>> antennaIDs = datafile["DIPOLE_NAMES"]  # List of antenna IDs
+    >>> selectedAntennas = datafile["SELECTED_DIPOLES"] # List of selected antennas
+    >>> nofSelectedAntennas = datafile["NOF_SELECTED_DATASETS"] # Number of selected antennas
+    >>> fftlength = datafile["FFTSIZE"] # Length of an FFT block
+    >>> sampleFrequency = datafile["SAMPLE_FREQUENCY"][0] # Sample frequency
+    >>> maxblocksize=min(filesize,1024*1024); # Maximum blocksize we will use
+    >>> nBlocks = filesize/blocksize; # Number of blocks
 
-    obsdate => 1265926154
-    filesize => 132096
-    blocksize => 2048
-    nAntennas => 16
-    antennas => Vector(int, 16, fill=[128002016,128002017,128002018,128002019,128002020,128002021,128002022,128002023,128003024,128003025,128003026,128003027,128003028,128003029,128003030,128003031])
-    antennaIDs => Vector(int, 16, fill=[128002016,128002017,128002018,128002019,128002020,128002021,128002022,128002023,128003024,128003025,128003026,128003027,128003028,128003029,128003030,128003031])
-    selectedAntennas => Vector(int, 16, fill=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
-    nofSelectedAntennas => 16
-    fftlength => 1025
+    obsdate => 1214929202
+    filesize => 2048000
+    blocksize => 1024
+    nAntennas => 1
+    antennaIDs => ['001001009']
+    selectedAntennas => ['001001009']
+    nofSelectedAntennas => 1
+    fftlength => 513
     sampleFrequency => 200000000.0
-    maxblocksize => 132096
-    nBlocks => 64
+    nBlocks => 2000
 
-
-To get a readable version of the observing date use the python time
+As you can see the date is expressed in a not well interpretable
+format, i.e. the nr. of seconds after January 1st, 1970.  To get a
+human readable version of the observing date use the python time
 module::
 
     >>> import time
     >>> time.asctime(time.localtime(obsdate))
     'Thu Feb 11 23:09:14 2010'
 
-
 Fortunately, you do not have to do this all the time, since all the
 parameters will be read out at the beginning and will be stored as
 attributes to the file object.
-They will be updated whenever you do a ``file.set(key,value)``, however,
-assigning a new value to the attribute will **not** automatically change
-the parameter in the file. For this, you have to use the the 'set'
-method, which is an implementation of the :func:`hFileSetParameter`
-function. E.g. changing the blocksize we already did before. This is
-simply::
 
-    >>> datafile.set("blocksize",2048);
+To set the data attributes you can simply use the same attribute
+naming as mentioned above, e.g.::
 
-again the list of implemented keywords is visible with using::
+    >>> datafile["BLOCKSIZE"] = 2048
 
-    >>> datafile.set("help",0);
-
-Here the listed keywords actually start with capital letters, however,
-to spare you some annoyance, you can use a spelling which starts with
-either an upper or a lower case letter.
-
-Another useful feature: The set method actually returns the ``crfile``
-object itself. Hence, you can append multiple set commands after each
-other::
-
-    >>> datafile.set("block",2).set("selectedAntennas",[0,2,3]);
-
-Alternatively you can also use square brackets::
-
-    >>> datafile["selectedAntennas"]=[0,2]
-
-but then it is not possible to append multiple set commands in one
-line, so you need to provide lists of keywords and list of values,
-like::
-
-    >>> datafile["blocksize","selectedAntennas"]=[2048,[0,2]]
-    >>> datafile["blocksize","selectedAntennas"]
-
-Note, that we have now reduced the number of antennas to two: namely
-antenna 0 and 2 and the number of selected antennas is::
-
-    >>> datafile["nofSelectedAntennas"]
-
-However, in the follwing we want to work on all antennas again, so we
-do::
-
-    >>> datafile.set("block",0).set("selectedAntennas",range(nAntennas))
 
 
 Reading in data
 ---------------
 
-The next step is to actually read in data. This is done with the read
-method (accessing :func:`hFileRead`). The data is read flatly into a
-1D vector. This is also true if multiple antennas are read out at
-once. Here simply the data from the antennas follow each other.
+The next step is to actually read in data. This is done with the
+:meth:`read` method.
 
-Also, by default, memory allocation of the vectors has to be done in
-Python before calling any of the functions. This improves speed and
-efficiency, but requires one to program carefully and to understand
-the data structure.
+Before this is done, one has to allocate the memory in which the data
+is put. Although this requires one to program carefully and understand
+the data structure, this improves speed and efficiency.
 
-First we create a FloatArray of the correct dimensions, naming it
-``Voltage`` and setting the unit to counts::
+Let's first create a :type:`FloatArray` of the correct dimensions,
+naming it ``fxdata`` and setting the unit to counts::
 
-    >>> fxdata=hArray(float,[nofSelectedAntennas,blocksize],name="E-Field").setUnit("","Counts")
+    >>> fxdata = hArray(float,[nofSelectedAntennas,blocksize],name="E-Field")
+    >>> fxdata.setUnit("","Counts")
 
 This is now a large vector filled with zeros.
 
-Now we can read in the raw time series data, either using
-:func:`datafile.read` and a keyword, or actually better, use the
-:func:`read` method of arrays, as they then store filename and history
-information in the array.
+Now we can read in the raw timeseries data, either by using
+:func:`datafile.read` and a keyword, or use the :func:`read` method of
+arrays, e.g.::
 
-Currently implemented keywords for reading data fields are: *Fx*,
-*Voltage*, *FFT*, *CalFFT*,*Time* and *Frequency*.
+    >>> datafile.read("TIMESERIES_DATA", fxdata)
 
-So, let us read in the raw time series data, i.e. the electric field
-in the antenna as digitized by the ADC. This is provided by the
-keyword *Fx* (meaning f(x))::
+or::
 
-    >>> fxdata.read(datafile,"Fx")
-    'hArray(float, [16, 2048], fill=[16,17,10,18,17,6,16,17,-1,0,...,-9,-12,-25,-13,-7,-15,-5,3,-2,1], name="E-field") # len=32768 slice=[0:32768])'
+    >>> fxdata.read(datafile, "TIMESERIES_DATA")
 
-and the vector is filled with time series data from the data
-file. Note that we had to use the .vec method for the array, since
-:func:`datafile`.read does not accept arrays (since it cannot handle
-C++ iterators).
+The types of data that can be read are `TIMESERIES_DATA`, `FFT_DATA`,
+`FREQUENCY_DATA`, and `TIME_DATA`.
 
-Now, you can access the individual antennas as single vectors through
-slicing::
-
-    >>> ant0data=fxdata[0].vec()
-
-If you do not have yet a pre-existing array into which you want to read
-data, you can automatically create one, using the square brackets
-syntax already known from retrieving the file header keywords. So, for
-example, to get the `x`-Axis we create a second vector::
-
-    >>> times=datafile["Time"]
-
-.. note::
-    you can also create an empty array with the same properties
-    and dimensions, but without reading data into the array, by preceding
-    the keyword with the word ``empty``, i.e. ``times=datafile['emptyTime']``.
-
-In the square bracket notation python will actually set the name and
-units of the data accordingly. So, let us have the time axis in
-microseconds, by using :func:`setUnit`::
-
-    >>> times.setUnit("\\mu","")
-
-We do the same now for the frequency axis, which we convert to *MHz*::
-
-    >>> frequencies=datafile["Frequency"].setUnit("M","")
-
-We can calculate the average spectum of the data set for one antenna,
-by looping over all blocks. Here we do not use the square bracket
-notation, since we want to read the data repeatedly into the same
-memory location!::
-
-    >>> fftdata=datafile["emptyFFT"]
-    >>> avspectrum=hArray(float,dimensions=fftdata,name="average spectrum")
-    >>> for block in range(nBlocks):
-    ...     fftdata.read(datafile.set("Block",block),"FFT").none()
-    ...     avspectrum[...].spectralpower(fftdata[...])
-
-.. note::
-   The ``.none()`` method is appended to suppress unwanted output
-   in generating the tutorial, when an operation returns an array or
-   vector.
-
-Alternatively you can use the method::
-
-    >>> avspectrum.craveragespectrum(datafile)
-
-which does this automatically.
 
 
 Basic plotting
@@ -1056,6 +947,7 @@ however, this should have already been done when loading the
 :mod:`pycrtools`. Besides the plotting commands provided by
 :mod:`matplotlib`, this plotting functionality is also available from
 the :class:`hArrays`.
+
 
 Matplotlib
 ----------
