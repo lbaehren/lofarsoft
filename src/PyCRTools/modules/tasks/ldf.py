@@ -195,7 +195,8 @@ class ldf(tasks.Task):
         draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF"),
         CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization"),
         Draw3D = dict(default=True,doc="Draw 2D LDF"),
-        save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder")
+        save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder"),
+        generate_html = dict(default=False,doc="Default output to altair webserver")
         
         )
         
@@ -380,8 +381,21 @@ class ldf(tasks.Task):
         cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
         
         if self.save_images:
-            pic_ldf = str(self.topdir)+"/VHECR_LORA-"+str(self.event_id)+"/LDF.png"
+            directory = str(self.topdir)+"/VHECR_LORA-"+str(self.event_id)+"/"
+            pic_name = str(self.event_id)+"_LDF.png"
+            pic_ldf = directory+pic_name
             cr.plt.savefig(pic_ldf)
+            
+            if self.generate_html:
+                html_file = open(directory+'index.html', 'a')
+                html_file.write("\n<a name=\"%s"%pic_name)
+                html_file.write("\" href=\"%s"%pic_name)
+                html_file.write("\">%s</a> <br>"%pic_name)
+                html_file.write("\n<a href=\"%s"%pic_name)
+                html_file.write("\"><img src=\"%s\" width=800></a><br>"%pic_name)
+                html_file.close()
+
+            
         
         if self.draw_global:
         
