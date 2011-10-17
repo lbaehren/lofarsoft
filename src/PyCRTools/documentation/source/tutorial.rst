@@ -32,7 +32,6 @@ default namespace, type::
    functions get cluttered up in the current namespace possibly
    overwriting already existing functions.
 
-
 Vectors
 =======
 
@@ -1078,6 +1077,9 @@ spectra for two antennas::
     >>> plt.xlabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
     >>> plt.ylabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
 
+Note that the array entries need to be converted to vectors (using the
+:func:`vec` method) when they are given as arguments to the plotting
+command.
 
 To plot the time series of the entire dataset, we first read in all
 samples from all antennas::
