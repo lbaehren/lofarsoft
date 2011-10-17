@@ -5,11 +5,19 @@ import pycrtools as cr
 def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, samplenumber, clockoffset = 1e4, blocksize = 2**16):
     """Calculates block number corresponding to LORA timestamp and the
     sample number within that block (i.e. returns a tuple
-    (``blocknumber``,``samplenumber``)).  The LORA timestamp is given
-    in *lora_seconds* and *lora_nanoseconds*.  From the LOFAR TBB
-    event you need the *starttime* in seconds, the corresponding
-    *samplenumber*, the *clockoffset* between LORA and LOFAR.  Finally
-    you need the *blocksize* used for reading the LOFAR data.
+    (``blocknumber``,``samplenumber``)).
+
+    Input parameters:
+
+    =================== ==============================
+    *lora_seconds*      LORA timestamp in seconds (UTC timestamp, second after 1st January 1970).
+    *lora_nanoseconds*  LORA timestamp in nanoseconds.
+    *starttime*         LOFAR_TBB timestamp.
+    *samplenumber*      Sample number.
+    *clockoffset*       Clock offset between LORA and LOFAR.
+    *blocksize*         Blocksize of the LOFAR data.
+    =================== ==============================
+
     """
 
     lora_samplenumber = (lora_nanoseconds - clockoffset) / 5
@@ -23,13 +31,21 @@ def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, sample
 
 
 def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurroundingSecond=True,silent=False):
-    """ Reads in a file from LORA and returns a dictionary with important parameters. Az(imuth) is defined in degrees from North through East. El(evation) is in degrees from the horizon upwards.
+    """ Reads in a file from LORA and returns a dictionary with
+    important parameters, such as the core position (``core``), the
+    energy (``energy``) and the direction (``direction``) of the
+    shower. For the direction the Az(imuth) is defined in degrees from
+    North through East. El(evation) is in degrees from the horizon
+    upwards.
 
     Input parameters:
-    * lora_second * UTC timestamp of LORA event or filename
-    * datadir * Directory of LORA event files
-    * checkSurroundingSecond * Checks if there is a dataset of neighbouring seconds if not of this second
-    * silent *  Print message of directory sought for
+
+    ======================== =========================
+    *lora_second*            UTC timestamp of LORA event or filename
+    *datadir*                Directory of LORA event files
+    *checkSurroundingSecond* Checks if there is a dataset of neighbouring seconds if not of this second
+    *silent*                 Print message of directory sought for
+    ======================== =========================
 
     """
 
@@ -100,6 +116,16 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     return loradata
 
 def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
+    """
+    Description:
+
+    Input parameters:
+
+    ============== ==============================
+    *lora_second*  x
+    *logfile*      x
+    ============== ==============================
+    """
     f=open(logfile,'r')
     lines=f.readlines()
     p={}

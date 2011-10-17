@@ -23,6 +23,7 @@ pycrtools.grid
 pycrtools.matching
 pycrtools.srcfind
 pycrtools.ppf
+pycrtools.lora
 pycrtools.tasks
 pycrtools.tasks.averagespectrum
 pycrtools.tasks.beamformer
