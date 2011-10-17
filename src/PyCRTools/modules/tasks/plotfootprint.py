@@ -14,7 +14,7 @@ import pycrtools.rftools as rf
 deg=pi/180.
 pi2=pi/2.
 
-def gatherresults(filefilter,pol,excludelist):
+def gatherresults(filefilter,pol,excludelist,plotlora):
     """This function returns a dictionary with selected results from file in the subdirectories (/pol?/*/) of the filedir that are needed for the plotfootprint task."""
     if not filefilter:
         return None
@@ -62,18 +62,18 @@ def gatherresults(filefilter,pol,excludelist):
     if "TIME" not in res.keys():
         assert False
 #res["TIME"]=1307920753 if "event-1" in res["FILENAME"] else None
-
-    lorainfo=lora.loraInfo(res["TIME"])
-    for k in ["core","direction","energy"]:
-        par["lora"+k]=lorainfo[k]
-
-    par["loraarrivaltimes"]=cr.hArray(float,dimensions=len(lorainfo["10*nsec"]),fill=lorainfo["10*nsec"])/1e10
-
-    par["lorapositions"]=[]
-    for k in ["posX","posY","posZ"]:
-        par["lorapositions"].extend(lorainfo[k])
-    par["lorapositions"]=cr.hArray(par["lorapositions"],dimensions=[3,len(lorainfo["posX"])])
-    par["lorapower"]=cr.hArray(lorainfo["particle_density(/m2)"],dimensions=[len(lorainfo["posX"])])
+    if plotlora:
+        lorainfo=lora.loraInfo(res["TIME"])
+        for k in ["core","direction","energy"]:
+            par["lora"+k]=lorainfo[k]
+    
+        par["loraarrivaltimes"]=cr.hArray(float,dimensions=len(lorainfo["10*nsec"]),fill=lorainfo["10*nsec"])/1e10
+    
+        par["lorapositions"]=[]
+        for k in ["posX","posY","posZ"]:
+            par["lorapositions"].extend(lorainfo[k])
+        par["lorapositions"]=cr.hArray(par["lorapositions"],dimensions=[3,len(lorainfo["posX"])])
+        par["lorapower"]=cr.hArray(lorainfo["particle_density(/m2)"],dimensions=[len(lorainfo["posX"])])
 
 
     clockcorrection=cr.metadata.get("ClockCorrection",antid[pol],antset,return_as_hArray=True)
@@ -149,8 +149,9 @@ class plotfootprint(tasks.Task):
     parameters=dict(
         filefilter={default:None,doc:"Obtains results from subdirectories of these files (from results.py)"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
+        plotlora={default:True,doc:"Plot the LORA data when positions are present?"},
         excludelist={default:None,doc:"List with stations not to take into account when making the footprint"},
-        results=p_(lambda self:gatherresults(self.filefilter,self.pol,self.excludelist),"hArray with BLAAT transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
+        results=p_(lambda self:gatherresults(self.filefilter,self.pol,self.excludelist,self.plotlora),"hArray with BLAAT transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
         positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
         size={default:300,doc:"Size of largest point."},
         sizes_min={default:None,doc:"If set, then use this as the minimum scale for the sizes, when normalizing and plotting."},
@@ -171,7 +172,6 @@ class plotfootprint(tasks.Task):
         NAnt=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
         figure={default:None,doc:"No startplot"},
         colormap={default:"autumn",doc:"colormap to use for LOFAR timing"},
-        plotlora={default:True,doc:"Plot the LORA data when positions are present?"},
         loracore=p_(lambda self:obtainvalue(self.results,"loracore"),doc="Shower core position in hArray(float(X,Y,0))",unit="m"),
         loradirection=p_(lambda self:obtainvalue(self.results,"loradirection"),doc="Shower direction hArray(float,(Azimuth,Elevation)). Azimuth defined from North Eastwards. Elevation defined from horizon up",unit="degrees"),
         lorapositions=p_(lambda self:obtainvalue(self.results,"lorapositions"),doc="3-dim hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m"),
@@ -182,7 +182,9 @@ class plotfootprint(tasks.Task):
         loracolor={default:"#730909",doc:"Color used for LORA plots. If set to 'time' uses the arrival time" },
         plotlayout={default:True,doc:"Plot the LOFAR layout of the stations as the background"},
         filetype={default:"png",doc:"extension/type of output file"},
-        usecolorbar={default:True,doc:"print the colorbar?"}
+        usecolorbar={default:True,doc:"print the colorbar?"},
+        save_images = {default:False,doc:"Enable if images should be saved to disk in default folder"},
+        generate_html = {default:False,doc:"Default output to altair webserver"}
         
         )
         
@@ -292,6 +294,20 @@ class plotfootprint(tasks.Task):
         cr.plt.xlabel("meters East")
         cr.plt.ylabel("meters North")
         #cr.plt.text(100,-220,"Size denotes signal power")
-        if self.filefilter and self.plot_name == "footprint":
-            self.plot_name=self.filefilter+"/"+"pol"+str(self.pol)+"/"+self.plot_name
-        self.plot_finish(filename=self.plot_name,filetype=self.filetype)
+        if self.filefilter:
+            name_extension = "footprint_pol"+str(self.pol)
+            self.plot_name=self.filefilter+"pol"+str(self.pol)+"/"+name_extension
+
+        if self.generate_html:
+            
+            html_file = open(self.filefilter+'index.html','a')
+            name = "pol"+str(self.pol)+"/pycrfig-0001-"+name_extension+".png"
+            
+            html_file.write("\n<a name=\"%s"%name)
+            html_file.write("\" href=\"%s"%name)
+            html_file.write("\">%s</a> <br>"%name)
+            html_file.write("\n<a href=\"%s"%name)
+            html_file.write("\"><img src=\"%s\" width=800></a><br>"%name)
+            html_file.close()
+            
+        self.plot_finish(filename=self.plot_name,filetype=self.filetype)   
