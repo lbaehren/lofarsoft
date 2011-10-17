@@ -912,7 +912,7 @@ Before this is done, one has to allocate the memory in which the data
 is put. Although this requires one to program carefully and understand
 the data structure, this improves speed and efficiency.
 
-Let's first create a :type:`FloatArray` of the correct dimensions,
+Let's first create a :class:`FloatArray` of the correct dimensions,
 naming it ``fxdata`` and setting the unit to counts::
 
     >>> fxdata = hArray(float,[nofSelectedAntennas,blocksize],name="E-Field")
@@ -930,8 +930,8 @@ or::
 
     >>> fxdata.read(datafile, "TIMESERIES_DATA")
 
-The types of data that can be read are `TIMESERIES_DATA`, `FFT_DATA`,
-`FREQUENCY_DATA`, and `TIME_DATA`.
+The types of data that can be read are ``TIMESERIES_DATA``, ``FFT_DATA``,
+``FREQUENCY_DATA``, and ``TIME_DATA``.
 
 
 

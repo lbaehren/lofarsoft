@@ -563,25 +563,29 @@ class Task(object):
     *parfile* - provide a (python) parameter file defining variables, to initialize parameters
     *kwargs* - any parameter=value pair to set the value of the respective parameter in the workspace
 
-    To create a task instance say:
+    To create a task instance say::
 
-    Task=tasks.tasknam.TaskName()
+        >>> Task = tasks.tasknam.TaskName()
 
-    To run it call Task(), or directly instantiate and run it by
+    To run it call :func:`Task`, or directly instantiate and run it
+    by::
 
-    Task=tasks.tasknam.TaskName()(pars ....)
+        >>> Task = tasks.tasknam.TaskName()(pars ....)
 
-    Task() -> (re)run the task with currently set parameters.
+    To (re)run the task with currently set parameters, simply use::
+
+        >>> Task()
 
     If called for the first time the initialization
     routine will be called.
 
-    Task(x1,x2,...,par1=val1,par2=val2) -> rerun the task with
-    the positional parameters xN and the parameters parN set to
-    the values provided and keeping the previous parameters the
-    same
+    To rerun the task with the positional parameters ``xN`` and the
+    parameters ``parN`` set to the values provided and keeping the
+    previous parameters the same, use::
 
-    Task.ws -> return workspace (and print all the pararameters)
+        >>> Task(x1,x2,...,par1=val1,par2=val2)
+
+    ``Task.ws`` returns the workspace (and print all the pararameters)
 
     Parameters for calling the Task:
 
@@ -598,7 +602,7 @@ class Task(object):
     update parameters therein as provided in the file and the
     keywords.
 
-    ws parameters will be overwritten by file parameter and they
+    ``ws`` parameters will be overwritten by file parameter and they
     will be overwritten by keyword parameters (which thus have
     the highest priority).
 
