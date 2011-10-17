@@ -18,6 +18,7 @@ If this is not true for your files use the ``fix_metadata.py`` script to fix thi
 import os
 import numpy as np
 import pycrtools as cr
+from datetime import datetime
 from pycrtools import metadata as md
 
 # This class implements the IO interface
@@ -81,6 +82,7 @@ class TBBData(IOInterface):
             "SAMPLE_INTERVAL":lambda:[1/(v*self.__conversiondict[u]) for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
             "FREQUENCY_INTERVAL":lambda:[v*self.__conversiondict[u]/self["BLOCKSIZE"] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
             "FREQUENCY_RANGE":lambda:[(f/2*(n-1),f/2*n) for f,n in zip(self["SAMPLE_FREQUENCY"],self["NYQUIST_ZONE"])],
+            "STATION_NAME":lambda:[md.idToStationName(i / 1000000) for i in self["CHANNEL_ID"]],
             "FFTSIZE":lambda:self["BLOCKSIZE"]/2+1,
             "BLOCKSIZE":lambda: self.__blocksize,
             "BLOCK":lambda: self.__block,
@@ -164,7 +166,17 @@ class TBBData(IOInterface):
     def __repr__(self):
         """Display summary when printed.
         """
-        return self.__file.summary().strip()
+
+        s = ""
+
+        s += "FILENAME:            " + self["FILENAME"] + "\n"
+        s += "TIME:                " + str(datetime.utcfromtimestamp(self["TIME"][0])) + "\n"
+        s += "DATA_LENGTH:         " + str(self["DATA_LENGTH"][0]) + " (" + str(self["DATA_LENGTH"][0] / self["BLOCKSIZE"]) + " blocks)\n"
+        s += "ANTENNA_SET:         " + self["ANTENNA_SET"] + "\n"
+        s += "STATION_NAME:        " + str(self["STATION_NAME"][0]) + "\n"
+        s += "NOF_DIPOLE_DATASETS: " + str(self["NOF_DIPOLE_DATASETS"]) + " ("+str(self["NOF_SELECTED_DATASETS"]) + " selected)"
+
+        return s
 
     def keys(self,excludedata=False):
         """Returns list of valid keywords.
