@@ -95,6 +95,7 @@ class TBBData(IOInterface):
             "ANTENNA_POSITION_ITRF":self.__file.antenna_position_itrf,
             "NYQUIST_ZONE":self.__file.nyquist_zone,
             "TIME":self.__file.time,
+            "TIME_HR":lambda:[str(datetime.utcfromtimestamp(t)) for t in self["TIME"]],
             "SAMPLE_NUMBER":self.__file.sample_number,
             "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
             "SAMPLE_FREQUENCY_UNIT":self.__file.sample_frequency_unit,
