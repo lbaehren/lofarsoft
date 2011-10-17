@@ -115,16 +115,21 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
 
     return loradata
 
+
 def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
     """
-    Description:
+    Get nanosecond timing from LORA logfile.
 
     Input parameters:
 
     ============== ==============================
-    *lora_second*  x
-    *logfile*      x
+    *lora_second*  Second from which to obtain the nanosecond time info.
+    *logfile*      LORA logfile from which to obtain the time info.
     ============== ==============================
+
+    Output:
+
+    Tuple containing LORA second and nanosecond timing info.
     """
     f=open(logfile,'r')
     lines=f.readlines()
