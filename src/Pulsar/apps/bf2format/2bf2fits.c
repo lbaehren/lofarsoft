@@ -62,6 +62,7 @@ void usage(){
   puts("-CS\t\tInput data is CS data (one file, total I only)");
   puts("-H\t\tHDF5 Data Mode, only working in combination with -CS");
   puts("-append\t\tfor IS data append output fits files together");
+  puts("-skip\t\tSkip this number of blocks in the output. Only works with -H option.");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -394,7 +395,7 @@ void *stokesdata_h5_ptr = NULL;
 
 /* Returns 1 if successful, 0 on error */
 /* Only for H5 data */
-int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append)
+int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks)
 {
 
   typedef struct {
@@ -684,9 +685,11 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
      /* Write out subint */
-     if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i, packeddata, scales, offsets) != 1) {
-       fprintf(stderr, "ERROR: Cannot write subint data               \n");      
-       return 0;
+     if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= 0) {
+       if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i- skipNrBlocks, packeddata, scales, offsets) != 1) {
+	 fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+	 return 0;
+       }
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 5\n", (x-1)*AVERAGE_OVER+i); */
    }
@@ -710,7 +713,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
 /* Returns 1 if successful, 0 on error */
 /* Only for CS data */
-int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking)
+int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, long skipNrBlocks)
 {
   typedef struct {
     unsigned	sequence_number;
@@ -758,6 +761,39 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
    swap_endian( (char*)&stokesdata[0].sequence_number );
    *lastseq = stokesdata[0].sequence_number;
    
+   //   fseek(input, (filesize-1)*sizeof(stokesdata_struct), SEEK_SET);
+   /*
+   fseek(input, 0, SEEK_SET);
+   long curblock = 0;
+   while( !feof( input ) ) {
+     num = fread( &stokesdata[0], sizeof stokesdata[0], 1, input );
+     if(num == 1) {
+       unsigned i,c,s;
+       i = 0;
+       for( s = 0; s <= 0; s++ ) {
+	 unsigned t;
+	 float value;
+	 for( t = 0; t < SAMPLES; t++ ) {
+	   for( c = 100; c <= 100; c++ ) {
+	     floatSwap( &stokesdata[i].samples[t][s][c] );
+	     value = stokesdata[i].samples[t][s][c];
+	     if(isnan( value )) {
+	       fprintf(stderr, "Found a NAN (block: %ld)\n", curblock);
+	     }
+	     if(fabs(value) < 1e-3) {
+	       fprintf(stderr, "Found a 0 (block: %ld sample %d)\n", curblock, t);
+	     }
+		//	     printf("%f XXXXX\n", stokesdata[i].samples[t][s][c]);
+	   }
+	 }
+       }
+     }
+     printf("Block %ld done\n", curblock);
+     curblock++;
+   }
+   exit(0);
+   */
+
    return 1;
  }
 
@@ -791,7 +827,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      for( s = 0; s < SUBBANDS; s++ ) {
        unsigned t;
        for( t = 0; t < SAMPLES; t++ ) {
-         for( c = 0; c < CHANNELS; c++ ) {
+         for( c = 0; c <= CHANNELS; c++ ) {
 	   floatSwap( &stokesdata[i].samples[t][s][c] );
          }
        }
@@ -884,12 +920,14 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 	 return 0;
        }
        /* Write out subint */
-       if(writeFITSsubint(fout, gap+1, packeddata, scales, offsets) != 1) {
-	 fprintf(stderr, "ERROR: Cannot write subint data               \n");      
-	 return 0;
+       if(gap+1 - skipNrBlocks >= 0) {
+	 if(writeFITSsubint(fout, gap+1 - skipNrBlocks, packeddata, scales, offsets) != 1) {
+	   fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+	   return 0;
+	 }
+	 output_samples += SAMPLES;
+	 nul_samples += SAMPLES;
        }
-       output_samples += SAMPLES;
-       nul_samples += SAMPLES;
      }
      stokesdata[i].sequence_number =  prev_seqnr + 1;       
      prev_seqnr = stokesdata[i].sequence_number;
@@ -967,10 +1005,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
    } // SUBBANDS
 
      /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
-     if(verbose) {
-       printf(".");
-       fflush(stdout);
-     }
+   
 
      /* Pack data */
      if(sigmalimit > 0) {
@@ -989,9 +1024,16 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
      /* Write out subint */
-     if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i, packeddata, scales, offsets) != 1) {
-       fprintf(stderr, "ERROR: Cannot write subint data               \n");      
-       return 0;
+     if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= 0) {
+       if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i - skipNrBlocks, packeddata, scales, offsets) != 1) {
+	 fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+	 return 0;
+       }
+     }
+   
+     if(verbose) {
+       printf("\rProcessed block %d/%ld (%.3f%%)", (x-1)*AVERAGE_OVER+i, fout.NrPulses, 100.0*((x-1)*AVERAGE_OVER+i)/(float)fout.NrPulses);
+       fflush(stdout);
      }
    }
 
@@ -1434,6 +1476,7 @@ int main( int argc, char **argv )
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
   double lofreq;
+  long skipNrBlocks;
 
   //  char header_txt[parsetmaxnrlines][1001], *txt[parsetmaxnrlines],;
   char *header_txt[parsetmaxnrlines];
@@ -1452,7 +1495,7 @@ int main( int argc, char **argv )
   readparset = 0;
   nrbits = 8;
   subbandnr = 0;
-
+  skipNrBlocks = 0;
   cleanPRSData(&subintdata);
 
   sigma_limit = -1;
@@ -1478,6 +1521,13 @@ int main( int argc, char **argv )
         return 0;
       }else if(strcmp(argv[i], "-nbits") == 0) {
 	j = sscanf(argv[i+1], "%d", &nrbits);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
+      }else if(strcmp(argv[i], "-skip") == 0) {
+	j = sscanf(argv[i+1], "%ld", &skipNrBlocks);
 	if(j != 1) {
 	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
@@ -1839,6 +1889,11 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     printf("  Header dump:\n");
     printHeaderPSRData(fout, 4);
    }
+   if(skipNrBlocks != 0) {
+     fprintf(stderr, "2bf2fits: Skipping blocks is not implemented for this input data format.\n");
+     exit(-1);
+   }
+
    if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose)) return 0;
    if(!writePSRFITSHeader(&fout, application.verbose)) return 0;
 
@@ -1910,10 +1965,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
         if(is_H5) {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks) == 0)
 	    return 0;
 	}
       }
@@ -1922,12 +1977,23 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       /* Copy header parameters to output header */
       copy_paramsPSRData(subintdata, &fout);
       fout.NrPulses = lastseq+1;
+
+      if(skipNrBlocks != 0) {
+	if(is_CS == 0) {
+	  fprintf(stderr, "2bf2fits: Skipping blocks is not implemented for this input data format.\n");
+	  exit(-1);
+	}
+	fout.NrPulses -= skipNrBlocks;
+	if(fout.NrPulses <= 0) {
+	  fprintf(stderr, "2bf2fits: You appear to would like to skip more data than there is!\n");
+	  exit(-1);
+	}
+      }
+
       if(application.verbose) {
 	printf("  Header dump:\n");
 	printHeaderPSRData(fout, 4);
       }
-
-
       if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose))
 	return 0;
       if(!writePSRFITSHeader(&fout, application.verbose))
@@ -1940,10 +2006,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
 	if(is_H5 == 0) {
-	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking) == 0)
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks) == 0)
 	    return 0;
 	}
       }
