@@ -12,6 +12,7 @@ import pycrtools.tasks as tasks
 from pycrtools.tasks import shortcuts as sc
 import pytmf
 import os
+import sys
 
 
 def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
@@ -32,6 +33,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         meansignal = {0:[],1:[]}
         names0 = []
         names1 = []
+        res={}
     
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 
@@ -43,7 +45,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
 #                print "WARNING nan found. skipping file", resfile.name
 #                continue
             print "Processing data results directory:",datadir
-            res={}
+            
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
             
@@ -78,6 +80,9 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             else:
                 names1.append(stationname)    
 
+        if res == {}:
+            print "No results file found"
+            sys.exit(0)
         
         print "Number of dipoles found:",ndipoles
         
