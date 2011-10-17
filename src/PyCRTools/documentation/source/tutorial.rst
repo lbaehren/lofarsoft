@@ -26,6 +26,11 @@ default namespace, type::
 
    >>> from pycrtools import *
 
+.. note::
+
+   The latter approach is not recommended as all pycrtools
+   functions get cluttered up in the current namespace possibly
+   overwriting already existing functions.
 
 
 Vectors
@@ -1134,22 +1139,26 @@ in the array.
 
 The available parameters, used in the :class:`hArray.par` class, are:
 
-* ``xvalues``: An array with corresponding x values. If ``None``, integer numbers from 0 to the length of the array are used.
-* ``xlabel``: The x-axis label. If not specified, use the ``name`` keyword of the array. Units are added automatically.
-* ``ylabel``: The y-axis label. If not specified, use the ``name`` keyword of the array. Units are added automatically.
-* ``xlim``: Tuple with minimum and maximum values for the x-axis.
-* ``ylim``: Tuple with minimum and maximum values for the y-axis.
-* ``title``: A title for the plot
-* ``clf``: If ``True`` (default) clear the screen before plotting. If
-  ``False`` plots are composed with multiple lines from different
-  arrays.
-* ``logplot``: Can be used to make log-log or semi-log plots:
+  =============== ==================================================
+  ``xvalues``     An array with corresponding x values.
+                  If ``None``, integer numbers from 0 to the length of the array are used.
+  ``xlabel``      The x-axis label.
+                  If not specified, use the ``name`` keyword of the array.
+                  Units are added automatically.
+  ``ylabel``      The y-axis label.
+                  If not specified, use the ``name`` keyword of the array.
+                  Units are added automatically.
+  ``xlim``        Tuple with minimum and maximum values for the x-axis.
+  ``ylim``        Tuple with minimum and maximum values for the y-axis.
+  ``title``       A title for the plot
+  ``clf``         If ``True`` (default) clear the screen before plotting.
+                  If ``False`` plots are composed with multiple lines from different arrays.
+  ``logplot``     Can be used to make log-log or semi-log plots:
 
-  "x" -> semilog plot in x
-
-  "y" -> semilog plot in y
-
-  "xy" -> loglog plot
+                  * "x" -> semilog plot in x
+                  * "y" -> semilog plot in y
+                  * "xy" -> loglog plot
+  =============== ==================================================
 
 .. [in preparation]
 
