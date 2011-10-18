@@ -26,7 +26,9 @@ from lpps_search import fold
 from lpps_search import knownpulsar
 from lpps_search.sift import plot_p_histogram, plot_f_histogram, plot_p_dm
 
-N_CANDIDATES_CUTOFF = 200
+#N_CANDIDATES_CUTOFF = 200
+LOW_CANDIDATE = 0
+HIGH_CANDIDATE = 50
 
 
 def parse_list_of_directories(s, must_exist=False):
@@ -249,7 +251,7 @@ if __name__ == '__main__':
     
     tmp_s = []
     for x in s:
-        tmp_s.append(x[:N_CANDIDATES_CUTOFF])
+        tmp_s.append(x[LOW_CANDIDATE:HIGH_CANDIDATE])
     s = tmp_s
     print 'TOTAL NUMBER OF CANDIDATES AFTER APPLYING CUTOFF %d' % s_count
 
