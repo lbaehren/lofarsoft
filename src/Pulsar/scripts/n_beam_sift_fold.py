@@ -28,7 +28,7 @@ from lpps_search.sift import plot_p_histogram, plot_f_histogram, plot_p_dm
 
 #N_CANDIDATES_CUTOFF = 200
 LOW_CANDIDATE = 0
-HIGH_CANDIDATE = 50
+HIGH_CANDIDATE = 200
 
 
 def parse_list_of_directories(s, must_exist=False):
