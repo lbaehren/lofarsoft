@@ -179,8 +179,9 @@ class ldf(tasks.Task):
         plot_parameter=dict(default="pulses_maxima_y", doc="Which parameter of the results-dict to plot: 'pulses_strength' or 'pulses_maxima_y'"),
         logplot=dict(default=True, doc="Draw y-axis logarithmically"),
         plot_clf = dict(default=True,doc="Clean window before plotting?"),
-        plot_xmin = dict(default=0,doc="Mininum value of x-axis"),
-        plot_xmax = dict(default=300,doc="Maximum value of x-axis"),
+        plot_xmin = dict(default=0,doc="Mininum value of x-axis. To use turn plot_auto_scale off."),
+        plot_xmax = dict(default=300,doc="Maximum value of x-axis. To use turn plot_auto_scale off."),
+        plot_scale_auto = dict(default=True, doc="Will scales axes to maximum values, will override manual plotting boundaries and whatever plt thinks it is doing."),
         antenna_set = dict(default=lambda self:self.results["antenna_set"],doc="determines labelling of polarizations"),
         color_pol0 = dict(default='#B30424',doc="color pol 0"),
         color_pol1 = dict(default='#68C8F7',doc="color pol 1"),
@@ -332,6 +333,11 @@ class ldf(tasks.Task):
             labelpol1 = "pol 1"    
 
         if self.signals0:
+            
+            if self.plot_scale_auto:
+                y_max0 = self.signals0.max()[0]*1.5
+                y_min0 = self.signals0.min()[0]*0.5
+                
             if self.signaluncertainties0:
                 if self.logplot:
                     #exception for too large errorbars in logplot (reaching negative numbers)
@@ -341,11 +347,8 @@ class ldf(tasks.Task):
                     sig_uncer0 = self.signals0 - sig_lower0
                     
                     cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),yerr=[sig_uncer0.vec(),self.signaluncertainties0.vec()],xerr=self.DistUncertainties0.vec(),color=self.color_pol0,marker=self.marker_pol0,linestyle="None",label=labelpol0)
-                    cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
                     cr.plt.yscale("log")
-                    
-                    
-                
+
                 else:
                     cr.plt.errorbar(self.Distances0.vec(),self.signals0.vec(),self.signaluncertainties0.vec(),self.DistUncertainties0.vec(),color=self.color_pol0,marker=self.marker_pol0,linestyle="None",label="pol 0")
            
@@ -353,6 +356,20 @@ class ldf(tasks.Task):
                 self.signals0.plot(color='m',linestyle="None",marker=self.marker_pol0,label=labelpol0,clf=False)           
 
         if self.signals1:
+        
+            if self.plot_scale_auto:
+                y_min = self.signals1.min()[0]*0.5
+                y_max = self.signals1.max()[0]*1.5
+                x_max = self.Distances1.max()
+
+                if y_max < y_max0:
+                    y_max = y_max0
+                if y_min > y_min0:
+                    y_min = y_min0
+                if x_max < self.plot_xmax:
+                    x_max = self.plot_xmax  
+  
+                
             if self.signaluncertainties1:
                 if self.logplot:
                     #exception for too large errorbars in logplot (reaching negative numbers)
@@ -363,7 +380,6 @@ class ldf(tasks.Task):
                     
                     cr.plt.errorbar(self.Distances1.vec(),self.signals1.vec(),yerr=[sig_uncer1.vec(),self.signaluncertainties1.vec()],xerr=self.DistUncertainties1.vec(),color=self.color_pol1,marker=self.marker_pol1,linestyle="None",label=labelpol1) #
                     cr.plt.yscale("log")
-                    cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
                         
                     
                 else:
@@ -378,7 +394,10 @@ class ldf(tasks.Task):
         else:
             cr.plt.ylabel("Power [a.u.]")
             
-        cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+        if self.plot_scale_auto:
+            cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+        else:
+            cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
         
         if self.save_images:
             directory = str(self.topdir)+"/VHECR_LORA-"+str(self.event_id)+"/"
