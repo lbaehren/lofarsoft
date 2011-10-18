@@ -12,7 +12,7 @@
 DE601 G 50.52483 6.88361 # Effelsberg
 DE602 G 48.50085 11.28656 # Garching
 DE603 G 50.99167 11.71667 # Tautenburg
-DE604 Y 52.43800 13.01600 # Potsdam
+DE604 G 52.43800 13.01600 # Potsdam
 #DE605 Y 50.90639 6.40389 # Juelich
 ## coordinates for Juelich updated 2 March 2010 by Menno Norden
 DE605 Y 50.8972719 6.4241444 # Juelich
