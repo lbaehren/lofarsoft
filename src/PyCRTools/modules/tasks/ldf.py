@@ -406,13 +406,22 @@ class ldf(tasks.Task):
             cr.plt.savefig(pic_ldf)
             
             if self.generate_html:
-                html_file = open(directory+'index.html', 'a')
-                html_file.write("\n<a name=\"%s"%pic_name)
-                html_file.write("\" href=\"%s"%pic_name)
-                html_file.write("\">%s</a> <br>"%pic_name)
-                html_file.write("\n<a href=\"%s"%pic_name)
-                html_file.write("\"><img src=\"%s\" width=800></a><br>"%pic_name)
-                html_file.close()
+                status = "new"
+                check_file = open(directory+'index.html', 'r')
+                for line in check_file:
+                    if "LDF" in line:
+                        status = "filled"
+                check_file.close()
+                
+                if status == "new":
+                    html_file = open(directory+'index.html', 'a')
+                
+                    html_file.write("\n<a name=\"%s"%pic_name)
+                    html_file.write("\" href=\"%s"%pic_name)
+                    html_file.write("\">%s</a> <br>"%pic_name)
+                    html_file.write("\n<a href=\"%s"%pic_name)
+                    html_file.write("\"><img src=\"%s\" width=800></a><br>"%pic_name)
+                    html_file.close()
 
             
         
