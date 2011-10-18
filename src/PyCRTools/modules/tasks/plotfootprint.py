@@ -299,15 +299,22 @@ class plotfootprint(tasks.Task):
             self.plot_name=self.filefilter+"pol"+str(self.pol)+"/"+name_extension
 
         if self.generate_html:
-            
-            html_file = open(self.filefilter+'index.html','a')
-            name = "pol"+str(self.pol)+"/pycrfig-0001-"+name_extension+".png"
-            
-            html_file.write("\n<a name=\"%s"%name)
-            html_file.write("\" href=\"%s"%name)
-            html_file.write("\">%s</a> <br>"%name)
-            html_file.write("\n<a href=\"%s"%name)
-            html_file.write("\"><img src=\"%s\" width=800></a><br>"%name)
-            html_file.close()
+                status = "new"
+                check_file = open(self.filefilter+'index.html', 'r')
+                for line in check_file:
+                    if "footprint_pol"+str(self.pol) in line:
+                        status = "filled"
+                check_file.close()
+                
+                if status == "new":
+                    html_file = open(self.filefilter+'index.html','a')
+                    name = "pol"+str(self.pol)+"/pycrfig-0001-"+name_extension+".png"
+                    
+                    html_file.write("\n<a name=\"%s"%name)
+                    html_file.write("\" href=\"%s"%name)
+                    html_file.write("\">%s</a> <br>"%name)
+                    html_file.write("\n<a href=\"%s"%name)
+                    html_file.write("\"><img src=\"%s\" width=800></a><br>"%name)
+                    html_file.close()
             
         self.plot_finish(filename=self.plot_name,filetype=self.filetype)   
