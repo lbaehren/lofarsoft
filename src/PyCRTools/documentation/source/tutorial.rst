@@ -930,8 +930,22 @@ or::
 
     >>> fxdata.read(datafile, "TIMESERIES_DATA")
 
-The types of data that can be read are ``TIMESERIES_DATA``, ``FFT_DATA``,
-``FREQUENCY_DATA``, and ``TIME_DATA``.
+The types of data that can be read are ``TIMESERIES_DATA``,
+``FFT_DATA``, ``FREQUENCY_DATA``, and ``TIME_DATA``. You can also use
+these keywords with the ``EMPTY_`` prefix, which creates an empty
+hArray of the correct type and size.
+
+.. [Example of calculating an average spectrum]
+
+Below is an example that shows how to read in data to calculate an
+average spectrum::
+
+    >>> fftdata = datafile["EMPTY_FFT_DATA"]
+    >>> avspectrum = hArray(float, dimensions=fftdata, name="Average spectrum")
+    >>> for block in range(nBlocks):
+    >>>     datafile["BLOCK"] = block
+    >>>     fftdata.read(datafile, "FFT_DATA")
+    >>>     hSpectralPower(avspectrum[...], fftdata[...])
 
 
 
