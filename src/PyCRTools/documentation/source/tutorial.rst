@@ -962,12 +962,13 @@ window in which the plots are shown. This is done by::
 Now we can use the following plotting commands to show the average
 spectra for two antennas::
 
-    >>> plt.subplot(1,2,1)
-    >>> plt.title("Average spectrum for two antennas")
-    >>> plt.semilogy(frequencies.vec(), avspectrum[0].vec())
-    >>> plt.semilogy(frequencies.vec(), avspectrum[1].vec())
-    >>> plt.xlabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
-    >>> plt.ylabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
+    >>> frequencies = datafile["FREQUENCY_DATA"].setUnit("M","")
+    >>> for i in range(2):
+    >>>     plt.subplot(1,2,i)
+    >>>     plt.title("Average spectrum for two antennas")
+    >>>     plt.semilogy(frequencies.vec(), avspectrum[0].vec())  #plt.semilogy(frequencies.vec(), avspectrum[i].vec())
+    >>>     plt.xlabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
+    >>>     plt.ylabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
 
 Note that the array entries need to be converted to vectors (using the
 :func:`vec` method) when they are given as arguments to the plotting
@@ -976,17 +977,18 @@ command.
 To plot the time series of the entire dataset, we first read in all
 samples from all antennas::
 
-    >>> datafile["block", "blocksize"] = (0, maxblocksize)
-    >>> timeall = datafile["Time"]
-    >>> fxall = datafile["Fx"]
+    >>> datafile["BLOCK"] = 0
+    >>> datafile["BLOCKSIZE"] = maxblocksize
+    >>> timeall = datafile["TIME_DATA"]
+    >>> fxall = datafile["TIMESERIES_DATA"]
 
 and then we plot it::
 
     >>> plt.subplot(1,2,2)
     >>> plt.title("Time series of antenna 0")
     >>> plt.plot(timeall.vec(), fxall[0].vec())
-    >>> plt xtitle("Time [$\\mu$s]")
-    >>> plt ytitle("Electric Field [ADC counts]")
+    >>> plt.xlabel("Time [$\\mu$s]")
+    >>> plt.ylabel("Electric Field [ADC counts]")
 
 .. [resulting plot of the code above]
 
@@ -998,8 +1000,6 @@ needs to be logarithmic.
 
 Plotting using the :class:`hArray` plotting methods
 ---------------------------------------------------
-
-.. [under construction]
 
 Another way of producing plots is to use the plot method of the
 :class:`hArray` class::
@@ -1054,14 +1054,9 @@ The available parameters, used in the :class:`hArray.par` class, are:
                   * "xy" -> loglog plot
   =============== ==================================================
 
-.. [in preparation]
-
 
 Some use cases
 ==============
-
-.. [in preparation]
-
 
 Quality check of time series data
 ---------------------------------
@@ -1083,7 +1078,9 @@ data set and set the block size accordingly::
 
 We will then read this block of data into an appropriately sized data array::
 
-    >>> dataarray = datafile.set("blocksize",blocksize).set("block",3)["Voltage"]
+    >>> datafile["BLOCKSIZE"] = blocksize)
+    >>> datafile["BLOCK"] = 3
+    >>> dataarray = datafile["TIMESERIES_DATA"]
 
 The array now contains all the measured voltages of the selected
 antennas in the file.
@@ -1092,28 +1089,30 @@ First we calculate the mean over all samples for each antennas (and
 make use of the looping through the Ellipsis (...) object)::
 
     >>> datamean = dataarray[...].mean()
-    Vector(float, 16, fill=[7.17281,-7.79052,-1.97656,-0.283491,5.22623,-1.53358,0.440468,-6.22257,1.53373,4.74461,6.70252,-4.63748,-4.67412,7.92508,0.101472,-4.59787])
+    Vector(float, 1, fill=[6.60586])
+
+..    Vector(float, 16, fill=[7.17281,-7.79052,-1.97656,-0.283491,5.22623,-1.53358,0.440468,-6.22257,1.53373,4.74461,6.70252,-4.63748,-4.67412,7.92508,0.101472,-4.59787])
 
 Similarly we get the RMS (where we spare the algorithm from recalculating the
 mean, by providing it as input - actually a list of means)::
 
     >>> dataRMS = dataarray[...].stddev(datamean)
-    Vector(float, 16, fill=[10.4218,10.3521,10.1878,11.9229,10.0157,11.8848,9.56963,10.0076,10.7717,10.1781,10.3913,10.879,9.58076,10.2835,10.4557,9.78504])
+..    Vector(float, 16, fill=[10.4218,10.3521,10.1878,11.9229,10.0157,11.8848,9.56963,10.0076,10.7717,10.1781,10.3913,10.879,9.58076,10.2835,10.4557,9.78504])
 
 and finally we get the total number of peaks 5 sigma above the noise::
 
-    >>> dataNpeaks = dataarray[...].countgreaterthanabs(dataRMS*5)
-    Vector(int, 1, fill=[0])
+    >>> Npeaks_detected = dataarray[...].countgreaterthanabs(dataRMS*5)
+..    Vector(int, 1, fill=[0])
 
 To see whether we have more peaks than expected, we first calculate
 the expected number of peaks for a Gaussian distribution and our
-``blocksize``, as well as the error on that number::
+``BLOCKSIZE``, as well as the error on that number::
 
     >>> Npeaks_expected = funcGaussian(5, 1,0)*blocksize
-    0.04909742525458545
+..    0.04909742525458545
 
     >>> Npeaks_error = sqrt(Npeaks_expected)
-    0.22157938815373926
+..     0.22157938815373926
 
 So, that we can get a normalized quantity::
 
@@ -1127,7 +1126,7 @@ We do the calculation of G using our STL vectors (even though speed is not
 of the essence here)::
 
     >>> dataNonGaussianity = Vector(float, nAntennas)
-    >>> dataNonGaussianity.sub(dataNpeaks, Npeaks_expected)
+    >>> dataNonGaussianity.sub(Npeaks_detected, Npeaks_expected)
     >>> dataNonGaussianity /= Npeaks_error
 
 The next stept is to make a nice table of the results and check
@@ -1137,12 +1136,12 @@ on empirical studies of the data).
 To ease the operation we combine all the data into one python array
 (using the zip function - zip, as in zipper)::
 
-    >>> dataproperties = zip(selectedAntennas,datamean,dataRMS,dataNpeaks,dataNonGaussianity)
+    >>> dataproperties = zip(selectedAntennas,datamean,dataRMS,Npeaks_detected,dataNonGaussianity)
 
 which is a rather nasty collection of numbers. So, we print a nice
 table (restricting it to the first 5 antennas):
 
-    >>> for prop in dataproperties[0:5]: print "Antenna {0:3d}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)
+    >>> for prop in dataproperties[0:5]: print "Antenna {0:3s}: mean={1: 6.2f}, rms={2:6.1f}, npeaks={3:5d}, spikyness={4: 7.2f}".format(*prop)
     Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22
 
 Clearly this is a spiky dataset, with only one antenna not being
@@ -1169,40 +1168,43 @@ python function is available, that does the quality checking for you
 and returns a list with failed antennas and their properties::
 
     >>> badantennalist = CRQualityCheck(qualitycriteria, datafile=datafile, dataarray=dataarray, blocksize=blocksize, verbose=False)
-    Block=     0, Antenna   0: mean=  6.59, rms= 141.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     1, Antenna   0: mean=  6.63, rms= 138.8, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     2, Antenna   0: mean=  6.62, rms= 141.4, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     3, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     4, Antenna   0: mean=  6.61, rms= 140.9, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     5, Antenna   0: mean=  6.60, rms= 137.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     6, Antenna   0: mean=  6.62, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     7, Antenna   0: mean=  6.62, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     8, Antenna   0: mean=  6.63, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=     9, Antenna   0: mean=  6.63, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    10, Antenna   0: mean=  6.63, rms= 140.9, npeaks=    1, spikyness=   4.29   ['rms', 'spikyness']
-    Block=    11, Antenna   0: mean=  6.60, rms= 142.4, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    12, Antenna   0: mean=  6.61, rms= 143.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    13, Antenna   0: mean=  6.61, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    14, Antenna   0: mean=  6.59, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    46, Antenna   0: mean=  6.61, rms= 142.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    47, Antenna   0: mean=  6.60, rms= 136.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    48, Antenna   0: mean=  6.59, rms= 141.1, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    49, Antenna   0: mean=  6.60, rms= 138.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    50, Antenna   0: mean=  6.63, rms= 143.8, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    51, Antenna   0: mean=  6.59, rms= 139.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    52, Antenna   0: mean=  6.58, rms= 141.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    53, Antenna   0: mean=  6.64, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    54, Antenna   0: mean=  6.61, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    55, Antenna   0: mean=  6.60, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    56, Antenna   0: mean=  6.62, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    57, Antenna   0: mean=  6.60, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    58, Antenna   0: mean=  6.60, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    59, Antenna   0: mean=  6.60, rms= 135.8, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    60, Antenna   0: mean=  6.59, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
-    Block=    61, Antenna   0: mean=  6.64, rms= 135.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    Block=     0, Antenna   9: mean=  6.61, rms= 141.0, npeaks=    1, spikyness=   0.27   ['rms']
+    Block=     3, Antenna   9: mean=  6.61, rms= 140.8, npeaks=    0, spikyness=  -0.87   ['rms']
 
-    >>> badantennalist[0]
-    [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
+    .. Block=     0, Antenna   0: mean=  6.59, rms= 141.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     1, Antenna   0: mean=  6.63, rms= 138.8, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     2, Antenna   0: mean=  6.62, rms= 141.4, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     3, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     4, Antenna   0: mean=  6.61, rms= 140.9, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     5, Antenna   0: mean=  6.60, rms= 137.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     6, Antenna   0: mean=  6.62, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     7, Antenna   0: mean=  6.62, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     8, Antenna   0: mean=  6.63, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=     9, Antenna   0: mean=  6.63, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    10, Antenna   0: mean=  6.63, rms= 140.9, npeaks=    1, spikyness=   4.29   ['rms', 'spikyness']
+    .. Block=    11, Antenna   0: mean=  6.60, rms= 142.4, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    12, Antenna   0: mean=  6.61, rms= 143.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    13, Antenna   0: mean=  6.61, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    14, Antenna   0: mean=  6.59, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    46, Antenna   0: mean=  6.61, rms= 142.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    47, Antenna   0: mean=  6.60, rms= 136.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    48, Antenna   0: mean=  6.59, rms= 141.1, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    49, Antenna   0: mean=  6.60, rms= 138.7, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    50, Antenna   0: mean=  6.63, rms= 143.8, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    51, Antenna   0: mean=  6.59, rms= 139.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    52, Antenna   0: mean=  6.58, rms= 141.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    53, Antenna   0: mean=  6.64, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    54, Antenna   0: mean=  6.61, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    55, Antenna   0: mean=  6.60, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    56, Antenna   0: mean=  6.62, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    57, Antenna   0: mean=  6.60, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    58, Antenna   0: mean=  6.60, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    59, Antenna   0: mean=  6.60, rms= 135.8, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    60, Antenna   0: mean=  6.59, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
+    .. Block=    61, Antenna   0: mean=  6.64, rms= 135.6, npeaks=    0, spikyness=  -0.22   ['rms']
+
+    .. >>> badantennalist[0]
+    .. [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
 
 (first the antenna number, then the block, then a list with the
 *mean*, *rms*, *npeaks*, and *spikyness*, and finally the failed
@@ -1214,6 +1216,8 @@ case the data provided in the datararray will be used.
 
 Finding peaks in a vector
 -------------------------
+
+.. [in preparation]
 
 In the following example we try to find peaks in some artificially
 generated data.
@@ -1291,8 +1295,12 @@ And the slices are actually contained in the return vector for each antenna::
 .. Fourier transforms (FFT) and cross correlation
 .. ----------------------------------------------
 
+.. [in preparation]
+
 
 
 .. Coordinate transformation
 .. -------------------------
+
+.. [in preparation]
 
