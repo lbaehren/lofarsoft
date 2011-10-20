@@ -1120,17 +1120,17 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
  int min_lastseq, max_firstseq;
 
  for (ss=0; ss<SUBBANDS; ss++) {
-  stokesdata[ss] = (stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_struct) );
-  if(stokesdata[ss] == NULL) {
-    fprintf(stderr, "Memory allocation error\n");
-    return 0;
-  }
-  /* open file */
-  input[ss] = fopen(isfiles[ss], "rb");
-  if(input == NULL) {
-   fprintf(stderr, "2bf2fits: Cannot open input file\n");
-   return 0;
-  }
+   stokesdata[ss] = (stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_struct) );
+   if(stokesdata[ss] == NULL) {
+     fprintf(stderr, "Memory allocation error\n");
+     return 0;
+   }
+   /* open file */
+   input[ss] = fopen(isfiles[ss], "rb");
+   if(input == NULL) {
+     fprintf(stderr, "2bf2fits: Cannot open input file\n");
+     return 0;
+   }
  } // s
 
  /* Only find out how many blocks (including gaps) are in the data, then quit function. */
@@ -1138,7 +1138,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
    fseek( input[0], 0, SEEK_SET );
    num = fread( &stokesdata[0][0], sizeof(stokesdata_struct), 1, input[0] );
    if(num != 1) {
-     fprintf(stderr, "No data?\n");
+     fprintf(stderr, "convert_nocollapse_ISappend: No data in first subband file?\n");
      return 0;
    }
    swap_endian( (char*)&stokesdata[0][0].sequence_number );
@@ -1163,29 +1163,31 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
      fseek( input[ss], 0, SEEK_SET );
      num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), 1, input[ss] );
      if(num != 1) {
-       fprintf(stderr, "No data?\n");
-       return 0;
-     }
-     swap_endian( (char*)&stokesdata[ss][0].sequence_number );
-     seqseek[ss] = stokesdata[ss][0].sequence_number;
-     if (stokesdata[ss][0].sequence_number > max_firstseq) {
-      max_firstseq = stokesdata[ss][0].sequence_number;
-     }
-     fseek(input[ss], 0, SEEK_END);
-     filesize = ftell(input[ss]);
-     if(verbose) printf("  File size %ld bytes = %ld blocks of %ld bytes\n", filesize, filesize/sizeof(stokesdata_struct), sizeof(stokesdata_struct));
-     filesize /= sizeof(stokesdata_struct);
-     fseek(input[ss], (filesize-1)*sizeof(stokesdata_struct), SEEK_SET);
-     num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), 1, input[ss] );
-     if(num != 1) {
-       fprintf(stderr, "Error reading file.\n");
-       return 0;
-     }
-     swap_endian( (char*)&stokesdata[ss][0].sequence_number );
-     if (stokesdata[ss][0].sequence_number < min_lastseq) {
-      min_lastseq = stokesdata[ss][0].sequence_number;
+       fprintf(stderr, "convert_nocollapse_ISappend: No data in subband file %d\n", ss);
+       seqseek[ss] = -1;   // Set a flag so we know it shouldn't be processed
+     }else {
+       swap_endian( (char*)&stokesdata[ss][0].sequence_number );
+       seqseek[ss] = stokesdata[ss][0].sequence_number;
+       if (stokesdata[ss][0].sequence_number > max_firstseq) {
+	 max_firstseq = stokesdata[ss][0].sequence_number;
+       }
+       fseek(input[ss], 0, SEEK_END);
+       filesize = ftell(input[ss]);
+       if(verbose) printf("  File size %ld bytes = %ld blocks of %ld bytes\n", filesize, filesize/sizeof(stokesdata_struct), sizeof(stokesdata_struct));
+       filesize /= sizeof(stokesdata_struct);
+       fseek(input[ss], (filesize-1)*sizeof(stokesdata_struct), SEEK_SET);
+       num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), 1, input[ss] );
+       if(num != 1) {
+	 fprintf(stderr, "Error reading file.\n");
+	 return 0;
+       }
+       swap_endian( (char*)&stokesdata[ss][0].sequence_number );
+       if (stokesdata[ss][0].sequence_number < min_lastseq) {
+	 min_lastseq = stokesdata[ss][0].sequence_number;
+       }
      }
    } // ss
+ 
    if (max_firstseq > *firstseq) {
     if (verbose) {
      printf ("First sequence number of subband 0 = %d, the maximum among all subband files = %d\n", *firstseq, max_firstseq);
@@ -1203,11 +1205,12 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
   
    //adjusting seek offsets
    for (ss=0; ss<SUBBANDS; ss++) {
-    seqseek[ss] = max_firstseq - seqseek[ss];
+     if(seqseek[ss] != -1)
+       seqseek[ss] = max_firstseq - seqseek[ss];
    }
    if (verbose) {
      for (ss=0; ss<SUBBANDS; ss++) {
-      if (seqseek[ss] != 0) printf ("The first seq number of subband %d is %d blocks smaller!\n", ss, seqseek[ss]);
+       if (seqseek[ss] != 0 && seqseek[ss] != -1) printf ("The first seq number of subband %d is %d blocks smaller!\n", ss, seqseek[ss]);
      }
    }
 
@@ -1229,7 +1232,8 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
  */
 
  // positioning the start pointer for each file depending on its sequence number
- for (ss=0; ss<SUBBANDS; ss++) fseek(input[ss], seqseek[ss] * sizeof(stokesdata_struct), SEEK_SET);
+ for (ss=0; ss<SUBBANDS; ss++) 
+   fseek(input[ss], seqseek[ss] * sizeof(stokesdata_struct), SEEK_SET);
 
  printf ("\nProcessing...\n");
 
@@ -1247,51 +1251,67 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
 
    /* read data */
    for (ss=0; ss<SUBBANDS; ss++) {
-    num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), AVERAGE_OVER, input[ss] );
-    /* If no more data, sto while loop */
-    if( !num ) { exit_flag = 1; break; }
-
-   /* i loops over the blocks of data read in */
-   for( i = 0; i < num; i++ ) {
-     for( c = 0; c < CHANNELS; c++ ) {
-       unsigned b,t,s;
-       b = beamnr;
-       for( t = 0; t < SAMPLES; t++ ) {
-         for( s = 0; s < STOKES; s++ ) {
-	   floatSwap( &stokesdata[ss][i].samples[b][s][c][t] );
-	   if(zapFirstChannel && CHANNELS > 1 && c == 0) {
-	     stokesdata[ss][i].samples[b][s][c][t]  = 0.0;
+     if(seqseek[ss] != -1) {    /* There is data in the file */
+       num = fread( &stokesdata[ss][0], sizeof(stokesdata_struct), AVERAGE_OVER, input[ss] );
+       /* If no more data, sto while loop */
+       if( !num ) { exit_flag = 1; break; }
+     
+       /* i loops over the blocks of data read in */
+       for( i = 0; i < num; i++ ) {
+	 for( c = 0; c < CHANNELS; c++ ) {
+	   unsigned b,t,s;
+	   b = beamnr;
+	   for( t = 0; t < SAMPLES; t++ ) {
+	     for( s = 0; s < STOKES; s++ ) {
+	       floatSwap( &stokesdata[ss][i].samples[b][s][c][t] );
+	       if(zapFirstChannel && CHANNELS > 1 && c == 0) {
+		 stokesdata[ss][i].samples[b][s][c][t]  = 0.0;
+	       }
+	     }
 	   }
-         }
+	 }
+       }
+     }else {
+       for( i = 0; i < AVERAGE_OVER; i++ ) {
+	 for( c = 0; c < CHANNELS; c++ ) {
+	   unsigned b,t,s;
+	   b = beamnr;
+	   for( t = 0; t < SAMPLES; t++ ) {
+	     for( s = 0; s < STOKES; s++ ) {
+	       stokesdata[ss][i].samples[b][s][c][t]  = 0.0;
+	     }
+	   }
+	 }
        }
      }
-   }
-   
+     
    } // SUBBANDS
    if (exit_flag == 1) break;
-
+ 
 
    /* Print if there are gaps in the data. It doesn't deal with it here though. */
    orig_prev_seqnr = prev_seqnr;
    for (ss=0; ss<SUBBANDS; ss++) {
-   for( i = 0; i < num; i++ ) {
-     /* sequence number is big endian */
-     swap_endian( (char*)&stokesdata[ss][i].sequence_number );
-
-     /* detect gaps */
-     if( prev_seqnr + 1 != stokesdata[ss][i].sequence_number ) {
-       fprintf(stderr,"\nconvert_nocollapse_ISappend: num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[ss][i].sequence_number );
-     } 
-     prev_seqnr = stokesdata[ss][i].sequence_number;
-   }
+     for( i = 0; i < num; i++ ) {
+       /* sequence number is big endian */
+       if(seqseek[ss] != -1) {    /* There is data in the file */
+	 swap_endian( (char*)&stokesdata[ss][i].sequence_number );
+       
+	 /* detect gaps */
+	 if( prev_seqnr + 1 != stokesdata[ss][i].sequence_number ) {
+	   fprintf(stderr,"\nconvert_nocollapse_ISappend: num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[ss][i].sequence_number );
+	 } 
+	 prev_seqnr = stokesdata[ss][i].sequence_number;
+       }
+     }
      prev_seqnr = orig_prev_seqnr;
    } // SUBBANDS
  
    /* Calculate average. RMS not used right now. */
    float *average = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
    float *rms = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
-   if (!average || !rms) { perror("Out of memory: average or rms"); }
-
+   if (average == NULL || rms == NULL) { perror("Out of memory: average or rms"); exit(0); }
+ 
    for (ss=0; ss<SUBBANDS; ss++) {
    for( c = 0; c < CHANNELS; c++ ) {
      float sum = 0.0f;
@@ -1333,19 +1353,19 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
      for( gap = prev_seqnr + 1; gap < stokesdata[0][i].sequence_number; gap++ ) {
        /* gaps, fill in zeroes */
        for (ss=0; ss<SUBBANDS; ss++) {
-       for( c = 0; c < CHANNELS; c++ ) {
-	 for( time = 0; time < SAMPLES; time++ ) {
-	   /*	     if (writefloats==1){ */
-	   float sum = 0;
-	   /* patrick: put polarization to 0, assume only one pol
-	      written out. */
-           ac = ss * CHANNELS + c;
-	   if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
-	     fprintf(stderr, "Error writing to temporary memory\n");
-	     return 0;
+	 for( c = 0; c < CHANNELS; c++ ) {
+	   for( time = 0; time < SAMPLES; time++ ) {
+	     /*	     if (writefloats==1){ */
+	     float sum = 0;
+	     /* patrick: put polarization to 0, assume only one pol
+		written out. */
+	     ac = ss * CHANNELS + c;
+	     if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	       fprintf(stderr, "Error writing to temporary memory\n");
+	       return 0;
+	     }
 	   }
 	 }
-       }
        } // SUBBANDS
        if(verbose) {
 	 printf(".");
