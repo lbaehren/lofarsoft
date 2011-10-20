@@ -32,6 +32,8 @@ int SAMPLES = 768;
 int AVERAGE_OVER = 600;
 int NUM_BLOCKGROUPS = -1;
 float N_sigma = 7;
+int zapFirstChannel = 1;   // By default, set first frequency channel of each subband to zero
+
 #define WRITEFUNC(b)			(b[STOKES_SWITCH]) // I=0,Q=1,U/2=2,V/2=3
 //#define WRITEFUNC(b)			(b[0]+b[1]) // X power * 2
 //#define WRITEFUNC(b)			(b[0]-b[1]) // Y power * 2
@@ -49,7 +51,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose);
 char *get_ptr_entry(char *str, char **txt, int nrlines, char *separator);
 
 void usage(){
-  puts("Just wanted to make sure the new version is picked up.");
+  //  puts("Just wanted to make sure the new version is picked up.");
   puts("Syntax: 2bf2fits [options] SB*.MS");
   puts("-A\t\tNumber of blocks to read in at the same time, which affects calc of running mean etc. (Default = 600)");
   puts("-clipav\t\tInstead of normal clipping, write out average");
@@ -62,7 +64,9 @@ void usage(){
   puts("-CS\t\tInput data is CS data (one file, total I only)");
   puts("-H\t\tHDF5 Data Mode, only working in combination with -CS");
   puts("-append\t\tfor IS data append output fits files together");
-  puts("-skip\t\tSkip this number of blocks in the output. Only works with -H option.");
+  puts("-skip\t\tSkip this number of blocks in the output. Only works with -CS option.");
+  puts("-trunc\t\tTruncate output after this number of blocks. Only works with -CS option.");
+  puts("-noZap0\t\tDo NOT zap the first frequency channel in each subband");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -186,6 +190,9 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
        for( t = 0; t < SAMPLES; t++ ) {
          for( s = 0; s < STOKES; s++ ) {
 	   floatSwap( &stokesdata[i].samples[b][s][c][t] );
+	   if(zapFirstChannel && CHANNELS > 1 && c == 0) {
+	     stokesdata[i].samples[b][s][c][t]  = 0.0;
+	   }
          }
        }
      }
@@ -205,11 +212,10 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
      /* detect gaps */
      if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
-       fprintf(stderr,"\nnum %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
+       fprintf(stderr,"\nconvert_nocollapse: num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
      }
      prev_seqnr = stokesdata[i].sequence_number;
    }
-
 
    /* Calculate average. RMS not used right now. */
    float average[CHANNELS], rms[CHANNELS];
@@ -395,7 +401,7 @@ void *stokesdata_h5_ptr = NULL;
 
 /* Returns 1 if successful, 0 on error */
 /* Only for H5 data */
-int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks)
+int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks, long truncNrBlocks)
 {
 
   typedef struct {
@@ -412,6 +418,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
  unsigned num;
  int x;
  long filesize, currentblock;
+ int doneprocessing = 0;
 
  if(stokesdata_h5_ptr == NULL) {
    //   printf("XXXXX Alloc %ld\n",AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
@@ -497,6 +504,9 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 for( t = 0; t < SAMPLES; t++ ) {
 	   for( s = 0; s < STOKES; s++ ) {
 	     floatSwap( &stokesdata_h5[i].samples[b][t][nsub][c][s] );
+	     if(zapFirstChannel && CHANNELS > 1 && c == 0) {
+	       stokesdata_h5[i].samples[b][t][nsub][c][s] = 0.0;
+	     }
 	   }
 	 }
        }
@@ -685,16 +695,25 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
      /* Write out subint */
-     if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= 0) {
-       if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i- skipNrBlocks, packeddata, scales, offsets) != 1) {
-	 fprintf(stderr, "ERROR: Cannot write subint data               \n");      
-	 return 0;
+     if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= truncNrBlocks && truncNrBlocks > 0) {
+       doneprocessing = 1;
+     }else {
+       if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= 0) {
+	 if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i- skipNrBlocks, packeddata, scales, offsets) != 1) {
+	   fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+	   return 0;
+	 }
        }
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 5\n", (x-1)*AVERAGE_OVER+i); */
+     if(doneprocessing)
+       break;
+     
    }
    /*   fprintf(stderr, "XXXXXXXX X - 6\n"); */
 
+   if(doneprocessing)
+     break;
  } //  while( !feof( input ) ) {
  printf("\n");
  // printf("Wait before destruction\n");  scanf("%d", &x);
@@ -713,7 +732,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
 /* Returns 1 if successful, 0 on error */
 /* Only for CS data */
-int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, long skipNrBlocks)
+int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, long skipNrBlocks, long truncNrBlocks)
 {
   typedef struct {
     unsigned	sequence_number;
@@ -728,18 +747,19 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
  unsigned nul_samples = 0;
  /* unsigned toobig = 0, toosmall = 0; */
  unsigned num;
+ int doneprocessing = 0;
  int x;
  long filesize;
 
- stokesdata = (stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_struct) );
- if(stokesdata == NULL) {
-   fprintf(stderr, "Memory allocation error\n");
-   return 0;
- }
 
  /* Only find out how many blocks (including gaps) are in the data, then quit function. */
  if(findseq) {
 
+   stokesdata = (stokesdata_struct *) malloc(sizeof(stokesdata_struct) );
+   if(stokesdata == NULL) {
+     fprintf(stderr, "Memory allocation error\n");
+     return 0;
+   }
    fseek( input, 0, SEEK_SET );
    num = fread( &stokesdata[0], sizeof stokesdata[0], 1, input );
    if(num != 1) {
@@ -760,7 +780,8 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
    }
    swap_endian( (char*)&stokesdata[0].sequence_number );
    *lastseq = stokesdata[0].sequence_number;
-   
+   if(verbose) printf("  Last sequence number: %d\n", *lastseq);
+ 
    //   fseek(input, (filesize-1)*sizeof(stokesdata_struct), SEEK_SET);
    /*
    fseek(input, 0, SEEK_SET);
@@ -794,9 +815,15 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
    exit(0);
    */
 
+   free(stokesdata);
    return 1;
  }
 
+ stokesdata = (stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_struct) );
+ if(stokesdata == NULL) {
+   fprintf(stderr, "Memory allocation error\n");
+   return 0;
+ }
 
  /* Allocate temporary memory for packed data */
  unsigned char *packeddata;
@@ -822,25 +849,35 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
    /* read data */
    num = fread( &stokesdata[0], sizeof stokesdata[0], AVERAGE_OVER, input );
 
+
    /* i loops over the blocks of data read in */
    for( i = 0; i < num; i++ ) {
      for( s = 0; s < SUBBANDS; s++ ) {
        unsigned t;
        for( t = 0; t < SAMPLES; t++ ) {
-         for( c = 0; c <= CHANNELS; c++ ) {
+         for( c = 0; c < CHANNELS; c++ ) {
 	   floatSwap( &stokesdata[i].samples[t][s][c] );
+	   if(zapFirstChannel && CHANNELS > 1 && c == 0) {
+	     stokesdata[i].samples[t][s][c] = 0.0;
+	   }
          }
        }
      }
    }
-   
+ 
+   /*   fprintf(stderr, "XXXX %d\n", stokesdata[1].sequence_number);
+   swap_endian( (char*)&stokesdata[1].sequence_number );
+   fprintf(stderr, "XXXX %d\n", stokesdata[1].sequence_number);
+   */
+
    /* If no more data, sto while loop */
    if( !num ) {
      break;
    }
+ 
 
 
-   /* Print if there are gaps in the data. It doesn't deal with it here though. */
+  /* Print if there are gaps in the data. It doesn't deal with it here though. */
    orig_prev_seqnr = prev_seqnr;
    for( i = 0; i < num; i++ ) {
      /* sequence number is big endian */
@@ -848,11 +885,10 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 
      /* detect gaps */
      if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
-       fprintf(stderr,"\nnum %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
+       fprintf(stderr,"\nconvert_nocollapse_CS: num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[i].sequence_number );
      }
      prev_seqnr = stokesdata[i].sequence_number;
    }
-
 
    /* Calculate average. RMS not used right now. */
    float *average = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
@@ -920,7 +956,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 	 return 0;
        }
        /* Write out subint */
-       if(gap+1 - skipNrBlocks >= 0) {
+       if(gap+1 - skipNrBlocks >= 0 && (gap+1 - skipNrBlocks <= truncNrBlocks || truncNrBlocks <= 0)) {
 	 if(writeFITSsubint(fout, gap+1 - skipNrBlocks, packeddata, scales, offsets) != 1) {
 	   fprintf(stderr, "ERROR: Cannot write subint data               \n");      
 	   return 0;
@@ -1024,10 +1060,14 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      }
      /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
      /* Write out subint */
-     if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= 0) {
-       if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i - skipNrBlocks, packeddata, scales, offsets) != 1) {
-	 fprintf(stderr, "ERROR: Cannot write subint data               \n");      
-	 return 0;
+     if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= truncNrBlocks && truncNrBlocks > 0) {
+       doneprocessing = 1;
+     }else {
+       if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= 0) {
+	 if(writeFITSsubint(fout, (x-1)*AVERAGE_OVER+i - skipNrBlocks, packeddata, scales, offsets) != 1) {
+	   fprintf(stderr, "ERROR: Cannot write subint data               \n");      
+	   return 0;
+	 }
        }
      }
    
@@ -1035,11 +1075,15 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
        printf("\rProcessed block %d/%ld (%.3f%%)", (x-1)*AVERAGE_OVER+i, fout.NrPulses, 100.0*((x-1)*AVERAGE_OVER+i)/(float)fout.NrPulses);
        fflush(stdout);
      }
+     if(doneprocessing)
+       break;
    }
 
   free (average);
   free (rms);
 
+  if(doneprocessing)
+    break;
  } //  while( !feof( input ) ) {
  printf("\n");
  if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 0, 1) != 1) {
@@ -1215,6 +1259,9 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
        for( t = 0; t < SAMPLES; t++ ) {
          for( s = 0; s < STOKES; s++ ) {
 	   floatSwap( &stokesdata[ss][i].samples[b][s][c][t] );
+	   if(zapFirstChannel && CHANNELS > 1 && c == 0) {
+	     stokesdata[ss][i].samples[b][s][c][t]  = 0.0;
+	   }
          }
        }
      }
@@ -1233,13 +1280,13 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
 
      /* detect gaps */
      if( prev_seqnr + 1 != stokesdata[ss][i].sequence_number ) {
-       fprintf(stderr,"\nnum %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[ss][i].sequence_number );
+       fprintf(stderr,"\nconvert_nocollapse_ISappend: num %d gap between sequence numbers %u and %u.\n",i, prev_seqnr, stokesdata[ss][i].sequence_number );
      } 
      prev_seqnr = stokesdata[ss][i].sequence_number;
    }
      prev_seqnr = orig_prev_seqnr;
    } // SUBBANDS
-
+ 
    /* Calculate average. RMS not used right now. */
    float *average = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
    float *rms = (float *)calloc (SUBBANDS * CHANNELS, sizeof(float));
@@ -1476,7 +1523,7 @@ int main( int argc, char **argv )
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
   double lofreq;
-  long skipNrBlocks;
+  long skipNrBlocks, truncNrBlocks;
 
   //  char header_txt[parsetmaxnrlines][1001], *txt[parsetmaxnrlines],;
   char *header_txt[parsetmaxnrlines];
@@ -1496,6 +1543,7 @@ int main( int argc, char **argv )
   nrbits = 8;
   subbandnr = 0;
   skipNrBlocks = 0;
+  truncNrBlocks = 0;
   cleanPRSData(&subintdata);
 
   sigma_limit = -1;
@@ -1533,6 +1581,13 @@ int main( int argc, char **argv )
 	  return 0;
 	}
         i++;
+      }else if(strcmp(argv[i], "-trunc") == 0) {
+	j = sscanf(argv[i+1], "%ld", &truncNrBlocks);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
       }else if(strcmp(argv[i], "-sigma") == 0) {
 	j = sscanf(argv[i+1], "%f", &sigma_limit);
 	if(j != 1) {
@@ -1556,6 +1611,8 @@ int main( int argc, char **argv )
 	  return 0;
 	}
         i++;
+      }else if(strcmp(argv[i], "-noZap0") == 0) {
+	zapFirstChannel = 0;
       }else if(strcmp(argv[i], "-debugpacking") == 0) {
 	debugpacking = 1;
 	/*
@@ -1889,8 +1946,8 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     printf("  Header dump:\n");
     printHeaderPSRData(fout, 4);
    }
-   if(skipNrBlocks != 0) {
-     fprintf(stderr, "2bf2fits: Skipping blocks is not implemented for this input data format.\n");
+   if(skipNrBlocks != 0 || truncNrBlocks != 0) {
+     fprintf(stderr, "2bf2fits: Skipping/truncating blocks is not implemented for this input data format.\n");
      exit(-1);
    }
 
@@ -1965,10 +2022,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
         if(is_H5) {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks, truncNrBlocks) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks) == 0)
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks, truncNrBlocks) == 0)
 	    return 0;
 	}
       }
@@ -1989,6 +2046,21 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 	  exit(-1);
 	}
       }
+      if(truncNrBlocks != 0) {
+	if(is_CS == 0) {
+	  fprintf(stderr, "2bf2fits: Truncating output is not implemented for this input data format.\n");
+	  exit(-1);
+	}
+	if(truncNrBlocks >= fout.NrPulses) {
+	  fprintf(stderr, "2bf2fits: You appear to request to write out more data than there is!\n");
+	  exit(-1);
+	}	
+	fout.NrPulses = truncNrBlocks;
+	if(fout.NrPulses <= 0) {
+	  fprintf(stderr, "2bf2fits: You appear to request to write out no data!\n");
+	  exit(-1);
+	}	
+      }
 
       if(application.verbose) {
 	printf("  Header dump:\n");
@@ -2006,10 +2078,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
 	if(is_H5 == 0) {
-	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks) == 0)
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks, truncNrBlocks) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks, truncNrBlocks) == 0)
 	    return 0;
 	}
       }
