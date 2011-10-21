@@ -1,7 +1,9 @@
 
-##-------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 1620 2008-06-06 09:26:35Z baehren                       $
-##-------------------------------------------------------------------------------
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
 
 ## Name of the project handled by CMake
 project (LUS)
@@ -11,6 +13,12 @@ cmake_minimum_required (VERSION 2.8)
 
 ## Enforced CMake policy
 cmake_policy (VERSION 2.8)
+
+## Project release version (major.minor.patch)
+set (LUS_VERSION_MAJOR 0   )
+set (LUS_VERSION_MINOR 0   )
+set (LUS_VERSION_PATCH 0   )
+set (LUS_VERSION "${LUS_VERSION_MAJOR}.${LUS_VERSION_MINOR}.${LUS_VERSION_PATCH}")
 
 ## ==============================================================================
 ##
