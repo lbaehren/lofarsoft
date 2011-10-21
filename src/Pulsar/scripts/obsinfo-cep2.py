@@ -982,7 +982,7 @@ class outputInfo:
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>" % (self.id, self.colspan, self.comment)
 
-			# adding CS combined_plot column
+			# adding CS/BF combined_plot column
 			if self.filestem_array[0] == "":
 				self.infohtml = self.infohtml + "\n <td align=center></td>"
 			else:
@@ -992,7 +992,7 @@ class outputInfo:
 				self.infohtml = self.infohtml + "\n <td align=center></td>"
 			else:
 				self.infohtml = self.infohtml + "\n <td align=center><a href=\"plots/%s/%s.png\"><img src=\"plots/%s/%s.th.png\"></a></td>" % (self.id, self.filestem_array[1], self.id, self.filestem_array[1])
-			# adding BF combined_plot column
+			# adding FE combined_plot column
 			if self.filestem_array[2] == "":
 				self.infohtml = self.infohtml + "\n <td align=center></td>"
 			else:
@@ -2198,7 +2198,8 @@ if __name__ == "__main__":
 							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
 							os.system(cmd)
 						# checking if this obs is FE obs. If so, then get status maps
-						if oi.FE == "+" and cmdout[4] == "yes":
+#						if oi.FE == "+" and cmdout[4] == "yes":
+						if cmdout[4] == "yes":   # now also checking not just for FE obs (in case there are 'heat' maps for CS data with many TA beams)
 							# copying FE status plots
 							profiles_array[2]="status"
 							combined="status"
