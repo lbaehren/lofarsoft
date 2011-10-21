@@ -56,9 +56,9 @@ if (UNIX)
 	pyqt4-py26
 	)
       
-      if (NOT doxygen_executable)
+      if (NOT DOXYGEN_EXECUTABLE)
 	list (APPEND fink_packages doxygen)
-      endif (NOT doxygen_executable)
+      endif (NOT DOXYGEN_EXECUTABLE)
       
       if (NOT HAVE_GSL)
 	list (APPEND fink_packages gsl)

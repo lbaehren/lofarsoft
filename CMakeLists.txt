@@ -120,10 +120,11 @@ configure_file (
 ##
 ## ==============================================================================
 
+find_package (BISON)
+find_package (Doxygen)
+
 find_program (bash_executable       bash    PATHS ${bin_locations})
-find_program (bison_executable      bison   PATHS ${bin_locations})
 find_program (curl_executable       curl    PATHS ${bin_locations})
-find_program (doxygen_executable    doxygen PATHS ${bin_locations})
 find_program (flex_executable       flex    PATHS ${bin_locations})
 find_program (perl_executable       perl    PATHS ${bin_locations})
 find_program (svn_executable        svn     PATHS ${bin_locations})

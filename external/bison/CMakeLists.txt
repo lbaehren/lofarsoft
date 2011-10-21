@@ -42,15 +42,14 @@ endif (LUS_ROOT)
 ## ------------------------------------------------------------------------------
 ## Check for system-wide BISON library installation
 
-if (bison_executable)
-  set (HAVE_BISON YES)
-else (bison_executable)
-  set (HAVE_BISON NO)
-endif (bison_executable)
+if (NOT BISON_FOUND)
+  # load standard CMake find module
+  find_package (BISON)
+endif (NOT BISON_FOUND)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
+if (NOT BISON_FOUND OR BISON_FORCE_BUILD)
 
   include (ExternalProject)
 
@@ -85,9 +84,9 @@ if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
 
   ## <-- end build condition ----------------------------------------------------->
 
-else (NOT HAVE_BISON OR BISON_FORCE_BUILD)
+else (NOT BISON_FOUND OR BISON_FORCE_BUILD)
   add_custom_target (bison
     WORKING_DIRECTORY ${BISON_BINARY_DIR}
     COMMENT "[Bison] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_BISON OR BISON_FORCE_BUILD)
+endif (NOT BISON_FOUND OR BISON_FORCE_BUILD)
