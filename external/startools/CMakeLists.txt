@@ -120,9 +120,12 @@ else (ROOT_FOUND)
   message (STATUS "ROOT_INCLUDES  = ${ROOT_INCLUDES}")
 endif (ROOT_FOUND)
 
-## --- PostgreSQL ------------------------------------------
+##__________________________________________________________
+##                                                PostgreSQL
 
-include (FindPostgreSQL)
+if (NOT PostgreSQL_FOUND)
+  include (FindPostgreSQL)
+endif (NOT PostgreSQL_FOUND)
 
 if (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
   set (HAVE_PostgreSQL TRUE)
