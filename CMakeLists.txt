@@ -124,11 +124,11 @@ find_package (BISON)
 find_package (Doxygen)
 find_package (FLEX)
 find_package (Perl)
+find_package (Subversion)
 find_package (Wget)
 
 find_program (bash_executable       bash    PATHS ${bin_locations})
 find_program (curl_executable       curl    PATHS ${bin_locations})
-find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 
 set (BLITZ_FIND_QUIETLY           YES )

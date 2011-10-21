@@ -42,9 +42,9 @@ endif (LUS_ROOT)
 
 set (MATHGL_FIND_QUIETLY YES)
 
-include (FindMathGL)
+find_package (MathGL)
+find_package (Subversion)
 
-find_program (svn_executable  svn  PATHS ${bin_locations})
 find_program (tar_executable  tar  PATHS ${bin_locations})
 find_program (find_executable find PATHS ${bin_locations})
 
@@ -63,7 +63,6 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   list (APPEND bin_locations /sw/lib/qt4-mac/bin)
   list (APPEND bin_locations /sw/lib/qt4-x11/bin)
 
-  find_program (tar_executable    tar    ${bin_locations} )
   find_program (ln_executable     ln     ${bin_locations} )
   find_program (qmake_executable  qmake  ${bin_locations} )
 
@@ -234,13 +233,13 @@ endif (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 ## ------------------------------------------------------------------------------
 ## Update the tar-archive to the latest version of the source
 
-if (svn_executable AND tar_executable)
+if (SUBVERSION_FOUND AND tar_executable)
   add_custom_target (update_mathgl
     COMMAND rm -rf mathgl
-    COMMAND ${svn_executable} co http://ufp.appl.sci-nnov.ru/svn/mathgl/trunk mathgl
+    COMMAND ${Subversion_SVN_EXECUTABLE} co http://ufp.appl.sci-nnov.ru/svn/mathgl/trunk mathgl
     COMMAND ${tar_executable} -cvzf mathgl.tgz mathgl --exclude .svn
     COMMAND rm -rf mathgl
     WORKING_DIRECTORY ${MATHGL_SOURCE_DIR}
     COMMENT "Retrieving latest version of MathGL source code ..."
     )
-endif (svn_executable AND tar_executable)  
+endif (SUBVERSION_FOUND AND tar_executable)  

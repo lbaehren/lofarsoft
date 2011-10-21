@@ -50,8 +50,8 @@ rm -rf build/*
 echo "-- Updating working copy ..."
 
 cd ${LUS_ROOT}
-${svn_executable} cleanup
-${svn_executable} up
+${Subversion_SVN_EXECUTABLE} cleanup
+${Subversion_SVN_EXECUTABLE} up
 
 echo "-- Run configure scripts ..."
 
