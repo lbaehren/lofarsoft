@@ -122,11 +122,11 @@ configure_file (
 
 find_package (BISON)
 find_package (Doxygen)
+find_package (FLEX)
+find_package (Perl)
 
 find_program (bash_executable       bash    PATHS ${bin_locations})
 find_program (curl_executable       curl    PATHS ${bin_locations})
-find_program (flex_executable       flex    PATHS ${bin_locations})
-find_program (perl_executable       perl    PATHS ${bin_locations})
 find_program (svn_executable        svn     PATHS ${bin_locations})
 find_program (tar_executable        tar     PATHS ${bin_locations})
 find_program (wget_executable       wget    PATHS ${bin_locations})

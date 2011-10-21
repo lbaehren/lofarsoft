@@ -77,9 +77,9 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
     enable_testing()
   endif (WCSLIB_ENABLE_TESTING)
   
-  if (NOT flex_executable)
-    find_program (flex_executable flex ${bin_locations} )
-  endif (NOT flex_executable)
+  if (NOT FLEX_FOUND)
+    find_package (FLEX)
+  endif (NOT FLEX_FOUND)
   
   ## ----------------------------------------------------------------------------
   ## Installation

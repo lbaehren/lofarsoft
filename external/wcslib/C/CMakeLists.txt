@@ -59,12 +59,12 @@ set (WCSLIB_flex_inputs
   wcsutrn
 )
 
-if (flex_executable)
+if (FLEX_FOUND)
   foreach (src ${WCSLIB_flex_inputs})
     message (STATUS "Flex processing ${src}...")
     execute_process (
       WORKING_DIRECTORY ${WCSLIB_SOURCE_DIR}/C
-      COMMAND ${flex_executable} -o${WCSLIB_BINARY_DIR}/C/${src}.c -P${src} ${src}.l
+      COMMAND ${FLEX_EXECUTABLE} -o${WCSLIB_BINARY_DIR}/C/${src}.c -P${src} ${src}.l
       TIMEOUT 20
       ERROR_VARIABLE flex_error
       OUTPUT_QUIET
@@ -74,9 +74,9 @@ if (flex_executable)
       message (SEND_ERROR ${flex_error})
     endif (flex_error)
   endforeach (src)
-else (flex_executable)
-  message (SEND_ERROR "Unable to process flex input files!")
-endif (flex_executable)
+else (FLEX_FOUND)
+  message (SEND_ERROR "[WCSLIB] Unable to process flex input files!")
+endif (FLEX_FOUND)
 
 ## -----------------------------------------------------------------------------
 ## Sources and instructions to build the library
