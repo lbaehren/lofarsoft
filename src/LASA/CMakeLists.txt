@@ -116,20 +116,20 @@ endif (HAVE_HDF5)
 ##__________________________________________________________
 ##                                                      ROOT
 
-if (NOT HAVE_ROOT)
+if (NOT ROOT_FOUND)
   include (FindROOT)
-endif (NOT HAVE_ROOT)
+endif (NOT ROOT_FOUND)
 
-if (HAVE_ROOT)
+if (ROOT_FOUND)
   ## compiler flag
   add_definitions (-DHAVE_ROOT)
   ## include path
   include_directories (${ROOT_INCLUDES})
   ## link library
   list (APPEND lasa_link_libraries ${ROOT_LIBRARIES})
-else (HAVE_ROOT)
+else (ROOT_FOUND)
   message (FATAL_ERROR "[LASA] Missing ROOT - unable to proceeed!")
-endif (HAVE_ROOT)
+endif (ROOT_FOUND)
 
 ## =============================================================================
 ##

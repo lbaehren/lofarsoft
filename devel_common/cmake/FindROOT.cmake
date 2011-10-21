@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -23,7 +21,9 @@
 # - Check for the presence of ROOT
 #
 # The following variables are set when ROOT is found:
+#  ROOT_FOUND      = Set to true, if all components of ROOT have been found.
 #  HAVE_ROOT       = Set to true, if all components of ROOT have been found.
+#                    (set for compatibility)
 #  ROOT_INCLUDES   = Include path for the header files of ROOT
 #  ROOT_LIBRARIES  = Link these to use ROOT
 #  ROOT_LFLAGS     = Linker flags (optional)
@@ -40,7 +40,7 @@ if (NOT FIND_ROOT_CMAKE)
   ##_____________________________________________________________________________
   ## Is the root of the installation defined through environment variable?
   
-  set (HAVE_ROOTSYS $ENV{ROOTSYS})
+  set (ROOT_FOUNDSYS $ENV{ROOTSYS})
   
   if (NOT ROOT_FIND_QUIETLY)
     if (HAVE_ROOTSYS)
@@ -130,9 +130,11 @@ if (NOT FIND_ROOT_CMAKE)
   ## Actions taken when all components have been found
   
   if (ROOT_INCLUDES AND ROOT_LIBRARIES)
-    set (HAVE_ROOT TRUE)
+    set (ROOT_FOUND TRUE)
+    set (HAVE_ROOT  TRUE)
   else (ROOT_INCLUDES AND ROOT_LIBRARIES)
-    set (HAVE_ROOT FALSE)
+    set (ROOT_FOUND FALSE)
+    set (HAVE_ROOT  FALSE)
     if (NOT ROOT_FIND_QUIETLY)
       if (NOT ROOT_INCLUDES)
 	message (STATUS "Unable to find ROOT header files!")
@@ -143,22 +145,24 @@ if (NOT FIND_ROOT_CMAKE)
     endif (NOT ROOT_FIND_QUIETLY)
   endif (ROOT_INCLUDES AND ROOT_LIBRARIES)
   
-  if (HAVE_ROOT)
+  if (ROOT_FOUND)
     if (NOT ROOT_FIND_QUIETLY)
       message (STATUS "Found components for ROOT")
       message (STATUS "ROOT_INCLUDES  = ${ROOT_INCLUDES}")
       message (STATUS "ROOT_LIBRARIES = ${ROOT_LIBRARIES}")
     endif (NOT ROOT_FIND_QUIETLY)
-  else (HAVE_ROOT)
+  else (ROOT_FOUND)
     if (ROOT_FIND_REQUIRED)
       message (FATAL_ERROR "Could not find ROOT!")
     endif (ROOT_FIND_REQUIRED)
-  endif (HAVE_ROOT)
+  endif (ROOT_FOUND)
   
   ##_____________________________________________________________________________
   ## Mark as advanced ...
   
   mark_as_advanced (
+    HAVE_ROOT
+    ROOT_FOUND
     ROOT_INCLUDES
     ROOT_LIBRARIES
     libm

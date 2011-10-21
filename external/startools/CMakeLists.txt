@@ -92,7 +92,9 @@ endif (HAVE_MATH_H)
 ##__________________________________________________________
 ##                                                     FFTW3
 
-include (FindFFTW3)
+if (NOT HAVE_FFTW3)
+  include (FindFFTW3)
+endif (HAVE_FFTW3)
 
 if (HAVE_FFTW3)
   include_directories (${FFTW3_INCLUDES})
@@ -106,15 +108,17 @@ endif (HAVE_FFTW3)
 ##__________________________________________________________
 ##                                                      ROOT
 
-include (FindROOT)
+if (NOT ROOT_FOUND)
+  find_package (ROOT)
+endif (NOT ROOT_FOUND)
 
-if (HAVE_ROOT)
+if (ROOT_FOUND)
   include_directories (${ROOT_INCLUDES})
   add_definitions (-DHAVE_ROOT)
-else (HAVE_ROOT)
+else (ROOT_FOUND)
   message (SEND_ERROR "[Star-Tools] Missing or incomplete ROOT installation!")
   message (STATUS "ROOT_INCLUDES  = ${ROOT_INCLUDES}")
-endif (HAVE_ROOT)
+endif (ROOT_FOUND)
 
 ## --- PostgreSQL ------------------------------------------
 

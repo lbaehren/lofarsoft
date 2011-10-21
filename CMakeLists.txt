@@ -158,9 +158,11 @@ foreach (varSystemPackage
     set (${varPackageUpper}_FIND_QUIETLY  TRUE )
   endif (LUS_VERBOSE_CONFIGURE)
 
-  ## Load CMake module
-  find_package (${varSystemPackage})
-
+  ## Load CMake module if package not yet located
+  if (NOT ${varPackageUpper}_FOUND)
+    find_package (${varSystemPackage})
+  endif (NOT ${varPackageUpper}_FOUND)
+  
 endforeach (varSystemPackage)
 
 find_program (bash_executable   bash    PATHS ${bin_locations})
@@ -240,9 +242,9 @@ set (packages_external
   wcstools
   )
 
-if (HAVE_ROOT)
+if (ROOT_FOUND)
   list (APPEND packages_external startools)
-endif (HAVE_ROOT)
+endif (ROOT_FOUND)
 
 ## Packages handled directly through CMake
 
@@ -282,9 +284,9 @@ add_dependencies (pelican git boost cfitsio)
 
 add_dependencies (plplot numpy swig)
 
-if (HAVE_ROOT)
+if (ROOT_FOUND)
   add_dependencies (startools fftw3)
-endif (HAVE_ROOT)
+endif (ROOT_FOUND)
 
 ## ==============================================================================
 ##
@@ -347,9 +349,9 @@ if (CR_WITH_AERA)
   add_dependencies(cr aera)
 endif (CR_WITH_AERA)
 
-if (HAVE_ROOT AND CR_WITH_STARTOOLS)
+if (ROOT_FOUND AND CR_WITH_STARTOOLS)
   add_dependencies (cr startools)
-endif (HAVE_ROOT AND CR_WITH_STARTOOLS)
+endif (ROOT_FOUND AND CR_WITH_STARTOOLS)
 
 if (CR_WITH_GUI)
   add_dependencies (cr pyqt)

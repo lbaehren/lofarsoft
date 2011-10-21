@@ -42,11 +42,13 @@ endif (LUS_ROOT)
 
 set (ROOT_FIND_QUIETLY YES)
 
-include (FindROOT)
+if (NOT ROOT_FOUND)
+  find_package (ROOT)
+endif (NOT ROOT_FOUND)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+if (NOT ROOT_FOUND OR ROOT_FORCE_BUILD)
 
   if (SVN_EXECUTABLE)
     
@@ -81,9 +83,9 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   
   ## <-- end build condition ----------------------------------------------------->
   
-else (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+else (NOT ROOT_FOUND OR ROOT_FORCE_BUILD)
   add_custom_target (root
     WORKING_DIRECTORY ${ROOT_BINARY_DIR}
     COMMENT "[ROOT] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+endif (NOT ROOT_FOUND OR ROOT_FORCE_BUILD)

@@ -316,10 +316,10 @@ endif (CR_WITH_PLOTTING)
 
 ## check if ROOT is available
 
-if (NOT HAVE_ROOT)
+if (NOT ROOT_FOUND)
   message (STATUS "[CR-Tools] LopesStar support disabled; missing ROOT.")
   set (CR_WITH_STARTOOLS FALSE)
-endif (NOT HAVE_ROOT)
+endif (NOT ROOT_FOUND)
 
 ## check if FFTW3 is available
 
@@ -740,7 +740,7 @@ message (STATUS " POPT ..................... : ${HAVE_POPT}")
 message (STATUS " PostgreSQL ............... : ${HAVE_POSTGRESQL}")
 message (STATUS " Python ................... : ${HAVE_PYTHON}")
 message (STATUS " Qt4 ...................... : ${QT4_FOUND}")
-message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
+message (STATUS " ROOT ..................... : ${ROOT_FOUND}")
 message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
 message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
 message (STATUS "+------------------------------------------------------------+")
