@@ -69,9 +69,9 @@ if (UNIX)
 	list (APPEND fink_packages swig)
       endif (NOT SWIG_FOUND)
       
-      if (NOT wget_executable)
-	list (APPEND fink_packages wget)
-      endif (NOT wget_executable)
+      if (NOT WGET_FOUND)
+	find_package (Wget)
+      endif (NOT WGET_FOUND)
       
       ##______________________________________________________________
       ## Define installation targets for the packages
