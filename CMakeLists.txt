@@ -133,6 +133,8 @@ foreach (varSystemPackage
     BISON
     Blitz
     CASACORE
+    CFITSIO
+    CUDA
     Doxygen
     FFTW3
     FLEX
@@ -144,6 +146,7 @@ foreach (varSystemPackage
     ROOT
     Subversion
     SWIG
+    WCSLIB
     Wget
     )
 
@@ -442,6 +445,8 @@ message (STATUS " .. C compiler             = ${CMAKE_C_COMPILER}"            )
 message (STATUS " .. size(void*)            = ${CMAKE_SIZEOF_VOID_P}"         )
 message (STATUS " Required external packages:"                                )
 message (STATUS " .. Bison                  = ${BISON_FOUND}"                 )
+message (STATUS " .. CFITSIO                = ${CFITSIO_FOUND}"               )
+message (STATUS " .. CUDA                   = ${CUDA_FOUND}"                  )
 message (STATUS " .. casacore               = ${CASACORE_FOUND}"              )
 message (STATUS " .. Doxygen                = ${DOXYGEN_FOUND}"               )
 message (STATUS " .. Flex                   = ${FLEX_FOUND}"                  )
@@ -454,6 +459,7 @@ message (STATUS " .. Perl                   = ${PERL_FOUND}"                  )
 message (STATUS " .. ROOT                   = ${ROOT_FOUND}"                  )
 message (STATUS " .. SWIG                   = ${SWIG_FOUND}"                  )
 message (STATUS " .. Subversion             = ${SUBVERSION_FOUND}"            )
+message (STATUS " .. WCSLIB                 = ${WCSLIB_FOUND}"                )
 message (STATUS " .. Wget                   = ${WGET_FOUND}"                  )
 message (STATUS " LOFAR User software configuration:"                         )
 message (STATUS " .. LOFARSOFT              = $ENV{LOFARSOFT}"                )

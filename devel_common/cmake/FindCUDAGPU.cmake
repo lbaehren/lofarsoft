@@ -13,8 +13,10 @@ if (NOT CUDA_HAVE_GPU)
 
     cmake_minimum_required (VERSION 2.8)
     
-    find_package (cuda)
-    
+    if (NOT CUDA_FOUND)
+      find_package (cuda)
+    endif (NOT CUDA_FOUND)
+
     if (CUDA_FOUND)
         try_run (RUN_RESULT_VAR COMPILE_RESULT_VAR
             ${CMAKE_BINARY_DIR} 
