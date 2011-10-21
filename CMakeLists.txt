@@ -46,12 +46,12 @@ endif (LUS_ROOT)
 ##
 ## ==============================================================================
 
-option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             YES )
-option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO  )
-option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
-option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
-option (TEST_DATASETS          "Download and install sample test datasets?"   NO  )
-option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO  )
+option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO )
+option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO )
+option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
+option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
+option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
+option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
 
 ## Options affecting the build of individual packages
 
@@ -120,29 +120,56 @@ configure_file (
 ##
 ## ==============================================================================
 
-find_package (BISON)
-find_package (Doxygen)
-find_package (FLEX)
-find_package (Perl)
-find_package (Subversion)
-find_package (Wget)
+find_program (HOSTNAME_CMD NAMES hostname)
+if (HOSTNAME_CMD)
+  exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE CMAKE_SYSTEM_HOSTNAME)
+endif (HOSTNAME_CMD)
 
-find_program (bash_executable       bash    PATHS ${bin_locations})
-find_program (curl_executable       curl    PATHS ${bin_locations})
-find_program (tar_executable        tar     PATHS ${bin_locations})
+## Got through the basic list of system tools and libraries; for each package
+## take into account the ENABLE_VERBOSE_CONFIGURE option and ensure a standard
+## version of the status variable is being define (<PACKAGE>_FOUND)
 
-set (BLITZ_FIND_QUIETLY           YES )
-set (GIT_FIND_QUIETLY             YES )
-set (OPENGL_FIND_QUIETLY          YES )
-set (ROOT_FIND_QUIETLY            YES )
+foreach (varSystemPackage
+    BISON
+    Blitz
+    CASACORE
+    Doxygen
+    FLEX
+    Git
+    HDF5
+    OpenGL
+    OpenMP
+    Perl
+    ROOT
+    Subversion
+    SWIG
+    Wget
+    )
+
+  ## Get package name in uppercase
+  string (TOUPPER ${varSystemPackage} varPackageUpper)
+
+  ## Set verbosity level
+  if (LUS_VERBOSE_CONFIGURE)
+    set (${varSystemPackage}_FIND_QUIETLY FALSE )
+    set (${varPackageUpper}_FIND_QUIETLY  FALSE )
+  else (LUS_VERBOSE_CONFIGURE)  
+    set (${varSystemPackage}_FIND_QUIETLY TRUE )
+    set (${varPackageUpper}_FIND_QUIETLY  TRUE )
+  endif (LUS_VERBOSE_CONFIGURE)
+
+  ## Load CMake module
+  find_package (${varSystemPackage})
+
+endforeach (varSystemPackage)
+
+find_program (bash_executable   bash    PATHS ${bin_locations})
+find_program (curl_executable   curl    PATHS ${bin_locations})
+find_program (tar_executable    tar     PATHS ${bin_locations})
+
 set (VERSION_CONTROL_FIND_QUIETLY YES )
 
 include (BuildPackage)
-include (FindBlitz)
-include (FindGit)
-include (FindOpenGL)
-include (FindOpenMP)
-include (FindROOT)
 include (FindVersionControl)
 
 ## ==============================================================================
@@ -385,15 +412,36 @@ add_dependencies (contrib dal)
 ##
 ## ==============================================================================
 
-if (LUS_VERBOSE_CONFIGURE)
-  message (STATUS "------------------------------------------------------------")
-  message (STATUS "[LUS] Configuration summary.")
-  message (STATUS "------------------------------------------------------------")
-  message (STATUS "LOFARSOFT          = $ENV{LOFARSOFT}")
-  message (STATUS "LUS_ROOT           = ${LUS_ROOT}")
-  message (STATUS "LUS_INSTALL_PREFIX = ${LUS_INSTALL_PREFIX}")
-  message (STATUS "LUS_PYTHONPATH     = ${USG_PYTHONPATH}")
-  message (STATUS "LUS_DATA_DIR       = ${LUS_DATA_DIR}")
-  message (STATUS "Version control    = ${VERSION_CONTROL_SYSTEM}")
-  message (STATUS "------------------------------------------------------------")
-endif (LUS_VERBOSE_CONFIGURE)
+message (STATUS "------------------------------------------------------------")
+message (STATUS "[LUS] Configuration summary.")
+message (STATUS "------------------------------------------------------------")
+message (STATUS " System configuration:"                                      )
+message (STATUS " .. Hostname               = ${CMAKE_SYSTEM_HOSTNAME}"       )
+message (STATUS " .. Processor type         = ${CMAKE_SYSTEM_PROCESSOR}"      )
+message (STATUS " .. CMake executable       = ${CMAKE_COMMAND}"               )
+message (STATUS " .. CMake version          = ${CMAKE_VERSION}"               )
+message (STATUS " .. System name            = ${CMAKE_SYSTEM}"                )
+message (STATUS " .. C++ compiler           = ${CMAKE_CXX_COMPILER}"          )
+message (STATUS " .. C compiler             = ${CMAKE_C_COMPILER}"            )
+message (STATUS " .. size(void*)            = ${CMAKE_SIZEOF_VOID_P}"         )
+message (STATUS " Required external packages:"                                )
+message (STATUS " .. Bison                  = ${BISON_FOUND}"                 )
+message (STATUS " .. casacore               = ${CASACORE_FOUND}"              )
+message (STATUS " .. Doxygen                = ${DOXYGEN_FOUND}"               )
+message (STATUS " .. Flex                   = ${FLEX_FOUND}"                  )
+message (STATUS " .. Git                    = ${GIT_FOUND}"                   )
+message (STATUS " .. HDF5                   = ${HDF5_FOUND}"                  )
+message (STATUS " .. OpenGL                 = ${OPENGL_FOUND}"                )
+message (STATUS " .. OpenMP                 = ${OPENMP_FOUND}"                )
+message (STATUS " .. Perl                   = ${PERL_FOUND}"                  )
+message (STATUS " .. ROOT                   = ${ROOT_FOUND}"                  )
+message (STATUS " .. SWIG                   = ${SWIG_FOUND}"                  )
+message (STATUS " .. Subversion             = ${SUBVERSION_FOUND}"            )
+message (STATUS " .. Wget                   = ${WGET_FOUND}"                  )
+message (STATUS " LOFAR User software configuration:"                         )
+message (STATUS " .. LOFARSOFT              = $ENV{LOFARSOFT}"                )
+message (STATUS " .. LUS_ROOT               = ${LUS_ROOT}"                    )
+message (STATUS " .. LUS_INSTALL_PREFIX     = ${LUS_INSTALL_PREFIX}"          )
+message (STATUS " .. LUS_PYTHONPATH         = ${USG_PYTHONPATH}"              )
+message (STATUS " .. LUS_DATA_DIR           = ${LUS_DATA_DIR}"                )
+message (STATUS "------------------------------------------------------------")
