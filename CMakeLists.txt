@@ -280,26 +280,15 @@ endforeach (package_name)
 ##                                        Dependencies of the packages
 
 add_dependencies (casacore hdf5 cfitsio wcslib bison flex)
-
 add_dependencies (hdf5 szip)
-
 add_dependencies (mathgl hdf5 swig num_util gsl)
-
-add_dependencies (numpy cblas)
-
 add_dependencies (matplotlib numpy)
-
 add_dependencies (num_util boost numpy)
-
-#add_dependencies (pyrap casacore num_util)
-
-add_dependencies (pyqt sip)
-
-add_dependencies (wcslib boost flex)
-
+add_dependencies (numpy cblas)
 add_dependencies (pelican git boost cfitsio)
-
 add_dependencies (plplot numpy swig)
+add_dependencies (pyqt sip)
+add_dependencies (wcslib boost flex)
 
 if (ROOT_FOUND)
   add_dependencies (startools fftw3)
