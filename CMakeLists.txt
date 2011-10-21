@@ -134,6 +134,7 @@ foreach (varSystemPackage
     Blitz
     CASACORE
     Doxygen
+    FFTW3
     FLEX
     Git
     HDF5
@@ -162,6 +163,19 @@ foreach (varSystemPackage
   if (NOT ${varPackageUpper}_FOUND)
     find_package (${varSystemPackage})
   endif (NOT ${varPackageUpper}_FOUND)
+
+  ## Conformation of returned status variable
+  if (HAVE_${varSystemPackage})
+    set (HAVE_${varPackageUpper} TRUE)
+  endif (HAVE_${varSystemPackage})
+
+  if (HAVE_${varPackageUpper})
+    set (${varPackageUpper}_FOUND TRUE)
+  endif (HAVE_${varPackageUpper})
+  
+  if (${varPackageUpper}_FOUND)
+    set (${varPackageUpper}_FOUND TRUE)
+  endif (${varPackageUpper}_FOUND)
   
 endforeach (varSystemPackage)
 
@@ -432,6 +446,7 @@ message (STATUS " .. casacore               = ${CASACORE_FOUND}"              )
 message (STATUS " .. Doxygen                = ${DOXYGEN_FOUND}"               )
 message (STATUS " .. Flex                   = ${FLEX_FOUND}"                  )
 message (STATUS " .. Git                    = ${GIT_FOUND}"                   )
+message (STATUS " .. FFTW3                  = ${FFTW3_FOUND}"                 )
 message (STATUS " .. HDF5                   = ${HDF5_FOUND}"                  )
 message (STATUS " .. OpenGL                 = ${OPENGL_FOUND}"                )
 message (STATUS " .. OpenMP                 = ${OPENMP_FOUND}"                )
