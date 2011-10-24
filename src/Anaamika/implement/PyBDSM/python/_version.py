@@ -25,6 +25,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/10/24 - Many small bug fixes to the psf_vary module. Fixed use of
+                 input directory so that input files not in the current
+                 directory are handled correctly.
+
     2011/10/14 - Added residual rms and mean values to sources and source
                  list catalogs. These values can be compared to background
                  rms and mean values as a quick check of fit quality.

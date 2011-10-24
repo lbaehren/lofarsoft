@@ -354,12 +354,12 @@ def shape_varybeta(image, mask, basis, betainit, cen, nmax, betarange, plot):
 	beta = betainit
 	error = 1
 
-    if plot:
-      pl.figure()
-      pl.plot(beta_arr,res_rms,'*-')
-      pl.xlabel('Beta')
-      pl.ylabel('Residual rms')
-
+#     if plot:
+#       pl.figure()
+#       pl.plot(beta_arr,res_rms,'*-')
+#       pl.xlabel('Beta')
+#       pl.ylabel('Residual rms')
+ 
     return beta, error
 
 

@@ -54,12 +54,24 @@ class Op_readimage(Op):
         if pols[0] != 'I':
             raise RuntimeError("First entry of pols has to be I")
 
-        # Check for trailing "/" in filename (happens a lot, since MS images are directories)    ### KEEP
+        # Check for trailing "/" in filename (happens a lot, since MS images are directories)
+        # Although the general rule is to not alter the values in opts (only the
+        # user should be able to alter these), in this case there is no harm in
+        # replacing the filename in opts.
         if img.opts.filename == '':
             raise RuntimeError('Image file name not specified.')
         if img.opts.filename[-1] == '/':
             img.opts.filename = img.opts.filename[:-1]
 
+        # Determine indir if not explicitly given by user (in img.opts.indir)
+        if img.opts.indir == None:
+            indir = os.path.dirname(img.opts.filename)
+            if indir == '':
+                indir = './'
+            img.indir = indir
+        else:
+            img.indir = img.opts.indir
+            
         for pol in pols:
             if pol == 'I':
                 image_file = img.opts.filename
@@ -67,7 +79,7 @@ class Op_readimage(Op):
                 split_filename = img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
                 image_file = split_filename[0]+'_'+pol+split_filename[-1]
 
-            result = read_image_from_file(image_file, img, img.opts.indir)
+            result = read_image_from_file(image_file, img, img.indir)
             if result == None:
                 if pol == 'I':
                     raise RuntimeError("Cannot open file " + repr(image_file) + ". " + img._reason)
@@ -125,7 +137,6 @@ class Op_readimage(Op):
             fname = img.opts.filename
         if fname[-2:] in '_I':
             fname = fname[:-2] # trim off '_I' as well
-        if img.opts.indir == None: img.opts.indir = './'
         img.filename = img.opts.filename
         img.parentname = fname
         img.imagename = fname+'.pybdsm'

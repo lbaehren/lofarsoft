@@ -1101,7 +1101,7 @@ def write_image_to_file(use, filename, image, img, outdir=None,
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Writefile")
 
     if outdir == None:
-      outdir = img.opts.indir
+      outdir = img.indir
     if not os.path.exists(outdir) and outdir != '':
         os.mkdir(outdir)
     

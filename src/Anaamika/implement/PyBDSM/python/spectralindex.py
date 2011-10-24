@@ -80,7 +80,7 @@ class Op_spectralindex(Op):
             mylog.info('%s %i %s' % ('Kept all ',shp[0]," channels "))
         img.avimage = avimage
         if img.opts.output_all:
-            func.write_image_to_file(img.use_io, img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img, img.opts.indir)
+            func.write_image_to_file(img.use_io, img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img, img.indir)
                                                 # calculate the rms of each channel
 
         nchan = avimage.shape[0]

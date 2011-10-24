@@ -71,7 +71,7 @@ class Op_collapse(Op):
 
             split_filename=img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
             image_file=split_filename[0]+'_'+pol+split_filename[-1]
-            data, hdr = func.read_image_from_file(image_file, img, img.opts.indir, quiet=True)
+            data, hdr = func.read_image_from_file(image_file, img, img.indir, quiet=True)
                 
           if c_mode == 'single':
             if pol == 'I': 
@@ -130,7 +130,7 @@ class Op_collapse(Op):
               image_file = split_imname[0] + '_' + \
                   pol + split_imname[-1]
               data, hdr = read_image_from_file(image_file, img,
-                                               img.opts.indir)
+                                               img.indir)
               if pol == 'Q': img.ch0_Q = data
               if pol == 'U': img.ch0_U = data
               if pol == 'V': img.ch0_V = data

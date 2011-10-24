@@ -689,7 +689,8 @@ class Opts(object):
                                  "to the name of the output directory",
                              group="output_opts")
     indir           = Option(None, String(),
-                             doc="Directory of input FITS files",
+                             doc="Directory of input FITS files. None => get "\
+                                 "from filename",
                              group="output_opts")
     output_fbdsm    =   Bool(False,
                              doc="write out fBDSM format output files "\

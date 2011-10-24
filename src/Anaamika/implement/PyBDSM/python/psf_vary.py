@@ -14,6 +14,8 @@ import shapelets as sh
 from scipy.optimize import leastsq
 import nat
 from math import *
+import statusbar
+
 
 class Op_psf_vary(Op):
     """Computes variation of psf across the image """
@@ -28,13 +30,16 @@ class Op_psf_vary(Op):
 
         over = 2
         generators = opts.psf_generators; nsig = opts.psf_nsig; kappa2 = opts.psf_kappa2
-        snrcut = opts.psf_snrcut; snrtop = opts.psf_snrtop; snrbot = opts.psf_snrbot; snrcutstack = opts.psf_snrcutstack
+        snrtop = opts.psf_snrtop; snrbot = opts.psf_snrbot; snrcutstack = opts.psf_snrcutstack
         gencode = opts.psf_gencode; primarygen = opts.psf_primarygen; itess_method = opts.psf_itess_method
         tess_sc = opts.psf_tess_sc; tess_fuzzy= opts.psf_tess_fuzzy
-        if img.opts.psf_snrcut < 10: 
-          mylog.info("Snrcut=',snrcut,' too low; increasing to 10")
-          img.opts.psf_snrcut = snrcut = 10
-
+        if opts.psf_snrcut < 10: 
+          mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 10")
+          snrcut = 10
+        else:
+          snrcut = opts.psf_snrcut
+        img.psf_snrcut = snrcut
+          
         wtfns=['unity', 'roundness', 'log10', 'sqrtlog10']
         if 0 <= itess_method < 4: tess_method=wtfns[itess_method]
         else: tess_method='unity'
@@ -44,7 +49,7 @@ class Op_psf_vary(Op):
         num = N.zeros(ngaus, int); peak = N.zeros(ngaus); xc = N.zeros(ngaus); yc = N.zeros(ngaus) 
         bmaj = N.zeros(ngaus); bmin = N.zeros(ngaus); bpa = N.zeros(ngaus); code = N.array(['']*ngaus); 
         rms = N.zeros(ngaus)
-        for i, g in enumerate(img.gaussians):#()):
+        for i, g in enumerate(img.gaussians):
           num[i] = i; peak[i] = g.peak_flux; xc[i] = g.centre_pix[0]; yc[i] = g.centre_pix[1]
           bmaj[i] = g.size_pix[0]; bmin[i] = g.size_pix[1]; bpa[i] = g.size_pix[2]
           code[i] = img.sources[g.source_id].code; rms[i] = img.islands[g.island_id].rms
@@ -54,6 +59,7 @@ class Op_psf_vary(Op):
         # takes gaussians with code=S and snr > snrcut.
         tr=[n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
         g_gauls = self.trans_gaul(tr)
+        mylogger.userinfo(mylog, 'Number of generators for PSF variation', str(len(g_gauls)))
 
         # computes statistics of fitted sizes. Same as psfvary_fullstat.f in fBDSM.
         bmaj_a, bmaj_r, bmaj_ca, bmaj_cr, ni = _cbdsm.bstat(bmaj, None, nsig)
@@ -70,7 +76,8 @@ class Op_psf_vary(Op):
         vorogenP, vorogenS = self.get_voronoi_generators(g_gauls, generators, gencode, snrcut, snrtop, snrbot)
 
         # group generators into tiles
-        tile_prop = self.edit_vorogenlist(vorogenP, frac=0.25)
+        tile_prop = self.edit_vorogenlist(vorogenP, frac=50.0)
+        mylogger.userinfo(mylog, 'Number of tiles for PSF variation', str(len(tile_prop[0])))
 
         # tesselate the image 
         #volrank, volrank_tilenum, wts = tesselate(vorogenP, vorogenS, tile_prop, tess_method, tess_sc, tess_fuzzy, \
@@ -79,6 +86,7 @@ class Op_psf_vary(Op):
 
         tile_list, tile_coord, tile_snr = tile_prop
         ntile = len(tile_list)
+        bar = statusbar.StatusBar('Determining PSF variation ............... : ', 0, ntile)
         ngenpertile=N.zeros(ntile)
         tr_gaul = self.trans_gaul(g_gauls)
         tr=[n for i, n in enumerate(tr_gaul) if flag_unresolved[i] and n[1]/n[8] >= snrcutstack]
@@ -86,13 +94,11 @@ class Op_psf_vary(Op):
             tile_gauls = [n for n in tr if volrank[int(round(n[2])),int(round(n[3]))]-1 \
                        == itile]
             ngenpertile[itile]=len(tile_gauls)
-        print 'Number of generators per tile : ',ngenpertile
 
         # filter for (almost) empty tiles with unresolved sources < num, and change volrank accordingly
         ltnum=1
         ngenpertile, tile_prop, r2t = self.edit_tile(ltnum, g_gauls, flag_unresolved, snrcutstack, volrank, \
                             tile_prop, tess_sc, tess_fuzzy, vorowts, tess_method, plot)
-        print 'Number of new generators per tile : ',ngenpertile
         func.write_image_to_file(img.use_io, img.imagename + '.volrank.fits', N.transpose(volrank), img)
 
         # For each tile, calculate the weighted averaged psf image. Also for all the sources in the image.
@@ -111,7 +117,6 @@ class Op_psf_vary(Op):
         nmax = 12
         basis = 'cartesian'
         betarange = [0.5,sqrt(betainit*max(tshape))]
-        print " DONT take varybeta but actual sigma of gaussian"
         beta, error  = sh.shape_varybeta(totpsfimage, mask, basis, betainit, cen, nmax, betarange, plot)
         if error == 1: print '  Unable to find minimum in beta'
 
@@ -122,6 +127,8 @@ class Op_psf_vary(Op):
             psfim = psfimages[i]
             cf = sh.decompose_shapelets(psfim, mask, basis, beta, cen, nmax, mode='')
             psf_cf.append(cf)
+            if img.opts.quiet == False:
+                bar.increment()
 
         # transpose the psf image list
         tile_list, tile_coord, tile_snr = tile_prop
@@ -132,6 +139,11 @@ class Op_psf_vary(Op):
         # irregular grids is crap. doesnt even pass through some of the points.
         # for now, fit polynomial.
         compress = 100.0
+        x, y = N.transpose(psfcoords)
+        if len(x) < 3:
+            mylog.warning('Insufficient number of tiles to do interpolation of PSF variation')
+            return
+
         psf_coeff_interp, xgrid, ygrid = self.interp_shapcoefs(nmax, tr_psf_cf, psfcoords, image.shape, \
                  compress, plot)
 
@@ -139,6 +151,7 @@ class Op_psf_vary(Op):
         skip = 5
         aa = self.create_psf_grid(psf_coeff_interp, image.shape, xgrid, ygrid, skip, nmax, psfshape, \
              basis, beta, cen, totpsfimage, plot)
+        img.psf_images = aa
 
 ##################################################################################################
 
@@ -238,8 +251,11 @@ class Op_psf_vary(Op):
         s_c=self.LM_fit(xval[sind:],yfit[sind:],err[sind:], func.wenss_fit)
     
         err[:]=1.
-        s_dm=self.LM_fit(N.log10(xval),medy,err,func.poly, order=2)
         s_cm=self.LM_fit(N.log10(xval),medy,err,func.poly, order=1)
+        if len(xval) >= 3:
+            s_dm=self.LM_fit(N.log10(xval),medy,err,func.poly, order=2)
+        else:
+            s_dm = (N.array([s_cm[0], s_cm[1], 0.0]), 0)
     
         if ptpbin<75: s_dm=N.append(s_cm[:], [0.])
         return s_c, s_dm
@@ -258,7 +274,7 @@ class Op_psf_vary(Op):
         nmaj=N.array(b1)[index]
         nmin=N.array(b2)[index]
     
-        if plot: pl.figure()
+#         if plot: pl.figure()
         f_sclip=N.zeros((2,num), dtype=bool)
         for idx, nbeam in enumerate([nmaj, nmin]):
           xarr=N.copy(snr)
@@ -274,7 +290,6 @@ class Op_psf_vary(Op):
             nout = len(z1[0]); niter += 1
             xarr = z1[0]; yarr = z1[1];   # end of sub_size_wenss_getnum
             if noutold == nout: break
-          print ' Iterations = ',niter,'; Fraction thrown away = ',float(num-nout)/num
     
           # flag in the 'unresolved' sources. returns flag array, True ==> unresolved
           logsnr=N.log10(snr)
@@ -284,19 +299,19 @@ class Op_psf_vary(Op):
           f_s = f_sclip[0]*f_sclip[1]
     
           # now make plots
-          if plot:
-            bb=[b1, b2]
-            pl.subplot(211+idx)
-            pl.semilogx(s1, bb[idx], 'og')
-            f0=f_sclip[idx][index.argsort()]
-            sf=[n for i, n in enumerate(s1) if f0[i]]
-            b1f=[n for i, n in enumerate(bb[idx]) if f0[i]]
-            pl.semilogx(sf, b1f, 'or')
-            pl.semilogx(snr,med,'-')
-            pl.semilogx(snr,med+med*dumr*(N.array([kappa2]*num)),'-')
-            pl.semilogx(snr,med-med*dumr*(N.array([kappa2]*num)),'-')
-            pl.title(' axis ' + str(idx))
-    
+#           if plot:
+#             bb=[b1, b2]
+#             pl.subplot(211+idx)
+#             pl.semilogx(s1, bb[idx], 'og')
+#             f0=f_sclip[idx][index.argsort()]
+#             sf=[n for i, n in enumerate(s1) if f0[i]]
+#             b1f=[n for i, n in enumerate(bb[idx]) if f0[i]]
+#             pl.semilogx(sf, b1f, 'or')
+#             pl.semilogx(snr,med,'-')
+#             pl.semilogx(snr,med+med*dumr*(N.array([kappa2]*num)),'-')
+#             pl.semilogx(snr,med-med*dumr*(N.array([kappa2]*num)),'-')
+#             pl.title(' axis ' + str(idx))
+#     
         return f_s[index.argsort()]
     
 ##################################################################################################
@@ -571,10 +586,10 @@ class Op_psf_vary(Op):
         a factor times the beam size. Currently the mask is for the whole image but need to 
         modify it for masks for each gaussian. These gaussians are supposed to be relatively 
         isolated unresolved sources. Cut out an image a big bigger than facXbeam and imageshift
-        to nearest half pixel and then add."""
+        to nearest half pixel and then add.
     
-        print " Does not handle masks etc well at all. Masks for image for blanks, masks for \
-        islands, etc."
+        Does not handle masks etc well at all. Masks for image for blanks, masks for \
+        islands, etc."""
     
         gxcens_pix = g_gauls[2] 
         gycens_pix = g_gauls[3]
@@ -608,9 +623,9 @@ class Op_psf_vary(Op):
     def psf_in_tile(self, image, beam, g_gauls, flag_unresolved, cdelt, factor, snrcutstack, volrank, \
                     tile_prop, r2t, plot):
         """ For each tile given by tile_prop, make a list of all gaussians in the constituent tesselations
-        and pass it to stackpsf with a weight for each gaussian, to calculate the average psf per tile. """
+        and pass it to stackpsf with a weight for each gaussian, to calculate the average psf per tile.
     
-        print " Should define weights inside a tile to include closure errors "
+        Should define weights inside a tile to include closure errors """
     
         tile_list, tile_coord, tile_snr = tile_prop
         tr_gaul = self.trans_gaul(g_gauls)
@@ -700,19 +715,19 @@ class Op_psf_vary(Op):
             z = N.array(tr_psf_cf[coord])    # else natgrid cant deal with noncontiguous memory
             p[coord] = rgrid.rgrd(z)
     
-        if plot:
-          for i,coord in enumerate(index):
-            if i % 36 == 0:
-              pl.figure(None)
-              pl.clf()
-              title = 'Interpolated shapelet coefficients'
-              if i>0: title = title+' (cont)'
-              pl.suptitle(title)
-            pl.subplot(6,6,(i%36)+1)
-            pl.title(str(coord))
-            pl.plot(xi/compress, yi/compress, 'xk')
-            pl.imshow(p[coord], interpolation='nearest')
-            pl.colorbar()
+#         if plot:
+#           for i,coord in enumerate(index):
+#             if i % 36 == 0:
+#               pl.figure(None)
+#               pl.clf()
+#               title = 'Interpolated shapelet coefficients'
+#               if i>0: title = title+' (cont)'
+#               pl.suptitle(title)
+#             pl.subplot(6,6,(i%36)+1)
+#             pl.title(str(coord))
+#             pl.plot(xi/compress, yi/compress, 'xk')
+#             pl.imshow(p[coord], interpolation='nearest')
+#             pl.colorbar()
     
         return p, xo, yo
 
@@ -722,20 +737,20 @@ class Op_psf_vary(Op):
         """ Creates a image with the gridded interpolated psfs. xgrid and ygrid are 1d numpy arrays
         with the x and y coordinates of the grids. """
     
-        if plot: 
-          plnum=N.zeros(2)
-          for i in range(2):
-            dum=pl.figure(None)
-            plnum[i]=dum.number
-            pl.clf()
-            if i == 0: pl.suptitle('Gridded psfs')
-            if i == 1: pl.suptitle('Gridded residual psfs')
-            ax = pl.subplot(1,1,1)
-            plaxis = pl.axis([0, imshape[0], 0, imshape[1]])
-            pax = ax.get_position()
-            start = N.array((pax.xmin, pax.ymin))
-            stop = N.array((pax.xmax, pax.ymax))
-            sz=0.07
+#         if plot: 
+#           plnum=N.zeros(2)
+#           for i in range(2):
+#             dum=pl.figure(None)
+#             plnum[i]=dum.number
+#             pl.clf()
+#             if i == 0: pl.suptitle('Gridded psfs')
+#             if i == 1: pl.suptitle('Gridded residual psfs')
+#             ax = pl.subplot(1,1,1)
+#             plaxis = pl.axis([0, imshape[0], 0, imshape[1]])
+#             pax = ax.get_position()
+#             start = N.array((pax.xmin, pax.ymin))
+#             stop = N.array((pax.xmax, pax.ymax))
+#             sz=0.07
         mask=N.zeros(psfshape, dtype=bool)   # right now doesnt matter
         xg=xgrid[::skip+1]
         yg=ygrid[::skip+1]
@@ -743,26 +758,32 @@ class Op_psf_vary(Op):
         xy = [(i,j) for i in xgrid[::skip+1] for j in ygrid[::skip+1]]
         blah=[]
         for i, coord in enumerate(index):
-            cf = N.zeros(psfshape)
+            maxpsfshape = [0, 0]
+            for k in psf_coeff_interp:
+                if k[0]+1 > maxpsfshape[0]:
+                    maxpsfshape[0] = k[0]+1
+                if k[1]+1 > maxpsfshape[1]:
+                    maxpsfshape[1] = k[1]+1
+            cf = N.zeros(maxpsfshape)
             for k in psf_coeff_interp:
                 cf[k]=psf_coeff_interp[k][coord]
             cf = N.transpose(cf)
             psfgridim = sh.reconstruct_shapelets(psfshape, mask, basis, beta, cen, nmax, cf)
             blah.append(psfgridim)
       
-            if plot:
-              for j in range(2):
-                pl.figure(plnum[j])
-                posn = [xy[i][0], xy[i][1]]
-                normposn =N.array(stop-start, dtype=float)/N.array(imshape[0:2])*posn+start
-                a=pl.axes([normposn[0]-sz/2., normposn[1]-sz/2., sz, sz])
-                if j == 0: pl.contour(psfgridim,15)
-                if j == 1: pl.contour(psfgridim-totpsfimage,15)
-                pl.setp(a, xticks=[], yticks=[])
-                pl.colorbar()
-        if plot: 
-          pl.figure(plnum[0])
-          pl.figure(plnum[1])
-    
+#             if plot:
+#               for j in range(2):
+#                 pl.figure(plnum[j])
+#                 posn = [xy[i][0], xy[i][1]]
+#                 normposn =N.array(stop-start, dtype=float)/N.array(imshape[0:2])*posn+start
+#                 a=pl.axes([normposn[0]-sz/2., normposn[1]-sz/2., sz, sz])
+#                 if j == 0: pl.contour(psfgridim,15)
+#                 if j == 1: pl.contour(psfgridim-totpsfimage,15)
+#                 pl.setp(a, xticks=[], yticks=[])
+#                 pl.colorbar()
+#         if plot: 
+#           pl.figure(plnum[0])
+#           pl.figure(plnum[1])
+#     
         return blah
         
