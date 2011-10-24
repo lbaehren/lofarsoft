@@ -5,7 +5,7 @@ set before = `date +%s`
 
 set mydir = `pwd`
 
-setenv PSRCAT_FILE /lofarhome_1/anoutsos/lofarsoft/build/pulsar/psrcat/psrcat.db
+setenv PSRCAT_FILE $LOFARSOFT/release/share/pulsar/data/psrcat.db
 
 echo " USAGE: csh doRaw.sh L00000_SAP000_B000_S0_P000_bf.raw 0329+54"
 echo "-- Note: It doesn't matter which of the two polarisation files (S0 or S1) you give to the script, it only needs one."
