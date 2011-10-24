@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh
 
 # pulsars_at_location.sh  ==  Find the closest and brightest N Pulsars
 #
@@ -104,5 +104,6 @@ fi
 
 echo $matched_string
 
+#cat $matched_file
 rm $matched_file
 exit
