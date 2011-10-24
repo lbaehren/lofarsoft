@@ -56,9 +56,10 @@ using CR::CalTableReader;
 // date conversion can be done with:
 // date -u -d '1970-01-01 978350400 seconds'
 // date --date='2008-12-19 00:02:00 UTC' +%s
-const unsigned int AERA_test_start=1269561600;
-const unsigned int AERA_test_end=1270857600;
-const unsigned int LOPES_3D_start= 1268956800;
+const unsigned int LOPES_3D_2011= 1293840000; // 2010-01-01 00:00:00 UTC
+const unsigned int AERA_test_start=1269561600; // Fri Mar 26 00:00:00 UTC 2010
+const unsigned int AERA_test_end=1270857600; // Sat Apr 10 00:00:00 UTC 2010
+const unsigned int LOPES_3D_start= 1268956800; //Fri Mar 19 00:00:00 UTC 2010
 const unsigned int LOPES10_start = 978350400; // Mo Jan  1 12:00:00 UTC 2001
 const unsigned int LOPES30_start = 1104580800; //Sa Jan  1 12:00:00 UTC 2005 
 // Antenna 27, 29 and 30 are moved to NS
@@ -2016,10 +2017,10 @@ void writeElGainCal(void)
 // Data are read in from AmpFact-file from Steffen's root scripts for amplitude calibration
 void writeLOPES3DElGainCal(void)
 {
-  const string path = "/home/huber/rootanalysis/ampFact/save/";
-  const string files[] = {"Amp01", "Amp02", "Amp03", "Amp04", "Amp05bckup", "Amp06", "Amp07", "Amp08", "Amp09", "Amp10",
-                          "Amp11", "Amp12", "Amp13", "Amp14", "Amp15", "Amp16", "Amp17", "Amp18", "Amp19bckup", "Amp20",
-                          "Amp21", "Amp22", "Amp23", "Amp24", "Amp25", "Amp26", "Amp27", "Amp28", "Amp29", "Amp30bckup"};
+  const string path = "/home/huber1/work/LOPES3DCAL/ampFactkorrekt2011/";
+  const string files[] = {"Amp01", "Amp02", "Amp03", "Amp04", "Amp05", "Amp06", "Amp07", "Amp08", "Amp09", "Amp10",
+                          "Amp11", "Amp12", "Amp13", "Amp14", "Amp15", "Amp16", "Amp17", "Amp18", "Amp19", "Amp20",
+                          "Amp21", "Amp22", "Amp23", "Amp24", "Amp25", "Amp26", "Amp27", "Amp28", "Amp29", "Amp30"};
   // construct casacore Vectors with frequency values:
   // first create array, secondly a stl-vector and then a casacore Vector
   double freqAxis[] =  {4e+07, 4.1e+07, 4.2e+07, 4.3e+07, 4.4e+07, 4.5e+07, 4.6e+07, 4.7e+07, 4.8e+07, 4.9e+07, 5e+07, 5.1e+07, 5.2e+07, 5.3e+07, 5.4e+07, 5.5e+07, 5.6e+07, 5.7e+07, 5.8e+07, 5.9e+07, 6e+07, 6.1e+07, 6.2e+07, 6.3e+07, 6.4e+07, 6.5e+07, 6.6e+07, 6.7e+07, 6.8e+07, 6.9e+07, 7e+07, 7.1e+07, 7.2e+07, 7.3e+07, 7.4e+07, 7.5e+07, 7.6e+07, 7.7e+07, 7.8e+07, 7.9e+07, 8e+07};
@@ -2033,7 +2034,6 @@ void writeLOPES3DElGainCal(void)
   ifstream infile;
   double freq, gain, error;  
     
-  // Add the value for Dual Pol start for all antennas
   for (int i = 0; i < MAX_Antennas; i++) {
     infile.open(string(path+files[i]).c_str(), ifstream::in);
     // check if file could be opened
@@ -2074,10 +2074,104 @@ void writeLOPES3DElGainCal(void)
 
 
 
+//Correct some channels beacouse of changes in the setup (eg. new LNAs ...) 
+void writeLOPES3DfinalElGainCal(void)
+{
+int ant2change=1300891012;    //2011-03-23 14:36:52
+int ant4change=1289318400;    //2010-11-09 16:00:00
+int ant9change=1284732000;    //2010-09-17 14:00:00
+int ant24change=1297824159;   //2011-02-16 02:42:39
+int ant28change=1297824159;   //2011-02-16 02:42:39
+  const string path = "/home/huber1/work/LOPES3DCAL/ampFactkorrekt2011/change/";
+  const string files[] = {"Amp01", "Amp02", "Amp03", "Amp04", "Amp05", "Amp06", "Amp07", "Amp08", "Amp09", "Amp10",
+                          "Amp11", "Amp12", "Amp13", "Amp14", "Amp15", "Amp16", "Amp17", "Amp18", "Amp19", "Amp20",
+                          "Amp21", "Amp22", "Amp23", "Amp24", "Amp25", "Amp26", "Amp27", "Amp28", "Amp29", "Amp30"};
+  // construct casacore Vectors with frequency values:
+  // first create array, secondly a stl-vector and then a casacore Vector
+  double freqAxis[] =  {4e+07, 4.1e+07, 4.2e+07, 4.3e+07, 4.4e+07, 4.5e+07, 4.6e+07, 4.7e+07, 4.8e+07, 4.9e+07, 5e+07, 5.1e+07, 5.2e+07, 5.3e+07, 5.4e+07, 5.5e+07, 5.6e+07, 5.7e+07, 5.8e+07, 5.9e+07, 6e+07, 6.1e+07, 6.2e+07, 6.3e+07, 6.4e+07, 6.5e+07, 6.6e+07, 6.7e+07, 6.8e+07, 6.9e+07, 7e+07, 7.1e+07, 7.2e+07, 7.3e+07, 7.4e+07, 7.5e+07, 7.6e+07, 7.7e+07, 7.8e+07, 7.9e+07, 8e+07};
+  unsigned int Nfreqs = sizeof(freqAxis)/sizeof(freqAxis[0]);
+  Vector<double> ElGainCalFreq(vector<double> (freqAxis,freqAxis+Nfreqs));
+
+  // Create Vector to store ElCainCal values for each antenna
+  Vector<double> ElGainCal(ElGainCalFreq.copy());
+  ElGainCal.set(0);
+
+  ifstream infile;
+  double freq, gain, error;
+
+  for (int i = 0; i < MAX_Antennas; i++) {
+    infile.open(string(path+files[i]).c_str(), ifstream::in);
+    // check if file could be opened
+    if (!(infile.is_open())) {
+      cerr << "Failed to open file \"" << path+files[i] <<"\"." << endl;
+      return;
+    }
+
+    for (unsigned int j = 0; j < Nfreqs; j++) {
+      if (!(infile.good())) {
+        cerr << "File \"" << path+files[i] <<"\" is not good." << endl;
+        return;
+      }
+      infile >> freq >> gain >> error;
+
+      // calculate gain factor, and avoid very large values for band limits
+      if (gain < 1)
+        ElGainCal(j) = 1;
+      else
+        ElGainCal(j) = 1 / sqrt(gain);
+      // cout << freq << " Gain = " << gain << " Error = " << error << " factor = " << ElGainCalFreq(j) << endl;
+      // check if frequency is consistent
+      if ( abs(freqAxis[j]/freq-1e6) > 0.01)  {
+        cerr << "Frequencies are inconsistent." << endl;
+        return;
+      }
+    }
+    infile.close();
+
+   if (i==1){
+      cout << "Writing ElGainCal values for Tripol setup: " << antennaIDs[i] << endl;
+      if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",ant2change) )
+        cerr << "\nERROR while writing field: ElGainCal" << endl;
+      if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",ant2change) )
+        cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+   }
+  if (i==3){
+      cout << "Writing ElGainCal values for Tripol setup: " << antennaIDs[i] << endl;
+      if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",ant4change) )
+        cerr << "\nERROR while writing field: ElGainCal" << endl;
+      if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",ant4change) )
+        cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+   }
+  if (i==8){
+      cout << "Writing ElGainCal values for Tripol setup: " << antennaIDs[i] << endl;
+      if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",ant9change) )
+        cerr << "\nERROR while writing field: ElGainCal" << endl;
+      if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",ant9change) )
+        cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+   }
+  if (i==23 ){
+      cout << "Writing ElGainCal values for Tripol setup: " << antennaIDs[i] << endl;
+      if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",ant24change) )
+        cerr << "\nERROR while writing field: ElGainCal" << endl;
+      if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",ant24change) )
+        cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+   }
+  if (i==27){
+      cout << "Writing ElGainCal values for Tripol setup: " << antennaIDs[i] << endl;
+      if (!writer.AddData(ElGainCal,antennaIDs[i],"ElGainCal",ant28change) )
+        cerr << "\nERROR while writing field: ElGainCal" << endl;
+      if (!writer.AddData(ElGainCalFreq,antennaIDs[i],"ElGainCalFreq",ant28change) )
+        cerr << "\nERROR while writing field: ElGainCalFreq" << endl;
+   }
+  }
+}
+
+
+
 
 void writeLOPES3DGain(void) //write the simulated gain patterns into the Caltable
 {
-const string path = "/home/huber/LOPES3DCAL/gain/";
+const string path = "/home/huber1/work/huberiklxds12backup/LOPES3DCAL/gain/";
 const string files[] = {"xrichtighor.txt", "xrichtigvert.txt", "xrichtigtot.txt","yrichtighor.txt", "yrichtigvert.txt", "yrichtigtot.txt","zrichtighor.txt", "zrichtigvert.txt", "zrichtigtot.txt"};
   // construct casacore Vectors with frequency values:
   // first create array, secondly a stl-vector and then a casacore Vector
@@ -2125,7 +2219,7 @@ double  gain[21];
 istringstream iss;
 string line;
 iss >> skipws;
-
+int counter=0;
  for (int o =0; o<9; o++ ){
          for (int i = 0; i < MAX_Antennas; i++) {
 
@@ -2147,9 +2241,13 @@ iss >> skipws;
         // read in the simulatetd gain values from external file
         iss >> gain[0] >> gain[1] >>gain[2] >>gain[3] >>gain[4] >>gain[5] >>gain[6] >>gain[7] >>gain[8] >>gain[9] >>gain[10] >>gain[11] >>gain[12] >>gain[13] >>gain[14] >>gain[15] >>gain[16] >>gain[17] >>gain[18] >>gain[19] >>gain[20] ;
 
-                // writing values in casacore vector 
+                // writing values in casacore vector   // 1/sqrt(Gain) Directivity
                 for (  int u =0; u<=20; u++ ){
-                ElGainCal(IPosition(3,u,az,el))=gain[u];
+                ElGainCal(IPosition(3,u,az,el))=1/sqrt(pow(10,(gain[u]/20)));
+		if (1/sqrt(pow(10,(gain[u]/20)))>=10000){ElGainCal(IPosition(3,u,az,el))=10000; //to avoid regions that are too much amplified beacause they have 0 sensitivity -> would lead to unphysical infinite high noise signal
+		counter++;
+		cout << counter <<"  az:" <<  az*5 << " el" << el*5  << endl;
+		}
                 }
                 if (az >= 72){ az = -1; el++;}
                 az ++;
@@ -2206,7 +2304,7 @@ cout << "Writing gainpattern  finished  ";
 
 
 
-void writeLOPES3Drefphsases(void)
+void writeLOPES3Drefphases(void)
 {
   //set Refphases for the testphase of the AERA-beacon
   Matrix<Double> PhaseRefFreqsb(3,2);
@@ -2340,11 +2438,168 @@ void writeLOPES3Drefphsases(void)
 }
 
 
+
+
+
+void writeLOPES3Drefphases2011(void)
+{
+// Set new reference frequencies LOPES-beacon
+  Matrix<Double> PhaseRefFreqs(3,2);
+  PhaseRefFreqs(0,0) = 53100000;
+  PhaseRefFreqs(0,1) = 53100000;
+  PhaseRefFreqs(1,0) = 63500000;
+  PhaseRefFreqs(1,1) = 63500000;
+  PhaseRefFreqs(2,0) = 68100000;
+  PhaseRefFreqs(2,1) = 68100000;
+
+// Set reference Phases
+  Matrix<Double> PhaseRefPhases(30,3);
+
+  PhaseRefPhases(0,0) =83.87;    PhaseRefPhases(0,1) =129.22;     PhaseRefPhases(0,2) =55.52;
+  PhaseRefPhases(1,0) =-126.49;   PhaseRefPhases(1,1) =-94.62;    PhaseRefPhases(1,2) =-132.73;
+  PhaseRefPhases(2,0) =137.84;    PhaseRefPhases(2,1) =38.92;      PhaseRefPhases(2,2) =-165.11;
+  PhaseRefPhases(3,0) =-60.82;   PhaseRefPhases(3,1) =173.54;    PhaseRefPhases(3,2) =154.89;
+  PhaseRefPhases(4,0) =108.33;   PhaseRefPhases(4,1) =-78.56;    PhaseRefPhases(4,2) =-83.41;
+  PhaseRefPhases(5,0) =0.0;      PhaseRefPhases(5,1) =0.0;       PhaseRefPhases(5,2) =0.0;
+  PhaseRefPhases(6,0) =108.39;   PhaseRefPhases(6,1) =18.17;     PhaseRefPhases(6,2) =-54.18;
+  PhaseRefPhases(7,0) =-19.56;   PhaseRefPhases(7,1) =-36.07;    PhaseRefPhases(7,2) =-92.83;
+  PhaseRefPhases(8,0) =163.81;   PhaseRefPhases(8,1) =174.48;    PhaseRefPhases(8,2) =-49.72;
+  PhaseRefPhases(9,0) =74.33;    PhaseRefPhases(9,1) =-123.69;    PhaseRefPhases(9,2) =-148.79;
+  PhaseRefPhases(10,0) =-169.65; PhaseRefPhases(10,1) =-0.59;     PhaseRefPhases(10,2) =-57.98;
+  PhaseRefPhases(11,0) =93.74;   PhaseRefPhases(11,1) =-142.83;  PhaseRefPhases(11,2) =122.02;
+  PhaseRefPhases(12,0) =51.53;   PhaseRefPhases(12,1) =87.19;    PhaseRefPhases(12,2) =-5.09;
+  PhaseRefPhases(13,0) =-49.74;  PhaseRefPhases(13,1) =90.83;    PhaseRefPhases(13,2) =130.72;
+  PhaseRefPhases(14,0) =103.41;  PhaseRefPhases(14,1) =121.21;   PhaseRefPhases(14,2) =-4.38;
+  PhaseRefPhases(15,0) =84.26;    PhaseRefPhases(15,1) =33.43;    PhaseRefPhases(15,2) =10.52;
+  PhaseRefPhases(16,0) =178.04;  PhaseRefPhases(16,1) =122.22;   PhaseRefPhases(16,2) =137.88;
+  PhaseRefPhases(17,0) =29.1;   PhaseRefPhases(17,1) =-33.65;   PhaseRefPhases(17,2) =58.38;
+  PhaseRefPhases(18,0) =-117.87;  PhaseRefPhases(18,1) =-98.84;  PhaseRefPhases(18,2) =13.10;
+  PhaseRefPhases(19,0) =-31.69;  PhaseRefPhases(19,1) =72.33;    PhaseRefPhases(19,2) =13.1;
+  PhaseRefPhases(20,0) =61.88;   PhaseRefPhases(20,1) =134.3;   PhaseRefPhases(20,2) =148.26;
+  PhaseRefPhases(21,0) =60.21;   PhaseRefPhases(21,1) =-79.32;   PhaseRefPhases(21,2) =66.61;
+  PhaseRefPhases(22,0) =49.97;   PhaseRefPhases(22,1) =13.67;    PhaseRefPhases(22,2) =143.82;
+  PhaseRefPhases(23,0) =66.71;    PhaseRefPhases(23,1) =113.53;   PhaseRefPhases(23,2) =-6.99;
+  PhaseRefPhases(24,0) =14.21;   PhaseRefPhases(24,1) =-18.93;   PhaseRefPhases(24,2) =152.05;
+  PhaseRefPhases(25,0) =54.97;   PhaseRefPhases(25,1) =104.03;   PhaseRefPhases(25,2) =-147.69;
+  PhaseRefPhases(26,0) =94.83;   PhaseRefPhases(26,1) =-145.94;   PhaseRefPhases(26,2) =-122.2;
+  PhaseRefPhases(27,0) =-176.89; PhaseRefPhases(27,1) =98.17;    PhaseRefPhases(27,2) =-150.39;
+  PhaseRefPhases(28,0) =-101.1;  PhaseRefPhases(28,1) =-100.75;  PhaseRefPhases(28,2) =-67.14;
+  PhaseRefPhases(29,0) =175.47;  PhaseRefPhases(29,1) =41.47;    PhaseRefPhases(29,2) =115.56;
+
+
+// Set reference Phases
+  Matrix<Double> PhaseRefPhasesb(30,3);
+
+  PhaseRefPhasesb(0,0) =83.87;    PhaseRefPhasesb(0,1) =129.22;    PhaseRefPhasesb(0,2) =55.52;
+  PhaseRefPhasesb(1,0) =-126.49;   PhaseRefPhasesb(1,1) =-94.62;   PhaseRefPhasesb(1,2) =-132.73;
+  PhaseRefPhasesb(2,0) =137.84;    PhaseRefPhasesb(2,1) =38.92;    PhaseRefPhasesb(2,2) =-165.11;
+  PhaseRefPhasesb(3,0) =-60.82;   PhaseRefPhasesb(3,1) =173.54;    PhaseRefPhasesb(3,2) =154.89;
+  PhaseRefPhasesb(4,0) =108.33;   PhaseRefPhasesb(4,1) =-78.56;    PhaseRefPhasesb(4,2) =-83.41;
+  PhaseRefPhasesb(5,0) =0.0;      PhaseRefPhasesb(5,1) =0.0;       PhaseRefPhasesb(5,2) =0.0;
+  PhaseRefPhasesb(6,0) =108.39;   PhaseRefPhasesb(6,1) =18.17;     PhaseRefPhasesb(6,2) =-54.18;
+  PhaseRefPhasesb(7,0) =-19.56;   PhaseRefPhasesb(7,1) =-36.07;    PhaseRefPhasesb(7,2) =-92.83;
+  PhaseRefPhasesb(8,0) =163.81;   PhaseRefPhasesb(8,1) =174.48;    PhaseRefPhasesb(8,2) =-44.89;
+  PhaseRefPhasesb(9,0) =57.5;    PhaseRefPhasesb(9,1) =-123.69;   PhaseRefPhasesb(9,2) =-148.79;
+  PhaseRefPhasesb(10,0) =-169.65; PhaseRefPhasesb(10,1) =-0.59;    PhaseRefPhasesb(10,2) =-57.98;
+  PhaseRefPhasesb(11,0) =93.74;   PhaseRefPhasesb(11,1) =-142.83;  PhaseRefPhasesb(11,2) =122.02;
+  PhaseRefPhasesb(12,0) =51.53;   PhaseRefPhasesb(12,1) =87.19;    PhaseRefPhasesb(12,2) =-5.09;
+  PhaseRefPhasesb(13,0) =-49.74;  PhaseRefPhasesb(13,1) =90.83;    PhaseRefPhasesb(13,2) =130.72;
+  PhaseRefPhasesb(14,0) =103.41;  PhaseRefPhasesb(14,1) =121.21;   PhaseRefPhasesb(14,2) =-4.38;
+  PhaseRefPhasesb(15,0) =84.26;    PhaseRefPhasesb(15,1) =33.43;   PhaseRefPhasesb(15,2) =10.52;
+  PhaseRefPhasesb(16,0) =178.04;  PhaseRefPhasesb(16,1) =122.22;   PhaseRefPhasesb(16,2) =137.88;
+  PhaseRefPhasesb(17,0) =29.1;   PhaseRefPhasesb(17,1) =-33.65;    PhaseRefPhasesb(17,2) =58.38;
+  PhaseRefPhasesb(18,0) =-117.87;  PhaseRefPhasesb(18,1) =-98.84;  PhaseRefPhasesb(18,2) =13.10;
+  PhaseRefPhasesb(19,0) =-31.69;  PhaseRefPhasesb(19,1) =72.33;    PhaseRefPhasesb(19,2) =23.64;
+  PhaseRefPhasesb(20,0) =61.88;   PhaseRefPhasesb(20,1) =134.3;    PhaseRefPhasesb(20,2) =148.26;
+  PhaseRefPhasesb(21,0) =60.21;   PhaseRefPhasesb(21,1) =-79.32;   PhaseRefPhasesb(21,2) =66.61;
+  PhaseRefPhasesb(22,0) =49.97;   PhaseRefPhasesb(22,1) =13.67;    PhaseRefPhasesb(22,2) =143.82;
+  PhaseRefPhasesb(23,0) =66.71;    PhaseRefPhasesb(23,1) =113.53;  PhaseRefPhasesb(23,2) =-6.99;
+  PhaseRefPhasesb(24,0) =14.21;   PhaseRefPhasesb(24,1) =-18.93;   PhaseRefPhasesb(24,2) =152.05;
+  PhaseRefPhasesb(25,0) =54.97;   PhaseRefPhasesb(25,1) =144.38;   PhaseRefPhasesb(25,2) =-141.84;
+  PhaseRefPhasesb(26,0) =94.83;   PhaseRefPhasesb(26,1) =-145.94;  PhaseRefPhasesb(26,2) =-122.2;
+  PhaseRefPhasesb(27,0) =-176.89; PhaseRefPhasesb(27,1) =98.17;    PhaseRefPhasesb(27,2) =-150.39;
+  PhaseRefPhasesb(28,0) =-101.1;  PhaseRefPhasesb(28,1) =-100.75;  PhaseRefPhasesb(28,2) =-67.14;
+  PhaseRefPhasesb(29,0) =175.47;  PhaseRefPhasesb(29,1) =1.85;    PhaseRefPhasesb(29,2) =115.56;
+
+
+// Set Sample jumps
+  Vector<Double> SampleJumps(4);
+  SampleJumps(0) = -2;
+  SampleJumps(1) = 2;
+  SampleJumps(2) = -1;
+  SampleJumps(3) = 1;
+
+// 1301184000 -- 27.3.2011
+// 1302307200 -- 09.4.2011
+// 1302393600 -- 10.4.2011
+
+int LOPES_3D_2011_2=0;
+
+// Add the value for all antennas
+
+for (int i = 0; i < MAX_Antennas; i++) {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // It is neccessary to write the Delay again, as the other fields
+    // are junior fields an cannot be written alone
+    Double old_delay = 0.;
+    if (!reader.GetData(LOPES_3D_2011, antennaIDs[i], "Delay", &old_delay)) {
+      cerr << "Error while reading field: Delay" << endl;
+    } else {
+      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",LOPES_3D_2011) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",LOPES_3D_2011) )
+        cerr << "\nERROR while writing field: PhaseRefFreqs" << endl;
+      if (!writer.AddData(SampleJumps,antennaIDs[i],"SampleJumps",LOPES_3D_2011) )
+        cerr << "\nERROR while writing field: SampleJumps" << endl;
+      // Reference Antenna 6 for new phase differences
+      if (!writer.AddData(20102,antennaIDs[i],"PhaseRefAnt",LOPES_3D_2011) )
+        cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
+      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",LOPES_3D_2011) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+    }
+ }
+
+
+for (int i = 0; i < MAX_Antennas; i++) {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    // It is neccessary to write the Delay again, as the other fields
+    // are junior fields an cannot be written alone
+if (i==8 || i==9 || i==29 ) {LOPES_3D_2011_2=1301184000;}
+if (i==14 || i==19) {LOPES_3D_2011_2=1302307200;}
+if (i==25 ) {LOPES_3D_2011_2=1302393600;}
+
+Double old_delay = 0.;
+if (!reader.GetData(LOPES_3D_2011_2,antennaIDs[i], "Delay", &old_delay)) {
+      cerr << "Error while reading field: Delay" << endl;
+    } else {
+      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",LOPES_3D_2011_2) )
+        cerr << "\nERROR while writing field: Delay" << endl;
+      if (!writer.AddData(PhaseRefFreqs,antennaIDs[i],"PhaseRefFreqs",LOPES_3D_2011_2) )
+        cerr << "\nERROR while writing field: PhaseRefFreqs" << endl;
+      if (!writer.AddData(SampleJumps,antennaIDs[i],"SampleJumps",LOPES_3D_2011_2) )
+        cerr << "\nERROR while writing field: SampleJumps" << endl;
+      // Reference Antenna 6 for new phase differences
+      if (!writer.AddData(20102,antennaIDs[i],"PhaseRefAnt",LOPES_3D_2011_2) )
+        cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
+      if (!writer.AddData(PhaseRefPhasesb.row(i),antennaIDs[i],"PhaseRefPhases",LOPES_3D_2011_2) )
+        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+    }
+  }
+
+
+
+}
+
+
+
+
 void write_LOPES_3D_Delays(void)
 {
   // Set delays for LOPES 3D             //old delays
-/*  Vector<Double> delay(30);
-
+  Vector<Double> delay(30);
+  delay(0)  = 0.;
   delay(1)  =  1.41 ;                    //-22.54          ;
   delay(2)  =  -416.035;                 //-422        ;
   delay(3)  =  -413.455;                 //-411.13        ;
@@ -2377,10 +2632,10 @@ void write_LOPES_3D_Delays(void)
 
   // converstion from s to ns
   delay /= 1e9;
-*/
+
   // Set delays for LOPES 3D with area beacon
   Vector<Double> delayb(30);
-
+  delayb(0)  = 0.;
   delayb(1)  = -22.54          ;
   delayb(2)  = -422        ;
   delayb(3)  = -411.13        ;
@@ -2417,25 +2672,73 @@ void write_LOPES_3D_Delays(void)
 
   // Add the delays for all antennas to the CalTable
   // write apr delays three times, as they are valid for three different periods
-//  for (int i = 0; i < MAX_Antennas; i++) {
-//cout << "Writing delays for LOPES 3D for antenna: " << antennaIDs[i] <<"   Delay:" << delay(i)  << endl;
-//    if (!writer.AddData(delay(i),antennaIDs[i],"Delay",LOPES_3D_start) )
-//      cerr << "\nERROR while writing field: Delay" << endl;
-//   }
+  for (int i = 0; i < MAX_Antennas; i++) {
+cout << "Writing delays for LOPES 3D for antenna: " << antennaIDs[i] <<"   Delay:" << delay(i)  << endl;
+    if (!writer.AddData(delay(i),antennaIDs[i],"Delay",LOPES_3D_start) )
+      cerr << "\nERROR while writing field: Delay" << endl;
+   }
 
   for (int i = 0; i < MAX_Antennas; i++) {
 cout << "Writing delays for LOPES 3D (AERA-Beacon Test)  for antenna: " << antennaIDs[i] <<"   Delay:" << delayb(i)  << endl;
   if (!writer.AddData(delayb(i),antennaIDs[i],"Delay",AERA_test_start) )
       cerr << "\nERROR while writing field: Delay" << endl;
    }
-/*
+
   for (int i = 0; i < MAX_Antennas; i++) {
 cout << "Writing delays for LOPES 3D for antenna: " << antennaIDs[i] <<"   Delay:" << delay(i)  << endl;
    if (!writer.AddData(delay(i),antennaIDs[i],"Delay",AERA_test_end) )
       cerr << "\nERROR while writing field: Delay" << endl;
    }
-*/
+
 }
+
+
+void write_LOPES_3D_Delays2011(void)
+{
+  // Set delays for LOPES 3D Horias measurement 2011 
+  Vector<Double> delayb(30);
+  delayb(0)  = -458.752;
+  delayb(1)  = -460.993;
+  delayb(2)  = -41.628;
+  delayb(3)  = -43.432;
+  delayb(4)  = -2.288;
+  delayb(5)  = -0.000;
+  delayb(6)  = -40.717;
+  delayb(7)  = -40.667;
+  delayb(8)  = -30.064;
+  delayb(9)  = -447.453;
+  delayb(10) = 745.528;
+  delayb(11) = 746.439;
+  delayb(12) = 740.272;
+  delayb(13) = 745.001;
+  delayb(14) = 748.658;
+  delayb(15) = 330.368;
+  delayb(16) = 326.349;
+  delayb(17) = 326.809;
+  delayb(18) = 744.591;
+  delayb(19) = 747.309;
+  delayb(20) = 494.850;
+  delayb(21) = 493.273;
+  delayb(22) = 502.447;
+  delayb(23) = 102.621;
+  delayb(24) = 70.421;
+  delayb(25) = 79.282;
+  delayb(26) = 505.400;
+  delayb(27) = 493.785;
+  delayb(28) = 83.580;
+  delayb(29) = 499.709;
+
+  // converstion from s to ns
+  delayb /= 1e9;
+
+  for (int i = 0; i < MAX_Antennas; i++) {
+cout << "Writing delays for LOPES 3D 2011  for antenna: " << antennaIDs[i] <<"   Delay:" << delayb(0)-delayb(i)  << endl;
+  if (!writer.AddData(delayb(0)-delayb(i),antennaIDs[i],"Delay",LOPES_3D_2011) )
+      cerr << "\nERROR while writing field: Delay" << endl;
+   }
+}
+
+
 
 void Lopes3D_HWSetup(void)
 {
@@ -2561,11 +2864,13 @@ int main (int argc, char *argv[])
 
 
 //Lopes3D_HWSetup();
-write_LOPES_3D_Delays();
-//writeLOPES3Drefphsases();
-//writeLOPES3DElGainCal();
+//write_LOPES_3D_Delays();
+//writeLOPES3Drefphases();
+writeLOPES3DElGainCal();
 //writeLOPES3DGain(); 
-
+//write_LOPES_3D_Delays2011();
+//writeLOPES3Drefphases2011();
+writeLOPES3DfinalElGainCal();
 
     // execute requested function to change CalTable
     // adjust_height_of_ant_14(); // allready checked in
