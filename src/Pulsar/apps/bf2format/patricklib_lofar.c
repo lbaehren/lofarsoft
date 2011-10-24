@@ -22,6 +22,13 @@ void internalFITSscalePulse(float *pulse, long nrSamples, float *offset, float *
   }
   if(*scale == 0.0)
     *scale = 1;
+  /*
+  if(finite(*scale) == 0) {
+    printf("maxvalue = %f\n", maxvalue);
+    printf("pulse[0] = %f\n", pulse[0]);
+    printf("pulse[1] = %f\n", pulse[1]);
+    printf("pulse[2] = %f\n", pulse[2]);
+    }*/
   /*  fprintf(stderr, "  internalFITSscalePulse: scale=%e offset=%e maxvalue=%f\n", *scale, *offset, maxvalue); */
 }
 
@@ -299,12 +306,12 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   }
 
   sprintf(dummy_txt, "PSRFITS");
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "FITSTYPE", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "FITSTYPE", dummy_txt, "FITS definition for pulsar data files", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "TELESCOP", datafile->observatory, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "TELESCOP", datafile->observatory, "Telescope name", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -314,17 +321,17 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   }else {
     sprintf(dummy_txt, "SEARCH");    
   }
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "OBS_MODE", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "OBS_MODE", dummy_txt, "(PSR, CAL, SEARCH)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "SRC_NAME", datafile->psrname, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "SRC_NAME", datafile->psrname, "Source or scan ID", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "BACKEND", datafile->instrument, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "BACKEND", datafile->instrument, "Backend ID", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -334,37 +341,48 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   /*  mjd2date(datafile->mjd, &year, &month, &day, &hours, &minutes, &seconds);
       sprintf(dummy_txt, "%d-%02d-%02dT%02d:%02d:%02.0f", year, month, day, hours, minutes, seconds);*/
   /*  printf("Written date as: '%s'\n", dummy_txt); */
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "DATE-OBS", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "DATE-OBS", dummy_txt, "Date of observation (YYYY-MM-DDThh:mm:ss UTC)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
 
   converthms_string(dummy_txt, (12.0/M_PI)*datafile->ra, 0);
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "RA", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "RA", dummy_txt, "Right ascension (hh:mm:ss.ssss)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   /*  printf("RA = '%s'\n", dummy_txt); */
 
   converthms_string(dummy_txt, (180.0/M_PI)*datafile->dec, 0);
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "DEC", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "DEC", dummy_txt, "Declination (-dd:mm:ss.sss)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   /*  printf("DEC = '%s'\n", dummy_txt); */
 
+  dummy_float = 2000;   /* Assume equinox 2000 coordinates */
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "EQUINOX", &dummy_float, "Equinox of coords (e.g. 2000.0)", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+  sprintf(dummy_txt, "J2000");    
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "COORD_MD", dummy_txt, "Coordinate mode (J2000, GALACTIC, ECLIPTIC)", &status) != 0) {
+    fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
+    return 0;
+  }
+
   /* Write out some empty variables to make PRESTO stop complaining */
   dummy_txt[0] = 0;
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "OBSERVER", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "OBSERVER", dummy_txt, "Observer name(s)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "FRONTEND", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "FRONTEND", dummy_txt, "Receiver ID", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "PROJID", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "PROJID", dummy_txt, "Project name", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -376,30 +394,30 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
      information is redundant and I think PSRCHIVE is not really using
      them. Assume we are tracking source. */
   dummy_int = datafile->nrFreqChan;
-  if(fits_write_key(datafile->fits_fptr, TINT, "OBSNCHAN", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "OBSNCHAN", &dummy_int, "Number of frequency channels (original)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   dummy_float = datafile->bw;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSBW", &dummy_float, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSBW", &dummy_float, "[MHz] Bandwidth for observation", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   /*  dummy_double = datafile->dm; */
   dummy_double = 0;    /* I think if set to zero means that the dm sweep is still in the data. */
-  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "CHAN_DM", &dummy_double, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "CHAN_DM", &dummy_double, "[cm-3 pc] DM used for on-line dedispersion", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   sprintf(dummy_txt, "TRACK");
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "TRK_MODE", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "TRK_MODE", dummy_txt, "Track mode (TRACK, SCANGC, SCANLAT)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
   /* Write out the minor axis beam width to be zero. Hopefully that makes PRESTO happy. */
   dummy_float = 0;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "BMIN", &dummy_float, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "BMIN", &dummy_float, "[deg] Beam minor axis length (needs to be set to something for PRESTO)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -410,7 +428,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     sprintf(dummy_txt, "CIRC");
   }
   if(datafile->fd_type != 0) {
-    if(fits_write_key(datafile->fits_fptr, TSTRING, "FD_POLN", dummy_txt, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TSTRING, "FD_POLN", dummy_txt, "LIN or CIRC", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
@@ -419,37 +437,37 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     }else {
       dummy_int = -1;
     }
-    if(fits_write_key(datafile->fits_fptr, TINT, "FD_HAND", &dummy_int, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TINT, "FD_HAND", &dummy_int, "+/- 1. +1 is LIN:A=X,B=Y, CIRC:A=L,B=R (I)", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
   }else {
     fprintf(stderr, "WARNING writePSRFITSHeader: fd_type is not set.\n");
   }
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "FD_SANG", &datafile->fd_sang, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "FD_SANG", &datafile->fd_sang, "[deg] FA of E vect for equal sig in A&B (E)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "FD_XYPH", &datafile->fd_xyph, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "FD_XYPH", &datafile->fd_xyph, "[deg] Phase of A^* B for injected cal (E)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
 
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSFREQ", &datafile->freq_cent, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSFREQ", &datafile->freq_cent, "[MHz] Centre frequency for observation", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
   dummy_int = datafile->mjd;
-  if(fits_write_key(datafile->fits_fptr, TINT, "STT_IMJD", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "STT_IMJD", &dummy_int, "Start MJD (UTC days) (J - long integer)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
   /* Make sure the second is rounded to the nearest integer */
   dummy_int2 = (int)((datafile->mjd - (double)dummy_int)*86400.0 + 0.5);
-  if(fits_write_key(datafile->fits_fptr, TINT, "STT_SMJD", &dummy_int2, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "STT_SMJD", &dummy_int2, "[s] Start time (sec past UTC 00h) (J)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -457,7 +475,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   dummy_double = (datafile->mjd - (double)dummy_int)*(24.0*3600.0);
   dummy_double -= dummy_int2;
 
-  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "STT_OFFS", &dummy_double, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "STT_OFFS", &dummy_double, "[s] Start time offset (D)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -511,12 +529,12 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
   sprintf(dummy_txt, "TIME");
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "INT_TYPE", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "INT_TYPE", dummy_txt, "Time axis (TIME, BINPHSPERI, BINLNGASC, etc)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   sprintf(dummy_txt, "SEC");
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "INT_UNIT", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "INT_UNIT", dummy_txt, "Unit of time axis (SEC, PHS (0-1), DEG)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -526,7 +544,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     sprintf(dummy_txt, "AABBCRCI");
   }
   if(datafile->poltype != 0) {
-    if(fits_write_key(datafile->fits_fptr, TSTRING, "POL_TYPE", dummy_txt, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TSTRING, "POL_TYPE", dummy_txt, "Polarisation identifier (e.g., AABBCRCI, AA+BB)", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
@@ -534,7 +552,7 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     fprintf(stderr, "WARNING writePSRFITSHeader: poltype is not set.\n");
   }
   dummy_int = datafile->NrPols;
-  if(fits_write_key(datafile->fits_fptr, TINT, "NPOL", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NPOL", &dummy_int, "Nr of polarisations", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -543,34 +561,34 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
      0. Is this going to work with data split over multiple files?
      Anyway, for now it makes PRESTO happy. */
   dummy_int = 0;
-  if(fits_write_key(datafile->fits_fptr, TINT, "NCHNOFFS", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NCHNOFFS", &dummy_int, "Channel/sub-band offset for split files", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  if(fits_write_key(datafile->fits_fptr, TINT, "NSUBOFFS", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NSUBOFFS", &dummy_int, "Subint offset (Contiguous SEARCH-mode files)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
 
   dummy_double = datafile->SampTime;
-  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "TBIN", &dummy_double, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "TBIN", &dummy_double, "[s] Time per bin or sample", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   if(datafile->dd_mode == 0 && datafile->Period > 0) {
     dummy_int = datafile->NrBins;
-    if(fits_write_key(datafile->fits_fptr, TINT, "NBIN", &dummy_int, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TINT, "NBIN", &dummy_int, "Nr of bins (PSR/CAL mode; else 1)", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
   }else {   /* In search mode */
     dummy_int = 1;
-    if(fits_write_key(datafile->fits_fptr, TINT, "NBIN", &dummy_int, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TINT, "NBIN", &dummy_int, "Nr of bins (PSR/CAL mode; else 1)", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
     dummy_int = datafile->NrBins;
-    if(fits_write_key(datafile->fits_fptr, TINT, "NSBLK", &dummy_int, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TINT, "NSBLK", &dummy_int, "Samples/row (SEARCH mode, else 1)", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
@@ -579,23 +597,23 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
       datafile->NrBits = 8;
     }
     dummy_int = datafile->NrBits;
-    if(fits_write_key(datafile->fits_fptr, TINT, "NBITS", &dummy_int, "", &status) != 0) {
+    if(fits_write_key(datafile->fits_fptr, TINT, "NBITS", &dummy_int, "Nr of bits/datum (SEARCH mode data, else 1)", &status) != 0) {
       fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
       return 0;
     }
   }
   dummy_int = datafile->nrFreqChan;
-  if(fits_write_key(datafile->fits_fptr, TINT, "NCHAN", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NCHAN", &dummy_int, "Number of channels/sub-bands in this file", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   dummy_float = datafile->channelbw;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "CHAN_BW", &dummy_float, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TFLOAT, "CHAN_BW", &dummy_float, "[MHz] Channel/sub-band width", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   dummy_double = datafile->dm;
-  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "DM", &dummy_double, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "DM", &dummy_double, "[cm-3 pc] DM for post-detection dedisperion", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -634,27 +652,27 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     return 0;
   }
   dummy_int = datafile->NrPulses*datafile->NrPols*datafile->nrFreqChan;
-  if(fits_write_key(datafile->fits_fptr, TINT, "NLEV", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NLEV", &dummy_int, "Number of digitiser levels", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   sprintf(dummy_txt, "9-bit");
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "DIG_MODE", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "DIG_MODE", dummy_txt, "Digitiser mode", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
     }
   dummy_int = 2;
-  if(fits_write_key(datafile->fits_fptr, TINT, "NDIGR", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NDIGR", &dummy_int, "Number of digitised channels (I)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   dummy_int = 1;
-  if(fits_write_key(datafile->fits_fptr, TINT, "NCYCSUB", &dummy_int, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TINT, "NCYCSUB", &dummy_int, "Number of correlator cycles per subint", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
   sprintf(dummy_txt, "AUTO");
-  if(fits_write_key(datafile->fits_fptr, TSTRING, "DIGLEV", dummy_txt, "", &status) != 0) {
+  if(fits_write_key(datafile->fits_fptr, TSTRING, "DIGLEV", dummy_txt, "Digitiser level-setting mode (AUTO, FIX)", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -1124,6 +1142,7 @@ int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *
   long subintsize, i;
   float weight;
   double offset;
+  static int showErrorMessage = 1;
 
   if(lookupSubintTable(datafile) == 0) {
     fprintf(stderr, "ERROR writeFITSsubint: Cannot mode to subint table.\n");    
@@ -1143,14 +1162,51 @@ int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *
     return 0;
   }
 
+  for(i = 0; i < datafile.NrPols*datafile.nrFreqChan; i++) {
+    if(isnan(offsets[i])) {
+      offsets[i] = 0;
+      scales[i] = 0;
+      if(showErrorMessage)
+	fprintf(stderr, "writeFITSsubint: Caught an NaN in an offset (duplicate messages are suppressed)\n");
+      showErrorMessage = 0;
+    }
+    if(finite(offsets[i]) == 0) {
+      offsets[i] = 0;
+      scales[i] = 0;
+      if(showErrorMessage)
+	fprintf(stderr, "writeFITSsubint: Caught an infinity in an offset (duplicate messages are suppressed)\n");
+      showErrorMessage = 0;
+    }
+    if(isnan(scales[i])) {
+      offsets[i] = 0;
+      scales[i] = 0;
+      if(showErrorMessage)
+	fprintf(stderr, "writeFITSsubint: Caught an NaN in a scale (duplicate messages are suppressed)\n");
+      showErrorMessage = 0;
+    }
+    if(finite(scales[i]) == 0) {
+      offsets[i] = 0;
+      scales[i] = 0;
+      if(showErrorMessage)
+	fprintf(stderr, "writeFITSsubint: Caught an infinity in a scale (duplicate messages are suppressed)\n");
+      showErrorMessage = 0;
+    }
+    /*    printf("XXX checkscales %ld: %e %e\n", subintnr, offsets[i], scales[i]); */
+  }
+  
+  /*
+  for(i = 0; i < 1+0*datafile.NrPols*datafile.nrFreqChan; i++) {
+    printf("XXX checkscales %ld: %e %e\n", subintnr, offsets[i], scales[i]);
+  }
+  */
+  
+
   if(fits_write_col(datafile.fits_fptr, TFLOAT, 17, 1+subintnr, 1, datafile.NrPols*datafile.nrFreqChan, scales, &status) != 0) {
     fprintf(stderr, "ERROR writeFITSsubint: Error writing scales.\n");
     fits_report_error(stderr, status); /* print any error message */
     return 0;
   }
 
-  /*  for(i = 0; i < datafile.NrPols*datafile.nrFreqChan; i++)
-      printf("XXX %d: %e %e\n", subintnr, offsets[i], scales[i]);*/
 
   if(fits_write_col(datafile.fits_fptr, TFLOAT, 16, 1+subintnr, 1, datafile.NrPols*datafile.nrFreqChan, offsets, &status) != 0) {
     fprintf(stderr, "ERROR writeFITSsubint: Error writing offsets.\n");
