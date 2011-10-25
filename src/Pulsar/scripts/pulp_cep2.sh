@@ -10,6 +10,9 @@ USAGE="\nusage : pulp_cep2.sh <args identical to pulp.sh> \n\n"\
 "      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -incoh_only -rfi -all \n"\
 "      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -coh_only -rfi \n"\
 "      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -rfi -all\n"\
+"\n"\
+"      To get older presto subband format output add '-subs' flag:\n"\
+"      pulp_cep2.sh -id L26170 -p B1254-10 -o L26170_red -rfi -all -subs\n"\
 "      \n"
 
 if [ $# -lt 6 ]                    
