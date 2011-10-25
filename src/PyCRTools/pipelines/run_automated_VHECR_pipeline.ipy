@@ -130,7 +130,6 @@ for f in files:
         continue
     else:
         if isprocessed(f,myoutputdir):
-	    print f
             if reprocesslora:
                 if nowloradata(f,myoutputdir):
                     fname+=f+" "
