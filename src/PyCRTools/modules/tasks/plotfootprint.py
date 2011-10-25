@@ -128,6 +128,8 @@ def obtainvalue(par,key):
                 print "please add ",key,"to defaults in plotfootprint.py / obtainvalue "
                 return None
 
+
+
 class plotfootprint(tasks.Task):
     """
     **Description:**
@@ -181,6 +183,7 @@ class plotfootprint(tasks.Task):
         lofarshape={default:"o",doc:"Shape of LOFAR antennas. e.g. 'o' for circle, '^' for triangle"},
         loracolor={default:"#730909",doc:"Color used for LORA plots. If set to 'time' uses the arrival time" },
         plotlayout={default:True,doc:"Plot the LOFAR layout of the stations as the background"},
+        plotbarycenter={default:True,doc:"Indicate barycenter obtained from LOFAR signals"},
         filetype={default:"png",doc:"extension/type of output file"},
         usecolorbar={default:True,doc:"print the colorbar?"},
         save_images = {default:False,doc:"Enable if images should be saved to disk in default folder"},
@@ -189,6 +192,28 @@ class plotfootprint(tasks.Task):
         )
         
 
+    def CalculateBaryCenter(self,positions, signals):
+
+        pos1 = cr.hArray_transpose(positions)[0].vec()
+        pos1 = cr.hArray(pos1)
+        pos2 = cr.hArray_transpose(positions)[1].vec()
+        pos2 = cr.hArray(pos2)
+
+        SumSig = signals.sum()
+        
+        x_val = pos1*signals
+        sum_x = x_val.sum()
+        sum_x = sum_x/SumSig
+        
+        y_val = pos2*signals
+        sum_y = y_val.sum()
+        sum_y = sum_y/SumSig
+                
+        core = [sum_x[0],sum_y[0]]
+        
+        print "Calculated", core
+        return core
+        
     def call(self):
         pass
 
@@ -226,6 +251,10 @@ class plotfootprint(tasks.Task):
                 self.scolors /= self.scolors.max().val()
         else:
             raise TypeError("PlotAntennaLayout: parameter 'colors' needs to be string or an hArray thereof.")
+            
+        if self.positions and self.power:
+            LofarCore = self.CalculateBaryCenter(self.positions,self.power)
+               
 
         if self.loracolor is "time": 
             if self.loraarrivaltimes:
@@ -286,6 +315,8 @@ class plotfootprint(tasks.Task):
                     dsin=cr.sin(cr.radians(self.loradirection[0]))
                     elev=self.loradirection[1]
                     cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=3,color='red',ls='dashed',hatch='\\')
+        if self.plotbarycenter:
+            cr.plt.scatter(LofarCore[0],LofarCore[1],s=80,c = "black", marker='d')            
         if self.names and self.plotnames:
             for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
                 cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
