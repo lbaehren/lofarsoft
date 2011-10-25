@@ -728,7 +728,7 @@ for full_filename in files:
 #        import pdb; pdb.set_trace()
         nofChannels = len(datafile["CHANNEL_ID"]) # already noted somewhere else?
         cabledelayList = [0.0] * nofChannels
-#        cabledelays = hArray(float, dimensions = [nofChannels]) 
+#        cabledelays = hArray(float, dimensions = [nofChannels])
         # check if 'Cabledelays.pic' exists in results dir
         delayfile = os.path.join(outputdir, 'Cabledelays.pic')
         print delayfile
@@ -741,12 +741,12 @@ for full_filename in files:
                 key = str(id)
                 if key in cabledelay_database:
                     cabledelayList[n] = cabledelay_database[str(id)]["cabledelay"]
-                n+=1 
+                n+=1
             print cabledelayList
         else:
             print 'Cable delays file does not exist yet.'
-        cabledelays = hArray(cabledelayList) # zeros if file isn't there. Other choice: take from metadata 
-        
+        cabledelays = hArray(cabledelayList) # zeros if file isn't there. Other choice: take from metadata
+
 #        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
 #        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
 #        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
@@ -868,7 +868,7 @@ for full_filename in files:
 #        timeseries_raw_rms = hArray(dimensions=timeseries_calibrated_data_antennas_rms)
         # get raw rms value to see how much calibration was done in total
         timeseries_raw_rms = timeseries_data[..., 0:pulse.start].stddev() # no DC offset correction was done
-        
+
 # calibration complete.
         print "---> Saving calibrated time series to",calibrated_timeseries_file
         timeseries_calibrated_data.write(calibrated_timeseries_file)
@@ -1022,11 +1022,11 @@ for full_filename in files:
         # include average cable delays (as in cable delay database) in time lags per pulse
         time_lags = hArray(time_lags)
         time_lags -= cabledelays
-        
+
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
 
-        trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=final_residual_delays,sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
+        trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=final_residual_delays[antennas_with_strong_pulses],sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
         print "\n--->Imaging"
 
