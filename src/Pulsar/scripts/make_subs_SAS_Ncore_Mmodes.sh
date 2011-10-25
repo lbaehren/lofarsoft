@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=2.22
+VERSION=3.00
 
 #####################################################################
 # Usage #
@@ -85,7 +85,7 @@ parset_location=""
 user_parset_location=0
 input_string=$*
 proc=0
-subs=1
+subsformat=0
 H5_exist=0
 
 while [ $# -gt 0 ]
@@ -110,7 +110,7 @@ do
 	-test)   test=1;;
 	-nofold)   nofold=1;;
 	-debug)   debug=1;;
-	-subs)    subs=1;;
+	-subs)    subsformat=1;;
 	-raw)     input_location="$2"; user_input_location=1; shift;;
 	-par)     parset_location="$2"; user_parset_location=1; shift;;
 	-help)   help=1 
@@ -253,9 +253,9 @@ then
    echo "    Will user user-specified parset input location: $parset_location." 
 fi
 
-if [ $subs == 1 ]
+if [ $subsformat == 1 ]
 then
-   echo "    Will process using presto .subXXXX files instead of default psrfits." 
+   echo "    Will process using presto .subXXXX files instead of default psrfits format." 
 fi
 
 #####################################################################
@@ -781,6 +781,14 @@ then
    nmodes=1
    echo "Coherentstokes ONLY mode for processing."
    echo "Coherentstokes ONLY mode for processing." >> $log
+elif [[ $INCOHERENTSTOKES == 'false' ]] && [[ $COHERENTSTOKES == 'true' ]] && [[ $incoh_only == 1 ]] && [[ $coh_only == 0 ]]
+then
+   echo "ERROR: Coherentstokes = true, but user specified Incoherentstokes processing only; no IS data to process."
+   proc=-2
+elif [[ $INCOHERENTSTOKES == 'true' ]] && [[ $COHERENTSTOKES == 'false' ]] && [[ $incoh_only == 0 ]] && [[ $coh_only == 1 ]]
+then
+   echo "ERROR: Incoherentstokes = true, but user specified Coherentstokes processing only; no CS data to process."
+   proc=-2
 elif [[ $INCOHERENTSTOKES == 'false' ]] && [[ $COHERENTSTOKES == 'true' ]]
 then
    mode_str="stokes"
@@ -798,9 +806,20 @@ else
    echo "ERROR: Unable to determine stokes type from parset, Incoherentstokes or Coherentstokes must be True for processing." >> $log
    echo "       This Pulsar Pipeline is unable to run on the requested dataset."
    echo "       This Pulsar Pipeline is unable to run on the requested dataset." >> $log
-   exit 1
+   proc=-2
 fi
 
+# clean up if exiting early
+if (( $proc == -2 ))
+then
+    cd $location/..
+    echo "ERROR: No processing performed;  cleaning up."
+    if [[ -d $location ]]
+    then 
+       rm -rf $location
+    fi
+    exit 1
+fi
 
 #Non-Flys Eye (flyseye=0);  Flys Eye (flyseye=1)
 flyseye=0
@@ -862,6 +881,11 @@ do
 	   echo "WARNING: 2nd Transpose IncoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams."
 	   echo "WARNING: 2nd Transpose IncoherentStokes must have N cores = # of beams;  resetting user-specified core to $nrBeams." >> $log
 	   core=$nrBeams
+	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $NBEAMS -gt 1 ]] && [[ $subsformat == 0 ]]
+	then
+	   echo "WARNING: IS mode with psrfits, N cores must be set to 1."
+	   echo "WARNING: IS mode with psrfits, N cores must be set to 1." >> $log
+	   core=1
 	elif [[ $STOKES == 'incoherentstokes' ]] && [[ $nrBeams -gt 128 ]]
 	then
 	   echo "ERROR: Pipeline is currently unable to handle more than 128 Incoherent beams;  there are $nrBeams in this observation."
@@ -1008,7 +1032,10 @@ do
                   echo "WARNING: number of IS files is less than number requested in observation;  creating dummy files to compensate"
                   echo "WARNING: number of IS files is less than number requested in observation;  creating dummy files to compensate"  >> $log
                   ii=0
-                  rm -rf /data/$OBSID
+                  if [[ -d /data/$OBSID ]]
+                  then 
+                     rm -rf /data/$OBSID
+                  fi
                   mkdir /data/$OBSID
 	              rootname=`head -1 $master_list | sed -e "s/\// /g" -e "s/.* //g" -e "s/_SB.*//g"`
 	              while (( $ii < $nfiles ))
@@ -1197,34 +1224,6 @@ do
 	   done
 	   beams=$beams_tmp
     fi
-
-	#Set up the list of files called "DONE" for output checking of prepfold results
-#	done_list=""
-#	if (( $flyseye == 0 ))
-#	then
-#		for ii in $num_dir
-#		do
-#		   if [ $ii -ne $last ]
-#		   then
-#		      done_list=`echo "&& -e "${STOKES}/"RSP"${ii}/"DONE" $done_list`
-#		   else
-#		      done_list=`echo ${STOKES}/"RSP"${ii}/"DONE"  $done_list`
-#		   fi   
-#		done
-#	else
-#	    for ii in $num_dir
-#	    do
-#		   for jjj in $beams
-#	       do
-#			   if [ $ii -ne $last ]
-#			   then
-#			      done_list=`echo "&& -e "${STOKES}/"RSP"${ii}/${jjj}/"DONE" $done_list`
-#			   else
-#			      done_list=`echo ${STOKES}/"RSP"${ii}/${jjj}/"DONE"  $done_list`
-#			   fi   
-#		   done	
-#		done
-#	fi # end if (( $flyseye == 0 ))
     
 	#Create directories with appropriate permissions (beams are ignored/blank when not needed)
     if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
@@ -1334,25 +1333,29 @@ do
 	#Convert the subbands with bf2presto or 2bf2fits
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
-	    if [[ $subs == 0 ]] && [[ $STOKES == "stokes" ]]
+	    if [[ $subsformat == 0 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 0 ]]
 	    then
 	       converter_exe="2bf2fits"
-	       extra_flags="-CS"
-	    elif [[ $subs == 0 ]] && [[ $STOKES == "incoherentstokes" ]]
+	       extra_flags="-CS -parset $PARSET -nbits 8 -A 600"
+	    elif [[ $subsformat == 0 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 1 ]]
 	    then
 	       converter_exe="2bf2fits"
-	       extra_flags="-append"
-	    elif [[ $subs == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 0 ]]
+	       extra_flags="-CS -H -parset $PARSET -append -nbits 8 -A 600"
+	    elif [[ $subsformat == 0 ]] && [[ $STOKES == "incoherentstokes" ]]
+	    then
+	       converter_exe="2bf2fits"
+	       extra_flags="-append -parset $PARSET -nbits 8 -A 600"
+	    elif [[ $subsformat == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 0 ]]
 	    then
 	       converter_exe="bf2presto8"
-	       extra_flags=""
-	    elif [[ $subs == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 1 ]]
+	       extra_flags="-f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+	    elif [[ $subsformat == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 1 ]]
 	    then
 	       converter_exe="bf2presto8"
-	       extra_flags="-H"
-	    else # [[ $subs == 1 ]] 
+	       extra_flags="-H -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+	    else # [[ $subsformat == 1 ]] && [[ $STOKES == "incoherentstokes" ]] 
 	       converter_exe="bf2presto8"
-	       extra_flags=" "
+	       extra_flags="-f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
 	    fi
 		echo "Starting $converter_exe conversion with flags=$extra_flags for RSP-splits"
 		echo "Starting $converter_exe conversion with flags=$extra_flags for RSP-splits" >> $log
@@ -1374,16 +1377,20 @@ do
               
 			  if [[ $transpose == 0 ]] 
 			  then
-			     echo ${converter_exe} ${extra_flags} ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
-			     ${converter_exe} ${extra_flags} ${COLLAPSE} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			     echo ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
+			     ${converter_exe} ${extra_flags} -A 10 -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_BusyWeek/incoherentstokes/RSP$ii/*sub0000 ${STOKES}/RSP$ii/
 #                 ln -s /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_BusyWeek/incoherentstokes/RSP$ii/*sub[0-9]* ${STOKES}/RSP$ii/
 			     bf2presto_pid[$ii]=$!  
 			  elif [[ $transpose == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
               then
-			     echo ${converter_exe} ${extra_flags} ${COLLAPSE} -t -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
-			     ${converter_exe} ${extra_flags} ${COLLAPSE} -t -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
+                 if (( $subsformat == 1 ))
+                 then
+                    extra_flags="$extra_flags -t"
+                 fi
+			     echo ${converter_exe} ${extra_flags} -A 10 -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
+			     ${converter_exe} ${extra_flags} -A 10 -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			     bf2presto_pid[$ii]=$!  
@@ -1391,8 +1398,14 @@ do
                  if (( $TiedArray == 0 ))
                  then
                     cd ${location}/${STOKES}/RSP$ii/
-			        echo ${converter_exe} ${extra_flags} ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			        ${converter_exe} ${extra_flags} ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+
+	                if (( $subsformat == 1 ))
+	                then
+	                   extra_flags="$extra_flags -M -T ${nSubbands}"
+	                fi
+
+			        echo ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			        ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
 #                    cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			        bf2presto_pid[$ii]=$!  
@@ -1402,8 +1415,14 @@ do
 			        do
 			            ## -- not sure about this line:    ${STOKES}/"RSP"${ii}/${jjj}
                         cd ${location}/${STOKES}/RSP$ii/${jjj}
-			            echo ${converter_exe} ${extra_flags} ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			            ${converter_exe} ${extra_flags} ${COLLAPSE} -M -T ${nSubbands} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+
+		                if (( $subsformat == 1 ))
+		                then
+		                   extra_flags="$extra_flags -M -T ${nSubbands}"
+		                fi
+
+			            echo ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			            ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			           bf2presto_pid[$ii][$counter]=$!  
 				       counter=$(( $counter + 1 )) 
 			        done
@@ -1427,19 +1446,37 @@ do
 #		 	    echo 'Converting subbands: '`cat RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 
 		 	    if [[ $transpose == 0 ]] 
 			    then
-			       echo ${converter_exe} ${extra_flags} ${COLLAPSE} -b ${NBEAMS} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			       ${converter_exe} ${extra_flags} ${COLLAPSE} -b ${NBEAMS} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+
+	               if (( $subsformat == 1 ))
+	               then
+	                  extra_flags="$extra_flags -b ${NBEAMS}"
+	               fi
+
+			       echo ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			       ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!  
 			    elif [[ $transpose == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
                 then
-			       echo ${converter_exe} ${extra_flags} ${COLLAPSE} -t -b ${NBEAMS} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			       ${converter_exe} ${extra_flags} ${COLLAPSE} -t -b ${NBEAMS} -A 10 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+
+	               if (( $subsformat == 1 ))
+	               then
+	                  extra_flags="$extra_flags -t -b ${NBEAMS}"
+	               fi
+
+			       echo ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			       ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!
                 else #    # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
                    if (( $TiedArray == 0 ))
                    then
-				       echo ${converter_exe} ${extra_flags} ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-				       ${converter_exe} ${extra_flags} ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+
+		               if (( $subsformat == 1 ))
+		               then
+		                  extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
+		               fi
+
+				       echo ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+				       ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			       
 			           bf2presto_pid[$ii]=$!
 			           
@@ -1448,27 +1485,20 @@ do
 				        for jjj in $beams
 				        do
 	                        cd ${location}/${STOKES}/RSP$ii/${jjj}
-				            echo ${converter_exe} ${extra_flags} ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-				            ${converter_exe} ${extra_flags} ${COLLAPSE} -T ${nSubbands} -A 10 -M -b 1 -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+
+			                if (( $subsformat == 1 ))
+			                then
+			                   extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
+			                fi
+
+				            echo ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+				            ${converter_exe} ${extra_flags} -A 10 -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 				            bf2presto_pid[$ii][$counter]=$!
 				            counter=$(( $counter + 1 )) 
 				        done
 				     
 				   fi #end  (( $TiedArray == 1 ))
-			       
-#A2test
-#                 echo "ln -s /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/stokes/CS007LBA/RSP0/*sub[0-9]* ${location}/${STOKES}/RSP$ii/beam_0/" >> $log
-#                 mkdir -p ${location}/${STOKES}/RSP$ii/beam_0/
-#                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/stokes/CS007LBA/RSP${ii}/*sub0000 ${location}/${STOKES}/RSP$ii/beam_0/
-#                 ln -s /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/stokes/CS007LBA/RSP${ii}/*sub[0-9]* ${location}/${STOKES}/RSP$ii/beam_0/
-
 			    fi  #end [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
-			    
-	#			echo 'Converting subbands: '`cat SB_master.list` >> bf2presto.out 2>&1 
-	#		    echo bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID} `cat SB_master.list` >> $log
-	#		    bf2presto ${COLLAPSE} -b ${NBEAMS} -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} -o ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID} `cat SB_master.list` >> bf2presto.out 2>&1 &
-	#			set bf2presto_pid=$! 
-	 
 			done
 			cd ${location}
 	    fi
@@ -1504,7 +1534,7 @@ do
 		date
 		date >> $log
 		
-	    if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]]
+	    if [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]] && [[ $subsformat == 1 ]]
 	    then
 	       if [[ $flyseye == 0 ]] 
 	       then
@@ -1536,14 +1566,17 @@ do
        # clean up dummy files
        if [[ $create_dummies == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
        then
-          rm -rf /data/$OBSID
+          if [[ -d /data/$OBSID ]]
+          then
+             rm -rf /data/$OBSID
+          fi
        fi
 
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
 	# Calculating the number of samples to be passed to inf-file
 	split_files=`echo $all_num $CHAN | awk '{print $1 * $2}'`
-	if (( $flyseye == 0 )) && (( $rfi_pproc == 0 ))
+	if (( $flyseye == 0 )) && (( $rfi_pproc == 0 )) && (( $subsformat == 1 ))
 	then
 	    # check the file sizes to be sure all sub files are the same
 	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
@@ -1566,32 +1599,54 @@ do
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort -n | uniq -c | sort -n -r | head -1 | awk '{print $2 / 2 }' -`
 	fi
 
+##############################################################################################
+# Excise the channels (subband data -- create blank dummy files;  psrfits -- user rfifind to create mask)
+##############################################################################################
      # clean up data and excise every 0th channel from each subband (make blank .subXXXX files)
-     # A2 to-do: check for the number of channels and if 1, don't excise data
-	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $CHAN != 1 ]
+     # A2 to-do: check for the number of channels and is 1, don't excise data
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $CHAN != 1 ] 
 	then
-		echo "Excising blank channels from .subXXX files"
-		echo "Excising blank channels from .subXXX files" >> $log
+	    if (( $subsformat == 1 ))
+	    then
+		   echo "Excising blank channels from .subXXX files"
+		   echo "Excising blank channels from .subXXX files" >> $log
+        else
+		   echo "Creating rfi mask for to blank channels from psrfits files"
+		   echo "Creating rfi mask for to blank channels from psrfits files" >> $log
+        fi # end if (( $subsformat == 1 ))
 
 		if (( $flyseye == 0 ))
 		then
 			for ii in $num_dir
 			do
 			    cd ${location}/${STOKES}/RSP${ii}
-			    /bin/ls *sub[0-9]??? | grep -v sub0000 > $$.list
-			    while read file_name
-			    do
-			       subband_number=`echo $file_name | sed 's/.*\.sub//g' | awk '{printf("%d\n"),$1}'`
-			       modulo_files=`echo $subband_number $CHAN | awk '{print ($1 % $2)}'`
-			       if (( $modulo_files == 0 ))
-			       then
-			             echo "   Excising RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`"
-			             echo "   Excising RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`" >> $log
-			             mv $file_name $file_name"_ORIG"
-			             touch $file_name
-			       fi
-			    done < $$.list
-			    rm $$.list
+			    if (( $subsformat == 1 ))
+			    then
+				    /bin/ls *sub[0-9]??? | grep -v sub0000 > $$.list
+				    while read file_name
+				    do
+				       subband_number=`echo $file_name | sed 's/.*\.sub//g' | awk '{printf("%d\n"),$1}'`
+				       modulo_files=`echo $subband_number $CHAN | awk '{print ($1 % $2)}'`
+				       if (( $modulo_files == 0 ))
+				       then
+				             echo "   Excising RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`"
+				             echo "   Excising RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`" >> $log
+				             mv $file_name $file_name"_ORIG"
+				             touch $file_name
+				       fi
+				    done < $$.list
+				    rm $$.list
+				else 
+				    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+				    then
+					    # prepare for psrfits channel excision via the rfifind mask file
+					    max=`echo "$nSubbands * $CHAN" | bc` 
+					    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits
+					    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+					    rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.rfiout 2>&1 &
+	  			        rfifind_pid[$ii]=$!  
+                    fi
+				fi # end if (( $subsformat == 1 ))
 			done
 		else
 		    if (( $TiedArray == 0 ))
@@ -1600,200 +1655,341 @@ do
 		    else
 		       loop_beams=$beams
 		    fi
-		    
+		    counter=0
 		    for jjj in $loop_beams
 		    do
 		        for ii in $num_dir
 		        do
 				    cd ${location}/${STOKES}/RSP${ii}/${jjj}
-				    /bin/ls *sub[0-9]??? | grep -v sub0000 > $$.list
-				    while read file_name
-				    do
-				       subband_number=`echo $file_name | sed 's/.*\.sub//g' | awk '{printf("%d\n"),$1}'`
-				       modulo_files=`echo $subband_number $CHAN | awk '{print ($1 % $2)}'`
-				       if (( $modulo_files == 0 ))
-				       then
-				          echo "   Excising $jjj RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`"
-				          echo "   Excising $jjj RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`" >> $log
-				          mv $file_name $file_name"_ORIG"
-				          touch $file_name
-				       fi
-				    done < $$.list
-				    rm $$.list
+			        if (( $subsformat == 1 ))
+			        then
+				        /bin/ls *sub[0-9]??? | grep -v sub0000 > $$.list
+					    while read file_name
+					    do
+					       subband_number=`echo $file_name | sed 's/.*\.sub//g' | awk '{printf("%d\n"),$1}'`
+					       modulo_files=`echo $subband_number $CHAN | awk '{print ($1 % $2)}'`
+					       if (( $modulo_files == 0 ))
+					       then
+					          echo "   Excising $jjj RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`"
+					          echo "   Excising $jjj RSP$ii sub`echo $file_name | sed 's/.*\.sub//g'`" >> $log
+					          mv $file_name $file_name"_ORIG"
+					          touch $file_name
+					       fi
+					    done < $$.list
+					    rm $$.list
+					else
+					    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+					    then
+						    # prepare for psrfits channel excision via the rfifind mask file
+						    max=`echo "$nSubbands * $CHAN" | bc` 
+						    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits
+						    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						    rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.rfiout 2>&1 &
+	  			            rfifind_pid[$ii][$counter]=$!  
+                        fi
+					fi # end if (( $subsformat == 1 ))
 		        done
+		        counter=$(( $counter + 1 ))
 	        done
 		
-		fi
-	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+		fi # end if (( $flyseye == 0 ))
+       
+	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $CHAN != 1 ]
 	cd ${location}
+
+	#RFI-Report
+	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+	then 
+		   echo "Producing rfi report"
+		   echo "Producing rfi report" >> $log
+		   date
+		   date >> $log
+		   for ii in $num_dir
+		   do
+		      if (( $flyseye == 0 ))
+		      then
+		         echo cd ${location}/${STOKES}/RSP${ii} >> $log
+		         cd ${location}/${STOKES}/RSP${ii}
+		         if (( $subsformat == 1 ))
+		         then
+		            echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
+		         else
+		            echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n `echo ${SAMPLES}*10 | bc` *.fits  >> $log
+		         fi
+			     if [ $test == 0 ]
+			     then
+				    sleep 5
+		            if (( $subsformat == 1 ))
+		            then
+		               python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
+		               subdyn_pid[$ii]=$!
+		            else
+		               python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n `echo ${SAMPLES}*10 | bc` *.fits &
+		               subdyn_pid[$ii]=$!
+		            fi
+		         fi
+		      else
+	
+	             if [ $rfi_pproc == 1 ]
+	             then
+	                loop_beams=$beams
+	             else
+	                loop_beams=$beams_init
+	             fi
+	             
+	             counter=0
+				 for jjj in $loop_beams
+				 do
+				     if [ $rfi_pproc == 0 ]
+				     then
+	   		            echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
+			            cd ${location}/${STOKES}/RSP${ii}/${jjj}
+			         else
+			            echo cd ${location}/${STOKES}/${jjj}/beam_${ii}/ >> $log
+			            cd ${location}/${STOKES}/${jjj}/beam_${ii}/
+	                 fi
+	                 
+		             if (( $subsformat == 1 ))
+		             then
+			            echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
+			         else
+			            echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n `echo ${SAMPLES}*10 | bc` *.fits  >> $log
+			         fi
+				     if [ $test == 0 ]
+				     then
+				        sleep 5
+		                if (( $subsformat == 1 ))
+		                then
+			               python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
+			               subdyn_pid[$ii][$counter]=$!	
+			            else
+			               python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n `echo ${SAMPLES}*10 | bc` *.fits &
+			               subdyn_pid[$ii][$counter]=$!	
+			            fi
+			         fi
+				     counter=$(( $counter + 1 ))
+		         done      
+	          fi
+		   done
+		
+		   echo cd ${location} >> $log
+		   cd ${location}
+
+	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ] 
+		
+	# wait for rfifind to finish
+	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+	then
+	    if (( $subsformat == 0 ))
+	    then
+			for ii in $num_dir
+			do
+			   echo "Waiting for RSP$ii rfifind_pid to finish"
+			   echo "Waiting for RSP$ii rfifind_pid to finish" >> $log
+			   if (( $flyseye == 0 ))
+			   then
+			       wait ${rfifind_pid[ii]}
+			   else
+		  		    if (( $TiedArray == 0 ))
+				    then
+				       loop_beams=$beams_init
+				    else
+				       loop_beams=$beams
+				    fi
+		
+			        counter=0
+			        for jjj in $loop_beams
+			        do
+			           echo "Waiting for RSP$ii beam_$counter rfifind_pid to finish"
+			           echo "Waiting for RSP$ii beam_$counter rfifind_pid to finish" >> $log
+			           wait ${rfifind_pid[ii][counter]}
+					   counter=$(( $counter + 1 )) 
+			        done
+			   fi
+			done					
+	    fi # end if (( $subsformat == 0 ))
+	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 	
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 	then
-		#Create .sub.inf files with par2inf.py
-	    if (( $flyseye == 0 )) || (( $transpose == 0 ))
-	    then
-	        beam_counter=0
-			while (( $beam_counter < $nrBeams ))
-			do
-				echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
-				cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
-				#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-				echo "Running par2inf 1" 
-				echo "Running par2inf 1" >> $log
-				
-				if (( $nrBeams == 1 ))
-				then
-                   if [[ $STOKES != "stokes" ]]
-                   then
-				        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
-				        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-				        status=$?	
-	                else 
-	                    if [[ $nrTArings == 0 ]]
-	                    then
-						    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
-						    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
-					        status=$?	
-					     else
-					        # get the beam_num from the file name of the TA beam (assume single file TA beams per machine)
-					        beam_num=`head -1 ${location}/${STOKES}/SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
-						    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 -B ${beam_num} ${location}/${OBSID}.parset >> $log
-						    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 -B ${beam_num} ${location}/${OBSID}.parset
-					        status=$?	
-					     fi
-                    fi
-			        
-					if [ $status -ne 0 ]
-					then
-					   echo "ERROR: Unable to successfully run par2inf task"
-					   echo "ERROR: Unable to successfully run par2inf task" >> $log
-					   exit 1
-					fi
+	   if (( $subsformat == 1 ))
+	   then
+			#Create .sub.inf files with par2inf.py
+		    if (( $flyseye == 0 )) || (( $transpose == 0 ))
+		    then
+		        beam_counter=0
+				while (( $beam_counter < $nrBeams ))
+				do
+					echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
+					cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
+					#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+					echo "Running par2inf 1" 
+					echo "Running par2inf 1" >> $log
 					
-					# move results to the correct location					
-            		jj=0    
-					for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
-					do
-                       if (( $TiedArray == 0 ))
-                       then
-                           INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
-                           echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${ii} > ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
-                           sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${ii} > ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
-                           rm ${ii}
-#						   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-#						   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
-						   jj=`expr $jj + 1`
-					   else
-					       for jjj in $beams
-					       do 
+					if (( $nrBeams == 1 ))
+					then
+	                   if [[ $STOKES != "stokes" ]]
+	                   then
+					        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset >> $log
+					        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+					        status=$?	
+		                else 
+		                    if [[ $nrTArings == 0 ]]
+		                    then
+							    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
+							    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
+						        status=$?	
+						     else
+						        # get the beam_num from the file name of the TA beam (assume single file TA beams per machine)
+						        beam_num=`head -1 ${location}/${STOKES}/SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+							    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 -B ${beam_num} ${location}/${OBSID}.parset >> $log
+							    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 -B ${beam_num} ${location}/${OBSID}.parset
+						        status=$?	
+						     fi
+	                    fi
+				        
+						if [ $status -ne 0 ]
+						then
+						   echo "ERROR: Unable to successfully run par2inf task"
+						   echo "ERROR: Unable to successfully run par2inf task" >> $log
+						   exit 1
+						fi
+						
+						# move results to the correct location					
+	            		jj=0    
+						for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
+						do
+	                       if (( $TiedArray == 0 ))
+	                       then
 	                           INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
-	                           echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${ii} > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
-	                           sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${ii} > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
-                               rm ${ii}
-#							   echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-#							   cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+	                           echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${ii} > ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
+	                           sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${ii} > ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+	                           rm ${ii}
+	#						   echo mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+	#						   mv ${ii} ${STOKES}/RSP${jj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
 							   jj=`expr $jj + 1`
-						   done 
-					   fi
-					done
-				else # (( $nrBeams > 1 ))
-			        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset >> $log
-			        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset
-			        status=$?	
-			        
+						   else
+						       for jjj in $beams
+						       do 
+		                           INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
+		                           echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${ii} > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
+		                           sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${ii} > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+	                               rm ${ii}
+	#							   echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+	#							   cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+								   jj=`expr $jj + 1`
+							   done 
+						   fi
+						done
+					else # (( $nrBeams > 1 ))
+				        echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset >> $log
+				        python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[$beam_counter]} -o test -N ${NSAMPL} -n `echo $all_num $core | awk '{print $1 / $2}'` -r 1 -B $beam_counter ./${OBSID}.parset
+				        status=$?	
+				        
+						if [ $status -ne 0 ]
+						then
+						   echo "ERROR: Unable to successfully run par2inf task"
+						   echo "ERROR: Unable to successfully run par2inf task" >> $log
+						   exit 1
+						fi
+						
+						# move result (single file) to the correct location
+						result=`ls -1 test*.inf`
+	
+	                    INFNAME=${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}
+	                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${result} > ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf" >> $log
+	                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${result} > ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf 
+	                    rm ${result}
+	#					echo mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf >> $log
+	#					mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf
+				     fi # end if (( $nrBeams == 1 ))
+	
+					beam_counter=$(( $beam_counter + 1 ))
+				done # end while (( $beam_counter < $nrBeams ))
+	        elif (( $flyseye == 1 )) && (( $transpose == 1 ))
+	        then
+				for ii in $num_dir
+				do	        
+					echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf >> $log
+					cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf
+					#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
+					echo "Running par2inf for dir $ii" 
+					echo "Running par2inf for dir $ii" >> $log
+					
+				    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
+				    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
+				    status=$?	
+				
 					if [ $status -ne 0 ]
 					then
 					   echo "ERROR: Unable to successfully run par2inf task"
 					   echo "ERROR: Unable to successfully run par2inf task" >> $log
 					   exit 1
 					fi
-					
-					# move result (single file) to the correct location
-					result=`ls -1 test*.inf`
-
-                    INFNAME=${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}
-                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' ${result} > ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf" >> $log
-                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" ${result} > ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf 
-                    rm ${result}
-#					echo mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf >> $log
-#					mv ${result} ${STOKES}/RSP${beam_counter}/${PULSAR_ARRAY_PRIMARY[$beam_counter]}_${OBSID}_RSP${beam_counter}.sub.inf
-			     fi # end if (( $nrBeams == 1 ))
-
-				beam_counter=$(( $beam_counter + 1 ))
-			done # end while (( $beam_counter < $nrBeams ))
-        elif (( $flyseye == 1 )) && (( $transpose == 1 ))
-        then
-			for ii in $num_dir
-			do	        
-				echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf >> $log
-				cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf
-				#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
-				echo "Running par2inf for dir $ii" 
-				echo "Running par2inf for dir $ii" >> $log
-				
-			    echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset >> $log
-			    python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $nSubbands -r 1 ${location}/${OBSID}.parset
-			    status=$?	
-			
-				if [ $status -ne 0 ]
-				then
-				   echo "ERROR: Unable to successfully run par2inf task"
-				   echo "ERROR: Unable to successfully run par2inf task" >> $log
-				   exit 1
-				fi
-
-                if (( $TiedArray == 0 ))
-                then
-	                result=`ls -1 test*.inf`
-                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}
-                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
-                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
-                    rm ${result}
-#	                echo mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
-#	                mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
-		         else
-		             for jjj in $beams
-		             do
+	
+	                if (( $TiedArray == 0 ))
+	                then
 		                result=`ls -1 test*.inf`
 	                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}
-	                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
-	                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
-#                        rm ${result}
-
-#		                echo cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
-#		                cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
-		             done		         
-	             fi
-            done
-        fi
-		
-		# A2 check to see if this is still valid/needed mode of operation
-		jj=0    
-        if (( $flyseye == 1 )) && (( $transpose == 0 ))
-		then
-		    for jjj in $beams
-		    do
-		        jj=0    
-			    for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
+	                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
+	                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
+	                    rm ${result}
+	#	                echo mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
+	#	                mv $result ${STOKES}/RSP${ii}/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+			         else
+			             for jjj in $beams
+			             do
+			                result=`ls -1 test*.inf`
+		                    INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}
+		                    echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf" >> $log
+		                    sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $result > ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf 
+	#                        rm ${result}
+	
+	#		                echo cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf >> $log
+	#		                cp $result ${STOKES}/RSP${ii}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub.inf
+			             done		         
+		             fi
+	            done
+	        fi
+			
+			# A2 check to see if this is still valid/needed mode of operation
+			jj=0    
+	        if (( $flyseye == 1 )) && (( $transpose == 0 ))
+			then
+			    for jjj in $beams
 			    do
-			       #cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
-                   INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
-                   echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
-                   sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
-                   #rm ${result}
-                   
-#			       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
-#			       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
-			       jj=`expr $jj + 1`
+			        jj=0    
+				    for ii in `ls -1 test*.inf | awk -F\. '{print $0,substr($1,5,10)}' | sort -k 2 -n | awk '{print $1}'`
+				    do
+				       #cp ${ii} ${STOKES}/${jjj}/RSP${jj}/${PULSAR}_${OBSID}_RSP${jj}.sub.inf
+	                   INFNAME=${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}
+	                   echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf" >> $log
+	                   sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" $ii > ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf 
+	                   #rm ${result}
+	                   
+	#			       echo cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf >> $log
+	#			       cp ${ii} ${STOKES}/RSP${jj}/${jjj}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${jj}.sub.inf
+				       jj=`expr $jj + 1`
+				    done
 			    done
-		    done
-		fi 
-		
-	    if (( $flyseye == 1 )) && (( $transpose == 0 ))
-	    then
-	       echo rm test*.inf >> $log
-	       rm test*.inf
-	    fi
+			fi 
+			
+		    if (( $flyseye == 1 )) && (( $transpose == 0 ))
+		    then
+		       echo rm test*.inf >> $log
+		       rm test*.inf
+		    fi
+		 else # if (( $subsformat == 1 ))
+	        if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+	        then
+		        # copy the rfifind .inf file as the .inf file instead of creating it
+		        echo "Note, skipping creating .inf file for psrfits mode" 
+		        echo "Note, skipping creating .inf file for psrfits mode"  >> $log	        
+	        else
+		        echo "Note, skipping creating .inf file for psrfits mode" 
+		        echo "Note, skipping creating .inf file for psrfits mode"  >> $log	        
+	        fi
+		 fi
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
     # Create the RSPA (all) directory when the all option is requested
@@ -1817,18 +2013,6 @@ do
 		         mkdir -p ${STOKES}/"RSPA"
 	         fi
 		  fi
-#	  else #A2 - no cumulative RSPA in fly's eye mode
-#		  for jjj in $beams
-#		  do
-#  	        if [ -d ${STOKES}/$jjj/RSPA ]
-#	        then 
-#	           echo "${STOKES}/$jjj/RSPA already exist;  deleting contents in order to process all subbands correctly"
-#	           echo "${STOKES}/$jjj/RSPA already exist;  deleting contents in order to process all subbands correctly" >> $log
-#	           rm -rf ${STOKES}/$jjj/RSPA/*
-#	        else
-#		       mkdir -p ${STOKES}/$jjj/RSPA
-#		    fi
-#		  done
 	  fi 
     fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 		
@@ -1842,62 +2026,7 @@ do
          echo "sed -e 's/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/' `ls test*.inf` > ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf" >> $log
          sed -e "s/Data file name without suffix.*/Data file name without suffix          =  $INFNAME/" `ls test*.inf` > ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf 
          rm `ls test*.inf`
-#	     echo mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf >> $log
-#	     mv `ls test*.inf` ${STOKES}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf
-
-#	elif (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 1 ))
-#    then
-#    	for jjj in $beams_init
-#	    do
-#	       echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
-#	       python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset  
-#	       echo mv `ls test*.inf` ${STOKES}/${jjj}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf >> $log
-#	       mv `ls test*.inf` ${STOKES}/${jjj}/RSPA/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub.inf
-#        done
 	fi
-
-	
-	#Check when all 8 DONE files are available, then all processes have exited
-	#ii=1
-	#yy=0
-	#while [ $ii -ne $yy ]
-	#do
-	#  if [ -e $done_list ]
-	#  then
-	#     echo "All bf2presto tasks have completed!" 
-	#     yy=1
-	#     sleep 5
-	#  fi
-	#  sleep 10
-	#done
-
-	#Split the bf2presto results within the beams into RSP in Fly's Eye Mode
-#	if (( $flyseye == 1 ))
-#	then	
-#	    echo cd ${location}/${STOKES} >> $log
-#	    cd ${location}/${STOKES}
-#		for ii in `ls -d beam_?`
-#		do
-#			A=`ls $ii/${PULSAR}_${OBSID}.sub???? | grep "sub" -c`
-#			B=`echo "($A/$core)-1" | bc`
-#			for iii in $num_dir
-#			do
-				#mkdir -p ${ii}/RSP${iii}
-#				echo mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -1` ${ii}/RSP${iii}/${PULSAR}_${OBSID}.sub0000 >> $log
-#				mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -1` ${ii}/RSP${iii}/${PULSAR}_${OBSID}.sub0000
-#				echo mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -$B` ${ii}/RSP${iii} >> $log
-#				mv `ls $ii/${PULSAR}_${OBSID}.sub???? | head -$B` ${ii}/RSP${iii}
-#			done
-#		done
-#	    echo cd ${location} >> $log
-#	    cd ${location}	
-#	fi # end if (( $flyseye == 1 ))
-	
-	#Make a master subband location with all subbands (run in the background, while other tasks are being done)
-	#This is done using links to the bf2presto output files, in the RSPA directory, changing the subband order
-	#so that the total order is from 0 to total number of subbands
-#	if (( $flyseye == 0 ))
-#	then
 
 	if [ $all == 1 ] || [ $all_pproc == 1 ]
 	then 
@@ -1934,55 +2063,61 @@ do
 		    fi
 		    echo cd $location >> $log
 		    cd $location
-#	     else
-#	        for jjj in $beams
-#	        do
-#	           echo cd ${location}/${STOKES}/${jjj}/"RSPA" >> $log
-#	           cd ${location}/${STOKES}/${jjj}/"RSPA"
-#	           echo "#!/bin/sh" > run.sh
-#	           ls ../RSP[0-7]/*sub[0-9]??? | sed 's/\// /g' | awk '{print $3}' | sed 's/RSP/ RSP /' | sed 's/ RSP/RSP/g' | sed 's/\.sub/ /' | awk -v offset=$offset '{printf("ln -s ../RSP%d/%s%d.sub%04d %sA.sub%04d\n"),$2,$1,$2,$3,$1,$2*offset+$3}' >> run.sh
-#			   echo "Performing subband linking for all RPSs in one location for $STOKES/$jjj/RSPA"
-#			   echo "Performing subband linking for all RPSs in one location for $STOKES/$jjj/RSPA" >> $log
-#			   echo chmod 777 run.sh >> $log
-#			   chmod 777 run.sh
-#	  	       check_number=`wc -l run.sh | awk '{print $1}'`
-#	           total=$(( $all_num * $CHAN + 1 ))
-#			   if [ $check_number -ne $total ]
-#			   then
-#			        all=0
-#			        echo "Warning - possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)"
-#			        echo "Warning - possible problem running on ALL subbands in $STOKES/$jjj/RSPA;  master list is too short (is $check_number but should be $total rows)" >> $log
-#			    else
-#			        echo ./run.sh >> $log
-#		            if [ $all_pproc == 0 ]	
-#		            then		        
-#			           ./run.sh &
-#			        else
-#			           ./run.sh 
-#			        fi
-#			        echo "Done subband linking for all RPSs in one location for $STOKES/$jjj/RSPA"
-#			        echo "Done subband linking for all RPSs in one location for $STOKES/$jjj/RSPA" >> $log
-#			    fi
-#			    echo cd $location >> $log
-#			    cd $location
-#	        done
 	     fi
-	     
-#	      if [ $status -ne 0 ]
-#	      then
-#	         echo "WARNING: Unable to successfully run creation of link file list for ALL subbands"
-#	         echo "         Skipping the ALL processing"
-#	         echo "WARNING: Unable to successfully run creation of link file list for ALL subbands"  >> $log
-#	         echo "         Skipping the ALL processing" >> $log
-#	         all=0
-#	         break
-#	     fi
-	
+	     	
 	fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 #    fi # end if (( $flyseye == 0 ))
-	
+
+    if (( $subsformat == 0 ))
+    then
+         total_channels=`echo "$nSubbands * $CHAN" | bc`
+         if (( $total_channels <= 6000 ))
+         then 
+            prepfold_nsubs=256 
+         else
+            prepfold_nsubs=512 
+         fi        
+         # if total_channels is not divisible by prepfold_nsubs (prepfold fails), find one which is divisible
+		 ii=$prepfold_nsubs
+		 while (( $ii <= $total_channels ))
+		 do 
+		       modulo_files=`echo $total_channels $ii | awk '{print ($1 % $2)}'`
+		       if (( $modulo_files == 0 ))
+		       then
+		          echo "Success: $ii divides into $total_channels total channels;  use for -nsubs"
+		          break
+		       else
+		          echo "Tried $ii nsubs, but still not divisble into $total_channels" >> $log
+		          echo "Tried $ii nsubs, but still not divisble into $total_channels"
+		       fi
+		       ii=`expr $ii + 1`
+		 done
+         echo "Successfully found $ii to use as nsubs for prepfold" >> $log
+         echo "Successfully found $ii to use as nsubs for prepfold"
+		 prepfold_nsubs=$ii
+    fi
+
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] #&& [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
 	then
+        
+        # check for .par file, else create one
+		for fold_pulsar in $PULSAR_LIST
+		do
+	        fold_pulsar_cut=`echo $fold_pulsar | sed 's/PSR//g' | sed 's/[BJ]//g'`
+		    if [[ $fold_pulsar_cut != "NONE" ]] 
+		    then 
+		        if [[ -f $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ]]
+		        then 
+		           echo cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/
+		           echo cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/  >> $log
+		           cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/
+		        else
+		           echo "psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par"
+		           echo "psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par" >> $log
+		           psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par
+		        fi
+		     fi
+		done
 		
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
@@ -2005,20 +2140,51 @@ do
 					   nofold=1
 		               continue
 		            fi
-		            
+		            	
 				    if (( $flyseye == 0 ))
 				    then
 						for ii in $num_dir
 					    do
 						   cd ${location}/${STOKES}/RSP${ii}
+						   cp ${location}/$fold_pulsar_cut.par .
 						   echo cd ${location}/${STOKES}/RSP${ii} >> $log
-						   echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+						   
+						   if (( $subsformat == 1 ))
+						   then
+						      echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+						   else
+						      if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+						      then
+						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask
+						      else
+						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						      fi
+						   fi
+						   
 						   if [ $test == 0 ]
 						   then
-						      prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
-  						      prepfold_pid[$ii]=$!  
+							   if (( $subsformat == 1 ))
+							   then
+						          prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+  						          prepfold_pid[$ii]=$!  
+ 						          echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
+  						       else
+  						          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+  						          then
+						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						             sleep 10
+						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask
+  						             prepfold_pid[$ii]=$!  
+ 						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						          else 
+						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+  						             prepfold_pid[$ii]=$!  
+ 						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						          fi
+ 						       fi
 						   fi
-						   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 						   sleep 10
 					    done
 				     else
@@ -2034,14 +2200,44 @@ do
 							for ii in $num_dir
 						    do
 							   cd ${location}/${STOKES}/RSP${ii}/${jjj}
+							   cp ${location}/$fold_pulsar_cut.par .
 							   echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
-							   echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+
+							   if (( $subsformat == 1 ))
+							   then
+							       echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+							   else
+							       if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+							       then
+							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 
+							       else
+							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+							       fi
+							   fi
 						       if [ $test == 0 ]
 						       then
-							       prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
-						           prepfold_pid[$ii][$counter]=$!  
+								   if (( $subsformat == 1 ))
+								   then
+								       prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+							           prepfold_pid[$ii][$counter]=$!  
+							           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
+							       else
+							           if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+							           then
+									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+									       sleep 10
+									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
+								           prepfold_pid[$ii][$counter]=$!  
+								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							           else
+									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+								           prepfold_pid[$ii][$counter]=$!  
+								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							           fi
+							       fi
 							   fi
-							   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 							   sleep 10
 						    done
 						    counter=$(( $counter + 1 ))
@@ -2055,6 +2251,7 @@ do
 					for ii in $num_dir
 					do
 					   echo "Waiting for RSP$ii prepfold_pid to finish"
+					   echo "Waiting for RSP$ii prepfold_pid to finish" >> $log
 					   if (( $flyseye == 0 ))
 					   then
 					       wait ${prepfold_pid[ii]}
@@ -2070,39 +2267,12 @@ do
 					        for jjj in $loop_beams
 					        do
 					           echo "Waiting for RSP$ii beam_$counter prepfold_pid to finish"
+					           echo "Waiting for RSP$ii beam_$counter prepfold_pid to finish" >> $log
 					           wait ${prepfold_pid[ii][counter]}
 							   counter=$(( $counter + 1 )) 
 					        done
 					   fi
-					done
-
-
-#				    if (( $flyseye == 0 ))
-#				    then
-#					   for ii in $num_dir
-#					   do
-#					      echo "Waiting for RSP$ii prepfold to finish; pid = ${prepfold_pid[ii]}"
-#					      wait ${prepfold_pid[ii]}
-#					   done
-#					else
-#					    if (( $TiedArray == 0 ))
-#					    then
-#					       loop_beams=$beams_init
-#					    else
-#					       loop_beams=$beams
-#					    fi
-#                        counter=0
-#					    for jjj in $loop_beams
-#					    do
-#							for ii in $num_dir
-#						    do
-#					           echo "Waiting for RSP$ii for beam $jjj prepfold to finish"
-#					           wait ${prepfold_pid[ii][counter]}
-#				            done	
-#						    counter=$(( $counter + 1 ))
-#					    done
-#					fi
-					
+					done					
 					
 				done # finished loop over PULSAR_LIST
 			fi # end if [[ $PULSAR_LIST != "NONE" ]] && [[ $nofold == 0 ]]
@@ -2123,13 +2293,43 @@ do
 	
 						cd ${location}/${STOKES}/RSP${ii}
 						echo cd ${location}/${STOKES}/RSP${ii} >> $log
-						echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+
+					    if (( $subsformat == 1 ))
+					    then
+						    echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+						else
+						    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+						    then
+						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
+						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 		
+						    else
+						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
+						    fi				
+						fi
+
 						if [ $test == 0 ]
 						then
-			   	            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
-						    prepfold_pid[$ii]=$!  
+						    if (( $subsformat == 1 ))
+						    then
+				   	            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+							    prepfold_pid[$ii]=$!  
+						        echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
+							else
+							    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+							    then
+				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   	               sleep 10
+				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
+							       prepfold_pid[$ii]=$!  
+						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
+						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
+						        else
+				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+							       prepfold_pid[$ii]=$!  
+						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
+						        fi
+							fi
 			   	        fi
-						echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.sub[0-9]??? >> $log
 						sleep 5
 					fi # end if [[ $fold_pulsar == "NONE" ]] || [[ $nofold == 1 ]]
 				done # folding over pulsars
@@ -2140,6 +2340,7 @@ do
 				        break
 				    else 
 					    echo "Waiting for RSP$ii prepfold to finish for pulsar $fold_pulsar"
+					    echo "Waiting for RSP$ii prepfold to finish for pulsar $fold_pulsar" >> $log
 					    wait ${prepfold_pid[ii]}
 				    fi
 				 done # end for fold_pulsar in $PULSAR_LIST	
@@ -2168,29 +2369,45 @@ do
 	          then
 		         cd ${location}/${STOKES}/RSPA
 		         echo cd ${location}/${STOKES}/RSPA >> $log
-		         echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+
+			     if (( $subsformat == 1 ))
+			     then
+		             echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+		         else
+		             if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+		             then
+		                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+		                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout_nomask 
+		             else
+		                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+		             fi
+		         fi
 		         index=$index
 			     if [ $test == 0 ]
 			     then
-		            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
-			        prepfold_pid_all[$index]=$!  
+				     if (( $subsformat == 1 ))
+				     then
+			            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+				        prepfold_pid_all[$index]=$!  
+		                echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> $log
+				     else
+				        if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+				        then
+			               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+			               sleep 10
+			               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout_nomask 2>&1 &
+				           prepfold_pid_all[$index]=$!  
+		                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
+		                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
+		                else
+			               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+				           prepfold_pid_all[$index]=$!  
+		                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
+		                fi
+				     fi
 		         fi
-		         echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> $log
 		         cd ${location}
 		         sleep 5
-#		      else
-#			     for jjj in $beams
-#			     do
-#			         cd ${location}/${STOKES}/${jjj}/RSPA
-#			         echo cd ${location}/${STOKES}/${jjj}/RSPA >> $log
-#			         echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[$jjj]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
-#			         prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[$jjj]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
-#				     prepfold_pid_all[$beam_index]=$!  
-#			         (( beam_index = $beam_index + 1 )) 
-#			         echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[$jjj]}_${OBSID}_RSPA.sub[0-9]??? >> $log
-#			         cd ${location}
-#			         sleep 5
-#			     done
 			  fi # end if (( $flyseye == 0 ))
 			  index=$(( $index + 1 ))
 		  done # end for fold_pulsar in $PULSAR_LIST
@@ -2201,7 +2418,7 @@ do
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] 
 	then
 		#Make a cumulative plot of the profiles
-		if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+		if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]] && [[ $STOKES == "incoherentstokes" ]] && [[ $subsformat == 1 ]]
 		then
 			for fold_pulsar in $PULSAR_LIST
 			do
@@ -2238,7 +2455,7 @@ do
 					done	
 				fi
 			done # end for fold_pulsar in $PULSAR_LIST
-        fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+        fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]] && [[ $STOKES == "incoherentstokes" ]] && [[ $subsformat == 1 ]]
 	    echo cd ${location} >> $log
 	    cd ${location}
 		
@@ -2250,8 +2467,8 @@ do
 			date
 			date >> $log
 	
-	        #find all the .ps files and convert them into .pdf .png and .th.png results
-	        find ./ -name "*.ps" -print | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
+	        #find all the prepfold .ps files and convert them into .pdf .png and .th.png results
+	        find ./ -name "*.ps" -print | grep -v rfifind | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
 	        wc_convert=`wc -l convert.sh | awk '{print $1}'`
 	        if [[ $wc_convert > 0 ]]
 	        then
@@ -2265,173 +2482,113 @@ do
         fi # end if [[ $nofold == 0 ]]
 	fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] 
 		
-	#RFI-Report
-	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
-	then 
-	   echo "Producing rfi report"
-	   echo "Producing rfi report" >> $log
-	   date
-	   date >> $log
-	   for ii in $num_dir
-	   do
-	      if (( $flyseye == 0 ))
-	      then
-	         echo cd ${location}/${STOKES}/RSP${ii} >> $log
-	         cd ${location}/${STOKES}/RSP${ii}
-	         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
-		     if [ $test == 0 ]
-		     then
-			    sleep 5
-	            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
-	            subdyn_pid[$ii]=$!
-	         fi
-	      else
-# commented out as there seems to be a bug for FE (solar obs)
-#			 for jjj in $beams_init
-#			 do
-#		         echo cd ${location}/${STOKES}/${jjj}/RSP${ii} >> $log
-#		         cd ${location}/${STOKES}/${jjj}/RSP${ii}
-#		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
-#			     if [ $test == 0 ]
-#			     then
-#		            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
-#		         fi
-#		         subdyn_pid[$ii][$jjj]=$!	
-#	         done      
 
-             if [ $rfi_pproc == 1 ]
-             then
-                loop_beams=$beams
-             else
-                loop_beams=$beams_init
-             fi
-             
-             counter=0
-			 for jjj in $loop_beams
-			 do
-			     if [ $rfi_pproc == 0 ]
-			     then
-   		            echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
-		            cd ${location}/${STOKES}/RSP${ii}/${jjj}
-		         else
-		            echo cd ${location}/${STOKES}/${jjj}/beam_${ii}/ >> $log
-		            cd ${location}/${STOKES}/${jjj}/beam_${ii}/
-                 fi
-                 
-		         echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
-			     if [ $test == 0 ]
-			     then
-			        sleep 5
-		            python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]??? &
-		            subdyn_pid[$ii][$counter]=$!	
-		         fi
-			     counter=$(( $counter + 1 ))
-	         done      
+	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ] 
+	then	
+		   echo cd ${location} >> $log
+		   cd ${location}
 
-          fi
-	   done
-	
-	   echo cd ${location} >> $log
-	   cd ${location}
-	
-	   #Check when all processes to be done, then all processes have exited
-	   if (( $flyseye == 0 ))
-	   then
-	      for ii in $num_dir
-	      do
-	         echo "Waiting for RSP$ii subdyn to finish non-Fly's eye mode; pid = ${subdyn_pid[ii]}"
-	         wait ${subdyn_pid[ii]}
-#	         echo "Exit status of subdyn for RSP$ii is $?"
-	      done
-	   else
-	      for ii in $num_dir
-	      do
-             counter=0
-			 for jjj in $loop_beams
-			 do
-		         echo "Waiting for RSP$ii and $jjj subdyn to finish in Fly's eye mode pid ${subdyn_pid_[ii][counter]}"
-	             wait ${subdyn_pid[ii][counter]}
-#	             echo "Exit status of subdyn for RSP$ii in beam $jjj is $?"
-			     counter=$(( $counter + 1 ))
-	         done
-	      done
-       fi	   
+		   #Check when all processes to be done, then all processes have exited
+		   if (( $flyseye == 0 ))
+		   then
+		      for ii in $num_dir
+		      do
+		         echo "Waiting for RSP$ii subdyn to finish non-Fly's eye mode; pid = ${subdyn_pid[ii]}"
+		         wait ${subdyn_pid[ii]}
+	#	         echo "Exit status of subdyn for RSP$ii is $?"
+		      done
+		   else
+		      for ii in $num_dir
+		      do
+	             counter=0
+				 for jjj in $loop_beams
+				 do
+			         echo "Waiting for RSP$ii and $jjj subdyn to finish in Fly's eye mode pid ${subdyn_pid_[ii][counter]}"
+		             wait ${subdyn_pid[ii][counter]}
+	#	             echo "Exit status of subdyn for RSP$ii in beam $jjj is $?"
+				     counter=$(( $counter + 1 ))
+		         done
+		      done
+	       fi	 
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ] 
 	
 	#Gather the RFI RSPN/*rfiprep files into one summary RFI file
     if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 	then 
-	   if [ $nrBeams == 1 ]
-	   then
-		   echo "Creating RFI Summary files from RSP-split results."
-		   echo "Creating RFI Summary files from RSP-split results." >> $log
-	
-	       max_num=$(( (( $all_num * $CHAN )) - 1 ))
-	
-		   if (( $flyseye == 0 ))
+#       if (( $subsformat == 1 ))
+#       then
+		   if [ $nrBeams == 1 ]
 		   then
-	          rfi_file=$location/${STOKES}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_sub0-${max_num}.rfirep
-		      if [ -f $rfi_file ]
-		      then
-		         rm $rfi_file
-		         echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
-		      fi
-		      
-		      # put the header line into the RFI summary file
-		      echo "# Subband       Freq (MHz)" > $rfi_file
-		      
-		      for ii in $num_dir
-		      do
-		         offset=$(( $all_num * $CHAN / $core * $ii ))
-		         echo "RFI all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
-		         cat $location/${STOKES}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
-		      done
-		      
-		   else
-              counter=0
-		   	  for jjj in $loop_beams
-			  do
-	              rfi_file=$location/${STOKES}/RSP${ii}/${PULSAR_ARRAY_PRIMARY[$counter]}_${OBSID}_sub0-${max_num}.rfirep
+			   echo "Creating RFI Summary files from RSP-split results."
+			   echo "Creating RFI Summary files from RSP-split results." >> $log
+		
+		       max_num=$(( (( $all_num * $CHAN )) - 1 ))
+		
+			   if (( $flyseye == 0 ))
+			   then
+		          rfi_file=$location/${STOKES}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_sub0-${max_num}.rfirep
 			      if [ -f $rfi_file ]
 			      then
 			         rm $rfi_file
 			         echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
 			      fi
-		      
-		          # put the header line into the RFI summary file
-		          echo "# Subband       Freq (MHz)" > $rfi_file
-	
+			      
+			      # put the header line into the RFI summary file
+			      echo "# Subband       Freq (MHz)" > $rfi_file
+			      
 			      for ii in $num_dir
 			      do
 			         offset=$(( $all_num * $CHAN / $core * $ii ))
-		             echo "RFI beam=$jjj, all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
-#			         cat $location/${STOKES}/${jjj}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
-			         cat $location/${STOKES}/RSP${ii}/${jjj}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+			         echo "RFI all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
+			         cat $location/${STOKES}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
 			      done
+			      
+			   else
+	              counter=0
+			   	  for jjj in $loop_beams
+				  do
+		              rfi_file=$location/${STOKES}/RSP${ii}/${PULSAR_ARRAY_PRIMARY[$counter]}_${OBSID}_sub0-${max_num}.rfirep
+				      if [ -f $rfi_file ]
+				      then
+				         rm $rfi_file
+				         echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
+				      fi
+			      
+			          # put the header line into the RFI summary file
+			          echo "# Subband       Freq (MHz)" > $rfi_file
+		
+				      for ii in $num_dir
+				      do
+				         offset=$(( $all_num * $CHAN / $core * $ii ))
+			             echo "RFI beam=$jjj, all_num=$all_num, chan=$CHAN, core=$core, num_dir=ii=$ii ==> offset=$offset"
+	#			         cat $location/${STOKES}/${jjj}/RSP${ii}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+				         cat $location/${STOKES}/RSP${ii}/${jjj}/*rfirep | grep -v "#" | awk -v offset=$offset '{printf("%d \t\t %f\n"),$1+offset, $2}' >> $rfi_file
+				      done
+		
+			      done
+			   fi
+		   else # if [[ $nrBeams > 1 ]]
+			   echo "Merging RFI Summary files from RSP-split results from different beams. (removed)"
+			   echo "Merging RFI Summary files from RSP-split results from different beams. (removed)" >> $log
 	
-		      done
-		   fi
-	   else # if [[ $nrBeams > 1 ]]
-		   echo "Merging RFI Summary files from RSP-split results from different beams. (removed)"
-		   echo "Merging RFI Summary files from RSP-split results from different beams. (removed)" >> $log
-
-	       max_num=$all_num
-           rfi_file=$location/${STOKES}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_sub0-${max_num}.rfirep
-	       if [ -f $rfi_file ]
-	       then
-	          rm $rfi_file
-	          echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
-	       fi
-	       
-	       touch $location/${STOKES}/$$.rfirep	      
-	       for ii in $num_dir
-	       do
-	           comm $location/${STOKES}/$$.rfirep $location/${STOKES}/RSP${ii}/*rfirep | sed -e 's/^[ \t]*//' > $location/${STOKES}/$$.tmp
-	           mv $location/${STOKES}/$$.tmp $location/${STOKES}/$$.rfirep
-	       done
-           mv $location/${STOKES}/$$.rfirep $rfi_file
-
-	   fi # end if [[ $nrBeams == 1 ]]
+		       max_num=$all_num
+	           rfi_file=$location/${STOKES}/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_sub0-${max_num}.rfirep
+		       if [ -f $rfi_file ]
+		       then
+		          rm $rfi_file
+		          echo "WARNING: deleting previous version of RFI summary file: $rfi_file"
+		       fi
+		       
+		       touch $location/${STOKES}/$$.rfirep	      
+		       for ii in $num_dir
+		       do
+		           comm $location/${STOKES}/$$.rfirep $location/${STOKES}/RSP${ii}/*rfirep | sed -e 's/^[ \t]*//' > $location/${STOKES}/$$.tmp
+		           mv $location/${STOKES}/$$.tmp $location/${STOKES}/$$.rfirep
+		       done
+	           mv $location/${STOKES}/$$.rfirep $rfi_file
+	
+		   fi # end if [[ $nrBeams == 1 ]]
+#		fi # end if (( $subsformat == 1 ))
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 		
 	#Wait for the all prepfold to finish
@@ -2456,18 +2613,6 @@ do
 			      echo "Waiting for Pulsar #$index prepfold (all) to finish"
 			      wait ${prepfold_pid_all[$index]}
 			   
-	#			   while [ $ii -ne $yy ]
-	#			   do
-	#			      if [ -e ${STOKES}/RSPA/DONE ]
-	#			      then
-	#			         echo "prepfold on the total list has completed!" 
-	#			         echo "prepfold on the total list has completed!" >> $log
-	#			         date
-	#			         date >> $log
-	#			         yy=1
-	#			      fi
-	#			      sleep 15
-	#			   done
 				   echo convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf >> $log
 				   convert ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.pdf
 				   echo convert -rotate 90 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.png >> $log
@@ -2475,18 +2620,6 @@ do
 				   echo convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png >> $log
 				   convert -rotate 90 -crop 200x140-0 ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.ps ${STOKES}/RSPA/${fold_pulsar}_${OBSID}_RSPA_PSR_${fold_pulsar}.pfd.th.png
 			   else
-	#			   while [ $ii -ne $yy ]
-	#			   do
-	#			      if [ -e ${STOKES}/${last_beam}/RSPA/DONE ]
-	#			      then
-	#			         echo "prepfold on the total list has completed!" 
-	#			         echo "prepfold on the total list has completed!" >> $log
-	#			         date
-	#			         date >> $log
-	#			         yy=1
-	#			      fi
-	#			      sleep 15
-	#			   done
 				   for jjj in $beams
 				   do
 			           echo "Waiting for Pulsar #$index, beam #$beam_index prepfold (all) to finish"
@@ -2506,29 +2639,6 @@ do
 		fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
     fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 
-#    if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
-#    then
-#	    # Move the RSP?/beam_? directory structure output from bf2presto into beam_?/RSP? structure
-#		if (( $flyseye == 1 ))
-#		then
-#		    for jjj in $beams
-#		    do
-#		        mkdir -p ${STOKES}/${jjj}
-#		        echo mkdir -p ${STOKES}/${jjj} >> $log
-#		        for ii in $num_dir
-#		        do
-#		           mkdir ${STOKES}/${jjj}/RSP${ii}
-#		           echo mkdir ${STOKES}/${jjj}/RSP${ii} >> $log
-#		           mv ${STOKES}/RSP${ii}/${jjj}/* ${STOKES}/${jjj}/RSP${ii}/
-#		           echo mv ${STOKES}/RSP${ii}/${jjj}/* ${STOKES}/${jjj}/RSP${ii}/ >> $log
-#		           cp ${STOKES}/RSP${ii}/bf2presto* ${STOKES}/RSP${ii}/*list ${STOKES}/${jjj}/
-#		           echo cp ${STOKES}/RSP${ii}/bf2presto* ${STOKES}/RSP${ii}/*list ${STOKES}/${jjj}/ >> $log
-#		        done
-#	        done
-#	        rm -rf ${STOKES}/RSP[0-7]
-#	    fi
-#    fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
-
 	#Rename the RSP?/beam_? to their actual names based on the observation parset names -> NAME/beam_?
     if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $TiedArray == 0 ]
     then
@@ -2545,6 +2655,10 @@ do
 			echo "mv RSP${ii} $NAME"
 			mv RSP${ii} $NAME
 			cd ${location}/${STOKES}/$NAME
+
+            # add to the beam_process_node.txt for fly's eye mode here, since you know the station name
+            sed -n "$N"p SB_master.list | awk -v NODE_NAME=`uname -n` -v NEW_NAME=$NAME '{print NODE_NAME " " $1 "["NAME"]"}' > $location/${STOKES}/beam_process_node.txt
+
 		    for jjj in $loop_beams
 			do
 			   cd ${location}/${STOKES}/$NAME/${jjj}
@@ -2690,6 +2804,7 @@ do
                echo mv ${jjj} ../../RSP${beam_index} >> $log
                mv ${jjj} ../../RSP${beam_index}
 		       counter=$(( $counter + 1 ))
+
 			done
 			cd ${location}/${STOKES}/tmp$$/RSP${ii}
             echo mv * ../../
@@ -2708,7 +2823,10 @@ do
     echo $core > $location/${STOKES}/nof_cores.txt
     if [[ $STOKES == "stokes" ]] 
     then 
-       cat $master_list | awk -v NODE_NAME=`uname -n` '{print NODE_NAME " " $1}' > $location/${STOKES}/beam_process_node.txt
+       if (( $flyseye == 0 ))
+       then
+          cat $master_list | awk -v NODE_NAME=`uname -n` '{print NODE_NAME " " $1}' > $location/${STOKES}/beam_process_node.txt
+       fi
     fi
 
 	#create a delete list of subband files for future clean up
@@ -2724,6 +2842,16 @@ do
        fi	
 	fi
 	
+	#run the heat map for multiple TA beams
+	cd $location
+    if (( $nrTArings > 0 ))
+    then
+       echo "plot_LOFAR_TA_multibeam.py --chi chi-squared.txt --parset ${OBSID}.parset --out_logscale ${OBSID}_TA_heatmap_log.png --out_linscale ${OBSID}_TA_heatmap_linear.png --target ${PULSAR_ARRAY_PRIMARY[0]}" > TA_heatmap.sh
+       chmod 777 TA_heatmap.sh
+       echo "Created TA_heatmap.sh which will be run after hoovering step"
+       echo "Created TA_heatmap.sh which will be run after hoovering step" >> $log
+    fi
+
 done # for loop over modes in $mode_str 
 
 if [[ $proc != 0 ]]
@@ -2738,19 +2866,20 @@ then
 	echo "running:  thumbnail_combine.sh $log" >> $log
 	thumbnail_combine.sh $log
 		
+	cd ${location}
+
 	#Make a tarball of all the plots
 	echo "Creating tar file of plots"
 	echo "Creating tar file of plots" >> $log
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*prepout" -o -name "*parset" \)`
+	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" \)`
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
 	#echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
 	#gzip ${PULSAR}_${OBSID}_plots.tar
-	cd ${location}
 	
 	#Change permissions and move files
 	echo "Changing permissions of files"
@@ -2769,11 +2898,14 @@ then
 	echo "End Time: " $date_end >> $log
 	
 	echo "Results output location:" $location
-else
+else  # end if [[ $proc != 0 ]]
     #no processing done, clean up
     cd $location/..
     echo "ERROR: No processing was performed due to no input data found"
-    rm -rf $location
+    if [[ -d $location ]]
+    then
+       rm -rf $location
+    fi
     exit 1
 fi
 
