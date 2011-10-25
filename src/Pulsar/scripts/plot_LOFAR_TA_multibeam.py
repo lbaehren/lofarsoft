@@ -128,6 +128,9 @@ ylabel("Declination Offset [deg]", fontsize=14)
 # label the plot [note, there are 2x as many beams in the parset right now;  can remove the divide by 2 later
 suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + " (out of " + str(int((DECs[:,0].size)/2)) + ")\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
 
+# for LOTAS, number of beams is correct
+###suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + " (out of " + str(int((DECs[:,0].size))) + ")\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
+
 colorbar()
 
 #use this to send plot to stdout
