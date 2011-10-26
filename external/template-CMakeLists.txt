@@ -8,16 +8,21 @@ cmake_policy (VERSION 2.8)
 ##
 ## ==============================================================================
 
+##__________________________________________________________
 ## Name of the project handled by CMake
+
 project (<PACKAGE>)
 
+##__________________________________________________________
 ##  Package information
+
 set (<PACKAGE>_VERSION        "" )
 set (<PACKAGE>_SOURCE_ARCHIVE "" )
 set (<PACKAGE>_URL            "" )
 set (<PACKAGE>_SVN            "" )
 
-## Package options 
+##__________________________________________________________
+## Package configuration/build options
 
 option (<PACKAGE>_FORCE_BUILD  "Force build and installation of package?" NO )
 option (<PACKAGE>_FROM_REPOS   "Install package from repository?"         NO )
@@ -52,7 +57,7 @@ if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
     set (<PACKAGE>_SOURCE ${<PACKAGE>_URL})
   endif (NOT <PACKAGE>_SOURCE AND <PACKAGE>_URL)
     
-  if (<PACKAGE>_FROM_REPOS)
+  if (<PACKAGE>_FROM_REPOS AND <PACKAGE>_SVN)
 
     ## Build package off code repository
     
@@ -66,7 +71,7 @@ if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
       INSTALL_COMMAND ${PORT_INSTALL_COMMAND} make install
       )
   
-  else (<PACKAGE>_FROM_REPOS)
+  else (<PACKAGE>_FROM_REPOS AND <PACKAGE>_SVN)
 
     ## Build package off tar-archive
     
@@ -80,7 +85,7 @@ if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
       INSTALL_COMMAND ${PORT_INSTALL_COMMAND} make install
       )
     
-  endif (<PACKAGE>_FROM_REPOS)
+  endif (<PACKAGE>_FROM_REPOS AND <PACKAGE>_SVN)
 
   ## Update global configuration settings
   
