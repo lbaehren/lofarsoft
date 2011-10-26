@@ -1614,8 +1614,8 @@ do
 		   echo "Excising blank channels from .subXXX files"
 		   echo "Excising blank channels from .subXXX files" >> $log
         else
-		   echo "Creating rfi mask for to blank channels from psrfits files"
-		   echo "Creating rfi mask for to blank channels from psrfits files" >> $log
+		   echo "Checking whether to create rfi mask for to blank channels from psrfits files"
+		   echo "Checking whether to create rfi mask for to blank channels from psrfits files" >> $log
         fi # end if (( $subsformat == 1 ))
 
 		if (( $flyseye == 0 ))
