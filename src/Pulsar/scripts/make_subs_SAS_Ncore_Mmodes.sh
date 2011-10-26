@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.00
+VERSION=3.01
 
 #####################################################################
 # Usage #
@@ -425,10 +425,13 @@ else
    echo "Pulsar Pipeline run with: $0" > $log
 fi
 echo "Pipeline V$VERSION" >> $log
+echo "Pipeline V$VERSION" 
 echo "$0 $input_string" >> $log
+echo "$0 $input_string" 
 echo "Start date: $date_start" >> $log
-echo "PARSET:" $PARSET
+echo "Start date: $date_start" 
 echo "PARSET:" $PARSET >> $log
+echo "PARSET:" $PARSET
 
 
 #####################################################################
