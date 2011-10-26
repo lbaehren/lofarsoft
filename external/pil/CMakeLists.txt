@@ -1,74 +1,108 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (PIL)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (PIL_VERSION        "" )
+set (PIL_SOURCE_ARCHIVE "pil.tgz" )
+set (PIL_URL            "" )
+set (PIL_SVN            "" )
 
-option (PIL_FORCE_BUILD       "Force rebuild and local installation?"  NO )
-option (PIL_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO )
-option (PIL_VERBOSE_BUILD     "Be verbose during build process?"       NO )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (PIL_FORCE_BUILD  "Force build and installation of package?" NO )
+option (PIL_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${PIL_SOURCE_DIR}
-  ${PIL_SOURCE_DIR}/..
-  ${PIL_SOURCE_DIR}/../..
-  ${PIL_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[pil] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
 include (FindPIL)
 
-## <-- begin build condition --------------------------------------------------->
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-if (NOT HAVE_PIL OR PIL_FORCE_BUILD)
+if (PIL_FROM_REPOS)
+  set (PIL_FORCE_BUILD TRUE)
+endif (PIL_FROM_REPOS)
+
+if (NOT PIL_FOUND OR PIL_FORCE_BUILD)
   
-  find_file (have_pil_tgz pil.tgz ${PIL_SOURCE_DIR})
+  ## Locate source file to build from
   
-  if (have_pil_tgz)
+  find_file (PIL_SOURCE ${PIL_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT PIL_SOURCE AND PIL_URL)
+    set (PIL_SOURCE ${PIL_URL})
+  endif (NOT PIL_SOURCE AND PIL_URL)
+    
+  if (PIL_FROM_REPOS AND PIL_SVN)
+
+    ## Build package off code repository
+    
     ExternalProject_Add (pil
-      PREFIX ${PIL_BINARY_DIR}
-      DOWNLOAD_DIR ${PIL_BINARY_DIR}/download
-      SOURCE_DIR ${PIL_BINARY_DIR}/source
-      URL ${have_pil_tgz}
-      URL_MD5 828350a6952d6dc1be1b9cacddede056
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${PIL_SVN}
+      BUILD_IN_SOURCE 1
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
       )
-    ## Pre-configure of configuration scripts
-    ExternalProject_Add_Step (pil pil_preconfig
-      COMMAND cp ${PIL_SOURCE_DIR}/pil.cmake CMakeLists.txt
-      COMMENT "Replacing original CMakeLists.txt"
-      DEPENDEES patch
-      DEPENDERS configure
-      WORKING_DIRECTORY ${PIL_BINARY_DIR}/source
+  
+  else (PIL_FROM_REPOS AND PIL_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (pil
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${PIL_SOURCE}
+      BUILD_IN_SOURCE 1
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
       )
-  else (have_pil_tgz)
-    message (WARNING "[pil] Unable to build project - no sources found!")
-  endif (have_pil_tgz)
+    
+  endif (PIL_FROM_REPOS AND PIL_SVN)
+
+  ## Update global configuration settings
   
-  ## <-- end build condition ----------------------------------------------------->
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (pil update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of pil ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
   
-else (NOT HAVE_PIL OR PIL_FORCE_BUILD)
+else (NOT PIL_FOUND OR PIL_FORCE_BUILD)
+  
   add_custom_target (pil
-    WORKING_DIRECTORY ${PIL_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[pil] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_PIL OR PIL_FORCE_BUILD)
+  
+endif (NOT PIL_FOUND OR PIL_FORCE_BUILD)
