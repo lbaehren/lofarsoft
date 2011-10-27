@@ -981,8 +981,8 @@ spectra for two antennas::
     >>>     plt.subplot(1,2,i)
     >>>     plt.title("Average spectrum for two antennas")
     >>>     plt.semilogy(frequencies.vec(), avspectrum[0].vec())  #plt.semilogy(frequencies.vec(), avspectrum[i].vec())
-    >>>     plt.xlabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
-    >>>     plt.ylabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
+    >>>     plt.xlabel(frequencies.getKey("name")+" ["+frequencies.getUnit()+"]")
+    >>>     plt.ylabel(avspectrum.getKey("name")+" ["+avspectrum.getUnit()+"]")
 
 Note that the array entries need to be converted to vectors (using the
 :func:`vec` method) when they are given as arguments to the plotting
@@ -1069,8 +1069,8 @@ The available parameters, used in the :class:`hArray.par` class, are:
   =============== ==================================================
 
 
-Some use cases
-==============
+Use cases
+=========
 
 Quality check of time series data
 ---------------------------------
@@ -1184,41 +1184,6 @@ and returns a list with failed antennas and their properties::
     >>> badantennalist = CRQualityCheck(qualitycriteria, datafile=datafile, dataarray=dataarray, blocksize=blocksize, verbose=False)
     Block=     0, Antenna   9: mean=  6.61, rms= 141.0, npeaks=    1, spikyness=   0.27   ['rms']
     Block=     3, Antenna   9: mean=  6.61, rms= 140.8, npeaks=    0, spikyness=  -0.87   ['rms']
-
-    .. Block=     0, Antenna   0: mean=  6.59, rms= 141.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     1, Antenna   0: mean=  6.63, rms= 138.8, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     2, Antenna   0: mean=  6.62, rms= 141.4, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     3, Antenna   0: mean=  6.59, rms= 135.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     4, Antenna   0: mean=  6.61, rms= 140.9, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     5, Antenna   0: mean=  6.60, rms= 137.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     6, Antenna   0: mean=  6.62, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     7, Antenna   0: mean=  6.62, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     8, Antenna   0: mean=  6.63, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=     9, Antenna   0: mean=  6.63, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    10, Antenna   0: mean=  6.63, rms= 140.9, npeaks=    1, spikyness=   4.29   ['rms', 'spikyness']
-    .. Block=    11, Antenna   0: mean=  6.60, rms= 142.4, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    12, Antenna   0: mean=  6.61, rms= 143.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    13, Antenna   0: mean=  6.61, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    14, Antenna   0: mean=  6.59, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    46, Antenna   0: mean=  6.61, rms= 142.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    47, Antenna   0: mean=  6.60, rms= 136.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    48, Antenna   0: mean=  6.59, rms= 141.1, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    49, Antenna   0: mean=  6.60, rms= 138.7, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    50, Antenna   0: mean=  6.63, rms= 143.8, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    51, Antenna   0: mean=  6.59, rms= 139.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    52, Antenna   0: mean=  6.58, rms= 141.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    53, Antenna   0: mean=  6.64, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    54, Antenna   0: mean=  6.61, rms= 143.1, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    55, Antenna   0: mean=  6.60, rms= 145.5, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    56, Antenna   0: mean=  6.62, rms= 135.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    57, Antenna   0: mean=  6.60, rms= 146.0, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    58, Antenna   0: mean=  6.60, rms= 143.3, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    59, Antenna   0: mean=  6.60, rms= 135.8, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    60, Antenna   0: mean=  6.59, rms= 141.6, npeaks=    0, spikyness=  -0.22   ['rms']
-    .. Block=    61, Antenna   0: mean=  6.64, rms= 135.6, npeaks=    0, spikyness=  -0.22   ['rms']
-
-    .. >>> badantennalist[0]
-    .. [0, 0, (6.5949006782945734, 141.70452128542746, 0, -0.22157938815373929), ['rms']]
 
 (first the antenna number, then the block, then a list with the
 *mean*, *rms*, *npeaks*, and *spikyness*, and finally the failed
