@@ -1,81 +1,109 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (VALGRIND)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (VALGRIND_VERSION        "3.6.1" )
+set (VALGRIND_SOURCE_ARCHIVE "valgrind-${VALGRIND_VERSION}.tar.bz2" )
+set (VALGRIND_URL            "http://valgrind.org/downloads/${VALGRIND_SOURCE_ARCHIVE}" )
+set (VALGRIND_SVN            "svn://svn.valgrind.org/valgrind/trunk" )
 
-option (VALGRIND_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (VALGRIND_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
-option (VALGRIND_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (VALGRIND_FORCE_BUILD  "Force build and installation of package?" NO )
+option (VALGRIND_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${VALGRIND_SOURCE_DIR}
-  ${VALGRIND_SOURCE_DIR}/..
-  ${VALGRIND_SOURCE_DIR}/../..
-  ${VALGRIND_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Valgrind] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+#find_package (Valgrind)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-set (VALGRIND_FIND_QUIETLY YES )
+if (VALGRIND_FROM_REPOS)
+  set (VALGRIND_FORCE_BUILD TRUE)
+endif (VALGRIND_FROM_REPOS)
 
-#include (FindValgrind)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
+if (NOT VALGRIND_FOUND OR VALGRIND_FORCE_BUILD)
   
-  ##__________________________________________________________________
-  ## Additional CMake modules
-
-  include (ExternalProject)
-
-  ##__________________________________________________________________
-  ## Configure and build the project
+  ## Locate source file to build from
+  
+  find_file (VALGRIND_SOURCE ${VALGRIND_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT VALGRIND_SOURCE AND VALGRIND_URL)
+    set (VALGRIND_SOURCE ${VALGRIND_URL})
+  endif (NOT VALGRIND_SOURCE AND VALGRIND_URL)
     
-  if (SVN_EXECUTABLE)
+  if (VALGRIND_FROM_REPOS AND VALGRIND_SVN)
+
+    ## Build package off code repository
     
     ExternalProject_Add (valgrind
-      PREFIX ${VALGRIND_BINARY_DIR}
-      DOWNLOAD_DIR ${VALGRIND_BINARY_DIR}
-      SOURCE_DIR ${VALGRIND_BINARY_DIR}
-      SVN_REPOSITORY svn://svn.valgrind.org/valgrind/trunk
-      PATCH_COMMAND ${VALGRIND_BINARY_DIR}/autogen.sh
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${VALGRIND_SVN}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${VALGRIND_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
-      INSTALL_COMMAND make install
+      PATCH_COMMAND ${PROJECT_BINARY_DIR}/autogen.sh
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  
+  else (VALGRIND_FROM_REPOS AND VALGRIND_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (valgrind
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${VALGRIND_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
       )
     
-  else (SVN_EXECUTABLE)
-    add_custom_target (valgrind
-      WORKING_DIRECTORY ${VALGRIND_BINARY_DIR}
-      COMMENT "[Valgrind] Unable to build package - missing Subversion to get code!"
+  endif (VALGRIND_FROM_REPOS AND VALGRIND_SVN)
+
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (valgrind update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of Valgrind ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
       )
-  endif (SVN_EXECUTABLE)
+  endif (LUS_BINARY_DIR)
   
-  ## <-- end build condition ----------------------------------------------------->
+else (NOT VALGRIND_FOUND OR VALGRIND_FORCE_BUILD)
   
-else (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
   add_custom_target (valgrind
-    WORKING_DIRECTORY ${VALGRIND_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[Valgrind] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_VALGRIND OR VALGRIND_FORCE_BUILD)
+  
+endif (NOT VALGRIND_FOUND OR VALGRIND_FORCE_BUILD)
