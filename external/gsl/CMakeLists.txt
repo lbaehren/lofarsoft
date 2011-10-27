@@ -1,98 +1,112 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (GSL)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (GSL_VERSION        "1.15" )
+set (GSL_SOURCE_ARCHIVE "gsl-${GSL_VERSION}.tar.gz" )
+set (GSL_URL            "ftp://ftp.gnu.org/gnu/gsl/${GSL_SOURCE_ARCHIVE}" )
+set (GSL_SVN            "" )
 
-option (GSL_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (GSL_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (GSL_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (GSL_FORCE_BUILD  "Force build and installation of package?" NO )
+option (GSL_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${GSL_SOURCE_DIR}
-  ${GSL_SOURCE_DIR}/..
-  ${GSL_SOURCE_DIR}/../..
-  ${GSL_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
-
-if (NOT GSL_VERBOSE_CONFIGURE)
-  set (GSL_FIND_QUIETLY  YES )
-endif (NOT GSL_VERBOSE_CONFIGURE)
-
-include (FindGSL)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_GSL OR GSL_FORCE_BUILD)
-
-  set (GSL_VERSION  "1.13" )
-  set (GSL_SOURCE   "gsl-${GSL_VERSION}.tar.gz" )
-  set (GSL_URL      "ftp://ftp.mirror.nl/pub/mirror/gnu/gsl/${GSL_SOURCE}" )
+if (NOT GSL_FOUND)
+  find_package (GSL)
+endif (NOT GSL_FOUND)
   
-  ##__________________________________________________________________
-  ## Build the project
-  
-  include (ExternalProject)
-  
-  find_file (have_gsl_tgz ${GSL_SOURCE} ${GSL_SOURCE_DIR})
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-  if (NOT have_gsl_tgz)
-    set (have_gsl_tgz ${GSL_URL})
-  endif (NOT have_gsl_tgz)
+if (GSL_FROM_REPOS)
+  set (GSL_FORCE_BUILD TRUE)
+endif (GSL_FROM_REPOS)
+
+if (NOT GSL_FOUND OR GSL_FORCE_BUILD)
   
-  ExternalProject_Add (gsl
-    PREFIX ${GSL_BINARY_DIR}
-    DOWNLOAD_DIR ${GSL_BINARY_DIR}/download
-    SOURCE_DIR ${GSL_BINARY_DIR}/source
-    URL ${have_gsl_tgz}
-    URL_MD5 d9fcfa367c44ab68a25b4edf34c3c5f7
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${GSL_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+  ## Locate source file to build from
+  
+  find_file (GSL_SOURCE ${GSL_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
   
-  ## <-- end build condition ----------------------------------------------------->
+  if (NOT GSL_SOURCE AND GSL_URL)
+    set (GSL_SOURCE ${GSL_URL})
+  endif (NOT GSL_SOURCE AND GSL_URL)
+    
+  if (GSL_FROM_REPOS AND GSL_SVN)
+
+    ## Build package off code repository
+    
+    ExternalProject_Add (gsl
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${GSL_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      INSTALL_COMMAND make install
+      )
   
-else (NOT HAVE_GSL OR GSL_FORCE_BUILD)
+  else (GSL_FROM_REPOS AND GSL_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (gsl
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${GSL_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      INSTALL_COMMAND make install
+      )
+    
+  endif (GSL_FROM_REPOS AND GSL_SVN)
+
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (gsl update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of gsl ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT GSL_FOUND OR GSL_FORCE_BUILD)
+  
   add_custom_target (gsl
-    WORKING_DIRECTORY ${GSL_BINARY_DIR}
-    COMMENT "[GSL] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[gsl] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_GSL OR GSL_FORCE_BUILD)
-
-## ------------------------------------------------------------------------------
-## Configuration summary
-
-if (GSL_VERBOSE_CONFIGURE) 
-
-  message ("--------------------------------------------------")
-  message ("   [GSL] Configuration summary.")
-  message (" ")
-  message (STATUS "C++ compiler    = ${CMAKE_CXX_COMPILER}")
-  message (STATUS "BLAS library    = ${LAPACK_BLAS_LIBRARY}")
-  message (STATUS "CBLAS library   = ${LAPACK_CBLAS_LIBRARY}")
-  message (STATUS "LAPACK library  = ${LAPACK_LAPACK_LIBRARY}")
-  message (STATUS "FFTW3_INCLUDES  = ${FFTW3_INCLUDES}")
-  message (STATUS "FFTW3_LIBRARIES = ${FFTW3_LIBRARIES}")
-  message ("--------------------------------------------------")
-
-endif (GSL_VERBOSE_CONFIGURE)
+  
+endif (NOT GSL_FOUND OR GSL_FORCE_BUILD)
