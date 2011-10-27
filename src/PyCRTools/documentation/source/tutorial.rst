@@ -1123,10 +1123,7 @@ the expected number of peaks for a Gaussian distribution and our
 ``BLOCKSIZE``, as well as the error on that number::
 
     >>> Npeaks_expected = funcGaussian(5, 1,0)*blocksize
-..    0.04909742525458545
-
     >>> Npeaks_error = sqrt(Npeaks_expected)
-..     0.22157938815373926
 
 So, that we can get a normalized quantity::
 
