@@ -25,6 +25,15 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/10/26 - Extended psf_vary module to include fitting of stacked
+                 PSFs with Gaussians, interpolation of the resulting
+                 parameters across the image, and correction of the de-
+                 convolved source sizes using the interpolated PSFs.
+                 Changed plotting of Gaussians in show_fit() to use the
+                 FWHM instead of sigma. Modified error calculation of M
+                 sources to be more robust when sources are small. Fixed
+                 spelling of "gaussian" in bbs_patches option list.
+
     2011/10/24 - Many small bug fixes to the psf_vary module. Fixed use of
                  input directory so that input files not in the current
                  directory are handled correctly.

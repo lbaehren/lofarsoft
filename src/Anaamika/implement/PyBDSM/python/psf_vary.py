@@ -15,7 +15,9 @@ from scipy.optimize import leastsq
 import nat
 from math import *
 import statusbar
-
+from const import fwsig
+# from matplotlib.mlab import griddata
+from scipy.interpolate import griddata
 
 class Op_psf_vary(Op):
     """Computes variation of psf across the image """
@@ -26,6 +28,7 @@ class Op_psf_vary(Op):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary  ")
         opts = img.opts
         plot = opts.debug_figs_7_psf_vary
+        dir = img.basedir + '/misc/'
         image = img.ch0
 
         over = 2
@@ -33,9 +36,9 @@ class Op_psf_vary(Op):
         snrtop = opts.psf_snrtop; snrbot = opts.psf_snrbot; snrcutstack = opts.psf_snrcutstack
         gencode = opts.psf_gencode; primarygen = opts.psf_primarygen; itess_method = opts.psf_itess_method
         tess_sc = opts.psf_tess_sc; tess_fuzzy= opts.psf_tess_fuzzy
-        if opts.psf_snrcut < 10: 
+        if opts.psf_snrcut < 5: 
           mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 10")
-          snrcut = 10
+          snrcut = 5
         else:
           snrcut = opts.psf_snrcut
         img.psf_snrcut = snrcut
@@ -57,9 +60,9 @@ class Op_psf_vary(Op):
         tr_gauls = self.trans_gaul(gauls)
 
         # takes gaussians with code=S and snr > snrcut.
-        tr=[n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
+        tr = [n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
         g_gauls = self.trans_gaul(tr)
-        mylogger.userinfo(mylog, 'Number of generators for PSF variation', str(len(g_gauls)))
+        mylogger.userinfo(mylog, 'Number of generators for PSF variation', str(len(g_gauls[0])))
 
         # computes statistics of fitted sizes. Same as psfvary_fullstat.f in fBDSM.
         bmaj_a, bmaj_r, bmaj_ca, bmaj_cr, ni = _cbdsm.bstat(bmaj, None, nsig)
@@ -77,7 +80,6 @@ class Op_psf_vary(Op):
 
         # group generators into tiles
         tile_prop = self.edit_vorogenlist(vorogenP, frac=50.0)
-        mylogger.userinfo(mylog, 'Number of tiles for PSF variation', str(len(tile_prop[0])))
 
         # tesselate the image 
         #volrank, volrank_tilenum, wts = tesselate(vorogenP, vorogenS, tile_prop, tess_method, tess_sc, tess_fuzzy, \
@@ -86,7 +88,6 @@ class Op_psf_vary(Op):
 
         tile_list, tile_coord, tile_snr = tile_prop
         ntile = len(tile_list)
-        bar = statusbar.StatusBar('Determining PSF variation ............... : ', 0, ntile)
         ngenpertile=N.zeros(ntile)
         tr_gaul = self.trans_gaul(g_gauls)
         tr=[n for i, n in enumerate(tr_gaul) if flag_unresolved[i] and n[1]/n[8] >= snrcutstack]
@@ -99,59 +100,152 @@ class Op_psf_vary(Op):
         ltnum=1
         ngenpertile, tile_prop, r2t = self.edit_tile(ltnum, g_gauls, flag_unresolved, snrcutstack, volrank, \
                             tile_prop, tess_sc, tess_fuzzy, vorowts, tess_method, plot)
-        func.write_image_to_file(img.use_io, img.imagename + '.volrank.fits', N.transpose(volrank), img)
+        tile_list, tile_coord, tile_snr = tile_prop
+        ntile = len(tile_list)
+        bar = statusbar.StatusBar('Determining PSF variation ............... : ', 0, ntile)
+        mylogger.userinfo(mylog, 'Number of tiles for PSF variation', str(ntile))
+
+        if opts.output_all:
+            func.write_image_to_file(img.use_io, img.imagename + '.volrank.fits', N.transpose(volrank), img, dir)
 
         # For each tile, calculate the weighted averaged psf image. Also for all the sources in the image.
         cdelt = list(img.wcs_obj.acdelt[0:2])
         factor=3.
         psfimages, psfcoords, totpsfimage = self.psf_in_tile(image, img.beam, g_gauls, flag_unresolved, \
                    cdelt, factor, snrcutstack, volrank, tile_prop, r2t, plot)
-
-        # use totpsfimage to get beta, centre and nmax for shapelet decomposition. Use nmax=5 or 6
-        mask=N.zeros(totpsfimage.shape, dtype=bool)
-        (m1, m2, m3)=func.moment(totpsfimage, mask)
-        betainit=sqrt(m3[0]*m3[1])*2.0  * 1.4
-        tshape = totpsfimage.shape
-        cen = N.array(N.unravel_index(N.argmax(totpsfimage), tshape))+[1,1]
-        cen = tuple(cen)
-        nmax = 12
-        basis = 'cartesian'
-        betarange = [0.5,sqrt(betainit*max(tshape))]
-        beta, error  = sh.shape_varybeta(totpsfimage, mask, basis, betainit, cen, nmax, betarange, plot)
-        if error == 1: print '  Unable to find minimum in beta'
-
-        # decompose all the psf images using the beta from above
-        nmax=12; psf_cf=[]
         npsf = len(psfimages)
-        for i in range(npsf):
-            psfim = psfimages[i]
-            cf = sh.decompose_shapelets(psfim, mask, basis, beta, cen, nmax, mode='')
-            psf_cf.append(cf)
-            if img.opts.quiet == False:
+
+        if opts.psf_use_shap:
+            # use totpsfimage to get beta, centre and nmax for shapelet decomposition. Use nmax=5 or 6
+            mask=N.zeros(totpsfimage.shape, dtype=bool)
+            (m1, m2, m3)=func.moment(totpsfimage, mask)
+            betainit=sqrt(m3[0]*m3[1])*2.0  * 1.4
+            tshape = totpsfimage.shape
+            cen = N.array(N.unravel_index(N.argmax(totpsfimage), tshape))+[1,1]
+            cen = tuple(cen)
+            nmax = 12
+            basis = 'cartesian'
+            betarange = [0.5,sqrt(betainit*max(tshape))]
+            beta, error  = sh.shape_varybeta(totpsfimage, mask, basis, betainit, cen, nmax, betarange, plot)
+            if error == 1: print '  Unable to find minimum in beta'
+    
+            # decompose all the psf images using the beta from above
+            nmax=12; psf_cf=[]
+            for i in range(npsf):
+                psfim = psfimages[i]
+                cf = sh.decompose_shapelets(psfim, mask, basis, beta, cen, nmax, mode='')
+                psf_cf.append(cf)
+                if img.opts.quiet == False:
+                    bar.increment()
+                    
+            # transpose the psf image list
+            xt, yt = N.transpose(tile_coord)
+            tr_psf_cf = N.transpose(N.array(psf_cf))
+    
+            # interpolate the coefficients across the image. Ok, interpolate in scipy for 
+            # irregular grids is crap. doesnt even pass through some of the points.
+            # for now, fit polynomial.
+            compress = 100.0
+            x, y = N.transpose(psfcoords)
+            if len(x) < 3:
+                mylog.warning('Insufficient number of tiles to do interpolation of PSF variation')
+                return
+    
+            psf_coeff_interp, xgrid, ygrid = self.interp_shapcoefs(nmax, tr_psf_cf, psfcoords, image.shape, \
+                     compress, plot)
+    
+            psfshape = psfimages[0].shape
+            skip = 5
+            aa = self.create_psf_grid(psf_coeff_interp, image.shape, xgrid, ygrid, skip, nmax, psfshape, \
+                 basis, beta, cen, totpsfimage, plot)
+            img.psf_images = aa
+        else:
+            # Fit stacked PSFs with Gaussians
+            bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+            psf_maj = N.zeros(npsf)
+            psf_min = N.zeros(npsf)
+            psf_pa = N.zeros(npsf)
+            for i in range(ntile):
+                psfim = psfimages[i]
+                mask = N.zeros(psfim.shape, dtype=bool)
+                x_ax, y_ax = N.indices(psfim.shape) 
+                maxv = N.max(psfim)
+                p_ini = [maxv, (psfim.shape[0]-1)/2.0*1.1, (psfim.shape[1]-1)/2.0*1.1, bm_pix[0]/fwsig*1.3, 
+                         bm_pix[1]/fwsig*1.1, bm_pix[2]*2]
+                para, ierr = func.fit_gaus2d(psfim, p_ini, x_ax, y_ax, mask)
+                psf_maj[i] = para[3]
+                psf_min[i] = para[4]
+                psf_pa[i] = para[5]
+                if img.opts.quiet == False:
+                    bar.increment()
+
+            # Interpolate grid
+            maj_array = N.zeros(image.shape)
+            min_array = N.zeros(image.shape)
+            pa_array = N.zeros(image.shape)
+            for i, coord in enumerate(psfcoords):
+                maj_array[tuple(coord)] = psf_maj[i]
+                min_array[tuple(coord)] = psf_min[i]
+                pa_array[tuple(coord)] = psf_pa[i]
+                
+            points = N.where(maj_array > 0.0)
+            x = N.array(points[0], dtype=int)
+            y = N.array(points[1], dtype=int)
+            maj_values = N.array(maj_array[points])
+            min_values = N.array(min_array[points])
+            pa_values = N.array(pa_array[points])
+            xi = N.linspace(0,image.shape[0],image.shape[0])
+            yi = N.linspace(0,image.shape[1],image.shape[1])
+            grid_x, grid_y = N.mgrid[0:image.shape[0], 0:image.shape[1]]
+            maj_interp = griddata((x, y), maj_values, (grid_x, grid_y), method='cubic')
+            min_interp = griddata((x, y), min_values, (grid_x, grid_y), method='cubic')
+            pa_interp = griddata((x, y), pa_values, (grid_x, grid_y), method='cubic')
+            
+            # Now fill in regions outside the grid
+            nodata = N.where(N.isnan(maj_interp))
+            if len(nodata[0]) > 0:
+                maj_interp_nearest = N.zeros(image.shape)
+                min_interp_nearest = N.zeros(image.shape)
+                pa_interp_nearest = N.zeros(image.shape)
+                for i, coord in enumerate(psfcoords):
+                    intile = N.where(volrank == volrank[tuple(coord)])
+                    maj_interp_nearest[intile] = maj_values[i]
+                    min_interp_nearest[intile] = min_values[i]
+                    pa_interp_nearest[intile] = pa_values[i]
+                blanktiles = N.where(maj_interp_nearest == 0)
+                maj_interp_nearest[blanktiles] = N.mean(maj_values)
+                min_interp_nearest[blanktiles] = N.mean(min_values)
+                pa_interp_nearest[blanktiles] = N.mean(pa_values)         
+                maj_interp[nodata] = maj_interp_nearest[nodata]
+                min_interp[nodata] = min_interp_nearest[nodata]
+                pa_interp[nodata] = pa_interp_nearest[nodata]
+                        
+            # Store interpolated images
+            img.psf_vary_maj = maj_interp
+            img.psf_vary_min = min_interp
+            img.psf_vary_pa = pa_interp
+            if opts.output_all:
+                func.write_image_to_file(img.use_io, img.imagename + '.maj_interp.fits', N.transpose(maj_interp), img, dir)
+                func.write_image_to_file(img.use_io, img.imagename + '.min_interp.fits', N.transpose(min_interp), img, dir)
+                func.write_image_to_file(img.use_io, img.imagename + '.pa_interp.fits', N.transpose(pa_interp), img, dir)
+            
+            # Loop through source and Gaussian lists and deconvolve the sizes using appropriate beam
+            bar = statusbar.StatusBar('Correcting deconvolved source sizes ..... : ', 0, img.nsrc)
+            for src in img.sources:
+                src_pos = img.sky2pix(src.posn_sky_centroid)
+                src_pos_int = (int(src_pos[0]), int(src_pos[1]))
+                gaus_c = img.beam2pix(src.size_sky)
+                gaus_bm = [maj_interp[src_pos_int]*fwsig, min_interp[src_pos_int]*fwsig, pa_interp[src_pos_int]*fwsig]
+                gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
+                src.deconv_size_sky = img.pix2beam(gaus_dc)
+                src.deconv_size_skyE = [0.0, 0.0, 0.0]
+                for g in src.gaussians:
+                    gaus_c = img.beam2pix(g.size_sky)
+                    gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
+                    g.deconv_size_sky = img.pix2beam(gaus_dc)
+                    g.deconv_size_skyE = [0.0, 0.0, 0.0]
+                    bar.spin()
                 bar.increment()
-
-        # transpose the psf image list
-        tile_list, tile_coord, tile_snr = tile_prop
-        xt, yt = N.transpose(tile_coord)
-        tr_psf_cf = N.transpose(N.array(psf_cf))
-
-        # interpolate the coefficients across the image. Ok, interpolate in scipy for 
-        # irregular grids is crap. doesnt even pass through some of the points.
-        # for now, fit polynomial.
-        compress = 100.0
-        x, y = N.transpose(psfcoords)
-        if len(x) < 3:
-            mylog.warning('Insufficient number of tiles to do interpolation of PSF variation')
-            return
-
-        psf_coeff_interp, xgrid, ygrid = self.interp_shapcoefs(nmax, tr_psf_cf, psfcoords, image.shape, \
-                 compress, plot)
-
-        psfshape = psfimages[0].shape
-        skip = 5
-        aa = self.create_psf_grid(psf_coeff_interp, image.shape, xgrid, ygrid, skip, nmax, psfshape, \
-             basis, beta, cen, totpsfimage, plot)
-        img.psf_images = aa
 
 ##################################################################################################
 

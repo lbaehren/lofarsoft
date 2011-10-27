@@ -21,6 +21,9 @@ def process(img, **kwargs):
     from image import Image
     import mylogger 
 
+    pars = img.opts.to_dict()
+    img._prev_opts = pars
+    
     # First, reset img to initial state (in case img is being reprocessed)
     if hasattr(img, 'use_io'): del img.use_io
     if hasattr(img, 'sources'): del img.sources
@@ -81,12 +84,14 @@ def get_op_chain(img):
     from bdsm import default_chain
     
     return default_chain
-    # prev_opts = img._prev_opts
-    # new_opts = img.opts.to_dict()
-    
-    # Find whether new opts differ from previous opts
-    # If new_opts == prev_opts, don't do anything
-
+#     prev_opts = img._prev_opts
+#     new_opts = img.opts.to_dict()
+#     
+#     # Find whether new opts differ from previous opts
+#     for k, v in prev_opts.iteritems():
+#         if v != new_opts[k]:
+#             if k == 'rms_box':
+                
     # If filename, beam, trim_box differ, start from readimage
     # Elif shapelet_do, etc. differ, start from there
     

@@ -265,9 +265,11 @@ def drawellipse(g):
         raise RuntimeError("Input to drawellipse neither Gaussian nor list")
 
     x2 = []; y2 = []
+    size = [param[3], param[4], param[5]]
+    size_fwhm = corrected_size(size)
     for th in range(0, 370, 10):
-      x1=param[3]*math.cos(th/rad)
-      y1=param[4]*math.sin(th/rad)
+      x1=size_fwhm[0]*math.cos(th/rad)
+      y1=size_fwhm[1]*math.sin(th/rad)
       x2.append(x1*math.cos(param[5]/rad)-y1*math.sin(param[5]/rad)+param[1])
       y2.append(x1*math.sin(param[5]/rad)+y1*math.cos(param[5]/rad)+param[2])
     x2 = N.array(x2); y2 = N.array(y2)

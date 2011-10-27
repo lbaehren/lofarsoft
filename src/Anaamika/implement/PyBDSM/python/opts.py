@@ -54,6 +54,8 @@ class Opts(object):
                                  "min, pos ang E of N) in degrees. "\
                                  "E.g., beam = (0.06, 0.02, 13.3). None => "\
                                  "get from header\n"\
+                                 "For more than one channel, use the beam_spectrum "\
+                                 "parameter. "\
                                  "If the beam is not given "\
                                  "by the user, then it is looked for in the "\
                                  "image header. If not found, then an error "\
@@ -84,9 +86,9 @@ class Opts(object):
                                  "If flag_minsize_bm: flag + 128")
     frequency       = Option(None, Float(),
                              doc="Frequency in Hz of input image. "\
-                                 "E.g., frequency = 74e6. None => get from header. "\
+                                 "E.g., frequency = 74e6. None => get from header.\n"\
                                  "For more than one channel, use the frequency_sp "\
-                                 "parameter\nIf the frequency is not given "\
+                                 "parameter. If the frequency is not given "\
                                  "by the user, then it is looked for in the "\
                                  "image header. If not found, then an error "\
                                  "is raised. PyBDSM will not work without the "\
@@ -665,7 +667,7 @@ class Opts(object):
                                  "delete existing "\
                                  "files or append a new directory",
                              group="output_opts")
-    bbs_patches     =   Enum(None, 'single', 'Gaussian', 'source',
+    bbs_patches     =   Enum(None, 'single', 'gaussian', 'source',
                              doc="For BBS format, type of patch to use: None "\
                                  "=> no patches. "\
                                  "'single' => all Gaussians in one patch. "\
@@ -832,7 +834,9 @@ class Opts(object):
                                  "If psf_tess_sc is 'c', then this determines the fraction "\
                                  "of overlap between adjacent tiles for fuzzy tessellation.",
                              group="psf_vary_do")
-
+    psf_use_shap    =   Bool(False,
+                             doc="Use shapelets for PSF variation",
+                             group="psf_vary_do")
     
     #-----------------------------SHAPELET OPTIONS--------------------------------
     shapelet_basis  =   Enum("cartesian", "polar", 

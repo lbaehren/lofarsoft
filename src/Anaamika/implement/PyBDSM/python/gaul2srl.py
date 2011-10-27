@@ -351,13 +351,21 @@ class Op_gaul2srl(Op):
         for i in range(nMC):
             subim_src_MC = self.make_subim(subn, subm, g_sublist, delc) + \
                         N.random.normal(loc=0.0, scale=isl.rms*sqrt(bmar_p), size=(subn, subm))
-            mompara_MC = func.momanalmask_gaus(subim_src_MC, mask, isrc, bmar_p, True)
-            mompara0_MC[i] = mompara_MC[0]
-            mompara1_MC[i] = mompara_MC[1]
-            mompara2_MC[i] = mompara_MC[2]
-            mompara3_MC[i] = mompara_MC[3]
-            mompara4_MC[i] = mompara_MC[4]
-            mompara5_MC[i] = mompara_MC[5]
+            try:
+                mompara_MC = func.momanalmask_gaus(subim_src_MC, mask, isrc, bmar_p, True)
+                mompara0_MC[i] = mompara_MC[0]
+                mompara1_MC[i] = mompara_MC[1]
+                mompara2_MC[i] = mompara_MC[2]
+                mompara3_MC[i] = mompara_MC[3]
+                mompara4_MC[i] = mompara_MC[4]
+                mompara5_MC[i] = mompara_MC[5]
+            except:
+                mompara0_MC[i] = mompara[0]
+                mompara1_MC[i] = mompara[1]
+                mompara2_MC[i] = mompara[2]
+                mompara3_MC[i] = mompara[3]
+                mompara4_MC[i] = mompara[4]
+                mompara5_MC[i] = mompara[5]
         mompara0E = N.std(mompara0_MC)
         mompara1E = N.std(mompara1_MC)
         mompara2E = N.std(mompara2_MC)
