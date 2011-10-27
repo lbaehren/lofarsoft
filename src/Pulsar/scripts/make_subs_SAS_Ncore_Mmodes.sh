@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.02
+VERSION=3.03
 
 #####################################################################
 # Usage #
@@ -2074,11 +2074,14 @@ do
     if (( $subsformat == 0 ))
     then
          total_channels=`echo "$nSubbands * $CHAN" | bc`
-         if (( $total_channels <= 6000 ))
+         if (( $total_channels >= 256 )) && (( $total_channels <= 6000 ))
          then 
             prepfold_nsubs=256 
-         else
+         elif (( $total_channels > 6000 ))
+         then
             prepfold_nsubs=512 
+         else
+            prepfold_nsubs=$total_channels
          fi        
          # if total_channels is not divisible by prepfold_nsubs (prepfold fails), find one which is divisible
 		 ii=$prepfold_nsubs
@@ -2175,14 +2178,14 @@ do
   						       else
   						          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
   						          then
-						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
 						             sleep 10
-						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask
+						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
   						             prepfold_pid[$ii]=$!  
  						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          else 
-						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
   						             prepfold_pid[$ii]=$!  
  						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          fi
@@ -2849,7 +2852,35 @@ do
 	cd $location
     if (( $nrTArings > 0 ))
     then
-       echo "plot_LOFAR_TA_multibeam.py --chi chi-squared.txt --parset ${OBSID}.parset --out_logscale ${OBSID}_TA_heatmap_log.png --out_linscale ${OBSID}_TA_heatmap_linear.png --target ${PULSAR_ARRAY_PRIMARY[0]}" > TA_heatmap.sh
+	      echo "Creating TA heat map for Pulsar(s):" ${PULSAR_ARRAY[0]}
+	      echo "Creating TA heat map for Pulsar(s):" ${PULSAR_ARRAY[0]} >> $log
+          nfolds=`echo ${PULSAR_ARRAY[0]} | wc -w | awk '{print $1}'`
+	      ii=1
+	      if [ -f TA_heatmap.sh ]
+	      then
+	         rm TA_heatmap.sh
+	      fi
+	      echo "#!/bin/ksh" >> TA_heatmap.sh
+	      echo "" >> TA_heatmap.sh
+	      ii=1
+          
+          echo "ii=1" >> TA_heatmap.sh
+          echo "nfolds=$nfolds" >> TA_heatmap.sh
+          
+	      while (( $ii <= $nfolds ))
+	      do
+	         pulsar=`echo ${PULSAR_ARRAY[0]} | awk -v N=$ii '{print $N}'`
+	         echo "   working on:" $pulsar
+	         echo "   working on:" $pulsar >> $log
+
+             echo "pulsar=$pulsar" >> TA_heatmap.sh
+             echo "echo working on: $pulsar" >> TA_heatmap.sh
+	         echo "grep $pulsar chi-squared.txt > ${pulsar}_chi-squared.txt" >> TA_heatmap.sh
+	         echo "plot_LOFAR_TA_multibeam.py --chi ${pulsar}_chi-squared.txt --parset ${OBSID}.parset --out_logscale ${OBSID}_${pulsar}_TA_heatmap_log.png --out_linscale ${OBSID}_${pulsar}_TA_heatmap_linear.png --target ${pulsar}" >> TA_heatmap.sh
+	         ii=$(( $ii + 1 ))
+	         echo "ii=$ii" >> TA_heatmap.sh
+	      done
+          
        chmod 777 TA_heatmap.sh
        echo "Created TA_heatmap.sh which will be run after hoovering step"
        echo "Created TA_heatmap.sh which will be run after hoovering step" >> $log
