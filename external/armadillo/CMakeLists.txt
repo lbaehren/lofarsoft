@@ -1,80 +1,106 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (ARMADILLO)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (ARMADILLO_VERSION        "2.2.4" )
+set (ARMADILLO_SOURCE_ARCHIVE "armadillo-${ARMADILLO_VERSION}.tar.gz" )
+set (ARMADILLO_URL            "http://downloads.sourceforge.net/project/arma/${ARMADILLO_SOURCE_ARCHIVE}" )
+set (ARMADILLO_SVN            "" )
 
-option (ARMADILLO_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (ARMADILLO_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
-option (ARMADILLO_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (ARMADILLO_FORCE_BUILD  "Force build and installation of package?" NO )
+option (ARMADILLO_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${ARMADILLO_SOURCE_DIR}
-  ${ARMADILLO_SOURCE_DIR}/..
-  ${ARMADILLO_SOURCE_DIR}/../..
-  ${ARMADILLO_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+find_package (Armadillo)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-if (NOT ARMADILLO_VERBOSE_CONFIGURE)
-  set (ARMADILLO_FIND_QUIETLY YES )
-  set (BOOST_FIND_QUIETLY YES )
-endif (NOT ARMADILLO_VERBOSE_CONFIGURE)
+if (ARMADILLO_FROM_REPOS)
+  set (ARMADILLO_FORCE_BUILD TRUE)
+endif (ARMADILLO_FROM_REPOS)
 
-include (FindArmadillo)
-include (FindBoost)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
+if (NOT ARMADILLO_FOUND OR ARMADILLO_FORCE_BUILD)
   
-  set (ARMADILLO_VERSION "1.0.0")
-  set (ARMADILLO_TAR_ARCHIVE "armadillo-${ARMADILLO_VERSION}.tar.gz")
-  set (ARMADILLO_URL "http://downloads.sourceforge.net/project/arma/old_releases/${ARMADILLO_TAR_ARCHIVE}")
-
-  ##__________________________________________________________________
-  ## Build the project
+  ## Locate source file to build from
   
-  include (ExternalProject)
-  
-  find_file (have_armadillo_tgz ${ARMADILLO_TAR_ARCHIVE} ${ARMADILLO_SOURCE_DIR})
-  
-  if (NOT have_armadillo_tgz)
-    set (have_armadillo_tgz ${ARMADILLO_URL})
-  endif (NOT have_armadillo_tgz)
-  
-  ExternalProject_Add (armadillo
-    PREFIX ${ARMADILLO_BINARY_DIR}
-    DOWNLOAD_DIR ${ARMADILLO_BINARY_DIR}/download
-    SOURCE_DIR ${ARMADILLO_BINARY_DIR}/source
-    URL ${have_armadillo_tgz}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+  find_file (ARMADILLO_SOURCE ${ARMADILLO_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
   
-  ## <-- end build condition ----------------------------------------------------->
+  if (NOT ARMADILLO_SOURCE AND ARMADILLO_URL)
+    set (ARMADILLO_SOURCE ${ARMADILLO_URL})
+  endif (NOT ARMADILLO_SOURCE AND ARMADILLO_URL)
+    
+  if (ARMADILLO_FROM_REPOS AND ARMADILLO_SVN)
+
+    ## Build package off code repository
+    
+    ExternalProject_Add (armadillo
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${ARMADILLO_SVN}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      )
   
-else (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
+  else (ARMADILLO_FROM_REPOS AND ARMADILLO_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (armadillo
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${ARMADILLO_SOURCE}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (ARMADILLO_FROM_REPOS AND ARMADILLO_SVN)
+
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (armadillo update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of armadillo ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT ARMADILLO_FOUND OR ARMADILLO_FORCE_BUILD)
+  
   add_custom_target (armadillo
-    WORKING_DIRECTORY ${ARMADILLO_BINARY_DIR}
-    COMMENT "[Armadillo] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[armadillo] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_ARMADILLO OR ARMADILLO_FORCE_BUILD)
+  
+endif (NOT ARMADILLO_FOUND OR ARMADILLO_FORCE_BUILD)
