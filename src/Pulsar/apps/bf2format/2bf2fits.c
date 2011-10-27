@@ -1990,11 +1990,11 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   if(is_H5 && is_append == 0) {
     subbandnr_h5_first = 0;
     subbandnr_h5_last = SUBBANDS - 1;
+    fprintf(stderr, "Going to process subbands %ld to %ld\n", subbandnr_h5_first, subbandnr_h5_last);
   }else {
     subbandnr_h5_first = 0;  /* Ignore loop if not H5 */
     subbandnr_h5_last = 0;
   }
-  fprintf(stderr, "Going to process subbands %ld to %ld\n", subbandnr_h5_first, subbandnr_h5_last);
   for( b = 0; b < BEAMS; b++ ) {
    /* loop over input files */
     while((filename = getNextFilenameFromList(&application, argv)) != NULL) {
