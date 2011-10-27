@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |   **NB** Substantial changes by John Swinbank, July 2009.                   |
@@ -274,12 +272,14 @@ endif (HAVE_BOOST)
 ## Provide standard CMake variable
 
 set (Boost_FOUND     ${HAVE_BOOST}      )
+set (BOOST_FOUND     ${HAVE_BOOST}      )
 set (Boost_LIBRARIES ${BOOST_LIBRARIES} )
 
 ## -----------------------------------------------------------------------------
 
 mark_as_advanced (
   HAVE_BOOST
+  BOOST_FOUND
   BOOST_INCLUDES
   BOOST_LIBRARIES
   Boost_FOUND
