@@ -1,92 +1,110 @@
 
-## ------------------------------------------------------------------------------
-#
-#  CMake wrapper around the GNU Autotools-based configure/build of the BISON
-#  library.
-#
-## ------------------------------------------------------------------------------
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
 
-## Name of the project
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (BISON)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (BISON_VERSION        "2.5" )
+set (BISON_SOURCE_ARCHIVE "bison-${BISON_VERSION}.tar.gz" )
+set (BISON_URL            "ftp://ftp.gnu.org/gnu/bison/${BISON_SOURCE_ARCHIVE}" )
+set (BISON_SVN            "" )
 
-option (BISON_FORCE_BUILD       "Force rebuild and local installation"      NO  )
-option (BISON_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (BISON_FORCE_BUILD  "Force build and installation of package?" NO )
+option (BISON_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS
-  ${BISON_SOURCE_DIR}
-  ${BISON_SOURCE_DIR}/..
-  ${BISON_SOURCE_DIR}/../..
-  ${BISON_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Bison] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-
-## ------------------------------------------------------------------------------
-## Check for system-wide BISON library installation
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
 if (NOT BISON_FOUND)
-  # load standard CMake find module
   find_package (BISON)
 endif (NOT BISON_FOUND)
 
-## <-- begin build condition --------------------------------------------------->
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
+
+if (BISON_FROM_REPOS)
+  set (BISON_FORCE_BUILD TRUE)
+endif (BISON_FROM_REPOS)
 
 if (NOT BISON_FOUND OR BISON_FORCE_BUILD)
-
-  include (ExternalProject)
-
-  set (BISON_VERSION     "2.4")
-  set (BISON_DIRECTORY   "bison-${BISON_VERSION}")
-  set (BISON_TAR_ARCHIVE "${BISON_DIRECTORY}.tar.gz")
-  set (BISON_URL         "http://ftp.gnu.org/gnu/bison/${BISON_TAR_ARCHIVE}")
-
-  ##__________________________________________________________________
-  ## Build the project
-
-  find_file (BISON_SOURCE ${BISON_TAR_ARCHIVE} ${BISON_SOURCE_DIR})
-
-  if (NOT BISON_SOURCE)
+  
+  ## Locate source file to build from
+  
+  find_file (BISON_SOURCE ${BISON_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT BISON_SOURCE AND BISON_URL)
     set (BISON_SOURCE ${BISON_URL})
-  endif (NOT BISON_SOURCE)
+  endif (NOT BISON_SOURCE AND BISON_URL)
+    
+  if (BISON_FROM_REPOS AND BISON_SVN)
 
-  if (BISON_SOURCE)
+    ## Build package off code repository
+    
     ExternalProject_Add (bison
-      PREFIX ${BISON_BINARY_DIR}
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${BISON_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  
+  else (BISON_FROM_REPOS AND BISON_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (bison
+      PREFIX ${PROJECT_BINARY_DIR}
       DOWNLOAD_DIR download
       SOURCE_DIR source
       URL ${BISON_SOURCE}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${BISON_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}
-      BUILD_COMMAND make
-      INSTALL_COMMAND make install
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
       )
-  else (BISON_SOURCE)
-    message (WARNING "[Bison] Unable to build project - missing source!")
-  endif (BISON_SOURCE)
+    
+  endif (BISON_FROM_REPOS AND BISON_SVN)
 
-  ## <-- end build condition ----------------------------------------------------->
-
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (bison update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of bison ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
 else (NOT BISON_FOUND OR BISON_FORCE_BUILD)
+  
   add_custom_target (bison
-    WORKING_DIRECTORY ${BISON_BINARY_DIR}
-    COMMENT "[Bison] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[bison] Found system-wide installation; skipping rebuild!"
     )
+  
 endif (NOT BISON_FOUND OR BISON_FORCE_BUILD)
