@@ -10,6 +10,7 @@ set (external_packages
   armadillo
   bison
   blas
+  blitz
   boost
   casacore
   cfitsio
@@ -40,10 +41,6 @@ set (external_packages
   valgrind
   tmf
   )
-
-if (NOT HAVE_BLITZ)
-  list (APPEND external_packages blitz)
-endif (NOT HAVE_BLITZ)
 
 if (OPENGL_FOUND)
   list (APPEND external_packages mathgl)

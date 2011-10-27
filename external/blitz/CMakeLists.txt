@@ -1,74 +1,108 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (BLITZ)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (BLITZ_VERSION        "0.9" )
+set (BLITZ_SOURCE_ARCHIVE "blitz-${BLITZ_VERSION}.tar.gz" )
+set (BLITZ_URL            "http://downloads.sourceforge.net/project/blitz/blitz/Blitz%2B%2B%20${BLITZ_VERSION}/${BLITZ_SOURCE_ARCHIVE}" )
+set (BLITZ_CVS            ":pserver:anonymous@blitz.cvs.sourceforge.net:/cvsroot/blitz" )
 
-option (BLITZ_FORCE_BUILD       "Force rebuild and local installation?"     NO  )
-option (BLITZ_CMAKE_BUILD       "Use CMake to configure and build Blitz++?" YES )
-option (BLITZ_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  )
-option (BLITZ_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (BLITZ_FORCE_BUILD  "Force build and installation of package?" NO )
+option (BLITZ_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${BLITZ_SOURCE_DIR}
-  ${BLITZ_SOURCE_DIR}/..
-  ${BLITZ_SOURCE_DIR}/../..
-  ${BLITZ_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+find_package (Blitz)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-if (NOT BLITZ_VERBOSE_CONFIGURE)
-  set (BLITZ_FIND_QUIETLY  YES )
-endif (NOT BLITZ_VERBOSE_CONFIGURE)
+if (BLITZ_FROM_REPOS)
+  set (BLITZ_FORCE_BUILD TRUE)
+endif (BLITZ_FROM_REPOS)
 
-include (FindBlitz)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_BLITZ OR BLITZ_FORCE_BUILD)
+if (NOT BLITZ_FOUND OR BLITZ_FORCE_BUILD)
   
-  ##__________________________________________________________________
-  ## Build the project
+  ## Locate source file to build from
   
-  include (ExternalProject)
+  find_file (BLITZ_SOURCE ${BLITZ_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
   
-  find_file (have_blitz_tgz blitz-0.9.tar.gz ${BLITZ_SOURCE_DIR})
-  
-  if (have_blitz_tgz)
+  if (NOT BLITZ_SOURCE AND BLITZ_URL)
+    set (BLITZ_SOURCE ${BLITZ_URL})
+  endif (NOT BLITZ_SOURCE AND BLITZ_URL)
+    
+  if (BLITZ_FROM_REPOS AND BLITZ_CVS)
+
+    ## Build package off code repository
+    
     ExternalProject_Add (blitz
-      PREFIX ${BLITZ_BINARY_DIR}
-      DOWNLOAD_DIR ${BLITZ_BINARY_DIR}/blitz
-      SOURCE_DIR ${BLITZ_BINARY_DIR}/blitz
-      URL ${have_blitz_tgz}
-      URL_MD5 031df2816c73e2d3bd6d667bbac19eca
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      CVS_REPOSITORY ${BLITZ_CVS}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${BLITZ_BINARY_DIR}/blitz/configure --prefix=${LUS_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} --disable-doxygen
       )
-  else (have_blitz_tgz)
-    status (WARNING "[Blitz++] Unable to build project - no sources found!")
-  endif (have_blitz_tgz)
   
-  ## <-- end build condition ----------------------------------------------------->
+  else (BLITZ_FROM_REPOS AND BLITZ_CVS)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (blitz
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${BLITZ_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} --disable-doxygen
+      )
+    
+  endif (BLITZ_FROM_REPOS AND BLITZ_CVS)
+
+  ## Update global configuration settings
   
-else (NOT HAVE_BLITZ OR BLITZ_FORCE_BUILD)
-  message (STATUS "[Blitz++] Found system-wide installation; skipping rebuild!")
-endif (NOT HAVE_BLITZ OR BLITZ_FORCE_BUILD)
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (blitz update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of blitz ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT BLITZ_FOUND OR BLITZ_FORCE_BUILD)
+  
+  add_custom_target (blitz
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[blitz] Found system-wide installation; skipping rebuild!"
+    )
+  
+endif (NOT BLITZ_FOUND OR BLITZ_FORCE_BUILD)
