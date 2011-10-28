@@ -1,98 +1,125 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (CFITSIO)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (CFITSIO_VERSION        "3140" )
+set (CFITSIO_SOURCE_ARCHIVE "cfitsio${CFITSIO_VERSION}.tar.gz" )
+set (CFITSIO_URL            "ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/${CFITSIO_SOURCE_ARCHIVE}" )
+set (CFITSIO_SVN            "" )
 
-option (CFITSIO_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (CFITSIO_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO  )
-option (CFITSIO_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-option (CFITSIO_enable_lfs        "Enable large file system support?"      YES )
-option (CFITSIO_enable_reentrant  "Enable reentrant multithreading?"       NO  )
-option (CFITSIO_enable_hera       "Build for HERA project?"                NO  )
+option (CFITSIO_FORCE_BUILD       "Force build and installation of package?" NO  )
+option (CFITSIO_FROM_REPOS        "Install package from repository?"         NO  )
+option (CFITSIO_enable_lfs        "Enable large file system support?"        YES )
+option (CFITSIO_enable_reentrant  "Enable reentrant multithreading?"         NO  )
+option (CFITSIO_enable_hera       "Build for HERA project?"                  NO  )
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+if (CFITSIO_enable_lfs)
+  set (cfitsio_enable_lfs "--enable-lfs")
+else (CFITSIO_enable_lfs)
+  set (cfitsio_enable_lfs "--disable-lfs")
+endif (CFITSIO_enable_lfs)
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${CFITSIO_SOURCE_DIR}
-  ${CFITSIO_SOURCE_DIR}/..
-  ${CFITSIO_SOURCE_DIR}/../..
-  ${CFITSIO_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+if (CFITSIO_enable_hera)
+  set (cfitsio_enable_hera "--enable-hera")
+else (CFITSIO_enable_hera)
+  set (cfitsio_enable_hera "--disable-hera")
+endif (CFITSIO_enable_hera)
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+if (NOT CFITSIO_FOUND)
+  find_package (CFITSIO)
+endif (NOT CFITSIO_FOUND)
 
-if (NOT CFITSIO_VERBOSE_CONFIGURE)
-  set (CFITSIO_FIND_QUIETLY YES )
-endif (NOT CFITSIO_VERBOSE_CONFIGURE)
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-include (FindCFITSIO)
+if (CFITSIO_FROM_REPOS)
+  set (CFITSIO_FORCE_BUILD TRUE)
+endif (CFITSIO_FROM_REPOS)
 
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
-
-  set (cfitsio_version "3140")
-  set (CFITSIO_TAR_ARCHIVE "cfitsio${cfitsio_version}.tar.gz")
-
-  ##__________________________________________________________________
-  ## Build the project
+if (NOT CFITSIO_FOUND OR CFITSIO_FORCE_BUILD)
   
-  include (ExternalProject)
+  ## Locate source file to build from
   
-  find_file (have_cfitsio_tgz ${CFITSIO_TAR_ARCHIVE} ${CFITSIO_SOURCE_DIR})
+  find_file (CFITSIO_SOURCE ${CFITSIO_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
   
-  if (have_cfitsio_tgz)
-    if (CFITSIO_enable_lfs)
-      ExternalProject_Add (cfitsio
-	PREFIX ${CFITSIO_BINARY_DIR}
-	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}/download
-	SOURCE_DIR ${CFITSIO_BINARY_DIR}/source
-	URL ${have_cfitsio_tgz}
-	URL_MD5 7467fdacb807ebeef7fe088f2b69d9ee
-	BUILD_IN_SOURCE 1
-	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX}  --includedir=${LUS_INCLUDE_DIR}/cfitsio --enable-lfs
-	)
-    else (CFITSIO_enable_lfs)
-      ExternalProject_Add (cfitsio
-	PREFIX ${CFITSIO_BINARY_DIR}
-	DOWNLOAD_DIR ${CFITSIO_BINARY_DIR}
-	SOURCE_DIR ${CFITSIO_BINARY_DIR}
-	URL ${have_cfitsio_tgz}
-	URL_MD5 7467fdacb807ebeef7fe088f2b69d9ee
-	BUILD_IN_SOURCE 1
-	CONFIGURE_COMMAND ${CFITSIO_BINARY_DIR}/configure --prefix=${LUS_INSTALL_PREFIX}  --includedir=${LUS_INCLUDE_DIR}/cfitsio
-	)
-    endif (CFITSIO_enable_lfs)
-  else (have_cfitsio_tgz)
-    add_custom_target (cfitsio
-      WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
-      COMMENT "[CFITSIO] Unable to build package - missing sources!"
+  if (NOT CFITSIO_SOURCE AND CFITSIO_URL)
+    set (CFITSIO_SOURCE ${CFITSIO_URL})
+  endif (NOT CFITSIO_SOURCE AND CFITSIO_URL)
+    
+  if (CFITSIO_FROM_REPOS AND CFITSIO_SVN)
+
+    ## Build package off code repository
+    
+    ExternalProject_Add (cfitsio
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${CFITSIO_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} ${cfitsio_enable_lfs} ${cfitsio_enable_hera}
       )
-  endif (have_cfitsio_tgz)
   
-  ## <-- end build condition ----------------------------------------------------->
+  else (CFITSIO_FROM_REPOS AND CFITSIO_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (cfitsio
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${CFITSIO_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} ${cfitsio_enable_lfs} ${cfitsio_enable_hera}
+      )
+    
+  endif (CFITSIO_FROM_REPOS AND CFITSIO_SVN)
+
+  ## Update global configuration settings
   
-else (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (cfitsio update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of CFITSIO ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT CFITSIO_FOUND OR CFITSIO_FORCE_BUILD)
+  
   add_custom_target (cfitsio
-    WORKING_DIRECTORY ${CFITSIO_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[CFITSIO] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
+  
+endif (NOT CFITSIO_FOUND OR CFITSIO_FORCE_BUILD)
