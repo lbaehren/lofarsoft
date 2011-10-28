@@ -65,10 +65,10 @@ def process(img, **kwargs):
         op_chain = get_op_chain(img)
         _run_op_list(img, op_chain)   
         return True
-    except RuntimeError, err:
-        # Catch and log error
-        mylog.error(str(err))
-        return False
+#     except RuntimeError, err:
+#         # Catch and log error
+#         mylog.error(str(err))
+#         return False
     except KeyboardInterrupt:
         mylogger.userinfo(mylog, "\n\033[31;1mAborted\033[0m")
         return False
