@@ -47,6 +47,7 @@ includefilter=[""]
 # Add problematic eventto extrude list (this should eventually be put into a database/external list,
 # i.e. not hardcoded in pipeline)
 excludefilter=["20110610T","VHECR_LORA-1969","killed","test","temp","dump"]
+excludefilter.append["L32"]
 excludefilter.append("20110613T051515.914")
 excludefilter.append("20110813T190822.655") # Zero values cause exception when executing logplot
 excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception when executing logplot
@@ -120,6 +121,7 @@ fname2=""
 files=os.listdir(datadir)
 
 for f in files:
+
     if infilter(f,excludefilter):
         continue
     if processall:
@@ -136,7 +138,7 @@ for f in files:
                     continue
         else:
             if processnew:
-	        print "new", f
+                print "new", f
                 fname+=f+" "
                 continue
 
