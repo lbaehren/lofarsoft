@@ -1,81 +1,115 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (BOOST)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (BOOST_VERSION_MAJOR  "1" )
+set (BOOST_VERSION_MINOR  "47" )
+set (BOOST_VERSION_PATCH  "0" )
+set (BOOST_VERSION        "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}" )
+set (BOOST_SOURCE_ARCHIVE "boost_${BOOST_VERSION_MAJOR}_${BOOST_VERSION_MINOR}_${BOOST_VERSION_PATCH}.tar.bz2" )
+set (BOOST_URL            "http://downloads.sourceforge.net/project/boost/boost/${BOOST_VERSION}/${BOOST_SOURCE_ARCHIVE}" )
+set (BOOST_SVN            "" )
 
-option (BOOST_FORCE_BUILD       "Force rebuild and local installation?"  NO )
-option (BOOST_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
-option (BOOST_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (BOOST_FORCE_BUILD  "Force build and installation of package?" NO )
+option (BOOST_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${BOOST_SOURCE_DIR}
-  ${BOOST_SOURCE_DIR}/..
-  ${BOOST_SOURCE_DIR}/../..
-  ${BOOST_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Boost++] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT BOOST_FOUND)
+  find_package (Boost)
+endif (NOT BOOST_FOUND)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-set (BOOST_FIND_QUIETLY YES )
+if (BOOST_FROM_REPOS)
+  set (BOOST_FORCE_BUILD TRUE)
+endif (BOOST_FROM_REPOS)
 
-include (FindBoost)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
+if (NOT BOOST_FOUND OR BOOST_FORCE_BUILD)
   
-  ## Package information
-
-  set (Boost_VERSION        "1_43_0" )
-  set (Boost_SOURCE_ARCHIVE "boost_${Boost_VERSION}.tar.gz" )
-  set (Boost_URL            "http://downloads.sourceforge.net/project/boost/boost/1.43.0/${Boost_SOURCE_ARCHIVE}" )
-
-  ## Check for package source
+  ## Locate source file to build from
   
-  find_file (Boost_SOURCE ${Boost_SOURCE_ARCHIVE}
-    PATHS ${Boost_SOURCE_DIR}
+  find_file (BOOST_SOURCE ${BOOST_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
   
-  if (NOT Boost_SOURCE)
-    set (Boost_SOURCE ${Boost_URL})
-  endif (NOT Boost_SOURCE)
+  if (NOT BOOST_SOURCE AND BOOST_URL)
+    set (BOOST_SOURCE ${BOOST_URL})
+  endif (NOT BOOST_SOURCE AND BOOST_URL)
+    
+  if (BOOST_FROM_REPOS AND BOOST_SVN)
+
+    ## Build package off code repository
+    
+    ExternalProject_Add (boost
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${BOOST_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh --prefix=${CMAKE_INSTALL_PREFIX}
+      BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
+      )
   
-  ExternalProject_Add (boost
-    PREFIX ${PROJECT_BINARY_DIR}
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
-    URL ${Boost_SOURCE}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh
-    BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
-    INSTALL_COMMAND ${PROJECT_BINARY_DIR}/source/bjam install --prefix=${LUS_INSTALL_PREFIX}
-    )
+  else (BOOST_FROM_REPOS AND BOOST_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (boost
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${BOOST_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh --prefix=${CMAKE_INSTALL_PREFIX}
+      BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
+      )
+    
+  endif (BOOST_FROM_REPOS AND BOOST_SVN)
   
-  ## <-- end build condition ----------------------------------------------------->
+  ## Update global configuration settings
   
-else (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (boost update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of boost ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT BOOST_FOUND OR BOOST_FORCE_BUILD)
+  
   add_custom_target (boost
-    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
-    COMMENT "[Boost++] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[boost] Found system-wide installation; skipping rebuild!"
     )
-  message (STATUS "[Boost++] Found system-wide installation; skipping rebuild!")
-endif (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
+  
+endif (NOT BOOST_FOUND OR BOOST_FORCE_BUILD)

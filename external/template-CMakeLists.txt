@@ -33,7 +33,9 @@ option (<PACKAGE>_FROM_REPOS   "Install package from repository?"         NO )
 ##
 ## ==============================================================================
 
-find_package (<PACKAGE>)
+if (NOT <PACKAGE>_FOUND)
+  find_package (<PACKAGE>)
+endif (NOT <PACKAGE>_FOUND)
 
 ## ==============================================================================
 ##

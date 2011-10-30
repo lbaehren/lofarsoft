@@ -1,74 +1,110 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (FFTW3)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (FFTW3_VERSION        "3.3" )
+set (FFTW3_SOURCE_ARCHIVE "fftw-${FFTW3_VERSION}.tar.gz" )
+set (FFTW3_URL            "ftp://ftp.fftw.org/pub/fftw/${FFTW3_SOURCE_ARCHIVE}" )
+set (FFTW3_SVN            "" )
 
-option (FFTW3_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (FFTW3_CMAKE_BUILD       "Use CMake to configure and build FFTW3?"  YES )
-option (FFTW3_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (FFTW3_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (FFTW3_FORCE_BUILD  "Force build and installation of package?" NO )
+option (FFTW3_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${FFTW3_SOURCE_DIR}
-  ${FFTW3_SOURCE_DIR}/..
-  ${FFTW3_SOURCE_DIR}/../..
-  ${FFTW3_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[FFTW3] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT FFTW3_FOUND)
+  find_package (FFTW3)
+endif (NOT FFTW3_FOUND)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-set (FFTW3_FIND_QUIETLY YES)
+if (FFTW3_FROM_REPOS)
+  set (FFTW3_FORCE_BUILD TRUE)
+endif (FFTW3_FROM_REPOS)
 
-include (FindFFTW3)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
-
-  set (FFTW3_VERSION "3.2.2")
-  set (FFTW3_SOURCE  "fftw-${FFTW3_VERSION}.tar.gz")
-  set (FFTW3_URL     "ftp://ftp.fftw.org/pub/fftw/${FFTW3_SOURCE}")
+if (NOT FFTW3_FOUND OR FFTW3_FORCE_BUILD)
   
-  find_file (have_fftw3_tgz ${FFTW3_SOURCE} ${FFTW3_SOURCE_DIR})
-
-  if (NOT have_fftw3_tgz)
-    set (have_fftw3_tgz ${FFTW3_URL})
-  endif (NOT have_fftw3_tgz)
+  ## Locate source file to build from
   
-  ExternalProject_Add (fftw3
-    PREFIX ${FFTW3_BINARY_DIR}
-    DOWNLOAD_DIR ${FFTW3_BINARY_DIR}/download
-    SOURCE_DIR ${FFTW3_BINARY_DIR}/source
-    URL ${have_fftw3_tgz}
-    URL_MD5 b616e5c91218cc778b5aa735fefb61ae
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${FFTW3_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX}
+  find_file (FFTW3_SOURCE ${FFTW3_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
   
-  ## <-- end build condition ----------------------------------------------------->
+  if (NOT FFTW3_SOURCE AND FFTW3_URL)
+    set (FFTW3_SOURCE ${FFTW3_URL})
+  endif (NOT FFTW3_SOURCE AND FFTW3_URL)
+    
+  if (FFTW3_FROM_REPOS AND FFTW3_SVN)
+
+    ## Build package off code repository
+    
+    ExternalProject_Add (fftw3
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${FFTW3_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
   
-else (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
+  else (FFTW3_FROM_REPOS AND FFTW3_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (fftw3
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${FFTW3_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (FFTW3_FROM_REPOS AND FFTW3_SVN)
+
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (fftw3 update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of fftw3 ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT FFTW3_FOUND OR FFTW3_FORCE_BUILD)
+  
   add_custom_target (fftw3
-    WORKING_DIRECTORY ${FFTW3_BINARY_DIR}
-    COMMENT "[FFTW3] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[fftw3] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_FFTW3 OR FFTW3_FORCE_BUILD)
+  
+endif (NOT FFTW3_FOUND OR FFTW3_FORCE_BUILD)

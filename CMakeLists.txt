@@ -131,6 +131,7 @@ endif (HOSTNAME_CMD)
 
 foreach (varSystemPackage
     BISON
+    Boost
     Blitz
     CASACORE
     CFITSIO
@@ -435,6 +436,7 @@ message (STATUS " .. C compiler             = ${CMAKE_C_COMPILER}"            )
 message (STATUS " .. size(void*)            = ${CMAKE_SIZEOF_VOID_P}"         )
 message (STATUS " Required external packages:"                                )
 message (STATUS " .. Bison ...................... = ${BISON_FOUND}"           )
+message (STATUS " .. Boost++ .................... = ${BOOST_FOUND}"           )
 message (STATUS " .. CFITSIO .................... = ${CFITSIO_FOUND}"         )
 message (STATUS " .. CUDA ....................... = ${CUDA_FOUND}"            )
 message (STATUS " .. casacore ................... = ${CASACORE_FOUND}"        )
