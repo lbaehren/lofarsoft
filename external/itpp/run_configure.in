@@ -1,1 +1,0 @@
-./configure --prefix=${LUS_INSTALL_PREFIX} --with-fft=${WITH_FFT} --with-fft-include=${WITH_FFTW_INCLUDES} --with-blas=${WITH_BLAS} --disable-html-doc
