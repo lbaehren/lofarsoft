@@ -543,7 +543,7 @@ void secondTranspose( FILE **inputfiles, int beamnr)
 void coherentH5( FILE **inputfiles, int beamnr)
 {
   struct stokesdata_struct {
-    float	samples[BEAMS][SAMPLES|2][SUBBANDS][CHANNELS][STOKES];
+    float	samples[BEAMS][SAMPLES][SUBBANDS][CHANNELS][STOKES];
   };
   
   struct stokesdata_struct *stokesdata;
@@ -672,7 +672,7 @@ void coherentH5( FILE **inputfiles, int beamnr)
 void incoherentH5( FILE **inputfiles, FILE **outputfile, int beamnr, int writefb, int n_infiles)
 {
   struct stokesdata_struct {
-    float	samples[BEAMS][STOKES][CHANNELS][SAMPLES|2];
+    float	samples[BEAMS][STOKES][CHANNELS][SAMPLES];
   };
   
   struct stokesdata_struct *stokesdata;
@@ -942,10 +942,9 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 {
   struct stokesdata_struct {
     unsigned	sequence_number;
-    char        pad[508];
+    //char        pad[508];
     float	samples[BEAMS][CHANNELS][SAMPLES|2][STOKES];
   };
-  
   struct stokesdata_struct *stokesdata;
   static int current_file=0;
   unsigned output_samples = 0;
@@ -954,11 +953,12 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
   double scale;
   double offset;
   int x = 0;
-  
+
   stokesdata = (struct stokesdata_struct *) malloc( AVERAGE_OVER * sizeof(struct stokesdata_struct) );
   input = inputfiles[current_file];
   current_file++;
-  fseek( input, 0, SEEK_SET ); 
+  fseek( input, 0, SEEK_SET ); //PROBLEM WITH THIS LINE
+  int prev_seqnr = -1;
   while( !feof( input ) ) {
     if (x == NUM_BLOCKGROUPS) break;
     x++;
@@ -983,7 +983,7 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 	
 	for( t = 0; t < SAMPLES; t++ ){ 
 	  //first pass to compute statistics
-	  floatSwap( &stokesdata[i].samples[beamnr][chan][t][s] );
+	  //floatSwap( &stokesdata[i].samples[beamnr][chan][t][s] );
 	  if( !isnan(stokesdata[i].samples[beamnr][chan][t][s]) ){
 	    average += stokesdata[i].samples[beamnr][chan][t][s]; 
 	    rms += stokesdata[i].samples[beamnr][chan][t][s]*stokesdata[i].samples[beamnr][chan][t][s];
@@ -1007,44 +1007,56 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 	offset = average;
       }
    
-      int prev_seqnr = -1 + (x-1)*AVERAGE_OVER;
+      //int prev_seqnr = -1 + (x-1)*AVERAGE_OVER;
       
-      for( i = 0; i < num; i++ ) {    
+      for( i = 0; i < AVERAGE_OVER; i++ ) {    
 	float value;
+	int test;
 	signed short shvalue;
+	float flvalue;
 	signed char ivalue;
 	
 	/* detect gaps and write zeros here*/
+	//fprintf(stderr,"%d %d \n", prev_seqnr, stokesdata[i].sequence_number);
 	if( prev_seqnr + 1 != stokesdata[i].sequence_number ) {
-	  fprintf(stderr,"gap between sequence numbers %d and %d.\n", prev_seqnr, stokesdata[i].sequence_number );
+	   fprintf(stderr,"gap between sequence numbers %d and %d.\n", prev_seqnr, stokesdata[i].sequence_number );
 	  
-	  //corrupted sequence number, write block of zeros and move to next number
-	  if( stokesdata[i].sequence_number - prev_seqnr > 100){
-	    fprintf(stderr,"skipping corrupted sequence number: %d.\n", stokesdata[i].sequence_number );
+	   //corrupted sequence number, write block of zeros and move to next number
+	   /*	   	   if( stokesdata[i].sequence_number - prev_seqnr < -1000){
+	    fprintf(stderr,"skipping corrupted sequence number: %d. Diff: %d\n ", stokesdata[i].sequence_number,  stokesdata[i].sequence_number - prev_seqnr );
+	    
 	    for( t=0; t < SAMPLES; t++){
 	      shvalue =0;
 	      fwrite(&shvalue, sizeof shvalue, 1, outputfile[chan]);
 	      output_samples++;
 	      nul_samples++;
 	    }
-	    prev_seqnr ++;
-	    
+	    	    prev_seqnr ++;
+	   
 	    //dropped packet(s) write zeros until gap is padded
-	  } else {
+	    } else { */
 	    int gap, ii;
 	    gap = stokesdata[i].sequence_number - (prev_seqnr+1);
-	    fprintf(stderr, "gap:%d\n", gap);
+	    fprintf(stderr, "gap:%d missing samples: %d\n", gap, gap*SAMPLES);
+	    test = 0;
 	    for( ii=0; ii< gap; ii++){
 	      for( t=0; t < SAMPLES; t++){
-		shvalue =0;
-		fwrite(&shvalue, sizeof shvalue, 1, outputfile[chan]);
+		shvalue = average;
+		flvalue = average;
+		test++;
+		if (writefloats == 1){
+		  fwrite(&flvalue, sizeof flvalue, 1, outputfile[chan]);  
+		}else{
+		  fwrite(&shvalue, sizeof shvalue, 1, outputfile[chan]);
+		}
 		output_samples++;
 		nul_samples++;
 	      }
 	    }
-	    prev_seqnr = stokesdata[i].sequence_number;  
-	  }
-	} else {
+	    prev_seqnr = stokesdata[i].sequence_number -1;  
+	    fprintf(stderr,"written %d zeros\n", test);
+	}
+	//} //else {
 	  //write data
 	  for( t = 0; t < SAMPLES; t++ ){
 	    value = floor((stokesdata[i].samples[beamnr][chan][t][s]-offset)*scale);
@@ -1082,8 +1094,8 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 	    }
 	    output_samples++;
 	  }//for( t = 0; t < SAMPLES; t++ )
-	  prev_seqnr = stokesdata[i].sequence_number;
-	}//if( prev_seqnr + 1 != stokesdata[i].sequence_number ) else{
+	  prev_seqnr++;// = stokesdata[i].sequence_number;
+	  // }//if( prev_seqnr + 1 != stokesdata[i].sequence_number ) else{
       }//for( i = 0; i < num; i++ )
     }//for( chan = 0; chan < 1; chan++ )
   }//while( !feof( input ) )
@@ -1095,7 +1107,7 @@ void convert_nocollapse( FILE **inputfiles, FILE **outputfile, int beamnr, int w
 
 void convert_collapse( FILE *input, FILE **outputfile, int beamnr )
 {
- 
+
   struct stokesdata_struct {
     unsigned	sequence_number;
     char        pad[508];
@@ -1408,7 +1420,6 @@ int main( int argc, char **argv ) {
 
   FILE *input[MAXNOINPUTFILES], *outputfile[CHANNELS]; 
   c=0;
-  
   /* command line verification */
   if( argc -optind < 1 ) {
     usage();
@@ -1428,7 +1439,7 @@ int main( int argc, char **argv ) {
   }
   
   /* open files */
-  for( b = 0; b < BEAMS; b++ ) {
+  for( b = 2; b < BEAMS; b++ ) {
     /* how many files to open for output? */
     if (collapse == 1 || writefb == 1) {
       n_outfiles = 1;        /* one file only */
@@ -1456,8 +1467,7 @@ int main( int argc, char **argv ) {
     }    
 
     /* open output file(s), do conversion */
-    
-    //FILTERBANK MODE
+       //FILTERBANK MODE
     if ( writefb==1 ){ 
       /* create single filterbank file*/
       sprintf( buf, "%s.fil", OUTNAME );  /* append filterbank suffix */
@@ -1564,11 +1574,16 @@ int main( int argc, char **argv ) {
 	  convert_collapse( input[f], outputfile, b );	
 	  // takes file *input for input
 	}
+	//printf("BEAM : %d", b);
 	for ( c = 0; c < n_outfiles; c++ ) { /* close CHANNEL output files */
 	  fclose( outputfile[c] );
 	}
       }
     }
-  }
+    //for( f = 0; f < n_infiles; f++ ) {
+    // fprintf(stderr,"Closing %s\n", argv[optind+f]);
+    // fclose( input[f] );
+    // }
+  }    
   return 0;
 }
