@@ -1,93 +1,110 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (SWIG)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (SWIG_VERSION        "2.0.4" )
+set (SWIG_SOURCE_ARCHIVE "swig-${SWIG_VERSION}.tar.gz" )
+set (SWIG_URL            "http://downloads.sourceforge.net/project/swig/swig/swig-${SWIG_VERSION}/${SWIG_SOURCE_ARCHIVE}" )
+set (SWIG_SVN            "" )
 
-option (SWIG_FORCE_BUILD       "Force rebuild and local installation?"  NO )
-option (SWIG_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO )
-option (SWIG_VERBOSE_BUILD     "Be verbose during build process?"       NO )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (SWIG_FORCE_BUILD  "Force build and installation of package?" NO )
+option (SWIG_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Swig] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT SWIG_FOUND)
+  find_package (SWIG)
+endif (NOT SWIG_FOUND)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-include (FindSWIG)
+if (SWIG_FROM_REPOS)
+  set (SWIG_FORCE_BUILD TRUE)
+endif (SWIG_FROM_REPOS)
 
-if (SWIG_FOUND)
-  ## report found SWIG installation
-  if (SWIG_VERBOSE_CONFIGURE)
-    message (STATUS "SWIG_DIR        = ${SWIG_DIR}")
-    message (STATUS "SWIG_EXECUTABLE = ${SWIG_EXECUTABLE}")
-    message (STATUS "SWIG_VERSION    = ${SWIG_VERSION}")
-  endif (SWIG_VERBOSE_CONFIGURE)
+if (NOT SWIG_FOUND OR SWIG_FORCE_BUILD)
   
-  string (COMPARE GREATER ${SWIG_VERSION} "1.3.38" SWIG_VERSION_OK)
-
-  if (SWIG_VERSION_OK)
-    set (HAVE_SWIG TRUE)
-  else (SWIG_VERSION_OK)
-    message (STATUS "[Swig] System version too old - forcing rebuild!")
-    set (HAVE_SWIG FALSE)
-  endif (SWIG_VERSION_OK)
-else (SWIG_FOUND)
-    set (HAVE_SWIG FALSE)
-endif (SWIG_FOUND)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
+  ## Locate source file to build from
   
-  include (ExternalProject)
-
-  set (SWIG_VERSION "1.3.40")
-  set (SWIG_DIRECTORY "swig-${SWIG_VERSION}")
-  set (SWIG_TAR_ARCHIVE "${SWIG_DIRECTORY}.tar.gz")
-  set (SWIG_URL "${USG_DOWNLOAD}/software/${SWIG_TAR_ARCHIVE}")
-
-  find_file (have_swig_tgz ${SWIG_TAR_ARCHIVE} ${CMAKE_CURRENT_SOURCE_DIR})
-  
-  if (have_swig_tgz)
-    ExternalProject_Add (swig
-      PREFIX ${SWIG_BINARY_DIR}
-      DOWNLOAD_DIR ${SWIG_BINARY_DIR}/download
-      SOURCE_DIR ${SWIG_BINARY_DIR}/source
-      URL ${have_swig_tgz}
-      URL_MD5 2df766c9e03e02811b1ab4bba1c7b9cc
-      CONFIGURE_COMMAND ${SWIG_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX}
-      )
-  else (have_swig_tgz)
-    status (WARNING "[Swig] Unable to build project - no sources found!")
-  endif (have_swig_tgz)
-  
-## <-- end build condition ----------------------------------------------------->
-  
-else (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
-  add_custom_target (swig
-    WORKING_DIRECTORY ${SWIG_BINARY_DIR}
-    COMMENT "[Swig] Found system-wide installation; skipping rebuild!"
+  find_file (SWIG_SOURCE ${SWIG_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
-endif (NOT HAVE_SWIG OR SWIG_FORCE_BUILD)
+  
+  if (NOT SWIG_SOURCE AND SWIG_URL)
+    set (SWIG_SOURCE ${SWIG_URL})
+  endif (NOT SWIG_SOURCE AND SWIG_URL)
+    
+  if (SWIG_FROM_REPOS AND SWIG_SVN)
+
+    ## Build package off code repository
+    
+    ExternalProject_Add (swig
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${SWIG_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  
+  else (SWIG_FROM_REPOS AND SWIG_SVN)
+
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (swig
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${SWIG_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (SWIG_FROM_REPOS AND SWIG_SVN)
+
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (swig update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of swig ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT SWIG_FOUND OR SWIG_FORCE_BUILD)
+  
+  add_custom_target (swig
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[swig] Found system-wide installation; skipping rebuild!"
+    )
+  
+endif (NOT SWIG_FOUND OR SWIG_FORCE_BUILD)
