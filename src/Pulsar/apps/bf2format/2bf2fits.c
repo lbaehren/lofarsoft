@@ -404,8 +404,10 @@ void *stokesdata_h5_ptr = NULL;
 int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks, long truncNrBlocks)
 {
 
+  /* Used to be SAMPLES|2, but that is apparently no longer the case
+     for the new H5 format. */
   typedef struct {
-    float	samples[BEAMS][SAMPLES|2][SUBBANDS][CHANNELS][STOKES];
+    float	samples[BEAMS][SAMPLES][SUBBANDS][CHANNELS][STOKES];
   }stokesdata_h5_struct;
   
   stokesdata_h5_struct *stokesdata_h5;
