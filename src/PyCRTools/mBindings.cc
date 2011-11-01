@@ -55,6 +55,7 @@
 #include "mFitting.h"
 #include "mIO.h"
 #include "mRF.h"
+#include "mCalibration.h"
 #include "mEndPointRadiation.h"
 #include "mTBB.h"
 #include "legacy.h"
@@ -289,6 +290,11 @@ BOOST_PYTHON_MODULE(_hftools)
 
 
 #include "../../../../build/pycrtools/mMath.def.h"
+
+// ________________________________________________________________________
+//                                                              Calibration 
+
+#include "../../../../build/pycrtools/mCalibration.def.h"
 
 // ________________________________________________________________________
 //                                                                      FFT

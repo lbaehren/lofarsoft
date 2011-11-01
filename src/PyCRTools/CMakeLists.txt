@@ -162,6 +162,7 @@ set (PYCRTOOLS_CPP_MODULES
   EndPointRadiation
   TBB
   Imaging
+  Calibration
   )
 
 list (APPEND PYCRTOOLS_CPP_MODULES Bindings)
