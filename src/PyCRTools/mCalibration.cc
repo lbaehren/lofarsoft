@@ -104,7 +104,7 @@ void HFPP_FUNC_NAME (const CIter pol0, const CIter pol0_end,
   // Sanity checks
   if (N != std::distance(pol0, pol0_end) || N != std::distance(pol1, pol1_end))
   {
-    throw PyCR::ValueError("[hCalibratePolarization] input vectors have incompatible sizes.");
+    throw PyCR::ValueError("[hCalibratePolarizationLBA] input vectors have incompatible sizes.");
   }
 
   // Get iterators
@@ -120,7 +120,7 @@ void HFPP_FUNC_NAME (const CIter pol0, const CIter pol0_end,
     // Invert the Jones matrix (J contains beam pattern so J^-1 is the correction)
     det = (J[0][0] * J[1][1]) - (J[0][1] * J[1][0]);
 
-    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarization] Jones matrix is singular.");
+    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarizationLBA] Jones matrix is singular.");
 
     Jinv[0][0] = J[1][1] / det;
     Jinv[0][1] = -1.0 * J[0][1] / det;
@@ -187,7 +187,7 @@ void HFPP_FUNC_NAME (const CIter polx, const CIter polx_end,
   // Sanity checks
   if (N != std::distance(polx, polx_end) || N != std::distance(poly, poly_end) || N != std::distance(polz, polz_end))
   {
-    throw PyCR::ValueError("[hCalibratePolarization] input vectors have incompatible sizes.");
+    throw PyCR::ValueError("[hCalibratePolarizationLBA] input vectors have incompatible sizes.");
   }
 
   // Get iterators
@@ -204,7 +204,7 @@ void HFPP_FUNC_NAME (const CIter polx, const CIter polx_end,
     // Invert the Jones matrix (J contains beam pattern so J^-1 is the correction)
     det = (J[0][0] * J[1][1]) - (J[0][1] * J[1][0]);
 
-    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarization] Jones matrix is singular.");
+    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarizationLBA] Jones matrix is singular.");
 
     Jinv[0][0] = J[1][1] / det;
     Jinv[0][1] = -1.0 * J[0][1] / det;
@@ -222,6 +222,65 @@ void HFPP_FUNC_NAME (const CIter polx, const CIter polx_end,
 
     ++polx_it;
     ++poly_it;
+    ++freq_it;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Return approximate Gain factors for given direction and frequencies
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hLBAGain
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(G)()("Approximate gain calibration factors.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Frequencies in Hz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(az)()("Azimuth with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(el)()("Elevation with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  For each frequency the Jones matrix containing the antenna response is calculated using the LOFAR provided ElementResponse
+  library.
+  This matrix contains the beam pattern and multiplying by the inverse of this matrix gives the polarized signal in the on-sky
+  frame.
+
+  This routine returns the sum of the absolute values squared of each row of the Jones matrix, giving a rough estimate of the
+  gain without taking mixing into account.
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter G, const NIter G_end,
+    const NIter frequencies, const NIter frequencies_end,
+    const HNumber az, const HNumber el)
+{
+  std::complex<double> J[2][2]; // Jones matrix for element response
+  std::complex<double> det; // Determinant of Jones matrix (used for matrix inversion)
+
+  // Get lengths
+  const int N = std::distance(frequencies, frequencies_end);
+
+  // Sanity checks
+  if (2 * N != std::distance(G, G_end))
+  {
+    throw PyCR::ValueError("[hPolarizationCalibrationFactorsLBA] input vectors have incompatible sizes.");
+  }
+
+  // Get iterators
+  NIter G_it = G;
+  NIter freq_it = frequencies;
+
+  for (int i=0; i<N; i++)
+  {
+    // Get element response
+    LOFAR::element_response_lba(*freq_it, az, el, J);
+
+    *G_it = real(J[0][0] * conj(J[0][0])) + real(J[0][1] * conj(J[0][1]));
+    ++G_it;
+    *G_it = real(J[1][0] * conj(J[1][0])) + real(J[1][1] * conj(J[1][1]));
+    ++G_it;
+
     ++freq_it;
   }
 }
