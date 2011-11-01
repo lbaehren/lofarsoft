@@ -11,6 +11,7 @@ import pycrtools as cr
 import pycrtools.tasks as tasks
 from pycrtools.tasks import shortcuts as sc
 import pytmf
+import time
 import os
 import sys
 
@@ -69,7 +70,8 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             sigtemp = cr.hArray(float,[res["ndipoles"],1],res[plot_parameter])
             MPos.mean(postemp)
             MSig.mean(sigtemp)
-            stationname = int(res["FILENAME"].split('-')[2].rstrip("h5").rstrip('.'))
+            
+            stationname=res["antennas"][0][0:3]
             
             
             meansignal[res["polarization"]].extend(MSig)
@@ -86,7 +88,13 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
         
         print "Number of dipoles found:",ndipoles
         
-        par["event_id"]=res["FILENAME"].split('-')[1]
+        timesec=res["TIME"]
+        timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
+
+        timens=str(res["SAMPLE_INTERVAL"]*res["SAMPLE_NUMBER"]*1000)[0:3]
+        time_stamp=timestr+"."+timens+"Z" 
+        
+        par["event_id"]= time_stamp
         
         par["antenna_set"] = res["ANTENNA_SET"]
         
@@ -197,7 +205,8 @@ class ldf(tasks.Task):
         CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization"),
         Draw3D = dict(default=True,doc="Draw 2D LDF"),
         save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder"),
-        generate_html = dict(default=False,doc="Default output to altair webserver")
+        generate_html = dict(default=False,doc="Default output to altair webserver"),
+        use_lofar_information = dict(default = False, doc = "Use Barycenter and other information to draw different LDF"),
         
         )
         
@@ -282,10 +291,28 @@ class ldf(tasks.Task):
         err.sqrt()
                 
         return err 
- 
-   
-   
-    
+        
+    def CalculateBaryCenter(self,positions, signals):
+
+        pos1 = cr.hArray_transpose(positions)[0].vec()
+        pos1 = cr.hArray(pos1)
+        pos2 = cr.hArray_transpose(positions)[1].vec()
+        pos2 = cr.hArray(pos2)
+
+        SumSig = signals.sum()
+        
+        x_val = pos1*signals
+        sum_x = x_val.sum()
+        sum_x = sum_x/SumSig
+        
+        y_val = pos2*signals
+        sum_y = y_val.sum()
+        sum_y = sum_y/SumSig
+                
+        core = [sum_x[0],sum_y[0]]
+
+        return core     
+
     def init(self):
         pass
     
@@ -305,15 +332,17 @@ class ldf(tasks.Task):
         
         self.Distances0 = self.GetDistance(self.loracore,self.loradirection,self.positions0)
         self.Distances1 = self.GetDistance(self.loracore,self.loradirection,self.positions1)
-        
-        self.stationDistances0 = self.GetDistance(self.loracore,self.loradirection,self.meanpositions0)
-        self.stationDistances1 = self.GetDistance(self.loracore,self.loradirection,self.meanpositions1) 
 
         self.signals0.par.xvalues=cr.hArray(self.Distances0)
-        self.signals1.par.xvalues=cr.hArray(self.Distances1)
+        self.signals1.par.xvalues=cr.hArray(self.Distances1)        
         
-        self.meansignals0.par.xvalues = cr.hArray(self.stationDistances0)
-        self.meansignals1.par.xvalues = cr.hArray(self.stationDistances1)
+        if self.draw_global:
+        
+            self.stationDistances0 = self.GetDistance(self.loracore,self.loradirection,self.meanpositions0)
+            self.stationDistances1 = self.GetDistance(self.loracore,self.loradirection,self.meanpositions1) 
+
+            self.meansignals0.par.xvalues = cr.hArray(self.stationDistances0)
+            self.meansignals1.par.xvalues = cr.hArray(self.stationDistances1)
 
         if self.square:
             self.signals0.square()
@@ -427,8 +456,8 @@ class ldf(tasks.Task):
         
         if self.draw_global:
         
-            self.meansignals1.plot(color=color_pol1,marker='h',markersize = 10,linestyle="None",clf=False)
-            self.meansignals0.plot(color=color_pol0,marker='h',linestyle="None",markersize = 10,clf=False)
+            self.meansignals1.plot(color=self.color_pol1,marker='h',markersize = 10,linestyle="None",clf=False)
+            self.meansignals0.plot(color=self.color_pol0,marker='h',linestyle="None",markersize = 10,clf=False)
             cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
             
             for i in  xrange(len(self.stationnames0)):
@@ -545,10 +574,23 @@ class ldf(tasks.Task):
 #                    ax.plot([fx[i]+xerror[i], fx[i]-xerror[i]], [fy[i], fy[i]], [fz[i], fz[i]], marker="_")
 #                    ax.plot([fx[i], fx[i]], [fy[i]+yerror[i], fy[i]-yerror[i]], [fz[i], fz[i]], marker="_")
 #                    ax.plot([fx[i], fx[i]], [fy[i], fy[i]], [fz[i]+zerror[i], fz[i]-zerror[i]], marker="_")
-                
 
+
+        if self.use_lofar_information:   
+
+            print "pol 0"    
+            self.CorePol1 = self.CalculateBaryCenter(self.positions0,self.signals0)
+            print "pol 1"
+            self.CorePol2 = self.CalculateBaryCenter(self.positions1,self.signals1)
+            print "LORA", self.loracore, CorePol1, CorePol2
                 
-                    
+            self.DistNew0 = self.GetDistance(self.CorePol1,self.loradirection,self.positions0)
+            self.DistNew1 = self.GetDistance(self.CorePol2,self.loradirection,self.positions1)
+           
+            cr.plt.plot(self.DistNew1.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
+            cr.plt.plot(self.DistNew1.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1)  
+            
+             
                 
 
                
