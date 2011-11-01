@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pycrtools as cr
 
-topdir = '/Users/acorstanje/triggering/CR/results_john/'
+#topdir = '/Users/acorstanje/triggering/CR/results_john/'
+topdir = '/data/VHECR/LORAtriggered/results/'
 #event = 'VHECR_LORA-20110612T231913.199Z'
 #event = 'VHECR_LORA-20110714T174749.986Z' # for use with Plotfootprint
 #event = 'VHECR_LORA-20110716T094509.665Z'
@@ -46,12 +47,20 @@ for eventdir in eventlist:
         if not os.path.isfile(os.path.join(datadir,"results.py")):
             continue # doesn't matter if 'datadir' isn't a directory...
         resfile = os.path.join(datadir,"results.py")
+#        resfiletest = open(resfile)
+#        if "nan" in resfiletest.read():
+#            print "WARNING nan found. skipping file", resfile
+#            resfiletest.close()
+#            continue
+#        resfiletest.close()
         res = {}
         execfile(resfile, res)
         res = res["results"]
         if res["delay_quality_error"] > 1.0:
             # if happens for all pol+stations, Ngood[k] will be 0 and the other entries will also be 0.
+            print 'delay quality error bad for file', resfile
             continue
+        print 'Good file', resfile
         Ngood[k] += 1
         if loracores[k] == 0:
             thisCore = res["pulse_core_lora"] # tuple, assume same for all results
