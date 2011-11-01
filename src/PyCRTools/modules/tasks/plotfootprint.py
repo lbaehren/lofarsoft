@@ -6,6 +6,7 @@ import pycrtools as cr
 import pycrtools.tasks as tasks
 import pytmf
 import os
+import time
 from pycrtools.tasks.shortcuts import *
 from pycrtools import lora
 from math import *
@@ -87,8 +88,13 @@ def gatherresults(filefilter,pol,excludelist,plotlora):
     par["arrivaltime"]=cr.hArray(timelags[pol])+clockcorrection
     par["arrivaltime"]-=min(par["arrivaltime"])
     par["arrivaltime"]*=1e9
-#par["loracolor"]="time"
-    par["title"]="Footprint of CR event "+res["FILENAME"].split('-')[1]
+
+    timesec=res["TIME"]
+    timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
+    timens=str(res["SAMPLE_INTERVAL"]*res["SAMPLE_NUMBER"]*1000)[0:3]
+    time_stamp=timestr+"."+timens+"Z"
+    
+    par["title"]="Footprint of CR event "+ time_stamp
     par["names"]=[str(a)[:-6]+","+str(a)[-3:] for a in antid]
     par["antid"] = cr.hArray(antid[pol])
     return par
