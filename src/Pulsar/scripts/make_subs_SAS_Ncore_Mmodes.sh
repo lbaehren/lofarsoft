@@ -2013,7 +2013,10 @@ do
 		         all=0
 		         all_pproc=0
 		     else
-		         mkdir -p ${STOKES}/"RSPA"
+		         if (( $subsformat == 1 ))
+		         then
+		            mkdir -p ${STOKES}/"RSPA"
+		         fi
 	         fi
 		  fi
 	  fi 
