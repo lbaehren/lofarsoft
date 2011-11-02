@@ -2034,7 +2034,7 @@ do
 	if [ $all == 1 ] || [ $all_pproc == 1 ]
 	then 
 	   if (( $subsformat == 1 ))
-	   them
+	   then
 	     #master_counter=0
 	     offset=$(( $all_num / $core * $CHAN ))
 	
