@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.03
+VERSION=3.04
 
 #####################################################################
 # Usage #
@@ -1992,7 +1992,7 @@ do
 		        echo "Note, skipping creating .inf file for psrfits mode" 
 		        echo "Note, skipping creating .inf file for psrfits mode"  >> $log	        
 	        fi
-		 fi
+		 fi #end if (( $subsformat == 1 ))
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 
     # Create the RSPA (all) directory when the all option is requested
@@ -2020,7 +2020,7 @@ do
     fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 		
 	#Create the .sub.inf file for the entire set (in background, as there is plenty of time to finish before file is needed
-	if (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 0 ))
+	if (( (( $all == 1 )) || (( $all_pproc == 1 )) )) && (( $flyseye == 0 )) && (( $subsformat == 1 ))
 	then 
 	     echo python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset >> $log
 	     python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR_ARRAY_PRIMARY[0]} -o test -N ${NSAMPL} -n $all_num -r 1 ./${OBSID}.parset
@@ -2033,6 +2033,8 @@ do
 
 	if [ $all == 1 ] || [ $all_pproc == 1 ]
 	then 
+	   if (( $subsformat == 1 ))
+	   them
 	     #master_counter=0
 	     offset=$(( $all_num / $core * $CHAN ))
 	
@@ -2067,7 +2069,7 @@ do
 		    echo cd $location >> $log
 		    cd $location
 	     fi
-	     	
+	   fi # end if (( $subsformat == 1 ))
 	fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
 #    fi # end if (( $flyseye == 0 ))
 
@@ -2358,66 +2360,69 @@ do
     # fold the RSPA location in non-multi-beam mode     
     if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
     then
-	   #When the first folding task finishes, start the folding for the "all" directory
-	   if [ $all == 1 ] || [ $all_pproc == 1 ]
-	   then
-		  echo "Starting folding for RSPA (all subbands)"
-		  echo "Starting folding for RSPA (all subbands)" >> $log
-		  date
-		  date >> $log
-
-		  # Fold data per requested Pulsar
-		  index=1
-		  beam_index=1
-		  for fold_pulsar in $PULSAR_LIST
-		  do
-		      if (( $flyseye == 0 ))
-	          then
-		         cd ${location}/${STOKES}/RSPA
-		         echo cd ${location}/${STOKES}/RSPA >> $log
-
-			     if (( $subsformat == 1 ))
-			     then
-		             echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
-		         else
-		             if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
-		             then
-		                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
-		                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout_nomask 
-		             else
-		                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
-		             fi
-		         fi
-		         index=$index
-			     if [ $test == 0 ]
-			     then
+       if (( $subsformat == 1 ))
+       then 
+		   #When the first folding task finishes, start the folding for the "all" directory
+		   if [ $all == 1 ] || [ $all_pproc == 1 ]
+		   then
+			  echo "Starting folding for RSPA (all subbands)"
+			  echo "Starting folding for RSPA (all subbands)" >> $log
+			  date
+			  date >> $log
+	
+			  # Fold data per requested Pulsar
+			  index=1
+			  beam_index=1
+			  for fold_pulsar in $PULSAR_LIST
+			  do
+			      if (( $flyseye == 0 ))
+		          then
+			         cd ${location}/${STOKES}/RSPA
+			         echo cd ${location}/${STOKES}/RSPA >> $log
+	
 				     if (( $subsformat == 1 ))
 				     then
-			            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
-				        prepfold_pid_all[$index]=$!  
-		                echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> $log
-				     else
-				        if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
-				        then
-			               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
-			               sleep 10
-			               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout_nomask 2>&1 &
-				           prepfold_pid_all[$index]=$!  
-		                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
-		                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
-		                else
-			               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
-				           prepfold_pid_all[$index]=$!  
-		                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
-		                fi
-				     fi
-		         fi
-		         cd ${location}
-		         sleep 5
-			  fi # end if (( $flyseye == 0 ))
-			  index=$(( $index + 1 ))
-		  done # end for fold_pulsar in $PULSAR_LIST
-	   fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
+			             echo prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+			         else
+			             if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+			             then
+			                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+			                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout_nomask 
+			             else
+			                echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 
+			             fi
+			         fi
+			         index=$index
+				     if [ $test == 0 ]
+				     then
+					     if (( $subsformat == 1 ))
+					     then
+				            prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+					        prepfold_pid_all[$index]=$!  
+			                echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.sub[0-9]??? >> $log
+					     else
+					        if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+					        then
+				               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+				               sleep 10
+				               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout_nomask 2>&1 &
+					           prepfold_pid_all[$index]=$!  
+			                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
+			                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
+			                else
+				               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 && touch "DONE" >> ${fold_pulsar}_${OBSID}_RSPA.prepout 2>&1 &
+					           prepfold_pid_all[$index]=$!  
+			                   echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSPA ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSPA.fits >> $log
+			                fi
+					     fi
+			         fi
+			         cd ${location}
+			         sleep 5
+				  fi # end if (( $flyseye == 0 ))
+				  index=$(( $index + 1 ))
+			  done # end for fold_pulsar in $PULSAR_LIST
+	      fi # end if [ $all == 1 ] || [ $all_pproc == 1 ]
+	   fi # end if (( $subsformat == 1 ))
 	fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
 
 		
@@ -2598,7 +2603,7 @@ do
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 		
 	#Wait for the all prepfold to finish
-	if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+	if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]] && [[ $subsformat == 1 ]]
 	then
 		if [ $all -eq 1 ] || [ $all_pproc == 1 ]
 		then
@@ -2643,7 +2648,7 @@ do
 		       index=$(( $index + 1 ))
 	       done # end for fold_pulsar in $PULSAR_LIST
 		fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
-    fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]]
+    fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]] && [[ $subsformat == 1 ]]
 
 	#Rename the RSP?/beam_? to their actual names based on the observation parset names -> NAME/beam_?
     if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $TiedArray == 0 ]
@@ -2836,15 +2841,27 @@ do
     fi
 
 	#create a delete list of subband files for future clean up
-	if [[ $STOKES == "incoherentstokes" ]] 
+	if [[ $STOKES == "incoherentstokes" ]] && [[ $subsformat == 1 ]]
 	then
 	   find `pwd`/incoherentstokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > IS_delete_sub.list
-	else
+	elif [[ $subsformat == 1 ]]
+	then
        if (( $flyseye == 0 )) || (( $TiedArray == 1 ))
        then
 	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > CS_delete_sub.list
        else
 	      find `pwd`/stokes -name "*sub????*" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > FE_delete_sub.list
+       fi
+    elif [[ $STOKES == "incoherentstokes" ]] && [[ $subsformat == 0 ]]	
+    then
+	   find `pwd`/incoherentstokes -name "*.fits" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > IS_delete_fits.list
+	elif [[ $STOKES == "stokes" ]] && [[ $subsformat == 0 ]]
+	then
+       if (( $flyseye == 0 )) || (( $TiedArray == 1 ))
+       then
+	      find `pwd`/stokes -name "*.fits" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > CS_delete_fits.list
+       else
+	      find `pwd`/stokes -name "*fits" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > FE_delete_fits.list
        fi	
 	fi
 	
