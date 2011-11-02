@@ -50,7 +50,6 @@ option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO
 option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO )
 option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
 option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
-option (TEST_DATASETS          "Download and install sample test datasets?"   NO )
 option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
 
 ## Options affecting the build of individual packages
@@ -267,7 +266,6 @@ endif (ROOT_FOUND)
 
 ## Packages handled directly through CMake
 
-add_subdirectory (${LUS_ROOT}/data)
 add_subdirectory (${LUS_ROOT}/doc)
 add_subdirectory (${LUS_ROOT}/external)
 add_subdirectory (${LUS_ROOT}/devel_common)
