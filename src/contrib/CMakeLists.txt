@@ -71,15 +71,49 @@ find_package (ZLIB)
 
 ## USG CMake modules 
 
-include (FindBlitz)
-include (FindBoost)
-include (FindCASACORE)
-include (FindCFITSIO)
-include (FindGFortran)
-include (FindHDF5)
-include (FindLAPACK)
-include (FindPLplot)
-include (FindWCSLIB)
+foreach (varSystemPackage
+    Blitz
+    Boost
+    CASACORE
+    CFITSIO
+    GFortran
+    HDF5
+    LAPACK
+    PLplot
+    WCSLIB
+    )
+
+  ## Get package name in uppercase
+  string (TOUPPER ${varSystemPackage} varPackageUpper)
+
+  ## Set verbosity level
+  if (LUS_VERBOSE_CONFIGURE)
+    set (${varSystemPackage}_FIND_QUIETLY FALSE )
+    set (${varPackageUpper}_FIND_QUIETLY  FALSE )
+  else (LUS_VERBOSE_CONFIGURE)  
+    set (${varSystemPackage}_FIND_QUIETLY TRUE )
+    set (${varPackageUpper}_FIND_QUIETLY  TRUE )
+  endif (LUS_VERBOSE_CONFIGURE)
+
+  ## Load CMake module if package not yet located
+  if (NOT ${varPackageUpper}_FOUND)
+    find_package (${varSystemPackage})
+  endif (NOT ${varPackageUpper}_FOUND)
+
+  ## Conformation of returned status variable
+  if (HAVE_${varSystemPackage})
+    set (HAVE_${varPackageUpper} TRUE)
+  endif (HAVE_${varSystemPackage})
+
+  if (HAVE_${varPackageUpper})
+    set (${varPackageUpper}_FOUND TRUE)
+  endif (HAVE_${varPackageUpper})
+  
+  if (${varPackageUpper}_FOUND)
+    set (${varPackageUpper}_FOUND TRUE)
+  endif (${varPackageUpper}_FOUND)
+  
+endforeach (varSystemPackage)
 
 ## -----------------------------------------------------------------------------
 ## Compiler flags
