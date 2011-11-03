@@ -13,6 +13,7 @@ Contents:
    :maxdepth: 2
 
    introduction
+   installation
    tutorial
    cookbook
    api
