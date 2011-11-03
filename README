@@ -136,8 +136,8 @@ respective package manager:
 
 == Fedora 15 ==
 
-  yum install cmake git-svn subversion gcc-gfortran libgfortran
-  yum install blas-devel lapack-devel boost-devel fftw-devel
+  yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison swig
+  yum install blas-devel lapack-devel boost-devel fftw-devel hdf5-devel
   yum install cfitsio-devel gsl-devel
 
 == OpenSuSE 11.4 ==
