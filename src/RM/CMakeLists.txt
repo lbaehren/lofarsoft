@@ -1,8 +1,4 @@
 
-##-------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 2289 2009-02-03 17:33:37Z baehren                       $
-##-------------------------------------------------------------------------------
-
 ## Name of the project
 project (RM)
 
@@ -247,12 +243,12 @@ else (HAVE_HDF5)
   message (STATUS "[RM] HDF5 installation incomplete!")
 endif (HAVE_HDF5)
 
-if (RM_ENABLE_ITPP AND HAVE_ITPP)
+if (RM_ENABLE_ITPP AND ITPP_FOUND)
   include_directories (${ITPP_INCLUDES})
   add_definitions (-DHAVE_ITPP)
-else (RM_ENABLE_ITPP AND HAVE_ITPP)
+else (RM_ENABLE_ITPP AND ITPP_FOUND)
   message (STATUS "[RM] IT++ installation incomplete!")
-endif (RM_ENABLE_ITPP AND HAVE_ITPP)
+endif (RM_ENABLE_ITPP AND ITPP_FOUND)
 
 if (HAVE_WCSLIB)
   include_directories (${WCSLIB_INCLUDES})
