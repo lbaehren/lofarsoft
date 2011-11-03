@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -254,9 +252,11 @@ endif (CASACORE_LIBRARIES)
 ## If detection successful, register package as found
 
 if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
-  set (HAVE_CASACORE TRUE)
+  set ( HAVE_CASACORE  TRUE )
+  set ( CASACORE_FOUND TRUE )
 else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
-  set (HAVE_CASACORE FALSE)
+  set ( HAVE_CASACORE  FALSE )
+  set ( CASACORE_FOUND FALSE )
   if (NOT CASACORE_FIND_QUIETLY)
     if (NOT CASACORE_INCLUDES)
       message (STATUS "Unable to find CASACORE header files!")

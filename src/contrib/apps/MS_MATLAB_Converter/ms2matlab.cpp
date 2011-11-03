@@ -1,22 +1,24 @@
+
+/* Standard system header files */
 #include <iostream>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <sstream>
 #include <iomanip>
-//#include <unistd.h>
-
 #include <sys/stat.h>
 #include <sys/types.h>
 
+
+/* casacore/CASA header files */
 #include <casa/Arrays.h>
 #include <casa/aipstype.h>
 #include <casa/complex.h>
 
-#include <IO/SimpleOpt.h>
-#include <IO/MSReader.h>
-#include <IO/MatWriter.h>
-#include <IO/MSInfo.h>
+/* Custom header files */
+#include "SimpleOpt.h"
+#include "MSReader.h"
+#include "MatWriter.h"
+#include "MSInfo.h"
 
 # define TCHAR		char
 # define _T(x)		x
@@ -24,10 +26,17 @@
 
 using namespace std;
 
-enum FillMode { FillFrequency, FillTime };
+//! Fill mode types
+enum FillMode {
+  FillFrequency,
+  FillTime
+};
 
 void countZeros(const Cube<complex<float> >& cube);
 
+/*!
+  Definition of command line options
+*/
 CSimpleOpt::SOption cmdOptions[] = {
   { 0, _T("-?"), SO_NONE },
   { 0, _T("-h"), SO_NONE },

@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -23,8 +21,7 @@
 # - Check for the presence of Matlab
 #
 # The following variables are set when MATLAB is found:
-#  HAVE_MATLAB       = Set to true, if all components of MATLAB
-#                          have been found.
+#  HAVE_MATLAB       = Set to true, if all components of MATLAB have been found.
 #  MATLAB_INCLUDES   = Include path for the header files of MATLAB
 #  MATLAB_LIBRARIES  = Link these to use MATLAB
 #  MATLAB_LFGLAS     = Linker flags (optional)
@@ -55,9 +52,11 @@ find_library (MATLAB_LIBRARIES matlab
 ## Actions taken when all components have been found
 
 if (MATLAB_INCLUDES AND MATLAB_LIBRARIES)
-  set (HAVE_MATLAB TRUE)
+  set (HAVE_MATLAB  TRUE)
+  set (MATLAB_FOUND TRUE)
 else (MATLAB_INCLUDES AND MATLAB_LIBRARIES)
-  set (HAVE_MATLAB FALSE)
+  set (HAVE_MATLAB  FALSE)
+  set (MATLAB_FOUND FALSE)
   if (NOT MATLAB_FIND_QUIETLY)
     if (NOT MATLAB_INCLUDES)
       message (STATUS "Unable to find Matlab header files!")

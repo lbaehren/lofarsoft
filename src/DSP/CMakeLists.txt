@@ -1,8 +1,4 @@
 
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 724 2007-09-10 10:17:21Z baehren                        $
-##------------------------------------------------------------------------------
-
 ## Name of the project
 project (DSP)
 
@@ -71,11 +67,6 @@ endif (NOT DSP_VERBOSE_CONFIGURE)
 ## Handle option: Activate support for Glish applications on/off
 
 # --> handled below
-
-## -----------------------------------------------------------------------------
-## Subdirectories
-
-add_subdirectory (implement)
 
 ## =============================================================================
 ##
@@ -269,20 +260,3 @@ if (prefix)
   message (STATUS "[DSP] Installation area located.")
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
-
-## ------------------------------------------------------------------------------
-## Configuration summary
-
-message (STATUS "CMAKE_SYSTEM .......... : ${CMAKE_SYSTEM}")
-message (STATUS "CMAKE_SYSTEM_PROCESSOR  : ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_SYSTEM_64BIT .....: ${CMAKE_SYSTEM_64BIT}")
-message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN : ${CMAKE_SYSTEM_BIG_ENDIAN}")
-message (STATUS "BLITZ ................. : ${HAVE_BLITZ}")
-message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
-message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
-message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
-message (STATUS "GSL ................... : ${HAVE_GSL}")
-message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
-message (STATUS "Matlab ................ : ${HAVE_MATLAB}")
-message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
-message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")
