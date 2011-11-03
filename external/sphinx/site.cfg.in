@@ -1,0 +1,4 @@
+
+[install]
+install_lib = ${CMAKE_INSTALL_PREFIX}/lib/python
+install_scripts = ${CMAKE_INSTALL_PREFIX}/bin

@@ -1,58 +1,50 @@
 
-## ------------------------------------------------------------------------------
-#
-#  CMake wrapper around the GNU Autotools-based configure/build of the SPHINX
-#  library.
-#
-## ------------------------------------------------------------------------------
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
 
-## Name of the project
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (SPHINX)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the binary from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (SPHINX_VERSION        "1.1" )
+set (SPHINX_SOURCE_ARCHIVE "Sphinx-${SPHINX_VERSION}.tar.gz" )
+set (SPHINX_URL            "http://pypi.python.org/packages/source/S/Sphinx/${SPHINX_SOURCE_ARCHIVE}" )
+set (SPHINX_SVN            "" )
 
-option (SPHINX_FORCE_BUILD       "Force rebuild and local installation"      NO  )
-option (SPHINX_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  )
-option (SPHINX_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (SPHINX_FORCE_BUILD  "Force build and installation of package?" NO )
+option (SPHINX_FROM_REPOS   "Install package from repository?"         NO )
+option (SPHINX_REQUIRED_MAJOR_VERSION "Minimum required major version" 1  )
+option (SPHINX_REQUIRED_MINOR_VERSION "Minimum required minor version" 0  )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS
-  ${SPHINX_SOURCE_DIR}
-  ${SPHINX_SOURCE_DIR}/..
-  ${SPHINX_SOURCE_DIR}/../..
-  ${SPHINX_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Sphinx] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT PYTHON_FOUND)
+  find_package (Python)
+endif (NOT PYTHON_FOUND)
 
-## ------------------------------------------------------------------------------
-## System inspection
+##__________________________________________________________
+## Existing installation of Sphinx?
 
-if (NOT SPHINX_VERBOSE_CONFIGURE)
-  set (SPHINX_FIND_QUIETLY  YES )
-  set (PYTHON_FIND_QUIETLY YES )
-endif (NOT SPHINX_VERBOSE_CONFIGURE)
-
-include (FindPython)
-include (FindSphinx)
-
-## Check version number of Sphinx installation
-set (SPHINX_REQUIRED_MAJOR_VERSION   1)
-set (SPHINX_REQUIRED_MINOR_VERSION   0)
+if (NOT SPHINX_FOUND)
+  find_package (Sphinx)
+endif (NOT SPHINX_FOUND)
 
 if (SPHINX_API_VERSION)
   if (SPHINX_MAJOR_VERSION LESS ${SPHINX_REQUIRED_MAJOR_VERSION})
@@ -67,53 +59,97 @@ if (SPHINX_API_VERSION)
   endif (SPHINX_MAJOR_VERSION LESS ${SPHINX_REQUIRED_MAJOR_VERSION})
 endif (SPHINX_API_VERSION)
 
-## <-- begin build condition --------------------------------------------------->
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-if (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
+if (SPHINX_FROM_REPOS)
+  set (SPHINX_FORCE_BUILD TRUE)
+endif (SPHINX_FROM_REPOS)
 
-  include (ExternalProject)
+if (NOT SPHINX_FOUND OR SPHINX_FORCE_BUILD)
+  
+  ##________________________________________________________
+  ## Generate site.cfg file to custimize configuration
 
-  set (SPHINX_VERSION     "1.0.7")
-  set (SPHINX_DIRECTORY   "Sphinx-${SPHINX_VERSION}")
-  set (SPHINX_TAR_ARCHIVE "${SPHINX_DIRECTORY}.tar.gz")
+  configure_file (
+    ${PROJECT_SOURCE_DIR}/site.cfg.in
+    ${PROJECT_BINARY_DIR}/site.cfg
+    )
+  
+  ##________________________________________________________
+  ## Check if installation directory exists
+  
+  if (NOT EXISTS ${CMAKE_INSTALL_PREFIX}/lib/python)
+    file (MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/python)
+  endif ()
 
-  ##__________________________________________________________________
-  ## Build the project
+  ##________________________________________________________
+  ## Locate source file to build from
+  
+  find_file (SPHINX_SOURCE ${SPHINX_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT SPHINX_SOURCE AND SPHINX_URL)
+    set (SPHINX_SOURCE ${SPHINX_URL})
+  endif (NOT SPHINX_SOURCE AND SPHINX_URL)
+    
+  if (SPHINX_FROM_REPOS AND SPHINX_SVN)
 
-  find_file (have_sphinx_tgz ${SPHINX_TAR_ARCHIVE} ${SPHINX_SOURCE_DIR})
-
-  if (have_sphinx_tgz)
+    ##______________________________________________________
+    ## Build package off code repository
+    
     ExternalProject_Add (sphinx
-      PREFIX ${SPHINX_BINARY_DIR}
-      DOWNLOAD_DIR ${SPHINX_BINARY_DIR}/download
-      SOURCE_DIR ${SPHINX_BINARY_DIR}/source
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${SPHINX_SVN}
       BUILD_IN_SOURCE 1
-      URL ${have_sphinx_tgz}
-      URL_MD5 42c722d48e52d4888193965dd473adb5
-      CONFIGURE_COMMAND echo "No configuration needed"
-      BUILD_COMMAND echo "Not building anything"
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SPHINX_BINARY_DIR}/source/setup.py install --home=${LUS_INSTALL_PREFIX}
+      CONFIGURE_COMMAND cat ${PROJECT_BINARY_DIR}/site.cfg >> setup.cfg
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} setup.py build
+      INSTALL_COMMAND  ${CMAKE_COMMAND} -E environment "PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python"&& ${PYTHON_EXECUTABLE} setup.py install --home=${CMAKE_INSTALL_PREFIX}
       )
-  else (have_sphinx_tgz)
-    message (WARNING "[Sphinx] Unable to build project - missing source!")
-  endif (have_sphinx_tgz)
+  
+  else (SPHINX_FROM_REPOS AND SPHINX_SVN)
 
-  ##__________________________________________________________________
-  ## Configuration summary
+    ##______________________________________________________
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (sphinx
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${SPHINX_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND cat ${PROJECT_BINARY_DIR}/site.cfg >> setup.cfg
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} setup.py build
+      INSTALL_COMMAND  ${CMAKE_COMMAND} -E environment "PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python"&& ${PYTHON_EXECUTABLE} setup.py install --home=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (SPHINX_FROM_REPOS AND SPHINX_SVN)
 
-  if (SPHINX_VERBOSE_CONFIGURE)
-    message ("-------------------------------------------------------------")
-    message (STATUS "[Sphinx] Summary of configuration status.")
-    message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
-    message ("-------------------------------------------------------------")
-  endif (SPHINX_VERBOSE_CONFIGURE)
-
-  ## <-- end build condition ----------------------------------------------------->
-
-else (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
+  ##________________________________________________________
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (sphinx update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of Sphinx ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT SPHINX_FOUND OR SPHINX_FORCE_BUILD)
+  
   add_custom_target (sphinx
-    WORKING_DIRECTORY ${BOOST_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[Sphinx] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_SPHINX OR SPHINX_FORCE_BUILD)
-
+  
+endif (NOT SPHINX_FOUND OR SPHINX_FORCE_BUILD)
