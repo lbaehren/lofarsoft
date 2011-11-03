@@ -143,3 +143,9 @@ respective package manager:
   apt-get install build-essential gfortran git-svn cmake subversion flex bison
   apt-get install libblas-dev liblapack-dev libboost-all-dev
   apt-get install libcfitsio3-dev
+
+== Ubuntu Linux 11.10 ==
+
+  apt-get install build-essential gfortran git-svn cmake subversion flex bison
+  apt-get install libblas-dev liblapack-dev libboost-all-dev
+  apt-get install libcfitsio3-dev

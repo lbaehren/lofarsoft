@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -73,9 +71,11 @@ endif (SZIP_SZ_LIBRARY)
 ## Actions taken when all components have been found
 
 if (SZIP_INCLUDES AND SZIP_LIBRARIES)
-  set (HAVE_SZIP TRUE)
+  set (HAVE_SZIP  TRUE)
+  set (SZIP_FOUND TRUE)
 else (SZIP_INCLUDES AND SZIP_LIBRARIES)
-  set (HAVE_SZIP FALSE)
+  set (HAVE_SZIP  FALSE)
+  set (SZIP_FOUND FALSE)
   if (NOT SZIP_FIND_QUIETLY)
     if (NOT SZIP_INCLUDES)
       message (STATUS "Unable to find SZIP header files!")

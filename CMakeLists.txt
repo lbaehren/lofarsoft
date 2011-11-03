@@ -135,6 +135,7 @@ foreach (varSystemPackage
     CASACORE
     CFITSIO
     CUDA
+    CppUnit
     Doxygen
     FFTW3
     FLEX
@@ -145,12 +146,14 @@ foreach (varSystemPackage
     ITPP
     OpenGL
     OpenMP
+    PIL
     Perl
     Python
     ROOT
     Sphinx
     Subversion
     SWIG
+    SZIP
     WCSLIB
     Wget
     )
@@ -456,6 +459,7 @@ message (STATUS " .. Perl ....................... = ${PERL_FOUND}"            )
 message (STATUS " .. ROOT ....................... = ${ROOT_FOUND}"            )
 message (STATUS " .. SWIG ....................... = ${SWIG_FOUND}"            )
 message (STATUS " .. Subversion ................. = ${SUBVERSION_FOUND}"      )
+message (STATUS " .. SZIP compression library ... = ${SZIP_FOUND}"            )
 message (STATUS " .. WCSLIB ..................... = ${WCSLIB_FOUND}"          )
 message (STATUS " .. Wget ....................... = ${WGET_FOUND}"            )
 message (STATUS " LOFAR User software configuration:"                         )

@@ -1,81 +1,114 @@
 
-## ------------------------------------------------------------------------------
-#
-#  CMake wrapper around the GNU Autotools-based configure/build of the SZIP
-#  library.
-#
-## ------------------------------------------------------------------------------
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
 
-## Name of the project
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (SZIP)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (SZIP_VERSION        "2.1" )
+set (SZIP_SOURCE_ARCHIVE "szip-${SZIP_VERSION}.tar.gz" )
+set (SZIP_URL            "http://www.hdfgroup.org/ftp/lib-external/szip/${SZIP_VERSION}/src/${SZIP_SOURCE_ARCHIVE}" )
+set (SZIP_SVN            "" )
 
-option (SZIP_FORCE_BUILD       "Force rebuild and local installation"      NO  )
-option (SZIP_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (SZIP_FORCE_BUILD  "Force build and installation of package?" NO )
+option (SZIP_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${SZIP_SOURCE_DIR}
-  ${SZIP_SOURCE_DIR}/..
-  ${SZIP_SOURCE_DIR}/../..
-  ${SZIP_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Szip] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT SZIP_FOUND)
+  find_package (SZIP)
+endif (NOT SZIP_FOUND)
 
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-## ------------------------------------------------------------------------------
-## Check for system-wide SZIP library installation
+if (SZIP_FROM_REPOS)
+  set (SZIP_FORCE_BUILD TRUE)
+endif (SZIP_FROM_REPOS)
 
-set (SZIP_FIND_QUIETLY YES)
-
-include (FindSZIP)
-
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
+if (NOT SZIP_FOUND OR SZIP_FORCE_BUILD)
   
-  set (SZIP_VERSION "2.1")
-  set (SZIP_TAR_ARCHIVE "szip-${SZIP_VERSION}.tar.gz")
-
-  ##__________________________________________________________________
-  ## Build the project
+  ##________________________________________________________
+  ## Locate source file to build from
   
-  find_file (have_szip_tgz ${SZIP_TAR_ARCHIVE} ${SZIP_SOURCE_DIR})
-  
-  if (have_szip_tgz)
-    ExternalProject_Add (szip
-      PREFIX ${SZIP_BINARY_DIR}
-      DOWNLOAD_DIR ${SZIP_BINARY_DIR}/download
-      SOURCE_DIR ${SZIP_BINARY_DIR}/source
-      URL ${have_szip_tgz}
-      URL_MD5 1e0621efa66c2e1b07d7659703df5ea8
-      CONFIGURE_COMMAND ${SZIP_BINARY_DIR}/source/configure --prefix=${LUS_INSTALL_PREFIX} --includedir=${LUS_INSTALL_PREFIX}/include/szip
-      )
-  else (have_szip_tgz)
-    message (WARNING "[Szip] Unable to build project - missing source!")
-  endif (have_szip_tgz)
-  
-  ## <-- end build condition ----------------------------------------------------->
-  
-else (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
-  add_custom_target (szip
-    WORKING_DIRECTORY ${SZIP_BINARY_DIR}
-    COMMENT "[Szip] Found system-wide installation; skipping rebuild!"
+  find_file (SZIP_SOURCE ${SZIP_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
-endif (NOT HAVE_SZIP OR SZIP_FORCE_BUILD)
+  
+  if (NOT SZIP_SOURCE AND SZIP_URL)
+    set (SZIP_SOURCE ${SZIP_URL})
+  endif (NOT SZIP_SOURCE AND SZIP_URL)
+    
+  if (SZIP_FROM_REPOS AND SZIP_SVN)
+
+    ##______________________________________________________
+    ## Build package off code repository
+    
+    ExternalProject_Add (szip
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${SZIP_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  
+  else (SZIP_FROM_REPOS AND SZIP_SVN)
+
+    ##______________________________________________________
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (szip
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${SZIP_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (SZIP_FROM_REPOS AND SZIP_SVN)
+
+  ##________________________________________________________
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (szip update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of szip ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT SZIP_FOUND OR SZIP_FORCE_BUILD)
+  
+  add_custom_target (szip
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[szip] Found system-wide installation; skipping rebuild!"
+    )
+  
+endif (NOT SZIP_FOUND OR SZIP_FORCE_BUILD)
