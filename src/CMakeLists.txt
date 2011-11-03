@@ -8,7 +8,6 @@ add_subdirectory (PyCRTools)
 add_subdirectory (DAL)
 add_subdirectory (DSP)
 add_subdirectory (LASA)
-add_subdirectory (Timba)
 
 ## ------------------------------------------------------------------------------
 ## User contributions
