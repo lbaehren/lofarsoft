@@ -17,7 +17,6 @@ import numpy as N
 from image import *
 import _cbdsm
 import mylogger
-import sys
 import functions as func
 
 avspc_wtarr = NArray(doc = "Weight array for channel collapse")
@@ -31,20 +30,22 @@ class Op_collapse(Op):
 
     def __call__(self, img):
       mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Collapse")
-      if img.opts.polarisation_do: pols = ['I', 'Q', 'U', 'V'] # make sure I is done first
-      else: pols = ['I']                                       # assume I is always present
+      if img.opts.polarisation_do: 
+        pols = ['I', 'Q', 'U', 'V'] # make sure I is done first
+      else: 
+        pols = ['I'] # assume I is always present
 
-      if len(img.image.shape) == 3:
+      if img.image.shape[1] > 1:
         c_mode = img.opts.collapse_mode
         chan0 = img.opts.collapse_ch0
         c_list = img.opts.collapse_av
         c_wts = img.opts.collapse_wt
-        if c_list == []: c_list = N.arange(img.image.shape[0])
+        if c_list == []: c_list = N.arange(img.image.shape[1])
         if len(c_list) == 1:
             c_mode = 'single'
             chan0 = c_list[0]
             img.collapse_ch0 = chan0            
-        ch0sh = img.image.shape[1:]
+        ch0sh = img.image.shape[2:]
         img.ch0 = N.zeros(ch0sh)
         if img.opts.polarisation_do: 
           img.ch0_Q = N.zeros(ch0sh); img.ch0_U = N.zeros(ch0sh); img.ch0_V = N.zeros(ch0sh)
@@ -53,9 +54,8 @@ class Op_collapse(Op):
           ch0images = [img.ch0]
 
         # assume all Stokes images have the same blank pixels as I:
-        blank = N.isnan(img.image)
+        blank = N.isnan(img.image[0])
         hasblanks = blank.any()
-        nch = len(c_list)
         kappa = img.opts.kappa_clip
 
         mean, rms, cmean, crms = chan_stats(img, kappa)
@@ -63,41 +63,31 @@ class Op_collapse(Op):
         img.channel_clippedmean = cmean; img.channel_clippedrms = crms
 
         for ipol, pol in enumerate(pols):
-          if pol != 'I':
-            # Read in the other Stokes image cubes. Checks that the files exist and
-            # that the images have the same shape as I were done in FITS.py. Also,
-            # assume (until true 4-D cubes are available) that input filename includes
-            # '_I.fits' and that other Stokes cubes are named '*_Q.fits', etc.
-
-            split_filename=img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
-            image_file=split_filename[0]+'_'+pol+split_filename[-1]
-            data, hdr = func.read_image_from_file(image_file, img, img.indir, quiet=True)
-                
           if c_mode == 'single':
             if pol == 'I': 
-              img.ch0 = ch0 = img.image[chan0]
+              img.ch0 = ch0 = img.image[0, chan0]
               mylogger.userinfo(mylog, 'Source extraction will be ' \
                                     'done on channel', '%i (%.3f MHz)' % \
                                     (chan0, img.cfreq/1e6))
             else:
-              ch0images[ipol][:] = ch0[:] = data[chan0][:]
+              ch0images[ipol][:] = ch0[:] = img.image[ipol, chan0][:]
 
           if c_mode == 'average':
             if not hasblanks:
               if pol == 'I': 
-                ch0, wtarr = avspc_direct(c_list, img.image, img.channel_clippedrms, c_wts)
+                ch0, wtarr = avspc_direct(c_list, img.image[0], img.channel_clippedrms, c_wts)
               else:
                 # use wtarr from the I image, which is always collapsed first
-                ch0, wtarr = avspc_direct(c_list, data, img.channel_clippedrms, c_wts, wtarr=wtarr)
+                ch0, wtarr = avspc_direct(c_list, img.image[ipol], img.channel_clippedrms, c_wts, wtarr=wtarr)
             else:
               if pol == 'I': 
-                ch0, wtarr = avspc_blanks(c_list, img.image, img.channel_clippedrms, c_wts)
+                ch0, wtarr = avspc_blanks(c_list, img.image[0], img.channel_clippedrms, c_wts)
               else: 
                 # use wtarr from the I image, which is always collapsed first
-                ch0, wtarr = avspc_blanks(c_list, data, img.channel_clippedrms, c_wts, wtarr=wtarr)
+                ch0, wtarr = avspc_blanks(c_list, img.image[ipol], img.channel_clippedrms, c_wts, wtarr=wtarr)
+            ch0images[ipol][:] = ch0[:]
 
             if pol == 'I':
-              img.ch0 = ch0
               img.avspc_wtarr = wtarr
               init_freq_collapse(img, wtarr)
               if c_wts == 'unity':
@@ -115,26 +105,26 @@ class Op_collapse(Op):
               mylog.debug('%s %s' % ('Channels averaged : ', str1))
               str1 = " ".join(["%9.4e" % n for n in wtarr])
               mylog.debug('%s %s %s' % ('Channel weights : ', str1, '; unity=zero if c_wts="rms"'))
-            ch0images[ipol][:] = ch0[:]
+              
           if img.opts.output_all:
               func.write_image_to_file(img.use_io, img.imagename+'.ch0_'+pol+'.fits', N.transpose(ch0), img)
               mylog.debug('%s %s ' % ('Writing file ', img.imagename+'.ch0_'+pol+'.fits'))
-
+              
       else:
-        img.ch0 = img.image
+        # Only one channel in image
+        img.ch0 = img.image[0, 0]
         mylogger.userinfo(mylog, 'Frequency of image',
                           '%.3f MHz' % (img.cfreq/1e6,))
         if img.opts.polarisation_do: 
           for pol in pols[1:]:
-              split_imname = img.opts.filename.split("_I") 
-              image_file = split_imname[0] + '_' + \
-                  pol + split_imname[-1]
-              data, hdr = read_image_from_file(image_file, img,
-                                               img.indir)
-              if pol == 'Q': img.ch0_Q = data
-              if pol == 'U': img.ch0_U = data
-              if pol == 'V': img.ch0_V = data
+              if pol == 'Q': img.ch0_Q = img.image[1, 0][:]
+              if pol == 'U': img.ch0_U = img.image[2, 0][:]
+              if pol == 'V': img.ch0_V = img.image[3, 0][:]
       
+      # Lastly, remove Q, U, and V images from img.image, as they are no longer needed
+      if img.opts.polarisation_do: 
+          img.image = img.image[0,:].reshape(1, img.image.shape[1], img.image.shape[2], img.image.shape[3])
+
       # create mask if needed (assume all pols have the same mask as I)
       mask = N.isnan(img.ch0)
       masked = mask.any()
@@ -153,16 +143,16 @@ class Op_collapse(Op):
 def chan_stats(img, kappa):
 
     if isinstance(img, Image): # check if img is an Image or just an ndarray
-      nchan = img.image.shape[0]
+      nchan = img.image.shape[1]
     else:
-      nchan = img.shape[0]
+      nchan = img.shape[1]
 
     mean = []; rms = []; cmean = []; crms = []
     for ichan in range(nchan):
       if isinstance(img, Image): # check if img is an Image or just an ndarray
-        im = img.image[ichan]
+        im = img.image[0, ichan]
       else:
-        im = img[ichan]
+        im = img[0, ichan]
 
       if N.any(im):
         immask = N.isnan(im)
@@ -247,8 +237,8 @@ def avspc_blanks(c_list, image, rmsarr, c_wts, wtarr=None):
 def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, sbeam, freqin, calcrms_fromim):
     from math import sqrt
 
-    nchan = imagein.shape[0]
-    new_n = imageout.shape[0]
+    nchan = imagein.shape[1]
+    new_n = imageout.shape[1]
     beamlist = []
     avimage_flags = N.zeros(new_n, bool)
     crms_av = N.zeros(new_n)
@@ -258,7 +248,7 @@ def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, 
         strt = fac*ichan; stp = fac*ichan+fac
       else:
         strt = fac*ichan; stp = nchan
-      subim = imagein[strt:stp,:,:]
+      subim = imagein[0,strt:stp,:,:]
       rmsarr = chanrms[strt:stp]
       flags = iniflags[strt:stp]
       c_list = N.arange(subim.shape[0])
@@ -266,18 +256,18 @@ def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, 
       blank = N.isnan(subim)
       hasblanks = blank.any()
       if not hasblanks: 
-          imageout[ichan], dum = avspc_direct(c_list, subim, rmsarr, c_wts)
+          imageout[0, ichan], dum = avspc_direct(c_list, subim, rmsarr, c_wts)
       else:
-          imageout[ichan], dum = avspc_blanks(c_list, subim, rmsarr, c_wts)
+          imageout[0, ichan], dum = avspc_blanks(c_list, subim, rmsarr, c_wts)
       beamlist.append(tuple(N.mean(sbeam[strt:stp][c_list], axis=0)))
       dumr = freqin[strt:stp]
       goodfreqs = dumr[N.where(~flags)[0]]
       freq_av[ichan] = N.mean(goodfreqs)
       avimage_flags[ichan] = N.product(flags)
-      subnan = N.isnan(imageout[ichan])
+      subnan = N.isnan(imageout[0, ichan])
       if not N.all(subnan):
         if calcrms_fromim:  # then calculate rms from the averaged image, assumed to be large enuff
-          mean, rms, cmean, crms_av[ichan], cnt = _cbdsm.bstat(imageout[ichan], N.isnan(imageout[ichan]), kappa)
+          mean, rms, cmean, crms_av[ichan], cnt = _cbdsm.bstat(imageout[0, ichan], N.isnan(imageout[0, ichan]), kappa)
         else:  # else just compute theoretical rms
           crms_av[ichan] = 1.0/sqrt(N.sum(1.0/rmsarr[c_list]/rmsarr[c_list]))
       else:
@@ -289,15 +279,13 @@ def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, 
 
 def init_freq_collapse(img, wtarr):
     # Place appropriate, post-collapse frequency info in img
-    mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Collapse")
-
     # Calculate weighted average frequency
     if img.opts.frequency_sp != None:
         c_list = img.opts.collapse_av
-        if c_list == []: c_list = N.arange(img.image.shape[0])
+        if c_list == []: c_list = N.arange(img.image.shape[1])
         freqs = img.opts.frequency_sp
         if len(freqs) != len(c_list):
-            raise RuntimeError("Number of channel and number of frequencies specified "\
+            raise RuntimeError("Number of channels and number of frequencies specified "\
                          "by user do not match")
         sumwts = 0.0
         sumfrq = 0.0
@@ -308,7 +296,7 @@ def init_freq_collapse(img, wtarr):
     else:
         # Calculate from header info
         c_list = img.opts.collapse_av
-        if c_list == []: c_list = N.arange(img.image.shape[0])
+        if c_list == []: c_list = N.arange(img.image.shape[1])
         sumwts = 0.0
         sumfrq = 0.0
         crval, cdelt, crpix = img.freq_pars

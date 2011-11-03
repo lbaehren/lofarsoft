@@ -762,7 +762,7 @@ class Opts(object):
     psf_snrcut      =  Float(10.0,
                              doc = "Minimum SNR for statistics\n"\
                                  "Only Gaussians with SNR greater than this are "\
-                                 "considered for processing. The minimum value is 10.0",
+                                 "considered for processing. The minimum value is 5.0",
                              group="psf_vary_do")
     psf_snrtop      =  Float(0.15,
                              doc = "Fraction of SNR > snrcut as primary generators\n"\

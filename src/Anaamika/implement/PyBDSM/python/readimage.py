@@ -42,22 +42,10 @@ class Op_readimage(Op):
         import time, os
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Readimage")
 
-        # Open file(s). Check if there are other polarizations available
-        # (assume for now that they are all separate fits files with *_I.fits
-        # as the fits_name, and *_Q.fits, *_U.fits, and *_V.fits in the same
-        # location). If so, make sure they exist, but do not store them (they
-        # are loaded later by collapse.py).
-        if img.opts.polarisation_do == True: 
-            pols=['I','Q','U','V']
-        else: 
-            pols=['I'] # assume I is always present
-        if pols[0] != 'I':
-            raise RuntimeError("First entry of pols has to be I")
-
         # Check for trailing "/" in filename (happens a lot, since MS images are directories)
         # Although the general rule is to not alter the values in opts (only the
         # user should be able to alter these), in this case there is no harm in
-        # replacing the filename in opts.
+        # replacing the filename in opts with the '/' trimmed off.
         if img.opts.filename == '':
             raise RuntimeError('Image file name not specified.')
         if img.opts.filename[-1] == '/':
@@ -72,49 +60,30 @@ class Op_readimage(Op):
         else:
             img.indir = img.opts.indir
             
-        for pol in pols:
-            if pol == 'I':
-                image_file = img.opts.filename
-            else:
-                split_filename = img.opts.filename.split("_I") # replace 'I' with 'Q', 'U', or 'V'
-                image_file = split_filename[0]+'_'+pol+split_filename[-1]
-
-            result = read_image_from_file(image_file, img, img.indir)
-            if result == None:
-                if pol == 'I':
-                    raise RuntimeError("Cannot open file " + repr(image_file) + ". " + img._reason)
-                else:
-                    img.opts.polarisation_do = False
-                    mylog.warning('Cannot open ' + pol + ' image. '\
-                                      'Polarisation module disabled.')
-                    break
-            else:
-                data, hdr = result
-
-            if pol == 'I':
-                # Store data and header in img, but only for pol == 'I'
-                img.image = data
-                img.header = hdr
-                img.j = 0                    
-            else:
-                # Make sure all polarisations have the same shape as I
-                if data.shape != img.image.shape:
-                    img.opts.polarisation_do = False
-                    mylog.warning('Shape of one or more of Q, U, V images '\
-                                      'does not match that of I. Polarisation '\
-                                      'module disabled.')
-                    break
-
-        if len(img.image.shape) == 3:
-            mylogger.userinfo(mylog, 'Image size',
-                              str(img.image.shape[-2:])+' pixels')
-            mylogger.userinfo(mylog, 'Number of channels',
-                              '%i' % img.image.shape[0])
+        image_file = os.path.basename(img.opts.filename)
+        result = read_image_from_file(image_file, img, img.indir)
+        if result == None:
+            raise RuntimeError("Cannot open file " + repr(image_file) + ". " + img._reason)
         else:
-            mylogger.userinfo(mylog, 'Image size',
-                              str(img.image.shape)+' pixels')
-            mylogger.userinfo(mylog, 'Number of channels',
-                              '1')
+            data, hdr = result
+
+        # Store data and header in img. If polarisation_do = False, only store pol == 'I'
+        if img.opts.polarisation_do and data.shape[0] == 1:
+            img.opts.polarisation_do = False
+            mylog.warning('Image has Stokes I only. Polarisation module disabled.')
+        if img.opts.polarisation_do or data.shape[0] == 1:
+            img.image = data
+        else:
+            img.image = data[0,:].reshape(1, data.shape[1], data.shape[2], data.shape[3])
+        img.header = hdr
+        img.j = 0                    
+
+        mylogger.userinfo(mylog, 'Image size',
+                          str(img.image.shape[-2:])+' pixels')
+        mylogger.userinfo(mylog, 'Number of channels',
+                          '%i' % img.image.shape[1])
+        mylogger.userinfo(mylog, 'Number of Stokes parameters',
+                          '%i' % img.image.shape[0])
 
         ### initialize wcs conversion routines
         self.init_wcs(img)
@@ -129,18 +98,13 @@ class Op_readimage(Op):
 
         # Try to trim common extensions from filename
         root, ext = os.path.splitext(img.opts.filename)
-        if ext in ['.fits', '.FITS']:
-            fname = root
-        elif ext == '.image':
+        if ext in ['.fits', '.FITS', '.image']:
             fname = root
         else:
             fname = img.opts.filename
-        if fname[-2:] in '_I':
-            fname = fname[:-2] # trim off '_I' as well
         img.filename = img.opts.filename
         img.parentname = fname
         img.imagename = fname+'.pybdsm'
-        img.bbspatchnum = 0 # stupid, but kya karen
         img.waveletimage = False
         if img.opts.output_all:
             # Set up directory to write output to

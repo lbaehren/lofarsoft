@@ -36,7 +36,7 @@ class Op_islands(Op):
             has_fbdsm = True
         except ImportError:
             has_fbdsm = False
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands   ")
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands")
         opts = img.opts
 
         img.islands = self.ndimage_alg(img, opts)

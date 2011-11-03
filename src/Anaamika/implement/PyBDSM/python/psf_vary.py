@@ -17,7 +17,6 @@ from math import *
 import statusbar
 from const import fwsig
 from matplotlib.mlab import griddata
-# from scipy.interpolate import griddata
 
 class Op_psf_vary(Op):
     """Computes variation of psf across the image """
@@ -36,9 +35,9 @@ class Op_psf_vary(Op):
         snrtop = opts.psf_snrtop; snrbot = opts.psf_snrbot; snrcutstack = opts.psf_snrcutstack
         gencode = opts.psf_gencode; primarygen = opts.psf_primarygen; itess_method = opts.psf_itess_method
         tess_sc = opts.psf_tess_sc; tess_fuzzy= opts.psf_tess_fuzzy
-        if opts.psf_snrcut < 5: 
-          mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 10")
-          snrcut = 5
+        if opts.psf_snrcut < 5.0: 
+          mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 5")
+          snrcut = 5.0
         else:
           snrcut = opts.psf_snrcut
         img.psf_snrcut = snrcut
@@ -179,7 +178,7 @@ class Op_psf_vary(Op):
                 if img.opts.quiet == False:
                     bar.increment()
 
-            # Interpolate grid
+            # Interpolate grid using griddata
             maj_array = N.zeros(image.shape)
             min_array = N.zeros(image.shape)
             pa_array = N.zeros(image.shape)
@@ -187,7 +186,6 @@ class Op_psf_vary(Op):
                 maj_array[tuple(coord)] = psf_maj[i]
                 min_array[tuple(coord)] = psf_min[i]
                 pa_array[tuple(coord)] = psf_pa[i]
-                
             points = N.where(maj_array > 0.0)
             x = N.array(points[0], dtype=float)
             y = N.array(points[1], dtype=float)
@@ -196,16 +194,13 @@ class Op_psf_vary(Op):
             pa_values = N.array(pa_array[points])
             xi = N.linspace(0,image.shape[0],image.shape[0])
             yi = N.linspace(0,image.shape[1],image.shape[1])
-#             grid_x, grid_y = N.mgrid[0:image.shape[0], 0:image.shape[1]]
-#             maj_interp = griddata((x, y), maj_values, (grid_x, grid_y), method='cubic')
-#             min_interp = griddata((x, y), min_values, (grid_x, grid_y), method='cubic')
-#             pa_interp = griddata((x, y), pa_values, (grid_x, grid_y), method='cubic')
             maj_interp = griddata(x, y, maj_values, xi, yi)
             min_interp = griddata(x, y, min_values, xi, yi)
             pa_interp = griddata(x, y, pa_values, xi, yi)
             
-            # Now fill in regions outside the grid
-            # Check if they are masked arrays:
+            # Now fill in regions outside the grid.
+            # First check if they are masked arrays and, if so, convert to 
+            # normal arrays.
             if hasattr(maj_interp, 'filled'):
                 maj_interp.filled(N.nan)
                 min_interp.filled(N.nan)
@@ -214,6 +209,7 @@ class Op_psf_vary(Op):
                 min_interp = N.array(min_interp)
                 pa_interp = N.array(pa_interp)
             nodata = N.where(N.isnan(maj_interp))
+            # Now fill NaNs with values in tiles
             if len(nodata[0]) > 0:
                 maj_interp_nearest = N.zeros(image.shape)
                 min_interp_nearest = N.zeros(image.shape)

@@ -107,37 +107,6 @@ class Image(object):
         interface.write_catalog(self, **kwargs)
     write_gaul = write_catalog # for legacy scripts
     
-    # Deprecated methods. As a temporary measure, until people are used to the new
-    # interactive shell, check for deprecated methods:
-    def showfit(self, **kwargs):
-        """Deprecated method!"""
-        print 'The "showfit()" method has been replaced with "show_fit()"'
-        return
-    def showrms(self, **kwargs):
-        """Deprecated method!"""
-        print 'The "showrms()" method has been replaced with "show_fit()"'
-        return
-    def write_model_img(self, **kwargs):
-        """Deprecated method!"""
-        print 'The "write_model_img()" method has been replaced with "export_image()"'
-        return
-    def write_resid_img(self, **kwargs):
-        """Deprecated method!"""
-        print 'The "write_resid_img()" method has been replaced with "export_image()"'
-        return
-    def write_rms_img(self, **kwargs):
-        """Deprecated method!"""
-        print 'The "write_rms_img()" method has been replaced with "export_image()"'
-        return
-    def write_ch0_img(self, **kwargs):
-        """Deprecated method!"""
-        print 'The "write_ch0_img()" method has been replaced with "export_image()"'
-        return
-#     def write_catalog(self, **kwargs):
-#         """Deprecated method!"""
-#         print 'The "write_gaul()" method has been replaced with "write_catalog()"'
-#         return
-
 
 class Op(object):
     """Common base class for all PyBDSM operations.

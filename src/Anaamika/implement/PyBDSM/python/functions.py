@@ -524,7 +524,6 @@ def momanalmask_gaus(subim, mask, isrc, bmar_p, allpara=True):
       dumr = atanproper(dumr, m2[0]-m2[1], 2.0*m11)
       mompara[5] = 0.5*dumr*180.0/pi - 90.0
       if mompara[5] < 0.0: mompara[5] += 180.0
-
     return mompara
      
 def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
@@ -977,6 +976,7 @@ def read_image_from_file(filename, img, indir, quiet=False):
     else: 
         prefix = indir + '/'
     image_file = prefix + filename
+    print image_file
     
     # If img.use_io is set, then use appropriate io module
     if img.use_io != '':
@@ -1046,25 +1046,58 @@ def read_image_from_file(filename, img, indir, quiet=False):
         hdr = fits[0].header
         fits.close()
 
-    ### try to reduce dimensionality of data
+    # Make sure data is in proper order. Final order is [pol, chan, x (RA), y (DEC)],
+    # so we need to rearrange dimensions if they are not in this order. Use the
+    # ctype FITS keywords or equivalent in pyrap to determine order of dimensions.
     mylog.info("Original data shape of " + image_file +': ' +str(data.shape))
-    data = data.squeeze()
-    if len(data.shape) >= 4: # 4d and more -- try to drop extra dimensions
-        dims = data.shape[0:-3]
-        allones = N.equal(dims, 1).all()
-        if not allones:
-            sys.exit("Data dimensionality too high")
-        else:
-            data.shape = data.shape[-3:]
-    if len(data.shape) == 3:
-        if data.shape[0] == 1: # cut 3'd dimension if unity
-            data.shape = data.shape[-2:]
-    mylog.info("Final data shape of " + image_file + ': ' + str(data.shape))
+    ctype_in = []
+    if img.use_io == 'fits':
+        for i in range(len(data.shape)):
+            key_val_raw = hdr['CTYPE' + str(i+1)]
+            key_val = key_val_raw.split('-')[0]
+            ctype_in.append(key_val.strip())
+        ctype_in.reverse() # Need to reverse order, as pyfits does this
+    if img.use_io == 'rap':
+        coords = hdr['coordinates']
+        if coords.has_key('spectral2'):
+            ctype_in.append('FREQ')
+        elif coords.has_key('stokes2'):
+            ctype_in.append('STOKES')
+        if coords.has_key('spectral1'):
+            ctype_in.append('FREQ')
+        elif coords.has_key('stokes1'):
+            ctype_in.append('STOKES')
+        if coords.has_key('direction0'):
+            ctype_in.append('RA')
+            ctype_in.append('DEC')
+        
+    ctype_out = ['STOKES', 'FREQ', 'RA', 'DEC']
+    indx_out = [-1, -1, -1, -1]
+    indx_in = range(len(data.shape))
+    for i in indx_in:
+        for j in range(4):
+            if ctype_in[i] == ctype_out[j]:
+                indx_out[j] = i
+    if indx_out[2] == -1 or indx_out[3] == -1:
+        sys.exit("Image data not found")
+    else:
+        shape_out = [1, 1, data.shape[indx_out[2]], data.shape[indx_out[3]]]
+    if indx_out[0] != -1:
+        shape_out[0] = data.shape[indx_out[0]]
+    if indx_out[1] != -1:
+        shape_out[1] = data.shape[indx_out[1]]
 
-    ### now we need to transpose coordinates corresponding to RA & DEC
+    ### now we need to transpose columns to get the right order
     axes = range(len(data.shape))
-    axes[-1], axes[-2] = axes[-2], axes[-1]
+    indx_out.reverse()
+    for indx in indx_out:
+        if indx != -1:
+            axes.remove(indx)
+            axes.insert(0, indx)
     data = data.transpose(*axes)
+    data.shape = data.shape[0:4] # trim unused dimensions (if any)
+    data = data.reshape(shape_out)
+    mylog.info("Final data shape (npol, nchan, x, y): " + str(data.shape))
 
     ### and make a copy of it to get proper layout & byteorder
     data = N.array(data, order='C',
@@ -1076,18 +1109,11 @@ def read_image_from_file(filename, img, indir, quiet=False):
         xmin, xmax, ymin, ymax = img.trim_box
         if xmin < 0: xmin = 0
         if ymin < 0: ymin = 0
-        if len(data.shape) == 3:
-            if xmax > data.shape[1]: xmax = data.shape[1]
-            if ymax > data.shape[2]: ymax = data.shape[2]
-        else:
-            if xmax > data.shape[0]: xmax = data.shape[0]
-            if ymax > data.shape[1]: ymax = data.shape[1]                
+        if xmax > data.shape[2]: xmax = data.shape[2]
+        if ymax > data.shape[3]: ymax = data.shape[3]
         if xmin >= xmax or ymin >= ymax:
             raise RuntimeError("The trim_box option does not specify a valid part of the image.")          
-        if len(data.shape) == 3:
-            data = data[:, xmin:xmax, ymin:ymax]
-        else:
-            data = data[xmin:xmax, ymin:ymax]
+        data = data[:, :, xmin:xmax, ymin:ymax]
     else:
         img.trim_box = None
 
@@ -1116,7 +1142,7 @@ def write_image_to_file(use, filename, image, img, outdir=None,
             return
         
     temp_im = make_fits_image(N.transpose(image), img.wcs_obj, img.beam, img.freq_pars)
-    temp_im.writeto(outdir + filename,  clobber=True)
+    temp_im.writeto(outdir + filename,  clobber=clobber)
     #if use == 'rap':
     #  import pyrap.images as pim
     #  mylog.info("Using the input file as template for writing Casa Image. No guarantees")      

@@ -42,7 +42,6 @@ def process(img, **kwargs):
     if hasattr(img, 'model_shap'): del img.model_shap
     if hasattr(img, 'mask'): del img.mask
 
-
     # Start up logger. We need to initialize it each time process() is
     # called, in case the quiet or debug options have changed
     log = img.opts.filename + '.pybdsm.log'
@@ -65,10 +64,10 @@ def process(img, **kwargs):
         op_chain = get_op_chain(img)
         _run_op_list(img, op_chain)   
         return True
-#     except RuntimeError, err:
-#         # Catch and log error
-#         mylog.error(str(err))
-#         return False
+    except RuntimeError, err:
+        # Catch and log error
+        mylog.error(str(err))
+        return False
     except KeyboardInterrupt:
         mylogger.userinfo(mylog, "\n\033[31;1mAborted\033[0m")
         return False

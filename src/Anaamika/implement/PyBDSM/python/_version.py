@@ -25,6 +25,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/11/03 - Altered reading of images to correctly handle 4D cubes.
+                 Fixed bug in readimage that affected filenames.
+
     2011/10/26 - Extended psf_vary module to include fitting of stacked
                  PSFs with Gaussians, interpolation of the resulting
                  parameters across the image, and correction of the de-

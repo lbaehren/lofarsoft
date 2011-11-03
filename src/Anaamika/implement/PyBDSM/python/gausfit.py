@@ -210,7 +210,7 @@ class Op_gausfit(Op):
 
         if img.opts.ini_gausfit not in ['default', 'fbdsm', 'nobeam']: img.opts.ini_gausfit = 'default'
         if img.opts.ini_gausfit == 'default': 
-          ngmax = 25
+          ngmax = 100
         if img.opts.ini_gausfit == 'fbdsm': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr2, beam, img)
         if img.opts.ini_gausfit == 'nobeam': 
