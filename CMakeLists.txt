@@ -208,7 +208,7 @@ include (FindVersionControl)
 add_custom_target (clean-build
   COMMAND rm -rf *~
   COMMAND rm -rf contrib devel_common external
-  COMMAND rm -rf anaamika cr dal lasa pulsar smosaic
+  COMMAND rm -rf anaamika cr dal lasa pulsar
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeOptions.cmake
@@ -273,9 +273,10 @@ endif (ROOT_FOUND)
 
 ## Packages handled directly through CMake
 
-add_subdirectory (${LUS_ROOT}/doc)
-add_subdirectory (${LUS_ROOT}/external)
-add_subdirectory (${LUS_ROOT}/devel_common)
+add_subdirectory (devel_common)
+add_subdirectory (doc)
+add_subdirectory (external)
+add_subdirectory (src)
 
 ## Build instructions for packages
 
@@ -406,13 +407,6 @@ endif (RM_ENABLE_ARMADILLO)
 if (RM_ENABLE_ITPP)
   add_dependencies (rm itpp)
 endif (RM_ENABLE_ITPP)
-
-##____________________________________________________________________
-##                                                             smosaic
-
-build_package (smosaic src/smosaic)
-
-add_dependencies (smosaic casacore cfitsio wcslib)
 
 ##____________________________________________________________________
 ##                                                             contrib

@@ -1,6 +1,3 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 494 2007-08-02 09:39:15Z baehren                       $
-##------------------------------------------------------------------------------
 
 ## Name of the project
 project (contrib)
@@ -103,6 +100,7 @@ endif (HAVE_HDF5)
 ## Subdirectories
 
 add_subdirectory (data_inspection)
+add_subdirectory (smosaic)
 add_subdirectory (testing)
 add_subdirectory (utilities)
 
