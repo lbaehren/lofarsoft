@@ -8,7 +8,9 @@ ________________________________________________________________________________
   - System packages
     - Debian GNU Linux 6.x
     - Fedora 15
+    - OpenSuSE 11.4
     - Ubuntu Linux 10.04 LTS
+    - Ubuntu Linux 11.10
 
 _________________________________________________________________________________
 >>> Quick start
@@ -128,9 +130,9 @@ respective package manager:
 
 == Debian GNU Linux 6.x ==
 
-  apt-get install build-essential gfortran git-svn cmake subversion flex bison
-  apt-get install libblas-dev liblapack-dev libboost-all-dev
-  apt-get install libcfitsio3-dev
+  apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
+  apt-get install libblas-dev liblapack-dev libboost-all-dev libfftw3-dev
+  apt-get install libcfitsio3-dev libgsl0-dev
 
 == Fedora 15 ==
 
@@ -138,10 +140,15 @@ respective package manager:
   yum install blas-devel lapack-devel boost-devel fftw-devel
   yum install cfitsio-devel gsl-devel
 
+== OpenSuSE 11.4 ==
+
+  yast2 --install cmake git-svn subversion bison flex
+  yast2 --install libcfitsio-devel gsl-devel
+
 == Ubuntu Linux 10.04 LTS ==
 == Ubuntu Linux 11.10     ==
 
-  apt-get install build-essential gfortran git-svn cmake subversion flex bison
-  apt-get install libblas-dev liblapack-dev libboost-all-dev
-  apt-get install libcfitsio3-dev
+  apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
+  apt-get install libblas-dev liblapack-dev libboost-all-dev libfftw3-dev
+  apt-get install libcfitsio3-dev libgsl0-dev
 
