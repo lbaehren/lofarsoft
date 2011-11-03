@@ -70,13 +70,6 @@ foreach (external_package ${external_packages}
 endforeach (external_package armadillo)
 
 ##____________________________________________________________________
-## Packages which are only available on Mac OS X
-
-if (APPLE)
-  add_subdirectory (${LUS_EXTERNAL_DIR}/fink)
-endif (APPLE)
-
-##____________________________________________________________________
 ## Packages not available on Mac OS X
 
 if (NOT APPLE)
