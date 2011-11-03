@@ -146,7 +146,9 @@ foreach (varSystemPackage
     OpenGL
     OpenMP
     Perl
+    Python
     ROOT
+    Sphinx
     Subversion
     SWIG
     WCSLIB
