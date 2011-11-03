@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -72,7 +70,11 @@ endif (ipython_version_test_output)
 ## Actions taken when all components have been found
 
 if (IPYTHON_EXECUTABLE AND IPYTHON_MAJOR_VERSION AND IPYTHON_MINOR_VERSION)
-  set (HAVE_IPYTHON TRUE)
+  set (HAVE_IPYTHON  TRUE)
+  set (IPYTHON_FOUND TRUE)
+else (IPYTHON_EXECUTABLE AND IPYTHON_MAJOR_VERSION AND IPYTHON_MINOR_VERSION)
+  set (HAVE_IPYTHON  FALSE)
+  set (IPYTHON_FOUND FALSE)
 endif (IPYTHON_EXECUTABLE AND IPYTHON_MAJOR_VERSION AND IPYTHON_MINOR_VERSION)
 
 if (HAVE_IPYTHON)

@@ -1,7 +1,5 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
-# |   Copyright (C) 2007                                                        |
+# |   Copyright (C) 2011                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
 # |   This program is free software; you can redistribute it and/or modify      |
@@ -23,7 +21,7 @@
 # - Check for the presence of IT++
 #
 # The following variables are set when IT++ is found:
-#  HAVE_ITPP       = Set to true, if all components of IT++ have been found.
+#  ITPP_FOUND      = Set to true, if all components of IT++ have been found.
 #  ITPP_INCLUDES   = Include path for the header files of IT++
 #  ITPP_LIBRARIES  = Link these to use IT++
 #  ITPP_LFLAGS     = Linker flags (optional)
@@ -58,9 +56,9 @@ if (NOT FIND_ITPP_CMAKE)
   ## Actions taken when all components have been found
   
   if (ITPP_INCLUDES AND ITPP_LIBRARIES)
-    set (HAVE_ITPP TRUE)
+    set (ITPP_FOUND TRUE)
   else (ITPP_INCLUDES AND ITPP_LIBRARIES)
-    set (HAVE_ITPP FALSE)
+    set (ITPP_FOUND FALSE)
     if (NOT ITPP_FIND_QUIETLY)
       if (NOT ITPP_INCLUDES)
 	message (STATUS "Unable to find ITPP header files!")
@@ -71,17 +69,17 @@ if (NOT FIND_ITPP_CMAKE)
     endif (NOT ITPP_FIND_QUIETLY)
   endif (ITPP_INCLUDES AND ITPP_LIBRARIES)
   
-  if (HAVE_ITPP)
+  if (ITPP_FOUND)
     if (NOT ITPP_FIND_QUIETLY)
       message (STATUS "Found components for ITPP")
       message (STATUS "ITPP_INCLUDES  = ${ITPP_INCLUDES}")
       message (STATUS "ITPP_LIBRARIES = ${ITPP_LIBRARIES}")
     endif (NOT ITPP_FIND_QUIETLY)
-  else (HAVE_ITPP)
+  else (ITPP_FOUND)
     if (ITPP_FIND_REQUIRED)
       message (FATAL_ERROR "Could not find ITPP!")
     endif (ITPP_FIND_REQUIRED)
-  endif (HAVE_ITPP)
+  endif (ITPP_FOUND)
   
   ##_____________________________________________________________________________
   ## Mark advanced variables
