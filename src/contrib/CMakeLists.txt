@@ -101,7 +101,6 @@ endif (HAVE_HDF5)
 
 add_subdirectory (data_inspection)
 add_subdirectory (smosaic)
-add_subdirectory (testing)
 add_subdirectory (utilities)
 
 ## -----------------------------------------------------------------------------
