@@ -103,7 +103,6 @@ endif (HAVE_HDF5)
 ## Subdirectories
 
 add_subdirectory (data_inspection)
-add_subdirectory (shapelets)
 add_subdirectory (testing)
 add_subdirectory (utilities)
 
