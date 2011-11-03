@@ -447,13 +447,13 @@ of Python.
 Let us take our two-dimensional array from before::
 
     >>> a
-    hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=range(9)) # len=9 slice=[0:9])
 
 The vector followed by a single number in square brackets
 will *in principle* obtain the first column of the array::
 
     >>> a[0]
-    hArray(int, [3, 3], fill=[0,0,0]) # len=9 slice=[0:3])
+    hArray(int, [3, 3], fill=[0,1,2]) # len=9 slice=[0:3])
 
 It says *in principle*, because the only thing which that command does is
 to return a new ``hArray`` Python object, which will point to the same
@@ -465,7 +465,7 @@ whenever a method tries to operate on the vector::
 This retrieves a copy of the data, since assigning a sub-slice of a
 vector to another vector actually requires copying the data - as
 vectors do not know about slicing (yet). Use one-dimensional arrays if
-you want to have are reference to a slice only.
+what you want to have are reference to a slice only.
 
 In contrast, ``a.vec()``, without slicing, will give you a reference to
 the underlying vector.
@@ -560,8 +560,8 @@ out find operation. Clearly, the -99 values that we put into our array
 for demonstration purposes were not taken into account for the sum of
 the rows. Note, that the slice specification in the line above needs
 to have either vectors or scalar values, but not a mix of the
-two. This is the reason for using [0]:number_of_indices rather than
-just 0:number_of_indices.
+two. This is the reason for using ``[0]:number_of_indices`` rather than
+just ``0:number_of_indices``.
 
 It would have been nicer to do right away something like the
 following::
@@ -1165,10 +1165,6 @@ table (restricting it to the first 5 antennas):
     Antenna 003000002: mean= -2.29, rms=   5.3, npeaks=    0, spikyness=  -0.28
     Antenna 003000003: mean=  2.78, rms=   5.0, npeaks=    0, spikyness=  -0.28
     Antenna 003000004: mean= -6.23, rms=   5.4, npeaks=    4, spikyness=  14.22
-
-Clearly this is a spiky dataset, with only one antenna not being
-affected by too many peaks (which is in fact not the case for the
-first block of that dataset).
 
 To check automatically whether all parameters are in the allowed
 range, we can use a little python helper function, using a python
