@@ -141,6 +141,8 @@ foreach (varSystemPackage
     GSL
     Git
     HDF5
+    IPython
+    ITPP
     OpenGL
     OpenMP
     Perl
@@ -444,6 +446,8 @@ message (STATUS " .. GNU Scientific Library (GSL) = ${GSL_FOUND}"             )
 message (STATUS " .. Git ........................ = ${GIT_FOUND}"             )
 message (STATUS " .. FFTW3 ...................... = ${FFTW3_FOUND}"           )
 message (STATUS " .. HDF5 Library ............... = ${HDF5_FOUND}"            )
+message (STATUS " .. IPython .................... = ${IPYTHON_FOUND}"         )
+message (STATUS " .. IT++ Library ............... = ${ITPP_FOUND}"            )
 message (STATUS " .. OpenGL ..................... = ${OPENGL_FOUND}"          )
 message (STATUS " .. OpenMP ..................... = ${OPENMP_FOUND}"          )
 message (STATUS " .. Perl ....................... = ${PERL_FOUND}"            )
