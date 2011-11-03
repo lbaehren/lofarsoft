@@ -49,6 +49,7 @@ endif (<PACKAGE>_FROM_REPOS)
 
 if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
   
+  ##________________________________________________________
   ## Locate source file to build from
   
   find_file (<PACKAGE>_SOURCE ${<PACKAGE>_SOURCE_ARCHIVE}
@@ -61,6 +62,7 @@ if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
     
   if (<PACKAGE>_FROM_REPOS AND <PACKAGE>_SVN)
 
+    ##______________________________________________________
     ## Build package off code repository
     
     ExternalProject_Add (<package>
@@ -74,6 +76,7 @@ if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
   
   else (<PACKAGE>_FROM_REPOS AND <PACKAGE>_SVN)
 
+    ##______________________________________________________
     ## Build package off tar-archive
     
     ExternalProject_Add (<package>
@@ -87,6 +90,7 @@ if (NOT <PACKAGE>_FOUND OR <PACKAGE>_FORCE_BUILD)
     
   endif (<PACKAGE>_FROM_REPOS AND <PACKAGE>_SVN)
 
+  ##________________________________________________________
   ## Update global configuration settings
   
   if (LUS_BINARY_DIR)
