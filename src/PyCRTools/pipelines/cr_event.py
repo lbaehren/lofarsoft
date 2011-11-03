@@ -490,6 +490,8 @@ for full_filename in files:
                     sample_number=sample_number_lora
                 print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
                 lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
+            else:
+                print "WARNING: LORA logfile found but no info for this event time in LORAtime4 file!"
         else:
             print "WARNING: No LORA logfile found - ",lora_logfile
 
