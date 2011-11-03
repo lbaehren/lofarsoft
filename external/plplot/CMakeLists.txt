@@ -1,89 +1,120 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (PLPLOT)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (PLPLOT_VERSION        "5.9.4" )
+set (PLPLOT_SOURCE_ARCHIVE "plplot-${PLPLOT_VERSION}.tar.gz" )
+set (PLPLOT_URL            "http://downloads.sourceforge.net/project/plplot/plplot/${PLPLOT_VERSION}%20Source/${PLPLOT_SOURCE_ARCHIVE}" )
+set (PLPLOT_SVN            "https://plplot.svn.sourceforge.net/svnroot/plplot/trunk" )
 
-option (PLPLOT_FORCE_BUILD       "Force rebuild and local installation?"  NO  )
-option (PLPLOT_VERBOSE_CONFIGURE "Be verbose during configuration?"       YES )
-option (PLPLOT_VERBOSE_BUILD     "Be verbose during build process?"       NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (PLPLOT_FORCE_BUILD  "Force build and installation of package?" NO )
+option (PLPLOT_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${PLPLOT_SOURCE_DIR}
-  ${PLPLOT_SOURCE_DIR}/..
-  ${PLPLOT_SOURCE_DIR}/../..
-  ${PLPLOT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Plplot] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT PLPLOT_FOUND)
+  find_package (PLplot)
+endif (NOT PLPLOT_FOUND)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-set (PLPLOT_FIND_QUIETLY YES )
+if (PLPLOT_FROM_REPOS)
+  set (PLPLOT_FORCE_BUILD TRUE)
+endif (PLPLOT_FROM_REPOS)
 
-include (FindPLplot)
+if (NOT PLPLOT_FOUND OR PLPLOT_FORCE_BUILD)
 
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
-  
-  ##__________________________________________________________________
-  ## Additional CMake modules
-
-  include (ExternalProject)
-  include (FindNumPy)
-
-  if (NOT HAVE_NUMPY)
-    include (FindNumeric)
-  endif (NOT HAVE_NUMPY)
-
-  ##__________________________________________________________________
-  ## Configure and build the project
-
-  set (PLPLOT_VERSION "5.9.2" )
-  set (PLPLOT_SOURCE  "plplot-${PLPLOT_VERSION}.tar.gz" )
-
-  find_file (have_plplot_tgz ${PLPLOT_SOURCE} ${PLPLOT_SOURCE_DIR})
+  ##________________________________________________________
+  ## Initial CMake cache variables
   
   configure_file (
     ${PLPLOT_SOURCE_DIR}/plplot.cmake.in
     ${PLPLOT_BINARY_DIR}/plplot.cmake
     )
 
-  if (have_plplot_tgz)
-    ExternalProject_Add (plplot
-      PREFIX ${PLPLOT_BINARY_DIR}
-      DOWNLOAD_DIR ${PLPLOT_BINARY_DIR}/download
-      SOURCE_DIR ${PLPLOT_BINARY_DIR}/source
-      URL ${have_plplot_tgz}
-      URL_MD5 2a14753112083badab87f1806cc12a46
-      CMAKE_ARGS -C ${PLPLOT_BINARY_DIR}/plplot.cmake
-      )
-  else (have_plplot_tgz)
-    message (WARNING "[Plplot] Unable to build project - no sources found!")
-  endif (have_plplot_tgz)
+  ##________________________________________________________
+  ## Locate source file to build from
   
-  ## <-- end build condition ----------------------------------------------------->
-  
-else (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
-  add_custom_target (plplot
-    WORKING_DIRECTORY ${PLPLOT_BINARY_DIR}
-    COMMENT "[Plplot] Found system-wide installation; skipping rebuild!"
+  find_file (PLPLOT_SOURCE ${PLPLOT_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
     )
-endif (NOT HAVE_PLPLOT OR PLPLOT_FORCE_BUILD)
+  
+  if (NOT PLPLOT_SOURCE AND PLPLOT_URL)
+    set (PLPLOT_SOURCE ${PLPLOT_URL})
+  endif (NOT PLPLOT_SOURCE AND PLPLOT_URL)
+    
+  if (PLPLOT_FROM_REPOS AND PLPLOT_SVN)
+
+    ##______________________________________________________
+    ## Build package off code repository
+    
+    ExternalProject_Add (plplot
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${PLPLOT_SVN}
+      CMAKE_ARGS -C ${PROJECT_BINARY_DIR}/plplot.cmake
+      )
+  
+  else (PLPLOT_FROM_REPOS AND PLPLOT_SVN)
+    
+    ##______________________________________________________
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (plplot
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${PLPLOT_SOURCE}
+      CMAKE_ARGS -C ${PROJECT_BINARY_DIR}/plplot.cmake
+      )
+    
+  endif (PLPLOT_FROM_REPOS AND PLPLOT_SVN)
+  
+  ##________________________________________________________
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (plplot update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of PLplot ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT PLPLOT_FOUND OR PLPLOT_FORCE_BUILD)
+  
+  add_custom_target (plplot
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[PLplot] Found system-wide installation; skipping rebuild!"
+    )
+  
+endif (NOT PLPLOT_FOUND OR PLPLOT_FORCE_BUILD)
