@@ -76,7 +76,6 @@ endif (NOT DSP_VERBOSE_CONFIGURE)
 ## Subdirectories
 
 add_subdirectory (implement)
-add_subdirectory (apps)
 
 ## =============================================================================
 ##

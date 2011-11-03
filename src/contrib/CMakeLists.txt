@@ -102,6 +102,7 @@ endif (HAVE_HDF5)
 add_subdirectory (data_inspection)
 add_subdirectory (smosaic)
 add_subdirectory (utilities)
+add_subdirectory (MS_MATLAB_Converter)
 
 ## -----------------------------------------------------------------------------
 ## Configuration summary
