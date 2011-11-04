@@ -16,7 +16,7 @@ find_path (caltable_lopes
   )
 
 ##____________________________________________________________________
-## Test datasets
+## Test HDF5 datasets
 
 find_file (dataset_tbb
   NAMES
@@ -32,6 +32,7 @@ if (dataset_tbb)
   set (CR_DATASET_TBB_DATASET "Station023/023000000")
 endif (dataset_tbb)
 
+##____________________________________________________________________
 ## Reference values for test programs
 
 find_file (dataset_lopes_example
@@ -41,49 +42,32 @@ find_file (dataset_lopes_example
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
+##____________________________________________________________________
+## PPF coefficients
+
 find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat
   PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
+  ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
 find_file (data_ppf_inversion ppf_inv.dat
   PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
+  ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
 find_file (data_modelcoeff1 modelcoeff1.dat
   PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
+  ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
 find_file (data_modelcoeff2 modelcoeff2.dat
   PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
+  ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
 find_file (positions_lopes08 positions_lopes08.dat
   PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
+  ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
 ##
