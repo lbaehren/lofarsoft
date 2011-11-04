@@ -1,6 +1,3 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
-##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## Project name and version number number
@@ -51,7 +48,9 @@ if (NOT WCSLIB_VERBOSE_CONFIGURE)
   set (WCSLIB_FIND_QUIETLY YES)
 endif (NOT WCSLIB_VERBOSE_CONFIGURE)
 
-include (FindWCSLIB)
+if (NOT WCSLIB_FOUND)
+  find_package (WCSLIB)
+endif (NOT WCSLIB_FOUND)
 
 ## <-- begin build condition --------------------------------------------------->
 

@@ -1,6 +1,3 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
-##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## Create "config.h"
@@ -43,8 +40,9 @@ check_function_exists (strstr   HAVE_STRSTR  )
 
 ## Create config.h -----------------------------------------
 
-configure_file (${LUS_ROOT}/devel_common/cmake/config_wcslib.h.in
-  ${WCSLIB_BINARY_DIR}/config.h)
+configure_file (
+  ${PROJECT_SOURCE_DIR}/config_wcslib.h.in
+  ${PROJECT_BINARY_DIR}/config.h)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Flex
