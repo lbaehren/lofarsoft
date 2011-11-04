@@ -1,6 +1,3 @@
-##------------------------------------------------------------------------------
-## $Id::                                                                       $
-##------------------------------------------------------------------------------
 
 ##_______________________________________________________________________________
 ##                                                           List of source files
@@ -81,13 +78,13 @@ endforeach (test)
 
 ## Tests which need additional input
     
-if (dataset_lopes_example)
-  add_test (tUpSampledDR tUpSampledDR ${dataset_lopes_example})
-  add_test (tLopesEventIn tLopesEventIn ${dataset_lopes_example})
-else (dataset_lopes_example)
+if (dataset_lopes)
+  add_test (tUpSampledDR tUpSampledDR ${dataset_lopes})
+  add_test (tLopesEventIn tLopesEventIn ${dataset_lopes})
+else (dataset_lopes)
   add_test (tUpSampledDR tUpSampledDR)
   add_test (tLopesEventIn tLopesEventIn)
-endif (dataset_lopes_example)
+endif (dataset_lopes)
 
 if (dataset_tbb)
   add_test (tLOFAR_TBB ${BASH_EXCUTABLE} tLOFAR_TBB.sh)

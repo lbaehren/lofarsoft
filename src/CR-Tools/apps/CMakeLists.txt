@@ -1,8 +1,4 @@
 
-##-------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 575 2007-08-17 14:04:03Z baehren                        $
-##-------------------------------------------------------------------------------
-
 ##____________________________________________________________________
 ##                                                           getPhases
 
@@ -67,8 +63,8 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   list (APPEND cr_apps imager)
   ## testing 
   add_test (imager_test01 imager --help)
-  add_test (imager_test02 imager --infile ${dataset_lopes_example})
-  add_test (imager_test03 imager --infile ${dataset_lopes_example} --blocksize 4096)
+  add_test (imager_test02 imager --infile ${dataset_lopes})
+  add_test (imager_test03 imager --infile ${dataset_lopes} --blocksize 4096)
 endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 
 ##____________________________________________________________________
