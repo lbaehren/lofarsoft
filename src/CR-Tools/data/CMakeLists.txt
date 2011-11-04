@@ -1,4 +1,95 @@
 
+## ==============================================================================
+##
+##  Test datasets & calibration data
+##
+## ==============================================================================
+
+##____________________________________________________________________
+## LOPES Cal-Table
+
+find_path (caltable_lopes
+  NAMES
+  table.dat table.info
+  PATHS
+  LOPES-CalTable
+  )
+
+##____________________________________________________________________
+## Test datasets
+
+find_file (dataset_tbb
+  NAMES
+  lightning_16_48.h5 rw_20090417_181700.h5
+  PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
+if (dataset_tbb)
+  set (CR_DATASET_TBB 1)
+  set (CR_DATASET_TBB_STATION "Station023")
+  set (CR_DATASET_TBB_CHANNEL "023000000")
+  set (CR_DATASET_TBB_DATASET "Station023/023000000")
+endif (dataset_tbb)
+
+## Reference values for test programs
+
+find_file (dataset_lopes_example
+  NAMES
+  example.event
+  PATHS
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
+find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+find_file (data_ppf_inversion ppf_inv.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+find_file (data_modelcoeff1 modelcoeff1.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+find_file (data_modelcoeff2 modelcoeff2.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+find_file (positions_lopes08 positions_lopes08.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+##
+## ==============================================================================
+##
+
 ## include guard
 if (NOT FIND_TESTDATASETS_CMAKE)
 
@@ -30,17 +121,6 @@ if (NOT FIND_TESTDATASETS_CMAKE)
   endif (NOT dataset_ms)
   
   ## === TBB time-series data ===================================================
-  
-  if (NOT dataset_tbb)
-    find_file (dataset_tbb
-      NAMES
-      lightning_16_48.h5
-      rw_20090417_181700.h5
-      PATHS
-      ${LUS_ROOT}/data
-      ${LUS_ROOT}/data/test
-      )
-  endif (NOT dataset_tbb)
   
   if (NOT dataset_tbb_raw)
     find_file (dataset_tbb_raw

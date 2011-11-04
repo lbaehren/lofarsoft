@@ -222,7 +222,6 @@ if (NOT USG_CMAKE_CONFIG)
   ## ============================================================================
 
   include (ExternalProject)
-  include (FindTestDatasets)
   include (MD5Checksum)
   include (AddPythonModule)
   include (OptimizeForArchitecture)

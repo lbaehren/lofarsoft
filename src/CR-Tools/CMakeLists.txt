@@ -1,8 +1,4 @@
 
-##-------------------------------------------------------------------------------
-## $Id::                                                                        $
-##-------------------------------------------------------------------------------
-
 ## Name of the project
 project (CR)
 
@@ -415,87 +411,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ## =============================================================================
 ##
-##  Datasets for the test programs
-##
-## =============================================================================
-
-include (FindTestDatasets)
-
-## LOPES Cal-Table
-
-find_path (caltable_lopes table.dat table.info
-  PATHS
-  ${LUS_ROOT}/data/lopes
-  PATH_SUFFIXES
-  LOPES-CalTable
-  )
-
-## Test datasets
-
-if (dataset_tbb)
-  set (CR_DATASET_TBB 1)
-  set (CR_DATASET_TBB_STATION "Station023")
-  set (CR_DATASET_TBB_CHANNEL "023000000")
-  set (CR_DATASET_TBB_DATASET "Station023/023000000")
-endif (dataset_tbb)
-
-## Reference values for test programs
-
-find_file (dataset_lopes_example example.event
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${LUS_ROOT}/data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_ppf_inversion ppf_inv.dat
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_modelcoeff1 modelcoeff1.dat
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (data_modelcoeff2 modelcoeff2.dat
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-find_file (positions_lopes08 positions_lopes08.dat
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
-## =============================================================================
-##
 ##  Location of (external) header files
 ##
 ## =============================================================================
@@ -647,15 +562,7 @@ endif (HAVE_LIBZ)
 ##
 ## =============================================================================
 
-## Create "crtools.h"
-
-configure_file (
-  ${CR_SOURCE_DIR}/crtools.h.in
-  ${CR_BINARY_DIR}/crtools.h
-  )
-
-## Sub-directories
-
+add_subdirectory (data)
 add_subdirectory (implement)
 add_subdirectory (apps)
 
@@ -664,6 +571,13 @@ if (CR_BUILD_EXTERNAL_TESTS)
 endif (CR_BUILD_EXTERNAL_TESTS)
 
 add_subdirectory (private)
+
+## Create "crtools.h"
+
+configure_file (
+  ${CR_SOURCE_DIR}/crtools.h.in
+  ${CR_BINARY_DIR}/crtools.h
+  )
 
 ## =============================================================================
 ##
@@ -746,9 +660,13 @@ message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
 message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
-message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
-message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
-message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
-message (STATUS " Support for Python ........ : ${CR_WITH_PYCR}")
-message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
+message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}"    )
+message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}"     )
+message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}"        )
+message (STATUS " Support for Python ........ : ${CR_WITH_PYCR}"         )
+message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}"          )
+message (STATUS " Test & calibration datasets"                           )
+message (STATUS " .. LOPES-CalTable  ........ : ${caltable_lopes}"       )
+message (STATUS " .. dataset_tbb ............ : ${dataset_tbb}"          )
+message (STATUS " .. LOPES example event .... : ${dataset_lopes_example}")
 message (STATUS "+============================================================+")
