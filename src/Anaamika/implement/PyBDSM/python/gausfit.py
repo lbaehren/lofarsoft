@@ -58,10 +58,14 @@ class Op_gausfit(Op):
             bar.start()
         min_maxsize = 50.0
         maxsize = opts.splitisl_maxsize
-        min_deblend_size = 20.0
-        deblend_size = opts.deblend_maxsize
-        if maxsize < min_maxsize: maxsize = min_maxsize
-        if deblend_size < min_deblend_size: deblend_size = min_deblend_size
+        min_peak_size = 30.0
+        peak_size = opts.peak_maxsize
+        if maxsize < min_maxsize: 
+            maxsize = min_maxsize
+            opts.splitisl_maxsize = min_maxsize
+        if peak_size < min_peak_size: 
+            peak_size = min_peak_size
+            opts.peak_maxsize = min_peak_size
 
         for idx, isl in enumerate(img.islands):
           a = time()
@@ -81,7 +85,7 @@ class Op_gausfit(Op):
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
                 islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
                 size_subisl = islcp.mask_active.sum()/img.pixel_beamarea*2.0 
-                if opts.deblend_isl and size_subisl > deblend_size:
+                if opts.peak_fit and size_subisl > peak_size:
                     sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
                 else:
                     sgaul, sfgaul = self.fit_island(islcp, opts, img)
@@ -92,25 +96,22 @@ class Op_gausfit(Op):
               if img.waveletimage:
                 isl.islmean = 0.0
               else:
-                bstat = _cbdsm.bstat
-                islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
-                isl.islmean = 0.0 #islm
-                # print '\n SETTING MEAN AS ISLMEAN'
-                # pl.figure()
-                # pl.subplot(1,2,1)
-                # pl.suptitle('islmean')
-                # pl.imshow(N.transpose(isl.image), origin='lower', interpolation='nearest'); pl.colorbar()
-                # pl.subplot(1,2,2)
-                # pl.imshow(N.transpose(isl.image-isl.islmean), origin='lower', interpolation='nearest'); pl.colorbar()
-                #sys.exit()
-              if opts.deblend_isl and size > deblend_size:
+                if opts.atrous_do:
+                    # If wavelet decomposition and fitting will be done, set islmean
+                    # as clipped island mean
+                    bstat = _cbdsm.bstat
+                    islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
+                    isl.islmean = islm
+                else:
+                    isl.islmean = 0.0 
+              if opts.peak_fit and size > peak_size:
                 gaul, fgaul = self.deblend_and_fit(img, isl)
               else:
                 gaul, fgaul = self.fit_island(isl, opts, img)
               if bar.started: bar.increment()
 
           else:
-            if opts.deblend_isl and size > deblend_size:
+            if opts.peak_fit and size > peak_size:
               gaul, fgaul = self.deblend_and_fit(img, isl)
             else:
               gaul, fgaul = self.fit_island(isl, opts, img)
@@ -227,7 +228,7 @@ class Op_gausfit(Op):
 
         if img.opts.ini_gausfit not in ['default', 'fbdsm', 'nobeam']: img.opts.ini_gausfit = 'default'
         if img.opts.ini_gausfit == 'default' and ngmax == None: 
-          ngmax = 100
+          ngmax = 25
         if img.opts.ini_gausfit == 'fbdsm': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr2, beam, img)
         if img.opts.ini_gausfit == 'nobeam': 
@@ -261,20 +262,19 @@ class Op_gausfit(Op):
         thresh = opts.fittedimage_clip
         rms = isl.rms
         factor = 1.0
-        maxsize = opts.deblend_maxsize
+        maxsize = opts.peak_maxsize
         if opts.verbose_fitting:
-            print 'Deblending island ', isl.island_id
+            print 'Finding and fitting peaks of island ', isl.island_id
         while True:
-            factor *= 2.0
+            factor *= 1.2
             if N.max(isl.image-isl.islmean-isl.mean)/thresh_isl/factor <= rms:
-                if factor == 1.0:
+                if int(factor) == 1:
                     slices = []
                 break
             act_pixels = (isl.image-isl.islmean-isl.mean)/thresh_isl/factor >= rms
             if split_i_sub != None:       
                 mask_active = N.where(split_sub_labels == split_i_sub+1, False, True)
-                act_pixels = N.logical_and(act_pixels, ~mask_active)
-
+                N.logical_and(act_pixels, ~mask_active, act_pixels)
             rank = len(isl.shape)
             # generates matrix for connectivity, in this case, 8-conn
             connectivity = nd.generate_binary_structure(rank, rank)
@@ -293,7 +293,7 @@ class Op_gausfit(Op):
         gaul = []; fgaul = []
         n_subisl = len(slices)
         if opts.verbose_fitting and n_subisl > 1:
-          print 'DEBLENDING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
+          print 'SEPARATED ISLAND INTO ',n_subisl,' PEAKS FOR ISLAND ',isl.island_id
         for i_sub_isl in range(n_subisl):
           islcp = isl.copy(img)
           islcp.mask_active = N.where(sub_labels == i_sub_isl+1, False, True)

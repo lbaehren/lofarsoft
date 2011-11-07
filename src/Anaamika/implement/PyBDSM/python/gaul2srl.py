@@ -340,7 +340,7 @@ class Op_gaul2srl(Op):
         totE_sq = 0.0
         for g in g_sublist:
             tot += g.total_flux
-            totE_sq += g.total_fluxE
+            totE_sq += g.total_fluxE**2
         totE = sqrt(totE_sq)
         size_sky = [mompara[3]*sqrt(cdeltsq), mompara[4]*sqrt(cdeltsq), mompara[5]]
         

@@ -222,6 +222,8 @@ class Op_wavelet_atrous(Op):
         opts['filename'] = ''
         opts['output_all'] = img.opts.output_all
         opts['verbose_fitting'] = img.opts.verbose_fitting
+        opts['split_isl'] = True
+        opts['peak_fit'] = False
 
         ops = []
         for op in chain:

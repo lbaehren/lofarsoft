@@ -310,17 +310,22 @@ class Opts(object):
                                       "3x3 footprint is less than this fraction of the "\
                                       "island area, then a 3x3 opening is considered.",
                              group='advanced_opts')
-    deblend_isl     =   Bool(True,
-                             doc="Deblend island during fitting of Gaussians.\n"\
-                                 "Deblending will identify and fit peaks of emission in "\
-                                 "the island. Once the peaks have been fit, the "\
+    peak_fit        =   Bool(True,
+                             doc="Find and fit peaks of large islands before fitting entire "\
+                                "island\n"\
+                                 "When enabled, PyBDSM will first identify and "\
+                                 "fit peaks of emission in "\
+                                 "large islands (the size of islands for which "\
+                                 "peak fitting is done is controlled with the "\
+                                 "peak_maxsize option). Once the peaks have been fit, the "\
                                  "residual emission is then fit in the normal "\
                                  "way. Enabling this option will generally speed up "\
-                                 "fitting, but may result in higher residuals.",
+                                 "fitting, but may result in somewhat higher residuals.",
                              group='advanced_opts')
-    deblend_maxsize =  Float(20.0,
+    peak_maxsize    =  Float(30.0,
                              doc="If island size in beam area is more than this, "\
-                                 "try to deblend island. Min value is 20",
+                                 "attempt to fit peaks separately (if "\
+                                 "peak_fit=True). Min value is 30",
                              group='advanced_opts')
     fdr_alpha       =  Float(0.05,
                              doc="Alpha for FDR algorithm for thresholds\n"\

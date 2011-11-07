@@ -26,10 +26,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
-    2011/11/04 - Implemented new island deblending routine that can speed
-                 up fitting of islands. Changed plotting of Gaussians 
-                 in show_fit to use Ellipse artists to improve plotting 
-                 speed.
+    2011/11/04 - Implemented new island fitting routine (enabled with the
+                 peak_fit option) that can speed up fitting of large 
+                 islands. Changed plotting of Gaussians in show_fit to 
+                 use Ellipse artists to improve plotting speed.
 
     2011/11/03 - Altered reading of images to correctly handle 4D cubes.
                  Fixed bug in readimage that affected filenames.

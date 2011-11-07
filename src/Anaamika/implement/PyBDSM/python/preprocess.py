@@ -147,8 +147,11 @@ class Op_preprocess(Op):
         if opts.rms_box is None:
             # 'size' of brightest source
             kappa1 = 3.0
-            brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* 
+            try:
+                brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* 
                                    sqrt(2.*log(img.max_value/(kappa1*crms)))))
+            except:
+                brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig))
             # atleast 4 boxes on each side
             largesize = int(round(min(shape)/4.))
             intersrcsep = int(round(sqrt(img.bmpersrc_th)*2.* \
