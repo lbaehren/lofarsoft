@@ -87,6 +87,7 @@ class TBBData(IOInterface):
             "BLOCKSIZE":lambda: self.__blocksize,
             "BLOCK":lambda: self.__block,
             "MAXIMUM_READ_LENGTH":self.__file.maximum_read_length(self.__refAntenna),
+            "TIME_HR":lambda:[str(datetime.utcfromtimestamp(t)) for t in self["TIME"]],
 
             # ICD KEYWORDS
             "FILENAME":self.__file.filename,
@@ -95,7 +96,6 @@ class TBBData(IOInterface):
             "ANTENNA_POSITION_ITRF":self.__file.antenna_position_itrf,
             "NYQUIST_ZONE":self.__file.nyquist_zone,
             "TIME":self.__file.time,
-            "TIME_HR":lambda:[str(datetime.utcfromtimestamp(t)) for t in self["TIME"]],
             "SAMPLE_NUMBER":self.__file.sample_number,
             "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
             "SAMPLE_FREQUENCY_UNIT":self.__file.sample_frequency_unit,
@@ -164,20 +164,86 @@ class TBBData(IOInterface):
         # Generate FFTW plan
         self.__plan = cr.FFTWPlanManyDftR2c(self.__blocksize, self.__file.nofSelectedDatasets(), 1, self.__blocksize, 1, self.__blocksize / 2 + 1, cr.fftw_flags.ESTIMATE)
 
+
+    def info(self, verbose=True, show=True):
+        """Display some information about the file. Short and long versions (verbose=False/True)
+            .. function_author:: Emilio Enriquez <E.Enriquez@astro.ru.nl>
+        """
+        #Selecting a subset of keys.
+        if verbose:
+            key=self.keys()
+            key = [k for k in key if 'EMPTY' not in k]
+            key.sort()
+        else:
+            key=['FILENAME','TIME_HR','DATA_LENGTH','DATA_LENGTH_TIME','STATION_NAME','NOF_DIPOLE_DATASETS']
+
+        if self['ANTENNA_SET'] == 'UNDEFINED':
+            print "WARNING: ANTENNA_SET == UNDEFINED cannot read antenna positions."
+            key = [k for k in key if 'POSITION' not in k]
+
+        output ='[TBB_Timeseries] Summary of object properties' 
+        if show: print output.strip()
+
+        #For the print out format.
+        maxii=0
+        for i in range(len(key)):
+            maxii=max([maxii,len(key[i])])
+        stringlength = maxii + 5
+        und = ''
+
+        #Loop over the selected keys.
+        for k in key:
+            s = ""
+            if k == 'DATA_LENGTH_TIME' and not(verbose): 
+                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'               			
+                if show: print s
+                output += '\n'+s 
+                continue
+        
+            ss = k +' '*(stringlength-len(k))+' : '
+            
+            if k == 'DATA_LENGTH' and not(verbose): 
+                s =  ss+str(self[k][0])+' Samples ( '+str(self[k][0]/self['BLOCKSIZE'])+' BLOCKS, each of '+str(self['BLOCKSIZE'])+' Samples) '              			
+                if show: print s
+                output += '\n'+s 
+                continue
+            if k == 'NOF_DIPOLE_DATASETS' and not(verbose):
+                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '               			
+                if show: print s
+                output += '\n'+s 
+                continue
+            
+            if type(self[k])==type([0,0]) and len(self[k])>7 :
+                if all(x == self[k][0] for x in self[k]):
+                    if verbose:
+                        s =  ss+'[ '+str(self[k][0])+', ...] x'+ str(len(self[k]))+' with '+str(type(self[k][0]))
+                    else:
+                        s =  ss+str(self[k][0])               
+                else:
+                    s = ss+str(self[k][:3]+['...']+self[k][-3:])
+            else:
+                if isinstance(self[k],(cr.core.hftools._hftools.ComplexArray,cr.core.hftools._hftools.IntArray,cr.core.hftools._hftools.BoolArray,cr.core.hftools._hftools.FloatArray,cr.core.hftools._hftools.StringArray)):
+                    s = ss + str(self[k].__repr__(maxlen=10))
+                else:    
+                    if self[k]=='UNDEFINED':
+                        und += k+' , '
+                        continue
+                    else:
+                        s = ss + str(self[k])                       
+            if show: print s
+            output += '\n'+s 
+            
+        if len(und) > 0:
+            s = 'These keywords are UNDEFINED : ['+str(und)+']'
+            if show: print s
+            output += s
+
+        if not show:
+            return output.strip()
     def __repr__(self):
         """Display summary when printed.
         """
-
-        s = ""
-
-        s += "FILENAME:            " + self["FILENAME"] + "\n"
-        s += "TIME:                " + str(datetime.utcfromtimestamp(self["TIME"][0])) + "\n"
-        s += "DATA_LENGTH:         " + str(self["DATA_LENGTH"][0]) + " (" + str(self["DATA_LENGTH"][0] / self["BLOCKSIZE"]) + " blocks)\n"
-        s += "ANTENNA_SET:         " + self["ANTENNA_SET"] + "\n"
-        s += "STATION_NAME:        " + str(self["STATION_NAME"][0]) + "\n"
-        s += "NOF_DIPOLE_DATASETS: " + str(self["NOF_DIPOLE_DATASETS"]) + " ("+str(self["NOF_SELECTED_DATASETS"]) + " selected)"
-
-        return s
+        return self.info(False, False)
 
     def keys(self,excludedata=False):
         """Returns list of valid keywords.
