@@ -1365,10 +1365,10 @@ And the slices are actually contained in the return vector for each antenna::
 
 
 
-.. Fourier transforms (FFT) and cross correlation
-.. ----------------------------------------------
+Fourier transforms (FFT) and cross correlation
+----------------------------------------------
 
-.. [in preparation]
+[in preparation]
 
 
 
