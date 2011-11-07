@@ -232,22 +232,22 @@ namespace RM {
     std::string getURLType();
     void deleteFITSfile();
     void flushFITSfile();
-	 void flushFITSBuffer();
-	  
-	 void setNulval(double);
-	 double getNulval(void); 
-	 int getAnynul(void);
-	  
-	  
-	 // ============================================================================
-	 //
-	 //	File related functions
-	 //
-	 // ============================================================================	  
-	    
-	 void preemptivelyDelete(const string &filename); 
-
-	  
+    void flushFITSBuffer();
+    
+    void setNulval(double);
+    double getNulval(void); 
+    int getAnynul(void);
+    
+    
+    // ============================================================================
+    //
+    //	File related functions
+    //
+    // ============================================================================	  
+    
+    void preemptivelyDelete (const std::string &filename); 
+    
+    
     // ============================================================================
     //
     //	Image access functions
@@ -261,27 +261,27 @@ namespace RM {
     //! Get the size of the image
     std::vector<int64_t> getImgSize();
     //! Get the size of the image (legacy interface)
-	 void getImgSize(int maxdim,
-						  long *naxes);
+    void getImgSize(int maxdim,
+		    long *naxes);
     void getImgParam(int maxdim,
-							int &bitpix,
-							int &naxis,
-							long *naxes);
+		     int &bitpix,
+		     int &naxis,
+		     long *naxes);
     void createImg(int bitpix,
 		   int naxis,
 		   long *naxes);
-	 void createImg(int bitpix,
-						 std::vector<int64_t> &dimensions); 
+    void createImg(int bitpix,
+		   std::vector<int64_t> &dimensions); 
     void readPix(int datatype,
 		 long *fpixel,
 		 long nelements,
 		 void *nulval,
 		 void *array,
 		 int *anynul);
-	 void readPix(int datatype,
-					  long *fpixel,
-					  long nelements,
-					  void *array);	    
+    void readPix(int datatype,
+		 long *fpixel,
+		 long nelements,
+		 void *array);	    
     void writePix(int datatype,
 		  long *fpixel,
 		  long nelements,
@@ -299,12 +299,12 @@ namespace RM {
 		    void *array,
 		    int *anynul);	
     void readSubset(	int  datatype, 
-	      				long *fpixel,
-			     			long *lpixel, 
-			     			long *inc, void *nulval,
-			     			std::vector<double> &vec,
-			     			int *anynul);	    
-		    
+			long *fpixel,
+			long *lpixel, 
+			long *inc, void *nulval,
+			std::vector<double> &vec,
+			int *anynul);	    
+    
     void writeSubset( int datatype,
 		      long *fpixel,
 		      long *lpixel,
@@ -325,36 +325,36 @@ namespace RM {
     
     //! Get size of Header space of current HDU
     void getHDRspace (int &keysexist,
-							 int &morekeys);
+		      int &morekeys);
     //! Get a record from the current HDU
     void readRecord (int keynum,
-							std::string record);
+		     std::string record);
     //! Get the record card from the current HDU
     void readCard (std::string keyname,
-						 std::string record);
+		   std::string record);
     //! Read header key with key number keynum
     void readKeyn (int keynum,
-						 std::string keyname,
-						 std::string value,
-						 std::string comment);
+		   std::string keyname,
+		   std::string value,
+		   std::string comment);
     //! Read header key with these specifics
     void readKey(int datatype,
-					  std::string keyname,
-					  void *value,
-					  std::string comment);
+		 std::string keyname,
+		 void *value,
+		 std::string comment);
     //! Read keyword of key with keyname
     void readKeyword(std::string keyname,
-							std::string value,
-							std::string comment);
+		     std::string value,
+		     std::string comment);
     //! FInd the next key
     void findNextKey(char **inclist,
-							int ninc,
-							char **exclist,
-							int nexc,
-							std::string card);
+		     int ninc,
+		     char **exclist,
+		     int nexc,
+		     std::string card);
     //! Read the corresponding unit of key with keyname
     void readKeyUnit(std::string keyname,
-							std::string unit);
+		     std::string unit);
     
     //===============================================================
     //
@@ -362,20 +362,20 @@ namespace RM {
     //
     //===============================================================
     
-	 //! Write key to FITS header
+    //! Write key to FITS header
     void writeKey (int datatype,
-						 std::string keyname,
-						 void *value,
-						 std::string comment);
-	 //! Update key in FITS header
-	 void updateKey (int datatype,
-						  std::string &keyname,
-						  void *value,
-						  std::string &comment);
-	 //! Write record card
+		   std::string keyname,
+		   void *value,
+		   std::string comment);
+    //! Update key in FITS header
+    void updateKey (int datatype,
+		    std::string &keyname,
+		    void *value,
+		    std::string &comment);
+    //! Write record card
     void writeRecord (std::string &card);
     void modifyComment (std::string &keyname,
-		       std::string &comment);
+			std::string &comment);
     void writeKeyUnit (std::string &keyname,
 		       std::string &unit);
     //! Write a comment to the CHDU
