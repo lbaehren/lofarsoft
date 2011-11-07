@@ -93,9 +93,6 @@ set (DAL_GIT "git://github.com/nextgen-astrodata/DAL.git" CACHE STRING "Git repo
 
 option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
 
-option (RM_ENABLE_ITPP       "Enable using IT++ library?"                  NO  )
-option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"             YES )
-
 ## Handle options
 
 if (LUS_ENABLE_TESTING)
@@ -392,21 +389,6 @@ build_package (lasa src/LASA)
 build_package (pulsar src/Pulsar)
 
 add_dependencies (pulsar cfitsio wcstools swig)
-
-##____________________________________________________________________
-##                                                                  RM
-
-build_package (rm src/RM)
-
-add_dependencies (rm dal)
-
-if (RM_ENABLE_ARMADILLO)
-  add_dependencies (rm armadillo)
-endif (RM_ENABLE_ARMADILLO)
-
-if (RM_ENABLE_ITPP)
-  add_dependencies (rm itpp)
-endif (RM_ENABLE_ITPP)
 
 ## ==============================================================================
 ##

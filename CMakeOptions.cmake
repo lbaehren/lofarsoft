@@ -97,11 +97,3 @@ set (DAL_WITH_MYSQL ${DAL_WITH_MYSQL} CACHE BOOL
 
 set (WCSLIB_PYTHON_WRAPPER ${WCSLIB_PYTHON_WRAPPER} CACHE BOOL
   "Generate Python wrapper for WCSLIB?")
-
-## === RM Synthesis =============================================================
-
-set (RM_ENABLE_ITPP ${RM_ENABLE_ITPP} CACHE BOOL
-  "Enable using IT++ library?"                                        )
-set (RM_ENABLE_ARMADILLO ${RM_ENABLE_ARMADILLO} CACHE BOOL
-  "Enable using Armadillo library?"                                   )
-
