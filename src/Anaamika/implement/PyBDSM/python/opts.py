@@ -312,8 +312,8 @@ class Opts(object):
                              group='advanced_opts')
     deblend_isl     =   Bool(True,
                              doc="Deblend island during fitting of Gaussians.\n"\
-                                 "Deblending will identify and fit peaks of emission in ",
-                                 "the island. Once the peaks have been fit, the ",
+                                 "Deblending will identify and fit peaks of emission in "\
+                                 "the island. Once the peaks have been fit, the "\
                                  "residual emission is then fit in the normal "\
                                  "way. Enabling this option will generally speed up "\
                                  "fitting, but may result in higher residuals.",
