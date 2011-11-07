@@ -3,7 +3,7 @@
 project (RM)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 ## Load CMake modules
 include (CTest)
@@ -47,32 +47,6 @@ option (RM_ENABLE_ARMADILLO     "Enable using Armadillo library?"            YES
 ##
 ## =============================================================================
 
-## Verbose during configure? If not, then mute the output from the search scripts
-
-if (NOT RM_VERBOSE_CONFIGURE)
-  ## output of the find scripts
-  set (ARMADILLO_FIND_QUIETLY  YES )
-  set (BOOST_FIND_QUIETLY      YES )
-  set (CASA_FIND_QUIETLY       YES )
-  set (CASACORE_FIND_QUIETLY   YES )
-  set (CFITSIO_FIND_QUIETLY    YES )
-  set (DAL_FIND_QUIETLY        YES )
-  set (FFTW3_FIND_QUIETLY      YES )
-  set (GFORTRAN_FIND_QUIETLY   YES )
-  set (HDF5_FIND_QUIETLY       YES )
-  set (ITPP_FIND_QUIETLY       YES )
-  set (LAPACK_FIND_QUIETLY     YES )
-  set (PGPLOT_FIND_QUIETLY     YES )
-  set (PLPLOT_FIND_QUIETLY     YES )
-  set (POPT_FIND_QUIETLY       YES )
-  set (POSTGRESQL_FIND_QUIETLY YES )
-  set (PYTHON_FIND_QUIETLY     YES )
-  set (WCSLIB_FIND_QUIETLY     YES )
-  set (ZLIB_FIND_QUIETLY       YES )
-  ## output of the generated makefile
-  set (CMAKE_VERBOSE_MAKEFILE  NO  )
-endif (NOT RM_VERBOSE_CONFIGURE)
-
 ## Check functions -------------------------------
 
 include (CheckFunctionExists)
@@ -82,21 +56,42 @@ check_function_exists (fabs  HAVE_FABS )
 
 ## Standard CMake modules ------------------------
 
-find_package (Motif)
-find_package (X11)
-find_package (ZLIB)
+foreach (externalPackage
+    Armadillo
+    Boost
+    CASACORE
+    CFITSIO
+    DAL
+    FFTW3
+    GFortran
+    Motif
+    LAPACK
+    Python
+    X11
+    ZLIB
+    )
 
-## Custom CMake modules --------------------------
+  ## Get package name in uppercase
+  string (TOUPPER ${externalPackage} varPackageUpper)
 
-include (FindArmadillo)
-include (FindBoost)
-include (FindDAL)
-include (FindGFortran)
-include (FindLAPACK)
-include (FindPython)
+  ## Set verbosity level
+  if (RM_VERBOSE_CONFIGURE)
+    set (${externalPackage}_FIND_QUIETLY FALSE )
+    set (${varPackageUpper}_FIND_QUIETLY FALSE )
+  else (RM_VERBOSE_CONFIGURE)  
+    set (${externalPackage}_FIND_QUIETLY TRUE )
+    set (${varPackageUpper}_FIND_QUIETLY TRUE )
+  endif (RM_VERBOSE_CONFIGURE)
+
+  ## Load CMake module if package not yet located
+  if (NOT ${varPackageUpper}_FOUND)
+    find_package (${externalPackage})
+  endif (NOT ${varPackageUpper}_FOUND)
+
+endforeach (externalPackage)
 
 if (RM_ENABLE_ITPP)
-  include (FindITPP)
+  find_package (ITPP)
 endif (RM_ENABLE_ITPP)
 
 ## =============================================================================
@@ -121,32 +116,6 @@ if (RM_COMPILER_WARNINGS)
     )
 endif (RM_COMPILER_WARNINGS)
     
-## Handle configuration to use CASA/casacore
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  
-  ## compiler flags
-  set (HAVE_CASA YES)
-
-  ## Platform test 32/64 bit ------------------------------
-  set (CMAKE_SYSTEM_64BIT 0)
-  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-        set (CMAKE_SYSTEM_64BIT 1)
-        set (AIPS_64B YES)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-  if (APPLE)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      set (CMAKE_SYSTEM_64BIT YES)
-      set (AIPS_64B YES)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-  endif (APPLE)
-  
-endif (HAVE_CASA OR HAVE_CASACORE)
-
 ## =============================================================================
 ##
 ##  Installation
@@ -209,39 +178,39 @@ endif (HAVE_ARMADILLO)
 if (HAVE_DAL)
   include_directories (${DAL_INCLUDES})
   ## additional compiler flags
-  if (HAVE_CASA OR HAVE_CASACORE)
+  if (CASACORE_INCLUDES)
     set (WITH_CASA YES)
     add_definitions (-DWITH_CASA)
-  endif (HAVE_CASA OR HAVE_CASACORE)
+  endif (CASACORE_INCLUDES)
 endif (HAVE_DAL)
 
-if (HAVE_CASACORE)
+if (CASACORE_INCLUDES)
   include_directories (${CASACORE_INCLUDES})
   add_definitions (-DHAVE_CASA)
-else (HAVE_CASACORE)
+else (CASACORE_INCLUDES)
   message (STATUS "[RM] Missing or incomplete installation of casacore!")
-endif (HAVE_CASACORE)
+endif (CASACORE_INCLUDES)
 
-if (HAVE_CFITSIO)
+if (CFITSIO_INCLUDES)
   include_directories (${CFITSIO_INCLUDES})
   add_definitions (-DHAVE_CFITSIO)
-else (HAVE_CFITSIO)
+else (CFITSIO_INCLUDES)
   message (STATUS "[RM] Missing or incomplete installation of CFITSIO!")
-endif (HAVE_CFITSIO)
+endif (CFITSIO_INCLUDES)
 
-if (HAVE_FFTW3)
+if (FFTW3_INCLUDES)
   include_directories (${FFTW3_INCLUDES})
   add_definitions (-DHAVE_FFTW3)
-else (HAVE_FFTW3)
+else (FFTW3_INCLUDES)
   message (STATUS "[RM] Missing or incomplete installation of FFTW3!")
-endif (HAVE_FFTW3)
+endif (FFTW3_INCLUDES)
 
-if (HAVE_HDF5)
+if (HDF5_INCLUDES)
   include_directories (${HDF5_INCLUDES})
   add_definitions (-DHAVE_HDF5)
-else (HAVE_HDF5)
+else (HDF5_INCLUDES)
   message (STATUS "[RM] HDF5 installation incomplete!")
-endif (HAVE_HDF5)
+endif (HDF5_INCLUDES)
 
 if (RM_ENABLE_ITPP AND ITPP_FOUND)
   include_directories (${ITPP_INCLUDES})

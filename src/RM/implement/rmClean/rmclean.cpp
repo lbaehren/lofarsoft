@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <math.h>
 #include <limits>   /* maximum value for variables on architecture/compiler */
-#include <fftw3.h>
 #include "rmclean.h"
 
 using namespace std;

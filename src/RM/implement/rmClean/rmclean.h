@@ -29,7 +29,11 @@
 
 #include <vector>
 #include <complex>
+
+#ifdef HAVE_FFTW3
 #include <fftw3.h>
+#endif
+
 #include "rmIO.h"
 
 using namespace std;
