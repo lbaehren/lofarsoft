@@ -408,13 +408,6 @@ if (RM_ENABLE_ITPP)
   add_dependencies (rm itpp)
 endif (RM_ENABLE_ITPP)
 
-##____________________________________________________________________
-##                                                             contrib
-
-build_package (contrib src/contrib)
-
-add_dependencies (contrib dal)
-
 ## ==============================================================================
 ##
 ##  Configuration summary
