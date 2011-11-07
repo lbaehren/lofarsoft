@@ -310,6 +310,18 @@ class Opts(object):
                                       "3x3 footprint is less than this fraction of the "\
                                       "island area, then a 3x3 opening is considered.",
                              group='advanced_opts')
+    deblend_isl     =   Bool(True,
+                             doc="Deblend island during fitting of Gaussians.\n"\
+                                 "Deblending will identify and fit peaks of emission in ",
+                                 "the island. Once the peaks have been fit, the ",
+                                 "residual emission is then fit in the normal "\
+                                 "way. Enabling this option will generally speed up "\
+                                 "fitting, but may result in higher residuals.",
+                             group='advanced_opts')
+    deblend_maxsize =  Float(20.0,
+                             doc="If island size in beam area is more than this, "\
+                                 "try to deblend island. Min value is 20",
+                             group='advanced_opts')
     fdr_alpha       =  Float(0.05,
                              doc="Alpha for FDR algorithm for thresholds\n"\
                                  "If thresh is 'fdr', then the estimate of fdr_alpha "\

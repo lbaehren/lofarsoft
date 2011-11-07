@@ -21,6 +21,8 @@ import statusbar
 import misc
 import _cbdsm
 import pylab as pl
+import scipy.ndimage as nd
+
 
 ngaus = Int(doc="Total number of gaussians extracted")
 total_flux_gaus = Float(doc="Total flux in the Gaussians extracted")
@@ -45,6 +47,8 @@ class Op_gausfit(Op):
     """
     def __call__(self, img):
         from time import time
+        import functions as func
+
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gausfit")
         global bar
         bar = statusbar.StatusBar('Fitting islands with Gaussians .......... : ',
@@ -54,7 +58,10 @@ class Op_gausfit(Op):
             bar.start()
         min_maxsize = 50.0
         maxsize = opts.splitisl_maxsize
+        min_deblend_size = 20.0
+        deblend_size = opts.deblend_maxsize
         if maxsize < min_maxsize: maxsize = min_maxsize
+        if deblend_size < min_deblend_size: deblend_size = min_deblend_size
 
         for idx, isl in enumerate(img.islands):
           a = time()
@@ -62,10 +69,9 @@ class Op_gausfit(Op):
           if opts.verbose_fitting:
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active),'; size = ',size
             
-          if size > maxsize and opts.split_isl:
-
+          if size > maxsize:
             tosplit = misc.isl_tosplit(isl, img)
-            if tosplit[0] > 0:
+            if tosplit[0] > 0 and opts.split_isl:
               n_subisl, sub_labels = tosplit[1], tosplit[2]
               gaul = []; fgaul = []
               if opts.verbose_fitting:
@@ -74,7 +80,11 @@ class Op_gausfit(Op):
                 islcp = isl.copy(img)
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
                 islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
-                sgaul, sfgaul = self.fit_island(islcp, opts, img)
+                size_subisl = islcp.mask_active.sum()/img.pixel_beamarea*2.0 
+                if opts.deblend_isl and size_subisl > deblend_size:
+                    sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
+                else:
+                    sgaul, sfgaul = self.fit_island(islcp, opts, img)
                 gaul = gaul + sgaul; fgaul = fgaul + sfgaul
                 if bar.started: bar.spin()
               if bar.started: bar.increment()
@@ -84,7 +94,7 @@ class Op_gausfit(Op):
               else:
                 bstat = _cbdsm.bstat
                 islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
-                isl.islmean = islm
+                isl.islmean = 0.0 #islm
                 # print '\n SETTING MEAN AS ISLMEAN'
                 # pl.figure()
                 # pl.subplot(1,2,1)
@@ -93,18 +103,22 @@ class Op_gausfit(Op):
                 # pl.subplot(1,2,2)
                 # pl.imshow(N.transpose(isl.image-isl.islmean), origin='lower', interpolation='nearest'); pl.colorbar()
                 #sys.exit()
-              gaul, fgaul = self.fit_island(isl, opts, img)
+              if opts.deblend_isl and size > deblend_size:
+                gaul, fgaul = self.deblend_and_fit(img, isl)
+              else:
+                gaul, fgaul = self.fit_island(isl, opts, img)
               if bar.started: bar.increment()
 
           else:
-            gaul, fgaul = self.fit_island(isl, opts, img)
+            if opts.deblend_isl and size > deblend_size:
+              gaul, fgaul = self.deblend_and_fit(img, isl)
+            else:
+              gaul, fgaul = self.fit_island(isl, opts, img)
             if bar.started: bar.increment()
-
-          #print '--'*30
 
           if opts.plot_islands:
               pl.figure()
-              pl.suptitle('ISland : '+str(isl.island_id))
+              pl.suptitle('Island : '+str(isl.island_id))
               pl.subplot(1,2,1)
               pl.imshow(N.transpose(isl.image), origin='lower', interpolation='nearest'); pl.colorbar()
               pl.subplot(1,2,2)
@@ -121,7 +135,6 @@ class Op_gausfit(Op):
           isl.gaul = gaul
           isl.fgaul= fgaul
           b = time()
-          #print 'Island ', isl.island_id, ' : ', b-a
 
         gaussian_list = [g for isl in img.islands for g in isl.gaul] 
         img.gaussians = gaussian_list
@@ -169,7 +182,7 @@ class Op_gausfit(Op):
 
         return img
 
-    def fit_island(self, isl, opts, img):
+    def fit_island(self, isl, opts, img, ngmax=None, ffimg=None):
         """Fit island with a set of 2D gaussians.
 
         Parameters:
@@ -192,7 +205,10 @@ class Op_gausfit(Op):
 
         """
         from _cbdsm import MGFunction
-        fcn = MGFunction(isl.image-isl.islmean, isl.mask_noisy, 1)
+        if ffimg == None:
+            fcn = MGFunction(isl.image-isl.islmean, isl.mask_noisy, 1)
+        else:
+            fcn = MGFunction(isl.image-isl.islmean-ffimg, isl.mask_noisy, 1)
         beam = img.pixel_beam
 
         if abs(beam[0]/beam[1]) < 1.1:
@@ -204,12 +220,13 @@ class Op_gausfit(Op):
         peak = fcn.find_peak()[0]
         dof = isl.size_active
         shape = isl.shape
+        isl_image = isl.image - isl.islmean
         gaul = []
         iter = 0
         ng1 = 0
 
         if img.opts.ini_gausfit not in ['default', 'fbdsm', 'nobeam']: img.opts.ini_gausfit = 'default'
-        if img.opts.ini_gausfit == 'default': 
+        if img.opts.ini_gausfit == 'default' and ngmax == None: 
           ngmax = 100
         if img.opts.ini_gausfit == 'fbdsm': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr2, beam, img)
@@ -220,7 +237,7 @@ class Op_gausfit(Op):
             iter += 1
             fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr2, iter, img.opts.ini_gausfit, ngmax, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr2, peak, shape)
+                                              beam, thr2, peak, shape, isl_image)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
                break
@@ -231,6 +248,79 @@ class Op_gausfit(Op):
         fgaul = [(flag, self.fixup_gaussian(isl, g))
                                        for flag, g in fgaul]
 
+        return gaul, fgaul
+
+    def deblend_and_fit(self, img, isl, split_i_sub=None, split_sub_labels=None):
+        """Deblends an island and then fits it"""
+        import functions as func
+        sgaul = []; sfgaul = []
+        gaul = []; fgaul = []
+        opts = img.opts
+        thresh_isl = opts.thresh_isl
+        thresh_pix = opts.thresh_pix
+        thresh = opts.fittedimage_clip
+        rms = isl.rms
+        factor = 1.0
+        maxsize = opts.deblend_maxsize
+        if opts.verbose_fitting:
+            print 'Deblending island ', isl.island_id
+        while True:
+            factor *= 2.0
+            if N.max(isl.image-isl.islmean-isl.mean)/thresh_isl/factor <= rms:
+                if factor == 1.0:
+                    slices = []
+                break
+            act_pixels = (isl.image-isl.islmean-isl.mean)/thresh_isl/factor >= rms
+            if split_i_sub != None:       
+                mask_active = N.where(split_sub_labels == split_i_sub+1, False, True)
+                act_pixels = N.logical_and(act_pixels, ~mask_active)
+
+            rank = len(isl.shape)
+            # generates matrix for connectivity, in this case, 8-conn
+            connectivity = nd.generate_binary_structure(rank, rank)
+            # labels = matrix with value = (initial) island number
+            sub_labels, count = nd.label(act_pixels, connectivity)
+            # slices has limits of bounding box of each such island
+            slices = nd.find_objects(sub_labels)
+            size = []
+            for idx, s in enumerate(slices):
+                idx += 1 # nd.labels indices are counted from 1
+                size.append((sub_labels[s] == idx).sum()*2.0)
+            # Check whether we have reduced the size to at less
+            # than maxsize; if not, continue with higher threshhold
+            if max(size) < maxsize*img.pixel_beamarea:
+                break
+        gaul = []; fgaul = []
+        n_subisl = len(slices)
+        if opts.verbose_fitting and n_subisl > 1:
+          print 'DEBLENDING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
+        for i_sub_isl in range(n_subisl):
+          islcp = isl.copy(img)
+          islcp.mask_active = N.where(sub_labels == i_sub_isl+1, False, True)
+          islcp.mask_noisy = N.where(sub_labels == i_sub_isl+1, False, True)
+          sgaul, sfgaul = self.fit_island(islcp, opts, img)
+          gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+          if bar.started: bar.spin()
+          
+        # Now fit residuals
+        ffimg_tot = N.zeros(isl.shape)
+        if len(gaul) > 0:
+            gaul_obj_list = [Gaussian(img, par, isl.island_id, gidx) for (gidx, par) in enumerate(gaul)]
+            for g in gaul_obj_list:
+                g.centre_pix[0] -= isl.origin[0]
+                g.centre_pix[1] -= isl.origin[1]
+                C1, C2 = g.centre_pix
+                shape = isl.shape
+                b = find_bbox(thresh*isl.rms, g)
+                bbox = N.s_[max(0, int(C1-b)):min(shape[0], int(C1+b+1)),
+                            max(0, int(C2-b)):min(shape[1], int(C2+b+1))]
+                x_ax, y_ax = N.mgrid[bbox]
+                ffimg = func.gaussian_fcn(g, x_ax, y_ax)
+                ffimg_tot[bbox] += ffimg
+        if N.max(isl.image-ffimg_tot-isl.islmean-isl.mean)/thresh_pix >= rms:
+            sgaul, sfgaul = self.fit_island(isl, opts, img, ffimg=ffimg_tot)
+            gaul = gaul + sgaul; fgaul = fgaul + sfgaul   
+        
         return gaul, fgaul
 
     def inigaus_fbdsm(self, isl, thr, beam, img):
@@ -439,7 +529,7 @@ class Op_gausfit(Op):
         else:
             return False
 
-    def flag_gaussians(self, gaul, opts, beam, thr, peak, shape):
+    def flag_gaussians(self, gaul, opts, beam, thr, peak, shape, isl_image=None):
         """Flag gaussians according to some rules.
         Splits list of gaussian parameters in 2, where the first
         one is a list of parameters for accepted gaussians, and
@@ -453,11 +543,13 @@ class Op_gausfit(Op):
         thr: threshold for pixels with signal
         peak: peak data value in the current island
         shape: shape of the current island
+        isl_image: island image (used to determine local pixel value at Gaussian
+        center
         """
         good = []
         bad  = []
         for g in gaul:
-            flag = self._flag_gaussian(g, beam, thr, peak, shape, opts)
+            flag = self._flag_gaussian(g, beam, thr, peak, shape, opts, isl_image)
             if flag:
                 bad.append((flag, g))
             else:
@@ -465,7 +557,7 @@ class Op_gausfit(Op):
 
         return good, bad
 
-    def _flag_gaussian(self, g, beam, thr, peak, shape, opts):
+    def _flag_gaussian(self, g, beam, thr, peak, shape, opts, isl_image):
         """The actual flagging routine. See above for description.
         """
         from math import sqrt, sin, cos, log, pi
@@ -490,10 +582,14 @@ class Op_gausfit(Op):
 
         ### now check all conditions
         border = opts.flag_bordersize
+        flag_max = False
         if A < opts.flag_minsnr*thr: flag += 1
-        if A > opts.flag_maxsnr*peak: flag += 2
+        if x1 >= 0 and x2 >= 0 and x1 <= shape[0] and x2 <= shape[1]:
+            if A > opts.flag_maxsnr*1.5*isl_image[x1, x2]: flag_max = True
+        if A > opts.flag_maxsnr*peak or flag_max: flag += 2
         if N.isnan(x1) or x1 < border or x1 > shape[0] - border -1: flag += 4
         if N.isnan(x2) or x2 < border or x2 > shape[1] - border -1: flag += 8
+
 
         if xbox > opts.flag_maxsize_isl*shape[0]: flag += 16
         if ybox > opts.flag_maxsize_isl*shape[1]: flag += 32
@@ -544,6 +640,26 @@ class Op_gausfit(Op):
         else:
             return 0.0
 
+def find_bbox(thresh, g):
+    """Calculate bounding box for gaussian.
+
+    This function calculates size of the box for evaluating
+    gaussian, so that value of gaussian is smaller than threshold
+    outside of the box.
+
+    Parameters:
+    thres: threshold
+    g: Gaussian object
+    """
+
+    from math import ceil, sqrt, log
+    A = g.peak_flux
+    S = g.size_pix[0]
+    if A == 0.0:
+        return ceil(S*1.5)
+    if thresh/A >= 1.0 or thresh/A <= 0.0:
+        return ceil(S*1.5)
+    return ceil(S*sqrt(-2*log(thresh/A)))
 
 from image import *
 

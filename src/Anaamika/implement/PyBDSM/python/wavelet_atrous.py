@@ -213,9 +213,9 @@ class Op_wavelet_atrous(Op):
 
         opts['flag_smallsrc'] = False
         opts['flag_minsnr'] = 0.5
-        opts['flag_maxsnr'] = 2.0
+        opts['flag_maxsnr'] = 1.0
         opts['flag_maxsize_isl'] = 2.5
-        opts['flag_bordersize'] = 0
+        opts['flag_bordersize'] = 2
         opts['flag_maxsize_bm'] = 15.0
         opts['flag_minsize_bm'] = 0.2
         opts['bbs_patches'] = img.opts.bbs_patches
@@ -248,8 +248,10 @@ class Op_wavelet_atrous(Op):
         if img.opts.atrous_orig_isl:
             mask = N.ones(img.ch0.shape, dtype=bool)
             for isl in img.islands:
-                mask[isl.bbox] = isl.mask_active
-            wimg.rms_mask = img.mask # mask only for rms/mean map calculation
+                mask[isl.bbox] = isl.mask_active # This will be new mask for island finding and fitting
+            if img.mask != None:
+                mask[img.mask] = True # Make sure we pick up all masked pixels in img.mask as well
+            wimg.rms_mask = img.mask # use original img.mask only for rms/mean map calculation
         else:
             mask = img.mask
         wimg.masked = True

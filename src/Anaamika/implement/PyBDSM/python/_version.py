@@ -15,7 +15,8 @@ __version__ = '1.0'
 # needs to do: 
 # "svn propset svn:keywords Revision src/Anaamika/implement/PyBDSM/python/_version.py" 
 # from the LOFARSOFT directory. Then, the revision number is
-# added automatically with each update to this file. 
+# added automatically with each update to this file. The line below does not
+# need to be edited by hand.
 __revision__ = filter(str.isdigit, "$Revision$")
 
 
@@ -24,6 +25,11 @@ def changelog():
     """
     PyBDSM Changelog.
     -----------------------------------------------------------------------
+
+    2011/11/04 - Implemented new island deblending routine that can speed
+                 up fitting of islands. Changed plotting of Gaussians 
+                 in show_fit to use Ellipse artists to improve plotting 
+                 speed.
 
     2011/11/03 - Altered reading of images to correctly handle 4D cubes.
                  Fixed bug in readimage that affected filenames.

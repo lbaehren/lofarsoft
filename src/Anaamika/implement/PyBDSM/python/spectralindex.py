@@ -57,8 +57,8 @@ class Op_spectralindex(Op):
      if img.opts.spectralindex_do:
       mylog.info('Extracting spectral indices for all sources')
       shp = img.image.shape
-      if len(shp) == 3 and shp[0] > 1:
-        bar1 = statusbar.StatusBar('Determing rms for channels in image ..... : ', 0, shp[0])
+      if shp[1] > 1:
+        bar1 = statusbar.StatusBar('Determing rms for channels in image ..... : ', 0, shp[1])
                                                 # calc freq, beam_spectrum for nchan channels
         if img.opts.quiet == False:
           bar1.start()
@@ -67,17 +67,17 @@ class Op_spectralindex(Op):
         iniflags = self.iniflag(img)    
         img.iniflags = iniflags
                                                 # preaverage to ~nchan0 channels; get modified beam sp
-        if shp[0] >= 2*img.opts.specind_nchan0:  
+        if shp[1] >= 2*img.opts.specind_nchan0:  
             avimage, avimage_flags = self.pre_av(img, shp, iniflags)
             img.avimage_flags = avimage_flags
         else:   
-            avimage = img.image
+            avimage = img.image[0]
             img.beam_spec_av = img.beam_spectrum
             img.freq_av = img.freq
             img.freq0 = N.median(img.freq) # this should not be cfreq
             img.avimage_flags = iniflags
             img.avimage_crms = img.channel_clippedrms
-            mylog.info('%s %i %s' % ('Kept all ',shp[0]," channels "))
+            mylog.info('%s %i %s' % ('Kept all ',shp[1]," channels "))
         img.avimage = avimage
         if img.opts.output_all:
             func.write_image_to_file(img.use_io, img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img, img.indir)
@@ -150,7 +150,7 @@ class Op_spectralindex(Op):
         If False, only rms=0 (meaning, entire channel image is zero or blanked) is flagged."""
 
         image = img.image
-        nchan = image.shape[0]
+        nchan = image.shape[1]
         iniflags = N.zeros(nchan, bool)
         zeroflags = N.zeros(nchan, bool)
         crms = img.channel_clippedrms
@@ -171,12 +171,12 @@ class Op_spectralindex(Op):
 
         shp = img.image.shape
         sbeam = img.opts.beam_spectrum 
-        if sbeam != None and len(sbeam) != shp[0]: sbeam = None  # sanity check
+        if sbeam != None and len(sbeam) != shp[1]: sbeam = None  # sanity check
         if sbeam == None:
-          sbeam = [img.beam]*shp[0]
+          sbeam = [img.beam]*shp[1]
 
         img.beam_spectrum = sbeam
-        img.freq = N.zeros(shp[0])
+        img.freq = N.zeros(shp[1])
         crval, cdelt, crpix = img.freq_pars
         if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and \
                 img.opts.frequency == None:
@@ -184,14 +184,14 @@ class Op_spectralindex(Op):
                                    "and frequencies not specified by user")
         else:
             if img.opts.frequency == None:
-                for ichan in range(shp[0]):
+                for ichan in range(shp[1]):
                     ich = ichan+1
                     img.freq[ichan] = crval+cdelt*(ich-crpix)
             else:
-                if len(img.opts.frequency) != shp[0]:
+                if len(img.opts.frequency) != shp[1]:
                     raise RuntimeError("Number of channels does not match number "\
                                  "of frequencies specified by user")
-                for ichan in range(shp[0]):
+                for ichan in range(shp[1]):
                     img.freq[ichan] = img.opts.frequency[ichan]
 
 
@@ -204,7 +204,7 @@ class Op_spectralindex(Op):
         mylog = img.mylog
 
         nchan0 = img.opts.specind_nchan0
-        nchan = shp[0]
+        nchan = shp[1]
         fac = nchan/nchan0
         nn = nchan*1.0/fac
         remain = nn-math.floor(nn)
@@ -212,9 +212,9 @@ class Op_spectralindex(Op):
           new_n = int(math.floor(nn))
         else:
           new_n = int(math.ceil(nn))
-        image = N.zeros((new_n, shp[1], shp[2]))
+        image = N.zeros((new_n, shp[2], shp[3]))
 
-        d = collapse.windowaverage_cube(imagein=img.image, imageout=image, fac=fac, chanrms=img.channel_clippedrms, \
+        d = collapse.windowaverage_cube(imagein=img.image[0], imageout=image, fac=fac, chanrms=img.channel_clippedrms, \
                 iniflags=iniflags, c_wts='rms', kappa=img.opts.kappa_clip, sbeam=N.array(img.beam_spectrum), 
                 freqin=img.freq, calcrms_fromim=True)
         image, img.beam_spec_av, freq_av, avimage_flags, crms_av = d

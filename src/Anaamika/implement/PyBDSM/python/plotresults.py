@@ -8,6 +8,7 @@ import matplotlib.patches as mpatches
 import functions as func
 import os
 from matplotlib.widgets import Button
+from matplotlib.patches import Ellipse
 
 def _isl2border(img, isl):
     """From all valid island pixels, generate the border. """
@@ -268,46 +269,38 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             src = isl.sources[isrc]
                             for g in src.gaussians:
                                 gidx = g.gaus_num
-                                ellx, elly = func.drawellipse(g)
-                                gline, = ax.plot(ellx, elly, color = col,
-                                                 linestyle = style, picker=3)
-                                gline.gaus_id = gidx
-                                gline.src_id = src.source_id
-                                gline.jlevel = g.jlevel
-                                gline.isl_id = g.island_id
-                                gline.tflux = g.total_flux
-                                gline.pflux = g.peak_flux
-                    else: # just plot one color per island
-                        if hasattr(img, 'ngaus'):
-                            isrc = 0
-                            col = colours[isrc % 6]
-                            style = styles[isrc/6 % 3]
-                            for g in isl.gaul:
-                                gidx = g.gaus_num
-                                ellx, elly = func.drawellipse(g)
-                                gline, = ax.plot(ellx, elly, color = col,
-                                                 linestyle = style, picker=3)
-                                gline.gaus_id = gidx
-                                gline.src_id = src.source_id
-                                gline.jlevel = g.jlevel
-                                gline.isl_id = g.island_id
-                                gline.tflux = g.total_flux
-                                gline.pflux = g.peak_flux
+                                e = Ellipse(xy=g.centre_pix, width=g.size_pix[0], height=g.size_pix[1], angle=g.size_pix[2]+90.0)
+                                ax.add_artist(e)
+                                e.set_picker(3)
+                                e.set_clip_box(ax.bbox)
+                                e.set_facecolor(col)
+                                e.set_alpha(0.5)
+                                e.gaus_id = gidx
+                                e.src_id = src.source_id
+                                e.jlevel = g.jlevel
+                                e.isl_id = g.island_id
+                                e.tflux = g.total_flux
+                                e.pflux = g.peak_flux
+
                 if hasattr(img, 'atrous_gaussians'):
                     for jindx, atrgaus in enumerate(img.atrous_gaussians):
                         for atrg in atrgaus:
-                            gidx = atrg.gaus_num
                             col = 'r'
                             style = '-'
-                            ellx, elly = func.drawellipse(atrg)
-                            gline, = ax.plot(ellx, elly, color = col,
-                                             linestyle = style, picker=3)
-                            gline.gaus_id = gidx
-                            gline.src_id = atrg.source_id
-                            gline.jlevel = atrg.jlevel
-                            gline.isl_id = atrg.island_id
-                            gline.tflux = atrg.total_flux
-                            gline.pflux = atrg.peak_flux
+                            gidx = atrg.gaus_num
+                            e = Ellipse(xy=atrg.centre_pix, width=atrg.size_pix[0], height=atrg.size_pix[1], angle=atrg.size_pix[2]+90.0)
+                            ax.add_artist(e)
+                            e.set_picker(3)
+                            e.set_clip_box(ax.bbox)
+                            e.set_facecolor(col)
+                            e.set_alpha(0.5)
+                            e.gaus_id = gidx
+                            e.src_id = atrg.source_id
+                            e.jlevel = atrg.jlevel
+                            e.isl_id = atrg.island_id
+                            e.tflux = atrg.total_flux
+                            e.pflux = atrg.peak_flux
+
             if 'Flagged' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
                     xb, yb = _isl2border(img, isl)

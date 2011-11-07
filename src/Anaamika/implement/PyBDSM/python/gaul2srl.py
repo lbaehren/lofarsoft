@@ -262,6 +262,10 @@ class Op_gaul2srl(Op):
                                         # try
         subim_src = self.make_subim(subn, subm, g_sublist, delc)
         mompara = func.momanalmask_gaus(subim_src, mask, isrc, bmar_p, True)
+        if mompara[1]+delc[0] > img.ch0.shape[0]:
+            mompara[1] = img.ch0.shape[0] - delc[0] - 1
+        if mompara[2]+delc[1] > img.ch0.shape[1]:
+            mompara[2] = img.ch0.shape[1] - delc[1] - 1
         
                                         # initial peak posn and value
         maxv = N.max(subim_src)

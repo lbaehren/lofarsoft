@@ -85,6 +85,8 @@ class Op_preprocess(Op):
 
         ### max/min pixel value & coordinates
         shape = image.shape[0:2]
+        if mask != None:
+            img.blankpix = N.sum(mask)
         if img.blankpix == 0:
           max_idx = image.argmax()
           min_idx = image.argmin()
