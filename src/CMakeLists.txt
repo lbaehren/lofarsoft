@@ -73,7 +73,7 @@ if (RM_ENABLE_ARMADILLO AND EXISTS armadillo)
   add_dependencies (rm armadillo)
 endif (RM_ENABLE_ARMADILLO AND EXISTS armadillo)
 
-if (RM_ENABLE_ITPP)
+if (RM_ENABLE_ITPP AND EXISTS itpp)
   add_dependencies (rm itpp)
-endif (RM_ENABLE_ITPP)
+endif (RM_ENABLE_ITPP AND EXISTS itpp)
 
