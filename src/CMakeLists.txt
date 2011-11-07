@@ -40,8 +40,8 @@ add_dependencies (contrib dal)
 ##__________________________________________________________
 ## Options
 
-option (RM_ENABLE_ITPP       "Enable using IT++ library?"       NO  )
-option (RM_ENABLE_ARMADILLO  "Enable using Armadillo library?"  YES )
+option (RM_WITH_ITPP       "Enable using IT++ library?"       NO  )
+option (RM_WITH_ARMADILLO  "Enable using Armadillo library?"  YES )
 
 ##__________________________________________________________
 ## Build instructions
@@ -52,7 +52,7 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
     DOWNLOAD_DIR download
     SOURCE_DIR source
     URL ${CMAKE_CURRENT_SOURCE_DIR}/RM
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_ENABLE_ITPP=${RM_ENABLE_ITPP} -DRM_ENABLE_ARMADILLO=${RM_ENABLE_ARMADILLO}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_WITH_ITPP=${RM_WITH_ITPP} -DRM_WITH_ARMADILLO=${RM_WITH_ARMADILLO}
     )
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ExternalProject_Add (rm
@@ -60,7 +60,7 @@ else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
     DOWNLOAD_DIR download
     SOURCE_DIR source
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/RM
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_ENABLE_ITPP=${RM_ENABLE_ITPP} -DRM_ENABLE_ARMADILLO=${RM_ENABLE_ARMADILLO}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_WITH_ITPP=${RM_WITH_ITPP} -DRM_WITH_ARMADILLO=${RM_WITH_ARMADILLO}
     )
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 
@@ -69,11 +69,11 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 
 add_dependencies (rm dal)
 
-if (RM_ENABLE_ARMADILLO AND EXISTS armadillo)
+if (RM_WITH_ARMADILLO AND EXISTS armadillo)
   add_dependencies (rm armadillo)
-endif (RM_ENABLE_ARMADILLO AND EXISTS armadillo)
+endif (RM_WITH_ARMADILLO AND EXISTS armadillo)
 
-if (RM_ENABLE_ITPP AND EXISTS itpp)
+if (RM_WITH_ITPP AND EXISTS itpp)
   add_dependencies (rm itpp)
-endif (RM_ENABLE_ITPP AND EXISTS itpp)
+endif (RM_WITH_ITPP AND EXISTS itpp)
 

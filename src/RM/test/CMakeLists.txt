@@ -4,12 +4,12 @@
 
 file (GLOB rm_tests *.cc *.cpp)
 
-if (NOT HAVE_ITPP OR NOT RM_ENABLE_ITPP)
+if (NOT HAVE_ITPP OR NOT RM_WITH_ITPP)
   list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/trmnoise.cpp)
   list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/tWienerFilter.cpp)
   list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/tWienerFilter-FourierTransform.cpp)
   list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/tWienerFilter-SimpleSignal.cpp)
-endif (NOT HAVE_ITPP OR NOT RM_ENABLE_ITPP)
+endif (NOT HAVE_ITPP OR NOT RM_WITH_ITPP)
 
 if (NOT HAVE_FFTW3)
   list (REMOVE_ITEM rm_tests ${CMAKE_CURRENT_SOURCE_DIR}/tPreshift.cpp)
@@ -45,10 +45,10 @@ find_file (trmClean_gaussian gaussian.dat ${RM_SOURCE_DIR}/data)
 add_test (tRMSim tRMSim)
 add_test (trmParallel trmParallel)
 
-if (HAVE_ITPP AND RM_ENABLE_ITPP)
+if (HAVE_ITPP AND RM_WITH_ITPP)
   add_test (trmnoise trmnoise)
   add_test (tWienerFilter tWienerFilter)
-endif (HAVE_ITPP AND RM_ENABLE_ITPP)
+endif (HAVE_ITPP AND RM_WITH_ITPP)
 
 if (trmClean_gaussian)
   add_test (trmClean trmClean ${trmClean_gaussian})

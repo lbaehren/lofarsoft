@@ -38,8 +38,8 @@ endif (NOT LUS_ROOT)
 option (RM_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
 option (RM_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (RM_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
-option (RM_ENABLE_ITPP          "Enable using IT++ library?"                 NO  )
-option (RM_ENABLE_ARMADILLO     "Enable using Armadillo library?"            YES )
+option (RM_WITH_ITPP            "Enable using IT++ library?"                 NO  )
+option (RM_WITH_ARMADILLO       "Enable using Armadillo library?"            YES )
 
 ## =============================================================================
 ##
@@ -90,9 +90,9 @@ foreach (externalPackage
 
 endforeach (externalPackage)
 
-if (RM_ENABLE_ITPP)
+if (RM_WITH_ITPP)
   find_package (ITPP)
-endif (RM_ENABLE_ITPP)
+endif (RM_WITH_ITPP)
 
 ## =============================================================================
 ##
@@ -168,12 +168,14 @@ endif (HAVE_SYS_SYSCTL_H)
 
 ## External header files
 
-if (HAVE_ARMADILLO)
-  include_directories (${ARMADILLO_INCLUDES})
-  add_definitions (-DHAVE_ARMADILLO)
-else (HAVE_ARMADILLO)
-  message (STATUS "[RM] Armadillo installation incomplete!")
-endif (HAVE_ARMADILLO)
+if (RM_WITH_ARMADILLO)
+  if (HAVE_ARMADILLO OR ARMADILLO_FOUND)
+    include_directories (${ARMADILLO_INCLUDES})
+    add_definitions (-DHAVE_ARMADILLO)
+  else (HAVE_ARMADILLO OR ARMADILLO_FOUND)
+    message (STATUS "[RM] Armadillo installation incomplete!")
+  endif (HAVE_ARMADILLO OR ARMADILLO_FOUND)
+endif (RM_WITH_ARMADILLO)
 
 if (HAVE_DAL)
   include_directories (${DAL_INCLUDES})
@@ -212,12 +214,12 @@ else (HDF5_INCLUDES)
   message (STATUS "[RM] HDF5 installation incomplete!")
 endif (HDF5_INCLUDES)
 
-if (RM_ENABLE_ITPP AND ITPP_FOUND)
+if (RM_WITH_ITPP AND ITPP_FOUND)
   include_directories (${ITPP_INCLUDES})
   add_definitions (-DHAVE_ITPP)
-else (RM_ENABLE_ITPP AND ITPP_FOUND)
+else (RM_WITH_ITPP AND ITPP_FOUND)
   message (STATUS "[RM] IT++ installation incomplete!")
-endif (RM_ENABLE_ITPP AND ITPP_FOUND)
+endif (RM_WITH_ITPP AND ITPP_FOUND)
 
 if (HAVE_WCSLIB)
   include_directories (${WCSLIB_INCLUDES})
