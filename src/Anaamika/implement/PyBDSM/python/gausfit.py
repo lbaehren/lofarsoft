@@ -241,7 +241,11 @@ class Op_gausfit(Op):
                                               beam, thr2, peak, shape, isl_image)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
-               break
+                break
+            if not fitok and iter == 5:
+                fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr2, iter, img.opts.ini_gausfit, 1, verbose)
+                gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
+                                              beam, thr2, peak, shape, isl_image)
 
         ### return whatever we got
         isl.mg_fcn = fcn
