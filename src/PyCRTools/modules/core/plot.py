@@ -335,10 +335,16 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
 #    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx
 #    elif logplot=="y": _plot=hSemiLogY if EDP64bug else self.plt.semilogy
 #    elif (logplot=="xy") | (logplot=="yx"): _plot=hSemiLogXY if EDP64bug else self.plt.loglog
-    if logplot=="x": _plot=self.plt.semilogx
-    elif logplot=="y": _plot=self.plt.semilogy
-    elif (logplot=="xy") | (logplot=="yx"): _plot=self.plt.loglog
-    else: _plot=self.plt.plot
+    fig = self.plt.figure()
+    ax = fig.add_axes((0.1,0.1,0.8,0.8))
+    _plot = ax.plot # self.plt.semilogx
+    if logplot=="x":
+        ax.set_xscale("log", nonposx='clip')
+    elif logplot=="y":
+        ax.set_yscale("log", nonposy='clip')
+    elif (logplot=="xy") | (logplot=="yx"):
+        ax.set_xscale("log", nonposx='clip')
+        ax.set_yscale("log", nonposy='clip')
     iterate=True
     loop=0
     ylen=len(self.vec())
@@ -349,7 +355,13 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
             if yerr or xerr:
                 self.plt.errorbar(xvalues.vec()[:ylen],self.vec(),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
         else:
-            _plot(xvalues.vec(),self.vec(),**plotargs)
+            try:
+                _plot(xvalues.vec(),self.vec(),**plotargs)
+            except:
+                print "ERROR when plotting vectors:"
+                print "x:", xvalues.vec()
+                print "y:", self.vec()
+                print "Skipping plot"
             if yerr or xerr:
                 self.plt.errorbar(asvec(xvalues),asvec(self),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
         if not highlight==None:
