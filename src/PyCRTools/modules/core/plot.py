@@ -352,6 +352,11 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
     while (iterate):
         if ylen<xlen:
             _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
+            except:
+                print "ERROR when plotting vectors:"
+                print "x:", xvalues.vec()[:ylen]
+                print "y:", self.vec()
+                print "Skipping plot"
             if yerr or xerr:
                 self.plt.errorbar(xvalues.vec()[:ylen],self.vec(),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
         else:
@@ -362,6 +367,7 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
                 print "x:", xvalues.vec()
                 print "y:", self.vec()
                 print "Skipping plot"
+                #ErrorValue()
             if yerr or xerr:
                 self.plt.errorbar(asvec(xvalues),asvec(self),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
         if not highlight==None:
