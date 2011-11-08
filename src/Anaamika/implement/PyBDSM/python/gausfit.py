@@ -98,7 +98,8 @@ class Op_gausfit(Op):
               else:
                 if opts.atrous_do:
                     # If wavelet decomposition and fitting will be done, set islmean
-                    # as clipped island mean
+                    # as clipped island mean. This will speed up fitting and the
+                    # remaining emission will be fit by the wavelet module.
                     bstat = _cbdsm.bstat
                     islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
                     isl.islmean = islm

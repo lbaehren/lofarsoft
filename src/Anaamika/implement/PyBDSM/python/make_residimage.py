@@ -102,8 +102,12 @@ class Op_make_residimage(Op):
             img.model_shap = fimg
             img.resid_shap = img.ch0 - fimg
             # Apply mask to model and resid images
-            if isinstance(img.mask, N.ndarray):
-                pix_masked = N.where(img.mask == True)
+            if hasattr(img, 'rms_mask'):
+                mask = img.rms_mask
+            else:
+                mask = img.mask
+            if isinstance(mask, N.ndarray):
+                pix_masked = N.where(mask == True)
                 img.model_shap[pix_masked] = N.nan
                 img.resid_shap[pix_masked] = N.nan
                 

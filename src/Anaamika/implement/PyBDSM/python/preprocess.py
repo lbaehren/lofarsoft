@@ -47,7 +47,10 @@ class Op_preprocess(Op):
           pols = ['I'] # assume I is always present
           ch0images = [img.ch0]
 
-        mask = img.mask
+        if hasattr(img, 'rms_mask'):
+            mask = img.rms_mask
+        else:
+            mask = img.mask
         opts = img.opts
         kappa = opts.kappa_clip
         for ipol, pol in enumerate(pols):

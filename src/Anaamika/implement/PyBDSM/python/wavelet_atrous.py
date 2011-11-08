@@ -197,7 +197,7 @@ class Op_wavelet_atrous(Op):
                Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
 
         opts={'thresh':'hard'}
-        opts['thresh_pix']=5.0
+        opts['thresh_pix'] = 5.0
         opts['kappa_clip'] = 3.0
         opts['rms_map'] = True
         opts['thresh_isl'] = 3.0
@@ -223,7 +223,8 @@ class Op_wavelet_atrous(Op):
         opts['output_all'] = img.opts.output_all
         opts['verbose_fitting'] = img.opts.verbose_fitting
         opts['split_isl'] = True
-        opts['peak_fit'] = False
+        opts['peak_fit'] = True
+        opts['peak_maxsize'] = 30.0
 
         ops = []
         for op in chain:
@@ -250,7 +251,7 @@ class Op_wavelet_atrous(Op):
         if img.opts.atrous_orig_isl:
             mask = N.ones(img.ch0.shape, dtype=bool)
             for isl in img.islands:
-                mask[isl.bbox] = isl.mask_active # This will be new mask for island finding and fitting
+                mask[isl.bbox] = isl.mask_noisy # This will be new mask for island finding and fitting
             if img.mask != None:
                 mask[img.mask] = True # Make sure we pick up all masked pixels in img.mask as well
             wimg.rms_mask = img.mask # use original img.mask only for rms/mean map calculation

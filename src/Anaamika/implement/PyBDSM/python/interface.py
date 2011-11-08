@@ -41,6 +41,7 @@ def process(img, **kwargs):
     if hasattr(img, 'resid_shap'): del img.resid_shap
     if hasattr(img, 'model_shap'): del img.model_shap
     if hasattr(img, 'mask'): del img.mask
+    if hasattr(img, 'rms_mask'): del img.rms_mask
 
     # Start up logger. We need to initialize it each time process() is
     # called, in case the quiet or debug options have changed
