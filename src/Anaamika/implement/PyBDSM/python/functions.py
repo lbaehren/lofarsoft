@@ -1068,8 +1068,8 @@ def read_image_from_file(filename, img, indir, quiet=False):
         elif coords.has_key('stokes1'):
             ctype_in.append('STOKES')
         if coords.has_key('direction0'):
-            ctype_in.append('RA')
             ctype_in.append('DEC')
+            ctype_in.append('RA')
         
     ctype_out = ['STOKES', 'FREQ', 'RA', 'DEC']
     indx_out = [-1, -1, -1, -1]

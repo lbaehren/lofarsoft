@@ -243,6 +243,7 @@ class Op_gausfit(Op):
             if fitok and len(fgaul) == 0:
                 break
             if not fitok and iter == 5:
+                # If all else fails, try to fit just a single Gaussian to the island
                 fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr2, iter, img.opts.ini_gausfit, 1, verbose)
                 gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
                                               beam, thr2, peak, shape, isl_image)

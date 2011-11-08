@@ -46,8 +46,8 @@ class Op_rmsimage(Op):
         opts = img.opts
         map_opts = (opts.kappa_clip, opts.rms_box, opts.spline_rank)
         ch0_images = [img.ch0, img.ch0_Q, img.ch0_U, img.ch0_V]
-        cmeans = [img.clipped_mean] + [img.clipped_mean_QUV]
-        crmss = [img.clipped_rms] + [img.clipped_rms_QUV]
+        cmeans = [img.clipped_mean] + img.clipped_mean_QUV
+        crmss = [img.clipped_rms] + img.clipped_rms_QUV
         for ipol, pol in enumerate(pols):
           data = ch0_images[ipol]
           mean = N.zeros(data.shape, dtype=N.float32)

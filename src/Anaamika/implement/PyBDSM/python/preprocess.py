@@ -41,6 +41,8 @@ class Op_preprocess(Op):
         if img.opts.polarisation_do:
           pols = ['I', 'Q', 'U', 'V']
           ch0images = [img.ch0, img.ch0_Q, img.ch0_U, img.ch0_V]
+          img.clipped_mean_QUV = []
+          img.clipped_rms_QUV = []
         else:
           pols = ['I'] # assume I is always present
           ch0images = [img.ch0]

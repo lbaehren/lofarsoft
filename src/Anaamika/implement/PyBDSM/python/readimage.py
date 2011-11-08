@@ -68,6 +68,12 @@ class Op_readimage(Op):
             data, hdr = result
 
         # Store data and header in img. If polarisation_do = False, only store pol == 'I'
+        mylogger.userinfo(mylog, 'Image size',
+                          str(data.shape[-2:])+' pixels')
+        mylogger.userinfo(mylog, 'Number of channels',
+                          '%i' % data.shape[1])
+        mylogger.userinfo(mylog, 'Number of Stokes parameters',
+                          '%i' % data.shape[0])
         if img.opts.polarisation_do and data.shape[0] == 1:
             img.opts.polarisation_do = False
             mylog.warning('Image has Stokes I only. Polarisation module disabled.')
@@ -77,13 +83,6 @@ class Op_readimage(Op):
             img.image = data[0,:].reshape(1, data.shape[1], data.shape[2], data.shape[3])
         img.header = hdr
         img.j = 0                    
-
-        mylogger.userinfo(mylog, 'Image size',
-                          str(img.image.shape[-2:])+' pixels')
-        mylogger.userinfo(mylog, 'Number of channels',
-                          '%i' % img.image.shape[1])
-        mylogger.userinfo(mylog, 'Number of Stokes parameters',
-                          '%i' % img.image.shape[0])
 
         ### initialize wcs conversion routines
         self.init_wcs(img)
