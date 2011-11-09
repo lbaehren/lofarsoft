@@ -84,7 +84,7 @@ class Op_gausfit(Op):
                 islcp = isl.copy(img)
                 islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
                 islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
-                size_subisl = islcp.mask_active.sum()/img.pixel_beamarea*2.0 
+                size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
                 if opts.peak_fit and size_subisl > peak_size:
                     sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
                 else:
@@ -100,9 +100,10 @@ class Op_gausfit(Op):
                     # If wavelet decomposition and fitting will be done, set islmean
                     # as clipped island mean. This will speed up fitting and the
                     # remaining emission will be fit by the wavelet module.
-                    bstat = _cbdsm.bstat
-                    islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
-                    isl.islmean = islm
+#                     bstat = _cbdsm.bstat
+#                     islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
+#                     isl.islmean = islm
+                    isl.islmean = 0.0
                 else:
                     isl.islmean = 0.0 
               if opts.peak_fit and size > peak_size:
@@ -268,7 +269,10 @@ class Op_gausfit(Op):
         thresh = opts.fittedimage_clip
         rms = isl.rms
         factor = 1.0
-        maxsize = opts.peak_maxsize
+        # Set desired size of sub-island. Don't let it get too small, or fitting
+        # won't work well.
+        maxsize = max(opts.peak_maxsize, (~isl.mask_active).sum()/img.pixel_beamarea/2.0)
+        
         if opts.verbose_fitting:
             print 'Finding and fitting peaks of island ', isl.island_id
         while True:
@@ -292,9 +296,9 @@ class Op_gausfit(Op):
             for idx, s in enumerate(slices):
                 idx += 1 # nd.labels indices are counted from 1
                 size.append((sub_labels[s] == idx).sum()*2.0)
-            # Check whether we have reduced the size to at less
+            # Check whether we have reduced the size of smallest island to less
             # than maxsize; if not, continue with higher threshhold
-            if max(size) < maxsize*img.pixel_beamarea:
+            if min(size) < maxsize*img.pixel_beamarea:
                 break
         gaul = []; fgaul = []
         n_subisl = len(slices)

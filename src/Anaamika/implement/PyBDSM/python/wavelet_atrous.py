@@ -84,6 +84,8 @@ class Op_wavelet_atrous(Op):
             if cnt > 198: cmean = mean; crms = rms
             im_new=self.atrous(im_old,filter[lpf]['vec'],lpf,j)
             im_new[pix_masked] = N.nan  # since fftconvolve wont work with blanked pixels
+            if im_new.shape != im_old.shape:
+                im_new = im_new[0:im_old.shape[0], 0:im_old.shape[1]]
             w=im_old-im_new
             im_old=im_new
             suffix = 'w'+`j`
