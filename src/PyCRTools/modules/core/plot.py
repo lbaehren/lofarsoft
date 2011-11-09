@@ -351,7 +351,8 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
     xlen=len(xvalues.vec())
     while (iterate):
         if ylen<xlen:
-            _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
+            try:
+                _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
             except:
                 print "ERROR when plotting vectors:"
                 print "x:", xvalues.vec()[:ylen]
