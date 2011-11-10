@@ -1,3 +1,17 @@
+2011-11-07
+==========
+
+  :Author: Pim Schellart <P.Schellart@astro.ru.nl>
+
+- Added calibration module with C++ functions for gain calibration using
+  the ASTRON provided ElementResponse library with the LOFAR antenna model.
+  `hCalibratePolarizationLBA` performs on sky or x,y,z polarization gain
+  calibration taking mixing between the dipoles into account.
+  `hLBAGain` gives antenna gain for each of the two LOFAR antenna dipoles
+  for a given direction and array of frequencies.
+  Only for LBA now, will add HBA when output is verified.
+
+
 2011-09-16
 ==========
 
