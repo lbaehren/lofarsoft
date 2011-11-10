@@ -993,8 +993,10 @@ for full_filename in files:
         (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
-
-        scrt=direction.residual_delays.vec(); scrt.abs();
+        
+        scrt = hArray(copy=direction.residual_delays).vec() # NB! Need to copy the hArray
+        # otherwise, the original array will get modified by scrt.abs().
+        scrt.abs();
         delay_quality_error=scrt.median()/maximum_allowed_delay
         print "#Delay Quality Error:",delay_quality_error
 
