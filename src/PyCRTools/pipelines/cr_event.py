@@ -463,7 +463,7 @@ for full_filename in files:
             continue
 
         if blocknumber<0:
-            block_number=data_length/blocksize
+            block_number=(data_length/blocksize-1)/2
 #       Only use sample_number to indicate a 'good' pulse position
 #        if samplenumber<0:
 #            sample_number=blocksize/2
