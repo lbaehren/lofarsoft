@@ -158,8 +158,8 @@ if not parser.get_prog_name()=="cr_event_radio.py":
     station=""
     plotpause=False
     refresh=True
-    search_window_width=-1
-    sample_number=-1
+    search_window_width=1024
+    sample_number=65536 + 512 # LOFAR radio-triggered specific! NB gets overridden by options.sample_number etc...
 
     maximum_allowed_delay=1e-8 # maximum differential mean cable delay
                                # that the expected positions can differ
@@ -344,6 +344,22 @@ for full_filename in files:
 
 
         ########################################################################
+        #Open the data file
+        ########################################################################
+        print "---> Open data file",full_filename
+        try:
+            datafile=open(full_filename); 
+            if datafile["ANTENNA_SET"]=="UNDEFINED": 
+                datafile["ANTENNA_SET"]=lofarmode
+        except RuntimeError:
+            print "ERROR opening file - skipping this file!"
+            statuslist.append("OPEN FAILED")
+            finish_file()
+            continue
+
+
+
+        ########################################################################
         #Setting filenames and directories
         ########################################################################
         (filedir,filename)=os.path.split(full_filename)
@@ -353,16 +369,33 @@ for full_filename in files:
 
         (rootfilename,fileextensions)=os.path.splitext(filename)
 
-        filename_split=rootfilename.split("-")
-        projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
+        #filename_split=rootfilename.split("-")
+        #projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
+        projectname="VHECR_RADIO"
 
-        station_name=filename_split[-1] if not station else station
-        old_time_stamp=time_stamp
-        time_stamp=filename_split[-2] if not timestamp else timestamp
-        pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
+        timesec=datafile["TIME"][0]
+        timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
+
+        timems = int(datafile["SAMPLE_INTERVAL"][0]*datafile["SAMPLE_NUMBER"][0]*1000)
+        timems = str(timems).zfill(3) # make 3 digits with leading zeros if needed.
+        # NOTE: chosen to take int part of time in ms; i.e. not rounding to nearest ms.
+        
+        #time_stamp=filename_split[-2] if not timestamp else timestamp
+        time_stamp=timestr+"."+timems+"Z" if not timestamp else timestamp
+
+        pretty_time_stamp=time.strftime("%Y-%m-%d %H:%M:%S."+timems,time.gmtime(timesec))
+
+        station_name=metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+
+
+        #station_name=filename_split[-1] 
+        #old_time_stamp=time_stamp
+        #time_stamp=filename_split[-2] if not timestamp else timestamp
+        #pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
 
         outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
-        topdir_name=projectname+"-"+time_stamp
+#        topdir_name=projectname+"-"+time_stamp
+        topdir_name = rootfilename
         reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)
         reldir_from_top = os.path.join(topdir_name,"pol"+str(current_polarization),station_name)
         outputdir_event=os.path.join(outputdir_expanded,topdir_name)
@@ -416,16 +449,8 @@ for full_filename in files:
 
 
         ########################################################################
-        #Open the data file
+        #Continued opening the data file
         ########################################################################
-        print "---> Open data file",full_filename
-        try:
-            datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
-        except RuntimeError:
-            print "ERROR opening file - skipping this file!"
-            statuslist.append("OPEN FAILED")
-            finish_file()
-            continue
 
 
         tbb_starttime=datafile["TIME"][0]
@@ -708,7 +733,7 @@ for full_filename in files:
         #Set parameters of data file
         ########################################################################
 
-        print "---> Load the block with the peak"
+        print "---> Load the block with the peak", block_number, blocksize
         datafile["BLOCKSIZE"]=blocksize #2**16
         datafile["BLOCK"]=block_number #93
 
@@ -750,9 +775,9 @@ for full_filename in files:
             print 'Cable delays file does not exist yet.'
         cabledelays = hArray(cabledelayList) # zeros if file isn't there. Other choice: take from metadata 
         
-        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
-        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
-        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
+#        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
+#        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
+#        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
         cabledelays=hArray(cabledelays)
   # ??????????????      cabledelays *= -1.0
         ########################################################################
@@ -827,6 +852,7 @@ for full_filename in files:
         if (search_window_width > 0) and (sample_number > 0):
             # only narrow the search window if we have a 'good' guess for sample_number...
             search_window=(sample_number-search_window_width/2,sample_number+search_window_width/2)
+            print search_window
         else:
             search_window=False
 
@@ -989,13 +1015,14 @@ for full_filename in files:
 
         print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
 
-
+      #  import pdb; pdb.set_trace()
         (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="x")
         (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
 
-        scrt=direction.residual_delays.vec(); scrt.abs();
+        scrt = hArray(copy=direction.residual_delays).vec(); scrt.abs(); # NB! Need to copy the hArray
+        # otherwise, the original array will get modified by scrt.abs().
         delay_quality_error=scrt.median()/maximum_allowed_delay
         print "#Delay Quality Error:",delay_quality_error
 
@@ -1025,6 +1052,8 @@ for full_filename in files:
         # include average cable delays (as in cable delay database) in time lags per pulse
         time_lags = hArray(time_lags)
         time_lags -= cabledelays
+        
+     #   import pdb; pdb.set_trace()
         
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
