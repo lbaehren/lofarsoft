@@ -1030,6 +1030,13 @@ for full_filename in files:
 
         trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=final_residual_delays[antennas_with_strong_pulses],sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
+        print "\n--->AntennaResponse"
+
+        ########################################################################
+        #AntennaResponse
+        ########################################################################
+        ar=trerun("AntennaResponse", "ar", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], nantennas = antenna_positions.shape()[0], polarization=current_polarization, antennaset = datafile["ANTENNA_SET"])
+
         print "\n--->Imaging"
 
         ########################################################################
