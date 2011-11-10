@@ -62,8 +62,18 @@ class Op_wavelet_atrous(Op):
           jmax=img.opts.atrous_jmax
           l = len(filter[lpf]['vec'])             # 1st 3 is arbit and 2nd 3 is whats expected for a-trous
           if jmax < 1 or jmax > 15:                   # determine jmax 
-            jmax = int(floor(log((min(resid.shape)/3.0*3.0-l)/(l-1)+1)/log(2.0)+1.0))
-            if min(resid.shape)*0.55 <= (l+(l-1)*(2**(jmax)-1)): jmax = jmax-1
+            # Check if largest island size is smaller than 1/3 of image size. If
+            # so, use it to determine jmax
+            max_isl_shape = (0, 0)
+            for isl in img.islands:
+                if isl.image.shape[0]*isl.image.shape[1] > max_isl_shape[0]*max_isl_shape[1]:
+                    max_isl_shape = isl.image.shape
+            if max_isl_shape != (0, 0) and min(max_isl_shape) < min(resid.shape)/3.0:
+                min_size = min(max_isl_shape)
+            else:
+                min_size = min(resid.shape)
+            jmax = int(floor(log((min_size/3.0*3.0-l)/(l-1)+1)/log(2.0)+1.0))+1
+            if min_size*0.55 <= (l+(l-1)*(2**(jmax)-1)): jmax = jmax-1
           img.wavelet_lpf = lpf
           img.wavelet_jmax = jmax
           mylog.info("Using "+filter[lpf]['name']+' filter with J_max = '+str(jmax))
@@ -84,8 +94,6 @@ class Op_wavelet_atrous(Op):
             if cnt > 198: cmean = mean; crms = rms
             im_new=self.atrous(im_old,filter[lpf]['vec'],lpf,j)
             im_new[pix_masked] = N.nan  # since fftconvolve wont work with blanked pixels
-            if im_new.shape != im_old.shape:
-                im_new = im_new[0:im_old.shape[0], 0:im_old.shape[1]]
             w=im_old-im_new
             im_old=im_new
             suffix = 'w'+`j`
@@ -188,6 +196,8 @@ class Op_wavelet_atrous(Op):
         kern=N.outer(ff,ff) 
         unmasked = N.nan_to_num(image)
         im_new=S.fftconvolve(unmasked,kern,mode='same')
+        if im_new.shape != image.shape:
+            im_new = im_new[0:image.shape[0], 0:image.shape[1]]
 
         return im_new
 

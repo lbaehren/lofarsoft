@@ -176,9 +176,9 @@ class Op_gausfit(Op):
                            (img.total_flux_gaus/img.ch0_sum_jy,))
             
         # Check if there are many Gaussians with deconvolved size of 0 in one
-        # axis but not in the other
+        # axis but not in the other. Don't bother to do this for wavelet images.
         fraction_1d = self.check_for_1d_gaussians(img)
-        if fraction_1d > 0.5 and img.beam != None:
+        if fraction_1d > 0.5 and img.beam != None and img.waveletimage == False:
             mylog.warn('After deconvolution, more than 50% of Gaussians are '\
                            "1-D. Unless you're fitting an extended source, "\
                            "beam may be incorrect.")

@@ -40,7 +40,8 @@ def inp(cur_cmd=None):
         return
     if cur_cmd != None:
         if cur_cmd == write_gaul:
-            print 'This task has been deprecated. Please use "write_catalog" instead.'
+            print 'This task has been deprecated. Please use '\
+                  '"write_catalog" instead.'
             return
         if not hasattr(cur_cmd, 'arg_list'):
             print '\033[31;1mERROR\033[0m: not a valid task'
@@ -433,7 +434,7 @@ def write_catalog(**kwargs):
         print "\n\033[31;1mAborted\033[0m"
 
 write_catalog.arg_list = ['bbs_patches', 'format', 'outfile', 'srcroot',
-                       'incl_wavelet', 'clobber', 'catalog_type']
+                          'incl_wavelet', 'clobber', 'catalog_type']
 write_catalog.use_groups = False
 
 
@@ -620,8 +621,9 @@ def _opts_completer(self, event):
         else:
             # User has not started to enter a string:
             # Match to commands + tasks only
-            cmds = ['process_image', 'write_catalog', 'export_image', 'show_fit',
-                    'go', 'inp', 'tget', 'tput', 'default', 'changelog']
+            cmds = ['process_image', 'write_catalog', 'export_image', 
+                    'show_fit', 'go', 'inp', 'tget', 'tput', 'default', 
+                    'changelog']
             return cmds
     else:
         # Match to parameter, task, and command names only

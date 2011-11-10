@@ -1,13 +1,13 @@
 """ WARNING, ERROR and CRITICAL are always output to screen and to log file.
-INFO and USERINFO always go to the log file. DEBUG goes to log file if debug is True.
-USERINFO goes to screen only if quiet is False.
+INFO and USERINFO always go to the log file. DEBUG goes to log file if debug is 
+True. USERINFO goes to screen only if quiet is False.
 
 Use as follows:
 
 mylog = mylogger.logging.getLogger("name")
 
 mylog.info('info') --> print to logfile, but not to screen
-mylog.userinfo(mylog, 'info') --> prints to screen (if quiet==False)
+mylog.userinfo(mylog, 'info') --> print to screen (if quiet==False)
                                   and to logfile
 """
 import logging
@@ -31,7 +31,8 @@ def init_logger(logfilename, quiet=False, debug=False):
   if debug:
     # For log file and debug on, print name and levelname
     fh.setLevel(logging.DEBUG)
-    fmt1 = logging.Formatter('%(asctime)s %(name)-20s:: %(levelname)-8s: %(message)s',
+    fmt1 = logging.Formatter('%(asctime)s %(name)-20s:: %(levelname)-8s: '\
+                             '%(message)s',
                              datefmt='%a %d-%m-%Y %H:%M:%S')
   else:
     # For log file and debug off, don't print name and levelname as

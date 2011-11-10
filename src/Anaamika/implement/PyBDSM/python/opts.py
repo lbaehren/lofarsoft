@@ -1113,7 +1113,8 @@ class Opts(object):
         fmt = "%20s = %5s  ## %s\n"
 
         for k,v in opts:
-            res += fmt % (k, str(self.__getattribute__(k)), str(v.doc()).split('\n')[0])
+            res += fmt % (k, str(self.__getattribute__(k)), 
+                          str(v.doc()).split('\n')[0])
 
         return res
 
