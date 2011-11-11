@@ -980,7 +980,6 @@ def read_image_from_file(filename, img, indir, quiet=False):
     else: 
         prefix = indir + '/'
     image_file = prefix + filename
-    print image_file
     
     # If img.use_io is set, then use appropriate io module
     if img.use_io != '':
