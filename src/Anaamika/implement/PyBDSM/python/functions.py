@@ -172,8 +172,11 @@ def gdist_pa(pix1, pix2, gsize):
 
     dx = pix2[0] - pix1[0]
     dy = pix2[1] - pix1[1]
-    dumr = atan(abs(dy/dx))
-    val = atanproper(dumr, dx, dy)
+    if dx == 0.0:
+        val = pi/2.0
+    else:
+        dumr = atan(abs(dy/dx))
+        val = atanproper(dumr, dx, dy)
 
     psi = val - (gsize[2]+90.0)/180.0*pi
                                 # convert angle to eccentric anomaly
@@ -501,6 +504,7 @@ def momanalmask_gaus(subim, mask, isrc, bmar_p, allpara=True):
     from math import sqrt, atan, pi
     from const import fwsig
     import numpy as N
+    N.seterr(all='ignore')
 
     m1 = N.zeros(2); m2 = N.zeros(2); m11 = 0.0; tot = 0.0
     mompara = N.zeros(6)

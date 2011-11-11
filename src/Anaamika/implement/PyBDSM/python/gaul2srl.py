@@ -20,6 +20,8 @@ from islands import *
 from gausfit import Gaussian
 import mylogger
 import output_fbdsm_files as opf
+import numpy as N
+N.seterr(divide='raise')
 
 nsrc = Int(doc="Number of sources in the image")
 Gaussian.source_id = Int(doc="Source number of a gaussian", colname='Source_id')
@@ -125,9 +127,7 @@ class Op_gaul2srl(Op):
                   decr =  N.min(src_id[arr])-i
                   for j in arr: src_id[j] -= decr
         nsrc = N.max(src_id)+1
-                                # now do whats in sub_calc_para_source
-                                # make mask and subim. Invalid mask value is -1 since 0 is valid srcid
-        mask = self.make_mask(isl, subn, subm, nsrc, src_id, g_list, delc)
+        # now do whats in sub_calc_para_source
 
         source_list = []
         for isrc in range(nsrc):
@@ -140,6 +140,8 @@ class Op_gaul2srl(Op):
           if ngau_insrc == 1:
               src_index, source = self.process_single_gaussian(img, g_sublist, src_index, code = 'C')
           else:
+              # make mask and subim. Invalid mask value is -1 since 0 is valid srcid
+              mask = self.make_mask(isl, subn, subm, nsrc, isrc, g_list, delc)
               src_index, source = self.process_Multiple(img, g_sublist, mask, src_index, isrc, subim, \
                                   isl, delc, subn, subm)
           source_list.append(source)
@@ -261,12 +263,7 @@ class Op_gaul2srl(Op):
 
                                         # try
         subim_src = self.make_subim(subn, subm, g_sublist, delc)
-        mompara = func.momanalmask_gaus(subim_src, mask, isrc, bmar_p, True)
-        if mompara[1]+delc[0] > img.ch0.shape[0]:
-            mompara[1] = img.ch0.shape[0] - delc[0] - 1
-        if mompara[2]+delc[1] > img.ch0.shape[1]:
-            mompara[2] = img.ch0.shape[1] - delc[1] - 1
-        
+        mompara = func.momanalmask_gaus(subim_src, mask, isrc, bmar_p, True)        
                                         # initial peak posn and value
         maxv = N.max(subim_src)
         maxx, maxy = N.unravel_index(N.argmax(subim_src), subim_src.shape)
@@ -298,15 +295,15 @@ class Op_gaul2srl(Op):
           maxpeak = maxv
           posn = N.unravel_index(N.argmax(data*~rmask), data.shape)+N.array(delc) +blc
 
-                                        # calculate peak by bilinear interpolation around centroid
+        # calculate peak by bilinear interpolation around centroid
+        # First check that moment analysis gave a valid position. If not, use
+        # posn from gaussian fit instead.
         if N.isnan(mompara[1]):
-            x1 = 0
-        else:
-            x1 = N.int(N.floor(mompara[1]))
+            mompara[1] = posn[0] - delc[0]
+        x1 = N.int(N.floor(mompara[1]))
         if N.isnan(mompara[2]):
-            y1 = 0
-        else:
-            y1 = N.int(N.floor(mompara[2]))
+            mompara[2] = posn[1] - delc[1]
+        y1 = N.int(N.floor(mompara[2]))
         xind = slice(x1, x1+2, 1); yind = slice(y1, y1+2, 1)
         if img.opts.flag_smallsrc and (N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4):
             mylog.debug('Island = '+str(isl.island_id))

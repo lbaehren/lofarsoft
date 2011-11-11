@@ -26,6 +26,12 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/11/11 - Fixed bugs in source generation that would lead to
+                 masking of all pixels for certain sources during
+                 moment analysis. Adjusted calculation of jmax in
+                 wavelet module to use island sizes (instead of image size)
+                 if opts.atrous_orig_isl is True.
+
     2011/11/04 - Implemented new island fitting routine (enabled with the
                  peak_fit option) that can speed up fitting of large 
                  islands. Changed plotting of Gaussians in show_fit to 
