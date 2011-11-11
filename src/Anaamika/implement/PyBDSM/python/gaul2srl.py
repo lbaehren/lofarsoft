@@ -141,7 +141,7 @@ class Op_gaul2srl(Op):
               src_index, source = self.process_single_gaussian(img, g_sublist, src_index, code = 'C')
           else:
               # make mask and subim. Invalid mask value is -1 since 0 is valid srcid
-              mask = self.make_mask(isl, subn, subm, nsrc, isrc, g_list, delc)
+              mask = self.make_mask(isl, subn, subm, nsrc, isrc, g_sublist, delc)
               src_index, source = self.process_Multiple(img, g_sublist, mask, src_index, isrc, subim, \
                                   isl, delc, subn, subm)
           source_list.append(source)
@@ -417,10 +417,13 @@ class Op_gaul2srl(Op):
         src_image = N.zeros((subn, subm, nsrc))
         nn = 1
         for isrc in range(nsrc):
-            posn = N.where(src_id == isrc)[0]
-            g_sublist=[]
-            for i in posn:
-                g_sublist.append(g_list[i])
+            if nsrc == 1:
+                g_sublist = g_list
+            else:
+                posn = N.where(src_id == isrc)[0]
+                g_sublist=[]
+                for i in posn:
+                    g_sublist.append(g_list[i])
             for g in g_sublist:
                 params = func.g2param(g)
                 params[1] -= delc[0]; params[2] -= delc[1]
