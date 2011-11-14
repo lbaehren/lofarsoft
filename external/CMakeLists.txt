@@ -1,10 +1,10 @@
 
-##____________________________________________________________________
-## Load CMake modules
+##_______________________________________________________________________________
+##                                                             Load CMake modules
 
 include (ExternalProject)
 
-##____________________________________________________________________
+##_______________________________________________________________________________
 ## List of external packages
 
 set (external_packages
@@ -56,7 +56,12 @@ else (OPENGL_FOUND)
     )
 endif (OPENGL_FOUND)
 
-## Targets for external packages _________________
+if (ROOT_FOUND)
+  list (APPEND external_packages startools)
+endif (ROOT_FOUND)
+
+##_______________________________________________________________________________
+##                                                  Targets for external packages
 
 foreach (external_package ${external_packages}
     )
@@ -74,3 +79,20 @@ foreach (external_package ${external_packages}
   endif (external_package_${external_package})
 endforeach (external_package armadillo)
 
+##_______________________________________________________________________________
+##                                         Dependencies between external packages
+
+add_dependencies (casacore hdf5 cfitsio wcslib bison flex)
+add_dependencies (hdf5 szip)
+add_dependencies (mathgl hdf5 swig num_util gsl)
+add_dependencies (matplotlib numpy)
+add_dependencies (num_util boost numpy)
+add_dependencies (numpy cblas)
+add_dependencies (pelican git boost cfitsio)
+add_dependencies (plplot numpy swig)
+add_dependencies (pyqt sip)
+add_dependencies (wcslib boost flex)
+
+if (ROOT_FOUND)
+  add_dependencies (startools fftw3)
+endif (ROOT_FOUND)

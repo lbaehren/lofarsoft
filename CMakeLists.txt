@@ -252,10 +252,6 @@ configure_file (
   ${LUS_BUILD_DIR}/build_package.sh
   )
 
-if (ROOT_FOUND)
-  list (APPEND packages_external startools)
-endif (ROOT_FOUND)
-
 ## Packages handled directly through CMake
 
 add_subdirectory (devel_common)
@@ -268,24 +264,6 @@ add_subdirectory (src)
 foreach (package_name ${packages_external})
   build_package (${package_name} external/${package_name})
 endforeach (package_name)
-
-##____________________________________________________________________
-##                                        Dependencies of the packages
-
-add_dependencies (casacore hdf5 cfitsio wcslib bison flex)
-add_dependencies (hdf5 szip)
-add_dependencies (mathgl hdf5 swig num_util gsl)
-add_dependencies (matplotlib numpy)
-add_dependencies (num_util boost numpy)
-add_dependencies (numpy cblas)
-add_dependencies (pelican git boost cfitsio)
-add_dependencies (plplot numpy swig)
-add_dependencies (pyqt sip)
-add_dependencies (wcslib boost flex)
-
-if (ROOT_FOUND)
-  add_dependencies (startools fftw3)
-endif (ROOT_FOUND)
 
 ## ==============================================================================
 ##
