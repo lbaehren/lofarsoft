@@ -24,6 +24,7 @@ set (external_packages
   hdf5
   itpp
   matplotlib
+  num_util
   numeric
   numpy
   scipy

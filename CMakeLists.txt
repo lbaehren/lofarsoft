@@ -252,10 +252,6 @@ configure_file (
   ${LUS_BUILD_DIR}/build_package.sh
   )
 
-set (packages_external
-  num_util
-  )
-
 if (ROOT_FOUND)
   list (APPEND packages_external startools)
 endif (ROOT_FOUND)
