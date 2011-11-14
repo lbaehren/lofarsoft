@@ -68,6 +68,26 @@ add_dependencies (contrib dal)
 
 ## ==============================================================================
 ##
+##                                                            $LOFARSOFT/src/LASA
+##
+## ==============================================================================
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+  ExternalProject_Add (lasa
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/LASA
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/LASA
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
+else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+  ExternalProject_Add (lasa
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/LASA
+    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/LASA
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+
+## ==============================================================================
+##
 ##                                                              $LOFARSOFT/src/RM
 ##
 ## ==============================================================================

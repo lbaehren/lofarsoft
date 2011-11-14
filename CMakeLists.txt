@@ -200,7 +200,7 @@ include (FindVersionControl)
 add_custom_target (clean-build
   COMMAND rm -rf *~
   COMMAND rm -rf contrib devel_common external
-  COMMAND rm -rf anaamika cr dal lasa pulsar
+  COMMAND rm -rf cr dal pulsar
   COMMAND rm -rf cmake_install.cmake
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeOptions.cmake
@@ -333,11 +333,6 @@ add_dependencies (pycrtools dal casacore fftw3 gsl tmf num_util)
 if (PYCRTOOLS_WITH_AERA)
   add_dependencies (pycrtools aera)
 endif (PYCRTOOLS_WITH_AERA)
-
-##____________________________________________________________________
-##                                       LASA (LOFAR Air-Shower Array)
-
-build_package (lasa src/LASA)
 
 ##____________________________________________________________________
 ##                                                              Pulsar
