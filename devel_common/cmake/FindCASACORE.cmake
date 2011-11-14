@@ -111,38 +111,12 @@ set (casacore_headers
 
 ## ==============================================================================
 ##
-##  Macro definitions
-##
-## ==============================================================================
-
-## Find the components of a given casacore module; the macro will try to locate
-## both the library as well as a representative header file (e.g. libcasa_tables
-## and tables/Tables.h).
-
-macro (casacore_find_module _name)
-
-  ## get upper-case version of the module name for book-keeping
-  string(TOUPPER ${_name} _NAME)
-
-  ## try to locate the library
-  find_library (CASACORE_${_NAME}_LIBRARY casa_${_name} ${_name}
-    PATHS ${lib_locations}
-    NO_DEFAULT_PATH
-    )
-  
-  if (CASACORE_${_NAME}_LIBRARY)
-    message (STATUS "CASACORE_${_NAME}_LIBRARY = ${CASACORE_${_NAME}_LIBRARY}")
-  endif (CASACORE_${_NAME}_LIBRARY)
-  
-endmacro (casacore_find_module _name)
-
-## ==============================================================================
-##
 ##  Search for installation of casacore
 ##
 ## ==============================================================================
 
 list (APPEND include_locations
+  ${CASACORE_ROOT_DIR}/include/casacore
   ${LUS_ROOT}/release/include
   ${LUS_ROOT}/external/casacore
   /usr/include
@@ -153,6 +127,7 @@ list (APPEND include_locations
 )
 
 list (APPEND lib_locations
+  ${CASACORE_ROOT_DIR}/lib
   /opt/casacore/lib
   /app/usg/release/lib
 )
@@ -197,7 +172,7 @@ foreach (CASACORE_HEADER ${casacore_headers})
   ## search for the header file of a given module
   find_path (header_path ${CASACORE_HEADER}
     PATHS ${include_locations}
-    PATH_SUFFIXES casacore
+    PATH_SUFFIXES casacore include/casacore
     NO_DEFAULT_PATH
     )
   ## if the header file was found, add its path to the include path
