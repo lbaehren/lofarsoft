@@ -22,10 +22,10 @@ option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?
 
 find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  ${StarTools_SOURCE_DIR}
-  ${StarTools_SOURCE_DIR}/..
-  ${StarTools_SOURCE_DIR}/../..
-  ${StarTools_SOURCE_DIR}/../../..
+  ${PROJECT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR}/..
+  ${PROJECT_SOURCE_DIR}/../..
+  ${PROJECT_SOURCE_DIR}/../../..
   $ENV{LOFARSOFT}
   )
 
@@ -147,7 +147,7 @@ endif (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
 if (LUS_INSTALL_PREFIX)
   set (CMAKE_INSTALL_PREFIX ${LUS_INSTALL_PREFIX}) 
 else (LUS_INSTALL_PREFIX)
-  set (CMAKE_INSTALL_PREFIX ${StarTools_SOURCE_DIR})
+  set (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 endif (LUS_INSTALL_PREFIX)
 
 ## No relinking and full RPATH for the install tree
@@ -165,8 +165,8 @@ set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ## ==============================================================================
 
 include_directories (
-  ${StarTools_SOURCE_DIR}/src
-  ${StarTools_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/src
+  ${PROJECT_SOURCE_DIR}/include
   )
 
 add_subdirectory (src)
