@@ -114,7 +114,7 @@ parser.add_option("-q","--nopause", action="store_true",help="Do not pause after
 parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip file if results directory already exists")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
-
+parser.add_option("-O", "--max_outliers", type="int", default=5, help="Maximum allowed number of outliers in calculated cable delays")
 
 if parser.get_prog_name()=="cr_event_radio.py":
     (options, args) = parser.parse_args()
@@ -191,6 +191,7 @@ else:
     refresh = not options.norefresh
     plotpause = (not options.nopause and refresh)
     maximum_allowed_delay = options.maximum_allowed_delay
+    max_outliers = options.max_outliers
     search_window_width=options.search_window_width
     sample_number=options.sample_number
     max_data_length=options.max_data_length
@@ -243,7 +244,7 @@ def finish_file(laststatus=""):
     summaryfile.close()
 
     global good_old_time_stamp
-    if delay_quality_error<1:
+    if delay_quality_error<1 and delay_outliers < max_outliers: 
         topsummaryfile=open(goodsummaryfilename,"a")
         if not good_old_time_stamp == time_stamp:
             topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
@@ -332,6 +333,7 @@ for full_filename in files:
         # Initialization of some parameters
         #------------------------------------------------------------------------
         delay_quality_error=99.
+        delay_outliers = 99
         lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0)
         pulse_normalized_height=-1.0
         pulse_height=-1.0
@@ -389,7 +391,7 @@ for full_filename in files:
 
 
         #station_name=filename_split[-1] 
-        #old_time_stamp=time_stamp
+        old_time_stamp=time_stamp
         #time_stamp=filename_split[-2] if not timestamp else timestamp
         #pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
 
@@ -1021,10 +1023,16 @@ for full_filename in files:
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
 
-        scrt = hArray(copy=direction.residual_delays).vec(); scrt.abs(); # NB! Need to copy the hArray
+        scrt = hArray(copy=direction.residual_delays); scrt.abs(); # NB! Need to copy the hArray
         # otherwise, the original array will get modified by scrt.abs().
-        delay_quality_error=scrt.median()/maximum_allowed_delay
+        delay_quality_error=scrt.median()[0]/maximum_allowed_delay
         print "#Delay Quality Error:",delay_quality_error
+
+        # also count # outliers, impose maximum
+        number = hArray(int, dimensions=scrt)
+        delay_outliers = number.findgreaterthanabs(scrt, maximum_allowed_delay)[0] # returns count, indices in 'number' array
+        
+        print "# delay outliers: ", delay_outliers
 
         if delay_quality_error>1:
             print "************************************************************************"
@@ -1150,6 +1158,7 @@ for full_filename in files:
             antennas_residual_cable_delays = list(final_residual_delays.vec()),
             antennas_with_peaks=antennas_with_peaks,
             delay_quality_error=delay_quality_error,
+            delay_outliers = delay_outliers,
             pulse_location=beam_maxima.maxx.val(),
             pulses_strength=list(pulses_strength.vec()),
             pulses_maxima_x=list(maxima_power.maxx),
@@ -1171,6 +1180,13 @@ for full_filename in files:
         event.par.results=results
         event.write(result_file)
 
+        if delay_quality_error >= 1:
+            final_status = "BAD"
+        elif delay_outliers > max_outliers:
+            final_status = "BAD / TOO MANY OUTLIERS (" + str(delay_outliers) + ")"
+        else:
+            final_status = "OK"
+        results.update(dict(status = final_status))
         #Writing results.py
         f=open(os.path.join(outputdir_with_subdirectories,"results.py"),"w")
         f.write("#"+outfilename+"\nresults="+str(results))
@@ -1178,7 +1194,7 @@ for full_filename in files:
 
         # Writing results to XML file
         xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
-
-        finish_file(laststatus="OK" if delay_quality_error<1 else "BAD")
+        
+        finish_file(laststatus = final_status)
 
 plt.ion()
