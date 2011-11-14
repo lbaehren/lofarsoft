@@ -136,9 +136,9 @@ respective package manager:
 
 == Fedora 15 ==
 
-  yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison swig
-  yum install blas-devel lapack-devel boost-devel fftw-devel hdf5-devel
-  yum install cfitsio-devel gsl-devel
+  yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison
+  yum install blas-devel lapack-devel boost-devel fftw-devel hdf5-devel cfitsio-devel gsl-devel
+  yum install swig numpy pyfits
 
 == OpenSuSE 11.4 ==
 
