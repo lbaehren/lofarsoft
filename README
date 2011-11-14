@@ -128,11 +128,13 @@ ________________________________________________________________________________
 Most of the required external software packages can be installed via the
 respective package manager:
 
-== Debian GNU Linux 6.x ==
+== Debian GNU Linux 6.x   ==
+== Ubuntu Linux 10.04 LTS ==
+== Ubuntu Linux 11.10     ==
 
   apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
-  apt-get install libblas-dev liblapack-dev libboost-all-dev libfftw3-dev
-  apt-get install libcfitsio3-dev libgsl0-dev
+  apt-get install libblas-dev liblapack-dev libboost-all-dev libfftw3-dev libhdf5-serial-dev
+  apt-get install libcfitsio3-dev libgsl0-dev python-numpy
 
 == Fedora 15 ==
 
@@ -143,19 +145,12 @@ respective package manager:
 == OpenSuSE 11.4 ==
 
   yast2 --install cmake git-svn subversion bison flex
-  yast2 --install blas lapack boost-devel
-  yast2 --install libcfitsio-devel gsl-devel
+  yast2 --install blas lapack boost-devel libcfitsio-devel gsl-devel
+  yast2 --install python-devel python-numpy-devel
 
 If you'd rather work from the terminal only:
 
   zypper install cmake git-svn subversion bison flex
-  zypper install blas lapack boost-devel
-  zypper install libcfitsio-devel gsl-devel
-
-== Ubuntu Linux 10.04 LTS ==
-== Ubuntu Linux 11.10     ==
-
-  apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
-  apt-get install libblas-dev liblapack-dev libboost-all-dev libfftw3-dev
-  apt-get install libcfitsio3-dev libgsl0-dev numpy
+  zypper install blas lapack boost-devel libcfitsio-devel gsl-devel
+  zypper install python-devel python-numpy-devel
 
