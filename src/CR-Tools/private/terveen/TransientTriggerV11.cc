@@ -136,7 +136,7 @@ bool FileExists(string strFilename) {
 int main (int argc,
 		  char *argv[])
 {
-	bool failsafe=true;
+	bool failsafe=0;
 	cout<<"This file outputs histograms of pulsar data to /Users/STV/Documents/GiantPulse/."<<endl;
 	int integrationlength = 1; //average length
 	float triggerlevel = 141/3;
@@ -165,6 +165,7 @@ int main (int argc,
 	int nrCombinedSBs = 1;
 	int HBAmode = 1;
 	string pulsedir = "pulses";
+    int sleeptime = 0;
 	
 	/*
 	 Check if filename of the dataset is provided on the command line; if only
@@ -198,6 +199,7 @@ int main (int argc,
 			"-nrCSB number of subbands to combine as one"
 			"-tInt <time integration>"
 			"-LBA LBA mode"
+            "-sleep <sleeptime (sec)>"
 			"Examples:\n"
 			"./TransientTrigger -i ~/Astro/data/pulsars/obs/ -FSB 0 -LSB 10 -il 20 -tl 50 -n 51 \n"
 			"./TransientTrigger -i ~/Astro/data/pulsars/L2009_13298/ -FSB 0 -LSB 10 -il 20 -tl 50 -n 3595 \n; open /Users/STV/Documents/GiantPulse/excesslog_pdt.txt\n"
@@ -263,6 +265,10 @@ int main (int argc,
 			argcounter++;
 			CoinNr = atoi(argv[argcounter]);
 			cout << "Coincidence subbands required " << CoinNr << endl;	
+		} else if(topic == "-sleep"){
+			argcounter++;
+            sleeptime=(int) 1000000*atof(argv[argcounter]);
+			cout << "Sleep for " << sleeptime << "us" << endl; 
 		} else if(topic == "-Ctime"){
 			argcounter++;
 			CoinTime = atoi(argv[argcounter]);
@@ -565,6 +571,7 @@ int main (int argc,
 			
 
 		}
+        usleep(sleeptime);
 	}
 	return nofFailedTests;
 }
