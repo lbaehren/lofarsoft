@@ -83,8 +83,3 @@ set (DAL_VERBOSE_CONFIGURE ${DAL_VERBOSE_CONFIGURE} CACHE BOOL
   "Verbose output during configuration?")
 set (DAL_WITH_MYSQL ${DAL_WITH_MYSQL} CACHE BOOL
   "Build with support for MySQL database?")
-
-## === WCSLIB ======================================================================
-
-set (WCSLIB_PYTHON_WRAPPER ${WCSLIB_PYTHON_WRAPPER} CACHE BOOL
-  "Generate Python wrapper for WCSLIB?")

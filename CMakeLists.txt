@@ -87,8 +87,6 @@ option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"        NO 
 option (DAL_WITH_MYSQL         "Build with support for MySQL database?"      NO  )
 set (DAL_GIT "git://github.com/nextgen-astrodata/DAL.git" CACHE STRING "Git repository for DAL.")
 
-option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
-
 ## Handle options
 
 if (LUS_ENABLE_TESTING)
