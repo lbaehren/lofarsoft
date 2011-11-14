@@ -344,6 +344,22 @@ for full_filename in files:
 
 
         ########################################################################
+        #Open the data file
+        ########################################################################
+        print "---> Open data file",full_filename
+        try:
+            datafile=open(full_filename); 
+            if datafile["ANTENNA_SET"]=="UNDEFINED": 
+                datafile["ANTENNA_SET"]=lofarmode
+        except RuntimeError:
+            print "ERROR opening file - skipping this file!"
+            statuslist.append("OPEN FAILED")
+            finish_file()
+            continue
+
+
+
+        ########################################################################
         #Setting filenames and directories
         ########################################################################
         (filedir,filename)=os.path.split(full_filename)
@@ -353,13 +369,29 @@ for full_filename in files:
 
         (rootfilename,fileextensions)=os.path.splitext(filename)
 
-        filename_split=rootfilename.split("-")
-        projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
+        #filename_split=rootfilename.split("-")
+        #projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
+        projectname="VHECR_LORA"
 
-        station_name=filename_split[-1] if not station else station
+        timesec=datafile["TIME"][0]
+        timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
+
+        timems = int(datafile["SAMPLE_INTERVAL"][0]*datafile["SAMPLE_NUMBER"][0]*1000)
+        timems = str(timems).zfill(3) # make 3 digits with leading zeros if needed.
+        # NOTE: chosen to take int part of time in ms; i.e. not rounding to nearest ms.
+        
+        #time_stamp=filename_split[-2] if not timestamp else timestamp
+        time_stamp=timestr+"."+timems+"Z" if not timestamp else timestamp
+
+        pretty_time_stamp=time.strftime("%Y-%m-%d %H:%M:%S."+timems,time.gmtime(timesec))
+
+        station_name=metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+
+
+        #station_name=filename_split[-1] 
         old_time_stamp=time_stamp
-        time_stamp=filename_split[-2] if not timestamp else timestamp
-        pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
+        #time_stamp=filename_split[-2] if not timestamp else timestamp
+        #pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
 
         outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
         topdir_name=projectname+"-"+time_stamp
@@ -416,16 +448,8 @@ for full_filename in files:
 
 
         ########################################################################
-        #Open the data file
+        #Continued opening the data file
         ########################################################################
-        print "---> Open data file",full_filename
-        try:
-            datafile=open(full_filename); datafile["ANTENNA_SET"]=lofarmode
-        except RuntimeError:
-            print "ERROR opening file - skipping this file!"
-            statuslist.append("OPEN FAILED")
-            finish_file()
-            continue
 
 
         tbb_starttime=datafile["TIME"][0]
