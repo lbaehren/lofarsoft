@@ -20,16 +20,12 @@ option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
   ExternalProject_Add (anaamika
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
     URL ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DANAAMIKA_ENABLE_SCIPY=${ANAAMIKA_ENABLE_SCIPY}
     )
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
   ExternalProject_Add (anaamika
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/Anaamika
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DANAAMIKA_ENABLE_SCIPY=${ANAAMIKA_ENABLE_SCIPY}
     )
@@ -56,16 +52,12 @@ endif (ANAAMIKA_ENABLE_SCIPY)
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
   ExternalProject_Add (contrib
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/contrib
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
     URL ${CMAKE_CURRENT_SOURCE_DIR}/contrib
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     )
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
   ExternalProject_Add (contrib
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/contrib
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/contrib
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     )
@@ -92,16 +84,12 @@ option (RM_WITH_ARMADILLO  "Enable using Armadillo library?"  YES )
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ExternalProject_Add (rm
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/RM
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
     URL ${CMAKE_CURRENT_SOURCE_DIR}/RM
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_WITH_ITPP=${RM_WITH_ITPP} -DRM_WITH_ARMADILLO=${RM_WITH_ARMADILLO}
     )
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ExternalProject_Add (rm
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/RM
-    DOWNLOAD_DIR download
-    SOURCE_DIR source
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/RM
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_WITH_ITPP=${RM_WITH_ITPP} -DRM_WITH_ARMADILLO=${RM_WITH_ARMADILLO}
     )
