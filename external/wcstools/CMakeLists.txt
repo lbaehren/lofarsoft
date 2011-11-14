@@ -1,142 +1,31 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
-##------------------------------------------------------------------------------
 
-## -----------------------------------------------------------------------------
-## Project name and version number number
+include (ExternalProject)
 
-## Name of the project
-project (WCSTOOLS)
+## ==============================================================================
+##
+##                                                        $LOFARSOFT/src/Anaamika
+##
+## ==============================================================================
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
+##__________________________________________________________
+## Options
 
-include (CTest)
 
-## ------------------------------------------------------------------------------
-## User selectable options
+##__________________________________________________________
+## Build instructions
 
-option (WCSTOOLS_BUILD_TOOLS  "Build the applications?"   YES )
-option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" NO  )
-
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-    PATHS 
-    ${WCSTOOLS_SOURCE_DIR}
-    ${WCSTOOLS_SOURCE_DIR}/..
-    ${WCSTOOLS_SOURCE_DIR}/../..
-    ${WCSTOOLS_SOURCE_DIR}/../../..
-    ENV LOFARSOFT
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  ExternalProject_Add (wcstools
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/src
+    DOWNLOAD_DIR download
+    SOURCE_DIR source
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/src
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     )
-  
-  if (LUS_ROOT)
-    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_ROOT)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_ROOT)
-endif (NOT LUS_ROOT)
+else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  message (STATUS "[wcstools] Unable to find source directory!")
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-## ==============================================================================
-##
-##  External packages/libraries
-##
-## ==============================================================================
+##__________________________________________________________
+## Package dependencies
 
-find_library (libsocket socket
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
-
-find_library (libnsl nsl
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
-
-find_library (libm m
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
-
-find_library (libSystemStubs SystemStubs
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-  /Developer/SDKs/MacOSX10.3.9.sdk/usr/lib
-  )
-
-## set up chain of libraries to link against
-
-set (link_libraries "")
-
-if (libnsl)
-  list (APPEND link_libraries ${libnsl})
-endif (libnsl)
-
-if (libm)
-  list (APPEND link_libraries ${libm})
-endif (libm)
-
-## ==============================================================================
-##
-##  Libraries
-##
-## ==============================================================================
-
-add_subdirectory (libwcs)
-
-if (WCSTOOLS_BUILD_LIBNED)
-  add_subdirectory (libned)
-endif (WCSTOOLS_BUILD_LIBNED)
-
-## ==============================================================================
-##
-##  Applications
-##
-## ==============================================================================
-
-if (WCSTOOLS_BUILD_TOOLS)
-  
-  set (wcstools
-    cphead
-    delwcs
-    delhead
-    edhead
-    fixpix
-    gethead
-    i2f
-    imcat
-    imhead
-    immatch
-    imrot
-    imsize
-    imstar
-    imwcs
-    scat sethead addpix getpix setpix sky2xy
-    keyhead skycoor subpix xy2sky wcshead conpix gettab newfits getfits
-    imstack imextract sumpix remap getcol getdate imfill imsmooth imresize
-    fileroot filename filext char2sp sp2char crlf isnum isrange simpos bincat
-    )
-  
-  foreach (app ${wcstools})
-    ## compiler instructions
-    add_executable (${app} ${app}.c)
-    ## linker instructions
-    target_link_libraries (${app} wcs ${link_libraries})
-    ## installation instructions
-    install (TARGETS ${app}
-      RUNTIME DESTINATION bin
-      )
-  endforeach (app)
-
-endif (WCSTOOLS_BUILD_TOOLS)

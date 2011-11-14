@@ -1,9 +1,11 @@
 
-## Load CMake modules ____________________________
+##____________________________________________________________________
+## Load CMake modules
 
 include (ExternalProject)
 
-## List of external packages _____________________
+##____________________________________________________________________
+## List of external packages
 
 set (external_packages
   aera
@@ -38,8 +40,9 @@ set (external_packages
   sip
   swig
   szip
-  valgrind
   tmf
+  valgrind
+  wcstools
   )
 
 if (OPENGL_FOUND)
