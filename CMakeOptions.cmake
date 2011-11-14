@@ -17,15 +17,6 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
 set (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
   "Does the compiler support OpenMP?")
 
-## === Anaamika =================================================================
-
-set (ANAAMIKA_ENABLE_SCIPY ${ANAAMIKA_ENABLE_SCIPY} CACHE BOOL
-  "Build SciPy as interactive environment?"                           )
-set (ANAAMIKA_ENABLE_FBDSM ${ANAAMIKA_ENABLE_FBDSM} CACHE BOOL
-  "Build Fortran-based version of BDSM?"                              )
-set (ANAAMIKA_ENABLE_PYBDSM ${ANAAMIKA_ENABLE_PYBDSM} CACHE BOOL
-  "Build Python-enabled version of BDSM?"                             )
-
 ## === CR-Tools =================================================================
 
 set (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL

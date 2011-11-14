@@ -54,10 +54,6 @@ option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO
 
 ## Options affecting the build of individual packages
 
-option (ANAAMIKA_ENABLE_SCIPY   "Build SciPy as interactive environment?"  NO  )
-option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
-option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
-
 option (CR_WITH_DAL             "Build and use the Data Access Library?"   YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
 option (CR_WITH_PYCR            "Support for Python applications?"         NO )
@@ -304,17 +300,6 @@ endif (ROOT_FOUND)
 ##  USG packages
 ##
 ## ==============================================================================
-
-##____________________________________________________________________
-##                                                            Anaamika
-
-build_package (anaamika src/Anaamika)
-
-add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
-
-if (ANAAMIKA_ENABLE_SCIPY)
-  add_dependencies (anaamika scipy)
-endif (ANAAMIKA_ENABLE_SCIPY)
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)

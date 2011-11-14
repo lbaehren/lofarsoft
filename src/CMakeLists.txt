@@ -3,6 +3,49 @@ include (ExternalProject)
 
 ## ==============================================================================
 ##
+##                                                        $LOFARSOFT/src/Anaamika
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Options
+
+option (ANAAMIKA_ENABLE_SCIPY   "Build SciPy as interactive environment?"  NO  )
+option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
+option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
+
+##__________________________________________________________
+## Build instructions
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
+  ExternalProject_Add (anaamika
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
+    DOWNLOAD_DIR download
+    SOURCE_DIR source
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DANAAMIKA_ENABLE_SCIPY=${ANAAMIKA_ENABLE_SCIPY}
+    )
+else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
+  ExternalProject_Add (anaamika
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
+    DOWNLOAD_DIR download
+    SOURCE_DIR source
+    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/Anaamika
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DANAAMIKA_ENABLE_SCIPY=${ANAAMIKA_ENABLE_SCIPY}
+    )
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
+
+##__________________________________________________________
+## Package dependencies
+
+add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
+
+if (ANAAMIKA_ENABLE_SCIPY)
+  add_dependencies (anaamika scipy)
+endif (ANAAMIKA_ENABLE_SCIPY)
+
+## ==============================================================================
+##
 ##                                                         $LOFARSOFT/src/contrib
 ##
 ## ==============================================================================
@@ -67,7 +110,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 ##__________________________________________________________
 ## Package dependencies
 
-add_dependencies (rm dal)
+add_dependencies (rm wcslib cfitsio dal)
 
 if (RM_WITH_ARMADILLO AND EXISTS armadillo)
   add_dependencies (rm armadillo)
