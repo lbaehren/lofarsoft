@@ -141,7 +141,7 @@ class Op_gaul2srl(Op):
               src_index, source = self.process_single_gaussian(img, g_sublist, src_index, code = 'C')
           else:
               # make mask and subim. Invalid mask value is -1 since 0 is valid srcid
-              mask = self.make_mask(isl, subn, subm, nsrc, isrc, g_sublist, delc)
+              mask = self.make_mask(isl, subn, subm, 1, isrc, g_sublist, delc)
               src_index, source = self.process_Multiple(img, g_sublist, mask, src_index, isrc, subim, \
                                   isl, delc, subn, subm)
           source_list.append(source)
