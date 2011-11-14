@@ -120,6 +120,7 @@ endif (HOSTNAME_CMD)
 ## version of the status variable is being define (<PACKAGE>_FOUND)
 
 foreach (varSystemPackage
+    Armadillo
     BISON
     Boost
     Blitz

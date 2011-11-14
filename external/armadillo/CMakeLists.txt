@@ -33,7 +33,9 @@ option (ARMADILLO_FROM_REPOS   "Install package from repository?"         NO )
 ##
 ## ==============================================================================
 
-find_package (Armadillo)
+if (NOT ARMADILLO_FOUND)
+  find_package (Armadillo)
+endif (NOT ARMADILLO_FOUND)
 
 ## ==============================================================================
 ##
