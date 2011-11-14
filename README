@@ -138,9 +138,11 @@ respective package manager:
   apt-get install libcfitsio3-dev libgsl0-dev python-numpy
 
 == Fedora 15 ==
+== Fedora 16 ==
 
   yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison
-  yum install blas-devel lapack-devel boost-devel fftw-devel hdf5-devel cfitsio-devel gsl-devel
+  yum install blas-devel lapack-devel boost-devel qt-devel fftw-devel
+  yum install gsl-devel plplot-devel armadillo-devel hdf5-devel cfitsio-devel
   yum install swig numpy pyfits
 
 == OpenSuSE 11.4 ==
