@@ -42,6 +42,7 @@ set (external_packages
   szip
   tmf
   valgrind
+  wcslib
   wcstools
   )
 

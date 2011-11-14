@@ -256,7 +256,6 @@ configure_file (
 
 set (packages_external
   num_util
-  wcslib
   )
 
 if (ROOT_FOUND)
