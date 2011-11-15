@@ -143,7 +143,7 @@ respective package manager:
   yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison
   yum install blas-devel lapack-devel boost-devel qt-devel fftw-devel
   yum install gsl-devel plplot-devel armadillo-devel hdf5-devel cfitsio-devel
-  yum install swig numpy pyfits
+  yum install swig numpy pyfits ipython
 
 == OpenSuSE 11.4 ==
 
