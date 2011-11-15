@@ -239,10 +239,17 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
          }
        }
      }
-   
-     N = validsamples?validsamples:1;
-     average[c] = sum/N;
-     rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+     N = validsamples;
+     if(N == 0) {
+       average[c] = 0;
+       rms[c] = 0;
+     }else if(N == 1) {
+       average[c] = sum;
+       rms[c] = 0;
+     }else {
+       average[c] = sum/N;
+       rms[c] = sqrt((ms-(N*average[c]*average[c]))/(float)(N-1));
+     }
    }
  
   /* convert and write the data */
@@ -315,7 +322,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
 	 if(sigmalimit > 0) {
 	   if(debugpacking)
-	     printf("value %e ", sum);
+	     printf("2 value %e ", sum);
 	   sum = (sum - offsets[c])/scales[c];
 	   if(debugpacking)
 	     printf(" %e ", sum);
@@ -339,6 +346,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	   /*	   printf("value %e\n", sum); */
 	 }
 	 
+
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
 	 if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
@@ -537,32 +545,106 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        float ms = 0.0f;
        int N = 0;
        unsigned validsamples = 0;
-       float prev;
-       prev = stokesdata_h5[0].samples[beamnr][0][nsub][c][STOKES_SWITCH];
        /* compute average */
        for( i = 0; i < num; i++ ) {
 	 for( time = 0; time < SAMPLES; time++ ) {
 	   float value;
 	   value = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
-	   if(prev < 1){
-	     prev = value;
-	   } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
+	   // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
+	   if( !isnan( value ) ) {
 	     sum += value;
 	     ms += value*value;
-	     prev = value;
 	     validsamples++;
 	   }
 	 }
        }
    
-       N = validsamples?validsamples:1;
+       N = validsamples;
        if(is_append) {
-	 average[nsub*CHANNELS+c] = sum/N;
-	 rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+	 if(N == 0) {
+	   average[nsub*CHANNELS+c] = 0;
+	   rms[nsub*CHANNELS+c] = 0;
+	 }else if(N == 1) {
+	   average[nsub*CHANNELS+c] = sum;
+	   rms[nsub*CHANNELS+c] = 0;
+	 }else {
+	   average[nsub*CHANNELS+c] = sum/N;
+	   rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+	 }
+	 if (debugpacking) printf("average[%ld] = %lf rms[%ld] = %lf\n",nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
        }else {
-	 average[c] = sum/N;
-	 rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+	 if(N == 0) {
+	   average[c] = 0;
+	   rms[c] = 0;
+	 }else if(N == 1) {
+	   average[c] = sum;
+	   rms[c] = 0;
+	 }else {
+	   average[c] = sum/N;
+	   rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+	 }
+	 if (debugpacking) printf("average[%d] = %lf rms[%d] = %lf\n",c,average[c],c,rms[c]);
        }
+
+       /* BWS: Ideal loop would count how many samples over the limit, but that requires more passes through
+	  the data, so for now, just do it brute force, with three loops.... */
+
+       int avgloops = 20;
+       int al;
+       float previous_rms,current_rms;
+       for ( al = 0; al < avgloops; al++)
+	 {
+	   sum = 0.0f;
+	   ms = 0.0f;
+	   validsamples = 0;
+
+	   for( i = 0; i < num; i++ ) {
+	     for( time = 0; time < SAMPLES; time++ ) {
+	       float value;
+	       value = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
+	       // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
+	       if( !isnan( value ) && value > average[c] - 3 * rms[c] && value < average[c] + 3 *rms[c]) {
+		 sum += value;
+		 ms += value*value;
+		 validsamples++;
+	       }
+	     }
+	   }
+   
+	   N = validsamples;
+	   if(is_append) {
+	     previous_rms = rms[nsub*CHANNELS+c];
+	     if(N == 0) {
+	       average[nsub*CHANNELS+c] = 0;
+	       rms[nsub*CHANNELS+c] = 0;
+	     }else if(N == 1) {
+	       average[nsub*CHANNELS+c] = sum;
+	       rms[nsub*CHANNELS+c] = 0;
+	     }else {
+	       average[nsub*CHANNELS+c] = sum/N;
+	       rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+	     }
+	     if (debugpacking) printf("avloop %d average[%ld] = %lf rms[%ld] = %lf\n",al,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
+	     current_rms = rms[nsub*CHANNELS+c];
+	   }else {
+	     previous_rms = rms[c];
+	     if(N == 0) {
+	       average[c] = 0;
+	       rms[c] = 0;
+	     }else if(N == 1) {
+	       average[c] = sum;
+	       rms[c] = 0;
+	     }else {
+	       average[c] = sum/N;
+	       rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+	     }
+	     if (debugpacking) printf("avloop %d average[%d] = %lf rms[%d] = %lf\n",al,c,average[c],c,rms[c]);
+	     current_rms = rms[c];
+	   }
+	   if ( previous_rms / current_rms < 1.005 || current_rms == 0.0 ) break;
+	 }
+
+ 
      }
    }
  
@@ -574,30 +656,32 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        /* patrick */
      if(sigmalimit > 0 && i == 0) {
        for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
-       for( c = 0; c < CHANNELS; c++ ) {
-	 /*
-	 0                         = ivalue(average[c]-sigmalimit*rms[c]);
-	 0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
-	 0                         = (average[c]-sigmalimit*rms[c] - offset);
-	 */
-	 if(is_append == 0) {
-	   offsets[c]                    = average[c]-sigmalimit*rms[c];
+	 for( c = 0; c < CHANNELS; c++ ) {
 	   /*
-	     pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
-	     pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
+	     0                         = ivalue(average[c]-sigmalimit*rms[c]);
+	     0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
+	     0                         = (average[c]-sigmalimit*rms[c] - offset);
 	   */
-	   scales[c]  = (average[c]+sigmalimit*rms[c]-offsets[c])/(float)(pow(2,subintdata->NrBits)-1);
-	   if(debugpacking)
-	     fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[c], offsets[c], average[c], rms[c]);
-	 }else {
-	   offsets[nsub*CHANNELS+c]      = average[nsub*CHANNELS+c]-sigmalimit*rms[nsub*CHANNELS+c];
-	   scales[nsub*CHANNELS+c]  = (average[nsub*CHANNELS+c]+sigmalimit*rms[nsub*CHANNELS+c]-offsets[nsub*CHANNELS+c])/(float)(pow(2,subintdata->NrBits)-1);
-	   if(debugpacking)
-	     fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[nsub*CHANNELS+c], offsets[nsub*CHANNELS+c], average[nsub*CHANNELS+c], rms[nsub*CHANNELS+c]);
+	   if(is_append == 0) {
+	     //	     offsets[c]                    = average[c]-sigmalimit*rms[c];
+	     offsets[c]                    = average[c];
+	     /*
+	       pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
+	       pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
+	     */
+	     scales[c]  = (2*sigmalimit*rms[c])/(float)(pow(2,subintdata->NrBits));
+	     if(debugpacking)
+	       fprintf(stderr, "num %d nsub %ld ch %d scale=%e offset=%e (av=%e  rms=%e)\n", i, nsub, c, scales[c], offsets[c], average[c], rms[c]);
+	   }else {
+	     offsets[nsub*CHANNELS+c]      = average[nsub*CHANNELS+c];
+	     scales[nsub*CHANNELS+c]  = (2*sigmalimit*rms[nsub*CHANNELS+c])/(float)(pow(2,subintdata->NrBits));
+	     if(debugpacking)
+	       fprintf(stderr, "num %d nsub %ld ch %d scale=%e offset=%e (av=%e  rms=%e)\n", i, nsub, c, scales[nsub*CHANNELS+c], offsets[nsub*CHANNELS+c], average[nsub*CHANNELS+c], rms[nsub*CHANNELS+c]);
+	   }
 	 }
-        }
        }
      }
+
      /* process data */
      for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
      for( c = 0; c < CHANNELS; c++ ) {
@@ -616,9 +700,9 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	   if(debugpacking)
 	     printf("value %e ", sum);
 	   if(is_append)
-	     sum = (sum - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c];
+	     sum = (sum - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c] + (float)(pow(2,subintdata->NrBits-1));
 	   else
-	     sum = (sum - offsets[c])/scales[c];
+	     sum = (sum - offsets[c])/scales[c] + (float)(pow(2,subintdata->NrBits-1));
 	   if(debugpacking)
 	     printf(" %e ", sum);
 	   if(sum < 0) {
@@ -648,6 +732,12 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
 	   /*	   printf("value %e\n", sum); */
 	 }
+
+	 /* BWS */
+	 // if (nsub*CHANNELS+c == 20 && i == 0 ) printf("BWS %d %d %f %f %f %f\n",c,time,sum,stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH],offsets[nsub*CHANNELS+c], scales[nsub*CHANNELS+c]);
+
+
+
 	 
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
@@ -920,9 +1010,18 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      }
    
      ac=s*CHANNELS+c;
-     N = validsamples?validsamples:1;
-     average[ac] = sum/N;
-     rms[ac] = sqrt((ms-(N*average[ac]*average[ac]))/(N-1));
+
+     N = validsamples;
+     if(N == 0) {
+       average[ac] = 0;
+       rms[ac] = 0;
+     }else if(N == 1) {
+       average[ac] = sum;
+       rms[ac] = 0;
+     }else {
+       average[ac] = sum/N;
+       rms[ac] = sqrt((ms-(N*average[ac]*average[ac]))/(N-1));
+     }
    } // CHANNELS
   } // SUBBANDS
  
@@ -966,10 +1065,10 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 	 output_samples += SAMPLES;
 	 nul_samples += SAMPLES;
        }
-     }
+     }  /* End of for(gap loop */
      stokesdata[i].sequence_number =  prev_seqnr + 1;       
      prev_seqnr = stokesdata[i].sequence_number;
-
+   
        /* patrick */
      if(sigmalimit > 0 && i == 0) {
        for( s = 0; s < SUBBANDS; s++ ) {
@@ -1337,9 +1436,18 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
      }
    
      ac = ss * CHANNELS + c;
-     N = validsamples?validsamples:1;
-     average[ac] = sum/N;
-     rms[ac] = sqrt((ms-(N*average[ac]*average[ac]))/(N-1));
+
+     N = validsamples;
+     if(N == 0) {
+       average[ac] = 0;
+       rms[ac] = 0;
+     }else if(N == 1) {
+       average[ac] = sum;
+       rms[ac] = 0;
+     }else {
+       average[ac] = sum/N;
+       rms[ac] = sqrt((ms-(N*average[ac]*average[ac]))/(N-1));
+     }
    }
    } // SUBBANDS
 
