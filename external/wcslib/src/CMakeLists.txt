@@ -23,34 +23,43 @@ option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" NO  )
 option (WCSLIB_ENABLE_TESTING    "Enable building and running tests?"   YES )
 option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  YES )
 
+## Handle option: Verbose output during configuration?
+
+if (NOT WCSLIB_VERBOSE_CONFIGURE)
+  set (WCSLIB_FIND_QUIETLY  YES )
+  set (CFITSIO_FIND_QUIETLY YES )
+  set (BOOST_FIND_QUIETLY   YES )
+  set (PYTHON_FIND_QUIETLY  YES )
+endif (NOT WCSLIB_VERBOSE_CONFIGURE)
+
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${WCSLIB_SOURCE_DIR}
-  ${WCSLIB_SOURCE_DIR}/..
-  ${WCSLIB_SOURCE_DIR}/../..
-  ${WCSLIB_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+if (NOT LUS_CMAKE_MODULES)
+  find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
+    PATHS 
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    PATH_SUFFIXES
+    cmake
+    devel_common/cmake
+    )
+endif (NOT LUS_CMAKE_MODULES)
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[WCSLIB] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
-
-if (NOT WCSLIB_VERBOSE_CONFIGURE)
-  set (WCSLIB_FIND_QUIETLY YES)
-endif (NOT WCSLIB_VERBOSE_CONFIGURE)
-
-if (NOT WCSLIB_FOUND)
-  find_package (WCSLIB)
-endif (NOT WCSLIB_FOUND)
+if (LUS_CMAKE_MODULES)
+  ## Augment CMAKE_MODULE_PATH variable
+  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
+    "CMake module path"
+    FORCE)
+  ## Load custom CMake settings
+  include (LUS_CMakeSettings)
+  ## Check if package is not installed yet
+  if (NOT WCSLIB_FOUND)
+    find_package (WCSLIB)
+  endif (NOT WCSLIB_FOUND)
+endif (LUS_CMAKE_MODULES)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -58,15 +67,12 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
   
   ## silence find scipt output if necessary
   
-  if (NOT WCSLIB_VERBOSE_CONFIGURE)
-    set (CFITSIO_FIND_QUIETLY YES )
-    set (BOOST_FIND_QUIETLY   YES )
-    set (PYTHON_FIND_QUIETLY  YES )
-  endif (NOT WCSLIB_VERBOSE_CONFIGURE)
+  if (NOT CFITSIO_FOUND)
+    find_package (CFITSIO)
+  endif (NOT CFITSIO_FOUND)
   
-  include (FindCFITSIO)
-  include (FindBoost)
-  include (FindPython)
+  find_package (Boost)
+  find_package (Python)
   
   ## ----------------------------------------------------------------------------
   ## Check for additional tools which are required

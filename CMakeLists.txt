@@ -26,6 +26,26 @@ set (LUS_VERSION "${LUS_VERSION_MAJOR}.${LUS_VERSION_MINOR}.${LUS_VERSION_PATCH}
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
+##                                                       CMake modules
+
+find_path (LUS_CMAKE_MODULES
+  NAMES         template_FindXX.cmake LUS_CMakeSettings.cmake
+  PATHS         ${PROJECT_SOURCE_DIR}
+  PATH_SUFFIXES Modules cmake devel_common/cmake
+ )
+
+if (LUS_CMAKE_MODULES)
+  ## Augment CMAKE_MODULE_PATH variable
+  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
+    "CMake module path"
+    FORCE)
+  ## Load custom CMake settings
+  include (LUS_CMakeSettings)
+endif (LUS_CMAKE_MODULES)
+
+##____________________________________________________________________
+
 find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS
   ${PROJECT_SOURCE_DIR}
@@ -34,10 +54,12 @@ find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   )
 
 if (LUS_ROOT)
+  set (LUS_ROOT_DIR ${LUS_ROOT} )
   ## load custom modules
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  include (CMakeSettings)
 else (LUS_ROOT)
-  set (LUS_ROOT ${PROJECT_SOURCE_DIR})
+  set (LUS_ROOT     ${PROJECT_SOURCE_DIR} )
+  set (LUS_ROOT_DIR ${PROJECT_SOURCE_DIR} )
 endif (LUS_ROOT)
 
 ## ==============================================================================
@@ -54,9 +76,11 @@ option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO
 
 ## Options affecting the build of individual packages
 
+option (WCSLIB_PYTHON_WRAPPER   "Generate Python wrapper for WCSLIB?"      YES )
+
 option (CR_WITH_DAL             "Build and use the Data Access Library?"   YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
-option (CR_WITH_PYCR            "Support for Python applications?"         NO )
+option (CR_WITH_PYCR            "Support for Python applications?"         NO  )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
 option (CR_WITH_GUI             "Build the graphical interface?"           NO  )
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"   YES )
@@ -383,8 +407,8 @@ message (STATUS " .. SZIP compression library ... = ${SZIP_FOUND}"            )
 message (STATUS " .. WCSLIB ..................... = ${WCSLIB_FOUND}"          )
 message (STATUS " .. Wget ....................... = ${WGET_FOUND}"            )
 message (STATUS " LOFAR User software configuration:"                         )
-message (STATUS " .. LOFARSOFT                    = $ENV{LOFARSOFT}"          )
 message (STATUS " .. LUS_ROOT                     = ${LUS_ROOT}"              )
+message (STATUS " .. LUS_CMAKE_MODULES .......... = ${LUS_CMAKE_MODULES}"     )
 message (STATUS " .. LUS_INSTALL_PREFIX           = ${LUS_INSTALL_PREFIX}"    )
 message (STATUS " .. LUS_PYTHONPATH               = ${USG_PYTHONPATH}"        )
 message (STATUS " .. LUS_DATA_DIR                 = ${LUS_DATA_DIR}"          )
