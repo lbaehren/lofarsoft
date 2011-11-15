@@ -28,20 +28,27 @@ option (NUM_UTIL_VERBOSE_BUILD     "Be verbose during build process?"         NO
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+if (NOT LUS_CMAKE_MODULES)
+  find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
+    PATHS 
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    PATH_SUFFIXES
+    cmake
+    devel_common/cmake
+    )
+endif (NOT LUS_CMAKE_MODULES)
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (LUS_CMAKE_MODULES)
+  ## Augment CMAKE_MODULE_PATH variable
+  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
+    "CMake module path"
+    FORCE)
+  ## Load custom CMake settings
+  include (LUS_CMakeSettings)
+endif (LUS_CMAKE_MODULES)
 
 ## ==============================================================================
 ##
