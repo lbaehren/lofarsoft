@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -24,6 +22,7 @@
 #
 # The following variables are set when SIP is found:
 #  HAVE_SIP       = Set to true, if all components of SIP have been found.
+#  SIP_FOUND      = Set to true, if all components of SIP have been found.
 #  SIP_INCLUDES   = Include path for the header files of SIP
 #  SIP_LIBRARIES  = Link these to use SIP
 #  SIP_VERSION    = Version of SIP.
@@ -114,9 +113,11 @@ if (NOT FIND_SIP_CMAKE)
   ## Actions taken when all components have been found
   
   if (SIP_INCLUDES AND SIP_LIBRARIES)
-    set (HAVE_SIP TRUE)
+    set (HAVE_SIP  TRUE)
+    set (SIP_FOUND TRUE)
   else (SIP_INCLUDES AND SIP_LIBRARIES)
-    set (HAVE_SIP FALSE)
+    set (HAVE_SIP  FALSE)
+    set (SIP_FOUND FALSE)
     if (NOT SIP_FIND_QUIETLY)
       if (NOT SIP_INCLUDES)
 	message (STATUS "Unable to find SIP header files!")

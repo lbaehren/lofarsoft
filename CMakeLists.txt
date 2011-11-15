@@ -168,6 +168,7 @@ foreach (varSystemPackage
     ROOT
     Sphinx
     Subversion
+    SIP
     SWIG
     SZIP
     WCSLIB
@@ -401,6 +402,7 @@ message (STATUS " .. OpenGL ..................... = ${OPENGL_FOUND}"          )
 message (STATUS " .. OpenMP ..................... = ${OPENMP_FOUND}"          )
 message (STATUS " .. Perl ....................... = ${PERL_FOUND}"            )
 message (STATUS " .. ROOT ....................... = ${ROOT_FOUND}"            )
+message (STATUS " .. SIP ........................ = ${SIP_FOUND}"             )
 message (STATUS " .. SWIG ....................... = ${SWIG_FOUND}"            )
 message (STATUS " .. Subversion ................. = ${SUBVERSION_FOUND}"      )
 message (STATUS " .. SZIP compression library ... = ${SZIP_FOUND}"            )
