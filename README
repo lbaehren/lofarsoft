@@ -154,6 +154,6 @@ respective package manager:
 If you'd rather work from the terminal only:
 
   zypper install cmake git-svn subversion bison flex
-  zypper install blas lapack boost-devel libcfitsio-devel gsl-devel
+  zypper install blas lapack boost-devel libcfitsio-devel gsl-devel libqt4-devel
   zypper install python-devel python-numpy-devel
 
