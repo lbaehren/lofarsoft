@@ -12,22 +12,27 @@ enable_testing()
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_CMAKE_MODULES)
+  find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
     PATHS 
-    ${RM_SOURCE_DIR}
-    ${RM_SOURCE_DIR}/..
-    ${RM_SOURCE_DIR}/../..
-    ${RM_SOURCE_DIR}/../../..
-    ENV LOFARSOFT
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    PATH_SUFFIXES
+    cmake
+    devel_common/cmake
     )
-  
-  if (LUS_ROOT)
-    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_ROOT)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_ROOT)
-endif (NOT LUS_ROOT)
+endif (NOT LUS_CMAKE_MODULES)
+
+if (LUS_CMAKE_MODULES)
+  ## Augment CMAKE_MODULE_PATH variable
+  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
+    "CMake module path"
+    FORCE)
+  ## Load custom CMake settings
+  include (LUS_CMakeSettings)
+endif (LUS_CMAKE_MODULES)
 
 ## =============================================================================
 ##
@@ -64,9 +69,12 @@ foreach (externalPackage
     DAL
     FFTW3
     GFortran
+    HDF5
+    ITPP
     Motif
     LAPACK
     Python
+    WCSLIB
     X11
     ZLIB
     )
@@ -221,12 +229,12 @@ else (RM_WITH_ITPP AND ITPP_FOUND)
   message (STATUS "[RM] IT++ installation incomplete!")
 endif (RM_WITH_ITPP AND ITPP_FOUND)
 
-if (HAVE_WCSLIB)
+if (HAVE_WCSLIB OR WCSLIB_FOUND)
   include_directories (${WCSLIB_INCLUDES})
   add_definitions (-DHAVE_WCSLIB)
-else (HAVE_WCSLIB)
+else (HAVE_WCSLIB OR WCSLIB_FOUND)
   message (STATUS "[RM] Missing or incomplete installation of WCSLIB!")
-endif (HAVE_WCSLIB)
+endif (HAVE_WCSLIB OR WCSLIB_FOUND)
 
 ## =============================================================================
 ##
@@ -282,19 +290,20 @@ add_subdirectory (apps)
 message (STATUS "+============================================================+")
 message (STATUS "| RM-Tools: Summary of configuration settings                |")
 message (STATUS "+------------------------------------------------------------+")
-message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
-message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
-message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
-message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
-message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " CFITSIO_INCLUDES ......... : ${CFITSIO_INCLUDES}")
-message (STATUS " CFITSIO_LIBRARIES ........ : ${CFITSIO_LIBRARIES}")
-message (STATUS " DAL_INCLUDES ............. : ${DAL_INCLUDES}")
-message (STATUS " DAL_LIBRARIES ............ : ${DAL_LIBRARIES}")
-message (STATUS " HDF5_INCLUDES ............ : ${HDF5_INCLUDES}")
-message (STATUS " HDF5_LIBRARIES ........... : ${HDF5_LIBRARIES}")
-message (STATUS " ITPP_INCLUDES ............ : ${ITPP_INCLUDES}")
-message (STATUS " ITPP_LIBRARIES ........... : ${ITPP_LIBRARIES}")
+message (STATUS " System configuration:"                                        )
+message (STATUS " .. Processor type           = ${CMAKE_SYSTEM_PROCESSOR}"      )
+message (STATUS " .. CMake executable         = ${CMAKE_COMMAND}"               )
+message (STATUS " .. CMake version            = ${CMAKE_VERSION}"               )
+message (STATUS " .. System name              = ${CMAKE_SYSTEM}"                )
+message (STATUS " .. C++ compiler             = ${CMAKE_CXX_COMPILER}"          )
+message (STATUS " .. C compiler               = ${CMAKE_C_COMPILER}"            )
+message (STATUS " .. size(void*)              = ${CMAKE_SIZEOF_VOID_P}"         )
+message (STATUS " External packages:"                                           )
+message (STATUS " .. Boost++ ................ = ${BOOST_FOUND}"                 )
+message (STATUS " .. CFITSIO ................ = ${CFITSIO_FOUND}"               )
+message (STATUS " .. casacore ............... = ${CASACORE_FOUND}"              )
+message (STATUS " .. FFTW3 .................. = ${FFTW3_FOUND}"                 )
+message (STATUS " .. HDF5 Library ........... = ${HDF5_FOUND}"                  )
+message (STATUS " .. IT++ Library ........... = ${ITPP_FOUND}"                  )
+message (STATUS " .. WCSLIB ................. = ${WCSLIB_FOUND}"                )
 message (STATUS "+============================================================+")
