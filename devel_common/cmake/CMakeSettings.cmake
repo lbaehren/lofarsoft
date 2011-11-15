@@ -132,8 +132,6 @@ if (NOT USG_CMAKE_CONFIG)
 	WORKING_DIRECTORY ${LUS_INSTALL_PREFIX}
 	)
     endif (LUS_INSTALL_PREFIX)
-  else (LUS_ROOT)
-    message (SEND_ERROR "LUS_ROOT is undefined!")
   endif (LUS_ROOT)
   
   ## ---------------------------------------------------------------------------
