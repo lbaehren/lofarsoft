@@ -133,8 +133,8 @@ respective package manager:
 == Ubuntu Linux 11.10     ==
 
   apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
-  apt-get install libblas-dev liblapack-dev libboost-all-dev libhdf5-serial-dev
-  apt-get install libarmadillo-dev libitpp-dev libfftw3-dev
+  apt-get install libblas-dev liblapack-dev libboost-all-dev libqt4-dev
+  apt-get install libarmadillo-dev libitpp-dev libfftw3-dev libhdf5-serial-dev
   apt-get install libcfitsio3-dev libgsl0-dev python-numpy
 
 == Fedora 15 ==
