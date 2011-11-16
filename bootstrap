@@ -145,8 +145,6 @@ fi
 
 check_cmake_version 
 
-exit
-
 ##__________________________________________________________
 ## Configure LUS build
 
