@@ -285,12 +285,6 @@ add_subdirectory (doc)
 add_subdirectory (external)
 add_subdirectory (src)
 
-## Build instructions for packages
-
-foreach (package_name ${packages_external})
-  build_package (${package_name} external/${package_name})
-endforeach (package_name)
-
 ## ==============================================================================
 ##
 ##  USG packages
