@@ -15,9 +15,9 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ## Project release version (major.minor.patch)
-set (LUS_VERSION_MAJOR 0   )
-set (LUS_VERSION_MINOR 0   )
-set (LUS_VERSION_PATCH 0   )
+set (LUS_VERSION_MAJOR 0 )
+set (LUS_VERSION_MINOR 0 )
+set (LUS_VERSION_PATCH 0 )
 set (LUS_VERSION "${LUS_VERSION_MAJOR}.${LUS_VERSION_MINOR}.${LUS_VERSION_PATCH}")
 
 ## ==============================================================================
@@ -207,9 +207,9 @@ foreach (varSystemPackage
   
 endforeach (varSystemPackage)
 
-find_program (bash_executable   bash    PATHS ${bin_locations})
-find_program (curl_executable   curl    PATHS ${bin_locations})
-find_program (tar_executable    tar     PATHS ${bin_locations})
+find_program (bash_executable   bash  PATHS ${bin_locations})
+find_program (curl_executable   curl  PATHS ${bin_locations})
+find_program (tar_executable    tar   PATHS ${bin_locations})
 
 ## ==============================================================================
 ##
