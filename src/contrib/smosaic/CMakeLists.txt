@@ -5,6 +5,13 @@
 ##
 ## =============================================================================
 
+include_directories (
+  ${CASA_INCLUDES}
+  ${CFITSIO_INCLUDES}
+  ${HDF5_INCLUDES}
+  ${WCSLIB_INCLUDES}
+  )
+
 add_executable (smosaic smosaic.cc)
 
 target_link_libraries (smosaic
