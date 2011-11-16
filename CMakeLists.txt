@@ -214,7 +214,6 @@ find_program (tar_executable    tar     PATHS ${bin_locations})
 set (VERSION_CONTROL_FIND_QUIETLY YES )
 
 include (BuildPackage)
-include (FindVersionControl)
 
 ## ==============================================================================
 ##
