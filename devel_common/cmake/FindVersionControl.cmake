@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id:: template_FindXX.cmake 1643 2008-06-14 10:19:20Z baehren             $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2010                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -88,47 +86,6 @@ else (GIT_EXECUTABLE AND GIT_CONFIG_DIR)
     set (VERSION_CONTROL_SYSTEM "svn")
   endif (SVN_EXECUTABLE AND SVN_CONFIG_DIR)
 endif (GIT_EXECUTABLE AND GIT_CONFIG_DIR)
-
-##_______________________________________________________________________________
-##  Define target "make update"
-
-if (VERSION_CONTROL_SYSTEM STREQUAL "bzr")
-  add_custom_target (update
-    COMMAND ${BZR_EXECUTABLE} update
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Updating working version of the source code from repository ..."
-    )
-endif (VERSION_CONTROL_SYSTEM STREQUAL "bzr")
-
-if (VERSION_CONTROL_SYSTEM STREQUAL "git")
-  add_custom_target (update
-    COMMAND ${GIT_EXECUTABLE} stash
-    COMMAND ${GIT_EXECUTABLE} svn rebase
-    COMMAND ${GIT_EXECUTABLE} stash apply
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Updating working version of the source code from repository ..."
-    )
-endif (VERSION_CONTROL_SYSTEM STREQUAL "git")
-
-if (VERSION_CONTROL_SYSTEM STREQUAL "svn")
-  add_custom_target (update
-    COMMAND ${SVN_EXECUTABLE} cleanup
-    COMMAND ${SVN_EXECUTABLE} up
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Updating working version of the source code from repository ..."
-    )
-endif (VERSION_CONTROL_SYSTEM STREQUAL "svn")
-
-##_______________________________________________________________________________
-##  Define target "make upgrade"
-
-add_custom_target (upgrade
-  COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/build && rm -rf CMake* && ./bootstrap
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "Updating working version of the source code from repository ..."
-  )
-
-add_dependencies (upgrade update)
 
 ##_______________________________________________________________________________
 ##  Feedback

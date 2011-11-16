@@ -148,7 +148,6 @@
 
   - \ref lasa_setup
   - \ref lasa_build
-  - \ref lasa_update
   - \ref lasa_commit
 
   \section lasa_setup Setting up your working copy
@@ -236,24 +235,6 @@
     cd build/lasa
     make
     \endverbatim
-  </ol>
-
-  \section lasa_update Update your working copy
-
-  Once you have a working copy of the code base, keep in mind, that not only
-  you yourself might be making adjustments, but also other developers. Therefore
-  in regular intervals you should update your working copy to be in sync with
-  the evolution of the project's code base.
-
-  <ol>
-    <li>The savest way to update your existing working copy is to run
-    \verbatim
-    cd build
-    make update
-    \endverbatim
-    from the \e build directory; this will ensure, that not only you will be
-    picking up changes in the source code, but also adjustments to the build
-    environment.
   </ol>
 
   \section lasa_commit Committing changes
