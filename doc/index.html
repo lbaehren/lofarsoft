@@ -34,54 +34,55 @@ Online resources:
 
 <div class='section'><a name="Quick start">Quick start</a></div>
 
-As read-only access to the repository is not restricted in any ways,
-you can obtain a working copy of the source code by running
+<ol>
+  
+  <li>As read-only access to the repository is not restricted in any ways,
+  you can obtain a working copy of the source code by running
+  
+  <ul>
+    <li>using <a href="http://subversion.apache.org">Subversion</a>...
+    <pre class="code">svn co http://usg.lofar.org/svn/code/trunk lofarsoft</pre>
+    </li>
+    <li>using <a href="http://git-scm.com">Git</a>...
+    <pre class="code">git svn clone http://usg.lofar.org/svn/code/trunk lofarsoft</pre>
+    </li>
+  </ul>
+  
+  <li>Once checkout from the repository is complete, first set up your environment:
+  
+  <pre class="code">
+  # csh, tcsh
+  setenv LOFARSOFT <root directory of code tree>
+  source $LOFARSOFT/devel_common/scripts/init.csh
+  
+  # sh, bash
+  export LOFARSOFT=<root directory of code tree>
+  . $LOFARSOFT/devel_common/scripts/init.sh
+  </pre>
 
-<ul>
-  <li>using <a href="http://subversion.apache.org">Subversion</a>...
-  <pre class="code">svn co http://usg.lofar.org/svn/code/trunk lofarsoft</pre>
-  </li>
-  <li>using <a href="http://git-scm.com">Git</a>...
-  <pre class="code">git svn clone http://usg.lofar.org/svn/code/trunk lofarsoft</pre>
-  </li>
-</ul>
-
-Once checkout from the repository is complete, first set up your environment:
-
-<pre class='code'>
-# csh, tcsh
-setenv LOFARSOFT <root directory of code tree>
-source $LOFARSOFT/devel_common/scripts/init.csh
-
-# sh, bash
-export LOFARSOFT=<root directory of code tree>
-. $LOFARSOFT/devel_common/scripts/init.sh
-</pre>
-
-Then change into the "build" directory to run the bootstrap script:
-
-<pre class='code'>
-cd build
-./bootstrap
-</pre>
-
-The the main job of the bootstrap script is to check whether or not a recent
-enough version of <a href="http://www.cmake.org">CMake</a> is
-installed on your system; if the found installation is too old or not
-available at all, a build from the provided sources is triggered and
-the resulting executables will be installed into "release/bin" (which
-of course then should be in your PATH).
+  <li>Bootstrap your working copy of the software:
+  <pre class="code">
+  ./bootstrap
+  </pre>
+  The the main job of the bootstrap script is to check whether or not a recent
+  enough version of <a href="http://www.cmake.org">CMake</a> is
+  installed on your system; if the found installation is too old or not
+  available at all, a build from the provided sources is triggered and
+  the resulting executables will be installed into "release/bin" (which
+  of course then should be in your PATH).
+  
+</ol>
 
 In order to get a list of possible build targets, type
 
-<pre class='code'>
+<pre class="code">
 make help
 </pre>
 
 Running 
 
-<pre class='code'>
-make <target>
+<pre class="code">
+ make <target>
 </pre>
 
 will try to build the selected target -- including, where required, required
@@ -159,7 +160,7 @@ respective package manager:
 
 <ul>
   <li><strong>Debian GNU Linux 6.x / Ubuntu Linux 10.04 LTS / Ubuntu Linux 11.10</strong>
-  <pre>
+  <pre class="code">
   apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
   apt-get install libblas-dev liblapack-dev libboost-all-dev libqt4-dev
   apt-get install libarmadillo-dev libitpp-dev libfftw3-dev libhdf5-serial-dev
@@ -167,20 +168,20 @@ respective package manager:
   </pre>
   
   <li><strong>Fedora 14 / Fedora 15 / Fedora 16</strong>
-  <pre>
+  <pre class="code">
   yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison
   yum install blas-devel lapack-devel boost-devel qt-devel fftw-devel
   yum install gsl-devel plplot-devel armadillo-devel hdf5-devel cfitsio-devel
   yum install swig numpy pyfits ipython
   </pre>
   <li><strong>OpenSuSE 11.4</strong>
-  <pre>
+  <pre class="code">
   yast2 --install cmake git-svn subversion bison flex
   yast2 --install blas lapack boost-devel libcfitsio-devel gsl-devel
   yast2 --install python-devel python-numpy-devel
   </pre>
   If you'd rather work from the terminal only:
-  <pre>
+  <pre class="code">
   zypper install cmake git-svn subversion bison flex
   zypper install blas lapack boost-devel libcfitsio-devel gsl-devel libqt4-devel
   zypper install python-devel python-numpy-devel
