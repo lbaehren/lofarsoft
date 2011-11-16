@@ -1,0 +1,158 @@
+#!/bin/sh
+
+## ==============================================================================
+##
+##  Definition of variables
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Environment variables
+
+cmakeSourceDir=`pwd`
+cmakeSourceArchive=$cmakeSourceDir/external/cmake/cmake-2.8.5.tar.gz
+cmakeBinaryDir=$cmakeSourceDir/build
+cmakeInstallPrefix=$cmakeSourceDir/release
+
+export PATH=$cmakeInstallPrefix/bin:$PATH
+
+##__________________________________________________________
+## Required CMake version
+
+cmakeVersion=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+
+cmakeVersionRequiredMajor=2
+cmakeVersionRequiredMinor=8
+cmakeVersionRequiredPatch=3
+
+cmakeVersionRequired=$((100*$cmakeVersionRequiredPatch))
+cmakeVersionRequired=$((100*$cmakeVersionRequiredMinor))$cmakeVersionRequired
+cmakeVersionRequired=$((100*$cmakeVersionRequiredMajor))$cmakeVersionRequired
+
+##__________________________________________________________
+## Configuration summary
+
+echo ""
+echo "======================================================================"
+echo ""
+echo " [LUS] Start boostrap process for software stack ..."
+echo ""
+echo "======================================================================"
+echo ""
+echo " -- CMake source directory  = $cmakeSourceDir"
+echo " -- CMake binary diectory   = $cmakeBinaryDir"
+echo " -- CMake install prefix    = $cmakeInstallPrefix"
+echo " -- CMake installed version = $cmakeVersion"
+
+## ==============================================================================
+##
+##  Function definitions
+##
+## ==============================================================================
+
+##____________________________________________________________________
+##                                                       print_message
+
+print_message ()
+{
+    echo ""
+    echo "----------------------------------------------------------------------"
+    echo ""
+    echo " [LUS] $1"
+    echo ""
+    echo "----------------------------------------------------------------------"
+    echo ""
+}
+
+##____________________________________________________________________
+##                                                         build_cmake
+
+build_cmake ()
+{
+  cd $cmakeSourceDir
+
+  if test -d $cmakeSourceDir/cmake ; then {
+
+    if test -f $cmakeSourceArchive ; then {
+
+      echo "-- Unpacking source archive  ..."
+      cd $cmakeBinaryDir
+      tar -xzf $cmakeSourceArchive
+
+      tmpBuildDir=`ls $cmakeBinaryDir`
+
+      if test -d $tmpBuildDir ; then {
+        echo "-- Configuring CMake ..."
+        ./configure --prefix=$cmakeInstallPrefix
+        make
+        make install
+      } fi;
+
+    } fi;
+
+  } fi;
+}
+
+##____________________________________________________________________
+##                                                 check_cmake_version
+
+check_cmake_version ()
+{
+  ## Check if CMake is available and if so, what is version is
+
+  if test -z `which cmake` ; then {
+    cmakeVersion=000000000
+  } else {
+    ## Get the version string from the installed CMake executable
+    cmakeVersion=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+    ## Extract major, minor and patch version
+    cmakeVersionMajor=`echo $cmakeVersion | tr "." " " | tr "-" " "  | awk '{print $1}'`
+    cmakeVersionMinor=`echo $cmakeVersion | tr "." " " | tr "-" " "  | awk '{print $2}'`
+    cmakeVersionPatch=`echo $cmakeVersion | tr "." " " | tr "-" " "  | awk '{print $3}'`
+    ## Assemble version string for comparison
+    cmakeVersion=$((100*$cmakeVersionPatch))
+    cmakeVersion=$((100*$cmakeVersionMinor))$cmakeVersion
+    cmakeVersion=$((100*$cmakeVersionMajor))$cmakeVersion
+  } fi;
+
+  ## Check installed version of CMake against the required version
+
+  if test $cmakeVersion -lt $cmakeVersionRequired ; then {
+    print_message "Required CMake version not available. Initiating build ..."
+    build_cmake
+  } else {
+    print_message "Installed version of CMake is ok."
+  } fi;
+}
+
+## ==============================================================================
+##
+##  Configuration run
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Create build directory
+
+cd $cmakeSourceDir
+
+if test ! -d $cmakeBinaryDir ; then
+    mkdir $cmakeBinaryDir
+fi
+
+##__________________________________________________________
+## Run check on installed CMake version
+
+check_cmake_version 
+
+##__________________________________________________________
+## Configure LUS build
+
+if test -d $cmakeBinaryDir ; then {
+  ## -- change into the build directory
+  cd $cmakeBinaryDir
+  ## -- clean up build directory
+  rm -rf *
+  ## -- run CMake to configure LUS build
+  cmake $cmakeSourceDir $*
+} fi;
