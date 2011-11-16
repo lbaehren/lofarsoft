@@ -325,7 +325,7 @@ endmacro (build_package _packageName _packageSource)
 
 configure_file (
   ${PROJECT_SOURCE_DIR}/devel_common/scripts/build_package.sh.in
-  ${PROJECT_BUILD_DIR}/build_package.sh
+  ${PROJECT_BINARY_DIR}/build_package.sh
   )
 
 ##____________________________________________________________________
