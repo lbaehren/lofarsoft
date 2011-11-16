@@ -14,23 +14,32 @@ option (contrib_ENABLE_TESTING    "Build and enable running test programs?"  YES
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${PROJECT_SOURCE_DIR}
-  ${PROJECT_SOURCE_DIR}/..
-  ${PROJECT_SOURCE_DIR}/../..
-  ${PROJECT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+if (NOT LUS_CMAKE_MODULES)
+  find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
+    PATHS 
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    PATH_SUFFIXES
+    cmake
+    devel_common/cmake
+    )
+endif (NOT LUS_CMAKE_MODULES)
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (LUS_CMAKE_MODULES)
+  ## Augment CMAKE_MODULE_PATH variable
+  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
+    "CMake module path"
+    FORCE)
+  ## Load custom CMake settings
+  include (LUS_CMakeSettings)
+endif (LUS_CMAKE_MODULES)
 
 ## ------------------------------------------------------------------------------
 ## Locate components of required external packages
+
+if (LUS_CMAKE_MODULES)
 
 if (NOT contrib_VERBOSE_CONFIGURE)
   set (BLITZ_FIND_QUIETLY      YES )
@@ -113,7 +122,18 @@ foreach (varSystemPackage
     set (${varPackageUpper}_FOUND TRUE)
   endif (${varPackageUpper}_FOUND)
   
+  if (${varPackage}_INCLUDES)
+    include_directories (${${varPackage}_INCLUDES})
+  endif (${varPackage}_INCLUDES)
+  
 endforeach (varSystemPackage)
+
+else (LUS_CMAKE_MODULES)
+
+  message (WARNING "[contrib] Unable to find LUS CMake modules directory!")
+
+endif (LUS_CMAKE_MODULES)
+
 
 ## -----------------------------------------------------------------------------
 ## Compiler flags
@@ -134,10 +154,11 @@ endif (HAVE_HDF5)
 ## Subdirectories
 
 add_subdirectory (data_inspection)
-add_subdirectory (smosaic)
-
-## Collection of applications
 add_subdirectory (apps)
+
+if (CASA_LIBRARIES AND WCSLIB_LIBRARIES)
+  add_subdirectory (smosaic)
+endif (CASA_LIBRARIES AND WCSLIB_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Configuration summary
