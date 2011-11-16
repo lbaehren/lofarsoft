@@ -70,23 +70,18 @@ Online resources:
   available at all, a build from the provided sources is triggered and
   the resulting executables will be installed into "release/bin" (which
   of course then should be in your PATH).
-  
+
+  <li>Change into the <code>build</code> directory in order to build
+  the software package you are interested in:
+  <pre class="code">
+  cd build
+  make &lt;target&gt;
+  </pre>
+  In order to get a list of possible build targets, type
+  <pre class="code">
+  make help
+  </pre>
 </ol>
-
-In order to get a list of possible build targets, type
-
-<pre class="code">
-make help
-</pre>
-
-Running 
-
-<pre class="code">
- make <target>
-</pre>
-
-will try to build the selected target -- including, where required, required
-packages.
 
 <div class="top">[<a href="#top">top</a>]</div>
 
