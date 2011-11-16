@@ -225,7 +225,7 @@ add_custom_target (clean-build
   COMMAND rm -rf CMakeCache.txt
   COMMAND rm -rf CMakeOptions.cmake
   COMMAND rm -rf CMakeFiles
-  WORKING_DIRECTORY ${LUS_BUILD_DIR}
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   COMMENT "Cleaning up build directory ..."
 )
 
@@ -286,7 +286,7 @@ macro (build_package _packageName _packageSource)
   ## Locate common options
 
   find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
-    PATHS ${LUS_BUILD_DIR}
+    PATHS ${PROJECT_BINARY_DIR}
     )
 
   ## get components of the path to the package's source code
@@ -295,9 +295,9 @@ macro (build_package _packageName _packageSource)
   ## feedback
   if (${_packageLocation} STREQUAL "external")
     message (STATUS "Adding external package ${_packageName} ...")
-    set (_packageBuildLocation ${LUS_BUILD_DIR}/external/${_packageName})
+    set (_packageBuildLocation ${PROJECT_BINARY_DIR}/external/${_packageName})
   else (${_packageLocation} STREQUAL "external")
-    set (_packageBuildLocation ${LUS_BUILD_DIR}/${_packageName})
+    set (_packageBuildLocation ${PROJECT_BINARY_DIR}/${_packageName})
   endif (${_packageLocation} STREQUAL "external")
 
   ## create the directory within which the build is performed
