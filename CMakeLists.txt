@@ -211,10 +211,6 @@ find_program (bash_executable   bash    PATHS ${bin_locations})
 find_program (curl_executable   curl    PATHS ${bin_locations})
 find_program (tar_executable    tar     PATHS ${bin_locations})
 
-set (VERSION_CONTROL_FIND_QUIETLY YES )
-
-include (BuildPackage)
-
 ## ==============================================================================
 ##
 ##  Cleaning up
@@ -270,13 +266,6 @@ add_custom_target (clean-src
 ##
 ## ==============================================================================
 
-## Packages with build handled through shell script
-
-configure_file (
-  ${LUS_ROOT}/devel_common/scripts/build_package.sh.in
-  ${LUS_BUILD_DIR}/build_package.sh
-  )
-
 ## Packages handled directly through CMake
 
 add_subdirectory (devel_common)
@@ -289,6 +278,55 @@ add_subdirectory (src)
 ##  USG packages
 ##
 ## ==============================================================================
+
+## Definition of macro for handling build channeled through shell script
+
+macro (build_package _packageName _packageSource)
+
+  ## Locate common options
+
+  find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
+    PATHS ${LUS_BUILD_DIR}
+    )
+
+  ## get components of the path to the package's source code
+  get_filename_component (_packageLocation ${_packageSource} PATH)
+
+  ## feedback
+  if (${_packageLocation} STREQUAL "external")
+    message (STATUS "Adding external package ${_packageName} ...")
+    set (_packageBuildLocation ${LUS_BUILD_DIR}/external/${_packageName})
+  else (${_packageLocation} STREQUAL "external")
+    set (_packageBuildLocation ${LUS_BUILD_DIR}/${_packageName})
+  endif (${_packageLocation} STREQUAL "external")
+
+  ## create the directory within which the build is performed
+  file (MAKE_DIRECTORY ${_packageBuildLocation})
+
+  if (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_packageName}
+      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      COMMAND make install
+      WORKING_DIRECTORY ${_packageBuildLocation}
+      COMMENT "Building package ${package_name} ..."
+      )
+  else (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_packageName}
+      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      COMMAND make install
+      WORKING_DIRECTORY ${_packageBuildLocation}
+      COMMENT "Building package ${package_name} ..."
+      )
+  endif (LUS_CMAKE_OPTIONS)
+  
+endmacro (build_package _packageName _packageSource)
+
+## Packages with build handled through shell script
+
+configure_file (
+  ${PROJECT_SOURCE_DIR}/devel_common/scripts/build_package.sh.in
+  ${PROJECT_BUILD_DIR}/build_package.sh
+  )
 
 ##____________________________________________________________________
 ##                                           Data Access Library (DAL)
