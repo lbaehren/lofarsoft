@@ -43,6 +43,7 @@ echo " -- CMake source directory  = $cmakeSourceDir"
 echo " -- CMake binary diectory   = $cmakeBinaryDir"
 echo " -- CMake install prefix    = $cmakeInstallPrefix"
 echo " -- CMake installed version = $cmakeVersion"
+echo " -- CMake source archive    = $cmakeSourceArchive"
 
 ## ==============================================================================
 ##
@@ -70,24 +71,23 @@ print_message ()
 build_cmake ()
 {
   cd $cmakeSourceDir
+  
+  if test -f $cmakeSourceArchive ; then {
 
-  if test -d $cmakeSourceDir/cmake ; then {
+    cd $cmakeBinaryDir
 
-    if test -f $cmakeSourceArchive ; then {
+    print_message "Unpacking source archive  ..."
 
-      echo "-- Unpacking source archive  ..."
-      cd $cmakeBinaryDir
-      tar -xzf $cmakeSourceArchive
+    tar -xzf $cmakeSourceArchive
 
-      tmpBuildDir=`ls $cmakeBinaryDir`
-
-      if test -d $tmpBuildDir ; then {
-        echo "-- Configuring CMake ..."
-        ./configure --prefix=$cmakeInstallPrefix
-        make
-        make install
-      } fi;
-
+    tmpBuildDir=`ls $cmakeBinaryDir | grep cmake`
+      
+    if test -d $tmpBuildDir ; then {
+      cd $tmpBuildDir
+      print_message "Configuring CMake ..."
+      ./configure --prefix=$cmakeInstallPrefix
+      make
+      make install
     } fi;
 
   } fi;
@@ -144,6 +144,8 @@ fi
 ## Run check on installed CMake version
 
 check_cmake_version 
+
+exit
 
 ##__________________________________________________________
 ## Configure LUS build
