@@ -103,7 +103,7 @@ option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP support?
 option (DOCUMENTATION_ONLY     "Configure for building documentation only?"  NO  )
 option (DAL_WITH_DOCUMENTATION "Generate documentation for the DAL?"         YES )
 option (DAL_SHARED_LIBRARY     "Build DAL as shared library?"                NO  )
-option (DAL_ENABLE_TESTING     "Build and enable test programs?"             YES )
+option (DAL_ENABLE_TESTING     "Build and enable test programs?"             NO  )
 option (DAL_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"   YES )
 option (DAL_PYTHON_BINDINGS    "Create python bindings?"                     YES )
 option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                NO  )
@@ -122,7 +122,7 @@ endif (LUS_ENABLE_TESTING)
 
 configure_file (
   ${PROJECT_SOURCE_DIR}/CMakeOptions.cmake
-  ${LUS_BINARY_DIR}/CMakeOptions.cmake
+  ${PROJECT_BINARY_DIR}/CMakeOptions.cmake
   )
 
 ## ==============================================================================
@@ -152,6 +152,7 @@ foreach (varSystemPackage
     CFITSIO
     CUDA
     CppUnit
+    DAL
     Doxygen
     FFTW3
     FLEX
