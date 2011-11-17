@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pycrtools as cr
 import pickle
 
-topdir = '/Users/acorstanje/triggering/CR/results_CS002/'
+topdir = '/Users/acorstanje/triggering/CR/results_CS003/'
 #event = 'VHECR_LORA-20110612T231913.199Z'
 #event = 'fullLOFAR--5' # for use with Plotfootprint
 #event = 'VHECR_LORA-20110716T094509.665Z'
@@ -27,6 +27,7 @@ print '**********'
 
 antid = []
 cabledelays = []
+residualdelays = []
 positions = []
 timestamps = []
 cabledelays_database = dict()
@@ -66,7 +67,8 @@ for eventdir in eventlist:
         antid.extend([str(int(v)) for v in res["antennas"].values()])
             
         # check: same ordering for ant-id's and cable delays??? Relying on that.
-        cabledelays.extend(res["antennas_residual_cable_delays"])  # make that 'total' cable delays, and have also 'residual' delays      
+        cabledelays.extend(res["antennas_final_cable_delays"])  # make that 'total' cable delays, and have also 'residual' delays      
+        residualdelays.extend(res["antennas_residual_cable_delays"])
         # use antenna id as key in the database
         timelist = [res["TIME"]] * len(res["antennas"])
         timestamps.extend(timelist)
@@ -75,20 +77,30 @@ count = dict()
 antennapositions = dict()
 for i in range(len(antid)):
     if not antid[i] in cabledelays_database.keys():
-        cabledelays_database[antid[i]] = dict(cabledelay = 0.0, spread = 0.0, delaylist = [], timelist = [])
+        cabledelays_database[antid[i]] = dict(cabledelay = 0.0, residualdelay = 0.0, spread = 0.0, delaylist = [], residuallist = [], timelist = [])
         antennapositions[antid[i]] = positions[i * 3: (i+1)*3]
 #    cabledelays_database[antid[i]] += cabledelays[i]
 #    count[antid[i]] += 1
     cabledelays_database[antid[i]]["delaylist"].extend([cabledelays[i]])
+    cabledelays_database[antid[i]]["residuallist"].extend([residualdelays[i]])
     cabledelays_database[antid[i]]["timelist"].extend([timestamps[i]])
 #    count[antid[i]] = 1
 
+# get averages of cable delays. Zero out if spread too high?
 for key in cabledelays_database:
-    theseDelays = np.array(cabledelays_database[key]["delaylist"])
+    theseDelays = cabledelays_database[key]["delaylist"]
+    theseDelays = np.array(theseDelays)
+    theseResiduals = np.array(cabledelays_database[key]["residuallist"])
+#    theseDelays[np.where(abs(theseDelays) > 20.0)] = float('nan')
     avg = theseDelays.mean()
+    residualavg = theseResiduals.mean()
     spread = theseDelays.std()
-    
+
+    if spread > 5.0e-9:
+        avg = 0.0 # remove inconsistent fit values (improve?)
+        residualavg = 0.0 # to show in plot...
     cabledelays_database[key]["cabledelay"] = avg
+    cabledelays_database[key]["residualdelay"] = residualavg
     cabledelays_database[key]["spread"] = spread
 
 outfile = open(os.path.join(topdir, 'Cabledelays.pic'), 'wb')
@@ -106,8 +118,6 @@ polarization = 0 # should do both
 
 #trerun("PlotAntennaLayout","Delays",positions = ,colors=final_residual_delays[antennas_with_strong_pulses],sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
-
-
 #fptask = cr.trerun("plotfootprint", "0", colormap = 'jet', filefilter = filefilter, pol=polarization) 
 print 'FP TAKS DONE'
 y = []
@@ -115,13 +125,14 @@ yspread = []
 positions = []
 names = []
 for id in antennapositions.keys(): # get unique ids
-    thisCableDelay = 1.0e9 * cabledelays_database[str(id)]["cabledelay"]
+    thisCableDelay = 1.0e9 * cabledelays_database[str(id)]["residualdelay"]
+    thisSpread = 1.0e9 * cabledelays_database[str(id)]["spread"]
     positions.extend(antennapositions[id])
     names.append(str(int(id) % 100)) # NB. Append needed rather than extend, as we want to put a string into the list...
-    if thisCableDelay > 50:
+    if abs(thisSpread) > 5.0:
         thisCableDelay = 0.0 # kick outliers
     y.extend([thisCableDelay])
-    yspread.extend([cabledelays_database[str(id)]["spread"]])
+    yspread.extend([thisSpread])
 
 cdelays = cr.hArray(y)
 cdelayspread = np.array(yspread)
@@ -148,26 +159,40 @@ x = np.arange(len(cabledelays_database))
 y = np.zeros(len(cabledelays_database))
 
 x = []
-y = []
+y_total = []
+y_residual = []
 n = 0
+plotparameter = "residualdelay"
 for key in cabledelays_database:
     thisAnt = cabledelays_database[key]
 #    y[n] = thisAnt["cabledelay"]
-    for k in range(len(thisAnt["delaylist"])):
-        x.extend([n])
-        thisAvg = 1.0e9 * thisAnt["cabledelay"]
-        thisDelay = 1.0e9 * thisAnt["delaylist"][k]
-        thisDiff = thisDelay - thisAvg
-        y.extend([thisDelay])
-#        y[n, k] = (30.0 * k + thisDelay) if thisDelay < 30.0 else (-10.0 + k)# remove outliers
-#        ydiff[n, k] = (0.0 * k + thisDiff) #if thisDiff < 30.0 else (30.0 + k) 
-#    yerr[n] = thisAnt["spread"]
+    thisSpread = 1.0e9 * thisAnt["spread"]
+    if thisSpread < 5.0:
+        for k in range(len(thisAnt["residuallist"])): # residual and total lists are the same size...
+            x.extend([n])
+#            thisAvg = 1.0e9 * thisAnt["residualdelay"]
+            thisResidualDelay = 1.0e9 * thisAnt["residuallist"][k]
+            thisTotalDelay = 1.0e9 * thisAnt["delaylist"][k]
+#            thisDiff = thisDelay - thisAvg
+#            y.extend([thisDelay])
+            y_residual.extend([thisResidualDelay])
+            y_total.extend([thisTotalDelay])
+    #        y[n, k] = (30.0 * k + thisDelay) if thisDelay < 30.0 else (-10.0 + k)# remove outliers
+    #        ydiff[n, k] = (0.0 * k + thisDiff) #if thisDiff < 30.0 else (30.0 + k) 
+    #    yerr[n] = thisAnt["spread"]
     n+=1
 
-plt.scatter(x, y)
-
-
+plt.scatter(x, y_residual)
+plt.ylabel('Residual cable delay [ns]')
+plt.xlabel('Antenna number (concatenated)')
+plt.title('Residual cable delays after last pipeline iteration')
     
+plt.figure()
+plt.scatter(x, y_total)
+plt.ylabel('Total cable delay [ns]')
+plt.xlabel('Antenna number (concatenated)')
+plt.title('Total cable delays after last pipeline iteration')
+
 #plt.scatter(x[:,0], ydiff[:,0], c='b')
 #plt.scatter(x[:,1], ydiff[:,1], c='g')
 #plt.scatter(x[:,2], ydiff[:,2], c='r')
