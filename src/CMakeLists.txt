@@ -124,11 +124,11 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 
 add_dependencies (rm wcslib cfitsio dal)
 
-if (RM_WITH_ARMADILLO AND EXISTS armadillo)
+if (RM_WITH_ARMADILLO)
   add_dependencies (rm armadillo)
-endif (RM_WITH_ARMADILLO AND EXISTS armadillo)
+endif (RM_WITH_ARMADILLO)
 
-if (RM_WITH_ITPP AND EXISTS itpp)
+if (RM_WITH_ITPP)
   add_dependencies (rm itpp)
-endif (RM_WITH_ITPP AND EXISTS itpp)
+endif (RM_WITH_ITPP)
 
