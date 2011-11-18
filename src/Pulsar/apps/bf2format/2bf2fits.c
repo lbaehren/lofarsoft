@@ -3,6 +3,7 @@
 #include <math.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 #include <string.h>
 #include "fitsio.h"
@@ -115,9 +116,11 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
     float	samples[BEAMS][STOKES][CHANNELS][SAMPLES|2];
   }stokesdata_struct;
     
- stokesdata_struct *stokesdata;
+
+  time_t t1,t2;
+  stokesdata_struct *stokesdata;
  int prev_seqnr = -1;
- unsigned time;
+ unsigned timeT;
  unsigned output_samples = 0;
  unsigned nul_samples = 0;
  /* unsigned toobig = 0, toosmall = 0; */
@@ -227,8 +230,8 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
      float prev = stokesdata[0].samples[beamnr][STOKES_SWITCH][c][0];
      /* compute average */
      for( i = 0; i < num; i++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
-         const float value = stokesdata[i].samples[beamnr][STOKES_SWITCH][c][time];
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+         const float value = stokesdata[i].samples[beamnr][STOKES_SWITCH][c][timeT];
 	 if(prev < 1){
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
@@ -260,12 +263,12 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
      for( gap = prev_seqnr + 1; gap < stokesdata[i].sequence_number; gap++ ) {
        /* gaps, fill in zeroes */
        for( c = 0; c < CHANNELS; c++ ) {
-	 for( time = 0; time < SAMPLES; time++ ) {
+	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	   /*	     if (writefloats==1){ */
 	   float sum = 0;
 	   /* patrick: put polarization to 0, assume only one pol
 	      written out. */
-	   if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
+	   if(writePulsePSRData(*subintdata, 0, 0, c, timeT, 1, &sum) == 0) { 
 	     fprintf(stderr, "Error writing to temporary memory\n");
 	     return 0;
 	   }
@@ -312,11 +315,14 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	   fprintf(stderr, "scale=%e offset=%e (av=%e  rms=%e)\n", scales[c], offsets[c], average[c], rms[c]);
        }
      }
+
      /* process data */
+     (void) time(&t1);
+     printf("Just after initial time\n");
      for( c = 0; c < CHANNELS; c++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
-         sum = stokesdata[i].samples[beamnr][STOKES_SWITCH][c][time] ;
+         sum = stokesdata[i].samples[beamnr][STOKES_SWITCH][c][timeT] ;
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
@@ -345,11 +351,13 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
 	   /*	   printf("value %e\n", sum); */
 	 }
+	 (void) time(&t2);
+	 printf("Time to do process loop is %d seconds\n",(int)(t2-t1));
 	 
 
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
-	 if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
+	 if(writePulsePSRData(*subintdata, 0, 0, c, timeT, 1, &sum) == 0) { 
 	   fprintf(stderr, "Error writing to temporary memory");
 	   return 0;
 	 }
@@ -357,7 +365,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 	 output_samples++;
 	 if( sum == 0 ) nul_samples++;
 
-       } // for( time = 0; time < SAMPLES; time++ ) 
+       } // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
      }
 
      /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
@@ -420,8 +428,8 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
   
   stokesdata_h5_struct *stokesdata_h5;
 
-  
- unsigned time;
+  time_t t1,t2;  
+ unsigned timeT;
  unsigned output_samples = 0;
  unsigned nul_samples = 0;
  /* unsigned toobig = 0, toosmall = 0; */
@@ -531,6 +539,8 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
    /* Calculate average. RMS not used right now. */
    //   float average[CHANNELS], rms[CHANNELS];
+
+   (void) time(&t1);
    float *average, *rms;
    if(is_append) {
      average = calloc(SUBBANDS*CHANNELS, sizeof(float));
@@ -544,13 +554,41 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        float sum = 0.0f;
        float ms = 0.0f;
        int N = 0;
+       int l;
        unsigned validsamples = 0;
+       float median = 0.0f;
        /* compute average */
        for( i = 0; i < num; i++ ) {
-	 for( time = 0; time < SAMPLES; time++ ) {
+	 float mvalue[SAMPLES];
+	 /*	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+	   mvalue[timeT] = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	   }*/
+
+	 /* Massive kludge - BWS - Skip first 4 samples always due to distortion of rms */
+	 /* Added 2011-11-16 */
+	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	   float value;
-	   value = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
+	   float mtemp;
+	   value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
 	   // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
+
+	   // Try median
+	   /* for (l=timeT+1;l<SAMPLES;l++)
+	     {
+	       if (!isnan(mvalue[l]) && !isnan(mvalue[timeT])) 
+		 {
+		   if (mvalue[timeT] > mvalue[l])
+		     {
+		       mtemp = mvalue[l];
+		       mvalue[l] = mvalue[timeT];
+		       mvalue[timeT] = mtemp;
+		     }
+		 }
+	     }
+	   if (SAMPLES%2 == 0) median = (mvalue[SAMPLES/2]+mvalue[SAMPLES/2-1])/2;
+	   else median = mvalue[SAMPLES/2];*/
+
+	   // Mean method 
 	   if( !isnan( value ) ) {
 	     sum += value;
 	     ms += value*value;
@@ -571,7 +609,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	   average[nsub*CHANNELS+c] = sum/N;
 	   rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
 	 }
-	 if (debugpacking) printf("average[%ld] = %lf rms[%ld] = %lf\n",nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
+	 if (debugpacking) printf("N = %d average[%ld] = %lf rms[%ld] = %lf\n",N,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
        }else {
 	 if(N == 0) {
 	   average[c] = 0;
@@ -583,7 +621,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	   average[c] = sum/N;
 	   rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
 	 }
-	 if (debugpacking) printf("average[%d] = %lf rms[%d] = %lf\n",c,average[c],c,rms[c]);
+	 if (debugpacking) printf("N = %d average[%d] = %lf rms[%d] = %lf\n",N,c,average[c],c,rms[c]);
        }
 
        /* BWS: Ideal loop would count how many samples over the limit, but that requires more passes through
@@ -599,15 +637,16 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	   validsamples = 0;
 
 	   for( i = 0; i < num; i++ ) {
-	     for( time = 0; time < SAMPLES; time++ ) {
+	     for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	       float value;
-	       value = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
-	       // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
-	       if( !isnan( value ) && value > average[c] - 3 * rms[c] && value < average[c] + 3 *rms[c]) {
-		 sum += value;
-		 ms += value*value;
-		 validsamples++;
-	       }
+	       value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	       // if (nsub == 237 && c == 1) printf("BWS AVG timeT %d num %d channel %d nsub %ld value %f sum %f %f %f\n",timeT,i,c,nsub,value,sum,average[nsub*CHANNELS+c],rms[nsub*CHANNELS+c]);
+	       if (!isnan( value ) && value > average[nsub*CHANNELS+c] - 3.0 * rms[nsub*CHANNELS+c] && value < average[nsub*CHANNELS+c] + 3.0 *rms[nsub*CHANNELS+c]) 
+		 {
+		   sum += value;
+		   ms += value*value;
+		   validsamples++;
+		 }
 	     }
 	   }
    
@@ -624,7 +663,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	       average[nsub*CHANNELS+c] = sum/N;
 	       rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
 	     }
-	     if (debugpacking) printf("avloop %d average[%ld] = %lf rms[%ld] = %lf\n",al,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
+	     if (debugpacking) printf("N %d avloop %d average[%ld] = %lf rms[%ld] = %lf\n",N,al,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
 	     current_rms = rms[nsub*CHANNELS+c];
 	   }else {
 	     previous_rms = rms[c];
@@ -638,18 +677,20 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	       average[c] = sum/N;
 	       rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
 	     }
-	     if (debugpacking) printf("avloop %d average[%d] = %lf rms[%d] = %lf\n",al,c,average[c],c,rms[c]);
+	     if (debugpacking) printf("N %d avloop %d average[%d] = %lf rms[%d] = %lf\n",N,al,c,average[c],c,rms[c]);
 	     current_rms = rms[c];
 	   }
-	   if ( previous_rms / current_rms < 1.005 || current_rms == 0.0 ) break;
+	   if ( previous_rms / current_rms < 1.05 || current_rms == 0.0 ) break;
 	 }
-
- 
      }
+   (void) time(&t2);
+   //   printf("nsub = %ld Time to process is %lf seconds\n",nsub,(double)(t2-t1));
    }
  
   /* convert and write the data */
+   float powerNbits = (float)(pow(2,subintdata->NrBits)-1);
    for( i = 0; i < num; i++ ) {
+   (void) time(&t1);
 
      /*     fprintf(stderr, "XXXXXXXX %d - 2\n", i); */
    
@@ -657,26 +698,16 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
      if(sigmalimit > 0 && i == 0) {
        for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
 	 for( c = 0; c < CHANNELS; c++ ) {
-	   /*
-	     0                         = ivalue(average[c]-sigmalimit*rms[c]);
-	     0                         = (average[c]-sigmalimit*rms[c] - offset)/scale;
-	     0                         = (average[c]-sigmalimit*rms[c] - offset);
-	   */
 	   if(is_append == 0) {
-	     //	     offsets[c]                    = average[c]-sigmalimit*rms[c];
 	     offsets[c]                    = average[c];
-	     /*
-	       pow(2,subintdata.NrBits)-1  = ivalue(average[c]+sigmalimit*rms[c]);
-	       pow(2,subintdata.NrBits)-1  = (average[c]+sigmalimit*rms[c]-offset)/scale;
-	     */
-	     scales[c]  = (2*sigmalimit*rms[c])/(float)(pow(2,subintdata->NrBits));
-	     if(debugpacking)
-	       fprintf(stderr, "num %d nsub %ld ch %d scale=%e offset=%e (av=%e  rms=%e)\n", i, nsub, c, scales[c], offsets[c], average[c], rms[c]);
+	     scales[c]  = (sigmalimit*rms[c])/powerNbits;
+	     /*     if(debugpacking)
+		    fprintf(stderr, "num %d nsub %ld ch %d scale=%e offset=%e (av=%e  rms=%e)\n", i, nsub, c, scales[c], offsets[c], average[c], rms[c]); */
 	   }else {
 	     offsets[nsub*CHANNELS+c]      = average[nsub*CHANNELS+c];
-	     scales[nsub*CHANNELS+c]  = (2*sigmalimit*rms[nsub*CHANNELS+c])/(float)(pow(2,subintdata->NrBits));
-	     if(debugpacking)
-	       fprintf(stderr, "num %d nsub %ld ch %d scale=%e offset=%e (av=%e  rms=%e)\n", i, nsub, c, scales[nsub*CHANNELS+c], offsets[nsub*CHANNELS+c], average[nsub*CHANNELS+c], rms[nsub*CHANNELS+c]);
+	     scales[nsub*CHANNELS+c]  = (sigmalimit*rms[nsub*CHANNELS+c])/powerNbits;
+	     /*	     if(debugpacking)
+		     fprintf(stderr, "num %d nsub %ld ch %d scale=%e offset=%e (av=%e  rms=%e)\n", i, nsub, c, scales[nsub*CHANNELS+c], offsets[nsub*CHANNELS+c], average[nsub*CHANNELS+c], rms[nsub*CHANNELS+c]);*/
 	   }
 	 }
        }
@@ -685,11 +716,11 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
      /* process data */
      for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
      for( c = 0; c < CHANNELS; c++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
-	 sum = stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH];
+	 sum = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
 	 if(is_append) {
 	   sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[nsub*CHANNELS+c] : sum;
 	 }else {
@@ -697,13 +728,13 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 }
 	   
 	 if(sigmalimit > 0) {
-	   if(debugpacking)
-	     printf("value %e ", sum);
+	   if(debugpacking && nsub == 237)
+	     printf("printf channel %d time %d value %e ", c, timeT, sum);
 	   if(is_append)
 	     sum = (sum - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c] + (float)(pow(2,subintdata->NrBits-1));
 	   else
 	     sum = (sum - offsets[c])/scales[c] + (float)(pow(2,subintdata->NrBits-1));
-	   if(debugpacking)
+	   if(debugpacking && nsub == 237)
 	     printf(" %e ", sum);
 	   if(sum < 0) {
 	     if(clipav) {
@@ -727,14 +758,16 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	     }
 	     /*	     printf("Overflow! %e\n", sum); */
 	   }
-	   if(debugpacking)
+	   if(debugpacking && nsub == 237)
 	     printf(" %e \n", sum);
 
 	   /*	   printf("value %e\n", sum); */
 	 }
+     (void) time(&t2);
+     printf("Time to process num %d is %lf seconds\n",i,(double)(t2-t1));
 
 	 /* BWS */
-	 // if (nsub*CHANNELS+c == 20 && i == 0 ) printf("BWS %d %d %f %f %f %f\n",c,time,sum,stokesdata_h5[i].samples[beamnr][time][nsub][c][STOKES_SWITCH],offsets[nsub*CHANNELS+c], scales[nsub*CHANNELS+c]);
+	 // if (nsub*CHANNELS+c == 20 && i == 0 ) printf("BWS %d %d %f %f %f %f\n",c,timeT,sum,stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH],offsets[nsub*CHANNELS+c], scales[nsub*CHANNELS+c]);
 
 
 
@@ -742,12 +775,12 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
 	 if(is_append) {
-	   if(writePulsePSRData(*subintdata, 0, 0, nsub*CHANNELS+c, time, 1, &sum) == 0) { 
+	   if(writePulsePSRData(*subintdata, 0, 0, nsub*CHANNELS+c, timeT, 1, &sum) == 0) { 
 	     fprintf(stderr, "Error writing to temporary memory\n");
 	     return 0;
 	   }
 	 }else {
-	   if(writePulsePSRData(*subintdata, 0, 0, c, time, 1, &sum) == 0) { 
+	   if(writePulsePSRData(*subintdata, 0, 0, c, timeT, 1, &sum) == 0) { 
 	     fprintf(stderr, "Error writing to temporary memory\n");
 	     return 0;
 	   }
@@ -756,7 +789,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 output_samples++;
 	 if( sum == 0 ) nul_samples++;
 
-       } // for( time = 0; time < SAMPLES; time++ ) 
+       } // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
      }
      }
    
@@ -802,6 +835,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        break;
      
    }
+
    /*   fprintf(stderr, "XXXXXXXX X - 6\n"); */
 
    if(doneprocessing)
@@ -834,7 +868,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
     
  stokesdata_struct *stokesdata;
  int prev_seqnr = -1;
- unsigned time;
+ unsigned timeT;
  unsigned output_samples = 0;
  unsigned nul_samples = 0;
  /* unsigned toobig = 0, toosmall = 0; */
@@ -996,8 +1030,8 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      float prev = stokesdata[0].samples[0][s][c];
      /* compute average */
      for( i = 0; i < num; i++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
-         const float value = stokesdata[i].samples[time][s][c];
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+         const float value = stokesdata[i].samples[timeT][s][c];
 	 if(prev < 1){
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
@@ -1035,12 +1069,12 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
        for( s = 0; s < SUBBANDS; s++ ) {
        for( c = 0; c < CHANNELS; c++ ) {
          ac=s*CHANNELS+c;
-	 for( time = 0; time < SAMPLES; time++ ) {
+	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	   /*	     if (writefloats==1){ */
 	   float sum = 0;
 	   /* patrick: put polarization to 0, assume only one pol
 	      written out. */
-	   if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	   if(writePulsePSRData(*subintdata, 0, 0, ac, timeT, 1, &sum) == 0) { 
 	     fprintf(stderr, "Error writing to temporary memory\n");
 	     return 0;
 	   }
@@ -1095,9 +1129,9 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      for( s = 0; s < SUBBANDS; s++ ) {
      for( c = 0; c < CHANNELS; c++ ) {
        ac=s*CHANNELS+c;
-       for( time = 0; time < SAMPLES; time++ ) {
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
-         sum = stokesdata[i].samples[time][s][c];
+         sum = stokesdata[i].samples[timeT][s][c];
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[ac] : sum;
@@ -1129,7 +1163,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 	 
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
-	 if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	 if(writePulsePSRData(*subintdata, 0, 0, ac, timeT, 1, &sum) == 0) { 
 	   fprintf(stderr, "Error writing to temporary memory");
 	   return 0;
 	 }
@@ -1137,7 +1171,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 	 output_samples++;
 	 if( sum == 0 ) nul_samples++;
 
-       } // for( time = 0; time < SAMPLES; time++ ) 
+       } // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
      }
    } // SUBBANDS
 
@@ -1211,7 +1245,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
 
  FILE *input[SUBBANDS]; // file descriptors for each subband
  int prev_seqnr = -1;
- unsigned time;
+ unsigned timeT;
  unsigned output_samples = 0;
  unsigned nul_samples = 0;
  /* unsigned toobig = 0, toosmall = 0; */
@@ -1327,7 +1361,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
  }
 
  /* 
-    - Reads AVERAGE_OVER (10) blocks of data at the time from the input data. 
+    - Reads AVERAGE_OVER (10) blocks of data at the timeT from the input data. 
     - Swap some bytes around
     - Look if there is a gap in the data (sequence numbers are missing) and write zero's in gaps.
  */
@@ -1422,8 +1456,8 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
      float prev = stokesdata[ss][0].samples[beamnr][STOKES_SWITCH][c][0];
      /* compute average */
      for( i = 0; i < num; i++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
-         const float value = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][time];
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+         const float value = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][timeT];
 	 if(prev < 1){
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
@@ -1464,13 +1498,13 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
        /* gaps, fill in zeroes */
        for (ss=0; ss<SUBBANDS; ss++) {
 	 for( c = 0; c < CHANNELS; c++ ) {
-	   for( time = 0; time < SAMPLES; time++ ) {
+	   for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	     /*	     if (writefloats==1){ */
 	     float sum = 0;
 	     /* patrick: put polarization to 0, assume only one pol
 		written out. */
 	     ac = ss * CHANNELS + c;
-	     if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	     if(writePulsePSRData(*subintdata, 0, 0, ac, timeT, 1, &sum) == 0) { 
 	       fprintf(stderr, "Error writing to temporary memory\n");
 	       return 0;
 	     }
@@ -1527,10 +1561,10 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
      /* process data */
      for (ss=0; ss<SUBBANDS; ss++) {
      for( c = 0; c < CHANNELS; c++ ) {
-       for( time = 0; time < SAMPLES; time++ ) {
+       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
          ac = ss * CHANNELS + c;
-         sum = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][time] ;
+         sum = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][timeT] ;
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[ac] : sum;
@@ -1562,7 +1596,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
 	 
 	 /* patrick: put polarization to 0, assume only one pol
 	    written out. Think x is the current bin nr */
-	 if(writePulsePSRData(*subintdata, 0, 0, ac, time, 1, &sum) == 0) { 
+	 if(writePulsePSRData(*subintdata, 0, 0, ac, timeT, 1, &sum) == 0) { 
 	   fprintf(stderr, "Error writing to temporary memory");
 	   return 0;
 	 }
@@ -1570,7 +1604,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
 	 output_samples++;
 	 if( sum == 0 ) nul_samples++;
 
-       } // for( time = 0; time < SAMPLES; time++ ) 
+       } // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
      }
     } // SUBBANDS
 
@@ -1963,7 +1997,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       /*      sscanf(s_ptr, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hour, &min, &sec);*/
       sscanf(s_ptr, "'%d-%d-%d %d:%d:%d'", &y, &m, &d, &hour, &min, &sec);
     }else {
-      fprintf(stderr, "2bf2fits: Observation.startTime not set\n");
+      fprintf(stderr, "2bf2fits: Observation.startTimeT not set\n");
       return 0;     
     }
     sec_mid = hour * 3600.0 + min * 60.0 + sec;
