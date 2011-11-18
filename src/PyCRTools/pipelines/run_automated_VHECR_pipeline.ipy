@@ -46,59 +46,116 @@ reprocesslora=False
 includefilter=[""]
 # Add problematic eventto extrude list (this should eventually be put into a database/external list,
 # i.e. not hardcoded in pipeline)
-excludefilter=["20110610T","VHECR_LORA-1969","killed","test","temp","dump"]
-excludefilter.append("L32")
+excludefilter=["20110610T","VHECR_LORA-1969","killed","test","temp","dump","manual","trash"]
+excludefilter.append("L31774")
 excludefilter.append("20110613T051515.914")
 excludefilter.append("20110813T190822.655") # Zero values cause exception when executing logplot
 excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception when executing logplot
 
 
+def get_file_metadata(filename):
+    """Get metadata from a LOFAR data file.
+
+    This function returns the project name, the station id and the
+    timestamp of the LOFAR data file.
+
+    =========== ====================
+    Parameter   Description
+    =========== ====================
+    *filename*  Full filename of the LOFAR datafile.
+    =========== ====================
+    """
+    project_name = "VHECR_LORA"
+    station_id = "UNDEFINED"
+    time_stamp = "UNDEFINED"
+
+    try:
+        datafile=open(filename);
+    except RuntimeError:
+        print "ERROR opening file - skipping this file!"
+        return (project_name, station_id, time_stamp)
+
+    if datafile:
+
+        timesec=datafile["TIME"][0]
+        timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
+
+        timems = int(datafile["SAMPLE_INTERVAL"][0]*datafile["SAMPLE_NUMBER"][0]*1000)
+        timems = str(timems).zfill(3) # make 3 digits with leading zeros if needed.
+        # NOTE: chosen to take int part of time in ms; i.e. not rounding to nearest ms.
+
+        time_stamp=timestr+"."+timems+"Z"
+
+        station_id = "%03d" %(datafile["CHANNEL_ID"][0]/1000000)
+
+        datafile = 0
+
+    return (project_name, station_id, time_stamp)
+
+
 def get_results(filename,outputdir,pol=0):
-        current_polarization=pol
-        station=""
-        timestamp=""
-        time_stamp=""
-        (rootfilename,fileextensions)=os.path.splitext(filename)
+    current_polarization=pol
+    station=""
+    timestamp=""
+    time_stamp=""
+    (rootfilename,fileextensions)=os.path.splitext(filename)
 
-        filename_split=rootfilename.split("-")
-        projectname="-".join(filename_split[:-2]) if len(filename_split)>2 else filename_split[0]
+    # Get metadata from file
+    (project_name, station_name, time_stamp) = get_file_metadata(filename)
 
-        station_name=filename_split[-1] if not station else station
-        old_time_stamp=time_stamp
-        time_stamp=filename_split[-2] if not timestamp else timestamp
-        pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
+    outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
+    topdir_name=project_name+"-"+time_stamp
+    reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)
+    outputdir_event=os.path.join(outputdir_expanded,topdir_name)
+    outputdir_with_subdirectories=os.path.join(outputdir_event,reldir_from_event)
 
-        outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
-        topdir_name=projectname+"-"+time_stamp
-        reldir_from_event = os.path.join("pol"+str(current_polarization),station_name)
-        reldir_from_top = os.path.join(topdir_name,"pol"+str(current_polarization),station_name)
-        outputdir_event=os.path.join(outputdir_expanded,topdir_name)
-        outputdir_with_subdirectories=os.path.join(outputdir_event,reldir_from_event)
-        outfilename=rootfilename+"-pol"+str(current_polarization)
+    result_xml_file=os.path.join(outputdir_with_subdirectories,"results.xml")
+    result_html_file=os.path.join(outputdir_with_subdirectories,"index.html")
 
-        calibrated_timeseries_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries")
-        #result_file=os.path.join(outputdir_with_subdirectories,outfilename+".results")
-        result_xml_file=os.path.join(outputdir_with_subdirectories,"results.xml")
-        result_html_file=os.path.join(outputdir_with_subdirectories,"index.html")
-        #calibrated_timeseries_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-timeseries-cut")
-        #calibrated_fft_cut_file=os.path.join(outputdir_with_subdirectories,outfilename+"-calibrated-fft-cut")
-        if os.path.isfile(result_xml_file):
-            res=xmldict.load(result_xml_file)
-            return [True, res]
-        if os.path.isfile(result_html_file):
-            return [True, None]
-        else:
-            return [False, None]
+    print "result XML file: ", result_xml_file
+
+    if os.path.isfile(result_xml_file):
+        res=xmldict.load(result_xml_file)
+        return [True, res]
+    if os.path.isfile(result_html_file):
+        return [True, None]
+    else:
+        return [False, None]
 
 
 def isprocessed(filename,outputdir):
+    """Check if a data file is already processed.
+
+    This function returns *True* if a results file already exists,
+    i.e. the file is already processed.  Otherwise *False* is
+    returned.
+
+    =========== ====================
+    Parameter   Description
+    =========== ====================
+    *filename*  Name of the LOFAR datafile.
+    *outputdir* Path of the output directory.
+    =========== ====================
+    """
     if get_results(filename,outputdir,0)[0] and get_results(filename,outputdir,1)[0]:
         return True
     else:
         return False
 
 
-def nowloradata(filename,outputdir):
+def isLORAdata(filename,outputdir):
+    """Check if LORA data is available for the LOFAR data file.
+
+    If LORA data is available for the provided LOFAR data file this
+    method returns *True*, if not *False* is returned.
+
+    =========== ====================
+    Parameter   Description
+    =========== ====================
+    *filename*  Name of the LOFAR datafile.
+    *outputdir* Path of the output directory.
+    =========== ====================
+    """
     res=get_results(filename,outputdir,0)[1]
     if res: #already processed
         if not res["pulse_direction_lora"]: #No lora direction given
@@ -108,6 +165,18 @@ def nowloradata(filename,outputdir):
 
 
 def infilter(filename,filters):
+    """Check if the filename matches any of the provided filters.
+
+    This function returns *True* if the filename matches at least one
+    filter in the filter list. Otherwise *False* is returned.
+
+    =========== ====================
+    Parameter   Description
+    =========== ====================
+    *filename*  Name of the LOFAR datafile.
+    *filters*   List of filters
+    =========== ====================
+    """
     if not isinstance(filters,type([])):
         if filter in filename:
             return True
@@ -121,10 +190,9 @@ blocksize=65536
 myoutputdir="/data/VHECR/LORAtriggered/results/"
 fname=""
 fname2=""
-files=os.listdir(datadir)
+files = filter(lambda f:"h5" in f, os.listdir(datadir))
 
 for f in files:
-
     if infilter(f,excludefilter):
         continue
     if processall:
@@ -134,9 +202,9 @@ for f in files:
         fname+=f+" "
         continue
     else:
-        if isprocessed(f,myoutputdir):
+        if isprocessed(datadir+f,myoutputdir):
             if reprocesslora:
-                if nowloradata(f,myoutputdir):
+                if isLORAdata(datadir+f,myoutputdir):
                     fname+=f+" "
                     continue
         else:
