@@ -47,10 +47,11 @@ includefilter=[""]
 # Add problematic eventto extrude list (this should eventually be put into a database/external list,
 # i.e. not hardcoded in pipeline)
 excludefilter=["20110610T","VHECR_LORA-1969","killed","test","temp","dump"]
-excludefilter.append["L32"]
+excludefilter.append("L32")
 excludefilter.append("20110613T051515.914")
 excludefilter.append("20110813T190822.655") # Zero values cause exception when executing logplot
 excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception when executing logplot
+
 
 def get_results(filename,outputdir,pol=0):
         current_polarization=pol
@@ -89,11 +90,13 @@ def get_results(filename,outputdir,pol=0):
         else:
             return [False, None]
 
+
 def isprocessed(filename,outputdir):
     if get_results(filename,outputdir,0)[0] and get_results(filename,outputdir,1)[0]:
         return True
     else:
         return False
+
 
 def nowloradata(filename,outputdir):
     res=get_results(filename,outputdir,0)[1]
@@ -103,13 +106,13 @@ def nowloradata(filename,outputdir):
                  return True
     return False
 
+
 def infilter(filename,filters):
     if not isinstance(filters,type([])):
         if filter in filename:
             return True
     else:
         return True in [f in filename for f in filters if len(f)>0]
-
 
 
 datadir="/data/VHECR/LORAtriggered/data/"
