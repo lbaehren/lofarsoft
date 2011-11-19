@@ -317,8 +317,8 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
      }
 
      /* process data */
-     (void) time(&t1);
-     printf("Just after initial time\n");
+     // (void) time(&t1);
+     // printf("Just after initial time\n");
      for( c = 0; c < CHANNELS; c++ ) {
        for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
@@ -351,8 +351,8 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
 	   /*	   printf("value %e\n", sum); */
 	 }
-	 (void) time(&t2);
-	 printf("Time to do process loop is %d seconds\n",(int)(t2-t1));
+	 // (void) time(&t2);
+	 // printf("Time to do process loop is %d seconds\n",(int)(t2-t1));
 	 
 
 	 /* patrick: put polarization to 0, assume only one pol
@@ -540,7 +540,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
    /* Calculate average. RMS not used right now. */
    //   float average[CHANNELS], rms[CHANNELS];
 
-   (void) time(&t1);
+   //(void) time(&t1);
    float *average, *rms;
    if(is_append) {
      average = calloc(SUBBANDS*CHANNELS, sizeof(float));
@@ -683,14 +683,14 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	   if ( previous_rms / current_rms < 1.05 || current_rms == 0.0 ) break;
 	 }
      }
-   (void) time(&t2);
+     //(void) time(&t2);
    //   printf("nsub = %ld Time to process is %lf seconds\n",nsub,(double)(t2-t1));
    }
  
   /* convert and write the data */
    float powerNbits = (float)(pow(2,subintdata->NrBits)-1);
    for( i = 0; i < num; i++ ) {
-   (void) time(&t1);
+     // (void) time(&t1);
 
      /*     fprintf(stderr, "XXXXXXXX %d - 2\n", i); */
    
@@ -763,8 +763,8 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
 	   /*	   printf("value %e\n", sum); */
 	 }
-     (void) time(&t2);
-     printf("Time to process num %d is %lf seconds\n",i,(double)(t2-t1));
+	 //     (void) time(&t2);
+	 // printf("Time to process num %d is %lf seconds\n",i,(double)(t2-t1));
 
 	 /* BWS */
 	 // if (nsub*CHANNELS+c == 20 && i == 0 ) printf("BWS %d %d %f %f %f %f\n",c,timeT,sum,stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH],offsets[nsub*CHANNELS+c], scales[nsub*CHANNELS+c]);
