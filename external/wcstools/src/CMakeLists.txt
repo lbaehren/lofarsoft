@@ -22,22 +22,27 @@ option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" NO  )
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_CMAKE_MODULES)
+  find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
     PATHS 
-    ${WCSTOOLS_SOURCE_DIR}
-    ${WCSTOOLS_SOURCE_DIR}/..
-    ${WCSTOOLS_SOURCE_DIR}/../..
-    ${WCSTOOLS_SOURCE_DIR}/../../..
-    ENV LOFARSOFT
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    PATH_SUFFIXES
+    cmake
+    devel_common/cmake
     )
-  
-  if (LUS_ROOT)
-    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_ROOT)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_ROOT)
-endif (NOT LUS_ROOT)
+endif (NOT LUS_CMAKE_MODULES)
+
+if (LUS_CMAKE_MODULES)
+  ## Augment CMAKE_MODULE_PATH variable
+  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
+    "CMake module path"
+    FORCE)
+  ## Load custom CMake settings
+  include (LUS_CMakeSettings)
+endif (LUS_CMAKE_MODULES)
 
 ## ==============================================================================
 ##
