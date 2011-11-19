@@ -167,17 +167,94 @@ on your disk:
 <div class='section'><a name="External dependencies">External dependencies</a></div>
 
 Most of the required external software packages can be installed via the
-respective package manager:
+respective package manager; the table below lists the most important
+dependencies and their respective packages for the main set of
+targeted platforms.
+
+<center>
+<table>
+  <tr>
+    <td bgcolor="#dddddd">Package</td>
+    <td class="indexvalue">Ubuntu</td>
+    <td class="indexvalue">Debian</td>
+    <td class="indexvalue">Fedora</td>
+    <td class="indexvalue">OpenSuSE</td>
+    <td bgcolor="#dddddd">Comment</td>
+  </tr>
+  <tr>
+    <td class="indexvalue">CMake</td>
+    <td>cmake</td>
+    <td>cmake</td>
+    <td>cmake</td>
+    <td>cmake</td>
+    <td>Required for configuration and build</td>
+  </tr>
+  <tr>
+    <td class="indexvalue">Git</td>
+    <td>git-svn</td>
+    <td>git-svn</td>
+    <td>git-svn</td>
+    <td>git-svn</td>
+    <td>Required for checking out source code.</td>
+  </tr>
+  <tr>
+    <td class="indexvalue">Subversion</td>
+    <td>subversion</td>
+    <td>subversion</td>
+    <td>subversion</td>
+    <td>subversion</td>
+    <td>Required for checking out source code.</td>
+  </tr>
+  <tr>
+    <td class="indexvalue">Doxygen</td>
+    <td>doxygen</td>
+    <td>doxygen</td>
+    <td>doxygen</td>
+    <td>doxygen</td>
+    <td>Generation of source code documentation.</td>
+  </tr>
+  <tr>
+    <td class="indexvalue">Flex</td>
+    <td>flex</td>
+    <td>flex</td>
+    <td>flex</td>
+    <td>flex</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td class="indexvalue">Bison</td>
+    <td>bison</td>
+    <td>bison</td>
+    <td>bison</td>
+    <td>bison</td>
+    <td></td>
+  </tr>
+
+</table>
+</center>
 
 <ul>
   <li><strong>Debian GNU Linux 6.x / Ubuntu Linux 10.04 LTS / Ubuntu Linux 11.10</strong>
   <pre class="code">
-  apt-get install build-essential gfortran git-svn cmake subversion flex bison swig
+  apt-get install cmake git-svn subversion
+  apt-get install build-essential gfortran bison flex swig
   apt-get install libblas-dev liblapack-dev libboost-all-dev libqt4-dev libcppunit-dev
   apt-get install libarmadillo-dev libitpp-dev libfftw3-dev libhdf5-serial-dev
-  apt-get install libcfitsio3-dev libplplot-dev libgsl0-dev python-numpy ipython
+  apt-get install libcfitsio3-dev libplplot-dev libgsl0-dev
+  apt-get install python-dev python-numpy ipython
   </pre>
-  
+  <li><strong>Mac OS X</strong>
+  <ol>
+    <li>First install the GNU C/C++ compiler optimized for OSX provided by
+    <a hef="http://www.apple.com">Apple</a> as part of the X Code Integrated
+    Development Environment.
+    <li>You can either use the OSX Installation DVD which came with your Mac or
+    <a href="http://developer.apple.com/technologies/xcode.html">download</a>
+    it from the Apple website.
+    <li>Double click the package and follow the installation instructions.
+    Then run <i>Software Update</i> from the Apple menu to ensure you have the
+    latest version of all libraries.
+  </ol>
   <li><strong>Fedora 14 / Fedora 15 / Fedora 16</strong>
   <pre class="code">
   yum install cmake git-svn subversion gcc-gfortran libgfortran flex bison
