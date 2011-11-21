@@ -1061,7 +1061,7 @@ for full_filename in files:
         ########################################################################
         #AntennaResponse
         ########################################################################
-        ar=trerun("AntennaResponse", "ar", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], nantennas = antenna_positions.shape()[0], polarization=current_polarization, antennaset = datafile["ANTENNA_SET"])
+#        ar=trerun("AntennaResponse", "ar", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], nantennas = antenna_positions.shape()[0], polarization=current_polarization, antennaset = datafile["ANTENNA_SET"])
 
         print "\n--->Imaging"
 

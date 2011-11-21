@@ -4,8 +4,18 @@ AntennaResponse documentation
 
 """
 
+import numpy as np
 from pycrtools.tasks import Task
 import pycrtools as cr
+
+def frequencies(nf, sample_frequency, nyquist_zone):
+    """Calculate frequencies."""
+
+    frequencies = cr.hArray(float, nf)
+
+    cr.hFFTFrequencies(frequencies, sample_frequency, nyquist_zone)
+
+    return frequencies
 
 class AntennaResponse(Task):
     """AntennaResponse task documentation.
@@ -15,8 +25,8 @@ class AntennaResponse(Task):
         az = dict ( default = 0.0 ),
         el = dict ( default = 0.0 ),
         data = dict( default = None ),
-        fftdata = dict( default = None ),
-        frequencies = dict( default = None ),
+        fftdata = dict( default = lambda self : cr.hArray(complex, dimensions=(self.nantennas, self.nf)) ),
+        frequencies = dict( default = lambda self : frequencies(self.nf, self.sample_frequency, self.nyquist_zone) ),
         nantennas = dict ( default = None ),
         blocksize = dict( default = None ),
         nf = dict ( default = lambda self : self.blocksize / 2 + 1 ),
@@ -25,22 +35,9 @@ class AntennaResponse(Task):
         nyquist_zone = dict( default = 1 ),
         sample_frequency = dict( default = 200.e6 ),
         gain = dict ( default = lambda self : cr.hArray(float, dimensions = (2, self.nf)) ),
+        plan = dict ( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, self.blocksize, 1, self.nf, cr.fftw_flags.ESTIMATE) ),
+        iplan = dict ( default = lambda self : cr.FFTWPlanManyDftC2r(self.blocksize, self.nantennas, 1, self.nf, 1, self.blocksize, cr.fftw_flags.ESTIMATE) ),
     )
-
-    def init(self):
-        """Initialize.
-        """
-
-        # Calculate frequencies if not given
-        if self.frequencies is None:
-            self.frequencies=cr.hArray(float, self.nf)
-            cr.hFFTFrequencies(self.frequencies, self.sample_frequency, self.nyquist_zone)
-
-        # Create plan for forward FFT
-        self.plan = cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, self.blocksize, 1, self.nf, cr.fftw_flags.ESTIMATE)
-
-        # Create plan for inverse FFT
-        self.iplan = cr.FFTWPlanManyDftC2r(self.blocksize, self.nantennas, 1, self.nf, 1, self.blocksize, cr.fftw_flags.ESTIMATE)
 
     def run(self):
         """Run.
@@ -55,13 +52,11 @@ class AntennaResponse(Task):
         cr.hMul(self.gain, self.blocksize)
 
         # Go to frequency domain
-        if self.fftdata is None:
+        print "AntennaResponse: Converting to frequency domain."
 
-            # Create empty array
-            self.fftdata = cr.hArray(complex, dimensions=(self.nantennas, self.nf))
-
-            # Perform FFT
-            cr.hFFTWExecutePlan(self.fftdata, self.data, self.plan)
+        # Perform FFT
+        print self.fftdata.shape(), self.data.shape()
+        cr.hFFTWExecutePlan(self.fftdata, self.data, self.plan)
 
         # Correct for antenna response
         if self.antennaset == "LBA_INNER":
@@ -70,6 +65,13 @@ class AntennaResponse(Task):
             cr.hDiv(self.fftdata, self.gain[int(not self.polarization)])
         else:
             raise ValueError("Antennaset not supported.")
+
+        print "AntennaResponse: Converting to time domain."
+        print self.fftdata.shape(), self.data.shape()
+        print self.plan
+
+        np.save("freq-"+str(self.polarization), self.frequencies.toNumpy())
+        np.save("gain-"+str(self.polarization), self.gain.toNumpy())
 
         # Transform back to time domain
         cr.hFFTWExecutePlan(self.data, self.fftdata, self.iplan)
