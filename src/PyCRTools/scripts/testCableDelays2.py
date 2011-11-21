@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pycrtools as cr
 import pickle
 
-topdir = '/Users/acorstanje/triggering/CR/results_CS003/'
+topdir = '/Users/acorstanje/triggering/CR/results_CS302/'
 #event = 'VHECR_LORA-20110612T231913.199Z'
 #event = 'fullLOFAR--5' # for use with Plotfootprint
 #event = 'VHECR_LORA-20110716T094509.665Z'
@@ -114,7 +114,6 @@ print 'pickled done'
 
 #filefilter = os.path.join(topdir, event)
 #print filefilter
-polarization = 0 # should do both
 
 #trerun("PlotAntennaLayout","Delays",positions = ,colors=final_residual_delays[antennas_with_strong_pulses],sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
@@ -159,6 +158,9 @@ x = np.arange(len(cabledelays_database))
 y = np.zeros(len(cabledelays_database))
 
 x = []
+x_avg = []
+y_avg_residual = []
+y_avg_total = []
 y_total = []
 y_residual = []
 n = 0
@@ -166,11 +168,15 @@ plotparameter = "residualdelay"
 for key in cabledelays_database:
     thisAnt = cabledelays_database[key]
 #    y[n] = thisAnt["cabledelay"]
+    thisAvg = 1.0e9 * thisAnt["residualdelay"]
+    thisTotal = 1.0e9 * thisAnt["cabledelay"]
     thisSpread = 1.0e9 * thisAnt["spread"]
+    x_avg.extend([n])
+    y_avg_residual.extend([thisAvg])
+    y_avg_total.extend([thisTotal])
     if thisSpread < 5.0:
         for k in range(len(thisAnt["residuallist"])): # residual and total lists are the same size...
             x.extend([n])
-#            thisAvg = 1.0e9 * thisAnt["residualdelay"]
             thisResidualDelay = 1.0e9 * thisAnt["residuallist"][k]
             thisTotalDelay = 1.0e9 * thisAnt["delaylist"][k]
 #            thisDiff = thisDelay - thisAvg
@@ -182,17 +188,20 @@ for key in cabledelays_database:
     #    yerr[n] = thisAnt["spread"]
     n+=1
 
-plt.scatter(x, y_residual)
+plt.scatter(x, y_residual, label='Residual cable delays')
+plt.scatter(x_avg, y_avg_residual, c='r', label='Average residual delay')
 plt.ylabel('Residual cable delay [ns]')
 plt.xlabel('Antenna number (concatenated)')
-plt.title('Residual cable delays after last pipeline iteration')
-    
+plt.title('Residual cable delays per antenna after last pipeline iteration')
+plt.legend(loc='best')
+
 plt.figure()
-plt.scatter(x, y_total)
+plt.scatter(x, y_total, label='Total cable delays')
+plt.scatter(x_avg, y_avg_total, c = 'r', label='Average cable delay')
 plt.ylabel('Total cable delay [ns]')
 plt.xlabel('Antenna number (concatenated)')
-plt.title('Total cable delays after last pipeline iteration')
-
+plt.title('Total cable delays per antenna after last pipeline iteration')
+plt.legend(loc='center right')
 #plt.scatter(x[:,0], ydiff[:,0], c='b')
 #plt.scatter(x[:,1], ydiff[:,1], c='g')
 #plt.scatter(x[:,2], ydiff[:,2], c='r')
