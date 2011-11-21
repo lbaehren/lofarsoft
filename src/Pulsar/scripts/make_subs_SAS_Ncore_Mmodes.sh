@@ -1339,15 +1339,15 @@ do
 	    if [[ $subsformat == 0 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 0 ]]
 	    then
 	       converter_exe="2bf2fits"
-	       extra_flags="-CS -parset $PARSET -nbits 8 -A 600 -v"
+	       extra_flags="-CS -parset $PARSET -nbits 8 -A 100 -sigma 3 -v"
 	    elif [[ $subsformat == 0 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 1 ]]
 	    then
 	       converter_exe="2bf2fits"
-	       extra_flags="-CS -H -parset $PARSET -append -nbits 8 -A 600 -v"
+	       extra_flags="-CS -H -parset $PARSET -append -nbits 8 -A 100 -sigma 3 -v"
 	    elif [[ $subsformat == 0 ]] && [[ $STOKES == "incoherentstokes" ]]
 	    then
 	       converter_exe="2bf2fits"
-	       extra_flags="-append -parset $PARSET -nbits 8 -A 600 -v"
+	       extra_flags="-append -parset $PARSET -nbits 8 -A 100 -sigma 3 -v"
 	    elif [[ $subsformat == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 0 ]]
 	    then
 	       converter_exe="bf2presto8"
