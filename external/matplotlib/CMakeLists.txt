@@ -1,104 +1,132 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (MATPLOTLIB)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (MATPLOTLIB_VERSION        "1.1.0" )
+set (MATPLOTLIB_SOURCE_ARCHIVE "matplotlib-${MATPLOTLIB_VERSION}.tar.gz" )
+set (MATPLOTLIB_URL            "http://downloads.sourceforge.net/project/matplotlib/matplotlib/matplotlib-${MATPLOTLIB_VERSION}/${MATPLOTLIB_SOURCE_ARCHIVE}" )
+set (MATPLOTLIB_SVN            "" )
 
-option (MATPLOTLIB_FORCE_BUILD       "Force rebuild and local installation?"    NO  )
-option (MATPLOTLIB_CMAKE_BUILD       "Use CMake to configure and build MATPLOTLIB?"  YES )
-option (MATPLOTLIB_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (MATPLOTLIB_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (MATPLOTLIB_FORCE_BUILD  "Force build and installation of package?" NO )
+option (MATPLOTLIB_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${MATPLOTLIB_SOURCE_DIR}
-  ${MATPLOTLIB_SOURCE_DIR}/..
-  ${MATPLOTLIB_SOURCE_DIR}/../..
-  ${MATPLOTLIB_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT PYTHON_FOUND)
+  find_package (Python)
+endif (NOT PYTHON_FOUND)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+if (NOT NUMPY_FOUND)
+  find_package (NumPy)
+endif (NOT NUMPY_FOUND)
 
-if (NOT MATPLOTLIB_VERBOSE_CONFIGURE)
-  set (MATPLOTLIB_FIND_QUIETLY  YES )
-  set (NUMPY_FIND_QUIETLY       YES )
-  set (PYTHON_FIND_QUIETLY      YES )
-endif (NOT MATPLOTLIB_VERBOSE_CONFIGURE)
+if (NOT MATPLOTLIB_FOUND)
+  find_package (Matplotlib)
+endif (NOT MATPLOTLIB_FOUND)
 
-include (FindPython)
-include (FindNumPy)
-include (FindMatplotlib)
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-message (STATUS "Python = ${PYTHON_EXECUTABLE}")
+if (MATPLOTLIB_FROM_REPOS)
+  set (MATPLOTLIB_FORCE_BUILD TRUE)
+endif (MATPLOTLIB_FROM_REPOS)
 
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
-
-  include (ExternalProject)
+if (NOT MATPLOTLIB_FOUND OR MATPLOTLIB_FORCE_BUILD)
   
-  set (matplotlib_version "0.99.1.2")
-  set (matplotlib_tar_archive "matplotlib-${matplotlib_version}.tar.gz")
+  ##________________________________________________________
+  ## Customize setup.py script
 
-  find_file (have_matplotlib_tgz ${matplotlib_tar_archive} ${MATPLOTLIB_SOURCE_DIR})
-  find_file (have_setupext_py setupext.py.in ${MATPLOTLIB_SOURCE_DIR})
-
-  ## Build the project
-
-  if (have_matplotlib_tgz)
-    ExternalProject_Add (matplotlib
-      PREFIX ${MATPLOTLIB_BINARY_DIR}
-      DOWNLOAD_DIR ${MATPLOTLIB_BINARY_DIR}/download
-      SOURCE_DIR ${MATPLOTLIB_BINARY_DIR}/source
-      URL ${have_matplotlib_tgz}
-      URL_MD5 952e2c992e4a762b8538171f51c9140a
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/source/setup.py --help
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/source/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${MATPLOTLIB_BINARY_DIR}/source/setup.py install --prefix=  --home=${LUS_INSTALL_PREFIX}
-      )
-  else (have_matplotlib_tgz)
-    status (WARNING "[Matplotlib] Unable to build project - no sources found!")
-  endif (have_matplotlib_tgz)
-
-  ## Patch the setup script to check for external packages
-
-  if (have_setupext_py)
-    ## create patched version of the configuration script
-    configure_file (${have_setupext_py} ${MATPLOTLIB_SOURCE_DIR}/setupext.py)
-    ## patch the original script provided by Matplotlib
-    ExternalProject_Add_Step (matplotlib matplotlib_setupext
-      COMMAND mv ${MATPLOTLIB_SOURCE_DIR}/setupext.py setupext.py
-      COMMENT "Replacing original setupext.py ..."
-      DEPENDEES patch
-      DEPENDERS configure
-      WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}
-      )
-  endif (have_setupext_py)
-  
-  ## <-- end build condition ----------------------------------------------------->
-  
-else (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
-  add_custom_target (matplotlib
-    WORKING_DIRECTORY ${MATPLOTLIB_BINARY_DIR}
-    COMMENT "[Matplotlib] Found system-wide installation; skipping rebuild!"
+  configure_file (
+    ${PROJECT_SOURCE_DIR}/setupext.py.in
+    ${PROJECT_BINARY_DIR}/setupext.py
     )
-  message (STATUS "[Matplotlib] Found system-wide installation; skipping rebuild!")
-endif (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
+
+  ##________________________________________________________
+  ## Locate source file to build from
+  
+  find_file (MATPLOTLIB_SOURCE ${MATPLOTLIB_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT MATPLOTLIB_SOURCE AND MATPLOTLIB_URL)
+    set (MATPLOTLIB_SOURCE ${MATPLOTLIB_URL})
+  endif (NOT MATPLOTLIB_SOURCE AND MATPLOTLIB_URL)
+    
+  if (MATPLOTLIB_FROM_REPOS AND MATPLOTLIB_SVN)
+
+    ##______________________________________________________
+    ## Build package off code repository
+    
+    ExternalProject_Add (matplotlib
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${MATPLOTLIB_SVN}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX}
+      )
+  
+  else (MATPLOTLIB_FROM_REPOS AND MATPLOTLIB_SVN)
+
+    ##______________________________________________________
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (matplotlib
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${MATPLOTLIB_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py --help
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py install --prefix=  --home=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (MATPLOTLIB_FROM_REPOS AND MATPLOTLIB_SVN)
+
+  ##________________________________________________________
+  ## Update global configuration settings
+  
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (matplotlib update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of matplotlib ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT MATPLOTLIB_FOUND OR MATPLOTLIB_FORCE_BUILD)
+  
+  add_custom_target (matplotlib
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[matplotlib] Found system-wide installation; skipping rebuild!"
+    )
+  
+endif (NOT MATPLOTLIB_FOUND OR MATPLOTLIB_FORCE_BUILD)
