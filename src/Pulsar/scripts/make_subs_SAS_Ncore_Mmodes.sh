@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.05
+VERSION=3.06
  
 #####################################################################
 # Usage #
