@@ -233,6 +233,11 @@ targeted platforms.
 </table>
 </center>
 
+<p>
+
+<u>Note:</u> Most of the commands below will require system
+administrator permissions.
+
 <ul>
   <li><strong>Debian GNU Linux 6.x / Ubuntu Linux 10.04 LTS / Ubuntu Linux 11.10</strong>
   <pre class="code">
@@ -262,15 +267,15 @@ targeted platforms.
   yum install gsl-devel plplot-devel armadillo-devel hdf5-devel cfitsio-devel
   yum install swig numpy pyfits ipython
   </pre>
-  <li><strong>OpenSuSE 11.4</strong>
+  <li><strong>OpenSuSE 11.4 / OpenSuSE 12.1</strong>
   <pre class="code">
-  yast2 --install cmake git-svn subversion bison flex
+  yast2 --install cmake git-svn subversion bison flex doxygen
   yast2 --install blas lapack boost-devel libcfitsio-devel gsl-devel libcppunit-devel
   yast2 --install python-devel python-numpy-devel ipython
   </pre>
   If you'd rather work from the terminal only:
   <pre class="code">
-  zypper install cmake git-svn subversion bison flex
+  zypper install cmake git-svn subversion bison flex doxygen
   zypper install blas lapack boost-devel libcfitsio-devel gsl-devel libcppunit-devel
   zypper install python-devel python-numpy-devel ipython
   </pre>
