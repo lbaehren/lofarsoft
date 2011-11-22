@@ -1,72 +1,47 @@
 
-## ------------------------------------------------------------------------------
-#
-#  CMake wrapper around the GNU Autotools-based configure/build of the NUMPY
-#  library.
-#
-## ------------------------------------------------------------------------------
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
 
-## Name of the project
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (NUMPY)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.8)
-
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
-
-option (NUMPY_FORCE_BUILD       "Force rebuild and local installation"      NO  )
-option (NUMPY_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  )
-option (NUMPY_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
-
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${NUMPY_SOURCE_DIR}
-  ${NUMPY_SOURCE_DIR}/..
-  ${NUMPY_SOURCE_DIR}/../..
-  ${NUMPY_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Numpy] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
-## System inspection
-
-if (NOT NUMPY_VERBOSE_CONFIGURE)
-  set (LAPACK_FIND_QUIETLY  YES )
-  set (NUMPY_FIND_QUIETLY   YES )
-  set (PYTHON_FIND_QUIETLY  YES )
-endif (NOT NUMPY_VERBOSE_CONFIGURE)
-
-include (FindNumPy)
-include (FindLAPACK)
-
-if (NOT HAVE_PYTHON)
-  message (WARNING "[NumPy] Unable to build project - missing Python!")
-endif (NOT HAVE_PYTHON)
-
-if (NOT LAPACK_BLAS_LIBRARY)
-  message (WARNING "[NumPy] Unable to build project - missing BLAS library!")
-endif (NOT LAPACK_BLAS_LIBRARY)
-
-if (NOT LAPACK_LAPACK_LIBRARY)
-  message (WARNING "[NumPy] Unable to build project - missing LAPACK library!")
-endif (NOT LAPACK_LAPACK_LIBRARY)
-
-## Check version number of NumPy installation
+##__________________________________________________________
+##  Package information
 
 set (NUMPY_REQUIRED_MAJOR_VERSION   1)
 set (NUMPY_REQUIRED_MINOR_VERSION   1)
+
+set (NUMPY_VERSION        "1.6.1" )
+set (NUMPY_SOURCE_ARCHIVE "numpy-${NUMPY_VERSION}.tar.gz" )
+set (NUMPY_URL            "http://downloads.sourceforge.net/project/numpy/NumPy/${NUMPY_VERSION}/${NUMPY_SOURCE_ARCHIVE}" )
+set (NUMPY_GIT            "git://github.com/numpy/numpy.git" )
+
+##__________________________________________________________
+## Package configuration/build options
+
+option (NUMPY_FORCE_BUILD  "Force build and installation of package?" NO )
+option (NUMPY_FROM_REPOS   "Install package from repository?"         NO )
+
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
+
+if (NOT NUMPY_FOUND)
+  find_package (NumPy)
+endif (NOT NUMPY_FOUND)
+
+##__________________________________________________________
+## Check version of NumPy
 
 if (NUMPY_API_VERSION)
   if (NUMPY_MAJOR_VERSION LESS ${NUMPY_REQUIRED_MAJOR_VERSION})
@@ -81,63 +56,94 @@ if (NUMPY_API_VERSION)
   endif (NUMPY_MAJOR_VERSION LESS ${NUMPY_REQUIRED_MAJOR_VERSION})
 endif (NUMPY_API_VERSION)
 
-## <-- begin build condition --------------------------------------------------->
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-if (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
+if (NUMPY_FROM_REPOS)
+  set (NUMPY_FORCE_BUILD TRUE)
+endif (NUMPY_FROM_REPOS)
+
+if (NOT NUMPY_FOUND OR NUMPY_FORCE_BUILD)
   
-  set (NUMPY_VERSION     "1.3.0")
-  set (NUMPY_DIRECTORY   "numpy-${NUMPY_VERSION}")
-  set (NUMPY_TAR_ARCHIVE "${NUMPY_DIRECTORY}.tar.gz")
-  
-  ## create "site.cfg" used later on
+  ##________________________________________________________
+  ## Create "site.cfg" used later on
 
   if (PYTHON_LIBRARIES)
     get_filename_component (python_libdir ${PYTHON_LIBRARIES} PATH)
   endif (PYTHON_LIBRARIES)
   
   configure_file (
-    ${NUMPY_SOURCE_DIR}/site.cfg
-    ${NUMPY_BINARY_DIR}/site.cfg
+    ${PROJECT_SOURCE_DIR}/site.cfg.in
+    ${PROJECT_BINARY_DIR}/site.cfg
     )
 
-  ##__________________________________________________________________
-  ## Build the project
+  ##________________________________________________________
+  ## Locate source file to build from
+  
+  find_file (NUMPY_SOURCE ${NUMPY_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT NUMPY_SOURCE AND NUMPY_URL)
+    set (NUMPY_SOURCE ${NUMPY_URL})
+  endif (NOT NUMPY_SOURCE AND NUMPY_URL)
+    
+  if (NUMPY_FROM_REPOS AND NUMPY_GIT)
 
-  find_file (have_numpy_tgz ${NUMPY_TAR_ARCHIVE} ${NUMPY_SOURCE_DIR})
-
-  if (have_numpy_tgz)
+    ##______________________________________________________
+    ## Build package off code repository
+    
     ExternalProject_Add (numpy
-      PREFIX ${NUMPY_BINARY_DIR}
-      DOWNLOAD_DIR ${NUMPY_BINARY_DIR}/download
-      SOURCE_DIR ${NUMPY_BINARY_DIR}/source
-      URL ${have_numpy_tgz}
-      URL_MD5 3f7773ff0971a5ebb8591536d8ec7bd6
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      GIT_REPOSITORY ${NUMPY_GIT}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND cp ${NUMPY_BINARY_DIR}/site.cfg ${NUMPY_BINARY_DIR}/source
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${NUMPY_BINARY_DIR}/source/setup.py install --prefix= --home=${LUS_INSTALL_PREFIX}
+      CONFIGURE_COMMAND cp ${PROJECT_BINARY_DIR}/site.cfg ${PROJECT_BINARY_DIR}/source
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py install --prefix= --home=${CMAKE_INSTALL_PREFIX}
       )
-  else (have_numpy_tgz)
-    message (WARNING "[NumPy] Unable to build project - missing source!")
-  endif (have_numpy_tgz)
+  
+  else (NUMPY_FROM_REPOS AND NUMPY_GIT)
 
-  ##__________________________________________________________________
-  ## Configuration summary
+    ##______________________________________________________
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (numpy
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${NUMPY_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND cp ${PROJECT_BINARY_DIR}/site.cfg ${NUMPY_BINARY_DIR}/source
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py build
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py install --prefix= --home=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (NUMPY_FROM_REPOS AND NUMPY_GIT)
+
+  ##________________________________________________________
+  ## Update global configuration settings
   
-  if (NUMPY_VERBOSE_CONFIGURE)
-    message ("-------------------------------------------------------------")
-    message (STATUS "[NumPy] Summary of configuration status.")
-    message (STATUS "BLAS_LIBRARIES   = ${BLAS_LIBRARIES}")
-    message (STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
-    message (STATUS "PYTHON_VERSION   = ${PYTHON_VERSION}")
-    message ("-------------------------------------------------------------")
-  endif (NUMPY_VERBOSE_CONFIGURE)
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (numpy update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of numpy ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
   
-  ## <-- end build condition ----------------------------------------------------->
+else (NOT NUMPY_FOUND OR NUMPY_FORCE_BUILD)
   
-else (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
   add_custom_target (numpy
-    WORKING_DIRECTORY ${NUMPY_BINARY_DIR}
-    COMMENT "[NumPy] Found system-wide installation; skipping rebuild!"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "[numpy] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_NUMPY OR NUMPY_FORCE_BUILD)
+  
+endif (NOT NUMPY_FOUND OR NUMPY_FORCE_BUILD)
