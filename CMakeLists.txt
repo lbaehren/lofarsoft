@@ -68,11 +68,11 @@ endif (LUS_ROOT)
 ##
 ## ==============================================================================
 
-option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO )
-option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      NO )
-option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO )
-option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO )
-option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO )
+option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO  )
+option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      YES )
+option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
+option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
+option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO  )
 
 ## Options affecting the build of individual packages
 
@@ -161,9 +161,12 @@ foreach (varSystemPackage
     HDF5
     IPython
     ITPP
+    LAPACK
+    NumPy
     OpenGL
     OpenMP
     PIL
+    PLplot
     Perl
     Python
     ROOT
@@ -273,6 +276,12 @@ add_subdirectory (devel_common)
 add_subdirectory (doc)
 add_subdirectory (external)
 add_subdirectory (src)
+
+## Enable testing
+
+if (LUS_ENABLE_TESTING)
+  include (LUS_TestTargets)
+endif (LUS_ENABLE_TESTING)
 
 ## ==============================================================================
 ##
