@@ -7,6 +7,14 @@ if (NOT LUS_TESTTARGETS_CMAKE)
 
   ## ============================================================================
   ##
+  ##  Options
+  ##
+  ## ============================================================================
+
+  option (LUS_TEST_EXTERNAL_PACKAGES "Test building external packages?" YES)
+
+  ## ============================================================================
+  ##
   ##  Definition of macros
   ##
   ## ============================================================================
@@ -23,23 +31,52 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   ##
   ## ============================================================================
 
-  ## External packages
+  ##__________________________________________________________________
+  ##                                                 External packages
 
-  add_test (test_build_bison    make bison    )
-  add_test (test_build_flex     make flex     )
-  add_test (test_build_gsl      make gsl      )
-  add_test (test_build_hdf5     make hdf5     )
-  add_test (test_build_itpp     make itpp     )
-  add_test (test_build_numpy    make numpy    )
-  add_test (test_build_pil      make pil      )
-  add_test (test_build_swig     make swig     )
+  foreach (varExternalPackage
+      armadillo
+      bison
+      blitz
+      boost
+      casacore
+      cfitsio
+      cppunit
+      fftw3
+      flex
+      gsl
+      hdf5
+      ipython
+      itpp
+      matplotlib
+      numpy
+      pil
+      plplot
+      pyfits
+      sip
+      sphinx
+      swig
+      tmf
+      wcslib
+      wcstools
+      )
 
-  ## LUS packages
+    ## Define test target
+    add_test (test_build_${varExternalPackage} make ${varExternalPackage})
 
-  add_test (test_build_dal      make dal      )
-  add_test (test_build_contrib  make contrib  )
-  add_test (test_build_rm       make rm       )
-  add_test (test_build_anaamika make anaamika )
-  add_test (test_build_pulsar   make pulsar   )
+  endforeach (varExternalPackage)
+
+  ##__________________________________________________________________
+  ##                                                      LUS packages
+
+  foreach (varInternalPackage
+      dal
+      contrib
+      rm
+      anaamika
+      pulsar
+      )
+    add_test (test_build_${varInternalPackage} make ${varInternalPackage})
+  endforeach (varInternalPackage)
 
 endif (NOT LUS_TESTTARGETS_CMAKE)
