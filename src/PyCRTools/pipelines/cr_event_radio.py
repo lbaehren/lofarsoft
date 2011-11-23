@@ -883,6 +883,13 @@ for full_filename in files:
             pulse=pulses
         pulse_npeaks=pulses.npeaks
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
+        if pulse_npeaks==0:
+            print "************************************************************************"
+            print "********          ATTENTION: No pulses found          ******************"
+            print "************************************************************************"
+            print "ERROR: LocatePulseTrain: No pulses found!"
+            finish_file(laststatus="NO PULSE")
+            continue
 
 # Finish gain calibration - also apply gain calibration on time series data in 'pulse' result workspace.
         timeseries_calibrated_data_gainnormalisation = timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
@@ -918,14 +925,7 @@ for full_filename in files:
             npeaks_found=pulse_npeaks
             ))
 
-        if pulse_npeaks==0:
-            print "************************************************************************"
-            print "********          ATTENTION: No pulses found          ******************"
-            print "************************************************************************"
-            print "ERROR: LocatePulseTrain: No pulses found!"
-            finish_file(laststatus="NO PULSE")
-            continue
-
+        
         #Store the small version of the calibrated timeseries, e.g. for the imager
         print "---> Saving ",calibrated_timeseries_cut_file
         pulse.timeseries_data_cut.write(calibrated_timeseries_cut_file)
