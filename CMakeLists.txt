@@ -272,7 +272,6 @@ add_custom_target (clean-src
 
 ## Packages handled directly through CMake
 
-add_subdirectory (devel_common)
 add_subdirectory (doc)
 add_subdirectory (external)
 add_subdirectory (src)

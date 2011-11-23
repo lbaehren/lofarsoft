@@ -15,10 +15,20 @@ if (NOT LUS_TESTTARGETS_CMAKE)
 
   ## ============================================================================
   ##
-  ##  Definition of macros
+  ##  Definition of macros & custom targets
   ##
   ## ============================================================================
-
+  
+  add_custom_target (DashboardBuild
+    COMMAND make ExperimentalStart
+    COMMAND make ExperimentalConfigure
+    COMMAND make ExperimentalTest
+    COMMAND make ExperimentalSubmit
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    COMMENT "Starting test builds to be submitted to Dashboard ..."
+    SOURCES ${PROJECT_SOURCE_DIR}/CTestConfig.cmake
+    )
+  
   ## ============================================================================
   ##
   ##  Test targets for find modules
