@@ -1,76 +1,120 @@
 
-## Name of the project
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
+
+## ==============================================================================
+##
+##  CMake project settings
+##
+## ==============================================================================
+
+##__________________________________________________________
+## Name of the project handled by CMake
+
 project (NUMERIC)
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+##__________________________________________________________
+##  Package information
 
-## -----------------------------------------------------------------------------
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
+set (NUMERIC_VERSION        "24.2" )
+set (NUMERIC_SOURCE_ARCHIVE "Numeric-${NUMERIC_VERSION}.tar.gz" )
+set (NUMERIC_URL            "http://downloads.sourceforge.net/project/numpy/Old%20Numeric/${NUMERIC_VERSION}/${NUMERIC_SOURCE_ARCHIVE}" )
+set (NUMERIC_SVN            "" )
 
-option (NUMERIC_FORCE_BUILD       "Force rebuild and local installation?"      NO  )
-option (NUMERIC_CMAKE_BUILD       "Use CMake to configure and build NUMERIC?"  YES )
-option (NUMERIC_VERBOSE_CONFIGURE "Be verbose during configuration?"           NO  )
-option (NUMERIC_VERBOSE_BUILD     "Be verbose during build process?"           NO  )
+##__________________________________________________________
+## Package configuration/build options
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+option (NUMERIC_FORCE_BUILD  "Force build and installation of package?" NO )
+option (NUMERIC_FROM_REPOS   "Install package from repository?"         NO )
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${NUMERIC_SOURCE_DIR}
-  ${NUMERIC_SOURCE_DIR}/..
-  ${NUMERIC_SOURCE_DIR}/../..
-  ${NUMERIC_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+## ==============================================================================
+##
+##  System inspection
+##
+## ==============================================================================
 
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+if (NOT PYTHON_EXECUTABLE)
+  find_package (Python)
+endif (NOT PYTHON_EXECUTABLE)
 
-## ------------------------------------------------------------------------------
-## Check if the program/package/library is already available
+if (NOT NUMERIC_FOUND)
+  find_package (Numeric)
+endif (NOT NUMERIC_FOUND)
 
-if (NOT NUMERIC_VERBOSE_CONFIGURE)
-  set (NUMERIC_FIND_QUIETLY YES )
-  set (PYTHON_FIND_QUIETLY YES )
-endif (NOT NUMERIC_VERBOSE_CONFIGURE)
+## ==============================================================================
+##
+##  Build instructions
+##
+## ==============================================================================
 
-include (FindNumeric)
+if (NUMERIC_FROM_REPOS)
+  set (NUMERIC_FORCE_BUILD TRUE)
+endif (NUMERIC_FROM_REPOS)
 
-## <-- begin build condition --------------------------------------------------->
-
-if (NOT HAVE_NUMERIC OR NUMERIC_FORCE_BUILD)
+if (NOT NUMERIC_FOUND OR NUMERIC_FORCE_BUILD)
   
-  include (ExternalProject)
+  ##________________________________________________________
+  ## Locate source file to build from
+  
+  find_file (NUMERIC_SOURCE ${NUMERIC_SOURCE_ARCHIVE}
+    PATHS ${PROJECT_SOURCE_DIR}
+    )
+  
+  if (NOT NUMERIC_SOURCE AND NUMERIC_URL)
+    set (NUMERIC_SOURCE ${NUMERIC_URL})
+  endif (NOT NUMERIC_SOURCE AND NUMERIC_URL)
+    
+  if (NUMERIC_FROM_REPOS AND NUMERIC_SVN)
 
-  find_file (have_numeric_tgz Numeric-24.2.tar.gz ${NUMERIC_SOURCE_DIR})
-
-  if (have_numeric_tgz)
+    ##______________________________________________________
+    ## Build package off code repository
+    
     ExternalProject_Add (numeric
-      PREFIX ${NUMERIC_BINARY_DIR}
-      DOWNLOAD_DIR ${NUMERIC_BINARY_DIR}
-      SOURCE_DIR ${NUMERIC_BINARY_DIR}
-      URL ${have_numeric_tgz}
-      URL_MD5 2ae672656e06716a149acb048cca3093
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      SVN_REPOSITORY ${NUMERIC_SVN}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${NUMERIC_BINARY_DIR}/setup.py build
-      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${NUMERIC_BINARY_DIR}/setup.py install --home=${LUS_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py build
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py install --home=${CMAKE_INSTALL_PREFIX}
       )
-  else (have_numeric_tgz)
-    status (WARNING "[Numeric] Unable to build project - no sources found!")
-  endif (have_numeric_tgz)
   
-  ## <-- end build condition ----------------------------------------------------->
+  else (NUMERIC_FROM_REPOS AND NUMERIC_SVN)
+
+    ##______________________________________________________
+    ## Build package off tar-archive
+    
+    ExternalProject_Add (numeric
+      PREFIX ${PROJECT_BINARY_DIR}
+      DOWNLOAD_DIR download
+      SOURCE_DIR source
+      URL ${NUMERIC_SOURCE}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py build
+      BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/source/setup.py install --home=${CMAKE_INSTALL_PREFIX}
+      )
+    
+  endif (NUMERIC_FROM_REPOS AND NUMERIC_SVN)
+
+  ##________________________________________________________
+  ## Update global configuration settings
   
-else (NOT HAVE_NUMERIC OR NUMERIC_FORCE_BUILD)
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (numeric update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of Numeric ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
+else (NOT NUMERIC_FOUND OR NUMERIC_FORCE_BUILD)
+  
   add_custom_target (numeric
-    WORKING_DIRECTORY ${NUMERIC_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "[Numeric] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_NUMERIC OR NUMERIC_FORCE_BUILD)
+  
+endif (NOT NUMERIC_FOUND OR NUMERIC_FORCE_BUILD)
