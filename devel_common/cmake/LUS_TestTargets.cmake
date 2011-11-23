@@ -23,12 +23,15 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   ## Custom target to run the collection of tests and submit the
   ## results to the Dashboard server.
 
+  file (WRITE ${PROJECT_BINARY_DIR}/testbuild
+"${CMAKE_CTEST_COMMAND} -D ExperimentalStart
+${CMAKE_CTEST_COMMAND} -D ExperimentalConfigure
+${CMAKE_CTEST_COMMAND} -D ExperimentalTest
+${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
+    )
+  
   add_custom_target (DashboardBuild
-    COMMAND make ExperimentalStart
-    COMMAND make ExperimentalConfigure
-    COMMAND make ExperimentalSubmit
-    COMMAND make ExperimentalTest
-    COMMAND make ExperimentalSubmit
+    COMMAND sh testbuild
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Starting test builds to be submitted to Dashboard ..."
     SOURCES ${PROJECT_SOURCE_DIR}/CTestConfig.cmake
