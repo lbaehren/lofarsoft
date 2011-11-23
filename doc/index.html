@@ -20,6 +20,7 @@
   <li><a href="#Quick start">Quick start</a></li>
   <li><a href="#code tree">Organization of the code</a></li>
   <li><a href="#External dependencies">External dependencies</a></li>
+  <li><a href="#Testing">Testing</a></li>
 </ul>
 
 Online resources:
@@ -229,7 +230,22 @@ targeted platforms.
     <td>bison</td>
     <td></td>
   </tr>
-
+  <tr>
+    <td class="indexvalue">BLAS</td>
+    <td>libblas-dev</td>
+    <td>libblas-dev</td>
+    <td>blas-devel</td>
+    <td>blas</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td class="indexvalue">LAPACK</td>
+    <td>liblapack-dev</td>
+    <td>liblapack-dev</td>
+    <td>lapack-devel</td>
+    <td>lapack</td>
+    <td></td>
+  </tr>
 </table>
 </center>
 
@@ -283,7 +299,27 @@ administrator permissions.
 
 <div class="top">[<a href="#top">top</a>]</div>
 
+<!-- New section --------------------------------------------------------------->
+
+<div class='section'><a name="Testing">Testing</a></div>
+
+<p align="justify">Given the number of targeted platforms and external
+dependencies (see corresponding <a href="#External dependencies">section above</a>)
+we are aiming to provide a framework through which it is possible to
+test the behaviour of the software collection. While each of the
+individual packages might bring along its own collection of tests, we
+also need means to check the integration within the framework of the LUS.</p>
+
+<pre class="code">
+make DashboardBuild
+</pre>
+
+The results of the test will be submitted to the ASTRON Dashboard
+server and displayed on the <a href="http://svn.astron.nl/CDash/index.php?project=LUSCommon">LUSCommon</a>
+page.
+
+<div class="top">[<a href="#top">top</a>]</div>
+
 </body>
 
 </html>
-
