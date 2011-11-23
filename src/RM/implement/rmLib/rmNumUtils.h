@@ -11,7 +11,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_eigen.h>
-#include <omp.h>
+//#include <omp.h>
 
 #define DEBUG 1
 #define uint unsigned int
