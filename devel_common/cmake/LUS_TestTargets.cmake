@@ -79,16 +79,18 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
       wcstools
       )
 
-    ## Define test target
-    add_test (test_build_${varExternalPackage} make ${varExternalPackage})
-
+    ## Set up a test in case the corresponding target does exist
+    if (TARGET ${varExternalPackage})
+      add_test (test_build_${varExternalPackage} make ${varExternalPackage})
+    endif (TARGET ${varExternalPackage})
+    
   endforeach (varExternalPackage)
-
+  
   ##__________________________________________________________________
   ##                                                      LUS packages
-
+  
   ## Test building the packages from within the LUS framework
-
+  
   add_test (test_build_anaamika   make anaamika  )
   add_test (test_build_dal        make dal       )
   add_test (test_build_contrib    make contrib   )
