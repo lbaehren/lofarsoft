@@ -19,6 +19,10 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   ##
   ## ============================================================================
   
+  ##__________________________________________________________________
+  ## Custom target to run the collection of tests and submit the
+  ## results to the Dashboard server.
+
   add_custom_target (DashboardBuild
     COMMAND make ExperimentalStart
     COMMAND make ExperimentalConfigure
@@ -80,14 +84,19 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   ##__________________________________________________________________
   ##                                                      LUS packages
 
-  foreach (varInternalPackage
-      dal
-      contrib
-      rm
-      anaamika
-      pulsar
-      )
-    add_test (test_build_${varInternalPackage} make ${varInternalPackage})
-  endforeach (varInternalPackage)
+  ## Test building the packages from within the LUS framework
+
+  add_test (test_build_anaamika   make anaamika )
+  add_test (test_build_dal        make dal      )
+  add_test (test_build_contrib    make contrib  )
+  add_test (test_build_rm         make rm       )
+  add_test (test_build_pulsar     make pulsar   )
+
+  ## Run the tests defined as part of the individual packages
+
+  add_test (test_tests_rm
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/src/RM/src/rm-build
+    COMMAND make Experimental
+    )
 
 endif (NOT LUS_TESTTARGETS_CMAKE)
