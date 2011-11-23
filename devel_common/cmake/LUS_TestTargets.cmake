@@ -48,55 +48,59 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
   ##  Test targets for building packages
   ##
   ## ============================================================================
-
-  ##__________________________________________________________________
-  ##                                                 External packages
-
-  foreach (varExternalPackage
-      armadillo
-      bison
-      blitz
-      boost
-      casacore
-      cfitsio
-      cppunit
-      fftw3
-      flex
-      gsl
-      hdf5
-      ipython
-      itpp
-      matplotlib
-      numpy
-      pil
-      plplot
-      pyfits
-      sip
-      sphinx
-      swig
-      tmf
-      wcslib
-      wcstools
-      )
-
-    ## Set up a test in case the corresponding target does exist
-    if (TARGET ${varExternalPackage})
-      add_test (test_build_${varExternalPackage} make ${varExternalPackage})
-    endif (TARGET ${varExternalPackage})
+  
+  if (LUS_TEST_EXTERNAL_PACKAGES)
     
-  endforeach (varExternalPackage)
+    ##________________________________________________________________
+    ##                                               External packages
+    
+    foreach (varExternalPackage
+	armadillo
+	bison
+	blitz
+	boost
+	casacore
+	cfitsio
+	cppunit
+	fftw3
+	flex
+	gsl
+	hdf5
+	ipython
+	itpp
+	matplotlib
+	numpy
+	pil
+	plplot
+	pyfits
+	sip
+	sphinx
+	swig
+	tmf
+	wcslib
+	wcstools
+	)
+      
+      ## Set up a test in case the corresponding target does exist
+      if (TARGET ${varExternalPackage})
+	add_test (test_build_${varExternalPackage} make ${varExternalPackage})
+      endif (TARGET ${varExternalPackage})
+      
+    endforeach (varExternalPackage)
+    
+  endif (LUS_TEST_EXTERNAL_PACKAGES)
   
   ##__________________________________________________________________
   ##                                                      LUS packages
   
   ## Test building the packages from within the LUS framework
   
-  add_test (test_build_anaamika   make anaamika  )
-  add_test (test_build_dal        make dal       )
-  add_test (test_build_contrib    make contrib   )
-  add_test (test_build_rm         make rm        )
-  add_test (test_build_pulsar     make pulsar    )
-  add_test (test_build_pycrtools  make pycrtools )
+  add_test (test_build_anaamika   ${CMAKE_BUILD_TOOL} anaamika  )
+  add_test (test_build_dal        ${CMAKE_BUILD_TOOL} dal       )
+  add_test (test_build_contrib    ${CMAKE_BUILD_TOOL} contrib   )
+  add_test (test_build_rm         ${CMAKE_BUILD_TOOL} rm        )
+  add_test (test_build_pulsar     ${CMAKE_BUILD_TOOL} pulsar    )
+  add_test (test_build_pycrtools  ${CMAKE_BUILD_TOOL} pycrtools )
 
   ## Run the tests defined as part of the individual packages
   
@@ -104,7 +108,7 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
     add_test (
       NAME test_tests_anaamika
       WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
-      COMMAND make Experimental
+      COMMAND ${CMAKE_BUILD_TOOL} Experimental
       )
   endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
   
@@ -112,7 +116,7 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
     add_test (
       NAME test_tests_rm
       WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
-      COMMAND make Experimental
+      COMMAND ${CMAKE_BUILD_TOOL} Experimental
       )
   endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
   
