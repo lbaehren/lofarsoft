@@ -228,27 +228,31 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   ##  Configuration summary
   ##
   ## ==============================================================================
-
-  message (STATUS "+------------------------------------------------------------+" )
-  message (STATUS "| [casacore] Summary of configuration settings               |" )
-  message (STATUS "+------------------------------------------------------------+" )
-  message (STATUS " casacore package description:"                             )
-  message (STATUS " .. Version                   = ${CASACORE_VERSION}"        )
-  message (STATUS " .. Source archive            = ${CASACORE_SOURCE_ARCHIVE}" )
-  message (STATUS " .. Build  from SVN HEAD      = ${CASACORE_FROM_REPOS_HEAD}")
-  message (STATUS " .. SVN revision number       = ${CASACORE_SVN_REVISION}"   )
-  message (STATUS " PROJECT_SOURCE_DIR           = ${PROJECT_SOURCE_DIR}"      )
-  message (STATUS " CMAKE_INSTALL_PREFIX         = ${CMAKE_INSTALL_PREFIX}"    )
-  message (STATUS " Enable FFTW3 library support = ${CASACORE_WITH_FFTW3}"     )
-  message (STATUS " Enable HDF5 library support  = ${CASACORE_WITH_HDF5}"      )
-  message (STATUS " Build test programs          = ${CASACORE_BUILD_TESTING}"  )
-  message (STATUS " Found CFITSIO library        = ${CFITSIO_FOUND}"           )
-  message (STATUS " Found FFTW3 library          = ${FFTW3_FOUND}"             )
-  message (STATUS " Found HDF5 library           = ${HDF5_FOUND}"              )
-  message (STATUS " Found LAPACK library         = ${LAPACK_FOUND}"            )
-  message (STATUS " Found MPI library            = ${MPI_FOUND}"               )
-  message (STATUS " Found WCSLIB library         = ${WCSLIB_FOUND}"            )
-  message (STATUS "+------------------------------------------------------------+" )
+  
+  if (CASACORE_VERBOSE_CONFIGURE)
+    
+    message (STATUS "+------------------------------------------------------------+" )
+    message (STATUS "| [casacore] Summary of configuration settings               |" )
+    message (STATUS "+------------------------------------------------------------+" )
+    message (STATUS " casacore package description:"                             )
+    message (STATUS " .. Version                   = ${CASACORE_VERSION}"        )
+    message (STATUS " .. Source archive            = ${CASACORE_SOURCE_ARCHIVE}" )
+    message (STATUS " .. Build  from SVN HEAD      = ${CASACORE_FROM_REPOS_HEAD}")
+    message (STATUS " .. SVN revision number       = ${CASACORE_SVN_REVISION}"   )
+    message (STATUS " PROJECT_SOURCE_DIR           = ${PROJECT_SOURCE_DIR}"      )
+    message (STATUS " CMAKE_INSTALL_PREFIX         = ${CMAKE_INSTALL_PREFIX}"    )
+    message (STATUS " Enable FFTW3 library support = ${CASACORE_WITH_FFTW3}"     )
+    message (STATUS " Enable HDF5 library support  = ${CASACORE_WITH_HDF5}"      )
+    message (STATUS " Build test programs          = ${CASACORE_BUILD_TESTING}"  )
+    message (STATUS " Found CFITSIO library        = ${CFITSIO_FOUND}"           )
+    message (STATUS " Found FFTW3 library          = ${FFTW3_FOUND}"             )
+    message (STATUS " Found HDF5 library           = ${HDF5_FOUND}"              )
+    message (STATUS " Found LAPACK library         = ${LAPACK_FOUND}"            )
+    message (STATUS " Found MPI library            = ${MPI_FOUND}"               )
+    message (STATUS " Found WCSLIB library         = ${WCSLIB_FOUND}"            )
+    message (STATUS "+------------------------------------------------------------+" )
+    
+  endif (CASACORE_VERBOSE_CONFIGURE)
   
 else (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
   
@@ -258,4 +262,3 @@ else (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
     )
   
 endif (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
-
