@@ -22,6 +22,7 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   add_custom_target (DashboardBuild
     COMMAND make ExperimentalStart
     COMMAND make ExperimentalConfigure
+    COMMAND make ExperimentalSubmit
     COMMAND make ExperimentalTest
     COMMAND make ExperimentalSubmit
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
