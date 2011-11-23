@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -52,13 +50,13 @@ if (NOT HAVE_PYTHON)
   set (PYTHON_PYTHONHOME $ENV{PYTHONHOME})
   
   if (PYTHON_PYTHONHOME)
-    message (STATUS "Found environment variable PYTHONHOME.")
+    message (STATUS "[FindPython] Found environment variable PYTHONHOME.")
   endif (PYTHON_PYTHONHOME)
   
   ## ----------------------------------------------------------------------------
   ## Default Python versions
   
-  set (python_version_list      2.7 2.6 2.5 2.4          )
+  set (python_version_list      2.7 2.6 2.5 2.4      )
   set (python_bin_locations     ${bin_locations}     )
   set (python_include_locations ${include_locations} )
   set (python_lib_locations     ${lib_locations}     )
@@ -76,26 +74,29 @@ if (NOT HAVE_PYTHON)
       OUTPUT_VARIABLE python_default_version
       )
     
-    if (python_default_version MATCHES ".*apple")
-      # Make sure we use the Apple Python if appropriate
-      set (python_bin_locations /usr/bin)
-      set (python_include_locations /usr/include)
-      set (python_lib_locations /usr/lib)
-      if (NOT PYTHON_FIND_QUIETLY)
-	message (STATUS "Setting paths for Apple supplied Python")
-      endif (NOT PYTHON_FIND_QUIETLY)
-    else (python_default_version MATCHES ".*apple")
-      # The headers should be available in the standard MacPorts location
-      list (APPEND python_include_locations
-      	/Library/Frameworks/Python.framework/Versions/Current/Headers/
-	/opt/local/Library/Frameworks/Python.framework/Headers
+    if (python_default_version) 
+      if (python_default_version MATCHES ".*apple")
+	# Make sure we use the Apple Python if appropriate
+	set (python_bin_locations /usr/bin)
+	set (python_include_locations /usr/include)
+	set (python_lib_locations /usr/lib)
+	if (NOT PYTHON_FIND_QUIETLY)
+	  message (STATUS "Setting paths for Apple supplied Python")
+	endif (NOT PYTHON_FIND_QUIETLY)
+      else (python_default_version MATCHES ".*apple")
+	# The headers should be available in the standard MacPorts location
+	list (APPEND python_include_locations
+      	  /Library/Frameworks/Python.framework/Versions/Current/Headers/
+	  /opt/local/Library/Frameworks/Python.framework/Headers
+	  )
+      endif (python_default_version MATCHES ".*apple")
+      
+      string (REGEX REPLACE
+	"python(.)(.).*" "\\1.\\2;"
+	python_version_list ${python_default_version}
 	)
-    endif (python_default_version MATCHES ".*apple")
-    
-    string (REGEX REPLACE
-      "python(.)(.).*" "\\1.\\2;"
-      python_version_list ${python_default_version}
-      )
+      
+    endif (python_default_version)
     
   endif (PYTHON_SELECTOR)
   
@@ -104,7 +105,7 @@ if (NOT HAVE_PYTHON)
   endif (NOT PYTHON_FIND_QUIETLY)
   
   foreach (python_version ${python_version_list})    
-
+    
     if (NOT HAVE_PYTHON)
       
       ## Check for the Python executable
