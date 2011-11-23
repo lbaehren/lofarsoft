@@ -94,8 +94,13 @@ if (NOT LUS_TESTTARGETS_CMAKE)
 
   ## Run the tests defined as part of the individual packages
 
+  add_test (test_tests_anaamika
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
+    COMMAND make Experimental
+    )
+
   add_test (test_tests_rm
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/src/RM/src/rm-build
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
     COMMAND make Experimental
     )
 
