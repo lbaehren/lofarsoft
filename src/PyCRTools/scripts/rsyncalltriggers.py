@@ -7,14 +7,14 @@
 import subprocess
 import os
 
-stationList = ['CS001C', 'CS002C', 'CS003C', 'CS004C', 'CS005C', 'CS006C', 'CS007C', 'CS011C', 'CS017C', 'CS021C']
-topdir = '/Users/acorstanje/triggering/triggers'
-
+stationList = ["CS001","CS002","CS003","CS004","CS005","CS006","CS007","CS011","CS013","CS017","CS021","CS024","CS026","CS028","CS030","CS031","CS101","CS103","CS201","CS301","CS302","CS401","CS501","RS106","RS205","RS208","RS306","RS307","RS406","RS503"]
+#topdir = '/Users/acorstanje/triggering/triggers'
+topdir = '/Volumes/WDdata/triggers'
 for station in stationList:
-    thisDir = os.path.join(topdir, station)  
+    thisDir = os.path.join(topdir, station+'C')  
     if not os.path.exists(thisDir):
         os.mkdir(thisDir)
 #    triggerFilename = date + '_TRIGGER-'+station+'.dat'
     print 'Downloading station %s' % station
-    proc = subprocess.Popen(['rsync', '-avv', station+':/localhome/data/2*_TRIGGER.dat', thisDir])
+    proc = subprocess.Popen(['rsync', '-avv', '--progress', station+'C' + ':/localhome/data/201[123456789]*_TRIGGER.dat', thisDir])
     proc.wait()
