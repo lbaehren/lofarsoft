@@ -93,15 +93,19 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   add_test (test_build_pulsar     make pulsar   )
 
   ## Run the tests defined as part of the individual packages
-
-  add_test (test_tests_anaamika
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
-    COMMAND make Experimental
-    )
-
-  add_test (test_tests_rm
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
-    COMMAND make Experimental
-    )
-
+  
+  if (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
+    add_test (test_tests_anaamika
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
+      COMMAND make Experimental
+      )
+  endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
+  
+  if (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
+    add_test (test_tests_rm
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
+      COMMAND make Experimental
+      )
+  endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
+  
 endif (NOT LUS_TESTTARGETS_CMAKE)
