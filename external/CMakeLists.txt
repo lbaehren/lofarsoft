@@ -25,7 +25,6 @@ set (external_packages
   itpp
   matplotlib
   num_util
-  numeric
   numpy
   scipy
   sphinx
