@@ -86,11 +86,12 @@ if (NOT LUS_TESTTARGETS_CMAKE)
 
   ## Test building the packages from within the LUS framework
 
-  add_test (test_build_anaamika   make anaamika )
-  add_test (test_build_dal        make dal      )
-  add_test (test_build_contrib    make contrib  )
-  add_test (test_build_rm         make rm       )
-  add_test (test_build_pulsar     make pulsar   )
+  add_test (test_build_anaamika   make anaamika  )
+  add_test (test_build_dal        make dal       )
+  add_test (test_build_contrib    make contrib   )
+  add_test (test_build_rm         make rm        )
+  add_test (test_build_pulsar     make pulsar    )
+  add_test (test_build_pycrtools  make pycrtools )
 
   ## Run the tests defined as part of the individual packages
   
