@@ -6,8 +6,12 @@
 //	Last change:		18-10-2009
 
 /* Standard header files */
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <complex>
 #include <vector>
+#include <stack>
 #include <fstream>
 #include <algorithm>			// for minimum element in vector
 #include <limits>			// limit for S infinite
@@ -16,7 +20,6 @@
 #include "WienerFilter.h"
 
 using namespace std;
-using namespace itpp;
 
 namespace RM {
   
@@ -53,9 +56,27 @@ namespace RM {
     maxiterations=1;				// default value for maximum number of iterations
     rmsthreshold=-1;				// default, don't try to achieve rms threshold
     nu_0=1400000000;				// default value for nu_0=1.4GHz
-    epsilon_0=1e-26;				// epsilon zero (Jy conversion)
+    epsilon_0=1.0;				// epsilon zero (Jy conversion)
+    R_ready=false ;
+    D_ready=false ;
+    WF_ready=false ;
   }
+
+/*! 
+   \brief Procedure to write the signal covariance matrix into a ascii file */
+void wienerfilter::writeSignalMatrix(const string &filename){
+
+  S.write(filename) ;
+}
   
+void wienerfilter::writeNoiseMatrix(const string &filename) {
+  N.write(filename) ;
+}
+
+void wienerfilter::readResponseMatrix(const string &filename){
+
+  R.write(filename) ;
+}
   
   /*!
     \brief Constructor with frequency and Faraday depth dimenions
@@ -105,8 +126,44 @@ namespace RM {
     
     //	cout << "wienerfilter():--frequencies.size() " << frequencies.size() << endl;				// debug
     //	cout << "wienerfilter():--delta_frequencies.size() " << delta_frequencies.size() << endl;	// debug
+    R_ready=false ;
   }
   
+/*! Procedure prepares the Wienerfilter object for a flat prior and no information
+   about the noise. This means, that the resulting Matrix coresponds to the 
+   Marcow- Guass- Regularisation of processing inverse problems. */
+
+void wienerfilter::prepare(vector<double> &freqsC, vector<double> &freqsI, vector<double> &faras, double nu_0, double alpha, double epsilon, int method) {
+  if((method!=1) &&(method !=4) && (!WF_ready)) {
+    setFrequencies(freqsC) ;
+    setFaradayDepths(faras) ;
+    alpha = alpha;
+    nu_0 = nu_0 ;
+    epsilon_0 = epsilon ;
+    if (method ==2) {  // use common Wiener filtering
+      createResponseMatrix(freqsI,epsilon,0 );
+      computeD_NoNoiseCov() ;
+      computeW_noNoise() ;    
+      WF = D*W;
+      WF_ready = true ;
+    }
+    else if (method ==3) {  // use svd
+      createResponseMatrix(freqsI,epsilon,1 );
+      cmat RH = R.H() ;
+//       cout << "RH calculated " << endl ;
+      cmat RhR = RH*R ;
+//       cout << "calculated Rh, calculate Propagator using eingenvalues" << endl ;
+      D = RhR.calcPosEig() ;
+//       cout << "Propagator calculated" << endl ;
+      WF = D*RH ;
+//       cout << "computed reconstruction matrix " << WF.rows() << " " << WF.cols() << endl ;
+      WF_ready = true ;
+    }
+//     R.absOut("R.mat");
+    R_ready = true ;
+
+  }
+}
   
   /*!
     \brief Constructor with frequency and Faraday depth dimenions
@@ -118,20 +175,20 @@ namespace RM {
   \param nfreqs - number of frequency channels in data d
   \param faradays - vector containing Faraday depths to be probed for
 */
-wienerfilter::wienerfilter(int nfreqs, const vector<double> &faradays)
+wienerfilter::wienerfilter(int nfreqs, vector<double> faradays)
 {
-  d.set_size(nfreqs);					// set length of data vector to number of frequencies
+  d.set_size(nfreqs);				// set length of data vector to number of frequencies
   s.set_size(faradays.size());			// set length of signal vector to number of Faraday depths
-  j.set_size(s.size());					// set j to size of s
+  j.set_size(s.size());				// set j to size of s
   maperror.set_size(s.size());			// set size of map error the same as s
   m.set_size(faradays.size());			// set size of m
   faradaydepths=faradays;				// set faradaydepths to the content of the vector faradays provided as parameter
   delta_faradaydepths.resize(faradays.size());	// resize vector containing delta Faraday depth distances
   frequencies.resize(nfreqs);			// set length of vector for frequencies
   delta_frequencies.resize(nfreqs);		// set length of vector for delta frequencies
-  lambdasquareds.resize(nfreqs);		// set size of lambdasquareds vector
-  delta_lambdasquareds.resize(nfreqs);	// set size of delta_lambda_squareds	
-  bandpass.resize(nfreqs);				// bandpass vector for each frequency
+  lambdasquareds.resize(nfreqs);			// set size of lambdasquareds vector
+  delta_lambdasquareds.resize(nfreqs);		// set size of delta_lambda_squareds	
+  bandpass.resize(nfreqs);			// bandpass vector for each frequency
   
   // Set default filenames
   Sfilename="Smatrix.it";				// filename for S matrix file
@@ -140,16 +197,17 @@ wienerfilter::wienerfilter(int nfreqs, const vector<double> &faradays)
   Dfilename="Dmatrix.it";				// filename for D matrix file
   Qfilename="Qmatrix.it";				// filename for Q matrix file
   
-  variance_s=25;						// initialize variance of s
-  lambda_phi=0.5;						// initialize lambda phi coherence length
-  nu_0=1400000000;						// default value for nu_0=1.4GHz
-  epsilon_0=1e-26;						// epsilon zero (Jy conversion)
+  variance_s=25;					// initialize variance of s
+  lambda_phi=0.5;					// initialize lambda phi coherence length
+  nu_0=1400000000;				// default value for nu_0=1.4GHz
+  epsilon_0=1e-26;				// epsilon zero (Jy conversion)
   
-  maxiterations=10;						// default value for maximum number of iterations
-  rmsthreshold=-1;						// default, don't try to achieve rms threshold
+  maxiterations=10;				// default value for maximum number of iterations
+  rmsthreshold=-1;				// default, don't try to achieve rms threshold
   
   for(int i=0; i<nfreqs; i++)			// write default values into bandpass vector
     bandpass[i]=complex<double>(1,1);	// default is 1 both for Q and U
+  R_ready=false ;
 }
 
 
@@ -194,6 +252,7 @@ wienerfilter::wienerfilter(int nfreqs, int nfaradays, std::string &formula)
 	epsilon_0=1e-26;				// epsilon zero (Jy conversion)	
 	maxiterations=10;				// default value for maximum number of iterations
 	rmsthreshold=-1;				// default, don't try to achieve rms threshold
+  R_ready=false ;
 }
 
 
@@ -210,212 +269,92 @@ wienerfilter::~wienerfilter()
 
 
 
-//*****************************************************
-//
-// Wiener filtering high-level calling functions
-//
-//*****************************************************
-/*!
-  \brief Perform Wiener filtering
-  
-  \param noise - noise value (the same for all channels)
-  \param type - type of Signal covariance matrix S ("white"=default, "gaussian", "powerlaw")
-*/
-void wienerfilter::wienerFiltering(double noise, const std::string &type)
-{
-  cout << "1 is called" << endl;
-  createNoiseMatrix(noise);
-  createSMatrix(type);
-  doWienerFiltering();
+complex<double> wienerfilter::integrand(double x,double phi_a, double phi_b,double alpha) {
+  const double csq=89875517873681764.0;
+  complex<double> I(0,1) ;
+  double xsq = x*x ;
+  double wa = 2*csq/xsq*phi_a ;
+  double wb = 2*csq/xsq*phi_b ;
+  complex<double> exa = complex<double>(cos(wa),sin(wa));
+  complex<double> exb = complex<double>(cos(wb),sin(wb));
+  complex<double> res = xsq*pow(x,-alpha)*(exb-exa) ;
+  return res ;
 }
 
+/*! procedure for an adaptive integral evaluation of the function integrand which describes
+    the response of the faraday rotation.
+    \param nu_a lower integration bound 
+    \param nu_b upper intefration bound 
+    \param eps accuracy of the numerical integration 
+    \param phi_a lower bound in Faraday space (analytical integration)
+    \param phi_b upper bound in Faraday space (analytical integration) */
 
-/*!
-  \brief Perform Wiener filtering with "white" Signal covariance matrix assumed
-  
-  \param noise - noise value to be set for all channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param alpha - spectral index (default=-0.7)
-*/
-void wienerfilter::wienerFiltering(double noise, double lambda_phi, double alpha)
-{
-  cout << "2 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setAlpha(alpha);
-  createSMatrix("white");
-
-  doWienerFiltering();
+complex<double> wienerfilter::integral(double nu_a, double nu_b, double eps,double alpha, double phi_a, double phi_b, int level ) {
+  complex<double> erg ;  
+//  double h = nu_b-nu_a ;  
+  double cent = (nu_a+nu_b)/2 ;  
+  double epsilon = 5.9604644775390625e-08 ;  // machine accuracy for double precission
+  complex<double> area_sing = 0.5*( integrand(nu_a,phi_a,phi_b,alpha)+ integrand(nu_b,phi_a,phi_b,alpha)) ;  // the factor h vanished by shortening
+  complex<double> area_doub = 0.25*(integrand(nu_a,phi_a,phi_b,alpha)+2.0*integrand(cent,phi_a,phi_b,alpha)+integrand(nu_b,phi_a,phi_b,alpha)) ;
+//   bool cont = (abs(area_doub-area_sing) < (eps*abs(area_sing)+epsilon)) ;
+  if (abs(area_doub-area_sing) <= (eps)*abs(area_sing)+epsilon) {
+    erg = area_doub ;
+  }
+  else {
+    complex<double> left = integral(nu_a,cent,eps,alpha,phi_a,phi_b,level+1) ;
+    complex<double> right = integral(cent,nu_b,eps,alpha,phi_a,phi_b,level+1) ;
+    erg = left+right;
+  }
+  return erg ;
 }
 
-
-/*!
-  \brief Perform Wiener filtering with Signal covariance specified
-  
-  \param noise - noise value to be set for all channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param alpha - spectral index
-  \param type - type of Signal covariance ("white"=default, "gaussian" or "powerlaw")
-*/
-void wienerfilter::wienerFiltering(double noise, double lambda_phi, double alpha, const std::string &type)
-{
-  cout << "3 is called" << endl;
-  createNoiseMatrix(noise);
-
-  setLambdaPhi(lambda_phi);
-  setAlpha(alpha);
-  createSMatrix(type);
-
-  doWienerFiltering();
+complex<double> null(double nu1,double nu2, double alpha) {
+  //cg6 = ((1 / (3 - alpha) * (nu2 ^ (3 - alpha) - nu1 ^ (3 - alpha)) / (nu2 - nu1)) ^ 1 / (2 - alpha)) ^ (2 - alpha) * (nu2 - nu1);
+  double cg6 = (pow(nu1,(3 - alpha)) - pow(nu2,(3 - alpha))) / (-3 + alpha);
+  complex<double> res(cg6,0) ;
+  return res ;
 }
 
-
-/*!
-  \brief Perform Wiener filtering with "white" signal assumed
-  
-  \param noise - noise value to be set for all channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param epsilon_zero - emissivity at nu_0
-  \param alpha - spectral index (default=-0.7)
-*/
-void wienerfilter::wienerFiltering(double noise, double lambda_phi, double epsilon_zero, double alpha)
-{
-  cout << "4 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setEpsilonZero(epsilon_zero);
-  setAlpha(alpha);  
-
-  
-  createSMatrix("white");
-
-  doWienerFiltering();
+complex<double>low(double phi,double nu1,double nu2, double alpha, double c ) {
+  complex<double> i(0.0,1.0) ;
+  complex<double> cg2 = (-0.1e1 / 0.4e1*i) * nu1 * nu2 * sqrt(nu1 * nu2) * exp((2.0*i) * c*c * phi * (0.3e1 * sqrt(nu1 * nu2) - 0.2e1 * nu1 - 0.2e1 * nu2) / nu1 / nu2 * (pow((nu1 * nu2),(-0.1e1 / 0.2e1)))) * (exp((4.0*i) * c*c * phi / nu1 * (pow((nu1 * nu2),(-0.1e1 / 0.2e1)))) - exp((4.0*i) * c*c * phi / nu2 * (pow((nu1 * nu2),(-0.1e1 / 0.2e1))))) * (pow(((pow(nu2,(3 - alpha)) - pow(nu1,(3 - alpha))) / (alpha * nu1 - alpha * nu2 - 0.3e1 * nu1 + 0.3e1 * nu2)) , (-2 / (-2 + alpha)))) * (pow((pow(((pow(nu2, (3 - alpha)) - pow(nu1 , (3 - alpha))) / (alpha * nu1 - alpha * nu2 - 0.3e1 * nu1 + 0.3e1 * nu2)) , (-1 / (-2 + alpha)))) , (-alpha))) / (c*c) / phi;
+  return cg2 ;
 }
 
-
-/*!
-  \brief Perform Wiener filtering with "white" signal assumed
-  
-  \param noise - noise value to be set for all channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param epsilon_zero - emissivity at nu_0
-  \param alpha - spectral index
-  \param type - type of Signal covariance ("white"=default, "gaussian" or "powerlaw")  
-*/
-void wienerfilter::wienerFiltering(double noise, double lambda_phi, double epsilon_zero, double alpha, const std::string &type)
-{
-  cout << "5 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setEpsilonZero(epsilon_zero);
-  setAlpha(alpha);  
-  setVariance_s(20);
-  createSMatrix(type);
-
-  doWienerFiltering();
+complex<double> hi(double phi,double nu1,double nu2, double alpha, double c )  {
+  complex<double> i(0.0,1.0) ;
+  complex<double> cg1 = (-0.1e1 / 0.4e1*i) * nu1 * nu2 * sqrt(nu1 * nu2) * exp((2.0*i) * c*c * phi * (0.3e1 * sqrt(nu1 * nu2) - 0.2e1 * nu1 - 0.2e1 * nu2) / nu1 / nu2 * (pow((nu1 * nu2),(-0.1e1 / 0.2e1)))) * (exp((4.0*i) * c*c * phi / nu1 * (pow((nu1 * nu2), (-0.1e1 / 0.2e1)))) - exp((4.0*i) * c*c * phi / nu2 * (pow((nu1 * nu2), (-0.1e1 / 0.2e1))))) * (pow(((pow(nu2 , (3 - alpha)) - pow(nu1, (3 - alpha))) / (alpha * nu1 - alpha * nu2 - 0.3e1 * nu1 + 0.3e1 * nu2)) , (-2 / (-2 + alpha)))) * (pow((pow(((pow(nu2, (3 - alpha)) - pow(nu1 , (3 - alpha))) / (alpha * nu1 - alpha * nu2 - 0.3e1 * nu1 + 0.3e1 * nu2)), (-1 / (-2 + alpha)))) , (-alpha))) / (c*c) / phi;
+  return cg1 ;
 }
+/*! procedure for an adaptive integral evaluation of the function integrand which describes
+    the response of the faraday rotation.
+    \param nu_a lower integration bound 
+    \param nu_b upper intefration bound 
+    \param eps accuracy of the numerical integration 
+    \param phi_a lower bound in Faraday space (analytical integration)
+    \param phi_b upper bound in Faraday space (analytical integration) */
 
-
-/*!
-  \brief Perform Wiener filtering
-  
-  \param noise - vector with noise value for each channel
-  \param type - Type of Signal covariance matrix S ("white"=default, "gaussian", "powerlaw")
-*/
-void wienerfilter::wienerFiltering(const vector<double> &noise, const std::string &type)
-{
-  cout << "6 is called" << endl;
-  createNoiseMatrix(noise);
-  createSMatrix(type);
-
-  doWienerFiltering();
-}
-
-
-/*!
-  \brief Perform Wiener filtering
-
-  \param noise - noise vector to be set for each individual channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param alpha - spectral index (default=-0.7)
-*/
-void wienerfilter::wienerFiltering(const vector<double> &noise, double lambda_phi, double alpha)
-{
-  cout << "7 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setAlpha(alpha);
-  createSMatrix("white");  
-
-  doWienerFiltering();
-}
-
-
-/*!
-  \brief Perform Wiener filtering
-
-  \param noise - noise vector to be set for each individual channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param alpha - spectral index (default=-0.7)
-  \param type - type of Signal covariance matrix ("white"=default, "gaussian" or "powerlaw")
-*/
-void wienerfilter::wienerFiltering(const vector<double> &noise, double lambda_phi, double alpha, const std::string &type)
-{
-  cout << "8 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setAlpha(alpha);
-  createSMatrix(type);  
-
-  doWienerFiltering();
-}
-
-
-/*!
-  \brief Perform Wiener filtering
-
-  \param noise - noise vector to be set for all channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param alpha - spectral index (default=-0.7)
-*/
-void wienerfilter::wienerFiltering(const vector<double> &noise, double epsilon_zero, double lambda_phi, double alpha)
-{
-  cout << "9 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setEpsilonZero(epsilon_zero);
-  setAlpha(alpha);
-  createSMatrix("white");
-
-  doWienerFiltering();
-}
-
-
-/*!
-  \brief Perform Wiener filtering
-
-  \param noise - noise value to be set for all channels
-  \param lambda_phi - lambda phi coherence length of signal
-  \param alpha - spectral index
-  \param type - type of Signal covariance matrix ("white"=default, "gaussian" or "powerlaw")
-*/
-void wienerfilter::wienerFiltering(const vector<double> &noise, double epsilon_zero, double lambda_phi, double alpha, const std::string &type)
-{
-  cout << "10 is called" << endl;
-  createNoiseMatrix(noise);
-  setLambdaPhi(lambda_phi);
-  setEpsilonZero(epsilon_zero);
-  setAlpha(alpha);
-  createSMatrix(type);
-
-
-  cout << "variance_s = " << getVariance_s() << endl;
-  cout << "lambda_phi = " << getLambdaPhi() << endl;
-  cout << "epsilon_0 = " << getEpsilonZero() << endl;
-  cout << "alpha = " << getAlpha() << endl;
-
-
-  doWienerFiltering();
+complex<double> wienerfilter::integral_approx(double nu_a, double nu_b, double eps,double alpha, double phi_a, double phi_b, int level ) {
+//  const double csq=89875517873681764.0;		// c^2 constant
+  const double c= 299792458.0 ;
+  complex<double> erg ;  
+//  double h = nu_b-nu_a ;
+  complex<double> unt ;
+  complex<double> ob ;
+  /* the integral in \nu is different for phi == 0 and phi != null
+     for phi == 0 the integral is exact
+     for phi != 0 the integral is an approximation 
+     The origin of the two terms is the integral over phi */
+  if (phi_a == 0)   // case phi ==0
+    unt = null(nu_a,nu_b,alpha);
+  else
+    unt = low(phi_a,nu_a,nu_b,alpha,c) ;
+  if (phi_b == 0)  // case phi == 0 
+    ob = null(nu_a,nu_b,alpha) ;
+  else 
+    ob = hi(phi_b,nu_a,nu_b,alpha,c) ;
+  erg = (ob-unt)/(nu_a-nu_b) ;
+  return erg ;
 }
 
 
@@ -425,14 +364,17 @@ void wienerfilter::wienerFiltering(const vector<double> &noise, double epsilon_z
   \param data - vector containing complex data
   \param map - reconstructed map
 */
-void wienerfilter::applyWF(const cvec &data, cvec &map)
+void wienerfilter::applyWF(cvec &data, cvec &map)
 {
-  if(data.size()==0)
+  if(data.size()==0) {
+    cerr << "Wiener Filtering can not be performed " << endl ;
     throw "wienerfilter::applyWF data vector has size 0";
+  }
 
   //****************************************
   if(WF.cols()==0 && WF.rows()==0)	// if WF matrix does not exist
   {
+    cerr << "Wiener Filtering can not be performed " << endl ;
     throw "wienerfilter::applyWF WF matrix does not exist";
   }
 
@@ -441,71 +383,508 @@ void wienerfilter::applyWF(const cvec &data, cvec &map)
 
 
 
-	
-	
-/*!
-  \brief Apply the Wiener Filter operator to a data vector to reconstruct a map
-  
-  \param data - vector containing complex data
-  \param map - reconstructed map
-*/
-void wienerfilter::applyWF(const std::vector<std::complex<double> > &data, std::vector<std::complex<double> > &map)
-{
-  if(data.size()==0)
-    throw "wienerfilter::applyWF data vector has size 0";
-
-  // ****************************************
-  if(WF.cols()==0 && WF.rows()==0)	// if WF matrix does not exist
-  {
-    throw "wienerfilter::applyWF WF matrix does not exist";
-  }
-
-  map=WF*data;		// reconstruct map from data
+vector<complex<double> > wienerfilter::applyWF(vector<complex<double> > datas) {
+  vector<complex<double> > map=WF*datas ;
+  return map ;
 }
 
 
-//*****************************************************
-//
-// Internal Wiener filtering algorithm functions
-//
-//*****************************************************
+vector<complex<double> > wienerfilter::applyR(vector<complex<double> > &map) {
+  vector<complex<double> > data=WF*map ;
+  return data ;
+}
+
 
 /*!
-  \brief internal function that does actual Wiener filtering
+  \brief functions generates the Matrix for performing the wiener filtering
 */
-void wienerfilter::doWienerFiltering()
+void wienerfilter::generateWienerFiltering(int noNoise, int flatPrior, double signal_var, double signal_corr, double noise_var, vector<uint> gaps, double eps, uint QR )
 {
-  createResponseMatrix();	  // Set up matrices
-
+//    cout << "doing WienerFiltering" << endl;	// debug
+  setVariance_s(signal_var) ;
+  setLambdaPhi(signal_corr) ;
+  if (noNoise == 0 )   // don't create noise matrix if noNoise is active 
+    createNoiseMatrix(noise_var);
+  string type= "gaussian";
+  if (signal_corr==0) type = "white" ;
+  if (flatPrior == 0) // don't create signal covariance matrix for flatPrior
+    createSMatrix(type) ;
+  // Set up matrices
+  createResponseMatrix(gaps,eps,QR );
+  R.realValOut("real.csv") ;
+  R.imagValOut("imag.csv") ;
+  R.absOut("Response.mat");
+  cout << "noNoise=" << noNoise << " flatPrior=" <<  flatPrior << endl ;
   // Perform Wiener Filtering computations
-  computej(); 
-  computeD();
-
-  computeQ();
-  computeW();
-  computeM();
-
-
-  if(_DEBUG_)	// If _DEBUG_ is set, output matrices to files
-  {
-    writeASCII(N, "./intermediate/N.dat");
-    writeASCII(D, "real" ,"./intermediate/D_r.dat");
-    writeASCII(D, "imaginary" ,"./intermediate/D_i.dat");
-
-    writeASCII(S, "real" ,"./intermediate/S_r.dat");
-    writeASCII(S, "imaginary" ,"./intermediate/S_i.dat");
-
-    writeASCII(R, "real" ,"./intermediate/R_r.dat");
-    writeASCII(R, "imaginary" ,"./intermediate/R_i.dat");
-
-    writeASCII(M, "real" ,"./intermediate/M_r.dat"); 
-    writeASCII(M, "imaginary" ,"./intermediate/M_i.dat"); 
+  if (noNoise == 0) {
+    NI=N.inv();
   }
-  
-  reconstructm();
+  if ((noNoise ==0) && (flatPrior == 0 )) {
+    computeD();
+  }
+  else if (noNoise == 0 ) {
+    computeD_NoSignalCov() ;
+  }
+  else {
+    computeD_NoNoiseCov() ;
+  }
+  cout <<  " Propagator fertig " << endl ;
+//   cout << "W I E N E R : " << D(0,0)<< " " << D(10,0) << " " << D(0,10) << " " << D(10,10) << " " << D(0,20) << " " << D(20,0) << endl ;
+  D.absOut("Propagator.mat") ;
+//   computeQ();
+  if (noNoise == 0)
+    computeW();
+  else 
+    computeW_noNoise() ;
+//   cout << "W I E N E R : " << W(0,0)<< " " << W(10,0) << " " << W(0,10) << " " << W(10,10) << " " << W(0,20) << " " << W(20,0) << endl ;
+//  computeM();
+  WF = D*W ;
+  WF.absOut("Wiener.mat");
+  cout << "wiener filter finished " << endl ;
+//   cout << "W I E N E R : " << WF(0,0)<< " " << WF(10,0) << " " << WF(0,10) << " " << WF(10,10) << " " << WF(0,20) << " " << WF(20,0) << endl ;
+}
+
+/*!
+  \brief functions generates the Matrix for performing the wiener filtering
+*/
+void wienerfilter::generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cvec power, double eps, uint QR)
+{
+  cout << "calculate Singnal Matrix from Powerspectrum" << endl ;
+  calcSFromPowerspec(power) ;
+  // Set up matrices
+  if (!R_ready) {
+    cout << "create Response Matrix " << R_ready << endl ;
+    createResponseMatrix(gaps,eps,QR );
+    cout << "response generated" << endl ;
+  }
+  else {
+    cout << "response matrix used" << endl ;
+  }
+  R.absOut("Response.mat");
+  // Perform Wiener Filtering computations
+  if (noNoise == 0) {
+    createNoiseMatrix(noise_var);
+    NI=N.inv();
+    NI.absOut("invNoise.csv");
+  }
+  if (noNoise ==0) {
+    computeD();
+  }
+  else {
+    computeD_NoNoiseCov() ;
+  }
+  cout <<  " Propagator fertig " << endl ;
+//   cout << "W I E N E R : " << D(0,0)<< " " << D(10,0) << " " << D(0,10) << " " << D(10,10) << " " << D(0,20) << " " << D(20,0) << endl ;
+  D.absOut("Propagator.mat") ;
+//   computeQ();
+  if (noNoise == 0)
+    computeW();
+  else 
+    computeW_noNoise() ;
+//   cout << "W I E N E R : " << W(0,0)<< " " << W(10,0) << " " << W(0,10) << " " << W(10,10) << " " << W(0,20) << " " << W(20,0) << endl ;
+//  computeM();
+  WF = D*W ;
+  WF.absOut("Wiener.mat");
+//   cout << "W I E N E R : " << WF(0,0)<< " " << WF(10,0) << " " << WF(0,10) << " " << WF(10,10) << " " << WF(0,20) << " " << WF(20,0) << endl ;
+}
+
+void wienerfilter::generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cmat covMat, double eps, uint QR )
+{
+  S=covMat ;
+  S.absOut("origSignal.mat") ;
+  cout << "create Response Matrix " << endl ;
+  createResponseMatrix(gaps,eps,QR );
+  cout << "response generated" << endl ;
+  R.absOut("Response.mat");
+  // Perform Wiener Filtering computations
+  if (noNoise == 0) {
+    createNoiseMatrix(noise_var);
+    NI=N.inv();
+  }
+  if (noNoise ==0) {
+    computeD();
+  }
+  else {
+    computeD_NoNoiseCov() ;
+  }
+  cout <<  " Propagator fertig " << endl ;
+//   cout << "W I E N E R : " << D(0,0)<< " " << D(10,0) << " " << D(0,10) << " " << D(10,10) << " " << D(0,20) << " " << D(20,0) << endl ;
+  D.absOut("Propagator.mat") ;
+//   computeQ();
+  if (noNoise == 0)
+    computeW();
+  else 
+    computeW_noNoise() ;
+//   cout << "W I E N E R : " << W(0,0)<< " " << W(10,0) << " " << W(0,10) << " " << W(10,10) << " " << W(0,20) << " " << W(20,0) << endl ;
+//  computeM();
+  WF = D*W ;
+  WF.absOut("Wiener.mat");
+//   cout << "W I E N E R : " << WF(0,0)<< " " << WF(10,0) << " " << WF(0,10) << " " << WF(10,10) << " " << WF(0,20) << " " << WF(20,0) << endl ;
+}
+
+/*! procedure calculates the covarinace matrix, which is invariant angainst translation
+    by using the powerspectrum of the corrlation function.
+    \param vector which represents the powerspectrum 
+   */
+void wienerfilter::calcSFromPowerspec(cvec power) {
+    uint dim = power.size() ;
+    cmat t(dim,dim) ;
+    S=t ;	
+    cvec result(dim) ;
+    power.fft(result) ;
+   
+    /* Set the Entries of the S-Matrix to the values of the fft of 
+       the powerspectrum. Hangle the Matrix like a correlation function
+       which only depends on the difference of its argument
+       s11=s22=s33 .. s42=s53=s64 */
+    for(uint i = 0 ; i < dim ; i++ ) {
+	for (uint j=0; j<dim; j++) {
+	  S.set_peropdic(j,j+i,result[i]);
+	}
+    }
+    S.absOut("power.csv") ;
+}
+
+/*! procdure to iterate the signal powerspectrum and the reconstructed signal.
+    Relaying on 
+    Torsten Ensslin, Mona Frommert 
+    Reconstruction of signals with unknown spectrain information field theory 
+    with parameter uncertainty
+    arXiv 1002.2928 using Jeffery Prior and critical filter*/
+void wienerfilter::iteratePowerSpectrum(cvec freqs, cvec faradays, cvec power0, cvec data, vector<uint> gaps, cvec epsilon, cvec delta,  double aimDist) {
+  double curDist = 2.0*aimDist ;//  variable for the current distance 
+  complex<double> m1(-1,0) ;
+  cvec power = power0 ;
+  /* loop for iterating the map and the signal powerspectrum */
+  while (curDist > aimDist) {
+    cvec powerOld = power ;     // store the old powerspectrum for the use in comparison to the new one
+    cvec map(faradays.size()) ; // create a vector for the estimated signal (poralized emmision in Faraday space)
+    calcSFromPowerspec(power) ; // create a signal covariance matrix from the powerspectrum using fft
+    double noiseVar = data.Abs()*0.1 ; //create an estimation of the noise matrix
+    generateWienerFiltering(0, noiseVar, gaps, power, 0.001,2) ;  // create a wiener filter for the signal and noise covariance matrix
+    applyWF(data, map) ; // apply the filer to the data vector to get the new signal vector 
+    cvec maptr(faradays.size()) ; 
+    map.fft(maptr) ;  // generate fft from map to make powerspectrum iteration in fourierspace
+    cmat mmt(maptr) ;  // mmt = tensorproduct of map and complex adjoint of map map*map^t
+    cmat prop = D.fft() ;
+    /* create a vector for the prefactor 1/(1/2+epsilon_i) */
+    oneOverEps *mapFunk = new oneOverEps(epsilon,1.0,0.5,0.0) ;
+    cvec epsi(mapFunk,epsilon.size()) ;
+    delete mapFunk ;
+    prop.multToDia(delta) ; // multiply the diagonal of the fft of the propagator with deltas
+    cmat sum = prop+mmt ;
+    sum.multToDia(epsi) ;
+    /* the correction terms for the powerspectrum are pointwise in the diagonal of the matrix sum */
+    sum.copyToVec(power) ;  // dopy the powerspectrum into an Vector 
+    powerOld.add(power,m1) ;
+    curDist = powerOld.Abs() ; // calculate the changing of the powerspectrum to check for convergence
+  }  // end of the loop over different powerspectra
 }
 
 
+/*! procdure to iterate the signal powerspectrum and the reconstructed signal
+    for a couple of data sets, which are assumed to share the same signal covariance matrix
+    which can be represented by a powerspectrum.
+    Relaying on 
+    Torsten Ensslin, Mona Frommert 
+    Reconstruction of signals with unknown spectrain information field theory 
+    with parameter uncertainty
+    arXiv 1002.2928 using Jeffery Prior and critical filter
+    page 8 formula 48 
+    \param power0 initial guess for the powerspectrum
+    \param datas vector of datas for which the common powerspectrum is to be generated 
+    \param gaps is the vector of the gaps in the frequency achs
+    \param epsilon vector of epsilons which are parameter of the filter
+    \param delta vector of parameters of the filter 
+    \param aimDis stop condition, if the condition is reached, the powerspectrum is considered as found
+    \return true if the iteration is regarded as converged else false 
+*/
+void wienerfilter::iteratePowerSpectra(cvec power0, vector<cvec> datas, vector<uint> gaps, cvec epsilon, cvec delta,  double aimDist, uint smoothSteps) {
+  double curDist = 2.0*aimDist ;//  variable for the current distance 
+  complex<double> m1(-1,0) ;
+  complex<double> zero(0,0) ;  
+  cvec power = power0 ;  
+  uint dim = datas.size() ;  
+  complex<double> fak(1.0/dim,0) ;
+  uint ite = 0 ;
+  char buffer [33];
+  double noiseVar = datas[0].Abs()*0.1 ; //create an estimation of the noise matrix
+  bool res = false ;  // result value 
+  /* loop for iterating the map and the signal powerspectrum */
+  while ((curDist > aimDist) && (ite<100)) {
+    ite++ ;
+    cvec powerOld = power ;     // store the old powerspectrum for the use in comparison to the new one
+    cvec powerSum(power.size(),zero) ; // init the sum of the powerspectra to make the average of all lines of sight
+    cvec map(power0.size()) ; // create a vector for the estimated signal (poralized emmision in Faraday space)
+    calcSFromPowerspec(power) ; // create a signal covariance matrix from the powerspectrum using fft
+    generateWienerFiltering(0, noiseVar, gaps, power, 0.001,2) ;  // create a wiener filter for the signal and noise covariance matrix
+    for (uint i=0; i<dim; i++) { // loop over all lines of sight, which are assumed to share the signal power spectrum       
+      cvec data = datas[i] ;
+      if (i % 15 ==0 ) cout << "Process line " << i << endl ;
+      applyWF(data, map) ; // apply the filer to the data vector to get the new signal vector 
+      cvec maptr(power0.size()) ; 
+      map.fft(maptr) ;  // generate fft from map to make powerspectrum iteration in fourierspace
+      cmat mmt(maptr) ;  // mmt = tensorproduct of map and complex adjoint of map map*map^t
+      cmat prop = D.fft() ;
+      /* create a vector for the prefactor 1/(1/2+epsilon_i) */
+      oneOverEps *mapFunk = new oneOverEps(epsilon,1.0,0.5,0.0) ;
+      cvec epsi(mapFunk,epsilon.size()) ;
+      delete mapFunk ;
+      prop.multToDia(delta) ; // multiply the diagonal of the fft of the propagator with deltas
+      cmat sum = prop+mmt ;
+      sum.multToDia(epsi) ; // diagonale of the matrix sum contains the new powerspectrum
+    /* the correction terms for the powerspectrum are pointwise in the diagonal of the matrix sum */
+      sum.copyToVec(power) ;  // dopy the powerspectrum into an Vector       
+      powerSum.add(power,fak) ;
+    } // end of the loop over all lines of sight
+    /* prepare a controle output */
+    sprintf(buffer,"%d",ite);
+    string index(buffer) ;
+    string name1 = "one"+index+".csv" ;
+    string name2 = "sum"+index+".csv" ;
+    string name3 = "smooth"+index+".csv" ;
+    power.absOut(name1) ;  // print an example for an individuel found Powerspectrum
+    powerSum.absOut(name2) ;  // print the averaged powerspectrum 
+    smooth(powerSum,smoothSteps) ;
+    powerSum.absOut(name3) ;  // print the averaged powerspectrum 
+    double curNorm = powerSum.Abs() ;
+    curDist = powerOld.Abs(powerSum)/curNorm ; // calculate the changing of the powerspectrum to check for convergence
+    power.data = powerSum.data ;
+    cerr << "Iteration: " << ite << "  distance: " << curDist << "  Norm: " << curNorm <<  endl ;
+  }
+  /* check, if the procedure is converged, than calculate the signal covariance matrix once again, and 
+     set the result vector to true */
+  if (curDist < aimDist) {
+    calcSFromPowerspec(power) ;
+    generateWienerFiltering(0, noiseVar, gaps, power, 0.001,2) ;  // create a wiener filter for the signal and noise covariance matrix
+    res = true ;
+  }
+}
+
+/*! procedure to smooth the powerspectrum by some iterations of the difusionequation.
+    \param power powerspectrum to be smoothed 
+    \param num number of iterations performed for smoothing */
+void wienerfilter::smooth(cvec &power, uint num) {
+  uint dim = power.size() ;
+  for (uint j=0; j<num; j++) {
+    vector<complex<double> > vek = power.data ;
+    for (uint i=0; i<dim; i++) {
+      complex<double> rval ;
+      complex<double> lval ;
+      if(i==0) {
+	rval = vek[1];
+	lval = vek[dim-1] ;
+      }
+      else if (i==dim-1) {
+	rval = vek[0] ;
+	lval = vek[i-1] ;
+      } 
+      else {
+	rval = vek[i+1] ;
+	lval = vek[i-1] ;
+      }
+      power.set(i,0.25*(2.0*vek[i]+rval+lval)) ;
+    }
+  }
+}
+
+/*! procdure to iterate the signal powerspectrum and the reconstructed signal
+    for a couple of data sets, which are assume	d to share the same signal covariance matrix
+    which can be represented by a powerspectrum.
+    Relaying on 
+    Torsten Ensslin, Mona Frommert 
+    Reconstruction of signals with unknown spectrain information field theory 
+    with parameter uncertainty
+    arXiv 1002.2928 using Jeffery Prior and critical filter
+    page 8 formula 48 */
+void wienerfilter::iteratePowerSpectraNaive(cvec power0, vector<cvec> datas, vector<uint> gaps, cvec epsilon, cvec delta,  double aimDist) {
+  double curDist = 2.0*aimDist ;//  variable for the current distance 
+  complex<double> m1(-1,0) ;
+  complex<double> zero(0,0) ;  
+  cvec power = power0 ;  
+  uint dim = datas.size() ;  
+  complex<double> fak(1.0/dim,0) ;
+  uint ite = 0 ;
+  char buffer [33];
+  /* loop for iterating the map and the signal powerspectrum */
+  while ((curDist > aimDist) && (ite<50)) {
+    ite++ ;
+    cvec powerOld = power ;     // store the old powerspectrum for the use in comparison to the new one
+    cvec powerSum(power.size(),zero) ; // init the sum of the powerspectra to make the average of all lines of sight
+    cvec powerSq(power.size(),zero) ;  // init the sum of the powerspectra squared to get the diagonal covariance matrix
+    cvec map(power0.size()) ; // create a vector for the estimated signal (poralized emmision in Faraday space)
+    calcSFromPowerspec(power) ; // create a signal covariance matrix from the powerspectrum using fft
+    double noiseVar = datas[0].Abs()/datas[0].size() ; //create an estimation of the noise matrix
+    generateWienerFiltering(0, noiseVar, gaps, power, 0.001,2) ;  // create a wiener filter for the signal and noise covariance matrix
+    for (uint i=0; i<dim; i++) { // loop over all lines of sight, which are assumed to share the signal power spectrum       
+      cvec data = datas[i] ;
+      if (i % 15 ==0 ) cout << "Process line " << i << endl ;
+      applyWF(data, map) ; // apply the filer to the data vector to get the new signal vector 
+      cvec maptr(power0.size()) ; 
+      map.fft(maptr) ;  // generate fft from map to make powerspectrum iteration in fourierspace
+      powerSum.add(maptr,1.0) ;
+      powerSq.addSQ(maptr,1.0) ;
+    } // end of the loop over all lines of sight
+    powerSq.valOut("Vorher.csv");
+    powerSq.addSQ(powerSum,-fak) ;
+    powerSq.valOut("Nachher.csv");
+    power.add(powerSq,1.0) ;
+    power.mult(0.5) ;
+    sprintf(buffer,"%d",ite);
+    string index(buffer) ;
+    string name = "power"+index+".csv" ;
+    power.absOut(name) ;
+    double cNorm = power.Abs() ;
+//     powerOld.add(power,m1) ;
+    curDist = powerOld.Abs(power) ; // calculate the changing of the powerspectrum to check for convergence
+    cerr << "Iteration: " << ite << "  distance: " << curDist << "   Norm: " << cNorm <<  endl ;
+  }
+}
+/*! procdure to iterate the signal signal covariance matrix and the reconstructed signal
+    for a couple of data sets, which are assumed to share the same signal covariance matrix.
+    Relaying on 
+    Torsten Ensslin, Mona Frommert 
+    Reconstruction of signals with unknown spectrain information field theory 
+    with parameter uncertainty
+    arXiv 1002.2928 using Jeffery Prior and critical filter
+    page 8 formula 48 */
+void wienerfilter::iterateCovMatrix(vector<cvec> &datas, vector<uint> &gaps, double aimDist) {
+  double curDist = 2.0*aimDist ;//  variable for the current distance 
+  complex<double> m1(-1,0) ;
+  complex<double> zero(0,0) ;
+  cmat covMat = S ;//covMat0 ;
+  cvec map(covMat.rows()) ; // create a vector for the estimated signal (poralized emmision in Faraday space)
+  uint dim = datas.size() ;  
+  complex<double> fak(1.0/dim,0) ;
+  uint ite = 0 ;
+  char buffer [33];	
+  /* loop for iterating the map and the signal powerspectrum */
+  while ((curDist > aimDist) && (ite<10)) {
+    cmat sumMat(covMat.rows(),covMat.cols(	),zero) ;
+    ite++ ;
+    double noiseVar = datas[0].Abs()*0.1 ; //create an estimation of the noise matrix
+    generateWienerFiltering(0, noiseVar, gaps, covMat, 0.001,2) ;  // create a wiener filter for the signal and noise covariance matrix
+ 	cout << "1. filter generated" << endl ;
+    for (uint i=0; i<dim; i++) { // loop over all lines of sight, which are assumed to share the signal power spectrum       
+      cvec data = datas[i] ;
+//       cout << "Process line " << i << endl ;
+      applyWF(data, map) ; // apply the filer to the data vector to get the new signal vector 
+      sumMat.add(map,map) ;
+    } // end of the loop over all lines of sight
+    sumMat.mult(fak) ;
+    covMat = sumMat+D ;
+    sprintf(buffer,"%d",ite);
+    string index(buffer) ;
+    string name = "test"+index+".csv" ;
+    covMat.absOut(name.c_str());
+  }
+cout << "iteration ist fertig " << endl ;
+}
+
+/*! procdure to iterate the signal signal covariance matrix and the reconstructed signal
+    for a couple of data sets, which are assumed to share the same signal covariance matrix.
+    Relaying on 
+    Torsten Ensslin, Mona Frommert 
+    Reconstruction of signals with unknown spectrain information field theory 
+    with parameter uncertainty
+    arXiv 1002.2928 using Jeffery Prior and critical filter
+    page 8 formula 48 */
+void wienerfilter::iterateMatrixNaive(vector<cvec> &datas, vector<uint> &gaps, double aimDist) {
+  double curDist = 2.0*aimDist ;//  variable for the current distance 
+  complex<double> m1(-1,0) ;
+  complex<double> zero(0,0) ;
+  cmat covMat = S ;//covMat0 ;
+  cvec map(covMat.rows()) ; // create a vector for the estimated signal (poralized emmision in Faraday space)
+  uint dim = datas.size() ;  
+  complex<double> fak(1.0/dim,0) ;
+  uint ite = 0 ;
+  char buffer [33];
+  /* loop for iterating the map and the signal powerspectrum */
+  while ((curDist > aimDist) && (ite<30)) {
+    cmat sumMat(covMat.rows(),covMat.cols(),zero) ;
+    cvec sumVec(covMat.rows(),zero) ;
+    ite++ ;
+    double noiseVar = datas[0].Abs()*0.1 ; //create an estimation of the noise matrix
+    generateWienerFiltering(0, noiseVar, gaps, covMat, 0.001,2) ;  // create a wiener filter for the signal and noise covariance matrix
+ 	cout << "1. filter generated" << endl ;
+    for (uint i=0; i<dim; i++) { // loop over all lines of sight, which are assumed to share the signal power spectrum       
+      cvec data = datas[i] ;
+//       cout << "Process line " << i << endl ;
+      applyWF(data, map) ; // apply the filer to the data vector to get the new signal vector 
+      sumMat.add(map,map) ;
+      sumVec.add(map,1.0) ;
+    } // end of the loop over all lines of sight
+    
+    sumMat.mult(fak) ;
+    sumVec.mult(-1.0*fak) ;
+    sumMat.add(sumVec,sumVec) ;
+    covMat = covMat+sumMat;
+    covMat.mult(0.5) ;
+    sprintf(buffer,"%d",ite);
+    string index(buffer) ;
+    string nameM = "Mat"+index+".csv" ;
+    string nameV = "Vec"+index+".csv" ;
+    
+    covMat.absOut(nameM.c_str());
+    sumVec.absOut(nameV.c_str());
+  }
+cout << "iteration ist fertig " << endl ;
+}
+
+void wienerfilter::iterateForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps, uint smoothSteps, double powerEps) {
+  setVariance_s(sigVar) ;
+  complex<double> zero(0,0) ;
+  complex<double> one(1,0) ;
+  setLambdaPhi(corLenght) ;
+  createSMatrix("gaussian") ;   // generate the covariance matrix from the parameter values
+  cmat Power = S.fft() ;        // generate the powerspectrum from the signal matrix
+  cvec power(Power) ; 		// generate the powerspectrum vector from the matrix 
+  uint dim = power.size() ;
+  cvec epsilon(dim,zero) ;
+  cvec delta(dim,1) ;
+  uint nx = cubeIn.getXSize() ; ;
+//  uint ny = cubeIn.getYSize() ;
+  vector<cvec> datas ;
+  for (uint ij=0 ; ij<1; ij++) 
+  {
+    cout << "ij " << ij << endl  ;
+    for (uint ii=0; ii<nx; ii++) 
+    {
+      vector<complex<double> > P_lambda ; 
+      cubeIn.getLineOfSight(ii,ij,P_lambda) ;
+      cvec data(P_lambda) ;
+      datas.push_back(data) ;
+    }
+  }
+   cout << endl ;
+   iteratePowerSpectra( power, datas, gaps, epsilon, delta, powerEps, smoothSteps) ;
+  cout << "Zahl der Eintraege: " << datas.size() << "  Dimension: "<< power.size() << endl ;
+}
+
+void wienerfilter::iterateMatForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps) {
+  setVariance_s(sigVar) ;
+  complex<double> zero(0,0) ;
+  complex<double> one(1,0) ;
+  setLambdaPhi(corLenght) ;
+  createSMatrix("gaussian") ;   // generate the covariance matrix from the parameter values
+  uint nx = cubeIn.getXSize() ;
+//  uint ny = cubeIn.getYSize() ;
+  vector<cvec> datas ;
+  for (uint ij=0 ; ij<1; ij++) 
+  {
+    cout << "ij " << ij << endl  ;
+    for (uint ii=0; ii<nx; ii++) 
+    {
+      vector<complex<double> > P_lambda ;
+      cubeIn.getLineOfSight(ii,ij,P_lambda) ;
+      cvec data(P_lambda) ;
+      datas.push_back(data) ;
+    }
+  }
+   cout << endl ;
+   iterateMatrixNaive( datas, gaps, 1.0) ;
+  cout << "Zahl der Eintraege: " << datas.size() <<  endl ;
+}
 /*!
 	\brief Create a LOFAR (or simulated) Noise matrix
 	
@@ -518,25 +897,29 @@ void wienerfilter::doWienerFiltering()
 */
 void wienerfilter::createNoiseMatrix(double noise)
 {
-  if(noise < 0)		// only if positive rmsnoise is given
+  if(noise < 0)	{	// only if positive rmsnoise is given
+	cerr << "can not create noise matrix " << endl ;
 	 throw "wienerfilter::createNoiseMatrix rmsnoise<0";
+  }
   else
   {
-	  if(d.length()>0)					// only if d vector has length > 0
+	  if(frequencies.size()>0)		// only if frequencies vector has length > 0
 	  {
-		  int size=d.length();				// get size of data vector d
+		  uint size=frequencies.size(); // get size of data vector d
 		 
 		  N.set_size(size, size);			// set size of Noise matrix
 		  N.zeros();					// initialize matrix to 0-matrix
 
-		  for(int i=0; i<size; i++)			// loop over rows (quadratic matrix)
+		  for(uint i=0; i<size; i++)			// loop over rows (quadratic matrix)
 		  {
 		     // set rms^2 value to all diagonal elements (because it's the Noise Covariance matrix)
-		     N.set(i, i, noise*noise);
+		     N.set(i, i, noise);
 		  }
 	  }
-	  else
+	  else {
+	    cerr << "can not create noise matrix " << endl ;
 	     throw "wienerfilter::createNoiseMatrix d vector has length 0";	
+	  }
   }
 }
 
@@ -554,10 +937,14 @@ void wienerfilter::createNoiseMatrix(double noise)
 */
 void wienerfilter::createNoiseMatrix(vector<double> &noiseperchan)
 {
-  if(noiseperchan.size()==0)			// only if positive rmsnoise is given
+  if(noiseperchan.size()==0) {			// only if positive rmsnoise is given
+	cerr << "can not create noise matrix " << endl ;
     throw "wienerfilter::createNoiseMatrix noiseperchan has zero length";
-  else if(noiseperchan.size()!=(unsigned int) d.size())
+  }
+  else if(noiseperchan.size()!=(unsigned int) d.size()) {
+    cerr << "can not create noise matrix " << endl ;
     throw "wienerfilter::createNoiseMatrix noiseperchan differs in length from data vector d";
+  }
   else
   {
 	  if(d.length()>0)				// only if d vector has length > 0
@@ -585,40 +972,36 @@ void wienerfilter::createNoiseMatrix(vector<double> &noiseperchan)
 	lambda squared wavelengths into Faraday space phi. It has m x n dimensions where m is the
 	number of lambda squared channels and n the number of Faraday depths probed for.
 */
-void wienerfilter::createResponseMatrix()
+void wienerfilter::createResponseMatrix(vector<uint> gaps, double eps, uint singVal)
 {
   const double csq=89875517873681764.0;		// c^2 constant
 
   complex<double> element=0;			// Matrix element in Vandermonde matrix for DFT
   complex<double> rowfactor=0;			// common factor for Matrix elements in the same row
-  vector<double> frequenciessquared(frequencies.size());	// vector to hold pre-computed frequencies squared
-  double Faradayexponent=0;			// Faraday rotation exponent
-  
+//   vector<double> frequenciessquared(frequencies.size());	// vector to hold pre-computed frequencies squared
+//  double Faradayexponent=0;			// Faraday rotation exponent
   //***********************************************************************
   // Parameter integrity checks
   //***********************************************************************
-  if(d.size()==0)
+  if(frequencies.size()==0) {
+    cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrix data vector d has size 0";
-  if(s.size()==0)
-     throw "wienerfilter::createResponseMatrix signal vector s has size 0";
-  if(frequencies.size()!=(unsigned int) d.size())
-     throw "wienerfilter::createResponseMatrix frequencies has invalid size";
-  if(delta_frequencies.size()!=(unsigned int) d.size())
-     throw "wienerfilter::createResponseMatrix delta frequencies has invalid size";
-  if(faradaydepths.size()!=(unsigned int) s.size())
+  }
+  if(faradaydepths.size()==0) {
+	cerr << "can not create response matrix " << endl ;
 	  throw "wienerfilter::createResponseMatrix faradaydepths has invalid size";
+  }
  
   // Create Response matrix with faradaydepths rows and frequencies columns 
-  int Nfaradaydepths=s.length();
-  int Nfrequencies=d.length(); 
-
+  uint Nfaradaydepths=faradaydepths.size();
+  uint Nfrequencies=frequencies.size(); 
   R.set_size(Nfrequencies, Nfaradaydepths);		// set size of response matrix
 
   // Check if spectral dependence parameters are valid
   if(nu_0==0)
      throw "wienerfilter::createResponseMatrix nu_0 is 0";  
-  if(alpha==0)	// check if alpha is valid
-     throw "wienerfilter::createResponseMatrix alpha is 0";
+//   if(alpha==0)	// check if alpha is valid
+//      throw "wienerfilter::createResponseMatrix alpha is 0";
 
 
   // ************************************************************************
@@ -626,34 +1009,131 @@ void wienerfilter::createResponseMatrix()
   // ************************************************************************
     
   // compute freq^2 vector first
-  for(unsigned int i=0; i<frequencies.size(); i++)  
-    frequenciessquared[i]=frequencies[i]*frequencies[i];
-  
+/*  for(unsigned int i=0; i<frequencies.size(); i++)  
+    frequenciessquared[i]=frequencies[i]*frequencies[i];*/
 //  cout << "createResponseMatrix(): R.rows()=" << R.rows() << "\tR.cols()=" << R.cols() << endl;			// debug
 //  cout << "alpha=" << alpha << endl;			// debug
 //  cout << "epsilonZero = " << epsilon_0 << endl;	// debug
   
 //  R.zeros();
-  for(int k=0; k<R.rows(); k++)		// loop over all rows of R (i.e. frequencies)
-  {  	 
+  complex<double> I(0,1) ;
+  complex<double> preFakt = epsilon_0*pow(nu_0, alpha)/(2.0*I*csq) ;
+  uint curIndex = 0 ;
+  cout << "start to create the Responsematrix" << endl ;
+  for(uint k=0; k<Nfrequencies; k++) { // loop over all rows of R (i.e. frequencies) 
       // Convert Jy to SI unit
-      // spectral dependence factor and bandpass common to all elements in the same row
-      rowfactor=complex<double> ( bandpass[k] * epsilon_0 * pow(frequencies[k]/nu_0, -alpha) * delta_frequencies[k] );
-
-  //    cout << k << "\t" << rowfactor << "\t";
-
-      for(int l=0; l<R.cols(); l++)	// loop over all columns of R (i.e. Faraday depths)
-      {
-	  Faradayexponent=-2.0 * (csq/frequenciessquared[k]) * faradaydepths[l];
-
-	  element = complex<double>( cos(Faradayexponent), sin(Faradayexponent));
-	  element = rowfactor*element*delta_faradaydepths[l];
-
-// 	  cout << "\t" << l << "\t" << delta_faradaydepths[l] << endl;
-
-	  R.set(k, l, element);	// write element to correct Matrix position
-      }
+      // spectral dependence factor and bandpass common to all elements in the same row	
+        rowfactor=preFakt;//*bandpass[k] ;	
+	double nu_a ; // start of the integration interval for vu integration 
+	double nu_b ; // end of the integration interval for vu integration 
+	if (k==gaps[curIndex])  nu_a = frequencies[gaps[curIndex]] ;
+	else nu_a = 0.5*(frequencies[k-1]+frequencies[k]) ;
+	if (k==gaps[curIndex+1]-1) {
+            nu_b = frequencies[gaps[curIndex+1]-1] ;
+            if (curIndex != gaps.size()) curIndex++ ;
+	}
+	else nu_b= 0.5*(frequencies[k]+frequencies[k+1]) ;
+//         cout << k << "\t" << rowfactor << "\t" << nu_a << "\t" << nu_b << "\t" << eps<< endl ;
+        for(uint l=0; l<R.cols(); l++) { // loop over all columns of R (i.e. Faraday depths)	
+	  double phi_a ;  // start of the integration interval for phi integration 
+	  double phi_b ;  // end of the integration interval for phi integration 
+	  // calculate the interval in faradaydepths
+	  if (l==0)  phi_a = faradaydepths[0] ;          
+	  else phi_a = 0.5*(faradaydepths[l-1]+faradaydepths[l]) ;
+	  if (l==Nfaradaydepths-1) phi_b = faradaydepths[Nfaradaydepths-1] ;
+	  else phi_b= 0.5*(faradaydepths[l]+faradaydepths[l+1]) ;
+// 	  complex<double> integr = integral(nu_a,nu_b,eps,alpha,phi_a,phi_b,1);
+	  complex<double> integr = integral_approx(nu_a,nu_b,eps,alpha,phi_a,phi_b,1);
+	  element = rowfactor*integr ;
+// 	  if (k==l) cout<< k << " " << l << " " << phi_a << " " << phi_b << " " << nu_a << " " << nu_b << " " << rowfactor << " " << integr << " " << element<< " " <<epsilon_0 << " " << alpha  << endl ;
+// 	  cout << "k:" << k << "  l:" << l << "  num:" << integr << "  approx:" <<vergleich  << "  diff:" << (integr+vergleich)/integr << endl ;
+	  R.set(k, l, element);	// write element to correct Matrix position	
+        }
   }
+  R_ready=true ;  
+  cmat RR ;
+  cout << "Responsematrix created" << endl ;
+  if (singVal!=0) {
+   cout << "start the singular value decomposition" << endl ;
+   if (R.rows() >= R.cols())
+     RR = R ;
+   else 
+     RR = R.H() ;
+   RR.svd() ;
+  }
+//   cmat sing(R.singVals) ;
+//   sing.absOut("sing.dat") ;
+}
+/*!
+	\brief Create the Response matrix
+	
+	The Response matrix R is the Fourier Transform operator transforming image
+	lambda squared wavelengths into Faraday space phi. It has m x n dimensions where m is the
+	number of lambda squared channels and n the number of Faraday depths probed for.
+*/
+void wienerfilter::createResponseMatrix(vector<double> intervals, double eps, uint singVal)
+{
+  const double csq=89875517873681764.0;		// c^2 constant
+
+  complex<double> element=0;			// Matrix element in Vandermonde matrix for DFT
+  complex<double> rowfactor=0;			// common factor for Matrix elements in the same row
+//   vector<double> frequenciessquared(frequencies.size());	// vector to hold pre-computed frequencies squared
+//  double Faradayexponent=0;			// Faraday rotation exponent
+  //***********************************************************************
+  // Parameter integrity checks
+  //***********************************************************************
+  if(frequencies.size()==0) {
+    cerr << "can not create response matrix " << endl ;
+     throw "wienerfilter::createResponseMatrix data vector d has size 0";
+  }
+  if(faradaydepths.size()==0) {
+	cerr << "can not create response matrix " << endl ;
+	  throw "wienerfilter::createResponseMatrix faradaydepths has invalid size";
+  }
+ 
+  // Create Response matrix with faradaydepths rows and frequencies columns 
+  cout << "start creating the response matrix" << endl ;
+  uint Nfaradaydepths=faradaydepths.size();
+  uint Nfrequencies=frequencies.size(); 
+  R.set_size(Nfrequencies, Nfaradaydepths);		// set size of response matrix
+
+  // Check if spectral dependence parameters are valid
+  if(nu_0==0)
+     throw "wienerfilter::createResponseMatrix nu_0 is 0";  
+
+  // ************************************************************************
+  // Calculate individual matrix elements
+  // ************************************************************************
+    
+  complex<double> I(0,1) ;
+  complex<double> preFakt = epsilon_0*pow(nu_0, alpha)/(2.0*I*csq) ;
+//  uint curIndex = 0 ;
+  for(uint k=0; k<Nfrequencies; k++) { // loop over all rows of R (i.e. frequencies) 
+      // Convert Jy to SI unit
+      // spectral dependence factor and bandpass common to all elements in the same row	
+        rowfactor=preFakt;//*bandpass[k] ;	
+	double nu_a ; // start of the integration interval for vu integration 
+	double nu_b ; // end of the integration interval for vu integration 	
+	nu_a = frequencies[k]-0.5*intervals[k] ;
+	nu_b = frequencies[k]+0.5*intervals[k] ;
+
+        for(uint l=0; l<R.cols(); l++) { // loop over all columns of R (i.e. Faraday depths)	
+	  double phi_a ;  // start of the integration interval for phi integration 
+	  double phi_b ;  // end of the integration interval for phi integration 
+	  // calculate the interval in faradaydepths
+	  if (l==0)  phi_a = faradaydepths[0] ;          
+	  else phi_a = 0.5*(faradaydepths[l-1]+faradaydepths[l]) ;
+	  if (l==Nfaradaydepths-1) phi_b = faradaydepths[Nfaradaydepths-1] ;
+	  else phi_b= 0.5*(faradaydepths[l]+faradaydepths[l+1]) ;
+
+	  complex<double> integr = integral_approx(nu_a,nu_b,eps,alpha,phi_a,phi_b,1);
+	  element = rowfactor*integr ;
+
+	  R.set(k, l, element);	// write element to correct Matrix position	
+        }
+  }
+  R_ready=true ;
+  cout << "creating response matrix finished" << endl ; 
 }
 
 
@@ -679,16 +1159,26 @@ void wienerfilter::createResponseMatrixIntegral()
   //***********************************************************************
   // Parameter integrity checks
   //***********************************************************************
-  if(d.size()==0)
+  if(d.size()==0) {
+	cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrixIntegral data vector d has size 0";
-  if(s.size()==0)
+  }
+  if(s.size()==0) {
+	cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrixIntegral signal vector s has size 0";
-  if(frequencies.size()!=(unsigned int) d.size())
+  }
+  if(frequencies.size()!=(unsigned int) d.size()) {
+	cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrixIntegral frequencies has invalid size";
-  if(delta_frequencies.size()!=(unsigned int) d.size())
+  }
+  if(delta_frequencies.size()!=(unsigned int) d.size()) {
+	cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrixIntegral delta frequencies has invalid size";
-  if(faradaydepths.size()!=(unsigned int) s.size())
+  }
+  if(faradaydepths.size()!=(unsigned int) s.size()) {
+	cerr << "can not create response matrix " << endl ;
 	  throw "wienerfilter::createResponseMatrixIntegral faradaydepths has invalid size";
+  }
  
   // Create Response matrix with faradaydepths rows and frequencies columns 
   int Nfaradaydepths=s.length();
@@ -697,10 +1187,14 @@ void wienerfilter::createResponseMatrixIntegral()
   R.set_size(Nfrequencies, Nfaradaydepths);		// set size of response matrix
 
   // Check if spectral dependence parameters are valid
-  if(nu_0==0)
+  if(nu_0==0) {
+	cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrixIntegral nu_0 is 0";  
-  if(alpha==0)	// check if alpha is valid
+  }
+  if(alpha==0)  {	// check if alpha is valid
+	cerr << "can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrixIntegral alpha is 0";
+  }
 
 
   // ************************************************************************
@@ -727,15 +1221,15 @@ void wienerfilter::createResponseMatrixIntegral()
   }
  
  
-  for(int k=0; k<R.rows(); k++)		// loop over all rows of R (i.e. frequencies)
+  for(uint k=0; k<R.rows(); k++)		// loop over all rows of R (i.e. frequencies)
   {  	 
       // Convert Jy to SI unit
       // spectral dependence factor and bandpass common to all elements in the same row
       rowfactor=complex<double> ( bandpass[k] * epsilon_0 * pow(frequencies[k]/nu_0, -alpha) * delta_frequencies[k] );
 
-  //    cout << k << "\t" << rowfactor << "\t";
+     cout << "HIER " << k << "\t" << rowfactor << "\t";
 
-      for(int l=0; l<R.cols(); l++)	// loop over all columns of R (i.e. Faraday depths)
+      for(uint l=0; l<R.cols(); l++)	// loop over all columns of R (i.e. Faraday depths)
       {
 	  Faradayexponent=-2.0 * (csq/frequenciessquared[k]) * faradaydepths[l];
 
@@ -765,24 +1259,26 @@ void wienerfilter::computeVariance_s()
 	//-----------------------------------------------------
 	if(d.size()==0)					// if d has no elements
 	{
+		cerr << "can not create signal covariance matrix " << endl ;
 		throw "wienerfilter::computeVariance_s d has size 0";
 	}
 	if(R.rows()!=d.size() || R.cols()!=s.size())
 	{
+		cerr << "can not create signal covariance matrix" << endl ;
 		throw "wienerfilter::computeVariance_s R has incorrect size";
 	}
 	
 	//------------------------------------------------------		
 	// Transform d -> s using R^{-1}
 // 	cout << "ds.size() = " << ds.size() << endl;
-	ds=inv(R)*(d);			// really need d-n and therefore a loop then!
+	ds=R.inv()*(d);			// really need d-n and therefore a loop then!
 // 	ds=d;
 
 	for(int i=0; i<size; i++)		// Compute complex average
 	{
 	  sum=sum+ds[i];			// sum over all elements
 	}
-	cavg=sum/size;		// that size isnt 0 is checked for above
+	cavg=(1.0/size)*sum;		// that size isnt 0 is checked for above
 	cout << "cavg = " << cavg << endl;
 	// compute dispersion_s of d vector
 	// < | s-s_avg |^2 >
@@ -810,30 +1306,32 @@ void wienerfilter::createSMatrix(const string &type)
 	double dist=0;							// distance petween phi_i and phi_j
 	
 	// Make data integrity checks
-	if(s.size()==0)						// if s has zero length
+	if(faradaydepths.size()==0)	{					// if s has zero length
+	  cerr << "can not create signal covariance matrix " << endl ;
 	  throw "wienerfilter::computeSMatrix s vector has 0 length";
-	if(faradaydepths.size()!=(unsigned int)s.size())
-	  throw "wienerfilter::computeSMatrix";
-	
+	}
+
 	// ******************************************************
-	S.set_size(s.size(), s.size());		// set size of S matrix to dimensions of d-vector
+	S.set_size(faradaydepths.size(), faradaydepths.size());		// set size of S matrix to dimensions of d-vector
 
 	if(variance_s <= 0)			// if standard deviation is smaller or equal zero
 	{
+	        cout << "variance = " << variance_s << endl ;
 		throw "wienerfilter::computeSMatrix dispersion_s <= 0";
 	}
-	if(lambda_phi<=0)					// if lambda_phi has an invalid value < 0
-	{
-		throw "wienerfilter::computeSMatrix lambda_phi < 0";
-	}
+// 	if(lambda_phi<=0)					// if lambda_phi has an invalid value < 0
+// 	{
+// 	        cout << "lambda Phie = " << lambda_phi << endl ;
+// 		throw "wienerfilter::computeSMatrix lambda_phi < 0";
+// 	}
 
 
 	if(type=="gaussian")					// if initial guess is a Gaussian decay:
 	{
 		vector<double> boundarycondition(5);		// vector with boundary conditions
 		vector<double>::iterator pos;			// position index of minimum element
-		double lambda_phi_corrected=0.0;		// corrected lambda_phi, we don't want to destroy our class attribute lambda_phi!
-	
+// 		double lambda_phi_corrected=0.0;		// corrected lambda_phi, we don't want to destroy our class attribute lambda_phi!
+		mat tMat(S.rows(),S.cols());
 		// Compute constant factors: 0.25*lambda_phi^2
 //		divisor=0.25*lambda_phi*lambda_phi; // old: without peridic boundary condition
 
@@ -841,9 +1339,9 @@ void wienerfilter::createSMatrix(const string &type)
 		//
 		// S(i,j)=dispersion_s^2*exp(0.5*abs(phi_i-phi_j)^2/(2*lambda_phi^2))
 		//
-		for(int row=0; row<S.rows(); row++)			// loop over rows of S
+		for(uint row=0; row<S.rows(); row++)			// loop over rows of S
 		{
-			for(int col=0; col<S.cols(); col++)		// loop over columns of S
+			for(uint col=0; col<S.cols(); col++)		// loop over columns of S
 			{
 //				dist=abs(row-col);			// compute absolute distance between phi_i and phi_j 
 				dist=abs(faradaydepths[row]-faradaydepths[col]);
@@ -852,31 +1350,38 @@ void wienerfilter::createSMatrix(const string &type)
 				// lambda=lambda_phi*min(faradaydepths[col]/lambda_phi, faradaydepths[row]/lambda_phi, 1)
 			
 				// write values into vector
-				boundarycondition[0]=faradaydepths[row]/lambda_phi;
-				boundarycondition[1]=faradaydepths[col]/lambda_phi; 
-				boundarycondition[2]=(faradaydepths[S.size()-1]-faradaydepths[row])/lambda_phi;
-				boundarycondition[3]=(faradaydepths[S.size()-1]-faradaydepths[col])/lambda_phi; 
-				boundarycondition[4]=1.0;
+// 				boundarycondition[0]=faradaydepths[row]/lambda_phi;
+// 				boundarycondition[1]=faradaydepths[col]/lambda_phi; 
+// 				boundarycondition[2]=(faradaydepths[S.size()-1]-faradaydepths[row])/lambda_phi;
+// 				boundarycondition[3]=(faradaydepths[S.size()-1]-faradaydepths[col])/lambda_phi; 
+// 				boundarycondition[4]=1.0;
 			
-				cout << "fd[" << row << "]=" << faradaydepths[row] << "\tfd[" << col << "]=" << faradaydepths[col] << "\tlambda_phi=" << lambda_phi << endl;
-				cout << "b[0]=" << boundarycondition[0] << "\tb[1]=" << boundarycondition[1] << "\tb[2]=" << boundarycondition[2];
+// 					cout << "fd[" << row << "]=" << faradaydepths[row] << "\tfd[" << col << "]=" << faradaydepths[col] << "\tlambda_phi=" << lambda_phi << endl;
+// 				cout << "b[0]=" << boundarycondition[0] << "\tb[1]=" << boundarycondition[1] << "\tb[2]=" << boundarycondition[2];
 			
 				// find minimum in vector
-				pos = min_element (boundarycondition.begin(), boundarycondition.end());
-				lambda_phi_corrected=*pos;	// set to corrected lambda_phi
+// 				pos = min_element (boundarycondition.begin(), boundarycondition.end());
+// 				lambda_phi_corrected=*pos;	// set to corrected lambda_phi
 				
-				if(lambda_phi_corrected != lambda_phi)
-				  cout << "\tlambda_phi_corrected (" << row << "," << col << ") = " << lambda_phi_corrected << endl;
+// 				if(lambda_phi_corrected != lambda_phi)
+// 				  cout << "\tlambda_phi_corrected (" << row << "," << col << ") = " << lambda_phi_corrected << endl;
 				
-				divisor=0.25*lambda_phi_corrected*lambda_phi_corrected;	// compute divisor
+				divisor=0.25*lambda_phi*lambda_phi;	// compute divisor
 				
 				
 // 				divisor=0.25*lambda_phi*lambda_phi
 
 				S.set(row, col, variance_s*exp(-dist/divisor) );	// Write element into S
+				tMat.set(row,col,variance_s*exp(-dist/divisor) );
 			}
 		}
-
+		mat tr(tMat.rows(),tMat.cols()) ;
+// 		bool sucess = tMat.JacobiIteration(tr,0.00000000001,2000000) ;
+//   		if (sucess) {
+// 		  vec eigenVals(tMat.rows()) ;
+// 		  tMat.copyToVec(eigenVals) ;
+// 		  cerr << eigenVals.data << endl ; 
+// 		}
 		// Write Gaussian decay formula into Sformula string
 		Sformula="dispersion_s^2*exp(0.5*abs(phi_i-phi_j)^2/(2*lambda_phi^2))";
 		Stype="gaussian";
@@ -884,9 +1389,9 @@ void wienerfilter::createSMatrix(const string &type)
 	else if(type=="white")
 	{
 		// S(i,j)=dispersion_s*Kronecker(i,j) diagonal!
-		for(int row=0; row<S.rows(); row++)			// loop over rows of S
+		for(uint row=0; row<S.rows(); row++)			// loop over rows of S
 		{
-			for(int col=0; col<S.cols(); col++)		// loop over columns of S
+			for(uint col=0; col<S.cols(); col++)		// loop over columns of S
 			{
 /*				if(col==row)						// Diagonal matrix!
 					S.set(row, col, variance_s);	// set to variance_s
@@ -909,9 +1414,9 @@ void wienerfilter::createSMatrix(const string &type)
 	else if(type=="powerlaw")
 	{
 		// S(i,j)=dispersion_s*exp(-abs(phi_i-phi_j)^2/lambda_phi)?
-		for(int row=0; row<S.rows(); row++)				// loop over rows of S
+		for(uint row=0; row<S.rows(); row++)				// loop over rows of S
 		{
-			for(int col=0; col<S.cols(); col++)			// loop over columns of S
+			for(uint col=0; col<S.cols(); col++)			// loop over columns of S
 			{
 // 					dist=abs(row-col);	// compute absolute distance between phi_i and phi_j 
 					dist=abs(faradaydepths[row]-faradaydepths[col]);
@@ -928,9 +1433,9 @@ void wienerfilter::createSMatrix(const string &type)
 	else if(type=="deconvolution")		// S matrix for deconvolution is infinite
 	{
 		// S(i,j)=inf
-		for(int row=0; row<S.rows(); row++)
+		for(uint row=0; row<S.rows(); row++)
 		{
-			for(int col=0; col<S.cols(); col++)						// set each element of S to:
+			for(uint col=0; col<S.cols(); col++)						// set each element of S to:
 			{
 //			    S.set(row, col, numeric_limits<double>::max( ));	// maximum double value available on this platform
 			    S.set(row, col, complex<double>(100000,100000));		// 100000 is sufficiently high
@@ -942,26 +1447,8 @@ void wienerfilter::createSMatrix(const string &type)
 	}
 	else
 	{
+		cerr << "can not create signal covariance matrix" << endl ;
 		throw "wienerfilter::computeSMatrix unknown spectral dependency function";
-	}
-}
-
-
-/*!
-	\brief Iterate signal matrix S with results from Wiener filtering of statistically enough s vectors
-*/
-void wienerfilter::iterateSMatrix()
-{
-	// Check if we have enough s vectors for statistical guess
-	if(number_of_iterations<LOSLIMIT)
-		throw "wienerfilter::iterateSMatrix() number_of_los calculated < LOSLIMIT";
-
-	// Adjust s and create new autocorrelation matrix S (k+1) compute
-	// over all line of sights
-	// S(i,j)=1/N_los*Sum_l=1^N_los(<m_i^(k), m_j^(k)> + D(i,j)^(k))
-	for(unsigned int l=0; l<number_of_iterations; l++)
-	{
-		// TODO!
 	}
 }
 
@@ -996,16 +1483,19 @@ void wienerfilter::computej()
 		if(W.rows()!=0 && W.cols()!=0)		// If we already computed W
 		{
 			#ifdef debug_
-			cout << "computej: j = W*d" << endl;			// debug
+			cout << "compute: j = W*d" << endl;			// debug
 			#endif
 			j=W*d;							// compute j
 		}
 		else		// otherwise compute it from individual matrices
 		{
 			#ifdef debug_
-			cout << "computej: j=R.H()*(inv(N)*d)" << endl;		// debug
+			cout << "compute: j=R.H()*(inv(N)*d)" << endl;		// debug
 			#endif
-			j=R.H()*(inv(N)*d);					// compute j
+			cmat RH = R.H() ;
+			mat NI = N.inv() ;
+			cvec Nd = NI*d ;
+			j=RH*(Nd);					// compute j
 		}
 	}
 }
@@ -1016,64 +1506,93 @@ void wienerfilter::computej()
 */
 void wienerfilter::computeD()								
 {
-	if(j.length()==0)
-		throw "wienerfilter::computeD j has zero length";
-	else if(R.rows()==0 || R.cols()==0)
+	if(R.rows()==0 || R.cols()==0) {
+		cerr << "wienerfilter::computeD R has size 0" << endl ,
 		throw "wienerfilter::computeD R has size 0";
-	else if(R.cols()!=s.length() || R.rows()!=d.length())
-		throw "wienerfilter::computeD R has invalid size";
-	else if(S.cols()!=s.length() || S.rows()!=s.length())
+	}
+	else if(S.cols()==0 || S.rows()==0) {
+		cerr << "wienerfilter::computeD S has invalid size"<< endl ;
 		throw "wienerfilter::computeD S has invalid size";
-	else if(N.rows()!=d.length() || N.cols()!=d.length())
-		throw "wienerfilter::computeD N has invalid size";
+	}
 	else
 	{
-		if(W.rows()!=0 && W.cols()!=0)			// if we already have W
-		{
-			#ifdef debug_
-			cout << "computeD: D = inv(S) + W *R" << endl;
-			#endif
-			D = inv(S) + W * R;					// compute with W and simplified formula
-		}
-		else
-		{
-			#ifdef debug_
-			cout << "computeD: D = inv(S) + R.H()*inv(N)*R" << endl;
-			#endif		
-			D = inv(S) + R.H()*inv(N) * R;		// D^-1=S^-1+R^{dagger}*inv(N)*R
-		}
-		
-		D=inv(D);					// compute inverse
-		computeMapError();				// Store diagonal of D in maperror
+
+// 		#ifdef debug_
+		cout << "compute: D = inv(S) + R.H()*inv(N)*R" << endl;
+// 		#endif
+		S.absOut("signal.mat");
+		cmat SI = S.inv() ;
+		cmat RH = R.H() ;
+		mat NI=N.inv();
+		N.absOut("noise.mat");
+		cmat RHN = RH*NI ;
+		cmat RHNR = RHN*R ;
+                RHNR.absOut("RHNIR.mat") ;		
+		cmat zw = SI + RHNR;		// D^-1=S^-1+R^{dagger}*inv(N)*R
+		D=zw.inv();					// compute inverse
+		cmat Eins = SI*S ;
+    		SI.absOut("sigInv.mat");
 	}
 }
 
-
 /*!
-	\brief Compute instrument fidelity Q=RSR^(inverse)
+	\brief Computes the Propagator D,  D=R^(dagger)N^(inverse)R=j*R
+	for the case, that the inverse of the Signalcovariance matrix = 0
 */
-void wienerfilter::computeQ()
+void wienerfilter::computeD_NoSignalCov()								
 {
-	if(N.rows()!=d.length() || N.cols()!=d.length())
-		throw "wienerfilter::computeQ N has invalid size";
-	else if(R.rows()!=d.length() || R.cols()!=s.length())
-		throw "wienerfilter::computeQ R has invalid size";
-	else if(S.rows()!=s.length() || S.cols()!=s.length())
-		throw "wienerfilter::computeQ S has invalid size";
+        if(R.rows()==0 || R.cols()==0) {
+		cerr <<"wienerfilter::computeD R has size 0" << endl ;
+		throw "wienerfilter::computeD R has size 0";
+	}
+	else if(S.cols()==0 || S.rows()==0) {
+		cerr <<"wienerfilter::computeD S has invalid size" << endl;
+		throw "wienerfilter::computeD S has invalid size";
+	}
 	else
 	{
-		if(M.cols()!=0 && M.rows()!=0)		// if M was computed
-		{
-			Q=S*M;
+		mat NI=N.inv();
+// 		#ifdef debug_
+		cout << "compute: D = inv(S) + R.H()*inv(N)*R" << endl;
+// 		#endif
+		cmat RH = R.H() ;
+		
+		cmat RHN = RH*NI ;
+		cmat RHNR = RHN*R ;		
+		D = RHNR;		// D^-1=R^{dagger}*inv(N)*R
+		
+		D=D.inv();			// compute inverse
+		computeMapError();		// Store diagonal of D in maperror
+	}
+}
+
+/*!
+	\brief Computes the Propagator D,  D=R^(dagger)N^(inverse)R=j*R
+	for the case, that the inverse of the Noisecovariance matrix = 0
+        For this case we use the Gauss-Markow-Regularisation, which can 
+        be regarded as a limit of Wiener Filterung for no noise and unknown 
+        powerspectrum of the signal.
+*/
+void wienerfilter::computeD_NoNoiseCov()  // is currently called								
+{
+       if(R.rows()==0 || R.cols()==0) {
+		cerr << "wienerfilter::computeD R has size 0" << endl ;
+		throw "wienerfilter::computeD R has size 0";
 		}
-		else if(M.rows()!=0 && M.cols()!=0)	// if we have already M
-		{
-			Q=S*M;				// compute directly
-		}
-		else					// compute it from individual matrices
-		{
-			Q=R*S*R.H()*inv(N);		// compute instrument fidelity
-		}
+	else
+	{
+// 		#ifdef debug_
+		cout << "compute: D = R.H()*R" << endl;
+		cmat RH = R.H() ;
+		cout << "Rh calculated " << RH.rows() << " " << RH.cols() <<  endl ;
+		cmat RHR = RH*R ;
+		cout << "RhR calculated " << endl ;
+// 		clock_t t3 = clock() ;
+// 		cout << "gls: " << t2-t1 << "  std: " << t3-t2 << endl ;
+		cmat RHRI = RHR.inv() ;
+		cout << "RhR^(-1) calculated " << endl ;
+		D=RHRI;//*RH ;					// compute inverse
+// 		computeMapError();				// Store diagonal of D in maperror
 	}
 }
 
@@ -1083,19 +1602,32 @@ void wienerfilter::computeQ()
 */
 void wienerfilter::computeW()
 {
+	cout << "Aufruf der Routine computeW" << endl ;
 	// Consistency checks
-	if(R.cols()!=s.size())
-		throw "wienerfilter::computeW R has wrong number columns";
-	if(R.rows()!=d.size())
+	if(R.cols()==0) {
+		cerr << "wienerfilter::computeW R has wrong columns" << endl ;
+		throw "wienerfilter::computeW R has wrong columns";
+	}
+	if(R.rows()==0) {
+		cerr << "wienerfilter::computeW R has wrong number of rows" << endl ;
 		throw "wienerfilter::computeW R has wrong number of rows";
-	if(N.rows()!=d.size())
+	}
+	if(N.rows()==0) {
+		cerr << "wienerfilter::computeW N has wrong number of rows" << endl ;
 		throw "wienerfilter::computeW N has wrong number of rows";
-	if(N.rows()!=N.cols())
+	 }
+	if(N.rows()==0) {
+		cerr << "wienerfilter::computeW N is not quadratic" << endl ;
 		throw "wienerfilter::computeW N is not quadratic";
-	
-	W=R.H()*inv(N);		// compute intermediate product W=R^{dagger}*inv(N)
+	}
+	cmat RH = R.H() ;
+	W=RH*NI;		// compute intermediate product W=R^{dagger}*inv(N)
 }
 
+void wienerfilter::computeW_noNoise() {
+
+  W = R.H();
+}
 
 /*!
 	\brief Computer intermediate matrix M
@@ -1103,12 +1635,8 @@ void wienerfilter::computeW()
 void wienerfilter::computeM()
 {
 	// Consistency checks TODO
-	if(W.cols()==0 || W.rows()==0)
-		throw "wienerfilter::computeM W has size 0 rows/columns";
-	if(Rcols()==0 || R.rows()==0)
-		throw "wienerfilter::computeM R has size 0 rows/columns";
-	else 
-		M=W*R;
+	
+	M=W*R;
 }
 
 
@@ -1120,19 +1648,32 @@ void wienerfilter::computeWF()
 	// Do consistency checks
 	if(S.cols()!=S.rows() || S.cols()!=s.size())
 	{
+		cerr << "wienerfilter::computeWF S has invalid size" << endl ;
 		throw "wienerfilter::computeWF S has invalid size";
 	}
 	if(M.cols()!=0 && W.cols()!=0)		// if M and W were computed
 	{
-		WF=(inv(S)+M)*W;
+		cmat SI = S.inv() ;
+		cmat SM = SI+M ;
+		WF=SM*W;
 	}
 	else if(M.cols()!=0 && W.cols()==0)	// if we only have M
 	{
-		WF=(inv(inv(S) + M))*W;				// correct?
+		cmat SI = S.inv() ;
+		cmat SM = SI+M ;
+		cmat SIM = SM.inv();
+		WF=SIM*W;				// correct?
 	}
 	else				// ... otherwise compute it from individual matrices
 	{
-		WF=(inv(S) + R.H()*inv(N)*R)*R.H()*inv(N);
+		cmat SI = S.inv() ;
+		cmat RH = R.H() ;
+		mat NI = N.inv() ;
+		cmat RNI = RH*NI ;
+		cmat RNR = RNI*R ;
+		cmat SPR = SI + RNR ;
+		cmat SPRR = SPR*RH ;
+		WF=SPRR*NI;
 	}
 }
 
@@ -1184,10 +1725,12 @@ double wienerfilter::getLambdaPhi()
 */
 void wienerfilter::setLambdaPhi(double lambdaphi)
 {
-	if(lambdaphi)
+// 	if(lambdaphi)
 	  this->lambda_phi=lambdaphi;
-	else
-		throw "wienerfilter::setLambdaPhi lambda_phi is 0";
+// 	else {
+// 		cerr << "wienerfilter::setLambdaPhi lambda_phi is 0" << endl ;
+// 		throw "wienerfilter::setLambdaPhi lambda_phi is 0";
+// 	}
 }
 
 
@@ -1225,7 +1768,7 @@ vector<double> wienerfilter::getLambdaSquareds()
 	
 	\param lambdasquareds - lambda squareds used in the data
 */
-void wienerfilter::setLambdaSquareds(const vector<double> &lambdasquareds)
+void wienerfilter::setLambdaSquareds(vector<double> &lambdasquareds)
 {
 	this->lambdasquareds=lambdasquareds;
 }
@@ -1245,10 +1788,12 @@ vector<double> wienerfilter::getDeltaLambdaSquareds()
 	
 	\param delta_lambda_squareds - vector containing the 
 */
-void wienerfilter::setDeltaLambdaSquareds(const vector<double> &delta_lambdasquareds)
+void wienerfilter::setDeltaLambdaSquareds(vector<double> &delta_lambdasquareds)
 {
-	if(delta_lambdasquareds.size()==0)
+	if(delta_lambdasquareds.size()==0) {
+		cerr << "wienerfilter::setDeltaLambdaSquareds delta_lambda_squareds has size 0" << endl ;
 		throw "wienerfilter::setDeltaLambdaSquareds delta_lambda_squareds has size 0";
+	}
 	else
 		this->delta_lambdasquareds=delta_lambdasquareds;
 }
@@ -1270,10 +1815,12 @@ vector<double> wienerfilter::getFrequencies()
 	
 	\param freqs - vector containing observed frequencies
 */
-void wienerfilter::setFrequencies(const vector<double> &freqs)
+void wienerfilter::setFrequencies(vector<double> &freqs)
 {
-	if(freqs.size()==0)
+	if(freqs.size()==0) {
+	   cerr << "wienerfilter::setFrequencies freqs vector is 0" << endl ;
 	   throw "wienerfilter::setFrequencies freqs vector is 0";
+	}
 	else
 	   frequencies=freqs;
 }
@@ -1295,10 +1842,12 @@ vector<double> wienerfilter::getDeltaFrequencies()
 
 	\param deltafreqs - vector containing delta frequencies distances between observed frequencies
 */
-void wienerfilter::setDeltaFrequencies(const vector<double> &deltafreqs)
+void wienerfilter::setDeltaFrequencies(vector<double> &deltafreqs)
 {
-	if(deltafreqs.size()==0)
+	if(deltafreqs.size()==0) {
+		cerr << "wienerfilter::setDeltaFrequencies deltafreqs vector has size 0" << endl ;
 		throw "wienerfilter::setDeltaFrequencies deltafreqs vector has size 0";
+	}
 	else
 		delta_frequencies=deltafreqs;			// set internal delta frequencies to given vector
 }
@@ -1316,10 +1865,12 @@ vector<double> wienerfilter::getFaradayDepths()
 /*!
 	\brief Set Faraday depths to be probed for
 */
-void wienerfilter::setFaradayDepths(const vector<double> &faradaydepths)
+void wienerfilter::setFaradayDepths(vector<double> &faradaydepths)
 {
-	if(faradaydepths.size()==0)
+	if(faradaydepths.size()==0)  {
+		cerr << "wienerfilter::setFaradayDepths faradaydepths has size 0"<< endl ;
 		throw "wienerfilter::setFaradayDepths faradaydepths has size 0";
+	}
 	else
 		this->faradaydepths=faradaydepths;
 }
@@ -1341,15 +1892,23 @@ vector<complex<double> > wienerfilter::getBandpass()
 	
 	\param bandpass - vector containing the bandpass setting for each frequency
 */
-void wienerfilter::setBandpass(const vector<complex<double> > &bandpass)
+void wienerfilter::setBandpass(vector<complex<double> > &bandpass)
 {
-	if(bandpass.size()==0)
+	if(bandpass.size()==0) {
+		cerr << "wienerfilter::setBandpass bandpass vector has size 0" << endl ;
 		throw "wienerfilter::setBandpass bandpass vector has size 0";
+	}
 	else
 		this->bandpass=bandpass;
 }
 
-
+void wienerfilter::createUnitBandpass() {
+  uint nfreqs = frequencies.size() ;
+  bandpass.resize(nfreqs);
+  for (uint i=0; i<nfreqs;i++) {
+    bandpass[i]=complex<double>(1,0);	
+  }
+}
 
 /*!
 	\brief Return dispersion_s
@@ -1378,10 +1937,14 @@ double wienerfilter::getEpsilonZero()
 */
 void wienerfilter::setEpsilonZero(double epsilonzero)
 {
-	if(epsilonzero==0)
+	if(epsilonzero==0) {
+		cerr << "wienerfilter::setEpsilonZero epsilonzero is 0" << endl ;
 		throw "wienerfilter::setEpsilonZero epsilonzero is 0";
-	else if(epsilonzero< 0)
+	}
+	else if(epsilonzero< 0) {
+		cerr << "wienerfilter::setEpsilonZero epsilonzero is 0" << endl ;
 		throw "wienerfilter::setEpsilonZero epsilonzero is 0";
+	}
 	else
 		epsilon_0=epsilonzero;
 }
@@ -1392,8 +1955,10 @@ void wienerfilter::setEpsilonZero(double epsilonzero)
 */
 void wienerfilter::setVariance_s(double variance_s)
 {
-  if(variance_s <= 0)
-    throw "wienerfilter::setVariance_s variance_s <= 0";
+//   if(variance_s <= 0) {
+// 	cerr << "wienerfilter::setVariance_s variance_s <= 0" << endl ;
+//     throw "wienerfilter::setVariance_s variance_s <= 0";
+//   }
 
   this->variance_s=variance_s;
 }
@@ -1415,10 +1980,14 @@ double wienerfilter::getNuZero()
 */
 void wienerfilter::setNuZero(double nu)
 {
-	if(nu==0)
+	if(nu==0) {
+	   cerr << "wienerfilter::setNuZero nu is 0" << endl ;
 	   throw "wienerfilter::setNuZero nu is 0";
-	else if(nu < 0)
+	}
+	else if(nu < 0) { 
+	   cerr << "wienerfilter::setNuZero nu < 0" << endl ; 
 	   throw "wienerfilter::setNuZero nu < 0";
+	}
 	else
 	   nu_0=nu;
 }
@@ -1440,8 +2009,10 @@ double wienerfilter::getAlpha()
 */
 void wienerfilter::setAlpha(double alpha)
 {
-	if(alpha==0)
+	if(alpha==0) {
+		cerr << "wienerfilter::setAlpha alpha is 0" << endl ;
 		throw "wienerfilter::setAlpha alpha is 0";
+	}
 //	else if(alpha < 0)
 // 		throw "wienerfilter::setAlpha alpha < 0";
 	else
@@ -1504,10 +2075,14 @@ cvec wienerfilter::getInformationSourceVector()
 */
 void wienerfilter::reconstructm()
 {
-	if(m.size()==0)
+	if(m.size()==0) {
+		cerr <<"wienerfilter::reconstructm m has size 0" << endl;
 		throw "wienerfilter::reconstructm m has size 0";
-	if(m.size()!=s.size())
+	}
+	if(m.size()!=s.size()) {
+		cerr << "wienerfilter::reconstructm m has wrong size" << endl ;
 		throw "wienerfilter::reconstructm m has wrong size";
+	}
 
 	if(WF.rows()!=0 && WF.cols()!=0)		// if we have the Wiener Filter matrix
 	{
@@ -1517,11 +2092,7 @@ void wienerfilter::reconstructm()
 	else
 	{
 // 	    cout << "m = D*j" << endl;		// debug
-		
-		if(D.rows()==0 || D.rows()==0)
-			throw "wienerfilter::reconstructm D matrix is 0";
-		else
-			m = D*j;					// m=D*j(d)
+	    m = D*j;					// m=D*j(d)
 	}
 }
 
@@ -1533,12 +2104,16 @@ void wienerfilter::reconstructm()
 */
 cvec wienerfilter::computeMapError()
 {
-	if(D.rows()==0 || D.cols()==0)
+	if(D.rows()==0 || D.cols()==0) {
+		cerr <<"wienerfilter::getMapError D has size 0" << endl ;
 		throw "wienerfilter::getMapError D has size 0";
-	if(D.rows()!=D.cols())
+	}
+	if(D.rows()!=D.cols()) {
+		cerr << "wienerfilter::getMapError D is not quadratic" << endl ;
 		throw "wienerfilter::getMapError D is not quadratic";
+	}
 		
-	for(int k=0; k < D.rows(); k++)
+	for(uint k=0; k < D.rows(); k++)
 	{
 	    // get sqrt of diagonal elements of D (since D is also covariance matrix of propagator matrix D)
 	    maperror[k]=sqrt(D.get(k,k));
@@ -1569,22 +2144,20 @@ cvec wienerfilter::getMapError()
 */
 vector<complex<double> > wienerfilter::getMapError()
 {
-  #ifdef _ITPP_
   unsigned int size=D.size();
   vector<complex<double> > rmerror(size);
 
-  if(size==0)
+  if(size==0) {
+	cerr << "wienerfilter::getMapError D has size 0" << endl ;
     throw "wienerfilter::getMapError D has size 0";
+  }
 
   for(unsigned int i=0; i < size; i++)
   {
     rmerror[i]=maperror[i];
   }
- 
+
   return rmerror;
-  #elif _ARMADILLO_
-  return this->maperror;
-  #endif
 }
 
 
@@ -1593,145 +2166,48 @@ vector<complex<double> > wienerfilter::getMapError()
 
 	\return cmat - propagator matrix D
 */
-#ifdef _ITPP_
 cmat wienerfilter::getD()
 {
 	return D;
 }
-#elif _ARMADILLO_
-cx_mat wienerfilter::getD()
-{
-	return D;
-}	
-#endif
 
-	
 /*!
 	\brief Return the instrumental fidelity matrix Q
 
 	\return cmat - instrumental fidelity Q
 */
-#ifdef _ITPP_
 cmat wienerfilter::getInstrumentFidelity()
 {
 	return Q;
 }
-#elif _ARMADILLO_
-cx_mat wienerfilter::getInstrumentFidelity()
-{
-	return Q;
-}
-#endif
-	
-	
+
 /*!
 	\brief Return the Wiener Filter matrix WF
 	
 	\return cmat - Wiener Filter matrix WF
 */
-#ifdef _ITPP_
 cmat wienerfilter::getWienerFilter()
 {
 	return WF;
 }
-#elif _ARMADILLO_
-cx_mat wienerfilter::getWienerFilter()
-{
-	return WF;
-}	
-#endif
-	
+
 
 /*!
 	\brief Return the data vector d
 */
-#ifdef _ITPP_
 cvec wienerfilter::getDataVector()
 {
 	return d;
 }
-#elif _ARMADILLO_
-vector<complex<double> > wienerfilter::getDataVector()
-{
-	return d;
-}	
-#endif
-	
+
 
 /*!
 	\brief Set the data vector cvec d to values given in vector
 
 	\param data - STL data vector
 */
-#ifdef _ITPP_
-void wienerfilter::setDataVector(vector<complex<double> > &data)
-{
-	cvec tempcvec;				// temporary vector for conversion
-	unsigned int size=0;		// to hold size of complex data vector
-	
-	if(data.size()==0)
-	{
-		throw "wienerfilter::setDataVector data has size 0";
-	}
-	else
-	{
-		size=data.size();
-		
-		for(unsigned int i=0; i<size; i++)
-		{
-			d[i]=complex<double>(data[i]);		// convert STL vector to temporary cvec
-				
-			tempcvec=to_cvec(data[i].real(), data[i].imag());
-			d.set_subvector(i, tempcvec);			// conversion currently does not work
-		}
-	}
-}
-#elif _ARMADILLO_
-void wienerfilter::setDataVector(vector<complex<double> > &data)
-{
-	if(data.size()==0)
-	{
-		throw "wienerfilter::setDataVector data has size 0";
-	}
-	else
-	{
-		this->d=data;
-	}
-#endif	
 
 
-#ifdef _ITPP_
-/*!
-	\brief Set the data vector cvec d to values given in ITPP cvec
-	
-	\param &data - ITPP cvec containing data
-*/
-void wienerfilter::setDataVector(cvec &data)
-{
-	if(data.size()==0)
-	{
-		throw "wienerfilter::setDataVector data has size 0";
-	}
-	else
-		d=(cvec) data;
-}
-
-/*!
-	\brief Set the signal vector cvec d to values given in ITPP cvec (only for debugging purposes!)
-	
-	\param &signal - ITPP cvec containing the signal
-*/
-void wienerfilter::setSignalVector(cvec &signalvec)
-{
-	if(signalvec.size()==0)
-	{
-		throw "wienerfilter::setSignalVector signalvec has size 0";
-	}
-	else
-		s=signalvec;
-}
-#endif
-	
 
 /*!
  	\brief Get the limit of maximum iterations
@@ -1817,120 +2293,6 @@ void wienerfilter::setRMSthreshold(double rms)
 	
 	\param filename - name of config file in ASCII format
 */
-void wienerfilter::readConfigFile(const string &filename)
-{
-	// use itpp::parser(filename) to parse config file, makes life easier
-	Parser p;							// ITPP file parser
-	p.init(string(filename));		// initialize parser with filename
-	
-	if(p.exist("Sfilename"))
-		Sfilename=p.get_string("Sfilename");
-	else
-		cerr << "wienerfilter::readConfigfile Sfilename doesn't exist" << endl;
-	if(p.exist("Rfilename"))
-		Rfilename=p.get_string("Rfilename");
-	else
-		cerr << "wienerfilter::readConfigfile Rfilename doesn't exist" << endl;
-	if(p.exist("Nfilename"))	
-		Nfilename=p.get_string("Nfilename");
-	else
-		cerr << "wienerfilter::readConfigfile Nfilename doesn't exist" << endl;
-	if(p.exist("Nfilename"))	
-		Dfilename=p.get_string("Dfilename");
-	else
-		cerr << "wienerfilter::readConfigfile Dfilename doesn't exist" << endl;
-	if(p.exist("Qfilename"))
-		Qfilename=p.get_string("Qfilename");
-	else
-		cerr << "wienerfilter::readConfigfile Qfilename doesn't exist" << endl;
-	if(p.exist("Sformula"))
-		Sformula=p.get_string("Sformula");
-	else
-		cerr << "wienerfilter::readConfigfile Sformula doesn't exist" << endl;	
-	if(p.exist("lambda_phi"))
-		lambda_phi=p.get_double("lambda_phi");
-	else
-		cerr << "wienerfilter::readConfigFile lambda_phi doesn't exist" << endl;
-	if(p.exist("maxiterations"))
-		maxiterations=p.get_int("maxiterations");
-	else
-		cerr <<"wienerfilter::readConfigfile maxiterations doesn't exist" << endl;
-	if(p.exist("rmsthreshold"))
-		rmsthreshold=p.get_double("rmsthreshold");
-	else
-		cerr << "wienerfilter::readConfigfile rmsthreshold doesn't exist" << endl;
-	
-	
-	/*
-	unsigned int position=0;		// position token was found in string
-	string substring;					// temporary substring
-
-	if(filename.length()==0)
-		throw "wienerfilter::readConfigFile invalid filename";
-	
-	// File contains list of Matrix filenames in ITPP format?
-   ifstream infile(const_cast<const char*>(filename.c_str()), ifstream::in);	// open file for reading
- 
-   if(infile.fail())
-   {
-     throw "wienerFilter::readConfigFile failed to open file";
-   }
-   if ( infile.is_open() )
-   {
-      string line;			// buffer line to read from config file
-
-      while ( getline ( infile, line ) ) 
-      {
-         string::size_type i = line.find_first_not_of ( " \t\n\v" );
-
-         if ( i != string::npos && line[i] == '#' )	// if it is a comment
-            continue;
-
-         // Process non-comment lines
-    		if((position=line.find("Sfilename="))!=string::npos)				// if Sfilename is found
-			{
-				Sfilename=line.substr(position);
-			}
-			else if((position=line.find("Rfilename="))!=string::npos)		// if Rfilename is found
-			{
-				Rfilename=line.substr(position);
-			}
-			else if((position=line.find("Nfilename="))!=string::npos)		// if Nfilename is found
-			{
-				Nfilename=line.substr(position);
-			}
-    		else if((position=line.find("Dfilename="))!=string::npos)		// if Dfilename is found
-			{
-				Dfilename=line.substr(position);
-			}
-    		else if((position=line.find("Qfilename="))!=string::npos)		// if Qfilename is found
-			{
-				Qfilename=line.substr(position);
-			}			
-    		else if((position=line.find("Sformula="))!=string::npos)			// if Sformula is found
-			{
-				Sformula=line.substr(position);
-			}			
-    		else if((position=line.find("maxiterations="))!=string::npos)		// if maxiterations is found
-			{
-				substring=line.substr(position);
-				maxiterations=atoi(substring.c_str());
-			}			
-    		else if((position=line.find("rmsthreshold="))!=string::npos)		// if rmsthreshold is found
-			{
-				substring=line.substr(position);
-				rmsthreshold=atoi(substring.c_str());
-			}			
-			else
-			{
-				throw "wienerfilter::readConfigFile file contains an unknown paramter";
-			}
-		}
-	
-		infile.close();
-	}
-	*/
-}
 
 
 /*!
@@ -1985,229 +2347,6 @@ void wienerfilter::writeConfigFile(const string &filename)
 
 
 
-//***************************************************************************
-//
-// IT++ input/output routines
-//
-//****************************************************************************
-#ifdef _ITPP_
-/*!
-	\brief Read Signal Matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::readSignalMatrix(const string &filename)
-{
-	if(filename.length())
-	{
-		Sfilename=filename;			// Update Nfilename attribute
-
-		it_file Sfile(filename);	// file stream for N matrix	
-		Sfile >> Name("S") >> S;
-
-		Sfile.close();
-	}
-	else
-		throw "wienerfilter::readSignalMatrix invalid filename";
-}
-
-
-/*!
-	\brief Write Signal matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::writeSignalMatrix(const string &filename)
-{
-	if(filename.length())
-	{
-		Sfilename=filename;		// Update Sfilename attribute	
-
-		it_file Sfile(filename);	// file stream for S matrix	
-		Sfile << Name("S") << S;	
-
-		Sfile.flush();
-		Sfile.close();
-	}
-	else
-		throw "wienerfilter::writeSignalMatrix invalid filename";
-}
-
-
-
-/*!
-	\brief Read Noise Matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::readNoiseMatrix(const string &filename)
-{
-	if(filename.length())
-	{
-		Nfilename=filename;			// Update Nfilename attribute
-
-		it_file Nfile(filename);	// file stream for N matrix	
-		Nfile >> Name("N") >> N;
-
-		Nfile.close();
-	}
-}
-
-
-/*!
-	\brief Write Noise matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::writeNoiseMatrix(const string &filename)
-{
-	if(filename.length())
-	{
-		Nfilename=filename;			// Update Nfilename attribute	
-
-		it_file Nfile(filename);	// file stream for N matrix	
-		Nfile << Name("N") << N;	
-
-		Nfile.flush();
-		Nfile.close();
-	}
-}
-
-
-/*!
-	\brief Read Response matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::readResponseMatrix(const string &filename)
-{
-   if(filename.length())			// only if a valid filename was given
-	{
-		Rfilename=filename;			// Update Rfilename attribute
-
-		it_file Rfile(filename);	// file stream for R matrix	
-		Rfile >> Name("R") >> R;	// read into wienerfilter class member
-
-		Rfile.close();
-	}
-}
-
-
-/*!
-	\brief Write Response matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::writeResponseMatrix(const string &filename)
-{
-   if(filename.length())			// only if a valid filename was given
-	{
-		Rfilename=filename;			// Update Rfilename attribute
-	
-		it_file Rfile(filename);	// file stream for R matrix	
-		Rfile << Name("R") << R;	// read into wienerfilter class member
-		
-		Rfile.flush();
-		Rfile.close();
-	}
-	else
-		throw "wienerfilter::writePropagatorMatrix invalid filename";
-}
-
-
-/*!
-	\brief Read Propagator mtrix from a ITPP file
-	
-	\param filename - name of ITPP file
-	
-	\return mat - propagator matrix
-*/
-void wienerfilter::readPropagatorMatrix(const string &filename)
-{
-	if(filename.length())			// only if a valid filename was given
-	{
-		Dfilename=filename;			// Update Dfilename attribute
-
-		it_file Dfile(filename);	// file stream for D matrix	
-		Dfile >> Name("D") >> D;	// read into wienerfilter class member
-
-		Dfile.close();
-	}
-	else
-		throw "wienerfilter::readPropagatorMatrix invalid filename";
-}
-
-
-/*!
-	\brief Write Propagator matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::writePropagatorMatrix(const string &filename)
-{
-	if(filename.length())			// only if a valid filename was given
-	{
-		Dfilename=filename;			// Update Dfilename attribute
-		
-		it_file Dfile(filename);	// file stream for D matrix	
-		Dfile << Name("D") << D;	
-
-		Dfile.flush();
-		Dfile.close();
-	}
-	else
-		throw "wienerfilter::writePropagatorMatrix invalid filename";
-}
-
-
-/*!
-	\brief Read Instrument Fidelity matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-	
-	\return mat - instrumental fidelity matrix
-*/
-void wienerfilter::readInstrumentFidelityMatrix(const string &filename)
-{
-	if(filename.length())			// only if a valid filename was given
-	{
-		Qfilename=filename;			// Update Qfilename attribute
-
-		it_file Qfile(filename);	// file stream for Q matrix	
-		Qfile >> Name("Q") >> Q;
-
-		Qfile.close();
-	}
-	else
-		throw "wienerfilter::readInstrumentFidelityMatrix invalid filename";
-}
-
-
-/*!
-	\brief Write Instrumental Fidelity matrix from a ITPP file
-	
-	\param filename - name of ITPP file
-*/
-void wienerfilter::writeInstrumentFidelityMatrix(const string &filename)
-{
-	if(filename.length())		// only if a valid filename was given
-	{
-		Qfilename=filename;			// Update Qfilename attribute	
-
-		it_file Qfile(filename);		
-		Qfile << Name("Q") << Q;				
-
-		Qfile.flush();
-		Qfile.close();
-	}
-	else
-	{
-		throw "wienerfilter::writeInstrumentFidelityMatrix invalid filename";
-	}
-}
-#endif
-
-
 //**********************************************************************
 //
 // ASCII write functions (useful if plotting will be done with GNUplot)
@@ -2239,7 +2378,7 @@ void wienerfilter::writeASCII(vector<double> v, const string &filename)
   }
 }
 
-#ifdef _ITPP_
+
 /*!
   \brief Write out a real ITPP vec vector in ASCII format
   
@@ -2264,8 +2403,7 @@ void wienerfilter::writeASCII(vec v, const string &filename)
     outfile << v[i] << endl;				// write out vector element
   }
 }
-#endif
-	
+
 
 /*!
   \brief Write out a real STL vector and a complex STL vector in ASCII format
@@ -2274,7 +2412,7 @@ void wienerfilter::writeASCII(vec v, const string &filename)
   \param v2 - real STL vector to write out
   \param filename - filename of ASCII text file to write
 */
-void wienerfilter:: writeASCII(const vector<double> &v1, const vector<double> &v2, const std::string &filename)
+void wienerfilter:: writeASCII(vector<double> v1, vector<double> v2, const std::string &filename)
 {
   unsigned int length=v1.size();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2305,7 +2443,7 @@ void wienerfilter:: writeASCII(const vector<double> &v1, const vector<double> &v
   \param cv - complex STL vector to write out
   \param filename - filename of ASCII text file to write
 */
-void wienerfilter:: writeASCII(const vector<double> &v, const vector<complex<double> > &cv, const std::string &filename)
+void wienerfilter:: writeASCII(vector<double> v, vector<complex<double> > cv, const std::string &filename)
 {
   unsigned int length=v.size();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2326,14 +2464,13 @@ void wienerfilter:: writeASCII(const vector<double> &v, const vector<complex<dou
 }
 
 
-#ifdef _ITPP_
 /*!
   \brief Write out a complex vector in ASCII format
   
   \param v - complex vector to write out
   \param filename - filename of ASCII text file to write
 */
-void wienerfilter::writeASCII(const cvec &v, const string &filename)
+void wienerfilter::writeASCII(cvec v, const string &filename)
 {
   unsigned int length=v.size();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2351,7 +2488,7 @@ void wienerfilter::writeASCII(const cvec &v, const string &filename)
     outfile << i << "\t" << v[i].real() << "\t" << v[i].imag() << endl;	// write out real and imaginary part of vector
   }
 }
-	
+
 
 /*!
   \brief Write out a coordinate and a real vector in ASCII format
@@ -2360,7 +2497,7 @@ void wienerfilter::writeASCII(const cvec &v, const string &filename)
   \param v - complex vector to write out
   \param filename - filename of ASCII text file to write
 */
-void wienerfilter::writeASCII(const vector<double> &coord, const cvec &v, const string &filename)
+void wienerfilter::writeASCII(vector<double> coord, cvec v, const string &filename)
 {
   unsigned int length=v.size();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2392,7 +2529,7 @@ void wienerfilter::writeASCII(const vector<double> &coord, const cvec &v, const 
   \param v - real vector to write out
   \param filename - filename of ASCII text file to write
 */
-void wienerfilter::writeASCII(const vec &coord, const vec &v, const string &filename)
+void wienerfilter::writeASCII(vec coord, vec v, const string &filename)
 {
   unsigned int length=v.size();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2424,7 +2561,7 @@ void wienerfilter::writeASCII(const vec &coord, const vec &v, const string &file
   \param v - complex vector to write out
   \param filename - filename of ASCII text file to write
 */
-void wienerfilter::writeASCII(const vec &coord, const cvec &v, const string &filename)
+void wienerfilter::writeASCII(vec coord, cvec v, const string &filename)
 {
   unsigned int length=v.size();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2443,7 +2580,6 @@ void wienerfilter::writeASCII(const vec &coord, const cvec &v, const string &fil
     outfile << "\t" << v[i].imag() << endl;		// write out imaginary part of vector
   }
 }
-#endif
 
 
 /*!
@@ -2452,8 +2588,7 @@ void wienerfilter::writeASCII(const vec &coord, const cvec &v, const string &fil
   \param M - complex matrix to write out
   \param filename - filename of ASCII text file to write
 */
-#ifdef _ITPP_
-void wienerfilter::writeASCII(const cmat M, const string &filename)
+void wienerfilter::writeASCII(cmat M, const string &filename)
 {
   unsigned int rows=M.rows(), cols=M.cols();
   ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
@@ -2474,31 +2609,8 @@ void wienerfilter::writeASCII(const cmat M, const string &filename)
 	 }
 	 outfile << endl;			// at end of each row add a newline
   }
+
 }
-#elif _ARMADILLO_
-void wienerfilter::writeASCII(const cx_mat M, const string &filename)
-{
-	unsigned int rows=M.rows(), cols=M.cols();
-	ofstream outfile(const_cast<const char*>(filename.c_str()), ofstream::out);
-	
-	//-----------------------------------------------------
-	// Check input parameters
-	if(rows==0 || cols==0)
-		throw "wienerfilter::writeASCII Matrix M has size 0";
-	if(filename=="")  
-		throw "wienerfilter::writeASCII no filename given";
-	
-	//-----------------------------------------------------
-	for(unsigned int i=0; i < rows; i++)				// loop over rows
-	{
-		for(unsigned int j=0; j < cols; j++)			// loop over columns
-		{
-			outfile << M(i,j).real() << "\t" << M(i,j).imag() << "\t";	// write out real and imaginary part of vector
-		}
-		outfile << endl;			// at end of each row add a newline
-	}
-}
-#endif
 
 
 /*!
@@ -2614,7 +2726,7 @@ void wienerfilter::getData(vector<complex<double> > &cmplx)
 	\param &real - vector containing the real part
 	\param &imag - vector containing the imaginary part
 */
-void wienerfilter::getData(const vector<double> &real, const vector<double> &imag)
+void wienerfilter::getData(vector<double> &real, vector<double> &imag)
 {
 	if(real.size()==0)
 		throw "wienerfilter::getData real vector has length 0";
@@ -2624,15 +2736,16 @@ void wienerfilter::getData(const vector<double> &real, const vector<double> &ima
 		throw "wienerfilter:getData re and im vector differ in length";
 	
 	cvec tempcvec;						// temporary cvec vector needed for conversion
-	int size=real.size();				// get size from vector parameters
+	int size=real.size();			// get size from vector parameters
 	
 	
 	d.set_size(size);					// set size initially to size of real vector
 	for(int i=0; i<size; i++)
 	{
 		// This must be possible to be implemented more efficiently!
-		tempcvec=to_cvec(real[i], imag[i]);		
-		d.ins(i, tempcvec);			// append temporary vector to d
+//		tempcvec=to_cvec(real[i], imag[i]);		
+//		d.ins(i, tempcvec);			// append temporary vector to d
+		d[i] = complex<double>(real[i],imag[i]);
 	}
 }	
 
@@ -2643,7 +2756,6 @@ void wienerfilter::getData(const vector<double> &real, const vector<double> &ima
   \param vector - vector to read into (reads only real part)
   \param filename - name of file to read from
 */
-#ifdef _ITPP_
 void wienerfilter::readSignalFromFile(const std::string &filename)
 {
   double value=0;
@@ -2680,11 +2792,12 @@ void wienerfilter::exportSignal(vector<complex<double> > &cmplx)
 	if(s.size()==0)
 		throw "wienerfilter::exportSignal s has length 0";
 	
-	for(int i=0; i<s.size(); i++)
+	for(uint i=0; i<s.size(); i++)
 	{
 		cmplx[i]=s[i];
 	}
 }
+
 
 /*!
 	\brief Export signal to real and imaginary STL vectors
@@ -2696,7 +2809,7 @@ void wienerfilter::exportSignal(vector<double> &re, vector<double> &im)
 {
 	cvec sconjugate(s.size());			// conjugate of s vector
 	
-	for(int i=0; i<s.length(); i++)
+	for(uint i=0; i<s.length(); i++)
 	{
 		// TODO: This doesn't work
 //		re[i]=static_cast<double>( 0.5*(s[i]-sconjugate[i]) );
@@ -2739,7 +2852,7 @@ void wienerfilter::readLambdaSqAndDeltaLambdaSqFromFile(const std::string &filen
   
   infile.close();
 }
-	
+
 
 /*!
 	\brief Read lambda squareds and complex data vector from a text file
@@ -2763,17 +2876,17 @@ void wienerfilter::readSimDataFromFile(const std::string &filename)
    {
       throw "wienerfilter::readSimDataFromFile failed to open file";
    }
-	
+	uint i=0;
 	while(infile.good())
 	{
 		infile >> lambdasq >> real >> imag;
 		lambdasquareds.push_back(lambdasq);
-		
-		tempcvec=to_cvec(real, imag);
+		d[i] = complex<double>(real,imag) ;
+//		tempcvec=to_cvec(real, imag);
 	}
 	
 	// Write vectors to wienerfilter class
-	d.ins(d.size(), tempcvec);
+//	d.ins(d.size(), tempcvec);
 	
 	infile.close();
 }
@@ -2809,19 +2922,21 @@ void wienerfilter::read4SimDataFromFile(const std::string &filename)
 		infile >> lambdasq >> deltalambdasq >> real >> imag;
 
 	   // Write complex vector to wienerfilter class data vector d (no easier way found than this)
-		tempcvec=to_cvec(real, imag);				
+	//	tempcvec=to_cvec(real, imag);				
 
 		if(lambdasquareds.size() > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
 		{
 			lambdasquareds[i]=lambdasq;
 			delta_lambdasquareds[i]=deltalambdasq;
-			d.set_subvector(i, tempcvec);		// set i-1 position to tempcvec (conversion currently does not work)		
+//			d.set_subvector(i, tempcvec);		// set i-1 position to tempcvec (conversion currently does not work)		
+			d[i]=complex<double>(real,imag);
 		}
 		else		// otherwise use push back function to append at the end of the vector
 		{
 		   	lambdasquareds.push_back(lambdasq);
 			delta_lambdasquareds.push_back(deltalambdasq);			
-			d.ins(d.size(), tempcvec);			// insert tempcvec at end of d
+//			d.ins(d.size(), tempcvec);			// insert tempcvec at end of d
+			d[i] = complex<double>(real,imag); 
 		}
 
 		i++;											// increment index into data vector
@@ -2833,6 +2948,19 @@ void wienerfilter::read4SimDataFromFile(const std::string &filename)
 	//delta_lambda_squareds.pop_back();
 	
 	infile.close();
+}
+
+
+/*!
+  \brief Read Faraday depths from a file
+
+  \param filename - name of text file containing Faraday depths
+*/
+void wienerfilter::readFaradayDepthsFromFile(const std::string &filename)
+{
+
+
+
 }
 
 
@@ -2870,15 +2998,17 @@ void wienerfilter::readDataFromFile(const std::string &filename)
 		infile >> real >> imag;
 
 	   // Write complex vector to wienerfilter class data vector d (no easier way found than this)
-		tempcvec=to_cvec(real, imag);				
+//		tempcvec=to_cvec(real, imag);				
 
 		if(frequencies.size() > i)		// if there is size left in lambdasquareds and delta_lambda_squareds vectors
 		{
-			d.set_subvector(i, tempcvec);	// set i-1 position to tempcvec (conversion currently does not work)		
+//			d.set_subvector(i, tempcvec);	// set i-1 position to tempcvec (conversion currently does not work)		
+			d[i] = complex<double>(real,imag);
 		}
 		else		// otherwise use push back function to append at the end of the vector
 		{
-		   d.ins(d.size(), tempcvec);		// insert tempcvec at end of d
+//		   d.ins(d.size(), tempcvec);		// insert tempcvec at end of d
+		   d[i] = complex<double>(real,imag);
 		}
 
 		i++;					// increment index into data vector
@@ -2918,19 +3048,21 @@ void wienerfilter::read4SimFreqDataFromFile(const std::string &filename)
 		infile >> freq >> deltafreq >> real >> imag;
 
 	   // Write complex vector to wienerfilter class data vector d (no easier way found than this)
-		tempcvec=to_cvec(real, imag);				
+//		tempcvec=to_cvec(real, imag);				
 
 		if(frequencies.size() > i)				// if there is size left in lambdasquareds and delta_lambda_squareds vectors
 		{
 			frequencies[i]=freq;
 			delta_frequencies[i]=deltafreq;
-			d.set_subvector(i, tempcvec);		// set i-1 position to tempcvec (conversion currently does not work)		
+//			d.set_subvector(i, tempcvec);		// set i-1 position to tempcvec (conversion currently does not work)		
+			d[i]=complex<double>(real,imag);
 		}
 		else		// otherwise use push back function to append at the end of the vector
 		{
 		   frequencies.push_back(freq);
 		   delta_frequencies.push_back(deltafreq);			
-		   d.ins(d.size(), tempcvec);			// insert tempcvec at end of d
+//		   d.ins(d.size(), tempcvec);			// insert tempcvec at end of d
+  		   d[i]=complex<double>(real,imag);		   
 		}
 
 		i++;											// increment index into data vector
@@ -2943,32 +3075,7 @@ void wienerfilter::read4SimFreqDataFromFile(const std::string &filename)
 	
 	infile.close();
 }
-#elif _ARMADILLO_
-	
-	// TODO with Armadillo-implementation
-	//void wienerfilter::getData(const vector<double> &real, const vector<double> &imag)	
-	//void wienerfilter::readSignalFromFile(const std::string &filename)
-	//void wienerfilter::exportSignal(vector<complex<double> > &cmplx)
-	//void wienerfilter::exportSignal(vector<double> &re, vector<double> &im)	
-	//void wienerfilter::readLambdaSqAndDeltaLambdaSqFromFile(const std::string &filename)	
-	//void wienerfilter::readSimDataFromFile(const std::string &filename)
-	//void wienerfilter::read4SimDataFromFile(const std::string &filename)	
-	//void wienerfilter::readDataFromFile(const std::string &filename)
-	//void wienerfilter::read4SimFreqDataFromFile(const std::string &filename)
-#endif
 
-
-/*!
- \brief Read Faraday depths from a file
- 
- \param filename - name of text file containing Faraday depths
- */
-void wienerfilter::readFaradayDepthsFromFile(const std::string &filename)
-{
-	
-	
-	
-}
 
 
 /*!
@@ -2988,7 +3095,6 @@ void wienerfilter::readRealDataFromFile(const std::string &filename)
 }
 
 
-#ifdef _ITPP_
 /*!
   \brief Write a data vector out to file on disk (mainly for debugging)
 
@@ -3040,7 +3146,7 @@ void wienerfilter::writeSignalToFile(const std::string &filename)
 */
 void wienerfilter::writeMapToFile(const std::string &filename)
 {
-  int i=0;     // loop variable
+  uint i=0;     // loop variable
 
   if(faradaydepths.size()==0)			// if Faradaydepths have not been set
     throw "wienerfilter::writeMapToFile faradaydepths has size 0";
@@ -3061,7 +3167,6 @@ void wienerfilter::writeMapToFile(const std::string &filename)
   outfile.flush();               		// flush output file
 }
 
-	
 
 //***************************************************************************
 //
@@ -3165,10 +3270,7 @@ void wienerfilter::writeMathematica(cmat M, const std::string &part, const std::
   }
   
 }
-#elif _ARMADILLO_
-	
-	// All output functions need to be adjusted to Armadillo...
-#endif
+
 
 
 //***************************************************************************
@@ -3243,9 +3345,9 @@ void wienerfilter::createSimpleResponseMatrix(int shift, double scale)
 
 
   // Simple shift and scale the original signal
-  for(int row=0; row<R.rows(); row++)
+  for(uint row=0; row<R.rows(); row++)
   {
-    for(int col=0; col<R.cols(); col++)
+    for(uint col=0; col<R.cols(); col++)
     {
       if(row==col+shift)
       {
@@ -3268,7 +3370,7 @@ void wienerfilter::createSimpleResponseMatrix(int shift, double scale)
   \param signal - STL vector signal to compute P=sqrt(Q^2 + U^2)
   \param power - vector to hold resulting P
 */
-void wienerfilter::complexPower(const vector<complex<double> > &signal, vector<double> &power)
+void wienerfilter::complexPower(vector<complex<double> > &signal, vector<double> &power)
 {
    if(signal.size()==0)
       throw "wienerfilter::complexPower signal has size 0";
@@ -3287,7 +3389,7 @@ void wienerfilter::complexPower(const vector<complex<double> > &signal, vector<d
   \param signal - ITPP vector signal to compute P=sqrt(Q^2 + U^2)
   \param power - vector to hold resulting P
 */
-void wienerfilter::complexPower(const cvec &signal, vector<double> &power)
+void wienerfilter::complexPower( cvec &signal, vector<double> &power)
 {
    if(signal.size()==0)
       throw "wienerfilter::complexPower signal has size 0";
@@ -3298,5 +3400,7 @@ void wienerfilter::complexPower(const cvec &signal, vector<double> &power)
    for(unsigned int i=0; i < (unsigned int)signal.size(); i++)
       power[i]=sqrt(signal[i].real()*signal[i].real()+signal[i].imag()*signal[i].imag());
 }
+
+
 
 }  // end namespace RM

@@ -1,30 +1,15 @@
-/***************************************************************************
- *   Copyright (C) 2009                                                    *
- *   Sven Duscha (sduscha@mpa-garching.mpg.de)                             *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
 
 #ifndef RMIO_H
 #define RMIO_H
 
 #include <vector>
 #include <complex>
-
-using std::vector;
+#include <fitsio.h>
+#include <fitsio2.h>
+//#include "psrfits.h"
+#include "rmNumUtils.h"
+#define uint unsigned int
+using namespace std;
 
 namespace RM {  //  BEGIN -- namespace RM
   
@@ -32,52 +17,123 @@ namespace RM {  //  BEGIN -- namespace RM
     \class rmIO
     \ingroup RM
     
-    \brief I/O helper class for RM
+    \brief I/O helper class for RM to read rm-cubes from
+    hdf5 files and write them into hdf5 files
     
-    \author Sven Duscha (sduscha@mpa-garching.mpg.de)
-    
-    \date 02.08.09.
-    
-    \test trmIO.cc
-    
-    <h3>Prerequisites</h3>
-    
-    <ul type="square">
-    <li> rm
-    </ul>
-    
-    <h3>Synopsis</h3>
-    
-    The need for testing several vector based RM algorithm and CLEAN classes
-    demands for standardized vector I/O (this is currently present in the rm class)
-    But due to branching of coding to different classes that only later get migrated
-    into the development tree, this I/O class seems appropriate.
-    
-    It provides vector<double> and vector<complex<double> > reading and writing I/O.
-    Most of the functions have been taken from the rm class.
     
     <h3>Example(s)<h3>
     
   */
-  
+  typedef struct psrfits psr;
   class rmIO {
-    
   public:
-    
-    //***************************************************************************
+     string grp_name ;
+     string data_name ;
+     string fara_name;
+//      string freq_name;
+     string fara_unit ;
+     string freq_unit ;
+     string freqConst ;
+     string lambConst ;
+     string namePhi ;
+     string nameTheta ;
+     string nameFara ;
+     string theta_unit ;
+     string phi_unit ;
+
+     string nameQ ;
+     string nameU ;
+     string q_name ;
+     string u_name ;
+     string currentMainGroup;
+     string currentImage ;
+     string currentData ;
+     string lambSQ_unit ;
+     bool write ;  // id for the data group of a image 
+     /* additional coordinates for the dimensions of the sky */
+     vector<double> theta ;
+     vector<double> phi ;
+
+     /* attribute shows the type of the axe, which is used for rm-synthesis third dimension
+        rmType = 0 : no maching third axe found
+	rmType = 1 : frequencies are used for this axe
+	rmType = 2 : lambda squared are used for this axe */
+     uint rmType;   
+    rmIO() {
+	grp_name = "/" + string("Coordinates") ; // name of the group containing the values of lambda squared  
+	data_name = "/Data" ;
+	freqConst = string("Freqs");
+	lambConst = string("LambdaSQ");
+	namePhi = string("Phi");
+	nameTheta = string("Theta");
+	nameFara = string("FaradayDepths");
+	fara_name = string("faraday_depths");
+/*	freq_name = string("frequencies");
+	lamb_name = string("lambda_squared") ;*/
+	fara_unit = string("rad/m^2");
+	freq_unit = string("1/s");
+	lambSQ_unit = string("m^2") ;
+	nameQ = string("Q") ;
+	nameU = string("U") ;
+  }
+
+  ~rmIO() {
+
+  }
+
+  /*! constuctor of a file io object for reading hdf5 files.
+      @param name of the file to open 
+    */
+  rmIO(string fileName, bool write) {
+// 	psr *test = new psr();
+/*	const char *name = fileName.c_str() ;
+	for (uint i=0; i<fileName.length(); i++) {
+	  test->filename[i] = name[i] ;
+	}*/
+  }
+
+    // ***************************************************************************
     //
     // Read frequency / lambda squared distributions from text (or later FITS/HDF5) files
     //
-    //***************************************************************************
+    // ***************************************************************************
     
     //! Read frequency distribution from a text file
-    void readFrequencies (const std::string &,
-			  vector<double> &data);
+    void readFrequencies ();
+    /*! saves a lines of sight data into a fits file in the format,
+        defined by James Anderson http://usg.lofar.org/forum/index.php?topic=676.0
+	The datastructure has a five dimensional image
 
-    //! Read lambda squareds from a text file
-    void readLambdaSquareds (const std::string &,
-			     vector<double> &data);
+	AXIS1 VALUE_ERROR       NAXIS1 must always be 2 (0: data-point value
+	                                                 1: error estimate)
+	AXIS2 Stokes(I,Q,U,V) , NAXIS2 should always be 4 (0:I, 1:Q, 2:U, 3:V)
+	AXIS3 Frequency
+	AXIS4 Pulse phase       NAXIS4 may be 1
+	AXIS5 Time              NAXIS5 may be 1
+	*/
+    void saveFreqLineToFits(string fileName, vector<complex<double> > &line, vector<double> &freqs) ;
+    void saveFaraLineToFits(string fileName, vector<complex<double> > &line, vector<double> &freqs) ;
+    /*! reads a line of sight data into a fits file in the format,
+        defined by James Anderson http://usg.lofar.org/forum/index.php?topic=676.0
+	The datastructure has a five dimensional image
+
+	AXIS1 VALUE_ERROR       NAXIS1 must always be 2 (0: data-point value
+	                                                 1: error estimate)
+	AXIS2 Stokes(I,Q,U,V) , NAXIS2 should always be 4 (0:I, 1:Q, 2:U, 3:V)
+	AXIS3 Frequency
+	AXIS4 Pulse phase       NAXIS4 may be 1
+	AXIS5 Time              NAXIS5 may be 1
+	*/
+    void readFreqLineFromFits(string fileName, cvec &line, vec &freqsC, vec &freqsI, int indFreq) ;
+    void readFreqLineFromAscii(string fileName, cvec &line, vec &freqsC, vec &freqsI, int indFreq) ;
+    void readFreqLine(string fileName, cvec &line, vec &freqsC, vec &freqsI, int indFreq,int fits) ;
     
+    /*! procedure to read the frequency intervals from the fitsfile 
+        out of the table of the seccond hdu */
+    void readFreqsFromFits(fitsfile *fptr, vec &freqsC, vec &freqsI) ;
+    //! Read lambda squareds from the hdf5 file
+//     int foundLambdaSQ(hid_t fileID,string &grp_name, string &retName) ;
+
     //! Compute deltaLambdaSquareds from lambdaSquareds
     void computeDeltaLambdaSquareds (const vector<double> &,
 				     vector<double> &);
@@ -116,8 +172,8 @@ namespace RM {  //  BEGIN -- namespace RM
     void readFaradaySimulationFromFile (vector<double> &faradayDepths,
 					vector<double> &deltaFaradayDepths,
 					vector<double> &FaradayEmissions,
-					const std::string &filename);
-
+					const std::string &filename);				     
+    
     //! read a real vector from a file
     void readVectorFromFile (vector<double> &vec,
 			     const std::string &filename);

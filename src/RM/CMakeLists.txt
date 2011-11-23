@@ -1,17 +1,16 @@
 
 ## Name of the project
 project (RM)
-
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
-
 ## Load CMake modules
+message("1.")
 include (CTest)
+message("2.")
 enable_testing()
-
+message("3.")
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
-
 if (NOT LUS_CMAKE_MODULES)
   find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
     PATHS 
@@ -31,7 +30,7 @@ if (LUS_CMAKE_MODULES)
     "CMake module path"
     FORCE)
   ## Load custom CMake settings
-  include (LUS_CMakeSettings)
+  ##include (LUS_CMakeSettings)
 endif (LUS_CMAKE_MODULES)
 
 ## =============================================================================
@@ -69,6 +68,7 @@ foreach (externalPackage
     DAL
     FFTW3
     GFortran
+    GSL
     HDF5
     ITPP
     Motif
@@ -235,6 +235,7 @@ set (rm_link_libraries
   ${FFTW3_LIBRARIES}
   ${WCSLIB_LIBRARIES}
   ${LAPACK_LIBRARIES}
+  ${GSL_LIBRARIES}
   )
 
 if (ARMADILLO_LIBRARIES)
@@ -272,7 +273,7 @@ add_subdirectory (apps)
 ##  Configuration summary
 ##
 ## =============================================================================
-
+message ("HALLO ${CASACORE_FOUND} ${FFTW3_FOUND}")
 message (STATUS "+============================================================+")
 message (STATUS "| RM-Tools: Summary of configuration settings                |")
 message (STATUS "+------------------------------------------------------------+")
