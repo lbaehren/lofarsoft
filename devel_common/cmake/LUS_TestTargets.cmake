@@ -24,12 +24,14 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   ## results to the Dashboard server.
 
   file (WRITE ${PROJECT_BINARY_DIR}/testbuild
-"${CMAKE_CTEST_COMMAND} -D ExperimentalStart
-${CMAKE_CTEST_COMMAND} -D ExperimentalConfigure
-${CMAKE_CTEST_COMMAND} -D ExperimentalTest
-${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
-    )
-  
+"## LUS test driver script
+${CMAKE_BUILD_TOOL} anaamika_Experimental
+${CMAKE_BUILD_TOOL} dal_Experimental
+${CMAKE_BUILD_TOOL} pulsar_Experimental
+${CMAKE_BUILD_TOOL} pycrtools_Experimental
+${CMAKE_BUILD_TOOL} rm_Experimental"
+)
+
   add_custom_target (DashboardBuild
     COMMAND sh testbuild
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
