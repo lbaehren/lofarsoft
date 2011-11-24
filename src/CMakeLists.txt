@@ -7,6 +7,9 @@ include (ExternalProject)
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
+##                                                Macro: build_package
+
 macro (build_package _packageName _packageSource)
 
   ## Locate common options
@@ -53,6 +56,50 @@ configure_file (
   ${PROJECT_SOURCE_DIR}/devel_common/scripts/build_package.sh.in
   ${PROJECT_BINARY_DIR}/build_package.sh
   )
+
+##____________________________________________________________________
+##                                            Macro: lus_package_build
+## Parameters:
+##  _name : Name of the package as available as biuld target.
+##  -dir  : Name of the directory containing the source code.
+
+macro (lus_package_build _name _dir)
+
+  ## Check for build directory
+  if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+    file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+  endif (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+
+  ## Trigger build and install
+  add_custom_target (${_name}
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir}
+    COMMAND ${CMAKE_BUILD_TOOL} install
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
+    )
+
+endmacro (lus_package_build)
+
+##____________________________________________________________________
+##                                     Macro: lus_package_experimental
+## Parameters:
+##  _name : Name of the package as available as biuld target.
+##  _dir  : Name of the directory containing the source code.
+
+macro (lus_package_experimental _name _dir)
+
+  ## Check for build directory
+  if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+    file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+  endif (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+
+  ## Trigger experimental build
+  add_custom_target (${_name}_Experimental
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir}
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
+    )
+
+endmacro (lus_package_experimental)
 
 ## ==============================================================================
 ##
@@ -146,15 +193,13 @@ endif (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
 ## ==============================================================================
 
 ##__________________________________________________________
-##                                        Build instructions
+##                              Build & Testing instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
-  ExternalProject_Add (contrib
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/contrib
-    URL ${CMAKE_CURRENT_SOURCE_DIR}/contrib
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    CMAKE_CACHE_ARGS -DLUS_CMAKE_MODULES:PATH=${LUS_CMAKE_MODULES}
-    )
+  ## Build package from present sources
+  lus_package_build (contrib contrib)
+  ## Experimental build
+  lus_package_experimental (contrib contrib)
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
   ExternalProject_Add (contrib
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/contrib
@@ -173,13 +218,6 @@ add_dependencies (contrib dal)
 ##                                                   Testing
 
 if (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
-
-  ## Custom target to trigger test build
-  add_custom_target (contrib_Experimental
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/contrib
-    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/contrib/src/contrib-build
-    )
 
   add_test (
     NAME contrib_Experimental
@@ -294,11 +332,10 @@ option (RM_WITH_ARMADILLO  "Enable using Armadillo library?"  YES )
 ## Build instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
-  ExternalProject_Add (rm
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/RM
-    URL ${CMAKE_CURRENT_SOURCE_DIR}/RM
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_WITH_ITPP=${RM_WITH_ITPP} -DRM_WITH_ARMADILLO=${RM_WITH_ARMADILLO}
-    )
+  ## Build package from present sources
+  lus_package_build (rm RM)
+  ## Experimental build
+  lus_package_experimental (rm RM)
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ExternalProject_Add (rm
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/RM
