@@ -5,10 +5,6 @@ project (RM)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
-## Load CMake modules
-include (CTest)
-enable_testing()
-
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 if (NOT LUS_CMAKE_MODULES)
@@ -42,6 +38,7 @@ endif (LUS_CMAKE_MODULES)
 option (RM_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
 option (RM_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
 option (RM_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
+option (RM_ENABLE_TESTING       "Build the test programs?"                   YES )
 option (RM_WITH_ITPP            "Enable using IT++ library?"                 NO  )
 option (RM_WITH_ARMADILLO       "Enable using Armadillo library?"            YES )
 
@@ -107,6 +104,11 @@ endif (RM_WITH_ITPP)
 ##  Handling of configuration/build/install options
 ##
 ## =============================================================================
+
+if (RM_ENABLE_TESTING)
+  include (CTest)
+  enable_testing()
+endif (RM_ENABLE_TESTING)
 
 ## -------------------------------------------------------------------
 ## Handle option: debugging messages on/off
