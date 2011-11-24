@@ -34,7 +34,7 @@ if (NOT LUS_TESTTARGETS_CMAKE)
       )
     file (APPEND ${PROJECT_BINARY_DIR}/testbuild "${CMAKE_BUILD_TOOL} ${_name}\n")
     file (APPEND ${PROJECT_BINARY_DIR}/testbuild "${CMAKE_BUILD_TOOL} ${_name}_Experimental\n")
-  endforeach (_package)
+  endforeach (_name)
 
   add_custom_target (DashboardBuild
     COMMAND sh testbuild
