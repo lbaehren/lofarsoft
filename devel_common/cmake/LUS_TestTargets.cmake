@@ -99,22 +99,6 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
   add_test (test_build_dal        ${CMAKE_BUILD_TOOL} dal       )
   add_test (test_build_pycrtools  ${CMAKE_BUILD_TOOL} pycrtools )
 
-  ## Anaamika
-  
-  if (TARGET anaamika)
-    
-    add_test (test_build_anaamika ${CMAKE_BUILD_TOOL} anaamika )
-    
-    if (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
-      add_test (
-	NAME test_tests_anaamika
-	WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
-	COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-	)
-    endif (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
-    
-  endif (TARGET anaamika)
-
   ## Pulsar Tools
   
   if (TARGET pulsar)
@@ -130,21 +114,5 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
     endif (EXISTS ${LUS_BINARY_DIR}/pulsar)
     
   endif (TARGET pulsar)
-  
-  ## RM-Synthesis tools
-  
-  if (TARGET rm)
-    
-    add_test (test_build_rm ${CMAKE_BUILD_TOOL} rm )
-    
-    if (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
-      add_test (
-	NAME test_tests_rm
-	WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
-	COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-	)
-    endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
-    
-  endif (TARGET rm)
   
 endif (NOT LUS_TESTTARGETS_CMAKE)

@@ -32,13 +32,33 @@ else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
 
 ##__________________________________________________________
-## Package dependencies
+##                                      Package dependencies
 
 add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
 
 if (ANAAMIKA_ENABLE_SCIPY)
   add_dependencies (anaamika scipy)
 endif (ANAAMIKA_ENABLE_SCIPY)
+
+##__________________________________________________________
+##                                                   Testing
+
+if (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
+
+  ## Custom target to trigger test build
+  add_custom_target (anaamika_Experimental
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
+    )
+
+  add_test (
+    NAME anaamika_Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    )
+
+endif (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
 
 ## ==============================================================================
 ##
@@ -132,3 +152,21 @@ if (RM_WITH_ITPP)
   add_dependencies (rm itpp)
 endif (RM_WITH_ITPP)
 
+##__________________________________________________________
+## Testing
+
+if (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
+
+  ## Custom target to trigger test build
+  add_custom_target (rm_Experimental
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
+    ) 
+
+  add_test (
+    NAME rm_Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    )
+
+endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
