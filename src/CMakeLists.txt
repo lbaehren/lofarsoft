@@ -109,25 +109,37 @@ endmacro (lus_package_experimental)
 ##
 ## ==============================================================================
 
-add_subdirectory (DAL)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
+  
+  add_subdirectory (DAL)
+  
+  add_custom_target (dal_depends DEPENDS casacore git)
+  add_dependencies (dal casacore git)
+  
+  if (DAL_PYTHON_BINDINGS)
+    if (TEST_DATASETS)
+      add_dependencies (dal_depends num_util test-data)
+      add_dependencies (dal num_util test-data)
+    else(TEST_DATASETS)
+      add_dependencies (dal_depends num_util)
+      add_dependencies (dal num_util)
+    endif (TEST_DATASETS)
+  else (DAL_PYTHON_BINDINGS)
+    if (TEST_DATASETS)
+      add_dependencies (dal_depends test-data)
+      add_dependencies (dal test-data)
+    endif (TEST_DATASETS)
+  endif (DAL_PYTHON_BINDINGS)
+  
+else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
 
-add_custom_target (dal_depends DEPENDS casacore git)
-add_dependencies (dal casacore git)
+  ExternalProject_Add (dal
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
+    GIT_REPOSITORY git://github.com/nextgen-astrodata/DAL.git
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
 
-if (DAL_PYTHON_BINDINGS)
-  if (TEST_DATASETS)
-    add_dependencies (dal_depends num_util test-data)
-    add_dependencies (dal num_util test-data)
-  else(TEST_DATASETS)
-    add_dependencies (dal_depends num_util)
-    add_dependencies (dal num_util)
-  endif (TEST_DATASETS)
-else (DAL_PYTHON_BINDINGS)
-  if (TEST_DATASETS)
-    add_dependencies (dal_depends test-data)
-    add_dependencies (dal test-data)
-  endif (TEST_DATASETS)
-endif (DAL_PYTHON_BINDINGS)
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
 
 ## ==============================================================================
 ##
