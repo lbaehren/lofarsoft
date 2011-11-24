@@ -12,8 +12,11 @@
 #include "rmCube.h"				// rmCube class declarations
 // #include <fitshandle.h>
 #define pi 3.1415926535897932385
+
+/* Namespace usage */
 using namespace std;
-using namespace casa ;
+using namespace casa;
+
 namespace RM {
   
   //===============================================================================
@@ -326,44 +329,55 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
       \param f_min minimal value for the first axis, the physical meaning depends on parameter axis
       \param f_max maximal value for the first axis, the physical meaning depends on parameter axis  
 */
-    rmCube::rmCube(string qpath, string upath, int axis, double f_min, double f_max) {
-    /* define vectors for file names */
-    vector<string> u_files;
-    vector<string> q_files;
-    /* read directories where to find the file names */
-    readDir(upath,u_files);
-    readDir(qpath,q_files);
-    /* remove all names wich do not belong to fits files, at least "." and ".." */
-    removeNoFits(u_files) ;
-    removeNoFits(q_files) ;
-    /* deremine the number of fitsfiles for the first dimension of the cube */
-    uint f = q_files.size() ;
-    /* get the dimension for a representive of the images to determine the
-       two other dimensions of the cube */
-    uint x,y; 
-    int pix ; 
-    getFitsSize(qpath, q_files, x, y, pix) ;  // get the size of the fits images
-    /* set the dimensions of the intern variables of the cube */ 
-    this->axis = axis ;
-    this->xSize=x;
-    this->ySize=y;
-    this->faradaySize=f;
-    this->pix = pix ;
-    allocMemory(true) ;
-    fillRM_Cube(qpath, upath, q_files, u_files, f, x, y, f_min, f_max);
-    this->rmType= axis ;
-  }
+    rmCube::rmCube (string qpath,
+		    string upath,
+		    int axis,
+		    double f_min,
+		    double f_max)
+    {
+      /* define vectors for file names */
+      vector<string> u_files;
+      vector<string> q_files;
+      /* read directories where to find the file names */
+      readDir(upath,u_files);
+      readDir(qpath,q_files);
+      /* remove all names wich do not belong to fits files, at least "." and ".." */
+      removeNoFits(u_files) ;
+      removeNoFits(q_files) ;
+      /* deremine the number of fitsfiles for the first dimension of the cube */
+      uint f = q_files.size() ;
+      /* get the dimension for a representive of the images to determine the
+	 two other dimensions of the cube */
+      uint x,y; 
+      int pix ; 
+      getFitsSize(qpath, q_files, x, y, pix) ;  // get the size of the fits images
+      /* set the dimensions of the intern variables of the cube */ 
+      this->axis = axis ;
+      this->xSize=x;
+      this->ySize=y;
+      this->faradaySize=f;
+      this->pix = pix ;
+      allocMemory(true) ;
+      fillRM_Cube(qpath, upath, q_files, u_files, f, x, y, f_min, f_max);
+      this->rmType= axis ;
+    }
+  
+  //_____________________________________________________________________________
+  //                                                                findCoorIndex
 
   /*! procedure finds the lowest coordinate system index for the coordinate,
-      with a given type.
-      \param coors coordinate system to search for the coordinate object
-      \param typ type of the coordinate to be searched 
-      \param considerTyp indicates wether only each coordinate has to be taken into account of 
-            each coordinate is weighted by its number of world axes
-      \return index of the first coordinate axis, which has the given typ, if no is found -1 is returned */
-
-  int findCoorIndex(CoordinateSystem coors, Coordinate::Type typ, bool considerCoorTyp) {
-    bool found = false ;
+    with a given type.
+    \param coors coordinate system to search for the coordinate object
+    \param typ type of the coordinate to be searched 
+    \param considerTyp indicates wether only each coordinate has to be taken into account of 
+    each coordinate is weighted by its number of world axes
+    \return index of the first coordinate axis, which has the given typ, if no is found -1 is returned */
+  
+  int findCoorIndex (casa::CoordinateSystem coors,
+		     casa::Coordinate::Type typ,
+		     bool considerCoorTyp)
+  {
+    bool found = false;
     int num = 0 ;
     int erg = -1 ;
     for(uint j=0; j<coors.nCoordinates( ) ; j++) {

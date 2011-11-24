@@ -17,6 +17,8 @@
 #include <sstream>
 #include "rm.h"
 #include "rmIO.h"
+
+/* casacore header files */
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Cube.h>
@@ -36,6 +38,7 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
+
 namespace RM {
   /*!
     \class rmCube
