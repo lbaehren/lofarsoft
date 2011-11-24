@@ -144,11 +144,10 @@ option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 ##                                        Build instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
-  ExternalProject_Add (anaamika
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
-    URL ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DANAAMIKA_ENABLE_SCIPY=${ANAAMIKA_ENABLE_SCIPY}
-    )
+  ## Build package from present sources
+  lus_package_build (anaamika Anaamika)
+  ## Experimental build
+  lus_package_experimental (anaamika Anaamika)
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
   ExternalProject_Add (anaamika
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
