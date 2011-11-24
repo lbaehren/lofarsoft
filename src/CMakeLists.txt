@@ -3,6 +3,85 @@ include (ExternalProject)
 
 ## ==============================================================================
 ##
+##  Common instructions for packages
+##
+## ==============================================================================
+
+macro (build_package _packageName _packageSource)
+
+  ## Locate common options
+
+  find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
+    PATHS ${PROJECT_BINARY_DIR}
+    )
+
+  ## get components of the path to the package's source code
+  get_filename_component (_packageLocation ${_packageSource} PATH)
+
+  ## feedback
+  if (${_packageLocation} STREQUAL "external")
+    message (STATUS "Adding external package ${_packageName} ...")
+    set (_packageBuildLocation ${PROJECT_BINARY_DIR}/external/${_packageName})
+  else (${_packageLocation} STREQUAL "external")
+    set (_packageBuildLocation ${PROJECT_BINARY_DIR}/${_packageName})
+  endif (${_packageLocation} STREQUAL "external")
+
+  ## create the directory within which the build is performed
+  file (MAKE_DIRECTORY ${_packageBuildLocation})
+
+  if (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_packageName}
+      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      COMMAND make install
+      WORKING_DIRECTORY ${_packageBuildLocation}
+      COMMENT "Building package ${package_name} ..."
+      )
+  else (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_packageName}
+      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      COMMAND make install
+      WORKING_DIRECTORY ${_packageBuildLocation}
+      COMMENT "Building package ${package_name} ..."
+      )
+  endif (LUS_CMAKE_OPTIONS)
+  
+endmacro (build_package _packageName _packageSource)
+
+## Create shell script to handle package builds
+
+configure_file (
+  ${PROJECT_SOURCE_DIR}/devel_common/scripts/build_package.sh.in
+  ${PROJECT_BINARY_DIR}/build_package.sh
+  )
+
+## ==============================================================================
+##
+##                                                             $LOFARSOFT/src/DAL
+##
+## ==============================================================================
+
+add_subdirectory (DAL)
+
+add_custom_target (dal_depends DEPENDS casacore git)
+add_dependencies (dal casacore git)
+
+if (DAL_PYTHON_BINDINGS)
+  if (TEST_DATASETS)
+    add_dependencies (dal_depends num_util test-data)
+    add_dependencies (dal num_util test-data)
+  else(TEST_DATASETS)
+    add_dependencies (dal_depends num_util)
+    add_dependencies (dal num_util)
+  endif (TEST_DATASETS)
+else (DAL_PYTHON_BINDINGS)
+  if (TEST_DATASETS)
+    add_dependencies (dal_depends test-data)
+    add_dependencies (dal test-data)
+  endif (TEST_DATASETS)
+endif (DAL_PYTHON_BINDINGS)
+
+## ==============================================================================
+##
 ##                                                        $LOFARSOFT/src/Anaamika
 ##
 ## ==============================================================================
@@ -15,7 +94,7 @@ option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
 option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 ##__________________________________________________________
-## Build instructions
+##                                        Build instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
   ExternalProject_Add (anaamika
@@ -67,7 +146,7 @@ endif (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
 ## ==============================================================================
 
 ##__________________________________________________________
-## Build instructions
+##                                        Build instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
   ExternalProject_Add (contrib
@@ -85,8 +164,60 @@ else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
     )
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
 
-## Package dependencies
+##__________________________________________________________
+##                                      Package dependencies
+
 add_dependencies (contrib dal)
+
+##__________________________________________________________
+##                                                   Testing
+
+if (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
+
+  ## Custom target to trigger test build
+  add_custom_target (contrib_Experimental
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/contrib
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/contrib/src/contrib-build
+    )
+
+  add_test (
+    NAME contrib_Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/contrib/src/contrib-build
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    )
+
+endif (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
+
+## ==============================================================================
+##
+##                                                        $LOFARSOFT/src/CR-Tools
+##
+## ==============================================================================
+
+build_package (cr src/CR-Tools)
+
+add_dependencies (cr plplot fftw3 gsl)
+
+if (CR_WITH_DAL)
+  add_dependencies (cr dal)
+endif (CR_WITH_DAL)
+
+if (CR_WITH_GUI)
+  add_dependencies (cr mathgl)
+endif (CR_WITH_GUI)
+
+if (CR_WITH_AERA)
+  add_dependencies(cr aera)
+endif (CR_WITH_AERA)
+
+if (ROOT_FOUND AND CR_WITH_STARTOOLS)
+  add_dependencies (cr startools)
+endif (ROOT_FOUND AND CR_WITH_STARTOOLS)
+
+if (CR_WITH_GUI)
+  add_dependencies (cr pyqt)
+endif (CR_WITH_GUI)
 
 ## ==============================================================================
 ##
@@ -109,6 +240,43 @@ else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
     CMAKE_CACHE_ARGS -DLUS_CMAKE_MODULES:PATH=${LUS_CMAKE_MODULES}
     )
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+
+## ==============================================================================
+##
+##                                                          $LOFARSOFT/src/Pulsar
+##
+## ==============================================================================
+
+build_package (pulsar src/Pulsar)
+
+add_dependencies (pulsar cfitsio wcstools swig)
+
+##__________________________________________________________
+## Testing
+
+if (EXISTS ${LUS_BINARY_DIR}/pulsar)
+
+  ## Custom target to trigger test build
+  add_custom_target (pulsar_Experimental
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar
+    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
+    WORKING_DIRECTORY ${LUS_BINARY_DIR}/pulsar
+    ) 
+  
+endif (EXISTS ${LUS_BINARY_DIR}/pulsar)
+
+## ==============================================================================
+##
+##                                                       $LOFARSOFT/src/PyCRTools
+##
+## ==============================================================================
+
+build_package (pycrtools src/PyCRTools)
+
+add_dependencies (pycrtools dal casacore fftw3 gsl tmf num_util)
+if (PYCRTOOLS_WITH_AERA)
+  add_dependencies (pycrtools aera)
+endif (PYCRTOOLS_WITH_AERA)
 
 ## ==============================================================================
 ##

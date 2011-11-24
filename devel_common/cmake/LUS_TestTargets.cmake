@@ -90,29 +90,4 @@ ${CMAKE_CTEST_COMMAND} -D ExperimentalSubmit"
     
   endif (LUS_TEST_EXTERNAL_PACKAGES)
   
-  ##__________________________________________________________________
-  ##                                                      LUS packages
-  
-  ## Test building the packages from within the LUS framework
-  
-  add_test (test_build_contrib    ${CMAKE_BUILD_TOOL} contrib   )
-  add_test (test_build_dal        ${CMAKE_BUILD_TOOL} dal       )
-  add_test (test_build_pycrtools  ${CMAKE_BUILD_TOOL} pycrtools )
-
-  ## Pulsar Tools
-  
-  if (TARGET pulsar)
-    
-    add_test (test_build_pulsar ${CMAKE_BUILD_TOOL} pulsar )
-    
-    if (EXISTS ${LUS_BINARY_DIR}/pulsar)
-      add_test (
-	NAME test_tests_pulsar
-	WORKING_DIRECTORY ${LUS_BINARY_DIR}/pulsar
-	COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-	)
-    endif (EXISTS ${LUS_BINARY_DIR}/pulsar)
-    
-  endif (TARGET pulsar)
-  
 endif (NOT LUS_TESTTARGETS_CMAKE)
