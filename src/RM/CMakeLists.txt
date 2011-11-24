@@ -1,14 +1,14 @@
 
 ## Name of the project
 project (RM)
+
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
+
 ## Load CMake modules
-message("1.")
 include (CTest)
-message("2.")
 enable_testing()
-message("3.")
+
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 if (NOT LUS_CMAKE_MODULES)
@@ -273,25 +273,29 @@ add_subdirectory (apps)
 ##  Configuration summary
 ##
 ## =============================================================================
-message ("HALLO ${CASACORE_FOUND} ${FFTW3_FOUND}")
-message (STATUS "+============================================================+")
-message (STATUS "| RM-Tools: Summary of configuration settings                |")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " System configuration:"                                        )
-message (STATUS " .. Processor type           = ${CMAKE_SYSTEM_PROCESSOR}"      )
-message (STATUS " .. CMake executable         = ${CMAKE_COMMAND}"               )
-message (STATUS " .. CMake version            = ${CMAKE_VERSION}"               )
-message (STATUS " .. System name              = ${CMAKE_SYSTEM}"                )
-message (STATUS " .. C++ compiler             = ${CMAKE_CXX_COMPILER}"          )
-message (STATUS " .. C compiler               = ${CMAKE_C_COMPILER}"            )
-message (STATUS " .. size(void*)              = ${CMAKE_SIZEOF_VOID_P}"         )
-message (STATUS " External packages:"                                           )
-message (STATUS " .. Armadillo .............. = ${ARMADILLO_FOUND} "            )
-message (STATUS " .. Boost++ ................ = ${BOOST_FOUND}"                 )
-message (STATUS " .. CFITSIO ................ = ${CFITSIO_FOUND}"               )
-message (STATUS " .. casacore ............... = ${CASACORE_FOUND}"              )
-message (STATUS " .. FFTW3 .................. = ${FFTW3_FOUND}"                 )
-message (STATUS " .. HDF5 Library ........... = ${HDF5_FOUND}"                  )
-message (STATUS " .. IT++ Library ........... = ${ITPP_FOUND}"                  )
-message (STATUS " .. WCSLIB ................. = ${WCSLIB_FOUND}"                )
-message (STATUS "+============================================================+")
+
+if (RM_VERBOSE_CONFIGURE)
+  
+  message (STATUS "+============================================================+")
+  message (STATUS "| RM-Tools: Summary of configuration settings                |")
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS " System configuration:"                                        )
+  message (STATUS " .. Processor type           = ${CMAKE_SYSTEM_PROCESSOR}"      )
+  message (STATUS " .. CMake executable         = ${CMAKE_COMMAND}"               )
+  message (STATUS " .. CMake version            = ${CMAKE_VERSION}"               )
+  message (STATUS " .. System name              = ${CMAKE_SYSTEM}"                )
+  message (STATUS " .. C++ compiler             = ${CMAKE_CXX_COMPILER}"          )
+  message (STATUS " .. C compiler               = ${CMAKE_C_COMPILER}"            )
+  message (STATUS " .. size(void*)              = ${CMAKE_SIZEOF_VOID_P}"         )
+  message (STATUS " External packages:"                                           )
+  message (STATUS " .. Armadillo .............. = ${ARMADILLO_FOUND} "            )
+  message (STATUS " .. Boost++ ................ = ${BOOST_FOUND}"                 )
+  message (STATUS " .. CFITSIO ................ = ${CFITSIO_FOUND}"               )
+  message (STATUS " .. casacore ............... = ${CASACORE_FOUND}"              )
+  message (STATUS " .. FFTW3 .................. = ${FFTW3_FOUND}"                 )
+  message (STATUS " .. HDF5 Library ........... = ${HDF5_FOUND}"                  )
+  message (STATUS " .. IT++ Library ........... = ${ITPP_FOUND}"                  )
+  message (STATUS " .. WCSLIB ................. = ${WCSLIB_FOUND}"                )
+  message (STATUS "+============================================================+")
+  
+endif (RM_VERBOSE_CONFIGURE)
