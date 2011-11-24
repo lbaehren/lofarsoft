@@ -310,7 +310,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 ##__________________________________________________________
 ## Package dependencies
 
-add_dependencies (rm wcslib cfitsio dal)
+add_dependencies (rm wcslib cfitsio dal casacore)
 
 if (RM_WITH_ARMADILLO)
   add_dependencies (rm armadillo)
