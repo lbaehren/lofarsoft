@@ -87,6 +87,8 @@ endmacro (lus_package_build)
 
 macro (lus_package_experimental _name _dir)
 
+  string (TOUPPER ${_name} varName)
+
   ## Check for build directory
   if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
     file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
@@ -94,7 +96,7 @@ macro (lus_package_experimental _name _dir)
 
   ## Trigger experimental build
   add_custom_target (${_name}_Experimental
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir}
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -D${varName}_ENABLE_TESTING=TRUE
     COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
     )
@@ -141,7 +143,7 @@ option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
 option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 ##__________________________________________________________
-##                                        Build instructions
+##                              Build & Testing instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
   ## Build package from present sources
@@ -164,26 +166,6 @@ add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
 if (ANAAMIKA_ENABLE_SCIPY)
   add_dependencies (anaamika scipy)
 endif (ANAAMIKA_ENABLE_SCIPY)
-
-##__________________________________________________________
-##                                                   Testing
-
-if (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
-
-  ## Custom target to trigger test build
-  add_custom_target (anaamika_Experimental
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika
-    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
-    )
-
-  add_test (
-    NAME anaamika_Experimental
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build
-    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-    )
-
-endif (EXISTS ${LUS_BINARY_DIR}/src/Anaamika/src/anaamika-build)
 
 ## ==============================================================================
 ##
@@ -232,7 +214,18 @@ endif (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
 ##
 ## ==============================================================================
 
-build_package (cr src/CR-Tools)
+##__________________________________________________________
+##                              Build & Testing instructions
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+  ## Build package from present sources
+  build_package (cr src/CR-Tools)
+  ## Experimental build
+  lus_package_experimental (cr CR-Tools)
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+
+##__________________________________________________________
+##                                      Package dependencies
 
 add_dependencies (cr plplot fftw3 gsl)
 
@@ -263,12 +256,10 @@ endif (CR_WITH_GUI)
 ## ==============================================================================
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
-  ExternalProject_Add (lasa
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/LASA
-    URL ${CMAKE_CURRENT_SOURCE_DIR}/LASA
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    CMAKE_CACHE_ARGS -DLUS_CMAKE_MODULES:PATH=${LUS_CMAKE_MODULES}
-    )
+  ## Build package from present sources
+  lus_package_build (lasa LASA)
+  ## Experimental build
+  lus_package_experimental (lasa LASA)
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
   ExternalProject_Add (lasa
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/LASA
@@ -284,23 +275,20 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
 ##
 ## ==============================================================================
 
-build_package (pulsar src/Pulsar)
+##__________________________________________________________
+##                              Build & Testing instructions
 
-add_dependencies (pulsar cfitsio wcstools swig)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
+  ## Build package from present sources
+  build_package (pulsar src/Pulsar)
+  ## Experimental build
+  lus_package_experimental (pulsar Pulsar)
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
 
 ##__________________________________________________________
-## Testing
+##                                      Package dependencies
 
-if (EXISTS ${LUS_BINARY_DIR}/pulsar)
-
-  ## Custom target to trigger test build
-  add_custom_target (pulsar_Experimental
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar
-    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/pulsar
-    ) 
-  
-endif (EXISTS ${LUS_BINARY_DIR}/pulsar)
+add_dependencies (pulsar cfitsio wcstools swig)
 
 ## ==============================================================================
 ##
@@ -308,9 +296,21 @@ endif (EXISTS ${LUS_BINARY_DIR}/pulsar)
 ##
 ## ==============================================================================
 
-build_package (pycrtools src/PyCRTools)
+##__________________________________________________________
+##                              Build & Testing instructions
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyCRTools)
+  ## Build package from present sources
+  build_package (pycrtools src/PyCRTools)
+  ## Experimental build
+  lus_package_experimental (pycrtools PyCRTools)
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyCRTools)
+
+##__________________________________________________________
+##                                      Package dependencies
 
 add_dependencies (pycrtools dal casacore fftw3 gsl tmf num_util)
+
 if (PYCRTOOLS_WITH_AERA)
   add_dependencies (pycrtools aera)
 endif (PYCRTOOLS_WITH_AERA)
@@ -328,7 +328,7 @@ option (RM_WITH_ITPP       "Enable using IT++ library?"       NO  )
 option (RM_WITH_ARMADILLO  "Enable using Armadillo library?"  YES )
 
 ##__________________________________________________________
-## Build instructions
+##                              Build & Testing instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ## Build package from present sources
@@ -355,22 +355,3 @@ endif (RM_WITH_ARMADILLO)
 if (RM_WITH_ITPP)
   add_dependencies (rm itpp)
 endif (RM_WITH_ITPP)
-
-##__________________________________________________________
-## Testing
-
-if (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
-
-  ## Custom target to trigger test build
-  add_custom_target (rm_Experimental
-    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
-    ) 
-
-  add_test (
-    NAME rm_Experimental
-    WORKING_DIRECTORY ${LUS_BINARY_DIR}/src/RM/src/rm-build
-    COMMAND ${CMAKE_CTEST_COMMAND} -D Experimental
-    )
-
-endif (EXISTS ${LUS_BINARY_DIR}/src/RM/src/rm-build)
