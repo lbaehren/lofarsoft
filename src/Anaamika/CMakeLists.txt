@@ -35,11 +35,11 @@ endif (LUS_ROOT)
 ##
 ## ==============================================================================
 
-option (ANAAMIKA_BUILD_TESTS       "Build the test programs?"              YES )
-option (ANAAMIKA_ENABLE_TESTING    "Build the test programs?"              YES )
-option (ANAAMIKA_VERBOSE_CONFIGURE "Verbose output during configuration?"  NO  )
-option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
-option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
+option (ANAAMIKA_BUILD_TESTS       "Build the test programs?"               YES )
+option (ANAAMIKA_ENABLE_TESTING    "Build the test programs?"               YES )
+option (ANAAMIKA_VERBOSE_CONFIGURE "Verbose output during configuration?"   NO  )
+option (ANAAMIKA_ENABLE_FBDSM      "Build Fortran-based version of BDSM?"   NO  )
+option (ANAAMIKA_ENABLE_PYBDSM     "Build Python-enabled version of BDSM?"  YES )
 
 ## ==============================================================================
 ##
@@ -101,4 +101,3 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC -fno-second-underscore")
 
 add_subdirectory (implement)
 add_subdirectory (apps)
-#add_subdirectory (scripts)
