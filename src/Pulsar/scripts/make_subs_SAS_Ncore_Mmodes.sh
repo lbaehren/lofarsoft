@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.06
+VERSION=3.07
  
 #####################################################################
 # Usage #
@@ -2184,9 +2184,10 @@ do
   						          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
   						          then
 						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+  						             prepfold_pid[$ii][0]=$!  
 						             sleep 10
 						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
-  						             prepfold_pid[$ii]=$!  
+  						             prepfold_pid[$ii][1]=$!  
  						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          else 
@@ -2237,9 +2238,10 @@ do
 							           if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 							           then
 									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+								           prepfold_pid[$ii][$counter][0]=$!  
 									       sleep 10
 									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
-								           prepfold_pid[$ii][$counter]=$!  
+								           prepfold_pid[$ii][$counter][1]=$!  
 								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 							           else
@@ -2265,7 +2267,18 @@ do
 					   echo "Waiting for RSP$ii prepfold_pid to finish" >> $log
 					   if (( $flyseye == 0 ))
 					   then
-					       wait ${prepfold_pid[ii]}
+					       if (( $subsformat == 1 ))
+					       then
+					          wait ${prepfold_pid[ii]}
+					       else
+					          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+					          then
+					             wait ${prepfold_pid[ii][0]}
+					             wait ${prepfold_pid[ii][1]}
+					          else
+					             wait ${prepfold_pid[ii]}
+					          fi
+					       fi
 					   else
 				  		    if (( $TiedArray == 0 ))
 						    then
@@ -2279,8 +2292,19 @@ do
 					        do
 					           echo "Waiting for RSP$ii beam_$counter prepfold_pid to finish"
 					           echo "Waiting for RSP$ii beam_$counter prepfold_pid to finish" >> $log
-					           wait ${prepfold_pid[ii][counter]}
-							   counter=$(( $counter + 1 )) 
+					           if (( $subsformat == 1 ))
+					           then
+					              wait ${prepfold_pid[ii][counter]}
+							      counter=$(( $counter + 1 )) 
+							   else
+						          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+						          then
+						             wait ${prepfold_pid[ii][counter][0]}
+						             wait ${prepfold_pid[ii][counter][1]}
+						          else
+						             wait ${prepfold_pid[ii][counter]}
+						          fi
+							   fi
 					        done
 					   fi
 					done					
@@ -2329,9 +2353,10 @@ do
 							    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 							    then
 				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+							       prepfold_pid[$ii][0]=$!  
 				   	               sleep 10
 				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
-							       prepfold_pid[$ii]=$!  
+							       prepfold_pid[$ii][1]=$!  
 						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
 						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
 						        else
@@ -2352,7 +2377,19 @@ do
 				    else 
 					    echo "Waiting for RSP$ii prepfold to finish for pulsar $fold_pulsar"
 					    echo "Waiting for RSP$ii prepfold to finish for pulsar $fold_pulsar" >> $log
-					    wait ${prepfold_pid[ii]}
+					    
+				       if (( $subsformat == 1 ))
+				       then
+				          wait ${prepfold_pid[ii]}
+				       else
+				          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
+				          then
+				             wait ${prepfold_pid[ii][0]}
+				             wait ${prepfold_pid[ii][1]}
+				          else
+				             wait ${prepfold_pid[ii]}
+				          fi
+				       fi
 				    fi
 				 done # end for fold_pulsar in $PULSAR_LIST	
 		    done # end for ii in $num_dir		
