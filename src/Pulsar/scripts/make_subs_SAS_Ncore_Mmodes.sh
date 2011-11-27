@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.07
+VERSION=3.08
  
 #####################################################################
 # Usage #
@@ -1590,7 +1590,7 @@ do
 	       echo "WARNING: RSP0/SubXXXX files are not all the same size;  raw data and processing is suspect to problems." >> $log
 	    fi
 		NSAMPL=`ls -l ${location}/${STOKES}/RSP0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort -n | uniq -c | sort -n -r | head -1 | awk '{print $2 / 2 }' -`
-	elif (( $flyseye == 1 )) && (( $rfi_pproc == 0 ))
+	elif (( $flyseye == 1 )) && (( $rfi_pproc == 0 )) && (( $subsformat == 1 ))
 	then
 	    file_size_check=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | awk '{print $5}' | sort | uniq -c | head -1 | awk '{print $1}'`
 	    num_files_check=`ls -l ${location}/${STOKES}/RSP0/beam_0/${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP0.sub???? | grep -v .inf | wc -l | awk '{print $1}`
