@@ -1563,7 +1563,12 @@ do
 		       done
 
 	       fi 
-
+	    elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]] && [[ $subsformat == 0 ]] && [[ $flyseye == 1 ]] 
+	    then
+	       # create beam_0 directory so that the psrfits logic can follow multi-beam logic for FE mode
+	       cd ${location}/${STOKES}/RSP0/
+	       mkdir beam_0
+	       mv * beam_0/
 	    fi
 
        # clean up dummy files
