@@ -377,7 +377,6 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
 		     casa::Coordinate::Type typ,
 		     bool considerCoorTyp)
   {
-    bool found = false;
     int num = 0 ;
     int erg = -1 ;
     for(uint j=0; j<coors.nCoordinates( ) ; j++) {
@@ -396,19 +395,23 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
   }
 
   /*! find the index of the subrecord object of a record, which has a given name.
-      \param rekord rekord to search the sub records inside
+      \param rec Record to search the sub records inside
       \param name name of the record to be searched
       \param countAll if count all is false,the procedure only counts subrecords for deremine 
                     the index of the sub record, otherwise it count all elemets of the record 
       \return index of the found record, if no one is found, the procedure returns -1 */
 
-  int findNamedRecord(TableRecord &rekord, string &name, bool countAll) {
-    int res = -1 ;
-    int counter=0;
-    RecordDesc descr = rekord.description() ;
-    for (uint i=0; (i<rekord.nfields()) &&(res == -1); i++) {
-      if (rekord.type(i)==TpRecord) {
-        if (descr.name(i)==name) {
+  int findNamedRecord (TableRecord &rec,
+		       string &name,
+		       bool countAll)
+  {
+    int res          = -1 ;
+    int counter      = 0;
+    RecordDesc descr = rec.description() ;
+
+    for (uint i=0; (i<rec.nfields()) &&(res == -1); i++) {
+      if (rec.type(i)==TpRecord) {
+        if (std::string(descr.name(i))==name) {
           if (countAll)
             res = i ;
           else 
@@ -419,9 +422,9 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
     }
     return res ;
   }
-
+  
   /*! procedure identifies the different directions of the coordinate system.
-      It returns a vector which covers the different directions.
+    It returns a vector which covers the different directions.
       0,1 indexes of the direction coordinates
       2   index of the spektral axis
       3   index of the stokes axis */
@@ -504,8 +507,6 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
     axis=1 ; // set axis flag to frequency axis 
     /* Ende der Definition einiger Konstanten */
     vector<string> files = readDirectory(imagePath) ;
-    double last=0;
-    uint nFreqs=0 ;
     freqSize=0 ;
     double freqDiff ;
 //     Vector<int> inds ;

@@ -44,15 +44,19 @@ namespace RM {
   */
   wienerfilter::wienerfilter()
   {
-    // Set default filenames
-    Sfilename="Smatrix.it";				// filename for S matrix file
-    Rfilename="Rmatrix.it";				// filename for R matrix file
-    Nfilename="Nmatrix.it";				// filename for N matrix file
-    Dfilename="Dmatrix.it";				// filename for D matrix file
-    Qfilename="Qmatrix.it";  			// filename for Q matrix file
-    
-    variance_s=0;					// initialize variance of s
-    lambda_phi=5;					// initialize lambda phi coherence length	maxiterations=100;				// default value for maximum number of iterations
+    /*____________________________________________
+      Set default filenames.
+    */
+    Sfilename="Smatrix.it";     // filename for S matrix file
+    Rfilename="Rmatrix.it";     // filename for R matrix file
+    Nfilename="Nmatrix.it";     // filename for N matrix file
+    Dfilename="Dmatrix.it";     // filename for D matrix file
+    Qfilename="Qmatrix.it";     // filename for Q matrix file
+    /*____________________________________________
+      Default values for the filter parameters.
+    */
+    variance_s=0;                // initialize variance of s
+    lambda_phi=5;                // initialize lambda phi coherence length	maxiterations=100;				// default value for maximum number of iterations
     maxiterations=1;				// default value for maximum number of iterations
     rmsthreshold=-1;				// default, don't try to achieve rms threshold
     nu_0=1400000000;				// default value for nu_0=1.4GHz
