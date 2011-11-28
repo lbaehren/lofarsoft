@@ -29,9 +29,11 @@
 
 if (NOT <PACKAGE>_FOUND)
 
-   ## Include common CMake settings
-  include (LUS_CMakeSettings)
-    
+  ## Include common CMake settings
+  if (EXISTS LUS_CMakeSettings.cmake)
+    include (LUS_CMakeSettings)
+  endif (EXISTS LUS_CMakeSettings.cmake)
+  
   if (NOT <PACKAGE>_ROOT_DIR)
     set (<PACKAGE>_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   endif (NOT <PACKAGE>_ROOT_DIR)
