@@ -221,38 +221,39 @@ find_program (curl_executable   curl  PATHS ${bin_locations})
 ## ==============================================================================
 
 add_custom_target (clean-build
-  COMMAND rm -rf *~
   COMMAND ${CMAKE_COMMAND} -E remove_directory contrib devel_common external
   COMMAND ${CMAKE_COMMAND} -E remove_directory cr dal pulsar
   COMMAND ${CMAKE_COMMAND} -E remove_directory  CMakeFiles
   COMMAND ${CMAKE_COMMAND} -E remove cmake_install.cmake
   COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
   COMMAND ${CMAKE_COMMAND} -E remove CMakeOptions.cmake
+  COMMAND ${CMAKE_COMMAND} -E *~
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   COMMENT "Cleaning up build directory ..."
 )
 
 add_custom_target (clean-doc
-  COMMAND rm -f *~
-  COMMAND rm -f html/formula*
-  COMMAND rm -f html/tab*
-  COMMAND rm -f html/search.*
-  COMMAND rm -f html/*.png
-  COMMAND rm -f html/*.map
-  COMMAND rm -f html/*.html
-  COMMAND rm -f html/*.md5
+  COMMAND ${CMAKE_COMMAND} -E *~
+  COMMAND ${CMAKE_COMMAND} -E html/formula*
+  COMMAND ${CMAKE_COMMAND} -E html/tab*
+  COMMAND ${CMAKE_COMMAND} -E html/search.*
+  COMMAND ${CMAKE_COMMAND} -E html/*.png
+  COMMAND ${CMAKE_COMMAND} -E html/*.map
+  COMMAND ${CMAKE_COMMAND} -E html/*.html
+  COMMAND ${CMAKE_COMMAND} -E html/*.md5
   WORKING_DIRECTORY ${LUS_ROOT}/doc
   COMMENT "Cleaning up documentation directory ..."
   )
 
 add_custom_target (clean-release
-  COMMAND rm -rf bin
-  COMMAND rm -rf etc
-  COMMAND rm -rf include
-  COMMAND rm -rf info
-  COMMAND rm -rf lib lib64
-  COMMAND rm -rf plugins
-  COMMAND rm -rf share
+  COMMAND ${CMAKE_COMMAND} -E remove_directory bin
+  COMMAND ${CMAKE_COMMAND} -E remove_directory etc
+  COMMAND ${CMAKE_COMMAND} -E remove_directory include
+  COMMAND ${CMAKE_COMMAND} -E remove_directory info
+  COMMAND ${CMAKE_COMMAND} -E remove_directory lib
+  COMMAND ${CMAKE_COMMAND} -E remove_directory lib64
+  COMMAND ${CMAKE_COMMAND} -E remove_directory plugins
+  COMMAND ${CMAKE_COMMAND} -E remove_directory share
   WORKING_DIRECTORY ${LUS_ROOT}/release
   COMMENT "Cleaning up release directory ..."
 )
