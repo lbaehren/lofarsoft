@@ -30,4 +30,4 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
     
   endforeach (_pathBase)
   
-endif (LUS_CMAKE_SETTINGS_CMAKE)
+endif (NOT LUS_CMAKE_SETTINGS_CMAKE)

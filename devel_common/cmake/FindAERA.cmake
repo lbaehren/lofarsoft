@@ -31,7 +31,10 @@ if (NOT FIND_AERA_CMAKE)
   set (FIND_AERA_CMAKE TRUE)
 
   ## Include common CMake settings
-  include (LUS_CMakeSettings)
+  if (EXISTS LUS_CMakeSettings.cmake)
+    include (LUS_CMakeSettings)
+  endif (EXISTS LUS_CMakeSettings.cmake)
+  
 
   ##_____________________________________________________________________________
   ## Check for the header files
