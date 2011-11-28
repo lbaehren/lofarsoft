@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.09
+VERSION=3.10
  
 #####################################################################
 # Usage #
@@ -2713,7 +2713,7 @@ do
 			cd ${location}/${STOKES}/$NAME
 
             # add to the beam_process_node.txt for fly's eye mode here, since you know the station name
-            sed -n "$N"p SB_master.list | awk -v NODE_NAME=`uname -n` -v NEW_NAME=$NAME '{print NODE_NAME " " $1 " ["NEW_NAME"]"}' > $location/${STOKES}/beam_process_node.txt
+            sed -n "$N"p $location/${STOKES}/SB_master.list | awk -v NODE_NAME=`uname -n` -v NEW_NAME=$NAME '{print NODE_NAME " " $1 " ["NEW_NAME"]"}' > $location/${STOKES}/beam_process_node.txt
 
 		    for jjj in $loop_beams
 			do
@@ -2881,7 +2881,7 @@ do
     then 
        if (( $flyseye == 0 ))
        then
-          cat $master_list | awk -v NODE_NAME=`uname -n` '{print NODE_NAME " " $1}' > $location/${STOKES}/beam_process_node.txt
+          cat $location/${STOKES}/SB_master.list | awk -v NODE_NAME=`uname -n` '{print NODE_NAME " " $1}' > $location/${STOKES}/beam_process_node.txt
        fi
     fi
 
