@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -23,12 +21,10 @@
 # - Check for the presence of SCIPY
 #
 # The following variables are set when SCIPY is found:
-#  HAVE_SCIPY               = Set to true, if all components of SCIPY have
-#                             been found.
-#
-#  SCIPY_MAJOR_VERSION      = SciPy major version
-#  SCIPY_MINOR_VERSION      = SciPy minor version
-#  SCIPY_RELEASE_VERSION    = SciPy release/patch version
+#  HAVE_SCIPY            = Set to true, if all components of SCIPY have been found.
+#  SCIPY_MAJOR_VERSION   = SciPy major version
+#  SCIPY_MINOR_VERSION   = SciPy minor version
+#  SCIPY_RELEASE_VERSION = SciPy release/patch version
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -60,10 +56,13 @@ set (CMAKE_FIND_LIBRARY_PREFIXES "" CACHE STRING
 ## This is necessary to e.g. pick up the MacPorts SciPy installation, which
 ## ends up in /opt/local/Library/Frameworks/Python.framework ...
 
-execute_process (
-  COMMAND ${PYTHON_EXECUTABLE} -c "import scipy, os; print os.path.dirname(scipy.__file__)"
-  OUTPUT_VARIABLE scipy_path
-  )
+if (PYTHON_EXECUTABLE)
+  execute_process (
+    COMMAND ${PYTHON_EXECUTABLE} -c "import scipy, os; print os.path.dirname(scipy.__file__)"
+    OUTPUT_VARIABLE scipy_path
+    )
+endif (PYTHON_EXECUTABLE)
+
 if (scipy_path)
   string (STRIP ${scipy_path} scipy_search_path)
 else (scipy_path)
@@ -95,11 +94,15 @@ if (scipy_version_test_output)
   ## Extract major version
   string (REGEX MATCH "[0-9]" SCIPY_MAJOR_VERSION ${scipy_version_test_output})
   ## Extract minor version
-  string (REGEX REPLACE "${SCIPY_MAJOR_VERSION}." "" scipy_version_test_output ${scipy_version_test_output})
-  string (REGEX MATCH "[0-9]" SCIPY_MINOR_VERSION ${scipy_version_test_output})
+  if (SCIPY_MAJOR_VERSION)
+    string (REGEX REPLACE "${SCIPY_MAJOR_VERSION}." "" scipy_version_test_output ${scipy_version_test_output})
+    string (REGEX MATCH "[0-9]" SCIPY_MINOR_VERSION ${scipy_version_test_output})
+  endif (SCIPY_MAJOR_VERSION)
   ## Extract patch version
-  string (REGEX REPLACE "${SCIPY_MINOR_VERSION}." "" scipy_version_test_output ${scipy_version_test_output})
-  string (REGEX MATCH "[0-9]" SCIPY_RELEASE_VERSION ${scipy_version_test_output})
+  if (SCIPY_MINOR_VERSION)
+    string (REGEX REPLACE "${SCIPY_MINOR_VERSION}." "" scipy_version_test_output ${scipy_version_test_output})
+    string (REGEX MATCH "[0-9]" SCIPY_RELEASE_VERSION ${scipy_version_test_output})
+    endif (SCIPY_MINOR_VERSION)
 endif (scipy_version_test_output)
 
 ## -----------------------------------------------------------------------------
