@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -33,26 +31,22 @@ if (NOT FIND_<PACKAGE>_CMAKE)
   
   set (FIND_<PACKAGE>_CMAKE TRUE)
   
-  ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
+  ## Include common CMake settings
+  include (LUS_CMakeSettings)
   
   ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (<PACKAGE>_INCLUDES <header file(s)>
-    PATHS ${include_locations}
+    HINTS ${<PACKAGE>_ROOT_DIR}
     PATH_SUFFIXES <optional path extension>
-    NO_DEFAULT_PATH
     )
   
   ##_____________________________________________________________________________
   ## Check for the library
   
   find_library (<PACKAGE>_LIBRARIES <package name>
-    PATHS ${lib_locations}
-    NO_DEFAULT_PATH
+    HINTS ${<PACKAGE>_ROOT_DIR}
     )
   
   ##_____________________________________________________________________________

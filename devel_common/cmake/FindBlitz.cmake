@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -28,67 +26,67 @@
 #  BLITZ_INCLUDES  = the path to where the Blitz++ include files are.
 #  BLITZ_LIBRARIES = Link these to use Blitz++
 
-#SET (BLITZ_VERSION "1_33_1")
+if (NOT BLITZ_FOUND)
 
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
-## Check for the header files; the include statement in the code should be e.g.
-##   #include <blitz/array.h>
-## in order to ease differentiation from where the various header files are
-## included.
-
-FIND_PATH (BLITZ_INCLUDES blitz/blitz.h blitz/array.h
-  PATHS ${include_locations}
-  )
-
-IF (BLITZ_INCLUDES)
-  STRING (REGEX REPLACE include/blitz include BLITZ_INCLUDES ${BLITZ_INCLUDES})
-ENDIF (BLITZ_INCLUDES)
-
-## -----------------------------------------------------------------------------
-## Check for the library
-
-FIND_LIBRARY (BLITZ_LIBRARIES blitz
-  PATHS ${lib_locations}
-  )
-
-## -----------------------------------------------------------------------------
-## Actions taken when all components have been found
-
-IF (BLITZ_INCLUDES AND BLITZ_LIBRARIES)
-  SET (HAVE_BLITZ TRUE)
-ELSE (BLITZ_INCLUDES AND BLITZ_LIBRARIES)
-  SET (HAVE_BLITZ FALSE)
-  IF (NOT BLITZ_FIND_QUIETLY)
-    IF (NOT BLITZ_INCLUDES)
-      MESSAGE (STATUS "Unable to find Blitz header files!")
-    ENDIF (NOT BLITZ_INCLUDES)
-    IF (NOT BLITZ_LIBRARIES)
-      MESSAGE (STATUS "Unable to find Blitz library files!")
-    ENDIF (NOT BLITZ_LIBRARIES)
-  ENDIF (NOT BLITZ_FIND_QUIETLY)
-ENDIF (BLITZ_INCLUDES AND BLITZ_LIBRARIES)
-
-IF (HAVE_BLITZ)
-  IF (NOT BLITZ_FIND_QUIETLY)
-    MESSAGE (STATUS "Found components for Blitz")
-    MESSAGE (STATUS "BLITZ_INCLUDES  = ${BLITZ_INCLUDES}")
-    MESSAGE (STATUS "BLITZ_LIBRARIES = ${BLITZ_LIBRARIES}")
-  ENDIF (NOT BLITZ_FIND_QUIETLY)
-ELSE (HAVE_BLITZ)
-  IF (BLITZ_FIND_REQUIRED)
-    MESSAGE (FATAL_ERROR "Could not find Blitz!")
-  ENDIF (BLITZ_FIND_REQUIRED)
-ENDIF (HAVE_BLITZ)
-
-## ------------------------------------------------------------------------------
-## Mark as advanced ...
-
-mark_as_advanced (
-  BLITZ_INCLUDES
-  BLITZ_LIBRARIES
-  )
+  ## Include common CMake settings
+  include (LUS_CMakeSettings)
+  
+  ## -----------------------------------------------------------------------------
+  ## Check for the header files; the include statement in the code should be e.g.
+  ##   #include <blitz/array.h>
+  ## in order to ease differentiation from where the various header files are
+  ## included.
+  
+  FIND_PATH (BLITZ_INCLUDES blitz/blitz.h blitz/array.h
+    HINTS ${BLITZ_ROOT_DIR}
+    )
+  
+  IF (BLITZ_INCLUDES)
+    STRING (REGEX REPLACE include/blitz include BLITZ_INCLUDES ${BLITZ_INCLUDES})
+  ENDIF (BLITZ_INCLUDES)
+  
+  ## -----------------------------------------------------------------------------
+  ## Check for the library
+  
+  FIND_LIBRARY (BLITZ_LIBRARIES blitz
+    HINTS ${BLITZ_ROOT_DIR}
+    )
+  
+  ## -----------------------------------------------------------------------------
+  ## Actions taken when all components have been found
+  
+  IF (BLITZ_INCLUDES AND BLITZ_LIBRARIES)
+    SET (HAVE_BLITZ TRUE)
+  ELSE (BLITZ_INCLUDES AND BLITZ_LIBRARIES)
+    SET (HAVE_BLITZ FALSE)
+    IF (NOT BLITZ_FIND_QUIETLY)
+      IF (NOT BLITZ_INCLUDES)
+	MESSAGE (STATUS "Unable to find Blitz header files!")
+      ENDIF (NOT BLITZ_INCLUDES)
+      IF (NOT BLITZ_LIBRARIES)
+	MESSAGE (STATUS "Unable to find Blitz library files!")
+      ENDIF (NOT BLITZ_LIBRARIES)
+    ENDIF (NOT BLITZ_FIND_QUIETLY)
+  ENDIF (BLITZ_INCLUDES AND BLITZ_LIBRARIES)
+  
+  IF (HAVE_BLITZ)
+    IF (NOT BLITZ_FIND_QUIETLY)
+      MESSAGE (STATUS "Found components for Blitz")
+      MESSAGE (STATUS "BLITZ_INCLUDES  = ${BLITZ_INCLUDES}")
+      MESSAGE (STATUS "BLITZ_LIBRARIES = ${BLITZ_LIBRARIES}")
+    ENDIF (NOT BLITZ_FIND_QUIETLY)
+  ELSE (HAVE_BLITZ)
+    IF (BLITZ_FIND_REQUIRED)
+      MESSAGE (FATAL_ERROR "Could not find Blitz!")
+    ENDIF (BLITZ_FIND_REQUIRED)
+  ENDIF (HAVE_BLITZ)
+  
+  ## ------------------------------------------------------------------------------
+  ## Mark as advanced ...
+  
+  mark_as_advanced (
+    BLITZ_INCLUDES
+    BLITZ_LIBRARIES
+    )
+  
+endif (NOT BLITZ_FOUND)
