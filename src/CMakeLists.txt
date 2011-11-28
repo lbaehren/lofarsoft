@@ -22,27 +22,22 @@ macro (build_package _packageName _packageSource)
   get_filename_component (_packageLocation ${_packageSource} PATH)
 
   ## feedback
-  if (${_packageLocation} STREQUAL "external")
-    message (STATUS "Adding external package ${_packageName} ...")
-    set (_packageBuildLocation ${PROJECT_BINARY_DIR}/external/${_packageName})
-  else (${_packageLocation} STREQUAL "external")
-    set (_packageBuildLocation ${PROJECT_BINARY_DIR}/${_packageName})
-  endif (${_packageLocation} STREQUAL "external")
-
+  set (_packageBuildLocation ${PROJECT_BINARY_DIR}/${_packageName})
+  
   ## create the directory within which the build is performed
   file (MAKE_DIRECTORY ${_packageBuildLocation})
-
+  
   if (LUS_CMAKE_OPTIONS)
     add_custom_target (${_packageName}
       COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
-      COMMAND make install
+      COMMAND ${CMAKE_BUILD_TOOL} install
       WORKING_DIRECTORY ${_packageBuildLocation}
       COMMENT "Building package ${package_name} ..."
       )
   else (LUS_CMAKE_OPTIONS)
     add_custom_target (${_packageName}
       COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
-      COMMAND make install
+      COMMAND ${CMAKE_BUILD_TOOL} install
       WORKING_DIRECTORY ${_packageBuildLocation}
       COMMENT "Building package ${package_name} ..."
       )
