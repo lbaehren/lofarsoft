@@ -222,12 +222,12 @@ find_program (curl_executable   curl  PATHS ${bin_locations})
 
 add_custom_target (clean-build
   COMMAND rm -rf *~
-  COMMAND rm -rf contrib devel_common external
-  COMMAND rm -rf cr dal pulsar
-  COMMAND rm -rf cmake_install.cmake
-  COMMAND rm -rf CMakeCache.txt
-  COMMAND rm -rf CMakeOptions.cmake
-  COMMAND rm -rf CMakeFiles
+  COMMAND ${CMAKE_COMMAND} -E remove_directory contrib devel_common external
+  COMMAND ${CMAKE_COMMAND} -E remove_directory cr dal pulsar
+  COMMAND ${CMAKE_COMMAND} -E remove_directory  CMakeFiles
+  COMMAND ${CMAKE_COMMAND} -E remove cmake_install.cmake
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeOptions.cmake
   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   COMMENT "Cleaning up build directory ..."
 )
