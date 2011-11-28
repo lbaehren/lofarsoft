@@ -45,7 +45,6 @@ set (MATHGL_FIND_QUIETLY YES)
 find_package (MathGL)
 find_package (Subversion)
 
-find_program (tar_executable  tar  PATHS ${bin_locations})
 find_program (find_executable find PATHS ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
@@ -89,6 +88,7 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   include (FindPython)
   include (FindOpenGL)
   include (FindQt4)
+  include (FindUnixCommands)
 
   ## Extra check for GSL _________________________
 
@@ -233,13 +233,13 @@ endif (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 ## ------------------------------------------------------------------------------
 ## Update the tar-archive to the latest version of the source
 
-if (SUBVERSION_FOUND AND tar_executable)
+if (SUBVERSION_FOUND AND TAR_EXECUTABLE)
   add_custom_target (update_mathgl
     COMMAND rm -rf mathgl
     COMMAND ${Subversion_SVN_EXECUTABLE} co http://ufp.appl.sci-nnov.ru/svn/mathgl/trunk mathgl
-    COMMAND ${tar_executable} -cvzf mathgl.tgz mathgl --exclude .svn
+    COMMAND ${TAR_EXECUTABLE} -cvzf mathgl.tgz mathgl --exclude .svn
     COMMAND rm -rf mathgl
     WORKING_DIRECTORY ${MATHGL_SOURCE_DIR}
     COMMENT "Retrieving latest version of MathGL source code ..."
     )
-endif (SUBVERSION_FOUND AND tar_executable)  
+endif (SUBVERSION_FOUND AND TAR_EXECUTABLE)  

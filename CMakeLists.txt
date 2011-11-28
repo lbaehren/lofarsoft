@@ -134,10 +134,11 @@ configure_file (
 ##
 ## ==============================================================================
 
-find_program (HOSTNAME_CMD NAMES hostname)
-if (HOSTNAME_CMD)
-  exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE CMAKE_SYSTEM_HOSTNAME)
-endif (HOSTNAME_CMD)
+find_package (UnixCommands)
+
+if (HOSTNAME_EXECUTABLE)
+  exec_program (${HOSTNAME_EXECUTABLE} ARGS OUTPUT_VARIABLE CMAKE_SYSTEM_HOSTNAME)
+endif (HOSTNAME_EXECUTABLE)
 
 ## Got through the basic list of system tools and libraries; for each package
 ## take into account the ENABLE_VERBOSE_CONFIGURE option and ensure a standard
@@ -211,9 +212,7 @@ foreach (varSystemPackage
   
 endforeach (varSystemPackage)
 
-find_program (bash_executable   bash  PATHS ${bin_locations})
 find_program (curl_executable   curl  PATHS ${bin_locations})
-find_program (tar_executable    tar   PATHS ${bin_locations})
 
 ## ==============================================================================
 ##
