@@ -127,7 +127,7 @@ used_ears=[u.split("stokes/")[1].split("/")[0] for u in list(infofile[0])]
 chisq=[re.sub('chi-sq=', '', c) for c in list(infofile[-1])]
 station_info={} # dictionary with station name as a key, and value is the tuple with (filename, chi-squared value)
 for i in np.arange(len(used_ears)):
-	station_info[used_ears[i]] = ('%s' % (pngs[i]), '%.3f' % (float(chisq[i])))
+	station_info[used_ears[i]] = ('%s' % (pngs[i]), '%.3f' % (chisq[i] != "" and float(chisq[i]) or 0))
 
 antenna=used_ears[0][5:8]                                                         # either LBA or HBA
 pulsar=pngs[0].split("_")[-1].split(".pfd")[0]                                    # pulsar name
