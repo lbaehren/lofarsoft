@@ -28,30 +28,25 @@
 #  ARMADILLO_LFLAGS     = Linker flags (optional)
 
 if (NOT FIND_ARMADILLO_CMAKE) 
-
+  
   set (FIND_ARMADILLO_CMAKE TRUE)
-  
-  ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
+
+  ## Include common CMake settings
+  include (LUS_CMakeSettings)
   
   ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (ARMADILLO_INCLUDES arma_ostream_proto.hpp
-    PATHS ${include_locations}
+    HINTS ${ARMADILLO_ROOT_DIR}
     PATH_SUFFIXES armadillo armadillo_bits
-    NO_DEFAULT_PATH
     )
   
   ##_____________________________________________________________________________
   ## Check for the library
   
   find_library (ARMADILLO_LIBRARIES armadillo
-    PATHS ${lib_locations}
-    PATH_SUFFIXES
-    NO_DEFAULT_PATH
+    HINTS ${ARMADILLO_ROOT_DIR}
     )
   
   ##_____________________________________________________________________________

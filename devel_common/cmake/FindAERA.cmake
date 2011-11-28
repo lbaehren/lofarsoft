@@ -30,16 +30,14 @@ if (NOT FIND_AERA_CMAKE)
 
   set (FIND_AERA_CMAKE TRUE)
 
-  ##_____________________________________________________________________________
-  ## Search locations
-
-  include (CMakeSettings)
+  ## Include common CMake settings
+  include (LUS_CMakeSettings)
 
   ##_____________________________________________________________________________
   ## Check for the header files
 
   find_path (AERA_INCLUDES Datareader.h
-    PATHS ${include_locations}
+    HINTS ${AERA_ROOT_DIR}
     PATH_SUFFIXES aera
     )
 
@@ -47,12 +45,12 @@ if (NOT FIND_AERA_CMAKE)
   ## Check for the library
 
   find_library (AERA_LIBRARIES AERADatareader
-    PATHS ${lib_locations}
+    HINTS ${AERA_ROOT_DIR}
     )
-
+  
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
-
+  
   if (AERA_INCLUDES AND AERA_LIBRARIES)
     set (AERA_FOUND TRUE)
 
@@ -60,7 +58,7 @@ if (NOT FIND_AERA_CMAKE)
     ##                                                     Find library version
 
     find_path (AERA_CONFIG_H Datareader_config.h
-      PATHS ${include_locations}
+      HINTS ${AERA_ROOT_DIR}
       PATH_SUFFIXES aera
       )
     if (AERA_CONFIG_H)
@@ -106,6 +104,7 @@ if (NOT FIND_AERA_CMAKE)
   ## Mark advanced variables
 
   mark_as_advanced (
+    AERA_ROOT_DIR
     AERA_INCLUDES
     AERA_LIBRARIES
     )
