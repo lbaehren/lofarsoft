@@ -1,8 +1,6 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
-# |   Copyright (C) 2007                                                        |
-# |   Lars B"ahren (bahren@astron.nl)                                           |
+# |   Copyright (C) 2011                                                        |
+# |   Lars B"ahren (lbaehren@gmail.com)                                         |
 # |                                                                             |
 # |   This program is free software; you can redistribute it and/or modify      |
 # |   it under the terms of the GNU General Public License as published by      |
@@ -23,45 +21,46 @@
 # - Check for the presence of CPPUNIT
 #
 # The following variables are set when CPPUNIT is found:
-#  HAVE_CPPUNIT       = Set to true, if all components of CPPUNIT have been found.
+#  CPPUNIT_FOUND      = Set to true, if all components of CPPUNIT
+#                         have been found.
 #  CPPUNIT_INCLUDES   = Include path for the header files of CPPUNIT
 #  CPPUNIT_LIBRARIES  = Link these to use CPPUNIT
 #  CPPUNIT_LFLAGS     = Linker flags (optional)
 
-if (NOT FIND_CPPUNIT_CMAKE)
+if (NOT CPPUNIT_FOUND)
+
+  ## Include common CMake settings
+  if (EXISTS LUS_CMakeSettings.cmake)
+    include (LUS_CMakeSettings)
+  endif (EXISTS LUS_CMakeSettings.cmake)
   
-  set (FIND_CPPUNIT_CMAKE TRUE)
-  
-  ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
+  if (NOT CPPUNIT_ROOT_DIR)
+    set (CPPUNIT_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+  endif (NOT CPPUNIT_ROOT_DIR)
   
   ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (CPPUNIT_INCLUDES cppunit/TestAssert.h
-    PATHS ${include_locations} ${CMAKE_INSTALL_PREFIX}
+    HINTS ${CPPUNIT_ROOT_DIR}
     PATH_SUFFIXES include
-    NO_DEFAULT_PATH
     )
   
   ##_____________________________________________________________________________
   ## Check for the library
   
   find_library (CPPUNIT_LIBRARIES cppunit
-    PATHS ${lib_locations} ${CMAKE_INSTALL_PREFIX}
+    HINTS ${CPPUNIT_ROOT_DIR}
     PATH_SUFFIXES lib
-    NO_DEFAULT_PATH
     )
   
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
   
   if (CPPUNIT_INCLUDES AND CPPUNIT_LIBRARIES)
-    set (HAVE_CPPUNIT TRUE)
+    set (CPPUNIT_FOUND TRUE)
   else (CPPUNIT_INCLUDES AND CPPUNIT_LIBRARIES)
-    set (HAVE_CPPUNIT FALSE)
+    set (CPPUNIT_FOUND FALSE)
     if (NOT CPPUNIT_FIND_QUIETLY)
       if (NOT CPPUNIT_INCLUDES)
 	message (STATUS "Unable to find CPPUNIT header files!")
@@ -72,17 +71,18 @@ if (NOT FIND_CPPUNIT_CMAKE)
     endif (NOT CPPUNIT_FIND_QUIETLY)
   endif (CPPUNIT_INCLUDES AND CPPUNIT_LIBRARIES)
   
-  if (HAVE_CPPUNIT)
+  if (CPPUNIT_FOUND)
     if (NOT CPPUNIT_FIND_QUIETLY)
       message (STATUS "Found components for CPPUNIT")
+      message (STATUS "CPPUNIT_ROOT_DIR  = ${CPPUNIT_ROOT_DIR}")
       message (STATUS "CPPUNIT_INCLUDES  = ${CPPUNIT_INCLUDES}")
       message (STATUS "CPPUNIT_LIBRARIES = ${CPPUNIT_LIBRARIES}")
     endif (NOT CPPUNIT_FIND_QUIETLY)
-  else (HAVE_CPPUNIT)
+  else (CPPUNIT_FOUND)
     if (CPPUNIT_FIND_REQUIRED)
       message (FATAL_ERROR "Could not find CPPUNIT!")
     endif (CPPUNIT_FIND_REQUIRED)
-  endif (HAVE_CPPUNIT)
+  endif (CPPUNIT_FOUND)
   
   ##_____________________________________________________________________________
   ## Mark advanced variables
@@ -92,4 +92,4 @@ if (NOT FIND_CPPUNIT_CMAKE)
     CPPUNIT_LIBRARIES
     )
   
-endif (NOT FIND_CPPUNIT_CMAKE)
+endif (NOT CPPUNIT_FOUND)
