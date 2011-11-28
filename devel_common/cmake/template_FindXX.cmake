@@ -1,6 +1,6 @@
 # +-----------------------------------------------------------------------------+
-# |   Copyright (C) 2007                                                        |
-# |   Lars B"ahren (bahren@astron.nl)                                           |
+# |   Copyright (C) 2011                                                        |
+# |   Lars B"ahren (lbaehren@gmail.com)                                         |
 # |                                                                             |
 # |   This program is free software; you can redistribute it and/or modify      |
 # |   it under the terms of the GNU General Public License as published by      |
@@ -21,25 +21,27 @@
 # - Check for the presence of <PACKAGE>
 #
 # The following variables are set when <PACKAGE> is found:
-#  HAVE_<PACKAGE>       = Set to true, if all components of <PACKAGE>
-#                          have been found.
+#  <PACKAGE>_FOUND      = Set to true, if all components of <PACKAGE>
+#                         have been found.
 #  <PACKAGE>_INCLUDES   = Include path for the header files of <PACKAGE>
 #  <PACKAGE>_LIBRARIES  = Link these to use <PACKAGE>
 #  <PACKAGE>_LFLAGS     = Linker flags (optional)
 
-if (NOT FIND_<PACKAGE>_CMAKE)
-  
-  set (FIND_<PACKAGE>_CMAKE TRUE)
-  
-  ## Include common CMake settings
+if (NOT <PACKAGE>_FOUND)
+
+   ## Include common CMake settings
   include (LUS_CMakeSettings)
+    
+  if (NOT <PACKAGE>_ROOT_DIR)
+    set (<PACKAGE>_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+  endif (NOT <PACKAGE>_ROOT_DIR)
   
   ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (<PACKAGE>_INCLUDES <header file(s)>
     HINTS ${<PACKAGE>_ROOT_DIR}
-    PATH_SUFFIXES <optional path extension>
+    PATH_SUFFIXES include
     )
   
   ##_____________________________________________________________________________
@@ -47,15 +49,24 @@ if (NOT FIND_<PACKAGE>_CMAKE)
   
   find_library (<PACKAGE>_LIBRARIES <package name>
     HINTS ${<PACKAGE>_ROOT_DIR}
+    PATH_SUFFIXES lib
+    )
+  
+  ##_____________________________________________________________________________
+  ## Check for the executable
+  
+  find_program (<PACKAGE>_EXECUTABLE <package name>
+    HINTS ${<PACKAGE>_ROOT_DIR}
+    PATH_SUFFIXES bin
     )
   
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found
   
   if (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-    set (HAVE_<PACKAGE> TRUE)
+    set (<PACKAGE>_FOUND TRUE)
   else (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
-    set (HAVE_<PACKAGE> FALSE)
+    set (<PACKAGE>_FOUND FALSE)
     if (NOT <PACKAGE>_FIND_QUIETLY)
       if (NOT <PACKAGE>_INCLUDES)
 	message (STATUS "Unable to find <PACKAGE> header files!")
@@ -66,17 +77,18 @@ if (NOT FIND_<PACKAGE>_CMAKE)
     endif (NOT <PACKAGE>_FIND_QUIETLY)
   endif (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
   
-  if (HAVE_<PACKAGE>)
+  if (<PACKAGE>_FOUND)
     if (NOT <PACKAGE>_FIND_QUIETLY)
       message (STATUS "Found components for <PACKAGE>")
+      message (STATUS "<PACKAGE>_ROOT_DIR  = ${<PACKAGE>_ROOT_DIR}")
       message (STATUS "<PACKAGE>_INCLUDES  = ${<PACKAGE>_INCLUDES}")
       message (STATUS "<PACKAGE>_LIBRARIES = ${<PACKAGE>_LIBRARIES}")
     endif (NOT <PACKAGE>_FIND_QUIETLY)
-  else (HAVE_<PACKAGE>)
+  else (<PACKAGE>_FOUND)
     if (<PACKAGE>_FIND_REQUIRED)
       message (FATAL_ERROR "Could not find <PACKAGE>!")
     endif (<PACKAGE>_FIND_REQUIRED)
-  endif (HAVE_<PACKAGE>)
+  endif (<PACKAGE>_FOUND)
   
   ##_____________________________________________________________________________
   ## Mark advanced variables
@@ -86,4 +98,4 @@ if (NOT FIND_<PACKAGE>_CMAKE)
     <PACKAGE>_LIBRARIES
     )
   
-endif (NOT FIND_<PACKAGE>_CMAKE)
+endif (NOT <PACKAGE>_FOUND)
