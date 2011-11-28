@@ -286,11 +286,11 @@ class Op_rmsimage(Op):
                 float(BS)/float(imgshape[1]) < 0.1:
             use_extrapolation = True
             mylog.info('Using simple extrapolation for edges of mean '\
-                           'and rms maps.')
+                           'and rms maps')
         else:
             use_extrapolation = False
             mylog.info('Using padded array for edges of mean '\
-                           'and rms maps.')
+                           'and rms maps')
 
         if use_extrapolation:
             boxcount = 1 + (imgshape - BS)/SS
@@ -328,7 +328,7 @@ class Op_rmsimage(Op):
         # Check if all regions have too few unmasked pixels
         if mask != None and N.size(N.where(mean_map != N.inf)) == 0:
             raise RuntimeError("No unmasked regions from which to determine "\
-                         "mean and rms maps.")
+                         "mean and rms maps")
 
         # Step 2: borders of the image
         if bounds[0]:

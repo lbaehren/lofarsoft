@@ -26,6 +26,8 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2011/11/28 - Fixed issue with a bug in PyWCS 1.10-4.7.
+    
     2011/11/11 - Fixed bugs in source generation that would lead to
                  masking of all pixels for certain sources during
                  moment analysis. Adjusted calculation of jmax in

@@ -222,6 +222,10 @@ class Op_readimage(Op):
             t.wcs.crpix = crpix
             t.wcs.cdelt = cdelt
             t.wcs.ctype = ctype
+            # The following are needed due to a bug in PyWCS 1.10-4.7 on Linux
+            # or Python 2.6 (not clear which one is causing problem)
+            t.wcs.lattype = 'DEC'
+            t.wcs.lngtype = 'RA'
             if crota != []:
                 t.wcs.crota = crota
             if cunit != []:
