@@ -212,8 +212,6 @@ foreach (varSystemPackage
   
 endforeach (varSystemPackage)
 
-find_program (curl_executable   curl  PATHS ${bin_locations})
-
 ## ==============================================================================
 ##
 ##  Cleaning up
