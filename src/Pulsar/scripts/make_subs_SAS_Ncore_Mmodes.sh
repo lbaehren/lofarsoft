@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.10
+VERSION=3.11
  
 #####################################################################
 # Usage #
@@ -522,6 +522,15 @@ SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{
 nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
 ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
 whichStokes=`grep OLAP.Stokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+obs_duration_min=`cat $PARSET | grep duration | grep Observation\.Beam | head -1 | awk -F "= " '{print $2/60.0}'`
+
+# set depsr -L flag based on the observation duration time (in unites of minutes)
+if (( $obs_duration_min < 10.0 ))
+then
+   dspsr_Lflag=10
+else
+   dspsr_Lflag=60
+fi
 
 if [[ $whichStokes != "I" ]]
 then
@@ -1785,6 +1794,30 @@ do
 
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ] 
 		
+    # psrfits-only path; use dspsr for folding (while rfifind and prepfold are running)
+	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $subsformat == 0 ]]
+	then
+        # check for .par file, else create one
+		for fold_pulsar in $PULSAR_LIST
+		do
+	        fold_pulsar_cut=`echo $fold_pulsar | sed 's/PSR//g' | sed 's/[BJ]//g'`
+		    if [[ $fold_pulsar_cut != "NONE" ]] 
+		    then 
+		        if [[ -f $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ]]
+		        then 
+		           echo cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/
+		           echo cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/  >> $log
+		           cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/
+		        else
+		           echo "psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par"
+		           echo "psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par" >> $log
+		           psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par
+		        fi
+		     fi
+		done
+
+	fi # end if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $subsformat == 0 ]]
+    
 	# wait for rfifind to finish
 	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 	then
@@ -2113,28 +2146,10 @@ do
 		 prepfold_nsubs=$ii
     fi
 
-	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] #&& [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
-	then
         
-        # check for .par file, else create one
-		for fold_pulsar in $PULSAR_LIST
-		do
-	        fold_pulsar_cut=`echo $fold_pulsar | sed 's/PSR//g' | sed 's/[BJ]//g'`
-		    if [[ $fold_pulsar_cut != "NONE" ]] 
-		    then 
-		        if [[ -f $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ]]
-		        then 
-		           echo cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/
-		           echo cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/  >> $log
-		           cp $LOFARSOFT/release/share/pulsar/data/parfile/$fold_pulsar_cut.par ${location}/
-		        else
-		           echo "psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par"
-		           echo "psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par" >> $log
-		           psrcat -db_file $LOFARSOFT/release/share/pulsar/data/psrcat.db -e $fold_pulsar_cut  > ${location}/$fold_pulsar_cut.par
-		        fi
-		     fi
-		done
-		
+	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] #&& [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
+	then	
+	    max=`echo "$nSubbands * $CHAN" | bc`	
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
 		then 
@@ -2156,7 +2171,9 @@ do
 					   nofold=1
 		               continue
 		            fi
-		            	
+		            
+		            fold_pulsar_cut=`echo $fold_pulsar | sed 's/PSR//g' | sed 's/[BJ]//g'`
+		            
 				    if (( $flyseye == 0 ))
 				    then
 						for ii in $num_dir
@@ -2176,6 +2193,8 @@ do
 						      else
 						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
 						      fi
+						      echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+
 						   fi
 						   
 						   if [ $test == 0 ]
@@ -2200,6 +2219,13 @@ do
   						             prepfold_pid[$ii]=$!  
  						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          fi
+ 						          echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						          dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+ 						          pid=$!
+ 						          wait $pid
+ 						          echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+ 						          echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
+ 						          dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
  						       fi
 						   fi
 						   sleep 10
@@ -2231,6 +2257,7 @@ do
 							       else
 							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
 							       fi
+						           echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 							   fi
 						       if [ $test == 0 ]
 						       then
@@ -2254,6 +2281,13 @@ do
 								           prepfold_pid[$ii][$counter]=$!  
 								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 							           fi
+							           echo "Running: " echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							           dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+ 						               pid=$!
+ 						               wait $pid
+	 						           echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+	 						           echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
+	 						           dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 							       fi
 							   fi
 							   sleep 10
@@ -2322,6 +2356,8 @@ do
                 PULSAR_LIST=${PULSAR_ARRAY[$ii]}
 				for fold_pulsar in $PULSAR_LIST
 				do
+				    fold_pulsar_cut=`echo $fold_pulsar | sed 's/PSR//g' | sed 's/[BJ]//g'`
+
 				    if [[ $fold_pulsar == "NONE" ]] || [[ $nofold == 1 ]]
 				    then
 				        break
@@ -2333,6 +2369,9 @@ do
 	
 						cd ${location}/${STOKES}/RSP${ii}
 						echo cd ${location}/${STOKES}/RSP${ii} >> $log
+						
+					    cp ${location}/$fold_pulsar_cut.par .
+					    echo cd ${location}/${STOKES}/RSP${ii} >> $log
 
 					    if (( $subsformat == 1 ))
 					    then
@@ -2345,6 +2384,7 @@ do
 						    else
 						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
 						    fi				
+                            echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 						fi
 
 						if [ $test == 0 ]
@@ -2369,6 +2409,13 @@ do
 							       prepfold_pid[$ii]=$!  
 						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
 						        fi
+						        echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						        dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+						        pid=$!
+				                wait $pid
+					            echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+					            echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
+					            dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 							fi
 			   	        fi
 						sleep 5
@@ -2524,7 +2571,7 @@ do
 			date >> $log
 	
 	        #find all the prepfold .ps files and convert them into .pdf .png and .th.png results
-	        find ./ -name "*.ps" -print | grep -v rfifind | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
+	        find ./ -name "*.ps" -print | egrep -v "rfifind|_B.ps|_DFTp.ps|_GTpf16.ps|_YFp.ps" | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
 	        wc_convert=`wc -l convert.sh | awk '{print $1}'`
 	        if [[ $wc_convert > 0 ]]
 	        then
@@ -2970,7 +3017,7 @@ then
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" \)`
+	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" \)`
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
