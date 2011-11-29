@@ -379,11 +379,15 @@ class Opts(object):
                                  "spline function to interpolate the background rms and "\
                                  "mean map over the entire image.",
                              group="advanced_opts")
-    minpix_isl      =    Int(4,
-                             doc="Minimal number of pixels with emission per island\n"\
+    minpix_isl      = Option(None, Int(),
+                             doc="Minimal number of pixels with emission per island. "\
+                                 "None -> calculate inside program\n"\
                                  "This is an integer and is the minimum number of pixels "\
                                  "in an island (whose values are greater thresh isl) for "\
-                                 "the island to be included. This is set to 4 for all "\
+                                 "the island to be included. If None, the number of "\
+                                 "pixels is set to the area of an unresolved source "\
+                                 "using the beam and pixel size information in the "\
+                                 "image header. It is set to 4 pixels for all "\
                                  "wavelet images.",
                              group="advanced_opts")
     rms_value       = Option(None, Float(),

@@ -222,10 +222,6 @@ class Op_readimage(Op):
             t.wcs.crpix = crpix
             t.wcs.cdelt = cdelt
             t.wcs.ctype = ctype
-            # The following are needed due to a bug in PyWCS 1.10-4.7 on Linux
-            # or Python 2.6 (not clear which one is causing problem)
-            t.wcs.lattype = 'DEC'
-            t.wcs.lngtype = 'RA'
             if crota != []:
                 t.wcs.crota = crota
             if cunit != []:
@@ -336,7 +332,7 @@ class Op_readimage(Op):
         img.pix2coord = pix2coord
         img.beam = beam
         img.pixel_beam = pbeam   # IN SIGMA UNITS
-        img.pixel_beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig
+        img.pixel_beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig # area of FWHM size
         img.pixel_restbeam = pbeam
         mylogger.userinfo(mylog, 'Beam shape (major, minor, pos angle)',
                           '(%s, %s, %s) degrees' % (round(beam[0],5),

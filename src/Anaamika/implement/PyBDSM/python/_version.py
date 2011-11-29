@@ -26,7 +26,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
-    2011/11/28 - Fixed issue with a bug in PyWCS 1.10-4.7.
+    2011/11/28 - Added option to have minpix_isl estimated automatically
+                 as 1/3 of the beam area. This estimate should help 
+                 exclude false islands that are much smaller than the
+                 beam. This estimate is not let to fall below 4 pixels.
     
     2011/11/11 - Fixed bugs in source generation that would lead to
                  masking of all pixels for certain sources during

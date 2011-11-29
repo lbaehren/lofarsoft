@@ -82,6 +82,7 @@ class Op_islands(Op):
         Function returns a list of Island objects.
         """
         ### islands detection
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands")
 
         image = img.ch0 
         mask = img.mask
@@ -90,6 +91,13 @@ class Op_islands(Op):
         thresh_isl = opts.thresh_isl
         thresh_pix = img.thresh_pix
         minsize = opts.minpix_isl
+        if minsize == None:
+            minsize = int(img.pixel_beamarea/3.0) # 1/3 of beam area in pixels
+            if minsize < 4:
+                minsize = 4 # Need at least 4 pixels for fitting
+            mylogger.userinfo(mylog, "Minimum number of pixels per island", '%i' %
+                          minsize)
+        
         clipped_mean = img.clipped_mean
         saverank = opts.savefits_rankim
 
