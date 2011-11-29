@@ -1,0 +1,28 @@
+
+## ==============================================================================
+##
+##  Test of the common LUS infrastructure
+##
+## ==============================================================================
+
+## Initialize the testing
+ExperimentalStart
+## Configure and start testing
+ExperimentalConfigure
+ExperimentalTest
+ExperimentalSubmit
+## Perform coverage testing
+ExperimentalCoverage
+ExperimentalSubmit
+
+## ==============================================================================
+##
+##  Build and test LUS packages
+##
+## ==============================================================================
+
+for varPackage in anaamika dal pulsar pycrtools rm
+{
+  ${CMAKE_BUILD_TOOL} $varPackage
+  ${CMAKE_BUILD_TOOL} $varPackage_Experimental
+}
