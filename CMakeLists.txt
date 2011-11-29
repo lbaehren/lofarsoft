@@ -268,6 +268,7 @@ add_custom_target (clean-src
 ##
 ## ==============================================================================
 
+add_subdirectory (devel_common)
 add_subdirectory (doc)
 add_subdirectory (external)
 add_subdirectory (src)
