@@ -22,7 +22,7 @@ ${CMAKE_BUILD_TOOL} ExperimentalSubmit
 ## ==============================================================================
 
 for varPackage in anaamika dal pulsar pycrtools rm
-{
-  ${CMAKE_BUILD_TOOL} $varPackage
-  ${CMAKE_BUILD_TOOL} $varPackage_Experimental
-}
+do
+  ${CMAKE_BUILD_TOOL} $varPackage ;
+  ${CMAKE_BUILD_TOOL} $varPackage_Experimental ;
+done
