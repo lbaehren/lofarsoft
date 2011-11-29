@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id:: template_FindXX.cmake 1643 2008-06-14 10:19:20Z baehren             $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2010                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -92,9 +90,11 @@ set (CMAKE_FIND_LIBRARY_PREFIXES ${TMP_FIND_LIBRARY_PREFIXES} CACHE STRING
 ## Actions taken when all components have been found
 
 if (PYQT_INCLUDES AND PYQT_LIBRARIES)
-  set (HAVE_PYQT TRUE)
+  set (HAVE_PYQT  TRUE )
+  set (PYQT_FOUND TRUE )
 else (PYQT_INCLUDES AND PYQT_LIBRARIES)
-  set (HAVE_PYQT FALSE)
+  set (HAVE_PYQT  FALSE )
+  set (PYQT_FOUND FALSE )
   if (NOT PYQT_FIND_QUIETLY)
     if (NOT PYQT_INCLUDES)
       message (STATUS "Unable to find PyQt header files!")
