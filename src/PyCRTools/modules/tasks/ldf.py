@@ -14,6 +14,7 @@ import pytmf
 import time
 import os
 import sys
+import numpy as np
 
 
 def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
@@ -72,7 +73,6 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             MSig.mean(sigtemp)
             
             stationname=res["antennas"][0][0:3]
-            
             
             meansignal[res["polarization"]].extend(MSig)
             meanpos[res["polarization"]].extend(MPos)
@@ -206,7 +206,9 @@ class ldf(tasks.Task):
         Draw3D = dict(default=True,doc="Draw 2D LDF"),
         save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder"),
         generate_html = dict(default=False,doc="Default output to altair webserver"),
-        use_lofar_information = dict(default = False, doc = "Use Barycenter and other information to draw different LDF"),
+        use_lofar_information = dict(default=False,doc="Use Barycenter and other information to draw different LDF"),
+        use_lofar_with_pol = dict(default=1,doc="Calculate LOFAR core for the polarization 0 or 1"),
+        parameters_for_fitting = dict(default=[50,5], doc="Give minimization parameters [bins,size]")
         
         )
         
@@ -472,7 +474,7 @@ class ldf(tasks.Task):
                 xcoord = self.stationDistances1[i]
 
                 cr.plt.annotate(str(station),xy=(xcoord,ycoord),xytext=(-30, 20),xycoords='data',textcoords='offset points',size='x-large',color=self.color_pol1)
-            cr.plt.xlabel("Distance to Shower Axis [m]")
+            cr.plt.xlabel("Distance to Shower Axis (LORA) [m]")
             if self.plot_parameter == "pulses_maxima_y":
                 cr.plt.ylabel("Pulse Power [a.u.]")
             else:
@@ -577,21 +579,173 @@ class ldf(tasks.Task):
 
 
         if self.use_lofar_information:   
-
-            print "pol 0"    
-            self.CorePol1 = self.CalculateBaryCenter(self.positions0,self.signals0)
-            print "pol 1"
-            self.CorePol2 = self.CalculateBaryCenter(self.positions1,self.signals1)
-            print "LORA", self.loracore, CorePol1, CorePol2
-                
-            self.DistNew0 = self.GetDistance(self.CorePol1,self.loradirection,self.positions0)
-            self.DistNew1 = self.GetDistance(self.CorePol2,self.loradirection,self.positions1)
-           
-            cr.plt.plot(self.DistNew1.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
-            cr.plt.plot(self.DistNew1.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1)  
             
-             
+            # Barycenter
+              
+            self.CorePol0 = self.CalculateBaryCenter(self.positions0,self.signals0)
+            self.CorePol0.append(0)
+            self.CorePol0 = cr.hArray(self.CorePol0)
+            self.CorePol1 = self.CalculateBaryCenter(self.positions1,self.signals1)
+            self.CorePol1.append(0)
+            self.CorePol1 = cr.hArray(self.CorePol1)
+            
+            #  pol 0
+            
+            figlofarpol0 = cr.plt.figure()
                 
+            self.DistNewpol01 = self.GetDistance(self.CorePol0,self.loradirection,self.positions1)
+            self.DistNewpol00 = self.GetDistance(self.CorePol0,self.loradirection,self.positions0)
+           
+            cr.plt.plot(self.DistNewpol01.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
+            
+            cr.plt.plot(self.DistNewpol00.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
+            cr.plt.yscale("log")
+            cr.plt.xlabel("Distance to Shower Axis from pol0 [m]")
+            if self.plot_parameter == "pulses_maxima_y":
+                cr.plt.ylabel("Pulse Power [a.u.]")
+            else:
+                cr.plt.ylabel("Power [a.u.]")  
+            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
+            cr.plt.title("BaryCenter_POL0_"+str(self.event_id)) 
+            
+            if self.plot_scale_auto:
+                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+            else:
+                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)         
+             
+            # pol1
+              
+            figlofarpol1 = cr.plt.figure()
+                
+            self.DistNewpol11 = self.GetDistance(self.CorePol1,self.loradirection,self.positions1)
+            self.DistNewpol10 = self.GetDistance(self.CorePol1,self.loradirection,self.positions0)
+           
+            cr.plt.plot(self.DistNewpol11.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
+            
+            cr.plt.plot(self.DistNewpol10.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
+            cr.plt.yscale("log")
+            cr.plt.xlabel("Distance to Shower Axis from pol1 [m]")
+            if self.plot_parameter == "pulses_maxima_y":
+                cr.plt.ylabel("Pulse Power [a.u.]")
+            else:
+                cr.plt.ylabel("Power [a.u.]")  
+            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
+            cr.plt.title("BaryCenter_POL1_"+str(self.event_id))  
+            
+            if self.plot_scale_auto:
+                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+            else:
+                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+            
+            # Minimization             
+            
+            StartDirection = self.loradirection
+
+            size = self.parameters_for_fitting[1]
+            bins = self.parameters_for_fitting[0]
+            count = 0
+
+            xgrid = np.zeros(bins*(bins))
+            ygrid = np.zeros(bins*(bins))
+            
+            vgrid = np.zeros(bins*(bins)) 
+            
+            width = bins/2.*size
+            
+            if self.use_lofar_with_pol == 1:
+                StartSignals = self.signals1
+            else:
+                StartSignals = self.signals0
+            
+            StartCore = cr.hArray(copy=self.loracore)
+            
+            StartCore[0] -= (bins/2*size)
+            StartCore[1] -= (bins/2*size)
+            
+            MinCore = cr.hArray(copy=StartCore)
+            starttestindex = float("inf")
+            
+            for stepX in xrange(bins):
+
+                VarCore = cr.hArray((0.,0.,0.))
+                VarCore[0] = StartCore[0] + stepX*size
+                    
+                for stepY in xrange(bins):
+                
+                    VarCore[1] =  StartCore[1] + stepY*size
+                    
+                    if self.use_lofar_with_pol == 1:
+                        StartDistances = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
+                    else:
+                        StartDistances = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
+                    Length = int(StartSignals.getDim()[0])
+                    Value = np.zeros((Length, 2))
+        
+                    Value[:,0] = StartDistances
+                    Value[:,1] = StartSignals.vec()
+        
+                    order = Value[:,0].argsort() 
+        
+                    ValueSorted = np.take(Value,order,0)
+                    
+                    testvalue = 0
+                    for i in xrange(Length-1):
+                        testvalue += abs(ValueSorted[i,1]-ValueSorted[i+1,1])
+                    
+                    
+                    if testvalue < starttestindex:
+                        MinCore = cr.hArray(copy=VarCore)
+                        starttestindex = testvalue
+                        
+                    xgrid[count] = stepX*size+StartCore[0]
+                    ygrid[count] = stepY*size+StartCore[1]
+                    vgrid[count] = testvalue
+                    count += 1    
+
+                        
+            H, xedges, yedges = np.histogram2d(ygrid, xgrid, bins=(bins, bins),range=np.array([[StartCore[1], StartCore[1]+bins*size], [StartCore[0], StartCore[0]+bins*size]]),normed=False, weights=vgrid)
+
+            extent = [yedges[0], yedges[-1], xedges[0], xedges[-1]]
+            
+            histo = cr.plt.figure()
+            
+            cr.plt.imshow(H, extent=extent, origin = "lower",interpolation='nearest',cmap='jet')
+            cr.plt.ylabel("LOFAR Y [m]")
+            cr.plt.xlabel("LOFAR X [m]")
+            cr.plt.colorbar()
+            cr.plt.scatter(self.loracore[0],self.loracore[1],s=80,c = "black", marker='d')
+            cr.plt.scatter(MinCore[0],MinCore[1],s=80,c = "black", marker='8')
+            cr.plt.scatter(self.CorePol0[0],self.CorePol0[1],s=80,c = "black", marker='>')
+            cr.plt.scatter(self.CorePol1[0],self.CorePol1[1],s=80,c = "black", marker='<')
+            cr.plt.title("Minimization "+str(self.event_id)+" for pol "+str(self.use_lofar_with_pol))
+            
+            
+
+            FittedLDF = cr.plt.figure()
+                
+            self.DistNewpol01 = self.GetDistance(MinCore,self.loradirection,self.positions1)
+            self.DistNewpol00 = self.GetDistance(MinCore,self.loradirection,self.positions0)
+           
+            cr.plt.plot(self.DistNewpol01.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
+            
+            cr.plt.plot(self.DistNewpol00.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
+            cr.plt.yscale("log")
+            cr.plt.xlabel("Distance to Shower Axis from pol0 [m]")
+            if self.plot_parameter == "pulses_maxima_y":
+                cr.plt.ylabel("Pulse Power [a.u.]")
+            else:
+                cr.plt.ylabel("Power [a.u.]")  
+            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
+            cr.plt.title("Core_from_FIT_"+str(self.event_id)+" for pol "+str(self.use_lofar_with_pol))
+            
+            if self.plot_scale_auto:
+                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+            else:
+                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+
+                            
+            
+                         
 
                
          
