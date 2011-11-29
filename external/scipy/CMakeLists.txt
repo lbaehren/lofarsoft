@@ -5,6 +5,9 @@ project (SCIPY)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
+## Load CMake modules
+include (ExternalProject)
+
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
 ## installation can be found. In order to handle this properly, we use the CMake
