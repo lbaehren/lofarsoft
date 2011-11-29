@@ -348,8 +348,8 @@ for full_filename in files:
         ########################################################################
         print "---> Open data file",full_filename
         try:
-            datafile=open(full_filename); 
-            if datafile["ANTENNA_SET"]=="UNDEFINED": 
+            datafile=open(full_filename);
+            if datafile["ANTENNA_SET"]=="UNDEFINED":
                 datafile["ANTENNA_SET"]=lofarmode
         except RuntimeError:
             print "ERROR opening file - skipping this file!"
@@ -379,16 +379,17 @@ for full_filename in files:
         timems = int(datafile["SAMPLE_INTERVAL"][0]*datafile["SAMPLE_NUMBER"][0]*1000)
         timems = str(timems).zfill(3) # make 3 digits with leading zeros if needed.
         # NOTE: chosen to take int part of time in ms; i.e. not rounding to nearest ms.
-        
+
         #time_stamp=filename_split[-2] if not timestamp else timestamp
         time_stamp=timestr+"."+timems+"Z" if not timestamp else timestamp
 
         pretty_time_stamp=time.strftime("%Y-%m-%d %H:%M:%S."+timems,time.gmtime(timesec))
 
-        station_name=metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+        #station_name = metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+        station_name = "%03d" %(datafile["CHANNEL_ID"][0]/1000000) if not station else station
 
 
-        #station_name=filename_split[-1] 
+        #station_name=filename_split[-1]
         old_time_stamp=time_stamp
         #time_stamp=filename_split[-2] if not timestamp else timestamp
         #pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
@@ -1017,7 +1018,7 @@ for full_filename in files:
         (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
         Pause(name="fitted-cable-delays")
-        
+
         scrt = hArray(copy=direction.residual_delays).vec() # NB! Need to copy the hArray
         # otherwise, the original array will get modified by scrt.abs().
         scrt.abs();
