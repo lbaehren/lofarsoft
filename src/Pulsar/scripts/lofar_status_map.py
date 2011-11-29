@@ -82,7 +82,6 @@ zooms={ 'intl': (-10.90, 43.4, 31.90, 60.4, 'lcc', 51, 12, 'i', 100.),
        }
 
 
-
 # function that return pixel coordinates from the station coordinates
 def get_pixels (x, y, figx, figy, dpi):
 	factor = 100 # resolution ?
