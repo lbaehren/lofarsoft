@@ -1,109 +1,112 @@
 #ifndef NumUtils_H
 #define NumUtils_H	
 
-// Standard header files
+/* Standard header files */
 #include <iostream>
 #include <string>
 #include <vector>
 #include <limits>
+#include <sys/types.h>
+/* GSL header files */
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_eigen.h>
-//#include <omp.h>
 
 #define DEBUG 1
-#define uint unsigned int
 //! statistical limit for number of line of sights before attempting a S(i,j) iteration
 #define LOSLIMIT 100
 #define PI 3.1415926535897932385
 #define CVAC 299792458
+
 namespace RM {  //  namespace RM
-using namespace std;
-void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
-void findGaps(vector<double> &freqs, vector<uint> &result) ;
-void FFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
-void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
-uint maxAbs(vector<complex<double> > vekt) ;
-double meanPeak(vector<complex<double> > vekt) ;
-complex<double> ehoch(double phi) ;
+  
+  using namespace std;
+  
+  void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
+  void findGaps(vector<double> &freqs, vector<uint> &result) ;
+  void FFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
+  void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
+  uint maxAbs(vector<complex<double> > vekt) ;
+  double meanPeak(vector<complex<double> > vekt) ;
+  complex<double> ehoch(double phi) ;
   class cVecFunk {
-    public:
+  public:
     virtual complex<double> function(uint index) =0 ;
   };
   class mat ;
   class cmat ;
   class vec ;
   class permEntry {
-     public:
-     uint pos1;
-     uint pos2;     
-     permEntry(uint w1,uint w2) {
-	 pos1 = w1 ;
-	 pos2 = w2 ;
-     }
+  public:
+    uint pos1;
+    uint pos2;     
+    permEntry(uint w1,uint w2) {
+      pos1 = w1 ;
+      pos2 = w2 ;
+    }
   } ;
   /*! class for a complex vector */
   class cvec {
-    public :
-      /*! calculates the absolute value of a complex number */
-      double Abs(complex<double> val) {
-	  return sqrt((val*conj(val)).real()) ;
+  public :
+    /*! calculates the absolute value of a complex number */
+    double Abs(complex<double> val) {
+      return sqrt((val*conj(val)).real()) ;
+    }
+    vector<complex<double> > data ;  // the actual data
+    cvec(void ) {
+    } ;
+    /*! constructor which reservese the memory for size elements */
+    cvec(uint size) {
+      data.resize(size) ;
+    };
+    cvec(uint size, complex<double> val) {
+      data.resize(size) ;
+      for (uint i=0; i<size; i++) {
+	data[i] = val ;
       }
-      vector<complex<double> > data ;  // the actual data
-      cvec(void ) {
-      } ;
-      /*! constructor which reservese the memory for size elements */
-      cvec(uint size) {
-	 data.resize(size) ;
-      };
-      cvec(uint size, complex<double> val) {
-	data.resize(size) ;
-	for (uint i=0; i<size; i++) {
-	  data[i] = val ;
-	}
+    }
+    cvec(cVecFunk *fu, uint dim)  {
+      data.resize(dim) ;
+      for (uint i=0; i<dim; i++) {
+	data[i] = fu->function(i) ;
       }
-      cvec(cVecFunk *fu, uint dim)  {
-	data.resize(dim) ;
-	for (uint i=0; i<dim; i++) {
-	  data[i] = fu->function(i) ;
-	}
+    }
+    /*! create complex vector from gsl vector */
+    cvec(gsl_vector_complex *gsl_vec) {
+      uint size = gsl_vec->size ;
+      data.resize(size) ;
+      for (uint i=0; i<size; i++) {
+	gsl_complex val = gsl_vector_complex_get(gsl_vec,i) ;
+	complex<double> cval(val.dat[0],val.dat[1]);
+	data[i] = cval ;
       }
-      /*! create complex vector from gsl vector */
-      cvec(gsl_vector_complex *gsl_vec) {
-	  uint size = gsl_vec->size ;
-	  data.resize(size) ;
-	  for (uint i=0; i<size; i++) {
-	    gsl_complex val = gsl_vector_complex_get(gsl_vec,i) ;
-	    complex<double> cval(val.dat[0],val.dat[1]);
-	    data[i] = cval ;
-	}
+    }
+    cvec(cmat &matr) ;
+    /*! constructor makes a cvec from a stl vector */
+    cvec(vector<complex<double> > &vek) {
+      data=vek ;
+    } ;
+    /*! resizes the dimension of the current vector */
+    void set_size(uint size) {
+      data.resize(size);
+    } ;
+    void set_vals(uint size, complex<double> val) {
+      data.resize(size) ;
+      for (uint i=0; i<size; i++) {
+	data[i] = val ;
       }
-      cvec(cmat &matr) ;
-      /*! constructor makes a cvec from a stl vector */
-      cvec(vector<complex<double> > &vek) {
-        data=vek ;
-      } ;
-      /*! resizes the dimension of the current vector */
-      void set_size(uint size) {
-	 data.resize(size);
-      } ;
-      void set_vals(uint size, complex<double> val) {
-	data.resize(size) ;
-	for (uint i=0; i<size; i++) {
-	  data[i] = val ;
-	}
-      } ;
-      /*! set the value of the element index ind to value val */
-      void set(uint ind, complex<double> val) {
-	data[ind] = val ;
-      }
-      /*! multiplies all elements of the current vector with the factor fak.
-	\param fak factor to be multiplied to all elements of the vector */
-      void mult(complex<double> fak) ;
-      /*! returns the size of the vector */
-      uint size() {
+    } ;
+    /*! set the value of the element index ind to value val */
+    void set(uint ind, complex<double> val) {
+      data[ind] = val ;
+    }
+    /*! multiplies all elements of the current vector with the factor fak.
+      \param fak factor to be multiplied to all elements of the vector */
+    void mult(complex<double> fak) ;
+    /*! returns the size of the vector */
+    uint size() {
 	return data.size() ;
       } ;
       /*! returns the size of the vector */
@@ -1016,8 +1019,20 @@ complex<double> ehoch(double phi) ;
       void flip() ;
   };
 
+  // ============================================================================
+  //
+  //  Class: grid
+  //
+  // ============================================================================
+
+  /*!
+    \class grid
+    Though formally set up as a class, the code below is just a collection of
+    public data and methods; there is no encapsulation.
+  */
   class grid {
-    public:
+
+  public:
     double dphi ;
     uint nphi ;
     double l2_nonuni ;
@@ -1026,19 +1041,20 @@ complex<double> ehoch(double phi) ;
     double start ;
     double stop ;
     double step ;
-    double gcf_expsinc(double x, double dx) ;
+    double gcf_expsinc (double x, double dx) ;
     void arange(double start, double stop, double step) ;
     void make_x_grid(vec &x, uint m, double dy, uint ny) ;
     void pre_fft_gridding(cvec &f, vec &x, double dy, uint ny) ;
     void compute_dirty_image(cvec &pol, vec &x, double delta, uint num) ;
     /*! constructor for regular grid with 
-        given start point given end point*/
+      given start point given end point*/
     grid(double start, double stop, double step) {
       arange(start, stop, step) ;
     }
     grid() {
     }
   } ;
+  
   double getVarForGauss(cvec data, vector<double> &faraday, int useClean, uint &lo, uint &index, uint &hi, double &max) ;
   void createPeak(vector<complex<double> > &data, double max, double sigma, vector<double> &faras,uint lo, uint index, uint hi, cvec &peak, uint useClean) ;
   void smoothPeak(cvec &peak, uint index, vector<double> &lcenter,vector<double> &linterv,vector<double> &faras, uint useClean) ;
@@ -1046,6 +1062,7 @@ complex<double> ehoch(double phi) ;
   void freqToLambdaSq(const vector<double> &center, const vector<double> &intervals, vector<double> &lcenter, vector<double> &linterv) ;
   vector<complex<double> > performRMSynthesis(vector<complex<double> > &QU, vector<double> &lambC,vector<double> &lambI, vector<double> &faradays,  double nu_0, double alpha, double epsilon) ;
   vector<complex<double> > performFarraday(vector<complex<double> > &peak, vector<double> &lambC, vector<double> &faradays,  double nu_0, double alpha, double epsilon) ;
+
 }  // end of the namespace RM
 
 

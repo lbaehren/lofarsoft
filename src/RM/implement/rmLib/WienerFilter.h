@@ -322,15 +322,25 @@ namespace RM {  //  namespace RM
 		    vector<double> &power);
   //! Compute P=sqrt(Q+iU)
   void complexPower( cvec &signal,
-		    vector<double> &power);	
-  complex<double> integrand(double x,double phi_a, double phi_b,double alpha) ;
-  complex<double> integral(double nu_a, double nu_b, double eps,double alpha, double phi_a, double phi_b, int level ) ;
+		     vector<double> &power);	
+  std::complex<double> integrand (double x,
+				  double phi_a,
+				  double phi_b,
+				  double alpha) ;
+  std::complex<double> integral (double nu_a,
+				 double nu_b,
+				 double eps,
+				 double alpha,
+				 double phi_a,
+				 double phi_b,
+				 int level) ;
   complex<double> integral_approx(double nu_a, double nu_b, double eps,double alpha, double phi_a, double phi_b, int level ) ;
   void prepare(vector<double> &freqsC, vector<double> &freqsI, vector<double> &faras, double nu_0, double alpha, double epsilon, int method) ;
+  
   // === Noise functions for signal creation ====================================
   
-/*   //! Add noise to data */
-/*   void addNoise(double max); */
+  /*   //! Add noise to data */
+  /*   void addNoise(double max); */
   
   };
   
@@ -343,12 +353,17 @@ namespace RM {  //  namespace RM
     complex<double> arg2 ;
     complex<double> arg3 ;
     public :
-    oneOverEps(cvec vector, complex<double> ar1, complex<double> ar2, complex<double> ar3) {
-      vek = vector ;
-      arg1= ar1 ;
-      arg2= ar2 ;
-      arg3= ar3 ;
-    }
+    
+    oneOverEps (cvec vector,
+		std::complex<double> ar1,
+		std::complex<double> ar2,
+		std::complex<double> ar3)
+      {
+	vek = vector ;
+	arg1= ar1 ;
+	arg2= ar2 ;
+	arg3= ar3 ;
+      }
     complex<double> function(uint index) {
       return 1.0/(arg1*vek[index]+arg2)+arg3*vek[index] ;
     }
