@@ -90,6 +90,8 @@ Online resources:
 
 <div class='section'><a name="code tree">Organization of the code</a></div>
 
+<h3>Directory hierarchy of the source code</h3>
+
 Once the check-out is completed, you will find the following directory structure
 on your disk:
 
@@ -160,7 +162,58 @@ on your disk:
     <td></td>
   </tr>
 </table>
-  
+
+<h3>Directory hierarchy of the release/installation directory</h3>
+
+The installation location -- as defined through the
+<tt>CMAKE_INSTALL_PREFIX</tt> variable by default is set to
+<tt>LOFARSOFT/release</tt>; this will allow for local installation of
+the User Software in case no system administration permissions are available.
+
+<pre class='code'>
+  lofarsoft
+  |-- release
+  |   |-- bin
+  |   |-- include
+  |   |-- lib
+  |   |   `-- python
+  |   `-- share
+  |       `-- cmake
+  |           `-- Modules
+  |
+</pre>
+
+In this the sub-directories are used as follows:
+
+<table border="0">
+  <tr valign="top">
+    <td><strong>bin</strong></td>
+    <td>Installation destination for program executables (both
+      compiled programs as well as scripts).</td>
+  </tr>
+  <tr valign="top">
+    <td><strong>include</strong></td>
+    <td>Installation destination of header files. Typically each
+      individual package will collect its header files within a
+      separate sub-directory.</td>
+  </tr>
+  <tr valign="top">
+    <td><strong>lib</strong></td>
+    <td>Installation destination for the library files. The
+      <strong>python</strong> sub-directory holds shared libraries to
+      be imported as modules into Python.</td>
+  </tr>
+  <tr valign="top">
+    <td><strong>share</strong></td>
+    <td>Installation destination for commonly shared files, such as
+      documentation (be it HTML-based of man-pages). The
+      <strong>cmake</strong> sub-directory is utilized for the
+      installation of custom CMake extension (such as the various
+      search modules, which are not part of the standard CMake
+      distribution).</td>
+  </tr>
+</table>
+
 <div class="top">[<a href="#top">top</a>]</div>
 
 <!-- New section --------------------------------------------------------------->
