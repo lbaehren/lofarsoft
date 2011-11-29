@@ -148,7 +148,7 @@ for LUS_PACKAGE in dal pulsar anaamika pycrtools
         echo "Install has error!" >>$lus_logfile
       fi
     fi
-    runTests $lus_logfile
+    ${LUS_PACKAGE}_Experimental $lus_logfile
 }
 
 # Status message
