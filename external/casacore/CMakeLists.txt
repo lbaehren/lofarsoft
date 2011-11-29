@@ -30,7 +30,7 @@ set (CASACORE_SVN_REVISION   "-r21024")
 option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
 option (CASACORE_FORCE_BUILD       "Force build and installation of package?" OFF )
 option (CASACORE_FROM_REPOS        "Install package from repository?"         NO  )
-option (CASACORE_FROM_REPOS_HEAD   "Install package from repository HEAD?"    NO  )
+option (CASACORE_FROM_REPOS_HEAD   "Install package from repository HEAD?"    YES )
 option (CASACORE_WITH_FFTW3        "Enable FFTW3 library support?"            OFF )
 option (CASACORE_WITH_HDF5         "Enable HDF5 library support?"             YES )
 option (CASACORE_BUILD_TESTING     "Build test programs?"                     OFF )
@@ -189,7 +189,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 	SVN_REPOSITORY ${CASACORE_SVN}
 	CMAKE_ARGS -C${CASACORE_CMAKE}
 	PATCH_COMMAND cat ${PROJECT_SOURCE_DIR}/casacore.patch.cmake >> ${PROJECT_BINARY_DIR}/source/CMakeLists.txt
-	BUILD_COMMAND make -j2
+	BUILD_COMMAND ${CMAKE_BUILD_TOOL} -j2
 	INSTALL_COMMAND make install
 	)
     else (CASACORE_FROM_REPOS_HEAD)
@@ -202,7 +202,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 	SVN_REVISION ${CASACORE_SVN_REVISION}
 	CMAKE_ARGS -C${CASACORE_CMAKE}
 	PATCH_COMMAND cat ${PROJECT_SOURCE_DIR}/casacore.patch.cmake >> ${PROJECT_BINARY_DIR}/source/CMakeLists.txt
-	BUILD_COMMAND make -j2
+	BUILD_COMMAND ${CMAKE_BUILD_TOOL} -j2
 	INSTALL_COMMAND make install
 	)
     endif (CASACORE_FROM_REPOS_HEAD)
@@ -217,7 +217,7 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
       URL ${CASACORE_SOURCE}
       CMAKE_ARGS -C${CASACORE_CMAKE}
       PATCH_COMMAND cat ${PROJECT_SOURCE_DIR}/casacore.patch.cmake >> ${PROJECT_BINARY_DIR}/source/CMakeLists.txt
-      BUILD_COMMAND make -j2
+      BUILD_COMMAND ${CMAKE_BUILD_TOOL} -j2
       INSTALL_COMMAND make install
       )
     
