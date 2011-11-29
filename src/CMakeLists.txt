@@ -232,9 +232,15 @@ endif (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
   ## Build package from present sources
-  build_package (cr src/CR-Tools)
+  lus_package_build (cr CR-Tools)
   ## Experimental build
   lus_package_experimental (cr CR-Tools)
+else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+  ExternalProject_Add (cr
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/CR-Tools
+    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/CR-Tools
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
 
 ##__________________________________________________________
