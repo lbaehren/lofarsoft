@@ -6,14 +6,14 @@
 ## ==============================================================================
 
 ## Initialize the testing
-ExperimentalStart
+${CMAKE_BUILD_TOOL} ExperimentalStart
 ## Configure and start testing
-ExperimentalConfigure
-ExperimentalTest
-ExperimentalSubmit
+${CMAKE_BUILD_TOOL} ExperimentalConfigure
+${CMAKE_BUILD_TOOL} ExperimentalTest
+${CMAKE_BUILD_TOOL} ExperimentalSubmit
 ## Perform coverage testing
-ExperimentalCoverage
-ExperimentalSubmit
+${CMAKE_BUILD_TOOL} ExperimentalCoverage
+${CMAKE_BUILD_TOOL} ExperimentalSubmit
 
 ## ==============================================================================
 ##
