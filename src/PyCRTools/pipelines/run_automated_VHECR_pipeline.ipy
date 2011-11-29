@@ -48,9 +48,14 @@ includefilter=[""]
 # i.e. not hardcoded in pipeline)
 excludefilter=["20110610T","VHECR_LORA-1969","killed","test","temp","dump","manual","trash"]
 excludefilter.append("L31774")
+excludefilter.append("CS013") # Exclude this as no antenna array configuration is available yet.
+excludefilter.append("CS028") # Exclude this as no antenna array configuration is available yet.
 excludefilter.append("20110613T051515.914")
+excludefilter.append("20111019T") # Long event, (MSSS event?) Eventually crashed due to indexing error new_badantennalist cr_event.py:668
 excludefilter.append("20110813T190822.655") # Zero values cause exception when executing logplot
 excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception when executing logplot
+excludefilter.append("20111023T193814.232Z")
+excludefilter.append("20111024T014841.773Z") # LORA trigger comes too late
 
 
 def get_file_metadata(filename):
@@ -112,7 +117,7 @@ def get_results(filename,outputdir,pol=0):
     result_xml_file=os.path.join(outputdir_with_subdirectories,"results.xml")
     result_html_file=os.path.join(outputdir_with_subdirectories,"index.html")
 
-    print "result XML file: ", result_xml_file
+    # print "result XML file: ", result_xml_file
 
     if os.path.isfile(result_xml_file):
         res=xmldict.load(result_xml_file)
