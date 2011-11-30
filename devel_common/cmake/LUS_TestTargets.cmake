@@ -63,7 +63,6 @@ if (NOT LUS_TESTTARGETS_CMAKE)
     foreach (varExternalPackage
 	armadillo
 	bison
-	blitz
 	boost
 	casacore
 	cfitsio
