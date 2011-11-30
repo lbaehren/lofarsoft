@@ -20,10 +20,6 @@ build/Makefile
 build/build_package.sh
 build/cmake_install.cmake
 data/aera
-doc/html
-doc/latex
-doc/CMake.html
-doc/CTest.html
 external/matplotlib/setupext.py
 release
 src/CR-Tools/implement/Pypeline/documentation/build
