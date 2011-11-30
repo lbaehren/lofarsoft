@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id                                                                     |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Lars Baehren (<mail>)                                                 *
  *                                                                         *
@@ -41,8 +38,6 @@ using CR::LinearTransform;  // Namespace usage
 
 /*!
   \brief Test constructors for a new LinearTransform object
-
-  \todo Still need to test constructors using Blitz++ and CASA array classes
 
   \return nofFailedTests -- The number of failed tests.
 */
@@ -120,27 +115,6 @@ int test_constructors ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-  
-#ifdef HAVE_BLITZ
-  std::cout << "[5] Testing constructor using Blitz++ arrays ..." << std::endl;
-  try {
-    uint rank (3);
-    blitz::Array<double,2> matrix (rank,rank);
-    blitz::Array<double,1> shift (rank);
-
-    matrix = 0,1,2,3,4,5,6,7,8;
-    shift  = 0.5,0.5,0.5;
-
-    std::cout << " -- Transformation matrix : " << matrix << std::endl;
-    std::cout << " -- Translation vector    : " << shift  << std::endl;
-    
-    LinearTransform xform (matrix,shift);
-    xform.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-#endif
   
   return nofFailedTests;
 }

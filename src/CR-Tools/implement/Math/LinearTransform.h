@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id                                                                   $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Lars Baehren (<mail>)                                                 *
  *                                                                         *
@@ -31,10 +28,6 @@
 #include <iomanip>
 
 #include <crtools.h>
-
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-#endif
 
 #ifdef HAVE_CASA
 #include <casa/Arrays.h>
@@ -149,16 +142,6 @@ namespace CR { // Namespace CR -- begin
 		     double const *matrix,
 		     double const *shift);
     
-#ifdef HAVE_BLITZ
-    /*! 
-      \brief Argumented constructor using Blitz++ arrays
-      
-      \param matrix -- Transformation matrix, \f$ \mathbf A \f$.
-      \param shift  -- Position shift, \f$ \vec s \f$.
-    */ 
-    LinearTransform (blitz::Array<double,2> const &matrix,
-		     blitz::Array<double,1> const &shift);
-#endif
 #ifdef HAVE_CASA
     /*! 
       \brief Argumented constructor using CASA arrays
@@ -214,17 +197,6 @@ namespace CR { // Namespace CR -- begin
                         was encountered.
     */
     bool setMatrix (double const *matrix);
-#ifdef HAVE_BLITZ
-    /*!
-      \brief Set the transformation matrix
-
-      \param matrix -- \f$ N \times M \f$ matrix
-
-      \return status -- Status of the operation; returns <i>false</i> if an error
-                        was encountered.
-    */
-    bool setMatrix (blitz::Array<double,2> const &matrix);
-#endif
 #ifdef HAVE_CASA
     /*!
       \brief Set the transformation matrix
@@ -239,9 +211,6 @@ namespace CR { // Namespace CR -- begin
     
     void shift (double *shift);
     void shift (std::vector<double> &vect);
-#ifdef HAVE_BLITZ
-    void shift (blitz::Array<double,1> &shift);
-#endif
 #ifdef HAVE_CASA
     void shift (casa::Vector<double> &shift);
 #endif
@@ -251,9 +220,6 @@ namespace CR { // Namespace CR -- begin
     */
     bool setShift (double const *shift);
     bool setShift (std::vector<double> const &shift);
-#ifdef HAVE_BLITZ
-    bool setShift (blitz::Array<double,1> const &shift);
-#endif
 #ifdef HAVE_CASA
     bool setShift (casa::Vector<double> const &shift);
 #endif
@@ -314,19 +280,6 @@ namespace CR { // Namespace CR -- begin
     */
     bool forward (std::vector<double> &out,
 		  std::vector<double> const &in);
-#ifdef HAVE_BLITZ
-    /*!
-      \brief Apply forward linear transform
-
-      \retval out -- 
-      \param in   -- 
-      
-      \return status -- Status of the operation; returns <i>false</i> if an error
-                        was encountered.
-    */
-    bool forward (blitz::Array<double,1> &out,
-		  blitz::Array<double,1> const &in);
-#endif
 #ifdef HAVE_CASA
     /*!
       \brief Apply forward linear transform

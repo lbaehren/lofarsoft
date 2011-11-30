@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id                                                                   $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Lars Baehren (<mail>)                                                 *
  *                                                                         *
@@ -70,35 +67,6 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  // ------------------------------------------------------------ LinearTransform
-  
-#ifdef HAVE_BLITZ
-  LinearTransform::LinearTransform (blitz::Array<double,2> const &matrix,
-				    blitz::Array<double,1> const &shift)
-  {
-    bool status (true);
-
-    /* Check if the shapes of the input arrays are consistent */
-    if (matrix.cols() == shift.numElements()) {
-      // store the shape information
-      shape_p.resize(2);
-      shape_p[0] = matrix.rows();
-      shape_p[1] = matrix.cols();
-      // store the transformation matrix
-      matrix_p = new double [shape_p[0]*shape_p[1]];
-      status = setMatrix (matrix);
-      // store the translation vector
-      shift_p = new double [shape_p[1]];
-      status = setShift (shift);
-    } else {
-      std::cerr << "[LinearTransform::LinearTransform] Inconsisten array shapes!"
-		<< std::endl;
-      std::cerr << " --> Matrix : " << matrix.shape() << std::endl;
-      std::cerr << " --> Shift  : " << shift.shape()  << std::endl;
-    }
-  }
-#endif
-
   // ------------------------------------------------------------ LinearTransform
   
 #ifdef HAVE_CASA
@@ -275,38 +243,6 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------ setMatrix
   
-#ifdef HAVE_BLITZ
-  bool LinearTransform::setMatrix (blitz::Array<double,2> const &matrix)
-  {
-    bool status (true);
-
-    /*
-      Check if the provided matrix has the correct shape
-    */
-    if (matrix.rows() == shape_p[0] && matrix.cols() == shape_p[1]) {
-      // local variables
-      int row (0);
-      int col (0);
-      uint n(0);
-      // copy the array elements
-      for (row=0; row<shape_p[0]; row++) {
-	for (col=0; col<shape_p[1]; col++) {
-	  matrix_p[n] = matrix(col,row);
-	  n++;
-	}
-      }
-    } else {
-      std::cerr << "[LinearTransform::setMatrix] Provided matrix has wrong shape!"
-		<< std::endl;
-      status = false;
-    }
-    
-    return status;
-  }
-#endif
-  
-  // ------------------------------------------------------------------ setMatrix
-  
 #ifdef HAVE_CASA
   bool LinearTransform::setMatrix (casa::Matrix<double> const &matrix)
   {
@@ -345,15 +281,6 @@ namespace CR { // Namespace CR -- begin
       vect[n] = shift_p[n];
     }
   }
-#ifdef HAVE_BLITZ
-  void LinearTransform::shift (blitz::Array<double,1> &shift)
-  {
-    shift.resize(shape_p[0]);
-    for (int n(0); n<shape_p[0]; n++) {
-      shift(n) = shift_p[n];
-    }
-  }
-#endif
 #ifdef HAVE_CASA
   void LinearTransform::shift (casa::Vector<double> &shift)
   {
@@ -424,33 +351,6 @@ namespace CR { // Namespace CR -- begin
     
     return status;
   }
-  
-  // ------------------------------------------------------------------- setShift
-  
-#ifdef HAVE_BLITZ
-  bool LinearTransform::setShift (blitz::Array<double,1> const &shift)
-  {
-    bool status (true);
-    int nelem (shape_p[1]);
-
-    try {
-      if (shift.numElements() == nelem) {
-	for (int n(0); n<nelem; n++) {
-	  shift_p[n] = shift(n);
-	}
-      } else {
-	std::cerr << "[LinearTransform::setShift] Incorrect shape of vector!"
-		  << std::endl;
-	status = false;
-      }
-    } catch (std::string message) {
-      std::cerr << "[LinearTransform::setShift] " << message << std::endl;
-      status = false;
-    }
-    
-    return status;
-  }
-#endif
   
   // ------------------------------------------------------------------- setShift
   
@@ -598,42 +498,4 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
-  // -------------------------------------------------------------------- forward
-  
-#ifdef HAVE_BLITZ
-  bool LinearTransform::forward (blitz::Array<double,1> &out,
-				 blitz::Array<double,1> const &in)
-  {
-    bool status (true);
-
-    // check the length of the input vector
-    if (in.numElements() != shape_p[1]) {
-      std::cerr << "[LinearTransform::forward] Incorrect length of input vector!"
-		<< std::endl;
-      return false;
-    }
-    
-    int row (0);
-    int col (0);
-    int n (0);
-    
-    out.resize (shape_p[0]);
-    
-    try {
-      for (row=0; row<shape_p[0]; row++) {
-	out(row) = shift_p[row];
-	for (col=0; col<shape_p[1]; col++) {
-	  out(row) += in(col)*matrix_p[n];
-	    n++;
-	}
-      }
-    } catch (std::string message) {
-      std::cerr << "[LinearTransform::forward] " << message << std::endl;
-      status = false;
-    }
-
-    return status;
-  }
-#endif
-  
 } // Namespace CR -- end

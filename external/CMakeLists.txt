@@ -12,7 +12,6 @@ set (external_packages
   armadillo
   bison
   blas
-  blitz
   boost
   casacore
   cfitsio

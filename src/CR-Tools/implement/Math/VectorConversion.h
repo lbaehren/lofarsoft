@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
@@ -181,14 +178,6 @@ namespace CR { // Namespace CR -- begin
       bool Cartesian2Spherical (std::vector<double> &spherical,
                                 std::vector<double> const &cartesian,
 				bool const &anglesInDegrees=false);
-      \endcode
-      <li>Blitz++ arrays 
-      \code
-      #ifdef HAVE_BLITZ
-      bool Cartesian2Spherical (blitz::Array<double,1> &spherical,
-                                blitz::Array<double,1> const &cartesian,
-				bool const &anglesInDegrees=false);
-      #endif
       \endcode
       <li>CASA arrays
       \code

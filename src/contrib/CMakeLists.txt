@@ -49,7 +49,6 @@ endif (LUS_CMAKE_MODULES)
 if (LUS_CMAKE_MODULES)
   
   foreach (varSystemPackage
-      Blitz
       Boost
       CASACORE
       CFITSIO
@@ -108,10 +107,6 @@ endif (LUS_CMAKE_MODULES)
 ## -----------------------------------------------------------------------------
 ## Compiler flags
 
-if (HAVE_BLITZ)
-   add_definitions (-DHAVE_BLITZ)
-endif (HAVE_BLITZ)
-
 if (HAVE_CASA)
    add_definitions (-DHAVE_CASA)
 endif (HAVE_CASA)
@@ -138,13 +133,15 @@ endif (CASA_LIBRARIES AND WCSLIB_LIBRARIES)
 ## Configuration summary
 
 if (contrib_VERBOSE_CONFIGURE)
-  message (STATUS "[config] Configuration summary.")
-  message (STATUS "Have Blitz++  = ${HAVE_BLITZ}")
-  message (STATUS "Have BOOST    = ${HAVE_BOOST}")
-  message (STATUS "Have casacore = ${HAVE_CASACORE}")
-  message (STATUS "Have CFITSIO  = ${HAVE_CFITSIO}")
-  message (STATUS "Have HDF5     = ${HAVE_HDF5}")
-  message (STATUS "Have PLPLOT   = ${HAVE_PLPLOT}")
-  message (STATUS "Have WCS      = ${HAVE_WCSLIB}")
-  message (STATUS "Have ZLIB     = ${HAVE_ZLIB}")
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS "| [config] Configuration summary.                            |")
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS " Have BOOST    = ${HAVE_BOOST}")
+  message (STATUS " Have casacore = ${HAVE_CASACORE}")
+  message (STATUS " Have CFITSIO  = ${HAVE_CFITSIO}")
+  message (STATUS " Have HDF5     = ${HAVE_HDF5}")
+  message (STATUS " Have PLPLOT   = ${HAVE_PLPLOT}")
+  message (STATUS " Have WCS      = ${HAVE_WCSLIB}")
+  message (STATUS " Have ZLIB     = ${HAVE_ZLIB}")
+  message (STATUS "+------------------------------------------------------------+")
 endif (contrib_VERBOSE_CONFIGURE)

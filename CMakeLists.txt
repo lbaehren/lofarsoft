@@ -148,7 +148,6 @@ foreach (varSystemPackage
     Armadillo
     BISON
     Boost
-    Blitz
     CASACORE
     CFITSIO
     CUDA

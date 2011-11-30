@@ -157,7 +157,6 @@ include (IncludeFindModule)
 
 set (cr_cmake_modules
   AERA
-  Blitz
   Boost
   CFITSIO
   DAL
@@ -486,10 +485,6 @@ if (HAVE_WCSLIB)
   include_directories (${WCSLIB_INCLUDES})
 endif (HAVE_WCSLIB)
 
-if (HAVE_BLITZ)
-  include_directories (${BLITZ_INCLUDES})
-endif (HAVE_BLITZ)
-
 ## =============================================================================
 ##
 ##  Link libraries
@@ -628,7 +623,6 @@ message (STATUS "+============================================================+"
 message (STATUS "| CR-Tools: Summary of configuration settings                |")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " AERA ..................... : ${AERA_FOUND}"               )
-message (STATUS " BLITZ .................... : ${HAVE_BLITZ}"              )
 message (STATUS " BOOST .................... : ${HAVE_BOOST} "             )
 message (STATUS " .. include directory       : ${BOOST_INCLUDES}"          )
 message (STATUS " .. libboost_date_time      : ${BOOST_DATE_TIME_LIBRARY}" )

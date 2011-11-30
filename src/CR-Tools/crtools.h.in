@@ -71,9 +71,6 @@
 /* Define to 1 if the Star-Tools package is available */
 #cmakedefine HAVE_STARTOOLS 1
 
-/* Define to 1 if we have the development version of the Blitz libraries*/
-#cmakedefine HAVE_BLITZ 1
-
 /* Define to 1 if we have the development version of the Boost libraries*/
 #cmakedefine HAVE_BOOST 1
 
