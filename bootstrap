@@ -56,13 +56,9 @@ echo " -- CMake source archive    = $cmakeSourceArchive"
 
 print_message ()
 {
-  echo ""
   echo "----------------------------------------------------------------------"
-  echo ""
   echo " [LUS] $1"
-  echo ""
   echo "----------------------------------------------------------------------"
-  echo ""
 }
 
 ##____________________________________________________________________
@@ -156,3 +152,8 @@ if test -d $cmakeBinaryDir ; then {
   ## -- run CMake to configure LUS build
   cmake $cmakeSourceDir $*
 } fi;
+
+##__________________________________________________________
+## Report end of bootstrap process
+
+print_message "Completed bootstrap - go to build directory to continue."
