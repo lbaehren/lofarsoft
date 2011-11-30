@@ -260,11 +260,29 @@ add_subdirectory (doc)
 add_subdirectory (external)
 add_subdirectory (src)
 
+##____________________________________________________________________
 ## Enable testing
 
 if (LUS_ENABLE_TESTING)
   include (LUS_TestTargets)
 endif (LUS_ENABLE_TESTING)
+
+##____________________________________________________________________
+## Prepare release directory (CMAKE_INSTALL_PREFIX)
+
+if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib64)
+  if (LUS_VERBOSE_CONFIGURE)
+    message (STATUS "[LUS] Found installation prefix directory.")
+  endif (LUS_VERBOSE_CONFIGURE)
+else (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib64)
+  if (UNIX)
+    execute_process (
+      COMMAND ${CMAKE_COMMAND} -E make_directory lib
+      COMMAND ${CMAKE_COMMAND} -E create_symlink lib lib64
+      WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}
+      )
+  endif (UNIX)
+endif (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib64)
 
 ## ==============================================================================
 ##

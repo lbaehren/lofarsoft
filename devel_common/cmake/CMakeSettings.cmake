@@ -124,14 +124,6 @@ if (NOT USG_CMAKE_CONFIG)
       "USG data area"
       FORCE
       )
-    ## Directories inside the release directory
-    if (LUS_INSTALL_PREFIX)
-      execute_process (
-	COMMAND mkdir -p lib
-	COMMAND ln -s lib lib64
-	WORKING_DIRECTORY ${LUS_INSTALL_PREFIX}
-	)
-    endif (LUS_INSTALL_PREFIX)
   endif (LUS_ROOT)
   
   ## ---------------------------------------------------------------------------
