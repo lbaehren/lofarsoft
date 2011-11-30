@@ -38,7 +38,7 @@ PROJECT_NUMBER         =
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = ${LUS_ROOT}/doc
+OUTPUT_DIRECTORY       = ${CMAKE_INSTALL_PREFIX}/share/lus/doc
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -556,7 +556,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = ${LUS_ROOT}/src/Pulsar/external ${LUS_ROOT}/src/RM/soft
+EXCLUDE                = ${LUS_ROOT}/src/Pulsar/external
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -604,7 +604,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH             = ${LUS_ROOT}/doc/html/images
+IMAGE_PATH             = ${CMAKE_INSTALL_PREFIX}/share/lus/doc/figures
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 
