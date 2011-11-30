@@ -27,7 +27,6 @@ set (external_packages
   numpy
   scipy
   sphinx
-  pelican
   pil
   plplot
   pyfits
@@ -86,7 +85,6 @@ add_dependencies (mathgl hdf5 swig num_util gsl)
 add_dependencies (matplotlib numpy)
 add_dependencies (num_util boost numpy)
 add_dependencies (numpy cblas)
-add_dependencies (pelican git boost cfitsio)
 add_dependencies (plplot numpy swig)
 add_dependencies (pyqt sip)
 add_dependencies (wcslib boost flex)

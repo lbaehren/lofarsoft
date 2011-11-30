@@ -318,12 +318,3 @@
     the command line.
   </ol>
 */
-
-//_______________________________________________________________________________
-//                                                                        Pelican
-
-/*!
-  \defgroup Pelican Pelican network package library
-
-  <a href="http://github.com/pelican/pelican-lofar">github.com/pelican/pelican-lofar</a>
-*/
