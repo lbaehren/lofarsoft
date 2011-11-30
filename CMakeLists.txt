@@ -230,19 +230,6 @@ add_custom_target (clean-build
   COMMENT "Cleaning up build directory ..."
 )
 
-add_custom_target (clean-doc
-  COMMAND ${CMAKE_COMMAND} -E *~
-  COMMAND ${CMAKE_COMMAND} -E html/formula*
-  COMMAND ${CMAKE_COMMAND} -E html/tab*
-  COMMAND ${CMAKE_COMMAND} -E html/search.*
-  COMMAND ${CMAKE_COMMAND} -E html/*.png
-  COMMAND ${CMAKE_COMMAND} -E html/*.map
-  COMMAND ${CMAKE_COMMAND} -E html/*.html
-  COMMAND ${CMAKE_COMMAND} -E html/*.md5
-  WORKING_DIRECTORY ${LUS_ROOT}/doc
-  COMMENT "Cleaning up documentation directory ..."
-  )
-
 add_custom_target (clean-release
   COMMAND ${CMAKE_COMMAND} -E remove_directory bin
   COMMAND ${CMAKE_COMMAND} -E remove_directory etc
