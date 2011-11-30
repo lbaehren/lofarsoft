@@ -91,7 +91,7 @@ if (NOT HAVE_PYFITS OR PYFITS_FORCE_BUILD)
       URL ${have_pyfits_tgz}
       URL_MD5 82e6919667aea99925db212d38670b38
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py --help
+      CONFIGURE_COMMAND true
       BUILD_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py build
       INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${PYFITS_BINARY_DIR}/source/setup.py install --prefix= --home=${LUS_INSTALL_PREFIX}
       )
