@@ -218,31 +218,6 @@ endforeach (varSystemPackage)
 ##
 ## ==============================================================================
 
-add_custom_target (clean-build
-  COMMAND ${CMAKE_COMMAND} -E remove_directory contrib devel_common external
-  COMMAND ${CMAKE_COMMAND} -E remove_directory cr dal pulsar
-  COMMAND ${CMAKE_COMMAND} -E remove_directory  CMakeFiles
-  COMMAND ${CMAKE_COMMAND} -E remove cmake_install.cmake
-  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
-  COMMAND ${CMAKE_COMMAND} -E remove CMakeOptions.cmake
-  COMMAND ${CMAKE_COMMAND} -E *~
-  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-  COMMENT "Cleaning up build directory ..."
-)
-
-add_custom_target (clean-release
-  COMMAND ${CMAKE_COMMAND} -E remove_directory bin
-  COMMAND ${CMAKE_COMMAND} -E remove_directory etc
-  COMMAND ${CMAKE_COMMAND} -E remove_directory include
-  COMMAND ${CMAKE_COMMAND} -E remove_directory info
-  COMMAND ${CMAKE_COMMAND} -E remove_directory lib
-  COMMAND ${CMAKE_COMMAND} -E remove_directory lib64
-  COMMAND ${CMAKE_COMMAND} -E remove_directory plugins
-  COMMAND ${CMAKE_COMMAND} -E remove_directory share
-  WORKING_DIRECTORY ${LUS_ROOT}/release
-  COMMENT "Cleaning up release directory ..."
-)
-
 add_custom_target (clean-src
   COMMAND rm -rf *~ */*~ */*/*~ */*/*/*~
   WORKING_DIRECTORY ${LUS_ROOT}/src
