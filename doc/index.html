@@ -20,6 +20,7 @@
   <li><a href="#Quick start">Quick start</a></li>
   <li><a href="#code tree">Organization of the code</a></li>
   <li><a href="#External dependencies">External dependencies</a></li>
+  <li><a href="#Documentation">Documentation</a></li>
   <li><a href="#Testing">Testing</a></li>
 </ul>
 
@@ -209,7 +210,7 @@ In this the sub-directories are used as follows:
   <tr valign="top">
     <td><strong>share</strong></td>
     <td>Installation destination for commonly shared files, such as
-      documentation (be it HTML-based of man-pages). The
+      <a href="#Documentation">documentation</a> (be it HTML-based of man-pages). The
       <strong>cmake</strong> sub-directory is utilized for the
       installation of custom CMake extension (such as the various
       search modules, which are not part of the standard CMake
@@ -354,6 +355,37 @@ administrator permissions.
   zypper install python-devel python-numpy-devel ipython
   </pre>
 </ul>
+
+<div class="top">[<a href="#top">top</a>]</div>
+
+<!-- New section --------------------------------------------------------------->
+
+<div class='section'><a name="Documentation">Documentation</a></div>
+
+Aside some high-level documentation (such as provided through this
+file), it also is possible to generate a source code documentation for
+the individual packages included in the software
+collection. Generation of this documentation is carried out using
+<a href="http://www.doxygen.org">Doxygen</a> and can be initiated from
+the build directory via the command
+
+<pre class="code">
+make doc
+</pre>
+
+As already indicated above, the resulting HTML pages will be written
+to <tt>share/lus/doc/html</tt> of the release/installation directory:
+
+<pre class='code'>
+  lofarsoft
+  |-- release
+  |   `-- share
+  |       `-- lus
+  |           `-- doc
+  |               |-- html
+  |               `-- latex
+  |
+</pre>
 
 <div class="top">[<a href="#top">top</a>]</div>
 
