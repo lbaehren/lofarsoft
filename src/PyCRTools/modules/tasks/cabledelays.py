@@ -138,6 +138,26 @@ def obtainvalue(par,key):
                 print "please add ",key,"to defaults in cabledelays.py / obtainvalue "
                 return None
 
+def getDelaysFromPhaseCalibrationTables(stationName, theseAntennas):
+
+    RCUlist = []
+    for id in theseAntennas:
+        thisRCU = int(id) % 100
+        RCUlist.extend([thisRCU])
+    RCUlist = np.array(RCUlist)
+    
+    phasecal = md.getStationPhaseCalibration(stationName,"LBA_OUTER") # NB! Antennaset as parameter...
+    phases = np.angle(phasecal)
+    delays = (phases[:, 1] - phases[:, 0]) * (1024 / (2*np.pi)) * 5.0e-9 # delay in seconds, 5.0 ns = sample time
+    
+    cabledelays_full=cr.metadata.getCableDelays(stationName, "LBA_OUTER")  # Obtain cabledelays
+
+    cabledelays=cabledelays_full % 5.0e-9 #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
+    cabledelays -= cabledelays[0] # Correct w.r.t. referecence antenna
+
+    delays += cabledelays
+    return (delays[RCUlist], cabledelays[RCUlist])   # take only 'theseAntennas' which are present in the cabledelays_database
+
 class cabledelays(tasks.Task):
     """
     **Description:**
@@ -188,14 +208,19 @@ class cabledelays(tasks.Task):
 
     def run(self):
        
+        if not self.doPlot and not self.write_database:
+            print 'WARNING: cabledelays Task: nothing to do! Provide either write_database or doPlot.'
+            return
+
         if self.write_database:
             outfile = open(os.path.join(self.topdir, 'Cabledelays.pic'), 'wb')
             pickle.dump(self.cabledelays_database, outfile)
             outfile.close()
             print 'Cabledelays.pic written'
+        
         if not self.doPlot:
             return
-
+    
         y = []
         yspread = []
         positions = []
@@ -212,14 +237,6 @@ class cabledelays(tasks.Task):
         
         cr.trerun("PlotAntennaLayout","Delays",positions = self.positions, colors= cr.hArray(y),sizes=100,names = self.names,title="Cable delays",plotlegend=True)
 
-        # get original cable delays from metadata
-        # NB! Is this a correct measure of cable delays???
-        #cabledelays_full=cr.metadata.get("CableDelays", fptask.antid, res["ANTENNA_SET"], True)  # Obtain cabledelays
-        #cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
-        #        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
-        #        cabledelays=hArray(cabledelays)
-
-
         # now plot cable delays with spread
         # make one figure per LOFAR station, with RCU number on the x-axis.
         
@@ -235,6 +252,9 @@ class cabledelays(tasks.Task):
             theseAntennas.sort()   # will sort by RCU number 
             thisStationName = md.idToStationName(station)
             
+            (delayfromphasetables, delayfromcabledelay) = getDelaysFromPhaseCalibrationTables(thisStationName, theseAntennas)
+            delayfromcabledelay *= 1.0e9
+            delayfromphasetables *= 1.0e9
             plt.figure()
             x = []
             x_avg = []
@@ -266,18 +286,21 @@ class cabledelays(tasks.Task):
                 #    yerr[n] = thisAnt["spread"]
                 n+=1
 
-            plt.scatter(x, y_residual, label='Residual cable delays')
+            plt.scatter(x, y_residual, label='Individual events')
             plt.scatter(x_avg, y_avg_residual, c='r', label='Average residual delay')
             plt.ylabel('Residual cable delay [ns]')
-            plt.xlabel('Antenna number (concatenated)')
+            plt.xlabel('Antenna number (RCU)')
             plt.title('Residual cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='best')
 
             plt.figure()
-            plt.scatter(x, y_total, label='Total cable delays')
+#            plt.scatter(x, y_total, label='Individual events')
             plt.scatter(x_avg, y_avg_total, c = 'r', label='Average cable delay')
+            plt.scatter(x_avg, delayfromphasetables, c = 'g', label = 'Delay from LOFAR Caltables')
+#                plt.scatter(x_avg, delayfromcabledelay, c = 'm', label = 'Delay from Cable delay table')
+
             plt.ylabel('Total cable delay [ns]')
-            plt.xlabel('Antenna number (concatenated)')
+            plt.xlabel('Antenna number (RCU)')
             plt.title('Total cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='center right')
 
