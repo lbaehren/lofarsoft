@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.11
+VERSION=3.12
  
 #####################################################################
 # Usage #
@@ -2241,9 +2241,9 @@ do
  						          dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
  						          if [ $pdmp == 1 ]
  						          then   
- 						             echo "Running: " pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
- 						             echo pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
- 						             pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
+ 						             echo "Running: " pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
+ 						             echo pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
+ 						             pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
  						             pdmp_pid[$ii]=$!
  						          fi
  						       fi
@@ -2310,9 +2310,9 @@ do
 	 						           dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 		 						       if [ $pdmp == 1 ]
 	 						           then   
-	 						              echo "Running: " pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
-	 						              echo pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
-	 						              pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
+	 						              echo "Running: " pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
+	 						              echo pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
+	 						              pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
 	 						              pdmp_pid[$ii][$counter]=$!
 	 						           fi
 							       fi
@@ -2781,6 +2781,8 @@ do
 			   if (( $flyseye == 0 ))
 			   then
 			       wait ${pdmp_pid[ii]}
+			       mv pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			       mv pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			   else
 		  		    if (( $TiedArray == 0 ))
 				    then
@@ -2795,6 +2797,8 @@ do
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish"
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
 			           wait ${pdmp_pid[ii][counter]}
+			           mv pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			           mv pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 					   counter=$(( $counter + 1 )) 
 			        done
 			   fi
