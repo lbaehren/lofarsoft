@@ -106,7 +106,8 @@ export LOFARSOFT=$lus_codedir
 export PATH=$LOFARSOFT/release/bin:$PATH
 . $LOFARSOFT/devel_common/scripts/init.sh  1>>$lus_logfile 2>&1 
 
-cd  $lus_codedir/build
+## Boostrap the fresh checkout
+cd  $lus_codedir
 ./bootstrap  \
   -DHDF5_HDF5_CPP_LIBRARY:FILEPATH=$LOFARSOFT/release/lib/libhdf5_cpp.so \
   -DHDF5_HDF5_HL_LIBRARY:FILEPATH=$LOFARSOFT/release/lib/libhdf5_hl.so \
@@ -115,6 +116,9 @@ cd  $lus_codedir/build
   -DDAL_FROM_REPOS=TRUE \
   -DANAAMIKA_ENABLE_FBDSM:BOOL=NO \
 1>>$lus_logfile 2>&1 
+
+## Change into the build directory
+cd  $lus_codedir/build
 
 if [ $? -ne 0 ]; then 
    echo "Problem during configure" >>$lus_logfile 2>&1 
