@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.12
+VERSION=3.13
  
 #####################################################################
 # Usage #
@@ -2438,6 +2438,13 @@ do
 					            echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 					            echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
 					            dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+						        if [ $pdmp == 1 ]
+					            then   
+					               echo "Running: " pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
+					               echo pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
+					               pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
+					               pdmp_pid[$ii][$counter]=$!
+					            fi
 							fi
 			   	        fi
 						sleep 5
@@ -2771,6 +2778,7 @@ do
 		do
 			for ii in $num_dir
 			do
+               cd ${location}/${STOKES}/RSP${ii}
 			   echo "Waiting for RSP$ii pdmp_pid to finish"
 			   echo "Waiting for RSP$ii pdmp_pid to finish" >> $log
 			   if (( $flyseye == 0 ))
@@ -2789,6 +2797,7 @@ do
 			        counter=0
 			        for jjj in $loop_beams
 			        do
+			           cd ${location}/${STOKES}/RSP${ii}/${jjj}
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish"
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
 			           wait ${pdmp_pid[ii][counter]}
@@ -2800,7 +2809,7 @@ do
 			done # for ii in $num_dir
 		done #for fold_pulsar in $PULSAR_LIST			
 	fi # end if [ $rfi == 0 ] && [ $rfi_pproc == 0 ] && [ $subsformat == 0 ] && [ $pdmp == 1 ]
-
+    
 	#Rename the RSP?/beam_? to their actual names based on the observation parset names -> NAME/beam_?
     if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $TiedArray == 0 ]
     then
