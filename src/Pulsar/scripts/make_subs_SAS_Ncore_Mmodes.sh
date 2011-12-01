@@ -10,7 +10,7 @@ VERSION=3.11
 # Usage #
 #####################################################################
 #Check the usage
-USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
+USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs] [-pdmp]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
 "         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or\n"\
@@ -40,6 +40,7 @@ USAGE2="      [-rfi_pproc] ==> Post-Processing optional parameter to perform Vla
 "      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"\
 "      [-nofold] ==> optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible\n"\
 "      [-subs] ==> optional parameter to process raw files into presto .subXXXX files instead of the default psrfits\n"\
+"      [-pdmp] ==> optional parameter to run the pdmp program on the dspsr output .ar file (psrfits only)\n"\
 "      [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline\n"\
 "      [-test] ==> optional for testing: runs bf2presto and bypasses prepfold and rfi processing but echo's all commands\n"\
 "      [-debug] ==> optional for testing: turns on debugging in ksh (tons of STDOUT messages)\n"
@@ -87,6 +88,7 @@ input_string=$*
 proc=0
 subsformat=0
 H5_exist=0
+pdmp=0
 
 while [ $# -gt 0 ]
 do
@@ -110,6 +112,7 @@ do
 	-test)   test=1;;
 	-nofold)   nofold=1;;
 	-debug)   debug=1;;
+	-pdmp)    pdmp=1;;
 	-subs)    subsformat=1;;
 	-raw)     input_location="$2"; user_input_location=1; shift;;
 	-par)     parset_location="$2"; user_parset_location=1; shift;;
@@ -256,6 +259,16 @@ fi
 if [ $subsformat == 1 ]
 then
    echo "    Will process using presto .subXXXX files instead of default psrfits format." 
+fi
+
+if [ $subsformat == 0 ] && [ $pdmp == 1 ]
+then
+   echo "    Will run pdmp program on psrfits dspsr output .ar file." 
+   echo "    NOTE: **** processing time doubles when pdmp is run!! ****" 
+elif [ $subsformat == 1 ] && [ $pdmp == 1 ]
+then
+   echo "    WARNING: user input pdmp flag ignored since data are processed in subband format"
+   pdmp=0
 fi
 
 #####################################################################
@@ -2226,9 +2239,16 @@ do
  						          echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
  						          echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
  						          dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+ 						          if [ $pdmp == 1 ]
+ 						          then   
+ 						             echo "Running: " pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
+ 						             echo pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
+ 						             pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
+ 						             pdmp_pid[$ii]=$!
+ 						          fi
  						       fi
 						   fi
-						   sleep 10
+						   sleep 5
 					    done
 				     else
 					    if (( $TiedArray == 0 ))
@@ -2288,9 +2308,16 @@ do
 	 						           echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 	 						           echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
 	 						           dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+		 						       if [ $pdmp == 1 ]
+	 						           then   
+	 						              echo "Running: " pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
+	 						              echo pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> $log
+	 						              pdmp -mc 512 -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar >> ${fold_pulsar}_${OBSID}_RSP${ii}.pdmpout 2>&1 &
+	 						              pdmp_pid[$ii][$counter]=$!
+	 						           fi
 							       fi
 							   fi
-							   sleep 10
+							   sleep 5
 						    done
 						    counter=$(( $counter + 1 ))
 					    done
@@ -2571,7 +2598,7 @@ do
 			date >> $log
 	
 	        #find all the prepfold .ps files and convert them into .pdf .png and .th.png results
-	        find ./ -name "*.ps" -print | egrep -v "rfifind|_B.ps|_DFTp.ps|_GTpf16.ps|_YFp.ps" | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
+	        find ./ -name "*.ps" -print | egrep -v "rfifind|_B.ps|_DFTp.ps|_GTpf16.ps|_YFp.ps|_pdmp.ps" | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
 	        wc_convert=`wc -l convert.sh | awk '{print $1}'`
 	        if [[ $wc_convert > 0 ]]
 	        then
@@ -2741,6 +2768,39 @@ do
 	       done # end for fold_pulsar in $PULSAR_LIST
 		fi # end if [ $all -eq 1 ] || [ $all_pproc == 1 ]
     fi # end if [[ $nrBeams == 1 ]] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]] && [[ $subsformat == 1 ]]
+
+	# wait for pdmp to finish
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]] && [[ $nofold == 0 ]] && [ $subsformat == 0 ] && [ $pdmp == 1 ]
+	then
+		for fold_pulsar in $PULSAR_LIST
+		do
+			for ii in $num_dir
+			do
+			   echo "Waiting for RSP$ii pdmp_pid to finish"
+			   echo "Waiting for RSP$ii pdmp_pid to finish" >> $log
+			   if (( $flyseye == 0 ))
+			   then
+			       wait ${pdmp_pid[ii]}
+			   else
+		  		    if (( $TiedArray == 0 ))
+				    then
+				       loop_beams=$beams_init
+				    else
+				       loop_beams=$beams
+				    fi
+		
+			        counter=0
+			        for jjj in $loop_beams
+			        do
+			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish"
+			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
+			           wait ${pdmp_pid[ii][counter]}
+					   counter=$(( $counter + 1 )) 
+			        done
+			   fi
+			done # for ii in $num_dir
+		done #for fold_pulsar in $PULSAR_LIST			
+	fi # end if [ $rfi == 0 ] && [ $rfi_pproc == 0 ] && [ $subsformat == 0 ] && [ $pdmp == 1 ]
 
 	#Rename the RSP?/beam_? to their actual names based on the observation parset names -> NAME/beam_?
     if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $TiedArray == 0 ]
