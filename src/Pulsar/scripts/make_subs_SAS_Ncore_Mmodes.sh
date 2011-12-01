@@ -10,7 +10,7 @@ VERSION=3.12
 # Usage #
 #####################################################################
 #Check the usage
-USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs] [-pdmp]\n\n"\
+USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
 "         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or\n"\
@@ -40,7 +40,6 @@ USAGE2="      [-rfi_pproc] ==> Post-Processing optional parameter to perform Vla
 "      [-transpose] ==> optional parameter to indicate the input data were run through the TAB 2nd transpose\n"\
 "      [-nofold] ==> optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible\n"\
 "      [-subs] ==> optional parameter to process raw files into presto .subXXXX files instead of the default psrfits\n"\
-"      [-pdmp] ==> optional parameter to run the pdmp program on the dspsr output .ar file (psrfits only)\n"\
 "      [-help] ==> optional parameter which prints the usage and examples of how to run the pipeline\n"\
 "      [-test] ==> optional for testing: runs bf2presto and bypasses prepfold and rfi processing but echo's all commands\n"\
 "      [-debug] ==> optional for testing: turns on debugging in ksh (tons of STDOUT messages)\n"
@@ -88,7 +87,8 @@ input_string=$*
 proc=0
 subsformat=0
 H5_exist=0
-pdmp=0
+# decided to always run pdmp in pipeline
+pdmp=1
 
 while [ $# -gt 0 ]
 do
@@ -264,11 +264,6 @@ fi
 if [ $subsformat == 0 ] && [ $pdmp == 1 ]
 then
    echo "    Will run pdmp program on psrfits dspsr output .ar file." 
-   echo "    NOTE: **** processing time doubles when pdmp is run!! ****" 
-elif [ $subsformat == 1 ] && [ $pdmp == 1 ]
-then
-   echo "    WARNING: user input pdmp flag ignored since data are processed in subband format"
-   pdmp=0
 fi
 
 #####################################################################
