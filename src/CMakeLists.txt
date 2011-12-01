@@ -293,7 +293,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
   ## Build package from present sources
-  build_package (pulsar src/Pulsar)
+  lus_package_build (pulsar src/Pulsar)
   ## Experimental build
   lus_package_experimental (pulsar Pulsar)
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
