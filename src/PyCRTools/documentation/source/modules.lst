@@ -18,6 +18,7 @@ pycrtools.core.hftools.mIO
 pycrtools.core.hftools.mRF
 pycrtools.core.hftools.mTBB
 pycrtools.core.hftools.mEndPointRadiation
+pycrtools.core.hftools.mCalibration
 pycrtools.metadata
 pycrtools.grid
 pycrtools.matching
