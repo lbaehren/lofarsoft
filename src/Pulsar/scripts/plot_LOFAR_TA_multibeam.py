@@ -40,6 +40,9 @@ file.close()
 RAs = numpy.array(RAs)
 DECs = numpy.array(DECs)
 
+line=options.parset
+obsid=str(line.split(".")[0])
+
 #Grab the chisqs
 #format is like this (note, list is NOT in beam numerical order):
 #file=./stokes/RSP113/B2217+47_L30847_RSP113_PSR_B2217+47.pfd.th.png obs=CS__RSP113_B2217+47 chi-sq=36.36464
@@ -94,8 +97,8 @@ scatter(x,y,s=s, marker='o', c=c, hold='on')
 xlim(-0.08*RAD2DEG,0.08*RAD2DEG)
 ylim(-0.08*RAD2DEG,0.08*RAD2DEG)
 
-xlabel("Right Ascension Offset [deg]", fontsize=14)
-ylabel("Declination Offset [deg]", fontsize=14)
+xlabel("Right Ascension Offset [deg]\nOBSID=" + str(obsid), fontsize=12)
+ylabel("Declination Offset [deg]", fontsize=12)
 
 suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + " (out of " + str(int((DECs[:,0].size)/2)) + ")\n Simultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
 colorbar()
@@ -122,13 +125,13 @@ while i < (x.size - 1) :
 xlim(-0.08*RAD2DEG,0.08*RAD2DEG)
 ylim(-0.08*RAD2DEG,0.08*RAD2DEG)
 
-xlabel("Right Ascension Offset [deg]", fontsize=14)
-ylabel("Declination Offset [deg]", fontsize=14)
+xlabel("Right Ascension Offset [deg]\nOBSID=" + str(obsid), fontsize=12)
+ylabel("Declination Offset [deg]", fontsize=12)
 
 # label the plot [note, there are 2x as many beams in the parset right now;  can remove the divide by 2 later
 suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + " (out of " + str(int((DECs[:,0].size)/2)) + ")\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
 
-# for LOTAS, number of beams is correct
+# for LOTAS, number of beams is incorrect by factor of 3
 ###suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + " (out of " + str(int((DECs[:,0].size))) + ")\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
 
 colorbar()
