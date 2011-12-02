@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.13
+VERSION=3.14
  
 #####################################################################
 # Usage #
@@ -2196,10 +2196,10 @@ do
 						   else
 						      if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 						      then
-						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
-						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask
+						         echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						         echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask
 						      else
-						         echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
+						         echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
 						      fi
 						      echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 
@@ -2215,17 +2215,17 @@ do
   						       else
   						          if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
   						          then
-						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+						             prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
   						             prepfold_pid[$ii][0]=$!  
 						             sleep 10
-						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
+						             prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
   						             prepfold_pid[$ii][1]=$!  
- 						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
- 						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						             echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						             echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          else 
-						             prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+						             prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
   						             prepfold_pid[$ii]=$!  
- 						             echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+ 						             echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          fi
  						          echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
@@ -2267,10 +2267,10 @@ do
 							   else
 							       if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 							       then
-							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
-							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 
+							          echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+							          echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 
 							       else
-							          echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
+							          echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
 							       fi
 						           echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 							   fi
@@ -2284,17 +2284,17 @@ do
 							       else
 							           if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 							           then
-									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+									       prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
 								           prepfold_pid[$ii][$counter][0]=$!  
 									       sleep 10
-									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
+									       prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
 								           prepfold_pid[$ii][$counter][1]=$!  
-								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+								           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+								           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 							           else
-									       prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+									       prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
 								           prepfold_pid[$ii][$counter]=$!  
-								           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+								           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 							           fi
 							           echo "Running: " echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 							           dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
@@ -2401,10 +2401,10 @@ do
 						else
 						    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 						    then
-						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
-						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 		
+						        echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
+						        echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 		
 						    else
-						        echo prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
+						        echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
 						    fi				
                             echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 						fi
@@ -2419,17 +2419,17 @@ do
 							else
 							    if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 							    then
-				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   	               prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
 							       prepfold_pid[$ii][0]=$!  
 				   	               sleep 10
-				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
+				   	               prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 2>&1 &
 							       prepfold_pid[$ii][1]=$!  
-						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
-						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
+						           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -mask ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}_rfifind.mask -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
+						           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
 						        else
-				   	               prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
+				   	               prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 2>&1 &
 							       prepfold_pid[$ii]=$!  
-						           echo "Running: " prepfold -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
+						           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
 						        fi
 						        echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 						        dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -F $nSubbands -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
