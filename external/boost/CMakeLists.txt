@@ -74,6 +74,7 @@ if (NOT BOOST_FOUND OR BOOST_FORCE_BUILD)
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh --prefix=${CMAKE_INSTALL_PREFIX}
       BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
+      INSTALL_COMMAND ${PROJECT_BINARY_DIR}/source/bjam install --prefix=${LUS_INSTALL_PREFIX}
       )
   
   else (BOOST_FROM_REPOS AND BOOST_SVN)
@@ -88,6 +89,7 @@ if (NOT BOOST_FOUND OR BOOST_FORCE_BUILD)
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap.sh --prefix=${CMAKE_INSTALL_PREFIX}
       BUILD_COMMAND ${PROJECT_BINARY_DIR}/source/bjam
+      INSTALL_COMMAND ${PROJECT_BINARY_DIR}/source/bjam install --prefix=${LUS_INSTALL_PREFIX}
       )
     
   endif (BOOST_FROM_REPOS AND BOOST_SVN)
@@ -100,7 +102,6 @@ if (NOT BOOST_FOUND OR BOOST_FORCE_BUILD)
       COMMAND ${CMAKE_COMMAND} ..
       COMMENT "Updating configuration settings after installation of boost ..."
       DEPENDEES install
-      DEPENDERS build
       WORKING_DIRECTORY ${LUS_BINARY_DIR}
       )
   endif (LUS_BINARY_DIR)
