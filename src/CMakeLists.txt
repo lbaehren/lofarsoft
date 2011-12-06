@@ -219,21 +219,24 @@ endif (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
 ##
 ## ==============================================================================
 
+set (CR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+set (CR_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/cr)
+
 ##__________________________________________________________
 ##                              Build & Testing instructions
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+if (IS_DIRECTORY ${CR_SOURCE_DIR})
   ## Build package from present sources
   lus_package_build (cr CR-Tools)
   ## Experimental build
   lus_package_experimental (cr CR-Tools)
-else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+else (IS_DIRECTORY ${CR_SOURCE_DIR})
   ExternalProject_Add (cr
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/CR-Tools
+    PREFIX ${CR_BINARY_DIR}
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/CR-Tools
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCR_WITH_STARTOOLS=${CR_WITH_STARTOOLS} -DCR_WITH_GUI=${CR_WITH_GUI}
     )
-endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
+endif (IS_DIRECTORY ${CR_SOURCE_DIR})
 
 ##__________________________________________________________
 ##                                      Package dependencies
@@ -266,19 +269,22 @@ endif (CR_WITH_GUI)
 ##
 ## ==============================================================================
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+set (LASA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+set (LASA_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/lasa)
+
+if (IS_DIRECTORY ${LASA_SOURCE_DIR})
   ## Build package from present sources
   lus_package_build (lasa LASA)
   ## Experimental build
   lus_package_experimental (lasa LASA)
-else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+else (IS_DIRECTORY ${LASA_SOURCE_DIR})
   ExternalProject_Add (lasa
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/LASA
+    PREFIX ${LASA_BINARY_DIR}
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/LASA
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     CMAKE_CACHE_ARGS -DLUS_CMAKE_MODULES:PATH=${LUS_CMAKE_MODULES}
     )
-endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
+endif (IS_DIRECTORY ${LASA_SOURCE_DIR})
 
 ## ==============================================================================
 ##
