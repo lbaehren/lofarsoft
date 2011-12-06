@@ -307,7 +307,11 @@ if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
     )
   ## Experimental build
-  lus_package_experimental (pulsar Pulsar)
+  add_custom_target (pulsar_Experimental
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} ${PULSAR_SOURCE_DIR}
+    COMMAND ${CMAKE_BUILD_TOOL} Experimental
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
+    )
 else (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
   ExternalProject_Add (pulsar
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Pulsar
