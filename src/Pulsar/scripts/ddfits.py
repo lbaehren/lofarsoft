@@ -143,7 +143,7 @@ if __name__ == "__main__":
 	hdulist.close()
 
 	# reading the input file again to get pointer for the data
-	rhdu=py.open(gpfile, 'readonly', memmap=1)
+	rhdu=py.open(infile, 'readonly', memmap=1)
 	tbdata=rhdu[1].data[startrow:endrow+badrows]
 
 	# opening output file to update header info and write out dedispersed data further in the loop
