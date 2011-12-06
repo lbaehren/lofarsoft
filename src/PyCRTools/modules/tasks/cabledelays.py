@@ -25,7 +25,7 @@ def gatherresults(topdir, maxspread):
     
     filelist=cr.listFiles(os.path.join(topdir,'*'))
      
-    eventlist=[]
+    eventlist=[] # get all events for this top-dir
     for file in filelist: # can this be done shorter / in listFiles?
         if os.path.isdir(file):
             eventlist.extend([file])
@@ -56,6 +56,7 @@ def gatherresults(topdir, maxspread):
             res = res["results"]
             # check result status
     #        if res["status"] != 'OK':
+            # A 'status' keyword would be nice... Number of delay outliers above (say) 10 ns is in 'delay_outliers' key.
             noutliers = res["delay_outliers"] if "delay_outliers" in res.keys() else 0 
             if res["delay_quality_error"] >= 1 or noutliers > 5: # have status criterion in pipeline...
                 print 'File status not OK, dir = %s, delay quality = %s, # outliers = %s' % (datadir, res["delay_quality_error"], noutliers)
@@ -72,7 +73,7 @@ def gatherresults(topdir, maxspread):
     count = dict()
     antennapositions = dict() # will contain positions for each (unique) antenna id
     for i in range(len(antid)):
-        # fill cabledelays_database
+        # fill cabledelays_database and antennapositions dict
         if not antid[i] in cabledelays_database.keys():
             cabledelays_database[antid[i]] = dict(cabledelay = 0.0, residualdelay = 0.0, spread = 0.0, delaylist = [], residuallist = [], timelist = [])
             antennapositions[antid[i]] = positions[i * 3: (i+1)*3]
@@ -80,7 +81,7 @@ def gatherresults(topdir, maxspread):
         cabledelays_database[antid[i]]["residuallist"].extend([residualdelays[i]])
         cabledelays_database[antid[i]]["timelist"].extend([timestamps[i]])
 
-    # get averages of cable delays. Zero out if spread too high.
+    # get averages of cable delays. Zero out if stddev spread too high. Better use zero than a (probably) wrong value (?)
     for key in cabledelays_database:
         theseDelays = cabledelays_database[key]["delaylist"]
         theseDelays = np.array(theseDelays)
@@ -140,7 +141,7 @@ def obtainvalue(par,key):
 
 def getDelaysFromPhaseCalibrationTables(stationName, theseAntennas):
 
-    RCUlist = []
+    RCUlist = [] # get the RCU list we have in 'theseAntennas'
     for id in theseAntennas:
         thisRCU = int(id) % 100
         RCUlist.extend([thisRCU])
@@ -155,7 +156,7 @@ def getDelaysFromPhaseCalibrationTables(stationName, theseAntennas):
     cabledelays=cabledelays_full % 5.0e-9 #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
     cabledelays -= cabledelays[0] # Correct w.r.t. referecence antenna
 
-    delays += cabledelays
+#    delays += cabledelays
     return (delays[RCUlist], cabledelays[RCUlist])   # take only 'theseAntennas' which are present in the cabledelays_database
 
 class cabledelays(tasks.Task):
@@ -209,7 +210,7 @@ class cabledelays(tasks.Task):
     def run(self):
        
         if not self.doPlot and not self.write_database:
-            print 'WARNING: cabledelays Task: nothing to do! Provide either write_database or doPlot.'
+            print 'WARNING: cabledelays Task: nothing to do! Provide write_database or doPlot flag.'
             return
 
         if self.write_database:
@@ -303,7 +304,13 @@ class cabledelays(tasks.Task):
             plt.xlabel('Antenna number (RCU)')
             plt.title('Total cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='center right')
-
+            
+            plt.figure()
+            plt.scatter(x_avg, y_avg_total - delayfromphasetables, c = 'r', label='Difference: fit vs Caltables')
+            plt.ylabel('Total cable delay [ns]')
+            plt.xlabel('Antenna number (RCU)')
+            plt.title('Difference between fitted cable delays and LOFAR Caltables\nStation '+thisStationName)
+            plt.grid()
             self.plot_finish(filename=self.plot_name + '-' + thisStationName,filetype=self.filetype)   
 
         # end for station in antennasPerStationID
