@@ -45,7 +45,6 @@ if __name__ == "__main__":
 
         # reading cmd options
         (opts,args) = cmdline.parse_args()
-	infile = args[0]
 
         # check if input file is given
         if len(args) == 0:
@@ -56,6 +55,7 @@ if __name__ == "__main__":
 		print "Have to set DM for dedispersion using -D option!"
 		sys.exit(1)
 
+	infile = args[0]
 
 	# reading the first file in the list 
 	# to get info about the file with GP
