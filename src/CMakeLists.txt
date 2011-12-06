@@ -109,7 +109,7 @@ endmacro (lus_package_experimental)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
   ## Add project sub-directory
-  add_subdirectory (dal)
+  add_subdirectory (DAL)
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
   ExternalProject_Add (dal
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
