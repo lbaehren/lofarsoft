@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.14
+VERSION=3.15
  
 #####################################################################
 # Usage #
@@ -2600,7 +2600,7 @@ do
 			date >> $log
 	
 	        #find all the prepfold .ps files and convert them into .pdf .png and .th.png results
-	        find ./ -name "*.ps" -print | egrep -v "rfifind|_B.ps|_DFTp.ps|_GTpf16.ps|_YFp.ps|_pdmp.ps" | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
+	        find ./ -name "*.ps" -print | egrep -v "rfifind|_B.ps|_DFTp.ps|_GTpf|_YFp.ps|_pdmp.ps" | sed 's/\.ps//g' | awk '{print "convert "$1".ps "$1".pdf; convert -rotate 90 "$1".ps "$1".png; convert -rotate 90 -crop 200x140-0 "$1".ps "$1".th.png"}' > convert.sh
 	        wc_convert=`wc -l convert.sh | awk '{print $1}'`
 	        if [[ $wc_convert > 0 ]]
 	        then
