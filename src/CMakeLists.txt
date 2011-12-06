@@ -108,11 +108,9 @@ endmacro (lus_package_experimental)
 ##                              Build & Testing instructions
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
-  
-  add_subdirectory (DAL)
-  
+  ## Add project sub-directory
+  add_subdirectory (dal)
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
-
   ExternalProject_Add (dal
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
     GIT_REPOSITORY git://github.com/nextgen-astrodata/DAL.git
