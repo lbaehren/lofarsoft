@@ -129,29 +129,19 @@ fi
 #for LUS_PACKAGE in dal anaamika cr pulsar rm
 for LUS_PACKAGE in dal pulsar anaamika pycrtools 
 {
+    ## Feedback
     echo "Building $LUS_PACKAGE"  1>>$lus_logfile
+
+    ## Change into common build directory
     cd  $lus_codedir/build
+
+    ## Build and install package
     result_package=`make -j4 -k $LUS_PACKAGE  1>>$lus_logfile 2>&1; echo $?`
     echo "==============================" >>$lus_logfile
     echo "make $LUS_PACKAGE result: "${result_package} >>$lus_logfile
     echo "==============================" >>$lus_logfile
-    if [ $LUS_PACKAGE == "dal" ]; then 
-      cd  $lus_codedir/build/src/DAL/src/dal-build
-    else
-      cd $LUS_PACKAGE
-      if [ $LUS_PACKAGE == "pulsar" ]; then
-         # needed for running pulsar software
-         make -j4 -k presto_makewisdom 1>>$lus_logfile 2>&1
-	 make -j4 ppgplot_bindings_install 1>>$lus_logfile 2>&1
-      fi
-      install_result=`make VERBOSE=1 install  1>>$lus_logfile 2>&1 ; echo $?`
-      echo "==========================" >>$lus_logfile
-      echo " Install $LUS_PACKAGE result: "${install_result} >>$lus_logfile
-      echo "==========================" >>$lus_logfile
-      if [ $install_result -ne 0 ]; then 
-        echo "Install has error!" >>$lus_logfile
-      fi
-    fi
+
+    ## Experimental build to submit test results to Dashboard
     ${LUS_PACKAGE}_Experimental $lus_logfile
 }
 
