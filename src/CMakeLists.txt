@@ -288,15 +288,35 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/LASA)
 ##
 ## ==============================================================================
 
+set (PULSAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
+set (PULSAR_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/pulsar)
+
 ##__________________________________________________________
 ##                              Build & Testing instructions
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
-  ## Build package from present sources
-  lus_package_build (pulsar src/Pulsar)
+if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
+  ## Check for build directory
+  if (NOT EXISTS ${PULSAR_BINARY_DIR})
+    file (MAKE_DIRECTORY ${PULSAR_BINARY_DIR})
+  endif (NOT EXISTS ${PULSAR_BINARY_DIR})
+  ## Trigger build and install
+  add_custom_target (pulsar
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} ${PULSAR_SOURCE_DIR}
+    COMMAND ${CMAKE_BUILD_TOOL}
+    COMMAND ${CMAKE_BUILD_TOOL} -k presto_makewisdom
+    COMMAND ${CMAKE_BUILD_TOOL} ppgplot_bindings_install
+    COMMAND ${CMAKE_BUILD_TOOL} install
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
+    )
   ## Experimental build
   lus_package_experimental (pulsar Pulsar)
-endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
+else (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
+  ExternalProject_Add (pulsar
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Pulsar
+    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/Pulsar
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
+endif (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
 
 ##__________________________________________________________
 ##                                      Package dependencies
