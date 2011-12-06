@@ -11,6 +11,7 @@
 
 cmakeSourceDir=`pwd`
 cmakeSourceArchive=$cmakeSourceDir/external/cmake/cmake-2.8.5.tar.gz
+cmakeSourcePatch=$cmakeSourceDir/external/cmake/cmake-2.8.5-epsv.patch
 cmakeBinaryDir=$cmakeSourceDir/build
 cmakeInstallPrefix=$cmakeSourceDir/release
 
@@ -79,10 +80,15 @@ build_cmake ()
     tmpBuildDir=`ls $cmakeBinaryDir | grep cmake`
       
     if test -d $tmpBuildDir ; then {
-      cd $tmpBuildDir
-      print_message "Configuring CMake ..."
+
+      echo "[CMake] Patching source code ..."
+      cd $tmpBuildDir;
+      patch -p1 < $cmakeSourcePatch
+      echo "[CMake] Configuring source distribution ..."
       ./configure --prefix=$cmakeInstallPrefix
+      echo "[CMake] Building package ..."
       make
+      echo "[CMake] Installing package ..."
       make install
     } fi;
 

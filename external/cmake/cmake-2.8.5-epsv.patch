@@ -1,0 +1,26 @@
+diff --git a/Utilities/cmcurl/easy.c b/Utilities/cmcurl/easy.c
+index 209d1c3..cc227f9 100644
+--- a/Utilities/cmcurl/easy.c
++++ b/Utilities/cmcurl/easy.c
+@@ -684,7 +684,7 @@ void curl_easy_reset(CURL *curl)
+   data->state.current_speed = -1; /* init to negative == impossible */
+ 
+   data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
+-  data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
++  data->set.ftp_use_epsv = FALSE;  /* FTP defaults to PASV operations */
+   data->set.ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
+ 
+   data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
+diff --git a/Utilities/cmcurl/url.c b/Utilities/cmcurl/url.c
+index da12231..d84aded 100644
+--- a/Utilities/cmcurl/url.c
++++ b/Utilities/cmcurl/url.c
+@@ -536,7 +536,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
+     data->state.current_speed = -1; /* init to negative == impossible */
+ 
+     data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
+-    data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
++    data->set.ftp_use_epsv = FALSE;  /* FTP defaults to PASV operations */
+     data->set.ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
+     data->set.ftp_filemethod = FTPFILE_MULTICWD;
+     data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
