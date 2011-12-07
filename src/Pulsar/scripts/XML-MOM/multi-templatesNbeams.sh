@@ -1,7 +1,7 @@
-#!/bin/ksh
+#!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=1.7
+VERSION=1.8
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -220,7 +220,7 @@ do
      -namecol)           NAMECOL=1; user_namecol=1;;
      -sexages)           sexages=1;;
      -debug)             debug=1;;
-     -clock)             clock=$2;;
+     -clock)             clock=$2; shift;;
      -nof_rings)         NOF_RINGS=$2; shift;;
      -ring_size)         RING_SIZE=$2; shift;;
      -cat)               user_catfile=$2; user_cat=1; shift;;
@@ -479,6 +479,10 @@ then
       echo "WARNING: ignoring user-specified channels per subband LBA setting;  input file setting will be used."
       user_chan_subs_lba=0
    fi
+fi
+
+if (( (( $ncols >= 4 )) && (( $INTYPE == 1 )) ))
+then
    if (( $user_steps_hba == 1 )) || (( $user_integ_hba == 1 )) 
    then
       echo "WARNING: ignoring user-specified integration steps/interval HBA setting;  input file setting will be used."
@@ -574,16 +578,19 @@ else  # IM data
 	       ANT_SHORT=HBA
 	       CHAN_SUBS=$CHAN_SUBS_HBA_IM
 	       INTERVAL=$INTEG_HBA
+	       STEPS=$STEPS_HBA
 	   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
 	   then
 	       ANT_SHORT=LBA
 	       CHAN_SUBS=$CHAN_SUBS_LBA_IM
 	       INTERVAL=$INTEG_LBA
+	       STEPS=$STEPS_LBA
 	   else
 	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
 	      exit 1
 	   fi
-	fi   
+	fi 
+	  
 fi # end if [ $INSWITCH == 1 ]
 
 ##################################################
@@ -951,9 +958,11 @@ do
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
+						        STEPS=$STEPS_HBA
 							else
 						        CHAN_SUBS=$CHAN_SUBS_LBA_IM
 						        INTERVAL=$INTEG_LBA
+						        STEPS=$STEPS_LBA
 							fi
 						fi # end if [ $INSWITCH == 1 ]
 				    fi # end (( $ncols == 2 ))
@@ -1065,9 +1074,11 @@ do
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
+						        STEPS=$STEPS_HBA
 							else
 						        CHAN_SUBS=$CHAN_SUBS_LBA_IM
 						        INTERVAL=$INTEG_LBA
+						        STEPS=$STEPS_LBA
 							fi
 						fi # end if [ $INSWITCH == 1 ]
 				    fi # end if (( $ncols == 3 ))
@@ -1086,6 +1097,12 @@ do
 				            fi
 				        else
 				            INTERVAL=`echo $line | awk '{print $5}'`
+							if [[ $ANT_SHORT == "HBA" ]]  
+							then 
+						        STEPS=$STEPS_HBA
+							else
+						        STEPS=$STEPS_LBA
+							fi
 				        fi
 				    fi
 			
@@ -1913,7 +1930,7 @@ do
 	        then
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/CLOCK/$clock/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FD_TF/$FD_TF/g" -e "s/BF_TF/$BF_TF/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/CLOCK/$clock/g " $middle >> $outfile
 	           fi
 	        fi 
 		        
@@ -1923,7 +1940,7 @@ do
 	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" $beam_xml >> $outfile
 	        elif [ $INSWITCH == 2 ] && [ $skip == 0 ]
 	        then
-	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" $beam_xml >> $outfile
+	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g " $beam_xml >> $outfile
 	        fi
 	        
 	        if (( $MULTI == 1 ))  && (( $nbeams > 1 ))

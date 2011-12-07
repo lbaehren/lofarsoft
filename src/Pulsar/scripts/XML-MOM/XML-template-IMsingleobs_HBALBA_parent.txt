@@ -27,7 +27,9 @@
                 </pencilBeamList>
             </pencilBeams>
             <stokes>
+                <stokesSelection>I</stokesSelection>
                 <integrateChannels>false</integrateChannels>
+                <integrationSteps>INTEG STEPS</integrationSteps>
             </stokes>
             <stationSet>Custom</stationSet>
             <stations>
