@@ -28,6 +28,18 @@ char tempo_site(int telescope_id) /*includefile*/
   case 9:
     return('t'); /*LOFAR*/
     break;
+  case 10:
+    return('u'); /*FR606*/
+    break;
+  case 12:
+    return('w'); /*UTR-2*/
+    break;
+  case 13:
+    return('x'); /*DE601*/
+    break;
+  case 14:
+    return('y'); /*UK608*/
+    break;
   default:
     return('?'); /*unknown*/
     /*error_message("tempo_site: unknown telescope!");*/
@@ -68,6 +80,18 @@ char *telescope_name (int telescope_id) /*includefile*/
     break;
   case 9: 
     strcpy(string,"LOFAR");
+    break;
+  case 10: 
+    strcpy(string,"FR606");
+    break;
+  case 12: 
+    strcpy(string,"UTR-2");
+    break;
+  case 13: 
+    strcpy(string,"DE601");
+    break;
+  case 14: 
+    strcpy(string,"UK608");
     break;
   default: 
     strcpy(string,"???????"); 
@@ -110,6 +134,9 @@ char *backend_name (int machine_id) /*includefile*/
     break;
   case 9:
     strcpy(string,"BG/P");
+    break;
+  case 10:
+    strcpy(string,"ARTEMIS");
     break;
   default:
     strcpy(string,"?????");
