@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.20
+VERSION=3.21
  
 #####################################################################
 # Usage #
@@ -3089,7 +3089,7 @@ then
 		   echo "Creating combined diagnostic plots" >> $log
 	       echo "montage -background none `find ./ -name \*_diag.png -print` status.png"
 	       echo "montage -background none `find ./ -name \*_diag.png -print` status.png" >> $log
-	       montage -background none `find ./ -name "*_diag.png" -exec print` status.png
+	       montage -background none `find ./ -name "*_diag.png" -print` status.png
 	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png"
 	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png" >> $log
 	       convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png
