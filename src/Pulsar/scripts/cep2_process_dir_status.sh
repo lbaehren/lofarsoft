@@ -98,7 +98,7 @@ else
   if [[ $is_combined == "" ]]; then
    :
   else
-   prepfold_png=`ls -1 $procdir/stokes/RSP0/*.pfd.png | head -n 1`
+   prepfold_png=`ls -1 $procdir/stokes/RSP0/*.pfd.png | grep RSP0_PSR | head -n 1`
    echo $prepfold_png
   fi
   exit 0
@@ -144,9 +144,9 @@ else
    :
   else
    if [[ $isRSPA == "" ]]; then
-    prepfold_png=`ls -1 $procdir/incoherentstokes/RSP0/*.pfd.png | head -n 1`
+    prepfold_png=`ls -1 $procdir/incoherentstokes/RSP0/*.pfd.png | grep RSP0_PSR | head -n 1`
    else
-    prepfold_png=`ls -1 $procdir/incoherentstokes/RSPA/*.pfd.png | head -n 1`
+    prepfold_png=`ls -1 $procdir/incoherentstokes/RSPA/*.pfd.png | grep RSPA_PSR | head -n 1`
    fi
    echo $prepfold_png
   fi
