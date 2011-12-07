@@ -7,7 +7,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] 
        [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug]
-       [-cat user_catalog_filename]
+       [-cat user_catalog_filename] [-integstepsHBA BF_integration_steps_HBA] [-integstepsLBA BF_integration_steps_LBA] 
 
        REQUIRED Input Parameters:
        -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
@@ -31,6 +31,8 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
        [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 64) 
        [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) 
        [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) 
+       [[-integstepsHBA BFintegration_steps_HBA]] ==> The BF integration steps for HBA (default = 16) 
+       [[-integstepsLBA BFintegration_steps_LBA]] ==> The BF integration steps for LBA (default = 16) 
        [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
        [[+IS list_or_ALL]] ==> Turn on incoherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
        [[+CS list_or_ALL]] ==> Turn on coherentStokesData with Imaging observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
