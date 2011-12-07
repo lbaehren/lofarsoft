@@ -290,10 +290,16 @@ endif (IS_DIRECTORY ${LASA_SOURCE_DIR})
 ##
 ##                                                          $LOFARSOFT/src/Pulsar
 ##
+##  Due to its internal organization (or lack thereof), the Pulsar-Tools bundle
+##  cannot be build and installed by calling a single target; therefore in
+##  order to hide this internal setup from the outside world and present a
+##  standard command sequence within the LUS framework, the internal build steps
+##  are collected into a common custom target.
+##
 ## ==============================================================================
 
 set (PULSAR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Pulsar)
-set (PULSAR_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/pulsar)
+set (PULSAR_BINARY_DIR ${LUS_BINARY_DIR}/pulsar)
 
 ##__________________________________________________________
 ##                              Build & Testing instructions
@@ -306,8 +312,8 @@ if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
   ## Trigger build and install
   add_custom_target (pulsar
     COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} ${PULSAR_SOURCE_DIR}
-    COMMAND ${CMAKE_BUILD_TOOL}
-    COMMAND ${CMAKE_BUILD_TOOL} -k presto_makewisdom
+    COMMAND ${CMAKE_BUILD_TOOL} -j2
+ #   COMMAND ${CMAKE_BUILD_TOOL} -j2 -k presto_makewisdom
     COMMAND ${CMAKE_BUILD_TOOL} ppgplot_bindings_install
     COMMAND ${CMAKE_BUILD_TOOL} install
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
