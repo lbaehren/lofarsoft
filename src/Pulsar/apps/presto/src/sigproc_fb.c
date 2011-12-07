@@ -117,17 +117,17 @@ static char *telescope_name(int telescope_id)
       strcpy(string, "Effelsberg");
       Tdiam = 100.0;
       break;
-   case 9:
+   case 11:
       strcpy(string, "ATA");
       break;
-   case 11:
+   case 9:
       strcpy(string, "LOFAR");
       Tdiam = 999.0; // certainly not right, depends on config
       break;
-   case 10:
+   case 12:
       strcpy(string, "UTR-2");
       break;
-   case 12:
+   case 10:
       strcpy(string, "FR606");
       break;
    case 13:
@@ -173,11 +173,11 @@ static char *backend_name(int machine_id)
    case 7:
       strcpy(string, "SPIGOT");
       break;
+   case 9:
+      strcpy(string, "BG/P");
+      break;
    case 10:
       strcpy(string, "ARTEMIS");
-      break;
-   case 11:
-      strcpy(string, "BG/P");
       break;
    default:
       strcpy(string, "????");
