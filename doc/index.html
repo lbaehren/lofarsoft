@@ -394,8 +394,19 @@ packages:
   include extended sources is not foreseen, though.</li>
   </ol>
   </li>
-  <li><strong>Pulsar-Tools</strong></li>
-  <li><strong>PyCRTools</strong></li>
+  <li><strong>Pulsar-Tools</strong> <br>
+  This is a bundle of software packages for pulsar data reduction; it
+  included a number of specially modified version of commonly used
+  packages (e.g. <a href="http://www.fftw.org">FFTW</a>), such that
+  system-wide installation typically cannot be utilized. For a more
+  detailed description on the various components and their
+  build/installation order consult <code>$LOFARSOFT/src/Pulsar/README</code>.</li>
+  <li><strong>PyCRTools</strong> <br>
+  PyCRTools is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+</li>
 </ul>
 
 <div class="top">[<a href="#top">top</a>]</div>
@@ -420,6 +431,8 @@ to <tt>share/lus/doc/html</tt> of the release/installation directory:
 
 <pre class='code'>
   lofarsoft
+  |-- doc
+  |   `-- index.html          <- This file
   |-- release
   |   `-- share
   |       `-- lus
