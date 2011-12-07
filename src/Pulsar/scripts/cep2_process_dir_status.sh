@@ -95,6 +95,8 @@ else
   else
    echo "yes"
   fi
+  prepfold_png=`ls -1 $procdir/stokes/RSP0/*.pfd.png | head -n 1`
+  echo $prepfold_png
   exit 0
  fi # $mode == "CS"
 
@@ -134,6 +136,12 @@ else
   else
    echo "yes"
   fi
+  if [[ $isRSPA == "" ]]; then
+   prepfold_png=`ls -1 $procdir/incoherentstokes/RSP0/*.pfd.png | head -n 1`
+  else
+   prepfold_png=`ls -1 $procdir/incoherentstokes/RSPA/*.pfd.png | head -n 1`
+  fi
+  echo $prepfold_png
   exit 0
  fi # $mode == "IS"
 fi
