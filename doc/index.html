@@ -21,6 +21,7 @@
   <li><a href="#code tree">Organization of the code</a></li>
   <li><a href="#External dependencies">External dependencies</a></li>
   <li><a href="#Documentation">Documentation</a></li>
+  <li><a href="#Packages">Collection of software packages</a></li>
   <li><a href="#Testing">Testing</a></li>
 </ul>
 
@@ -354,6 +355,47 @@ administrator permissions.
   zypper install blitz-devel gsl-devel libcfitsio-devel
   zypper install python-devel python-numpy-devel ipython
   </pre>
+</ul>
+
+<div class="top">[<a href="#top">top</a>]</div>
+
+<!-- New section --------------------------------------------------------------->
+
+<div class='section'><a name="Packages">Collection of software packages</a></div>
+
+The LOFAR User Software (LUS) collection includes the following
+packages:
+
+<ul>
+  <li><strong>Anaamika</strong> <br>
+  This suite includes the following sets of programs :
+  <ol>
+    <li><i>Blob Detection and Source Measurement</i> (BDSM). f-BDSM is written in fortran 77 and is a prototype for the final Python based PyBDSM which is currently being developed. This has been tested on simulations and real data (including CS1) and the report of these tests can be found elsewhere. f-BDSM (latest version 2.0) is currently maintained by the author at Leiden. Though BDSM can be run from the command line, all the tasks inside this package are also available individually in the package noise . The automatised graphics-free executable is called bdsm.</li>
+    <li><i>Noise</i>. This package works on images which can be read in from FITS files. Images can also be created inside the package using simple tasks. Various mathematical operations can then be performed on these images (basic statistics, image addition, median filtering etc, see below for the full list). They can also be displayed, with histograms, slice plots etc. Related to this package is Blob Detection and Source Measurement (BDSM), described in the previous chapter BDSM outputs a list of gaussians (and sources, and a residual image) given an input image. ‘Noise’ can then be used to overplot these gaussians on the image and analyse the products of BDSM. It can also be used to associate multiple source lists and analyse the associations (plot derived quantities against each other and overplot associated sources over the image etc).</li>
+    <li><i>Optimized Global Sky Model</i> (OR GSM). This program
+  (<code>or_gsm</code>) aims to construct a Global Sky Model (GSM)
+  from a collection of sky catalogues, assumed to be at similar
+  resolutions. A GSM is a model of the sky at a given resolution and
+  frequency, in terms of discrete sources. This model is made by
+  associating sources from the input catalogues. These GSM sources can
+  be specified by a specific decomposition, e.g., gaussians or
+  shapelets. Source properties are modelled as polynomial functions of
+  frequency, though currently this option is only implemented for the
+  total flux. Frequency spectra for each source are made available as
+  a model as well as plots. A predicted GSM can be compared with an
+  external catalogue as well.</li>
+    <li><i>Analyse_island</i>. This is a standalone program which will later be incorporated into ANAAMIKA and is useful for inspecting the results of BDSM for an individual island.</li>
+    <li><i>Qualitycontrol</i>. This is a prototype of a Quality
+  Control package, and is strung together from bits and pieces in the
+  package ANAAMIKA to form an automated command-line software.</li>
+    <li><i>Simulation</i>. This is a fairly simple program to simulate
+  the radio sky at low frequencies. Only single and double sources are
+  incorporated currently. The need for upgrading the simulation to
+  include extended sources is not foreseen, though.</li>
+  </ol>
+  </li>
+  <li><strong>Pulsar-Tools</strong></li>
+  <li><strong>PyCRTools</strong></li>
 </ul>
 
 <div class="top">[<a href="#top">top</a>]</div>
