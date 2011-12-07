@@ -2084,6 +2084,8 @@ if __name__ == "__main__":
 	try:
 		# Main loop for every observation
 		for id in obsids:
+			# i don't know why people make these obsids!!!
+			if id == "L?????": continue
 		
 			# if we do update then we do not need to initialize obsinfo class again, unless
 			# parset file does not exist
