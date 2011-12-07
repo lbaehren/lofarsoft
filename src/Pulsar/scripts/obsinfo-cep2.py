@@ -87,6 +87,8 @@ search_string=""
 
 # Setting User name
 username=os.environ['USER']
+# Lofar software
+lofarsoft=os.environ['LOFARSOFT']
 hostdir="Lofar"  # dir that contains plots, grid links, db file
 plotsdir="/home/%s/%s/plots" % (username, hostdir)
 griddir="/home/%s/%s/grid" % (username, hostdir)
@@ -130,7 +132,7 @@ cexec_egrep_string="egrep -v \'\\*\\*\\*\\*\\*\' |egrep -v \'\\-\\-\\-\\-\\-\'"
 # cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 cexeccmd="cexec -f /etc/c3.conf.full"
 # script that gets the status of processed data and also returns the size of processing directory
-process_dir_status_script="/home/kondratiev/bin/cep2_process_dir_status.sh"
+process_dir_status_script="%s/release/share/pulsar/bin/cep2_process_dir_status.sh" % (lofarsoft,)
 
 # storage nodes to collect info about Pulsar Observations
 # we assume that even for the case of long observations when data were spreaded out
@@ -2196,8 +2198,14 @@ if __name__ == "__main__":
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[0]="CScombined"
-							combined="combined"
-							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
+							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1:
+								combined="combined"
+								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
+							else:
+								thcombined="combined"
+								combined=cmdout[5]
+								basecombined=combined.split("/")[-1].split(".png")[0]
+								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, CSredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[0], plotsdir, id, thcombined, plotsdir, id, profiles_array[0])
 							os.system(cmd)
 						# checking if this obs is FE obs. If so, then get status maps
 #						if oi.FE == "+" and cmdout[4] == "yes":
@@ -2232,8 +2240,14 @@ if __name__ == "__main__":
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[1]="IScombined"
-							combined="combined"
-							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], ISredlocation, combined, ISredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[1], plotsdir, id, combined, plotsdir, id, profiles_array[1])
+							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1:
+								combined="combined"
+								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], ISredlocation, combined, ISredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[1], plotsdir, id, combined, plotsdir, id, profiles_array[1])
+							else:
+								thcombined="combined"
+								combined=cmdout[5]
+								basecombined=combined.split("/")[-1].split(".png")[0]
+								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, ISredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[1], plotsdir, id, thcombined, plotsdir, id, profiles_array[1])
 							os.system(cmd)
 
 
