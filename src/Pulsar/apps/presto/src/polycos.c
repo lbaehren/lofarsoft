@@ -84,6 +84,18 @@ char *make_polycos(char *parfilenm, infodata * idata)
    } else if (strcmp(idata->telescope, "LOFAR") == 0) {
       scopechar = 't';
       tracklen = 12;
+   } else if (strcmp(idata->telescope, "FR606") == 0) {
+      scopechar = 'u';
+      tracklen = 12;
+   } else if (strcmp(idata->telescope, "UTR-2") == 0) {
+      scopechar = 'w';
+      tracklen = 12;
+   } else if (strcmp(idata->telescope, "DE601") == 0) {
+      scopechar = 'x';
+      tracklen = 12;
+   } else if (strcmp(idata->telescope, "UK608") == 0) {
+      scopechar = 'y';
+      tracklen = 12;
    } else if (strcmp(idata->telescope, "WSRT") == 0) {
       scopechar = 'i';
       tracklen = 12;
