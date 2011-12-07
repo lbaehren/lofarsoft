@@ -840,11 +840,17 @@ class DirectionFitTriangles(tasks.Task):
                 break
 
         #End of Iteration
+        # BUGFIX: self.total_delays is recalculated only at the top of the loop
+        #         therefore has to be done once more at the end.
+        self.total_delays.add(self.residual_delays,self.cabledelays) # recalculates it from residual_delays
+       
         self.niter=it
         if self.doplot:
             cr.plt.title("Position of Event during DirectionFitting (Spherical Coordinates, N up)")
             cr.plt.polar(self.meandirection_spherical[2],self.meandirection_spherical[1]/deg,label="final",marker="o",color="red")
             cr.plt.legend(borderaxespad=-3)
+        #    cr.plt.xticklabels(['E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE'])
+
             self.plot_finish(name=self.__taskname__+self.plot_name)
         if self.verbose:
             print "------------------------------------------------------------------------"
@@ -1116,8 +1122,6 @@ class PlotAntennaLayout(tasks.Task):
     def run(self):
 
         #Calculate scaled sizes
-        #import pdb; pdb.set_trace()
-
         if isinstance(self.sizes, (int, long, float)):
             self.ssizes=self.sizes
         elif isinstance(self.sizes,tuple(cr.hRealContainerTypes)):
