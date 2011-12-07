@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.17
+VERSION=3.18
  
 #####################################################################
 # Usage #
@@ -2793,8 +2793,8 @@ do
 			       mv pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			       mv pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | awk '{print $4}'`
-			       echo "Running: " pam -e AR -d $NEWdm -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
-			       pam -e AR -d $NEWdm -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
+			       echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
+			       pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 			   else
 		  		    if (( $TiedArray == 0 ))
 				    then
@@ -2813,8 +2813,8 @@ do
 			           mv pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			           mv pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | awk '{print $4}'`
-			           echo "Running: " pam -e AR -d $NEWdm -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
-			           pam -e AR -d $NEWdm -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
+			           echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
+			           pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 					   counter=$(( $counter + 1 )) 
 			        done
 			   fi
