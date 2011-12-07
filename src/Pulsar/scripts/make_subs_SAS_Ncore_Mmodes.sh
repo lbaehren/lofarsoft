@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.16
+VERSION=3.17
  
 #####################################################################
 # Usage #
@@ -2231,7 +2231,7 @@ do
  						          dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
  						          pid=$!
  						          wait $pid
- 						          echo Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
+ 						          echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						          pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 
  						          echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
  						          echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
@@ -2302,7 +2302,7 @@ do
 							           dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
  						               pid=$!
  						               wait $pid
- 						               echo Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
+ 						               echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						               pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 
 	 						           echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 	 						           echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
@@ -2439,7 +2439,7 @@ do
 						        dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
 						        pid=$!
 				                wait $pid
- 						        echo Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
+ 						        echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						        pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 					            
  						        echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
 					            echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
