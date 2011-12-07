@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.21
+VERSION=3.22
  
 #####################################################################
 # Usage #
@@ -3081,19 +3081,19 @@ if [[ $proc != 0 ]]
 then
     if (( $flyseye == 0 ))
     then
-	    # creat combined _diag.png based on any that exist;  call is status.png
+	    # creat combined _diag.png based on any that exist;  call is status_diag.png
+	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
 	    diag_exist=`find ./ -name "*_diag.png" -print`
 	    if [[ $diag_exist != "" ]]
 	    then
 		   echo "Creating combined diagnostic plots"
 		   echo "Creating combined diagnostic plots" >> $log
-	       echo "montage -background none `find ./ -name \*_diag.png -print` status.png"
-	       echo "montage -background none `find ./ -name \*_diag.png -print` status.png" >> $log
-	       montage -background none `find ./ -name "*_diag.png" -print` status.png
-	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png"
-	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png" >> $log
-	       convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png
-	    fi
+	       echo "montage -background none `find ./ -name \*_diag.png -print` status_diag.png"
+	       echo "montage -background none `find ./ -name \*_diag.png -print` status_diag.png" >> $log
+	       montage -background none `find ./ -name "*_diag.png" -print` status_diag.png
+	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png"
+	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png" >> $log
+	       convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png
 	    else
 		   echo "No diagnostic dspsr plots to combine"
 		   echo "No diagnostic dspsr plots to combine" >> $log
