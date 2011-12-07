@@ -3074,11 +3074,28 @@ do
        echo "Created TA_heatmap.sh which will be run after hoovering step"
        echo "Created TA_heatmap.sh which will be run after hoovering step" >> $log
     fi
-
+     
 done # for loop over modes in $mode_str 
 
 if [[ $proc != 0 ]]
 then
+    if (( $flyseye == 0 ))
+    then
+	    # creat combined _diag.png based on any that exist;  call is status.png
+	    diag_exist=`find ./ -name "*_diag.png" -exec print`
+	    if [[ $diag_exist != "" ]]
+	    then
+		   echo "Creating combined diagnostic plots"
+		   echo "Creating combined diagnostic plots" >> $log
+	       echo "montage -background none `find ./ -name \*_diag.png -exec print` status.png"
+	       echo "montage -background none `find ./ -name \*_diag.png -exec print` status.png" >> $log
+	       montage -background none `find ./ -name "*_diag.png" -exec print` status.png
+	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png"
+	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png" >> $log
+	       convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status.png status.th.png
+	    fi
+    fi
+
 	#Make a combined png of all the th.png files
 	echo "Combining all th.png files into one"
 	echo "Combining all th.png files into one" >> $log
