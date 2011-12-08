@@ -87,8 +87,11 @@ if (LUS_SOURCE_DIR)
     CASACORE
     CFITSIO
     GFortran
+    HDF5
     LAPACK
+    MPI
     WCSLIB
+    ZLIB
     )
   
   include_find_module (${casacore_cmake_modules} ${CASACORE_VERBOSE_CONFIGURE})
@@ -104,12 +107,7 @@ endif (LUS_SOURCE_DIR)
 
 if (CASACORE_WITH_HDF5)
 
-  include (FindHDF5)
-  
   if (HDF5_FOUND)
-    
-    include (FindZLIB)
-    include (FindMPI)
     
     if (MPI_FOUND)
       list (APPEND HDF5_INCLUDES ${MPI_INCLUDE_PATH})
