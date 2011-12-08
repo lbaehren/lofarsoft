@@ -36,19 +36,6 @@ option (CASACORE_WITH_HDF5         "Enable HDF5 library support?"             YE
 option (CASACORE_BUILD_TESTING     "Build test programs?"                     OFF )
 
 ##__________________________________________________________
-## Handle option: be verbose during configuration?
-
-if (NOT CASACORE_VERBOSE_CONFIGURE)
-  set (CFITSIO_FIND_QUIETLY    TRUE )
-  set (FFTW3_FIND_QUIETLY      TRUE )
-  set (GFORTRAN_FIND_QUIETLY   TRUE )
-  set (HDF5_FIND_QUIETLY       TRUE )
-  set (LAPACK_FIND_QUIETLY     TRUE )
-  set (MPI_FIND_QUIETLY        TRUE )
-  set (WCSLIB_FIND_QUIETLY     TRUE )
-  set (ZLIB_FIND_QUIETLY       TRUE )
-endif (NOT CASACORE_VERBOSE_CONFIGURE)
-
 ## Handle option: Build type
 
 if (CASACORE_FROM_REPOS_HEAD)
