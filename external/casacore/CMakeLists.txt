@@ -68,6 +68,8 @@ endif (NOT LUS_SOURCE_DIR)
 if (LUS_SOURCE_DIR)
 
   set (CMAKE_MODULE_PATH "${LUS_SOURCE_DIR}/devel_common/cmake")
+  set (HDF5_ROOT_DIR     "${CMAKE_INSTALL_PREFIX}/include")
+  set (WCSLIB_ROOT_DIR   "${CMAKE_INSTALL_PREFIX}/include")
   
   include (LUS_CMakeSettings)
   
