@@ -2,9 +2,39 @@
 if (NOT LUS_CMAKE_SETTINGS_CMAKE)
   
   set (LUS_CMAKE_SETTINGS_CMAKE TRUE)
+
+  ## ============================================================================
+  ## 
+  ##                                                          Installation prefix
+  ##
+  ##  By default installation is performed into ${LUS_SOURCE_DIR}/release. 
+  ##  However LUS_INSTALL_PREFIX can be used to over-ride the default and have
+  ##  the software installed into a location of choice ; keep in mind though,
+  ##  that special privileges might be required.
+  ##
+  ## ============================================================================
   
-  ##____________________________________________________________________
-  ##                                                    Search locations
+  if (LUS_INSTALL_PREFIX)
+    set (CMAKE_INSTALL_PREFIX ${LUS_INSTALL_PREFIX} CACHE PATH
+      "CMake installation area" 
+      FORCE
+      )
+  else (LUS_INSTALL_PREFIX)
+    set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR} CACHE PATH
+      "CMake installation area" 
+      FORCE
+      )
+    set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR} CACHE PATH
+      "CMake installation area" 
+      FORCE
+      )
+  endif (LUS_INSTALL_PREFIX)
+  
+  ## ============================================================================
+  ##
+  ##                                                             Search locations
+  ##
+  ## ============================================================================
   
   foreach (_pathBase
       /app/usg
@@ -15,6 +45,7 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
       /sw
       /opt/local
       /opt
+      /opt/cep
       ${CMAKE_INSTALL_PREFIX}
       )
     
