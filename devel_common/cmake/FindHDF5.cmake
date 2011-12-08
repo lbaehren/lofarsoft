@@ -52,6 +52,7 @@ if (NOT FIND_HDF5_CMAKE)
   find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include hdf5 include/hdf5
+    NO_DEFAULT_PATH
     )
 
   ## Individual header files
@@ -59,16 +60,19 @@ if (NOT FIND_HDF5_CMAKE)
   find_path (HAVE_HDF5_HDF5_H hdf5.h
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include hdf5 include/hdf5
+    NO_DEFAULT_PATH
     )
   
   find_path (HAVE_HDF5_H5LT_H H5LT.h
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include hdf5 include/hdf5
+    NO_DEFAULT_PATH
     )
   
   find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include hdf5 include/hdf5
+    NO_DEFAULT_PATH
     )
   
   ##_____________________________________________________________________________
@@ -81,6 +85,7 @@ if (NOT FIND_HDF5_CMAKE)
   find_library (HDF5_HDF5_LIBRARY hdf5
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES lib hdf5/lib
+    NO_DEFAULT_PATH
     )
   
   if (HDF5_HDF5_LIBRARY)
@@ -92,6 +97,7 @@ if (NOT FIND_HDF5_CMAKE)
   FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY hdf5_hl
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES lib hdf5/lib
+    NO_DEFAULT_PATH
     )
   
   if (HDF5_HDF5_HL_LIBRARY)
@@ -103,6 +109,7 @@ if (NOT FIND_HDF5_CMAKE)
   FIND_LIBRARY (HDF5_HDF5_CPP_LIBRARY hdf5_cpp
     HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES lib hdf5/lib
+    NO_DEFAULT_PATH
     )
   
   if (HDF5_HDF5_CPP_LIBRARY)
@@ -115,22 +122,22 @@ if (NOT FIND_HDF5_CMAKE)
   
   find_program (H5CHECK_EXECUTABLE h5check
     HINTS ${HDF5_ROOT_DIR}
-    PATH_SUFFIXES bin
+    NO_DEFAULT_PATH
     )
   
   find_program (H5DUMP_EXECUTABLE h5dump 
     HINTS ${HDF5_ROOT_DIR}
-    PATH_SUFFIXES bin
+    NO_DEFAULT_PATH
     )
   
   find_program (H5LS_EXECUTABLE h5ls 
     HINTS ${HDF5_ROOT_DIR}
-    PATH_SUFFIXES bin
+    NO_DEFAULT_PATH
     )
   
   find_program (H5STAT_EXECUTABLE h5stat 
     HINTS ${HDF5_ROOT_DIR}
-    PATH_SUFFIXES bin
+    NO_DEFAULT_PATH
     )
 
   ##_____________________________________________________________________________
