@@ -256,15 +256,17 @@ vector<complex<double> > WaveletSynthesis::getLine(int x, int y)
 /* ================= apply symmetry argument: wplus->wminus->wres===============*/
 void WaveletSynthesis::doSymmetry(int b0, int size)
 {
-	int i, k, kr;
-	for(i=0; i<wplus.an; i++)
-		for(k=0; k<wplus.bn; k++)
-		{
-			kr = 2*b0 - k;
-			if(kr<1 || kr>wplus.bn || abs(kr-k)>size) wminus.wc[i][k] = 0;
-				else wminus.wc[i][k] = wplus.wc[i][kr];
-			wres.wc[i][k] = wplus.wc[i][k] + wminus.wc[i][k];
-		}
+  unsigned int i;
+  unsigned int k;
+  unsigned int kr;
+  for(i=0; i<wplus.an; i++)
+    for(k=0; k<wplus.bn; k++)
+      {
+	kr = 2*b0 - k;
+	if(kr<1 || kr>wplus.bn || abs(kr-k)>size) wminus.wc[i][k] = 0;
+	else wminus.wc[i][k] = wplus.wc[i][kr];
+	wres.wc[i][k] = wplus.wc[i][k] + wminus.wc[i][k];
+      }
 }
 
 /* ================= wavelet analysis stage ====================================*/
