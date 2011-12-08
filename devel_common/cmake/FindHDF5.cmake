@@ -42,7 +42,7 @@ if (NOT FIND_HDF5_CMAKE)
   ##_____________________________________________________________________________
   ## Search locations
   
-  include (CMakeSettings)
+  include (LUS_CMakeSettings)
   
   ##_____________________________________________________________________________
   ## Check for the header files
@@ -50,24 +50,24 @@ if (NOT FIND_HDF5_CMAKE)
   ## Include directory
 
   find_path (HDF5_INCLUDES hdf5.h hdf5_hl.h
-    PATHS ${HDF5_ROOT_DIR} ${include_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include include/hdf5
     )
 
   ## Individual header files
   
   find_path (HAVE_HDF5_HDF5_H hdf5.h
-    PATHS ${HDF5_ROOT_DIR} ${include_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include include/hdf5
     )
   
   find_path (HAVE_HDF5_H5LT_H H5LT.h
-    PATHS ${HDF5_ROOT_DIR} ${include_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include include/hdf5
     )
   
   find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
-    PATHS ${HDF5_ROOT_DIR} ${include_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES include include/hdf5
     )
   
@@ -79,7 +79,7 @@ if (NOT FIND_HDF5_CMAKE)
   ## Core library (libhdf5)
   
   find_library (HDF5_HDF5_LIBRARY hdf5
-    PATHS ${HDF5_ROOT_DIR} ${lib_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES lib hdf5/lib
     )
   
@@ -90,7 +90,7 @@ if (NOT FIND_HDF5_CMAKE)
   ## High level interface (libhdf5_hl)
   
   FIND_LIBRARY (HDF5_HDF5_HL_LIBRARY hdf5_hl
-    PATHS ${HDF5_ROOT_DIR} ${lib_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES lib hdf5/lib
     )
   
@@ -101,7 +101,7 @@ if (NOT FIND_HDF5_CMAKE)
   ## C++ interface (libhdf5_cpp)
   
   FIND_LIBRARY (HDF5_HDF5_CPP_LIBRARY hdf5_cpp
-    PATHS ${HDF5_ROOT_DIR} ${lib_locations}
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES lib hdf5/lib
     )
   
@@ -114,22 +114,22 @@ if (NOT FIND_HDF5_CMAKE)
   ## Check for the executables
   
   find_program (H5CHECK_EXECUTABLE h5check
-    PATHS ${HDF5_ROOT_DIR} /sw /usr /usr/local /opt/local
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES bin
     )
   
   find_program (H5DUMP_EXECUTABLE h5dump 
-    PATHS ${HDF5_ROOT_DIR} /sw /usr /usr/local /opt/local
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES bin
     )
   
   find_program (H5LS_EXECUTABLE h5ls 
-    PATHS ${HDF5_ROOT_DIR} /sw /usr /usr/local /opt/local
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES bin
     )
   
   find_program (H5STAT_EXECUTABLE h5stat 
-    PATHS ${HDF5_ROOT_DIR} /sw /usr /usr/local /opt/local
+    HINTS ${HDF5_ROOT_DIR}
     PATH_SUFFIXES bin
     )
 
