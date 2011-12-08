@@ -12,9 +12,10 @@ set (FFTW3_LIBRARIES    ${FFTW3_LIBRARIES}      CACHE FILEPATH "FFTW3 libraries"
 
 ## HDF5 library ____________________________________________
 
-set (USE_HDF5           ${HDF5_FOUND}     CACHE BOOL     "Enable HDF5"    FORCE )
-set (HDF5_INCLUDE_DIRS  ${HDF5_INCLUDES}  CACHE PATH     "HDF5 includes"  FORCE )
-set (HDF5_LIBRARIES     ${HDF5_LIBRARIES} CACHE FILEPATH "HDF5 libraries" FORCE )
+set (USE_HDF5           ${HDF5_FOUND}        CACHE BOOL     "Enable HDF5"    FORCE )
+set (HDF5_INCLUDE_DIRS  ${HDF5_INCLUDES}     CACHE PATH     "HDF5 includes"  FORCE )
+set (HDF5_LIBRARIES     ${HDF5_LIBRARIES}    CACHE FILEPATH "HDF5 libraries" FORCE )
+set (HDF5_hdf5_LIBRARY  ${HDF5_HDF5_LIBRARY} CACHE FILEPATH "HDF5 libraries" FORCE )
 
 ## LAPACK __________________________________________________
 
