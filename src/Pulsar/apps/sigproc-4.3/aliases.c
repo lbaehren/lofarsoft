@@ -25,14 +25,14 @@ char tempo_site(int telescope_id) /*includefile*/
   case 8:
     return('g'); /*Effelsberg*/
     break;
-  case 9:
+  case 10:
+    return('w'); /*UTR-2*/
+    break;
+  case 11:
     return('t'); /*LOFAR*/
     break;
-  case 10:
-    return('u'); /*FR606*/
-    break;
   case 12:
-    return('w'); /*UTR-2*/
+    return('u'); /*FR606*/
     break;
   case 13:
     return('x'); /*DE601*/
@@ -78,14 +78,14 @@ char *telescope_name (int telescope_id) /*includefile*/
   case 8: 
     strcpy(string,"Effelsberg");
     break;
-  case 9: 
+  case 10: 
+    strcpy(string,"UTR-2");
+    break;
+  case 11: 
     strcpy(string,"LOFAR");
     break;
-  case 10: 
-    strcpy(string,"FR606");
-    break;
   case 12: 
-    strcpy(string,"UTR-2");
+    strcpy(string,"FR606");
     break;
   case 13: 
     strcpy(string,"DE601");
@@ -132,11 +132,11 @@ char *backend_name (int machine_id) /*includefile*/
   case 8:
     strcpy(string,"PULSAR2000");
     break;
-  case 9:
-    strcpy(string,"BG/P");
-    break;
   case 10:
     strcpy(string,"ARTEMIS");
+    break;
+  case 11:
+    strcpy(string,"BG/P");
     break;
   default:
     strcpy(string,"?????");
