@@ -24,7 +24,7 @@ if (NOT LUS_TESTTARGETS_CMAKE)
   ## results to the Dashboard server.
 
   find_file (LUS_TEST_DRIVER_IN LUS_TestDriver.in
-    PATHS ${PROJECT_SOURCE_DIR} ${LUS_ROOT_DIR}
+    PATHS ${PROJECT_SOURCE_DIR} ${LUS_SOURCE_DIR}
     PATH_SUFFIXES devel_common/cmake cmake
     )
 

@@ -54,12 +54,10 @@ find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   )
 
 if (LUS_ROOT)
-  set (LUS_ROOT_DIR ${LUS_ROOT} )
   ## load custom modules
   include (CMakeSettings)
 else (LUS_ROOT)
   set (LUS_ROOT     ${PROJECT_SOURCE_DIR} )
-  set (LUS_ROOT_DIR ${PROJECT_SOURCE_DIR} )
 endif (LUS_ROOT)
 
 ## ==============================================================================
