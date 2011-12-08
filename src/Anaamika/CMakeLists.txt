@@ -25,7 +25,6 @@ if (NOT LUS_SOURCE_DIR)
     )
 endif (NOT LUS_SOURCE_DIR)
 
-
 if (LUS_SOURCE_DIR)
   include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
 else (LUS_SOURCE_DIR)
