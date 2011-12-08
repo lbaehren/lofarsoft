@@ -52,14 +52,14 @@ endif (CASACORE_FROM_REPOS_HEAD)
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
 if (NOT LUS_SOURCE_DIR)
-find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${PROJECT_SOURCE_DIR}
-  ${PROJECT_SOURCE_DIR}/..
-  ${PROJECT_SOURCE_DIR}/../..
-  ${PROJECT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
+  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/..
+    ${PROJECT_SOURCE_DIR}/../..
+    ${PROJECT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    )
 endif (NOT LUS_SOURCE_DIR)
 
 ##__________________________________________________________
