@@ -81,25 +81,72 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
     ## list element matches possibles value for a boolean variable, it
     ## is stored and the argument removed from the list.
     
-    set (_args ${ARGV})
-    list (REVERSE _args)
-    list (GET _args 0 varFirstArgument)
+    set (varArguments ${ARGV})
     
-    if (varFirstArgument MATCHES ON+|TRUE+|YES+)
-      set (_verbose YES)
-      list (REMOVE_AT _args 0)
-    endif (varFirstArgument MATCHES ON+|TRUE+|YES+)
-    
-    if (varFirstArgument MATCHES OFF+|FALSE+|NO+)
-      set (_verbose NO)
-      list (REMOVE_AT _args 0)
-    endif (varFirstArgument MATCHES OFF+|FALSE+|NO+)
+    ## Check list is not empty
+    if (varArguments)
+      
+      list (REVERSE varArguments)
+      list (GET varArguments 0 varFirstArgument)
+      
+      if (varFirstArgument MATCHES ON+|TRUE+|YES+)
+	set (_verbose YES)
+	list (REMOVE_AT varArguments 0)
+      endif (varFirstArgument MATCHES ON+|TRUE+|YES+)
+      
+      if (varFirstArgument MATCHES OFF+|FALSE+|NO+)
+	set (_verbose NO)
+	list (REMOVE_AT varArguments 0)
+      endif (varFirstArgument MATCHES OFF+|FALSE+|NO+)
+      
+    endif (varArguments)
     
     ##________________________________________________________________
     ## Once the optional argument has been removed, sort the list of
     ## inputs
+    
+    if (varArguments)
 
-    list (SORT _args)
+      list (SORT varArguments)
+
+      ##______________________________________________________________
+      ## Iterate through the list of modules
+      
+      foreach (varModule ${varArguments})
+	
+	## Get package name in uppercase
+	string (TOUPPER ${varModule} varModuleUpper)
+	
+	## Obey verbosity level
+	if (LUS_VERBOSE_CONFIGURE)
+	  set (${varModule}_FIND_QUIETLY      FALSE )
+	  set (${varModuleUpper}_FIND_QUIETLY FALSE )
+	else (LUS_VERBOSE_CONFIGURE)  
+	  set (${varModule}_FIND_QUIETLY      TRUE )
+	  set (${varModuleUpper}_FIND_QUIETLY TRUE )
+	endif (LUS_VERBOSE_CONFIGURE)
+	
+	## Load CMake module if package not yet located
+	if (NOT ${varModuleUpper}_FOUND)
+	  find_package (${varModule})
+	endif (NOT ${varModuleUpper}_FOUND)
+	
+	## Conformation of returned status variable
+	if (HAVE_${varModule})
+	  set (HAVE_${varModuleUpper} TRUE)
+	endif (HAVE_${varModule})
+	
+	if (HAVE_${varModuleUpper})
+	  set (${varModuleUpper}_FOUND TRUE)
+	endif (HAVE_${varModuleUpper})
+	
+	if (${varModuleUpper}_FOUND)
+	  set (${varModuleUpper}_FOUND TRUE)
+	endif (${varModuleUpper}_FOUND)
+	
+      endforeach (varModule)
+      
+    endif (varArguments)
     
   endmacro (lusFindModules)
   
