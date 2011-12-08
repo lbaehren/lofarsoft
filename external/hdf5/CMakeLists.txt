@@ -157,33 +157,43 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
       INSTALL_COMMAND make install
       )
   
-  ##__________________________________________________________________
-  ## Custom target wrapping the standard configure/build chain
+  ##________________________________________________________
+  ## Update global configuration settings
   
-#  add_custom_target (apply_patches
-#    COMMAND cp ${HDF5_SOURCE_DIR}/zip_perf.c ${HDF5_DIRECTORY}/perform
-#    WORKING_DIRECTORY ${HDF5_BINARY_DIR}
-#    COMMENT "Applying patches to the source code ..."
-#    )
+  if (LUS_BINARY_DIR)
+    ExternalProject_Add_Step (hdf5 update_configure
+      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} ..
+      COMMENT "Updating configuration settings after installation of <package> ..."
+      DEPENDEES install
+      DEPENDERS build
+      WORKING_DIRECTORY ${LUS_BINARY_DIR}
+      )
+  endif (LUS_BINARY_DIR)
+  
 
   ##__________________________________________________________________
   ## Configuration summary
-
-  message ("-------------------------------------------------------------")
-  message (STATUS "Library version")
-  message (STATUS ".. System installation               : " ${HDF5_LIBRARY_VERSION} )
-  message (STATUS ".. Required library version          : " ${HDF5_VERSION}         )
-  message (STATUS "Force rebuild and local installation : " ${HDF5_FORCE_BUILD}     )
-  message (STATUS "Be verbose during build process      : " ${HDF5_VERBOSE_BUILD}   )
-  message (STATUS "Build shared version of the library  : " ${HDF5_BUILD_SHARED}    )
-  message (STATUS "Build static version of the library  : " ${HDF5_BUILD_STATIC}    )
-  message (STATUS "Compile the C++ interface            : " ${HDF5_ENABLE_CXX}      )
-  message (STATUS "Compile the Fortran interface        : " ${HDF5_ENABLE_FORTRAN}  )
-  message (STATUS "Enable the high level library        : " ${HDF5_BUILD_HL}        )
-  message (STATUS "Search for MPI support files         : " ${HDF5_ENABLE_PARALLEL} )
-  message (STATUS "Enable thread safe capability        : " ${HDF5_ENABLE_THREADSAFE} )
-  message ("-------------------------------------------------------------")
-
+  
+  if (HDF5_VERBOSE_CONFIGURE)
+    message (STATUS "------------------------------------------------------------")
+    message (STATUS "[HDF5] Configuration summary.")
+    message (STATUS "------------------------------------------------------------")
+    message (STATUS "Library version")
+    message (STATUS ".. System installation               : " ${HDF5_LIBRARY_VERSION} )
+    message (STATUS ".. Required library version          : " ${HDF5_VERSION}         )
+    message (STATUS "Force rebuild and local installation : " ${HDF5_FORCE_BUILD}     )
+    message (STATUS "Be verbose during build process      : " ${HDF5_VERBOSE_BUILD}   )
+    message (STATUS "Build shared version of the library  : " ${HDF5_BUILD_SHARED}    )
+    message (STATUS "Build static version of the library  : " ${HDF5_BUILD_STATIC}    )
+    message (STATUS "Compile the C++ interface            : " ${HDF5_ENABLE_CXX}      )
+    message (STATUS "Compile the Fortran interface        : " ${HDF5_ENABLE_FORTRAN}  )
+    message (STATUS "Enable the high level library        : " ${HDF5_BUILD_HL}        )
+    message (STATUS "Search for MPI support files         : " ${HDF5_ENABLE_PARALLEL} )
+    message (STATUS "Enable thread safe capability        : " ${HDF5_ENABLE_THREADSAFE} )
+    message ("-------------------------------------------------------------")
+  endif (HDF5_VERBOSE_CONFIGURE)
+  
   ## <-- end build condition ----------------------------------------------------->
   
 else (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
