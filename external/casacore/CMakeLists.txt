@@ -70,20 +70,19 @@ if (LUS_SOURCE_DIR)
   set (CMAKE_MODULE_PATH "${LUS_SOURCE_DIR}/devel_common/cmake")
   
   include (LUS_CMakeSettings)
-  include (IncludeFindModule)
   
-  set (casacore_cmake_modules
-    CASACORE
-    CFITSIO
-    GFortran
-    HDF5
-    LAPACK
-    MPI
-    WCSLIB
-    ZLIB
-    )
-  
-  include_find_module (${casacore_cmake_modules} ${CASACORE_VERBOSE_CONFIGURE})
+  foreach (casacoreExternalPackages
+      CASACORE
+      CFITSIO
+      GFortran
+      HDF5
+      LAPACK
+      MPI
+      WCSLIB
+      ZLIB
+      )
+    find_package (${casacoreExternalPackages})
+  endforeach (casacoreExternalPackages)
   
   if (GFORTRAN_LIBRARY)
     list (APPEND LAPACK_LIBRARIES ${GFORTRAN_LIBRARY})
