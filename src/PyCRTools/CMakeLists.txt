@@ -7,8 +7,8 @@ cmake_minimum_required (VERSION 2.8)
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_SOURCE_DIR)
+  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
     PATHS
     ${PYCRTOOLS_SOURCE_DIR}
     ${PYCRTOOLS_SOURCE_DIR}/..
@@ -17,12 +17,12 @@ if (NOT LUS_ROOT)
     ENV LOFARSOFT
     )
 
-  if (LUS_ROOT)
-    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_ROOT)
+  if (LUS_SOURCE_DIR)
+    include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_SOURCE_DIR)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_ROOT)
-endif (NOT LUS_ROOT)
+  endif (LUS_SOURCE_DIR)
+endif (NOT LUS_SOURCE_DIR)
 
 ##-------------------------------------------------------------------------------
 ## Find libraries
@@ -328,14 +328,14 @@ install (
 
 # Install Python modules
 install (CODE "message (STATUS \"Installing Python modules...\")")
-install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/modules ${LUS_ROOT}/release/lib/python/pycrtools)")
+install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/modules ${LUS_SOURCE_DIR}/release/lib/python/pycrtools)")
 
 install (CODE "message (STATUS \"Installing Python module documentation...\")")
-install (FILES ${PYCRTOOLS_PYTHON_DOCS} DESTINATION ${LUS_ROOT}/release/lib/python/pycrtools/core/hftools)
+install (FILES ${PYCRTOOLS_PYTHON_DOCS} DESTINATION ${LUS_SOURCE_DIR}/release/lib/python/pycrtools/core/hftools)
 
 # Install Python scripts
 install (CODE "message (STATUS \"Installing Python scripts...\")")
-install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts ${LUS_ROOT}/release/bin/python)")
+install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts ${LUS_SOURCE_DIR}/release/bin/python)")
 
 ## =============================================================================
 ##

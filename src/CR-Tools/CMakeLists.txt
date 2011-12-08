@@ -8,8 +8,8 @@ cmake_minimum_required (VERSION 2.6)
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_SOURCE_DIR)
+  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
     PATHS
     ${CR_SOURCE_DIR}
     ${CR_SOURCE_DIR}/..
@@ -18,12 +18,12 @@ if (NOT LUS_ROOT)
     ENV LOFARSOFT
     )
 
-  if (LUS_ROOT)
-    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_ROOT)
+  if (LUS_SOURCE_DIR)
+    include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_SOURCE_DIR)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_ROOT)
-endif (NOT LUS_ROOT)
+  endif (LUS_SOURCE_DIR)
+endif (NOT LUS_SOURCE_DIR)
 
 ## =============================================================================
 ##
@@ -584,7 +584,7 @@ if (tar_executable AND gzip_executable)
 
   add_custom_target (create_archive
     COMMENT "Creating tar-archive for CR-Tools and required packages."
-    WORKING_DIRECTORY ${LUS_ROOT}
+    WORKING_DIRECTORY ${LUS_SOURCE_DIR}
     COMMAND ${tar_executable} -cvf crtools.tar --exclude .svn CMakeLists.txt
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn devel_common
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn release/release_area.txt
