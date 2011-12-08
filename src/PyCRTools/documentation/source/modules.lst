@@ -32,6 +32,7 @@ pycrtools.tasks.dynamicspectrum
 pycrtools.tasks.fitbaseline
 pycrtools.tasks.imager
 pycrtools.tasks.pulsecal
+pycrtools.tasks.ldf
 pycrtools.io
 pycrtools.io.interfaces
 #pycrtools.IO.TBB
