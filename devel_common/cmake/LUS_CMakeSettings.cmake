@@ -61,4 +61,46 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
     
   endforeach (_pathBase)
   
+  ## ============================================================================
+  ##
+  ##                                                Macro: Include search modules
+  ##
+  ##   The macro accepts a list of module names for which a "Find<module>.cmake"
+  ##   file exists. Optionally a "verbose" parameter (boolean) can be passed along
+  ##   as last argument; it the latter is set to "FALSE", the find script is
+  ##   loaded with <module>_FIND_QUIETLY
+  ##
+  ## ============================================================================
+  
+  macro (lusFindModules varModules)
+  
+    ##________________________________________________________________
+    ## Check for optional "verbose" parameter; as this can be passed
+    ## along as last argument, we first invert the list of arguments
+    ## to inspect the then first element in the list. If the first
+    ## list element matches possibles value for a boolean variable, it
+    ## is stored and the argument removed from the list.
+    
+    set (_args ${ARGV})
+    list (REVERSE _args)
+    list (GET _args 0 varFirstArgument)
+    
+    if (varFirstArgument MATCHES ON+|TRUE+|YES+)
+      set (_verbose YES)
+      list (REMOVE_AT _args 0)
+    endif (varFirstArgument MATCHES ON+|TRUE+|YES+)
+    
+    if (varFirstArgument MATCHES OFF+|FALSE+|NO+)
+      set (_verbose NO)
+      list (REMOVE_AT _args 0)
+    endif (varFirstArgument MATCHES OFF+|FALSE+|NO+)
+    
+    ##________________________________________________________________
+    ## Once the optional argument has been removed, sort the list of
+    ## inputs
+
+    list (SORT _args)
+    
+  endmacro (lusFindModules)
+  
 endif (NOT LUS_CMAKE_SETTINGS_CMAKE)
