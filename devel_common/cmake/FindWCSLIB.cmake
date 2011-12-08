@@ -33,23 +33,26 @@ if (NOT FIND_WCSLIB_CMAKE)
   ##_____________________________________________________________________________
   ## Search locations
   
-  include (CMakeSettings)
+  include (LUS_CMakeSettings)
   
   ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (WCSLIB_INCLUDES wcs/wcs.h wcslib/wcs.h
-    PATHS ${include_locations}
-    NO_DEFAULT_PATH
+    HINTS ${WCSLIB_ROOT_DIR}
     )
   
   ##_____________________________________________________________________________
   ## Check for the library
   
   find_library (WCSLIB_WCS_LIBRARY wcs
-    PATHS ${lib_locations}
-    PATH_SUFFIXES wcs wcslib darwin/lib linux_gnu/lib stable/linux_gnu/lib
-    NO_DEFAULT_PATH
+    HINTS ${WCSLIB_ROOT_DIR}
+    PATH_SUFFIXES
+    wcs
+    wcslib
+    darwin/lib
+    linux_gnu/lib
+    stable/linux_gnu/lib
     )
   
   if (WCSLIB_WCS_LIBRARY)
