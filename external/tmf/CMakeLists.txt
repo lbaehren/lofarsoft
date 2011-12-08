@@ -30,8 +30,8 @@ option (TMF_FROM_RELEASE "Use release version instead of trunk?" YES)
 ##
 ## ==============================================================================
 
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_SOURCE_DIR)
+  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
     PATHS
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/..
@@ -40,12 +40,12 @@ if (NOT LUS_ROOT)
     ENV LOFARSOFT
     )
 
-  if (LUS_ROOT)
-    include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_ROOT)
+  if (LUS_SOURCE_DIR)
+    include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
+  else (LUS_SOURCE_DIR)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_ROOT)
-endif (NOT LUS_ROOT)
+  endif (LUS_SOURCE_DIR)
+endif (NOT LUS_SOURCE_DIR)
 
 ## ==============================================================================
 ##
