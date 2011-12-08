@@ -67,7 +67,9 @@ endif (NOT LUS_SOURCE_DIR)
 
 if (LUS_SOURCE_DIR)
 
-  include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
+  set (CMAKE_MODULE_PATH "${LUS_SOURCE_DIR}/devel_common/cmake")
+  
+  include (LUS_CMakeSettings)
   include (IncludeFindModule)
   
   set (casacore_cmake_modules
