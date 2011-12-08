@@ -29,14 +29,14 @@ macro (build_package _packageName _packageSource)
   
   if (LUS_CMAKE_OPTIONS)
     add_custom_target (${_packageName}
-      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      COMMAND ${CMAKE_COMMAND} ${LUS_SOURCE_DIR}/${_packageSource} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
       COMMAND ${CMAKE_BUILD_TOOL} install
       WORKING_DIRECTORY ${_packageBuildLocation}
       COMMENT "Building package ${package_name} ..."
       )
   else (LUS_CMAKE_OPTIONS)
     add_custom_target (${_packageName}
-      COMMAND ${CMAKE_COMMAND} ${LUS_ROOT}/${_packageSource} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
+      COMMAND ${CMAKE_COMMAND} ${LUS_SOURCE_DIR}/${_packageSource} -DCMAKE_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
       COMMAND ${CMAKE_BUILD_TOOL} install
       WORKING_DIRECTORY ${_packageBuildLocation}
       COMMENT "Building package ${package_name} ..."
