@@ -215,7 +215,11 @@ class ldf(tasks.Task):
 
     ## Functions for shower geometry and uncertainty propagation
 
-    def GetDistance(self,loracore,loradirection,positions):        
+    def GetDistance(self,loracore,loradirection,positions):  
+    
+        """
+        Calculating the distance of a station to the shower core in the shower plane. 
+        """      
         
         distances = cr.hArray(copy=positions)
         finaldistance = cr.hArray(copy=positions)
@@ -234,6 +238,11 @@ class ldf(tasks.Task):
         
     
     def GetTotalDistanceUncertainty(self,loracore,loracoreuncertainties,positions,loradirection,loradirectionuncertainties,distances): 
+    
+        """
+        Propagating the uncertatinties of the core and the directions into the uncertainties of the distance to the shower axis. 
+        
+        """
         
         # Assuming differences in z-coordinates = 0
         
@@ -295,6 +304,11 @@ class ldf(tasks.Task):
         return err 
         
     def CalculateBaryCenter(self,positions, signals):
+    
+        """
+        Calculating the bary center, i.e. the average coordinate weigthed with the signal strengths. 
+        
+        """
 
         pos1 = cr.hArray_transpose(positions)[0].vec()
         pos1 = cr.hArray(pos1)
@@ -322,6 +336,11 @@ class ldf(tasks.Task):
         pass
     
     def run(self):
+    
+        """
+        Making all sorts of things with the LDF. Not fully developed to do the only possible method. 
+        
+        """
         
         if self.loracoreuncertainties == None:
             self.loracoreuncertainties = cr.hArray([5.,5.,0.])
@@ -435,6 +454,7 @@ class ldf(tasks.Task):
             pic_name = str(self.event_id)+"_LDF.png"
             pic_ldf = directory+pic_name
             cr.plt.savefig(pic_ldf)
+           
             
             if self.generate_html:
                 status = "new"
