@@ -61,19 +61,11 @@ endif (CASACORE_FROM_REPOS_HEAD)
 ##
 ## ==============================================================================
 
-set (CFITSIO_FOUND   FALSE )
-set (FFTW3_FOUND     FALSE )
-set (GFORTRAN_FOUND  FALSE )
-set (HDF5_FOUND      FALSE )
-set (LAPACK_FOUND    FALSE )
-set (MPI_FOUND       FALSE )
-set (WCSLIB_FOUND    FALSE )
-set (ZLIB_FOUND      FALSE )
-
 ##__________________________________________________________
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
+if (NOT LUS_SOURCE_DIR)
+find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/..
@@ -81,24 +73,32 @@ find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
   ${PROJECT_SOURCE_DIR}/../../..
   $ENV{LOFARSOFT}
   )
+endif (NOT LUS_SOURCE_DIR)
 
-if (LUS_ROOT)
-  ## Global CMake LUS settings
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  ## Load find modules
-  include (FindCFITSIO)
-  include (FindGFortran)
-  include (FindLAPACK)
-  include (FindWCSLIB)
-  include (FindCASACORE)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[casacore] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+##__________________________________________________________
+## Find installation of required packages
 
-if (GFORTRAN_LIBRARY)
-  list (APPEND LAPACK_LIBRARIES ${GFORTRAN_LIBRARY})
-endif (GFORTRAN_LIBRARY)
+if (LUS_SOURCE_DIR)
 
+  include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
+  include (IncludeFindModule)
+  
+  set (casacore_cmake_modules
+    CASACORE
+    CFITSIO
+    GFortran
+    LAPACK
+    WCSLIB
+    )
+  
+  include_find_module (${casacore_cmake_modules} ${CASACORE_VERBOSE_CONFIGURE})
+  
+  if (GFORTRAN_LIBRARY)
+    list (APPEND LAPACK_LIBRARIES ${GFORTRAN_LIBRARY})
+  endif (GFORTRAN_LIBRARY)
+
+endif (LUS_SOURCE_DIR)
+  
 ##__________________________________________________________
 ## Handle option: HDF5 library support
 
