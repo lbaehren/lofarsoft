@@ -81,7 +81,6 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
     ## list element matches possibles value for a boolean variable, it
     ## is stored and the argument removed from the list.
     
-<<<<<<< HEAD
     set (varArguments ${ARGV})
     
     ## Check list is not empty
