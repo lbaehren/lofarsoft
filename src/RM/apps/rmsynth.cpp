@@ -453,7 +453,7 @@ void processCube(double phi_min, double phi_max, uint nFara, int method, double 
     rmsynthesis is done separatly by using the line procedure */
   #pragma omp parallel 
   {
-    for (uint x=0; x<result.getXSize(); x++ ) {
+    for (int x=0; x<result.getXSize(); x++ ) {
       cout << "x= "<< x+1 << " / " << cube.getXSize() << endl ;
 //       #pragma omp for
       for (int y=0; y<result.getYSize(); y++ ) {
@@ -499,10 +499,10 @@ void processCube(double phi_min, double phi_max, uint nFara, int method, double 
   for (uint j=0; j<nFara ; j++) {
     pos[inds[2]] = j ;  // set the frequency coordinate inside the current image
     /* loop over the first dimension of the current image */
-    for (uint x=0; x<result.getXSize(); x++) {
+    for (int x=0; x<result.getXSize(); x++) {
       pos[inds[0]]=x ;  // set the position for the first spartial image dimension
       /* loop over the seccond dimension of the current image */
-      for (uint y=0; y<result.getYSize(); y++) {
+      for (int y=0; y<result.getYSize(); y++) {
         pos[inds[1]]=y ; // set the position for the seccond spartial image dimension
         pos[inds[3]]=1 ; // select pos component for Stokes Q
         complex<double> const val=result.getVal(curIndx,x,y) ;
