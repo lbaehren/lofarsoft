@@ -30,26 +30,6 @@ option (AERA_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO )
 option (AERA_VERBOSE_BUILD     "Be verbose during build process?"         NO )
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-if (NOT LUS_ROOT)
-  find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-    PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-    $ENV{LOFARSOFT}
-    )
-endif (NOT LUS_ROOT)
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
 if (NOT AERA_VERBOSE_CONFIGURE)
@@ -57,8 +37,7 @@ if (NOT AERA_VERBOSE_CONFIGURE)
 endif (NOT AERA_VERBOSE_CONFIGURE)
 
 set (AERA_FOUND FALSE)
-include (FindAERA)
-
+find_package (AERA)
 
 ## <-- begin build condition --------------------------------------------------->
 
