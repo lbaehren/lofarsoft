@@ -95,10 +95,11 @@ endif (LUS_SOURCE_DIR)
 
 if (CASACORE_WITH_HDF5)
 
+  list (INSERT HDF5_INCLUDES 0 ${CMAKE_INSTALL_PREFIX}/include )
+  
   if (HDF5_FOUND)
     
     if (MPI_FOUND)
-      list (APPEND HDF5_INCLUDES ${CMAKE_INSTALL_PREFIX}/include)
       list (APPEND HDF5_INCLUDES ${MPI_INCLUDE_PATH})
       list (APPEND HDF5_LIBRARIES ${MPI_LIBRARIES})
     endif (MPI_FOUND)
@@ -110,7 +111,7 @@ if (CASACORE_WITH_HDF5)
   else (HDF5_FOUND)
     
     set (CASACORE_WITH_HDF5 FALSE)
-
+    
   endif (HDF5_FOUND)
   
 endif (CASACORE_WITH_HDF5)
