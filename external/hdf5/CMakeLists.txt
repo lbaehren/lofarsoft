@@ -163,7 +163,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   if (LUS_BINARY_DIR)
     ExternalProject_Add_Step (hdf5 update_configure
       COMMAND ${CMAKE_COMMAND} -E remove CMake*
-      COMMAND ${CMAKE_COMMAND} ..
+      COMMAND ${CMAKE_COMMAND} -DHDF5_ROOT_DIR=${CMAKE_INSTALL_PREFIX} ..
       COMMENT "Updating configuration settings after installation of <package> ..."
       DEPENDEES install
       DEPENDERS build
