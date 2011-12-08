@@ -41,24 +41,9 @@ if (LUS_CMAKE_MODULES)
     "CMake module path"
     FORCE)
   ## Load custom CMake settings
+  include (CMakeSettings)
   include (LUS_CMakeSettings)
 endif (LUS_CMAKE_MODULES)
-
-##____________________________________________________________________
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS
-  ${PROJECT_SOURCE_DIR}
-  ${PROJECT_SOURCE_DIR}/..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  ## load custom modules
-  include (CMakeSettings)
-else (LUS_ROOT)
-  set (LUS_ROOT     ${PROJECT_SOURCE_DIR} )
-endif (LUS_ROOT)
 
 ## ==============================================================================
 ##
@@ -211,18 +196,6 @@ endforeach (varSystemPackage)
 
 ## ==============================================================================
 ##
-##  Cleaning up
-##
-## ==============================================================================
-
-add_custom_target (clean-src
-  COMMAND rm -rf *~ */*~ */*/*~ */*/*/*~
-  WORKING_DIRECTORY ${LUS_ROOT}/src
-  COMMENT "Cleaning up build directory ..."
-)
-
-## ==============================================================================
-##
 ##  Project sub-directories
 ##
 ## ==============================================================================
@@ -299,7 +272,7 @@ message (STATUS " .. SZIP compression library ... = ${SZIP_FOUND}"            )
 message (STATUS " .. WCSLIB ..................... = ${WCSLIB_FOUND}"          )
 message (STATUS " .. Wget ....................... = ${WGET_FOUND}"            )
 message (STATUS " LOFAR User software configuration:"                         )
-message (STATUS " .. LUS_ROOT ................... = ${LUS_ROOT}"              )
+message (STATUS " .. LUS_SOURCE_DIR ............. = ${LUS_SOURCE_DIR}"        )
 message (STATUS " .. LUS_CMAKE_MODULES .......... = ${LUS_CMAKE_MODULES}"     )
 message (STATUS " .. LUS_INSTALL_PREFIX ......... = ${LUS_INSTALL_PREFIX}"    )
 message (STATUS " .. LUS_PYTHONPATH ............. = ${USG_PYTHONPATH}"        )
