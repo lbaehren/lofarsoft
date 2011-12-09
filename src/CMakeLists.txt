@@ -312,13 +312,8 @@ if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
   ## Trigger build and install
   add_custom_target (pulsar
     COMMAND ${CMAKE_COMMAND} ${PULSAR_SOURCE_DIR}
+    COMMAND ${CMAKE_BUILD_TOOL} -j2 -k
     COMMAND ${CMAKE_BUILD_TOOL} -j2 -k install
-    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
-    )
-  ## Post installation commands
-  add_custom_command(
-    TARGET pulsar
-    POST_BUILD
     COMMAND ${CMAKE_BUILD_TOOL} -j2 -k ppgplot_bindings_install
     COMMAND ${CMAKE_BUILD_TOOL} -j2 -k presto_makewisdom
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
