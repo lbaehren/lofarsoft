@@ -1,7 +1,6 @@
 # pycrtools.template
 # pycrtools.core
 # pycrtools.core.types
-pycrtools.core.database
 pycrtools.core.htypes
 pycrtools.core.harray
 pycrtools.core.plot
@@ -35,5 +34,6 @@ pycrtools.tasks.imager
 pycrtools.tasks.pulsecal
 pycrtools.tasks.ldf
 pycrtools.io
+pycrtools.io.database
 pycrtools.io.interfaces
 #pycrtools.IO.TBB
