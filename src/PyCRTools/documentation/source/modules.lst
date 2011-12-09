@@ -1,10 +1,11 @@
 # pycrtools.template
 # pycrtools.core
 # pycrtools.core.types
+pycrtools.core.database
 pycrtools.core.htypes
 pycrtools.core.harray
-pycrtools.core.vector
 pycrtools.core.plot
+pycrtools.core.vector
 pycrtools.core.workspaces
 # pycrtools.core.hftools.mArray
 pycrtools.core.hftools.mVector
