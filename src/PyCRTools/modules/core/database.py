@@ -1,20 +1,40 @@
 """
-Provide simple database access interface using sqlite3.
+Provide a simple database access interface using sqlite3.
 """
 
 import sqlite3
 
 class Database:
-    """Class to handle all python communication with a SQLite database."""
+    """Class to handle all python communication with an SQLite database."""
 
     def __init__(self, filename=":memory:"):
-        """Initialisation of the Database class."""
+        """Initialisation of the Database class.
+
+        **Parameters**
+
+        ============ =====
+        *filename*   Filename of the database.
+        ============ =====
+
+        When the filename is ``:memory:`` the database is written to
+        and read from memory.
+        """
         self._filename = filename
         self._db = sqlite3.connect(self._filename)
 
 
     def open(self, filename=""):
-        """Open an SQLite database."""
+        """Open an SQLite database.
+
+        **Parameters**
+
+        ============ =====
+        *filename*   Filename of the database.
+        ============ =====
+
+        When the filename is ``:memory:`` the database is written to
+        and read from memory.
+        """
         self._db.close()
 
         if filename != "":
@@ -30,7 +50,14 @@ class Database:
 
 
     def insert(self, sql=""):
-        """Insert a new record into the database and return the new primary key"""
+        """Insert a new record into the database and return the new primary key.
+
+        **Parameters**
+
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
+        """
         if not self._db:
             self.open()
 
@@ -46,7 +73,14 @@ class Database:
 
 
     def select(self, sql=""):
-        """Select records from the database."""
+        """Select records from the database.
+
+        **Parameters**
+
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
+        """
         if not self._db:
             self.open()
 
@@ -60,7 +94,14 @@ class Database:
 
 
     def execute(self, sql=""):
-        """Execute an sql statement"""
+        """Execute an sql statement
+
+        **Parameters**
+
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
+        """
         if not self._db:
             self.open()
 
@@ -72,7 +113,14 @@ class Database:
 
 
     def executescript(self, sql=""):
-        """Execute a series of SQL statements."""
+        """Execute a series of SQL statements.
+
+        **Parameters**
+
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
+        """
         if not self._db:
             self.open()
 
