@@ -16,24 +16,6 @@ option (Pyrap_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
 option (Pyrap_VERBOSE_BUILD     "Be verbose during build process?"         NO  )
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${Pyrap_SOURCE_DIR}
-  ${Pyrap_SOURCE_DIR}/..
-  ${Pyrap_SOURCE_DIR}/../..
-  ${Pyrap_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
 
@@ -47,7 +29,7 @@ if (NOT HAVE_PYRAP OR Pyrap_FORCE_BUILD)
   
   find_path (Pyrap_prefix release_area.txt
     PATHS
-    ${Pyrap_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}
     PATH_SUFFIXES
     ../release
     ../../release

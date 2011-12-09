@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id:: FindNumPy.cmake 7993 2011-06-30 09:05:37Z loose                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -179,7 +177,7 @@ if (numpy_version_test_output)
 else (numpy_version_test_output)
 
   find_file (NUMPY_TEST_PROGRAM TestNumPyVersion.cc
-    PATHS ${CMAKE_MODULE_PATH} ${LUS_ROOT}
+    PATHS ${CMAKE_MODULE_PATH} ${LUS_SOURCE_DIR}
     PATH_SUFFIXES devel_common/cmake
     )
 

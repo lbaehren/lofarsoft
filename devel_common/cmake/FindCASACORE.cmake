@@ -117,8 +117,8 @@ set (casacore_headers
 
 list (APPEND include_locations
   ${CASACORE_ROOT_DIR}/include/casacore
-  ${LUS_ROOT}/release/include
-  ${LUS_ROOT}/external/casacore
+  ${LUS_SOURCE_DIR}/release/include
+  ${LUS_SOURCE_DIR}/external/casacore
   /usr/include
   /usr/local/include
   /sw/share/casacore

@@ -18,58 +18,25 @@ option (GIT_VERBOSE_CONFIGURE "Be verbose during configuration?"       NO )
 option (GIT_VERBOSE_BUILD     "Be verbose during build process?"       NO )
 
 ##_______________________________________________________________________________
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${GIT_SOURCE_DIR}
-  ${GIT_SOURCE_DIR}/..
-  ${GIT_SOURCE_DIR}/../..
-  ${GIT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[git] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-##_______________________________________________________________________________
 ##                                                                   Dependencies
 
-find_program (HAVE_GIT git ${bin_locations})
-
-##_______________________________________________________________________________
-##                                                                   Dependencies
-
-find_program (asciidoc_executable asciidoc ${bin_locations})
+find_program (GIT_EXECUTABLE git)
 
 ## Curl : Though there typically is a system-wide installation of the library,
 ##        that one might be too old. In order to avoid tempering with the files
 ##        in /usr/lib or /usr/local/lib as newer custom version should be used
 ##        when building Git.
 
-find_library (CURL_CURL_LIBRARY curl
-  PATHS /sw /usr /usr/local /opt/local
-  PATH_SUFFIXES lib
-  )
-
-find_path (CURL_INCLUDES include/curl/curl.h
-  PATHS /sw /usr /usr/local /opt/local
-  )
+find_path    (CURL_INCLUDES     include/curl/curl.h)
+find_library (CURL_CURL_LIBRARY curl)
 
 ## SSL / OpenSSL
 
 find_path (SSL_INCLUDES openssl/ssl2.h
-  PATHS /sw /usr /usr/local /opt/local
   PATH_SUFFIXES include lib/openssl lib/openssl/include
   )
 
-find_library (SSL_LIBRARIES ssl crypto
-  PATHS /sw /usr /usr/local /opt/local
-  PATH_SUFFIXES lib
-  )
+find_library (SSL_LIBRARIES ssl crypto)
 
 if (SSL_LIBRARIES)
   get_filename_component(SSL_LIBRARY_PATH ${SSL_LIBRARIES} PATH)
@@ -77,7 +44,7 @@ endif (SSL_LIBRARIES)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_GIT OR GIT_FORCE_BUILD)
+if (NOT GIT_EXECUTABLE OR GIT_FORCE_BUILD)
   
   set (GIT_VERSION 1.7.6)
   set (GIT_SOURCE_ARCHIVE git-${GIT_VERSION}.tar.gz)
@@ -87,33 +54,33 @@ if (NOT HAVE_GIT OR GIT_FORCE_BUILD)
   set (GIT_URL http://git-core.googlecode.com/files/git-1.7.6.4.tar.gz)
 
   ## locate source file to build from
-  find_file (HAVE_GIT_SOURCE ${GIT_SOURCE_ARCHIVE}
+  find_file (GIT_SOURCE ${GIT_SOURCE_ARCHIVE}
     PATHS ${GIT_SOURCE_DIR}
     )
   
-  if (NOT HAVE_GIT_SOURCE)
-    set (HAVE_GIT_SOURCE ${GIT_URL})
-  endif (NOT HAVE_GIT_SOURCE)
+  if (NOT GIT_SOURCE)
+    set (GIT_SOURCE ${GIT_URL})
+  endif (NOT GIT_SOURCE)
   
-  if (HAVE_GIT_SOURCE)
+  if (GIT_SOURCE)
     ExternalProject_Add (git
       PREFIX ${GIT_BINARY_DIR}
       DOWNLOAD_DIR ${GIT_BINARY_DIR}/download
       SOURCE_DIR ${GIT_BINARY_DIR}/source
-      URL ${HAVE_GIT_SOURCE}
+      URL ${GIT_SOURCE}
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${GIT_BINARY_DIR}/source/configure prefix=${CMAKE_INSTALL_PREFIX} --with-curl=${CMAKE_INSTALL_PREFIX} --with-openssl=${SSL_LIBRARY_PATH}
       INSTALL_COMMAND make install
       )
-  else (HAVE_GIT_SOURCE)
+  else (GIT_SOURCE)
     message (WARNING "[git] Unable to build project - no sources found!")
-  endif (HAVE_GIT_SOURCE)
+  endif (GIT_SOURCE)
   
   ## <-- end build condition ----------------------------------------------------->
   
-else (NOT HAVE_GIT OR GIT_FORCE_BUILD)
+else (NOT GIT_EXECUTABLE OR GIT_FORCE_BUILD)
   add_custom_target (git
     WORKING_DIRECTORY ${GIT_BINARY_DIR}
     COMMENT "[git] Found system-wide installation; skipping rebuild!"
     )
-endif (NOT HAVE_GIT OR GIT_FORCE_BUILD)
+endif (NOT GIT_EXECUTABLE OR GIT_FORCE_BUILD)

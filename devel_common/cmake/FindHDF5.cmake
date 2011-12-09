@@ -166,7 +166,7 @@ if (NOT FIND_HDF5_CMAKE)
   if (HDF5_INCLUDES AND HDF5_LIBRARIES)
     ## Locate test program
     find_file (HAVE_TestHDF5Library TestHDF5Library.cc
-      PATHS ${PROJECT_SOURCE_DIR} ${LUS_ROOT}
+      PATHS ${PROJECT_SOURCE_DIR} ${LUS_SOURCE_DIR}
       PATH_SUFFIXES cmake devel_common/cmake Modules
       )
     ## Build and run test program
