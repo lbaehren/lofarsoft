@@ -20,24 +20,6 @@ option (MATHGL_ENABLE_DOUBLE     "Enable double precision?"               YES )
 option (MATHGL_DOWNLOAD_ARCHIVE  "Download archive of latest version?"    NO  )
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${MATHGL_SOURCE_DIR}
-  ${MATHGL_SOURCE_DIR}/..
-  ${MATHGL_SOURCE_DIR}/../..
-  ${MATHGL_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[MathGL] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
 ## Check if the program/package/library is already available
 
 set (MATHGL_FIND_QUIETLY YES)

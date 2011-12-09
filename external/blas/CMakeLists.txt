@@ -15,24 +15,7 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${BLAS_SOURCE_DIR}
-  ${BLAS_SOURCE_DIR}/..
-  ${BLAS_SOURCE_DIR}/../..
-  ${BLAS_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## check for location installation location
+## Check for location installation location
 
 find_path (BLAS_INSTALL_PREFIX release_area.txt
   PATHS

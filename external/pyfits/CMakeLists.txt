@@ -22,24 +22,6 @@ option (PYFITS_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO 
 option (PYFITS_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${PYFITS_SOURCE_DIR}
-  ${PYFITS_SOURCE_DIR}/..
-  ${PYFITS_SOURCE_DIR}/../..
-  ${PYFITS_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[PyFITS] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-## ------------------------------------------------------------------------------
 ## System inspection
 
 if (NOT PYFITS_VERBOSE_CONFIGURE)

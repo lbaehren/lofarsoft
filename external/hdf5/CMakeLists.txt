@@ -36,25 +36,6 @@ option (HDF5_ENABLE_PARALLEL   "Search for MPI-IO and MPI support files?"  NO  )
 option (HDF5_ENABLE_THREADSAFE "Enable thread safe capability?"            NO  )
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${HDF5_SOURCE_DIR}
-  ${HDF5_SOURCE_DIR}/..
-  ${HDF5_SOURCE_DIR}/../..
-  ${HDF5_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
-
-
-## ------------------------------------------------------------------------------
 ## Check for system-wide HDF5 library installation
 
 set (HDF5_FIND_QUIETLY YES)
