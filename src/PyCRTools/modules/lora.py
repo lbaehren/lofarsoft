@@ -89,9 +89,14 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         return None
     firstline=lines[0].strip('/').split()
     secondline=lines[1].strip('/').split()
-    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)']
+    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)','CoreE(X)','CoreE(Y)']
+    len_firstline = len(firstline)
     loradata={}
-    for (a,b,c) in zip(firstline,reference,secondline):
+    if len_firstline != 9:
+        if len_firstline != 7:
+            print "Check LORA file format, update version ?!"
+            assert False
+    for (a,b,c) in zip(firstline,reference[0:len_firstline],secondline):
         # "Check if data format is still as defined"
         assert a==b
         loradata[a]=float(c)
