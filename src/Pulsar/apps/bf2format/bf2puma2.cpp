@@ -1,3 +1,10 @@
+/*
+ * bf2puma2wc.cpp
+ *
+ *  Created on: Dec 6, 2011
+ *      Author: anoutsos
+ */
+
 #include<iostream>
 #include<fstream>
 #include <sstream>
@@ -18,6 +25,10 @@
 // 2011 Jun 03  JMA  --use same min/max range for all real/imaginary values,
 //                     for both X and Y simulateously, but different for
 //                     different channels
+// 2011 Jun 03  JMA  --scale to a certain inclusion percentage for all channels
+//                     for a specific time block.  Scale so that the outer
+//                     fraction P is outside the range of int8_t and is written
+//                     as flag value F (normally -128).
 #include <stdint.h>
 
 
@@ -47,11 +58,10 @@
 #  endif
 #endif
 
-
-
-
+#define MAXLONG 2147483647
 #define NEED_TO_BYTESWAP 1
 #define MAX_NFILES 10000
+
 uint32_t CHANNELS = 16;
 uint32_t SUBBANDS = 32;
 uint32_t SAMPLES = 12208;
@@ -61,11 +71,12 @@ int verb = 0; // generic verbosity flag
 int realv = 0; // float-writer flag
 const int_fast32_t INPUT_DATA_BLOCK_HEADER_SIZE = 512;
 
+
 #define CLOCKRES 0.1953125
 
 using namespace std;
 
-streamsize getSize(const char*); 
+streamsize getSize(const char*);
 inline float FloatRead(int32_t a){
   union{
     float f;
@@ -86,6 +97,22 @@ inline float FloatRead(int32_t a){
 #else
   /* do nothing */
 #endif
+  dat.i = a;
+  return dat.f;
+}
+inline float int32_t_bits_to_float(int32_t a){
+  union{
+    float f;
+    int32_t i;
+  }dat;
+  dat.i = a;
+  return dat.f;
+}
+inline float uint32_t_bits_to_float(uint32_t a){
+  union{
+    float f;
+    uint32_t i;
+  }dat;
   dat.i = a;
   return dat.f;
 }
@@ -144,8 +171,29 @@ void byteswap_32_bit_float_array(const size_t NUM, float* const restrict fp){
 #endif
   return;
 }
+float byteswap_32_bit_float_array_and_find_max(const size_t NUM,
+                                               float* const restrict fp);
 
-
+// histogram sutff
+const int_fast32_t HIST_SIZE = 2048;
+inline float histogram_center(void)
+{
+    static const float c = HIST_SIZE/2-0.5;
+    return c;
+}
+void flush_histogram(void);
+void calculate_hist_constants(float min, float max);
+void add_buffer_hist(const size_t NUM, const float* const restrict fp);
+void find_hist_fraction_point_top(const float fraction,
+                                  const int_fast64_t count_offset,
+                                  int_fast32_t* index,
+                                  int_fast64_t* count);
+void find_hist_fraction_point_bot(const float fraction,
+                                  const int_fast64_t count_offset,
+                                  int_fast32_t* index,
+                                  int_fast64_t* count);
+float get_float_for_top_index_pos(const int_fast32_t index);
+float get_float_for_bot_index_pos(const int_fast32_t index);
 
 //complex<float> convert_complex(complex<float>);
 
@@ -158,16 +206,24 @@ struct samp_t{
 
 class writer{
 public:
-    writer() : sample_block_offset(0xFFFFFFFFU), blocksamples(0) {}
-    ~writer();
+  writer(char* &base, char* &hdr, char* &pset, int8_t flag)
+          : sample_block_offset(0xFFFFFFFFU), blocksamples(0),
+            flag_value(flag)
+  {
+      passFilenames(base, hdr, pset);
+      readParset();
+      filesInit();
+  }
+  ~writer();
   void filesInit();
   void filesClose();
-  void writePuMa2Block( const float * const restrict Xsamp,
+  void writePuMa2Block( const float global_minmax,
+                        const float * const restrict Xsamp,
                         const float * const restrict Ysamp);
   void writePuMa2BlockMissingFill(const int8_t Xfill,
                                   const int8_t Yfill);
   void readParset();
-  
+
   void passFilenames(char* &, char* &, char* &);
   void passSub(uint32_t  &);
   void passChan(uint32_t &);
@@ -176,6 +232,8 @@ public:
   uint32_t SUBBSTART;
   uint32_t SUBBEND;
   uint32_t NSUBBANDS;
+
+  int SUBBLIST[248];
 
   string DATE;
   string ANTENNA;
@@ -187,12 +245,13 @@ private:
   char* _basename;
   char* _hdrFilename;
   char* _psetFilename;
-  uint32_t _the_chan;  
-  uint32_t _the_sub;  
+  uint32_t _the_chan;
+  uint32_t _the_sub;
   string getKeyVal(string &);
   double mjdcalc();
   size_t sample_block_offset;
   samp_t* restrict blocksamples;
+  const int8_t flag_value;
 };
 writer::~writer() {
     free(blocksamples);
@@ -202,19 +261,35 @@ int main(int argc, char** argv){
 
   if(argc==1){
   	cout << endl << endl
-         << "Usage: <executable> -f <input file> -h <header file> -p <parset file> -BG -v "         << endl << endl
-         << " --- Example: bf2puma2 -f L00000_SAP000_B000 -h header.puma2 -p L00000.parset -BG -v " << endl << endl; 
-         
-        return 0;
+         << "Usage: <executable> -f <input file> -h <header file> "
+         << "-p <parset file>  [OPTIONS]" << endl <<endl << endl;
+        cout << "OPTIONS:" << endl << endl
+         << " -v                       Verbose" << endl << endl
+         << " -t                       Write out ascii files (.rv) containing the complex values" << endl <<endl
+         << " -BG                      Enable Big Endian (BlueGene) read-in" << endl
+         << "     >> note: user must also set NEED_TO_BYTESWAP to 1 and recompile!" << endl << endl
+         << " -b <nblocks>             Only read the first <nblocks> blocks" << endl << endl
+         << " -hist_cutoff <fraction>  Clip <fraction> off the edges of the samples histogram" << endl
+         << "     >> note: eliminates spiky RFI -- but may also clip bright pulsar signals!" << endl << endl
+         << " -all_times               Normalise data based on the entire data set " << endl
+         << "     >> note: if not used, the scaling is updated after every data block " << endl << endl
+         << " -flag_value <value>      Set the preferred <value> for blank data " << endl
+         << "     >> note: by default, empty blocks are filled in with \"-128\"s " << endl << endl;
+    return 0;
   }
 
   char* basename = 0;
   char* hdrFilename = 0;
   char* psetFilename = 0;
+  int scale_all_time_blocks_together = 0;
+  float cutoff_fraction = 0.0f;
   int8_t flag_value(-128); // 0xFF
   int BlueGeneData = 0;
 
-  for(int ia=0; ia<argc; ia++){      
+  // by default, read all blocks
+  long block_limit = MAXLONG;// max long
+
+  for(int ia=0; ia<argc; ia++){
     if(string(argv[ia])=="-f"){
         if(ia+1 < argc) {
             basename = argv[ia+1];
@@ -254,6 +329,38 @@ int main(int argc, char** argv){
       // Turn on Blue Gene block reads
       BlueGeneData = 1;
       continue;
+    }else if( string(argv[ia])=="-b"){
+      // Number of blocks to read
+      if(isdigit(argv[ia+1][0]))
+         block_limit = atoi(argv[ia+1]);
+
+      if(block_limit < 0 || block_limit > MAXLONG) {
+         cerr << "Warning: invalid block limit, setting to all blocks" << endl;
+         block_limit = MAXLONG;
+      }
+      continue;
+    }else if( string(argv[ia])=="-all_times"){
+      // Write float complex samples
+      scale_all_time_blocks_together = 1;
+      continue;
+    }else if( string(argv[ia])=="-hist_cutoff"){
+      // Write float complex samples
+        if(ia+1 < argc) {
+            cutoff_fraction = atof(argv[ia+1]);
+            if(cutoff_fraction < 0.0f) {
+                cerr << "Warning: cutoff less than 0, setting to 0.0" << endl;
+                cutoff_fraction = 0.0f;
+            }
+            else if(cutoff_fraction >= 0.4999f) {
+                cerr << "Warning: cutoff greater than 0.4999, setting to 0.4999" << endl;
+                cutoff_fraction = 0.4999f;
+            }
+        }
+        else {
+            cerr << "no argument following '-hist_cutoff'" << endl;
+            exit(2);
+        }
+      continue;
     }else if( string(argv[ia])=="-flag_value"){
       // Write float complex samples
         if(ia+1 < argc) {
@@ -266,45 +373,35 @@ int main(int argc, char** argv){
       continue;
     }
   }
-  
+
   if( verb ){
     cout << "input = " << basename <<endl;
     cout << "header = " << hdrFilename <<endl;
     cout << "parset = " << psetFilename <<endl;
   }
-  
+
   string filenameX_str = string(basename)+"_S0_P000_bf.raw";
   string filenameY_str = string(basename)+"_S1_P000_bf.raw";
-  
+
   const char* filenameX = filenameX_str.c_str();
   const char* filenameY = filenameY_str.c_str();
-  
+
   FILE * pfileX;
   FILE * pfileY;
-  
+
   pfileX = fopen ( filenameX , "rb" );
   if (pfileX==NULL){fputs ("File error",stderr); exit (1);}
-  
+
   pfileY = fopen ( filenameY , "rb" );
   if (pfileY==NULL) {fputs ("File error",stderr); exit (1);}
-  
-  writer puma2data;
 
-  puma2data.passFilenames(basename,hdrFilename, psetFilename);
-
-  puma2data.readParset();
-  
-  puma2data.filesInit();
-
+  writer puma2data(basename, hdrFilename, psetFilename, flag_value);
 
   if(verb)
-    cout << "\n\nUsing Channels: " << CHANNELS << "\t and Subbands: " 
+    cout << "\n\nUsing Channels: " << CHANNELS << "\t and Subbands: "
          << SUBBANDS << "\t and Samples: " << SAMPLES << endl << endl;
 
-#if(NEED_TO_BYTESWAP)
   size_t Jnumber_floats = size_t(2)*CHANNELS*SUBBANDS*(SAMPLES);
-#else
-#endif
   size_t Jnumber_floats_read = (BlueGeneData) ?
       size_t(2)*CHANNELS*SUBBANDS*(SAMPLES|2) : size_t(2)*CHANNELS*SUBBANDS*(SAMPLES);
   size_t Jnumber_char = sizeof(float)*Jnumber_floats_read;
@@ -314,9 +411,9 @@ int main(int argc, char** argv){
   XJV = reinterpret_cast<float* restrict>(malloc(Jnumber_char));
   float * restrict YJV;
   YJV = reinterpret_cast<float* restrict>(malloc(Jnumber_char));
-  
+
   if( XJV==0 || YJV==0){
-    fputs( "Memory fail", stderr ); 
+    fputs( "Memory fail", stderr );
     exit( 1 );
   }
 
@@ -326,7 +423,7 @@ int main(int argc, char** argv){
   uint32_t Xpad[INPUT_DATA_BLOCK_HEADER_SIZE/sizeof(uint32_t)];
 
   // Y-pol values:
-  uint32_t  seqnoY;
+  uint32_t seqnoY;
 
   uint32_t Ypad[INPUT_DATA_BLOCK_HEADER_SIZE/sizeof(uint32_t)];
 
@@ -336,49 +433,417 @@ int main(int argc, char** argv){
   }
 
 
-  uint32_t iblock = 0;
+  if(scale_all_time_blocks_together != 0) {
+      if(verb)cout << "Reading through all blocks to find min/max" << endl;
 
-  while(1){
-      size_t num;
-      uint32_t nskip(0);
-      cerr << "Reading block: " << iblock << endl;
+      uint32_t iblock = 0;
+      float global_minmax=0.0f;
+      int top_bottom_flag = -1;
+      int_fast64_t top_count = 0;
+      int_fast64_t bottom_count = 0;
+      int_fast32_t top_index = 0;
+      int_fast32_t bottom_index = 0;
+      int_fast32_t histogram_loop=0;
+      float top;
+      float bottom;
+      while(1){
+          size_t num;
+          float minmax;
+          if(verb)cout << "Reading block: " << iblock << endl;
 
+          if(iblock == block_limit) goto end_of_minmax_loop;
 
-      // Read X data:
-      num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
-      if( num != 1 ) goto end_of_data;
+          // Read X data:
+          num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+          if( num != 1 ) goto end_of_minmax_loop;
 
-      num = fread( XJV, Jnumber_char, 1, pfileX );
-      if( num != 1 ) goto end_of_data;
+          num = fread( XJV, Jnumber_char, 1, pfileX );
+          if( num != 1 ) goto end_of_minmax_loop;
 #if(NEED_TO_BYTESWAP)
-      seqnoX = byteswap_32_bit_int(Xpad[0]);
-      byteswap_32_bit_float_array(Jnumber_floats, XJV);
+          seqnoX = byteswap_32_bit_int(Xpad[0]);
 #else
-      seqnoX = Xpad[0];
+          seqnoX = Xpad[0];
+#endif
+          minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,XJV);
+          if(minmax > global_minmax) global_minmax = minmax;
+
+          // Read Y data:
+          num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+          if( num != 1 ) goto end_of_minmax_loop;
+
+          num = fread( YJV, Jnumber_char, 1, pfileY );
+          if( num != 1 ) goto end_of_minmax_loop;
+#if(NEED_TO_BYTESWAP)
+          seqnoY = byteswap_32_bit_int(Ypad[0]);
+#else
+          seqnoY = Ypad[0];
+#endif
+          minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,YJV);
+          if(minmax > global_minmax) global_minmax = minmax;
+
+          if(verb)
+              cout <<setw(10)<< "IBLOCK = " <<setw(10)<< iblock <<setw(10)
+                   << " SEQNO_X = " << seqnoX <<setw(10)
+                   << " / SEQNO_Y = " << seqnoY <<endl;
+
+          while(seqnoX != seqnoY){
+              while(seqnoX < seqnoY){
+                  if(verb)cerr << "seqnoX < seqnoY" <<endl;
+
+                  num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+                  if( num != 1 ) goto end_of_minmax_loop;
+
+                  num = fread( XJV, Jnumber_char, 1, pfileX );
+                  if( num != 1 ) goto end_of_minmax_loop;
+#if(NEED_TO_BYTESWAP)
+                  seqnoX = byteswap_32_bit_int(Xpad[0]);
+#else
+                  seqnoX = Xpad[0];
+#endif
+                  minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,XJV);
+                  if(minmax > global_minmax) global_minmax = minmax;
+              }
+
+              while(seqnoY < seqnoX){
+                  if(verb)cerr << "seqnoY < seqnoX" <<endl;
+
+                  num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+                  if( num != 1 ) goto end_of_minmax_loop;
+
+                  num = fread( YJV, Jnumber_char, 1, pfileY );
+                  if( num != 1 ) goto end_of_minmax_loop;
+#if(NEED_TO_BYTESWAP)
+                  seqnoY = byteswap_32_bit_int(Ypad[0]);
+#else
+                  seqnoY = Ypad[0];
+#endif
+                  minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,YJV);
+                  if(minmax > global_minmax) global_minmax = minmax;
+              }
+          }
+          iblock++;
+      } // End of while(1) loop
+end_of_minmax_loop:
+      if(verb)cout << " *** Read " << iblock << " blocks." <<endl;
+      if(verb)cout << "Global minmax is " << global_minmax << endl;
+      if(global_minmax <= 0.0f) {
+          global_minmax = 1.0f;
+          cerr << "block has only zeros!" << endl;
+          goto start_data_output;
+      }
+      if(cutoff_fraction <= 0.0f) {
+          goto start_data_output;
+      }
+
+      top = fabsf(global_minmax);
+      bottom = -fabsf(global_minmax);
+      while(histogram_loop < 20) {
+          // now go back and build the histogram area
+          rewind(pfileX);
+          rewind(pfileY);
+          iblock = 0;
+
+          if(verb)cout << "starting histogram loop " << histogram_loop << endl;
+          flush_histogram();
+          calculate_hist_constants(bottom,top);
+          while(1){
+              size_t num;
+              if(verb)cout << "Reading block: " << iblock << endl;
+
+              if(iblock == block_limit) goto end_of_histogram_N;
+
+              // Read X data:
+              num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+              if( num != 1 ) goto end_of_histogram_N;
+
+              num = fread( XJV, Jnumber_char, 1, pfileX );
+              if( num != 1 ) goto end_of_histogram_N;
+#if(NEED_TO_BYTESWAP)
+              seqnoX = byteswap_32_bit_int(Xpad[0]);
+              byteswap_32_bit_float_array(Jnumber_floats, XJV);
+#else
+              seqnoX = Xpad[0];
 #endif
 
-      // Read Y data:
-      num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
-      if( num != 1 ) goto end_of_data;
+              // Read Y data:
+              num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+              if( num != 1 ) goto end_of_histogram_N;
 
-      num = fread( YJV, Jnumber_char, 1, pfileY );
-      if( num != 1 ) goto end_of_data;
+              num = fread( YJV, Jnumber_char, 1, pfileY );
+              if( num != 1 ) goto end_of_histogram_N;
 #if(NEED_TO_BYTESWAP)
-      seqnoY = byteswap_32_bit_int(Ypad[0]);
-      byteswap_32_bit_float_array(Jnumber_floats, YJV);
+              seqnoY = byteswap_32_bit_int(Ypad[0]);
+              byteswap_32_bit_float_array(Jnumber_floats, YJV);
 #else
-      seqnoY = Ypad[0];
+              seqnoY = Ypad[0];
 #endif
 
-      if(verb)
-        cout <<setw(10)<< "IBLOCK = " <<setw(10)<< iblock <<setw(10)
-             << " SEQNO_X = " << seqnoX <<setw(10)
-             << " / SEQNO_Y = " << seqnoY <<endl;
+              if(verb)
+                  cout <<setw(10)<< "IBLOCK = " <<setw(10)<< iblock <<setw(10)
+                       << " SEQNO_X = " << seqnoX <<setw(10)
+                       << " / SEQNO_Y = " << seqnoY <<endl;
 
-      while(seqnoX != seqnoY){
-        while(seqnoX < seqnoY){
-          if(verb)cerr << "seqnoX < seqnoY" <<endl;
-          
+              while(seqnoX != seqnoY){
+                  while(seqnoX < seqnoY){
+                      if(verb)cerr << "seqnoX < seqnoY" <<endl;
+
+                      num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+                      if( num != 1 ) goto end_of_histogram_N;
+
+                      num = fread( XJV, Jnumber_char, 1, pfileX );
+                      if( num != 1 ) goto end_of_histogram_N;
+#if(NEED_TO_BYTESWAP)
+                      seqnoX = byteswap_32_bit_int(Xpad[0]);
+                      byteswap_32_bit_float_array(Jnumber_floats, XJV);
+#else
+                      seqnoX = Xpad[0];
+#endif
+                  }
+
+                  while(seqnoY < seqnoX){
+                      if(verb)cerr << "seqnoY < seqnoX" <<endl;
+
+                      num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+                      if( num != 1 ) goto end_of_histogram_N;
+
+                      num = fread( YJV, Jnumber_char, 1, pfileY );
+                      if( num != 1 ) goto end_of_histogram_N;
+#if(NEED_TO_BYTESWAP)
+                      seqnoY = byteswap_32_bit_int(Ypad[0]);
+                      byteswap_32_bit_float_array(Jnumber_floats, YJV);
+#else
+                      seqnoY = Ypad[0];
+#endif
+                  }
+              }
+              add_buffer_hist(Jnumber_floats, XJV);
+              add_buffer_hist(Jnumber_floats, YJV);
+              iblock++;
+          } // End of while(1) loop
+end_of_histogram_N:
+          if(verb)cout << " *** Read " << iblock << " blocks." <<endl;
+
+          if(verb)cout << "Evaluating results for histogram " << histogram_loop << endl;
+          if(top_bottom_flag == 0) {
+              // top already decided
+              find_hist_fraction_point_top(cutoff_fraction, top_count,
+                                          &top_index, &top_count);
+              if(verb)cout << "top index " << top_index << endl;
+              if(verb)cout << "top count " << top_count << endl;
+              top    = get_float_for_top_index_pos(top_index);
+              bottom = get_float_for_bot_index_pos(top_index);
+              global_minmax = fabsf(top);
+              if(top_index > 10) {
+                  break;
+              }
+          }
+          else if(top_bottom_flag == 1) {
+              // bottom already decided
+              find_hist_fraction_point_bot(cutoff_fraction, bottom_count,
+                                          &bottom_index, &bottom_count);
+              if(verb)cout << "bottom index " << bottom_index << endl;
+              if(verb)cout << "bottom count " << bottom_count << endl;
+              top    = get_float_for_top_index_pos(bottom_index);
+              bottom = get_float_for_bot_index_pos(bottom_index);
+              global_minmax = fabsf(bottom);
+              if(HIST_SIZE - bottom_index > 10) {
+                  break;
+              }
+          }
+          else {
+              // figure out whether top or bottom is farther out
+              find_hist_fraction_point_top(cutoff_fraction, top_count,
+                                          &top_index, &top_count);
+              if(verb)cout << "top index " << top_index << endl;
+              if(verb)cout << "top count " << top_count << endl;
+              find_hist_fraction_point_bot(cutoff_fraction, bottom_count,
+                                          &bottom_index, &bottom_count);
+              if(verb)cout << "bottom index " << bottom_index << endl;
+              if(verb)cout << "bottom count " << bottom_count << endl;
+              float diff_top = top_index - histogram_center();
+              float diff_bot = histogram_center() - bottom_index;
+              if(diff_top > 0.0f) {
+                  if(diff_top > diff_bot) {
+                      top_bottom_flag = 0;
+                      top    = get_float_for_top_index_pos(top_index);
+                      bottom = get_float_for_bot_index_pos(top_index);
+                      global_minmax = fabsf(bottom);
+                      if(diff_top > 10.0f) {
+                          break;
+                      }
+                  }
+                  else {
+                      top_bottom_flag = 1;
+                      top    = get_float_for_top_index_pos(bottom_index);
+                      bottom = get_float_for_bot_index_pos(bottom_index);
+                      global_minmax = fabsf(bottom);
+                      if(diff_bot > 10.0f) {
+                          break;
+                      }
+                  }
+              }
+              else if(diff_bot > 0.0f) {
+                  top_bottom_flag = 1;
+                  top    = get_float_for_top_index_pos(bottom_index);
+                  bottom = get_float_for_bot_index_pos(bottom_index);
+                  global_minmax = fabsf(bottom);
+                  if(diff_bot > 10.0f) {
+                      break;
+                  }
+              }
+              else {
+                  cerr << "programmer error! check!" << endl;
+                  global_minmax = 1.0f;
+                  break;
+              }
+          }
+          if(verb)cout << "Top " << top_index << " bottom " << bottom_index << endl;
+          histogram_loop++;
+      } // while(histogram_loop < 20) over histogram looping
+      if(histogram_loop >= 20) {
+          cerr << "Warning: maximum histogram loops reached on your data.  Check for bad outliers in your original data." << endl;
+      }
+
+start_data_output:
+      if(verb)cout << "Global minmax is " << global_minmax << endl;
+      if(verb)cout << "Starting data output" << endl;
+      rewind(pfileX);
+      rewind(pfileY);
+      iblock = 0;
+      if(global_minmax <= 0.0f) {
+          global_minmax = 1.0f;
+      }
+
+      while(1){
+          size_t num;
+          uint32_t nskip(0);
+          if(verb)cout << "Reading block: " << iblock << endl;
+
+          if(iblock == block_limit) goto end_of_fulldata;
+
+          // Read X data:
+          num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+          if( num != 1 ) goto end_of_fulldata;
+
+          num = fread( XJV, Jnumber_char, 1, pfileX );
+          if( num != 1 ) goto end_of_fulldata;
+#if(NEED_TO_BYTESWAP)
+          seqnoX = byteswap_32_bit_int(Xpad[0]);
+          byteswap_32_bit_float_array(Jnumber_floats, XJV);
+#else
+          seqnoX = Xpad[0];
+#endif
+
+          // Read Y data:
+          num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+          if( num != 1 ) goto end_of_fulldata;
+
+          num = fread( YJV, Jnumber_char, 1, pfileY );
+          if( num != 1 ) goto end_of_fulldata;
+#if(NEED_TO_BYTESWAP)
+          seqnoY = byteswap_32_bit_int(Ypad[0]);
+          byteswap_32_bit_float_array(Jnumber_floats, YJV);
+#else
+          seqnoY = Ypad[0];
+#endif
+
+          if(verb)
+              cout <<setw(10)<< "IBLOCK = " <<setw(10)<< iblock <<setw(10)
+                   << " SEQNO_X = " << seqnoX <<setw(10)
+                   << " / SEQNO_Y = " << seqnoY <<endl;
+
+          while(seqnoX != seqnoY){
+              while(seqnoX < seqnoY){
+                  if(verb)cerr << "seqnoX < seqnoY" <<endl;
+
+                  num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+                  if( num != 1 ) goto end_of_fulldata;
+
+                  num = fread( XJV, Jnumber_char, 1, pfileX );
+                  if( num != 1 ) goto end_of_fulldata;
+#if(NEED_TO_BYTESWAP)
+                  seqnoX = byteswap_32_bit_int(Xpad[0]);
+                  byteswap_32_bit_float_array(Jnumber_floats, XJV);
+#else
+                  seqnoX = Xpad[0];
+#endif
+              }
+
+              while(seqnoY < seqnoX){
+                  if(verb)cerr << "seqnoY < seqnoX" <<endl;
+
+                  num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+                  if( num != 1 ) goto end_of_fulldata;
+
+                  num = fread( YJV, Jnumber_char, 1, pfileY );
+                  if( num != 1 ) goto end_of_fulldata;
+#if(NEED_TO_BYTESWAP)
+                  seqnoY = byteswap_32_bit_int(Ypad[0]);
+                  byteswap_32_bit_float_array(Jnumber_floats, YJV);
+#else
+                  seqnoY = Ypad[0];
+#endif
+              }
+          }
+
+          // do we need to skip blocks?
+          while(iblock < seqnoX){
+              if(verb){
+                  cerr << "iblock < seqno: " << iblock << " < " << seqnoX <<endl;
+                  cerr <<"("<< iblock <<")";
+              }
+              nskip++;
+              iblock++;
+          }
+
+
+
+          //START WRITING
+          for(uint32_t isub=0; isub<puma2data.NSUBBANDS; isub++){
+              if(verb)cout << "Starting subband: " << isub << endl;
+              puma2data.passSub(isub);
+              for(uint32_t ichan=0; ichan<puma2data.NCHANNELS; ichan++){
+                  puma2data.passChan(ichan);
+
+                  // WRITE FLAG VALUE IN ALL EMPTY BLOCKS
+                  for(uint32_t iskip=0; iskip<nskip; iskip++)
+                      puma2data.writePuMa2BlockMissingFill( flag_value, flag_value );
+
+                  puma2data.writePuMa2Block( global_minmax, XJV, YJV );
+              } // End of loop over channels
+
+          } // End of loop over subbands
+          iblock++;
+      } // End of while(1) loop
+end_of_fulldata:
+      if(verb)cout << " *** Read " << iblock << " blocks." <<endl;
+  }
+  else {
+      // doing histogram by each block
+
+      uint32_t iblock = 0;
+      float Xminmax=0.0f;
+      float Yminmax=0.0f;
+
+      while(1){
+          Xminmax=Yminmax=0.0f;
+          size_t num;
+          uint32_t nskip(0);
+          int top_bottom_flag = -1;
+          int_fast64_t top_count = 0;
+          int_fast64_t bottom_count = 0;
+          int_fast32_t top_index = 0;
+          int_fast32_t bottom_index = 0;
+          int_fast32_t histogram_loop=0;
+          float top;
+          float bottom;
+          if(verb)cout << "Reading block: " << iblock << endl;
+
+
+          if(iblock == block_limit) goto end_of_data;
+
+
+          // Read X data:
           num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
           if( num != 1 ) goto end_of_data;
 
@@ -386,15 +851,12 @@ int main(int argc, char** argv){
           if( num != 1 ) goto end_of_data;
 #if(NEED_TO_BYTESWAP)
           seqnoX = byteswap_32_bit_int(Xpad[0]);
-          byteswap_32_bit_float_array(Jnumber_floats, XJV);
 #else
           seqnoX = Xpad[0];
 #endif
-        }
+          Xminmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,XJV);
 
-        while(seqnoY < seqnoX){
-          if(verb)cerr << "seqnoY < seqnoX" <<endl;
-          
+          // Read Y data:
           num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
           if( num != 1 ) goto end_of_data;
 
@@ -402,44 +864,187 @@ int main(int argc, char** argv){
           if( num != 1 ) goto end_of_data;
 #if(NEED_TO_BYTESWAP)
           seqnoY = byteswap_32_bit_int(Ypad[0]);
-          byteswap_32_bit_float_array(Jnumber_floats, YJV);
 #else
           seqnoY = Ypad[0];
 #endif
-        }
-      }
+          Yminmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,YJV);
 
-      // do we need to skip blocks?
-      while(iblock < seqnoX){
-          if(verb){
-            cerr << "iblock < seqno: " << iblock << " < " << seqnoX <<endl;
-            cerr <<"("<< iblock <<")"; 
+          if(verb)
+              cout <<setw(10)<< "IBLOCK = " <<setw(10)<< iblock <<setw(10)
+                   << " SEQNO_X = " << seqnoX <<setw(10)
+                   << " / SEQNO_Y = " << seqnoY <<endl;
+
+          while(seqnoX != seqnoY){
+              while(seqnoX < seqnoY){
+                  if(verb)cerr << "seqnoX < seqnoY" <<endl;
+
+                  num = fread( Xpad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileX );
+                  if( num != 1 ) goto end_of_data;
+
+                  num = fread( XJV, Jnumber_char, 1, pfileX );
+                  if( num != 1 ) goto end_of_data;
+#if(NEED_TO_BYTESWAP)
+                  seqnoX = byteswap_32_bit_int(Xpad[0]);
+#else
+                  seqnoX = Xpad[0];
+#endif
+                  Xminmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,XJV);
+              }
+
+              while(seqnoY < seqnoX){
+                  if(verb)cerr << "seqnoY < seqnoX" <<endl;
+
+                  num = fread( Ypad, INPUT_DATA_BLOCK_HEADER_SIZE, 1, pfileY );
+                  if( num != 1 ) goto end_of_data;
+
+                  num = fread( YJV, Jnumber_char, 1, pfileY );
+                  if( num != 1 ) goto end_of_data;
+#if(NEED_TO_BYTESWAP)
+                  seqnoY = byteswap_32_bit_int(Ypad[0]);
+#else
+                  seqnoY = Ypad[0];
+#endif
+                  Yminmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,YJV);
+              }
           }
-          nskip++; 
+          if(Yminmax > Xminmax) {
+              Xminmax = Yminmax;
+          }
+          if(Xminmax <= 0.0f) {
+              Xminmax = 1.0f;
+              cerr << "block has only zeros!" << endl;
+              goto start_block_output;
+          }
+          if(cutoff_fraction <= 0.0f) {
+              goto start_block_output;
+          }
+
+
+          top = fabsf(Xminmax);
+          bottom = -fabsf(Xminmax);
+          while(histogram_loop < 20) {
+              // now go back and build the histogram area
+              if(verb)cout << "starting histogram loop " << histogram_loop << endl;
+              if(verb)cout << "hist bottom top " << bottom << " " << top << endl;
+              flush_histogram();
+              calculate_hist_constants(bottom,top);
+              add_buffer_hist(Jnumber_floats, XJV);
+              add_buffer_hist(Jnumber_floats, YJV);
+
+              if(verb)cout << "Evaluating results for histogram " << histogram_loop << endl;
+              if(top_bottom_flag == 0) {
+                  // top already decided
+                  find_hist_fraction_point_top(cutoff_fraction, top_count,
+                                              &top_index, &top_count);
+                  if(verb)cout << "top index " << top_index << endl;
+                  if(verb)cout << "top count " << top_count << endl;
+                  top    = get_float_for_top_index_pos(top_index);
+                  bottom = get_float_for_bot_index_pos(top_index);
+                  Xminmax = fabsf(top);
+                  if(top_index > 10) {
+                      break;
+                  }
+              }
+              else if(top_bottom_flag == 1) {
+                  // bottom already decided
+                  find_hist_fraction_point_bot(cutoff_fraction, bottom_count,
+                                              &bottom_index, &bottom_count);
+                  if(verb)cout << "bottom index " << bottom_index << endl;
+                  if(verb)cout << "bottom count " << bottom_count << endl;
+                  top    = get_float_for_top_index_pos(bottom_index);
+                  bottom = get_float_for_bot_index_pos(bottom_index);
+                  Xminmax = fabsf(bottom);
+                  if(HIST_SIZE - bottom_index > 10) {
+                      break;
+                  }
+              }
+              else {
+                  // figure out whether top or bottom is farther out
+                  find_hist_fraction_point_top(cutoff_fraction, top_count,
+                                              &top_index, &top_count);
+                  if(verb)cout << "top index " << top_index << endl;
+                  if(verb)cout << "top count " << top_count << endl;
+                  find_hist_fraction_point_bot(cutoff_fraction, bottom_count,
+                                              &bottom_index, &bottom_count);
+                  if(verb)cout << "bottom index " << bottom_index << endl;
+                  if(verb)cout << "bottom count " << bottom_count << endl;
+                  float diff_top = top_index - histogram_center();
+                  float diff_bot = histogram_center() - bottom_index;
+                  if(diff_top > 0.0f) {
+                      if(diff_top > diff_bot) {
+                          top_bottom_flag = 0;
+                          top    = get_float_for_top_index_pos(top_index);
+                          bottom = get_float_for_bot_index_pos(top_index);
+                          Xminmax = fabsf(bottom);
+                          if(diff_top > 10.0f) {
+                              break;
+                          }
+                      }
+                      else {
+                          top_bottom_flag = 1;
+                          top    = get_float_for_top_index_pos(bottom_index);
+                          bottom = get_float_for_bot_index_pos(bottom_index);
+                          Xminmax = fabsf(bottom);
+                          if(diff_bot > 10.0f) {
+                              break;
+                          }
+                      }
+                  }
+                  else if(diff_bot > 0.0f) {
+                      top_bottom_flag = 1;
+                      top    = get_float_for_top_index_pos(bottom_index);
+                      bottom = get_float_for_bot_index_pos(bottom_index);
+                      Xminmax = fabsf(bottom);
+                      if(diff_bot > 10.0f) {
+                          break;
+                      }
+                  }
+                  else {
+                      cerr << "programmer error! check!" << endl;
+                      Xminmax = 1.0f;
+                      break;
+                  }
+              }
+              histogram_loop++;
+          } // while(histogram_loop < 20) over histogram looping
+          if(histogram_loop >= 20) {
+              if(verb)cerr << "Warning: maximum histogram loops reached on your data.  Check for bad outliers in your original data." << endl;
+          }
+
+start_block_output:
+
+          // do we need to skip blocks?
+          while(iblock < seqnoX){
+              if(verb){
+                  cerr << "iblock < seqno: " << iblock << " < " << seqnoX <<endl;
+                  cerr <<"("<< iblock <<")";
+              }
+              nskip++;
+              iblock++;
+          }
+
+
+
+          //START WRITING
+          for(uint32_t isub=0; isub<puma2data.NSUBBANDS; isub++){
+              if(verb)cout << "Starting subband: " << isub << endl;
+              puma2data.passSub(isub);
+              for(uint32_t ichan=0; ichan<puma2data.NCHANNELS; ichan++){
+                  puma2data.passChan(ichan);
+
+                  // WRITE FLAG VALUE IN ALL EMPTY BLOCKS
+                  for(uint32_t iskip=0; iskip<nskip; iskip++)
+                      puma2data.writePuMa2BlockMissingFill( flag_value, flag_value );
+
+                  puma2data.writePuMa2Block( Xminmax, XJV, YJV );
+              } // End of loop over channels
+
+          } // End of loop over subbands
           iblock++;
-      }
-
-
-      
-      //START WRITING
-      for(uint32_t isub=0; isub<puma2data.NSUBBANDS; isub++){
-	if(verb)cout << "Starting subband: " << isub << endl;
-	puma2data.passSub(isub);
-	for(uint32_t ichan=0; ichan<puma2data.NCHANNELS; ichan++){
-          puma2data.passChan(ichan);
-
-          // WRITE FLAG VALUE IN ALL EMPTY BLOCKS
-          for(uint32_t iskip=0; iskip<nskip; iskip++)
-            puma2data.writePuMa2BlockMissingFill( flag_value, flag_value );
-
-          puma2data.writePuMa2Block( XJV, YJV );
-	} // End of loop over channels
-
-      } // End of loop over subbands
-      iblock++;
-  } // End of while(1) loop
+      } // End of while(1) loop
 end_of_data:
-  if(verb)cout << " *** Read " << iblock << " blocks." <<endl; 
+      if(verb)cout << " *** Read " << iblock << " blocks." <<endl;
+  }
   if(verb)cout << "Closing output files: " << endl;
   puma2data.filesClose();
 
@@ -453,11 +1058,11 @@ void writer::passFilenames(char* &base, char* &hdr, char* &pset){
 }
 
 void writer::passSub(unsigned int &sub){
-  _the_sub = sub;  
+  _the_sub = sub;
 }
 
 void writer::passChan(unsigned int &chan){
-  _the_chan = chan;  
+  _the_chan = chan;
 }
 
 void writer::readParset(){
@@ -466,7 +1071,7 @@ void writer::readParset(){
   vector<string> tmps;
   tmps.push_back("Observation.antennaArray");
   tmps.push_back("Observation.antennaSet");
-  
+
   ANTENNA = "UNKNOWN";
   for(unsigned int it=0; it<tmps.size(); it++)
   {
@@ -494,42 +1099,113 @@ void writer::readParset(){
       cerr << "NPOL has bad value " << NPOL << endl;
       exit(2);
   }
-  
-  // Determine starting subband:
-  string mychar = "";
-  int ic = 1;
-  while(1){
-    tmp = "Observation.subbandList";
-    mychar = getKeyVal(tmp).substr(1,ic);
 
-    if(mychar.substr(ic-1,1)==".") break;
-    ic++;
-  }
-  SUBBSTART = atoi(mychar.c_str());
-  if(verb)cerr << "Got SUBBSTART = " << SUBBSTART <<endl;
 
-  // Determine ending subband:
-  mychar = "";
-  int nc = ic+2;
-  ic = 1;
-  while(1){
-    tmp = "Observation.subbandList";
-    mychar = getKeyVal(tmp).substr(nc,ic);
-    
-    if(mychar.substr(ic-1,1)=="]") break;
-    
-    ic++;
-  }
-  SUBBEND = atoi(mychar.c_str());
 
-  if(verb){
-    cerr << "Got SUBBEND = " << SUBBEND <<endl;
-    cout << " SUBBAND RANGE = [" << SUBBSTART << "--" << SUBBEND <<"]" <<endl;
-  }
+//  // Determine starting subband:
+//  string mychar = "";
+//  int ic = 1;
+//  while(1){
+//    tmp = "Observation.subbandList";
+//    mychar = getKeyVal(tmp).substr(1,ic);
+//
+//    if(mychar.substr(ic-1,1)==".") break;
+//    ic++;
+//  }
+//  SUBBSTART = atoi(mychar.c_str());
+//  if(verb)cerr << "Got SUBBSTART = " << SUBBSTART <<endl;
+//
+//  // Determine ending subband:
+//  mychar = "";
+//  int nc = ic+2;
+//  ic = 1;
+//  while(1){
+//    tmp = "Observation.subbandList";
+//    mychar = getKeyVal(tmp).substr(nc,ic);
+//
+//    if(mychar.substr(ic-1,1)=="]") break;
+//
+//    ic++;
+//  }
+//  SUBBEND = atoi(mychar.c_str());
+//
+//  if(verb){
+//    cerr << "Got SUBBEND = " << SUBBEND <<endl;
+//    cout << " SUBBAND RANGE = [" << SUBBSTART << "--" << SUBBEND <<"]" <<endl;
+//  }
+//
+//  // Determine number of subbands:
+//  NSUBBANDS = SUBBEND - SUBBSTART + 1;
+//  SUBBANDS = NSUBBANDS;
 
-  // Determine number of subbands:
-  NSUBBANDS = SUBBEND - SUBBSTART + 1;
-  SUBBANDS = NSUBBANDS;
+
+	// Load list of subbands:
+
+	tmp = "Observation.subbandList";
+	string mystring = getKeyVal(tmp);
+
+	int jj = 0;
+	int nc = 1;
+	while (1)
+	{
+		string mychar = "";
+		string lastchar = "";
+
+		int ic = 1;
+	        
+                int subfirst = -1;
+	        int sublast = -1;
+
+		while (1)
+		{
+			mychar = mystring.substr(nc, ic);
+			lastchar = mychar.substr(mychar.size() - 1, 1);
+
+
+			if (lastchar == ".") // parse first subband of subrange
+			{
+				subfirst = atoi(mychar.substr(0, mychar.size() - 1).c_str());
+				nc += (ic + 1);
+				ic = 1;
+				continue;
+			}
+			if (lastchar == "," || lastchar == "]") // parse last subband of subrange
+			{
+				sublast = atoi(mychar.substr(0, mychar.size() - 1).c_str());
+                                if(subfirst == -1) subfirst = sublast;
+                                nc += ic;
+				break;
+			}
+			ic++;
+		}
+
+
+		int sbb = subfirst;
+		while (sbb <= sublast)
+                {
+			SUBBLIST[jj] = sbb++; // store all subbands
+                        jj++;
+                }
+		
+                if (lastchar == "]")
+			break;
+
+	}
+
+	NSUBBANDS = jj;
+	SUBBANDS = jj;
+
+
+	if (verb)
+		cout << " SUBBAND RANGE = [" << SUBBLIST[0] << "--" << SUBBLIST[NSUBBANDS-1] << "]"
+				<< endl;
+
+
+
+
+
+
+
   // Determine Number of samples:
   tmp = "OLAP.CNProc.integrationSteps";
   SAMPLES = atoi(getKeyVal(tmp).c_str());
@@ -541,11 +1217,11 @@ void writer::readParset(){
 
   free(blocksamples);
   blocksamples = reinterpret_cast<samp_t* restrict>(malloc(sizeof(samp_t)*SAMPLES));
-  
+
   // Determine observing epoch:
   tmp="Observation.startTime";
   DATE = getKeyVal(tmp).c_str();
-  
+
   mjdcalc();
   cout << "DATE = " << DATE <<endl;
 
@@ -560,15 +1236,15 @@ void writer::filesInit(){
   for(unsigned int isub=0; isub<NSUBBANDS; isub++){
 
     for(unsigned int ichan=0; ichan<NCHANNELS; ichan++){
-    
+
        stringstream the_sub_sstrm;
-       the_sub_sstrm << isub;    
+       the_sub_sstrm << isub;
 
        stringstream the_chan_sstrm;
-       the_chan_sstrm << ichan;    
+       the_chan_sstrm << ichan;
 
        string basename_str = _basename;
-       string filename_str = basename_str + "_SB" + the_sub_sstrm.str() + "_CH" + 
+       string filename_str = basename_str + "_SB" + the_sub_sstrm.str() + "_CH" +
 	 the_chan_sstrm.str();
        string filename2_str = filename_str+".rv";
 
@@ -586,7 +1262,7 @@ void writer::filesInit(){
        }
        writeHeader(isub,ichan);
     }
-    
+
   }
 
 }
@@ -594,13 +1270,14 @@ void writer::filesInit(){
 void writer::filesClose(){
     for(unsigned int isub=0; isub<NSUBBANDS; isub++)
       for(unsigned int ichan=0; ichan<NCHANNELS; ichan++)
-      { 
+      {
           fclose(datafile[isub*NCHANNELS+ichan]);
           if(realv) fclose(realvolt[isub*NCHANNELS+ichan]);
       }
 }
 
-void writer::writePuMa2Block(const float * const restrict Xsamp,
+void writer::writePuMa2Block(const float global_minmax,
+                             const float * const restrict Xsamp,
                              const float * const restrict Ysamp) restrict {
 
     // to convert from float value f to int8_t value i, we want to do
@@ -614,54 +1291,37 @@ void writer::writePuMa2Block(const float * const restrict Xsamp,
     // prevent rounding errors from exceeding the int8_t range.
 
   static const float int8_max_float = 127.495;
+  static const int_fast32_t int8_offset = 127;
+  static const int_fast32_t int8_out_of_range = ~(int_fast32_t(0xFF));
 
   const size_t start = (size_t(_the_sub) * NCHANNELS + _the_chan)*2;
 
-  ///////////// STATISTICS ////////////////////
-  float multiplier;
-
-  float max00, min00;
-  float max01, min01;
-  float max10, min10;
-  float max11, min11;
-
-  if(SAMPLES > 0) {
-      max00 = min00 = Xsamp[start];
-      max01 = min01 = Xsamp[start+1];
-      max10 = min10 = Ysamp[start];
-      max11 = min11 = Ysamp[start+1];
-  }
-  else {
-      max00 = min00 = 0.0f;
-      max01 = min01 = 0.0f;
-      max10 = min10 = 0.0f;
-      max11 = min11 = 0.0f;
-  }      
   int iv = 0;
   int navg = 100;
   float vsum = 0.0f;
 
   size_t offset = 0;
+  const float multiplier = int8_max_float / global_minmax;
+
+  ////////////////REPACKING AND SAVING//////////////////////
+
   for( uint_fast32_t isamp = 0; isamp < SAMPLES; isamp++,
            offset += sample_block_offset ){
-
     float reX = Xsamp[start+offset];
     float imX = Xsamp[start+offset+1];
     float reY = Ysamp[start+offset];
     float imY = Ysamp[start+offset+1];
 
-    if     ( reX > max00 ) max00 = reX;
-    else if( reX < min00 ) min00 = reX;
+    int_fast32_t reXl = lrintf( reX * multiplier);
+    int_fast32_t imXl = lrintf( imX * multiplier);
+    int_fast32_t reYl = lrintf( reY * multiplier);
+    int_fast32_t imYl = lrintf( imY * multiplier);
 
-    if     ( imX > max01 ) max01 = imX;
-    else if( imX < min01 ) min01 = imX;
+    blocksamples[isamp].Xr = (!((reXl + int8_offset)&int8_out_of_range)) ? int8_t(reXl) : flag_value;
+    blocksamples[isamp].Xi = (!((imXl + int8_offset)&int8_out_of_range)) ? int8_t(imXl) : flag_value;
+    blocksamples[isamp].Yr = (!((reYl + int8_offset)&int8_out_of_range)) ? int8_t(reYl) : flag_value;
+    blocksamples[isamp].Yi = (!((imYl + int8_offset)&int8_out_of_range)) ? int8_t(imYl) : flag_value;
 
-    if     ( reY > max10 ) max10 = reY;
-    else if( reY < min10 ) min10 = reY; 
-
-    if     ( imY > max11 ) max11 = imY;
-    else if( imY < min11 ) min11 = imY;
-    
     if(realv)
     {
         iv++;
@@ -674,51 +1334,6 @@ void writer::writePuMa2Block(const float * const restrict Xsamp,
             vsum = 0.0f;
         }
     }
-
-
-  }
-  // Now find the biggest absolute difference
-  {
-      max00 = fabsf(max00);
-      max01 = fabsf(max01);
-      max10 = fabsf(max10);
-      max11 = fabsf(max11);
-      min00 = fabsf(min00);
-      min01 = fabsf(min01);
-      min10 = fabsf(min10);
-      min11 = fabsf(min11);
-
-      float diff00 = (max00 > min00) ? max00 : min00;
-      float diff01 = (max01 > min01) ? max01 : min01;
-      float diff10 = (max10 > min10) ? max10 : min10;
-      float diff11 = (max11 > min11) ? max11 : min11;
-
-      float diff0 = (diff00 > diff01) ? diff00 : diff01;
-      float diff1 = (diff10 > diff11) ? diff10 : diff11;
-
-      float diff = (diff0 > diff1) ? diff0 : diff1;
-
-      if(diff == 0.0f) {
-          diff = 1.0f;
-      }
-
-      multiplier = int8_max_float / diff;
-  }
-
-  ////////////////REPACKING AND SAVING//////////////////////
-
-  offset = 0;
-  for( uint_fast32_t isamp = 0; isamp < SAMPLES; isamp++,
-           offset += sample_block_offset ){
-    float reX = Xsamp[start+offset];
-    float imX = Xsamp[start+offset+1];
-    float reY = Ysamp[start+offset];
-    float imY = Ysamp[start+offset+1];
-
-    blocksamples[isamp].Xr = int8_t(lrintf( reX * multiplier));
-    blocksamples[isamp].Xi = int8_t(lrintf( imX * multiplier));
-    blocksamples[isamp].Yr = int8_t(lrintf( reY * multiplier));
-    blocksamples[isamp].Yi = int8_t(lrintf( imY * multiplier));
   }
 
   if(fwrite(blocksamples, sizeof(samp_t)*SAMPLES, 1, datafile[_the_sub*NCHANNELS+_the_chan]) != 1) {
@@ -726,6 +1341,7 @@ void writer::writePuMa2Block(const float * const restrict Xsamp,
       exit(2);
   }
 }
+
 void writer::writePuMa2BlockMissingFill(const int8_t Xfill,
                                         const int8_t Yfill) restrict {
     // write out fill data for missing samples
@@ -734,7 +1350,7 @@ void writer::writePuMa2BlockMissingFill(const int8_t Xfill,
         int iv = 0;
         int navg = 100;
         float vsum = 0.0f;
-        
+
         for( uint_fast32_t isamp = 0; isamp < SAMPLES; isamp++){
             if(++iv == navg) {
                 if(fwrite(&vsum, sizeof(vsum), 1, realvolt[_the_sub*NCHANNELS+_the_chan]) != 1) {
@@ -778,15 +1394,12 @@ void writer::writeHeader(unsigned int &isub, unsigned int &ichan){
 
        if(line.substr(0,4)=="FREQ"){
          if(ANTENNA=="HBA")
-             the_freq <<setprecision(20)<< (100.0+SUBBSTART*CLOCKRES)+
-             (isub*NCHANNELS+ichan)*(CLOCKRES/NCHANNELS);
+             the_freq <<setprecision(20)<< 100.0+(SUBBLIST[isub]+float(ichan)/float(NCHANNELS)-0.5)*CLOCKRES;
          else
          if(ANTENNA=="LBA")
-            the_freq <<setprecision(20)<< (SUBBSTART*CLOCKRES)+
-           (isub*NCHANNELS+ichan)*(CLOCKRES/NCHANNELS);
+            the_freq <<setprecision(20)<<        (SUBBLIST[isub]+float(ichan)/float(NCHANNELS)-0.5)*CLOCKRES;
          else
-            the_freq <<setprecision(20)<< (100.0+SUBBSTART*CLOCKRES)+
-             (isub*NCHANNELS+ichan)*(CLOCKRES/NCHANNELS);        
+             the_freq <<setprecision(20)<< 100.0+(SUBBLIST[isub]+float(ichan)/float(NCHANNELS)-0.5)*CLOCKRES;
 
          line="FREQ " + the_freq.str();
        }else if(line.substr(0,9)=="MJD_START"){
@@ -823,45 +1436,45 @@ streamsize getSize(const char* filename){
   myfile.seekg (0, ios::end);
   end = myfile.tellg();
   myfile.close();
-  
+
   return end-begin;
 }
 
 string writer::getKeyVal(string &key){
-  
+
 	string line;
 	//int start;
 	string value;
-  
+
   ifstream parsetfile;
 	parsetfile.open(_psetFilename);
-	
+
 	while(1){
     getline(parsetfile,line,'\n');
-    
+
     if(parsetfile.eof()) break;
-	  
-	  for(int i = line.find(key, 0); 
-              i != int(string::npos); 
-              i = line.find(key, i)){    		  
-      
+
+	  for(int i = line.find(key, 0);
+              i != int(string::npos);
+              i = line.find(key, i)){
+
 		  istringstream ostr(line);
 		  istream_iterator<string> it(ostr);
 		  istream_iterator<string> end;
-      
+
 		  size_t nwords = 0;
 		  while (it++ != end) nwords++;
-		  
+
 		  string temp;
 		  istringstream words(line);
 		  vector<string> parsed;
 		  while(words){
         words >> temp;
-        if(parsed.size()>=nwords) 
+        if(parsed.size()>=nwords)
           break;
         parsed.push_back(temp);
 		  }
-		  
+
       if(nwords>3){
         value = parsed[nwords-2]+"-"+parsed[nwords-1];
 		  }else{
@@ -875,18 +1488,18 @@ string writer::getKeyVal(string &key){
 }
 
 double writer::mjdcalc(){
-  
+
   int yy = atoi(DATE.substr(1,4).c_str());
   int mm = atoi(DATE.substr(6,2).c_str());
   int dd = atoi(DATE.substr(9,2).c_str());
-  
+
   int hh = atoi(DATE.substr(12,2).c_str());
   int mi = atoi(DATE.substr(15,2).c_str());
   int ss = atoi(DATE.substr(18,2).c_str());
-  
+
   int    m, y, ia, ib, ic;
   double jd, mjd0;
-  
+
   if (mm <= 2) {
     y = yy - 1;
     m = mm + 12;
@@ -901,8 +1514,406 @@ double writer::mjdcalc(){
   ic = (int) (y * 365.25);
   jd = dd + ia + ib + ic + 1720994.5;
   mjd0 = jd - 2400000.5;
-  
+
   mjd0 += ((double)(hh)+(double)(mi)/60.0+(double)(ss)/3600.0)/24.0;
-  
+
   return mjd0;
 }
+
+
+
+float byteswap_32_bit_float_array_and_find_max(const size_t NUM,
+                                               float* const restrict fp)
+{
+    static const size_t SIZE = 4;
+    float max0, max1, max2, max3;
+    float min0, min1, min2, min3;
+#if(NEED_TO_BYTESWAP)
+    int32_t* const restrict ip(reinterpret_cast<int32_t* const restrict>(fp));
+    if(NUM >= SIZE) {
+        {
+#  ifdef __GNUC__
+#    if ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3))
+            int32_t a0 = __builtin_bswap32(ip[0]);
+            int32_t a1 = __builtin_bswap32(ip[1]);
+            int32_t a2 = __builtin_bswap32(ip[2]);
+            int32_t a3 = __builtin_bswap32(ip[3]);
+#    else
+            uint32_t u0(ip[0]);
+            uint32_t u1(ip[1]);
+            uint32_t u2(ip[2]);
+            uint32_t u3(ip[3]);
+            int32_t a0 = int32_t((u0>>24)|((u0&0xFF0000)>>8)|((u0&0xFF00)<<8)|(u0<<24));
+            int32_t a1 = int32_t((u1>>24)|((u1&0xFF0000)>>8)|((u1&0xFF00)<<8)|(u1<<24));
+            int32_t a2 = int32_t((u2>>24)|((u2&0xFF0000)>>8)|((u2&0xFF00)<<8)|(u2<<24));
+            int32_t a3 = int32_t((u3>>24)|((u3&0xFF0000)>>8)|((u3&0xFF00)<<8)|(u3<<24));
+#    endif
+#  else
+            uint32_t u0(ip[0]);
+            uint32_t u1(ip[1]);
+            uint32_t u2(ip[2]);
+            uint32_t u3(ip[3]);
+            int32_t a0 = int32_t((u0>>24)|((u0&0xFF0000)>>8)|((u0&0xFF00)<<8)|(u0<<24));
+            int32_t a1 = int32_t((u1>>24)|((u1&0xFF0000)>>8)|((u1&0xFF00)<<8)|(u1<<24));
+            int32_t a2 = int32_t((u2>>24)|((u2&0xFF0000)>>8)|((u2&0xFF00)<<8)|(u2<<24));
+            int32_t a3 = int32_t((u3>>24)|((u3&0xFF0000)>>8)|((u3&0xFF00)<<8)|(u3<<24));
+#  endif
+            float f0 = int32_t_bits_to_float(a0);
+            float f1 = int32_t_bits_to_float(a1);
+            float f2 = int32_t_bits_to_float(a2);
+            float f3 = int32_t_bits_to_float(a3);
+            ip[0] = a0;
+            ip[1] = a1;
+            ip[2] = a2;
+            ip[3] = a3;
+            max0 = min0 = f0;
+            max1 = min1 = f1;
+            max2 = min2 = f2;
+            max3 = min3 = f3;
+        }
+        size_t s;
+        for(s=SIZE; s < NUM; s+=SIZE) {
+#  ifdef __GNUC__
+#    if ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3))
+            int32_t a0 = __builtin_bswap32(ip[s+0]);
+            int32_t a1 = __builtin_bswap32(ip[s+1]);
+            int32_t a2 = __builtin_bswap32(ip[s+2]);
+            int32_t a3 = __builtin_bswap32(ip[s+3]);
+#    else
+            uint32_t u0(ip[s+0]);
+            uint32_t u1(ip[s+1]);
+            uint32_t u2(ip[s+2]);
+            uint32_t u3(ip[s+3]);
+            int32_t a0 = int32_t((u0>>24)|((u0&0xFF0000)>>8)|((u0&0xFF00)<<8)|(u0<<24));
+            int32_t a1 = int32_t((u1>>24)|((u1&0xFF0000)>>8)|((u1&0xFF00)<<8)|(u1<<24));
+            int32_t a2 = int32_t((u2>>24)|((u2&0xFF0000)>>8)|((u2&0xFF00)<<8)|(u2<<24));
+            int32_t a3 = int32_t((u3>>24)|((u3&0xFF0000)>>8)|((u3&0xFF00)<<8)|(u3<<24));
+#    endif
+#  else
+            uint32_t u0(ip[s+0]);
+            uint32_t u1(ip[s+1]);
+            uint32_t u2(ip[s+2]);
+            uint32_t u3(ip[s+3]);
+            int32_t a0 = int32_t((u0>>24)|((u0&0xFF0000)>>8)|((u0&0xFF00)<<8)|(u0<<24));
+            int32_t a1 = int32_t((u1>>24)|((u1&0xFF0000)>>8)|((u1&0xFF00)<<8)|(u1<<24));
+            int32_t a2 = int32_t((u2>>24)|((u2&0xFF0000)>>8)|((u2&0xFF00)<<8)|(u2<<24));
+            int32_t a3 = int32_t((u3>>24)|((u3&0xFF0000)>>8)|((u3&0xFF00)<<8)|(u3<<24));
+#  endif
+            float f0 = int32_t_bits_to_float(a0);
+            float f1 = int32_t_bits_to_float(a1);
+            float f2 = int32_t_bits_to_float(a2);
+            float f3 = int32_t_bits_to_float(a3);
+            ip[s+0] = a0;
+            ip[s+1] = a1;
+            ip[s+2] = a2;
+            ip[s+3] = a3;
+            if     (f0 > max0) max0 = f0;
+            else if(f0 < min0) min0 = f0;
+            if     (f1 > max1) max1 = f1;
+            else if(f1 < min1) min1 = f1;
+            if     (f2 > max2) max2 = f2;
+            else if(f2 < min2) min2 = f2;
+            if     (f3 > max3) max3 = f3;
+            else if(f3 < min3) min3 = f3;
+        }
+        if(s != NUM) {
+            s -= SIZE;
+            for(; s < NUM; s++) {
+#  ifdef __GNUC__
+#    if ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3))
+                int32_t a = __builtin_bswap32(ip[s]);
+#    else
+                uint32_t u(ip[s]);
+                int32_t a = int32_t((u>>24)|((u&0xFF0000)>>8)|((u&0xFF00)<<8)|(u<<24));
+#    endif
+#  else
+                uint32_t u(ip[s]);
+                int32_t a = int32_t((u>>24)|((u&0xFF0000)>>8)|((u&0xFF00)<<8)|(u<<24));
+#  endif
+                float f = int32_t_bits_to_float(a);
+                ip[s] = a;
+                if     (f > max0) max0 = f;
+                else if(f < min0) min0 = f;
+            }
+        }
+        max0 = fabsf(max0);
+        max1 = fabsf(max1);
+        max2 = fabsf(max2);
+        max3 = fabsf(max3);
+        min0 = fabsf(min0);
+        min1 = fabsf(min1);
+        min2 = fabsf(min2);
+        min3 = fabsf(min3);
+        float d0 = (max0 > min0) ? max0 : min0;
+        float d1 = (max1 > min1) ? max1 : min1;
+        float d2 = (max2 > min2) ? max2 : min2;
+        float d3 = (max3 > min3) ? max3 : min3;
+        float d01 = (d0 > d1) ? d0 : d1;
+        float d23 = (d2 > d3) ? d2 : d3;
+        float d = (d01 > d23) ? d01 : d23;
+        return d;
+    }
+    else { // NUM < SIZE
+        max0 = min0 = 0.0f;
+        for(size_t s=0; s < NUM; s++) {
+#  ifdef __GNUC__
+#    if ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 3))
+            int32_t a = __builtin_bswap32(ip[s]);
+#    else
+            uint32_t u(ip[s]);
+            int32_t a = int32_t((u>>24)|((u&0xFF0000)>>8)|((u&0xFF00)<<8)|(u<<24));
+#    endif
+#  else
+            uint32_t u(ip[s]);
+            int32_t a = int32_t((u>>24)|((u&0xFF0000)>>8)|((u&0xFF00)<<8)|(u<<24));
+#  endif
+            float f = int32_t_bits_to_float(a);
+            ip[s] = a;
+            if(f > max0) max0 = f;
+            if(f < min0) min0 = f;
+        }
+        max0 = fabsf(max0);
+        min0 = fabsf(min0);
+        float d = (max0 > min0) ? max0 : min0;
+        return d;
+    }
+#else
+    if(NUM >= SIZE) {
+        {
+            float f0 = fp[0];
+            float f1 = fp[1];
+            float f2 = fp[2];
+            float f3 = fp[3];
+            max0 = min0 = f0;
+            max1 = min1 = f1;
+            max2 = min2 = f2;
+            max3 = min3 = f3;
+        }
+        size_t s;
+        for(s=SIZE; s < NUM; s+=SIZE) {
+            float f0 = fp[s+0];
+            float f1 = fp[s+1];
+            float f2 = fp[s+2];
+            float f3 = fp[s+3];
+            if     (f0 > max0) max0 = f0;
+            else if(f0 < min0) min0 = f0;
+            if     (f1 > max1) max1 = f1;
+            else if(f1 < min1) min1 = f1;
+            if     (f2 > max2) max2 = f2;
+            else if(f2 < min2) min2 = f2;
+            if     (f3 > max3) max3 = f3;
+            else if(f3 < min3) min3 = f3;
+        }
+        if(s != NUM) {
+            s -= SIZE;
+            for(; s < NUM; s++) {
+                float f = fp[s];
+                if     (f > max0) max0 = f;
+                else if(f < min0) min0 = f;
+            }
+        }
+        max0 = fabsf(max0);
+        max1 = fabsf(max1);
+        max2 = fabsf(max2);
+        max3 = fabsf(max3);
+        min0 = fabsf(min0);
+        min1 = fabsf(min1);
+        min2 = fabsf(min2);
+        min3 = fabsf(min3);
+        float d0 = (max0 > min0) ? max0 : min0;
+        float d1 = (max1 > min1) ? max1 : min1;
+        float d2 = (max2 > min2) ? max2 : min2;
+        float d3 = (max3 > min3) ? max3 : min3;
+        float d01 = (d0 > d1) ? d0 : d1;
+        float d23 = (d2 > d3) ? d2 : d3;
+        float d = (d01 > d23) ? d01 : d23;
+        return d;
+    }
+    else { // NUM < SIZE
+        max0 = min0 = 0.0f;
+        for(size_t s=0; s < NUM; s++) {
+            float f = fp[s];
+            if(f > max0) max0 = f;
+            if(f < min0) min0 = f;
+        }
+        max0 = fabsf(max0);
+        min0 = fabsf(min0);
+        float d = (max0 > min0) ? max0 : min0;
+        return d;
+    }
+#endif
+    return 0.0f;
+}
+
+
+
+
+
+
+
+int_fast64_t hist0[HIST_SIZE];
+int_fast64_t hist_sum = 0;
+float hist_s=0.0f;
+float hist_b=0.0f;
+float hist_min=0.0f;
+float hist_max=0.0f;
+
+void flush_histogram(void) {
+    memset(hist0, 0, sizeof(int_fast64_t)*HIST_SIZE);
+    hist_sum = 0;
+    return;
+}
+
+void calculate_hist_constants(float min, float max)
+{
+    if(min != max) {
+        float b = ( -0.49f + (0.51f - HIST_SIZE)*(min/max) )
+            / (1.0f - min/max);
+        float s;
+        if(min != 0.0f) {
+            s = (-0.49f - b) / min;
+        }
+        else {
+            s = (HIST_SIZE - 0.51f - b) / max;
+        }
+        hist_b = b;
+        hist_s = s;
+        hist_min = min;
+        hist_max = max;
+    }
+    else {
+        hist_b = 0.0f;
+        hist_s = 1.0f;
+        hist_min = -1.0f;
+        hist_max = +1.0f;
+    }
+    //if(verb) cout << "hist constants " << hist_b << " " << hist_s << endl;
+    return;
+}
+
+void add_buffer_hist(const size_t NUM, const float* const restrict fp)
+{
+    static const size_t SIZE = 4;
+    const float b = hist_b;
+    const float slope = hist_s;
+    if(NUM >= SIZE) {
+        size_t s;
+        for(s=0; s < NUM; s+=SIZE) {
+            float f0 = fp[s+0];
+            float f1 = fp[s+1];
+            float f2 = fp[s+2];
+            float f3 = fp[s+3];
+            int_fast32_t i0(lrintf( f0 * slope + b));
+            int_fast32_t i1(lrintf( f1 * slope + b));
+            int_fast32_t i2(lrintf( f2 * slope + b));
+            int_fast32_t i3(lrintf( f3 * slope + b));
+            if((i0 >= 0) && (i0 < HIST_SIZE)) {
+                ++hist0[i0];
+            }
+            if((i1 >= 0) && (i1 < HIST_SIZE)) {
+                ++hist0[i1];
+            }
+            if((i2 >= 0) && (i2 < HIST_SIZE)) {
+                ++hist0[i2];
+            }
+            if((i3 >= 0) && (i3 < HIST_SIZE)) {
+                ++hist0[i3];
+            }
+        }
+        if(s != NUM) {
+            s -= SIZE;
+            for(; s < NUM; s++) {
+                float f0 = fp[s];
+                int_fast32_t i0(lrintf( f0 * slope + b));
+                if((i0 >= 0) && (i0 < HIST_SIZE)) {
+                    ++hist0[i0];
+                }
+            }
+        }
+    }
+    else { // NUM < SIZE
+        for(size_t s=0; s < NUM; s++) {
+            float f0 = fp[s];
+            int_fast32_t i0(lrintf( f0 * slope + b));
+            if((i0 >= 0) && (i0 < HIST_SIZE)) {
+                ++hist0[i0];
+            }
+        }
+    }
+    hist_sum += NUM;
+    return;
+}
+
+void find_hist_fraction_point_top(const float fraction,
+                                  const int_fast64_t count_offset,
+                                  int_fast32_t* index,
+                                  int_fast64_t* count)
+{
+    if(fraction == 0.0f) {
+        *index = HIST_SIZE-1;
+        *count = count_offset;
+        return;
+    }
+    const int_fast64_t fraction_int(llrint(double(fraction)*hist_sum));
+    int_fast64_t sum = count_offset;
+    for(int_fast32_t i=HIST_SIZE-1; i >= 0; i--) {
+        sum += hist0[i];
+        if(sum > fraction_int) {
+            *index = i;
+            *count = sum-hist0[i];
+            return;
+        }
+    }
+    *index = 0;
+    *count = sum-hist0[0];
+    return;
+}
+
+void find_hist_fraction_point_bot(const float fraction,
+                                  const int_fast64_t count_offset,
+                                  int_fast32_t* index,
+                                  int_fast64_t* count)
+{
+//     if(verb) {
+//         int_fast64_t sum0=0;
+//         int_fast64_t sum1=hist_sum;
+//         for(int_fast32_t i=0; i < HIST_SIZE; i++) {
+//             sum0 += hist0[i];
+//             sum1 -= hist0[i];
+//             cout << i << " " << sum0/float(hist_sum) << " " << sum1/float(hist_sum) << " " << sum0 << " " << sum1 << endl;
+//         }
+//     }
+    if(fraction == 0.0f) {
+        *index = 0;
+        *count = count_offset;
+        return;
+    }
+    const int_fast64_t fraction_int(llrint(double(fraction)*hist_sum));
+    int_fast64_t sum = count_offset;
+    for(int_fast32_t i=0; i < HIST_SIZE; i++) {
+        sum += hist0[i];
+        if(sum > fraction_int) {
+            *index = i;
+            *count = sum-hist0[i];
+            return;
+        }
+    }
+    *index = HIST_SIZE-1;
+    *count = sum-hist0[HIST_SIZE-1];
+    return;
+}
+
+
+float get_float_for_top_index_pos(const int_fast32_t index)
+{
+    return (index + 0.5f - hist_b) / (hist_s);
+}
+
+float get_float_for_bot_index_pos(const int_fast32_t index)
+{
+    return (index - 0.5f - hist_b) / (hist_s);
+}
+
+
+
+
