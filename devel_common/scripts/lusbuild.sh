@@ -142,7 +142,7 @@ for LUS_PACKAGE in dal pulsar anaamika pycrtools
     echo "==============================" >>$lus_logfile
 
     ## Experimental build to submit test results to Dashboard
-    ${LUS_PACKAGE}_Experimental $lus_logfile
+    make ${LUS_PACKAGE}_Experimental $lus_logfile
 }
 
 # Status message
