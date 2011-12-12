@@ -50,7 +50,7 @@ then
 fi
 
 # find all the paths to the th.png files
-find ./ -iname "*.th.png" ! -iname "*status*png" ! -iname "*_nomask*png" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf16.png" ! -iname "*_YFp.png" -print | sort -d > /tmp/$$_combine_col1.txt
+find ./ -iname "*.th.png" ! -iname "*status*png" ! -iname "*_nomask*png" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf" ! -iname "*_YFp.png" -print | sort -d > /tmp/$$_combine_col1.txt
 wc_col1=`wc -l /tmp/$$_combine_col1.txt | awk '{print $1}'`
 if [[ $wc_col1 < 1 ]]
 then
@@ -64,7 +64,7 @@ then
    fi
 fi
 
-find ./ -iname "*prepout" ! -iname "*_nomask*" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf16.png" ! -iname "*_YFp.png" -print -exec grep -i squared {} \; | sed 's/prepout/prepout \\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | sort -d | sed 's/^.*= //g'  > /tmp/$$_combine_col3.txt
+find ./ -iname "*prepout" ! -iname "*_nomask*" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf" ! -iname "*_YFp.png" -print -exec grep -i squared {} \; | sed 's/prepout/prepout \\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | sort -d | sed 's/^.*= //g'  > /tmp/$$_combine_col3.txt
 wc_col3=`wc -l /tmp/$$_combine_col3.txt | awk '{print $1}'`
 if [[ $wc_col3 < 1 ]]
 then
@@ -100,9 +100,9 @@ fi
 
 
 #assume anything without long paths which contain incoherentstokes or stokes, is CS data for now
-find ./ -iname "*.th.png" ! -iname "*status*png" ! -iname "*_nomask*.th.png" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf16.png" ! -iname "*_YFp.png" -print | sort -d | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g" -e "s/RSP/_RSP/g" | awk '{if (NF == 7) print $1$2"\\n_"$7; else if (NF == 5) print $1"_"$3"\\n"$5;  else print $1"_"$2"\\n_"$5}' > /tmp/$$_combine_col2.txt
+find ./ -iname "*.th.png" ! -iname "*status*png" ! -iname "*_nomask*.th.png" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf" ! -iname "*_YFp.png" -print | sort -d | sed -e "s/\// /g" -e "s/_/ /g" -e "s/incoherentstokes/ IS_/g" -e 's/stokes/ CS_/g' -e "s/\.pfd.*//g" -e "s/\.//g" -e "s/_ .*L20.. /_ /g" -e "s/^.* L20.. / CS_ /g" -e "s/RSP/_RSP/g" | awk '{if (NF == 7) print $1$2"\\n_"$7; else if (NF == 5) print $1"_"$3"\\n"$5;  else print $1"_"$2"\\n_"$5}' > /tmp/$$_combine_col2.txt
 
-find ./ -iname "*.th.png" ! -iname "*status*png" ! -iname "*_nomask*.th.png" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf16.png" ! -iname "*_YFp.png" -print | sort -d |  sed -e "s/^.*beam/beam/g" -e "s/\/.*//g" -e "s/\.//g" | awk '{print "\\n"$1}' > /tmp/$$_combine_col4.txt
+find ./ -iname "*.th.png" ! -iname "*status*png" ! -iname "*_nomask*.th.png" ! -iname "*_B.png" ! -iname "*_DFTp.png" ! -iname "*_GTpf" ! -iname "*_YFp.png" -print | sort -d |  sed -e "s/^.*beam/beam/g" -e "s/\/.*//g" -e "s/\.//g" | awk '{print "\\n"$1}' > /tmp/$$_combine_col4.txt
 
 # create a shell script which needs to be run to create the combined plots
 # create an ascii file which stores the results Chi-Squared for data statistics
