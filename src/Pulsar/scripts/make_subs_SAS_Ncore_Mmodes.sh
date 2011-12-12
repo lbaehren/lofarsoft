@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.23
+VERSION=3.24
  
 #####################################################################
 # Usage #
@@ -2158,6 +2158,26 @@ do
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] #&& [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
 	then	
 	    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
+	    # find the max divisor for the subbands if nSubbands % $CHAN != 0
+		ii=$CHAN
+		while (( $ii <= $nSubbands ))
+		do 
+		     modulo_files=`echo $nSubbands $ii | awk '{print ($1 % $2)}'`
+		     if (( $modulo_files == 0 ))
+		     then
+		        echo "Success: $ii divides into $nSubbands subbands;  use for pav -f"
+		        break
+		     else
+		        echo "Tried $ii, but still not divisble into $nSubbands" >> $log
+		        echo "Tried $ii, but still not divisble into $nSubbands"
+		     fi
+	      ii=`expr $ii + 1`
+		done
+        echo "Successfully found $ii to use for pav -f" >> $log
+        echo "Successfully found $ii to use for pav -f"
+		pav_f=$ii
+
+	    mod_channels=`echo $nSubbands * $CHAN 
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
 		then 
@@ -2233,9 +2253,9 @@ do
  						          wait $pid
  						          echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						          pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 
- 						          echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
- 						          echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
- 						          dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+ 						          echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f
+ 						          echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f >> $log
+ 						          dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f
  						          if [ $pdmp == 1 ]
  						          then   
  						             echo "Running: " pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
@@ -2304,9 +2324,9 @@ do
  						               wait $pid
  						               echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						               pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 
-	 						           echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
-	 						           echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
-	 						           dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+	 						           echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f
+	 						           echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f >> $log
+	 						           dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f
 		 						       if [ $pdmp == 1 ]
 	 						           then   
 	 						              echo "Running: " pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
@@ -2441,9 +2461,9 @@ do
 				                wait $pid
  						        echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						        pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 					            
- 						        echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
-					            echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN >> $log
-					            dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $CHAN
+ 						        echo "Running: " dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f
+					            echo dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f >> $log
+					            dspsr_ar_plots.sh ${fold_pulsar}_${OBSID}_RSP${ii} $pav_f
 						        if [ $pdmp == 1 ]
 					            then   
 					               echo "Running: " pdmp -mc $nSubbands -mb 128 -g ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.ps/cps ${fold_pulsar}_${OBSID}_RSP${ii}.ar
@@ -2790,9 +2810,9 @@ do
 			   if (( $flyseye == 0 ))
 			   then
 			       wait ${pdmp_pid[ii]}
-			       mv pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
-			       mv pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
-			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | awk '{print $4}'`
+			       cp pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			       cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
+			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
 			       echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			       pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 			   else
@@ -2810,9 +2830,9 @@ do
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish"
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
 			           wait ${pdmp_pid[ii][counter]}
-			           mv pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
-			           mv pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
-			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | awk '{print $4}'`
+			           cp pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			           cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
+			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
 			           echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			           pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 					   counter=$(( $counter + 1 )) 
