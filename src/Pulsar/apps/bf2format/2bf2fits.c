@@ -641,12 +641,21 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	       float value;
 	       value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
 	       // if (nsub == 237 && c == 1) printf("BWS AVG timeT %d num %d channel %d nsub %ld value %f sum %f %f %f\n",timeT,i,c,nsub,value,sum,average[nsub*CHANNELS+c],rms[nsub*CHANNELS+c]);
-	       if (!isnan( value ) && value > average[nsub*CHANNELS+c] - 3.0 * rms[nsub*CHANNELS+c] && value < average[nsub*CHANNELS+c] + 3.0 *rms[nsub*CHANNELS+c]) 
-		 {
-		   sum += value;
-		   ms += value*value;
-		   validsamples++;
-		 }
+	       if(is_append) {
+		 if (!isnan( value ) && value > average[nsub*CHANNELS+c] - 3.0 * rms[nsub*CHANNELS+c] && value < average[nsub*CHANNELS+c] + 3.0 *rms[nsub*CHANNELS+c]) 
+		   {
+		     sum += value;
+		     ms += value*value;
+		     validsamples++;
+		   }
+	       }else {
+		 if (!isnan( value ) && value > average[c] - 3.0 * rms[c] && value < average[c] + 3.0 *rms[c]) 
+		   {
+		     sum += value;
+		     ms += value*value;
+		     validsamples++;
+		   }
+	       }
 	     }
 	   }
    
