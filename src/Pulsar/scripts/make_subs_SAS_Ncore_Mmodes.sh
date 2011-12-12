@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.24
+VERSION=3.25
  
 #####################################################################
 # Usage #
@@ -3099,7 +3099,7 @@ done # for loop over modes in $mode_str
 
 if [[ $proc != 0 ]]
 then
-    if (( $flyseye == 0 ))
+    if (( $flyseye == 0 )) && (( $nrTArings = 0 ))
     then
 	    # creat combined _diag.png based on any that exist;  call is status_diag.png
 	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
