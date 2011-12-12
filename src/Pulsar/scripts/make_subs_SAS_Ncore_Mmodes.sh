@@ -3099,7 +3099,7 @@ done # for loop over modes in $mode_str
 
 if [[ $proc != 0 ]]
 then
-    if (( $flyseye == 0 )) && (( $nrTArings = 0 ))
+    if (( $flyseye == 0 )) && (( $nrTArings == 0 ))
     then
 	    # creat combined _diag.png based on any that exist;  call is status_diag.png
 	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
