@@ -110,6 +110,12 @@ endmacro (lus_package_experimental)
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
   ## Add project sub-directory
   add_subdirectory (DAL)
+  ## Experimental build
+  add_custom_target (dal_Experimental
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} ${CMAKE_CURRENT_SOURCE_DIR}/DAL
+    COMMAND ${CMAKE_BUILD_TOOL} Experimental
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/DAL/src/dal-build
+    )
 else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
   ExternalProject_Add (dal
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
