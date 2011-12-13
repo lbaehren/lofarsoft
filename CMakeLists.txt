@@ -55,7 +55,6 @@ option (LUS_VERBOSE_CONFIGURE  "Be verbose during configuration?"             NO
 option (LUS_ENABLE_TESTING     "Enable testing and experimental builds?"      YES )
 option (POST_BUILD_CLEAN       "Clean up the build directory after a build?"  NO  )
 option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO  )
-option (DOXYGEN_GENERATE_LATEX "Have Doxygen generate LaTeX output?"          NO  )
 
 ## Options affecting the build of individual packages
 
