@@ -1,6 +1,16 @@
 #!/bin/ksh 
 
-# History of the various parset locations:
+# This program (find_lofar_parset.sh) takes one input argument - the OBSID.
+# Example:
+# > find_lofar_parset.sh L32629
+# The return value is either "ERROR" if the parset was not found, or the correct parset location:
+# /globalhome/lofarsystem/log/L32629/L32629.parset
+
+# The older format OBSIDs are also accepted: 
+# find_lofar_parset.sh L2011_25249
+# /globalhome/lofarsystem/log/L25249/L25249.parset
+
+# History of the various parset locations (where the program looks for parsets):
 # (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 # (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
 # (3) 2nd transpose parset as of Aug 20, 2010 is here: /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
