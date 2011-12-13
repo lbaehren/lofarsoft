@@ -48,7 +48,10 @@ WaveletClean::WaveletClean (vector<complex<double> > s,
 //_______________________________________________________________________________
 //                                                                           init
 	
-void WaveletClean::init(vector<complex<double> > s, vector<double> lam, vector<double> fd, int numw)
+void WaveletClean::init (vector<complex<double> > s,
+			 vector<double> lam,
+			 vector<double> fd,
+			 int numw)
 {
   res.resize(fd.size());
   lamsq = lam;
@@ -61,7 +64,11 @@ void WaveletClean::init(vector<complex<double> > s, vector<double> lam, vector<d
   analys(s, data);
   wplus = data;
 }
-/* ======== main intro point - calls "times" steps of cleaning ===============*/
+
+//_______________________________________________________________________________
+//                                                                        perform
+/* Main intro point - calls "times" steps of cleaning */
+
 void WaveletClean::perform(int times)
 {
 	unsigned int am, bm;
@@ -70,6 +77,10 @@ void WaveletClean::perform(int times)
 	for(int i=1; i<=times; i++)
 		perform();
 }
+
+//_______________________________________________________________________________
+//                                                                        perform
+
 void WaveletClean::perform()
 {
 	complex<double> kf;

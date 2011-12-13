@@ -169,18 +169,31 @@ class WaveletClean : public WaveletSynthesis
   double wmaxinit;
   void perform();						// one step of cleaning
   vector<complex <double> > signal;
+
  public:
-  // constructor automatically do wavelet transform
-  wavelet data;						// wavelet coefficients of initial Q+iU
-  wavelet RMSF;						// wavelet coefficients of point source
-  vector<double> depths;				// faraday depths for restored (cleaned) signal
-  vector<complex <double> > res;		// restored (cleaned) signal
+
+  //! Wavelet coefficients of initial Q+iU
+  wavelet data;
+  //! Wavelet coefficients of point source
+  wavelet RMSF;
+  //! Faraday depths for restored (cleaned) signal
+  vector<double> depths;
+
+  //! Restored (cleaned) signal
+  vector<complex <double> > res;
   
-  WaveletClean(vector<complex<double> > s, vector<double> lam);
-  // constructor, with default amin=-10,amax=15,adelta=1, bmin=-20, bmax=150, bdelta=1
-  WaveletClean(vector<complex<double> > s, vector<double> lam,
-	       double amin, double amax, double adelta, 
-	       double bmin, double bmax, double bdelta);
+  //! Constructor automatically do wavelet transform
+  WaveletClean (vector<complex<double> > s,
+		vector<double> lam);
+  //! Constructor, with default amin=-10,amax=15,adelta=1, bmin=-20, bmax=150, bdelta=1
+  WaveletClean (vector<complex<double> > s,
+		vector<double> lam,
+		double amin,
+		double amax,
+		double adelta, 
+		double bmin,
+		double bmax,
+		double bdelta);
   void init(vector<complex<double> > s, vector<double> lam, vector<double> fd, int numw);
   // calculates wavelet coefficients of signal
   void perform(int times);			// main intro point - calls "times" steps of cleaning

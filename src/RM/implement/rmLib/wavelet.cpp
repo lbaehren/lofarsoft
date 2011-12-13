@@ -29,36 +29,37 @@ wavelet::wavelet()
 }
 
 /*====== constructor with main parameters =================================*/
+
 wavelet::wavelet(double a1, double a2, double ad, double b1, double b2, double bd)
 {
-	unsigned int i;
-	log2=2;
-	log2=log(log2);
-	amin = a1;
-	amax = a2;
-	adelta = ad;
-	an = (int)ceil((amax-amin)/adelta)+1;
-	for(i=0; i<an; i++) as.push_back(exp(log2*(amin + i*adelta))); //logarithmic scales, base 2
-	bmin = b1;
-	bmax = b2;
-	bdelta = bd;
-	bn = (int)ceil((bmax-bmin)/bdelta)+1;
-	for(i=0; i<bn; i++) bs.push_back(bmin + i*bdelta); // arithmetic shifts
-	useWavelet(0);
-	wc = (complex<double> **)calloc(an, sizeof(complex<double> *));
-//	if(wc == NULL) {printf("\nAlloc_mem: insufficient memory!\n",-1,-1);exit(1);}
-
-   for(unsigned i = 0; i < an; i++) {
-         wc[i] = (complex<double> *)calloc(bn, sizeof(complex<double>));
-//		 if(wc[i] == NULL) {printf("\nAlloc_mem: insufficient memory!\n",-1,-1);exit(1);
-   }
-// 	printf("used constructor wavelet (%lf, %lf, %lf, %lf, %lf, %lf)\n",a1, a2, ad, b1, b2, bd);
+  unsigned int i;
+  log2=2;
+  log2=log(log2);
+  amin = a1;
+  amax = a2;
+  adelta = ad;
+  an = (int)ceil((amax-amin)/adelta)+1;
+  for(i=0; i<an; i++) as.push_back(exp(log2*(amin + i*adelta))); //logarithmic scales, base 2
+  bmin = b1;
+  bmax = b2;
+  bdelta = bd;
+  bn = (int)ceil((bmax-bmin)/bdelta)+1;
+  for(i=0; i<bn; i++) bs.push_back(bmin + i*bdelta); // arithmetic shifts
+  useWavelet(0);
+  wc = (complex<double> **)calloc(an, sizeof(complex<double> *));
+  //	if(wc == NULL) {printf("\nAlloc_mem: insufficient memory!\n",-1,-1);exit(1);}
+  
+  for(unsigned i = 0; i < an; i++) {
+    wc[i] = (complex<double> *)calloc(bn, sizeof(complex<double>));
+    //		 if(wc[i] == NULL) {printf("\nAlloc_mem: insufficient memory!\n",-1,-1);exit(1);
+  }
+  // 	printf("used constructor wavelet (%lf, %lf, %lf, %lf, %lf, %lf)\n",a1, a2, ad, b1, b2, bd);
 }
 
 /* =================================== simple Haar wavelet ===============================*/
 complex<double> wavelet::Haar(double x)
 {
-	if(x>1 || x<-1 || x==0) return 0;
+  if(x>1 || x<-1 || x==0) return 0;
 	if(x>0) return 1;
 	return -1;
 }
