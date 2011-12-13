@@ -7,6 +7,12 @@
 
 using namespace std;
 
+// ==============================================================================
+//
+//  Class: wavelet
+//
+// ==============================================================================
+
 /*!
   \class wavelet
   
@@ -22,50 +28,70 @@ using namespace std;
       
   <h3>Synopsis</h3>
 
-  The wavelet class provides algorithms for computing the direct and inverse wavelet transform
-  from an input one-dimensional array. 
-    
+  The wavelet class provides algorithms for computing the direct and inverse
+  wavelet transform from an input one-dimensional array. 
 */ 
 
 double cabs(complex<double> z);
 
 class wavelet {
+  
+  //! Number of wavelet
+  unsigned nw;
+  //! Normalisation constant for wavelet
+  double Cpsi;
+  
+  complex<double> Haar(double x);			// real wavelet - Haar
+  complex<double> MexicanHat(double x);	// real wavelet - Mexican Hat
+  complex<double> Morlet(double x);		// complex wavelet - Morlet
+  complex<double> wvf(double x);			// used wavelet function
+  // their fourier transforms:
+  complex<double> Haar_f(double x);
+  complex<double> MexicanHat_f(double x);
+  complex<double> Morlet_f(double x);
+  complex<double> wvf_f(double x);
+  
+ public:
+  // parameters and calculated data
+  double amin, amax, adelta;			// Boundaries and delta in logarithmic scale (base 2)
+  double log2;
+  unsigned an;						// Number of scales (computable)
+  //! Boundaries and delta in shift
+  double bmin, bmax, bdelta;
+  //! Number of shifts (computable)
+  unsigned bn;
+  //! 2d-array of wavelet coefficients
+  complex<double> **wc;
+  //! Scales
+  vector<double> as;
+  //! Shifts
+  vector<double> bs;
+  
+  // === Procedures =============================================================
 
-	unsigned nw;					// number of wavelet
-	double Cpsi;					// normalisation constant for wavelet
-
-	complex<double> Haar(double x);			// real wavelet - Haar
-	complex<double> MexicanHat(double x);	// real wavelet - Mexican Hat
-	complex<double> Morlet(double x);		// complex wavelet - Morlet
-	complex<double> wvf(double x);			// used wavelet function
-	// their fourier transforms:
-	complex<double> Haar_f(double x);
-	complex<double> MexicanHat_f(double x);
-	complex<double> Morlet_f(double x);
-	complex<double> wvf_f(double x);
-
-public:
-// parameters and calculated data
-	double amin, amax, adelta;			// Boundaries and delta in logarithmic scale (base 2)
-	double log2;
-	unsigned an;						// Number of scales (computable)
-	double bmin, bmax, bdelta;			// Boundaries and delta in shift
-	unsigned bn;						// Number of shifts (computable)
-	complex<double> **wc;				// 2d-array of wavelet coefficients
-	vector<double> as;				// scales
-	vector<double> bs;				// shifts
-
-// procedures
-	wavelet();						//simple constructor, needs initialisation of array to use
-	wavelet(double amin, double amax, double adelta, 
-		    double bmin, double bmax, double bdelta);			// constructor with main parameters
-	double useWavelet(int number);								// choose the number of using wavelet
-	void transform(vector<complex<double> > y);					// direct wavelet transform, result in the wc array
-	void transform(vector<complex<double> > y,vector<double> x);	// direct wavelet transform, result in the wc array
-	void ftransform(vector<complex<double> > y,vector<double> x);// direct wavelet transform of fourier image, result in the wc array
-	vector<complex<double> > invTransform(vector<double> x);		// inverse wavelet transform from the wc array
-	~wavelet();						// destructor, releases used memory
+  //! Simple constructor, needs initialisation of array to use
+  wavelet();
+  //! Constructor with main parameters
+  wavelet (double amin,
+	   double amax, 
+	   double adelta, 
+	   double bmin,
+	   double bmax,
+	   double bdelta);
+  //! Choose the number of using wavelet
+  double useWavelet(int number);
+  void transform(vector<complex<double> > y);					// direct wavelet transform, result in the wc array
+  void transform(vector<complex<double> > y,vector<double> x);	// direct wavelet transform, result in the wc array
+  void ftransform(vector<complex<double> > y,vector<double> x);// direct wavelet transform of fourier image, result in the wc array
+  vector<complex<double> > invTransform(vector<double> x);		// inverse wavelet transform from the wc array
+  ~wavelet();						// destructor, releases used memory
 };
+
+// ==============================================================================
+//
+//  Class: WaveletSynthesis
+//
+// ==============================================================================
 
 /*!
   \class WaveletSynthesis
@@ -79,9 +105,9 @@ public:
   \date 28.06.2011
   
   \test twvsynt.cc
-      
+  
   <h3>Synopsis</h3>
-
+  
   The wavelet synthesis class provides algorithms for RM-synthesis of polarization data
   from an input one-dimensional array. 
     
@@ -109,6 +135,12 @@ public:
 	~WaveletSynthesis();										// destructor, releases memory
 };
 
+// ==============================================================================
+//
+//  Class: WaveletClean
+//
+// ==============================================================================
+
 /*!
   \class WaveletClean, derived from WaveletSynthesis
   
@@ -133,29 +165,29 @@ public:
 
 class WaveletClean : public WaveletSynthesis
 {
-private:
-	double wmaxinit;
-	void perform();						// one step of cleaning
-	vector<complex <double> > signal;
-public:
-	// constructor automatically do wavelet transform
-	wavelet data;						// wavelet coefficients of initial Q+iU
-	wavelet RMSF;						// wavelet coefficients of point source
-	vector<double> depths;				// faraday depths for restored (cleaned) signal
-	vector<complex <double> > res;		// restored (cleaned) signal
-
-	WaveletClean(vector<complex<double> > s, vector<double> lam);
-				// constructor, with default amin=-10,amax=15,adelta=1, bmin=-20, bmax=150, bdelta=1
-	WaveletClean(vector<complex<double> > s, vector<double> lam,
-					double amin, double amax, double adelta, 
-					double bmin, double bmax, double bdelta);
-	void init(vector<complex<double> > s, vector<double> lam, vector<double> fd, int numw);
-				// calculates wavelet coefficients of signal
-	void perform(int times);			// main intro point - calls "times" steps of cleaning
-	unsigned int getMaxPos(unsigned int &a, unsigned int &b);	// finds position of maximum in data by default
-	unsigned int getMaxPos(wavelet &w, unsigned int &a, unsigned int &b);	// finds position of maximum
-	double chi2();						// chi-square criterion (requires inverse transform!)
-	double ratio();						// ratio of residue and initial signal
+ private:
+  double wmaxinit;
+  void perform();						// one step of cleaning
+  vector<complex <double> > signal;
+ public:
+  // constructor automatically do wavelet transform
+  wavelet data;						// wavelet coefficients of initial Q+iU
+  wavelet RMSF;						// wavelet coefficients of point source
+  vector<double> depths;				// faraday depths for restored (cleaned) signal
+  vector<complex <double> > res;		// restored (cleaned) signal
+  
+  WaveletClean(vector<complex<double> > s, vector<double> lam);
+  // constructor, with default amin=-10,amax=15,adelta=1, bmin=-20, bmax=150, bdelta=1
+  WaveletClean(vector<complex<double> > s, vector<double> lam,
+	       double amin, double amax, double adelta, 
+	       double bmin, double bmax, double bdelta);
+  void init(vector<complex<double> > s, vector<double> lam, vector<double> fd, int numw);
+  // calculates wavelet coefficients of signal
+  void perform(int times);			// main intro point - calls "times" steps of cleaning
+  unsigned int getMaxPos(unsigned int &a, unsigned int &b);	// finds position of maximum in data by default
+  unsigned int getMaxPos(wavelet &w, unsigned int &a, unsigned int &b);	// finds position of maximum
+  double chi2();						// chi-square criterion (requires inverse transform!)
+  double ratio();						// ratio of residue and initial signal
 };
 
 #endif		// _WV_H_
