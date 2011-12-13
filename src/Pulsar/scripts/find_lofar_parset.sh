@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh 
 
 # History of the various parset locations:
 # (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
@@ -21,17 +21,19 @@ has_underscore=`echo $OBSID | grep "_"`
 if [[ $has_underscore != "" ]]
 then
     short_id=`echo $OBSID | sed 's/L.....//g'`
+    PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 else
     short_id=`echo $OBSID | sed 's/L//g'`
+    PARSET=/globalhome/lofarsystem/log/${OBSID}/${OBSID}.parset
 fi
 
-PARSET=/globalhome/lofarsystem/log/${OBSID}/${OBSID}.parset
 
 if [ ! -f $PARSET ] 
 then
+   
    if [ -d /globalhome/lofarsystem/log/ ]
    then 
-      new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
+      new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset\* -print`
    fi
    
    if [[ $new_parset == "" ]]
@@ -40,10 +42,11 @@ then
       then 
          new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
       fi
-   	  if [[ $new_parset == "" ]]
+      
+      if [[ $new_parset == "" ]]
       then
           # Sept 23, 2010 another parset location added
-          if [ -d globalhome/lofarsystem/log/ ]
+          if [ -d /globalhome/lofarsystem/log/ ]
           then 
   	         new_parset=/globalhome/lofarsystem/log/L${short_id}/L${short_id}.parset
   	      fi
@@ -80,7 +83,6 @@ then
       echo $PARSET
    fi
 else
-   echo "ERROR"
-   exit
+   echo $PARSET
 fi
 
