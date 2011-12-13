@@ -51,7 +51,7 @@ if (NOT ROOT_FOUND OR ROOT_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       SVN_REPOSITORY ${ROOT_SVN}
-      CONFIGURE_COMMAND ${ROOT_BINARY_DIR}/root/configure ${root_architecture} --prefix=${LUS_INSTALL_PREFIX}
+      CONFIGURE_COMMAND ${ROOT_BINARY_DIR}/root/configure ${root_architecture} --prefix=${CMAKE_INSTALL_PREFIX}
       )
     
   else (SVN_EXECUTABLE)

@@ -18,26 +18,6 @@ option (SCIPY_VERBOSE_CONFIGURE "Be verbose during configuration?"          NO  
 option (SCIPY_VERBOSE_BUILD     "Be verbose during build process?"          NO  )
 
 ## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-if (NOT LUS_SOURCE_DIR)
-  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
-    PATHS 
-    ${SCIPY_SOURCE_DIR}
-    ${SCIPY_SOURCE_DIR}/..
-    ${SCIPY_SOURCE_DIR}/../..
-    ${SCIPY_SOURCE_DIR}/../../..
-    $ENV{LOFARSOFT}
-    )
-endif (NOT LUS_SOURCE_DIR)
-
-if (LUS_SOURCE_DIR)
-  include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
-else (LUS_SOURCE_DIR)
-  message (FATAL_ERROR "[SciPy] Unable to locate additional CMake scripts!")
-endif (LUS_SOURCE_DIR)
-
-## ------------------------------------------------------------------------------
 ## System inspection
 
 if (NOT SCIPY_VERBOSE_CONFIGURE)
@@ -119,7 +99,7 @@ if (NOT HAVE_SCIPY OR SCIPY_FORCE_BUILD)
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py --help
       BUILD_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py build
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py install --prefix= --home=${LUS_INSTALL_PREFIX}
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${SCIPY_BINARY_DIR}/source/setup.py install --prefix= --home=${CMAKE_INSTALL_PREFIX}
       )
   else (have_scipy_tgz)
     message (WARNING "[SciPy] Unable to build project - missing source!")
