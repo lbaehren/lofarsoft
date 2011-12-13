@@ -37,8 +37,9 @@ if (NOT FIND_HDF5_CMAKE)
     set (HDF5_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   endif (NOT HDF5_ROOT_DIR)
 
-  set (FIND_HDF5_CMAKE TRUE)
-  
+  set (FIND_HDF5_CMAKE     TRUE )
+  set (HDF5_VERSION_STRING 0    )
+
   ##_____________________________________________________________________________
   ## Search locations
   
@@ -212,8 +213,10 @@ if (NOT FIND_HDF5_CMAKE)
   endif (HDF5_VERSION_COMPILE_RESULT)
   
   set (HDF5_VERSION "${HDF5_VERSION_MAJOR}.${HDF5_VERSION_MINOR}.${HDF5_VERSION_RELEASE}")
-
-  math (EXPR HDF5_VERSION_STRING '10000*${HDF5_VERSION_MAJOR}+100*${HDF5_VERSION_MINOR}+${HDF5_VERSION_RELEASE}')
+  
+  if (HDF5_VERSION_MAJOR AND HDF5_VERSION_MINOR AND HDF5_VERSION_RELEASE)
+    math (EXPR HDF5_VERSION_STRING '10000*${HDF5_VERSION_MAJOR}+100*${HDF5_VERSION_MINOR}+${HDF5_VERSION_RELEASE}')
+  endif (HDF5_VERSION_MAJOR AND HDF5_VERSION_MINOR AND HDF5_VERSION_RELEASE)
   
   ##_____________________________________________________________________________
   ## Feedback
