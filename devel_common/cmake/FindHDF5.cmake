@@ -212,6 +212,8 @@ if (NOT FIND_HDF5_CMAKE)
   endif (HDF5_VERSION_COMPILE_RESULT)
   
   set (HDF5_VERSION "${HDF5_VERSION_MAJOR}.${HDF5_VERSION_MINOR}.${HDF5_VERSION_RELEASE}")
+
+  math (EXPR HDF5_VERSION_STRING '10000*${HDF5_VERSION_MAJOR}+100*${HDF5_VERSION_MINOR}+${HDF5_VERSION_RELEASE}')
   
   ##_____________________________________________________________________________
   ## Feedback

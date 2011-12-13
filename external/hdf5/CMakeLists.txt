@@ -42,33 +42,19 @@ set (HDF5_FIND_QUIETLY YES)
 set (SZIP_FIND_QUIETLY YES)
 set (ZLIB_FIND_QUIETLY YES)
 
-include (FindHDF5)
-include (FindSZIP)
-include (FindZLIB)
+find_package (HDF5)
+find_package (SZIP)
+find_package (ZLIB)
 
 ## if the there is a system-wide installation, it is the correct version of the
 ## library? If not we need to force a build from the provided source tree.
 
-## Check for major version
-if (HDF5_VERSION_MAJOR LESS ${HDF5_REQUIRED_VERSION_MAJ})
-  message (STATUS "HDF5 installation found - major version too small!")
-  message (STATUS ".. Required ${HDF5_REQUIRED_VERSION_MAJ} - found ${HDF5_VERSION_MAJOR}")
+math (EXPR HDF5_REQUIRED_VERSION_STRING '10000*${HDF5_REQUIRED_VERSION_MAJ}+100*${HDF5_REQUIRED_VERSION_MIN}+${HDF5_REQUIRED_VERSION_REL}')
+
+if (${HDF5_VERSION_STRING} VERSION_LESS ${HDF5_REQUIRED_VERSION_STRING})
+  set (HAVE_HDF5        FALSE)
   set (HDF5_FORCE_BUILD TRUE)
-else (HDF5_VERSION_MAJOR LESS ${HDF5_REQUIRED_VERSION_MAJ})
-  ## Check for major version
-  if (HDF5_VERSION_MINOR LESS ${HDF5_REQUIRED_VERSION_MIN})
-    message (STATUS "HDF5 installation found - minor version too small!")
-    message (STATUS ".. Required ${HDF5_REQUIRED_VERSION_MIN} - found ${HDF5_VERSION_MINOR}")
-    set (HDF5_FORCE_BUILD TRUE)
-  else (HDF5_VERSION_MINOR LESS ${HDF5_REQUIRED_VERSION_MIN})
-    ## Check for release version
-    if (HDF5_VERSION_RELEASE LESS ${HDF5_REQUIRED_VERSION_REL})
-      message (STATUS "HDF5 installation found - release version too small!")
-      message (STATUS ".. Required ${HDF5_REQUIRED_VERSION_REL} - found ${HDF5_VERSION_RELEASE}")
-      set (HDF5_FORCE_BUILD TRUE)
-    endif (HDF5_VERSION_RELEASE LESS ${HDF5_REQUIRED_VERSION_REL})
-  endif (HDF5_VERSION_MINOR LESS ${HDF5_REQUIRED_VERSION_MIN})
-endif (HDF5_VERSION_MAJOR LESS ${HDF5_REQUIRED_VERSION_MAJ})
+endif (${HDF5_VERSION_STRING} VERSION_LESS ${HDF5_REQUIRED_VERSION_STRING})
 
 ## Run an additional check to see whether we are on a Debian system
 
