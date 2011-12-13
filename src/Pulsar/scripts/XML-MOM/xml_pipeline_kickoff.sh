@@ -160,11 +160,38 @@ else # if [[ $cep2 == 1 ]]
         if [[ $incoherent == "" ]]
         then
            # CS stokes processing
+           # find the locus node list for CS data for processing
+           PARSET=`find_lofar_parset.sh $OBSID`
+           if [[ $PARSET == "ERROR" ]]
+           then
+              echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $OBSID' command"
+              exit 1
+           elif [[ ! -f $PARSET ]]
+           then
+              echo "ERROR: invalid PARSET file '$PARSET'"
+              exit 1
+           else
+              # collect the locus info from the parset
+              locus_list=NONE
+              locus_list=`grep locus $PARSET | grep CoherentStokes.mountpoints | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
+              status=$!
+              if [[ $status != 0 ]]
+              then
+                 echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
+                 locus_list="0-99"
+              fi
+              if [[ $locus_list == "" ]] || [[ $locus_list == "NONE" ]]
+              then
+                 echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
+                 locus_list="0-99"
+              fi
+           fi
+           
            if [[ $hoover_only == 0 ]]
            then
-              echo 'cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+              echo 'cexec locus:${locus_list} "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            else
-              echo '#cexec locus:0-99 "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+              echo '#cexec locus:${locus_list} "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            fi
            echo 'cexec hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/TA_heatmap.sh .; ./TA_heatmap.sh; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png status.png; convert -append *TA_heatmap_log.png  *TA_heatmap_linear.png status.png; convert -scale 200x140-0-0 status.png status.th.png; mv status_diag.png status.png"'  >> $outfile.$obsid.CS.sh
