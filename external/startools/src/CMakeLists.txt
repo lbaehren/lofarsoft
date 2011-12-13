@@ -123,17 +123,6 @@ endif (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
 ##
 ## ==============================================================================
 
-## Prefix for the installation will be dependent on where the package is build;
-## if the package is embedded within the directory structure of the USG software,
-## we install into "release". Otherwise we use the "include" and "lib" directories
-## within the package directory itself.
-
-if (LUS_INSTALL_PREFIX)
-  set (CMAKE_INSTALL_PREFIX ${LUS_INSTALL_PREFIX}) 
-else (LUS_INSTALL_PREFIX)
-  set (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
-endif (LUS_INSTALL_PREFIX)
-
 ## No relinking and full RPATH for the install tree
 
 set (CMAKE_SKIP_BUILD_RPATH TRUE)
