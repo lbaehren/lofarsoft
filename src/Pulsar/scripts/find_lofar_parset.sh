@@ -26,7 +26,6 @@ then
    exit
 fi
 
-#Check if case 1; else case 2
 has_underscore=`echo $OBSID | grep "_"`
 if [[ $has_underscore != "" ]]
 then
