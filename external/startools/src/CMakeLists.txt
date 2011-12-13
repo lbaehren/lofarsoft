@@ -10,31 +10,15 @@ project (StarTools)
 ## Minimum required CMake version
 cmake_minimum_required (VERSION 2.6)
 
-## -----------------------------------------------------------------------------
 ## User defined build/install options
 
 option (StarTools_VERBOSE_CONFIGURE  "Verbose output during configuration?"       0)
 option (StarTools_FORCE_BUILD        "Force rebuild and local installation"       0)
 option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?" 1)
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+## System inspection
 
-find_path (LUS_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${PROJECT_SOURCE_DIR}
-  ${PROJECT_SOURCE_DIR}/..
-  ${PROJECT_SOURCE_DIR}/../..
-  ${PROJECT_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (LUS_ROOT)
-  include (${LUS_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  include (FindStarTools)
-else (LUS_ROOT)
-  message (FATAL_ERROR "[Star-Tools] Unable to locate additional CMake scripts!")
-endif (LUS_ROOT)
+find_package (StarTools)
 
 ## ============================================================================== 
 ##
