@@ -161,10 +161,10 @@ else # if [[ $cep2 == 1 ]]
         then
            # CS stokes processing
            # find the locus node list for CS data for processing
-           PARSET=`find_lofar_parset.sh $OBSID`
+           PARSET=`find_lofar_parset.sh $obsid`
            if [[ $PARSET == "ERROR" ]]
            then
-              echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $OBSID' command"
+              echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $obsid' command"
               exit 1
            elif [[ ! -f $PARSET ]]
            then
