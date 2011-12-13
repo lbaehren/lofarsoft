@@ -33,7 +33,6 @@ set (external_packages
   pyqt
   python
   ipython
-  qt
   root
   sip
   swig
