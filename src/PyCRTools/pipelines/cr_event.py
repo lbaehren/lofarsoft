@@ -387,7 +387,7 @@ for full_filename in files:
 
         #station_name = metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
         station_name = "%03d" %(datafile["CHANNEL_ID"][0]/1000000) if not station else station
-
+        station_name = "CS{0}".format(station_name)
 
         #station_name=filename_split[-1]
         old_time_stamp=time_stamp
