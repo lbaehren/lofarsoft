@@ -16,37 +16,16 @@ include (CTest)
 option (WCSTOOLS_BUILD_TOOLS  "Build the applications?"   YES )
 option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" NO  )
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-if (NOT LUS_SOURCE_DIR)
-  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
-    PATHS 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../..
-    $ENV{LOFARSOFT}
-    )
-endif (NOT LUS_SOURCE_DIR)
-
-if (LUS_SOURCE_DIR)
-  include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
-else (LUS_SOURCE_DIR)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (LUS_SOURCE_DIR)
-
 ## ==============================================================================
 ##
 ##  External packages/libraries
 ##
 ## ==============================================================================
 
-find_library (libsocket socket)
-find_library (libnsl nsl)
-find_library (libm m)
-find_library (libSystemStubs SystemStubs)
+find_library (libsocket      socket      )
+find_library (libnsl         nsl         )
+find_library (libm           m           )
+find_library (libSystemStubs SystemStubs )
 
 ## set up chain of libraries to link against
 
@@ -95,7 +74,12 @@ if (WCSTOOLS_BUILD_TOOLS)
     imsize
     imstar
     imwcs
-    scat sethead addpix getpix setpix sky2xy
+    scat
+    sethead
+    addpix
+    getpix
+    setpix
+    sky2xy
     keyhead skycoor subpix xy2sky wcshead conpix gettab newfits getfits
     imstack imextract sumpix remap getcol getdate imfill imsmooth imresize
     fileroot filename filext char2sp sp2char crlf isnum isrange simpos bincat
@@ -109,7 +93,9 @@ if (WCSTOOLS_BUILD_TOOLS)
     ## installation instructions
     install (TARGETS ${app}
       RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
       )
   endforeach (app)
-
+  
 endif (WCSTOOLS_BUILD_TOOLS)
