@@ -82,17 +82,6 @@ option (PYCRTOOLS_WITH_GSL               "Compile PyCRTools with GSL support?"  
 option (PYCRTOOLS_WITH_NUMPY             "Compile PyCRTools with Numpy support?"                     YES )
 option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP support?"                    NO )
 
-option (DOCUMENTATION_ONLY     "Configure for building documentation only?"  NO  )
-option (DAL_WITH_DOCUMENTATION "Generate documentation for the DAL?"         YES )
-option (DAL_SHARED_LIBRARY     "Build DAL as shared library?"                NO  )
-option (DAL_ENABLE_TESTING     "Build and enable test programs?"             NO  )
-option (DAL_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"   YES )
-option (DAL_PYTHON_BINDINGS    "Create python bindings?"                     YES )
-option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                NO  )
-option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"        NO  )
-option (DAL_WITH_MYSQL         "Build with support for MySQL database?"      NO  )
-set (DAL_GIT "git://github.com/nextgen-astrodata/DAL.git" CACHE STRING "Git repository for DAL.")
-
 ## Handle options
 
 if (LUS_ENABLE_TESTING)

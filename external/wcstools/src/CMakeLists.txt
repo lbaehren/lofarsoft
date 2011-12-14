@@ -1,6 +1,3 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
-##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## Project name and version number number
@@ -46,35 +43,10 @@ endif (LUS_SOURCE_DIR)
 ##
 ## ==============================================================================
 
-find_library (libsocket socket
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
-
-find_library (libnsl nsl
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
-
-find_library (libm m
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  )
-
-find_library (libSystemStubs SystemStubs
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-  /Developer/SDKs/MacOSX10.3.9.sdk/usr/lib
-  )
+find_library (libsocket socket)
+find_library (libnsl nsl)
+find_library (libm m)
+find_library (libSystemStubs SystemStubs)
 
 ## set up chain of libraries to link against
 

@@ -1,0 +1,33 @@
+
+##_______________________________________________________________________________
+## Initial cache variables
+
+## Installation prefix
+set ( DAL_INSTALL_PREFIX     ${CMAKE_INSTALL_PREFIX}   CACHE PATH
+  "Installation location" FORCE
+  )
+## Enable testing
+set ( DAL_ENABLE_TESTING     ${DAL_ENABLE_TESTING}     CACHE BOOL
+  "Enable testing" FORCE
+  )
+## Build Python bindings (pydal)
+set ( DAL_PYTHON_BINDINGS    ${DAL_PYTHON_BINDINGS}    CACHE BOOL
+  "Build Python bindings (pydal)" FORCE 
+  )
+## Build libdal as shared library
+set ( DAL_SHARED_LIBRARY     ${DAL_SHARED_LIBRARY}     CACHE BOOL
+  "Build libdal as shared library" FORCE
+  )
+## Enable standard compiler warnings
+set ( DAL_COMPILER_WARNINGS  ${DAL_COMPILER_WARNINGS}  CACHE BOOL
+  "Enable standard compiler warnings" FORCE
+  )
+## Enable debugging messages/symbols
+set ( DAL_DEBUGGING_MESSAGES ${DAL_DEBUGGING_MESSAGES} CACHE BOOL
+  "Enable debugging messages/symbols" FORCE
+  )
+## Verbose during configuration stage
+set ( DAL_VERBOSE_CONFIGURE  ${DAL_VERBOSE_CONFIGURE}  )
+set ( DAL_WITH_DOCUMENTATION ${DAL_WITH_DOCUMENTATION} )
+set ( DAL_WITH_MYSQL         ${DAL_WITH_MYSQL}         )
+set ( DOCUMENTATION_ONLY     ${DOCUMENTATION_ONLY}     )
