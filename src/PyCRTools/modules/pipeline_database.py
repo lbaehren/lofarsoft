@@ -114,8 +114,6 @@ class PipelineDatabase:
             sql = "SELECT eventID FROM main.event"
         records = self._db.select(sql)
 
-        print records                   # DEBUG STATEMENT
-
         return records
 
 
@@ -651,7 +649,7 @@ class Datafile:
             self._db.execute(sql)
 
 
-    def setProperty(self, key, value):
+    def setProperty(self, key='', value=''):
         """Set a property and update the database.
 
         **Properties**
