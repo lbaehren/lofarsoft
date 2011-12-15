@@ -151,10 +151,12 @@ namespace PyCR { // Namespace PyCR -- begin
     PyErr_SetString(PyExc_IOError, e.message.c_str());
   }
 
+#ifdef HAS_EXCEPTION_HANDLING
   void translateDALIOError(DAL::IOError const& e)
   {
     PyErr_SetString(PyExc_IOError, "DAL cannot open file!");
   }
+#endif
 
   bool multicore()
   {
@@ -208,7 +210,9 @@ BOOST_PYTHON_MODULE(_hftools)
   register_exception_translator<PyCR::NameError>(PyCR::translateNameError);
   register_exception_translator<PyCR::NotImplementedError>(PyCR::translateNotImplementedError);
   register_exception_translator<PyCR::IOError>(PyCR::translateIOError);
+#ifdef HAS_EXCEPTION_HANDLING
   register_exception_translator<DAL::IOError>(PyCR::translateDALIOError);
+#endif
 
 // ________________________________________________________________________
 //                                                         State inspectors 
