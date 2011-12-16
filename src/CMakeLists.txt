@@ -102,28 +102,71 @@ endmacro (lus_package_experimental)
 ##
 ##                                                             $LOFARSOFT/src/DAL
 ##
+##  As the DAL is not hosted within the LUS Subversion repository, by default
+##  there is no local copy of the code base. Hence when building and installing
+##  the DAL as part of the LUS software collection a checkout from the repository
+##  on Github is required.
+##
 ## ==============================================================================
+
+set (DAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
+set (DAL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/DAL)
+
+##__________________________________________________________
+##                                                   Options
+
+option (DAL_SOURCE_VERSION     "DAL release version"                         0.2.0 )
+option (DAL_FORCE_BUILD        "Force build and installation of package?"    NO    )
+option (DAL_FROM_RELEASE       "Use release version instead of trunk?"       NO    )
+option (DAL_ENABLE_TESTING     "Enable testing and experimental builds?"     YES   )
+option (DOCUMENTATION_ONLY     "Configure for building documentation only?"  NO    )
+option (DAL_WITH_DOCUMENTATION "Generate documentation for the DAL?"         YES   )
+option (DAL_SHARED_LIBRARY     "Build DAL as shared library?"                NO    )
+option (DAL_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"   YES   )
+option (DAL_PYTHON_BINDINGS    "Create python bindings?"                     YES   )
+option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                NO    ) 
+option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"        NO    )
+option (DAL_WITH_MYSQL         "Build with support for MySQL database?"      NO    )
 
 ##__________________________________________________________
 ##                              Build & Testing instructions
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
-  ## Add project sub-directory
-  add_subdirectory (DAL)
-  ## Experimental build
-  add_custom_target (dal_Experimental
-    COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} ${CMAKE_CURRENT_SOURCE_DIR}/DAL
-    COMMAND ${CMAKE_BUILD_TOOL} Experimental
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/DAL/src/dal-build
-    )
-else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
-  ExternalProject_Add (dal
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-    GIT_REPOSITORY git://github.com/nextgen-astrodata/DAL.git
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    )
+if (${DAL_FOUND})
+  if (${DAL_SOURCE_VERSION} VERSION_GREATER ${DAL_VERSION})
+    set (DAL_FORCE_BUILD TRUE)
+  endif (${DAL_SOURCE_VERSION} VERSION_GREATER ${DAL_VERSION})
+endif (${DAL_FOUND})
 
-endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
+if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
+  ## Create configuration file for initial CMake cache
+  configure_file (
+    ${DAL_SOURCE_DIR}/dal.cmake.in
+    ${DAL_BINARY_DIR}/dal.cmake
+    )
+  
+  if (DAL_FROM_RELEASE)
+    ## Install from "release" branch
+    ExternalProject_Add (dal
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
+      GIT_REPOSITORY git://github.com/nextgen-astrodata/DAL.git
+      GIT_TAG release
+      CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
+      )
+  else (DAL_FROM_RELEASE)
+    ## Install from "master" branch
+    ExternalProject_Add (dal
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
+      GIT_REPOSITORY git://github.com/nextgen-astrodata/DAL.git
+      CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
+      )
+  endif (DAL_FROM_RELEASE)
+
+else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
+  add_custom_target (dal
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "[DAL] Found system-wide installation; skipping rebuild!"
+    )
+endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 
 ##__________________________________________________________
 ##                                      Package dependencies
@@ -147,7 +190,7 @@ endif (DAL_PYTHON_BINDINGS)
 ## ==============================================================================
 
 ##__________________________________________________________
-## Options
+##                                                   Options
 
 option (ANAAMIKA_ENABLE_SCIPY   "Build SciPy as interactive environment?"  NO  )
 option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
