@@ -55,11 +55,11 @@ class PipelineDatabase:
     def createTables(self):
         """Create the pipeline database."""
         # Check Event table
-        sql = "CREATE TABLE IF NOT EXISTS main.events (eventID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
+        sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
         self._db.execute(sql)
 
         # Check EventProperties table
-        sql = "CREATE TABLE IF NOT EXISTS main.eventproperties (propertyID TEXT NOT NULL UNIQUE, eventID TEXT NOT NULL, key TEXT, value TEXT, type TEXT);"
+        sql = "CREATE TABLE IF NOT EXISTS main.eventproperties (propertyID TEXT NOT NULL UNIQUE, eventID INTEGER NOT NULL, key TEXT, value TEXT, type TEXT);"
         self._db.execute(sql)
 
         # Check Datafile table
@@ -71,7 +71,7 @@ class PipelineDatabase:
         self._db.execute(sql)
 
         # Check Event_Datafile table (linking Event and Datafile tables)
-        sql = "CREATE TABLE IF NOT EXISTS main.event_datafile (eventID TEXT NOT NULL UNIQUE, datafileID TEXT NOT NULL UNIQUE);"
+        sql = "CREATE TABLE IF NOT EXISTS main.event_datafile (eventID INTEGER NOT NULL, datafileID TEXT NOT NULL UNIQUE);"
         self._db.execute(sql)
 
         # Check Filter table
@@ -106,7 +106,7 @@ class PipelineDatabase:
 
         If the status is empty then all eventIDs are selected.
         """
-        records = []
+        eventIDs = []
 
         if (status != ''):
             sql = "SELECT eventID FROM main.events WHERE status='{0}'".format(status)
@@ -114,10 +114,13 @@ class PipelineDatabase:
             sql = "SELECT eventID FROM main.events"
         records = self._db.select(sql)
 
-        return records
+        for record in records:
+            eventIDs.append(str(record[0]))
+
+        return eventIDs
 
 
-    def readEvent(self, id=''):
+    def readEvent(self, id=0):
         """Read the event that satisfies the provided id.
 
         **Properties**
@@ -133,12 +136,12 @@ class PipelineDatabase:
         if self.hasEvent(id):
             event.read()
         else:
-            raise ValueError("Event with id='%s' does not exist." %(id))
+            raise ValueError("Event with id=%d does not exist." %(id))
 
         return event
 
 
-    def createEvent(self, id=''):
+    def createEvent(self, id=0):
         """Add a new event to the database.
 
         **Properties**
@@ -156,12 +159,12 @@ class PipelineDatabase:
         if not self.hasEvent(id):
             event.write()
         else:
-            raise ValueError("Event with id='%s' already exists." %(id))
+            raise ValueError("Event with id=%d already exists." %(id))
 
         return event
 
 
-    def deleteEvent(self, id=''):
+    def deleteEvent(self, id=0):
         """Delete the event with the specified id from the database.
 
         **Properties**
@@ -171,13 +174,13 @@ class PipelineDatabase:
         ========== ================================
         """
         if self.hasEvent(id):
-            sql = "DELETE FROM main.events WHERE eventID='{0}'".format(id)
+            sql = "DELETE FROM main.events WHERE eventID={0}".format(id)
             self._db.execute(sql)
         else:
-            raise ValueError("Event with id='%s' does not exist." %(id))
+            raise ValueError("Event with id=%d does not exist." %(id))
 
 
-    def hasEvent(self, id=''):
+    def hasEvent(self, id=0):
         """Check if there is an event with the corresponding *id* in
         the database.
 
@@ -190,8 +193,8 @@ class PipelineDatabase:
         result = False
         records = []
 
-        if (id != ''):
-            sql = "SELECT eventID FROM main.events WHERE eventID='{0}'".format(id)
+        if (id != 0):
+            sql = "SELECT eventID FROM main.events WHERE eventID={0}".format(id)
             records = self._db.select(sql)
 
         if len(records) > 0:
@@ -211,7 +214,7 @@ class PipelineDatabase:
 
         If the status is empty all datafileIDs are selected.
         """
-        records = []
+        datafileIDs = []
 
         if (status != ''):
             sql = "SELECT datafileID FROM main.datafiles WHERE status='{0}'".format(status)
@@ -219,7 +222,10 @@ class PipelineDatabase:
             sql = "SELECT datafileID FROM main.datafiles"
         records = self._db.select(sql)
 
-        return records
+        for record in records:
+            datafileIDs.append(str(record[0]))
+
+        return datafileIDs
 
 
     def readDatafile(self, id=''):
@@ -337,6 +343,60 @@ class PipelineDatabase:
         return result
 
 
+    def check(self):
+        """Consistency check of the database.
+
+        Returns *True* if no inconsistencies are found, *False* otherwise.
+        """
+        result = True
+
+        # Run over all datafiles:
+        datafileIDs = self.readDatafileIDs()
+        for datafileID in datafileIDs:
+            datafile = self.readDatafile(datafileID)
+
+            # does the datafile have a status
+            if (datafile.status == ''):
+                print "{0}: Empty status".format(datafileID)
+                datafile.setStatus("UNPROCESSED")
+                result = False
+
+            # does the datafile have a timestamp
+            if (datafile.timestamp == 0):
+                print "{0}: Empty timestamp".format(datafileID)
+                result = False
+
+            # does the datafile have a resultspath
+            if (datafile.resultspath == ''):
+                print "{0}: Empty resultspath".format(datafileID)
+                if (datafile.status == "PROCESSED"):
+                    result = False
+
+            # check if corresponding events are available
+
+            # Check if datafiles are linked to exactly one event
+            sql = "SELECT eventID FROM main.event_datafile WHERE datafileID='{0}'".format(datafileID)
+            n_records = len(self._db.select(sql))
+            if n_records != 1:
+                print "Warning: {0}: Instead of 1 this datafile has {1} associated events".format(datafileID, n_records)
+                result = False
+
+        # Run over all events:
+        eventIDs = self.readEventIDs()
+        for eventID in eventIDs:
+            event = self.readEvent(eventID)
+
+            # - does the event have a valid status
+            if (event.status == ''):
+                print "{0}: Empty status".format(eventID)
+                result = False
+            pass
+
+        # Check for duplicate filters
+
+        return result
+
+
     def summary(self):
         """Summary of the PipelineDatabase object."""
         linewidth = 80
@@ -370,7 +430,7 @@ class PipelineDatabase:
 class Event:
     """Container class for VHECR event information."""
 
-    def __init__(self, db=None, id=''):
+    def __init__(self, db=None, id=0):
         """Initialisation of Event object.
 
         **Properties**
@@ -398,7 +458,7 @@ class Event:
         result = False
 
         if self._db:
-            sql = "SELECT * FROM main.events WHERE eventID='{0}'".format(self._id)
+            sql = "SELECT * FROM main.events WHERE eventID={0}".format(self._id)
             records = self._db.select(sql)
             if len(records) > 0:
                 result = True
@@ -410,7 +470,7 @@ class Event:
         """Read event information from the database."""
         if self._db:
             # read from event table
-            sql = "SELECT eventID, status, timestamp, resultspath FROM main.events WHERE eventID='{0}'".format(self._id)
+            sql = "SELECT eventID, status, timestamp, resultspath FROM main.events WHERE eventID={0}".format(self._id)
             records = self._db.select(sql)
             if len(records) == 1:
                 self._id, self.status, self.timestamp, self.resultspath = records[0]
@@ -420,13 +480,13 @@ class Event:
                 raise ValueError("Multiple records found for eventID={0}".format(self._id))
 
             # read from event_datafile table
-            sql = "SELECT datafileID FROM main.event_datafile WHERE eventID='{0}'".format(self._id)
+            sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0}".format(self._id)
             records = self._db.select(sql)
             for record in records:
                 self.datafileIDs.append(record[0]) # For the moment only append datafileIDs
 
             # read from eventproperties table
-            sql = "SELECT key, value, type FROM main.eventproperties WHERE eventID='{0}'".format(self._id)
+            sql = "SELECT key, value, type FROM main.eventproperties WHERE eventID={0}".format(self._id)
             records = self._db.select(sql)
             for record in records:
                 self.properties[record[0]] = record[1]
@@ -439,15 +499,17 @@ class Event:
         if self._db:
             # write to event table
             if not self.hasRecord():
-                sql = "INSERT INTO main.events (eventID, status, timestamp, resultspath) VALUES ('{0}', '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
+                sql = "INSERT INTO main.events (eventID, status, timestamp, resultspath) VALUES ({0}, '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
             else:
-                sql = "UPDATE main.events SET status='{1}', timestamp='{2}', resultspath='{3}' WHERE eventID='{0}'".format(self._id, self.status, self.timestamp, self.resultspath)
+                sql = "UPDATE main.events SET status='{1}', timestamp='{2}', resultspath='{3}' WHERE eventID={0}".format(self._id, self.status, self.timestamp, self.resultspath)
             self._db.insert(sql)
 
             # write to event_datafile table
             for datafileID in self.datafileIDs:
-                sql = "INSERT OR REPLACE INTO main.event_datafile (eventID, datafileID) VALUES ('{0}', '{1}')".format(self._id, datafileID)
-                self._db.execute(sql)
+                sql = "SELECT eventID FROM main.event_datafile WHERE datafileID='{0}'".format(datafileID)
+                if (len(self._db.select(sql)) == 0):
+                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, '{1}')".format(self._id, datafileID)
+                    self._db.execute(sql)
 
             # write to eventproperties table
             for key in self.properties.keys():
@@ -468,7 +530,10 @@ class Event:
         self.status = status
 
         if self._db:
-            sql = "INSERT OR REPLACE INTO main.events SET status='{0}' WHERE eventID='{1}'".format(self.status, self._id)
+            if not self.hasRecord():
+                sql = "INSERT INTO main.events (eventID, status, timestamp, resultspath) VALUES ({0}, '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
+            else:
+                sql = "UPDATE main.events SET status='{0}' WHERE eventID={1}".format(self.status, self._id)
             self._db.execute(sql)
 
 
@@ -485,7 +550,7 @@ class Event:
         if self.hasProperty(key):
             sql = "UPDATE main.eventproperties SET value='{1}' WHERE propertyID='{0}'".format(self.__getPropertyID(key), str(value))
         else:
-            sql = "INSERT INTO main.eventproperties (propertyID, eventID, key, value) VALUES ('{0}', '{1}', '{2}', '{3}')".format(self.__getPropertyID(key), self._id, key, str(value))
+            sql = "INSERT INTO main.eventproperties (propertyID, eventID, key, value) VALUES ('{0}', {1}, '{2}', '{3}')".format(self.__getPropertyID(key), self._id, key, str(value))
         self._db.execute(sql)
 
         self.properties[key] = value
@@ -538,7 +603,12 @@ class Event:
         *key*   key name of the property.
         ======= ===============================
         """
-        return self._id + "|" + key
+        return "{0}|{1}".format(self._id, key)
+
+
+    def getID(self):
+        """get the ID of this event."""
+        return self._id
 
 
     def summary(self):
@@ -550,7 +620,7 @@ class Event:
         print "="*linewidth
 
         # Event info
-        print "  %-40s : %s" %("ID", self._id)
+        print "  %-40s : %d" %("ID", self._id)
         print "  %-40s : %s" %("Status", self.status)
         print "  %-40s : %s" %("Timestamp", self.timestamp)
         print "  %-40s : %s" %("Results path", self.resultspath)
@@ -730,6 +800,11 @@ class Datafile:
         ======= ===============================
         """
         return self._id + "|" + key
+
+
+    def getID(self):
+        """get the ID of this datafile."""
+        return self._id
 
 
     def summary(self):
