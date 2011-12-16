@@ -44,8 +44,10 @@ foreach (_unixCommand
   
   ## Generate variable to store information
   string (TOUPPER ${_unixCommand} _varUnixCommand)
-
+  
   ## Search for the executable
-  find_program (${_varUnixCommand}_EXECUTABLE ${_unixCommand})
-
+  if (NOT ${_varUnixCommand}_EXECUTABLE)
+    find_program (${_varUnixCommand}_EXECUTABLE ${_unixCommand} )
+  endif (NOT ${_varUnixCommand}_EXECUTABLE)
+  
 endforeach (_unixCommand)
