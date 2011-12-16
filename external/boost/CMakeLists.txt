@@ -1,12 +1,12 @@
 
-cmake_minimum_required (VERSION 2.8)
-cmake_policy (VERSION 2.8)
-
 ## ==============================================================================
 ##
 ##  CMake project settings
 ##
 ## ==============================================================================
+
+cmake_minimum_required (VERSION 2.8)
+cmake_policy (VERSION 2.8)
 
 ##__________________________________________________________
 ## Name of the project handled by CMake
@@ -36,9 +36,20 @@ option (BOOST_FROM_REPOS   "Install package from repository?"         NO )
 ##
 ## ==============================================================================
 
+##__________________________________________________________
+## Search for Boost++ installation
+
 if (NOT BOOST_FOUND)
   find_package (Boost)
 endif (NOT BOOST_FOUND)
+
+##__________________________________________________________
+## Check Boost++ version number
+
+if (BOOST_FOUND)
+  message (STATUS "[Boost++]")
+  message (STATUS " .. BOOST_INCLUDES = ${BOOST_INCLUDES}")
+endif (BOOST_FOUND)
 
 ## ==============================================================================
 ##
