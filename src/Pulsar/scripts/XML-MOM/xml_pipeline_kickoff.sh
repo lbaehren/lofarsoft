@@ -189,10 +189,14 @@ else # if [[ $cep2 == 1 ]]
               locus_list=NONE
               locus_list=`grep locus $PARSET | grep CoherentStokes.mountpoints | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
 <<<<<<< HEAD
+<<<<<<< HEAD
               status=$?
 =======
               status=$!
 >>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
+=======
+              status=$?
+>>>>>>> bug fix for the parset finding command line ;  obsid was not capital
               if [[ $status != 0 ]]
               then
                  echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
@@ -216,7 +220,7 @@ else # if [[ $cep2 == 1 ]]
 =======
               fi
            fi
-           
+          
            if [[ $hoover_only == 0 ]]
            then
               echo 'cexec locus:${locus_list} "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
