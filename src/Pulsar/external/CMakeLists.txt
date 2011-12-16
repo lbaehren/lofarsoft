@@ -111,14 +111,14 @@ add_custom_target (tempo2_unpack
 if (UNIX)
  if (APPLE)
 add_custom_target (tempo2_configure
-  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/cmake_configure.log 2>&1
+  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CFITSIO_INCLUDES} --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name} 
   COMMENT "Configuring project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name} ..."
   )
 add_dependencies (tempo2_configure tempo2_unpack)
  else (APPLE)
 add_custom_target (tempo2_configure
-  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CMAKE_INSTALL_PREFIX}/../../include --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local LOGIN_ARCH=linux --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/cmake_configure.log 2>&1
+  COMMAND ./configure TEMPO2=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo2_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  --with-cfitsio-include-dir=${CFITSIO_INCLUDES} --with-cfitsio-lib-dir=${CMAKE_INSTALL_PREFIX}/../../lib --disable-local LOGIN_ARCH=linux --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo2_name} 
   COMMENT "Configuring project Tempo2 in ${PULSAR_BINARY_DIR}/apps/${tempo2_name} ..."
   )
