@@ -5,10 +5,14 @@
 
 #PLEASE increment the version number when you edit this file!!!
 <<<<<<< HEAD
+<<<<<<< HEAD
 VERSION=3.27
 =======
 VERSION=3.24
 >>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
+=======
+VERSION=3.25
+>>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
  
 #####################################################################
 # Usage #
@@ -3118,7 +3122,11 @@ done # for loop over modes in $mode_str
 
 if [[ $proc != 0 ]]
 then
+<<<<<<< HEAD
     if (( (( $flyseye == 0 )) && (( $nrTArings == 0 )) ))
+=======
+    if (( $flyseye == 0 )) && (( $nrTArings = 0 ))
+>>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
     then
 	    # creat combined _diag.png based on any that exist;  call is status_diag.png
 	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
