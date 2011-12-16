@@ -45,17 +45,17 @@ if (NOT HAVE_PGPLOT OR PGPLOT_FORCE_BUILD)
   ## ------------------------------------------------------------------------------
   ## Check for required tools
   
-  find_program (HAVE_WGET  wget  ${bin_locations} )
-  find_program (HAVE_CURL  curl  ${bin_locations} )
-  find_program (HAVE_TAR   tar   ${bin_locations} )
+  find_program (HAVE_WGET  wget )
+  find_program (HAVE_CURL  curl )
+  find_program (HAVE_TAR   tar  )
   
   ##__________________________________________________________________
   ## Download the tar-archive from the USG server
 
-  set (PGPLOT_VERSION "5.2")
-  set (PGPLOT_DIRECTORY "pgplot")
+  set (PGPLOT_VERSION     "5.2")
+  set (PGPLOT_DIRECTORY   "pgplot")
   set (PGPLOT_TAR_ARCHIVE "pgplot${PGPLOT_VERSION}.tar.gz")
-  set (PGPLOT_URL "ftp://ftp.astro.caltech.edu/pub/pgplot/${PGPLOT_TAR_ARCHIVE}")
+  set (PGPLOT_URL         "ftp://ftp.astro.caltech.edu/pub/pgplot/${PGPLOT_TAR_ARCHIVE}")
 
   if (HAVE_WGET)
     add_custom_target (download_archive ALL

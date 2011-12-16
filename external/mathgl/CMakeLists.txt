@@ -27,7 +27,7 @@ set (MATHGL_FIND_QUIETLY YES)
 find_package (MathGL)
 find_package (Subversion)
 
-find_program (find_executable find PATHS ${bin_locations})
+find_program (find_executable find)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -40,13 +40,13 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
 
   ##__________________________________________________________________
   ## Tools and definitions
-
-  list (APPEND bin_locations /sw/lib/qt4-mac/bin)
-  list (APPEND bin_locations /sw/lib/qt4-x11/bin)
-
-  find_program (ln_executable     ln     ${bin_locations} )
-  find_program (qmake_executable  qmake  ${bin_locations} )
-
+  
+  list (INSERT CMAKE_PROGRAM_PATH 0 /sw/lib/qt4-mac/bin)
+  list (INSERT CMAKE_PROGRAM_PATH 0 /sw/lib/qt4-x11/bin)
+  
+  find_program (ln_executable     ln    )
+  find_program (qmake_executable  qmake )
+  
   set (MATHGL_TAR_ARCHIVE "mathgl.tgz")
   set (MATHGL_URL "${USG_DOWNLOAD}/software/${MATHGL_TAR_ARCHIVE}")
 
