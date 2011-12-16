@@ -66,6 +66,8 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
   ## ============================================================================
   
   foreach (_pathBase
+      /usr
+      /usr/local
       /app/usg
       /opt/casa/local
       /usr/X11R6
@@ -140,7 +142,7 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
       ## Iterate through the list of modules
       
       foreach (varModule ${varArguments})
-	
+
 	## Get package name in uppercase
 	string (TOUPPER ${varModule} varModuleUpper)
 	
@@ -155,6 +157,7 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
 	
 	## Load CMake module if package not yet located
 	if (NOT ${varModuleUpper}_FOUND)
+	  message (STATUS "Looking for package ${varModule} ...")
 	  find_package (${varModule})
 	endif (NOT ${varModuleUpper}_FOUND)
 	
