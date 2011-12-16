@@ -11,7 +11,7 @@ set (fftw_directory "fftw/fftw-${fftw_version}-modified")
 set (fftw_archive "${fftw_directory}.tgz")
 
 add_custom_target (fftw_unpack
-  COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${fftw_archive}
+  COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${fftw_archive}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external
   COMMENT "Unpacking tar archive of FFTW from ${PULSAR_SOURCE_DIR}/external/${fftw_archive} to ${PULSAR_BINARY_DIR}/external ..."
   )
@@ -53,7 +53,7 @@ set (tempo_ephem_directory "tempo/tempo_ephem${tempo_version}")
 set (tempo_ephem_archive "${tempo_ephem_directory}.tar.gz")
 
 add_custom_target (tempo_unpack
-  COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo_archive}
+  COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo_archive}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
   COMMENT "Unpacking tar archive of Tempo from ${PULSAR_SOURCE_DIR}/external/${tempo_archive} to ${PULSAR_BINARY_DIR}/apps..."
   )
@@ -99,7 +99,7 @@ set (tempo2_archive "${tempo2_directory}.tar.gz")
 
 add_custom_target (tempo2_unpack
   COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${tempo2_name}
-  COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo2_archive}
+  COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo2_archive}
   COMMAND echo lofar " t LF" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/aliases
   COMMAND echo "" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
   COMMAND echo " 3826937.853   460938.478       5064630.667      LOFAR               t" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
@@ -169,7 +169,7 @@ add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
   set (ppgplot_archive "${ppgplot_directory}.tar.gz")
   
   add_custom_target (ppgplot_unpack
-    COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive}
+    COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive}
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Unpacking tar archive of PPGPLOT from ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive} to ${PULSAR_BINARY_DIR}/apps..."
     )
@@ -413,7 +413,7 @@ add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dsp
   add_custom_target (ssps_unpack
     COMMAND cd ${PULSAR_BINARY_DIR}/apps
     COMMAND rm -rf ${ssps_name}
-    COMMAND ${tar_executable} -xvzf ${PULSAR_SOURCE_DIR}/external/${ssps_archive}
+    COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${ssps_archive}
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Unpacking tar archive of SSPS from ${PULSAR_SOURCE_DIR}/external/${ssps_archive} to ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
     )

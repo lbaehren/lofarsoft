@@ -95,7 +95,6 @@ endforeach (_extraLocations)
 
 include (FindUnixCommands)
 
-find_program (tar_executable  tar  )
 find_program (gzip_executable gzip )
 
 ##__________________________________________________________
