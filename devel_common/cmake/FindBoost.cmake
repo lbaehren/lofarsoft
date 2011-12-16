@@ -135,13 +135,14 @@ endif (BOOST_FIND_wave)
 ## initialize list of detected libraries
 
 set (BOOST_LIBRARIES "")
+set (BOOST_INCLUDES  "")
 
 foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44) 
 
-  ## Check for the header files ------------------
+  ## Initialize book-keeping variable
+  set (continue_search NO)
   
   ## <boost/config.hpp>
-  set (continue_search 0)
   foreach (hdr ${boost_headers})
     find_path (BOOST_INCLUDES_${hdr} ${hdr}
       PATH_SUFFIXES
@@ -155,7 +156,7 @@ foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44)
       if (NOT BOOST_FIND_QUIETLY)
         message (STATUS "Not found: ${hdr} version ${boost_version}")
       endif (NOT BOOST_FIND_QUIETLY)
-      set (continue_search 1)
+      set (continue_search YES)
     endif (BOOST_INCLUDES_${hdr})
   endforeach (hdr)
   ## Remove possible duplicates from the list of includes
@@ -170,7 +171,7 @@ foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44)
     if (NOT BOOST_FIND_QUIETLY)
       message (STATUS "Too many header directories for Boost ${boost_version}")
     endif (NOT BOOST_FIND_QUIETLY)
-    set (continue_search 1)
+    set (continue_search YES)
   endif (num_includes EQUAL 1)
 
   ## Check for the module libraries --------------
@@ -201,16 +202,16 @@ foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44)
     endif (${_lib_cache})
   endforeach (lib)
   
-  if (NOT continue_search)
-    break ()
-  else (NOT continue_search)
-#    if (NOT BOOST_FIND_QUIETLY)
+  if (continue_search)
+    if (NOT BOOST_FIND_QUIETLY)
       message (STATUS "Boost ${boost_version} not found")
-#    endif (NOT BOOST_FIND_QUIETLY)
+    endif (NOT BOOST_FIND_QUIETLY)
     set (BOOST_LIBRARIES "")
-    set (BOOST_INCLUDES "")
-  endif (NOT continue_search)
-
+    set (BOOST_INCLUDES  "")
+  else (continue_search)
+    break ()
+  endif (continue_search)
+  
 endforeach (boost_version)
 
 ## -----------------------------------------------------------------------------
