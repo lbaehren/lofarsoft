@@ -49,8 +49,6 @@ option (ANAAMIKA_ENABLE_PYBDSM     "Build Python-enabled version of BDSM?"  YES 
 ##
 ## ==============================================================================
 
-include (IncludeFindModule)
-
 set (bdsm_cmake_modules
   Boost
   CFITSIO
@@ -63,7 +61,7 @@ set (bdsm_cmake_modules
   X11
   )
 
-include_find_module (${bdsm_cmake_modules} ${ANAAMIKA_VERBOSE_CONFIGURE})
+lusFindModules (${bdsm_cmake_modules} ${ANAAMIKA_VERBOSE_CONFIGURE})
 
 ## ==============================================================================
 ##

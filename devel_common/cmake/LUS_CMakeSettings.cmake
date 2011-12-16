@@ -32,6 +32,30 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
   
   ## ============================================================================
   ##
+  ##  CMake modules path
+  ##
+  ## ============================================================================
+
+  if (LUS_SOURCE_DIR)
+    
+    find_path (LUS_CMAKE_MODULE_PATH LUS_CMakeSettings.cmake
+      HINT $ENV{LOFARSOFT}
+      PATHS
+      ${LUS_SOURCE_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      PATH_SUFFIXES
+      cmake
+      devel_common/cmake
+      )
+
+    if (LUS_CMAKE_MODULE_PATH)
+      list (INSERT CMAKE_MODULE_PATH 0 ${LUS_CMAKE_MODULE_PATH} )
+    endif (LUS_CMAKE_MODULE_PATH)
+    
+  endif (LUS_SOURCE_DIR)
+  
+  ## ============================================================================
+  ##
   ##                                                             Search locations
   ##
   ##  When searching for application programs, header files and libraries, CMake
