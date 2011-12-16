@@ -45,6 +45,39 @@ lofarsoft                <- $LOFARSOFT
       `-- PyCRTools
 
 _________________________________________________________________________________
+>>> 4. External dependencies
+
+a) FFTW3
+
+The following dependencies are defined in external/CMakeLists.txt:
+
+  fftw_install
+  |-- fftw_build
+  |-- fftw_configure
+  `-- fftw_unpack
+
+  fftw_build
+  |-- fftw_configure
+  `-- fftw_unpack
+
+  fftw_configure
+  `-- fftw_unpack
+
+Collapsing the above definitions, one obtains:
+
+  fftw_install
+  `-- fftw_build
+      `-- fftw_configure
+           `-- fftw_unpack
+
+which is sufficiently well defined by the following statements:
+
+  add_dependencies (fftw_install fftw_build)
+  add_dependencies (fftw_build fftw_configure)
+  add_dependencies (fftw_configure fftw_unpack)
+
+
+_________________________________________________________________________________
 >>> 6. Basic installation steps for Presto
 
 1. Install FFTW3.X You need to compile FFTW for _single_ precision (see the
