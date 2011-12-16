@@ -1,0 +1,19 @@
+
+set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH
+  "Installation location" FORCE)
+
+set (LUS_SOURCE_DIR ${LUS_SOURCE_DIR} CACHE PATH
+  "LUS source directory" FORCE)
+
+## Boost++ libraries
+
+set (BOOST_FOUND      ${BOOST_FOUND}      CACHE BOOL     "Have Boost++?"     FORCE )
+set (BOOST_INCLUDES   ${BOOST_INCLUDES}   CACHE PATH     "Boost++ includes"  FORCE )
+set (BOOST_LIBRARIES  ${BOOST_LIBRARIES}  CACHE FILEPATH "Boost++ libraries" FORCE )
+
+set (NUMPY_FOUND      ${NUMPY_FOUND}      CACHE BOOL     "Have NumPy?"     FORCE )
+set (NUMPY_INCLUDES   ${NUMPY_INCLUDES}   CACHE PATH     "Numpy includes"  FORCE )
+set (NUMPY_LIBRARIES  ${NUMPY_LIBRARIES}  CACHE FILEPATH "Numpy libraries" FORCE )
+
+set (PYTHON_INCLUDES   ${PYTHON_INCLUDES}   CACHE PATH     "Python includes"  FORCE )
+set (PYTHON_LIBRARIES  ${PYTHON_LIBRARIES}  CACHE FILEPATH "Python libraries" FORCE )
