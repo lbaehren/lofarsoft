@@ -162,6 +162,7 @@ else # if [[ $cep2 == 1 ]]
            # CS stokes processing
            # find the locus node list for CS data for processing
 <<<<<<< HEAD
+<<<<<<< HEAD
            PARSET=`find_lofar_parset.sh $obsid`
            if [[ $PARSET == "ERROR" ]]
            then
@@ -171,6 +172,12 @@ else # if [[ $cep2 == 1 ]]
            if [[ $PARSET == "ERROR" ]]
            then
               echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $OBSID' command"
+>>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
+=======
+           PARSET=`find_lofar_parset.sh $obsid`
+           if [[ $PARSET == "ERROR" ]]
+           then
+              echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $obsid' command"
 >>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
               exit 1
            elif [[ ! -f $PARSET ]]
