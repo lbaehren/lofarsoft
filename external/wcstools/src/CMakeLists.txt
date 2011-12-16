@@ -22,23 +22,10 @@ option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" NO  )
 ##
 ## ==============================================================================
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Fix for installation prefix.
 find_library (libsocket      socket      )
 find_library (libnsl         nsl         )
 find_library (libm           m           )
 find_library (libSystemStubs SystemStubs )
-<<<<<<< HEAD
-=======
-find_library (libsocket socket)
-find_library (libnsl nsl)
-find_library (libm m)
-find_library (libSystemStubs SystemStubs)
->>>>>>> Cleaning up installation of DAL.
-=======
->>>>>>> Fix for installation prefix.
 
 ## set up chain of libraries to link against
 
