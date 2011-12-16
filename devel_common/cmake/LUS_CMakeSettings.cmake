@@ -20,11 +20,11 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
       FORCE
       )
   else (LUS_INSTALL_PREFIX)
-    set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR} CACHE PATH
+    set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release CACHE PATH
       "CMake installation area" 
       FORCE
       )
-    set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR} CACHE PATH
+    set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release CACHE PATH
       "CMake installation area" 
       FORCE
       )
