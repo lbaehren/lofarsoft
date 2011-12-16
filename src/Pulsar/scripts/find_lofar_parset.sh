@@ -40,9 +40,12 @@ then
 fi
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #Check if case 1; else case 2
 >>>>>>> added a script to find the lofar parset file
+=======
+>>>>>>> added more info / help for the script
 has_underscore=`echo $OBSID | grep "_"`
 if [[ $has_underscore != "" ]]
 then
