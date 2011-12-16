@@ -31,7 +31,7 @@ option (TMF_FROM_RELEASE "Use release version instead of trunk?" YES)
 ## ==============================================================================
 
 if (NOT LUS_SOURCE_DIR)
-  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
+  find_path (LUS_SOURCE_DIR devel_common/cmake/LUS_CMakeSettings.cmake
     PATHS
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/..
