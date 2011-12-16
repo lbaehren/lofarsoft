@@ -12,35 +12,35 @@ class Database:
 
         **Parameters**
 
-        ============ =========================
+        ============ =====
         *filename*   Filename of the database.
-        ============ =========================
+        ============ =====
 
-        When the *filename* is ``:memory:`` (by default) the database is
-        written to and read from memory.
+        When the filename is ``:memory:`` the database is written to
+        and read from memory.
         """
         self._filename = filename
         self._db = sqlite3.connect(self._filename)
 
 
-    def open(self, filename=":memory:"):
+    def open(self, filename=""):
         """Open an SQLite database.
 
         **Parameters**
 
-        ============ =========================
+        ============ =====
         *filename*   Filename of the database.
-        ============ =========================
+        ============ =====
 
-        When the *filename* is ``:memory:`` (default) the database is
-        written to and read from memory.
+        When the filename is ``:memory:`` the database is written to
+        and read from memory.
         """
         self._db.close()
 
         if filename != "":
             self._filename = filename
 
-        self._db = sqlite3.connect(self._filename)
+        self._db = sqlite.connect(self._filename)
 
 
     def close(self):
@@ -50,15 +50,13 @@ class Database:
 
 
     def insert(self, sql=""):
-        """Insert a new record into the database.
+        """Insert a new record into the database and return the new primary key.
 
         **Parameters**
 
-        ====== ============================
-        *sql*  SQL statement to execute.
-        ====== ============================
-
-        Returns the ID of the last row inserted.
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
         """
         if not self._db:
             self.open()
@@ -79,11 +77,9 @@ class Database:
 
         **Parameters**
 
-        ====== ============================
-        *sql*  SQL statement to execute.
-        ====== ============================
-
-        Returns a list of selected records.
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
         """
         if not self._db:
             self.open()
@@ -98,13 +94,13 @@ class Database:
 
 
     def execute(self, sql=""):
-        """Execute an SQL statement.
+        """Execute an sql statement
 
         **Parameters**
 
-        ====== ===========================
-        *sql*  SQL statement to execute.
-        ====== ===========================
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
         """
         if not self._db:
             self.open()
@@ -121,9 +117,9 @@ class Database:
 
         **Parameters**
 
-        ====== ===========================
-        *sql*  SQL statement to execute.
-        ====== ===========================
+        ======== =====
+        *sql*    SQL statement to execute.
+        ======== =====
         """
         if not self._db:
             self.open()
@@ -133,24 +129,4 @@ class Database:
         cursor.executescript(sql)
         self._db.commit()
         cursor.close()
-
-
-    def hasTable(self, tablename):
-        """Check if a specific table exists.
-
-        **Parameters**
-
-        ============ ==========================================
-        *tablename*  Name of the table to check for existence.
-        ============ ==========================================
-
-        Returns ``True`` if *tablename* exists, ``False`` otherwise.
-        """
-        result = False
-
-        sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='%s';" %(tablename)
-        result = len(self.select(sql)) > 0
-
-        return result
-
 
