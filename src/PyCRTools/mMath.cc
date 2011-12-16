@@ -1145,7 +1145,7 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const S val)
       vec.powerlawadd(xvec,A,alpha) -> vec=[vec_0+A*xvec_0^alpha,vec_1+A*xvec_1^alpha,...,vec_n+A*xvec_n^alpha ]
 
   Description:
-  If the second vector is shorter, it will wrap around. 
+  If the second vector is shorter, it will wrap around.
 
   See also:
   hPowerlawMul, hPowerlawAdd, hLinearFunctionMul, hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
@@ -1201,7 +1201,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter2 xvec, const 
       vec.linearfunctionadd(xvec,a,m) -> vec=[vec_0+a+xvec_0*m,vec_1+a+xvec_1*m,...,vec_n+a+xvec_n*m]
 
   Description:
-  If the second vector is shorter, it will wrap around. 
+  If the second vector is shorter, it will wrap around.
 
   See also:
   hPowerlawMul, hPowerlawAdd, hLinearFunctionMul, hLinearFunctionAdd, hLogLinearFunctionMul, hLogLinearFunctionAdd
@@ -1262,7 +1262,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const Iter2 xvec, const 
   log10(a*\nu^\alpha) = (ln(a)+\alpha*ln(\nu))/ln(10.)
 
 
-  If the second vector is shorter, it will wrap around. 
+  If the second vector is shorter, it will wrap around.
 
 
   See also:
@@ -2746,9 +2746,9 @@ HNumber HFPP_FUNC_NAME (const Iter vec,const Iter vec_end, const T threshold)
   // Sanity check
   if (len < 0) ERROR_RETURN_VALUE("Size of vector is < 0.",0.);
 
-  len=0;
+  len = 0;
 
-  HNumber sum;
+  HNumber sum = 0.;
 
   Iter it=vec;
   while (it!=vec_end) {
