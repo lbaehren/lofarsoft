@@ -13,6 +13,7 @@
 # /globalhome/lofarsystem/log/L25249/L25249.parset
 
 # History of the various parset locations (where the program looks for parsets):
+<<<<<<< HEAD
 =======
 #!/bin/ksh
 =======
@@ -21,6 +22,8 @@
 
 # History of the various parset locations:
 >>>>>>> added a script to find the lofar parset file
+=======
+>>>>>>> added more info / help for the script
 # (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 # (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
 # (3) 2nd transpose parset as of Aug 20, 2010 is here: /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
