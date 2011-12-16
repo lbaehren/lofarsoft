@@ -6,6 +6,7 @@
 #PLEASE increment the version number when you edit this file!!!
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 VERSION=3.27
 =======
 VERSION=3.24
@@ -13,6 +14,9 @@ VERSION=3.24
 =======
 VERSION=3.25
 >>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
+=======
+VERSION=3.26
+>>>>>>> excluded directories or files with the name -search- in the results .tar file
  
 #####################################################################
 # Usage #
@@ -3190,7 +3194,11 @@ then
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
+<<<<<<< HEAD
 	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
+=======
+	tar_list=`find ./ -type f \( ! -iname "*search*" -o -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \)`
+>>>>>>> excluded directories or files with the name -search- in the results .tar file
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
