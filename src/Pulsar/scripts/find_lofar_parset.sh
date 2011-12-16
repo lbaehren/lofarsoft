@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 #!/bin/ksh 
 
 # This program (find_lofar_parset.sh) takes one input argument - the OBSID.
@@ -14,6 +15,9 @@
 # History of the various parset locations (where the program looks for parsets):
 =======
 #!/bin/ksh
+=======
+#!/bin/ksh 
+>>>>>>> fixed a few problems with parsets from various timeframes
 
 # History of the various parset locations:
 >>>>>>> added a script to find the lofar parset file
@@ -41,6 +45,7 @@ if [[ $has_underscore != "" ]]
 then
     short_id=`echo $OBSID | sed 's/L.....//g'`
 <<<<<<< HEAD
+<<<<<<< HEAD
     PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 else
     short_id=`echo $OBSID | sed 's/L//g'`
@@ -55,18 +60,26 @@ then
    then 
       new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset\* -print`
 =======
+=======
+    PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
+>>>>>>> fixed a few problems with parsets from various timeframes
 else
     short_id=`echo $OBSID | sed 's/L//g'`
+    PARSET=/globalhome/lofarsystem/log/${OBSID}/${OBSID}.parset
 fi
 
-PARSET=/globalhome/lofarsystem/log/${OBSID}/${OBSID}.parset
 
 if [ ! -f $PARSET ] 
 then
+   
    if [ -d /globalhome/lofarsystem/log/ ]
    then 
+<<<<<<< HEAD
       new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
 >>>>>>> added a script to find the lofar parset file
+=======
+      new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset\* -print`
+>>>>>>> fixed a few problems with parsets from various timeframes
    fi
    
    if [[ $new_parset == "" ]]
@@ -75,6 +88,7 @@ then
       then 
          new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
       fi
+<<<<<<< HEAD
 <<<<<<< HEAD
       
       if [[ $new_parset == "" ]]
@@ -87,6 +101,13 @@ then
           # Sept 23, 2010 another parset location added
           if [ -d globalhome/lofarsystem/log/ ]
 >>>>>>> added a script to find the lofar parset file
+=======
+      
+      if [[ $new_parset == "" ]]
+      then
+          # Sept 23, 2010 another parset location added
+          if [ -d /globalhome/lofarsystem/log/ ]
+>>>>>>> fixed a few problems with parsets from various timeframes
           then 
   	         new_parset=/globalhome/lofarsystem/log/L${short_id}/L${short_id}.parset
   	      fi
@@ -124,10 +145,14 @@ then
    fi
 else
 <<<<<<< HEAD
+<<<<<<< HEAD
    echo $PARSET
 =======
    echo "ERROR"
    exit
 >>>>>>> added a script to find the lofar parset file
+=======
+   echo $PARSET
+>>>>>>> fixed a few problems with parsets from various timeframes
 fi
 
