@@ -161,10 +161,17 @@ else # if [[ $cep2 == 1 ]]
         then
            # CS stokes processing
            # find the locus node list for CS data for processing
+<<<<<<< HEAD
            PARSET=`find_lofar_parset.sh $obsid`
            if [[ $PARSET == "ERROR" ]]
            then
               echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $obsid' command"
+=======
+           PARSET=`find_lofar_parset.sh $OBSID`
+           if [[ $PARSET == "ERROR" ]]
+           then
+              echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $OBSID' command"
+>>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
               exit 1
            elif [[ ! -f $PARSET ]]
            then
@@ -174,7 +181,11 @@ else # if [[ $cep2 == 1 ]]
               # collect the locus info from the parset
               locus_list=NONE
               locus_list=`grep locus $PARSET | grep CoherentStokes.mountpoints | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
+<<<<<<< HEAD
               status=$?
+=======
+              status=$!
+>>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
               if [[ $status != 0 ]]
               then
                  echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
@@ -184,6 +195,7 @@ else # if [[ $cep2 == 1 ]]
               then
                  echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
                  locus_list="0-99"
+<<<<<<< HEAD
               else 
                  echo "Using the following locus nodes for CS processing: cexec -f /etc/c3.conf locus:$locus_list"
               fi
@@ -194,6 +206,16 @@ else # if [[ $cep2 == 1 ]]
               echo 'cexec -f /etc/c3.conf locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            else
               echo '#cexec -f /etc/c3.conf locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+=======
+              fi
+           fi
+           
+           if [[ $hoover_only == 0 ]]
+           then
+              echo 'cexec locus:${locus_list} "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+           else
+              echo '#cexec locus:${locus_list} "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+>>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
            fi
            echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/TA_heatmap.sh .; ./TA_heatmap.sh; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png status.png; convert -append *TA_heatmap_log.png  *TA_heatmap_linear.png status.png; convert -scale 200x140-0-0 status.png status.th.png; mv status_diag.png status.png"'  >> $outfile.$obsid.CS.sh
