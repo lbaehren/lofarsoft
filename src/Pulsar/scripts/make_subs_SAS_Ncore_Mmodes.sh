@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.27
+VERSION=3.28
  
 #####################################################################
 # Usage #
@@ -340,74 +340,22 @@ then
 	   exit 1
     fi
 else
-	#Set up the parset location:
-	# (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
-	# (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
-	# (3) 2nd transpose parset as of Aug 20, 2010 is here: /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
-	
-	#Check if case 1; else case 2
-    if [ $user_parset_location == 0 ]
-    then
-	    PARSET=/globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
-	else
-	    PARSET=$parset_location/${OBSID}/RTCP.parset.0
-	fi
-	has_underscore=`echo $OBSID | grep "_"`
-	if [[ $has_underscore != "" ]]
-	then
-	    short_id=`echo $OBSID | sed 's/L.....//g'`
-	else
-	    short_id=`echo $OBSID | sed 's/L//g'`
-	fi
-	
-	if [ ! -f $PARSET ] 
-	then
-	   if [ $user_parset_location == 0 ]
-       then
-	      new_parset=`find /globalhome/lofarsystem/log/ -name RTCP-${short_id}.parset -print`
-	   else
-	      new_parset=`find $parset_location/ -name RTCP-${short_id}.parset -print`
-	   fi
-	   if [[ $new_parset == "" ]]
-	   then
-	      if [ $user_parset_location == 0 ]
-          then
-	         new_parset=`find /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ -name RTCP-${short_id}.parset -print`
-	      else
-	         new_parset=`find $parset_location/ -name RTCP-${short_id}.parset -print`
-	      fi
-   	      if [[ $new_parset == "" ]]
-	      then
-	          # Sept 23, 2010 another parset location added
-	          if [ $user_parset_location == 0 ]
-	          then
-   	             new_parset=/globalhome/lofarsystem/log/L${short_id}/L${short_id}.parset
-	          else
-	             new_parset=`find $parset_location/ -name L${short_id}.parset -print`
-	          fi
-			  if [ ! -f $new_parset ] 
-			  then
-	             echo "ERROR: Unable to find parset for L$short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L${short_id} directory"
-	             exit 1
-	          fi
-	      else
-		      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
-		      if (( $found_nof_parsets !=  1 ))
-		      then
-		         echo "ERROR: Found more than one parset for $short_id in /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/ directory; unable to resolve problem"
-		         exit 1
-		      fi
-	      fi
-	   else
-	      found_nof_parsets=`echo $new_parset | wc -l | awk '{print $1}'`
-	      if (( $found_nof_parsets !=  1 ))
-	      then
-	         echo "ERROR: Found more than one parset for $short_id in /globalhome/lofarsystem/log/ directory; unable to resolve problem"
-	         exit 1
-	      fi
-	   fi
-	   PARSET=$new_parset
-	fi
+   if [ $user_parset_location == 0 ]
+   then
+       PARSET=`find_lofar_parset.sh $OBSID`
+   else
+       PARSET=$parset_location/${OBSID}.parset
+   fi
+   
+   if [[ $PARSET == "ERROR" ]]
+   then
+      echo "ERROR: Could not find parset using 'find_lofar_parset.sh $OBSID`"
+      exit 1
+   elif [[ ! -f $PARSET ]]
+   then
+      echo "ERROR: $PARSET file appears to be missing"
+      exit 1
+   fi
 fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 
 ###PULSAR=B2111+46
