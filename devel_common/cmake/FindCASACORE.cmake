@@ -18,6 +18,8 @@
 # |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
 # +-----------------------------------------------------------------------------+
 
+if (NOT CASACORE_FOUND)
+
 ## -----------------------------------------------------------------------------
 ## Check for the casacore distribution
 ##
@@ -29,7 +31,7 @@
 ##
 ## -----------------------------------------------------------------------------
 
-include (CMakeSettings)
+include (LUS_CMakeSettings)
 
 ## ==============================================================================
 ##
@@ -115,22 +117,13 @@ set (casacore_headers
 ##
 ## ==============================================================================
 
-list (APPEND include_locations
-  ${CASACORE_ROOT_DIR}/include/casacore
-  ${LUS_SOURCE_DIR}/release/include
-  ${LUS_SOURCE_DIR}/external/casacore
-  /usr/include
-  /usr/local/include
-  /sw/share/casacore
-  /sw/include
-  /app/usg/release/include
-)
+list (APPEND CMAKE_INCLUDE_PATH ${CASACORE_ROOT_DIR}/include/casacore )
+list (APPEND CMAKE_INCLUDE_PATH /sw/share/casacore                    )
+list (APPEND CMAKE_INCLUDE_PATH /app/usg/release/include              )
 
-list (APPEND lib_locations
-  ${CASACORE_ROOT_DIR}/lib
-  /opt/casacore/lib
-  /app/usg/release/lib
-)
+list (APPEND CMAKE_LIBRARY_PATH ${CASACORE_ROOT_DIR}/lib )
+list (APPEND CMAKE_LIBRARY_PATH /opt/casacore/lib        )
+list (APPEND CMAKE_LIBRARY_PATH /app/usg/release/lib     )
 
 ## -----------------------------------------------------------------------------
 ## Check for system header files
@@ -139,21 +132,21 @@ if (NOT CASACORE_FIND_QUIETLY)
   message (STATUS "[FindCASACORE] Check for system header files ...")
 endif (NOT CASACORE_FIND_QUIETLY)
 
-find_path (HAVE_ASSERT_H  assert.h  PATHS ${include_locations} )
-find_path (HAVE_CTYPE_H   ctype.h   PATHS ${include_locations} )
-find_path (HAVE_FCNTL_H   fcntl.h   PATHS ${include_locations} )
-find_path (HAVE_STDLIB_H  stdlib.h  PATHS ${include_locations} )
-find_path (HAVE_STDIO_H   stdio.h   PATHS ${include_locations} )
-find_path (HAVE_STRING_H  string.h  PATHS ${include_locations} )
-find_path (HAVE_UNISTD_H  unistd.h  PATHS ${include_locations} )
+find_path (HAVE_ASSERT_H  assert.h )
+find_path (HAVE_CTYPE_H   ctype.h  )
+find_path (HAVE_FCNTL_H   fcntl.h  )
+find_path (HAVE_STDLIB_H  stdlib.h )
+find_path (HAVE_STDIO_H   stdio.h  )
+find_path (HAVE_STRING_H  string.h )
+find_path (HAVE_UNISTD_H  unistd.h )
 
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
-find_library (HAVE_LIBM         m          PATHS ${lib_locations} )
-find_library (HAVE_LIBG2C       g2c        PATHS ${lib_locations} )
-find_library (HAVE_LIBF2C       f2c        PATHS ${lib_locations} )
-find_library (HAVE_LIBGFORTRAN  gfortran   PATHS ${lib_locations} )
+find_library (HAVE_LIBM         m        )
+find_library (HAVE_LIBG2C       g2c      )
+find_library (HAVE_LIBF2C       f2c      )
+find_library (HAVE_LIBGFORTRAN  gfortran )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files.
@@ -171,9 +164,7 @@ set (CASACORE_INCLUDES "")
 foreach (CASACORE_HEADER ${casacore_headers})
   ## search for the header file of a given module
   find_path (header_path ${CASACORE_HEADER}
-    PATHS ${include_locations}
     PATH_SUFFIXES casacore include/casacore
-    NO_DEFAULT_PATH
     )
   ## if the header file was found, add its path to the include path
   if (header_path)
@@ -201,15 +192,9 @@ endif (NOT CASACORE_FIND_QUIETLY)
 foreach (casacore_lib ${casacore_modules})
   ## search for the library
   if (${casacore_lib} MATCHES "mirlib")
-    find_library (CASACORE_lib${casacore_lib} mir casa_mirlib
-      PATHS ${lib_locations}
-      NO_DEFAULT_PATH
-      )
+    find_library (CASACORE_lib${casacore_lib} mir casa_mirlib)
   else (${casacore_lib} MATCHES "mirlib")
-    find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib}
-      PATHS ${lib_locations}
-      NO_DEFAULT_PATH
-      )
+    find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib})
   endif (${casacore_lib} MATCHES "mirlib")
   ## if we have found the library, add it to the list
   if (CASACORE_lib${casacore_lib})
@@ -278,14 +263,6 @@ IF (UNIX)
     add_definitions (-DAIPS_LITTLE_ENDIAN)
     set (CMAKE_SYSTEM_BIG_ENDIAN 0)
   endif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
-  #  TEST_BIG_ENDIAN (CMAKE_SYSTEM_BIG_ENDIAN)
-  #  if (CMAKE_SYSTEM_BIG_ENDIAN)
-  #    message (STATUS "System is big endian.")
-  #    add_definitions (-DAIPS_BIG_ENDIAN)
-  #  elseif (CMAKE_SYSTEM_BIG_ENDIAN)
-  #    message (STATUS "System is little endian.")
-  #    add_definitions (-DAIPS_LITTLE_ENDIAN)
-  #  endif (CMAKE_SYSTEM_BIG_ENDIAN)
   ##
   ## Platform test 32/64 bit ------------------------------
   ##
@@ -322,3 +299,5 @@ mark_as_advanced (
   casacore_modules
   casacore_headers
   )
+
+endif (NOT CASACORE_FOUND)

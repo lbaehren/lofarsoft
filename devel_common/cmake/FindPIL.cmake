@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id:: template_FindXX.cmake 1643 2008-06-14 10:19:20Z baehren             $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2010                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -36,7 +34,7 @@ if (NOT FIND_PIL_CMAKE)
   ##_____________________________________________________________________________
   ## Search locations
   
-  include (CMakeSettings)
+  include (LUS_CMakeSettings)
   
   ##_____________________________________________________________________________
   ## Check for the header files
@@ -58,10 +56,7 @@ if (NOT FIND_PIL_CMAKE)
   ##_____________________________________________________________________________
   ## Check for the executables
   
-  find_program (PGET_EXECUTABLE pget
-    PATHS ${bin_locations}
-    NO_DEFAULT_PATH
-    )
+  find_program (PGET_EXECUTABLE pget)
   
   ##_____________________________________________________________________________
   ## Actions taken when all components have been found

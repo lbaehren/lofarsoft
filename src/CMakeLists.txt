@@ -67,7 +67,7 @@ macro (lus_package_build _name _dir)
 
   ## Trigger build and install
   add_custom_target (${_name}
-    COMMAND ${CMAKE_COMMAND} -C${LUS_BINARY_DIR}/CMakeCache.txt ${CMAKE_CURRENT_SOURCE_DIR}/${_dir}
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir}
     COMMAND ${CMAKE_BUILD_TOOL} install
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
     )

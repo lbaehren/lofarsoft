@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -35,7 +33,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+include (LUS_CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Executables
@@ -43,20 +41,19 @@ include (CMakeSettings)
 ## moc
 
 if (NOT QT_MOC_EXECUTABLE)
-  find_program (QT_MOC_EXECUTABLE moc ${bin_locations})
+  find_program (QT_MOC_EXECUTABLE moc)
 endif (NOT QT_MOC_EXECUTABLE)
 
 ## qmake
 
 if (NOT QT_QMAKE_EXECUTABLE)
-  find_program (QT_QMAKE_EXECUTABLE qmake ${bin_locations})
+  find_program (QT_QMAKE_EXECUTABLE qmake)
 endif (NOT QT_QMAKE_EXECUTABLE)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (QT_INCLUDES QtCore/QTimerEvent QtCore/QResource
-  PATHS ${include_locations} /sw/lib
   PATH_SUFFIXES
   qt4-mac
   qt4-mac/include
@@ -65,7 +62,6 @@ find_path (QT_INCLUDES QtCore/QTimerEvent QtCore/QResource
   )
 
 find_path (QT_QTCORE_INCLUDES QTimerEvent QResource
-  PATHS ${include_locations} /sw/lib
   PATH_SUFFIXES
   qt4-mac
   qt4-mac/include
@@ -79,7 +75,6 @@ if (QT_QTCORE_INCLUDES)
 endif (QT_QTCORE_INCLUDES)
 
 find_path (QT_QTGUI_INCLUDES QAction QCloseEvent QMenu
-  PATHS ${include_locations} /sw/lib
   PATH_SUFFIXES
   qt4-mac
   qt4-mac/include
@@ -109,7 +104,6 @@ foreach (_lib
   ## search for the library
   if (NOT QT_${_var}_LIBRARY)
     find_library (QT_${_var}_LIBRARY ${_lib}
-      PATHS ${lib_locations} /sw/lib
       PATH_SUFFIXES
       qt4-mac
       qt4-mac/lib

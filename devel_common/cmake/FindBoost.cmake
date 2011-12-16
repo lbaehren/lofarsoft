@@ -32,7 +32,7 @@ include (CheckTypeSize)
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+include (LUS_CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
@@ -73,7 +73,7 @@ if (BOOST_FIND_python_ONLY)
 
 endif (BOOST_FIND_python_ONLY)
 
-set (boost_headers boost/config.hpp)
+set (boost_headers boost/config.hpp boost/version.hpp)
 
 if (BOOST_FIND_date_time)
   list (APPEND boost_libraries boost_date_time)
@@ -135,7 +135,7 @@ endif (BOOST_FIND_wave)
 
 set (BOOST_LIBRARIES "")
 
-foreach (boost_version 1_44 1_39_0 1_39 1_36_0 1_34_1) 
+foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44) 
 
   ## Check for the header files ------------------
 
@@ -143,7 +143,6 @@ foreach (boost_version 1_44 1_39_0 1_39 1_36_0 1_34_1)
   set (continue_search 0)
   foreach (hdr ${boost_headers})
     find_path (BOOST_INCLUDES_${hdr} ${hdr}
-      PATHS ${include_locations}
       PATH_SUFFIXES
       boost-${boost_version}
       boost
@@ -182,7 +181,6 @@ foreach (boost_version 1_44 1_39_0 1_39 1_36_0 1_34_1)
     set (_lib_cache ${_lib}_LIBRARY)
     ## try to locate the library
     find_library (${_lib_cache} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d ${lib}-gcc41-mt-${boost_version}
-      PATHS ${lib_locations}
       PATH_SUFFIXES boost boost-${boost_version}
       NO_DEFAULT_PATH
       )
@@ -221,10 +219,10 @@ if (BOOST_boost_python)
   ## load CMake module required for checking symbols within a library
   include (CheckLibraryExists)
 
-  check_library_exists (${BOOST_boost_python} PyMem_Malloc "" BOOST__PyMem_Malloc)
+  check_library_exists (${BOOST_boost_python} PyMem_Malloc  "" BOOST__PyMem_Malloc)
   check_library_exists (${BOOST_boost_python} PyModule_Type "" BOOST__PyModule_Type)
   check_library_exists (${BOOST_boost_python} PyMethod_Type "" BOOST__PyMethod_Type)
-  check_library_exists (${BOOST_boost_python} PyErr_WarnEx "" BOOST__PyErr_WarnEx)
+  check_library_exists (${BOOST_boost_python} PyErr_WarnEx  "" BOOST__PyErr_WarnEx)
 
 endif (BOOST_boost_python)
 
@@ -232,8 +230,11 @@ endif (BOOST_boost_python)
 ## Actions taken when all components have been found
 
 IF (BOOST_INCLUDES AND BOOST_LIBRARIES)
-  SET (HAVE_BOOST TRUE)
+  set (HAVE_BOOST  TRUE)
+  set (BOOST_FOUND TRUE)
 ELSE (BOOST_INCLUDES AND BOOST_LIBRARIES)
+  set (HAVE_BOOST  FALSE)
+  set (BOOST_FOUND FALSE)
   IF (NOT BOOST_FIND_QUIETLY)
     IF (NOT BOOST_INCLUDES)
       MESSAGE (STATUS "Unable to find Boost header files!")

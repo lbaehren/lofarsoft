@@ -34,14 +34,12 @@ if (NOT FIND_GIT_CMAKE)
   ##_____________________________________________________________________________
   ## Search locations
   
-  include (CMakeSettings)
+  include (LUS_CMakeSettings)
   
   ##_____________________________________________________________________________
   ## Find executable
   
-  find_program (GIT_EXECUTABLE git
-    PATHS ${bin_locations}
-    )
+  find_program (GIT_EXECUTABLE git)
   
   ##_____________________________________________________________________________
   ## Extract version information

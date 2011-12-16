@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -33,19 +31,17 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+include (LUS_CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Find python
-include (FindPython)
+
+find_package (Python)
 
 ## -----------------------------------------------------------------------------
 ## Check for executables
 
-find_program (SPHINX_EXECUTABLE sphinx
-  PATHS ${bin_locations}
-  NO_DEFAULT_PATH
-  )
+find_program (SPHINX_EXECUTABLE sphinx)
 
 ## -----------------------------------------------------------------------------
 ## Try to determine version
@@ -76,16 +72,20 @@ endif (sphinx_version_test_output)
 ## Actions taken when all components have been found
 
 if (SPHINX_EXECUTABLE AND SPHINX_MAJOR_VERSION AND SPHINX_MINOR_VERSION)
-  set (HAVE_SPHINX TRUE)
+  set (HAVE_SPHINX  TRUE)
+  set (SPHINX_FOUND TRUE)
+else (SPHINX_EXECUTABLE AND SPHINX_MAJOR_VERSION AND SPHINX_MINOR_VERSION)
+  set (HAVE_SPHINX  FALSE)
+  set (SPHINX_FOUND FALSE)
 endif (SPHINX_EXECUTABLE AND SPHINX_MAJOR_VERSION AND SPHINX_MINOR_VERSION)
 
-if (HAVE_SPHINX)
+if (SPHINX_FOUND)
   if (NOT SPHINX_FIND_QUIETLY)
     message (STATUS "Found Sphinx")
   endif (NOT SPHINX_FIND_QUIETLY)
-else (HAVE_SPHINX)
+else (SPHINX_FOUND)
   if (SPHINX_FIND_REQUIRED)
     message (FATAL_ERROR "Could not find Sphinx!")
   endif (SPHINX_FIND_REQUIRED)
-endif (HAVE_SPHINX)
+endif (SPHINX_FOUND)
 

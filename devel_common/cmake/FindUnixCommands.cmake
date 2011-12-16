@@ -41,7 +41,7 @@ foreach (_unixCommand
     rm
     tar
     )
-
+  
   ## Generate variable to store information
   string (TOUPPER ${_unixCommand} _varUnixCommand)
 

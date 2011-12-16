@@ -134,6 +134,7 @@ foreach (varSystemPackage
     ITPP
     LAPACK
     NumPy
+    NumUtil
     OpenGL
     OpenMP
     PIL

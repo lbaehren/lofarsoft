@@ -49,19 +49,20 @@ option (ANAAMIKA_ENABLE_PYBDSM     "Build Python-enabled version of BDSM?"  YES 
 ##
 ## ==============================================================================
 
-set (bdsm_cmake_modules
-  Boost
-  CFITSIO
-  NumPy
-  NumUtil
-  GFortran
-  PGPLOT
-  Python
-  WCSLIB
-  X11
-  )
-
-lusFindModules (${bdsm_cmake_modules} ${ANAAMIKA_VERBOSE_CONFIGURE})
+foreach (anaamikaExternalPackages
+    Boost
+    CASACORE
+    CFITSIO
+    NumPy
+    NumUtil
+    GFortran
+    PGPLOT
+    Python
+    WCSLIB
+    X11
+    )
+  lusFindModules (${anaamikaExternalPackages} ${ANAAMIKA_VERBOSE_CONFIGURE})
+endforeach (anaamikaExternalPackages)
 
 ## ==============================================================================
 ##
@@ -101,3 +102,30 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC -fno-second-underscore")
 
 add_subdirectory (implement)
 add_subdirectory (apps)
+
+## ==============================================================================
+##
+##  Configuration summary
+##
+## ==============================================================================
+
+message (STATUS "------------------------------------------------------------")
+message (STATUS "[Anaamika] Configuration summary.")
+message (STATUS "------------------------------------------------------------")
+message (STATUS " System configuration:"                                      )
+message (STATUS " .. Processor type ............. = ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS " .. CMake executable ........... = ${CMAKE_COMMAND}"         )
+message (STATUS " .. CMake version .............. = ${CMAKE_VERSION}"         )
+message (STATUS " .. System name ................ = ${CMAKE_SYSTEM}"          )
+message (STATUS " .. C++ compiler ............... = ${CMAKE_CXX_COMPILER}"    )
+message (STATUS " .. C compiler ................. = ${CMAKE_C_COMPILER}"      )
+message (STATUS " .. size(void*) ................ = ${CMAKE_SIZEOF_VOID_P}"   )
+message (STATUS " Required external packages:"                                )
+message (STATUS " .. Boost++ .................... = ${BOOST_FOUND}"           )
+message (STATUS " .. CFITSIO .................... = ${CFITSIO_FOUND}"         )
+message (STATUS " .. casacore ................... = ${CASACORE_FOUND}"        )
+message (STATUS " .. HDF5 Library ............... = ${HDF5_FOUND}"            )
+message (STATUS " .. num_util ................... = ${NUM_UTIL_FOUND}"        )
+message (STATUS " .. NumPy ...................... = ${NUMPY_FOUND}"           )
+message (STATUS " .. WCSLIB ..................... = ${WCSLIB_FOUND}"          )
+message (STATUS "------------------------------------------------------------")

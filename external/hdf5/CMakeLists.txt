@@ -137,7 +137,6 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
       WORKING_DIRECTORY ${LUS_BINARY_DIR}
       )
   endif (LUS_BINARY_DIR)
-  
 
   ##__________________________________________________________________
   ## Configuration summary

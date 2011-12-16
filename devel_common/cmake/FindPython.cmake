@@ -42,7 +42,7 @@ if (NOT HAVE_PYTHON)
   ## ----------------------------------------------------------------------------
   ## Standard locations where to look for required components
   
-  include (CMakeSettings)
+  include (LUS_CMakeSettings)
   
   ## ----------------------------------------------------------------------------
   ## Is the root of the Python installation defined through environment variable?
@@ -56,16 +56,13 @@ if (NOT HAVE_PYTHON)
   ## ----------------------------------------------------------------------------
   ## Default Python versions
   
-  set (python_version_list      2.7 2.6 2.5 2.4      )
-  set (python_bin_locations     ${bin_locations}     )
-  set (python_include_locations ${include_locations} )
-  set (python_lib_locations     ${lib_locations}     )
+  set (python_version_list      2.7 2.6 2.5 2.4       )
+  set (python_bin_locations     ${CMAKE_PROGRAM_PATH} )
+  set (python_include_locations ${CMAKE_INCLUDE_PATH} )
+  set (python_lib_locations     ${CMAKE_LIBRARY_PATH} )
   
   ## But see if python_select knows about a specific preference
-  find_program (PYTHON_SELECTOR python_select
-    PATHS ${bin_locations}
-    NO_DEFAULT_PATH
-    )
+  find_program (PYTHON_SELECTOR python_select)
   
   if (PYTHON_SELECTOR)
     
@@ -77,9 +74,9 @@ if (NOT HAVE_PYTHON)
     if (python_default_version) 
       if (python_default_version MATCHES ".*apple")
 	# Make sure we use the Apple Python if appropriate
-	set (python_bin_locations /usr/bin)
-	set (python_include_locations /usr/include)
-	set (python_lib_locations /usr/lib)
+	set (python_bin_locations     /usr/bin     )
+	set (python_include_locations /usr/include )
+	set (python_lib_locations     /usr/lib     )
 	if (NOT PYTHON_FIND_QUIETLY)
 	  message (STATUS "Setting paths for Apple supplied Python")
 	endif (NOT PYTHON_FIND_QUIETLY)

@@ -38,7 +38,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+include (LUS_CMakeSettings)
 
 if (NUMPY_FIND_QUIETLY)
   set (PYTHON_FIND_QUIETLY TRUE)
@@ -137,11 +137,8 @@ endif (NUMPY_SCALARMATH_LIBRARY)
 ## Check for executables
 
 find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION} f2py-${PYTHON_VERSION}
-  PATHS ${bin_locations}
-  /sw/bin
-  /sw/lib/python2.6/site-packages
+  PATHS
   /Library/Frameworks/EPD64.framework/Versions/Current/lib
-  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------

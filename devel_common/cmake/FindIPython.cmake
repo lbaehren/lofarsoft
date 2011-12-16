@@ -31,15 +31,12 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+include (LUS_CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for executables
 
-find_program (IPYTHON_EXECUTABLE ipython
-  PATHS ${bin_locations}
-  NO_DEFAULT_PATH
-  )
+find_program (IPYTHON_EXECUTABLE ipython)
 
 ## -----------------------------------------------------------------------------
 ## Try to determine version

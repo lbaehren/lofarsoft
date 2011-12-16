@@ -145,9 +145,11 @@ if (NOT FIND_HDF5_CMAKE)
   ## Actions taken when all components have been found
   
   if (HDF5_INCLUDES AND HDF5_LIBRARIES)
-    set (HAVE_HDF5 TRUE)
+    set (HAVE_HDF5  TRUE)
+    set (HDF5_FOUND TRUE)
   else (HDF5_INCLUDES AND HDF5_LIBRARIES)
-    set (HAVE_HDF5 FALSE)
+    set (HAVE_HDF5  FALSE)
+    set (HDF5_FOUND FALSE)
     if (NOT HDF5_FIND_QUIETLY)
       if (NOT HDF5_INCLUDES)
 	message (STATUS "Unable to find HDF5 header files!")

@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -119,7 +117,6 @@ if (NOT DAL_FOUND)
     ## try to locate the executable
     find_program (DAL_${_dal_executable}_EXECUTABLE ${_dal_executable}
       HINTS ${DAL_ROOT_DIR}
-      PATHS /sw /usr /usr/local /opt/dal ${bin_locations}
       PATH_SUFFIXES bin bin/dal
       )
     

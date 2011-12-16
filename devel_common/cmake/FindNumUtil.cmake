@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -32,7 +30,9 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+if (NOT LUS_CMAKE_SETTINGS_CMAKE)
+  include (LUS_CMakeSettings)
+endif (NOT LUS_CMAKE_SETTINGS_CMAKE)
 
 if (NUM_UTIL_FIND_QUIETLY)
   set (PYTHON_FIND_QUIETLY TRUE)
@@ -44,33 +44,34 @@ include (FindPython)
 ## Check for the header files
 
 find_path (NUM_UTIL_INCLUDES num_util.h
-  PATHS ${include_locations}
   PATH_SUFFIXES
   python
   num_util
   python/num_util
   python${PYTHON_VERSION}
-  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 find_library (NUM_UTIL_LIBRARIES num_util
-  PATHS ${lib_locations}
   PATH_SUFFIXES
   python
   python${PYTHON_VERSION}
-  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
+message (STATUS "NUM_UTIL_INCLUDES  = ${NUM_UTIL_INCLUDES}")
+message (STATUS "NUM_UTIL_LIBRARIES = ${NUM_UTIL_LIBRARIES}")
+
 if (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES)
-  set (HAVE_NUM_UTIL TRUE)
+  set (HAVE_NUM_UTIL  TRUE)
+  set (NUM_UTIL_FOUND TRUE)
 else (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES)
-  set (HAVE_NUM_UTIL FALSE)
+  set (HAVE_NUM_UTIL  FALSE)
+  set (NUM_UTIL_FOUND FALSE)
   if (NOT NUM_UTIL_FIND_QUIETLY)
     if (NOT NUM_UTIL_INCLUDES)
       message (STATUS "Unable to find NUM_UTIL header files!")
@@ -97,6 +98,7 @@ endif (HAVE_NUM_UTIL)
 ## Mark advanced variables
 
 mark_as_advanced (
+  HAVE_NUM_UTIL
   NUM_UTIL_INCLUDES
   NUM_UTIL_LIBRARIES
   )

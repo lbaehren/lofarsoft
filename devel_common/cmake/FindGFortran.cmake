@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -116,15 +114,11 @@ endif (UNIX)
 ## Executable
 
 find_program (GFORTRAN_EXECUTABLE gfortran gfortran-4.7 gfortran-4.6 gfortran-4.5 gfortran-4.4 gfortran-4.3 gfortran-4.2  gfortran-4.1
-  PATHS ${bin_locations}
   )
 
 ## Header files
 
 find_path (GFORTRAN_INCLUDES libgfortran.h
-  PATHS
-  ${include_locations}
-  /usr/lib/gcc/x86_64-redhat-linux
   PATH_SUFFIXES
   libgfortran
   4.1.2/finclude
@@ -202,10 +196,7 @@ find_path (F2C_INCLUDES f2c.h
 
 ## Library 
 
-find_library (F2C_LIBRARY f2c
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
+find_library (F2C_LIBRARY f2c)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
