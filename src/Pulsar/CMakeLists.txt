@@ -90,6 +90,11 @@ foreach (_extraLocations
   
 endforeach (_extraLocations)
 
+##__________________________________________________________
+## System programs
+
+include (FindUnixCommands)
+
 find_program (tar_executable  tar  )
 find_program (gzip_executable gzip )
 
