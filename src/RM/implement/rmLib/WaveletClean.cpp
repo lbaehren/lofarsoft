@@ -49,13 +49,19 @@ WaveletClean::WaveletClean (vector<complex<double> > s,
 //                                                                           init
 	
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> A little bit additional clean-up to make code more readable to help debugging efforts.
 void WaveletClean::init (vector<complex<double> > s,
 			 vector<double> lam,
 			 vector<double> fd,
 			 int numw)
+<<<<<<< HEAD
 =======
 void WaveletClean::init(vector<complex<double> > s, vector<double> lam, vector<double> fd, int numw)
 >>>>>>> Splitting off code implementing methods for WaveletClean class.
+=======
+>>>>>>> A little bit additional clean-up to make code more readable to help debugging efforts.
 {
   res.resize(fd.size());
   lamsq = lam;
@@ -69,14 +75,20 @@ void WaveletClean::init(vector<complex<double> > s, vector<double> lam, vector<d
   wplus = data;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> A little bit additional clean-up to make code more readable to help debugging efforts.
 
 //_______________________________________________________________________________
 //                                                                        perform
 /* Main intro point - calls "times" steps of cleaning */
 
+<<<<<<< HEAD
 =======
 /* ======== main intro point - calls "times" steps of cleaning ===============*/
 >>>>>>> Splitting off code implementing methods for WaveletClean class.
+=======
+>>>>>>> A little bit additional clean-up to make code more readable to help debugging efforts.
 void WaveletClean::perform(int times)
 {
 	unsigned int am, bm;
@@ -86,12 +98,18 @@ void WaveletClean::perform(int times)
 		perform();
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> A little bit additional clean-up to make code more readable to help debugging efforts.
 
 //_______________________________________________________________________________
 //                                                                        perform
 
+<<<<<<< HEAD
 =======
 >>>>>>> Splitting off code implementing methods for WaveletClean class.
+=======
+>>>>>>> A little bit additional clean-up to make code more readable to help debugging efforts.
 void WaveletClean::perform()
 {
 	complex<double> kf;
