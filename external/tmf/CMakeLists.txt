@@ -41,7 +41,7 @@ if (NOT LUS_SOURCE_DIR)
     )
 
   if (LUS_SOURCE_DIR)
-    include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
+    include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
   else (LUS_SOURCE_DIR)
     message (FATAL_ERROR "Unable to locate additional CMake scripts!")
   endif (LUS_SOURCE_DIR)
