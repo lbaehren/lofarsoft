@@ -56,6 +56,7 @@ excludefilter.append("20110813T190822.655") # Zero values cause exception when e
 excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception when executing logplot
 excludefilter.append("20111023T193814.232Z")
 excludefilter.append("20111024T014841.773Z") # LORA trigger comes too late
+excludefilter.append("20111024T040939") # Index out of bounds
 
 
 def get_file_metadata(filename):
@@ -91,7 +92,7 @@ def get_file_metadata(filename):
 
         time_stamp=timestr+"."+timems+"Z"
 
-        station_id = "%03d" %(datafile["CHANNEL_ID"][0]/1000000)
+        station_id = "CS%03d" %(datafile["CHANNEL_ID"][0]/1000000)
 
         datafile = 0
 
