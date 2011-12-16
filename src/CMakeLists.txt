@@ -172,6 +172,14 @@ else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
     )
 endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 
+ExternalProject_Add (dal_Experimental
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
+  GIT_REPOSITORY git://github.com/nextgen-astrodata/DAL.git
+  CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
+  TEST_BEFORE_INSTALL 1
+  TEST_COMMAND make Experimental
+  )
+
 ##__________________________________________________________
 ##                                      Package dependencies
 
