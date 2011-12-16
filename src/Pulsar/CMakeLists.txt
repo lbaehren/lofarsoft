@@ -90,9 +90,8 @@ foreach (_extraLocations
   
 endforeach (_extraLocations)
 
-
-find_program (tar_executable  tar  ${bin_locations} )
-find_program (gzip_executable gzip ${bin_locations} )
+find_program (tar_executable  tar  )
+find_program (gzip_executable gzip )
 
 ##__________________________________________________________
 ## System header files

@@ -35,7 +35,7 @@ endforeach (src)
 
 if (dataset_tbb)
   
-  find_program (BASH_EXCUTABLE bash ${bin_locations})
+  find_program (BASH_EXCUTABLE bash)
   get_filename_component (dataset_tbb_local ${dataset_tbb} NAME)
   
   foreach (testScript

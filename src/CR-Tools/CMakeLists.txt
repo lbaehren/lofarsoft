@@ -51,10 +51,10 @@ option (CR_WITH_OPENMP          "Enable OpenMP support?"                     NO 
 ##
 ## ==============================================================================
 
-find_program (awk_executable   NAMES gawk awk  PATHS ${bin_locations} )
-find_program (bash_executable  NAMES bash      PATHS ${bin_locations} )
-find_program (tar_executable   NAMES tar       PATHS ${bin_locations} )
-find_program (gzip_executable  NAMES gzip      PATHS ${bin_locations} )
+find_program (awk_executable   NAMES gawk awk )
+find_program (bash_executable  NAMES bash     )
+find_program (tar_executable   NAMES tar      )
+find_program (gzip_executable  NAMES gzip     )
 
 ##__________________________________________________________
 ##                                            cr_process_awk
