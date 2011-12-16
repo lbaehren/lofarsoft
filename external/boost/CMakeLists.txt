@@ -43,14 +43,6 @@ if (NOT BOOST_FOUND)
   find_package (Boost)
 endif (NOT BOOST_FOUND)
 
-##__________________________________________________________
-## Check Boost++ version number
-
-if (BOOST_FOUND)
-  message (STATUS "[Boost++]")
-  message (STATUS " .. BOOST_INCLUDES = ${BOOST_INCLUDES}")
-endif (BOOST_FOUND)
-
 ## ==============================================================================
 ##
 ##  Build instructions
