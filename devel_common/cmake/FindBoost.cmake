@@ -240,19 +240,11 @@ endif (BOOST_boost_python)
 ## Actions taken when all components have been found
 
 IF (BOOST_INCLUDES AND BOOST_LIBRARIES)
-<<<<<<< HEAD
   set (HAVE_BOOST  TRUE)
   set (BOOST_FOUND TRUE)
 ELSE (BOOST_INCLUDES AND BOOST_LIBRARIES)
   set (HAVE_BOOST  FALSE)
   set (BOOST_FOUND FALSE)
-=======
-  SET (HAVE_BOOST  TRUE)
-  SET (BOOST_FOUND TRUE)
-ELSE (BOOST_INCLUDES AND BOOST_LIBRARIES)
-  SET (HAVE_BOOST  FALSE)
-  SET (BOOST_FOUND FALSE)
->>>>>>> Set standard variable to indicate whether or not package has been found.
   IF (NOT BOOST_FIND_QUIETLY)
     IF (NOT BOOST_INCLUDES)
       MESSAGE (STATUS "Unable to find Boost header files!")
