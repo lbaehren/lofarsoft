@@ -434,6 +434,9 @@ endif (PYCRTOOLS_WITH_AERA)
 ##
 ## ==============================================================================
 
+set (RM_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/RM)
+set (RM_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/RM)
+
 ##__________________________________________________________
 ## Options
 
@@ -442,6 +445,12 @@ option (RM_WITH_ARMADILLO  "Enable using Armadillo library?"  YES )
 
 ##__________________________________________________________
 ##                              Build & Testing instructions
+
+## Create configuration file for initial CMake cache
+configure_file (
+  ${RM_SOURCE_DIR}/rm.cmake.in
+  ${RM_BINARY_DIR}/rm.cmake
+  )
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ## Build package from present sources
@@ -452,7 +461,7 @@ else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
   ExternalProject_Add (rm
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/RM
     SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/RM
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DRM_WITH_ITPP=${RM_WITH_ITPP} -DRM_WITH_ARMADILLO=${RM_WITH_ARMADILLO}
+    CMAKE_ARGS -C ${RM_BINARY_DIR}/rm.cmake
     )
 endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 

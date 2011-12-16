@@ -1,0 +1,19 @@
+
+##_______________________________________________________________________________
+## LUS environment
+
+set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH
+  "Installation location" FORCE)
+
+set (LUS_SOURCE_DIR ${LUS_SOURCE_DIR} CACHE PATH
+  "LUS source directory" FORCE)
+
+##_______________________________________________________________________________
+## Configuration options
+
+set (RM_WITH_ITPP ${RM_WITH_ITPP} CACHE BOOL
+  "Enable using IT++ library?" FORCE)
+
+set (RM_WITH_ARMADILLO ${RM_WITH_ARMADILLO} CACHE BOOL
+  "Enable using Armadillo library?" FORCE)
+
