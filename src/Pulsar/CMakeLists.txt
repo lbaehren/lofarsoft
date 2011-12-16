@@ -91,11 +91,9 @@ foreach (_extraLocations
 endforeach (_extraLocations)
 
 ##__________________________________________________________
-## System programs
+## System programs (tar, gzip, ...)
 
 include (FindUnixCommands)
-
-find_program (gzip_executable gzip )
 
 ##__________________________________________________________
 ## System header files
