@@ -2825,6 +2825,7 @@ do
 			   then
 			       wait ${pdmp_pid[ii]}
 <<<<<<< HEAD
+<<<<<<< HEAD
 			       grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			       grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
@@ -2833,6 +2834,11 @@ do
 			       cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
 >>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
+=======
+			       grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			       grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
+			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
+>>>>>>> multiple TA beams -- separate the _pdmp.per and _pdmp.posn files per folded pulsar name
 			       echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			       pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 			   else
@@ -2851,6 +2857,7 @@ do
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
 			           wait ${pdmp_pid[ii][counter]}
 <<<<<<< HEAD
+<<<<<<< HEAD
 			           grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			           grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
@@ -2859,6 +2866,11 @@ do
 			           cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
 >>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
+=======
+			           grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			           grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
+			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
+>>>>>>> multiple TA beams -- separate the _pdmp.per and _pdmp.posn files per folded pulsar name
 			           echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			           pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 					   counter=$(( $counter + 1 )) 
