@@ -57,7 +57,7 @@ excludefilter.append("20110821T151958.145Z-002") # Zero values cause exception w
 excludefilter.append("20111023T193814.232Z")
 excludefilter.append("20111024T014841.773Z") # LORA trigger comes too late
 excludefilter.append("20111024T040939") # Index out of bounds
-
+excludefilter.append("20111024T041249") # Seg fault during direction fit
 
 def get_file_metadata(filename):
     """Get metadata from a LOFAR data file.
