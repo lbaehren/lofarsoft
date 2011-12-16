@@ -7,6 +7,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 VERSION=3.27
 =======
 VERSION=3.24
@@ -17,6 +18,9 @@ VERSION=3.25
 =======
 VERSION=3.26
 >>>>>>> excluded directories or files with the name -search- in the results .tar file
+=======
+VERSION=3.27
+>>>>>>> removed the search dir from the tarball list
  
 #####################################################################
 # Usage #
@@ -3195,10 +3199,14 @@ then
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
 <<<<<<< HEAD
+<<<<<<< HEAD
 	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
 =======
 	tar_list=`find ./ -type f \( ! -iname "*search*" -o -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \)`
 >>>>>>> excluded directories or files with the name -search- in the results .tar file
+=======
+	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
+>>>>>>> removed the search dir from the tarball list
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	
