@@ -92,7 +92,6 @@ if (NOT HAVE_MATHGL OR MATHGL_FORCE_BUILD)
   if (HAVE_PYTHON)
     
     find_path (NUMPY_INCLUDES numpy/arrayobject.h
-      PATHS ${include_locations} /usr/lib /sw/lib
       PATH_SUFFIXES
       python2.6/site-packages/numpy/core/include
       python2.5/site-packages/numpy/core/include

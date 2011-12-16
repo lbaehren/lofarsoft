@@ -40,9 +40,7 @@ endif (BLAS_INSTALL_PREFIX)
 include (FindBLAS)
 
 if (NOT BLAS_LIBRARIES)
-  find_library (BLAS_LIBRARIES blas
-    PATHS ${lib_locations}
-    )
+  find_library (BLAS_LIBRARIES blas)
 endif (NOT BLAS_LIBRARIES)
 
 ## ==============================================================================
