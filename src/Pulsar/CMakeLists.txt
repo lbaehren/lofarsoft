@@ -343,50 +343,32 @@ else (HAVE_FFTW3)
   message (STATUS "[PULSAR] Missing or incomplete installation of FFTW3 (not the same as FFTW3F)!")
 endif (HAVE_FFTW3)
 
-## -----------------------------------------------------------------------------
-## Installation - We install into $LOFARSOFT/release/share/pulsar to keep all
-## the components in one place but not have them interfere with possible other
-## installations of the same packages (e.g. FFTW3)
+## ==============================================================================
+##
+##                                                             Installation setup
+##
+##  We install into $LOFARSOFT/release/share/pulsar to keep all the components
+##  in one place but not have them interfere with possible other installations
+##  of the same packages (e.g. FFTW3)
+##
+## ==============================================================================
 
-#find_path (prefix release_area.txt
-#  PATHS
-#  ${PULSAR_SOURCE_DIR}
-#  PATH_SUFFIXES
-#  ../release
-#  ../../release
-#  NO_DEFAULT_PATH
-#  )
-
-find_path (USG_INSTALL_PREFIX devel_common/cmake/CMakeSettings.cmake
- PATHS 
- ${PROJECT_SOURCE_DIR}
- ${PROJECT_SOURCE_DIR}/..
- ${PROJECT_SOURCE_DIR}/../..
- ${PROJECT_SOURCE_DIR}/../../..
- $ENV{LOFARSOFT}
- )
-
-#if (prefix)
-#  message (STATUS "Installation area located for package PULSAR.")
-#  set (CMAKE_INSTALL_PREFIX ${prefix}/share/pulsar) 
-#endif (prefix)
-
-if (USG_INSTALL_PREFIX)
- message (STATUS "[PULSAR] Installation area located for package PULSAR ${USG_INSTALL_PREFIX}/release/share/pulsar.")
- set (CMAKE_INSTALL_PREFIX ${USG_INSTALL_PREFIX}/release/share/pulsar)
-else (USG_INSTALL_PREFIX)
+if (LUS_SOURCE_DIR)
+ message (STATUS "[PULSAR] Installation area located for package PULSAR ${LUS_SOURCE_DIR}/release/share/pulsar.")
+ set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release/share/pulsar)
+else (LUS_SOURCE_DIR)
  message (STATUS "[PULSAR] WARNING: Installation area NOT located for package PULSAR!")
-endif (USG_INSTALL_PREFIX)
+endif (LUS_SOURCE_DIR)
 
 if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
   message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} exists!")
 else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
   message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} does not exist!")
   message (STATUS "[PULSAR] Creating installation location ${CMAKE_INSTALL_PREFIX}")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX})
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/bin)
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib)
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/doc)
+  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX})
+  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/bin)
+  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/lib)
+  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/doc)
 endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 
 if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc")
@@ -499,6 +481,7 @@ message (STATUS " .. Enable test programs         = ${PULSAR_ENABLE_TESTING}"   
 message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}" )
 message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}")
 message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}" )
+message (STATUS " .. Installation prefix          = ${CMAKE_INSTALL_PREFIX}"     )
 message (STATUS " External dependencies:"                                        )
 message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"            )
 message (STATUS "    .. CFITSIO library           = ${CFITSIO_LIBRARIES}"        )
