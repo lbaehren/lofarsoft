@@ -1,6 +1,7 @@
 # pycrtools.template
 # pycrtools.core
 # pycrtools.core.types
+pycrtools.core.database
 pycrtools.core.htypes
 pycrtools.core.harray
 pycrtools.core.plot
