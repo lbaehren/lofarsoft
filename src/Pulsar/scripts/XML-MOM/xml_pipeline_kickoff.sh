@@ -221,21 +221,29 @@ else # if [[ $cep2 == 1 ]]
 =======
 =======
               else 
+<<<<<<< HEAD
                  echo "Using the following locus nodes for CS processing: cexec locus:$locus_list"
 >>>>>>> print the locus node list to STDOUT;  fix problem with escaping the quotes for the cexec step
+=======
+                 echo "Using the following locus nodes for CS processing: cexec -f /etc/c3.conf locus:$locus_list"
+>>>>>>> added cexec -f /etc/c3.conf to be sure the number scheme is absolute for locus nodes
               fi
            fi
           
            if [[ $hoover_only == 0 ]]
            then
-              echo 'cexec locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+              echo 'cexec -f /etc/c3.conf locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            else
+<<<<<<< HEAD
 <<<<<<< HEAD
               echo '#cexec locus:${locus_list} "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
 >>>>>>> added CS locus list check where to run pulp.sh to match CS data location instead of all nodes
 =======
               echo '#cexec locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
 >>>>>>> print the locus node list to STDOUT;  fix problem with escaping the quotes for the cexec step
+=======
+              echo '#cexec -f /etc/c3.conf locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
+>>>>>>> added cexec -f /etc/c3.conf to be sure the number scheme is absolute for locus nodes
            fi
            echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/TA_heatmap.sh .; ./TA_heatmap.sh; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png status.png; convert -append *TA_heatmap_log.png  *TA_heatmap_linear.png status.png; convert -scale 200x140-0-0 status.png status.th.png; mv status_diag.png status.png"'  >> $outfile.$obsid.CS.sh
