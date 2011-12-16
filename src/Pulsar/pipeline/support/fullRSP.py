@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: fullRSP.py 6881 2011-01-28 14:01:26Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -13,9 +13,9 @@ import pulpEnv
 
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 6881 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-01-28 15:01:26 +0100 (Fri, 28 Jan 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class DISTError(IOError):

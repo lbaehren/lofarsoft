@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: pulpEnv.py 7119 2011-02-17 14:00:43Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -13,9 +13,9 @@
 import os
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 7119 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-02-17 15:00:43 +0100 (Thu, 17 Feb 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class PulpEnv:

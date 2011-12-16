@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: bundlePlots.py 6881 2011-01-28 14:01:26Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #

@@ -55,15 +55,7 @@ class PipelineDatabase:
     def createTables(self):
         """Create the pipeline database."""
         # Check Event table
-<<<<<<< HEAD
-<<<<<<< HEAD
         sql = "CREATE TABLE IF NOT EXISTS main.events (eventID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
-=======
-        sql = "CREATE TABLE IF NOT EXISTS main.event (eventID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-        sql = "CREATE TABLE IF NOT EXISTS main.events (eventID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
         self._db.execute(sql)
 
         # Check EventProperties table
@@ -71,15 +63,7 @@ class PipelineDatabase:
         self._db.execute(sql)
 
         # Check Datafile table
-<<<<<<< HEAD
-<<<<<<< HEAD
         sql = "CREATE TABLE IF NOT EXISTS main.datafiles (datafileID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
-=======
-        sql = "CREATE TABLE IF NOT EXISTS main.datafile (datafileID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-        sql = "CREATE TABLE IF NOT EXISTS main.datafiles (datafileID TEXT PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
         self._db.execute(sql)
 
         # Check DatafileProperties table
@@ -97,21 +81,9 @@ class PipelineDatabase:
 
     def reset(self):
         """Reset all tables and create a clean table structure"""
-<<<<<<< HEAD
-<<<<<<< HEAD
         self._db.execute("DROP TABLE IF EXISTS main.events")
         self._db.execute("DROP TABLE IF EXISTS main.eventproperties")
         self._db.execute("DROP TABLE IF EXISTS main.datafiles")
-=======
-        self._db.execute("DROP TABLE IF EXISTS main.event")
-        self._db.execute("DROP TABLE IF EXISTS main.eventproperties")
-        self._db.execute("DROP TABLE IF EXISTS main.datafile")
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-        self._db.execute("DROP TABLE IF EXISTS main.events")
-        self._db.execute("DROP TABLE IF EXISTS main.eventproperties")
-        self._db.execute("DROP TABLE IF EXISTS main.datafiles")
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
         self._db.execute("DROP TABLE IF EXISTS main.datafileproperties")
         self._db.execute("DROP TABLE IF EXISTS main.event_datafile")
         self._db.execute("DROP TABLE IF EXISTS main.filters")
@@ -137,28 +109,11 @@ class PipelineDatabase:
         records = []
 
         if (status != ''):
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "SELECT eventID FROM main.events WHERE status='{0}'".format(status)
         else:
             sql = "SELECT eventID FROM main.events"
         records = self._db.select(sql)
 
-=======
-            sql = "SELECT eventID FROM main.event WHERE status='{0}'".format(status)
-=======
-            sql = "SELECT eventID FROM main.events WHERE status='{0}'".format(status)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
-        else:
-            sql = "SELECT eventID FROM main.events"
-        records = self._db.select(sql)
-
-<<<<<<< HEAD
-        print records                   # DEBUG STATEMENT
-
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> Removed debugging statement in VHECR pipeline_database script.
         return records
 
 
@@ -216,15 +171,7 @@ class PipelineDatabase:
         ========== ================================
         """
         if self.hasEvent(id):
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "DELETE FROM main.events WHERE eventID='{0}'".format(id)
-=======
-            sql = "DELETE FROM main.event WHERE eventID='{0}'".format(id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "DELETE FROM main.events WHERE eventID='{0}'".format(id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             self._db.execute(sql)
         else:
             raise ValueError("Event with id='%s' does not exist." %(id))
@@ -244,15 +191,7 @@ class PipelineDatabase:
         records = []
 
         if (id != ''):
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "SELECT eventID FROM main.events WHERE eventID='{0}'".format(id)
-=======
-            sql = "SELECT eventID FROM main.event WHERE eventID='{0}'".format(id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "SELECT eventID FROM main.events WHERE eventID='{0}'".format(id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             records = self._db.select(sql)
 
         if len(records) > 0:
@@ -275,21 +214,9 @@ class PipelineDatabase:
         records = []
 
         if (status != ''):
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "SELECT datafileID FROM main.datafiles WHERE status='{0}'".format(status)
         else:
             sql = "SELECT datafileID FROM main.datafiles"
-=======
-            sql = "SELECT datafileID FROM main.datafile WHERE status='{0}'".format(status)
-        else:
-            sql = "SELECT datafileID FROM main.datafile"
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "SELECT datafileID FROM main.datafiles WHERE status='{0}'".format(status)
-        else:
-            sql = "SELECT datafileID FROM main.datafiles"
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
         records = self._db.select(sql)
 
         return records
@@ -343,15 +270,7 @@ class PipelineDatabase:
         ========== ================================
         """
         if self.hasDatafile(id):
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "DELETE FROM main.datafiles WHERE datafileID='{0}'".format(id)
-=======
-            sql = "DELETE FROM main.datafile WHERE datafileID='{0}'".format(id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "DELETE FROM main.datafiles WHERE datafileID='{0}'".format(id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             self._db.execute(sql)
         else:
             raise ValueError("Datafile with id='%s' does not exist." %(id))
@@ -371,15 +290,7 @@ class PipelineDatabase:
         records = []
 
         if (id != ''):
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "SELECT datafileID FROM main.datafiles WHERE datafileID='{0}'".format(id)
-=======
-            sql = "SELECT datafileID FROM main.datafile WHERE datafileID='{0}'".format(id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "SELECT datafileID FROM main.datafiles WHERE datafileID='{0}'".format(id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             records = self._db.select(sql)
 
         if len(records) > 0:
@@ -480,10 +391,6 @@ class Event:
         self.properties = {}
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
     def hasRecord(self):
         """Check if the database already has a record for this object
         with the corresponding *id*.
@@ -499,24 +406,11 @@ class Event:
         return result
 
 
-<<<<<<< HEAD
-=======
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
     def read(self):
         """Read event information from the database."""
         if self._db:
             # read from event table
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "SELECT eventID, status, timestamp, resultspath FROM main.events WHERE eventID='{0}'".format(self._id)
-=======
-            sql = "SELECT eventID, status, timestamp, resultspath FROM main.event WHERE eventID='{0}'".format(self._id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "SELECT eventID, status, timestamp, resultspath FROM main.events WHERE eventID='{0}'".format(self._id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             records = self._db.select(sql)
             if len(records) == 1:
                 self._id, self.status, self.timestamp, self.resultspath = records[0]
@@ -544,20 +438,10 @@ class Event:
         """Write event information to the database."""
         if self._db:
             # write to event table
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             if not self.hasRecord():
                 sql = "INSERT INTO main.events (eventID, status, timestamp, resultspath) VALUES ('{0}', '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
             else:
                 sql = "UPDATE main.events SET status='{1}', timestamp='{2}', resultspath='{3}' WHERE eventID='{0}'".format(self._id, self.status, self.timestamp, self.resultspath)
-<<<<<<< HEAD
-=======
-            sql = "INSERT OR REPLACE INTO main.event (eventID, status, timestamp, resultspath) VALUES ('{0}', '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             self._db.insert(sql)
 
             # write to event_datafile table
@@ -584,15 +468,7 @@ class Event:
         self.status = status
 
         if self._db:
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "INSERT OR REPLACE INTO main.events SET status='{0}' WHERE eventID='{1}'".format(self.status, self._id)
-=======
-            sql = "INSERT OR REPLACE INTO main.event SET status='{0}' WHERE eventID='{1}'".format(self.status, self._id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "INSERT OR REPLACE INTO main.events SET status='{0}' WHERE eventID='{1}'".format(self.status, self._id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             self._db.execute(sql)
 
 
@@ -717,10 +593,6 @@ class Datafile:
         self.properties = {}
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
     def hasRecord(self):
         """Check if the database already has a record for this object
         with the corresponding *id*.
@@ -736,24 +608,11 @@ class Datafile:
         return result
 
 
-<<<<<<< HEAD
-=======
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
     def read(self):
         """Read datafile information from the database."""
         if self._db:
             # read from datafile table
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "SELECT datafileID, status, timestamp, resultspath FROM main.datafiles WHERE datafileID='{0}'".format(self._id)
-=======
-            sql = "SELECT datafileID, status, timestamp, resultspath FROM main.datafile WHERE datafileID='{0}'".format(self._id)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-            sql = "SELECT datafileID, status, timestamp, resultspath FROM main.datafiles WHERE datafileID='{0}'".format(self._id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             records = self._db.select(sql)
             if len(records) == 1:
                 self._id, self.status, self.timestamp, self.resultspath = records[0]
@@ -775,20 +634,10 @@ class Datafile:
         """Write datafile information to the database."""
         if self._db:
             # write to datafile table
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             if not self.hasRecord():
                 sql = "INSERT INTO main.datafiles (datafileID, status, timestamp, resultspath) VALUES ('{0}', '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
             else:
                 sql = "UPDATE main.datafiles SET status='{1}', timestamp='{2}', resultspath='{3}' WHERE datafileID='{0}'".format(self._id, self.status, self.timestamp, self.resultspath)
-<<<<<<< HEAD
-=======
-            sql = "INSERT OR REPLACE INTO main.datafile (datafileID, status, timestamp, resultspath) VALUES ('{0}', '{1}', '{2}', '{3}')".format(self._id, self.status, self.timestamp, self.resultspath)
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
             self._db.insert(sql)
 
             # write to datafileproperties table
@@ -798,34 +647,6 @@ class Datafile:
             raise ValueError("Unable to write to database: no database was set.")
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    def scan(self, filename=''):
-        """Scan for datafile information from datafile with name filename.
-
-        **Properties**
-
-        ============ ===========================================
-        *filename*   filename of the datafile to be scanned.
-        ============ ===========================================
-        """
-        # TODO: Add implementation
-
-        ImplementationError("Function needs to be implemented.")
-
-        if filename != '':
-            f = cr.open(filename)
-            # create id (from filename)
-            # get timestamp
-            # get resultspath
-        else:
-            raise ValueError("No filename provided.")
-
-
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
     def setStatus(self, status=''):
         """Set the status of the datafile and update the database.
 
@@ -838,27 +659,11 @@ class Datafile:
         self.status = status
 
         if self._db:
-<<<<<<< HEAD
-<<<<<<< HEAD
             sql = "UPDATE main.datafiles SET status='{0}' WHERE datafileID='{1}'".format(self.status, self._id)
             self._db.execute(sql)
 
 
     def setProperty(self, key='', value=''):
-=======
-            sql = "UPDATE main.datafile SET status='{0}' WHERE datafileID='{1}'".format(self.status, self._id)
-=======
-            sql = "UPDATE main.datafiles SET status='{0}' WHERE datafileID='{1}'".format(self.status, self._id)
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
-            self._db.execute(sql)
-
-
-<<<<<<< HEAD
-    def setProperty(self, key, value):
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
-    def setProperty(self, key='', value=''):
->>>>>>> Removed debugging statement in VHECR pipeline_database script.
         """Set a property and update the database.
 
         **Properties**
@@ -927,23 +732,6 @@ class Datafile:
         return self._id + "|" + key
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    def getEventID(self):
-        """Derive the eventID for this datafile."""
-        # TODO: Add implementation
-
-        ImplementationError("Function needs to be implemented.")
-
-        result = ""
-
-        return result
-
-
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.
     def summary(self):
         """Summary of the Datafile object."""
         linewidth = 80
@@ -1100,12 +888,3 @@ class Filter:
 
         print "="*linewidth
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> Added pipeline_database module to PyCRTools.
-=======
->>>>>>> - Renamed event and datafile tables in PyCRTools database.

@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: stitchReports.py 7110 2011-02-17 10:16:37Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -14,9 +14,9 @@ import os, glob
 import pulpEnv
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 7110 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-02-17 11:16:37 +0100 (Thu, 17 Feb 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class StitchReports():

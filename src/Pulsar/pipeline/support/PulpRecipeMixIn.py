@@ -1,4 +1,4 @@
-#$Id$
+#$Id: PulpRecipeMixIn.py 6972 2011-02-04 14:03:18Z kenneth $
 
 #
 #                            Beam-formed data conversion Node (bf2presto) recipe
@@ -10,9 +10,9 @@
 import os.path
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 6972 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-02-04 15:03:18 +0100 (Fri, 04 Feb 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 

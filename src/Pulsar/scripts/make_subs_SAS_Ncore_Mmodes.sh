@@ -4,23 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 VERSION=3.27
-=======
-VERSION=3.24
->>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
-=======
-VERSION=3.25
->>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
-=======
-VERSION=3.26
->>>>>>> excluded directories or files with the name -search- in the results .tar file
-=======
-VERSION=3.27
->>>>>>> removed the search dir from the tarball list
  
 #####################################################################
 # Usage #
@@ -2193,13 +2177,6 @@ do
         echo "Successfully found $ii to use for pav -f"
 		pav_f=$ii
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	    mod_channels=`echo $nSubbands * $CHAN 
->>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
-=======
->>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
 		then 
@@ -2832,21 +2809,9 @@ do
 			   if (( $flyseye == 0 ))
 			   then
 			       wait ${pdmp_pid[ii]}
-<<<<<<< HEAD
-<<<<<<< HEAD
 			       grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			       grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
-=======
-			       cp pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
-			       cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
-			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
->>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
-=======
-			       grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
-			       grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
-			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
->>>>>>> multiple TA beams -- separate the _pdmp.per and _pdmp.posn files per folded pulsar name
 			       echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			       pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 			   else
@@ -2864,21 +2829,9 @@ do
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish"
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
 			           wait ${pdmp_pid[ii][counter]}
-<<<<<<< HEAD
-<<<<<<< HEAD
 			           grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			           grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
-=======
-			           cp pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
-			           cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
-			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
->>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
-=======
-			           grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
-			           grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
-			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
->>>>>>> multiple TA beams -- separate the _pdmp.per and _pdmp.posn files per folded pulsar name
 			           echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			           pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 					   counter=$(( $counter + 1 )) 
@@ -3145,19 +3098,7 @@ done # for loop over modes in $mode_str
 
 if [[ $proc != 0 ]]
 then
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     if (( (( $flyseye == 0 )) && (( $nrTArings == 0 )) ))
-=======
-    if (( $flyseye == 0 )) && (( $nrTArings = 0 ))
->>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
-=======
-    if (( $flyseye == 0 )) && (( $nrTArings == 0 ))
->>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
-=======
-    if (( (( $flyseye == 0 )) && (( $nrTArings == 0 )) ))
->>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
     then
 	    # creat combined _diag.png based on any that exist;  call is status_diag.png
 	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
@@ -3198,15 +3139,7 @@ then
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-<<<<<<< HEAD
-<<<<<<< HEAD
 	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
-=======
-	tar_list=`find ./ -type f \( ! -iname "*search*" -o -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \)`
->>>>>>> excluded directories or files with the name -search- in the results .tar file
-=======
-	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
->>>>>>> removed the search dir from the tarball list
 	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	

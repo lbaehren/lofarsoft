@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: prepfold.py 7121 2011-02-17 14:09:14Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -23,9 +23,9 @@ from lofarpipe.support.clusterdesc   import ClusterDesc, get_compute_nodes
 from lofarpipe.support.lofarnode     import run_node
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 7121 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-02-17 15:09:14 +0100 (Thu, 17 Feb 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class prepfold(LOFARrecipe):

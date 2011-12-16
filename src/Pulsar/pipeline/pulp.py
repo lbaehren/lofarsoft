@@ -38,9 +38,9 @@ import pulpVersion
 
 __version__      = pulpVersion.version
 __version_date__ = pulpVersion.version_date
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 6880 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-01-28 14:51:09 +0100 (Fri, 28 Jan 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class pulp(control):

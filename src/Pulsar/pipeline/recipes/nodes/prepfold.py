@@ -1,5 +1,5 @@
 #
-# $Id$
+# $Id: prepfold.py 7107 2011-02-16 16:54:42Z kenneth $
 
 #                                                          LOFAR PULSAR PIPELINE
 #
@@ -24,9 +24,9 @@ from lofarpipe.support.lofarexceptions import ExecutableMissing
 import pulpEnv
 
 # Repository info ...
-__svn_revision__ = ('$Rev$').split()[1]
-__svn_revdate__  = ('$Date$')[7:26]
-__svn_author__   = ('$Author$').split()[1]
+__svn_revision__ = ('$Rev: 7107 $').split()[1]
+__svn_revdate__  = ('$Date: 2011-02-16 17:54:42 +0100 (Wed, 16 Feb 2011) $')[7:26]
+__svn_author__   = ('$Author: kenneth $').split()[1]
 
 
 class prepfold(LOFARnode):
