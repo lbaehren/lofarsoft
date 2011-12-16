@@ -98,6 +98,9 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 
   ## Build package from source
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Cleaning up installation of DAL.
   
   if (DAL_FROM_RELEASE)
     
@@ -122,6 +125,7 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
     
   endif (DAL_FROM_RELEASE)
   
+<<<<<<< HEAD
 =======
 
   if (DAL_FROM_REPOS)
@@ -177,6 +181,8 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   endif (DAL_FROM_REPOS)
 
 >>>>>>> Avoid using LUS_INSTALL_PREFIX; use CMAKE_INSTALL_PREFIX instead.
+=======
+>>>>>>> Cleaning up installation of DAL.
 else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   
   add_custom_target (dal

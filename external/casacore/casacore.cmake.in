@@ -2,10 +2,14 @@
 ## Installation location
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}   CACHE PATH "Installation location" FORCE)
 =======
 set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}   CACHE BOOL "Installation location" FORCE)
 >>>>>>> Removing usage of LUS_INSTALL_PREFIX variable; everything is being mapped onto standard CMake variable CMAKE_INSTALL_PREFIX, so we better use that one.
+=======
+set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}   CACHE PATH "Installation location" FORCE)
+>>>>>>> Cleaning up installation of DAL.
 set (BUILD_TESTING        ${CASACORE_BUILD_TESTING} CACHE BOOL "Build tests?" FORCE )
 
 ## FFTW3 library ___________________________________________
