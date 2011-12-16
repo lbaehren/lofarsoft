@@ -34,14 +34,17 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
   ##
   ##                                                             Search locations
   ##
+  ##  When searching for application programs, header files and libraries, CMake
+  ##  inspects a number of default locations; instead of completely overwriting 
+  ##  the collection of search locations, we rather augment the standard
+  ##  variables.
+  ##
   ## ============================================================================
   
   foreach (_pathBase
       /app/usg
       /opt/casa/local
       /usr/X11R6
-      /usr/local
-      /usr
       /sw
       /opt/local
       /opt
