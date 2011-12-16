@@ -2,18 +2,22 @@
 ##_______________________________________________________________________________
 ##                                                           List of source files
 
-file (GLOB rm_tests *.cc *.cpp)
+set (rm_tests
+  tRMSim.cpp
+  trmClean.cpp
+  trmParallel.cpp
+  )
 
-if (NOT HAVE_ITPP OR NOT RM_WITH_ITPP)
-  list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/trmnoise.cpp)
-  list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/tWienerFilter.cpp)
-  list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/tWienerFilter-FourierTransform.cpp)
-  list (REMOVE_ITEM rm_tests ${RM_SOURCE_DIR}/test/tWienerFilter-SimpleSignal.cpp)
-endif (NOT HAVE_ITPP OR NOT RM_WITH_ITPP)
+if (HAVE_ITPP AND RM_WITH_ITPP)
+  list (APPEND rm_tests trmnoise.cpp)
+  list (APPEND rm_tests tWienerFilter.cpp)
+  list (APPEND rm_tests tWienerFilter-FourierTransform.cpp)
+  list (APPEND rm_tests tWienerFilter-SimpleSignal.cpp)
+endif (HAVE_ITPP AND RM_WITH_ITPP)
 
-if (NOT HAVE_FFTW3)
-  list (REMOVE_ITEM rm_tests ${CMAKE_CURRENT_SOURCE_DIR}/tPreshift.cpp)
-endif (NOT HAVE_FFTW3)
+if (HAVE_FFTW3)
+  list (APPEND rm_tests tPreshift.cpp)
+endif (HAVE_FFTW3)
 
 ##_______________________________________________________________________________
 ##                                                     Build/Install instructions

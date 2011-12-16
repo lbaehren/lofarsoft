@@ -32,9 +32,10 @@
 
 int main(int argc, char **argv)
 {
-  int nofFailedTests (0);
-  bool haveRMSF (true);
-  std::string filename ("rmsf.dat");
+  int nofFailedTests   = 0;
+  bool haveRMSF        = true;
+  std::string filename = "rmsf.dat";
+  unsigned int length  = 100;
 
   //________________________________________________________
   // Process parameters from the command line
@@ -46,10 +47,15 @@ int main(int argc, char **argv)
     haveRMSF = true;
   }
 
+  /* Feedback */
+  std::cout << "[trmClean]" << std::endl;
+  std::cout << " -- haveRMSF = " << haveRMSF << std::endl;
+  std::cout << " -- Filename = " << filename << std::endl;
+  std::cout << " -- Length   = " << length   << std::endl;
+
   //________________________________________________________
   // Run the tests
 
-  unsigned int length (100);
   vector<double> gaussian (length);
   vector<double> RMSFfaradayDepths (length);
   vector<double> faradayDepths (length);
@@ -60,7 +66,7 @@ int main(int argc, char **argv)
 
   // Create rmclean object to work with __________
 
-  std::cout << "-- create new rmclean object ..." << std::endl;
+  std::cout << "[trmClean] Creating new rmclean object ..." << std::endl;
   rmclean Cleanobject (length);
   
   if (haveRMSF) {
@@ -104,7 +110,6 @@ int main(int argc, char **argv)
   else {
     std::cerr << "[trmClean] Skipping tests - missing input file!" << std::endl;
   }
-
-  return nofFailedTests;
-  }
   
+  return nofFailedTests;
+}
