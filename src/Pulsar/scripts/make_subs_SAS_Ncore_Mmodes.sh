@@ -3123,9 +3123,13 @@ done # for loop over modes in $mode_str
 if [[ $proc != 0 ]]
 then
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (( (( $flyseye == 0 )) && (( $nrTArings == 0 )) ))
 =======
     if (( $flyseye == 0 )) && (( $nrTArings = 0 ))
+>>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
+=======
+    if (( $flyseye == 0 )) && (( $nrTArings == 0 ))
 >>>>>>> multiple TA beams -- turned off ability to create combined _diag.png plot, since this type of observation gets the TA heatmap instead
     then
 	    # creat combined _diag.png based on any that exist;  call is status_diag.png
