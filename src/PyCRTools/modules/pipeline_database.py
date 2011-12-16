@@ -135,9 +135,12 @@ class PipelineDatabase:
             sql = "SELECT eventID FROM main.event"
         records = self._db.select(sql)
 
+<<<<<<< HEAD
         print records                   # DEBUG STATEMENT
 
 >>>>>>> Added pipeline_database module to PyCRTools.
+=======
+>>>>>>> Removed debugging statement in VHECR pipeline_database script.
         return records
 
 
@@ -767,8 +770,12 @@ class Datafile:
             self._db.execute(sql)
 
 
+<<<<<<< HEAD
     def setProperty(self, key, value):
 >>>>>>> Added pipeline_database module to PyCRTools.
+=======
+    def setProperty(self, key='', value=''):
+>>>>>>> Removed debugging statement in VHECR pipeline_database script.
         """Set a property and update the database.
 
         **Properties**
