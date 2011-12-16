@@ -4,7 +4,11 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
+<<<<<<< HEAD
 VERSION=3.27
+=======
+VERSION=3.24
+>>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
  
 #####################################################################
 # Usage #
@@ -2177,6 +2181,10 @@ do
         echo "Successfully found $ii to use for pav -f"
 		pav_f=$ii
 
+<<<<<<< HEAD
+=======
+	    mod_channels=`echo $nSubbands * $CHAN 
+>>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
 		then 
@@ -2809,9 +2817,15 @@ do
 			   if (( $flyseye == 0 ))
 			   then
 			       wait ${pdmp_pid[ii]}
+<<<<<<< HEAD
 			       grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			       grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
+=======
+			       cp pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			       cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
+			       newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
+>>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
 			       echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			       pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 			   else
@@ -2829,9 +2843,15 @@ do
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish"
 			           echo "Waiting for RSP$ii beam_$counter pdmp_pid to finish" >> $log
 			           wait ${pdmp_pid[ii][counter]}
+<<<<<<< HEAD
 			           grep ${fold_pulsar} pdmp.per > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
 			           grep ${fold_pulsar} pdmp.posn > ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
 			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | head -1 | awk '{print $4}'`
+=======
+			           cp pdmp.per ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per
+			           cp pdmp.posn ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.posn
+			           newDM=`cat ${fold_pulsar}_${OBSID}_RSP${ii}_pdmp.per | grep ${fold_pulsar} | awk '{print $4}'`
+>>>>>>> fix bug with multi TA beams with multiple folds -- the pam arguments were not getting the new DM correctly because the previous routine was writing results to the same output file;  had to seprate the multi outputs;  also problem with pav -fCHAN flag when number of channels did not divide evenly into number of subbands
 			           echo "Running: " pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
 			           pam -e AR -d $newDM -DTp	${fold_pulsar}_${OBSID}_RSP${ii}.ar
 					   counter=$(( $counter + 1 )) 
