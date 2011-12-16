@@ -137,6 +137,10 @@ if (${DAL_FOUND})
   endif (${DAL_SOURCE_VERSION} VERSION_GREATER ${DAL_VERSION})
 endif (${DAL_FOUND})
 
+if (NOT DAL_FROM_RELEASE)
+  set (DAL_FORCE_BUILD TRUE)
+endif (NOT DAL_FROM_RELEASE)
+
 if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
   ## Create configuration file for initial CMake cache
   configure_file (
