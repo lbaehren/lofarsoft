@@ -22,6 +22,7 @@
 # - Check for the presence of the Boost library
 #
 #  HAVE_BOOST      = do we have BOOST?
+#  BOOST_FOUND     = do we have BOOST?
 #  BOOST_INCLUDES  = location of the include files
 #  BOOST_LIBRARIES = location of the libraries
 #
@@ -138,7 +139,7 @@ set (BOOST_LIBRARIES "")
 foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44) 
 
   ## Check for the header files ------------------
-
+  
   ## <boost/config.hpp>
   set (continue_search 0)
   foreach (hdr ${boost_headers})
@@ -147,7 +148,6 @@ foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44)
       boost-${boost_version}
       boost
       .
-      NO_DEFAULT_PATH
       )
     if (BOOST_INCLUDES_${hdr})
       list (APPEND BOOST_INCLUDES_tmp ${BOOST_INCLUDES_${hdr}})
@@ -180,9 +180,18 @@ foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44)
     string (TOUPPER ${lib} _lib)
     set (_lib_cache ${_lib}_LIBRARY)
     ## try to locate the library
-    find_library (${_lib_cache} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}-mt ${lib}-mt-d ${lib}-gcc41-mt-${boost_version}
-      PATH_SUFFIXES boost boost-${boost_version}
-      NO_DEFAULT_PATH
+    find_library (${_lib_cache}
+      NAMES
+      ${lib}
+      ${lib}-gcc42-${boost_version}
+      ${lib}-mt-${boost_version}
+      ${lib}-gcc
+      ${lib}-mt
+      ${lib}-mt-d
+      ${lib}-gcc41-mt-${boost_version}
+      PATH_SUFFIXES
+      boost
+      boost-${boost_version}
       )
     ## check if location was successful
     if (${_lib_cache})
@@ -195,9 +204,9 @@ foreach (boost_version 1_48_1 1_48_0 1_48 1_47_1 1_47_0 1_47 1_46 1_45 1_44)
   if (NOT continue_search)
     break ()
   else (NOT continue_search)
-    if (NOT BOOST_FIND_QUIETLY)
+#    if (NOT BOOST_FIND_QUIETLY)
       message (STATUS "Boost ${boost_version} not found")
-    endif (NOT BOOST_FIND_QUIETLY)
+#    endif (NOT BOOST_FIND_QUIETLY)
     set (BOOST_LIBRARIES "")
     set (BOOST_INCLUDES "")
   endif (NOT continue_search)
