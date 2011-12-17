@@ -425,7 +425,7 @@ add_custom_target (ssps_build
   COMMENT "Building project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
   COMMENT "Building project SSPS with command: python ${PULSAR_BINARY_DIR}/apps/${ssps_name}/setup.py build"
   )
-add_dependencies (ssps_build ssps_unpack)
+add_dependencies (ssps_build ssps_unpack fftw_install)
 
 add_custom_target (ssps_build_docs
   COMMAND cd ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs
