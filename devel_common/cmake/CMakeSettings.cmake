@@ -13,17 +13,13 @@
 ##                           variable serves as an include-guard, both protecting
 ##                           previously assigned variables as well as avoiding 
 ##                           unnecessary passes through the instructions.
-##  USG_LIB_LOCATIONS     -- 
-##  USG_INCLUDE_LOCATIONS -- 
-##  LUS_INSTALL_PREFIX    -- Prefix marking the location at which the finished
-##                           software components will be installed
 ##  USG_VARIANTS_FILE     -- Variants file containing host-specific overrides
 ##                           to the common configuration settings/presets.
 ##
 ##  Th directory structure and the corresponding CMake variables are given below:
 ##
-##  .                    LUS_ROOT(_DIR)      = ${LOFARSOFT}
-##  |-- release          LUS_RELEASE_DIR     = LUS_INSTALL_PREFIX
+##  .                    LUS_ROOT(_DIR)       = ${LOFARSOFT}
+##  |-- release          LUS_INSTALL_PREFIX  -> CMAKE_INSTALL_PREFIX
 ##  |   |-- include      LUS_INCLUDE_DIR
 ##  |   `-- lib          LUS_LIBRARY_DIR
 ##  |-- build            LUS_BUILD_DIR
@@ -84,10 +80,6 @@ if (NOT USG_CMAKE_CONFIG)
       FORCE
       )
 
-    set (LUS_INSTALL_PREFIX ${LUS_RELEASE_DIR} CACHE PATH
-      "LUS installation area"
-      FORCE
-      )
     set (CMAKE_INSTALL_PREFIX ${LUS_RELEASE_DIR} CACHE PATH
       "CMake installation area" 
       FORCE
