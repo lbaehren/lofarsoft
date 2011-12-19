@@ -22,7 +22,6 @@
 ##  |-- release          LUS_INSTALL_PREFIX  -> CMAKE_INSTALL_PREFIX
 ##  |   |-- include      LUS_INCLUDE_DIR
 ##  |   `-- lib          LUS_LIBRARY_DIR
-##  |-- build            LUS_BUILD_DIR
 ## 
 
 if (NOT USG_CMAKE_CONFIG)
@@ -56,13 +55,6 @@ if (NOT USG_CMAKE_CONFIG)
 
     set (CMAKE_MODULE_PATH ${LUS_ROOT}/devel_common/cmake CACHE PATH
       "LUS CMake modules"
-      FORCE
-      )
-
-    ## Build directory
-
-    set (LUS_BUILD_DIR ${LUS_ROOT}/build CACHE PATH
-      "Build directory"
       FORCE
       )
 
