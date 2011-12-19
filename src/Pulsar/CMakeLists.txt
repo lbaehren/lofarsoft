@@ -110,29 +110,29 @@ find_path (HAVE_SYS_UTIME_H  sys/utime.h   PATHS ${include_locations} )
 ##__________________________________________________________
 ## System Libraries
 
-find_library (libdl      dl       ${lib_locations})
-find_library (libm       m        ${lib_locations})
-find_library (libpthread pthread  ${lib_locations})
-find_library (libutil    util     ${lib_locations})
-find_library (libz       z        ${lib_locations})
+find_library (libdl      dl      )
+find_library (libm       m       )
+find_library (libpthread pthread )
+find_library (libutil    util    )
+find_library (libz       z       )
 
 ##__________________________________________________________
 ## Type sizes
 
 include (CheckTypeSize)
 
-check_type_size ("short"         SIZEOF_SHORT       )
-check_type_size ("int"           SIZEOF_INT         )
-check_type_size ("float"         SIZEOF_FLOAT       )
-check_type_size ("double"        SIZEOF_DOUBLE      )
-check_type_size ("long"          SIZEOF_LONG        )
-check_type_size ("long int"      SIZEOF_LONG_INT    )
-check_type_size ("long long"     SIZEOF_LONG_LONG   )
-check_type_size ("uint"          SIZEOF_UINT        )
-check_type_size ("int32_t"       SIZEOF_INT32_T     )
-check_type_size ("int64_t"       SIZEOF_INT64_T     )
-check_type_size ("uint32_t"      SIZEOF_UINT32_T     )
-check_type_size ("uint64_t"      SIZEOF_UINT64_T     )
+check_type_size ("short"         SIZEOF_SHORT      )
+check_type_size ("int"           SIZEOF_INT        )
+check_type_size ("float"         SIZEOF_FLOAT      )
+check_type_size ("double"        SIZEOF_DOUBLE     )
+check_type_size ("long"          SIZEOF_LONG       )
+check_type_size ("long int"      SIZEOF_LONG_INT   )
+check_type_size ("long long"     SIZEOF_LONG_LONG  )
+check_type_size ("uint"          SIZEOF_UINT       )
+check_type_size ("int32_t"       SIZEOF_INT32_T    )
+check_type_size ("int64_t"       SIZEOF_INT64_T    )
+check_type_size ("uint32_t"      SIZEOF_UINT32_T   )
+check_type_size ("uint64_t"      SIZEOF_UINT64_T   )
 
 ##__________________________________________________________
 ## CFITSIO
