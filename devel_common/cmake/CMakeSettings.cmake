@@ -73,18 +73,6 @@ if (NOT USG_CMAKE_CONFIG)
       FORCE
       )
 
-    ## Installation area
-
-    set (LUS_RELEASE_DIR ${LUS_ROOT}/release CACHE PATH
-      "LUS installation area"
-      FORCE
-      )
-
-    set (CMAKE_INSTALL_PREFIX ${LUS_RELEASE_DIR} CACHE PATH
-      "CMake installation area" 
-      FORCE
-      )
-
     ## Location of installed header files
 
     set (LUS_INCLUDE_DIR ${LUS_ROOT}/release/include CACHE PATH
