@@ -5,10 +5,10 @@
 ##
 ## ==============================================================================
 
-set (fftw_version "3.1.2")
-set (fftw_name "fftw-${fftw_version}-modified")
+set (fftw_version   "3.1.2")
+set (fftw_name      "fftw-${fftw_version}-modified")
 set (fftw_directory "fftw/fftw-${fftw_version}-modified")
-set (fftw_archive "${fftw_directory}.tgz")
+set (fftw_archive   "${fftw_directory}.tgz")
 
 add_custom_target (fftw_unpack
   COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${fftw_archive}
@@ -44,13 +44,13 @@ add_dependencies (fftw_install fftw_build fftw_configure fftw_unpack)
 ##
 ## ==============================================================================
 
-set (tempo_version "11.010")
-set (tempo_name "tempo${tempo_version}-modified")
-set (tempo_directory "tempo/tempo${tempo_version}-modified")
-set (tempo_archive "${tempo_directory}.tar.gz")
-set (tempo_ephem_name "tempo_ephem${tempo_version}")
+set (tempo_version         "11.010")
+set (tempo_name            "tempo${tempo_version}-modified")
+set (tempo_directory       "tempo/tempo${tempo_version}-modified")
+set (tempo_archive         "${tempo_directory}.tar.gz")
+set (tempo_ephem_name      "tempo_ephem${tempo_version}")
 set (tempo_ephem_directory "tempo/tempo_ephem${tempo_version}")
-set (tempo_ephem_archive "${tempo_ephem_directory}.tar.gz")
+set (tempo_ephem_archive   "${tempo_ephem_directory}.tar.gz")
 
 add_custom_target (tempo_unpack
   COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo_archive}
