@@ -32,34 +32,28 @@ if (NOT WCSLIB_VERBOSE_CONFIGURE)
   set (PYTHON_FIND_QUIETLY  YES )
 endif (NOT WCSLIB_VERBOSE_CONFIGURE)
 
-## ------------------------------------------------------------------------------
+##__________________________________________________________
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-if (NOT LUS_CMAKE_MODULES)
-  find_path (LUS_CMAKE_MODULES template_FindXX.cmake LUS_CMakeSettings.cmake
+if (NOT LUS_SOURCE_DIR)
+  find_path (LUS_SOURCE_DIR devel_common/cmake/LUS_CMakeSettings.cmake
     PATHS 
+    ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/..
     ${PROJECT_SOURCE_DIR}/../..
     ${PROJECT_SOURCE_DIR}/../../..
     $ENV{LOFARSOFT}
-    PATH_SUFFIXES
-    cmake
-    devel_common/cmake
     )
-endif (NOT LUS_CMAKE_MODULES)
+endif (NOT LUS_SOURCE_DIR)
 
-if (LUS_CMAKE_MODULES)
-  ## Augment CMAKE_MODULE_PATH variable
-  set (CMAKE_MODULE_PATH ${LUS_CMAKE_MODULES} CACHE PATH
-    "CMake module path"
-    FORCE)
+if (LUS_SOURCE_DIR)
   ## Load custom CMake settings
-  include (LUS_CMakeSettings)
+  include (${LUS_SOURCE_DIR}devel_common/cmake/LUS_CMakeSettings.cmake)
   ## Check if package is not installed yet
   if (NOT WCSLIB_FOUND)
     find_package (WCSLIB)
   endif (NOT WCSLIB_FOUND)
-endif (LUS_CMAKE_MODULES)
+endif (LUS_SOURCE_DIR)
 
 ## <-- begin build condition --------------------------------------------------->
 

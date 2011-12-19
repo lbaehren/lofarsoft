@@ -1,0 +1,25 @@
+
+set (LUS_SOURCE_DIR ${LUS_SOURCE_DIR} CACHE PATH
+  "Source directory of LUS software collection"
+  FORCE
+  )
+
+set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH
+  "Installation location"
+  FORCE
+  )
+
+set (WCSLIB_FORCE_BUILD ${WCSLIB_FORCE_BUILD} CACHE BOOL
+  "Force rebuild and local installation"
+  FORCE
+  )
+
+set (WCSLIB_PYTHON_WRAPPER ${WCSLIB_PYTHON_WRAPPER} CACHE BOOL
+  "Generate Python wrapper for WCSLIB?"
+  FORCE
+  )
+
+set (WCSLIB_ENABLE_TESTING ${WCSLIB_ENABLE_TESTING} CACHE BOOL
+  "Enable building and running tests?"
+  FORCE
+  )
