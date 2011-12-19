@@ -48,7 +48,7 @@ endif (NOT LUS_SOURCE_DIR)
 
 if (LUS_SOURCE_DIR)
   ## Load custom CMake settings
-  include (${LUS_SOURCE_DIR}devel_common/cmake/LUS_CMakeSettings.cmake)
+  include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
   ## Check if package is not installed yet
   if (NOT WCSLIB_FOUND)
     find_package (WCSLIB)
