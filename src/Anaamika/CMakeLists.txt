@@ -85,6 +85,11 @@ if (NOT HAVE_PYTHON)
   set (ANAAMIKA_ENABLE_PYBDSM FALSE)
 endif (NOT HAVE_PYTHON)
 
+if (NOT NUM_UTIL_LIBRARIES)
+  message (STATUS "[BDSM] Unable to build pybdsm - missing NumUtil!")
+  set (ANAAMIKA_ENABLE_PYBDSM FALSE)
+endif (NOT NUM_UTIL_LIBRARIES)
+
 if (ANAAMIKA_ENABLE_TESTING)
   include (CTest)
   enable_testing() 
