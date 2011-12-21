@@ -303,20 +303,26 @@ Don't forget to restart your shell or problems will arise along the way.
 
 .. note::
 
-   .bashrc is not loaded by default on Mac OSX. Either .bash_profile
+   .bashrc is not loaded by default on Mac OS X. Either .bash_profile
    or .profile is loaded by default, but only one of these. Therefore,
    make sure you have only one of the two.
 
 Now bootstrap the build system::
 
-  cd $LOFARSOFT/build
+  cd $LOFARSOFT
   ./bootstrap
 
-In the build directory, run::
+Then run::
 
+  cd build
   ccmake .
 
-and set ``WCSLIB_PYTHON_WRAPPER = OFF``, and ``DAL_PYTHON_BINDINGS = OFF``.
+and set ``WCSLIB_PYTHON_WRAPPER = OFF``, and ``DAL_PYTHON_BINDINGS =
+OFF``. Finalize the cmake configuration by pressing ``c``
+(configuration) and ``g`` (generating build scripts). If the ``g``
+option is not available, run the configuration again by pressing
+``c``.
+
 
 Compile the PyCRTools::
 
