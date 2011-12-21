@@ -432,8 +432,9 @@ class Opts(object):
                                  "E.g., trim_box = (120, 840, 15, 895). None => "\
                                  "use entire image",
                              group="advanced_opts")
-    stop_at         =   Enum(None, 'isl', 'fit', 'resid',
-                             doc="Stops after step if 'isl' or 'fit' or 'resid'",
+    stop_at         =   Enum(None, 'isl', 'read',
+                             doc="Stops after: 'isl' = island finding step or "\
+                                 "'read' = image reading step",
                              group="advanced_opts")
     group_by_isl    =   Bool(False,
                              doc="Group all Gaussians in each island into a single "\

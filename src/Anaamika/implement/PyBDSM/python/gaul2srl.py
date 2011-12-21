@@ -351,7 +351,7 @@ class Op_gaul2srl(Op):
         mompara5_MC = N.zeros(nMC, dtype=float)
         for i in range(nMC):
             subim_src_MC = self.make_subim(subn, subm, g_sublist, delc) + \
-                        N.random.normal(loc=0.0, scale=isl.rms*sqrt(bmar_p), size=(subn, subm))
+                        N.random.normal(loc=0.0, scale=abs(isl.rms)*sqrt(bmar_p), size=(subn, subm))
             try:
                 mompara_MC = func.momanalmask_gaus(subim_src_MC, mask, isrc, bmar_p, True)
                 mompara0_MC[i] = mompara_MC[0]

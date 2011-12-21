@@ -445,7 +445,7 @@ def write_gaul():
 
 
 def export_image(**kwargs):
-    """Write one or more images to a file.
+    """Write an image to disk.
 
     Parameters: filename, img_type, img_format, incl_wavelet, clobber
 
