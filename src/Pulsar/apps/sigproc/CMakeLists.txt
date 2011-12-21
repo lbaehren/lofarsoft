@@ -1,121 +1,152 @@
 
-## Libraries
+## ==============================================================================
+##
+##  Additional system inspection
+##
+## ==============================================================================
 
-## libsigproc
+if (NOT FFTW_FFTW3F_LIBRARY)
+  find_library (FFTW_FFTW3F_LIBRARY
+    NAMES fftw3f
+    PATHS ${CMAKE_INSTALL_PREFIX}
+    PATH_SUFFIXES lib
+    )
+endif (NOT FFTW_FFTW3F_LIBRARY)
 
-include_directories (${CMAKE_INSTALL_PREFIX}/include ${PULSAR_BINARY_DIR}/apps/sigproc)
+## Status message
 
-set (sigproc_sources add_channels.c
-add_samples.c
-aliases.c
-angle_split.c
-aoftm.c
-bandfactors.c
-bit.c
-bpp2fb.c
-cel2gal.c
-chan_freqs.c
-close_log.c  
-decimate_data.c
-decimate_header.c
-dedisperse_header.c
-deg2dms.c
-dmdelay.c
-dmshift.c
-error_message.c
-fetch_hdrval.c
-ffreq.c
-file_exists.c
-filterbank_header.c
-fold_header.c
-fold_data.c
-gmrt2fb.c
-help.c
-ignored_channels.c
-inv_cerf.c
-indexx.c
-lookup.c
-machine2prf.c
-mjd.c
-norm_prof.c
-np2.c
-nrselect.c
-nrutil.c
-nrsort.c
-nsamples.c
-ooty2fb.c
-open_file.c
-open_log.c  
-pack_unpack.c
-phcalc.c
-process.c
-print_version.c
-prof_adds.c
-prof_ddis.c
-prof_sbas.c
-prof_sumc.c
-prof_sumifs.c
-pspm_decode.c
-pspm_prof.c
-pspm_tstart.c
-pspm2fb.c
-put.c
-pulse.c
-random.c
-read_aoscan.c
-read_block.c
-read_header.c
-read_polyco.c
-recipes.c
-scaledata.c
-scale_prof.c
-scamp2fb.c
-send_stuff.c
-shift_prof.c
-fshift_prof.c
-cprofc.c
-sizeof_file.c
-slalib.c
-ssm.c
-submean.c
-submedian.c
-swap_bytes.c
-strings_equal.c
-typeof_inputdata.c
-update_log.c  
-uttime.c  
-vanvleck.c
-vmin.c
-vmax.c
-wappcorrect.c
-wapp_prof.c
-write_profiles.c  
-write_epn.c
-${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c
-readtim.c
-chkio.c   
-ioinf.c 
-readPtim.c
-smooth.c  
-single_ch.c 
-whiten.c   
-select.c   
-open_files.c 
-write_pulses.c
-thresh_1d.c
-head_parse.c 
-${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c
-wapp2fb.c 
-alfa_position.c 
-dedisperse_data.c
-)
+message ("")
+message (" [sigproc] FFTW_FFTW3F_LIBRARY = ${FFTW_FFTW3F_LIBRARY}")
+message ("")
+
+## ==============================================================================
+##
+##  Build instructions for libraries
+##
+## ==============================================================================
+
+include_directories (
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_INSTALL_PREFIX}/include
+  )
+
+set (sigproc_sources
+  add_channels.c
+  add_samples.c
+  aliases.c
+  angle_split.c
+  aoftm.c
+  bandfactors.c
+  bit.c
+  bpp2fb.c
+  cel2gal.c
+  chan_freqs.c
+  close_log.c  
+  decimate_data.c
+  decimate_header.c
+  dedisperse_header.c
+  deg2dms.c
+  dmdelay.c
+  dmshift.c
+  error_message.c
+  fetch_hdrval.c
+  ffreq.c
+  file_exists.c
+  filterbank_header.c
+  fold_header.c
+  fold_data.c
+  gmrt2fb.c
+  help.c
+  ignored_channels.c
+  inv_cerf.c
+  indexx.c
+  lookup.c
+  machine2prf.c
+  mjd.c
+  norm_prof.c
+  np2.c
+  nrselect.c
+  nrutil.c
+  nrsort.c
+  nsamples.c
+  ooty2fb.c
+  open_file.c
+  open_log.c  
+  pack_unpack.c
+  phcalc.c
+  process.c
+  print_version.c
+  prof_adds.c
+  prof_ddis.c
+  prof_sbas.c
+  prof_sumc.c
+  prof_sumifs.c
+  pspm_decode.c
+  pspm_prof.c
+  pspm_tstart.c
+  pspm2fb.c
+  put.c
+  pulse.c
+  random.c
+  read_aoscan.c
+  read_block.c
+  read_header.c
+  read_polyco.c
+  recipes.c
+  scaledata.c
+  scale_prof.c
+  scamp2fb.c
+  send_stuff.c
+  shift_prof.c
+  fshift_prof.c
+  cprofc.c
+  sizeof_file.c
+  slalib.c
+  ssm.c
+  submean.c
+  submedian.c
+  swap_bytes.c
+  strings_equal.c
+  typeof_inputdata.c
+  update_log.c  
+  uttime.c  
+  vanvleck.c
+  vmin.c
+  vmax.c
+  wappcorrect.c
+  wapp_prof.c
+  write_profiles.c  
+  write_epn.c
+  ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c
+  readtim.c
+  chkio.c   
+  ioinf.c 
+  readPtim.c
+  smooth.c  
+  single_ch.c 
+  whiten.c   
+  select.c   
+  open_files.c 
+  write_pulses.c
+  thresh_1d.c
+  head_parse.c 
+  ${PULSAR_BINARY_DIR}/apps/sigproc/mkheaderlex.c
+  wapp2fb.c 
+  alfa_position.c 
+  dedisperse_data.c
+  )
 
 set (sigproc_binaries
-    filterbank fake bandpass reader decimate
-    sigproc_fold polyco2period sigproc_profile flux splice barycentre
-    depolyco sigproc_downsample splitter snrdm blanker 
-    header flatten dedisperse clip sigproc_tree extract
-) 
+  filterbank
+  fake
+  bandpass
+  reader
+  decimate
+  sigproc_fold
+  polyco2period sigproc_profile flux splice barycentre
+  depolyco sigproc_downsample splitter snrdm blanker 
+  header flatten dedisperse clip sigproc_tree extract
+  ) 
 
 set (sigproc_fc_binaries
    pgplotter
@@ -139,7 +170,7 @@ set (sigproc_scripts
 add_library (sigproc STATIC ${sigproc_sources})
 
 target_link_libraries (sigproc
-  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+  ${FFTW_FFTW3F_LIBRARY}
   ${FFTW3_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${PGPLOT_LIBRARIES}
@@ -311,20 +342,36 @@ if (UNIX)
   )
  endif (APPLE)
 endif (UNIX)
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
+  target_link_libraries (${src}
+    sigproc
+    sigproc_fort
+    ${FFTW_FFTW3F_LIBRARY}
+    ${CFITSIO_LIBRARIES}
+    ${libm}
+    )
 endforeach (src)
 
 
 foreach (src ${sigproc_fc_binaries})
+  ## Additional target properties
   set_target_properties (${src}
     PROPERTIES
     LINKER_LANGUAGE Fortran
-#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+    #    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
     COMPILE_FLAGS "-O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
-  )
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm} ${PGPLOT_CPGPLOT_LIBRARY})
+    )
+  ##
+  target_link_libraries (
+    ${src}
+    sigproc
+    sigproc_fort
+    ${FFTW_FFTW3F_LIBRARY}
+    ${CFITSIO_LIBRARIES}
+    ${libm}
+    ${PGPLOT_CPGPLOT_LIBRARY}
+    )
 endforeach (src)
 
 set (CMAKE_Fortran_COMPILER g77)
