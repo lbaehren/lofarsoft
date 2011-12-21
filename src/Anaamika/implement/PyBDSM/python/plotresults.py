@@ -355,6 +355,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
 #     bPlay = Button(axPlay, 'Play')  
 #     bPlay.on_clicked(on_press)
     pl.show()
+    pl.close()
 
 def on_pick(event):
     global images

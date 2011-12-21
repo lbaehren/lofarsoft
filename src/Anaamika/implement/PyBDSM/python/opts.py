@@ -551,7 +551,7 @@ class Opts(object):
                                  "outside the island bounding box is flagged. The flag "\
                                  "value is increased by 4 (for x) and 8 (for y).",
                              group="flagging_opts")
-    flag_maxsize_bm =  Float(10.0,
+    flag_maxsize_bm =  Float(50.0,
                              doc="Flag Gaussian if area greater than "\
                                  "flag_maxsize_bm times beam area\n"\
                                  "Any fitted "\

@@ -42,7 +42,7 @@ class Op_cleanup(Op):
             pl.imshow(N.transpose(im), origin='lower', interpolation='nearest',vmin=vmin, vmax=vmax, \
                       cmap=cm.gray); pl.colorbar()
             pl.savefig(bdir+'allgaussians.png')
-
+            pl.close()
 
 
 

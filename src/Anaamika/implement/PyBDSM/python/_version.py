@@ -26,7 +26,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
-    2011/12/21 - Fixed bug in gaul2srl module. 
+    2011/12/21 - Fixed bug in gaul2srl module due to rare cases in which
+                 an island has a negative rms value. Fixed a memory issue
+                 in which memory was not released after using show_fit.
 
     2011/11/28 - Added option to have minpix_isl estimated automatically
                  as 1/3 of the beam area. This estimate should help 

@@ -219,6 +219,15 @@ class Op_gausfit(Op):
 
         thr1 = isl.mean + opts.thresh_isl*isl.rms
         thr2 = isl.mean + img.thresh_pix*isl.rms
+        if img.waveletimage:
+            # Since wavelets are being used, user wants to recover faint 
+            # diffuse emission, so fit all significant emission in island
+            thr0 = thr1
+        else:
+            # Fit only until no high peaks left, as overfitting often occurs
+            # if fit is done to thr1
+            thr0 = thr2
+            
         verbose = opts.verbose_fitting
         peak = fcn.find_peak()[0]
         dof = isl.size_active
@@ -232,23 +241,23 @@ class Op_gausfit(Op):
         if img.opts.ini_gausfit == 'default' and ngmax == None: 
           ngmax = 25
         if img.opts.ini_gausfit == 'fbdsm': 
-          gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr2, beam, img)
+          gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr0, beam, img)
         if img.opts.ini_gausfit == 'nobeam': 
-          gaul = self.inigaus_nobeam(isl, thr2, beam, img)
+          gaul = self.inigaus_nobeam(isl, thr0, beam, img)
           ng1 = len(gaul); ngmax = ng1+2
         while iter < 5:
             iter += 1
-            fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr2, iter, img.opts.ini_gausfit, ngmax, verbose)
+            fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, img.opts.ini_gausfit, ngmax, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr2, peak, shape, isl_image)
+                                              beam, thr0, peak, shape, isl_image)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
                 break
             if not fitok and iter == 5:
                 # If all else fails, try to fit just a single Gaussian to the island
-                fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr2, iter, img.opts.ini_gausfit, 1, verbose)
+                fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, img.opts.ini_gausfit, 1, verbose)
                 gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr2, peak, shape, isl_image)
+                                              beam, thr0, peak, shape, isl_image)
 
         ### return whatever we got
         isl.mg_fcn = fcn

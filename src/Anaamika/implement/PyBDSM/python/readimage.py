@@ -324,13 +324,13 @@ class Op_readimage(Op):
 
         ### convert beam into pixels and make sure it's asymmetric
         pbeam = beam2pix(beam)
-        pbeam = (pbeam[0]/fwsig, pbeam[1]/fwsig, pbeam[2])
+        pbeam = (pbeam[0]/fwsig, pbeam[1]/fwsig, pbeam[2])  # IN SIGMA UNITS
         
         ### and store it
         img.pix2beam = pix2beam
         img.beam2pix = beam2pix
         img.pix2coord = pix2coord
-        img.beam = beam
+        img.beam = beam   # FWHM size
         img.pixel_beam = pbeam   # IN SIGMA UNITS
         img.pixel_beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig # area of FWHM size
         img.pixel_restbeam = pbeam
