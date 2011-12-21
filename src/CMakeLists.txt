@@ -373,7 +373,6 @@ if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
   ## Trigger build and install
   add_custom_target (pulsar
     COMMAND ${CMAKE_COMMAND} ${PULSAR_SOURCE_DIR}
-    COMMAND sh ${PULSAR_BINARY_DIR}/runBuild
     COMMAND ${CMAKE_BUILD_TOOL} -j2
     COMMAND ${CMAKE_BUILD_TOOL} -j2 install
     COMMAND ${CMAKE_BUILD_TOOL} -j2 ppgplot_bindings_install
