@@ -1,12 +1,16 @@
-# $Id$
 
 include_directories (
   ${BOOST_INCLUDES}
   ${PYTHON_INCLUDES}
   ${NUMPY_INCLUDES}
-  ${NUM_UTIL_INCLUDES}
-  ${NUM_UTIL_INCLUDES}/..
   )
+
+if (NUM_UTIL_INCLUDES)
+  include_directories (
+    ${NUM_UTIL_INCLUDES}
+    ${NUM_UTIL_INCLUDES}/..
+    )
+endif (NUM_UTIL_INCLUDES)
 
 ## Fortran-based version
 if (ANAAMIKA_ENABLE_FBDSM)
