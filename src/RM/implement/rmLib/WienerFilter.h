@@ -1,5 +1,5 @@
-#ifndef WIENERFILTER_H
-#define WIENERFILTER_H	
+#ifndef Wiener_H
+#define Wiener_H	
 
 // Standard header files
 #include <iostream>
@@ -17,6 +17,7 @@ using namespace std;
 
 namespace RM {  //  namespace RM
 
+    
   /*!
     \class wienerfilter  
     \ingroup RM
@@ -43,7 +44,7 @@ namespace RM {  //  namespace RM
     cvec d;
     //! Signal vector
     cvec s;
-    
+    vec eigen ;
     // Intermediate products
     cmat W;	// W = R.H()*N.inv()
     cmat M;	// M = W*R
@@ -62,123 +63,115 @@ namespace RM {  //  namespace RM
     // Observational parameters
     
     //! Epsilon zero emissivity at frequency nu zero
-    double epsilon_0;
+  double epsilon_0;
     //! flag indicates, that Responsematrix is allready generaed 
-    bool R_ready ;
-    //! flag indicates, that the Propagator is ready
-    bool D_ready ;
-    //! flag indicates, that the complete filter matrix is ready
-    bool WF_ready ;
-    //! Frequency nu for which emissivity epsilon zero applies
-    double nu_0;
-    //! Spectral dependence power law factor alpha
-    double alpha;
-    double variance_s;							// standard deviation of s, complex (since both for Q and U)
-    double lambda_phi;							// lambda nu for spectral dependence coherence length
-    vector<double> lambdas;						// lambdas in data
-    vector<double> lambdasquareds;				// lambda squareds in data
-    vector<double> delta_lambdasquareds;				// delta lambda squareds distance between lambda squareds
-    vector<double> frequencies;					// frequencies present in observation
-    vector<double> delta_frequencies;				// delta frequencies distances between frequencies
-    vector<double> bandwidths;					// if we have bandwidths given, different from delta frequencies
-    vector<double> faradaydepths;					// Faraday depths to probe for
-    vector<double> delta_faradaydepths;			// delta faradays distance between Faraday depths
-    
-    // Instrumental parameters
-    vector<complex<double> > bandpass;			// bandpass factor for each frequency
-    
-    unsigned long maxiterations;					// maximum number of iterations to perform
-    unsigned long number_of_iterations; 			// number of iterations in this Wiener filtering
-    double rmsthreshold;							// rms threshold till iterations stop
-    
-    // String constants for memmber attributes (mainly file access names, initialized with default names)
-    string Sfilename;			// filename for S matrix file
-    string Rfilename;			// filename for R matrix file
-    string Nfilename;			// filename for N matrix file
-    string Dfilename;			// filename for D matrix file
-    string Qfilename;  			// filename for Q matrix file
-    string Sformula;			// formula for initial S guess
-    string Stype;				// type of spectral dependency
-    
-    //*****************************************************
-    //
-    // Wiener filtering algorithm functions
-    //
-    //*****************************************************/
-    void createNoiseMatrix(double noise);		// create an instrument/simulated noise matrix, complex due to P=Q+iU and noise might differ in Q and U
-    void createNoiseMatrix(vector<double> &noiseperchan);	// create a noise matrix with rms noise for each frequency channel
-    void createResponseMatrix(vector<uint> gaps, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
-    void createResponseMatrix(vector<double> intervals, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
-    void generateWienerFiltering(int noNoise, int flatPrior, double signal_var, double signal_corr, double noise_var, vector<uint> gaps, double eps,uint QR ) ;
-    void generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cvec power, double eps, uint QR ) ;
-    void generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cmat covMat, double eps, uint QR );
-    void createResponseMatrixIntegral();	// integral form of Response matrix
-    void createSMatrix(const string &);						// initial guess for the S matrix, Types: "whitesignal", "gaussian", "powerlaw", "deconvolution"
-    void iterateForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps, uint smoothSteps, double powerEps) ;	// adjust S matrix from result of Wiener filtering
-    void iterateMatForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps);
-    void iteratePowerSpectrum(cvec freqs, cvec faradays, cvec power0, cvec map, vector<uint> gaps, cvec epsilon, cvec delta, double aimDist);
-    void iteratePowerSpectra(cvec power0, vector<cvec> maps, vector<uint> gaps, cvec epsilon, cvec delta, double aimDist, uint smoothSteps);
-    void iteratePowerSpectraNaive(cvec power0, vector<cvec> datas, vector<uint> gaps, cvec epsilon, cvec delta,  double aimDist);
-    void iterateCovMatrix(vector<cvec> &datas, vector<uint> &gaps, double aimDist);
-    void iterateMatrixNaive(vector<cvec> &datas, vector<uint> &gaps, double aimDist);
-    // Algorithm functions
-    void computeVariance_s();				// compute dispersion_s (taken from data vector d)
-    void computej();					// R^(dagger)N^(inverse)*d
-    void computeD();					// D=R^(dagger)N^(inverse)R
-    void computeD_NoSignalCov() ;
-    void computeD_NoNoiseCov() ;
-    
-    // Compute intermediate product matrices
-    void computeW();					// W = R^{dagger}*N^{inverse}
-    void computeW_noNoise();
-    void computeM();					// M = W*R
-    
-    void reconstructm();					// function to reconstruct the map m
-    
-    // Functions to free memory of matrices that are not needed anymore
-    void deleteN();
-    void deleteR();
-    
-    void applyWF(cvec &data, cvec &map);	// apply WF-Matrix to data vector
-    vector<complex<double> > applyR(vector<complex<double> > &map); // apply response matrix to map vector
-    vector<complex<double> > applyWF(vector<complex<double> >) ;
-    void applyWF(std::vector<std::complex<double> > &data, std::vector<std::complex<double> > &map);
+  bool R_ready ;
+   //! flag indicates, that the Propagator is ready
+  bool D_ready ;
+   //! flag indicates, that the complete filter matrix is ready
+  bool WF_ready ;
+  //! Frequency nu for which emissivity epsilon zero applies
+  double nu_0;
+  //! Spectral dependence power law factor alpha
+  double alpha;
+  double variance_s;							// standard deviation of s, complex (since both for Q and U)
+  double lambda_phi;							// lambda nu for spectral dependence coherence length
+  vector<double> lambdas;						// lambdas in data
+  vector<double> lambdasquareds;				// lambda squareds in data
+  vector<double> delta_lambdasquareds;				// delta lambda squareds distance between lambda squareds
+  vector<double> frequencies;					// frequencies present in observation
+  vector<double> delta_frequencies;				// delta frequencies distances between frequencies
+  vector<double> bandwidths;					// if we have bandwidths given, different from delta frequencies
+  vector<double> faradaydepths;					// Faraday depths to probe for
+  vector<double> delta_faradaydepths;			// delta faradays distance between Faraday depths
+  
+  // Instrumental parameters
+  vector<complex<double> > bandpass;			// bandpass factor for each frequency
 
-    // === Public methods =======================================================
-    
-  public:
+  unsigned long maxiterations;					// maximum number of iterations to perform
+  unsigned long number_of_iterations; 			// number of iterations in this Wiener filtering
+  double rmsthreshold;							// rms threshold till iterations stop
 
-    //! Default constructor
-    wienerfilter();
-    //! Argumented constructor
-    wienerfilter(int nfreqs, int nfaradays);
-    //! Argumented constructor
-    wienerfilter(int nfreqs, vector<double> faradays);
-    //! Argumented constructor
-    wienerfilter(int nfreqs, int nfaradays, std::string &formula);
-    //! Destructor
-    ~wienerfilter();
-    
-    void smooth(cvec &power, uint num);
-    void computeWF();	//! compute Wiener Filter operator
-    
-    
-    // Member access functions (D and Q are results and handeled below)
-    //   double getVariance_s(void);					// for debugging get variance_s
-    void setVariance_s(double s);					// debug: set variance_s
-    
-    double getLambdaPhi();										// get lambda_phi
-    void setLambdaPhi(double lambdaphi);							// set lambda_phi
-    vector<double> getLambdas();									// get lambdas vector
-    void setLambdas(vector<double> &lambdas);						// set lambdas vector
-    vector<double> getLambdaSquareds();							// get lambda squareds used in data
-    void setLambdaSquareds(vector<double> &lambdasquareds);		// set lambda squareds used in data
-    vector<double> getDeltaLambdaSquareds();		// get the delta Lambda Squareds associated with the data
-    void setDeltaLambdaSquareds(vector<double> &delta_lambdasqs);	// set the delta Lambda Squareds associated with the data
-    vector<double> getFrequencies();								// get frequencies vector wth observed frequencies
-    void setFrequencies(vector<double> &freqs);					// set frequencies vector with to observed frequencies
-    vector<double> getDeltaFrequencies();				// get delta frequencies distances between observed frequencies
-    void setDeltaFrequencies(vector<double> &deltafreqs);		// set delta frequencies distances between observed frequencies
+  // String constants for memmber attributes (mainly file access names, initialized with default names)
+  string Sfilename;			// filename for S matrix file
+  string Rfilename;			// filename for R matrix file
+  string Nfilename;			// filename for N matrix file
+  string Dfilename;			// filename for D matrix file
+  string Qfilename;  			// filename for Q matrix file
+  string Sformula;			// formula for initial S guess
+  string Stype;				// type of spectral dependency
+
+  //*****************************************************
+  //
+  // Wiener filtering algorithm functions
+  //
+  //*****************************************************/
+  void createNoiseMatrix(double noise);		// create an instrument/simulated noise matrix, complex due to P=Q+iU and noise might differ in Q and U
+  void createNoiseMatrix(vector<double> &noiseperchan);	// create a noise matrix with rms noise for each frequency channel
+  void createResponseMatrix(vector<uint> gaps, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
+  void createResponseMatrix(vector<double> intervals, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
+  void generateWienerFiltering(int noNoise, int flatPrior, double signal_var, double signal_corr, double noise_var, vector<uint> gaps, double eps,uint QR ) ;
+  void generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cvec power, double eps, uint QR ) ;
+  void generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cmat covMat, double eps, uint QR );
+  void createResponseMatrixIntegral();	// integral form of Response matrix
+  void createSMatrix(const string &);						// initial guess for the S matrix, Types: "whitesignal", "gaussian", "powerlaw", "deconvolution"
+  void iterateForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps, uint smoothSteps, double powerEps) ;	// adjust S matrix from result of Wiener filtering
+  void iterateMatForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps);
+  void iteratePowerSpectrum(cvec freqs, cvec faradays, cvec power0, cvec map, vector<uint> gaps, cvec epsilon, cvec delta, double aimDist);
+  void iteratePowerSpectra(cvec power0, vector<cvec> maps, vector<uint> gaps, cvec epsilon, cvec delta, double aimDist, uint smoothSteps);
+  void iteratePowerSpectraNaive(cvec power0, vector<cvec> datas, vector<uint> gaps, cvec epsilon, cvec delta,  double aimDist);
+  void iterateCovMatrix(vector<cvec> &datas, vector<uint> &gaps, double aimDist);
+  void iterateMatrixNaive(vector<cvec> &datas, vector<uint> &gaps, double aimDist);
+  // Algorithm functions
+  void computeVariance_s();				// compute dispersion_s (taken from data vector d)
+  void computej();					// R^(dagger)N^(inverse)*d
+  void computeD();					// D=R^(dagger)N^(inverse)R
+  void computeD_NoSignalCov() ;
+  void computeD_NoNoiseCov() ;
+
+  // Compute intermediate product matrices
+  void computeW();					// W = R^{dagger}*N^{inverse}
+  void computeW_noNoise();
+  void computeM();					// M = W*R
+
+  void reconstructm();					// function to reconstruct the map m
+
+  // Functions to free memory of matrices that are not needed anymore
+  void deleteN();
+  void deleteR();
+
+  void applyWF(cvec &data, cvec &map);	// apply WF-Matrix to data vector
+  vector<complex<double> > applyR(vector<complex<double> > &map); // apply response matrix to map vector
+  vector<complex<double> > applyWF(vector<complex<double> >) ;
+  void applyWF(std::vector<std::complex<double> > &data, std::vector<std::complex<double> > &map);
+
+public:	
+  wienerfilter();						// default constructor
+  wienerfilter(int nfreqs, int nfaradays);
+  wienerfilter(int nfreqs, vector<double> faradays);
+  wienerfilter(int nfreqs, int nfaradays, std::string &formula);
+  ~wienerfilter();							// destructor
+	
+  void smooth(cvec &power, uint num);
+  void computeWF();	//! compute Wiener Filter operator
+  
+  
+  // Member access functions (D and Q are results and handeled below)
+//   double getVariance_s(void);					// for debugging get variance_s
+  void setVariance_s(double s);					// debug: set variance_s
+
+  double getLambdaPhi();										// get lambda_phi
+  void setLambdaPhi(double lambdaphi);							// set lambda_phi
+  vector<double> getLambdas();									// get lambdas vector
+  void setLambdas(vector<double> &lambdas);						// set lambdas vector
+  vector<double> getLambdaSquareds();							// get lambda squareds used in data
+  void setLambdaSquareds(vector<double> &lambdasquareds);		// set lambda squareds used in data
+  vector<double> getDeltaLambdaSquareds();		// get the delta Lambda Squareds associated with the data
+  void setDeltaLambdaSquareds(vector<double> &delta_lambdasqs);	// set the delta Lambda Squareds associated with the data
+  vector<double> getFrequencies();								// get frequencies vector wth observed frequencies
+  void setFrequencies(vector<double> &freqs);					// set frequencies vector with to observed frequencies
+  vector<double> getDeltaFrequencies();				// get delta frequencies distances between observed frequencies
+  void setDeltaFrequencies(vector<double> &deltafreqs);		// set delta frequencies distances between observed frequencies
   vector<double> getFaradayDepths();				// get the Faraday depths to be probed for
   void setFaradayDepths(vector<double> &faraday_depths);	// set the Faraday depths to be probed for
   void calcSFromPowerspec(cvec power) ;
@@ -322,25 +315,16 @@ namespace RM {  //  namespace RM
 		    vector<double> &power);
   //! Compute P=sqrt(Q+iU)
   void complexPower( cvec &signal,
-		     vector<double> &power);	
-  std::complex<double> integrand (double x,
-				  double phi_a,
-				  double phi_b,
-				  double alpha) ;
-  std::complex<double> integral (double nu_a,
-				 double nu_b,
-				 double eps,
-				 double alpha,
-				 double phi_a,
-				 double phi_b,
-				 int level) ;
+		    vector<double> &power);	
+  complex<double> integrand(double x,double phi_a, double phi_b,double alpha) ;
+  complex<double> integral(double nu_a, double nu_b, double eps,double alpha, double phi_a, double phi_b, int level ) ;
   complex<double> integral_approx(double nu_a, double nu_b, double eps,double alpha, double phi_a, double phi_b, int level ) ;
   void prepare(vector<double> &freqsC, vector<double> &freqsI, vector<double> &faras, double nu_0, double alpha, double epsilon, int method) ;
-  
+  void anaNoise(vector<double> &freqsC, vector<double> &freqsI, rmCube &cube, vector<double> &faras, double epsilon,double alpha) ;
   // === Noise functions for signal creation ====================================
   
-  /*   //! Add noise to data */
-  /*   void addNoise(double max); */
+/*   //! Add noise to data */
+/*   void addNoise(double max); */
   
   };
   
@@ -353,17 +337,12 @@ namespace RM {  //  namespace RM
     complex<double> arg2 ;
     complex<double> arg3 ;
     public :
-    
-    oneOverEps (cvec vector,
-		std::complex<double> ar1,
-		std::complex<double> ar2,
-		std::complex<double> ar3)
-      {
-	vek = vector ;
-	arg1= ar1 ;
-	arg2= ar2 ;
-	arg3= ar3 ;
-      }
+    oneOverEps(cvec vector, complex<double> ar1, complex<double> ar2, complex<double> ar3) {
+      vek = vector ;
+      arg1= ar1 ;
+      arg2= ar2 ;
+      arg3= ar3 ;
+    }
     complex<double> function(uint index) {
       return 1.0/(arg1*vek[index]+arg2)+arg3*vek[index] ;
     }

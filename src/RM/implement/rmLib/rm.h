@@ -52,12 +52,15 @@ using namespace std;
 class rm {
 
   //! Cached line of sight rm values if already computed
-  std::vector<double> cached_los;
+  vector<double> cached_los;
   //! Pixel coords of cached rm los values
   int cached_x, cached_y;
   //! Right Ascension and Declination coords of cached los rm values
-  double cached_ra;
-  double cached_dec;
+  double cached_ra, cached_dec;
+
+  //! Units of RA and Dec
+ // casa::Unit raUnit;
+ // casa::Unit decUnit;
 
   //! Units of input vectors (lamba squared or frequency) the cube was created from
   //casa::Unit spectralUnit;
@@ -66,10 +69,10 @@ class rm {
   //casa::Unit faradayUnit;
   
   //! Compute delta lambda squareds from frequencies using tophat function
-  void deltaLambdaSqTopHat(const std::vector<double> &frequency,
-			   const std::vector<double> &bandwidth,
-			   std::vector<double> &lambda_centre,
-			   std::vector<double> &delta_lambda_squareds);
+  void deltaLambdaSqTopHat(const vector<double> &frequency,
+			   const vector<double> &bandwidth,
+			   vector<double> &lambda_centre,
+			   vector<double> &delta_lambda_squareds);
 
   //! Calculate integrated total intensity along one line of sight
   double totalIntensity(const vector<double> &, int);

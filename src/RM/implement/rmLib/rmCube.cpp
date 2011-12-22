@@ -12,11 +12,8 @@
 #include "rmCube.h"				// rmCube class declarations
 // #include <fitshandle.h>
 #define pi 3.1415926535897932385
-
-/* Namespace usage */
 using namespace std;
-using namespace casa;
-
+using namespace casa ;
 namespace RM {
   
   //===============================================================================
@@ -329,54 +326,44 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
       \param f_min minimal value for the first axis, the physical meaning depends on parameter axis
       \param f_max maximal value for the first axis, the physical meaning depends on parameter axis  
 */
-    rmCube::rmCube (string qpath,
-		    string upath,
-		    int axis,
-		    double f_min,
-		    double f_max)
-    {
-      /* define vectors for file names */
-      vector<string> u_files;
-      vector<string> q_files;
-      /* read directories where to find the file names */
-      readDir(upath,u_files);
-      readDir(qpath,q_files);
-      /* remove all names wich do not belong to fits files, at least "." and ".." */
-      removeNoFits(u_files) ;
-      removeNoFits(q_files) ;
-      /* deremine the number of fitsfiles for the first dimension of the cube */
-      uint f = q_files.size() ;
-      /* get the dimension for a representive of the images to determine the
-	 two other dimensions of the cube */
-      uint x,y; 
-      int pix ; 
-      getFitsSize(qpath, q_files, x, y, pix) ;  // get the size of the fits images
-      /* set the dimensions of the intern variables of the cube */ 
-      this->axis = axis ;
-      this->xSize=x;
-      this->ySize=y;
-      this->faradaySize=f;
-      this->pix = pix ;
-      allocMemory(true) ;
-      fillRM_Cube(qpath, upath, q_files, u_files, f, x, y, f_min, f_max);
-      this->rmType= axis ;
-    }
-  
-  //_____________________________________________________________________________
-  //                                                                findCoorIndex
+    rmCube::rmCube(string qpath, string upath, int axis, double f_min, double f_max) {
+    /* define vectors for file names */
+    vector<string> u_files;
+    vector<string> q_files;
+    /* read directories where to find the file names */
+    readDir(upath,u_files);
+    readDir(qpath,q_files);
+    /* remove all names wich do not belong to fits files, at least "." and ".." */
+    removeNoFits(u_files) ;
+    removeNoFits(q_files) ;
+    /* deremine the number of fitsfiles for the first dimension of the cube */
+    uint f = q_files.size() ;
+    /* get the dimension for a representive of the images to determine the
+       two other dimensions of the cube */
+    uint x,y; 
+    int pix ; 
+    getFitsSize(qpath, q_files, x, y, pix) ;  // get the size of the fits images
+    /* set the dimensions of the intern variables of the cube */ 
+    this->axis = axis ;
+    this->xSize=x;
+    this->ySize=y;
+    this->faradaySize=f;
+    this->pix = pix ;
+    allocMemory(true) ;
+    fillRM_Cube(qpath, upath, q_files, u_files, f, x, y, f_min, f_max);
+    this->rmType= axis ;
+  }
 
   /*! procedure finds the lowest coordinate system index for the coordinate,
-    with a given type.
-    \param coors coordinate system to search for the coordinate object
-    \param typ type of the coordinate to be searched 
-    \param considerTyp indicates wether only each coordinate has to be taken into account of 
-    each coordinate is weighted by its number of world axes
-    \return index of the first coordinate axis, which has the given typ, if no is found -1 is returned */
-  
-  int findCoorIndex (casa::CoordinateSystem coors,
-		     casa::Coordinate::Type typ,
-		     bool considerCoorTyp)
-  {
+      with a given type.
+      \param coors coordinate system to search for the coordinate object
+      \param typ type of the coordinate to be searched 
+      \param considerTyp indicates wether only each coordinate has to be taken into account of 
+            each coordinate is weighted by its number of world axes
+      \return index of the first coordinate axis, which has the given typ, if no is found -1 is returned */
+
+  int findCoorIndex(CoordinateSystem coors, Coordinate::Type typ, bool considerCoorTyp) {
+    bool found = false ;
     int num = 0 ;
     int erg = -1 ;
     for(uint j=0; j<coors.nCoordinates( ) ; j++) {
@@ -395,23 +382,19 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
   }
 
   /*! find the index of the subrecord object of a record, which has a given name.
-      \param rec Record to search the sub records inside
+      \param rekord rekord to search the sub records inside
       \param name name of the record to be searched
       \param countAll if count all is false,the procedure only counts subrecords for deremine 
                     the index of the sub record, otherwise it count all elemets of the record 
       \return index of the found record, if no one is found, the procedure returns -1 */
 
-  int findNamedRecord (TableRecord &rec,
-		       string &name,
-		       bool countAll)
-  {
-    int res          = -1 ;
-    int counter      = 0;
-    RecordDesc descr = rec.description() ;
-
-    for (uint i=0; (i<rec.nfields()) &&(res == -1); i++) {
-      if (rec.type(i)==TpRecord) {
-        if (std::string(descr.name(i))==name) {
+  int findNamedRecord(TableRecord &rekord, string &name, bool countAll) {
+    int res = -1 ;
+    int counter=0;
+    RecordDesc descr = rekord.description() ;
+    for (uint i=0; (i<rekord.nfields()) &&(res == -1); i++) {
+      if (rekord.type(i)==TpRecord) {
+        if (descr.name(i)==name) {
           if (countAll)
             res = i ;
           else 
@@ -422,9 +405,9 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
     }
     return res ;
   }
-  
+
   /*! procedure identifies the different directions of the coordinate system.
-    It returns a vector which covers the different directions.
+      It returns a vector which covers the different directions.
       0,1 indexes of the direction coordinates
       2   index of the spektral axis
       3   index of the stokes axis */
@@ -440,6 +423,23 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
     return res ;
   }
 
+
+  /*! procedure identifies the different directions of the coordinate system.
+      It returns a vector which covers the different directions.
+      0,1 indexes of the direction coordinates
+      2   index of the spektral axis
+      3   index of the stokes axis */
+  Vector<int> indexesFits(CoordinateSystem coors ) {
+    Vector<int> res(4) ;
+//     int directIndex = findCoorIndex(coors,Coordinate::DIRECTION, true) ;
+//     int specIndex = findCoorIndex(coors,Coordinate::SPECTRAL,true) ;
+//     int stokIndex = findCoorIndex(coors,Coordinate::STOKES,true) ;
+    res[0]= 0 ;
+    res[1]= 1;
+    res[2]= 2 ;
+    res[3]= 3 ;
+    return res ;
+  }
 void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
   Table &tabTar = tarImage.table() ;
   TableRecord &recTar = tabTar.rwKeywordSet() ;
@@ -507,53 +507,96 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
     axis=1 ; // set axis flag to frequency axis 
     /* Ende der Definition einiger Konstanten */
     vector<string> files = readDirectory(imagePath) ;
+    double last=0;
+    uint nFreqs=0 ;
     freqSize=0 ;
     double freqDiff ;
+    bool fits = false ;
 //     Vector<int> inds ;
     /* read main metadata of the current data set to be able to 
        allocate the needed memory */
     for (uint i=0; i<files.size(); i++) {
       if ((files[i] != ".") && (files[i] != "..")) {
         string fileName=imagePath+files[i] ; // ("/scratch/thriller/lofar/andreas/L23648_SB002_uv.MS.dppp.dppp.dppp.img.image") ;
-        PagedImage<Float> imag1(fileName) ;
-        Table tab1=imag1.table() ;
-        /* store keywords */
-        if (i==0) {
-          recSrc = tab1.keywordSet() ;
-        }
-        CoordinateSystem coors = imag1.coordinates() ;
-        /* just now, store only one coordinates system, later may store a big one */
-        if (i==0) {
-          cs = coors ;
-          log = imag1.logger() ;
-          shape = imag1.shape() ;
-        }
-        Vector<double> pixel(4,0) ;
-        Vector<double> world(4,0) ;
-        inds =  indexes(coors) ;
-        ROArrayColumn<Float> arr2Col (tab1, query);
-        IPosition iPos = arr2Col.shape(0) ;
-        if (i==0) {
-          xSize=iPos[inds[0]];
-          ySize=iPos[inds[1]];
-        }
-        int specIndex=inds[2] ;
-        freqSize+=iPos[specIndex] ;
-        /* just to avoid segmentation faults */
-        if (specIndex != -1) {
-          for (uint j=0; j<iPos[specIndex]; j++) {
-            pixel[specIndex]=j;
-            coors.toWorld(world,pixel) ;  
-            freqs.push_back(world[specIndex]) ;
+        try {
+          PagedImage<Float> imag1(fileName) ;
+          Table tab1=imag1.table() ;
+          /* store keywords */
+          if (i==0) {
+            recSrc = tab1.keywordSet() ;
           }
+          CoordinateSystem coors = imag1.coordinates() ;
+          /* just now, store only one coordinates system, later may store a big one */
+          if (i==0) {
+            cs = coors ;
+            log = imag1.logger() ;
+            shape = imag1.shape() ;
+          }
+          Vector<double> pixel(4,0) ;
+          Vector<double> world(4,0) ;
+          inds =  indexes(coors) ;
+          ROArrayColumn<Float> arr2Col (tab1, query);
+          IPosition iPos = arr2Col.shape(0) ;
+          if (i==0) {
+            xSize=iPos[inds[0]];
+            ySize=iPos[inds[1]];
+          }
+          int specIndex=inds[2] ;
+          freqSize+=iPos[specIndex] ;
+          /* just to avoid segmentation faults */
+          if (specIndex != -1) {
+            for (uint j=0; j<iPos[specIndex]; j++) {
+              pixel[specIndex]=j;
+              coors.toWorld(world,pixel) ;  
+              freqs.push_back(world[specIndex]) ;
+            }
+          }
+        }
+        catch (TableNoFile imEx) {
+          fits = true ;
+          break ;
         }
       }
       else {
 //         cout << "nicht verwendet bei index: " << i << endl ;
       }
     }
+    /* read the fits files if the data is not represented by a casa image set */
+    if (fits) {
+      for (uint i=0; i<files.size(); i++) {
+        if ((files[i] != ".") && (files[i] != "..")) {
+          string fileName=imagePath+files[i] ; // ("/scratch/thriller/lofar/andreas/L23648_SB002_uv.MS.dppp.dppp.dppp.img.image") ;
+          FITSImage imag1(fileName) ;
+          const CoordinateSystem coors = imag1.coordinates() ;
+          if (i==0) {
+            cs = coors ;
+            log = imag1.logger() ;
+            shape = imag1.shape() ;
+          }
+          inds =  indexesFits(coors) ;
+          IPosition iPos = imag1.shape() ;
+          Vector<double> pixel(4,0) ;
+          Vector<double> world(4,0) ;
+          if (i==0) {
+            xSize=iPos[inds[0]];
+            ySize=iPos[inds[1]];
+          }
+          int specIndex=inds[2] ;
+          freqSize+=iPos[specIndex] ;
+          /* just to avoid segmentation faults */
+          if (specIndex != -1) {
+            for (uint j=0; j<iPos[specIndex]; j++) {
+              pixel[specIndex]=j;
+              coors.toWorld(world,pixel) ;  
+              freqs.push_back(world[specIndex]) ;
+            }
+          }
+        }
+      }
+    }
     /* loop to find the frequencies differnce as the smallest difference of all frequencies */
     for (uint i=1; i<freqs.size(); i++) {
+//      cout << i << " " << freqs[i] << endl ;
       if (i==1) freqDiff = freqs[1]-freqs[0] ;
       else freqDiff = min(freqDiff,freqs[i]-freqs[i-1]) ;
     }
@@ -562,43 +605,90 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
     for (uint i=0; i<freqsInter.size(); i++) {
       freqsInter[i]=freqDiff ;
     }
-//     cout << "TEST: " << freqs.size()  << " " << freqSize << " " << inds<< endl ;
     allocMemory(false) ;
     uint curIndx = 0 ;
     /* loop for reading the actual data into the rmcube */
-    for (uint i=0; i<files.size(); i++) {
-      if ((files[i] != ".") && (files[i] != "..")) {
-        string fileName=imagePath+files[i] ; // ("/scratch/thriller/lofar/andreas/L23648_SB002_uv.MS.dppp.dppp.dppp.img.image") ;
-        PagedImage<Float> imag1(fileName) ;
-        Table &tab1=imag1.table() ;
-        ROArrayColumn<Float> arr2Col (tab1, query);
-        IPosition iPos = arr2Col.shape(0) ;
-        Array<Float> feld = arr2Col.getColumn( );
-        IPosition pos(iPos.size()+1) ;
-        for (uint j=0; j<pos.size(); j++) {
-          pos[j] =0 ;
-        }
-        IPosition ipos = feld.shape() ;
-    //   loop over the first component of the Array
-        int index = inds[2];
-        /* loop over the subbands of the current image */
-        for (uint j=0; j<ipos[index] ; j++) {
-          pos[index] = j ;  // set the frequency coordinate inside the current image
+    if (!fits) { // reading for the non fits case
+      for (uint i=0; i<files.size(); i++) {
+        if ((files[i] != ".") && (files[i] != "..")) {
+          string fileName=imagePath+files[i] ; // ("/scratch/thriller/lofar/andreas/L23648_SB002_uv.MS.dppp.dppp.dppp.img.image") ;
+          PagedImage<Float> imag1(fileName) ;
+          Table &tab1=imag1.table() ;
+          ROArrayColumn<Float> arr2Col (tab1, query);
+          IPosition iPos = arr2Col.shape(0) ;
+          Array<Float> feld = arr2Col.getColumn( );
+          IPosition pos(iPos.size()+1) ;
+          for (uint j=0; j<pos.size(); j++) {
+            pos[j] =0 ;
+          }
+          IPosition ipos = feld.shape() ;
+    //    loop over the first component of the Array
+          int index = inds[2];
+          /* loop over the subbands of the current image */
+          for (uint j=0; j<ipos[index] ; j++) {
+            pos[index] = j ;  // set the frequency coordinate inside the current image
+            /* loop over the first dimension of the current image */
+            for (uint x=0; x<xSize; x++) {
+              pos[inds[0]]=x ;  // set the position for the first spartial image dimension
+              /* loop over the seccond dimension of the current image */
+              for (uint y=0; y<ySize; y++) {
+                pos[inds[1]]=y ; // set the position for the seccond spartial image dimension
+                pos[inds[3]]=1 ; // select pos component for Stokes Q
+                double Q = feld(pos) ;
+                pos[inds[3]]=2 ; // select pos component for Stokes U
+                double U = feld(pos) ;
+                complex<double> val(Q,U) ;
+                vals(curIndx,x,y) = val ;
+              } // end for y
+            } // end for x
+            curIndx++ ;
+          } // end for j (frequencies)
+        } // end if files
+      } // end loop over all files of the folder 
+    }
+    else { // case read fits files 
+      for (uint i=0; i<files.size(); i++) {
+        if ((files[i] != ".") && (files[i] != "..")) {
+          string fileName=imagePath+files[i] ; // ("/scratch/thriller/lofar/andreas/L23648_SB002_uv.MS.dppp.dppp.dppp.img.image") ;
+          FITSImage imag1(fileName) ;
+          IPosition start(4) ;
+          IPosition ende(4) ;
+          IPosition ipos = imag1.shape() ;
+          Array<Float> Q;
+          Array<Float> U;
+          int index = inds[2];
+          start[index]= 0 ;
+          ende[index]= (imag1.shape())[index];
+          ende[inds[3]] = 1;
+          ende[inds[0]] = 1 ;
+          ende[inds[1]] = 1 ;
           /* loop over the first dimension of the current image */
           for (uint x=0; x<xSize; x++) {
-            pos[inds[0]]=x ;  // set the position for the first spartial image dimension
+            start[inds[0]] = x ;
             /* loop over the seccond dimension of the current image */
             for (uint y=0; y<ySize; y++) {
-              pos[inds[1]]=y ; // set the position for the seccond spartial image dimension
-              pos[inds[3]]=1 ; // select pos component for Stokes Q
-              double Q = feld(pos) ;
-              pos[inds[3]]=2 ; // select pos component for Stokes U
-              double U = feld(pos) ;
-              complex<double> val(Q,U) ;
-              vals(curIndx,x,y) = val ;
-            }
-          }
-          curIndx++ ;
+              start[inds[1]] = y ;
+              start[inds[3]] = 1 ;
+              Slicer slQ(start, ende) ;
+              imag1.doGetSlice ( Q, slQ) ;
+              start[inds[3]] = 2 ;
+              Slicer slU(start, ende) ;
+              imag1.doGetSlice ( U, slU) ;
+              for (uint j=0; j<ipos[index] ; j++) {
+                double u=0 ;
+                double q=0 ;
+                Array<Float>::iterator itQ = U.begin() ;
+                for (Array<Float>::iterator it = U.begin(); it!=U.end(); ++it) {
+                    u = *it ;
+                    q = *itQ ;
+                    itQ++ ;
+                    complex<double> val(q,u) ;
+                    vals(curIndx+j,x,y) = val ;
+                }
+              }
+            } // end for y
+          } // end for x
+          curIndx+=ipos[index] ;
         }
       }
     }

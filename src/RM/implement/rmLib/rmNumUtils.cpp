@@ -1547,8 +1547,10 @@ void makeInverse(cmat &U,vec &eig, cmat &erg) {
      }
    }
 }
-/*! Procedure for calculating eigenvalues and eigenvectors for the current matrix which must be hermitian
-    but is also intended to be positive definite. */
+/*! Procedure for calculating the pseudoinverse of the current matrix 
+    by calculating the eigenvalues and eigenvectors. The matrix must be hermitian
+    but is also intended to be positive definite. 
+    \return The pseudoinvers Matrix */
 
 cmat cmat::calcPosEig() {
   if (rows() != cols()) {
@@ -1568,6 +1570,7 @@ cmat cmat::calcPosEig() {
   int res = gsl_eigen_hermv (A, eigVals, eigVecs, work);
   cout << "gsl procedure for eigenvalues finished: " << res  << endl ;
   cmat U(eigVecs) ;
+  cmat Uh=U.H() ;
   vec eig(eigVals) ;
   eig.valOut("eigen.dat") ;
   cmat inv(rows(),rows());
@@ -1578,6 +1581,35 @@ cmat cmat::calcPosEig() {
   gsl_vector_free(eigVals) ;
   return inv;
 }
+
+/*! Procedure calculates the Eigenvectors and Eigenvalues for the current matrix */
+void cmat::calcEigenSys() {
+  if (rows() != cols()) {
+     cerr << "CalcPosEig error: matrix is not a square matrix." << endl ;
+     throw "CalcPosEig error: matrix is not a square matrix." ;
+  }
+  gsl_matrix_complex *A=createGSL_Mat() ; //create a gsl matrix from the current matrix
+  size_t dim = A->size1 ;
+  gsl_matrix_complex  *eigVecs = gsl_matrix_complex_alloc(dim,dim) ;
+  gsl_vector *eigVals= gsl_vector_alloc(dim) ;
+  gsl_eigen_hermv_workspace *work = gsl_eigen_hermv_alloc (dim)  ;
+  if ((eigVecs==0)||(eigVals==0)|| (work==0) ) {
+    cerr << "cmat calculating eigenvectors: not enough memory" << endl ;
+    throw "cmat calculating eigenvectors: not enough memory" ;
+  }
+  cout << "start gsl procedure to calculate eigenvalues" << endl ;
+  int res = gsl_eigen_hermv (A, eigVals, eigVecs, work);
+  cout << "gsl procedure for eigenvalues finished: " << res  << endl ;
+  cmat U(eigVecs,true) ;
+  vec eig(eigVals) ;
+  eigenValues=eig.data ;
+  Q = U.data ;
+  gsl_eigen_hermv_free(work) ;
+  gsl_matrix_complex_free(A) ;
+  gsl_matrix_complex_free(eigVecs) ;
+  gsl_vector_free(eigVals) ;
+}
+
 vec mat::operator* (vec &vek) {
   uint nRow = rows() ;
   vec erg(nRow) ;

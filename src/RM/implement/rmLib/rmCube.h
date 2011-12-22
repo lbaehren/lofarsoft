@@ -17,14 +17,13 @@
 #include <sstream>
 #include "rm.h"
 #include "rmIO.h"
-
-/* casacore header files */
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Containers/RecordDesc.h>
 #include <casa/Containers/RecordInterface.h>
+#include <tables/Tables/TableError.h>
 #include <lattices/Lattices/TiledShape.h>
 #include <tables/Tables/ArrayColumn.h>
 #include <tables/Tables/TableRecord.h>
@@ -32,13 +31,13 @@
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableInfo.h>
 #include <images/Images/PagedImage.h>
+#include <images/Images/FITSImage.h>
 #include <lattices/Lattices/LatticeRegion.h>
 #include <coordinates/Coordinates/Coordinate.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
-
 namespace RM {
   /*!
     \class rmCube

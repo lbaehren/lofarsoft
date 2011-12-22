@@ -16,6 +16,9 @@
 #include <algorithm>			// for minimum element in vector
 #include <limits>			// limit for S infinite
 #include <iomanip>			// to set precision in cout
+#include <gsl/gsl_matrix.h>
+// #include <gmm_matrix.h>
+// #include <gmm_dense_qr.h>
 /* RM header files */
 #include "WienerFilter.h"
 
@@ -44,19 +47,15 @@ namespace RM {
   */
   wienerfilter::wienerfilter()
   {
-    /*____________________________________________
-      Set default filenames.
-    */
-    Sfilename="Smatrix.it";     // filename for S matrix file
-    Rfilename="Rmatrix.it";     // filename for R matrix file
-    Nfilename="Nmatrix.it";     // filename for N matrix file
-    Dfilename="Dmatrix.it";     // filename for D matrix file
-    Qfilename="Qmatrix.it";     // filename for Q matrix file
-    /*____________________________________________
-      Default values for the filter parameters.
-    */
-    variance_s=0;                // initialize variance of s
-    lambda_phi=5;                // initialize lambda phi coherence length	maxiterations=100;				// default value for maximum number of iterations
+    // Set default filenames
+    Sfilename="Smatrix.it";				// filename for S matrix file
+    Rfilename="Rmatrix.it";				// filename for R matrix file
+    Nfilename="Nmatrix.it";				// filename for N matrix file
+    Dfilename="Dmatrix.it";				// filename for D matrix file
+    Qfilename="Qmatrix.it";  			// filename for Q matrix file
+    
+    variance_s=0;					// initialize variance of s
+    lambda_phi=5;					// initialize lambda phi coherence length	maxiterations=100;				// default value for maximum number of iterations
     maxiterations=1;				// default value for maximum number of iterations
     rmsthreshold=-1;				// default, don't try to achieve rms threshold
     nu_0=1400000000;				// default value for nu_0=1.4GHz
@@ -132,6 +131,96 @@ void wienerfilter::readResponseMatrix(const string &filename){
     //	cout << "wienerfilter():--delta_frequencies.size() " << delta_frequencies.size() << endl;	// debug
     R_ready=false ;
   }
+
+/*! procedure to analyse the covariance structure of the current noise. It uses the eigenvectors of the Matrix RRh 
+    corresponding to low eigenvalues, to get "channels" which do not get any signal, and so only provide noise.
+    \param freqsC vector of the centers of the frequency intervals
+    \param freqsI vector of the interval lengths of the frequency intervals 
+    \param cube image cube with all observed images (for each frequency)
+    \param faras vector of faraday depths, where the rm synthesis should be made for
+    \param epsilon emission parameter for the model of polarised emission
+    \param alpha another parameter for the model of polarised emission */
+
+void wienerfilter::anaNoise(vector<double> &freqsC, vector<double> &freqsI, rmCube &cube, vector<double> &faras, double epsilon,double alpha) {
+  double eps = 1e-10 ;
+  double res = 0 ;
+  this->alpha=alpha ;
+  cout << "zahl der Frequenzintervalle: " << freqsI.size() << endl ;
+  /* create the response matrix for the rm synthesis */
+  setFrequencies(freqsC) ;
+  setDeltaFrequencies(freqsI) ;
+  setFaradayDepths(faras) ;
+  createResponseMatrix(freqsI,epsilon,1 );
+  /* create the positive matrix to make get the needed eigenvectors and 
+     eigenvalues for the signal free channels */
+  cmat RH = R.H() ;
+  cmat RRH = R*RH;
+  /* calculate eigenvectors and eigenvalues of the matrix RRh */
+  RRH.calcEigenSys() ;
+  /* get the eigenvectors from the matrix */
+  Q.data = RRH.Q;
+  /* get eigenvalules */
+  eigen.data = RRH.eigenValues;
+  eigen.valOut("pos.csv") ;  // control output to file
+  cvec vec1,vec2;
+  /* memory for storing all known components of the noise */
+  vector<cmat> noiseVals ;
+  vector<uint> index ; 
+  uint varNum = 0 ;
+  double fak=1.0/(cube.getXSize()*cube.getYSize()) ;
+  for (uint i=0; i<Q.rows(); i++) {
+    cout << "i= " << i << "/" << Q.rows() << endl ;
+    cmat img(cube.getXSize(),cube.getYSize()) ; // values for the current noise only channel
+    double eig=eigen[i] ;
+    vec1.data = Q.get(i) ;
+     if (eig < eps) {
+      index.push_back(i) ;
+      varNum++ ;  
+      /* loop over all lines of sight, to get the response value of a
+         channel, only containing noise for each line of sight */
+      for (uint x=0; x<cube.getXSize(); x++ ) {
+        for (uint y=0; y<cube.getYSize(); y++ ) {
+          cube.getLineOfSight(x,y,vec2) ;
+          complex<double> val = vec2.dot(vec1) ;
+          img.set(x,y,val) ;
+        }
+      }
+      noiseVals.push_back(img) ; //
+     }
+  }
+  vector<complex<double> > mean ;
+  cout << "kleiner Test: " << varNum << " " << noiseVals.size() << " " << noiseVals[0].rows() << " " << noiseVals[0].cols() << endl ;
+  /* loop over all channels, only containing noise */
+  cmat var(varNum,varNum) ;
+  /* loop over all "noise channels" */
+  for (uint i=0; i<varNum; i++) {
+    complex<double> mittel(0,0) ;
+    cmat &imgi=noiseVals[i] ;
+    for (uint j=0; j<varNum; j++) { /* loop over all noise channels, calculating covariance matrix */
+
+      cmat &imgj=noiseVals[j] ;
+      for (uint x=0; x<cube.getXSize(); x++ ) {
+        for (uint y=0; y<cube.getYSize(); y++ ) {
+          complex<double> vali = imgi.get(x,y) ;
+          complex<double> valj = imgj.get(x,y) ;
+          if (i==j) { // contribution to the mean only if i=j otherwise we only calculate contribution to the covariance */
+            mittel = mittel+vali ;
+          }
+          complex<double> cvarn=conj(vali)*valj ;
+          complex<double> cvar=var.get(i,j) ;
+          var.set(i,j,cvar+fak*cvarn) ;
+        }
+      }
+    }
+    mittel = fak*mittel ;
+    mean.push_back(mittel) ;
+  }
+  cvec mit(mean) ;
+  mit.valOut("mittel.csv") ;
+  var.realValOut("real.csv") ;
+  var.imagValOut("imag.csv") ;
+}
+
   
 /*! Procedure prepares the Wienerfilter object for a flat prior and no information
    about the noise. This means, that the resulting Matrix coresponds to the 
@@ -141,7 +230,7 @@ void wienerfilter::prepare(vector<double> &freqsC, vector<double> &freqsI, vecto
   if((method!=1) &&(method !=4) && (!WF_ready)) {
     setFrequencies(freqsC) ;
     setFaradayDepths(faras) ;
-    alpha = alpha;
+    this->alpha = alpha;
     nu_0 = nu_0 ;
     epsilon_0 = epsilon ;
     if (method ==2) {  // use common Wiener filtering
@@ -153,13 +242,18 @@ void wienerfilter::prepare(vector<double> &freqsC, vector<double> &freqsI, vecto
     }
     else if (method ==3) {  // use svd
       createResponseMatrix(freqsI,epsilon,1 );
+      cout << "Pepare Wiener Filter" << endl ;
+//      gmm::dense_matrix<complex<double> > gmMat ;
+//      gmMat.resize(R.rows(), R.cols());
+      /* copy the elements of the matrix R into the gmm Matrix gmMat */
+      cvec diag(R.cols()) ;
+
       cmat RH = R.H() ;
 //       cout << "RH calculated " << endl ;
-      cmat RhR = RH*R ;
-//       cout << "calculated Rh, calculate Propagator using eingenvalues" << endl ;
-      D = RhR.calcPosEig() ;
+      cmat RRh = R*RH ;
+      D = RRh.calcPosEig() ;
 //       cout << "Propagator calculated" << endl ;
-      WF = D*RH ;
+      WF = RH *D;
 //       cout << "computed reconstruction matrix " << WF.rows() << " " << WF.cols() << endl ;
       WF_ready = true ;
     }
@@ -1087,7 +1181,7 @@ void wienerfilter::createResponseMatrix(vector<double> intervals, double eps, ui
   // Parameter integrity checks
   //***********************************************************************
   if(frequencies.size()==0) {
-    cerr << "can not create response matrix " << endl ;
+    cerr << "3. can not create response matrix " << endl ;
      throw "wienerfilter::createResponseMatrix data vector d has size 0";
   }
   if(faradaydepths.size()==0) {
@@ -1586,15 +1680,14 @@ void wienerfilter::computeD_NoNoiseCov()  // is currently called
 	else
 	{
 // 		#ifdef debug_
-		cout << "compute: D = R.H()*R" << endl;
+		cout << "compute: D = [R.H()*R]^(-1)" << endl;
 		cmat RH = R.H() ;
 		cout << "Rh calculated " << RH.rows() << " " << RH.cols() <<  endl ;
 		cmat RHR = RH*R ;
-		cout << "RhR calculated " << endl ;
-// 		clock_t t3 = clock() ;
-// 		cout << "gls: " << t2-t1 << "  std: " << t3-t2 << endl ;
+                gsl_matrix_complex *test = RHR.createGSL_Mat() ;
+                gsl_vector_complex *vekt ;//= gsl_vector_complex_alloc(1) ;
+                gsl_linalg_hermtd_decomp(test, vekt) ;
 		cmat RHRI = RHR.inv() ;
-		cout << "RhR^(-1) calculated " << endl ;
 		D=RHRI;//*RH ;					// compute inverse
 // 		computeMapError();				// Store diagonal of D in maperror
 	}
