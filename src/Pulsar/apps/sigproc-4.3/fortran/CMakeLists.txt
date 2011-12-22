@@ -209,8 +209,14 @@ foreach (src ${sigproc_fc1_binaries})
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
   )
-#  target_link_libraries (${src} sigproc_fort sigproc ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
-  target_link_libraries (${src} sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${PGPLOT_LIBRARIES} ${libm})
+#  target_link_libraries (${src} sigproc_fort sigproc ${FFTW3_FFTW3F_STATIC_LIBRARY} ${CFITSIO_LIBRARIES} ${libm})
+  target_link_libraries (${src}
+    sigproc_fort
+    ${FFTW3_FFTW3F_STATIC_LIBRARY}
+    ${CFITSIO_LIBRARIES}
+    ${PGPLOT_LIBRARIES}
+    ${libm}
+    )
 endforeach (src)
 
 foreach (src ${sigproc_fc2_binaries})
@@ -228,7 +234,11 @@ foreach (src ${sigproc_fc2_binaries})
 ###    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
 ###    CMAKE_SHARED_LINKER_FLAGS ""
   )
-  target_link_libraries (${src} sigproc_fort sigproc ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a)
+  target_link_libraries (${src}
+    sigproc_fort
+    sigproc
+    ${FFTW3_FFTW3F_STATIC_LIBRARY}
+    )
 endforeach (src)
 
 foreach (src ${sigproc_fc3_binaries})

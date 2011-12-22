@@ -39,6 +39,7 @@ if (NOT FFTW3_FOUND)
   find_path (FFTW3_INCLUDES fftw3.h
     HINTS ${FFTW3_ROOT_DIR}
     PATH_SUFFIXES
+    share/pulsar/include
     include
     include/fftw3
     fftw3
@@ -54,7 +55,9 @@ if (NOT FFTW3_FOUND)
 
   find_library (FFTW3_FFTW3_LIBRARY fftw3
     HINTS ${FFTW3_ROOT_DIR}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES
+    share/pulsar/lib
+    lib
     )
   if (FFTW3_FFTW3_LIBRARY)
     list (APPEND FFTW3_LIBRARIES ${FFTW3_FFTW3_LIBRARY})
@@ -65,7 +68,9 @@ if (NOT FFTW3_FOUND)
   
   find_library (FFTW3_FFTW3_STATIC_LIBRARY ${CMAKE_FIND_LIBRARY_PREFIXES}fftw3.a
     HINTS ${FFTW3_ROOT_DIR}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES
+    share/pulsar/lib
+    lib
     )
   
   ##______________________________________________
@@ -73,7 +78,9 @@ if (NOT FFTW3_FOUND)
   
   find_library (FFTW3_FFTW3F_LIBRARY fftw3f
     HINTS ${FFTW3_ROOT_DIR}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES
+    share/pulsar/lib
+    lib
     )
   if (FFTW3_FFTW3F_LIBRARY)
     list (APPEND FFTW3_LIBRARIES ${FFTW3_FFTW3F_LIBRARY})
@@ -84,7 +91,9 @@ if (NOT FFTW3_FOUND)
   
   find_library (FFTW3_FFTW3F_STATIC_LIBRARY ${CMAKE_FIND_LIBRARY_PREFIXES}fftw3f.a
     HINTS ${FFTW3_ROOT_DIR}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES
+    share/pulsar/lib
+    lib
     )
   
   ##_____________________________________________________________________________

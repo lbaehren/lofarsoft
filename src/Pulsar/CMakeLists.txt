@@ -232,28 +232,24 @@ if (NOT X11_INCLUDE_DIR)
 endif (NOT X11_INCLUDE_DIR)
 
 ##__________________________________________________________
-## FFTW3 (not the same as FFTW3F)
+## FFTW3 / FFTW3F
 
 if (NOT FFTW3_FOUND)
   set (FFTW3_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
-  include (FindFFTW3static)
   include (${PROJECT_SOURCE_DIR}/cmake/FindFFTW3.cmake)
 endif (NOT FFTW3_FOUND)
 
-list (APPEND lib_locations /opt/local/lib)
-list (APPEND lib_locations /usr/lib64)
-
-if (NOT FFTW3_LIBRARIES)
-  ## search for the library
-  find_library (libfftw3 fftw3 ${lib_locations})
-  ## add the library to the list of X11 libraries
-  if (libfftw3)
-    message (STATUS "Found libfftw3 = ${libfftw3}")
-    set (FFTW3_LIBRARIES ${libfftw3} CACHE FILEPATH "Path to libfftw3." FORCE)
-  else (libfftw3)
-    message (STATUS "Unable to find libfftw3!")
-  endif (libfftw3)
-endif (NOT FFTW3_LIBRARIES)
+## If possible, use the static library; however if only a
+## shared version is available, use this as backup
+if (FFTW3_FFTW3_STATIC_LIBRARY)
+  set (FFTW3_LIBRARIES ${FFTW3_FFTW3_STATIC_LIBRARY} CACHE FILEPATH
+    "Path to FFTW3 library" FORCE)
+else (FFTW3_FFTW3_STATIC_LIBRARY)
+  if (FFTW3_FFTW3_LIBRARY)
+    set (FFTW3_LIBRARIES ${FFTW3_FFTW3_LIBRARY}} CACHE FILEPATH
+      "Path to FFTW3 library" FORCE)
+  endif (FFTW3_FFTW3_LIBRARY)
+endif (FFTW3_FFTW3_STATIC_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Include directories
@@ -493,7 +489,7 @@ message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"           
 message (STATUS "    .. CFITSIO library           = ${CFITSIO_LIBRARIES}"          )
 message (STATUS "    .. CFITSIO library path      = ${CFITSIO_LIBRARY_DIR}"        )
 message (STATUS "    .. CFITSIO include path      = ${CFITSIO_INCLUDES}"           )
-message (STATUS " .. Have FFTW3                   = ${HAVE_FFTW3}"                 )
+message (STATUS " .. Have FFTW3                   = ${FFTW3_FOUND}"                )
 message (STATUS "    .. libfftw3                  = ${FFTW3_FFTW3_LIBRARY}"        )
 message (STATUS "    .. libfftw3 (static)         = ${FFTW3_FFTW3_STATIC_LIBRARY}" )
 message (STATUS "    .. libfftw3f                 = ${FFTW3_FFTW3F_LIBRARY}"       )

@@ -5,8 +5,9 @@
 ##
 ## ==============================================================================
 
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.3)
 cmake_policy (VERSION 2.8)
+include (ExternalProject)
 
 ##__________________________________________________________
 ## Name of the project handled by CMake
@@ -17,7 +18,7 @@ project (FFTW)
 ## Package configuration/build options
 
 option (FFTW_FORCE_BUILD     "Force build and installation of package?" YES )
-option (FFTW_FROM_REPOS      "Install package from repository?"         YES )
+option (FFTW_FROM_REPOS      "Install package from repository?"         NO  )
 option (FFTW_MODIFIED_SOURCE "Use modified source archive?"             YES )
 
 ##__________________________________________________________
@@ -107,7 +108,7 @@ if (NOT FFTW3_FOUND OR FFTW_FORCE_BUILD)
       SOURCE_DIR source
       URL ${FFTW_SOURCE}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/${FFTW_SOURCE_DIRECTORY}/configure --prefix=${CMAKE_INSTALL_PREFIX} --enable-shared --enable-single ${FFTW_EXTRA_FLAGS}
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} --enable-shared --enable-single ${FFTW_EXTRA_FLAGS}
       )
     
   endif (FFTW_FROM_REPOS AND FFTW_SVN)
@@ -116,9 +117,9 @@ if (NOT FFTW3_FOUND OR FFTW_FORCE_BUILD)
   ## Update global configuration settings
   
   if (PULSAR_BINARY_DIR)
-    ExternalProject_Add_Step (fftw update_configure
+    ExternalProject_Add_Step (fftw pulsar_update_cache
       COMMAND ${CMAKE_COMMAND} -E remove CMake*
-      COMMAND ${CMAKE_COMMAND} ..
+      COMMAND ${CMAKE_COMMAND} ${PULSAR_SOURCE_DIR}
       COMMENT "Updating configuration settings after installation of FFTW3 ..."
       DEPENDEES install
       DEPENDERS build
