@@ -35,9 +35,17 @@ endif (UNIX)
 ##  LINK_FLAGS "-fno-second-underscore"
 ##  )
 
+##____________________________________________________________________
+##                                           Installation instructions
+
 install (
   TARGETS sla
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+##____________________________________________________________________
+##                                                 Dependency tracking
+
+add_dependencies (sla fftw)

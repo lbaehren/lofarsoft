@@ -501,8 +501,8 @@ add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 ##
 ## ==============================================================================
 
-set (psrfits_version "utils-525dbed")
-set (psrfits_name "psrfits_${psrfits_version}")
+set (psrfits_version   "utils-525dbed")
+set (psrfits_name      "psrfits_${psrfits_version}")
 set (psrfits_directory "psrfits_utils/psrfits_${psrfits_version}")
 
 add_custom_target (psrfits_unpack
