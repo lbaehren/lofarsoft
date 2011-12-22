@@ -43,9 +43,13 @@ endif (FFTW_MODIFIED_SOURCE)
 ##
 ## ==============================================================================
 
-if (NOT FFTW3_FOUND)
-  find_package (FFTW3)
-endif (NOT FFTW3_FOUND)
+if (NOT FFTW3_FFTW3_STATIC_LIBRARY)
+  set (FFTW3_FOUND FALSE)
+endif (NOT FFTW3_FFTW3_STATIC_LIBRARY)
+
+if (NOT FFTW3_FFTW3F_STATIC_LIBRARY)
+  set (FFTW3_FOUND FALSE)
+endif (NOT FFTW3_FFTW3F_STATIC_LIBRARY)
 
 ## CPU-dependent optimization
 
@@ -118,11 +122,11 @@ if (NOT FFTW3_FOUND OR FFTW_FORCE_BUILD)
   
   if (PULSAR_BINARY_DIR)
     ExternalProject_Add_Step (fftw pulsar_update_cache
-      COMMAND ${CMAKE_COMMAND} -E remove CMake*
+      COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
       COMMAND ${CMAKE_COMMAND} ${PULSAR_SOURCE_DIR}
       COMMENT "Updating configuration settings after installation of FFTW3 ..."
       DEPENDEES install
-      DEPENDERS build
+      ALWAYS 1
       WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
       )
   endif (PULSAR_BINARY_DIR)
