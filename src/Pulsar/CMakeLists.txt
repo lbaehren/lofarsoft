@@ -235,6 +235,7 @@ endif (NOT X11_INCLUDE_DIR)
 ## FFTW3 (not the same as FFTW3F)
 
 if (NOT FFTW3_FOUND)
+  set (FFTW3_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   include (FindFFTW3static)
   include (${PROJECT_SOURCE_DIR}/cmake/FindFFTW3.cmake)
 endif (NOT FFTW3_FOUND)

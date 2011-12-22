@@ -1,26 +1,6 @@
 
 ## ==============================================================================
 ##
-##  Additional system inspection
-##
-## ==============================================================================
-
-if (NOT FFTW_FFTW3F_LIBRARY)
-  find_library (FFTW_FFTW3F_LIBRARY
-    NAMES fftw3f
-    PATHS ${CMAKE_INSTALL_PREFIX}
-    PATH_SUFFIXES lib
-    )
-endif (NOT FFTW_FFTW3F_LIBRARY)
-
-## Status message
-
-message ("")
-message (" [sigproc] FFTW_FFTW3F_LIBRARY = ${FFTW_FFTW3F_LIBRARY}")
-message ("")
-
-## ==============================================================================
-##
 ##  Build instructions for libraries
 ##
 ## ==============================================================================
@@ -170,7 +150,7 @@ set (sigproc_scripts
 add_library (sigproc STATIC ${sigproc_sources})
 
 target_link_libraries (sigproc
-  ${FFTW_FFTW3F_LIBRARY}
+  ${FFTW3_FFTW3F_LIBRARY}
   ${FFTW3_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${PGPLOT_LIBRARIES}
@@ -345,7 +325,7 @@ endif (UNIX)
   target_link_libraries (${src}
     sigproc
     sigproc_fort
-    ${FFTW_FFTW3F_LIBRARY}
+    ${FFTW3_FFTW3F_LIBRARY}
     ${CFITSIO_LIBRARIES}
     ${libm}
     )
@@ -367,7 +347,7 @@ foreach (src ${sigproc_fc_binaries})
     ${src}
     sigproc
     sigproc_fort
-    ${FFTW_FFTW3F_LIBRARY}
+    ${FFTW3_FFTW3F_LIBRARY}
     ${CFITSIO_LIBRARIES}
     ${libm}
     ${PGPLOT_CPGPLOT_LIBRARY}
