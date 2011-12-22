@@ -36,7 +36,11 @@ add_custom_target (fftw_install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
   COMMENT "Install project FFTW into ${CMAKE_INSTALL_PREFIX}..."
   )
-add_dependencies (fftw_install fftw_build fftw_configure fftw_unpack)
+
+#add_dependencies (fftw_install fftw_build fftw_configure fftw_unpack)
+
+add_subdirectory (fftw)
+add_dependencies (fftw_install fftw)
 
 ## ==============================================================================
 ##
