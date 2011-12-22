@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.28
+VERSION=3.29
  
 #####################################################################
 # Usage #
@@ -357,6 +357,15 @@ else
       exit 1
    fi
 fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
+
+has_underscore=`echo $OBSID | grep "_"`
+if [[ $has_underscore != "" ]]
+then
+   short_id=`echo $OBSID | sed 's/L.....//g'`
+else
+   short_id=`echo $OBSID | sed 's/L//g'`
+fi
+
 
 ###PULSAR=B2111+46
 #STOKES=incoherentstokes
