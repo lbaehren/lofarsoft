@@ -3,7 +3,10 @@
 
 ## libsigproc
 
-include_directories (${CMAKE_INSTALL_PREFIX}/include ${PULSAR_BINARY_DIR}/apps/sigproc)
+include_directories (
+  ${CMAKE_INSTALL_PREFIX}/include
+  ${PULSAR_BINARY_DIR}/apps/sigproc
+  )
 
 set (sigproc_sources add_channels.c
 add_samples.c
@@ -181,7 +184,7 @@ set (sigproc_scripts
 add_library (sigproc STATIC ${sigproc_sources})
 
 target_link_libraries (sigproc
-#  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+#  ${FFTW3_FFTW3F_LIBRARY}
 #  ${FFTW3_LIBRARIES}
 #  ${CFITSIO_LIBRARIES}
 #  ${PGPLOT_LIBRARIES}
@@ -351,26 +354,36 @@ add_executable (gmrt2fil
 ## linker instructions
 
 foreach (src ${sigproc_binaries})
-if (UNIX)
- if (APPLE)
-  set_target_properties (${src}
-    PROPERTIES
-#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Ddarwin"
-    COMPILE_FLAGS "-O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Ddarwin"
-    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
-    CMAKE_SHARED_LINKER_FLAGS ""
-  )
- else (APPLE)
-  set_target_properties (${src}
-    PROPERTIES
-#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Dlinux"
-    COMPILE_FLAGS "-O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Dlinux"
-    CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
-    CMAKE_SHARED_LINKER_FLAGS ""
-  )
- endif (APPLE)
-endif (UNIX)
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${FFTW3_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm})
+  if (UNIX)
+    if (APPLE)
+      ## Additional target properties (Apple)
+      set_target_properties (${src}
+	PROPERTIES
+	#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Ddarwin"
+	COMPILE_FLAGS "-O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -Ddarwin"
+	CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+	CMAKE_SHARED_LINKER_FLAGS ""
+	)
+    else (APPLE)
+      ## Additional target properties (non-Apple)
+      set_target_properties (${src}
+	PROPERTIES
+	#    COMPILE_FLAGS "-g -O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Dlinux"
+	COMPILE_FLAGS "-O2 -DPSRFITS -DFFTW -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64  -Dlinux"
+	CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
+	CMAKE_SHARED_LINKER_FLAGS ""
+	)
+    endif (APPLE)
+  endif (UNIX)
+  ## Linker instructions
+  target_link_libraries (${src}
+    sigproc
+    sigproc_fort
+    ${FFTW3_FFTW3F_LIBRARY}
+    ${FFTW3_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
+    ${libm}
+    )
 endforeach (src)
 
 
@@ -383,7 +396,15 @@ foreach (src ${sigproc_fc_binaries})
     CMAKE_SHARED_LIBRARY_LINK_C_FLAGS ""
     CMAKE_SHARED_LINKER_FLAGS ""
   )
-  target_link_libraries (${src} sigproc sigproc_fort ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${FFTW3_LIBRARIES} ${CFITSIO_LIBRARIES} ${libm} ${PGPLOT_CPGPLOT_LIBRARY})
+  target_link_libraries (${src}
+    sigproc
+    sigproc_fort
+    ${FFTW3_FFTW3F_LIBRARY}
+    ${FFTW3_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
+    ${libm}
+    ${PGPLOT_CPGPLOT_LIBRARY}
+    )
 endforeach (src)
 
 #set (CMAKE_Fortran_COMPILER g77)

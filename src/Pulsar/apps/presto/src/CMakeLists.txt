@@ -91,7 +91,7 @@ set (presto_makewisdom_binaries
 add_library (presto SHARED ${presto_sources})
 
 target_link_libraries (presto
-  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+  ${FFTW3_FFTW3F_LIBRARY}
   ${CFITSIO_LIBRARIES}
   ${GLIB_LIBRARIES}
   ${PGPLOT_PGPLOT_LIBRARY}
@@ -102,7 +102,7 @@ target_link_libraries (presto
   )
 
 #target_link_libraries (presto
-#  ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a
+#  ${FFTW3_FFTW3F_LIBRARY}
 #  /opt/local/lib/libfftw3f.a
 #  ${CFITSIO_LIBRARIES}
 #  ${GLIB_LIBRARIES}
@@ -433,15 +433,25 @@ add_executable (psrfits_dumparrays
 
 ## linker instructions
 
-foreach (src ${presto_binaries})
-  set_target_properties (${src}
-    PROPERTIES
-#    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
-    COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
-  )
-  target_link_libraries (${src} presto sla ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${CFITSIO_LIBRARIES} ${libm})
-endforeach (src)
-
+if (FFTW3_FFTW3F_LIBRARY)
+  foreach (src ${presto_binaries})
+    set_target_properties (${src}
+      PROPERTIES
+      #    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+      COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
+      )
+    target_link_libraries (${src}
+      presto
+      sla
+      ${FFTW3_FFTW3F_LIBRARY}
+      ${CFITSIO_LIBRARIES}
+      ${libm}
+      )
+  endforeach (src)
+else (FFTW3_FFTW3F_LIBRARY)
+  message (STATUS "[presto] Missing fftw3f library - skip building applications ${presto_binaries}")
+endif (FFTW3_FFTW3F_LIBRARY)
+  
 foreach (src ${presto_glib_binaries})
   set_target_properties (${src}
     PROPERTIES
@@ -450,7 +460,12 @@ foreach (src ${presto_glib_binaries})
 #    COMPILE_FLAGS "-g -O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
     COMPILE_FLAGS "-O3 -fPIC -DDATABASE='\"${CMAKE_INSTALL_PREFIX}/lib\"' -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -ffast-math"
   )
-  target_link_libraries (${src} presto ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a ${GLIB_LIBRARIES} ${libm})
+  target_link_libraries (${src}
+    presto
+    ${FFTW3_FFTW3F_LIBRARY}
+    ${GLIB_LIBRARIES}
+    ${libm}
+    )
 endforeach (src)
 
 
@@ -487,7 +502,9 @@ foreach (src ${presto_makewisdom_binaries})
     COMPILE_FLAGS "-fPIC -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
     LINKER_FLAGS "-fPIC -DUSEFFTW -DUSEMMAP -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -ffast-math -W"
   )
-  target_link_libraries(${src} ${CMAKE_INSTALL_PREFIX}/lib/libfftw3f.a m)
+  target_link_libraries(${src}
+    ${FFTW3_FFTW3F_LIBRARY}
+    m)
 endforeach (src)
 
 if (PRESTO_MAKEWISDOM)

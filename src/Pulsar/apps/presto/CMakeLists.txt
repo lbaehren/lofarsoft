@@ -1,12 +1,6 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 2987 2009-09-04 12:43:48Z baehren                      $
-##------------------------------------------------------------------------------
 
 ## Name of the project
 PROJECT (presto C Fortran)
-
-## Minimum required version of CMake to configure the project
-#cmake_minimum_required (VERSION 2.6)
 
 ## =============================================================================
 ##
@@ -16,7 +10,12 @@ PROJECT (presto C Fortran)
 
 include_directories (${PULSAR_SOURCE_DIR}/apps/presto/include)
 
-add_subdirectory (src)
+if (FFTW3_FFTW3F_LIBRARY)
+  add_subdirectory (src)
+else (FFTW3_FFTW3F_LIBRARY)
+  message (STATUS "[presto] Missing fftw3f library - skip building library and executables!")
+endif (FFTW3_FFTW3F_LIBRARY)
+
 add_subdirectory (bin)
 add_subdirectory (lib)
 add_subdirectory (clig)
