@@ -68,6 +68,27 @@ endif (PULSAR_DEBUGGING_MESSAGES)
 
 ## ==============================================================================
 ##
+##                                                             Installation setup
+##
+##  Installation settings need to be processed early on, as this will have an 
+##  effect on the locations later on inspected by the find modules; if we want
+##  CMake to be able to locate the proper custom version (of libraries such as
+##  e.g. FFTW3), we need to point it to the correct location -- hence we need to
+##  set this up first.
+##
+## ==============================================================================
+
+## Load the module definition the installation setup
+
+include (${PULSAR_SOURCE_DIR}/cmake/InstallationSetup.cmake)
+
+## Use the installation setup to guide CMake's search modules
+
+list (INSERT CMAKE_INCLUDE_PATH 0 ${CMAKE_INSTALL_PREFIX}/include )
+list (INSERT CMAKE_LIBRARY_PATH 0 ${CMAKE_INSTALL_PREFIX}/lib )
+ 
+## ==============================================================================
+##
 ##  External dependencies
 ##
 ## ==============================================================================
@@ -235,8 +256,7 @@ endif (NOT X11_INCLUDE_DIR)
 ## FFTW3 / FFTW3F
 
 if (NOT FFTW3_FOUND)
-  set (FFTW3_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
-  include (${PROJECT_SOURCE_DIR}/cmake/FindFFTW3.cmake)
+  include (${PULSAR_SOURCE_DIR}/cmake/FindFFTW3.cmake)
 endif (NOT FFTW3_FOUND)
 
 ## If possible, use the static library; however if only a
@@ -270,8 +290,6 @@ if (HAVE_CFITSIO)
   add_definitions (-DHAVE_CFITSIO)
   ## Extract library path
   get_filename_component (CFITSIO_LIBRARY_DIR ${CFITSIO_LIBRARIES} PATH)
-else (HAVE_CFITSIO)
-  message (SEND_ERROR "[PULSAR] Missing or incomplete installation of CFITSIO!")
 endif (HAVE_CFITSIO)
 
 if (HAVE_GLIB)
@@ -345,110 +363,6 @@ else (HAVE_FFTW3 OR FFTW3_FOUND)
   message (STATUS "[PULSAR] Missing or incomplete installation of FFTW3 (not the same as FFTW3F)!")
 endif (HAVE_FFTW3 OR FFTW3_FOUND)
 
-## ==============================================================================
-##
-##                                                             Installation setup
-##
-##  We install into $LOFARSOFT/release/share/pulsar to keep all the components
-##  in one place but not have them interfere with possible other installations
-##  of the same packages (e.g. FFTW3)
-##
-## ==============================================================================
-
-if (LUS_SOURCE_DIR)
- message (STATUS "[PULSAR] Installation area located for package PULSAR ${LUS_SOURCE_DIR}/release/share/pulsar.")
- set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release/share/pulsar)
-else (LUS_SOURCE_DIR)
- message (STATUS "[PULSAR] WARNING: Installation area NOT located for package PULSAR!")
-endif (LUS_SOURCE_DIR)
-
-if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
-  message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} exists!")
-else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
-  message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} does not exist!")
-  message (STATUS "[PULSAR] Creating installation location ${CMAKE_INSTALL_PREFIX}")
-  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX})
-  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/bin)
-  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/lib)
-  EXECUTE_PROCESS (COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/doc)
-endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
-
-if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc")
-  message (STATUS "[PULSAR] Documentation Installation location ${CMAKE_INSTALL_PREFIX}/doc exists!")
-else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc")
-  message (STATUS "[PULSAR] Documentaion Installation location ${CMAKE_INSTALL_PREFIX}/bin does not exist!")
-  message (STATUS "[PULSAR] Creating documentation installation location ${CMAKE_INSTALL_PREFIX}/doc")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/doc)
-endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc")
-
-if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/data")
-  message (STATUS "[PULSAR] Documentation Installation location ${CMAKE_INSTALL_PREFIX}/data exists!")
-else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/data")
-  message (STATUS "[PULSAR] Documentaion Installation location ${CMAKE_INSTALL_PREFIX}/data does not exist!")
-  message (STATUS "[PULSAR] Creating documentation installation location ${CMAKE_INSTALL_PREFIX}/data")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/data)
-endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/data")
-
-if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin")
-  message (STATUS "[PULSAR] Bin Installation location ${CMAKE_INSTALL_PREFIX}/bin exists!")
-else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin")
-  message (STATUS "[PULSAR] Bin Installation location ${CMAKE_INSTALL_PREFIX}/bin does not exist!")
-  message (STATUS "[PULSAR] Creating bin installation location ${CMAKE_INSTALL_PREFIX}/bin")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/bin)
-endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/bin")
-
-if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
-  message (STATUS "[PULSAR] Include Installation location ${CMAKE_INSTALL_PREFIX}/include exists!")
-else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
-  message (STATUS "[PULSAR] Include Installation location ${CMAKE_INSTALL_PREFIX}/include does not exist!")
-  message (STATUS "[PULSAR] Creating include installation location ${CMAKE_INSTALL_PREFIX}/include")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/include)
-endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
-
-if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib")
-  message (STATUS "[PULSAR] Library Installation location ${CMAKE_INSTALL_PREFIX}/lib exists!")
-else (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib")
-  message (STATUS "[PULSAR] Library Installation location ${CMAKE_INSTALL_PREFIX}/lib does not exist!")
-  message (STATUS "[PULSAR] Creating library installation location ${CMAKE_INSTALL_PREFIX}/lib")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib)
-endif (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib")
-
-if (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/presto/src")
-  message (STATUS "[PULSAR] Build location ${PULSAR_BINARY_DIR}/apps/presto/src exists!")
-else (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/presto/src")
-  message (STATUS "[PULSAR] Creating location ${PULSAR_BINARY_DIR}/apps/presto/src")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${PULSAR_BINARY_DIR}/apps/presto/src)
-endif (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/presto/src")
-
-if (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc")
-  message (STATUS "[PULSAR] Build location ${PULSAR_BINARY_DIR}/apps/sigproc exists!")
-else (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc")
-  message (STATUS "[PULSAR] Creating location ${PULSAR_BINARY_DIR}/apps/sigproc")
-  EXECUTE_PROCESS( COMMAND mkdir -p ${PULSAR_BINARY_DIR}/apps/sigproc)
-endif (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc")
-
-if (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-  message (STATUS "[PULSAR] Makewisdom has already been run; skipping!")
-  set (PRESTO_MAKEWISDOM FALSE)
-else (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-  message (STATUS "[PULSAR] Makewisdom not been run;  adding to make queue")
-  set (PRESTO_MAKEWISDOM TRUE)
-endif (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-
-# skip the full RPATH for the build tree
-set (CMAKE_SKIP_BUILD_RPATH YES)
-
-# when building, use the install RPATH already
-# (so it doesn't need to relink when installing)
-set (CMAKE_BUILD_WITH_INSTALL_RPATH YES)
-
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
-
 ## =============================================================================
 ##
 ##  Subdirectories
@@ -469,35 +383,36 @@ endif (PULSAR_BUILD_TESTS)
 ##
 ## ==============================================================================
 
-message (STATUS "=============================================================="   )
-message (STATUS "  PULSAR: Summary of configuration settings                   "   )
-message (STATUS "+------------------------------------------------------------+"   )
-message (STATUS " System configuration:"                                           )
-message (STATUS " .. CMAKE_COMMAND                = ${CMAKE_COMMAND}"              )
-message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"               )
-message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"     )
-message (STATUS " Package configuration:"                                          )
-message (STATUS " .. PULSAR_SOURCE_DIR            = ${PULSAR_SOURCE_DIR}"          )
-message (STATUS " .. PULSAR_BINARY_DIR            = ${PULSAR_BINARY_DIR}"          )
-message (STATUS " .. Enable test programs         = ${PULSAR_ENABLE_TESTING}"      )
-message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}"   )
-message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}"  )
-message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}"   )
-message (STATUS " .. Installation prefix          = ${CMAKE_INSTALL_PREFIX}"       )
-message (STATUS " External dependencies:"                                          )
-message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"              )
-message (STATUS "    .. CFITSIO library           = ${CFITSIO_LIBRARIES}"          )
-message (STATUS "    .. CFITSIO library path      = ${CFITSIO_LIBRARY_DIR}"        )
-message (STATUS "    .. CFITSIO include path      = ${CFITSIO_INCLUDES}"           )
-message (STATUS " .. Have FFTW3                   = ${FFTW3_FOUND}"                )
-message (STATUS "    .. libfftw3                  = ${FFTW3_FFTW3_LIBRARY}"        )
-message (STATUS "    .. libfftw3 (static)         = ${FFTW3_FFTW3_STATIC_LIBRARY}" )
-message (STATUS "    .. libfftw3f                 = ${FFTW3_FFTW3F_LIBRARY}"       )
-message (STATUS "    .. libfftw3f (static)        = ${FFTW3_FFTW3F_STATIC_LIBRARY}"       )
-message (STATUS " .. Have MPI                     = ${MPI_FOUND}"                  )
-message (STATUS "    .. MPI compiler              = ${MPI_COMPILER}"               )
-message (STATUS "    .. MPI library               = ${MPI_LIBRARY}"                )
-message (STATUS "    .. MPI include path          = ${MPI_INCLUDE_PATH}"           )
-message (STATUS " .. Have PGPlot                  = ${HAVE_PGPLOT}"                )
-message (STATUS " .. Have Python                  = ${HAVE_PYTHON}"                )
-message (STATUS "+------------------------------------------------------------+"   )
+message (STATUS "=============================================================="    )
+message (STATUS "  PULSAR: Summary of configuration settings                   "    )
+message (STATUS "+------------------------------------------------------------+"    )
+message (STATUS " System configuration:"                                            )
+message (STATUS " .. CMAKE_COMMAND                = ${CMAKE_COMMAND}"               )
+message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"                )
+message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"      )
+message (STATUS " Package configuration:"                                           )
+message (STATUS " .. PULSAR_SOURCE_DIR            = ${PULSAR_SOURCE_DIR}"           )
+message (STATUS " .. PULSAR_BINARY_DIR            = ${PULSAR_BINARY_DIR}"           )
+message (STATUS " .. Enable test programs         = ${PULSAR_ENABLE_TESTING}"       )
+message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}"    )
+message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}"   )
+message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}"    )
+message (STATUS " .. Installation prefix          = ${CMAKE_INSTALL_PREFIX}"        )
+message (STATUS " External dependencies:"                                           )
+message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"               )
+message (STATUS "    .. CFITSIO version           = ${CFITSIO_VERSION}"             )
+message (STATUS "    .. CFITSIO library           = ${CFITSIO_LIBRARIES}"           )
+message (STATUS "    .. CFITSIO library path      = ${CFITSIO_LIBRARY_DIR}"         )
+message (STATUS "    .. CFITSIO include path      = ${CFITSIO_INCLUDES}"            )
+message (STATUS " .. Have FFTW3                   = ${FFTW3_FOUND}"                 )
+message (STATUS "    .. libfftw3                  = ${FFTW3_FFTW3_LIBRARY}"         )
+message (STATUS "    .. libfftw3 (static)         = ${FFTW3_FFTW3_STATIC_LIBRARY}"  )
+message (STATUS "    .. libfftw3f                 = ${FFTW3_FFTW3F_LIBRARY}"        )
+message (STATUS "    .. libfftw3f (static)        = ${FFTW3_FFTW3F_STATIC_LIBRARY}" )
+message (STATUS " .. Have MPI                     = ${MPI_FOUND}"                   )
+message (STATUS "    .. MPI compiler              = ${MPI_COMPILER}"                )
+message (STATUS "    .. MPI library               = ${MPI_LIBRARY}"                 )
+message (STATUS "    .. MPI include path          = ${MPI_INCLUDE_PATH}"            )
+message (STATUS " .. Have PGPlot                  = ${HAVE_PGPLOT}"                 )
+message (STATUS " .. Have Python                  = ${HAVE_PYTHON}"                 )
+message (STATUS "+------------------------------------------------------------+"    )
