@@ -604,6 +604,10 @@ vector<complex<double> > performFarraday(vector<complex<double> > &QU, vector<do
   return res ;
 }
 
+/*! procedure creates a complex matrix as the tensor product from two complex vectors 
+    \param vek1 first vector
+    \param vek2 seccond vector 
+    \return new Matrix, which is the tensor product of the two vectors */
 complex<double> cmat::prod(vector<complex<double> > &vek1, vector<complex<double> > &vek2) {
   uint s1 = vek1.size() ;
   uint s2 = vek2.size() ;
@@ -620,6 +624,9 @@ complex<double> cmat::prod(vector<complex<double> > &vek1, vector<complex<double
   return erg ;
 }
 
+/*! copies the diagonal of the current matrix to a vector
+   \param vector, in which the values of the diagonal of the matrix are copied. */
+   
 void cmat::copyToVec(cvec &vec)  {
   uint dim = vec.size() ;
   uint dim1 = rows() ;
@@ -635,6 +642,10 @@ void cmat::copyToVec(cvec &vec)  {
     vec.set(i,data[i][i]) ;
   }
 }
+
+/*! Implementation of a matrix multiplication of the current complex matrix to a 
+    real matrix.
+    \param real matrix to multiply to */
 cmat cmat::operator* (mat &matr) {
   uint nrow = rows() ;
   uint ncol = matr.cols() ;
@@ -1205,43 +1216,6 @@ cmat cmat::inv() {
   zw.data = data ;
   return zw.GaussEle() ;
 }
-
-/*! Procedure to perform a singular value decomposition of the current matrix,
-   which does not need to be quadratic or even hermitian */
-// void cmat::singulValueDecomp(uint QR) {
-//   complex<double> eins(1,0) ;
-//   /* create the products mat*mat^t and mat^t*mat */
-//   cmat tr = this->H() ;
-//   cmat ttr = (*this)*tr ;
-//   cmat trt = tr*(*this) ;
-//   cmat zw = *this ;
-//   /* get matrixes for the tow unitary matrixes of the singular value decomposition */
-//   cmat u1(ttr.rows(),ttr.cols()) ;
-//   cmat u2(trt.rows(),trt.cols()) ;
-//   /* fill with unit */
-//   cout << "start eigenvalue problems" << endl ;
-//   u1.fillUnit() ;
-//   u2.fillUnit() ;
-//   cout << "some preperation is done" << endl ;
-//   /* get eigenvalues and eigenvectors for the two matrixes ttr and trt */
-//   if (QR==1) {
-//     bool eig1 = ttr.JacobiIteration(u1,1e-3,10000000) ;
-//     bool eig2 = trt.JacobiIteration(u2,1e-3,10000000) ;
-//   }
-//   else if (QR==2) {
-//     bool eig1 = ttr.performQR(u1,1e-3,1000) ;
-//     bool eig2 = trt.performQR(u2,1e-3,1000) ;
-//   }
-//   cmat ich(data)	 ;
-//   cmat u1h = u1.H() ;
-//   cmat u2h = u2.H() ;
-//   cmat test2 = zw*u2 ;
-//   cmat test1 = u1h*test2 ;
-//   unitary1 = u1.data ;
-//   unitary2 = u2h.data ;
-// //  singVals = test1.data ;
-// } 
-        
             /**
      * Returns sqrt(x<sup>2</sup>+y<sup>2</sup>).
      */
