@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -29,18 +27,10 @@
 ##  LAPACK_INCLUDES  - Location of the LAPACK header files
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-set (LAPACK_FOUND FALSE)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (HAVE_CLAPACK_H clapack.h
   PATHS
-  ${include_locations}
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include
   /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
   /opt/aips++/local/include/atlas
@@ -56,7 +46,6 @@ foreach (LAPACK_LIBRARY lapack cblas blas atlas)
   string(TOUPPER ${LAPACK_LIBRARY} LAPACK_TMP)
   ## search for the library
   find_library (LAPACK_${LAPACK_TMP}_LIBRARY ${LAPACK_LIBRARY}
-    PATHS ${lib_locations}
     PATH_SUFFIXES lapack
     )
   ## add library to the list of LAPACK libraries
