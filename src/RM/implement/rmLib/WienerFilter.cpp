@@ -143,7 +143,6 @@ void wienerfilter::readResponseMatrix(const string &filename){
 
 void wienerfilter::anaNoise(vector<double> &freqsC, vector<double> &freqsI, rmCube &cube, vector<double> &faras, double epsilon,double alpha) {
   double eps = 1e-10 ;
-  double res = 0 ;
   this->alpha=alpha ;
   cout << "zahl der Frequenzintervalle: " << freqsI.size() << endl ;
   /* create the response matrix for the rm synthesis */
@@ -178,8 +177,8 @@ void wienerfilter::anaNoise(vector<double> &freqsC, vector<double> &freqsI, rmCu
       varNum++ ;  
       /* loop over all lines of sight, to get the response value of a
          channel, only containing noise for each line of sight */
-      for (uint x=0; x<cube.getXSize(); x++ ) {
-        for (uint y=0; y<cube.getYSize(); y++ ) {
+      for (int x=0; x<cube.getXSize(); x++ ) {
+        for (int y=0; y<cube.getYSize(); y++ ) {
           cube.getLineOfSight(x,y,vec2) ;
           complex<double> val = vec2.dot(vec1) ;
           img.set(x,y,val) ;
@@ -199,8 +198,8 @@ void wienerfilter::anaNoise(vector<double> &freqsC, vector<double> &freqsI, rmCu
     for (uint j=0; j<varNum; j++) { /* loop over all noise channels, calculating covariance matrix */
 
       cmat &imgj=noiseVals[j] ;
-      for (uint x=0; x<cube.getXSize(); x++ ) {
-        for (uint y=0; y<cube.getYSize(); y++ ) {
+      for (int x=0; x<cube.getXSize(); x++ ) {
+        for (int y=0; y<cube.getYSize(); y++ ) {
           complex<double> vali = imgi.get(x,y) ;
           complex<double> valj = imgj.get(x,y) ;
           if (i==j) { // contribution to the mean only if i=j otherwise we only calculate contribution to the covariance */
