@@ -40,6 +40,7 @@ option (RM_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO 
 option (RM_ENABLE_TESTING       "Build the test programs?"                   YES )
 option (RM_WITH_ITPP            "Enable using IT++ library?"                 NO  )
 option (RM_WITH_ARMADILLO       "Enable using Armadillo library?"            YES )
+option (RM_OSX_ARCHITECTURES    "Set OS X build architectures"               NO  )
 
 ## =============================================================================
 ##
@@ -51,7 +52,7 @@ option (RM_WITH_ARMADILLO       "Enable using Armadillo library?"            YES
 
 include (CheckFunctionExists)
 
-check_function_exists (abs   HAVE_ABS )
+check_function_exists (abs   HAVE_ABS  )
 check_function_exists (fabs  HAVE_FABS )
 
 ## Standard CMake modules ------------------------
@@ -104,19 +105,22 @@ endif (RM_WITH_ITPP)
 ##
 ## =============================================================================
 
+##____________________________________________________________________
+## Handle option: Enable testing?
+
 if (RM_ENABLE_TESTING)
   include (CTest)
   enable_testing()
 endif (RM_ENABLE_TESTING)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: debugging messages on/off
 
 if (RM_DEBUGGING_MESSAGES)
   set (DEBUGGING_MESSAGES ON)
 endif (RM_DEBUGGING_MESSAGES)
 
-## -------------------------------------------------------------------
+##____________________________________________________________________
 ## Handle option: Enable standard set of compiler warnings?  ON/OFF
 
 if (RM_COMPILER_WARNINGS)
@@ -124,7 +128,20 @@ if (RM_COMPILER_WARNINGS)
     "-Wall -g -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
     )
 endif (RM_COMPILER_WARNINGS)
-    
+
+##____________________________________________________________________
+##                                            OS X build architectures
+
+if (APPLE AND RM_OSX_ARCHITECTURES)
+  if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
+    set (CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "OS X build architectures" FORCE)
+  else (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
+    if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+      set (CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "OS X build architectures" FORCE)
+    endif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  endif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "i386")
+endif (APPLE AND RM_OSX_ARCHITECTURES)
+
 ## =============================================================================
 ##
 ##  Installation
@@ -217,6 +234,8 @@ endif (FFTW3_INCLUDES)
 if (HDF5_INCLUDES)
   include_directories (${HDF5_INCLUDES})
   add_definitions (-DHAVE_HDF5)
+else (HDF5_INCLUDES)
+  message (STATUS "[RM] Missing HDF5 header files!")
 endif (HDF5_INCLUDES)
 
 if (RM_WITH_ITPP AND ITPP_FOUND)
@@ -239,7 +258,6 @@ set (rm_link_libraries
   ${DAL_LIBRARIES}
   ${CASA_LIBRARIES}
   ${CFITSIO_LIBRARIES}
-  ${FFTW3_LIBRARIES}
   ${WCSLIB_LIBRARIES}
   ${LAPACK_LIBRARIES}
   ${GSL_LIBRARIES}
@@ -256,6 +274,10 @@ endif (ITPP_LIBRARIES)
 if (HDF5_LIBRARIES)
   list (APPEND rm_link_libraries ${HDF5_LIBRARIES})
 endif (HDF5_LIBRARIES)
+
+if (FFTW3_LIBRARIES)
+  list (APPEND rm_link_libraries ${FFTW3_LIBRARIES})
+endif (FFTW3_LIBRARIES)
 
 if (HAVE_LIBZ)
   list (APPEND rm_link_libraries ${HAVE_LIBZ})
@@ -282,16 +304,16 @@ add_subdirectory (apps)
 ## =============================================================================
 
 message (STATUS "+============================================================+")
-message (STATUS "| RM-Tools: Summary of configuration settings                |")
+message (STATUS "| [RM-Tools] Summary of configuration settings               |")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " System configuration:"                                        )
-message (STATUS " .. Processor type           = ${CMAKE_SYSTEM_PROCESSOR}"      )
-message (STATUS " .. CMake executable         = ${CMAKE_COMMAND}"               )
-message (STATUS " .. CMake version            = ${CMAKE_VERSION}"               )
-message (STATUS " .. System name              = ${CMAKE_SYSTEM}"                )
-message (STATUS " .. C++ compiler             = ${CMAKE_CXX_COMPILER}"          )
-message (STATUS " .. C compiler               = ${CMAKE_C_COMPILER}"            )
-message (STATUS " .. size(void*)              = ${CMAKE_SIZEOF_VOID_P}"         )
+message (STATUS " .. Processor type ......... = ${CMAKE_SYSTEM_PROCESSOR}"      )
+message (STATUS " .. CMake executable ....... = ${CMAKE_COMMAND}"               )
+message (STATUS " .. CMake version .......... = ${CMAKE_VERSION}"               )
+message (STATUS " .. System name ............ = ${CMAKE_SYSTEM}"                )
+message (STATUS " .. C++ compiler ........... = ${CMAKE_CXX_COMPILER}"          )
+message (STATUS " .. C compiler ............. = ${CMAKE_C_COMPILER}"            )
+message (STATUS " .. size(void*) ............ = ${CMAKE_SIZEOF_VOID_P}"         )
 message (STATUS " External packages:"                                           )
 message (STATUS " .. Armadillo .............. = ${ARMADILLO_FOUND} "            )
 message (STATUS " .. Boost++ ................ = ${BOOST_FOUND}"                 )
