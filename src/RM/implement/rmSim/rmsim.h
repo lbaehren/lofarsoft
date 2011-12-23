@@ -67,7 +67,12 @@ namespace RM {
     //! Default constructor
     rmsim ();
 
-    //! Argumented constructor
+    /*!
+      \brief Argumented constructor
+      \param faradaydepths
+      \param frequencies
+      \param weights
+    */
     rmsim (std::vector<double> &faradaydepths,
 	   std::vector<double> &frequencies,
 	   std::vector<double> &weights);
@@ -100,6 +105,7 @@ namespace RM {
      * Algorithm functions for a complete LOS emission with multiple
      * regions (providing external vector)
     */
+
     void faradayScreens (std::vector<double> &los,
 			 const std::vector<unsigned int> &positions,
 			 const std::vector<double> &heights,
@@ -147,42 +153,55 @@ namespace RM {
 			   const unsigned int postion,
 			   double height,
 			   const double rmsffwhm);
+    //! Add Faraday block
     void addFaradayBlock (std::vector<double> &los,
 			  const unsigned int position,
 			  double height,
 			  const unsigned int width,
 			  const double rmsffwhm);
-    void addFaradayGaussian(std::vector<double> &los, const unsigned int position, double height, const unsigned int fwhm, const double rmsffwhm);
-    void addFaradaySlab(std::vector<double> &los, const unsigned int positionleft, const unsigned int positionright, double heightleft, double heightright, const double rmsffwhm);	
+    void addFaradayGaussian (std::vector<double> &los,
+			     const unsigned int position,
+			     double height,
+			     const unsigned int fwhm,
+			     const double rmsffwhm);
+    //! Add Faraday slab
+    void addFaradaySlab (std::vector<double> &los,
+			 const unsigned int positionleft,
+			 const unsigned int positionright,
+			 double heightleft,
+			 double heightright,
+			 const double rmsffwhm);	
     
-    //*******************************************************************
-	//
-	// Member access functions
-	//
-	//*******************************************************************
-	void getFaradayLOS(std::vector<double> &faradayLOS);
-	void getPolarizedInt(std::vector<std::complex<double> > &polarizedInt);
-	void getPolarizedQ(std::vector<double> &polarizedQ);
-	void getPolarizedU(std::vector<double> &polarizedU);
-	void getFaradayDepths(std::vector<double> &faradayDepths);
-	void setFaradayDepths(const double min, const double max, const double step);
-	void setFaradayDepths(const std::vector<double> &faradayDepths);
+    /*________________________________________________________________
+     * Member access functions
+     */
 
-	//*******************************************************************
-	//
-	// Helper functions
-	//
-	//*******************************************************************	
-	void createGaussian(std::vector<double> &, const double peak, const double fwhm, const unsigned int peakpos);					// create a Gaussian with equivalent FWHM and peak height shifted to peakpos
+    void getFaradayLOS (std::vector<double> &faradayLOS);
+    void getPolarizedInt (std::vector<std::complex<double> > &polarizedInt);
+    void getPolarizedQ (std::vector<double> &polarizedQ);
+    void getPolarizedU (std::vector<double> &polarizedU);
+    void getFaradayDepths (std::vector<double> &faradayDepths);
+    void setFaradayDepths (const double min, const double max, const double step);
+    void setFaradayDepths (const std::vector<double> &faradayDepths);
+    
+    /*________________________________________________________________
+     * Helper functions
+     */
 
-	//*******************************************************************
-	//
-	// High-level simulation functions
-	//
-	//*******************************************************************	
-	void computePolarizedEmission();	// uses internally forwaredFourier() function of RM-Synthesis
-};
+    //! Create a Gaussian with equivalent FWHM and peak height shifted to peakpos
+    void createGaussian (std::vector<double> &,
+			 const double peak,
+			 const double fwhm,
+			 const unsigned int peakpos);
+    
+    /*________________________________________________________________
+     * High-level simulation functions
+     */
 
+    //! Uses internally forwaredFourier() function of RM-Synthesis
+    void computePolarizedEmission();
+  };
+  
 }  // END -- namespace RM
 
 #endif
