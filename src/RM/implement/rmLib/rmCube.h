@@ -15,8 +15,10 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+/* RM-Synthesis header files */
 #include "rm.h"
 #include "rmIO.h"
+/* casacore headre files */
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Cube.h>
@@ -38,6 +40,7 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
+
 namespace RM {
   /*!
     \class rmCube
@@ -79,14 +82,22 @@ namespace RM {
     //! Total Farday range covered
     uint faradaySize;
     uint freqSize;
-    int currentX;	              //!> current X position in cube
-    int currentY;	              //!> current Y position in cube
-    int currentFaradayDepth;    //!> current Faraday Depth
+    //! Current X position in cube
+    int currentX;
+    //! Current Y position in cube
+    int currentY;
+    //! Current Faraday Depth
+    int currentFaradayDepth;
     
-    // Image plane dimensions
-    double ra;			//!> total RA of field
-    double dec;		//!> total DEC of field
-    double ra_low;	//!> lower limit (edge) of RA of field
+    /*
+      Image plane dimensions
+    */
+    //! Total RA of field
+    double ra;
+    //! Total DEC of field			
+    double dec;
+    //! Lower limit (edge) of RA of field
+    double ra_low;
     double ra_high;	//!> upper limit (edge) of RA of field
     double dec_low;	//!> lower limit (edge) of DEC of field
     double dec_high;	//!> upper limit (edge) of DEC of field
@@ -118,11 +129,16 @@ namespace RM {
     //! Rotation Measure Spread Function
     std::vector<std::complex<double> > rmsf;
     casa::TableRecord recSrc ; 
-  
+
   public:
 
+    // === Public data ==========================================================
+
+    //! Complex values of the cube stored inside a one dimensional complex field
+    casa::Cube<complex<double> > vals ;
+
     // === Construction =========================================================
-    casa::Cube<complex<double> > vals ;			//! complex values of the cube stored inside a one dimensional complex field
+
     //! Empty constructor without initial values
     rmCube();
     //! Argumented constructor with dimensions
@@ -141,6 +157,7 @@ namespace RM {
     void removeNoFits(vector<string> &names) ;
     void getFitsSize(string &path, vector<string> &names, uint &x, uint &y, int &pix) ;
     void writeRM_Cube(string &qpath, string &upath, string &fileNames);
+
     // === Destruction ==========================================================
     
     //! Destructor
@@ -243,9 +260,25 @@ namespace RM {
 
     //! Compute the whole Cube with paramaters from attributes
     void computeCube();
-    void fillRM_Cube(string &qpath, string &upath, vector<string> &qimag, vector<string> &uimag, uint f, uint x, uint y, double fmin, double fmax) ;
-  }; // END -- class rmCube
+    //! Fill the RM cube
+    void fillRM_Cube (std::string &qpath,
+		      std::string &upath,
+		      std::vector<std::string> &qimag,
+		      std::vector<std::string> &uimag,
+		      uint f,
+		      uint x,
+		      uint y,
+		      double fmin,
+		      double fmax);
 
+    // === Static methods =======================================================
+    
+    static int findNamedRecord (casa::TableRecord &rec,
+				string &name,
+				bool countAll);
+    
+  }; // END -- class rmCube
+  
 } // END -- namespace RM
 
 #endif

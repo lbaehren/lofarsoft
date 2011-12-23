@@ -1,14 +1,16 @@
-#ifndef Wiener_H
-#define Wiener_H	
+#ifndef WIENERFILTER_H
+#define WIENERFILTER_H
 
-// Standard header files
+/* Standard header files */
 #include <iostream>
 #include <string>
 #include <vector>
+/* FFTW3 header files */
 #include <fftw3.h> 
 // RM header files
 #include "rmNumUtils.h"
 #include "rmCube.h"
+
 using namespace std;
 
 #define DEBUG 1
@@ -108,14 +110,14 @@ namespace RM {  //  namespace RM
   //*****************************************************/
   void createNoiseMatrix(double noise);		// create an instrument/simulated noise matrix, complex due to P=Q+iU and noise might differ in Q and U
   void createNoiseMatrix(vector<double> &noiseperchan);	// create a noise matrix with rms noise for each frequency channel
-  void createResponseMatrix(vector<uint> gaps, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
+  void createResponseMatrix(vector<unsigned int> gaps, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
   void createResponseMatrix(vector<double> intervals, double eps, uint singVal );	 							// create the Response matrix frequencies as No. of columns, Faraday depths as No. of rows
-  void generateWienerFiltering(int noNoise, int flatPrior, double signal_var, double signal_corr, double noise_var, vector<uint> gaps, double eps,uint QR ) ;
+  void generateWienerFiltering(int noNoise, int flatPrior, double signal_var, double signal_corr, double noise_var, vector<unsigned int> gaps, double eps, unsigned int QR ) ;
   void generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cvec power, double eps, uint QR ) ;
   void generateWienerFiltering(int noNoise, double noise_var, vector<uint> gaps, cmat covMat, double eps, uint QR );
   void createResponseMatrixIntegral();	// integral form of Response matrix
   void createSMatrix(const string &);						// initial guess for the S matrix, Types: "whitesignal", "gaussian", "powerlaw", "deconvolution"
-  void iterateForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps, uint smoothSteps, double powerEps) ;	// adjust S matrix from result of Wiener filtering
+  void iterateForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps, unsigned int smoothSteps, double powerEps) ;	// adjust S matrix from result of Wiener filtering
   void iterateMatForAll(rmCube &cubeIn, rmCube &cubeOut, double sigVar, double corLenght, double noiseVar,vector<uint> gaps);
   void iteratePowerSpectrum(cvec freqs, cvec faradays, cvec power0, cvec map, vector<uint> gaps, cvec epsilon, cvec delta, double aimDist);
   void iteratePowerSpectra(cvec power0, vector<cvec> maps, vector<uint> gaps, cvec epsilon, cvec delta, double aimDist, uint smoothSteps);

@@ -17,11 +17,9 @@
 #include <limits>			// limit for S infinite
 #include <iomanip>			// to set precision in cout
 #include <gsl/gsl_matrix.h>
-// #include <gmm_matrix.h>
-// #include <gmm_dense_qr.h>
-/* RM header files */
+/* RM-Synthesis header files */
 #include "WienerFilter.h"
-
+/* Namespace usage */
 using namespace std;
 
 namespace RM {
@@ -164,10 +162,10 @@ void wienerfilter::anaNoise(vector<double> &freqsC, vector<double> &freqsI, rmCu
   cvec vec1,vec2;
   /* memory for storing all known components of the noise */
   vector<cmat> noiseVals ;
-  vector<uint> index ; 
-  uint varNum = 0 ;
+  vector<unsigned int> index ; 
+  unsigned int varNum = 0 ;
   double fak=1.0/(cube.getXSize()*cube.getYSize()) ;
-  for (uint i=0; i<Q.rows(); i++) {
+  for (unsigned int i=0; i<Q.rows(); i++) {
     cout << "i= " << i << "/" << Q.rows() << endl ;
     cmat img(cube.getXSize(),cube.getYSize()) ; // values for the current noise only channel
     double eig=eigen[i] ;

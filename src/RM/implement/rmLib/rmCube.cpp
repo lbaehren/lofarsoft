@@ -1,3 +1,4 @@
+
 /*! Implementation of rmCube class methods
 
     Author:		Sven Duscha (sduscha@mpa-garching.mpg.de)
@@ -5,26 +6,28 @@
     Last change:	27-05-2009
 */
 
-
 #include <iostream>				// C++/STL iostream
 #include <math.h>				// mathematics library
 #include <string.h>
 #include "rmCube.h"				// rmCube class declarations
 // #include <fitshandle.h>
 #define pi 3.1415926535897932385
+
+/* Namespace usage */
 using namespace std;
 using namespace casa ;
+
 namespace RM {
   
-  //===============================================================================
+  //=============================================================================
   //
   //  Constructions / Destruction
   //
-  //===============================================================================
+  //=============================================================================
+
+  //_____________________________________________________________________________
+  //                                                                      ~rmCube
   
-  /*!
-    \brief Default destructor
-  */
   rmCube::~rmCube()
   {
 //     cout << "Call destructor" << buffer << endl ;
@@ -40,51 +43,65 @@ namespace RM {
   * from lampda^2 to faradaydepths.
   * \param  lambda vector  of the lambda^2 values */
  
-vector<double> rmCube::lambdaToFarraday(vector<double> &lambda ) {
-  int N = lambda.size(); 
-  /* reduce the lambdas so that lambda[0] = 0 */
-  for (int i=1; i<N; i++) {
-    lambda[i] = lambda[i]-lambda[0] ;
-  }
-  lambda[0] = 0 ;
-  vector<double> out(N);  // resultvector 
-  for (int i=0; i<N ; i++) {
-    if (lambda[i] == 0)
+  //=============================================================================
+  //
+  //  Public methods
+  //
+  //=============================================================================
+
+  //_____________________________________________________________________________
+  //                                                             lambdaToFarraday
+  
+  std::vector<double> rmCube::lambdaToFarraday (vector<double> &lambda )
+  {
+    int N = lambda.size(); 
+    /* reduce the lambdas so that lambda[0] = 0 */
+    for (int i=1; i<N; i++) {
+      lambda[i] = lambda[i]-lambda[0] ;
+    }
+    lambda[0] = 0 ;
+    vector<double> out(N);  // resultvector 
+    for (int i=0; i<N ; i++) {
+      if (lambda[i] == 0)
         out[i] = 0;
-    else
-       out[i] = 2*pi*i*i/(N*lambda[i]) ;
-    
+      else
+	out[i] = 2*pi*i*i/(N*lambda[i]) ;
+      
+    }
+    return out ;
   }
-  return out ;
-}
-
+  
+  //_____________________________________________________________________________
+  //                                                    lambdaToFarradayBrentjens
+  
   /*! function to calculate a set of farradaydepths out 
-  * of the set of lambda squares. The number of faradaydepths 
-  * is the same as the number of lambda^2. The searched values for 
-  * the faraday depths are choosen to get a nearly unitary transfomation
-  * from lampda^2 to faradaydepths.
-  * Procedure orientates on Phd theses of Michiel Brentjens page 43
-  * \param  lambda vector  of the lambda^2 values */
- 
-vector<double> rmCube::lambdaToFarradayBrentjens(vector<double> &lambda ) {
-  int N = lambda.size(); 
-/* calculate the total difference of the lambdas */
-  double DeltaLambda = (lambda[N-1]-lambda[0]) ;
-  /* calculate the mean delta lambda square */
-//  double deltaLambda = DeltaLambda/N ;
-  /* calculate the resolution in faradaydepths */
-  double deltaPhi = 2*sqrt(3.0)/DeltaLambda ;
-  vector<double> out(N);  // resultvector 
-  for (int i=0; i<N ; i++) {
-    out[i] = i*deltaPhi ;
+   * of the set of lambda squares. The number of faradaydepths 
+   * is the same as the number of lambda^2. The searched values for 
+   * the faraday depths are choosen to get a nearly unitary transfomation
+   * from lampda^2 to faradaydepths.
+   * Procedure orientates on Phd theses of Michiel Brentjens page 43
+   * \param  lambda vector  of the lambda^2 values */
+  
+  vector<double> rmCube::lambdaToFarradayBrentjens (vector<double> &lambda )
+  {
+    int N = lambda.size(); 
+    /* calculate the total difference of the lambdas */
+    double DeltaLambda = (lambda[N-1]-lambda[0]) ;
+    /* calculate the mean delta lambda square */
+    //  double deltaLambda = DeltaLambda/N ;
+    /* calculate the resolution in faradaydepths */
+    double deltaPhi = 2*sqrt(3.0)/DeltaLambda ;
+    vector<double> out(N);  // resultvector 
+    for (int i=0; i<N ; i++) {
+      out[i] = i*deltaPhi ;
+    }
+    return out ;
   }
-  return out ;
-}
-
+  
   /*! function to calculate a set of farradaydepths out 
-  * of the set of lambda squares. The number of faradaydepths 
-  * is the same as the number of lambda^2. The searched values for 
-  * the faraday depths are choosen to get a nearly unitary transfomation
+   * of the set of lambda squares. The number of faradaydepths 
+   * is the same as the number of lambda^2. The searched values for 
+   * the faraday depths are choosen to get a nearly unitary transfomation
   * from lampda^2 to faradaydepths.
   * Procedure orientates on Phd theses of Michiel Brentjens page 43
   * \param  lambda vector  of the lambda^2 values */
@@ -385,20 +402,30 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
     return erg ;
   }
 
-  /*! find the index of the subrecord object of a record, which has a given name.
-      \param rekord rekord to search the sub records inside
-      \param name name of the record to be searched
-      \param countAll if count all is false,the procedure only counts subrecords for deremine 
-                    the index of the sub record, otherwise it count all elemets of the record 
-      \return index of the found record, if no one is found, the procedure returns -1 */
+  //_____________________________________________________________________________
+  //                                                              findNamedRecord
+  
+  /*!
+    Find the index of the subrecord object of a record, which has a given name.
 
-  int findNamedRecord(TableRecord &rekord, string &name, bool countAll) {
-    int res = -1 ;
-    int counter=0;
-    RecordDesc descr = rekord.description() ;
-    for (uint i=0; (i<rekord.nfields()) &&(res == -1); i++) {
-      if (rekord.type(i)==TpRecord) {
-        if (descr.name(i)==name) {
+    \param rec      -- Record to search the sub records inside
+    \param name     -- Name of the record to be searched
+    \param countAll -- If variable is set to \c false, the procedure only counts
+                       subrecords for deremine the index of the sub record,
+		       otherwise it count all elemets of the record 
+    \return index of the found record, if no one is found, the procedure returns -1
+  */
+  int rmCube::findNamedRecord (casa::TableRecord &rec,
+			       std::string &name,
+			       bool countAll)
+  {
+    int res          = -1 ;
+    int counter      = 0;
+    RecordDesc descr = rec.description() ;
+    
+    for (uint i=0; (i<rec.nfields()) &&(res == -1); i++) {
+      if (rec.type(i)==TpRecord) {
+        if (descr.name(i)==casa::String(name)) {
           if (countAll)
             res = i ;
           else 
@@ -409,25 +436,32 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
     }
     return res ;
   }
-
+  
+  //_____________________________________________________________________________
+  //                                                                      indexes
+  
   /*! procedure identifies the different directions of the coordinate system.
       It returns a vector which covers the different directions.
       0,1 indexes of the direction coordinates
       2   index of the spektral axis
-      3   index of the stokes axis */
-  Vector<int> indexes(CoordinateSystem coors ) {
-    Vector<int> res(4) ;
-    int directIndex = findCoorIndex(coors,Coordinate::DIRECTION, true) ;
-    int specIndex = findCoorIndex(coors,Coordinate::SPECTRAL,true) ;
-    int stokIndex = findCoorIndex(coors,Coordinate::STOKES,true) ;
+      3   index of the stokes axis
+  */
+  casa::Vector<int> indexes (CoordinateSystem coors)
+  {
+    casa::Vector<int> res(4) ;
+
+    /* Get the index of the coordinate within the coordinate system */
+    int directIndex = findCoorIndex (coors,Coordinate::DIRECTION, true) ;
+    int specIndex   = findCoorIndex (coors,Coordinate::SPECTRAL,true) ;
+    int stokIndex   = findCoorIndex (coors,Coordinate::STOKES,true) ;
     res[0]= directIndex ;
     res[1]= directIndex+1;
     res[2]= specIndex ;
     res[3]= stokIndex ;
     return res ;
   }
-
-
+  
+  
   /*! procedure identifies the different directions of the coordinate system.
       It returns a vector which covers the different directions.
       0,1 indexes of the direction coordinates

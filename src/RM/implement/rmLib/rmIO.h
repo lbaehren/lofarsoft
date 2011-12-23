@@ -8,7 +8,6 @@
 #include <fitsio2.h>
 //#include "psrfits.h"
 #include "rmNumUtils.h"
-#define uint unsigned int
 using namespace std;
 
 namespace RM {  //  BEGIN -- namespace RM

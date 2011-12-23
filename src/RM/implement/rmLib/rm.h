@@ -12,9 +12,7 @@
 #include <casa/Quanta.h>		// ... and unit conversion
 #endif
 
-//#include "rmFITS.h"	// rmFITS file access
-
-// Namespace usage
+/* Namespace usage */
 using namespace std;
 
 /*!

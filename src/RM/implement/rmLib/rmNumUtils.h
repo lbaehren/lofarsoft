@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <sys/types.h>
+/* GSL header files */
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
@@ -13,65 +15,86 @@
 #include <gsl/gsl_eigen.h>
 
 #define DEBUG 1
-#define uint unsigned int
 //! statistical limit for number of line of sights before attempting a S(i,j) iteration
 #define LOSLIMIT 100
+#ifndef PI
 #define PI 3.1415926535897932385
+#endif
+#ifndef CVAC
 #define CVAC 299792458
-namespace RM {  //  namespace RM
+#endif
+
+/* Namespace usage */
 using namespace std;
-void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
-void findGaps(vector<double> &freqs, vector<uint> &result) ;
-void FFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
-void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
-uint maxAbs(vector<complex<double> > vekt) ;
-double meanPeak(vector<complex<double> > vekt) ;
-complex<double> ehoch(double phi) ;
+
+namespace RM {  //  namespace RM
+
+  void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
+  void findGaps(vector<double> &freqs, vector<unsigned int> &result) ;
+  //! Forward FFT
+  void FFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
+  //! Inverse FFT
+  void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
+  unsigned int maxAbs(vector<complex<double> > vekt) ;
+  double meanPeak(vector<complex<double> > vekt) ;
+  complex<double> ehoch(double phi) ;
+
+  /*!
+    \class cVecFunk
+    \ingroup RM
+  */
   class cVecFunk {
-    public:
-    virtual complex<double> function(uint index) =0 ;
+  public:
+    virtual complex<double> function(unsigned int index) =0 ;
   };
+  
+  /* Forward declaration of classes */
   class mat ;
   class cmat ;
   class vec ;
+  
+  /*!
+    \class permEntry
+    \ingroup RM
+  */
   class permEntry {
-     public:
-     uint pos1;
-     uint pos2;     
-     permEntry(uint w1,uint w2) {
-	 pos1 = w1 ;
-	 pos2 = w2 ;
-     }
+  public:
+    unsigned int pos1;
+    unsigned int pos2;     
+    permEntry(unsigned int w1,unsigned int w2) {
+      pos1 = w1 ;
+      pos2 = w2 ;
+    }
   } ;
   /*! class for a complex vector */
   class cvec {
-    public :
-      /*! calculates the absolute value of a complex number */
-      double Abs(complex<double> val) {
-	  return sqrt((val*conj(val)).real()) ;
-      }
+  public :
+    /*! calculates the absolute value of a complex number */
+    double Abs(complex<double> val) {
+      return sqrt((val*conj(val)).real()) ;
+    }
       vector<complex<double> > data ;  // the actual data
       cvec(void ) {
       } ;
       /*! constructor which reservese the memory for size elements */
-      cvec(uint size) {
+      cvec(unsigned int size) {
 	 data.resize(size) ;
       };
-      cvec(uint size, complex<double> val) {
+      cvec(unsigned int size, complex<double> val) {
 	data.resize(size) ;
-	for (uint i=0; i<size; i++) {
+	for (unsigned int i=0; i<size; i++) {
 	  data[i] = val ;
 	}
       }
-      cvec(cVecFunk *fu, uint dim)  {
+      cvec(cVecFunk *fu, unsigned int dim)  {
 	data.resize(dim) ;
-	for (uint i=0; i<dim; i++) {
+	for (unsigned int i=0; i<dim; i++) {
 	  data[i] = fu->function(i) ;
 	}
       }
       /*! create complex vector from gsl vector */
       cvec(gsl_vector_complex *gsl_vec) {
-	  uint size = gsl_vec->size ;
+	  unsigned int size = gsl_vec->size ;
 	  data.resize(size) ;
 	  for (uint i=0; i<size; i++) {
 	    gsl_complex val = gsl_vector_complex_get(gsl_vec,i) ;
@@ -85,28 +108,28 @@ complex<double> ehoch(double phi) ;
         data=vek ;
       } ;
       /*! resizes the dimension of the current vector */
-      void set_size(uint size) {
+      void set_size(unsigned int size) {
 	 data.resize(size);
       } ;
-      void set_vals(uint size, complex<double> val) {
+      void set_vals(unsigned int size, complex<double> val) {
 	data.resize(size) ;
-	for (uint i=0; i<size; i++) {
+	for (unsigned int i=0; i<size; i++) {
 	  data[i] = val ;
 	}
       } ;
       /*! set the value of the element index ind to value val */
-      void set(uint ind, complex<double> val) {
+      void set(unsigned int ind, complex<double> val) {
 	data[ind] = val ;
       }
       /*! multiplies all elements of the current vector with the factor fak.
 	\param fak factor to be multiplied to all elements of the vector */
       void mult(complex<double> fak) ;
       /*! returns the size of the vector */
-      uint size() {
+      unsigned int size() {
 	return data.size() ;
       } ;
       /*! returns the size of the vector */
-      uint length() {
+      unsigned int length() {
 	return data.size() ;
       } ;
       /*! returns a stl vector of the same data as the current vector */
@@ -114,11 +137,11 @@ complex<double> ehoch(double phi) ;
         return data ;
       }
       /*! returns the n-th element of the vector */
-      complex<double> &operator[](uint n) { 
+      complex<double> &operator[](unsigned int n) { 
 	  return data[n] ;
       }
       /*! returns the n-th element of the vector */
-      complex<double> operator()(uint n) {
+      complex<double> operator()(unsigned int n) {
 	  return data[n] ;
       }
       /*! procedure add the elements of a seccond vector (vek2)
