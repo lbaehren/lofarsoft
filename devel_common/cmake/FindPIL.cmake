@@ -32,11 +32,6 @@ if (NOT FIND_PIL_CMAKE)
   set (FIND_PIL_CMAKE TRUE)
 
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (LUS_CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (PIL_INCLUDES pil.h

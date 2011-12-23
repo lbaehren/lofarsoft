@@ -41,11 +41,6 @@ if (NOT FIND_HDF5_CMAKE)
   set (HDF5_VERSION_STRING 0    )
 
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (LUS_CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   ## Include directory

@@ -30,10 +30,6 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-if (NOT LUS_CMAKE_SETTINGS_CMAKE)
-  include (LUS_CMakeSettings)
-endif (NOT LUS_CMAKE_SETTINGS_CMAKE)
-
 if (NUM_UTIL_FIND_QUIETLY)
   set (PYTHON_FIND_QUIETLY TRUE)
 endif (NUM_UTIL_FIND_QUIETLY)

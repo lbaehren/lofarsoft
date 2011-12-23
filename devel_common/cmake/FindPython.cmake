@@ -40,11 +40,6 @@
 if (NOT HAVE_PYTHON)
   
   ## ----------------------------------------------------------------------------
-  ## Standard locations where to look for required components
-  
-  include (LUS_CMakeSettings)
-  
-  ## ----------------------------------------------------------------------------
   ## Is the root of the Python installation defined through environment variable?
   
   set (PYTHON_PYTHONHOME $ENV{PYTHONHOME})

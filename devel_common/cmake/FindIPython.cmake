@@ -29,11 +29,6 @@
 #  IPYTHON_MINOR_VERSION      = IPython minor version
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (LUS_CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for executables
 
 find_program (IPYTHON_EXECUTABLE ipython)

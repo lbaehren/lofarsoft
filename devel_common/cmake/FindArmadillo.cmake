@@ -31,9 +31,6 @@ if (NOT FIND_ARMADILLO_CMAKE)
   
   set (FIND_ARMADILLO_CMAKE TRUE)
 
-  ## Include common CMake settings
-  include (LUS_CMakeSettings)
-  
   ##_____________________________________________________________________________
   ## Check for the header files
   

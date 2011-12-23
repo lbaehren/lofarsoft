@@ -29,11 +29,6 @@
 #  SPHINX_MINOR_VERSION      = Sphinx minor version
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (LUS_CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Find python
 
 find_package (Python)

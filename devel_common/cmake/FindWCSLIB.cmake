@@ -31,11 +31,6 @@ if (NOT FIND_WCSLIB_CMAKE)
   set (WCSLIB_FOUND      FALSE )
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (LUS_CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (WCSLIB_INCLUDES wcs/wcs.h wcslib/wcs.h

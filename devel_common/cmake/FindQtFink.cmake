@@ -31,11 +31,6 @@
 #  QT_QTDESIGNER_LIBRARY  -- QtDesigner library
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (LUS_CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Executables
 
 ## moc

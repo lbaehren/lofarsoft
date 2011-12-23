@@ -29,11 +29,6 @@
 
 if (NOT STARTOOLS_FOUND)
 
-  ## Include common CMake settings
-  if (EXISTS LUS_CMakeSettings.cmake)
-    include (LUS_CMakeSettings)
-  endif (EXISTS LUS_CMakeSettings.cmake)
-  
   if (NOT STARTOOLS_ROOT_DIR)
     set (STARTOOLS_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   endif (NOT STARTOOLS_ROOT_DIR)

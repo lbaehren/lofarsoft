@@ -28,11 +28,6 @@
 
 if (NOT OCTAVE_FOUND)
 
-  ## Include common CMake settings
-  if (EXISTS LUS_CMakeSettings.cmake)
-    include (LUS_CMakeSettings)
-  endif (EXISTS LUS_CMakeSettings.cmake)
-  
   if (NOT OCTAVE_ROOT_DIR)
     set (OCTAVE_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   endif (NOT OCTAVE_ROOT_DIR)

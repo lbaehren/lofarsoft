@@ -31,11 +31,6 @@ include (CheckIncludeFiles)
 include (CheckTypeSize)
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (LUS_CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
 
 set (BOOST_FIND_python_ONLY NO)
