@@ -28,13 +28,16 @@ using namespace std;
 
 namespace RM {  //  namespace RM
 
-  void calcMeanVarDist(vector<double> &freqs, vector<double> &result) ;
-  void findGaps(vector<double> &freqs, vector<unsigned int> &result) ;
+  void calcMeanVarDist (vector<double> &freqs,
+			vector<double> &result) ;
+  //! Find gaps inside the ordered double valued vector 
+  void findGaps (vector<double> &freqs,
+		 vector<unsigned int> &result) ;
   //! Forward FFT
   void FFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
   //! Inverse FFT
   void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) ;
-  unsigned int maxAbs(vector<complex<double> > vekt) ;
+  unsigned int maxAbs (vector<complex<double> > vekt) ;
   double meanPeak(vector<complex<double> > vekt) ;
   complex<double> ehoch(double phi) ;
 

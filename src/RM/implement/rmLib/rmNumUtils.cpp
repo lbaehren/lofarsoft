@@ -10,112 +10,124 @@
 #include <limits>			// limit for S infinite
 #include <iomanip>			// to set precision in cout
 #include <fftw3.h>  // need for algrithm which 
-#include "rmNumUtils.h"
 #include <sstream>
-//#include <casa/Arrays/Array.h>
 /* RM header files */
+#include "rmNumUtils.h"
 
 using namespace std;
 
 namespace RM {
-
-
-
-/*! procedure finds gaps inside the ordered double valued vector 
-    \param freqs ordered double valued vector to find the gaps in */
-void findGaps(vector<double> &freqs,vector<uint> &result) {
-  vector<double> mean(2) ;
-  double epsilon = 1+5E-8 ;
-  calcMeanVarDist(freqs,mean) ;
-  double meanDist = mean[0] ;
-  double varDist = mean[1] ;
-  result.push_back(0) ; // always put the first element into the gaps 
-  /* loop over all elements of the given vector, to look at the distances
-    and to find the gaps, where the positions are stored into result */
-  for (uint i=0; i<freqs.size()-1; i++) {
-    /* a gap is detected for intervallength more than mean length plus 3 times 
-       the variance of the intervallenths */
-    if ((freqs[i+1]-freqs[i]) > (epsilon*meanDist+3*varDist)) {
-      result.push_back(i+1) ; 
+  
+  //_____________________________________________________________________________
+  //                                                                     findGaps
+  
+  /*!
+    \param freqs   -- Ordered double valued vector to find the gaps in
+    \retval result -- 
+  */
+  void findGaps (vector<double> &freqs,
+		 vector<uint> &result)
+  {
+    vector<double> mean(2) ;
+    double epsilon = 1+5E-8 ;
+    calcMeanVarDist(freqs,mean) ;
+    double meanDist = mean[0] ;
+    double varDist = mean[1] ;
+    result.push_back(0) ; // always put the first element into the gaps 
+    /* loop over all elements of the given vector, to look at the distances
+       and to find the gaps, where the positions are stored into result */
+    for (uint i=0; i<freqs.size()-1; i++) {
+      /* a gap is detected for intervallength more than mean length plus 3 times 
+	 the variance of the intervallenths */
+      if ((freqs[i+1]-freqs[i]) > (epsilon*meanDist+3*varDist)) {
+	result.push_back(i+1) ; 
+      }
     }
+    result.push_back(freqs.size()) ; // always put the first element into the gaps 
   }
-  result.push_back(freqs.size()) ; // always put the first element into the gaps 
-}
-
-
-/*! Procedure to calculate the mean separation and varinace of the  
+  
+  
+  //_____________________________________________________________________________
+  //                                                              calcMeanVarDist
+  
+  /*!
+    Procedure to calculate the mean separation and varinace of the  
     separations of the element of an ordered  real valued vector 
-    \param freqs ordered real valued vector (double precission ) 
-    \param result vector conatains the mean [0] and the variance[1] */
-void calcMeanVarDist(vector<double> &freqs, vector<double> &result) {
-  double mean = 0 ;
-  double var = 0 ;
-  int num = freqs.size()-1 ;
-  for (int i=0; i<num ; i++) {
-    double diff = freqs[i+1]-freqs[i] ;
-    mean = mean+diff ;
-    var = var+diff*diff ;
-  }
-  result[0] = mean/num ;
-  result[1] = sqrt((var-mean*mean/num)/num);
-}
 
-complex<double> ehoch(double phi){
-  complex<double> res=complex<double>(cos(phi), sin(phi));	
-  return res ;
-}
-/*! procedure which performs the fast fourier 
+    \param freqs ordered real valued vector (double precission ) 
+    \param result vector conatains the mean [0] and the variance[1]
+  */
+  void calcMeanVarDist (vector<double> &freqs,
+			vector<double> &result)
+  {
+    double mean = 0;
+    double var  = 0;
+    int num     = freqs.size()-1;
+    for (int i=0; i<num ; i++) {
+      double diff = freqs[i+1]-freqs[i] ;
+      mean = mean+diff ;
+      var = var+diff*diff ;
+    }
+    result[0] = mean/num ;
+    result[1] = sqrt((var-mean*mean/num)/num);
+  }
+  
+  complex<double> ehoch(double phi){
+    complex<double> res=complex<double>(cos(phi), sin(phi));	
+    return res ;
+  }
+  /*! procedure which performs the fast fourier 
     transformation on a complex vector of c++ stl .*/ 
-void FFT(vector<complex<double> > &input, vector<complex<double> > &result) {
+  void FFT(vector<complex<double> > &input, vector<complex<double> > &result) {
     uint SIZE=input.size() ;
     double fak = 1.0/sqrt(SIZE) ;
     if (SIZE == result.size()) {
       fftw_complex    *data, *fft_result;
       fftw_plan       plan_forward;
       uint             i;
-   
+      
       data        = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * SIZE );
       fft_result  = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * SIZE );
-   
+      
       plan_forward  = fftw_plan_dft_1d( SIZE, data, fft_result, FFTW_FORWARD, FFTW_ESTIMATE );
-   
+      
       /* populate input data */
       for( i = 0 ; i < SIZE ; i++ ) {
         data[i][0] = input[i].real();
         data[i][1] = input[i].imag();
       }
-    
+      
       fftw_execute( plan_forward );
-  
+      
       /* store resutl to reslult vector */
       for( i = 0 ; i < SIZE ; i++ ) {
         result[i] = fak*complex<double>(fft_result[i][0],fft_result[i][1]) ;
       }
-
+      
       /* free memory */
       fftw_destroy_plan( plan_forward );
       fftw_free( data );
       fftw_free( fft_result );
-   }
-   else {
-     cerr << "FFT can not be performed, dimension error " << endl ;
-     throw "FFT can not be performed, dimension error ";
-   }
-}
-/*! procedure which performs the incerse fast fourier 
+    }
+    else {
+      cerr << "FFT can not be performed, dimension error " << endl ;
+      throw "FFT can not be performed, dimension error ";
+    }
+  }
+  /*! procedure which performs the incerse fast fourier 
     transformation on a complex vector of c++ stl .*/ 
-void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) {
+  void iFFT(vector<complex<double> > &input, vector<complex<double> > &result) {
     uint SIZE=input.size() ;
     double fak = 1.0/sqrt(SIZE) ;
     if (SIZE == result.size()) {
       fftw_complex    *fft_result, *ifft_result;
       fftw_plan        plan_backward;
       uint             i;
-   
-
+      
+      
       fft_result  = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * SIZE );
       ifft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * SIZE );
-   
+      
       plan_backward = fftw_plan_dft_1d( SIZE, fft_result, ifft_result, FFTW_BACKWARD, FFTW_ESTIMATE );
    
       /* populate input data */
