@@ -13,13 +13,12 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_eigen.h>
+/* RM-Synthesis header files */
+#include "rmConstants.h"
 
 #define DEBUG 1
 //! statistical limit for number of line of sights before attempting a S(i,j) iteration
 #define LOSLIMIT 100
-#ifndef PI
-#define PI 3.1415926535897932385
-#endif
 #ifndef CVAC
 #define CVAC 299792458
 #endif

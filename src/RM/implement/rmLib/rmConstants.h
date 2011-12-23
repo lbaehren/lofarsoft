@@ -8,6 +8,7 @@
 
 namespace RM {  /* namespace RM -- BEGIN */
 
+  //! Pi
   const double PI = 3.1415926535897932385;
 
 }  /* namespace RM -- END */
