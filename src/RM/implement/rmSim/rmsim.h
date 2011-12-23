@@ -2,8 +2,10 @@
 #ifndef RMSIM_H
 #define RMSIM_H
 
+/* Standard header files */
 #include <vector>
-#include <complex>	
+#include <complex>
+/* RM-Synthesis header files */
 #include "rmNoise.h"
 #include "rmIO.h"
 #include "rm.h"
@@ -94,14 +96,27 @@ namespace RM {
     //! Resize the class internal Faraday LOS vector
     void faradayLOSresize(unsigned int);
     
-    // Algorithm functions for a complete LOS emission with multiple regions (providing external vector)
-    void faradayScreens(std::vector<double> &los, const std::vector<unsigned int> &positions, const std::vector<double> &heights, double rmsffwhm);
-    void faradayBlocks(std::vector<double> &los, const std::vector<unsigned int> &positions, const std::vector<unsigned int> &widths, const std::vector<double> &heights, const double rmsffwhm);
-    void faradayGaussians(std::vector<double> &los, const std::vector<unsigned int> &positions, const std::vector<unsigned int> &fwhms, const std::vector<double> &heights, const double rmsffwhm);
-    
-    /*
-     * Algorithm functions to add an additional emission region to an existing
-     * LOS (working on class attribute vector)
+    /*________________________________________________________________
+     * Algorithm functions for a complete LOS emission with multiple
+     * regions (providing external vector)
+    */
+    void faradayScreens (std::vector<double> &los,
+			 const std::vector<unsigned int> &positions,
+			 const std::vector<double> &heights,
+			 double rmsffwhm);
+    void faradayBlocks (std::vector<double> &los,
+			const std::vector<unsigned int> &positions,
+			const std::vector<unsigned int> &widths,
+			const std::vector<double> &heights,
+			const double rmsffwhm);
+    void faradayGaussians (std::vector<double> &los,
+			   const std::vector<unsigned int> &positions,
+			   const std::vector<unsigned int> &fwhms,
+			   const std::vector<double> &heights,
+			   const double rmsffwhm);
+    /*________________________________________________________________
+     * Algorithm functions to add an additional emission region to an
+     * existing LOS (working on class attribute vector)
      */
 
     //! Add a Faraday screen emission (width=1) to the Faraday LOS vector
@@ -124,9 +139,19 @@ namespace RM {
 			 double heightright,
 			 const double rmsffwhm);	
     
-    // Algorithm functions to add an additional emission region to an existing LOS (providing external vector)
-    void addFaradayScreen(std::vector<double> &los, const unsigned int postion, double height, const double rmsffwhm);
-    void addFaradayBlock(std::vector<double> &los, const unsigned int position, double height, const unsigned int width, const double rmsffwhm);
+    /*________________________________________________________________
+     * Algorithm functions to add an additional emission region to an
+     * existing LOS (providing external vector)
+     */
+    void addFaradayScreen (std::vector<double> &los,
+			   const unsigned int postion,
+			   double height,
+			   const double rmsffwhm);
+    void addFaradayBlock (std::vector<double> &los,
+			  const unsigned int position,
+			  double height,
+			  const unsigned int width,
+			  const double rmsffwhm);
     void addFaradayGaussian(std::vector<double> &los, const unsigned int position, double height, const unsigned int fwhm, const double rmsffwhm);
     void addFaradaySlab(std::vector<double> &los, const unsigned int positionleft, const unsigned int positionright, double heightleft, double heightright, const double rmsffwhm);	
     
