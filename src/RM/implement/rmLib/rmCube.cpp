@@ -368,7 +368,6 @@ void rmCube::writeRM_Cube(string &qpath, string &upath, string &fileNames) {
       \return index of the first coordinate axis, which has the given typ, if no is found -1 is returned */
 
   int findCoorIndex(CoordinateSystem coors, Coordinate::Type typ, bool considerCoorTyp) {
-    bool found = false ;
     int num = 0 ;
     int erg = -1 ;
     for(uint j=0; j<coors.nCoordinates( ) ; j++) {
@@ -512,11 +511,9 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
     axis=1 ; // set axis flag to frequency axis 
     /* Ende der Definition einiger Konstanten */
     vector<string> files = readDirectory(imagePath) ;
-    double last=0;
-    uint nFreqs=0 ;
-    freqSize=0 ;
-    double freqDiff ;
-    bool fits = false ;
+    freqSize        = 0;
+    double freqDiff = 0.0;
+    bool fits       = false ;
 //     Vector<int> inds ;
     /* read main metadata of the current data set to be able to 
        allocate the needed memory */
