@@ -581,7 +581,7 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
           freqSize+=iPos[specIndex] ;
           /* just to avoid segmentation faults */
           if (specIndex != -1) {
-            for (uint j=0; j<iPos[specIndex]; j++) {
+            for (int j=0; j<iPos[specIndex]; j++) {
               pixel[specIndex]=j;
               coors.toWorld(world,pixel) ;  
               freqs.push_back(world[specIndex]) ;
@@ -621,7 +621,7 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
           freqSize+=iPos[specIndex] ;
           /* just to avoid segmentation faults */
           if (specIndex != -1) {
-            for (uint j=0; j<iPos[specIndex]; j++) {
+            for (int j=0; j<iPos[specIndex]; j++) {
               pixel[specIndex]=j;
               coors.toWorld(world,pixel) ;  
               freqs.push_back(world[specIndex]) ;
@@ -661,7 +661,7 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
     //    loop over the first component of the Array
           int index = inds[2];
           /* loop over the subbands of the current image */
-          for (uint j=0; j<ipos[index] ; j++) {
+          for (int j=0; j<ipos[index] ; j++) {
             pos[index] = j ;  // set the frequency coordinate inside the current image
             /* loop over the first dimension of the current image */
             for (uint x=0; x<xSize; x++) {
@@ -710,7 +710,7 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
               start[inds[3]] = 2 ;
               Slicer slU(start, ende) ;
               imag1.doGetSlice ( U, slU) ;
-              for (uint j=0; j<ipos[index] ; j++) {
+              for (int j=0; j<ipos[index] ; j++) {
                 double u=0 ;
                 double q=0 ;
                 Array<Float>::iterator itQ = U.begin() ;
