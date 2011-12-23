@@ -47,34 +47,40 @@ lofarsoft                <- $LOFARSOFT
 _________________________________________________________________________________
 >>> 4. External dependencies
 
-a) FFTW3
+ a) FFTW3 (http://www.fftw.org)
 
-The following dependencies are defined in external/CMakeLists.txt:
+ FFTW is a C subroutine library for computing the discrete Fourier transform
+ (DFT) in one or more dimensions, of arbitrary input size, and of both real and
+ complex data (as well as of even/odd data, i.e. the discrete cosine/sine
+ transforms or DCT/DST). We believe that FFTW, which is free software, should
+ become the FFT library of choice for most applications. 
 
-  fftw_install
-  |-- fftw_build
-  |-- fftw_configure
-  `-- fftw_unpack
+ b) Tempo (http://www.atnf.csiro.au/research/pulsar/tempo)
 
-  fftw_build
-  |-- fftw_configure
-  `-- fftw_unpack
+ Tempo is a program for the analysis of pulsar timing data. Pulsar rotation,
+ astrometric, and binary parameters are deduced by fitting models to pulse
+ times of arrival measured at one or more terrestrial observatories.
 
-  fftw_configure
-  `-- fftw_unpack
+ Tempo is maintained and distributed by Princeton University and the Australia
+ Telescope National Facility (ATNF). The code is freely available, and others
+ are encouraged to extend, modify, and improve it as they see fit.
 
-Collapsing the above definitions, one obtains:
+ c) DSPSR (http://dspsr.sourceforge.net)
+ 
+ DSPSR is an Open Source C++ development library for digital signal processing of
+ pulsar astronomical timeseries. It implements an extensive range of algorithms
+ for use in coherent dedispersion, filterbank formation, pulse folding, etc.
+ These tools are utilized by a powerful suite of user-end programs that come with
+ the library. 
 
-  fftw_install
-  `-- fftw_build
-      `-- fftw_configure
-           `-- fftw_unpack
+ d) PSRCHIVE (http://psrchive.sourceforge.net/)
 
-which is sufficiently well defined by the following statements:
-
-  add_dependencies (fftw_install fftw_build)
-  add_dependencies (fftw_build fftw_configure)
-  add_dependencies (fftw_configure fftw_unpack)
+ PSRCHIVE is an Open Source C++ development library for the analysis of pulsar
+ astronomical data. It implements an extensive range of algorithms for use in
+ pulsar timing, scintillation studies, polarimetric calibration, single-pulse
+ work, RFI mitigation, etc. These tools are utilized by a powerful suite of
+ user-end programs that come with the library. The software is described in
+ Hotan, van Straten & Manchester (2004). 
 
 
 _________________________________________________________________________________

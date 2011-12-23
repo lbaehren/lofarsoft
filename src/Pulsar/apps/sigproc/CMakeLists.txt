@@ -180,7 +180,7 @@ if (UNIX)
 endif (UNIX)
 
 add_dependencies (sigproc  
-  fftw_install
+  fftw
   sigproc_fort
   presto_includes
   sigproc_quicklook

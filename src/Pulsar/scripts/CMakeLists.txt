@@ -5,7 +5,6 @@
 ##
 ## ==============================================================================
 
-#
 add_custom_target (scripts_install
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/GRID/* ${PULSAR_SOURCE_DIR}/scripts/*.py ${PULSAR_SOURCE_DIR}/scripts/*.sh ${PULSAR_SOURCE_DIR}/scripts/*.pl ${PULSAR_SOURCE_DIR}/scripts/*.csh ${CMAKE_INSTALL_PREFIX}/bin/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/Pulsar_Search_LOFAR-v1.txt ${CMAKE_INSTALL_PREFIX}/doc/
@@ -17,11 +16,11 @@ add_custom_target (scripts_install
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog_NA.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_RADEC.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_psrHBA.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_psrLBA.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/Combined_3C_PSR_catalog.txt ${CMAKE_INSTALL_PREFIX}/data/
-  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/pulp_help.txt ${CMAKE_INSTALL_PREFIX}/data/
-  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/master.rfi ${CMAKE_INSTALL_PREFIX}/data/
-  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/stations.txt ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/pulp_help.txt ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/master.rfi ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/stations.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND chmod 755 ${CMAKE_INSTALL_PREFIX}/bin/*.py ${CMAKE_INSTALL_PREFIX}/bin/*.sh ${CMAKE_INSTALL_PREFIX}/bin/*.pl ${CMAKE_INSTALL_PREFIX}/bin/*.csh
-  COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/data/parfile
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/data/parfile
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/scripts
   COMMENT "Install extra processing scripts and LOFAR inf file into ${CMAKE_INSTALL_PREFIX}/bin and ${CMAKE_INSTALL_PREFIX}/data..."
   )

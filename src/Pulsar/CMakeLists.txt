@@ -1,6 +1,6 @@
 
 ## Name of the project
-project (PULSAR)
+project (PULSAR C CXX Fortran)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
@@ -14,10 +14,10 @@ cmake_minimum_required (VERSION 2.6)
 if (NOT LUS_SOURCE_DIR)
   find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
     PATHS 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../..
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+    ${PULSAR_SOURCE_DIR}
+    ${PULSAR_SOURCE_DIR}/..
+    ${PULSAR_SOURCE_DIR}/../..
+    ${PULSAR_SOURCE_DIR}/../../..
     $ENV{LOFARSOFT}
     )
 endif (NOT LUS_SOURCE_DIR)
@@ -142,10 +142,6 @@ find_library (libz       z       )
 
 include (CheckTypeSize)
 
-check_type_size ("short"         SIZEOF_SHORT      )
-check_type_size ("int"           SIZEOF_INT        )
-check_type_size ("float"         SIZEOF_FLOAT      )
-check_type_size ("double"        SIZEOF_DOUBLE     )
 check_type_size ("long"          SIZEOF_LONG       )
 check_type_size ("long int"      SIZEOF_LONG_INT   )
 check_type_size ("long long"     SIZEOF_LONG_LONG  )
@@ -383,36 +379,4 @@ endif (PULSAR_BUILD_TESTS)
 ##
 ## ==============================================================================
 
-message (STATUS "=============================================================="    )
-message (STATUS "  PULSAR: Summary of configuration settings                   "    )
-message (STATUS "+------------------------------------------------------------+"    )
-message (STATUS " System configuration:"                                            )
-message (STATUS " .. CMAKE_COMMAND                = ${CMAKE_COMMAND}"               )
-message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"                )
-message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"      )
-message (STATUS " Package configuration:"                                           )
-message (STATUS " .. PULSAR_SOURCE_DIR            = ${PULSAR_SOURCE_DIR}"           )
-message (STATUS " .. PULSAR_BINARY_DIR            = ${PULSAR_BINARY_DIR}"           )
-message (STATUS " .. Enable test programs         = ${PULSAR_ENABLE_TESTING}"       )
-message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}"    )
-message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}"   )
-message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}"    )
-message (STATUS " .. Installation prefix          = ${CMAKE_INSTALL_PREFIX}"        )
-message (STATUS " External dependencies:"                                           )
-message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"               )
-message (STATUS "    .. CFITSIO version           = ${CFITSIO_VERSION}"             )
-message (STATUS "    .. CFITSIO library           = ${CFITSIO_LIBRARIES}"           )
-message (STATUS "    .. CFITSIO library path      = ${CFITSIO_LIBRARY_DIR}"         )
-message (STATUS "    .. CFITSIO include path      = ${CFITSIO_INCLUDES}"            )
-message (STATUS " .. Have FFTW3                   = ${FFTW3_FOUND}"                 )
-message (STATUS "    .. libfftw3                  = ${FFTW3_FFTW3_LIBRARY}"         )
-message (STATUS "    .. libfftw3 (static)         = ${FFTW3_FFTW3_STATIC_LIBRARY}"  )
-message (STATUS "    .. libfftw3f                 = ${FFTW3_FFTW3F_LIBRARY}"        )
-message (STATUS "    .. libfftw3f (static)        = ${FFTW3_FFTW3F_STATIC_LIBRARY}" )
-message (STATUS " .. Have MPI                     = ${MPI_FOUND}"                   )
-message (STATUS "    .. MPI compiler              = ${MPI_COMPILER}"                )
-message (STATUS "    .. MPI library               = ${MPI_LIBRARY}"                 )
-message (STATUS "    .. MPI include path          = ${MPI_INCLUDE_PATH}"            )
-message (STATUS " .. Have PGPlot                  = ${HAVE_PGPLOT}"                 )
-message (STATUS " .. Have Python                  = ${HAVE_PYTHON}"                 )
-message (STATUS "+------------------------------------------------------------+"    )
+include (${PULSAR_SOURCE_DIR}/cmake/ConfigurationSummary.cmake)

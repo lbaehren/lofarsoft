@@ -9,12 +9,29 @@
 ##
 ## ==============================================================================
 
+##____________________________________________________________________
+## Set up the base directory for the installation
+
 if (LUS_SOURCE_DIR)
- message (STATUS "[PULSAR] Installation area located for package PULSAR ${LUS_SOURCE_DIR}/release/share/pulsar.")
- set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release/share/pulsar)
+  ## Set installation prefix for Pulsar software collection
+  set (CMAKE_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release/share/pulsar
+    CACHE PATH
+    "CMake installation area" 
+    FORCE
+    )
+  set (LUS_INSTALL_PREFIX ${LUS_SOURCE_DIR}/release/share/pulsar
+    CACHE PATH
+    "CMake installation area" 
+    FORCE
+    )
+  ## Include guard against overwriting settings
+  set (USG_CMAKE_CONFIG TRUE CACHE BOOL "USG configuration set?" FORCE)
 else (LUS_SOURCE_DIR)
  message (STATUS "[PULSAR] WARNING: Installation area NOT located for package PULSAR!")
 endif (LUS_SOURCE_DIR)
+
+##____________________________________________________________________
+##                                          Create directory structure
 
 if (IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
   message (STATUS "[PULSAR] Installation location ${CMAKE_INSTALL_PREFIX} exists!")

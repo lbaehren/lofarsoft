@@ -5,42 +5,48 @@
 ##
 ## ==============================================================================
 
-set (fftw_version   "3.1.2")
-set (fftw_name      "fftw-${fftw_version}-modified")
-set (fftw_directory "fftw/fftw-${fftw_version}-modified")
-set (fftw_archive   "${fftw_directory}.tgz")
-
-add_custom_target (fftw_unpack
-  COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${fftw_archive}
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external
-  COMMENT "Unpacking tar archive of FFTW from ${PULSAR_SOURCE_DIR}/external/${fftw_archive} to ${PULSAR_BINARY_DIR}/external ..."
-  )
-
-add_custom_target (fftw_configure
-#  COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} --enable-sse
-  COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} 1> ${PULSAR_BINARY_DIR}/external/${fftw_name}/cmake_configure.log 2>&1
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name} 
-  COMMENT "Configuring project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name} ..."
-  )
-add_dependencies (fftw_configure fftw_unpack)
-
-add_custom_target (fftw_build
-  COMMAND make 
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
-  COMMENT "Building project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name}..."
-  )
-add_dependencies (fftw_build fftw_configure fftw_unpack)
-
-add_custom_target (fftw_install
-  COMMAND make install
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
-  COMMENT "Install project FFTW into ${CMAKE_INSTALL_PREFIX}..."
-  )
-
-#add_dependencies (fftw_install fftw_build fftw_configure fftw_unpack)
-
 add_subdirectory (fftw)
-add_dependencies (fftw_install fftw)
+
+if (NOT TARGET fftw)
+  
+  set (fftw_version   "3.1.2")
+  set (fftw_name      "fftw-${fftw_version}-modified")
+  set (fftw_directory "fftw/fftw-${fftw_version}-modified")
+  set (fftw_archive   "${fftw_directory}.tgz")
+  
+  add_custom_target (fftw_unpack
+    COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${fftw_archive}
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external
+    COMMENT "Unpacking tar archive of FFTW from ${PULSAR_SOURCE_DIR}/external/${fftw_archive} to ${PULSAR_BINARY_DIR}/external ..."
+    )
+  
+  add_custom_target (fftw_configure
+    #  COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} --enable-sse
+    COMMAND ./configure  --enable-shared --enable-single --prefix=${CMAKE_INSTALL_PREFIX} 1> ${PULSAR_BINARY_DIR}/external/${fftw_name}/cmake_configure.log 2>&1
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name} 
+    COMMENT "Configuring project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name} ..."
+    )
+  add_dependencies (fftw_configure fftw_unpack)
+  
+  add_custom_target (fftw_build
+    COMMAND make 
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
+    COMMENT "Building project FFTW in ${PULSAR_BINARY_DIR}/external/${fftw_name}..."
+    )
+  add_dependencies (fftw_build fftw_configure fftw_unpack)
+  
+  add_custom_target (fftw_install
+    COMMAND make install
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${fftw_name}
+    COMMENT "Install project FFTW into ${CMAKE_INSTALL_PREFIX}..."
+    )
+  add_dependencies (fftw_install fftw_build)
+  
+  ## Register last step in the chain with the actual target
+  add_custom_target (fftw ALL)
+  add_dependencies (fftw fftw_install)
+  
+endif (NOT TARGET fftw)
 
 ## ==============================================================================
 ##
@@ -210,17 +216,19 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 ##
 ## ==============================================================================
 
-set (psrchive_version "13.3")
-set (psrchive_name "psrchive-${psrchive_version}")
-set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
+if (NOT TARGET psrchive)
 
-add_custom_target (psrchive_unpack
-#  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
-  COMMAND rm -rf ${psrchive_name}
-  COMMAND cp -ru ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
-  )
+  set (psrchive_version   "13.3")
+  set (psrchive_name      "psrchive-${psrchive_version}")
+  set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
+  
+  add_custom_target (psrchive_unpack
+    #  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
+    COMMAND rm -rf ${psrchive_name}
+    COMMAND cp -ru ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+    COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
+    )
 
 #add_custom_target (psrchive_bootstrap
 #  COMMAND ./bootstrap
@@ -236,7 +244,6 @@ add_custom_target (psrchive_configure
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
-#add_dependencies (psrchive_configure psrchive_bootstrap psrchive_unpack)
 add_dependencies (psrchive_configure psrchive_unpack)
  else (APPLE)
 add_custom_target (psrchive_configure
@@ -244,7 +251,6 @@ add_custom_target (psrchive_configure
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
   )
-#add_dependencies (psrchive_configure psrchive_bootstrap psrchive_unpack)
 add_dependencies (psrchive_configure psrchive_unpack)
  endif (APPLE)
 endif (UNIX)
@@ -255,16 +261,21 @@ add_custom_target (psrchive_build
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
   COMMENT "Building project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name}..."
   )
-#add_dependencies (psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
-add_dependencies (psrchive_build psrchive_configure psrchive_unpack)
+add_dependencies (psrchive_build psrchive_configure)
 
 add_custom_target (psrchive_install
   COMMAND make install
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name}
   COMMENT "Install project psrchive into ${CMAKE_INSTALL_PREFIX}..."
   )
-#add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_bootstrap psrchive_unpack)
-add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_unpack)
+
+add_dependencies (psrchive_install psrchive_build)
+
+  ## Register last step in the chain with the actual target
+  add_custom_target (psrchive ALL)
+  add_dependencies (psrchive psrchive_install)
+
+endif (NOT TARGET psrchive)
 
 ## ==============================================================================
 ##
@@ -429,7 +440,7 @@ add_custom_target (ssps_build
   COMMENT "Building project SSPS in ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
   COMMENT "Building project SSPS with command: python ${PULSAR_BINARY_DIR}/apps/${ssps_name}/setup.py build"
   )
-add_dependencies (ssps_build ssps_unpack fftw_install)
+add_dependencies (ssps_build ssps_unpack fftw)
 
 add_custom_target (ssps_build_docs
   COMMAND cd ${PULSAR_BINARY_DIR}/apps/${ssps_name}/docs
@@ -501,55 +512,63 @@ add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 ##
 ## ==============================================================================
 
-set (psrfits_version   "utils-525dbed")
-set (psrfits_name      "psrfits_${psrfits_version}")
-set (psrfits_directory "psrfits_utils/psrfits_${psrfits_version}")
+add_subdirectory (psrfits_utils)
 
-add_custom_target (psrfits_unpack
-  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
-  COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} ${PULSAR_BINARY_DIR}/apps/
-  COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Copying psrfits from ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} to ${PULSAR_BINARY_DIR}/apps/${psrfits_name}"
-  )
+if (NOT TARGET psrfits_utils)
+  
+  set (psrfits_version   "utils-525dbed")
+  set (psrfits_name      "psrfits_${psrfits_version}")
+  set (psrfits_directory "psrfits_utils/psrfits_${psrfits_version}")
+  
+  add_custom_target (psrfits_unpack
+    COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+    COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} ${PULSAR_BINARY_DIR}/apps/
+    COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+    COMMENT "Copying psrfits from ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} to ${PULSAR_BINARY_DIR}/apps/${psrfits_name}"
+    )
+  
+  add_custom_target (psrfits_prepare
+    COMMAND ./prepare 1> ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/cmake_configure.log 2>&1
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name} 
+    COMMENT "Running prepare for project psrfits in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
+    )
+  add_dependencies (psrfits_prepare psrfits_unpack)
+  
+  if (UNIX)
+    if (APPLE)
+      add_custom_target (psrfits_configure
+	COMMAND ./configure LDFLAGS=-L${CFITSIO_LIBRARY_DIR} CPPFLAGS=-I${CFITSIO_INCLUDES} --bindir=${CMAKE_INSTALL_PREFIX}/bin --libdir=${CMAKE_INSTALL_PREFIX}/lib --includedir=${CMAKE_INSTALL_PREFIX}/include --prefix=${CMAKE_INSTALL_PREFIX} 1>> ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/cmake_configure.log 2>&1
+	WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+	COMMENT "Configuring project psrfits (darwin) in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
+	)
+      add_dependencies (psrfits_configure psrfits_prepare psrfits_unpack)
+    else (APPLE)
+      add_custom_target (psrfits_configure
+	COMMAND ./configure LDFLAGS=-L${CFITSIO_LIBRARY_DIR} CPPFLAGS=-I${CFITSIO_INCLUDES} --bindir=${CMAKE_INSTALL_PREFIX}/bin --libdir=${CMAKE_INSTALL_PREFIX}/lib --includedir=${CMAKE_INSTALL_PREFIX}/include --prefix=${CMAKE_INSTALL_PREFIX} 1>> ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/cmake_configure.log 2>&1
+	WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+	COMMENT "Configuring project psrfits (linux) in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
+	)
+      add_dependencies (psrfits_configure psrfits_prepare psrfits_unpack)
+    endif (APPLE)
+  endif (UNIX)
+  
+  add_custom_target (psrfits_build
+    COMMAND make prefix=${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+    COMMENT "Building project psrfits in ${PULSAR_BINARY_DIR}/apps/${psrfits_name}..."
+    )
+  add_dependencies (psrfits_build psrfits_configure)
+  
+  add_custom_target (psrfits_install
+    COMMAND make install 
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
+    COMMENT "Install project psrfits into ${CMAKE_INSTALL_PREFIX}..."
+    )
+  add_dependencies (psrfits_install psrfits_build)
 
-add_custom_target (psrfits_prepare
-  COMMAND ./prepare 1> ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/cmake_configure.log 2>&1
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name} 
-  COMMENT "Running prepare for project psrfits in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
-  )
-add_dependencies (psrfits_prepare psrfits_unpack)
-
-if (UNIX)
- if (APPLE)
-add_custom_target (psrfits_configure
-  COMMAND ./configure LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include --bindir=${CMAKE_INSTALL_PREFIX}/bin --libdir=${CMAKE_INSTALL_PREFIX}/lib --includedir=${CMAKE_INSTALL_PREFIX}/include --prefix=${CMAKE_INSTALL_PREFIX} 1>> ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/cmake_configure.log 2>&1
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
-  COMMENT "Configuring project psrfits (darwin) in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
-  )
-add_dependencies (psrfits_configure psrfits_prepare psrfits_unpack)
- else (APPLE)
-add_custom_target (psrfits_configure
-  COMMAND ./configure LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include --bindir=${CMAKE_INSTALL_PREFIX}/bin --libdir=${CMAKE_INSTALL_PREFIX}/lib --includedir=${CMAKE_INSTALL_PREFIX}/include --prefix=${CMAKE_INSTALL_PREFIX} 1>> ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/cmake_configure.log 2>&1
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
-  COMMENT "Configuring project psrfits (linux) in ${PULSAR_BINARY_DIR}/apps/${psrfits_name} ..."
-  )
-add_dependencies (psrfits_configure psrfits_prepare psrfits_unpack)
- endif (APPLE)
-endif (UNIX)
-
-add_custom_target (psrfits_build
-  COMMAND make prefix=${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
-  COMMENT "Building project psrfits in ${PULSAR_BINARY_DIR}/apps/${psrfits_name}..."
-  )
-add_dependencies (psrfits_build psrfits_configure psrfits_prepare psrfits_unpack)
-
-add_custom_target (psrfits_install
-  COMMAND make install 
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
-  COMMENT "Install project psrfits into ${CMAKE_INSTALL_PREFIX}..."
-  )
-add_dependencies (psrfits_install psrfits_build psrfits_configure psrfits_prepare psrfits_unpack)
-
-
+  ## Register last step in the chain with the actual target
+  add_custom_target (psrfits_utils ALL)
+  add_dependencies (psrfits_utils psrfits_install)
+  
+endif (NOT TARGET psrfits_utils)

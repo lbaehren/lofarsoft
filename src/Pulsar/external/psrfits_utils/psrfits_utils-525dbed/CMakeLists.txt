@@ -15,16 +15,6 @@ cmake_policy (VERSION 2.8)
 
 ## ==============================================================================
 ##
-##                                                              System inspection
-##
-## ==============================================================================
-
-if (NOT CFITSIO_FOUND)
-  find_package (CFITSIO)
-endif (NOT CFITSIO_FOUND)
-
-## ==============================================================================
-##
 ##                                                             Build instructions
 ##
 ## ==============================================================================
@@ -35,6 +25,7 @@ if (CFITSIO_FOUND)
   include_directories (
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CFITSIO_INCLUDES}
+    ${CFITSIO_INCLUDES}/
     )
 
   add_definitions (
@@ -111,4 +102,8 @@ if (CFITSIO_FOUND)
     DESTINATION ${CMAKE_INSTALL_PREFIX}/share
     )
   
+else (CFITSIO_FOUND)
+
+  message (STATUS "[psrfits_utils] Unable to to build package - missing CFITSIO!")
+
 endif (CFITSIO_FOUND)

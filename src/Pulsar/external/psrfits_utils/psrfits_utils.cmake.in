@@ -1,0 +1,11 @@
+
+##
+##  Installation prefix
+##
+set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH  "Installation prefix" FORCE )
+##
+##  CFITSIO library
+##
+set (CFITSIO_FOUND      ${CFITSIO_FOUND}     CACHE BOOL     "Have CFITSIO?"     FORCE )
+set (CFITSIO_INCLUDES   ${CFITSIO_INCLUDES}  CACHE PATH     "CFITSIO includes"  FORCE )
+set (CFITSIO_LIBRARIES  ${CFITSIO_LIBRARIES} CACHE FILEPATH "CFITSIO libraries" FORCE )

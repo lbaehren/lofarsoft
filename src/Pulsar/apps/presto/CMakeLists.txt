@@ -42,7 +42,7 @@ add_custom_target (presto_includes
 #  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/src
 #  COMMENT "Issueing command 'make' in ${PULSAR_BINARY_DIR}/apps/presto/src; log file ${PULSAR_BINARY_DIR}/apps/presto/src/make.log"
 #  )
-#add_dependencies (presto_noncmake presto_includes fftw_install)
+#add_dependencies (presto_noncmake presto_includes fftw)
 
 
 if (PULSAR_BUILD_TESTS)
