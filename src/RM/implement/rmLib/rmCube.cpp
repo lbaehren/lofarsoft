@@ -257,7 +257,12 @@ void rmCube::removeNoFits(vector<string> &names) {
     }
   }
 }
-
+/*! Procedure determines the size of a image Cube, built up on fits files, which are localized 
+    inside a specified directory. All fitsfiles, which build up the cube, must have a common 
+    name, which is extended by a number. 
+    This procedure was deactivated because of compilation problems while including 
+    cfitsio */
+    
 void rmCube::getFitsSize(string &path, vector<string> &names, uint &x, uint &y, int &pix) {
   uint pos = 0 ;
   int indx = -1 ;
@@ -725,16 +730,24 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
     }
  }
 
+  /*! returns a vector of the centers of the frequency intervals */
   vec rmCube::getFreqsCenters() {
     vec res(freqs) ;
     return res ;
   }
 
+  /*! return a vector of the lengths of the intervals of the frequencybands of 
+     the measurement */
   vec rmCube::getFreqsLengths() {
     vec res(freqsInter) ;
     return res ;
   }
 
+ /*! procedure set the value of this axis, which is not the same for the different 
+     kinds of cubes. The routine does this work either for a rmCube and also for an 
+     imageCube. It also looks, whether the user wants to determine a imageCube, which 
+     depends on freequencies or on lambda squared.
+     Which kind of cube is regarded is deremend by the value of the attribute axis. */
  void rmCube::setFirstCoord(uint index, double val) {
     switch(axis) {
        case 1:
@@ -748,10 +761,22 @@ void rmCube::copyMetaData(PagedImage<Float> &tarImage) {
        break ;
     }
  }
+ /*! returns the value of the polarised emission or the response of the antennas
+     depending on the attribute axis.
+     \param f frequency of lambda square or faraday depth (see axis attribute)
+     \param x first direction on the sky
+     \param y seccond direction on the sky */
  complex<double> rmCube::getVal(uint f, uint x, uint y) {
    return vals(f,x,y) ;
  }
 
+ /*! sets the value of the polarised emission or the response of the antennas
+     depending on the attribute axis.
+     \param f frequency of lambda square or faraday depth (see axis attribute)
+     \param x first direction on the sky
+     \param y seccond direction on the sky 
+     \param val value to which the specified element of the cube shall be set*/
+     
  void rmCube::setVal(uint f, uint x, uint y, complex<double> val) {
      vals(f,x,y) = val ;
  }
@@ -898,20 +923,23 @@ void rmCube::fillRM_Cube(string &qpath, string &upath, vector<string> &qimag, ve
   }
 }
 
+/*! returns the size of the cube in the first direction of the sky */
 int rmCube::getXSize()
 {
   return xSize;
 }
 
+/*! returns the number of frequency intervals of the image cube */
 uint rmCube::getfreqSize() {
   return freqSize ;
 }
+/*! returns the size of the cube in the seccond direction of the sky */
 int rmCube::getYSize()
 {
   return ySize;
 }
 
-
+/*! returns the number of faraday depths intervals of the rmcube */
 int rmCube::getFaradaySize()
 {
   return faradaySize;

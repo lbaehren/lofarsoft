@@ -90,7 +90,9 @@ namespace RM {
     double ra_high;	//!> upper limit (edge) of RA of field
     double dec_low;	//!> lower limit (edge) of DEC of field
     double dec_high;	//!> upper limit (edge) of DEC of field
-    int axis ;
+    int axis ;		//! describes the kind of cube 	1= image cube with frequnecies
+    			//!				2= image cube with lambda squared
+			//! 				3= rm Cube depends on faraday depth
     int pix ;          //! type of the images
     // Faraday depth dimension
     double faraday_low;			//!> lower limit of Faraday Depth computed
