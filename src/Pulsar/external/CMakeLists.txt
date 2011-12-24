@@ -165,6 +165,9 @@ add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
 ##
 ## ==============================================================================
 
+set (PPGPLOT_SOURCE_DIR {PULSAR_SOURCE_DIR}/external/ppgplot)
+set (PPGPLOT_BINARY_DIR {PULSAR_BINARY_DIR}/external/ppgplot)
+
 #set (ppgplot_cmake_build TRUE)
 
 #if (ppgplot_cmake_build)
@@ -187,12 +190,11 @@ add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
   get_filename_component(GFORTRAN_LIBRARY_DIR ${GFORTRAN_LIBRARY} PATH)
 
 configure_file (
-    ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py.in
-    ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py
+    ${PPGPLOT_SOURCE_DIR}/setup.py.in
+    ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py
 )
 
 add_custom_target (ppgplot_build
-  COMMAND cp ${PULSAR_SOURCE_DIR}/external/ppgplot/setup.py ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}/setup.py
   COMMAND python setup.py build_ext --inplace
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}
   COMMENT "Building project PPGPLOT in ${PULSAR_BINARY_DIR}/apps/${ppgplot_name}..."
