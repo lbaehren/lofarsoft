@@ -11,7 +11,7 @@ cmake_minimum_required (VERSION 2.6)
 
 configure_file (
     ${PULSAR_SOURCE_DIR}/apps/presto/python/setup.py.in
-    ${PULSAR_BINARY_DIR}/apps/presto/python/setup.py
+    ${PULSAR_BINARY_DIR}/tmp/presto/python/setup.py
 )
 
 ## Find the configured setup script
@@ -19,7 +19,7 @@ configure_file (
 find_file (PRESTO_SETUP_PY
   NAMES setup.py
   PATHS ${PULSAR_BINARY_DIR}
-  PATH_SUFFIXES apps/presto/python
+  PATH_SUFFIXES tmp/presto/python
   )
 
 if (NOT PRESTO_SETUP_PY)
