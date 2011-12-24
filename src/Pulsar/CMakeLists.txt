@@ -39,6 +39,7 @@ option (PULSAR_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"  Y
 option (PULSAR_DEBUGGING_MESSAGES "Print debugging information?"               YES )
 option (PULSAR_VERBOSE_CONFIGURE  "Verbose output during configuration?"       YES )
 
+##__________________________________________________________
 ## Handle option: testing mode on/off
 
 if (PULSAR_ENABLE_TESTING)
@@ -47,19 +48,22 @@ if (PULSAR_ENABLE_TESTING)
   enable_testing()
 endif (PULSAR_ENABLE_TESTING)
 
+##__________________________________________________________
 ## Handle option: verbose mode during configuration on/off
 
 if (NOT PULSAR_VERBOSE_CONFIGURE)
   set (CFITSIO_FIND_QUIETLY     YES )
   set (GFORTRAN_FIND_QUIETLY    YES )
-  set (GLIB_FIND_QUIETLY        YES )
-  set (PGPLOT_FIND_QUIETLY      YES )
-  set (NUMPY_FIND_QUIETLY       YES )
-  set (PYTHON_FIND_QUIETLY      YES )
-  set (MPI_FIND_QUIETLY         YES )
   set (FFTW3_FIND_QUIETLY       YES )
+  set (GLIB_FIND_QUIETLY        YES )
+  set (MPI_FIND_QUIETLY         YES )
+  set (NUMPY_FIND_QUIETLY       YES )
+  set (PGPLOT_FIND_QUIETLY      YES )
+  set (PYTHON_FIND_QUIETLY      YES )
+  set (X11_FIND_QUIETLY         YES )
 endif (NOT PULSAR_VERBOSE_CONFIGURE)
 
+##__________________________________________________________
 ## Handle option: debugging messages on/off
 
 if (PULSAR_DEBUGGING_MESSAGES)
@@ -170,10 +174,6 @@ endif (NOT HAVE_GLIB)
 if (NOT HAVE_PGPLOT)
   include (FindPGPLOT)
 endif (NOT HAVE_PGPLOT)
-
-if (NOT PGPLOT_CPGPLOT_LIBRARY)
-  message (WARNING "[PULSAR] Unable to find PGPlot c-library (clibpgplot)")
-endif (NOT PGPLOT_CPGPLOT_LIBRARY)
 
 ##__________________________________________________________
 ## GFortran library
@@ -329,21 +329,18 @@ if (HAVE_PYTHON)
   include_directories (${PYTHON_INCLUDES})
 else (HAVE_PYTHON) 
   set (PULSAR_PYTHON_BINDINGS FALSE)
-  message (STATUS "[PULSAR] Unable to generate Python bindings; missing Python headers!")
 endif (HAVE_PYTHON)
 
 if (NUMPY_INCLUDES) 
   include_directories (${NUMPY_INCLUDES} ${NUMPY_INCLUDES}/numpy)
 else (NUMPY_INCLUDES) 
   set (PULSAR_PYTHON_BINDINGS FALSE)
-  message (STATUS "[PULSAR] Unable to generate Python bindings; missing NumPy headers!")
 endif (NUMPY_INCLUDES)
 
 if (NUMERIC_INCLUDES) 
   include_directories (${NUMERIC_INCLUDES} ${NUMERIC_INCLUDES}/Numeric)
 else (NUMERIC_INCLUDES) 
   set (PULSAR_PYTHON_BINDINGS FALSE)
-  message (STATUS "[PULSAR] Unable to generate Python bindings; missing Numeric headers!")
 endif (NUMERIC_INCLUDES)
 
 if (X11_INCLUDE_DIR)
