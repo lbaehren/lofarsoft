@@ -7,12 +7,18 @@
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.6)
 
-## Generate setup.py script to configure package
+## Generate setup.py script to configure package ...
 
 configure_file (
     ${PULSAR_SOURCE_DIR}/apps/presto/python/setup.py.in
-    ${PULSAR_BINARY_DIR}/tmp/presto/python/setup.py
+    ${PULSAR_BINARY_DIR}/apps/presto/python/setup.py
 )
+
+### ... and adjust its permissions
+
+file (COPY ${PULSAR_BINARY_DIR}/apps/presto/python/setup.py
+  DESTINATION ${PULSAR_BINARY_DIR}/tmp/presto/python
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 ## Find the configured setup script
 
