@@ -11,6 +11,7 @@
 ##
 ## ==============================================================================
 
+
 ## === [1] General environment ==================================================
 ##
 ##     Provide some basic feedback on the (CMake) environment of the Pulsar-Tools
@@ -22,6 +23,7 @@ message (STATUS " System configuration:"                                        
 message (STATUS " .. CMAKE_COMMAND                = ${CMAKE_COMMAND}"               )
 message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"                )
 message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"      )
+message (STATUS " .. CMAKE_SKIP_BUILD_RPATH       = ${CMAKE_SKIP_BUILD_RPATH}"      )
 message (STATUS " Package configuration:"                                           )
 message (STATUS " .. PULSAR_SOURCE_DIR            = ${PULSAR_SOURCE_DIR}"           )
 message (STATUS " .. PULSAR_BINARY_DIR            = ${PULSAR_BINARY_DIR}"           )
@@ -31,6 +33,7 @@ message (STATUS " .. Enable compiler warnings     = ${PULSAR_COMPILER_WARNINGS}"
 message (STATUS " .. Print debugging messages     = ${PULSAR_DEBUGGING_MESSAGES}"   )
 message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}"    )
 message (STATUS " .. Enable Python bindings       = ${PULSAR_PYTHON_BINDINGS}"      )
+
 
 ## === [2] Check installation directories =======================================
 ##
@@ -57,6 +60,7 @@ message (STATUS " .. <prefix>/doc                 = ${HAVE_INSTALL_DIR_DOC}"    
 message (STATUS " .. <prefix>/include             = ${HAVE_INSTALL_DIR_INCLUDE}"    )
 message (STATUS " .. <prefix>/lib                 = ${HAVE_INSTALL_DIR_LIB}"        )
 
+
 ## === [3] Check presence of individual files ===================================
 ##
 ##     Besides the libraries and header files (which are being check in subsequent
@@ -72,3 +76,45 @@ find_file (HAVE_INSTALL_FILE_WISDOM
 
 message (STATUS " Installed configuration files:"                                   )
 message (STATUS " .. <prefix>/lib/fftw_wisdom.txt = ${HAVE_INSTALL_FILE_WISDOM}"    )
+
+
+## === [4] Check presence of program executables ================================
+
+find_file (HAVE_INSTALL_FILE_PULP
+  NAMES pulp.sh
+  PATHS ${CMAKE_INSTALL_PREFIX}
+  PATH_SUFFIXES bin
+  NO_DEFAULT_PATH
+  )
+
+find_file (HAVE_INSTALL_FILE_PREFOLD
+  NAMES prepfold
+  PATHS ${CMAKE_INSTALL_PREFIX}
+  PATH_SUFFIXES bin
+  NO_DEFAULT_PATH
+  )
+
+find_file (HAVE_INSTALL_FILE_DSPSR
+  NAMES dspsr
+  PATHS ${CMAKE_INSTALL_PREFIX}
+  PATH_SUFFIXES bin
+  NO_DEFAULT_PATH
+  )
+
+message (STATUS " Installed application excutables:")
+message (STATUS " .. <prefix>/bin/pulp.sh         = ${HAVE_INSTALL_FILE_PULP}"      )
+message (STATUS " .. <prefix>/bin/prepfold        = ${HAVE_INSTALL_FILE_PREFOLD}"   )
+message (STATUS " .. <prefix>/bin/dspsr           = ${HAVE_INSTALL_FILE_DSPSR}"     )
+
+
+## === [5] Check presence of header files =======================================
+
+find_file (HAVE_INSTALL_HEADER_FFTW3
+  NAMES fftw3.h
+  PATHS ${CMAKE_INSTALL_PREFIX}
+  PATH_SUFFIXES include
+  NO_DEFAULT_PATH
+  )
+
+## === [6] Check presence of libraries ==========================================
+
