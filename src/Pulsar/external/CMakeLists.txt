@@ -165,8 +165,8 @@ add_dependencies (tempo2_install tempo2_configure tempo2_unpack)
 ##
 ## ==============================================================================
 
-set (PPGPLOT_SOURCE_DIR {PULSAR_SOURCE_DIR}/external/ppgplot)
-set (PPGPLOT_BINARY_DIR {PULSAR_BINARY_DIR}/external/ppgplot)
+set (PPGPLOT_SOURCE_DIR ${PULSAR_SOURCE_DIR}/external/ppgplot)
+set (PPGPLOT_BINARY_DIR ${PULSAR_BINARY_DIR}/external/ppgplot)
 
 #set (ppgplot_cmake_build TRUE)
 
