@@ -4,20 +4,29 @@
 ##
 ## ==============================================================================
 
-## Generate setup.py script to configure package ...
+##____________________________________________________________________
+## Generate setup.py script to configure package and adjust its
+## permissions; by default the output of 'configure_file()' is
+## read-only, but since modifications are required later, the file
+## needs to be writable as well.
 
 configure_file (
     ${PULSAR_SOURCE_DIR}/apps/presto/python/setup.py.in
     ${PULSAR_BINARY_DIR}/apps/presto/python/setup.py
 )
 
-### ... and adjust its permissions
-
 file (COPY ${PULSAR_BINARY_DIR}/apps/presto/python/setup.py
   DESTINATION ${PULSAR_BINARY_DIR}/tmp/presto/python
   FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-## Find the configured setup script
+##____________________________________________________________________
+## Find the previously generated setup script; the path is made
+## available through the PRESTO_SETUP_PY variable, which in turn can
+## be used with all of the subsequent steps.
+
+if (NOT PRESTO_SETUP_PY)
+  message (WARNING "[Presto] Unable to configure and build ppgplot - missing setup.py")
+endif (NOT PRESTO_SETUP_PY)
 
 find_file (PRESTO_SETUP_PY
   NAMES setup.py
@@ -25,9 +34,8 @@ find_file (PRESTO_SETUP_PY
   PATH_SUFFIXES tmp/presto/python
   )
 
-if (NOT PRESTO_SETUP_PY)
-  message (WARNING "[Presto] Unable to configure and build ppgplot - missing setup.py")
-endif (NOT PRESTO_SETUP_PY)
+##____________________________________________________________________
+## Generate the Python bindings
 
 add_custom_target (ppgplot_bindings_build
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/*
