@@ -8,7 +8,7 @@
 set (PULSAR_PYTHONPATH "")
 
 ##____________________________________________________________________
-## Check 1: Is the PYTHONPATH defined via an environment variable?
+## Step 1: Is the PYTHONPATH defined via an environment variable?
 
 find_path (PULSAR_PYTHONPATH_ENV
   $ENV{PYTHONPATH}
@@ -19,7 +19,7 @@ if (PULSAR_PYTHONPATH_ENV)
 endif (PULSAR_PYTHONPATH_ENV)
 
 ##____________________________________________________________________
-## Check 2: PYTHONPATH extension for LUS Python modules
+## Step 2: PYTHONPATH extension for LUS Python modules
 
 find_path (PULSAR_PYTHONPATH_LUS
   NAMES
@@ -40,7 +40,14 @@ if (PULSAR_PYTHONPATH_LUS)
 endif (PULSAR_PYTHONPATH_LUS)
 
 ##____________________________________________________________________
-## Clean up the list: remove duplicate entries
+## Step 3: Add Pulsar-Tools specific extensions to PYTHONPATH
+
+list (APPEND PULSAR_PYTHONPATH ${CMAKE_INSTALL_PREFIX}/bin)
+list (APPEND PULSAR_PYTHONPATH ${CMAKE_INSTALL_PREFIX}/lib/python)
+
+##____________________________________________________________________
+## Clean up the list: remove duplicate entries and export back to
+## environment variable.
 
 list (REMOVE_DUPLICATES PULSAR_PYTHONPATH)
 
