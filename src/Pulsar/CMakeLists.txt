@@ -191,6 +191,7 @@ include (${PULSAR_SOURCE_DIR}/cmake/FindMPI.cmake)
 ## PYTHON 
 
 if (NOT HAVE_PYTHON)
+  include (${PULSAR_SOURCE_DIR}/cmake/FindPythonPath.cmake)
   include (FindPython)
   include (FindNumeric)
   include (FindNumPy)
