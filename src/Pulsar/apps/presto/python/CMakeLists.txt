@@ -4,9 +4,6 @@
 ##
 ## ==============================================================================
 
-## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.6)
-
 ## Generate setup.py script to configure package ...
 
 configure_file (
