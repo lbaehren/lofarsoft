@@ -27,7 +27,6 @@ set (external_packages
   numpy
   scipy
   sphinx
-  pil
   plplot
   pyfits
   pyqt
