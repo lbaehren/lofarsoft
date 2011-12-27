@@ -42,6 +42,7 @@ add_custom_target (ppgplot_bindings_build
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/ppgplot_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/presto_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/wrappers ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND export PYTHONPATH=${PULSAR_PYTHONPATH}
   COMMAND ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} build --build-base=${CMAKE_BINARY_DIR}/apps/presto/python
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMENT "Running build using ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} build --build-base=${CMAKE_BINARY_DIR}/apps/presto/python"
