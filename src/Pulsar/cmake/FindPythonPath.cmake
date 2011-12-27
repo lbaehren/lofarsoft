@@ -11,6 +11,7 @@ set (PULSAR_PYTHONPATH "")
 ## Step 1: Is the PYTHONPATH defined via an environment variable?
 
 find_path (PULSAR_PYTHONPATH_ENV
+  NAMES pylab.py
   $ENV{PYTHONPATH}
   )
 
