@@ -623,3 +623,21 @@ install (
 ##  ${PLOT2DOBJS}
 ##  )
 
+## ==============================================================================
+##
+##  Configuration summary
+## 
+## ==============================================================================
+
+message (STATUS "+------------------------------------------------------------+" )
+message (STATUS " [sigproc-4.3] Summary of configuration settings              " )
+message (STATUS "+------------------------------------------------------------+" )
+message (STATUS " Directories:"                                                  )
+message (STATUS " .. PULSAR_SOURCE_DIR        = ${PULSAR_SOURCE_DIR}"            )
+message (STATUS " .. CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}"     )
+message (STATUS " .. CMAKE_INSTALL_PREFIX     = ${CMAKE_INSTALL_PREFIX}"         )
+message (STATUS " Libraries:"                                                    )
+message (STATUS " .. FFTW3_FFTW3F_LIBRARY     = ${FFTW3_FFTW3F_LIBRARY}"         )
+message (STATUS " .. CFITSIO_LIBRARIES        = ${CFITSIO_LIBRARIES}"            )
+message (STATUS " .. PGPLOT_CPGPLOT_LIBRARY   = ${PGPLOT_CPGPLOT_LIBRARY}"       )
+message (STATUS "+------------------------------------------------------------+" )
