@@ -16,16 +16,17 @@ project (DSPSR)
 
 ## ==============================================================================
 ##
-##  Configuration options
+##                                                          Configuration options
 ##
 ## ==============================================================================
 
 set (DSPSR_VERSION          "1.0")
 set (DSPSR_SOURCE_DIRECTORY "dspsr-${DSPSR_VERSION}" )
+set (DSPSR_SOURCE_ARCHIVE   "${DSPSR_SOURCE_DIRECTORY}.tgz")
 
 ## ==============================================================================
 ##
-##  System inspection
+##                                                              System inspection
 ##
 ## ==============================================================================
 
@@ -41,14 +42,30 @@ endif (UNIX)
 
 ## ==============================================================================
 ##
-##  Build & installation instructions
+##                                              Build & installation instructions
+##
+##  We need to define a custom DOWNLOAD_COMMAND, as the project's sources are
+##  not provided as a tar-archive, but as a fully expanded code tree; in order
+##  to avoid writing into the original source directories, we need to create an
+##  archive first, which afterwards is being dropped into the build directory.
 ##
 ## ==============================================================================
 
 ExternalProject_Add (dspsr
   PREFIX ${PROJECT_BINARY_DIR}
   DOWNLOAD_DIR download
-  SOURCE_DIR ${PROJECT_SOURCE_DIR}/${DSPSR_SOURCE_DIRECTORY}
-  PATCH_COMMAND ${PROJECT_SOURCE_DIR}/${DSPSR_SOURCE_DIRECTORY}/bootstrap PSRHOME=${PROJECT_SOURCE_DIR}/${DSPSR_SOURCE_DIRECTORY} LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada
-  CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/${DSPSR_SOURCE_DIRECTORY}/configure PSRHOME=${PROJECT_SOURCE_DIR}/${DSPSR_SOURCE_DIRECTORY} LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl
-      )
+  SOURCE_DIR source
+  BUILD_IN_SOURCE 1
+  URL ${PROJECT_BINARY_DIR}/${DSPSR_SOURCE_ARCHIVE}
+  PATCH_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap PSRHOME=${PROJECT_BINARY_DIR}/source LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada
+  CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap PSRHOME=${PROJECT_BINARY_DIR}/source LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl
+  )
+
+## Create tar-archive
+
+ExternalProject_Add_Step(dspsr create_archive
+  COMMAND ${TAR_EXECUTABLE} -czf ${PROJECT_BINARY_DIR}/${DSPSR_SOURCE_ARCHIVE} ${DSPSR_SOURCE_DIRECTORY}
+  COMMENT "Creating tar-archive ${DSPSR_SOURCE_ARCHIVE} ..."
+  DEPENDERS download
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
