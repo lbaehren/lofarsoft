@@ -1,7 +1,7 @@
 
 ## ==============================================================================
 ##
-##  Handle configuration and build of FFTW3
+##                                                                          FFTW3
 ##
 ## ==============================================================================
 
@@ -9,7 +9,7 @@ add_subdirectory (fftw)
 
 ## ==============================================================================
 ##
-##  Handle configuration and build of Tempo
+##                                                                          Tempo
 ##
 ## ==============================================================================
 
@@ -22,7 +22,7 @@ set (tempo_ephem_directory "tempo/tempo_ephem${tempo_version}")
 set (tempo_ephem_archive   "${tempo_ephem_directory}.tar.gz")
 
 add_custom_target (tempo_unpack
-  COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo_archive}
+  COMMAND ${TAR_EXECUTABLE} -xvzf ${CMAKE_CURRENT_SOURCE_DIR}/${tempo_archive}
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
   COMMENT "Unpacking tar archive of Tempo from ${PULSAR_SOURCE_DIR}/external/${tempo_archive} to ${PULSAR_BINARY_DIR}/apps..."
   )
@@ -57,18 +57,18 @@ add_dependencies (tempo_install tempo_build tempo_unpack)
 
 ## ==============================================================================
 ##
-##  Handle configuration and build of Tempo2
+##                                                                         Tempo2
 ##
 ## ==============================================================================
 
-set (tempo2_version "2011.7")
-set (tempo2_name "tempo2-${tempo2_version}")
-set (tempo2_directory "tempo2/tempo2-${tempo2_version}")
-set (tempo2_archive "${tempo2_directory}.tar.gz")
+set (tempo2_version   "2011.7"                          )
+set (tempo2_name      "tempo2-${tempo2_version}"        )
+set (tempo2_directory "tempo2/tempo2-${tempo2_version}" )
+set (tempo2_archive   "${tempo2_directory}.tar.gz"      )
 
 add_custom_target (tempo2_unpack
   COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${tempo2_name}
-  COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${tempo2_archive}
+  COMMAND ${TAR_EXECUTABLE} -xvzf ${CMAKE_CURRENT_SOURCE_DIR}/${tempo2_archive}
   COMMAND echo lofar " t LF" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/aliases
   COMMAND echo "" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
   COMMAND echo " 3826937.853   460938.478       5064630.667      LOFAR               t" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
@@ -141,7 +141,7 @@ set (PPGPLOT_BINARY_DIR ${PULSAR_BINARY_DIR}/external/ppgplot)
   set (ppgplot_archive "${ppgplot_directory}.tar.gz")
   
   add_custom_target (ppgplot_unpack
-    COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive}
+    COMMAND ${TAR_EXECUTABLE} -xvzf ${CMAKE_CURRENT_SOURCE_DIR}/${ppgplot_archive}
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Unpacking tar archive of PPGPLOT from ${PULSAR_SOURCE_DIR}/external/${ppgplot_archive} to ${PULSAR_BINARY_DIR}/apps..."
     )
@@ -187,17 +187,17 @@ if (NOT TARGET psrchive)
     add_custom_target (psrchive_unpack
       #  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
       COMMAND rm -rf ${psrchive_name}
-      COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
+      COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
       WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-      COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
+      COMMENT "Copying PSRCHIVE from ${CMAKE_CURRENT_SOURCE_DIR}/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
       )
   else (APPLE)
     add_custom_target (psrchive_unpack
       #  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
       COMMAND rm -rf ${psrchive_name}
-      COMMAND cp -ru ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
+      COMMAND cp -ru ${CMAKE_CURRENT_SOURCE_DIR}/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
       WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-      COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
+      COMMENT "Copying PSRCHIVE from ${CMAKE_CURRENT_SOURCE_DIR}/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
       )
   endif (APPLE)
 
@@ -254,8 +254,8 @@ endif (NOT TARGET psrchive)
 ##
 ## ==============================================================================
 
-set (psrdada_version "20100817")
-set (psrdada_name "psrdada-${psrdada_version}")
+set (psrdada_version   "20100817")
+set (psrdada_name      "psrdada-${psrdada_version}")
 set (psrdada_directory "psrdada/psrdada-${psrdada_version}")
 
 add_custom_target (psrdada_unpack
@@ -263,7 +263,7 @@ add_custom_target (psrdada_unpack
   COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrdada_directory} ${PULSAR_BINARY_DIR}/apps/
   COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${psrdada_name}/build
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Copying psrdada from ${PULSAR_SOURCE_DIR}/external/${psrdada_directory} to ${PULSAR_BINARY_DIR}/apps/${psrdada_name}"
+  COMMENT "Copying psrdada from ${CMAKE_CURRENT_SOURCE_DIR}/${psrdada_directory} to ${PULSAR_BINARY_DIR}/apps/${psrdada_name}"
   )
 
 add_custom_target (psrdada_bootstrap
@@ -326,7 +326,7 @@ if (NOT TARGET dspsr)
   
   add_custom_target (dspsr_unpack
     COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
-    COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
+    COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
     COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
@@ -399,17 +399,17 @@ endif (NOT TARGET dspsr)
   
 #else (ssps_cmake_build)
   
-  set (ssps_version "0.1")
-  set (ssps_name "ssps-release-${ssps_version}")
-  set (ssps_directory "ssps/ssps-release-${ssps_version}")
-  set (ssps_archive "${ssps_directory}.tar.gz")
+  set (ssps_version   "0.1"                               )
+  set (ssps_name      "ssps-release-${ssps_version}"      )
+  set (ssps_directory "ssps/ssps-release-${ssps_version}" )
+  set (ssps_archive   "${ssps_directory}.tar.gz"          )
   
   add_custom_target (ssps_unpack
     COMMAND cd ${PULSAR_BINARY_DIR}/apps
     COMMAND rm -rf ${ssps_name}
-    COMMAND ${TAR_EXECUTABLE} -xvzf ${PULSAR_SOURCE_DIR}/external/${ssps_archive}
+    COMMAND ${TAR_EXECUTABLE} -xvzf ${CMAKE_CURRENT_SOURCE_DIR}/${ssps_archive}
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-    COMMENT "Unpacking tar archive of SSPS from ${PULSAR_SOURCE_DIR}/external/${ssps_archive} to ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
+    COMMENT "Unpacking tar archive of SSPS from ${CMAKE_CURRENT_SOURCE_DIR}/${ssps_archive} to ${PULSAR_BINARY_DIR}/apps/${ssps_name}..."
     )
   
 add_custom_target (ssps_build
@@ -462,12 +462,12 @@ set (psrcat_directory "psrcat/psrcat-${psrcat_version}")
 
 add_custom_target (psrcat_unpack
   COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/psrcat
-  COMMAND cp ${PULSAR_SOURCE_DIR}/external/${psrcat_directory}.tar.gz ${PULSAR_BINARY_DIR}/apps/
+  COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${psrcat_directory}.tar.gz ${PULSAR_BINARY_DIR}/apps/
   COMMAND cd ${PULSAR_BINARY_DIR}/apps/
   COMMAND tar xvfz ${psrcat_name}.tar.gz
   COMMAND rm ${psrcat_name}.tar.gz
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Copying PSRCAT from ${PULSAR_SOURCE_DIR}/external/${psrcat_directory}.tar.gz to ${PULSAR_BINARY_DIR}/apps/${psrcat_name}.tar.gz"
+  COMMENT "Copying PSRCAT from ${CMAKE_CURRENT_SOURCE_DIR}/${psrcat_directory}.tar.gz to ${PULSAR_BINARY_DIR}/apps/${psrcat_name}.tar.gz"
   )
 
 add_custom_target (psrcat_build
@@ -501,10 +501,10 @@ if (NOT TARGET psrfits_utils)
   
   add_custom_target (psrfits_unpack
     COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${psrfits_name}
-    COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} ${PULSAR_BINARY_DIR}/apps/
+    COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${psrfits_directory} ${PULSAR_BINARY_DIR}/apps/
     COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${psrfits_name}/build
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-    COMMENT "Copying psrfits from ${PULSAR_SOURCE_DIR}/external/${psrfits_directory} to ${PULSAR_BINARY_DIR}/apps/${psrfits_name}"
+    COMMENT "Copying psrfits from ${CMAKE_CURRENT_SOURCE_DIR}/${psrfits_directory} to ${PULSAR_BINARY_DIR}/apps/${psrfits_name}"
     )
   
   add_custom_target (psrfits_prepare
