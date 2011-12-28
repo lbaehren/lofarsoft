@@ -42,7 +42,6 @@ add_custom_target (ppgplot_bindings_build
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/ppgplot_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/presto_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/wrappers ${CMAKE_BINARY_DIR}/apps/presto/python
-  COMMAND export PYTHONPATH=${PULSAR_PYTHONPATH}
   COMMAND ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} build --build-base=${CMAKE_BINARY_DIR}/apps/presto/python
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMENT "Running build using ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} build --build-base=${CMAKE_BINARY_DIR}/apps/presto/python"
@@ -63,7 +62,6 @@ add_dependencies (ppgplot_bindings_install presto_pyscripts_install presto)
 add_custom_target (presto_fftfit
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/fftfit_src
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/fftfit_src ${CMAKE_BINARY_DIR}/apps/presto/python
-  COMMAND export PYTHONPATH=${PULSAR_PYTHONPATH}
   COMMAND ${F2PY_EXECUTABLE} -c fftfit_src/fftfit.pyf fftfit_src/*.f 
   COMMAND cp fftfit.so ${CMAKE_INSTALL_PREFIX}/lib/python
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/apps/presto/python
