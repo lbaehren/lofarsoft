@@ -24,15 +24,15 @@ file (COPY ${PULSAR_BINARY_DIR}/apps/presto/python/setup.py
 ## available through the PRESTO_SETUP_PY variable, which in turn can
 ## be used with all of the subsequent steps.
 
-if (NOT PRESTO_SETUP_PY)
-  message (WARNING "[Presto] Unable to configure and build ppgplot - missing setup.py")
-endif (NOT PRESTO_SETUP_PY)
-
 find_file (PRESTO_SETUP_PY
   NAMES setup.py
   PATHS ${PULSAR_BINARY_DIR}
   PATH_SUFFIXES tmp/presto/python
   )
+
+if (NOT PRESTO_SETUP_PY)
+  message (WARNING "[Presto] Unable to configure and build ppgplot - missing setup.py")
+endif (NOT PRESTO_SETUP_PY)
 
 ##____________________________________________________________________
 ## Generate the Python bindings
