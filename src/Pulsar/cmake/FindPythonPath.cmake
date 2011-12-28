@@ -36,6 +36,14 @@ find_path (PULSAR_PYTHONPATH_LUS
   share/pulsar/lib
   )
 
+if (NOT PULSAR_PYTHONPATH_LUS)
+  ## Reconstruct addition to Python path from LUS installation prefix
+  if (LUS_INSTALL_PREFIX)
+    set (PULSAR_PYTHONPATH_LUS "")
+    string(REPLACE "share/pulsar" "lib/python" PULSAR_PYTHONPATH_LUS ${LUS_INSTALL_PREFIX})
+  endif (LUS_INSTALL_PREFIX)
+endif (NOT PULSAR_PYTHONPATH_LUS)
+
 if (PULSAR_PYTHONPATH_LUS)
   list (APPEND PULSAR_PYTHONPATH ${PULSAR_PYTHONPATH_LUS})
 endif (PULSAR_PYTHONPATH_LUS)
