@@ -2,11 +2,21 @@ from distutils.core import setup, Extension
 from distutils.sysconfig import get_python_inc, get_python_lib
 import os
 import sys
+
+##____________________________________________________________________
+## Augment Python path
+
+sys.path.append("${PULSAR_PYTHONPATH_LUS}")
+sys.path.append("${CMAKE_INSTALL_PREFIX}/bin") 
+sys.path.append("${CMAKE_INSTALL_PREFIX}/lib/python")
+
+##____________________________________________________________________
+## Import custom modules
+
 import numpy
 
-###################################################################
-# build the extension
-#
+##____________________________________________________________________
+## Build the Python extensions
 
 define_macros = []
 undef_macros = []
