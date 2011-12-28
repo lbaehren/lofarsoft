@@ -305,16 +305,20 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 ##
 ## ==============================================================================
 
-set (dspsr_version "1.0")
-set (dspsr_name "dspsr-${dspsr_version}")
-set (dspsr_directory "dspsr/dspsr-${dspsr_version}")
+add_subdirectory (dspsr)
 
-add_custom_target (dspsr_unpack
-  COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
-  COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
-  COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-  COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
+if (NOT TARGET dspsr)
+  
+  set (dspsr_version   "1.0")
+  set (dspsr_name      "dspsr-${dspsr_version}")
+  set (dspsr_directory "dspsr/dspsr-${dspsr_version}")
+  
+  add_custom_target (dspsr_unpack
+    COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
+    COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
+    COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
+    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+    COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
   )
 add_dependencies (dspsr_unpack tempo2_install psrchive_install psrdada_install psrcat_install)
 
@@ -366,6 +370,13 @@ add_custom_target (dspsr_install
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
 add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+
+  ## Register last step in the chain with the actual target
+  add_custom_target (dspsr ALL)
+  add_dependencies (dspsr dspsr_install)
+
+endif (NOT TARGET dspsr)
+
 
 ## ==============================================================================
 ##
