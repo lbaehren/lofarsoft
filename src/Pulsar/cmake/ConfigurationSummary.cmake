@@ -45,6 +45,7 @@ message (STATUS "    .. MPI compiler              = ${MPI_COMPILER}"            
 message (STATUS "    .. MPI library               = ${MPI_LIBRARY}"                 )
 message (STATUS "    .. MPI include path          = ${MPI_INCLUDE_PATH}"            )
 message (STATUS " .. Have PGPlot                  = ${HAVE_PGPLOT}"                 )
+message (STATUS "    .. PGPlot include path       = ${PGPLOT_INCLUDES}"             )
 message (STATUS "    .. libpgplot                 = ${PGPLOT_PGPLOT_LIBRARY}"       )
 message (STATUS "    .. libcpgplot                = ${PGPLOT_CPGPLOT_LIBRARY}"      )
 message (STATUS " .. Have Python                  = ${HAVE_PYTHON}"                 )
