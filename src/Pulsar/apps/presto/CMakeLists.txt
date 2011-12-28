@@ -8,7 +8,17 @@ PROJECT (presto C Fortran)
 ##
 ## =============================================================================
 
-include_directories (${PULSAR_SOURCE_DIR}/apps/presto/include)
+##____________________________________________________________________
+## Header files
+
+include_directories (
+  ${presto_SOURCE_DIR}/include
+  )
+
+add_subdirectory (include)
+
+##____________________________________________________________________
+## Source directories to be processed
 
 if (FFTW3_FFTW3F_LIBRARY)
   add_subdirectory (src)
@@ -20,13 +30,6 @@ add_subdirectory (bin)
 add_subdirectory (lib)
 add_subdirectory (clig)
 add_subdirectory (python)
-
-add_custom_target (presto_includes
-  COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/include
-  COMMAND cp include/* ${CMAKE_INSTALL_PREFIX}/include/
-  WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/presto
-  COMMENT "Install presto include files from ${PULSAR_SOURCE_DIR}/apps/presto/include into ${CMAKE_INSTALL_PREFIX}/include..."
-  )
 
 #configure_file (
 #    ${PULSAR_SOURCE_DIR}/apps/presto/src/Makefile.in
@@ -42,7 +45,7 @@ add_custom_target (presto_includes
 #  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/src
 #  COMMENT "Issueing command 'make' in ${PULSAR_BINARY_DIR}/apps/presto/src; log file ${PULSAR_BINARY_DIR}/apps/presto/src/make.log"
 #  )
-#add_dependencies (presto_noncmake presto_includes fftw)
+#add_dependencies (presto_noncmake fftw)
 
 
 if (PULSAR_BUILD_TESTS)

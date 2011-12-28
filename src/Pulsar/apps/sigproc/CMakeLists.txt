@@ -8,6 +8,7 @@
 include_directories (
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_INSTALL_PREFIX}/include
+  ${presto_SOURCE_DIR}/include
   )
 
 set (sigproc_sources
@@ -182,7 +183,6 @@ endif (UNIX)
 add_dependencies (sigproc  
   fftw
   sigproc_fort
-  presto_includes
   sigproc_quicklook
   foldsignals
   hunt

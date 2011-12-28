@@ -6,6 +6,7 @@
 include_directories (
   ${CMAKE_INSTALL_PREFIX}/include
   ${PULSAR_BINARY_DIR}/apps/sigproc
+  ${presto_SOURCE_DIR}/include
   )
 
 set (sigproc_sources add_channels.c
@@ -216,7 +217,6 @@ endif (UNIX)
 add_dependencies (sigproc  
   fftw
   sigproc_fort
-  presto_includes
   sigproc_quicklook
   foldsignals
   hunt
