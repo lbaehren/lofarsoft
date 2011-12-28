@@ -183,13 +183,23 @@ if (NOT TARGET psrchive)
   set (psrchive_name      "psrchive-${psrchive_version}")
   set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
   
-  add_custom_target (psrchive_unpack
-    #  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
-    COMMAND rm -rf ${psrchive_name}
-    COMMAND cp -ru ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
-    WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
-    COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
-    )
+  if (APPLE)
+    add_custom_target (psrchive_unpack
+      #  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
+      COMMAND rm -rf ${psrchive_name}
+      COMMAND cp -r ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
+      WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+      COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
+      )
+  else (APPLE)
+    add_custom_target (psrchive_unpack
+      #  COMMAND find ./ -name entries -exec rm -rf {} "\;" 
+      COMMAND rm -rf ${psrchive_name}
+      COMMAND cp -ru ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} ${PULSAR_BINARY_DIR}/apps/
+      WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
+      COMMENT "Copying PSRCHIVE from ${PULSAR_SOURCE_DIR}/external/${psrchive_directory} to ${PULSAR_BINARY_DIR}/apps/${psrchive_name}"
+      )
+  endif (APPLE)
 
 #add_custom_target (psrchive_bootstrap
 #  COMMAND ./bootstrap
@@ -306,6 +316,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 ## ==============================================================================
 
 add_subdirectory (dspsr)
+add_dependencies (dspsr psrchive_install)
 
 if (NOT TARGET dspsr)
   
