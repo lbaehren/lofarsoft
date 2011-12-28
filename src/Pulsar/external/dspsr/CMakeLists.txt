@@ -58,7 +58,8 @@ ExternalProject_Add (dspsr
   BUILD_IN_SOURCE 1
   URL ${PROJECT_BINARY_DIR}/${DSPSR_SOURCE_ARCHIVE}
   PATCH_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap PSRHOME=${PROJECT_BINARY_DIR}/source LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada
-  CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/bootstrap PSRHOME=${PROJECT_BINARY_DIR}/source LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl
+  CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/source/configure PSRHOME=${PROJECT_BINARY_DIR}/source LOGIN_ARCH=${DSPSR_LOGIN_ARCH} --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl
+  INSTALL_COMMAND ${CMAKE_BUILD_TOOL} install -I${CMAKE_INSTALL_PREFIX}/psrdada/include   
   )
 
 ## Create tar-archive
