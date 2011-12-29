@@ -12,7 +12,7 @@ include (ExternalProject)
 ##__________________________________________________________
 ## Name of the project handled by CMake
 
-project (DSPSR)
+project (DSPSR C CXX Fortran)
 
 ## ==============================================================================
 ##
