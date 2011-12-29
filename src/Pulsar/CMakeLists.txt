@@ -72,6 +72,22 @@ endif (PULSAR_DEBUGGING_MESSAGES)
 
 ## ==============================================================================
 ##
+##                                                              System inspection
+##
+## ==============================================================================
+
+## Determine which value to assign to the architecture flag
+
+if (UNIX)
+  if (APPLE)
+    set (PULSAR_LOGIN_ARCH "darwin")
+  else (APPLE)
+    set (PULSAR_LOGIN_ARCH "linux")
+  endif (APPLE)
+endif (UNIX)
+
+## ==============================================================================
+##
 ##                                                             Installation setup
 ##
 ##  Installation settings need to be processed early on, as this will have an 
