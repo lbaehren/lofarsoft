@@ -2198,7 +2198,7 @@ if __name__ == "__main__":
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[0]="CScombined"
-							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1:
+							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
 								combined="combined"
 								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
 							else:
@@ -2240,7 +2240,7 @@ if __name__ == "__main__":
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[1]="IScombined"
-							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1:
+							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
 								combined="combined"
 								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], ISredlocation, combined, ISredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[1], plotsdir, id, combined, plotsdir, id, profiles_array[1])
 							else:
