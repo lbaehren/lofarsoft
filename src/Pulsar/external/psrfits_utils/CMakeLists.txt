@@ -14,17 +14,17 @@ project (PSRFITS)
 ##                                Set up initial CMake cache
 
 configure_file (
-  ${PROJECT_SOURCE_DIR}/psrfits_utils.cmake.in
-  ${PROJECT_BINARY_DIR}/psrfits_utils.cmake
+  ${PSRFITS_SOURCE_DIR}/psrfits_utils.cmake.in
+  ${PSRFITS_BINARY_DIR}/psrfits_utils.cmake
   )
 
 ##__________________________________________________________
 ##                                    Target to handle build
 
 add_custom_target (psrfits_utils
-  COMMAND ${CMAKE_COMMAND} -C ${PROJECT_BINARY_DIR}/psrfits_utils.cmake ${CMAKE_CURRENT_SOURCE_DIR}/psrfits_utils-525dbed
+  COMMAND ${CMAKE_COMMAND} -C ${PSRFITS_BINARY_DIR}/psrfits_utils.cmake ${CMAKE_CURRENT_SOURCE_DIR}/psrfits_utils-525dbed
   COMMAND ${CMAKE_BUILD_TOOL} install
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/psrfits_utils-525dbed
+  WORKING_DIRECTORY ${PSRFITS_BINARY_DIR}
   COMMENT "Triggering build of project psrfits_utils ..."
   SOURCES ${PROJECT_SOURCE_DIR}/psrfits_utils.cmake.in
   )
