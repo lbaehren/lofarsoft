@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.29
+VERSION=3.30
  
 #####################################################################
 # Usage #
@@ -176,6 +176,16 @@ echo "Running make_subs_SAS_Ncore_Mmodes.sh with the following input arguments:"
 echo "    OBSID = $OBSID"
 echo "    PULSAR = $PULSAR"
 echo "    Output Processing Location = $location"
+
+has_underscore=`echo $OBSID | grep "_"`
+if [[ $has_underscore != "" ]]
+then
+   short_id=`echo $OBSID | sed 's/L.....//g'`
+else
+   short_id=`echo $OBSID | sed 's/L//g'`
+fi
+
+
 if [[ "$COLLAPSE" != "" ]]
 then 
    echo "    COLLAPSE = $COLLAPSE"
@@ -357,15 +367,6 @@ else
       exit 1
    fi
 fi # end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
-
-has_underscore=`echo $OBSID | grep "_"`
-if [[ $has_underscore != "" ]]
-then
-   short_id=`echo $OBSID | sed 's/L.....//g'`
-else
-   short_id=`echo $OBSID | sed 's/L//g'`
-fi
-
 
 ###PULSAR=B2111+46
 #STOKES=incoherentstokes
@@ -1070,7 +1071,7 @@ do
   		   echo "2nd transpose FE data has $nSubbands subbands each in $all_num files" >> $log
 		elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $flyseye == 0 ]]
         then
-           if (( $nrBeams == 1 )) && (( $all_num > 1 ))
+           if (( $nrBeams == 1 )) && (( $all_num > 1 )) #&& (( $subsformat == 1 ))
            then
                TiedArray=1
                flyseye=1
@@ -1177,7 +1178,12 @@ do
 	if (( $flyseye == 1 )) 
 	then
 		min=0
-	    max=$NBEAMS
+		if (( $TiedArray == 0 )) 
+		then
+	       max=$NBEAMS
+	    else
+	       max=$all_num
+	    fi
 	    ii=0
 	    while (( $ii < $max ))
 	    do
@@ -1303,6 +1309,7 @@ do
 		      counter=$(( $counter + 1 )) 
 			done
 		done
+		cat ${STOKES}/$$"_split_"*
 		echo rm ${STOKES}/$$"_split_"* >> $log
 		rm ${STOKES}/$$"_split_"*
     fi	
@@ -1520,7 +1527,7 @@ do
 		       mv * ../
 		       cd ../
 		       rmdir beam_0
-	       elif [[ $TiedArray == 1 ]]
+	       elif [[ $TiedArray == 1 ]] # && [[ $subsformat == 0 ]]
 	       then
 		       # move the beam_0 data out one directory
 		       cd ${location}/${STOKES}/RSP0/
@@ -1537,7 +1544,7 @@ do
 		       done
 
 	       fi 
-	    elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]] && [[ $subsformat == 0 ]] && [[ $flyseye == 1 ]] 
+	    elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]] && [[ $subsformat == 0 ]] && [[ $flyseye == 1 ]] && [[ $TiedArray == 0 ]]
 	    then
 	       # create beam_0 directory so that the psrfits logic can follow multi-beam logic for FE mode
 	       cd ${location}/${STOKES}/RSP0/
@@ -1555,6 +1562,7 @@ do
        fi
 
 	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
+
 
 	# Calculating the number of samples to be passed to inf-file
 	split_files=`echo $all_num $CHAN | awk '{print $1 * $2}'`
@@ -2816,7 +2824,7 @@ do
 			cd ${location}/${STOKES}/$NAME
 
             # add to the beam_process_node.txt for fly's eye mode here, since you know the station name
-            sed -n "$N"p $location/${STOKES}/SB_master.list | awk -v NODE_NAME=`uname -n` -v NEW_NAME=$NAME '{print NODE_NAME " " $1 " ["NEW_NAME"]"}' > $location/${STOKES}/beam_process_node.txt
+            sed -n "$N"p $location/${STOKES}/SB_master.list | awk -v NODE_NAME=`uname -n` -v NEW_NAME=$NAME '{print NODE_NAME " " $1 " ["NEW_NAME"]"}' >> $location/${STOKES}/beam_process_node.txt
 
 		    for jjj in $loop_beams
 			do
@@ -2922,6 +2930,10 @@ do
                 cd ${location}/${STOKES}/tmp$$/RSP${ii}/${jjj}
                 prev_name=RSP${ii}
                 new_name=RSP${beam_index}
+
+                # add to the beam_process_node.txt for fly's eye mode here, since you know the station name
+                sed -n "$M"p $location/${STOKES}/SB_master.list | awk -v NODE_NAME=`uname -n` -v NEW_NAME=$new_name '{print NODE_NAME " " $1 " ["NEW_NAME"]"}' >> $location/${STOKES}/beam_process_node.txt
+	    
 			    if (( $beam_index != $ii ))
 			    then
 			       echo rename "s/$prev_name/$new_name/" *
@@ -3132,3 +3144,4 @@ else  # end if [[ $proc != 0 ]]
 fi
 
 exit 0
+
