@@ -1692,6 +1692,8 @@ int main( int argc, char **argv )
   FILE *fin;
   char *s_ptr, dummy_string[parsetmaxlinelength], dummy_string2[parsetmaxlinelength];
   int channellist[1000];
+  char tmpname[40];
+  char channellist_name[100];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
@@ -1948,10 +1950,11 @@ int main( int argc, char **argv )
       return 0;     
     }
     /* Get the list of subbands which should be there. */
-    sprintf(dummy_string2, "echo \"%s\" | awk '{print substr($1,2,length($1)-2)}' | awk -F\\, '{for (i=1; i <= NF ; i++)  print $i}' | awk -F\\. '{var=$1; while (var <=$NF) { print var; var +=1 }}' > /tmp/2bf2fits.channellist\n", dummy_string);
+    tmpnam(tmpname);
+    sprintf(dummy_string2, "echo \"%s\" | awk '{print substr($1,2,length($1)-2)}' | awk -F\\, '{for (i=1; i <= NF ; i++)  print $i}' | awk -F\\. '{var=$1; while (var <=$NF) { print var; var +=1 }}' > \"%s\"\n", dummy_string, tmpname);
     /*    printf(dummy_string2); */
     system(dummy_string2);
-    fin = fopen("/tmp/2bf2fits.channellist", "r");
+    fin = fopen(tmpname, "r");
     if(fin == NULL) {
       fprintf(stderr, "2bf2fits: Error generating channel list\n");
       perror("");
@@ -1964,7 +1967,8 @@ int main( int argc, char **argv )
     }
     fclose(fin);
     
-    system("rm /tmp/2bf2fits.channellist");
+    sprintf(dummy_string2, "rm \"%s\"\n", tmpname);
+    system(dummy_string2);
     subbandFirst = channellist[0];
 
     nsubbands = 512;
