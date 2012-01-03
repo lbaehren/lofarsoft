@@ -52,8 +52,8 @@ if (NOT FIND_ROOT_CMAKE)
   ## Check for the header files
   
   find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
+    HINTS ${ROOT_ROOT_DIR}
     PATHS
-    ${include_locations}
     /opt
     /opt/auger/root-v5.18.00
     $ENV{ROOTSYS}
@@ -95,8 +95,8 @@ if (NOT FIND_ROOT_CMAKE)
   foreach (lib ${libs})
     ## try to locate the library
     find_library (root${lib} ${lib}
+      HINTS ${ROOT_ROOT_DIR}
       PATHS
-      ${lib_locations}
       /opt/root/lib
       /opt/auger/root-v5.18.00
       $ENV{ROOTSYS}
@@ -115,8 +115,8 @@ if (NOT FIND_ROOT_CMAKE)
   
   ## system libraries in addition to root libraries themselves
   
-  find_library (libm m ${lib_locations})
-  find_library (libdl dl ${lib_locations})
+  find_library (libm m)
+  find_library (libdl dl)
   
   if (libm)
     list (APPEND ROOT_LIBRARIES ${libm})
