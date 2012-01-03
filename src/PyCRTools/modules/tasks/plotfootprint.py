@@ -11,6 +11,7 @@ from pycrtools.tasks.shortcuts import *
 from pycrtools import lora
 from math import *
 import pycrtools.rftools as rf
+import numpy as np
 
 deg=pi/180.
 pi2=pi/2.
@@ -44,7 +45,7 @@ def gatherresults(filefilter,pol,excludelist,plotlora):
             execfile(os.path.join(datadir,"results.py"),res)
             res=res["results"]
             antid[res["polarization"]].extend([int(v) for v in res["antennas"].values()])
-            positions2[res["polarization"]].extend(res["antenna_positions_ITRF_m"])
+            positions2[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])
             signal[res["polarization"]].extend(res["pulses_maxima_y"])
             ndipoles[res["polarization"]]+=res["ndipoles"]
             if not "BLOCKSIZE" in res.keys():
@@ -78,7 +79,8 @@ def gatherresults(filefilter,pol,excludelist,plotlora):
 
 
     clockcorrection=cr.metadata.get("ClockCorrection",antid[pol],antset,return_as_hArray=True)
-    par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],antset,return_as_hArray=True)
+    #par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],antset,return_as_hArray=True)
+    par["positions"] = cr.hArray(float,[ndipoles[pol],3],positions2[pol],name="Antenna Positions",units="m")
     #par["positions"]=cr.metadata.get("RelativeAntennaPositions",antid[pol],antset,return_as_hArray=True)
     par["power"]=cr.hArray(signal[pol])
 #indexvec=cr.hArray(int,dimensions=par["power"])
