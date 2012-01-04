@@ -110,12 +110,14 @@ if (NOT HAVE_PYTHON)
       ## Check for the Python executable
       
       if (PYTHON_PYTHONHOME)
-	find_program (PYTHON_EXECUTABLE python python${python_version}
+	find_program (PYTHON_EXECUTABLE
+          NAMES python python${python_version}
 	  PATHS ${PYTHON_PYTHONHOME} ${PYTHON_PYTHONHOME}/bin
 	  NO_DEFAULT_PATH
 	  )
       else (PYTHON_PYTHONHOME)
-	find_program (PYTHON_EXECUTABLE python${python_version}
+	find_program (PYTHON_EXECUTABLE
+          NAMES python python${python_version}
 	  PATHS
 	  /Library/Frameworks/EPD64.framework/Versions/Current/bin
 	  /Library/Frameworks/Python.framework/Versions/Current/bin	 
@@ -125,7 +127,7 @@ if (NOT HAVE_PYTHON)
 	  NO_DEFAULT_PATH
 	  )
       endif (PYTHON_PYTHONHOME)
-      
+
       ## Extract the full version information from the Python executable
       
       if (PYTHON_EXECUTABLE)
