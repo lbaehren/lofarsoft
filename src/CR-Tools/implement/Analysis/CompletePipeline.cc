@@ -1357,7 +1357,7 @@ namespace CR { // Namespace CR -- begin
  
       // print header line of output
       cout << "Ant   env height   max height   min height     noise      env time   max time   min time   time of half height     FWHM\n"
-           << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]     [us]       [us]       [us]           [us]              [ns]\n"
+           << "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]     [ns]       [ns]       [ns]           [ns]              [ns]\n"
            <<  "----------------------------------------------------------------------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
@@ -1535,22 +1535,6 @@ namespace CR { // Namespace CR -- begin
             snr = 1e6;  // large snr do not effect error or amplitude correction
         }  
 
-        // store the calculated values for later calculation of the mean
-        // multiply by 1e6 for conversion to micro
-        maxima.push_back(maximum*1e6);
-        maxima_time.push_back(timeRange(maxtimevalue)*1e6);
-        minima.push_back(minimum*1e6);
-        minima_time.push_back(timeRange(mintimevalue)*1e6);
-        envMaxima.push_back(envMaximum*1e6);
-        envMaxima_time.push_back(timeRange(envMaxtimevalue)*1e6);
-        noiseValues.push_back(noise*1e6);
-        snrValues.push_back(snr);
-         // make quality check before push back (calculation of FWHM and pulsestart can fail)
-        // if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
-        fwhm.push_back( (pulsestop-pulsestart)*1e9);
-        // if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
-        start_time.push_back(pulsestart*1e6);
-
         // fill pulseproperties object (in ns and µV/m/MHz)
         pulse.antennaID = antennaIDs(i);
         pulse.antenna = i+1;
@@ -1570,20 +1554,36 @@ namespace CR { // Namespace CR -- begin
         // store pulse properties in map
         pulses[antennaIDs(i)] = pulse;
 
+        // store the calculated values for later calculation of the mean
+        maxima.push_back(pulse.maximum);
+        maxima_time.push_back(pulse.maximumTime);
+        minima.push_back(pulse.minimum);
+        minima_time.push_back(pulse.minimumTime);
+        envMaxima.push_back(pulse.envelopeMaximum);
+        envMaxima_time.push_back(pulse.envelopeTime);
+        noiseValues.push_back(pulse.noise);
+        snrValues.push_back(snr);
+         // make quality check before push back (calculation of FWHM and pulsestart can fail)
+        // if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
+        fwhm.push_back(pulse.fwhm);
+        // if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
+        start_time.push_back(pulse.halfheightTime);
+        
+        
         // print the calculated values
-        cout << setw(2) << i+1 << "   "
-             << setw(11)<< envMaximum*1e6 << "  "
-             << setw(11)<< maximum*1e6 << "  "
-             << setw(11)<< minimum*1e6 << " "
+        cout << setw(2) << pulse.antenna << "   "
+             << setw(11)<< pulse.envelopeMaximum << "  "
+             << setw(11)<< pulse.maximum << "  "
+             << setw(11)<< pulse.minimum << " "
              //<< setw(11)<< minMaxSign << " "
              //<< setw(11)<< envSign << " "
-             << setw(11)<< noise*1e6 << "   "
+             << setw(11)<< pulse.noise << "   "
              //<< setw(8) << snr << "  "
-             << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "
-             << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
-             << setw(8) << timeRange(mintimevalue)*1e6 << "       "
-             << setw(8) << pulsestart*1e6 << "         "
-             << setw(8) << (pulsestop-pulsestart)*1e9 
+             << setw(8) << pulse.envelopeTime << "   "
+             << setw(8) << pulse.maximumTime << "   "
+             << setw(8) << pulse.minimumTime << "       "
+             << setw(8) << pulse.halfheightTime << "         "
+             << setw(8) << pulse.fwhm 
              << endl;
       } // for i
 
@@ -1642,10 +1642,10 @@ namespace CR { // Namespace CR -- begin
              << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(envMaxima)) 
              << " to " << max(static_cast< Vector<Double> >(envMaxima)) << "\n"
              << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(envMaxima)) << "\n"
-             << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(envMaxima_time))
+             << "Time range [ns]:      " << min(static_cast< Vector<Double> >(envMaxima_time))
              << " to " << max(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
-             << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
-             << "Time average (start) [us]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
+             << "Time average (max) [ns]:   " << mean(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
+             << "Time average (start) [ns]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
              << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << endl;
       }
 

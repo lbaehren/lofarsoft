@@ -795,27 +795,42 @@ namespace CR { // Namespace CR -- begin
                                                       int Gt, double az, double ze,
                                                       double ccCenter,
                                                       const string& index1,
-                                                      const string& index2)
+                                                      const string& index2,
+                                                      const bool variableTimeOffset,
+                                                      const bool variableTimeOffsetSim)
   {
     Record erg;
     try {
       cout << "\nPlotting time vs distance" << endl;
 
       // predefine fields for fit results
-      erg.define("latTime1D_Rcurv",0.);
-      erg.define("latTime1D_sigRcurv",0.);
+      erg.define("latTime1D_SphereKappa",0.);
+      erg.define("latTime1D_sigSphereKappa",0.);
+      erg.define("latTime1D_Rcurv",0.); //outdated
+      erg.define("latTime1D_sigRcurv",0.); //outdated
+      erg.define("latTime1D_SphereOffset",0.);
+      erg.define("latTime1D_sigSphereOffset",0.);
       erg.define("latTime1D_chi2NDF",0.);
-      erg.define("latTime2D_Rcurv",0.);
-      erg.define("latTime2D_sigRcurv",0.);
+      erg.define("latTime2D_SphereKappa",0.);
+      erg.define("latTime2D_sigSphereKappa",0.);
+      erg.define("latTime2D_Rcurv",0.); //outdated
+      erg.define("latTime2D_sigRcurv",0.); //outdated
+      erg.define("latTime2D_SphereOffset",0.);
+      erg.define("latTime2D_sigSphereOffset",0.);
       erg.define("latTime2D_chi2NDF",0.);
 
       erg.define("latTime1D_ConeRho",0.);
       erg.define("latTime1D_sigConeRho",0.);
+      erg.define("latTime1D_ConeOffset",0.);
+      erg.define("latTime1D_sigConeOffset",0.);
       erg.define("latTime1D_Conechi2NDF",0.);
       erg.define("latTime2D_ConeRho",0.);
       erg.define("latTime2D_sigConeRho",0.);
+      erg.define("latTime2D_ConeOffset",0.);
+      erg.define("latTime2D_sigConeOffset",0.);
       erg.define("latTime2D_Conechi2NDF",0.);
 
+      
       // create arrays for plotting and fitting
       unsigned int Nant = pulsesRec.size();
       double timeVal  [Nant], distance  [Nant]; // time value at antenna position projected to shower plane
@@ -829,7 +844,6 @@ namespace CR { // Namespace CR -- begin
       int antennaNumber [Nant];
       int antID         [Nant];
 
-
       // fit simulation only, if values are submitted
       bool fitSim = false;
       if (pulsesSim.size() > 0)
@@ -841,19 +855,22 @@ namespace CR { // Namespace CR -- begin
         // Pulse time relative to shower plane and relative to CC time
         // = geom. delay from beam forming (as it is substracted during analysis) +
         // time of pulse in trace (- CC beam time, to get an average of 0).
-        timeVal       [ant] = (*it).second.distZ / lightspeed * 1e9,    // defined in Math/Constants.h
+        
+        // use shower coordinates from KASCADE-Grande direction
+        zshower       [ant] = (*it).second.KGdistZ;
+        zshowerEr     [ant] = (*it).second.KGdistZerr;
+        distance      [ant] = (*it).second.KGdist;
+        distanceEr    [ant] = (*it).second.KGdisterr;
+        
+        timeVal       [ant] = zshower[ant] / lightspeed * 1e9,    // defined in Math/Constants.h
         timeVal       [ant] += (*it).second.geomDelay;
         timeVal       [ant] += (*it).second.time - ccCenter*1e9;
         // pulse time error: Error from shower plane (geometry) + time calibration (2 ns)
-        timeValEr     [ant] = sqrt(  pow((*it).second.distZerr / lightspeed * 1e9,2)
+        timeValEr     [ant] = sqrt(  pow(zshowerEr[ant] / lightspeed * 1e9,2)
                                   + pow((*it).second.timeError,2));
         // time values without projection to shower plane
         timeValUnpro  [ant] = (*it).second.geomDelay + (*it).second.time - ccCenter*1e9;
         timeValUnproEr[ant] = (*it).second.timeError;
-        zshower       [ant] = (*it).second.distZ;
-        zshowerEr     [ant] = 0.;
-        distance      [ant] = (*it).second.dist;
-        distanceEr    [ant] = (*it).second.disterr;
         antennaNumber [ant] = (*it).second.antenna;
         antID         [ant] = (*it).second.antennaID;
 
@@ -1071,17 +1088,17 @@ namespace CR { // Namespace CR -- begin
       string coneName = "";
       string coneNameS = "";
       if (index1 != "") {
-        curvName = "r_{c}- " + index1 + " [m]";
+        curvName = "#kappa- " + index1 + " [km^{-1}]";
         coneName = "#rho- " + index1 + " [rad]";
       } else {
-        curvName = "r_{c} [m]";
+        curvName = "#kappa [km^{-1}]";
         coneName = "#rho [rad]";
       }
       if (index2 != "") {
-        curvNameS = "r_{c}- " + index2 + " [m]";
+        curvNameS = "#kappa- " + index2 + " [km^{-1}]";
         coneNameS = "#rho- " + index2 + " [rad]";
       } else {
-        curvNameS = "r_{c} [m]";
+        curvNameS = "#kappa [km^{-1}]";
         coneNameS = "#rho [rad]";
       }
 
@@ -1090,12 +1107,24 @@ namespace CR { // Namespace CR -- begin
         // spherical fit (1 and 2 dimensional)
         TF1 *fitFunc;
         TF2 *fitFunc2D;
-        fitFunc=new TF1("fitFunc","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
-        fitFunc2D=new TF2("fitFunc2D","3.335640952*(sqrt(([0]-y)**2+x**2)-[0])",0,1000,-200,200);
+        //fitFunc=new TF1("fitFunc","3.335640952*(sqrt([0]**2+x**2)-[0]) + [1]",0,1000);
+        //fitFunc2D=new TF2("fitFunc2D","3.335640952*(sqrt(([0]-y)**2+x**2)-[0]) + [1]",0,1000,-200,200);
+        // use curvature = 1/radius (unit in 1/km)
+        fitFunc=new TF1("fitFunc","3.335640952*(sqrt((1000./[0])**2+x**2)-1000./[0]) + [1]",0,1000);
+        fitFunc2D=new TF2("fitFunc2D","3.335640952*(sqrt((1000./[0]-y)**2+x**2)-1000./[0]) + [1]",0,1000,-200,200);
         fitFunc->SetParName(0,curvName.c_str());
         fitFunc2D->SetParName(0,curvName.c_str());
+        fitFunc->SetParName(1,"offset [ns]");
+        fitFunc2D->SetParName(1,"offset [ns]");
+        if (variableTimeOffset) {
+          fitFunc->SetParameter(1,0);
+          fitFunc2D->SetParameter(1,0);
+        } else {
+          fitFunc->FixParameter(1,0);
+          fitFunc2D->FixParameter(1,0);
+        }
+          
         //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
-        fitFunc2D->SetParameter(0,1000);
         fitFunc->SetFillStyle(0);
         fitFunc->SetLineWidth(2);
 
@@ -1106,28 +1135,45 @@ namespace CR { // Namespace CR -- begin
         ptstats->Draw();
 
         // write fit results to record with other results
-        erg.define("latTime1D_Rcurv",fitFunc->GetParameter(0));
-        erg.define("latTime1D_sigRcurv",fitFunc->GetParError(0));
+        erg.define("latTime1D_SphereKappa",fitFunc->GetParameter(0));
+        erg.define("latTime1D_sigSphereKappa",fitFunc->GetParError(0));
+        erg.define("latTime1D_SphereOffset",fitFunc->GetParameter(1));
+        erg.define("latTime1D_sigSphereOffset",fitFunc->GetParError(1));
         erg.define("latTime1D_chi2NDF",fitFunc->GetChisquare()/double(fitFunc->GetNDF()));
-        erg.define("latTime2D_Rcurv",fitFunc2D->GetParameter(0));
-        erg.define("latTime2D_sigRcurv",fitFunc2D->GetParError(0));
+        erg.define("latTime2D_SphereKappa",fitFunc2D->GetParameter(0));
+        erg.define("latTime2D_sigSphereKappa",fitFunc2D->GetParError(0));
+        erg.define("latTime2D_SphereOffset",fitFunc2D->GetParameter(1));
+        erg.define("latTime2D_sigSphereOffset",fitFunc2D->GetParError(1));
         erg.define("latTime2D_chi2NDF",fitFunc2D->GetChisquare()/double(fitFunc2D->GetNDF()));
         cout << "\nResults of spherical fit (data)\n"
-             << "Rcurv(1D) = " << fitFunc->GetParameter(0) << "\t +/- " << fitFunc->GetParError(0) << " m\n"
-             << "Chi^2 (1D) = " << fitFunc->GetChisquare() << "\t NDF " << fitFunc->GetNDF() << "\n"
-             << "Rcurv(2D) = " << fitFunc2D->GetParameter(0) << "\t +/- " << fitFunc2D->GetParError(0) << " m\n"
-             << "Chi^2 (2D) = " << fitFunc2D->GetChisquare() << "\t NDF " << fitFunc2D->GetNDF() << "\n"
+             << "Curvature(1D) = " << fitFunc->GetParameter(0) << "\t +/- " << 1./fitFunc->GetParError(0) << " 1/km \t"
+             << "(corresponds to a radius of " << 1./fitFunc->GetParameter(0)*1e3 << " m)\n"
+             << "offset(1D)    = " << fitFunc->GetParameter(1) << "\t +/- " << fitFunc->GetParError(1) << " ns\n"
+             << "Chi^2 (1D)    = " << fitFunc->GetChisquare() << "\t NDF " << fitFunc->GetNDF() << "\n"
+             << "Curvature(2D) = " << fitFunc2D->GetParameter(0) << "\t +/- " << fitFunc2D->GetParError(0) << " 1/km \t"
+             << "(corresponds to a radius of " << 1./fitFunc2D->GetParameter(0)*1e3 << " m)\n"
+             << "offset(2D)    = " << fitFunc2D->GetParameter(1) << "\t +/- " << fitFunc2D->GetParError(1) << " ns\n"
+             << "Chi^2 (2D)    = " << fitFunc2D->GetChisquare() << "\t NDF " << fitFunc2D->GetNDF() << "\n"
              << endl;
 
         if (fitSim) {
           cout << "-------- SIMULATIONS ---------"<<endl;
           TF1 *fitFuncS;
           TF2 *fitFuncS2D;
-          fitFuncS=new TF1("fitFuncS","3.335640952*(sqrt([0]**2+x**2)-[0])",0,1000);
-          fitFuncS2D=new TF2("fitFuncS2D","3.335640952*(sqrt(([0]-y)**2+x**2)-[0])",0,1000,-200,200);
+           // using curvature (= 1/radius)
+          fitFuncS=new TF1("fitFuncS","3.335640952*(sqrt((1000./[0])**2+x**2)-1000./[0]) + [1]",0,1000);
+          fitFuncS2D=new TF2("fitFuncS2D","3.335640952*(sqrt((1000./[0]-y)**2+x**2)-1000./[0]) + [1]",0,1000,-200,200);
           fitFuncS->SetParName(0,curvNameS.c_str());
           fitFuncS2D->SetParName(0,curvNameS.c_str());
-          fitFuncS2D->SetParameter(0,1000);
+          fitFuncS->SetParName(1,"offset [ns]");
+          fitFuncS2D->SetParName(1,"offset [ns]");
+          if (variableTimeOffsetSim) {
+            fitFuncS->SetParameter(1,0);
+            fitFuncS2D->SetParameter(1,0);
+          } else {
+            fitFuncS->FixParameter(1,0);
+            fitFuncS2D->FixParameter(1,0);
+          }
           fitFuncS->SetFillStyle(0);
           fitFuncS->SetLineWidth(2);
           fitFuncS->SetLineColor(simColor);
@@ -1139,17 +1185,30 @@ namespace CR { // Namespace CR -- begin
           ptstatsS->Draw();
 
           // write fit results to record with other results
-          erg.define("latTime1D_Rcurv_sim",fitFuncS->GetParameter(0));
-          erg.define("latTime1D_sigRcurv_sim",fitFuncS->GetParError(0));
+          erg.define("latTime1D_SphereKappa_sim",fitFuncS->GetParameter(0));
+          erg.define("latTime1D_sigSphereKappa_sim",fitFuncS->GetParError(0));
+          erg.define("latTime1D_Rcurv_sim",0.); // outdated
+          erg.define("latTime1D_sigRcurv_sim",0.); // outdated
+          erg.define("latTime1D_SphereOffset_sim",fitFuncS->GetParameter(1));
+          erg.define("latTime1D_sigSphereOffset_sim",fitFuncS->GetParError(1));
           erg.define("latTime1D_chi2NDF_sim",fitFuncS->GetChisquare()/double(fitFuncS->GetNDF()));
-          erg.define("latTime2D_Rcurv_sim",fitFuncS2D->GetParameter(0));
-          erg.define("latTime2D_sigRcurv_sim",fitFuncS2D->GetParError(0));
+          erg.define("latTime2D_SphereKappa_sim",fitFuncS2D->GetParameter(0));
+          erg.define("latTime2D_sigSphereKappa_sim",fitFuncS2D->GetParError(0));
+          erg.define("latTime2D_Rcurv_sim",0.); // outdated
+          erg.define("latTime2D_sigRcurv_sim",0.); // outdated
+          erg.define("latTime2D_SphereOffset_sim",fitFuncS2D->GetParameter(1));
+          erg.define("latTime2D_sigSphereOffset_sim",fitFuncS2D->GetParError(1));
           erg.define("latTime2D_chi2NDF_sim",fitFuncS2D->GetChisquare()/double(fitFuncS2D->GetNDF()));
+          
           cout << "\nResults of spherical fit (SIMULATION)\n"
-               << "Rcurv(1D) = " << fitFuncS->GetParameter(0) << "\t +/- " << fitFuncS->GetParError(0) << " m\n"
-               << "Chi^2 (1D) = " << fitFuncS->GetChisquare() << "\t NDF " << fitFuncS->GetNDF() << "\n"
-               << "Rcurv(2D) = " << fitFuncS2D->GetParameter(0) << "\t +/- " << fitFuncS2D->GetParError(0) << " m\n"
-               << "Chi^2 (2D) = " << fitFuncS2D->GetChisquare() << "\t NDF " << fitFuncS2D->GetNDF() << "\n"
+               << "Curvature(1D) = " << fitFuncS->GetParameter(0) << "\t +/- " << 1./fitFuncS->GetParError(0) << " 1/km \t"
+               << "(corresponds to a radius of " << 1./fitFuncS->GetParameter(0)*1e3 << " m)\n"
+               << "offset(1D)    = " << fitFuncS->GetParameter(1) << "\t +/- " << fitFuncS->GetParError(1) << " ns\n"
+               << "Chi^2 (1D)    = " << fitFuncS->GetChisquare() << "\t NDF " << fitFuncS->GetNDF() << "\n"
+               << "Curvature(2D) = " << fitFuncS2D->GetParameter(0) << "\t +/- " << fitFuncS2D->GetParError(0) << " 1/km \t"
+               << "(corresponds to a radius of " << 1./fitFuncS2D->GetParameter(0)*1e3 << " m)\n"
+               << "offset(2D)    = " << fitFuncS2D->GetParameter(1) << "\t +/- " << fitFuncS2D->GetParError(1) << " ns\n"
+               << "Chi^2 (2D)    = " << fitFuncS2D->GetChisquare() << "\t NDF " << fitFuncS2D->GetNDF() << "\n"
                << endl;
         }
 
@@ -1166,13 +1225,19 @@ namespace CR { // Namespace CR -- begin
         // fit cone (one and two dimensional)
         TF1 *fitFuncCone;
         TF2 *fitFuncCone2D;
-        fitFuncCone=new TF1("fitFuncCone","3.335640952*(x*sin([0]))",0,1000);
-        fitFuncCone2D=new TF2("fitFuncCone2D","3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
+        fitFuncCone=new TF1("fitFuncCone","3.335640952*(x*sin([0])) + [1]",0,1000);
+        fitFuncCone2D=new TF2("fitFuncCone2D","3.335640952*(x*sin([0])-y*cos([0])) + [1]",0,1000,-200,200);
         fitFuncCone->SetParName(0,coneName.c_str());
         fitFuncCone2D->SetParName(0,coneName.c_str());
-        //fitFuncCone->SetParName(1,"offset [ns]");
-        //fitFuncCone2D->SetParName(1,"offset [ns]");
-        //fitFuncCone2D->FixParameter(1,0);
+        fitFuncCone->SetParName(1,"offset [ns]");
+        fitFuncCone2D->SetParName(1,"offset [ns]");
+        if (variableTimeOffset) {
+          fitFuncCone->SetParameter(1,0);
+          fitFuncCone2D->SetParameter(1,0);
+        } else {
+          fitFuncCone->FixParameter(1,0);
+          fitFuncCone2D->FixParameter(1,0);
+        }
         //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
         fitFuncCone2D->SetParameter(0,0);
 
@@ -1185,22 +1250,26 @@ namespace CR { // Namespace CR -- begin
         // write fit results to record with other results
         erg.define("latTime1D_ConeRho",fitFuncCone->GetParameter(0));
         erg.define("latTime1D_sigConeRho",fitFuncCone->GetParError(0));
+        erg.define("latTime1D_ConeOffset",fitFuncCone->GetParameter(1));
+        erg.define("latTime1D_sigConeOffset",fitFuncCone->GetParError(1));
         erg.define("latTime1D_Conechi2NDF",fitFuncCone->GetChisquare()/double(fitFuncCone->GetNDF()));
         erg.define("latTime2D_ConeRho",fitFuncCone2D->GetParameter(0));
         erg.define("latTime2D_sigConeRho",fitFuncCone2D->GetParError(0));
+        erg.define("latTime2D_ConeOffset",fitFuncCone2D->GetParameter(1));
+        erg.define("latTime2D_sigConeOffset",fitFuncCone2D->GetParError(1));
         erg.define("latTime2D_Conechi2NDF",fitFuncCone2D->GetChisquare()/double(fitFuncCone2D->GetNDF()));
         cout << "\nResults of cone fit (data)\n"
              << "Rho   (1D) = " << fitFuncCone->GetParameter(0)
              << "\t +/- " << fitFuncCone->GetParError(0) << " rad "
              << "\t = " << fitFuncCone->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncCone->GetParError(0)*180./3.14159 << " °\n"
-             //<< "offset(1D) = " << fitFuncCone->GetParameter(1) << "\t +/- " << fitFuncCone->GetParError(1) << " ns\n"
+             << "offset(1D) = " << fitFuncCone->GetParameter(1) << "\t +/- " << fitFuncCone->GetParError(1) << " ns\n"
              << "Chi^2 (1D) = " << fitFuncCone->GetChisquare() << "\t NDF " << fitFuncCone->GetNDF() << "\n"
              << "Rho   (2D) = " << fitFuncCone2D->GetParameter(0)
              << "\t +/- " << fitFuncCone2D->GetParError(0) << " rad "
              << "\t = " << fitFuncCone2D->GetParameter(0)*180./3.14159
              << "\t +/- " << fitFuncCone2D->GetParError(0)*180./3.14159 << " °\n"
-             //<< "offset(2D) = " << fitFuncCone2D->GetParameter(1) << "\t +/- " << fitFuncCone2D->GetParError(1) << " ns\n"
+             << "offset(2D) = " << fitFuncCone2D->GetParameter(1) << "\t +/- " << fitFuncCone2D->GetParError(1) << " ns\n"
              << "Chi^2 (2D) = " << fitFuncCone2D->GetChisquare() << "\t NDF " << fitFuncCone2D->GetNDF() << "\n"
              << endl;
 
@@ -1209,16 +1278,22 @@ namespace CR { // Namespace CR -- begin
           TF1 *fitFuncConeS;
           TF2 *fitFuncConeS2D;
           // without offset
-          fitFuncConeS=new TF1("fitFuncConeS","3.335640952*(x*sin([0]))",0,1000);
-          fitFuncConeS2D=new TF2("fitFuncConeS2D","3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
+          //fitFuncConeS=new TF1("fitFuncConeS","3.335640952*(x*sin([0]))",0,1000);
+          //fitFuncConeS2D=new TF2("fitFuncConeS2D","3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
           // with offset
-          //fitFuncConeS=new TF1("fitFuncConeS","[1]+3.335640952*(x*sin([0]))",0,1000);
-          //fitFuncConeS2D=new TF2("fitFuncConeS2D","[1]+3.335640952*(x*sin([0])-y*cos([0]))",0,1000,-200,200);
+          fitFuncConeS=new TF1("fitFuncConeS","3.335640952*(x*sin([0])) + [1]",0,1000);
+          fitFuncConeS2D=new TF2("fitFuncConeS2D","3.335640952*(x*sin([0])-y*cos([0])) + [1]",0,1000,-200,200);
           fitFuncConeS->SetParName(0,coneNameS.c_str());
           fitFuncConeS2D->SetParName(0,coneNameS.c_str());
           fitFuncConeS->SetParName(1,"offset [ns]");
           fitFuncConeS2D->SetParName(1,"offset [ns]");
-          fitFuncConeS2D->SetParameter(1,0);
+          if (variableTimeOffsetSim) {
+            fitFuncConeS->SetParameter(1,0);
+            fitFuncConeS2D->SetParameter(1,0);
+          } else {
+            fitFuncConeS->FixParameter(1,0);
+            fitFuncConeS2D->FixParameter(1,0);
+          }
           //fitFunc->FixParameter(1,1e9/lightspeed); // = 3.335640952
           fitFuncConeS2D->SetParameter(0,0);
           fitFuncConeS->SetFillStyle(0);

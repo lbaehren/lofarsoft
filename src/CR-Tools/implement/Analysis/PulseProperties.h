@@ -114,6 +114,22 @@
     double dist;
     //! error of distance of antenna position from shower axis (gaussian error propagation)
     double disterr;
+    //! antenna position in shower coordinates x (calculated with input shower direction)
+    double KGdistX;
+    //! error of antenna position in shower coordinates x (calculated with input shower direction)
+    double KGdistXerr;
+    //! antenna position in shower coordinates y (calculated with input shower direction)
+    double KGdistY;
+    //! error of antenna position in shower coordinates y (calculated with input shower direction)
+    double KGdistYerr;
+    //! antenna position in shower coordinates z (calculated with input shower direction)
+    double KGdistZ;
+    //! error of antenna position in shower coordinates z (calculated with input shower direction)
+    double KGdistZerr;
+    //! KGdistance of antenna position from shower axis sqrt(x^2+y^2) (calculated with input shower direction)
+    double KGdist;
+    //! error of KGdistance of antenna position from shower axis (gaussian error propagation) (calculated with input shower direction)
+    double KGdisterr;
     //! angle between antenna and core position
     double angleToCore;
     //! error of angle between antenna and core position
@@ -139,7 +155,7 @@
   };
   
   // define a string to put struct into root file
-  #define _pulseStructRootString "height/D:heightError/D:time/D:timeError/D:antennaID/I:antenna/I:maximum/D:envelopeMaximum/D:minimum/D:maximumTime/D:envelopeTime/D:minimumTime/D:halfheightTime/D:geomDelay/D:fwhm/D:distX/D:distXerr/D:distY/D:distYerr/D:distZ/D:distZerr/D:dist/D:disterr/D:angleToCore/D:angleToCoreerr/D:noise/D:lateralExpHeight/D:lateralExpHeightErr/D:lateralExpDeviation/D:lateralExpDeviationErr/D:lateralCut/O:polarization/C:minMaxSign/I:envSign/I"
+  #define _pulseStructRootString "height/D:heightError/D:time/D:timeError/D:antennaID/I:antenna/I:maximum/D:envelopeMaximum/D:minimum/D:maximumTime/D:envelopeTime/D:minimumTime/D:halfheightTime/D:geomDelay/D:fwhm/D:distX/D:distXerr/D:distY/D:distYerr/D:distZ/D:distZerr/D:dist/D:disterr/D:KGdistX/D:KGdistXerr/D:KGdistY/D:KGdistYerr/D:KGdistZ/D:KGdistZerr/D:KGdist/D:KGdisterr/D:angleToCore/D:angleToCoreerr/D:noise/D:lateralExpHeight/D:lateralExpHeightErr/D:lateralExpDeviation/D:lateralExpDeviationErr/D:lateralCut/O:polarization/C:minMaxSign/I:envSign/I"
 
   
   class PulseProperties {
@@ -207,6 +223,22 @@
     double dist;
     //! error of distance of antenna position from shower axis (gaussian error propagation)
     double disterr;
+    //! antenna position in shower coordinates x (calculated with input shower direction)
+    double KGdistX;
+    //! error of antenna position in shower coordinates x (calculated with input shower direction)
+    double KGdistXerr;
+    //! antenna position in shower coordinates y (calculated with input shower direction)
+    double KGdistY;
+    //! error of antenna position in shower coordinates y (calculated with input shower direction)
+    double KGdistYerr;
+    //! antenna position in shower coordinates z (calculated with input shower direction)
+    double KGdistZ;
+    //! error of antenna position in shower coordinates z (calculated with input shower direction)
+    double KGdistZerr;
+    //! KGdistance of antenna position from shower axis sqrt(x^2+y^2) (calculated with input shower direction)
+    double KGdist;
+    //! error of KGdistance of antenna position from shower axis (gaussian error propagation) (calculated with input shower direction)
+    double KGdisterr;
     //! angle between antenna and core position
     double angleToCore;
     //! error of angle between antenna and core position

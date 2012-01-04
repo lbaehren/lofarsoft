@@ -240,15 +240,17 @@ namespace CR { // Namespace CR -- begin
     /*!
        \brief Plots lateral distribution of pulse arrival times
 
-       \param filePrefix - the filename will be prefix+GT+".dat".
-       \param pulsesRec   - map with information about pulses from LOPES data
-       \param pulsesSim   - map with information about pulses from simulated data (leave it empty if there is no simulation)
-       \param Gt          - gt from the pipeline root file
-       \param az          - azimuth from the pipeline root file
-       \param ze          - zenith from the pipeline root file
-       \param ccCenter    - time of CC beam (center of gaussian fit)
-       \param index1      - index for statistics box
-       \param index2      - index for statistics box
+       \param filePrefix            - the filename will be prefix+GT+".dat".
+       \param pulsesRec             - map with information about pulses from LOPES data
+       \param pulsesSim             - map with information about pulses from simulated data (leave it empty if there is no simulation)
+       \param Gt                    - gt from the pipeline root file
+       \param az                    - azimuth from the pipeline root file
+       \param ze                    - zenith from the pipeline root file
+       \param ccCenter              - time of CC beam (center of gaussian fit)
+       \param index1                - index for statistics box
+       \param index2                - index for statistics box
+       \param variableTimeOffset    - allow time offset in fit (otherwise it is fixed to 0)
+       \param variableTimeOffsetSim - allow time offset in fit for simulated data set
     */
     Record lateralTimeDistribution (const string& filePrefix,
                                     map <int, PulseProperties> pulsesRec,
@@ -256,7 +258,9 @@ namespace CR { // Namespace CR -- begin
                                     int Gt, double az, double ze,
                                     double ccCenter,
                                     const string& index1 = "",
-                                    const string& index2 = "2");
+                                    const string& index2 = "2",
+                                    const bool variableTimeOffset = true,
+                                    const bool variableTimeOffsetSim = true);
                                    
   };
 } // Namespace CR -- end

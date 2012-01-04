@@ -67,6 +67,14 @@
     distZerr(0.),
     dist(-1.),
     disterr(0.),
+    KGdistX(-1.),
+    KGdistXerr(0.),
+    KGdistY(-1.),
+    KGdistYerr(0.),
+    KGdistZ(-1.),
+    KGdistZerr(0.),
+    KGdist(-1.),
+    KGdisterr(0.),
     angleToCore(-99.),
     angleToCoreerr(-99.),
     noise(0.),
@@ -134,6 +142,14 @@
     pulse.distZerr=distZerr;
     pulse.dist=dist;
     pulse.disterr=disterr;
+    pulse.KGdistX=KGdistX;
+    pulse.KGdistXerr=KGdistXerr;
+    pulse.KGdistY=KGdistY;
+    pulse.KGdistYerr=KGdistYerr;
+    pulse.KGdistZ=KGdistZ;
+    pulse.KGdistZerr=KGdistZerr;
+    pulse.KGdist=KGdist;
+    pulse.KGdisterr=KGdisterr;
     pulse.angleToCore=angleToCore;
     pulse.angleToCoreerr=angleToCoreerr;
     pulse.noise=noise;

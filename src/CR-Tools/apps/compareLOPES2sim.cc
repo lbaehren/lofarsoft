@@ -354,6 +354,11 @@ int main (int argc, char *argv[])
     double latTimeSphere2DSigRcurv_sim_EW = 0, latTimeSphere2DSigRcurv_sim_NS = 0, latTimeSphere2DSigRcurv_sim_VE = 0;
     double latTimeSphere2DChi2NDF_sim_EW = 0, latTimeSphere2DChi2NDF_sim_NS = 0, latTimeSphere2DChi2NDF_sim_VE = 0;
     
+    double latTimeSphere1DOffset_sim_EW = 0, latTimeSphere1DOffset_sim_NS = 0, latTimeSphere1DOffset_sim_VE = 0;
+    double latTimeSphere1DSigOffset_sim_EW = 0, latTimeSphere1DSigOffset_sim_NS = 0, latTimeSphere1DSigOffset_sim_VE = 0;
+    double latTimeSphere2DOffset_sim_EW = 0, latTimeSphere2DOffset_sim_NS = 0, latTimeSphere2DOffset_sim_VE = 0;
+    double latTimeSphere2DSigOffset_sim_EW = 0, latTimeSphere2DSigOffset_sim_NS = 0, latTimeSphere2DSigOffset_sim_VE = 0;
+    
     double latTimeCone1DRho_EW = 0, latTimeCone1DRho_NS = 0, latTimeCone1DRho_VE = 0;
     double latTimeCone1DSigRho_EW = 0, latTimeCone1DSigRho_NS = 0, latTimeCone1DSigRho_VE = 0;
     double latTimeCone1DChi2NDF_EW = 0, latTimeCone1DChi2NDF_NS = 0, latTimeCone1DChi2NDF_VE = 0;
@@ -564,6 +569,11 @@ int main (int argc, char *argv[])
       outtree->Branch("latTimeSphere2DSigRcurv_sim_EW",&latTimeSphere2DSigRcurv_sim_EW,"latTimeSphere2DSigRcurv_sim_EW/D");
       outtree->Branch("latTimeSphere2DChi2NDF_sim_EW",&latTimeSphere2DChi2NDF_sim_EW,"latTimeSphere2DChi2NDF_sim_EW/D");
       
+      outtree->Branch("latTimeSphere1DOffset_sim_EW",&latTimeSphere1DOffset_sim_EW,"latTimeSphere1DOffset_sim_EW/D");
+      outtree->Branch("latTimeSphere1DSigOffset_sim_EW",&latTimeSphere1DSigOffset_sim_EW,"latTimeSphere1DSigOffset_sim_EW/D");
+      outtree->Branch("latTimeSphere2DOffset_sim_EW",&latTimeSphere2DOffset_sim_EW,"latTimeSphere2DOffset_sim_EW/D");
+      outtree->Branch("latTimeSphere2DSigOffset_sim_EW",&latTimeSphere2DSigOffset_sim_EW,"latTimeSphere2DSigOffset_sim_EW/D");
+      
       outtree->Branch("latTimeCone1DRho_EW",&latTimeCone1DRho_EW,"latTimeCone1DRho_EW/D");
       outtree->Branch("latTimeCone1DSigRho_EW",&latTimeCone1DSigRho_EW,"latTimeCone1DSigRho_EW/D");
       outtree->Branch("latTimeCone1DChi2NDF_EW",&latTimeCone1DChi2NDF_EW,"latTimeCone1DChi2NDF_EW/D");
@@ -672,6 +682,11 @@ int main (int argc, char *argv[])
       outtree->Branch("latTimeSphere2DRcurv_sim_NS",&latTimeSphere2DRcurv_sim_NS,"latTimeSphere2DRcurv_sim_NS/D");
       outtree->Branch("latTimeSphere2DSigRcurv_sim_NS",&latTimeSphere2DSigRcurv_sim_NS,"latTimeSphere2DSigRcurv_sim_NS/D");
       outtree->Branch("latTimeSphere2DChi2NDF_sim_NS",&latTimeSphere2DChi2NDF_sim_NS,"latTimeSphere2DChi2NDF_sim_NS/D");
+            
+      outtree->Branch("latTimeSphere1DOffset_sim_NS",&latTimeSphere1DOffset_sim_NS,"latTimeSphere1DOffset_sim_NS/D");
+      outtree->Branch("latTimeSphere1DSigOffset_sim_NS",&latTimeSphere1DSigOffset_sim_NS,"latTimeSphere1DSigOffset_sim_NS/D");
+      outtree->Branch("latTimeSphere2DOffset_sim_NS",&latTimeSphere2DOffset_sim_NS,"latTimeSphere2DOffset_sim_NS/D");
+      outtree->Branch("latTimeSphere2DSigOffset_sim_NS",&latTimeSphere2DSigOffset_sim_NS,"latTimeSphere2DSigOffset_sim_NS/D");
       
       outtree->Branch("latTimeCone1DRho_NS",&latTimeCone1DRho_NS,"latTimeCone1DRho_NS/D");
       outtree->Branch("latTimeCone1DSigRho_NS",&latTimeCone1DSigRho_NS,"latTimeCone1DSigRho_NS/D");
@@ -781,6 +796,11 @@ int main (int argc, char *argv[])
       outtree->Branch("latTimeSphere2DRcurv_sim_VE",&latTimeSphere2DRcurv_sim_VE,"latTimeSphere2DRcurv_sim_VE/D");
       outtree->Branch("latTimeSphere2DSigRcurv_sim_VE",&latTimeSphere2DSigRcurv_sim_VE,"latTimeSphere2DSigRcurv_sim_VE/D");
       outtree->Branch("latTimeSphere2DChi2NDF_sim_VE",&latTimeSphere2DChi2NDF_sim_VE,"latTimeSphere2DChi2NDF_sim_VE/D");
+      
+      outtree->Branch("latTimeSphere1DOffset_sim_VE",&latTimeSphere1DOffset_sim_VE,"latTimeSphere1DOffset_sim_VE/D");
+      outtree->Branch("latTimeSphere1DSigOffset_sim_VE",&latTimeSphere1DSigOffset_sim_VE,"latTimeSphere1DSigOffset_sim_VE/D");
+      outtree->Branch("latTimeSphere2DOffset_sim_VE",&latTimeSphere2DOffset_sim_VE,"latTimeSphere2DOffset_sim_VE/D");
+      outtree->Branch("latTimeSphere2DSigOffset_sim_VE",&latTimeSphere2DSigOffset_sim_VE,"latTimeSphere2DSigOffset_sim_VE/D");
       
       outtree->Branch("latTimeCone1DRho_VE",&latTimeCone1DRho_VE,"latTimeCone1DRho_VE/D");
       outtree->Branch("latTimeCone1DSigRho_VE",&latTimeCone1DSigRho_VE,"latTimeCone1DSigRho_VE/D");
@@ -1299,6 +1319,11 @@ int main (int argc, char *argv[])
         latTimeSphere2DSigRcurv_sim_EW = ergTimeEW.asDouble("latTime2D_sigRcurv_sim");
         latTimeSphere2DChi2NDF_sim_EW = ergTimeEW.asDouble("latTime2D_chi2NDF_sim");
                                                                  
+        latTimeSphere1DOffset_sim_EW = ergTimeEW.asDouble("latTime1D_SphereOffset_sim");
+        latTimeSphere1DSigOffset_sim_EW = ergTimeEW.asDouble("latTime1D_sigSphereOffset_sim");
+        latTimeSphere2DOffset_sim_EW = ergTimeEW.asDouble("latTime2D_SphereOffset_sim");
+        latTimeSphere2DSigOffset_sim_EW = ergTimeEW.asDouble("latTime2D_sigSphereOffset_sim");
+        
         latTimeCone1DRho_EW = ergTimeEW.asDouble("latTime1D_ConeRho");
         latTimeCone1DSigRho_EW = ergTimeEW.asDouble("latTime1D_sigConeRho");
         latTimeCone1DChi2NDF_EW = ergTimeEW.asDouble("latTime1D_Conechi2NDF");
@@ -1370,6 +1395,11 @@ int main (int argc, char *argv[])
         latTimeSphere2DRcurv_sim_NS = ergTimeNS.asDouble("latTime2D_Rcurv_sim");
         latTimeSphere2DSigRcurv_sim_NS = ergTimeNS.asDouble("latTime2D_sigRcurv_sim");
         latTimeSphere2DChi2NDF_sim_NS = ergTimeNS.asDouble("latTime2D_chi2NDF_sim");
+        
+        latTimeSphere1DOffset_sim_NS = ergTimeNS.asDouble("latTime1D_SphereOffset_sim");
+        latTimeSphere1DSigOffset_sim_NS = ergTimeNS.asDouble("latTime1D_sigSphereOffset_sim");
+        latTimeSphere2DOffset_sim_NS = ergTimeNS.asDouble("latTime2D_SphereOffset_sim");
+        latTimeSphere2DSigOffset_sim_NS = ergTimeNS.asDouble("latTime2D_sigSphereOffset_sim");
                                                                  
         latTimeCone1DRho_NS = ergTimeNS.asDouble("latTime1D_ConeRho");
         latTimeCone1DSigRho_NS = ergTimeNS.asDouble("latTime1D_sigConeRho");

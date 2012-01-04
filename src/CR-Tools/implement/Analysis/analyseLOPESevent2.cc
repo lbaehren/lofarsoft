@@ -397,12 +397,16 @@ namespace CR { // Namespace CR -- begin
       }
 
       // output of antnenna to core distances in shower coordinates, if requested
-      if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
-                                                         toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"),
-                                                                  erg.asDouble("Elevation")),
-                                                         erg.asDouble("Elevation"), erg.asDouble("Azimuth"), XC, YC,
-                                                         beamformDR_p->headerRecord().asInt("Date"));
-      storeShowerCoordinates(erg);        // store shower coordinates in every case
+      if (printShowerCoordinates)
+        printAntennaDistances(erg.asArrayDouble("distances"),
+                              toShower(beamPipe_p->GetAntPositions(), erg.asDouble("Azimuth"),
+                              erg.asDouble("Elevation")),
+                              erg.asDouble("Elevation"), erg.asDouble("Azimuth"), XC, YC,
+                              beamformDR_p->headerRecord().asInt("Date"));
+        
+      // store shower coordinates for LOPES reconstruction and KASACADE-Grande input direction
+      storeShowerCoordinates(erg.asDouble("Elevation")*PI/180., erg.asDouble("Azimuth")*PI/180.,
+                             El*PI/180., Az*PI/180.);
       
 
       // give out the names of the created plots
@@ -627,29 +631,35 @@ namespace CR { // Namespace CR -- begin
 
 
 
- void analyseLOPESevent2::storeShowerCoordinates (const Record& erg)
+ void analyseLOPESevent2::storeShowerCoordinates (const double elevation,
+                                                  const double azimuth,
+                                                  const double elevationKG,
+                                                  const double azimuthKG)
   {
     try {
       // get AntennaIDs to store pulse parameters in corresponding map
       Vector<int> antennaIDs;
       beamformDR_p->headerRecord().get("AntennaIDs",antennaIDs);
 
-      // get antenna positions and distances in shower coordinates
-      Vector <double> distances = erg.asArrayDouble("distances");
       // get antenna positions (shifted, so that core position is at 0)
       Matrix <double> antPos = beamPipe_p->GetAntPositions(beamformDR_p);
       // get antenna positions in shower coordinates
-      Matrix <double> antPosS = toShower(beamPipe_p->GetAntPositions(beamformDR_p), erg.asDouble("Azimuth"), erg.asDouble("Elevation"));
+      Matrix <double> antPosS = toShower(beamPipe_p->GetAntPositions(beamformDR_p), azimuth/PI*180., elevation/PI*180.);
+      Matrix <double> antPosSKG = toShower(beamPipe_p->GetAntPositions(beamformDR_p), azimuthKG/PI*180., elevationKG/PI*180.);
 
       // for error calculation
       // errors of GPS measurement (< 1-2 cm) is neglected
       // possible shift between KASCADE and LOPES coordinate system ~20 cm is also negelected
       // calcualte squared errors for x, y, and z in shower coordinates
       // formulas: error propagation of transformation to shower coordinates
-      double sinEl = sin(erg.asDouble("Elevation")*PI/180.);
-      double cosEl = cos(erg.asDouble("Elevation")*PI/180.);
-      double sinAz = sin(erg.asDouble("Azimuth")*PI/180.);
-      double cosAz = cos(erg.asDouble("Azimuth")*PI/180.);
+      double sinEl = sin(elevation);
+      double cosEl = cos(elevation);
+      double sinAz = sin(azimuth);
+      double cosAz = cos(azimuth);
+      double sinElKG = sin(elevationKG);
+      double cosElKG = cos(elevationKG);
+      double sinAzKG = sin(azimuthKG);
+      double cosAzKG = cos(azimuthKG);
 
       // loop through antenna IDs and write distances in pulseProperties if element exists
       for (unsigned int i=0 ; i < antennaIDs.size(); i++)
@@ -661,16 +671,29 @@ namespace CR { // Namespace CR -- begin
           double xS = antPosS.row(i)(0);
           double yS = antPosS.row(i)(1);
           double zS = antPosS.row(i)(2);
+          double xSKG = antPosSKG.row(i)(0);
+          double ySKG = antPosSKG.row(i)(1);
+          double zSKG = antPosSKG.row(i)(2);
           calibPulses[antennaIDs(i)].distX    = xS;
           calibPulses[antennaIDs(i)].distY    = yS;
           calibPulses[antennaIDs(i)].distZ    = zS;
-          calibPulses[antennaIDs(i)].dist     = distances(i);  // already calculated: dist = sqrt(xS^2+yS^2), no zS!
+          calibPulses[antennaIDs(i)].dist     = sqrt(xS*xS+yS*yS);  // perpendicular to axis --> no zS!
+          calibPulses[antennaIDs(i)].KGdistX    = xSKG;
+          calibPulses[antennaIDs(i)].KGdistY    = ySKG;
+          calibPulses[antennaIDs(i)].KGdistZ    = zSKG;
+          calibPulses[antennaIDs(i)].KGdist     = sqrt(xSKG*xSKG+ySKG*ySKG);
           // calcualte errors
           calibPulses[antennaIDs(i)].distXerr = sqrt(  pow(coreError, 2)
                                                      + pow(( x*cosAz + y*sinAz)*azimuthError, 2)); 
           calibPulses[antennaIDs(i)].distYerr = sqrt(  pow(coreError*sinEl, 2)
                                                      + pow((-x*sinAz + y*cosAz)*azimuthError*sinEl, 2)
                                                      + pow(( x*cosAz + y*sinAz)*zenithError *cosEl, 2)); 
+          calibPulses[antennaIDs(i)].KGdistXerr = sqrt(  pow(coreError, 2)
+                                                       + pow(( x*cosAzKG + y*sinAzKG)*azimuthError, 2)); 
+          calibPulses[antennaIDs(i)].KGdistYerr = sqrt(  pow(coreError*sinElKG, 2)
+                                                       + pow((-x*sinAzKG + y*cosAzKG)*azimuthError*sinElKG, 2)
+                                                       + pow(( x*cosAzKG + y*sinAzKG)*zenithError *cosElKG, 2)); 
+          
           // The error of z due to the core uncertainty should affect all z-values exactly in the same direction.
           // That means a wrong core position should either decrease or increase all z-values the same way.
           // Thus, it should not be considered as statistical error in any fit.
@@ -684,7 +707,14 @@ namespace CR { // Namespace CR -- begin
           calibPulses[antennaIDs(i)].disterr  = sqrt(  pow(xS*calibPulses[antennaIDs(i)].distXerr,2) 
                                                      + pow(yS*calibPulses[antennaIDs(i)].distYerr,2))
                                                 / calibPulses[antennaIDs(i)].dist;
-          // for debug output                                                
+                                                
+          calibPulses[antennaIDs(i)].KGdistZerr = sqrt(  // pow(coreError*cosKGEl, 2)
+                                                       + pow((-x*sinAzKG + y*cosAzKG)*azimuthError*cosElKG, 2)
+                                                       + pow(( x*cosAzKG + y*sinAzKG)*zenithError *sinElKG, 2)); 
+                                                      
+          calibPulses[antennaIDs(i)].KGdisterr  = sqrt(  pow(xSKG*calibPulses[antennaIDs(i)].KGdistXerr,2) 
+                                                       + pow(ySKG*calibPulses[antennaIDs(i)].KGdistYerr,2))
+                                                  / calibPulses[antennaIDs(i)].KGdist;          // for debug output                                                
           /* cout << calibPulses[antennaIDs(i)].distX << " +/-" << calibPulses[antennaIDs(i)].distXerr << "\t "
                << calibPulses[antennaIDs(i)].distY << " +/-" << calibPulses[antennaIDs(i)].distYerr << "\t "
                << calibPulses[antennaIDs(i)].distZ << " +/-" << calibPulses[antennaIDs(i)].distZerr << "\t "

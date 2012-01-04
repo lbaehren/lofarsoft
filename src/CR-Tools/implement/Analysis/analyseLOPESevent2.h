@@ -498,10 +498,16 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Stores the distances of the antennas to the core in PulseProperties objects
 
-      \param erg         - results of the pipeline (e.g. Azimuth, Elevation)
+      \param elevation         - elevation to calculate shower coordinates (LOPES reconstruction)
+      \param azimuth           - azimuth to calculate shower coordinates (LOPES reconstruction)
+      \param elevationKG       - elevation to calculate shower coordinates (KASCADE-Grande input)
+      \param azimuthKG         - azimuth to calculate shower coordinates (KASCADE-Grande input)
    */
 
-    void storeShowerCoordinates (const Record& erg);
+    void storeShowerCoordinates (const double elevation,
+                                 const double azimuth,
+                                 const double elevationKG,
+                                 const double azimuthKG);
 
 
     /*!
