@@ -1,7 +1,12 @@
 
-## Libraries
+## ==============================================================================
+##
+##                                                                      Libraries
+##
+## ==============================================================================
 
-## libpresto
+##____________________________________________________________________
+##                                                           libpresto
 
 set (presto_sources 
   amoeba.c
@@ -56,9 +61,17 @@ set (presto_sources
 )
 
 set (presto_binaries
-  makedata makeinf mjd2cal realfft quicklook
-  search_bin search_rzw swap_endian prepdata
-  check_parkes_raw bary shiftdata dftfold
+  makedata
+  makeinf
+  mjd2cal
+  realfft
+  quicklook
+  search_bin
+  search_rzw
+  swap_endian
+  prepdata
+  check_parkes_raw
+  bary shiftdata dftfold
   patchdata readfile toas2dat taperaw
   prepsubband cal2mjd split_parkes_beams
   dat2sdat sdat2dat downsample rednoise un_sc_td bincand
@@ -162,7 +175,7 @@ add_subdirectory (fortran)
 
 ## ==============================================================================
 ##
-##  Executables
+##                                                                    Executables
 ##
 ## ==============================================================================
 

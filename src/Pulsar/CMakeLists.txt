@@ -24,6 +24,7 @@ endif (NOT LUS_SOURCE_DIR)
 
 if (LUS_SOURCE_DIR)
   include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
+  list (INSERT CMAKE_MODULE_PATH 0 ${LUS_SOURCE_DIR}/devel_common/cmake )
 else (LUS_SOURCE_DIR)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (LUS_SOURCE_DIR)
@@ -175,7 +176,7 @@ check_type_size ("uint64_t"      SIZEOF_UINT64_T   )
 ## CFITSIO
 
 set (FIND_CFITSIO_CMAKE FALSE)
-include (FindCFITSIO)
+find_package (CFITSIO)
 
 ##__________________________________________________________
 ## GLIB library
@@ -208,9 +209,9 @@ include (${PULSAR_SOURCE_DIR}/cmake/FindMPI.cmake)
 
 if (NOT HAVE_PYTHON)
   include (${PULSAR_SOURCE_DIR}/cmake/FindPythonPath.cmake)
-  include (FindPython)
-  include (FindNumeric)
-  include (FindNumPy)
+  find_package (Python)
+  find_package (Numeric)
+  find_package (NumPy)
 endif (NOT HAVE_PYTHON)
 
 ##__________________________________________________________

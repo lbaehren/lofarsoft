@@ -35,6 +35,20 @@ if (NOT PRESTO_SETUP_PY)
 endif (NOT PRESTO_SETUP_PY)
 
 ##____________________________________________________________________
+## Add sub-directory
+
+if (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+  ## Find SWIG installation
+  find_package (SWIG)
+  ## Load SWIG module
+  include (UseSWIG)
+  ## Add sub-directory
+  add_subdirectory (wrappers)
+else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+  message (STATUS "[presto] Skip using CMake SWIG module - incomplete Python installation!")
+endif (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+
+##____________________________________________________________________
 ## Generate the Python bindings
 
 add_custom_target (ppgplot_bindings_build

@@ -1457,23 +1457,37 @@ int subs_clip_times(float *rawdata, int ptsperblk, int numchan,
 /* averages of the channels are returned in good_chan_levels */
 /* (which must be pre-allocated).                            */
 
-double *events_fdot_correct(double *events, int Nevents, 
-                            double freq, double fdot);
-/* Correct a set of sorted events (in sec) for a specific */
-/* 'fdot' at the frequency 'freq' as per Chandler et al., */
-/* 2001.  tnew_i = t_i + 0.5*fdot/freq*t_i^2.  Return a   */
-/* new array of events.                                   */
+/*!
+  Correct a set of sorted events (in sec) for a specific
+  'fdot' at the frequency 'freq' as per Chandler et al.,
+  2001.  tnew_i = t_i + 0.5*fdot/freq*t_i^2.  Return a
+  new array of events.
 
-fcomplex *atwood_search(double *events, double *weights, 
-                        int Nevents, int Nwin, double dt);
-/* Perform the time-differencing, incoherent, autocorrelation-like */
-/* search for sparse event data described in                       */
-/* Atwood et al. 2006, ApJL, 652, 49                               */
-/*    events:  a sorted, double prec, array of event times in sec  */
-/*    weights:  a weight factor (0-1) for each of the events       */
-/*    Nevents:  the number of events                               */
-/*    Nwin:  number of bins that make up a "window" (the FFT len)  */
-/*    dt:  the time duration to use for the binning                */
+  \param events
+  \param Nevents
+  \param freq
+  \param fdot
+*/
+double *events_fdot_correct (double *events,
+			     int Nevents, 
+			     double freq,
+			     double fdot);
+
+/*!
+  Perform the time-differencing, incoherent, autocorrelation-like search
+  for sparse event data described in Atwood et al. 2006, ApJL, 652, 49
+
+  \param events:  a sorted, double prec, array of event times in sec
+  \param weights:  a weight factor (0-1) for each of the events
+  \param Nevents:  the number of events
+  \param Nwin:  number of bins that make up a "window" (the FFT len)
+  \param dt:  the time duration to use for the binning
+*/
+fcomplex *atwood_search (double *events,
+			 double *weights, 
+			 int Nevents,
+			 int Nwin,
+			 double dt);
 
 
 

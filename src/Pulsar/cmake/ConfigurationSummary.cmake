@@ -49,5 +49,6 @@ message (STATUS "    .. PGPlot include path       = ${PGPLOT_INCLUDES}"         
 message (STATUS "    .. libpgplot                 = ${PGPLOT_PGPLOT_LIBRARY}"       )
 message (STATUS "    .. libcpgplot                = ${PGPLOT_CPGPLOT_LIBRARY}"      )
 message (STATUS " .. Have Python                  = ${HAVE_PYTHON}"                 )
+message (STATUS "    .. Python executable         = ${PYTHON_EXECUTABLE}"           )
 message (STATUS "    .. Python include path       = ${PYTHON_INCLUDES}"             )
 message (STATUS "+------------------------------------------------------------+"    )
