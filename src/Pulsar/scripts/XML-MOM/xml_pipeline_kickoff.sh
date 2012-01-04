@@ -171,9 +171,16 @@ else # if [[ $cep2 == 1 ]]
               echo "ERROR: invalid PARSET file '$PARSET'"
               exit 1
            else
+              keyword=`grep locus $PARSET | grep Observation.DataProducts.Output_Beamformed.locations | awk '{print $3}'`
+              if [[ $keyword == "[]" ]] || [[ $keyword == "" ]]
+              then 
+                 keyword=CoherentStokes.mountpoints
+              else
+                 keyword=Observation.DataProducts.Output_Beamformed.locations
+              fi
               # collect the locus info from the parset
               locus_list=NONE
-              locus_list=`grep locus $PARSET | grep CoherentStokes.mountpoints | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
+              locus_list=`grep locus $PARSET | grep $keyword | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
               status=$?
               if [[ $status != 0 ]]
               then
