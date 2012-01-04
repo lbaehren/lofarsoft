@@ -34,12 +34,15 @@ if (NUM_UTIL_FIND_QUIETLY)
   set (PYTHON_FIND_QUIETLY TRUE)
 endif (NUM_UTIL_FIND_QUIETLY)
 
-include (FindPython)
-
+if (NOT PYTHON_FOUND)
+  find_package (Python)
+endif (NOT PYTHON_FOUND)
+    
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (NUM_UTIL_INCLUDES num_util.h
+  HINTS ${NUM_UTIL_ROOT_DIR}
   PATH_SUFFIXES
   python
   num_util
@@ -51,6 +54,7 @@ find_path (NUM_UTIL_INCLUDES num_util.h
 ## Check for the library
 
 find_library (NUM_UTIL_LIBRARIES num_util
+  HINTS ${NUM_UTIL_ROOT_DIR}
   PATH_SUFFIXES
   python
   python${PYTHON_VERSION}

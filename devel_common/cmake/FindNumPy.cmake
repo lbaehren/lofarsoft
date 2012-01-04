@@ -42,8 +42,10 @@ if (NUMPY_FIND_QUIETLY)
   set (PYTHON_FIND_QUIETLY TRUE)
 endif (NUMPY_FIND_QUIETLY)
 
-include (FindPython)
-
+if (NOT PYTHON_FOUND)
+  find_package (Python)
+endif (NOT PYTHON_FOUND)
+    
 ## -----------------------------------------------------------------------------
 ## As the shared libraries of a Python module typically do not contain the
 ## usual prefix, we need to remove it while searching for the NumPy libraries.
@@ -203,9 +205,11 @@ endif (numpy_version_test_output)
 ## Actions taken when all components have been found
 
 if (NUMPY_INCLUDES AND NUMPY_LIBRARIES AND F2PY_EXECUTABLE)
-  set (HAVE_NUMPY TRUE)
+  set (HAVE_NUMPY  TRUE)
+  set (NUMPY_FOUND TRUE)
 else (NUMPY_INCLUDES AND NUMPY_LIBRARIES AND F2PY_EXECUTABLE)
-  set (HAVE_NUMPY FALSE)
+  set (HAVE_NUMPY  FALSE)
+  set (NUMPY_FOUND FALSE)
   if (NOT NUMPY_FIND_QUIETLY)
     if (NOT NUMPY_INCLUDES)
       message (STATUS "Unable to find NUMPY header files!")
