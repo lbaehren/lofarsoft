@@ -15,11 +15,8 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (CASACORE_VERSION        "1.2.0-r21024" )
-set (CASACORE_SOURCE_ARCHIVE "casacore-${CASACORE_VERSION}.tar.bz2" )
-set (CASACORE_URL            "http://casacore.googlecode.com/files/${CASACORE_SOURCE_ARCHIVE}" )
 set (CASACORE_SVN            "http://casacore.googlecode.com/svn/trunk" )
-set (CASACORE_SVN_REVISION   "-r21024")
+set (CASACORE_STABLE_SVN_REVISION   "21024")
 
 ## ==============================================================================
 ##
@@ -27,20 +24,12 @@ set (CASACORE_SVN_REVISION   "-r21024")
 ##
 ## ==============================================================================
 
-option (CASACORE_VERBOSE_CONFIGURE "Be verbose during configuration?"         NO  )
-option (CASACORE_FORCE_BUILD       "Force build and installation of package?" OFF )
-option (CASACORE_FROM_REPOS        "Install package from repository?"         NO  )
-option (CASACORE_FROM_REPOS_HEAD   "Install package from repository HEAD?"    YES )
-option (CASACORE_WITH_FFTW3        "Enable FFTW3 library support?"            OFF )
-option (CASACORE_WITH_HDF5         "Enable HDF5 library support?"             YES )
-option (CASACORE_BUILD_TESTING     "Build test programs?"                     OFF )
-
-##__________________________________________________________
-## Handle option: Build type
-
-if (CASACORE_FROM_REPOS_HEAD)
-  set (CASACORE_FROM_REPOS TRUE)
-endif (CASACORE_FROM_REPOS_HEAD)
+option (CASACORE_VERBOSE_CONFIGURE        "Be verbose during configuration?"                                          OFF )
+option (CASACORE_FORCE_BUILD              "Force build and installation of package?"                                  OFF )
+option (CASACORE_FROM_LATEST_SVN_REVISION "Install package from latest SVN revision instead of known stable version?" OFF )
+option (CASACORE_WITH_FFTW3               "Enable FFTW3 library support?"                                             OFF )
+option (CASACORE_WITH_HDF5                "Enable HDF5 library support?"                                              OFF )
+option (CASACORE_BUILD_TESTING            "Build test programs?"                                                      OFF )
 
 ## ==============================================================================
 ##
@@ -150,27 +139,11 @@ endif (NOT CASACORE_CMAKE)
 ##
 ## ==============================================================================
 
-if (CASACORE_FROM_REPOS)
-  set (CASACORE_FORCE_BUILD TRUE)
-endif (CASACORE_FROM_REPOS)
-
 if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
-  
-  ## Locate source file to build from
-  
-  find_file (CASACORE_SOURCE ${CASACORE_SOURCE_ARCHIVE}
-    PATHS ${PROJECT_SOURCE_DIR}
-    )
-  
-  if (NOT CASACORE_SOURCE)
-    set (CASACORE_SOURCE ${CASACORE_URL})
-  endif (NOT CASACORE_SOURCE)
   
   ## Build package from source
   
-  if (CASACORE_FROM_REPOS)
-    
-    if (CASACORE_FROM_REPOS_HEAD)
+    if (CASACORE_FROM_LATEST_SVN_REVISION)
       ## Check out most recent version (SVN HEAD)
       ExternalProject_Add (casacore
 	PREFIX ${PROJECT_BINARY_DIR}
@@ -182,36 +155,20 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
 	BUILD_COMMAND ${CMAKE_BUILD_TOOL} -j4
 	INSTALL_COMMAND make install
 	)
-    else (CASACORE_FROM_REPOS_HEAD)
+    else (CASACORE_FROM_LATEST_SVN_REVISION)
       ## Check out specific revision
       ExternalProject_Add (casacore
 	PREFIX ${PROJECT_BINARY_DIR}
 	DOWNLOAD_DIR download
 	SOURCE_DIR source
 	SVN_REPOSITORY ${CASACORE_SVN}
-	SVN_REVISION ${CASACORE_SVN_REVISION}
+	SVN_REVISION -r${CASACORE_STABLE_SVN_REVISION}
 	CMAKE_ARGS -C${CASACORE_CMAKE}
 	PATCH_COMMAND cat ${PROJECT_SOURCE_DIR}/casacore.patch.cmake >> ${PROJECT_BINARY_DIR}/source/CMakeLists.txt
 	BUILD_COMMAND ${CMAKE_BUILD_TOOL} -j4
 	INSTALL_COMMAND make install
 	)
-    endif (CASACORE_FROM_REPOS_HEAD)
-    
-    
-  else (CASACORE_FROM_REPOS)
-    
-    ExternalProject_Add (casacore
-      PREFIX ${PROJECT_BINARY_DIR}
-      DOWNLOAD_DIR download
-      SOURCE_DIR source
-      URL ${CASACORE_SOURCE}
-      CMAKE_ARGS -C${CASACORE_CMAKE}
-      PATCH_COMMAND cat ${PROJECT_SOURCE_DIR}/casacore.patch.cmake >> ${PROJECT_BINARY_DIR}/source/CMakeLists.txt
-      BUILD_COMMAND ${CMAKE_BUILD_TOOL} -j4
-      INSTALL_COMMAND make install
-      )
-    
-  endif (CASACORE_FROM_REPOS)
+    endif (CASACORE_FROM_LATEST_SVN_REVISION)
 
   ## ==============================================================================
   ##
@@ -225,10 +182,11 @@ if (NOT HAVE_CASACORE OR CASACORE_FORCE_BUILD)
     message (STATUS "| [casacore] Summary of configuration settings               |" )
     message (STATUS "+------------------------------------------------------------+" )
     message (STATUS " casacore package description:"                             )
-    message (STATUS " .. Version                   = ${CASACORE_VERSION}"        )
-    message (STATUS " .. Source archive            = ${CASACORE_SOURCE_ARCHIVE}" )
-    message (STATUS " .. Build  from SVN HEAD      = ${CASACORE_FROM_REPOS_HEAD}")
-    message (STATUS " .. SVN revision number       = ${CASACORE_SVN_REVISION}"   )
+    if (CASACORE_FROM_LATEST_SVN_REVISION)
+      message (STATUS " .. SVN revision number       = ${CASACORE_STABLE_SVN_REVISION}"   )
+    else (CASACORE_FROM_LATEST_SVN_REVISION)
+      message (STATUS " .. SVN revision number       = latest"                   )
+    endif (CASACORE_FROM_LATEST_SVN_REVISION)
     message (STATUS " PROJECT_SOURCE_DIR           = ${PROJECT_SOURCE_DIR}"      )
     message (STATUS " CMAKE_INSTALL_PREFIX         = ${CMAKE_INSTALL_PREFIX}"    )
     message (STATUS " Enable FFTW3 library support = ${CASACORE_WITH_FFTW3}"     )
