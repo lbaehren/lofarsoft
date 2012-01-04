@@ -33,11 +33,6 @@ if (NOT FIND_CFITSIO_CMAKE)
   set (FIND_CFITSIO_CMAKE TRUE)
 
   ##_____________________________________________________________________________
-  ## Search locations
-
-  include (CMakeSettings)
-
-  ##_____________________________________________________________________________
   ## Check for the header files
 
   set (CFITSIO_INCLUDES "")

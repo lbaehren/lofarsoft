@@ -31,11 +31,6 @@ if (NOT FIND_CRTOOLS_CMAKE)
   set (FIND_CRTOOLS_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (CRTOOLS_INCLUDES Analysis/CompletePipeline.h IO/LOFAR_TBB.h

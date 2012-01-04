@@ -33,11 +33,6 @@ if (NOT FIND_CASAPY_CMAKE)
   set (FIND_CASAPY_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
-
-  ##_____________________________________________________________________________
   ## Base directory of CASApy installation
   
   if (APPLE)

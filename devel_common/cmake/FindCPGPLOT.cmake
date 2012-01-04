@@ -27,11 +27,6 @@
 #  CPGPLOT_INCLUDE_DIR -- Directory containing the CPGPLOT header files
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the library
 
 FIND_LIBRARY (CPGPLOT_LIBRARY
