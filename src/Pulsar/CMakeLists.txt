@@ -173,46 +173,36 @@ check_type_size ("uint32_t"      SIZEOF_UINT32_T   )
 check_type_size ("uint64_t"      SIZEOF_UINT64_T   )
 
 ##__________________________________________________________
-## CFITSIO
+## External packages
 
 set (FIND_CFITSIO_CMAKE FALSE)
-find_package (CFITSIO)
+include (${PULSAR_SOURCE_DIR}/cmake/FindPythonPath.cmake)
 
-##__________________________________________________________
-## GLIB library
+foreach (pulsarExternalPackages
+    CFITSIO
+    FFTW3
+    GLIB
+    GFortran
+    MPI
+    Numeric
+    NumPy
+    PGPLOT
+    Python
+    )
 
-if (NOT HAVE_GLIB)
-  include (FindGLIB)
-endif (NOT HAVE_GLIB)
-
-##__________________________________________________________
-## PGPLOT library
-
-if (NOT HAVE_PGPLOT)
-  include (FindPGPLOT)
-endif (NOT HAVE_PGPLOT)
-
-##__________________________________________________________
-## GFortran library
-
-if (NOT HAVE_GFORTRAN)
-  include (FindGFortran)
-endif (NOT HAVE_GFORTRAN)
-
-##__________________________________________________________
-## MPI
-
-include (${PULSAR_SOURCE_DIR}/cmake/FindMPI.cmake)
-
-##__________________________________________________________
-## PYTHON 
-
-if (NOT HAVE_PYTHON)
-  include (${PULSAR_SOURCE_DIR}/cmake/FindPythonPath.cmake)
-  find_package (Python)
-  find_package (Numeric)
-  find_package (NumPy)
-endif (NOT HAVE_PYTHON)
+  ##
+  ## Check if there is a custom version; if yes, rather use the custom
+  ## version instead of the one provided by either LUS or CMake.
+  ##
+  if (EXISTS ${PULSAR_SOURCE_DIR}/cmake/Find${pulsarExternalPackages}.cmake)
+    ## Load custom module
+    include (${PULSAR_SOURCE_DIR}/cmake/Find${pulsarExternalPackages}.cmake)
+  else (EXISTS ${PULSAR_SOURCE_DIR}/cmake/Find${pulsarExternalPackages}.cmake)
+    ## Load LUS or standard module
+    find_package (${pulsarExternalPackages})
+  endif (EXISTS ${PULSAR_SOURCE_DIR}/cmake/Find${pulsarExternalPackages}.cmake)
+  
+endforeach (pulsarExternalPackages)
 
 ##__________________________________________________________
 ## X11 
@@ -268,10 +258,6 @@ endif (NOT X11_INCLUDE_DIR)
 
 ##__________________________________________________________
 ## FFTW3 / FFTW3F
-
-if (NOT FFTW3_FOUND)
-  include (${PULSAR_SOURCE_DIR}/cmake/FindFFTW3.cmake)
-endif (NOT FFTW3_FOUND)
 
 ## If possible, use the static library; however if only a
 ## shared version is available, use this as backup
