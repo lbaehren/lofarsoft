@@ -26,7 +26,7 @@ find_path (PULSAR_PYTHONPATH_LUS
   NAMES
   pylab.py
   numpu/matlib.py
-  PATHS 
+  PATHS
   ${CMAKE_INSTALL_PREFIX}
   ${CMAKE_INSTALL_PREFIX}/..
   ${CMAKE_INSTALL_PREFIX}/../..
