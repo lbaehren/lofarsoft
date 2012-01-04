@@ -189,11 +189,7 @@ endif (NOT CASACORE_FIND_QUIETLY)
 
 foreach (casacore_lib ${casacore_modules})
   ## search for the library
-  if (${casacore_lib} MATCHES "mirlib")
-    find_library (CASACORE_lib${casacore_lib} mir casa_mirlib)
-  else (${casacore_lib} MATCHES "mirlib")
-    find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib})
-  endif (${casacore_lib} MATCHES "mirlib")
+  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib})
   ## if we have found the library, add it to the list
   if (CASACORE_lib${casacore_lib})
     list (APPEND CASACORE_LIBRARIES ${CASACORE_lib${casacore_lib}})
