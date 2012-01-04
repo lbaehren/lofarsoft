@@ -58,7 +58,11 @@ option (MULTITHREADED_BUILD    "Enable multithreading during build?"          NO
 
 ## Options affecting the build of individual packages
 
-option (WCSLIB_PYTHON_WRAPPER   "Generate Python wrapper for WCSLIB?"      YES )
+if (APPLE)
+  option (WCSLIB_PYTHON_WRAPPER   "Generate Python wrapper for WCSLIB?"      NO )
+else (APPLE)
+  option (WCSLIB_PYTHON_WRAPPER   "Generate Python wrapper for WCSLIB?"      YES )
+endif (APPLE)
 
 option (CR_WITH_DAL             "Build and use the Data Access Library?"   YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
