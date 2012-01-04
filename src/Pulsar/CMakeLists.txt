@@ -12,19 +12,18 @@ cmake_minimum_required (VERSION 2.6)
 ## ==============================================================================
 
 if (NOT LUS_SOURCE_DIR)
-  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
+  find_path (LUS_SOURCE_DIR devel_common/cmake/LUS_CMakeSettings.cmake
     PATHS 
-    ${PULSAR_SOURCE_DIR}
-    ${PULSAR_SOURCE_DIR}/..
-    ${PULSAR_SOURCE_DIR}/../..
-    ${PULSAR_SOURCE_DIR}/../../..
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
     $ENV{LOFARSOFT}
     )
 endif (NOT LUS_SOURCE_DIR)
 
 if (LUS_SOURCE_DIR)
-  include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
-  list (INSERT CMAKE_MODULE_PATH 0 ${LUS_SOURCE_DIR}/devel_common/cmake )
+  include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
 else (LUS_SOURCE_DIR)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (LUS_SOURCE_DIR)

@@ -78,16 +78,16 @@ if (NOT LUS_CMAKE_SETTINGS_CMAKE)
       ${CMAKE_INSTALL_PREFIX}
       )
     
-    ## Locations to search for header files
-    list (INSERT CMAKE_INCLUDE_PATH 0 ${_pathBase}/include )
-    
-    ## Locations to search for libraries
-    list (INSERT CMAKE_LIBRARY_PATH 0 ${_pathBase}         )
-    list (INSERT CMAKE_LIBRARY_PATH 0 ${_pathBase}/lib     )
-    
-    ## Locations to search for program executables
+    ## Standard CMake variables defining search locations
     list (INSERT CMAKE_PROGRAM_PATH 0 ${_pathBase}/bin     )
-    
+    list (INSERT CMAKE_INCLUDE_PATH 0 ${_pathBase}/include )
+    list (INSERT CMAKE_LIBRARY_PATH 0 ${_pathBase}/lib     )
+
+    ## Backwards compatibility variables
+    list (INSERT bin_locations      0 ${_pathBase}/bin     )
+    list (INSERT include_locations  0 ${_pathBase}/include )
+    list (INSERT lib_locations      0 ${_pathBase}/lib     )
+
   endforeach (_pathBase)
   
   ## ============================================================================
