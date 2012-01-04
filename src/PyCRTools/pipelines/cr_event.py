@@ -350,10 +350,10 @@ for full_filename in files:
         try:
             datafile=open(full_filename);
             if datafile["ANTENNA_SET"]=="UNDEFINED":
-                datafile["ANTENNA_SET"]=lofarmode
-        except RuntimeError:
+                datafile["ANTENNA_SET"]="LBA_OUTER"
+        except RuntimeError as e:
             print "ERROR opening file - skipping this file!"
-            statuslist.append("OPEN FAILED")
+            statuslist.append("OPEN FAILED "+str(e))
             finish_file()
             continue
 
@@ -476,6 +476,11 @@ for full_filename in files:
             plotfiles=Pause.plotfiles
             )
 
+        if "HBA" in datafile["ANTENNA_SET"]:
+            statuslist.append("HBA SKIPPED")
+            finish_file()
+            continue
+             
         if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
             print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             statuslist.append("DATA_LENGTH BAD")
@@ -506,7 +511,7 @@ for full_filename in files:
                     (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
                 except ValueError:
                     print "#ERROR - LORA trigger information not found"
-                    finish_file(laststatus="NO TRIGGER")
+                    finish_file(laststatus="TRIGGER TOO LATE")
                     continue
                 print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
                 if blocknumber<0:
@@ -516,7 +521,9 @@ for full_filename in files:
                 print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
                 lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
             else:
-                print "WARNING: LORA logfile found but no info for this event time in LORAtime4 file!"
+                finish_file(laststatus="TIMESTAMP NOT IN LORA LOGFILE")
+                continue
+#                print "WARNING: LORA logfile found but no info for this event time in LORAtime4 file!"
         else:
             print "WARNING: No LORA logfile found - ",lora_logfile
 
