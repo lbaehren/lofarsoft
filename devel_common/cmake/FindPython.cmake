@@ -57,9 +57,12 @@ if (NOT HAVE_PYTHON)
   set (python_lib_locations     ${CMAKE_LIBRARY_PATH} )
   
   ## But see if python_select knows about a specific preference
+  message (STATUS "Looging for program python_select")
   find_program (PYTHON_SELECTOR python_select)
   
   if (PYTHON_SELECTOR)
+
+    message (STATUS "Looging for program python_select - found")
     
     execute_process (
       COMMAND ${PYTHON_SELECTOR} -s
@@ -89,6 +92,10 @@ if (NOT HAVE_PYTHON)
 	)
       
     endif (python_default_version)
+
+  else (PYTHON_SELECTOR)
+
+    message (STATUS "Looging for program python_select - not found")
     
   endif (PYTHON_SELECTOR)
   
