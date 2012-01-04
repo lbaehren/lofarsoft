@@ -159,20 +159,6 @@ find_library (libutil    util    )
 find_library (libz       z       )
 
 ##__________________________________________________________
-## Type sizes
-
-include (CheckTypeSize)
-
-check_type_size ("long"          SIZEOF_LONG       )
-check_type_size ("long int"      SIZEOF_LONG_INT   )
-check_type_size ("long long"     SIZEOF_LONG_LONG  )
-check_type_size ("uint"          SIZEOF_UINT       )
-check_type_size ("int32_t"       SIZEOF_INT32_T    )
-check_type_size ("int64_t"       SIZEOF_INT64_T    )
-check_type_size ("uint32_t"      SIZEOF_UINT32_T   )
-check_type_size ("uint64_t"      SIZEOF_UINT64_T   )
-
-##__________________________________________________________
 ## External packages
 
 set (FIND_CFITSIO_CMAKE FALSE)
