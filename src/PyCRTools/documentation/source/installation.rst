@@ -19,7 +19,7 @@ Introduction
 ------------
 
 The following are instructions for installing the PyCRTools from
-source on Mac OSX 10.6 commonly known as Snow Leopard. While the
+source on Mac OS X 10.6 commonly known as Snow Leopard. While the
 system kernel itself does not run in 64 bit mode by default, all
 libraries are compiled 64 bit and the compiler is set to 64 bit
 architecture by default. Therefore these instructions also compile all
@@ -403,12 +403,25 @@ Then add the following line to your ``.bashrc`` or ``.bash_profile``::
   export LOFARSOFT=/path/to/lofarsoft
   . $LOFARSOFT/devel_common/scripts/init.sh
 
+Don't forget to restart your shell or problems will arise along the way.
+
 Now bootstrap the build system::
 
-  cd $LOFARSOFT/build
+  cd $LOFARSOFT
   ./bootstrap
 
-and compile the PyCRTools::
+Then run::
+
+  cd build
+  ccmake .
+
+and set ``WCSLIB_PYTHON_WRAPPER = OFF``, and ``DAL_PYTHON_BINDINGS =
+OFF``. Finalize the cmake configuration by pressing ``c``
+(configuration) and ``g`` (generating build scripts). If the ``g``
+option is not available, run the configuration again by pressing
+``c``.
+
+Compile the PyCRTools::
 
   make pycrtools
 
