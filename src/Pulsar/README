@@ -16,6 +16,11 @@ Collection of tools for pulsar data reduction.
 _________________________________________________________________________________
 >>> 2. Getting the source code
 
+The source code is freely available (world-readable) from the ASTRON Subversion
+server:
+
+  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
+
 For detailed and up-to-date information consult $LOFARSOFT/doc/index.html
 
 _________________________________________________________________________________
