@@ -6,7 +6,8 @@ CONTENTS:
   3. Organization of the source code
   4. External dependencies
   5. Configuration, build and installation
-  6. Basic installation steps for Presto
+  6. Testing
+  7. Basic installation steps for Presto
 
 _________________________________________________________________________________
 >>> 1. Introduction
@@ -86,6 +87,13 @@ ________________________________________________________________________________
  work, RFI mitigation, etc. These tools are utilized by a powerful suite of
  user-end programs that come with the library. The software is described in
  Hotan, van Straten & Manchester (2004). 
+
+
+_________________________________________________________________________________
+>>> 7. Testing
+
+In order to automatically validate the functionality (and perhaps later as well
+completeness) of the package installation, we are using CTest.
 
 
 _________________________________________________________________________________
