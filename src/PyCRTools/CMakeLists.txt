@@ -4,25 +4,28 @@ project (PyCRTools)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.8)
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
+## ==============================================================================
+##
+##  CMake configuration settings
+##
+## ==============================================================================
 
 if (NOT LUS_SOURCE_DIR)
-  find_path (LUS_SOURCE_DIR devel_common/cmake/CMakeSettings.cmake
-    PATHS
-    ${PYCRTOOLS_SOURCE_DIR}
-    ${PYCRTOOLS_SOURCE_DIR}/..
-    ${PYCRTOOLS_SOURCE_DIR}/../..
-    ${PYCRTOOLS_SOURCE_DIR}/../../..
-    ENV LOFARSOFT
+  find_path (LUS_SOURCE_DIR devel_common/cmake/LUS_CMakeSettings.cmake
+    PATHS 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
     )
-
-  if (LUS_SOURCE_DIR)
-    include (${LUS_SOURCE_DIR}/devel_common/cmake/CMakeSettings.cmake)
-  else (LUS_SOURCE_DIR)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (LUS_SOURCE_DIR)
 endif (NOT LUS_SOURCE_DIR)
+
+if (LUS_SOURCE_DIR)
+  include (${LUS_SOURCE_DIR}/devel_common/cmake/LUS_CMakeSettings.cmake)
+else (LUS_SOURCE_DIR)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (LUS_SOURCE_DIR)
 
 ##-------------------------------------------------------------------------------
 ## Find libraries
