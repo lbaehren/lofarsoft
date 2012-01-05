@@ -2243,13 +2243,13 @@ int counter=0;
 
                 // writing values in casacore vector   // 1/sqrt(Gain) Directivity
                 for (  int u =0; u<=20; u++ ){
-                ElGainCal(IPosition(3,u,az,el))=1/sqrt(pow(10,(gain[u]/20)));
-		if (1/sqrt(pow(10,(gain[u]/20)))>=10000){ElGainCal(IPosition(3,u,az,el))=10000; //to avoid regions that are too much amplified beacause they have 0 sensitivity -> would lead to unphysical infinite high noise signal
+                ElGainCal(IPosition(3,u,az,el))=1./sqrt(pow(10.,double(gain[u]/20.)));
+		if (1./sqrt(pow(10.,double(gain[u]/20.)))>=10000){ElGainCal(IPosition(3,u,az,el))=10000; //to avoid regions that are too much amplified beacause they have 0 sensitivity -> would lead to unphysical infinite high noise signal
 		counter++;
-		cout << counter <<"  az:" <<  az*5 << " el" << el*5  << endl;
+		cout << counter <<"  az:" <<  az*5 << " el" << el*5.  << endl;
 		}
                 }
-                if (az >= 72){ az = -1; el++;}
+                if (az >= 72.){ az = -1.; el++;}
                 az ++;
         }
     infile.close();
