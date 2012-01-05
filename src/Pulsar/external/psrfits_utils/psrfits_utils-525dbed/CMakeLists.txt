@@ -25,7 +25,6 @@ if (CFITSIO_FOUND)
   include_directories (
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CFITSIO_INCLUDES}
-    ${CFITSIO_INCLUDES}/
     )
 
   add_definitions (
