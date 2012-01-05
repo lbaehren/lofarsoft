@@ -172,11 +172,11 @@ namespace CR { // Namespace CR -- begin
       \param plotStop  -- Stop time of the interval diplayed in the plot
     */
     analyseLOPESevent (double const &remoteStart,
-		       double const &remoteStop,
-		       double const &fitStart,
-		       double const &fitStop,
-		       double const &plotStart,
-		       double const &plotStop);
+                       double const &remoteStop,
+                       double const &fitStart,
+                       double const &fitStop,
+                       double const &plotStart,
+                       double const &plotStop);
     
     // -------------------------------------------------------------- Destruction
 
@@ -237,7 +237,7 @@ namespace CR { // Namespace CR -- begin
              fraction of data length
     */
     inline void setRemoteInterval (double const &remoteStart,
-				   double const &remoteStop) {
+                                   double const &remoteStop) {
       remoteStart_p = remoteStart;
       remoteStop_p  = remoteStop;
     }
@@ -285,7 +285,7 @@ namespace CR { // Namespace CR -- begin
       \param fitStop  - The stop of the interval to be considered in the fit
     */
     inline void setFitInterval (double const &fitStart,
-				double const &fitStop) {
+                                double const &fitStop) {
       fitStart_p = fitStart;
       fitStop_p  = fitStop;
     }
@@ -333,7 +333,7 @@ namespace CR { // Namespace CR -- begin
       \param plotStop  -- Stop time of the interval diplayed in the plot
     */
     inline void setPlotInterval (double const &plotStart,
-				 double const &plotStop) {
+                                 double const &plotStop) {
       plotStart_p = plotStart;
       plotStop_p  = plotStop;
     }
@@ -434,7 +434,7 @@ namespace CR { // Namespace CR -- begin
       
       \param ObsRecord - observatories record that matches observatory names to the 
                           path to the corresponding CalTable
-			  
+                          
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
     Bool initPipeline(Record ObsRecord);
@@ -462,28 +462,28 @@ namespace CR { // Namespace CR -- begin
                               (1: yes, 0: no, -1: use default)
       \param UpSamplingRate - Samplerate for upsampling. If smaller than the original
                               samplerate (80MHz for LOPES) then no upsampling is done.
-			      (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+                              (Check the docs of <tt>UpSampledDR<\tt> for more info.)
       \param Polarization   - Polarization type to select only part of the antennas 
                               ("ANY": ignore antenna polarization)
 
       \return Record with the results.
     */
     Record ProcessEvent(String evname,
-			Double Az,
-			Double El,
-			Double distance,
-			Double XC, 
-			Double YC,
-			Bool RotatePos,
-			String PlotPrefix=String(),
-			Bool generatePlots=False,
-			Vector<Int> FlaggedAntIDs=Vector<Int>(),
-			Bool verbose=False,
-			Bool simplexFit=False,
-			Double ExtraDelay=0.,
-			int doTVcal=-1,
-			Double UpSamplingRate=0.,
-			String Polarization="ANY");
+                        Double Az,
+                        Double El,
+                        Double distance,
+                        Double XC, 
+                        Double YC,
+                        Bool RotatePos,
+                        String PlotPrefix=String(),
+                        Bool generatePlots=False,
+                        Vector<Int> FlaggedAntIDs=Vector<Int>(),
+                        Bool verbose=False,
+                        Bool simplexFit=False,
+                        Double ExtraDelay=0.,
+                        int doTVcal=-1,
+                        Double UpSamplingRate=0.,
+                        String Polarization="ANY");
 
 
     /*!
@@ -509,25 +509,25 @@ namespace CR { // Namespace CR -- begin
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
     Bool SetupEvent(String evname, 
-		    int doTVcal,
-		    Vector<Int> FlaggedAntIDs, 
-		    Vector<Bool> &AntennaSelection,
-		    Double UpSamplingRate,
-		    Double ExtraDelay,
-		    Bool verbose,
-		    Bool doGainCal=True,
-		    Bool doDispersionCal=True,
-		    Bool doDelayCal=True,
-		    Bool doRFImitigation=True,
-		    Bool doFlagNotActiveAnts=True,
-		    Bool doAutoFlagging=True);
+                    int doTVcal,
+                    Vector<Int> FlaggedAntIDs, 
+                    Vector<Bool> &AntennaSelection,
+                    Double UpSamplingRate,
+                    Double ExtraDelay,
+                    Bool verbose,
+                    Bool doGainCal=True,
+                    Bool doDispersionCal=True,
+                    Bool doDelayCal=True,
+                    Bool doRFImitigation=True,
+                    Bool doFlagNotActiveAnts=True,
+                    Bool doAutoFlagging=True);
 
     /*!
       \brief Perform the direction fitting (for spherical beamforming)
 
       \param Az             - value for the azimuth direction [in deg] (modified in place)
       \param El             - value for the elevation [in deg] (modified in place)
-      \param distance       - value for the distance parameter [in m] (modified in place)
+      \param curvature      - reciprocal value for the radius of curvature (=distance parameter) [in km] (modified in place)
       \param center         - position in time of the peak [in s] (modified in place)
       \param XC             - x-position of the shower center [in m]
       \param YC             - y-position of the shower center [in m]
@@ -537,20 +537,18 @@ namespace CR { // Namespace CR -- begin
       \param Polarization   - Polarization type to select only part of the antennas 
                               ("": use stored setting;"ANY": ignore antenna polarization)
       \param simplexFit     - fit the direction with a simple simplex fit
+                              (in this case, the initial distance value is ignored!)
       \param verbose        - produce verbose output on the commandline.
-      \param distanceSearch - if true, ignore the initial value of distance and perform a 
-			      simple search for the best starting value.
-
+ 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool doPositionFitting(Double &Az, Double &El, Double &distance, 
-			   Double &center,
-			   Double &XC, Double &YC, Bool RotatePos,
-			   Vector<Bool> AntennaSelection,
-			   String Polarization="",
-			   Bool simplexFit=True,
-			   Bool verbose=False,
-			   Bool distanceSearch=False);
+    Bool doPositionFitting(Double &Az, Double &El, Double &curvature, 
+                           Double &center,
+                           Double &XC, Double &YC, Bool RotatePos,
+                           Vector<Bool> AntennaSelection,
+                           String Polarization="",
+                           Bool simplexFit=True,
+                           Bool verbose=False);
     
 
     /*!
@@ -568,9 +566,8 @@ namespace CR { // Namespace CR -- begin
       \param Polarization   - Polarization type to select only part of the antennas 
                               ("": use stored setting;"ANY": ignore antenna polarization)
       \param simplexFit     - fit the direction with a simple simplex fit
+                              (in this case, the initial value for the cone angle is ignored!)
       \param verbose        - produce verbose output on the commandline.
-      \param coneAngleSearch- if true, ignore the initial value of coneAngle and perform a 
-                              simple search for the best starting value.
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -580,15 +577,14 @@ namespace CR { // Namespace CR -- begin
                                   Vector<Bool> AntennaSelection,
                                   String Polarization="",
                                   Bool simplexFit=True,
-                                  Bool verbose=False,
-                                  Bool coneAngleSearch=False);
+                                  Bool verbose=False);
                                   
    /*!
       \brief Make a gauss fit to the cc-beam
 
       \param Az               - value for the azimuth direction [in deg] (modified in place)
       \param El               - value for the elevation [in deg] (modified in place)
-      \param distance         - value for the distance parameter [in m] (modified in place)
+      \param curvature        - reciprocal value for the radius of curvature (=distance parameter) [in km] (modified in place)
       \param center           - position in time of the peak [in s] (modified in place)
       \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
       \param evname           - path to the eventfile to be processed
@@ -601,10 +597,10 @@ namespace CR { // Namespace CR -- begin
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
    */
-    Bool GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
-		      Vector<Bool> AntennaSelection, String evname, 
-		      Record &erg, Record &fiterg, 
-		      String Polarization="", Bool verbose=False,
+    Bool GaussFitData(Double &Az, Double &El, Double &curvature, Double &center, 
+                      Vector<Bool> AntennaSelection, String evname, 
+                      Record &erg, Record &fiterg, 
+                      String Polarization="", Bool verbose=False,
                       Double coneAngle=0);
 
    /*!
@@ -621,7 +617,7 @@ namespace CR { // Namespace CR -- begin
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
    */
     Bool doGeneratePlots(String PlotPrefix, Vector<Double> ccgauss, Vector<Double> xgauss, 
-			 Vector<Bool> AntennaSelection,	String Polarization="");
+                         Vector<Bool> AntennaSelection,        String Polarization="");
       
 
 
@@ -636,7 +632,7 @@ namespace CR { // Namespace CR -- begin
       \param center - (initial) value for the position of the pulse (center of the
              gaussian) [in s]; modified in place
       \param AntennaSelection - Vector of bool to select only part of the antennas.
-      \param distanceStep - difference in the distance of the inital points. 
+      \param curvatureStep - difference in the curvature of the inital points. 
       \param coneAngle - angle rho for conical beamforming
       \param angleStep - difference in the cone angle rho of the inital points. 
       \param conicalBeamforming - do conical beamforming
@@ -647,40 +643,63 @@ namespace CR { // Namespace CR -- begin
     
     Bool SimplexFit (Double &Az,
                      Double &El,
-                     Double &distance,
+                     Double &curvature,
                      Double &center,
                      Vector<Bool> AntennaSelection,
-                     Double distanceStep);
+                     Double curvatureStep);
                      
     Bool SimplexFit (Double &Az,
-		     Double &El,
-		     Double &distance,
-		     Double &center,
-		     Vector<Bool> AntennaSelection,
-		     Double distanceStep,
+                     Double &El,
+                     Double &curvature,
+                     Double &center,
+                     Vector<Bool> AntennaSelection,
+                     Double curvatureStep,
                      Double &coneAngle,
                      Double angleStep,
                      Bool conicalBeamforming = False);
+    
 
     /*!
-      \brief Evaluate a smallish grid around to find a good starting point for the simplenx fit
+      \brief Evaluate grid around to find a good starting point for the simplex fit (for spherical beamforming)
       
       \param Az - (initial) value for the azimuth direction [in deg]; modified in
              place
       \param El - (initial) value for the elevation [in deg]; modified in place
-      \param distance - value for the distance parameter [in m]
+      \param curvature        - reciprocal value for the radius of curvature (=distance parameter) [in km] (modified in place)
       \param AntennaSelection - Vector of bool to select only part of the antennas.
-      \param center* - position into which the center can be returned
-      \param coneAngle - angle for conical beamforming (default = 0 --> spherical beamforming)
+      \param centerp* - position into which the center can be returned
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool evaluateGrid(Double &Az,
-		      Double &El,
-		      Double &distance,
-		      Vector<Bool> AntennaSelection, 
-		      Double *centerp=NULL,
-                      Double coneAngle=0);
+    
+    Bool evaluate3DGridsph(Double &Az,
+                           Double &El,
+                           Double &curvature,
+                           Vector<Bool> AntennaSelection, 
+                           Bool verbose,
+                           Double *centerp=NULL);
+
+    /*!
+      \brief Evaluate grid around to find a good starting point for the simplex fit (for conical beamforming)
+      
+      \param Az - (initial) value for the azimuth direction [in deg]; modified in
+             place
+      \param El - (initial) value for the elevation [in deg]; modified in place
+      \param coneAngle - angle for conical beamforming; modified in place
+      \param AntennaSelection - Vector of bool to select only part of the antennas.
+      \param centerp* - position into which the center can be returned
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+      
+    Bool evaluate3DGridcone(Double &Az,
+                            Double &El,
+                            Double &coneAngle,
+                            Vector<Bool> AntennaSelection, 
+                            Bool verbose,
+                            Double *centerp=NULL);
+
+
 
     /*!
       \brief Convert positions from lab (Earth-bound) coordinates to air shower coordinates
@@ -693,43 +712,37 @@ namespace CR { // Namespace CR -- begin
     */
 
     Matrix<Double> toShower(const Matrix<Double> & pos,
-			    Double Az,
-			    Double El);
+                            Double Az,
+                            Double El);
 
     /*!
-      \brief Finds the distance with the maximal x-beam in a given direction in the
-             range from 2000 m to 15000 m
+      \brief Optimizes curvature for spherical beamforming (from 0 to 1 1/km)
       
       \param Az               - value for the azimuth direction [in deg]
       \param El               - value for the elevation [in deg]
-      \param distance         - value for the distance parameter [in m]; modified in place
+      \param curvature        - reciprocal value for the radius of curvature (=distance parameter) [in km] (modified in place)
       \param AntennaSelection - Vector of bool to select only part of the antennas.
       \param center*          - position into which the center can be returned
-      \param rough            - if <tt>True</tt>, makes only a rough scan in steps of 1000m, 
-                                otherwise in steps of 200m.
       \param verbose          - produce verbose output on the commandline.
  
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool findDistance(Double &Az,
-		      Double &El,
-		      Double &distance,
-		      Vector<Bool> AntennaSelection, 
-		      Double *centerp=NULL,
-		      Bool rough=True,
-		      Bool verbose=False);
+    Bool findCurvature(Double &Az,
+                       Double &El,
+                       Double &curvature,
+                       Vector<Bool> AntennaSelection, 
+                       Double *centerp=NULL,
+                       Bool verbose=False);
 
     /*!
       \brief Finds the cone angle with the maximal x-beam in a given direction in the
-             range form 0 to 0.1 rad
+             range form 0 to 0.05 rad
       
       \param Az               - value for the azimuth direction [in deg]
       \param El               - value for the elevation [in deg]
       \param coneAngle        - value for the cone angle rho [in rad]; modified in place
       \param AntennaSelection - Vector of bool to select only part of the antennas.
       \param center*          - position into which the center can be returned
-      \param rough            - if <tt>True</tt>, makes only a rough scan in steps of 0.005 rad, 
-                                otherwise in steps of 0.0005 rad.
       \param verbose          - produce verbose output on the commandline.
  
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
@@ -739,7 +752,6 @@ namespace CR { // Namespace CR -- begin
                        Double &coneAngle,
                        Vector<Bool> AntennaSelection, 
                        Double *centerp=NULL,
-                       Bool rough=True,
                        Bool verbose=False);
 
 
@@ -756,28 +768,11 @@ namespace CR { // Namespace CR -- begin
     void clear(void);
 
     /*!
-      \brief needed for FitPosition
-
-      \param az -- Azimuth component of the direction
-      \param el -- Elevation component of the direction
-      \param dist -- Value of the distance parameter
-      \param AntennaSelection --
-      \param centerp -- 
-      \param coneAngle  -- angle for conical beamforming (default = 0 --> spherical beamforming)
-    */
-    Double getHeight (Double az,
-		      Double el,
-		      Double dist,
-		      Vector<Bool> AntennaSelection,
-		      Double *centerp=NULL,
-                      Double coneAngle=0);
-
-    /*!
       \brief Alternative to getHeight to use in FitPosition
 
       \param az -- Azimuth component of the direction
       \param el -- Elevation component of the direction
-      \param dist -- Value of the distance parameter
+      \param curvature -- Value of the curvature parameter
       \param AntennaSelection --
       \param beamheightp -- Pointer to return height of desired beam, multiplied with 1e6
       \param beamtype -- Type of beam to return, enum defined in CR::SkymapQuantity
@@ -788,10 +783,10 @@ namespace CR { // Namespace CR -- begin
     */
     Bool getBeamHeight (Double az,
                         Double el,
-                        Double dist,
+                        Double curvature,
                         Vector<Bool> AntennaSelection,
-		        Double *beamheightp,
-		        SkymapQuantity::Type beamtype=SkymapQuantity::TIME_CC,
+                        Double *beamheightp,
+                        SkymapQuantity::Type beamtype=SkymapQuantity::TIME_CC,
                         Double *centerp=NULL,
                         Double coneAngle=0);
 

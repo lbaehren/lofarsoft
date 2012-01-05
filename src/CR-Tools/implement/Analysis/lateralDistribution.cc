@@ -95,23 +95,23 @@ namespace CR { // Namespace CR -- begin
     try {
       unsigned int ant = 0;        // counting antennas with pulse information
       // define default values, in case lateral distribution does not work
-      erg.define("eps",0.);
-      erg.define("epsilon_0m",0.);
-      erg.define("R_0",0.);
-      erg.define("eta",0.);
-      erg.define("sigeps",0.);
-      erg.define("sigR_0",0.);
-      erg.define("sigeta",0.);
-      erg.define("chi2NDF",0.);
-      erg.define("latMeanDist",0.);
-      erg.define("latMinDist",0.);
-      erg.define("latMaxDist",0.);
+      erg.define("eps",double(0));
+      erg.define("epsilon_0m",double(0));
+      erg.define("R_0",double(0));
+      erg.define("eta",double(0));
+      erg.define("sigeps",double(0));
+      erg.define("sigR_0",double(0));
+      erg.define("sigeta",double(0));
+      erg.define("chi2NDF",double(0));
+      erg.define("latMeanDist",double(0));
+      erg.define("latMinDist",double(0));
+      erg.define("latMaxDist",double(0));
       erg.define("NlateralAntennas",ant);
       erg.define("fitDistance",fitDistance);
 
       //for the dispersion fit values
-      erg.define("dispersion_RMS_perc",0.);
-      erg.define("dispersion_Mean_perc",0.);
+      erg.define("dispersion_RMS_perc",double(0));
+      erg.define("dispersion_Mean_perc",double(0));
 
       cout << "\nFitting lateral distribution for data (and simulation)..." << endl;
 
@@ -804,31 +804,31 @@ namespace CR { // Namespace CR -- begin
       cout << "\nPlotting time vs distance" << endl;
 
       // predefine fields for fit results
-      erg.define("latTime1D_SphereKappa",0.);
-      erg.define("latTime1D_sigSphereKappa",0.);
-      erg.define("latTime1D_Rcurv",0.); //outdated
-      erg.define("latTime1D_sigRcurv",0.); //outdated
-      erg.define("latTime1D_SphereOffset",0.);
-      erg.define("latTime1D_sigSphereOffset",0.);
-      erg.define("latTime1D_chi2NDF",0.);
-      erg.define("latTime2D_SphereKappa",0.);
-      erg.define("latTime2D_sigSphereKappa",0.);
-      erg.define("latTime2D_Rcurv",0.); //outdated
-      erg.define("latTime2D_sigRcurv",0.); //outdated
-      erg.define("latTime2D_SphereOffset",0.);
-      erg.define("latTime2D_sigSphereOffset",0.);
-      erg.define("latTime2D_chi2NDF",0.);
+      erg.define("latTime1D_SphereKappa",double(0));
+      erg.define("latTime1D_sigSphereKappa",double(0));
+      erg.define("latTime1D_Rcurv",double(0)); //outdated
+      erg.define("latTime1D_sigRcurv",double(0)); //outdated
+      erg.define("latTime1D_SphereOffset",double(0));
+      erg.define("latTime1D_sigSphereOffset",double(0));
+      erg.define("latTime1D_chi2NDF",double(0));
+      erg.define("latTime2D_SphereKappa",double(0));
+      erg.define("latTime2D_sigSphereKappa",double(0));
+      erg.define("latTime2D_Rcurv",double(0)); //outdated
+      erg.define("latTime2D_sigRcurv",double(0)); //outdated
+      erg.define("latTime2D_SphereOffset",double(0));
+      erg.define("latTime2D_sigSphereOffset",double(0));
+      erg.define("latTime2D_chi2NDF",double(0));
 
-      erg.define("latTime1D_ConeRho",0.);
-      erg.define("latTime1D_sigConeRho",0.);
-      erg.define("latTime1D_ConeOffset",0.);
-      erg.define("latTime1D_sigConeOffset",0.);
-      erg.define("latTime1D_Conechi2NDF",0.);
-      erg.define("latTime2D_ConeRho",0.);
-      erg.define("latTime2D_sigConeRho",0.);
-      erg.define("latTime2D_ConeOffset",0.);
-      erg.define("latTime2D_sigConeOffset",0.);
-      erg.define("latTime2D_Conechi2NDF",0.);
+      erg.define("latTime1D_ConeRho",double(0));
+      erg.define("latTime1D_sigConeRho",double(0));
+      erg.define("latTime1D_ConeOffset",double(0));
+      erg.define("latTime1D_sigConeOffset",double(0));
+      erg.define("latTime1D_Conechi2NDF",double(0));
+      erg.define("latTime2D_ConeRho",double(0));
+      erg.define("latTime2D_sigConeRho",double(0));
+      erg.define("latTime2D_ConeOffset",double(0));
+      erg.define("latTime2D_sigConeOffset",double(0));
+      erg.define("latTime2D_Conechi2NDF",double(0));
 
       
       // create arrays for plotting and fitting

@@ -110,7 +110,6 @@ using CR::LopesEventIn;
   listCalcMaxima          = false
   printShowerCoordinates  = false
   verbose                 = true
-  ignoreDistance          = true
   simplexFit              = true
   doTVcal                 = -1
   doGainCal               = true
@@ -169,14 +168,10 @@ using CR::LopesEventIn;
                             want to do the beam forming exactly in the direction and with the distance
                             specified, then you should switch off the simplex fit.<br>
                             The fit has several steps:<br>
-                            1. The optimal starting distance is determined (unless ignoreDistance = false)<br>
+                            1. Starting positions for the simplex fit are evaluated with a grid around the initial direction<br>
                             2. The simplex fit roughly optimizes the X-beam<br>
                             3. The simplex fit optimizes the CC-beam starting from the X-beam maximum<br>
-    <li>\b ignoreDistance   Status: <i>optional</i> - important<br>
-                            If set to true (default) then the distance value (curvature radius) for the beam
-                            forming will be estimated and the value in the eventlist ignored. That means that
-                            the value specified in the event list is completly ignored unless 'ignoreDistance'
-                            is set to false.<br>
+                            Please be aware, that the initial value for the radius of curvature is ignored when performing the simplex fit.<br>
     <li>\b upsamplingRate   Status: <i>optional</i> - recommended<br>
                             Calibrated traces will be upsampled to a upsampling rate specified in MHz.<br>
                             Recommended for CC-beam analysis: at least 320 MHz,<br>
@@ -905,7 +900,6 @@ void readConfigFile (const string &filename)
    config.addBool("printShowerCoordinates", false);   	// print the distance between antenna and shower core
    config.addBool("RotatePos", true); 	      		// should be true if coordinates are given in KASKADE frame
    config.addBool("verbose", true);
-   config.addBool("ignoreDistance", true);          	// distance value of the eventlist will be ignored
    config.addBool("simplexFit", true);
    config.addBool("doGainCal", true);		      	// calibration of the electrical fieldstrength
    config.addBool("doDispersionCal", true);	      	// application of the CalTable PhaseCal values
@@ -1205,11 +1199,6 @@ bool getEventFromKASCADE (const string &kascadeRootFile)
       inputTree->SetBranchAddress("kappaMario",&kappaMario);
       inputTree->SetBranchAddress("lgEMario",&lgEMario);
 
-      // as there is no radius of curvature in the file, set ignoreDistance to true
-      if (!config["ignoreDistance"]->bValue()) {
-        config["ignoreDistance"]->setValue("TRUE");
-        cout << "\nWARNING: OVERWRITING CONFIGURATION: ignoreDistance was set to 'true'!\n" << endl;
-      }
       // finding the radius of curvature works only, if the simplex fit is on
       if (!config["simplexFit"]->bValue()) {
         config["simplexFit"]->setValue("TRUE");
@@ -1377,11 +1366,6 @@ bool getEventFromLOPES (const string &lopesRootFile)
       // use same input reconstruction as previous time
       inputTree->SetBranchAddress("reconstruction",&reconstruction);
 
-      // as there is no radius of curvature in the file, set ignoreDistance to true
-      if (!config["ignoreDistance"]->bValue()) {
-        config["ignoreDistance"]->setValue("TRUE");
-        cout << "\nWARNING: OVERWRITING CONFIGURATION: ignoreDistance was set to 'true'!\n" << endl;
-      }
       // finding the radius of curvature works only, if the simplex fit is on
       if (!config["simplexFit"]->bValue()) {
         config["simplexFit"]->setValue("TRUE");
@@ -1488,6 +1472,7 @@ int main (int argc, char *argv[])
   bool Xconverged=0, Xconverged_NS=0, Xconverged_VE=0;                         // is true if the Gaussian fit to the CCbeam converged
   double AzL=0, ElL=0, AzL_NS=0, ElL_NS=0, AzL_VE=0, ElL_VE=0;                       // Azimuth and Elevation
   double distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;       // distance = radius of curvature
+  double kappaCC_EW = 0, kappaCC_NS = 0, kappaCC_VE = 0;       // curvature of spherical CC beam
   double R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;   // R_0 from lateral distribution exponential fit
   double eta = 0, sigeta = 0, eta_NS = 0, sigeta_NS = 0, eta_VE = 0, sigeta_VE = 0;   // eta from lateral distribution exponential fit
   double eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;   // Epsilon from lateral distribution exponential fit
@@ -1612,7 +1597,6 @@ int main (int argc, char *argv[])
              << "listCalcMaxima=false\n"
              << "printShowerCoordinates=false\n"
              << "verbose = true\n"
-             << "ignoredistance = true\n"
              << "simplexFit = true\n"
              << "doTVcal = default\n"
              << "doGainCal = true\n"
@@ -1790,6 +1774,7 @@ int main (int argc, char *argv[])
         roottree->Branch("AzL",&azimuth,"AzL/D");
         roottree->Branch("ElL",&elevation,"ElL/D");
         roottree->Branch("Distance",&distanceResult,"Distance/D");	// radius of curvature
+        roottree->Branch("kappaCC",&kappaCC_EW,"kappaCC/D");
         roottree->Branch("CCheight",&CCheight,"CCheight/D");
         roottree->Branch("CCwidth",&CCwidth,"CCwidth/D");
         roottree->Branch("CCcenter",&CCcenter,"CCcenter/D");
@@ -1859,6 +1844,7 @@ int main (int argc, char *argv[])
         roottree->Branch("AzL_EW",&AzL,"AzL_EW/D");
         roottree->Branch("ElL_EW",&ElL,"ElL_EW/D");
         roottree->Branch("Distance_EW",&distanceResult,"Distance_EW/D");	// radius of curvature
+        roottree->Branch("kappaCC_EW",&kappaCC_EW,"kappaCC_EW/D");
         roottree->Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
         roottree->Branch("CCwidth_EW",&CCwidth,"CCwidth_EW/D");
         roottree->Branch("CCcenter_EW",&CCcenter,"CCcenter_EW/D");
@@ -1929,6 +1915,7 @@ int main (int argc, char *argv[])
         roottree->Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
         roottree->Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
         roottree->Branch("Distance_NS",&distanceResultNS,"Distance_NS/D");	// radius of curvature
+        roottree->Branch("kappaCC_NS",&kappaCC_NS,"kappaCC_NS/D");
         roottree->Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
         roottree->Branch("CCwidth_NS",&CCwidth_NS,"CCwidth_NS/D");
         roottree->Branch("CCcenter_NS",&CCcenter_NS,"CCcenter_NS/D");
@@ -1996,6 +1983,7 @@ int main (int argc, char *argv[])
         roottree->Branch("AzL_VE",&AzL_VE,"AzL_VE/D");
         roottree->Branch("ElL_VE",&ElL_VE,"ElL_VE/D");
         roottree->Branch("Distance_VE",&distanceResultVE,"Distance_VE/D");      // radius of curvature
+        roottree->Branch("kappaCC_VE",&kappaCC_VE,"kappaCC_VE/D");
         roottree->Branch("CCheight_VE",&CCheight_VE,"CCheight_VE/D");
         roottree->Branch("CCwidth_VE",&CCwidth_VE,"CCwidth_VE/D");
         roottree->Branch("CCcenter_VE",&CCcenter_VE,"CCcenter_VE/D");
@@ -2176,6 +2164,7 @@ int main (int argc, char *argv[])
       Xconverged = 0, Xconverged_NS = 0, Xconverged_VE = 0;
       AzL = 0, ElL = 0, AzL_NS = 0, ElL_NS = 0, AzL_VE = 0, ElL_VE = 0;
       distanceResult = 0, distanceResultNS = 0, distanceResultVE = 0;
+      kappaCC_EW = 0, kappaCC_NS = 0, kappaCC_VE = 0;
       R_0 = 0, sigR_0 = 0, R_0_NS = 0, sigR_0_NS = 0, R_0_VE = 0, sigR_0_VE = 0;
       eta = 0, sigeta = 0, eta_NS = 0, sigeta_NS = 0, eta_VE = 0, sigeta_VE = 0;
       eps = 0, sigeps = 0, eps_NS = 0, sigeps_NS = 0, eps_VE = 0, sigeps_VE = 0;
@@ -2348,7 +2337,6 @@ int main (int argc, char *argv[])
                                                config["CalculateMaxima"]->bValue(),
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
-                                               config["ignoreDistance"]->bValue(),
                                                config["conicalBeamforming"]->bValue(),
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
@@ -2360,6 +2348,7 @@ int main (int argc, char *argv[])
             AzL = results.asDouble("Azimuth");
             ElL = results.asDouble("Elevation");
             distanceResult = results.asDouble("Distance");
+            kappaCC_EW = results.asDouble("kappaCC");
             CCheight = results.asDouble("CCheight");
             CCwidth = results.asDouble("CCwidth");
             CCcenter = results.asDouble("CCcenter");
@@ -2522,7 +2511,6 @@ int main (int argc, char *argv[])
                                                config["CalculateMaxima"]->bValue(),
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
-                                               config["ignoreDistance"]->bValue(),
                                                config["conicalBeamforming"]->bValue(),
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
@@ -2534,6 +2522,7 @@ int main (int argc, char *argv[])
             AzL_NS = results.asDouble("Azimuth");
             ElL_NS = results.asDouble("Elevation");
             distanceResultNS = results.asDouble("Distance");
+            kappaCC_NS = results.asDouble("kappaCC");
             CCheight_NS = results.asDouble("CCheight");
             CCwidth_NS = results.asDouble("CCwidth");
             CCcenter_NS = results.asDouble("CCcenter");
@@ -2700,7 +2689,6 @@ int main (int argc, char *argv[])
                                                config["CalculateMaxima"]->bValue(),
                                                config["listCalcMaxima"]->bValue(),
                                                config["printShowerCoordinates"]->bValue(),
-                                               config["ignoreDistance"]->bValue(),
                                                config["conicalBeamforming"]->bValue(),
                                                config["randomDelay"]->dValue(),
                                                randomSeed);
@@ -2712,6 +2700,7 @@ int main (int argc, char *argv[])
             AzL_VE = results.asDouble("Azimuth");
             ElL_VE = results.asDouble("Elevation");
             distanceResultVE = results.asDouble("Distance");
+            kappaCC_VE = results.asDouble("kappaCC");
             CCheight_VE = results.asDouble("CCheight");
             CCwidth_VE = results.asDouble("CCwidth");
             CCcenter_VE = results.asDouble("CCcenter");

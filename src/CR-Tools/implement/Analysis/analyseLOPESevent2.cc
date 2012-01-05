@@ -158,7 +158,6 @@ namespace CR { // Namespace CR -- begin
                                          bool CalculateMaxima,
                                          bool listCalcMaxima,
                                          bool printShowerCoordinates,
-                                         bool ignoreDistance,
                                          bool conicalBeamforming,
                                          double randomDelay,
                                          unsigned int randomSeed) {
@@ -172,6 +171,9 @@ namespace CR { // Namespace CR -- begin
       Double beamformingAz = Az;
       Double beamformingEl = El;
       Double coneAngle = 0.015; // starting coneAngle should have no effect, since the simplex fit determines an independent starting value
+      Double kappaCC = 0.3;
+      if (distance > 0)
+        kappaCC = 1000./distance;
 
 
       // define default values for return record, to prevent crash of call_pipeline
@@ -180,6 +182,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("Azimuth",double(0));
       erg.define("Elevation",double(0));
       erg.define("Distance",double(0));
+      erg.define("kappaCC",double(0));     
       erg.define("CCheight",double(0));
       erg.define("CCwidth",double(0));
       erg.define("CCheight_error",double(0));
@@ -273,16 +276,14 @@ namespace CR { // Namespace CR -- begin
       // store number of antennas used for CC beam
       erg.define("NCCbeamAntennas",uInt(ntrue(AntennaSelection)));
 
-      Double dummyDistance = 1e5;  // Dummy distance for conical beamforming
       if (conicalBeamforming) {
         cout << "\nStarting conical beamforming...\n" << endl;
-        distance = dummyDistance;
         
         // set starting coneAngle (should have no effect, since the simplex fit determines an independent starting value)
         CompleteBeamPipe_p->setConeAngle(coneAngle);
         
         if (! doConicalPositionFitting(beamformingAz, beamformingEl, coneAngle, center, XC, YC, RotatePos,
-                                       AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ) {
+                                       AntennaSelection, Polarization, simplexFit, verbose) ) {
           cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doConicalPositionFitting()!" << endl;
           return erg;
         }
@@ -291,15 +292,15 @@ namespace CR { // Namespace CR -- begin
         coneAngle = 0;
         
         //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
-        if (! doPositionFitting(beamformingAz, beamformingEl, distance, center, XC, YC, RotatePos,
-                                AntennaSelection, Polarization, simplexFit, verbose, ignoreDistance) ){
+        if (! doPositionFitting(beamformingAz, beamformingEl, kappaCC, center, XC, YC, RotatePos,
+                                AntennaSelection, Polarization, simplexFit, verbose) ){
           cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
           return erg;
         }
       }
 
       // make gauss fit to CC-beam
-      if (! GaussFitData(beamformingAz, beamformingEl, distance, center, AntennaSelection, evname, erg, fiterg, 
+      if (! GaussFitData(beamformingAz, beamformingEl, kappaCC, center, AntennaSelection, evname, erg, fiterg, 
                          Polarization, verbose, coneAngle) ){
         cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GaussFitData()!" << endl;
         return erg;
@@ -432,7 +433,8 @@ namespace CR { // Namespace CR -- begin
         cout << "\nRestuls of reconstruction with spherical beamforming:\n"
             << "Azimuth = " << erg.asDouble("Azimuth") << " degree \t"
             << "Elevation = " << erg.asDouble("Elevation") << " degree\n"
-            << "Radius of curvature (of CC-beam) = " << erg.asDouble("Distance") << " m\n"
+            << "Curvature (kappa) = " << erg.asDouble("kappaCC") << " 1/km \t"
+            << "(corresponds to radius of " << 1000./erg.asDouble("kappaCC") << " m)\n"
             << "CC-beam = " << erg.asDouble("CCheight")*1e6 << " µV/m/MHz \t"
             << " X-beam = " << erg.asDouble("Xheight")*1e6  << " µV/m/MHz \n"
             << endl;      
