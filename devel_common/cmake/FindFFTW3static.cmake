@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -26,11 +24,6 @@
 #  HAVE_FFTW3       = Set to true, if all components of FFTW3 have been found.
 #  FFTW3_INCLUDES   = Include path for the header files of FFTW3
 #  FFTW3_LIBRARIES  = Link these to use FFTW3
-
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

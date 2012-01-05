@@ -49,8 +49,6 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
-
 if (UNIX)
   if (APPLE)
     ## architecture-dependent locations

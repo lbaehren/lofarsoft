@@ -31,11 +31,6 @@ if (NOT FIND_ITPP_CMAKE)
   set (FIND_ITPP_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (ITPP_INCLUDES itbase.h itcomm.h

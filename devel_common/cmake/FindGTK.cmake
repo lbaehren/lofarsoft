@@ -33,11 +33,6 @@ if (NOT FIND_GTK_CMAKE)
   set (FIND_GTK_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (GTK_INCLUDES gtk.h

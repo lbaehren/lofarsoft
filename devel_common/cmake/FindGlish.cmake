@@ -28,8 +28,6 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
-
 if (NOT casa_locations)
   set (casa_locations
     ## most Linux systems

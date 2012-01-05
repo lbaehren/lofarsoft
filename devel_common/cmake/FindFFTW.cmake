@@ -26,11 +26,6 @@
 #  FFTW_LIBRARIES  = Link these to use FFTW
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (FFTW_INCLUDES fftw.h

@@ -25,11 +25,6 @@
 #  FFTW3_INCLUDES   = Include path for the header files of FFTW3
 #  FFTW3_LIBRARIES  = Link these to use FFTW3
 
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
 set (FFTW3_FOUND FALSE)
 
 ## -----------------------------------------------------------------------------

@@ -31,11 +31,6 @@ if (NOT FIND_GLOBUS_CMAKE)
   set (FIND_GLOBUS_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   find_path (Globus_INCLUDES globus.h
