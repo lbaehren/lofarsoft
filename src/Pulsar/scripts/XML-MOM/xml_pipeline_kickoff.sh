@@ -156,45 +156,60 @@ else # if [[ $cep2 == 1 ]]
         #note that single and double quotes need to be VERY exact for cexec commands and wildcards;
         #a large amount of effort was put into making all the quotes correct to farm out processing;
         #be very careful when you change anything in this section!  you have been warned!
+
+        # get the parset, find out if IS data are in 2nd transpose or not;
+        # if not, then run IS processing separately, else run as one set of processing with "CS";
+        # find the locus node list for CS data for processing
+        PARSET=`find_lofar_parset.sh $obsid`
+        if [[ $PARSET == "ERROR" ]]
+        then
+           echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $obsid' command"
+           exit 1
+        elif [[ ! -f $PARSET ]]
+        then
+           echo "ERROR: invalid PARSET file '$PARSET'"
+           exit 1
+        else
+           # check if IS data are under the 2nd transpose
+           keyword=""
+           keyword=`grep OLAP.IncoherentStokesAreTransposed $PARSET | awk '{print $3}'`
+           if [[ $keyword == "T" ]]
+           then
+              IS2=1
+           else
+              IS2=0
+           fi
+           
+           keyword=""
+           keyword=`grep locus $PARSET | grep Observation.DataProducts.Output_Beamformed.locations | awk '{print $3}'`
+           if [[ $keyword == "[]" ]] || [[ $keyword == "" ]]
+           then 
+              keyword=CoherentStokes.mountpoints
+           else
+              keyword=Observation.DataProducts.Output_Beamformed.locations
+           fi
+           # collect the locus info from the parset
+           locus_list=NONE
+           locus_list=`grep locus $PARSET | grep $keyword | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
+           status=$?
+           if [[ $status != 0 ]]
+           then
+              echo "WARNING: Unable to determine correct list of locus nodes for data processing; using all nodes"
+              locus_list="0-99"
+           fi
+           if [[ $locus_list == "" ]] || [[ $locus_list == "NONE" ]]
+           then
+              echo "WARNING: Unable to determine correct list of locus nodes for data processing; using all nodes"
+              locus_list="0-99"
+           else 
+              echo "Using the following locus nodes for processing: cexec -f /etc/c3.conf locus:$locus_list"
+           fi
+        fi
+
+        # CS stokes processing
         incoherent=`echo $line | grep incoh_only`
         if [[ $incoherent == "" ]]
         then
-           # CS stokes processing
-           # find the locus node list for CS data for processing
-           PARSET=`find_lofar_parset.sh $obsid`
-           if [[ $PARSET == "ERROR" ]]
-           then
-              echo "ERROR: unable to find parset file using 'find_lofar_parset.sh $obsid' command"
-              exit 1
-           elif [[ ! -f $PARSET ]]
-           then
-              echo "ERROR: invalid PARSET file '$PARSET'"
-              exit 1
-           else
-              keyword=`grep locus $PARSET | grep Observation.DataProducts.Output_Beamformed.locations | awk '{print $3}'`
-              if [[ $keyword == "[]" ]] || [[ $keyword == "" ]]
-              then 
-                 keyword=CoherentStokes.mountpoints
-              else
-                 keyword=Observation.DataProducts.Output_Beamformed.locations
-              fi
-              # collect the locus info from the parset
-              locus_list=NONE
-              locus_list=`grep locus $PARSET | grep $keyword | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
-              status=$?
-              if [[ $status != 0 ]]
-              then
-                 echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
-                 locus_list="0-99"
-              fi
-              if [[ $locus_list == "" ]] || [[ $locus_list == "NONE" ]]
-              then
-                 echo "WARNING: Unable to determine correct list of locus nodes for CS data processing; using all nodes"
-                 locus_list="0-99"
-              else 
-                 echo "Using the following locus nodes for CS processing: cexec -f /etc/c3.conf locus:$locus_list"
-              fi
-           fi
           
            if [[ $hoover_only == 0 ]]
            then
@@ -208,14 +223,20 @@ else # if [[ $cep2 == 1 ]]
 
            echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/'${obsid}'_CSplots ;  mv '${obsid}'_CSplots /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/"' >> $outfile.$obsid.CS.sh
 
-	       echo "./$outfile.$obsid.CS.sh > $outfile.$obsid.CS.log &" >> $outfile.all.sh
-        else  
-           # IS stokes processing
-           echo 'cexec -f /etc/c3.conf hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; mount_locus_nodes.sh; '$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.IS.sh  
-
-           echo 'cexec -f /etc/c3.conf hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd '${obsid}'_redIS ; mv status_diag.png status.png"' >> $outfile.$obsid.IS.sh
-
-	       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
+	       echo "./$outfile.$obsid.CS.sh > $outfile.$obsid.CS.log &" >> $outfile.all.sh	  
+	            
+        else # IS stokes processing
+           
+           if [[ $IS2 == 0 ]]
+           then 
+	           echo 'cexec -f /etc/c3.conf hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; mount_locus_nodes.sh; '$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.IS.sh  
+	
+	           echo 'cexec -f /etc/c3.conf hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd '${obsid}'_redIS ; mv status_diag.png status.png"' >> $outfile.$obsid.IS.sh
+	
+		       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
+		    else
+		       echo "IS 2nd transpose data processing is done within the 'CS' scripts now."
+		    fi
         fi
 	    ii=`expr $ii + 1`
     done < $outfile.all
