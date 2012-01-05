@@ -1,4 +1,16 @@
 
+## ==============================================================================
+##
+##  Initial cache settings for CMake project "psrfits_utils"
+##
+##  Instead of passing all of the required cache variables, which are derived
+##  from system inspection, as command line options (using the "-D" flag) we
+##  pass along a configured include file. This not only avoids long and hard to
+##  read string on the comand line but also aids in later debugging, as the 
+##  configuration settings can be read from the processed version of this file.
+##
+## ==============================================================================
+
 ##
 ##  Installation prefix
 ##
