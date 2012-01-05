@@ -473,8 +473,8 @@ void processCube (double phi_min,
   vector<double> faras(nFara) ;
   wienerfilter Wiener;
   fillFaras(phi_min, phi_max, nFara, faras) ;
-  int xSize = 10;//cube.getXSize() ; 
-  int ySize = 10;//cube.getYSize() ;
+  int xSize = cube.getXSize() ; 
+  int ySize = cube.getYSize() ;
   rmCube result(xSize, ySize, faras) ;
   Wiener.prepare(freqsC.data, freqsI.data, faras, nu_0, alpha, epsilon, method) ;
 //   Array<Float> feld = arr2Col.getColumn( );
