@@ -355,9 +355,9 @@ add_subdirectory (scripts)
 add_subdirectory (apps)
 add_subdirectory (external)
 
-if (PULSAR_BUILD_TESTS)
+if (PULSAR_ENABLE_TESTING)
   add_subdirectory (test)
-endif (PULSAR_BUILD_TESTS)
+endif (PULSAR_ENABLE_TESTING)
 
 ## ==============================================================================
 ##
