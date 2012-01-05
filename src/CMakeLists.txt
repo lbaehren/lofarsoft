@@ -55,8 +55,8 @@ configure_file (
 ##____________________________________________________________________
 ##                                            Macro: lus_package_build
 ## Parameters:
-##  _name : Name of the package as available as biuld target.
-##  -dir  : Name of the directory containing the source code.
+##  _name : Name of the package as available as build target.
+##  _dir  : Name of the directory containing the source code.
 
 macro (lus_package_build _name _dir)
 
@@ -66,12 +66,20 @@ macro (lus_package_build _name _dir)
   endif (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${_dir})
 
   ## Trigger build and install
-  add_custom_target (${_name}
-    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir}
-    COMMAND ${CMAKE_BUILD_TOOL} install
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
-    )
-
+  if (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_name}
+      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      COMMAND ${CMAKE_BUILD_TOOL} install
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
+      )
+  else (LUS_CMAKE_OPTIONS)
+    add_custom_target (${_name}
+      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      COMMAND ${CMAKE_BUILD_TOOL} install
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
+      )
+  endif (LUS_CMAKE_OPTIONS)
+  
 endmacro (lus_package_build)
 
 ##____________________________________________________________________
