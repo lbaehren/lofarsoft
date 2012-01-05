@@ -27,11 +27,6 @@
 #  PGPLOT_LIBRARY_DIR = Path to the directory containing the PGPLOT libraries
 
 ## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (PGPLOT_INCLUDES cpgplot.h

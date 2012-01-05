@@ -29,8 +29,6 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
-
 if (SCIPY_FIND_QUIETLY)
   set (PYTHON_FIND_QUIETLY TRUE)
 endif (SCIPY_FIND_QUIETLY)

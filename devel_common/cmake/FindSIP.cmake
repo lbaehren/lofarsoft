@@ -34,8 +34,6 @@ if (NOT FIND_SIP_CMAKE)
   ##_____________________________________________________________________________
   ## CMake common settings
   
-  include (CMakeSettings)
-  
   if (SIP_FIND_QUIETLY)
     set (PYTHON_FIND_QUIETLY YES )
   endif (SIP_FIND_QUIETLY)

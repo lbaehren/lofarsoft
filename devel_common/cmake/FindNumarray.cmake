@@ -28,11 +28,6 @@
 #  NUMARRAY_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (NUMARRAY_INCLUDES numarray.h libnumarray.h

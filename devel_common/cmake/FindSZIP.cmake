@@ -27,11 +27,6 @@
 #  SZIP_LFLAGS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (SZIP_INCLUDES szlib.h

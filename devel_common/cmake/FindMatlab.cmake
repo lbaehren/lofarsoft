@@ -27,11 +27,6 @@
 #  MATLAB_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (MATLAB_INCLUDES mat.h

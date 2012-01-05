@@ -44,11 +44,6 @@
 # pygtk-2.0.pc
 
 ## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
-
-include (CMakeSettings)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (PYGTK_INCLUDES pygtk.h

@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -32,9 +30,9 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
-
-include (FindPython)
+if (NOT PYTHON_FOUND)
+  include (FindPython)
+endif (NOT PYTHON_FOUND)
 
 set (find_path_suffixes 
   python

@@ -30,11 +30,6 @@ if (NOT FIND_POPT_CMAKE)
   set (FIND_POPT_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Standard locations where to look for required components
-  
-  include (CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Check for the header files
   
   FIND_PATH (POPT_INCLUDES popt.h

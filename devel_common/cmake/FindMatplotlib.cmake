@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -30,8 +28,9 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
-include (FindPython)
+if (NOT PYTHON_FOUND)
+  include (FindPython)
+endif (NOT PYTHON_FOUND)
 
 ## -----------------------------------------------------------------------------
 ## As the shared libraries of a Python module typically do not contain the 

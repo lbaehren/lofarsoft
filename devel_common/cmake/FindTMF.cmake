@@ -33,8 +33,6 @@ if (NOT TMF_FOUND)
   ## ---------------------------------------------------------------------
   ## Search locations
   
-  include (CMakeSettings)
-
   if (NOT TMF_ROOT_DIR)
     set (TMF_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
   endif (NOT TMF_ROOT_DIR)
@@ -140,11 +138,6 @@ endif (NOT TMF_FOUND)
 #  HAVE_TMF       = Set to true, if all components of TMF have been found.
 #  TMF_INCLUDES   = Include path for the header files of TMF
 #  TMF_LIBRARIES  = Link these to use TMF
-
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

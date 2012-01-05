@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -27,11 +25,6 @@
 #  NTLM_INCLUDES   = Include path for the header files of NTLM
 #  NTLM_LIBRARIES  = Link these to use NTLM
 #  NTLM_LFLAGS     = Linker flags (optional)
-
-## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

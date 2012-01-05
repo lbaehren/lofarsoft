@@ -29,8 +29,6 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
-
 ## Required related packages 
 
 if (PYQT_FIND_QUIETLY)

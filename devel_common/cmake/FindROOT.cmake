@@ -33,11 +33,6 @@ if (NOT FIND_ROOT_CMAKE)
   set (FIND_ROOT_CMAKE TRUE)
   
   ##_____________________________________________________________________________
-  ## Search locations
-  
-  include (CMakeSettings)
-  
-  ##_____________________________________________________________________________
   ## Is the root of the installation defined through environment variable?
   
   set (ROOT_FOUNDSYS $ENV{ROOTSYS})

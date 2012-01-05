@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -27,11 +25,6 @@
 #  PLPLOT_INCLUDES   = Include path for the header files of PLplot
 #  PLPLOT_LIBRARIES  = Link these to use PLplot
 #  PLPLOT_LFLAGS     = Linker flags (optional)
-
-## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
-
-include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

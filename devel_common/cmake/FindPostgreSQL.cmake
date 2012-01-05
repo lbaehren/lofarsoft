@@ -1,6 +1,4 @@
 # +-----------------------------------------------------------------------------+
-# | $Id::                                                                     $ |
-# +-----------------------------------------------------------------------------+
 # |   Copyright (C) 2007                                                        |
 # |   Lars B"ahren (bahren@astron.nl)                                           |
 # |                                                                             |
@@ -28,11 +26,6 @@
 #  POSTGRESQL_INCLUDES   = Include path for the header files of PostgreSQL
 #  POSTGRESQL_LIBRARIES  = Link these to use PostgreSQL
 #  POSTGRESQL_LFGLAS     = Linker flags (optional)
-
-## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
-
-include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for system header files included from within the library
