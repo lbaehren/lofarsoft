@@ -30,6 +30,7 @@ if (NOT PYFITS_VERBOSE_CONFIGURE)
   set (PYTHON_FIND_QUIETLY YES )
 endif (NOT PYFITS_VERBOSE_CONFIGURE)
 
+include (FindPyFITS)
 include (FindNumPy)
 include (FindLAPACK)
 

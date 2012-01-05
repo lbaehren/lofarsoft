@@ -145,6 +145,7 @@ foreach (varSystemPackage
     PLplot
     Perl
     Python
+    PyFITS
     ROOT
     Sphinx
     Subversion
@@ -229,6 +230,7 @@ message (STATUS " .. IT++ Library ............... = ${ITPP_FOUND}"            )
 message (STATUS " .. OpenGL ..................... = ${OPENGL_FOUND}"          )
 message (STATUS " .. OpenMP ..................... = ${OPENMP_FOUND}"          )
 message (STATUS " .. Perl ....................... = ${PERL_FOUND}"            )
+message (STATUS " .. PyFITS...................... = ${PYFITS_FOUND}"          )
 message (STATUS " .. ROOT ....................... = ${ROOT_FOUND}"            )
 message (STATUS " .. SIP ........................ = ${SIP_FOUND}"             )
 message (STATUS " .. SWIG ....................... = ${SWIG_FOUND}"            )
