@@ -37,18 +37,18 @@ endif (NOT PRESTO_SETUP_PY)
 ##____________________________________________________________________
 ## Add sub-directory
 
-if (PULSAR_ENABLE_SWIG)
-if (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
+if (PULSAR_ENABLE_SWIG AND PULSAR_PYTHON_BINDINGS)
   ## Find SWIG installation
   find_package (SWIG)
-  ## Load SWIG module
-  include (UseSWIG)
-  ## Add sub-directory
-  add_subdirectory (wrappers)
-else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
-  message (STATUS "[presto] Skip using CMake SWIG module - incomplete Python installation!")
-endif (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
-endif (PULSAR_ENABLE_SWIG)
+  if (SWIG_FOUND)
+    ## Load SWIG module
+    include(${SWIG_USE_FILE})
+    ## Add sub-directory
+    add_subdirectory (wrappers)
+  else (SWIG_FOUND)
+    message (message "[presto] Skip using CMake SWIG module - SWIG not found!")
+  endif (SWIG_FOUND)
+endif (PULSAR_ENABLE_SWIG AND PULSAR_PYTHON_BINDINGS)
 
 ##____________________________________________________________________
 ## Generate the Python bindings
