@@ -1,0 +1,19 @@
+#! /usr/bin/env python
+
+print "[test_sifting] Importing module 'sys' ..."
+
+##
+##  Import module 'sys' and add to the path where Python modules are read from
+##
+
+from sys import *
+
+sys.path.insert(0, "${CMAKE_INSTALL_PREFIX}/lib/python")
+
+##
+##  Import specific symbol/function from module 'sifting'
+##
+
+print "[test_sifting] Importing '${importSifting}' from module 'sifting' ..."
+
+from sifting import ${importSifting}
