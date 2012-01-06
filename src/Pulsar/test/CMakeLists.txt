@@ -61,8 +61,7 @@ foreach (importSifting
 
   ## Set up test
     add_test (test_import_sifting_${importSifting}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-      COMMAND ${PYTHON_EXECUTABLE} test_import_sifting_${importSifting}.py
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/test_import_sifting_${importSifting}.py
       )
   
 endforeach (importSifting)
