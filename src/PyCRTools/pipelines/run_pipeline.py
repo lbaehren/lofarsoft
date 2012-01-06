@@ -9,6 +9,7 @@ import subprocess
 
 input_directory = "/data/VHECR/LORAtriggered/data"
 processed_files = "/data/VHECR/LORAtriggered/processed.log"
+failed_files = "/data/VHECR/LORAtriggered/failed.log"
 
 # Read already processed files from list
 done = []
@@ -18,7 +19,10 @@ if os.path.isfile(processed_files):
     f.close()
 
 # Open processed files list for appending
-f = open(processed_files, "a")
+processed = open(processed_files, "a", 1)
+
+# Open failed files list for appending
+failed = open(failed_files, "a", 1)
 
 for file in glob.glob(input_directory+"/*.h5"):
 
@@ -27,11 +31,14 @@ for file in glob.glob(input_directory+"/*.h5"):
         status = subprocess.call("/opt/lofarsoft/src/PyCRTools/pipelines/cr_event.py "+file+" --datadir=/data/VHECR/LORAtriggered/data --outputdir=/data/VHECR/LORAtriggered/results --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R >& /data/VHECR/LORAtriggered/log_pipeline_run.txt", shell=True)
 
         if status == 0:
-            f.write(file + "\n")
+            processed.write(file + "\n")
+        else:
+            failed.write(file + "\n")
 
     else:
         print "skipping already processed", file
 
-# Close processed files list
-f.close()
+# Close files
+processed.close()
+failed.close()
 

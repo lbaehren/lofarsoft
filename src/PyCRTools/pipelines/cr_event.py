@@ -116,6 +116,10 @@ parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh p
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
 
+nogui=True
+import matplotlib
+matplotlib.use('Agg')
+
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
     if options.norefresh:
@@ -857,7 +861,7 @@ for full_filename in files:
         #First determine where the pulse is in a simple incoherent sum of all time series data
         if (search_window_width > 0) and (sample_number > 0):
             # only narrow the search window if we have a 'good' guess for sample_number...
-            search_window=(sample_number-search_window_width/2,sample_number+search_window_width/2)
+            search_window=(max(0, sample_number-search_window_width/2), min(timeseries_calibrated_data.shape()[1] - 1, sample_number+search_window_width/2))
         else:
             search_window=False
 
@@ -869,23 +873,33 @@ for full_filename in files:
             print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
             tbeam_incoherent=None
 
-        #Get a list of pulses in the search window
-        pulses=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
-        #How many antennas have pulses? Also: determine a finer window where the pulses are
-        if pulses.npeaks>0:
-            antennas_with_peaks=list(asvec(hArray(good_antennas)[pulses.peaks_found_list]))
-            print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
-            print "#LocatePulses - antennas with pulses:",antennas_with_peaks
-
         #If we had a pre-determined direction use this to find the dominant peak and cut out the time series around it
         if lora_direction:
             pulse=trerun("LocatePulseTrain","",timeseries_calibrated_data,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
+            antennas_with_peaks=good_antennas
+            pulse_npeaks=pulse.npeaks
 
         # Otherwise take the previously found window with the most pulses
-        else:
-            pulse=pulses
-        pulse_npeaks=pulses.npeaks
+        if not lora_direction or (lora_direction and pulse.npeaks==0):
+            print "searching per antenna"
+            pulse=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
+            pulse_npeaks=pulse.npeaks
+
+            #How many antennas have pulses? Also: determine a finer window where the pulses are
+            if pulse.npeaks>0:
+                antennas_with_peaks=list(asvec(hArray(good_antennas)[pulse.peaks_found_list]))
+                print "#LocatePulses - ",pulse.npeaks,"antennas with a pulse found. Pulse window start=",pulse.start,"+/-",pulse.start_rms,"pulse range:",pulse.start_min,"-",pulse.start_max
+                print "#LocatePulses - antennas with pulse:",antennas_with_peaks
+
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
+
+        if pulse_npeaks==0:
+            print "************************************************************************"
+            print "********          ATTENTION: No pulses found          ******************"
+            print "************************************************************************"
+            print "ERROR: LocatePulseTrain: No pulses found!"
+            finish_file(laststatus="NO PULSE")
+            continue
 
 # Finish gain calibration - also apply gain calibration on time series data in 'pulse' result workspace.
         timeseries_calibrated_data_gainnormalisation = timeseries_calibrated_data[...,0:pulse.start].stddev(0.0)
@@ -920,14 +934,6 @@ for full_filename in files:
             timeseries_raw_rms=list(timeseries_raw_rms),
             npeaks_found=pulse_npeaks
             ))
-
-        if pulse_npeaks==0:
-            print "************************************************************************"
-            print "********          ATTENTION: No pulses found          ******************"
-            print "************************************************************************"
-            print "ERROR: LocatePulseTrain: No pulses found!"
-            finish_file(laststatus="NO PULSE")
-            continue
 
         #Store the small version of the calibrated timeseries, e.g. for the imager
         print "---> Saving ",calibrated_timeseries_cut_file
@@ -1013,6 +1019,10 @@ for full_filename in files:
         good_pulse_cabledelays=cabledelays[antennas_with_strong_pulses]
 
         direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags,cabledelays=good_pulse_cabledelays,verbose=True,doplot=True)
+        if direction.ngood == 0:
+            finish_file(laststatus="NO GOOD TRIANGLES FOUND")
+            continue
+
         print "========================================================================"
         print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
         print " "

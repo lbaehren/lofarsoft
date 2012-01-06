@@ -62,6 +62,10 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
     vv = Vector(copy=v) ->  vv = Vector(int, 10, fill=[0,1,2,3,4,5,6,7,8,9])
 
     """
+    # Allow creation of Vector with single scalar
+    if isinstance(Type, float) or isinstance(Type, int):
+        Type = [Type]
+
     if not copy==None:
         if not properties:
             properties=copy

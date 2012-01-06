@@ -427,7 +427,10 @@ def hArray_getitem(self,indexlist,asvec=False):
     ary=self.getSlicedArray(indexlist)
     size=ary.getSize()
     if size == 0:
-        raise IndexError("index out of bounds")
+        if isinstance(indexlist, slice) and (indexlist.start == indexlist.stop or (indexlist.start is None and indexlist.stop == 0)):
+            return ary
+        else:
+            raise IndexError("index out of bounds")
     elif size == 1 and not ary.loopingMode() and not asvec:
         return ary.val()
     else:

@@ -134,6 +134,7 @@ class LocatePulseTrain(tasks.Task):
         pass
 
     def run(self):
+        self.npeaks = 0
         #Sum all antennas, if more than one antenna is present
         if not self.timeseries_data_sum:
             if len(self.timeseries_data.shape())==1:
@@ -147,13 +148,13 @@ class LocatePulseTrain(tasks.Task):
         self.blen=cr.Vector(int,self.nantennas,fill=max(self.timeseries_length/self.nblocks,8))
         if self.search_window:
             if hasattr(self.search_window,"__getitem__") and len(self.search_window)==2 and isinstance(self.search_window[0],(long,int)) and isinstance(self.search_window[1],(long,int)):
-                self.search_window_x0=max(min(len(self.timeseries_data_sum),self.search_window[0]),0) if self.search_window[0]>=0 else 0
-                self.search_window_x1=max(min(len(self.timeseries_data_sum),self.search_window[1]),1) if self.search_window[1]>0 else len(self.timeseries_data_sum)
+                self.search_window_x0=max(min(len(self.timeseries_data_sum) - 1,self.search_window[0]),0) if self.search_window[0]>=0 else 0
+                self.search_window_x1=max(min(len(self.timeseries_data_sum) - 1,self.search_window[1]),1) if self.search_window[1]>0 else len(self.timeseries_data_sum) - 1
             else:
                 raise ValueError("ERROR: LocatePulseTrain.search_window needs to be a tuple or list of two integers.")
         else:
             self.search_window_x0=0;
-            self.search_window_x1=self.timeseries_length
+            self.search_window_x1=self.timeseries_length - 1
 
         if self.search_per_antenna:
             self.timeseries_data[...].minstddevblock(self.blen,self.minrms,self.minmean)
@@ -196,7 +197,6 @@ class LocatePulseTrain(tasks.Task):
             self.start=self.indexlist[0,self.maxpos,0]
             self.end=self.indexlist[0,self.maxpos,1]
 
-
         self.cutlen=int(2**math.ceil(math.log(min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen),2))) if self.cut_to_power_of_two else min(max(self.end-self.start+self.prepulselen,self.minlen),self.maxlen)
         self.update()
 
@@ -208,11 +208,11 @@ class LocatePulseTrain(tasks.Task):
             else:
                 if self.search_window:
                     self.timeseries_data_sum.plot(color="green",label="search window",nhighlight=self.npeaks,highlight=self.indexlist,highlightcolor="orange",title="Peak search: Incoherent sum of timeseries data",highlightlabel="peaks found")
-                    self.timeseries_data_sum[:self.search_window_x0].plot(clf=False,color="blue",label="Incoherent sum")
-                    self.timeseries_data_sum[self.search_window_x1:].plot(clf=False,color="blue",xvalues=cr.hArray(range(self.search_window_x1,len(self.timeseries_data_sum))))
+                    cr.hArray(self.timeseries_data_sum[:self.search_window_x0]).plot(clf=False,color="blue",label="Incoherent sum")
+                    cr.hArray(self.timeseries_data_sum[self.search_window_x1:]).plot(clf=False,color="blue",xvalues=cr.hArray(range(self.search_window_x1,len(self.timeseries_data_sum))))
                 else:
                     self.timeseries_data_sum.plot(nhighlight=self.npeaks,highlight=self.indexlist,color="blue",highlightcolor="orange",title="Peak search: incoherent sum of timeseries data",label="incoherent sum",highlightlabel="peaks found")
-                self.timeseries_data_sum[self.start:self.end].plot(clf=False,color="red",xvalues=cr.hArray(range(self.start,self.end)),label="peak region")
+                cr.hArray(self.timeseries_data_sum[self.start:self.end]).plot(clf=False,color="red",xvalues=cr.hArray(range(self.start,self.end)),label="peak region")
                 cr.plt.legend(loc=2)
             self.plot_finish(name=self.__taskname__+self.plot_name)
 
@@ -222,7 +222,6 @@ class LocatePulseTrain(tasks.Task):
                 self.timeseries_data_cut[...].copy(self.timeseries_data[...,self.start:self.end])
             else:
                 self.timeseries_data_cut.copy(self.timeseries_data[self.start:self.end])
-
 
 class CrossCorrelateAntennas(tasks.Task):
     """
@@ -794,6 +793,9 @@ class DirectionFitTriangles(tasks.Task):
 
             #Get mean position of good antennas
             self.goodones.copyvec(self.centers,self.index,self.ngood,3)
+            if self.ngood == 0:
+                print "DirectionFitTriangles: NO_GOOD_TRIANGLES_FOUND"
+                return
             self.meancenter.mean(self.goodones[:self.ngood])
 
             #Get mean direction from good antennas
