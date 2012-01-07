@@ -6,7 +6,8 @@ print "[test_sifting] Importing module 'sys' ..."
 ##  Import module 'sys' and add to the path where Python modules are read from
 ##
 
-from sys import *
+import sys
+print sys.modules.keys()
 
 sys.path.insert(0, "${CMAKE_INSTALL_PREFIX}/lib/python")
 
