@@ -14,7 +14,7 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (TMF_GIT "git://github.com/pschella/tmf.git")
+set (TMF_GIT "http://github.com/pschella/tmf.git")
 
 ## ==============================================================================
 ##
