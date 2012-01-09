@@ -395,8 +395,8 @@ namespace CR { // Namespace CR -- begin
           return False;
         }
         
-        // optimize curvature
-        if (! findCurvature(Az, El, curvature, AntennaSelection, &center, verbose) ){
+        // optimize curvature (with x-beam)
+        if (! findCurvature(Az, El, curvature, AntennaSelection, &center, verbose, true) ){
           cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findCurvature()!" << endl;
           return False;
         }
@@ -409,8 +409,8 @@ namespace CR { // Namespace CR -- begin
           return False;
         }
         
-        // optimize curvature
-        if (! findCurvature(Az, El, curvature, AntennaSelection, &center, verbose) ){
+        // optimize curvature (with cc-beam)
+        if (! findCurvature(Az, El, curvature, AntennaSelection, &center, verbose, false) ){
           cerr << "analyseLOPESevent::doPositionFitting: " << "Error during findCurvature()!" << endl;
           return False;
         }
@@ -454,8 +454,8 @@ namespace CR { // Namespace CR -- begin
           return False;
         }
 
-        // optimize cone angle rho
-        if (! findConeAngle(Az, El, coneAngle, AntennaSelection, &center, verbose) ){
+        // optimize cone angle rho (with x-beam)
+        if (! findConeAngle(Az, El, coneAngle, AntennaSelection, &center, verbose, true) ){
           cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during findConeAngle()!" << endl;
           return False;
         }
@@ -469,8 +469,8 @@ namespace CR { // Namespace CR -- begin
           return False;
         }
         
-        // optimize cone angle rho
-        if (! findConeAngle(Az, El, coneAngle, AntennaSelection, &center, verbose) ){
+        // optimize cone angle rho (with cc beam)
+        if (! findConeAngle(Az, El, coneAngle, AntennaSelection, &center, verbose, false) ){
           cerr << "analyseLOPESevent::doConicalPositionFitting: " << "Error during findConeAngle()!" << endl;
           return False;
         }
@@ -504,6 +504,9 @@ namespace CR { // Namespace CR -- begin
         cerr << "analyseLOPESevent::GaussFitData: " << "Error during setConeAngle()!" << endl;
         return False;
       };
+      // consistency check: curvature must be > 0
+      if (curvature<1e-5)
+        curvature = 1e-5;
       if (! beamPipe_p->setDirection(Az, El, 1000./curvature)){
         cerr << "analyseLOPESevent::GaussFitData: " << "Error during setDirection()!" << endl;
         return False;
@@ -529,8 +532,19 @@ namespace CR { // Namespace CR -- begin
       if ( !fiterg.isDefined("Xconverged") || !fiterg.isDefined("CCconverged") ){
         cerr << "analyseLOPESevent::GaussFitData: " << "Error during fit!" << endl;
         return False;        
-      };
+      }
 
+      if ( fiterg.asDouble("Xheight")==NAN || fiterg.asDouble("CCheight")==NAN ){
+        cerr << "analyseLOPESevent::GaussFitData: " << "Error during fit: result = nan!" << endl;
+        return False;        
+      }
+      
+      if ( fiterg.asDouble("Xheight_error")==0. || fiterg.asDouble("CCheight_error")==0. ){
+        cerr << "analyseLOPESevent::GaussFitData: " << "Error during fit: fit error = 0!" << endl;
+        return False;        
+      }
+      
+      
       if (verbose) {
         cout << "Event \"" << evname << "\" fit results:" << endl;
         if (fiterg.asBool("Xconverged")){
@@ -555,7 +569,7 @@ namespace CR { // Namespace CR -- begin
              <<fiterg.asDouble("CCwidth_error") << endl;
         cout << "  CCCenter: " << fiterg.asDouble("CCcenter") << " +/- "
              <<fiterg.asDouble("CCcenter_error") << endl;
-      };
+      }
       
       //copy fit results to record
       erg.mergeField(fiterg,"Xconverged", RecordInterface::OverwriteDuplicates);
@@ -1369,23 +1383,40 @@ namespace CR { // Namespace CR -- begin
                                         Double &curvature,
                                         Vector<Bool> AntennaSelection, 
                                         Double *centerp,
-                                        Bool verbose){
+                                        Bool verbose,
+                                        Bool xbeam){
     try {
       Double height_=0., maxheight=0., maxcurv=2., center_=-1.8e-6, maxcenter=0.;
+      
       for(double kappa=0; kappa<=1; kappa += 0.005){
-        if (getBeamHeight(Az, El, kappa, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_)) {
-          if (height_ > maxheight) {
+        if (xbeam) {
+          if (getBeamHeight(Az, El, kappa, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_)) {
+            if (height_ > maxheight) {
               maxheight = height_;
               maxcurv = kappa;
-            maxcenter = center_;
-          }
+              maxcenter = center_;
+            }
+          }  
+        } else {
+          if (getBeamHeight(Az, El, kappa, AntennaSelection, &height_, SkymapQuantity::TIME_CC, &center_)) {
+            if (height_ > maxheight) {
+              maxheight = height_;
+              maxcurv = kappa;
+              maxcenter = center_;
+            }
+          }  
         }
       }
       curvature = maxcurv;
       if (centerp != NULL) {
         *centerp = maxcenter;
       }
-      if (verbose) { cout << "findcurvature: best curvature (xbeam): "<<curvature<<endl; };
+      if (verbose) {
+        if (xbeam)
+          cout << "findcurvature: best curvature (xbeam): "<<curvature<<endl;
+        else
+          cout << "findcurvature: best curvature (ccbeam): "<<curvature<<endl;
+      }
     } catch (AipsError x) {
         cerr << "analyseLOPESevent:findCurvature: "<< x.getMesg() <<endl;
         return false;
@@ -1399,16 +1430,29 @@ namespace CR { // Namespace CR -- begin
                                          Double &coneAngle,
                                          Vector<Bool> AntennaSelection, 
                                          Double *centerp,
-                                         Bool verbose){
+                                         Bool verbose,
+                                         Bool xbeam){
     try {
       Double height_=0., maxheight=0., maxconeAngle=0., center_=-1.8e-6, maxcenter=0.;
       Double dummyCurvature = 1e-3; // curvature has no effect for conical beamforming
+      
       for(double rho=0; rho<=0.05; rho+=0.00025){
-        if (getBeamHeight(Az, El, dummyCurvature, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_, rho)) {
-          if (height_ > maxheight) {
-            maxheight = height_;
-            maxconeAngle = rho;
-            maxcenter = center_;
+        // decide wether to do everything for xbeam or ccbeam
+        if (xbeam) {
+          if (getBeamHeight(Az, El, dummyCurvature, AntennaSelection, &height_, SkymapQuantity::TIME_X, &center_, rho)) {
+            if (height_ > maxheight) {
+              maxheight = height_;
+              maxconeAngle = rho;
+              maxcenter = center_;
+            }
+          }
+        } else {
+          if (getBeamHeight(Az, El, dummyCurvature, AntennaSelection, &height_, SkymapQuantity::TIME_CC, &center_, rho)) {
+            if (height_ > maxheight) {
+              maxheight = height_;
+              maxconeAngle = rho;
+              maxcenter = center_;
+            }
           }
         }
       }
@@ -1416,8 +1460,12 @@ namespace CR { // Namespace CR -- begin
       if (centerp != NULL) {
         *centerp = maxcenter;
       }
-      if (verbose)
-        cout << "findConeAngle: best coneAngle rho (xbeam): "<<coneAngle<<endl;
+      if (verbose) {
+        if (xbeam)
+          cout << "findConeAngle: best coneAngle rho (xbeam): "<<coneAngle<<endl;
+        else
+          cout << "findConeAngle: best coneAngle rho (ccbeam): "<<coneAngle<<endl;          
+      }  
     } catch (AipsError x) {
         cerr << "analyseLOPESevent:findConeAngle: "<< x.getMesg() <<endl;
         return false;

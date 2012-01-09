@@ -724,6 +724,7 @@ namespace CR { // Namespace CR -- begin
       \param AntennaSelection - Vector of bool to select only part of the antennas.
       \param center*          - position into which the center can be returned
       \param verbose          - produce verbose output on the commandline.
+      \param xbeam            - use x-beam instead of cc-beam
  
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -732,7 +733,8 @@ namespace CR { // Namespace CR -- begin
                        Double &curvature,
                        Vector<Bool> AntennaSelection, 
                        Double *centerp=NULL,
-                       Bool verbose=False);
+                       Bool verbose=False,
+                       Bool xbeam=False);
 
     /*!
       \brief Finds the cone angle with the maximal x-beam in a given direction in the
@@ -744,6 +746,7 @@ namespace CR { // Namespace CR -- begin
       \param AntennaSelection - Vector of bool to select only part of the antennas.
       \param center*          - position into which the center can be returned
       \param verbose          - produce verbose output on the commandline.
+      \param xbeam            - use x-beam instead of cc-beam
  
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -752,7 +755,8 @@ namespace CR { // Namespace CR -- begin
                        Double &coneAngle,
                        Vector<Bool> AntennaSelection, 
                        Double *centerp=NULL,
-                       Bool verbose=False);
+                       Bool verbose=False,
+                       Bool xbeam=False);
 
 
   protected: //this methods are protected to make them available in child class
