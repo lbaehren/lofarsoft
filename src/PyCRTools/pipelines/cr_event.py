@@ -115,11 +115,6 @@ parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip f
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 
-
-nogui=True
-import matplotlib
-matplotlib.use('Agg')
-
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
     if options.norefresh:
@@ -491,7 +486,7 @@ for full_filename in files:
 #            finish_file(status="FILE TOO LARGE")
 #            continue
 
-        if min(datafile["DATA_LENGTH"])<min_data_length:
+        if min(datafile["DATA_LENGTH"])<min_data_length or min(datafile["DATA_LENGTH"]) < blocksize:
             print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             finish_file(laststatus="FILE TOO SMALL")
             continue

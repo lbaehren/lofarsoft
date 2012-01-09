@@ -223,6 +223,9 @@ class LocatePulseTrain(tasks.Task):
             else:
                 self.timeseries_data_cut.copy(self.timeseries_data[self.start:self.end])
 
+        # Correct for index out of allowed range
+        self.end = min(self.end, len(self.timeseries_data_sum) - 1)
+
 class CrossCorrelateAntennas(tasks.Task):
     """
     **Usage:**
