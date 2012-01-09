@@ -68,18 +68,18 @@ macro (lus_package_build _name _dir)
   ## Trigger build and install
   if (LUS_CMAKE_OPTIONS)
     add_custom_target (${_name}
-      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -C${LUS_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -C${LUS_CMAKE_OPTIONS} -DLUS_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
       COMMAND ${CMAKE_BUILD_TOOL} install
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
       )
   else (LUS_CMAKE_OPTIONS)
     add_custom_target (${_name}
-      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/${_dir} -DLUS_INSTALL_PREFIX=${LUS_INSTALL_PREFIX}
       COMMAND ${CMAKE_BUILD_TOOL} install
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_dir}
       )
   endif (LUS_CMAKE_OPTIONS)
-  
+
 endmacro (lus_package_build)
 
 ##____________________________________________________________________
