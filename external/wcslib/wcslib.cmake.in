@@ -9,6 +9,11 @@ set (CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH
   FORCE
   )
 
+set (LUS_INSTALL_PREFIX ${LUS_INSTALL_PREFIX} CACHE PATH
+  "Installation location"
+  FORCE
+  )
+
 set (WCSLIB_FORCE_BUILD ${WCSLIB_FORCE_BUILD} CACHE BOOL
   "Force rebuild and local installation"
   FORCE
