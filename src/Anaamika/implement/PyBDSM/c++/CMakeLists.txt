@@ -18,6 +18,11 @@ set_target_properties(_cbdsm PROPERTIES
   LINKER_LANGUAGE Fortran
 )
 
+if (APPLE)
+  set_target_properties(_cbdsm PROPERTIES
+    LINK_FLAGS "-undefined dynamic_lookup")
+endif (APPLE)   
+
 install(TARGETS _cbdsm
   DESTINATION lib/python/bdsm
 )

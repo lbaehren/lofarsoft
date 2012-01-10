@@ -34,7 +34,7 @@ and parameters under exponents (NL_ij) are non-linear.
 
 #include "aux.h"
 #include "MGFunction.h"
-
+    
 #include <ext/algorithm>
 #include <num_util/num_util.h>
 #include <cfloat>

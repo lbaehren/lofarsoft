@@ -9,7 +9,6 @@
 */
 
 #include "Fitters.h"
-
 #include <iostream>
 
 using namespace std;

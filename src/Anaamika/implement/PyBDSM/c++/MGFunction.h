@@ -1,3 +1,4 @@
+#include "Python.h"
 #ifndef _MGFUNCTION_H_INCLUDED
 #define _MGFUNCTION_H_INCLUDED
 
