@@ -61,6 +61,7 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             
             rms[res["polarization"]].extend(res["timeseries_rms"])
             
+            
             ndipoles[res["polarization"]]+=res["ndipoles"]
             
             # Average Station data
@@ -81,7 +82,8 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
                 names0.append(stationname)
             else:
                 names1.append(stationname)    
-
+        
+        #print "rms:", rms
         if res == {}:
             print "No results file found"
             sys.exit(0)
@@ -189,6 +191,7 @@ class ldf(tasks.Task):
         plot_clf = dict(default=True,doc="Clean window before plotting?"),
         plot_xmin = dict(default=0,doc="Mininum value of x-axis. To use turn plot_auto_scale off."),
         plot_xmax = dict(default=300,doc="Maximum value of x-axis. To use turn plot_auto_scale off."),
+        remove_outliers = dict(default=False,doc="enable plotting with useful axes"),
         plot_scale_auto = dict(default=True, doc="Will scales axes to maximum values, will override manual plotting boundaries and whatever plt thinks it is doing."),
         antenna_set = dict(default=lambda self:self.results["antenna_set"],doc="determines labelling of polarizations"),
         color_pol0 = dict(default='#B30424',doc="color pol 0"),
@@ -206,8 +209,9 @@ class ldf(tasks.Task):
         Draw3D = dict(default=True,doc="Draw 2D LDF"),
         save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder"),
         generate_html = dict(default=False,doc="Default output to altair webserver"),
-        use_lofar_information = dict(default=False,doc="Use Barycenter and other information to draw different LDF"),
-        use_lofar_with_pol = dict(default=1,doc="Calculate LOFAR core for the polarization 0 or 1"),
+        use_lofar_information = dict(default=False,doc="Use minimization to draw different LDF"),
+        draw_bary_center = dict(default=False,doc="Use barycenter to draw different LDF"),
+        use_lofar_with_pol = dict(default=2,doc="Calculate LOFAR core for the polarization 0 or 1 or 2=both"),
         parameters_for_fitting = dict(default=[50,5], doc="Give minimization parameters [bins,size]")
         
         )
@@ -216,7 +220,8 @@ class ldf(tasks.Task):
     ## Functions for shower geometry and uncertainty propagation
 
     def GetDistance(self,loracore,loradirection,positions):  
-    
+        
+        
         """
         Calculating the distance of a station to the shower core in the shower plane. 
         """      
@@ -383,6 +388,11 @@ class ldf(tasks.Task):
             labelpol1 = "pol 1"    
 
         if self.signals0:
+        
+            if self.remove_outliers:
+                for i in xrange(len(self.signals0)):
+                    if self.signals0[i] > 100000:
+                        self.signals0[i] = 10        
             
             if self.plot_scale_auto:
                 y_max0 = self.signals0.max()[0]*1.5
@@ -406,6 +416,11 @@ class ldf(tasks.Task):
                 self.signals0.plot(color='m',linestyle="None",marker=self.marker_pol0,label=labelpol0,clf=False)           
 
         if self.signals1:
+            
+            if self.remove_outliers:
+                for i in xrange(len(self.signals1)):
+                    if self.signals1[i] > 100000:
+                        self.signals1[i] = 10
         
             if self.plot_scale_auto:
                 y_min = self.signals1.min()[0]*0.5
@@ -600,7 +615,7 @@ class ldf(tasks.Task):
 
         if self.use_lofar_information:   
             
-            # Barycenter
+             ##Barycenter
               
             self.CorePol0 = self.CalculateBaryCenter(self.positions0,self.signals0)
             self.CorePol0.append(0)
@@ -609,53 +624,53 @@ class ldf(tasks.Task):
             self.CorePol1.append(0)
             self.CorePol1 = cr.hArray(self.CorePol1)
             
-            #  pol 0
+             ## pol 0
             
-            figlofarpol0 = cr.plt.figure()
-                
-            self.DistNewpol01 = self.GetDistance(self.CorePol0,self.loradirection,self.positions1)
-            self.DistNewpol00 = self.GetDistance(self.CorePol0,self.loradirection,self.positions0)
-           
-            cr.plt.plot(self.DistNewpol01.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
-            
-            cr.plt.plot(self.DistNewpol00.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
-            cr.plt.yscale("log")
-            cr.plt.xlabel("Distance to Shower Axis from pol0 [m]")
-            if self.plot_parameter == "pulses_maxima_y":
-                cr.plt.ylabel("Pulse Power [a.u.]")
-            else:
-                cr.plt.ylabel("Power [a.u.]")  
-            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
-            cr.plt.title("BaryCenter_POL0_"+str(self.event_id)) 
-            
-            if self.plot_scale_auto:
-                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
-            else:
-                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)         
+#            figlofarpol0 = cr.plt.figure()
+#                
+#            self.DistNewpol01 = self.GetDistance(self.CorePol0,self.loradirection,self.positions1)
+#            self.DistNewpol00 = self.GetDistance(self.CorePol0,self.loradirection,self.positions0)
+#           
+#            cr.plt.plot(self.DistNewpol01.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
+#            
+#            cr.plt.plot(self.DistNewpol00.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
+#            cr.plt.yscale("log")
+#            cr.plt.xlabel("Distance to Shower Axis from pol0 [m]")
+#            if self.plot_parameter == "pulses_maxima_y":
+#                cr.plt.ylabel("Pulse Power [a.u.]")
+#            else:
+#                cr.plt.ylabel("Power [a.u.]")  
+#            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
+#            cr.plt.title("BaryCenter_POL0_"+str(self.event_id)) 
+#            
+#            if self.plot_scale_auto:
+#                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+#            else:
+#                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)         
              
-            # pol1
+            ## pol1
               
-            figlofarpol1 = cr.plt.figure()
-                
-            self.DistNewpol11 = self.GetDistance(self.CorePol1,self.loradirection,self.positions1)
-            self.DistNewpol10 = self.GetDistance(self.CorePol1,self.loradirection,self.positions0)
-           
-            cr.plt.plot(self.DistNewpol11.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
-            
-            cr.plt.plot(self.DistNewpol10.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
-            cr.plt.yscale("log")
-            cr.plt.xlabel("Distance to Shower Axis from pol1 [m]")
-            if self.plot_parameter == "pulses_maxima_y":
-                cr.plt.ylabel("Pulse Power [a.u.]")
-            else:
-                cr.plt.ylabel("Power [a.u.]")  
-            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
-            cr.plt.title("BaryCenter_POL1_"+str(self.event_id))  
-            
-            if self.plot_scale_auto:
-                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
-            else:
-                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+#            figlofarpol1 = cr.plt.figure()
+#                
+#            self.DistNewpol11 = self.GetDistance(self.CorePol1,self.loradirection,self.positions1)
+#            self.DistNewpol10 = self.GetDistance(self.CorePol1,self.loradirection,self.positions0)
+#           
+#            cr.plt.plot(self.DistNewpol11.vec(),self.signals1.vec(),color=self.color_pol1,linestyle="None",marker=self.marker_pol1,label=labelpol1) 
+#            
+#            cr.plt.plot(self.DistNewpol10.vec(),self.signals0.vec(),color=self.color_pol0,linestyle="None",marker=self.marker_pol0,label=labelpol0)  
+#            cr.plt.yscale("log")
+#            cr.plt.xlabel("Distance to Shower Axis from pol1 [m]")
+#            if self.plot_parameter == "pulses_maxima_y":
+#                cr.plt.ylabel("Pulse Power [a.u.]")
+#            else:
+#                cr.plt.ylabel("Power [a.u.]")  
+#            cr.plt.legend(loc='upper right', shadow=False, numpoints=1) 
+#            cr.plt.title("BaryCenter_POL1_"+str(self.event_id))  
+#            
+#            if self.plot_scale_auto:
+#                cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+#            else:
+#                cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
             
             # Minimization             
             
@@ -672,55 +687,169 @@ class ldf(tasks.Task):
             
             width = bins/2.*size
             
-            if self.use_lofar_with_pol == 1:
+            # use both polarizations
+            
+            if self.use_lofar_with_pol == 2:
+            
                 StartSignals = self.signals1
-            else:
-                StartSignals = self.signals0
-            
-            StartCore = cr.hArray(copy=self.loracore)
-            
-            StartCore[0] -= (bins/2*size)
-            StartCore[1] -= (bins/2*size)
-            
-            MinCore = cr.hArray(copy=StartCore)
-            starttestindex = float("inf")
-            
-            for stepX in xrange(bins):
+                NextSignals = self.signals0
 
-                VarCore = cr.hArray((0.,0.,0.))
-                VarCore[0] = StartCore[0] + stepX*size
-                    
-                for stepY in xrange(bins):
+                StartCore = cr.hArray(copy=self.loracore)
                 
-                    VarCore[1] =  StartCore[1] + stepY*size
-                    
-                    if self.use_lofar_with_pol == 1:
-                        StartDistances = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
-                    else:
-                        StartDistances = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
-                    Length = int(StartSignals.getDim()[0])
-                    Value = np.zeros((Length, 2))
-        
-                    Value[:,0] = StartDistances
-                    Value[:,1] = StartSignals.vec()
-        
-                    order = Value[:,0].argsort() 
-        
-                    ValueSorted = np.take(Value,order,0)
-                    
-                    testvalue = 0
-                    for i in xrange(Length-1):
-                        testvalue += abs(ValueSorted[i,1]-ValueSorted[i+1,1])
-                    
-                    
-                    if testvalue < starttestindex:
-                        MinCore = cr.hArray(copy=VarCore)
-                        starttestindex = testvalue
+                StartCore[0] -= (bins/2*size)
+                StartCore[1] -= (bins/2*size)
+                
+                MinCore = cr.hArray(copy=StartCore)
+                starttestindex = float("inf")
+                
+                uncertainty1 = self.signaluncertainties1.mean()
+                uncertainty0 = self.signaluncertainties0.mean()
+                
+                uncertainty = 3*(uncertainty1+uncertainty0/2.)
+            
+                for stepX in xrange(bins):
+    
+                    VarCore = cr.hArray((0.,0.,0.))
+                    VarCore[0] = StartCore[0] + stepX*size
                         
-                    xgrid[count] = stepX*size+StartCore[0]
-                    ygrid[count] = stepY*size+StartCore[1]
-                    vgrid[count] = testvalue
-                    count += 1    
+                    for stepY in xrange(bins):
+                    
+                        VarCore[1] =  StartCore[1] + stepY*size
+                        
+                        if self.use_lofar_with_pol == 1:
+                            StartDistances = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
+                            NextDistances  = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
+                        else:
+                            StartDistances = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
+                            NextDistances  = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
+                            
+                        Length = int(StartSignals.getDim()[0])
+                        Value = np.zeros((Length, 2))
+                        
+                        Length2 = int(NextSignals.getDim()[0])
+                        Value2 = np.zeros((Length2, 2))
+            
+                        Value[:,0] = StartDistances
+                        Value[:,1] = StartSignals.vec()
+                        
+                        Value2[:,0] = NextDistances
+                        Value2[:,1] = NextSignals.vec()
+            
+                        order = Value[:,0].argsort()
+                        order2 = Value2[:,0].argsort() 
+            
+                        ValueSorted = np.take(Value,order,0)
+                        
+                        ValueSorted2 = np.take(Value2,order2,0)
+                        
+                        testvalue1 = 0
+                        for i in xrange(Length-1):
+                            up = ValueSorted[i,1]
+                            down = ValueSorted[i+1,1]
+                            if up  > uncertainty and  down > uncertainty:
+                                testvalue1 += abs(up-down)
+                        
+    
+                        testvalue2 = 0
+                        for i in xrange(Length2-1):
+                            up = ValueSorted2[i,1]
+                            down = ValueSorted2[i+1,1]
+                            if up  > uncertainty and  down > uncertainty:
+                                testvalue2 += abs(up-down)
+                        
+                        testvalue = testvalue2+  testvalue1
+                        
+                        if testvalue < starttestindex:
+                            MinCore = cr.hArray(copy=VarCore)
+                            starttestindex = testvalue
+                            
+                        xgrid[count] = stepX*size+StartCore[0]
+                        ygrid[count] = stepY*size+StartCore[1]
+                        vgrid[count] = testvalue
+                        count += 1
+                                
+            else: 
+                if self.use_lofar_with_pol == 1:
+                    StartSignals = self.signals1
+                else:
+                    StartSignals = self.signals0
+            
+                StartCore = cr.hArray(copy=self.loracore)
+                
+                StartCore[0] -= (bins/2*size)
+                StartCore[1] -= (bins/2*size)
+                
+                MinCore = cr.hArray(copy=StartCore)
+                starttestindex = float("inf")
+                
+                if self.use_lofar_with_pol == 1:
+                    uncertainty = self.signaluncertainties1.mean()
+                else:
+                    uncertainty = self.signaluncertainties1.mean()
+                
+                uncertainty *= 3
+
+            
+                for stepX in xrange(bins):
+    
+                    VarCore = cr.hArray((0.,0.,0.))
+                    VarCore[0] = StartCore[0] + stepX*size
+                        
+                    for stepY in xrange(bins):
+                    
+                        VarCore[1] =  StartCore[1] + stepY*size
+                        
+                        if self.use_lofar_with_pol == 1:
+                            StartDistances = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
+    #                        NextDistances  = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
+                        else:
+                            StartDistances = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
+    #                        NextDistances  = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
+                            
+                        Length = int(StartSignals.getDim()[0])
+                        Value = np.zeros((Length, 2))
+                        
+    #                    Length2 = int(NextSignals.getDim()[0])
+    #                    Value2 = np.zeros((Length2, 2))
+            
+                        Value[:,0] = StartDistances
+                        Value[:,1] = StartSignals.vec()
+                        
+    #                    Value2[:,0] = NextDistances
+    #                    Value2[:,1] = NextSignals.vec()
+            
+                        order = Value[:,0].argsort()
+    #                    order2 = Value2[:,0].argsort() 
+    #        
+                        ValueSorted = np.take(Value,order,0)
+                        
+    #                    ValueSorted2 = np.take(Value2,order2,0)
+                        
+                        testvalue1 = 0
+                        for i in xrange(Length-1):
+                            up = ValueSorted[i,1]
+                            down = ValueSorted[i+1,1]
+                            if up  > uncertainty and  down > uncertainty:
+                                testvalue1 += abs(up-down)
+                        
+    
+    #                    testvalue2 = 0
+    #                    for i in xrange(Length2-1):
+    #                        up = ValueSorted2[i,1]
+    #                        down = ValueSorted2[i+1,1]
+    #                        if up  > uncertainty and  down > uncertainty:
+    #                            testvalue2 += abs(up-down)
+                        
+                        testvalue = testvalue1#+  testvalue1
+                        
+                        if testvalue < starttestindex:
+                            MinCore = cr.hArray(copy=VarCore)
+                            starttestindex = testvalue
+                            
+                        xgrid[count] = stepX*size+StartCore[0]
+                        ygrid[count] = stepY*size+StartCore[1]
+                        vgrid[count] = testvalue
+                        count += 1    
 
                         
             H, xedges, yedges = np.histogram2d(ygrid, xgrid, bins=(bins, bins),range=np.array([[StartCore[1], StartCore[1]+bins*size], [StartCore[0], StartCore[0]+bins*size]]),normed=False, weights=vgrid)
