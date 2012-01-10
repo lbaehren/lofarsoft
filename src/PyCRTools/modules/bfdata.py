@@ -24,6 +24,25 @@ def sb2freq(sb,clockfreq,filter):
     freq=clockfreq*1.e6/1024*sb+offset
     return freq
 
+
+def sbs2freq(sbs,clockfreq,filter,nrchannels):
+    offset=0
+    if filter=='HBA_110_190':
+        offset=1e8
+    elif filter=='HBA_170_230':
+        offset=1.6e8
+    elif filter=='HBA_210_250':
+        offset=2e8
+    freq=[]
+    for sb in sbs:
+        centerfreq=clockfreq*1.e6/1024*(sb)+offset
+        subbandwidth=clockfreq*1.e6/1024
+        channelwidth=subbandwidth/nrchannels
+        freq.extend(np.arange(centerfreq-subbandwidth/2,centerfreq+subbandwidth/2,channelwidth)) # central frequencies
+
+    return freq
+
+
 def getpar(parameters,keyword):
     if keyword in parameters.keys():
         return parameters[keyword]
@@ -79,7 +98,7 @@ class BFDataReader():
                     self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))
                 elif self.par["stokestype"]=="IQUV":
                     self.datatype="CoherentStokesIQUV"
-            elif self.par["complexvoltage"]:
+            elif self.par["complexvoltages"]:
                 self.datatype="ComplexVoltage"
                 self.samples=self.par["samples"]
         else:
@@ -114,7 +133,7 @@ class BFDataReader():
                             self.files.append(open(file))
                     if self.h5:
                         for file in self.par["files"]:
-                            if '.h5' in file and os.path.isfile(file[0:-3]+'.raw'):
+                            if '.h5' in file and os.path.isfile(file[0:-3]+'.raw') and file[0:-3]+'.raw' not in self.par['files']:
                                 self.files.append(open(file[0:-3]+'.raw'))   
                     self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))     
                 elif self.par["stokestype"]=="IQUV":
@@ -807,7 +826,8 @@ def get_parameters(obsid, useFilename=False):
         sbspernode[i]=int(sbspernode[i].split('*')[0])
     parameters["sbspernode"]=sbspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
-    parameters["subbands"]=allparameters["Observation.subbandList"]
+
+
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
     parameters["filterselection"]=allparameters["Observation.bandFilter"]
@@ -1008,7 +1028,11 @@ def get_parameters_new(obsid, useFilename=False):
             sbspernode[i]=int(sbspernode[i].split('*')[0])
         parameters["sbspernode"]=sbspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
-    parameters["subbands"]=allparameters["Observation.subbandList"]
+    
+    subbands=allparameters["Observation.subbandList"].strip('[]').split(',')
+    subbands=[range(int(a.split('..')[0]),int(a.split('..')[1])+1) if '..' in a else [a] for a in subbands if '..' in a]
+    parameters["subbands"]=[]
+    [parameters["subbands"].extend(b) for b in subbands]
     parameters["nrsubbands"]=sum(parameters["sbspernode"])
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
@@ -1157,11 +1181,21 @@ def get_parameters_new(obsid, useFilename=False):
         for b in range(nrbeams):
             for pol in range(nrpol):
                 node=parameters["storagenodes"][(b*nrpol+pol)%len(parameters["storagenodes"])]
-                mask=parameters["namemask"].strip('.MS')
-                name='/net/'+subcluster[node]+'/'+node
-                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
-                name=name+'_S'+str(pol)+'_bf.raw'
-                names.append(name)
+                if "namemask" in parameters.keys():
+                    mask=parameters["namemask"].strip('.MS')
+                    name='/net/'+subcluster[node]+'/'+node
+                    name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_B'+sb2str(b))
+                    name=name+'_S'+str(pol)+'_bf.raw'
+                    names.append(name)
+                elif "Observation.DataProducts.Output_Beamformed.locations" in allparameters.keys():
+                     DPprefix="Observation.DataProducts.Output_Beamformed."
+                     DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
+                     DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
+                     DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
+                     for num,name in enumerate(DPfilenames):
+                         names.append(DPdir+name)
+                         fullnames.append(DPfulldir[num%len(DPfulldir)]+name)
+
 
 
     if parameters["correlateddata"]:
@@ -1169,13 +1203,16 @@ def get_parameters_new(obsid, useFilename=False):
         for i in range(len(parameters["storagenodes"])):
             node=parameters["storagenodes"][i]
             nrpernode=parameters["sbspernode"][i]
-            mask=parameters["namemask"]
-            for j in range(int(nrpernode)):
-                name='/net/'+subcluster[node]+'/'+node
-                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
-                name=name+'.MS'
-                names.append(name)
-                sb+=1
+            if "namemask" in parameters.keys():
+                mask=parameters["namemask"]
+                for j in range(int(nrpernode)):
+                    name='/net/'+subcluster[node]+'/'+node
+                    name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
+                    name=name+'.MS'
+                    names.append(name)
+                    sb+=1
+            else:
+                print "Names for correlated data not supported yet"
 
 
     if parameters["filtereddata"]:
@@ -1211,9 +1248,14 @@ def get_parameters_new(obsid, useFilename=False):
         parameters["beam"][beam]["startTime"]=allparameters["Observation.Beam["+str(beam)+"].startTime"]
         parameters["beam"][beam]["target"]=allparameters["Observation.Beam["+str(beam)+"].target"]
 
-    startfreq=float(parameters['subbands'].strip('[]').split('..')[0])
-    endfreq=float(parameters['subbands'].strip('[]').split('..')[1])
-    parameters["frequencies"]=np.arange(sb2freq(startfreq-.5,parameters['clockfrequency'],parameters['filterselection']),sb2freq(endfreq+0.5,parameters['clockfrequency'],parameters['filterselection']),parameters["clockfrequency"]*1.e6/1024./parameters["channels"])
+    #startfreq=float(parameters['subbands'].strip('[]').split('..')[0])
+    #endfreq=float(parameters['subbands'].strip('[]').split('..')[-1])
+    startfreq=parameters['subbands'][0]
+    endfreq=parameters['subbands'][-1]
+    #if len(parameters['subbands'].split('..')) > 2:
+    #    print "WARNING, discontinues frequencies not supported yet"
+    #parameters["frequencies"]=np.arange(sb2freq(startfreq-.5,parameters['clockfrequency'],parameters['filterselection']),sb2freq(endfreq+0.5,parameters['clockfrequency'],parameters['filterselection']),parameters["clockfrequency"]*1.e6/1024./parameters["channels"])
+    parameters['frequencies']=sbs2freq(parameters['subbands'],parameters['clockfrequency'],parameters['filterselection'],parameters['channels'])
     parameters["timeresolution"]=parameters["timeintegration"]*parameters["channels"]*1024/(parameters["clockfrequency"]*1.e6)
 
 
