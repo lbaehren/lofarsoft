@@ -84,7 +84,6 @@ option (PYCRTOOLS_WITH_DAL               "Compile PyCRTools with DAL support?"  
 option (PYCRTOOLS_WITH_FFTW              "Compile PyCRTools with FFTW support?"                      YES )
 option (PYCRTOOLS_WITH_GSL               "Compile PyCRTools with GSL support?"                       YES )
 option (PYCRTOOLS_WITH_NUMPY             "Compile PyCRTools with Numpy support?"                     YES )
-option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP support?"                    NO )
 
 ## Handle options
 

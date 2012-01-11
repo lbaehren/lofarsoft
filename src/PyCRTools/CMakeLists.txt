@@ -108,16 +108,12 @@ endif (PYCRTOOLS_WITH_OPTIMIZATIONS)
 ##-------------------------------------------------------------------------------
 ## Optional dependencies
 
-if (PYCRTOOLS_WITH_OPENMP)
-  if (OPENMP_FOUND)
-    message (STATUS "[PyCRTools] OpenMP requested and enabled")
-    set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (PYCRTOOLS_CPP_FLAGS "${PYCRTOOLS_CPP_FLAGS} ${OpenMP_CXX_FLAGS} ")
-    set (PYCRTOOLS_LINKER_FLAGS "${PYCRTOOLS_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
-  else (OPENMP_FOUND)
-    message (WARNING "[PyCRTools] OpenMP requested but not enabled: OpenMP not found")
-  endif (OPENMP_FOUND)
-endif (PYCRTOOLS_WITH_OPENMP)
+if (OPENMP_FOUND)
+  message (STATUS "[PyCRTools] OpenMP requested and enabled")
+  set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (PYCRTOOLS_CPP_FLAGS "${PYCRTOOLS_CPP_FLAGS} ${OpenMP_CXX_FLAGS} ")
+  set (PYCRTOOLS_LINKER_FLAGS "${PYCRTOOLS_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif (OPENMP_FOUND)
 
 if (PYCRTOOLS_WITH_AERA)
   include (FindAERA)
@@ -355,12 +351,6 @@ message (STATUS "  Runtime warnings..........: " ${PYCRTOOLS_WITH_RUNTIME_WARNIN
 message (STATUS "  Debug symbols.............: " ${PYCRTOOLS_WITH_DEBUG_SYMBOLS})
 message (STATUS "  Optimizations.............: " ${PYCRTOOLS_WITH_OPTIMIZATIONS})
 message (STATUS "  CPU optimizations.........: " ${PYCRTOOLS_WITH_CPU_OPTIMIZATIONS})
-
-message (STATUS "------------------------------------------------------------")
-
-if (PYCRTOOLS_WITH_AERA)
-  message (STATUS "  AERA..................... : " ${AERA_FOUND})
-endif (PYCRTOOLS_WITH_AERA)
 message (STATUS "  OpenMP................... : " ${OPENMP_FOUND})
 
 message (STATUS "------------------------------------------------------------")
@@ -371,6 +361,5 @@ message (STATUS "  DAL support...............: " ${PYCRTOOLS_WITH_DAL} )
 message (STATUS "  FFTW support..............: " ${PYCRTOOLS_WITH_FFTW} )
 message (STATUS "  GSL support...............: " ${PYCRTOOLS_WITH_GSL} )
 message (STATUS "  Numpy support.............: " ${PYCRTOOLS_WITH_NUMPY} )
-message (STATUS "  OpenMP support............: " ${PYCRTOOLS_WITH_OPENMP} )
 
 message (STATUS "------------------------------------------------------------")
