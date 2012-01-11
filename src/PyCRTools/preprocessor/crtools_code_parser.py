@@ -984,7 +984,7 @@ def parseFile(input_filename, output_filename, options):
             continue
 
         # Check ifdef
-        m = re.match("^#ifdef (.*)", line)
+        m = re.match("^#if(.*)", line)
         if (m):
             ifdef_list.append(m.group(1))
 
