@@ -22,14 +22,11 @@ def mapAntennasetKeyword(antennaset):
     antennaset = antennaset.strip()
 
     incorrect = { 'LBA_INNER' : 'LBA_INNER',
-                          'LBA_OUTER' : 'LBA_OUTER',
-                          'LBA_SPARSE_EVEN' : 'LBA_SPARSE_0',
-                          'LBA_SPARSE_ODD' : 'LBA_SPARSE_1',
-                          'LBA_X' : 'LBA_X',
-                          'HBA_ZERO' : 'HBA_0',
-                          'HBA_ONE' : 'HBA_1',
-                          'HBA_DUAL' : 'HBA',
-                          'HBA_JOINED' : 'HBA' }
+                  'LBA_OUTER' : 'LBA_OUTER',
+                  'HBA_ZERO' : 'HBA_0',
+                  'HBA_ONE' : 'HBA_1',
+                  'HBA_DUAL' : 'HBA',
+                  'HBA_JOINED' : 'HBA' }
 
     if antennaset in incorrect:
         antennaset = incorrect[antennaset]
@@ -38,7 +35,7 @@ def mapAntennasetKeyword(antennaset):
         print "Keyword " + antennaset + " does not comply with ICD, mapping..."
         antennaset = "HBA"
     else:
-        print "Keyword " + antennaset + " does not comply with ICD, mapping..."
+        pass
 
     return antennaset
 
@@ -960,3 +957,4 @@ def convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002):
     returnpos[...].muladd(Arg2,itrfpos[...,2])
 
     return returnpos
+
