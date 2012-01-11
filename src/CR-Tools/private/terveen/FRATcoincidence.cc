@@ -228,9 +228,74 @@ namespace FRAT {
 			trigger.beam=beam;
 			trigger.DM=DM;
 			
+		}
+        
+        
+        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, int obsID, int beam)
+		{
+			
+			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
+			DoPadding=InDoPadding;
+			UseSamplesOr2=InUseSamplesOr2;
+			itsNrChannels= NrChannels; // channels for this stream
+            itsTotNrChannels = TotNrChannels; // total channels in this file (nrSBs * ChannelsPerSubband )
+            itsChannelsPerSubband=ChannelsPerSubband;
+			itsNrSamples = NrSamples;
+            itsFREQvalues = FREQvalues;
+			if(UseSamplesOr2){
+				itsNrSamplesOr2 = NrSamples|2;
+			} else {
+				itsNrSamplesOr2 = NrSamples;
+			}
+			
+			itsStreamID=StreamID;
+			itsDM = DM;
+			itsIntegrationLength=IntegrationLength; 
+			itsTriggerLevel = TriggerLevel;
+			itsStartChannel = StartChannel;
+            //itsNrChannels = TotNrChannels;
+			itsReferenceFreq = ReferenceFreq;
+			itsFreqResolution = FreqResolution;
+			itsTimeResolution = TimeResolution;
+			itsSequenceNumber = startBlock-1;
+			itsBlockNumber = 0;
+			itsTotalValidSamples = 0;
+			itsSBaverage=1e22;
+			itsSBstdev=1e10;
+			itsTriggerThreshold=10;
+			itsTotalZeros=0;
+			itsBufferLength=1000;
+			InitDedispersionOffset(FREQvalues);
+			verbose=true;
+			hostname="127.0.0.1";
+			send_data = new char[sizeof(struct triggerEvent)];
+			host= (struct hostent *) gethostbyname(hostname);
+			
+			DeDispersedBuffer.resize(itsBufferLength, 0.0);
+			SumDeDispersed.resize(itsBufferLength, 0.0);
+			if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+			{
+				perror("socket");
+				exit(1);
+			}
+			
+			server_addr.sin_family = AF_INET;
+			server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
+			server_addr.sin_addr = *((struct in_addr *)host->h_addr);
+			bzero(&(server_addr.sin_zero),8);
 			
 			
 			
+			trigger.time=0;
+			trigger.length=0;
+			trigger.block=0;
+			trigger.sample=0;
+			trigger.sum=0;
+			trigger.max=0;
+			trigger.subband=itsStreamID;
+			trigger.obsID=obsID;
+			trigger.beam=beam;
+			trigger.DM=DM;
 			
 		}
 		
@@ -294,7 +359,7 @@ namespace FRAT {
 			// LOG_DEBUG ("FRAT CoinCheck destruction");
 		}
 		
-		bool SubbandTrigger::processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime){
+		bool SubbandTrigger::processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
 			bool pulsefound=false;
 			if( ++itsSequenceNumber!=sequenceNumber && false) { 
 				std::cerr << "discontinous data" << std::endl; 
@@ -318,8 +383,10 @@ namespace FRAT {
 					totaltime=itsSequenceNumber*itsNrSamples+time;
 					rest=totaltime%itsBufferLength;
 					for(int channel=itsNrChannels-1; channel>=0; channel--){
-						value = data[channel*(itsNrSamplesOr2)+time];
-						if(DoPadding){value = FloatSwap(value);} //outside BG/P
+						//value = data[channel*(itsNrSamplesOr2)+time];
+						value = data[time*itsTotNrChannels+itsStartChannel+channel];
+						
+                        if(DoPadding){value = FloatSwap(value);} //outside BG/P
 						if( !isnan( value ) && value!=0 ) {
 							//value = 0;
 							validsamples++;
@@ -449,10 +516,10 @@ namespace FRAT {
 		
 		void SubbandTrigger::InitDedispersionOffset(){
 			dedispersionoffset.resize(itsNrChannels);
+            float freq1=itsStartFreq-0.5*itsNrChannels*itsFreqResolution;
 			for(int channel=0;channel<itsNrChannels;channel++){
 				
-				float freq1=itsStartFreq+0.5*itsFreqResolution;
-				float freq2=itsStartFreq+(channel+0.5)*itsFreqResolution;
+				float freq2=freq1+channel*itsFreqResolution;
 				float offset=4.15e-3*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))/itsTimeResolution;
 				// printf("%f ",offset);
 				
@@ -460,9 +527,32 @@ namespace FRAT {
 				
 				dedispersionoffset[channel]=(int)offset;
 			}
-			float freq1=itsReferenceFreq+0.5*itsFreqResolution;
-			float freq2=itsStartFreq+0.5*itsFreqResolution;
-			float offset=4.15e-3*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))/itsTimeResolution;
+			float freqA=itsReferenceFreq+0.5*itsFreqResolution;
+			float freqB=itsStartFreq+0.5*itsFreqResolution;
+			float offset=4.15e-3*itsDM*(1/(freqA*freqA)-1/(freqB*freqB))/itsTimeResolution;
+			itsReferenceTime=(int) offset;
+			CalculateBufferSize();
+		}
+        
+        
+        void SubbandTrigger::InitDedispersionOffset(std::vector<float> FREQvalues){
+			dedispersionoffset.resize(itsNrChannels);
+            // Frequency= FREQvalues[itsStartChannel+currentChannel]
+            printf("Setting offsets with timeresolution %f", itsTimeResolution);
+            float freq1=FREQvalues[itsStartChannel]-0.5*itsChannelsPerSubband*itsFreqResolution;
+			for(int channel=0;channel<itsNrChannels;channel++){
+				
+				float freq2=FREQvalues[itsStartChannel+channel]; //freq2=freq1+channel*itsFreqResolution;
+				float offset=4.15e-3*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))*1e18/itsTimeResolution;
+                printf("%f ",offset);
+				
+				// dedispersionoffset[fc][channel]=(int) (nrCHANNELS-channel-1)*(64*64)/(channels_p*channels_p);
+				
+				dedispersionoffset[channel]=(int)offset;
+			}
+			float freqA=itsReferenceFreq+0.5*itsFreqResolution;
+			float freqB=FREQvalues[itsStartChannel]+0.5*itsFreqResolution;
+			float offset=4.15e-3*itsDM*(1/(freqA*freqA)-1/(freqB*freqB))/itsTimeResolution;
 			itsReferenceTime=(int) offset;
 			CalculateBufferSize();
 		}

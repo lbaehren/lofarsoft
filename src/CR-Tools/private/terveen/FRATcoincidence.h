@@ -193,9 +193,11 @@ namespace FRAT {
 			  //SubbandTrigger();
 			  ~SubbandTrigger();
 			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, int obsID=0, int beam=0);
-			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime);
+              SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, int obsID=0, int beam=0);
+			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  int CalculateBufferSize();
 			  void InitDedispersionOffset();
+              void InitDedispersionOffset(std::vector<float> FREQvalues);
 			  void summary();
 			  bool makeplotBuffer(std::string pulselogfilename);
 			  std::string blockAnalysisSummary();
@@ -204,8 +206,11 @@ namespace FRAT {
 			  
 		  private:
 			  int itsNrChannels;
+              int itsTotNrChannels;
 			  int itsNrSamples;
 			  int itsNrSamplesOr2;
+              int itsChannelsPerSubband;
+              int itsStartChannel;
 			  float itsDM;
 			  int itsIntegrationLength;
 			  float itsTriggerLevel; // number of stdev above noise
@@ -214,6 +219,7 @@ namespace FRAT {
 			  float itsTimeResolution; // in s
 			  float itsReferenceFreq;
 			  float itsReferenceTime;
+              
 			  unsigned int itsSequenceNumber;
 			  int itsBlockNumber;
 			  //int itsStartBlock;
@@ -238,6 +244,7 @@ namespace FRAT {
 			  //char send_data[1024];
 			  char* send_data;
 			  char* hostname;
+              std::vector<float> itsFREQvalues;
 			  
 			  std::string itsFoundTriggers;
 			  		  
