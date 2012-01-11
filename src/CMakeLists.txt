@@ -119,6 +119,7 @@ endmacro (lus_package_experimental)
 
 set (DAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
 set (DAL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/DAL)
+set (DAL_GIT_REPOSITORY http://github.com/nextgen-astrodata/DAL.git CACHE STRING "DAL git repository.")
 
 ##__________________________________________________________
 ##                                                   Options
@@ -160,7 +161,7 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
     ## Install from "release" branch
     ExternalProject_Add (dal
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-      GIT_REPOSITORY http://github.com/nextgen-astrodata/DAL.git
+      GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
       GIT_TAG release
       CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
       )
@@ -168,7 +169,7 @@ if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
     ## Install from "master" branch
     ExternalProject_Add (dal
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-      GIT_REPOSITORY http://github.com/nextgen-astrodata/DAL.git
+      GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
       CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
       )
   endif (DAL_FROM_RELEASE)
@@ -182,7 +183,7 @@ endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
 
 ExternalProject_Add (dal_Experimental
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-  GIT_REPOSITORY http://github.com/nextgen-astrodata/DAL.git
+  GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
   CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
   TEST_BEFORE_INSTALL 1
   TEST_COMMAND make Experimental
