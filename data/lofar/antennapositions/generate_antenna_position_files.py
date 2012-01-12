@@ -38,7 +38,7 @@ for antenna_set in antenna_sets:
         positions = md.getAbsoluteAntennaPositions(station, md.mapAntennasetKeyword(antenna_set))
         
         for i in range(positions.shape[0]):
-            f.write("{0:03}{1:06} {2:7.5f} {3:7.5f} {4:7.5f}\n".format(int(station[2:]), i, positions[i][0], positions[i][1], positions[i][2]))
+            f.write("{0:03}{1:03}{2:03} {3:7.5f} {4:7.5f} {5:7.5f}\n".format(int(station[2:]), i/8, i, positions[i][0], positions[i][1], positions[i][2]))
 
     f.close()
     

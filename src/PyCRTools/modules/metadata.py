@@ -168,7 +168,7 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     return mdata
 
 
-def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
+def getStationPhaseCalibration(station, antennaset,return_as_hArray=False, caltable_location=None):
     """Read phase calibration data for a station.
 
     Required arguments:
@@ -226,16 +226,18 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     """
 
     # Return mode nr depending on observation mode
+    antennasetToMode = { "LBA_OUTER" : "1",
+                         "LBA_INNER" : "3",
+                         "HBA" : "5",
+                         "HBA0" : "5",
+                         "HBA1" : "5",
+                         "HBA_ZERO" : "5",
+                         "HBA_ONE" : "5",
+                         "HBA_DUAL" : "5",
+                         "HBA_JOINED" : "5" }
 
-    if antennaset not in ["LBA_OUTER", "HBA", "HBA0", "HBA1" ]:
-        print "Antennaset not supported yet"
-
-    antennasetToMode={}
-    antennasetToMode["LBA_OUTER"]="1"
-    antennasetToMode["LBA_INNER"]="3"
-    antennasetToMode["HBA"]="5"
-    antennasetToMode["HBA0"]="5"
-    antennasetToMode["HBA1"]="5"
+    if antennaset not in antennasetToMode.keys():
+        raise KeyError("Not a valid antennaset "+antennaset)
 
     modenr=antennasetToMode[antennaset]
     if isinstance(station, int):
@@ -245,8 +247,10 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False):
     station=stationNameToNR(station)
 
     # filename
-    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+'/data/lofar/StaticMetaData/CalTables/CalTable_'+station+'_mode'+modenr+'.dat'
+    if not caltable_location:
+        caltable_location = LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'+'/data/lofar/StaticMetaData/CalTables'
+
+    filename=caltable_location+'/CalTable_'+station+'_mode'+modenr+'.dat'
     if os.path.isfile(filename):
         file=open(filename)
     else:
