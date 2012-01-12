@@ -164,7 +164,7 @@ namespace PyCR { // Namespace PyCR -- begin
     return true;
 #else
     return false;
-#endif // _OPENMP    
+#endif // _OPENMP
   }
 } // Namespace PyCR -- end
 
@@ -215,7 +215,7 @@ BOOST_PYTHON_MODULE(_hftools)
 #endif
 
 // ________________________________________________________________________
-//                                                         State inspectors 
+//                                                         State inspectors
   def("multicore", &PyCR::multicore);
 
 // ________________________________________________________________________
@@ -302,7 +302,7 @@ BOOST_PYTHON_MODULE(_hftools)
 #include "../../../../build/pycrtools/mMath.def.h"
 
 // ________________________________________________________________________
-//                                                              Calibration 
+//                                                              Calibration
 
 #include "../../../../build/pycrtools/mCalibration.def.h"
 
@@ -431,8 +431,10 @@ BOOST_PYTHON_MODULE(_hftools)
     .def("time", &TBBData::python_time)
     .def("sample_number", &TBBData::python_sample_number)
     .def("data_length", &TBBData::python_data_length)
+#if TBB_TIMESERIES_VERSION > 0
     .def("dipole_calibration_delay", &TBBData::python_dipole_calibration_delay)
     .def("dipole_calibration_delay_unit", &TBBData::python_dipole_calibration_delay_unit)
+#endif
     .def("cable_delay", &TBBData::python_cable_delay)
     .def("cable_delay_unit", &TBBData::python_cable_delay_unit)
     .def("sample_frequency_value", &TBBData::python_sample_frequency_value)
