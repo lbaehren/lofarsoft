@@ -983,15 +983,18 @@ def parseFile(input_filename, output_filename, options):
                 def_file.write("// " + header_rule + "\n\n")
             continue
 
-        # Check ifdef
-        m = re.match("^#if(.*)", line)
+        # Check if/ifdef
+        m = re.match("^#if(|def) (.*)", line)
         if (m):
-            ifdef_list.append(m.group(1))
+            ifdef_list.append(m.group(2))
 
         # Check endif
         m = re.match("^#endif", line)
         if (m):
-            ifdef_list.pop()
+            if ifdef_list:
+                ifdef_list.pop()
+            else:
+                raise ValueError("Unbalanced if(def) / endif preprocessor statements")
 
         # Check docstring
         m = re.match('^\/\/\$DOCSTRING: (.*)',line)
