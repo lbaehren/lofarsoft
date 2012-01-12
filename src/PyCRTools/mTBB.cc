@@ -163,6 +163,36 @@ boost::python::list TBBData::python_data_length()
   return lst;
 }
 
+#if TBB_TIMESERIES_VERSION > 0
+boost::python::list TBBData::python_dipole_calibration_delay()
+{
+  boost::python::list lst;
+
+  std::vector<double> vec = dipole_calibration_delay();
+
+  for(uint i=0; i<vec.size(); ++i)
+  {
+    lst.append(vec[i]);
+  }
+
+  return lst;
+}
+
+boost::python::list TBBData::python_dipole_calibration_delay_unit()
+{
+  boost::python::list lst;
+
+  std::vector<std::string> vec = dipole_calibration_delay_unit();
+
+  for(uint i=0; i<vec.size(); ++i)
+  {
+    lst.append(vec[i]);
+  }
+
+  return lst;
+}
+#endif
+
 boost::python::list TBBData::python_cable_delay()
 {
   boost::python::list lst;

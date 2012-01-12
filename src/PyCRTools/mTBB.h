@@ -60,6 +60,12 @@ public:
 
   boost::python::list python_data_length();
 
+#if TBB_TIMESERIES_VERSION > 0
+  boost::python::list python_dipole_calibration_delay();
+
+  boost::python::list python_dipole_calibration_delay_unit();
+#endif
+
   boost::python::list python_cable_delay();
 
   boost::python::list python_cable_delay_unit();
