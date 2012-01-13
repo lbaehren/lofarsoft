@@ -418,6 +418,7 @@ BOOST_PYTHON_MODULE(_hftools)
 #include "../../../../build/pycrtools/mTBB.def.h"
 
   class_<TBBData>("TBBData", init<std::string>())
+    .def("version", &TBBData::version)
     .def("summary", &TBBData::python_summary)
     .def("filename", &TBBData::filename)
     .def("nofStationGroups", &TBBData::nofStationGroups)

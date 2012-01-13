@@ -99,8 +99,6 @@ class TBBData(IOInterface):
             "SAMPLE_NUMBER":self.__file.sample_number,
             "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
             "SAMPLE_FREQUENCY_UNIT":self.__file.sample_frequency_unit,
-            "DIPOLE_CALIBRATION_DELAY":self.__file.dipole_calibration_delay,
-            "DIPOLE_CALIBRATION_DELAY_UNIT":self.__file.dipole_calibration_delay_unit,
             "CABLE_DELAY":self.__file.cable_delay,
             "CABLE_DELAY_UNIT":self.__file.cable_delay_unit,
             "DATA_LENGTH":self.__file.data_length,
@@ -141,6 +139,10 @@ class TBBData(IOInterface):
             "OBSERVATION_FREQUENCY_CENTER":self.__file.frequencyCenter,
             "OBSERVATION_FREQUENCY_UNIT":self.__file.frequencyUnit
             }
+
+        if self.__file.version() >= 1:
+            self.__keyworddict["DIPOLE_CALIBRATION_DELAY"] = self.__file.dipole_calibration_delay
+            self.__keyworddict["DIPOLE_CALIBRATION_DELAY_UNIT"] = self.__file.dipole_calibration_delay_unit
 
     def __initSelection(self):
         """Selection dependent initialization.

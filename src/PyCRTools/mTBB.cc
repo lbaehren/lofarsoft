@@ -77,6 +77,16 @@ TBBData::~TBBData ()
 {
 }
 
+TBBData::version ()
+{
+  int v = 0;
+
+#ifdef TBB_TIMESERIES_VERSION
+  v = TBB_TIMESERIES_VERSION;
+#endif
+  return v;
+}
+
 //__________________________________________________________________________
 //                                                   Python access functions
 boost::python::list TBBData::python_dipoleNames()

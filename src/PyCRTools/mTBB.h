@@ -46,6 +46,7 @@ public:
   // === Parameters access =================================================
 
   // === Methods ===========================================================
+  int version ();
 
   // === Python specific methods ===========================================
   boost::python::list python_dipoleNames();
