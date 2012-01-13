@@ -138,7 +138,7 @@ endif (NUMPY_SCALARMATH_LIBRARY)
 
 find_program (F2PY_EXECUTABLE f2py f2py${PYTHON_VERSION} f2py-${PYTHON_VERSION}
   PATHS
-  /Library/Frameworks/EPD64.framework/Versions/Current/lib
+  /Library/Frameworks/EPD64.framework/Versions/Current/bin
   )
 
 ## -----------------------------------------------------------------------------
@@ -306,8 +306,14 @@ macro (add_f2py_module _name)
   if(F2PY_FCOMPILER)
     set(_fcompiler_opts "--fcompiler=${F2PY_FCOMPILER}")
     list(APPEND _fcompiler_opts "--f77exec=${CMAKE_Fortran_COMPILER}")
+    if(APPLE)
+      list(APPEND _fcompiler_opts "--f77flags=\"-m64\"")
+    endif(APPLE)
     if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
       list(APPEND _fcompiler_opts "--f90exec=${CMAKE_Fortran_COMPILER}")
+      if(APPLE)
+        list(APPEND _fcompiler_opts "--f90flags=\"-m64\"")
+      endif(APPLE)      
     endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   endif(F2PY_FCOMPILER)
 
