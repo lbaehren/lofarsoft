@@ -562,7 +562,7 @@ def export_image(img, outfile=None, img_format='fits',
     elif img.opts.shapelet_do == False and 'shap' in img_type:
         print 'Shapelets have not been fit. Please run process_image first.'
         return False    
-    elif hasattr(img, 'mean') == False:
+    elif img.mean == None:
         print 'Image has not been processed. Please run process_image first.'
         return False    
     format = img_format.lower()

@@ -1,7 +1,7 @@
 """Interactive PyBDSM shell.
 
 This module initializes the interactive PyBDSM shell, which is a customized
-ipython enviroment. It should be called from the terminal prompt using the
+IPython enviroment. It should be called from the terminal prompt using the
 "pybdsm" shell script in apps/PyBDSM/ or as "python pybdsm.py".
 """
 import bdsm
@@ -47,6 +47,10 @@ def inp(cur_cmd=None):
             print '\033[31;1mERROR\033[0m: not a valid task'
             return
         _set_current_cmd(cur_cmd)
+    else:
+        if not hasattr(_img, '_current_cmd'):
+            print '\033[31;1mERROR\033[0m: no task is set'
+            return
     bdsm.interface.list_pars(_img, opts_list=_img._current_cmd_arg_list,
                              banner=_img._current_cmd_desc,
                              use_groups=_img._current_cmd_use_groups)
@@ -64,7 +68,13 @@ def go(cur_cmd=None):
     if not success:
         return
     if cur_cmd == None:
+        if not hasattr(_img, '_current_cmd'):
+            print '\033[31;1mERROR\033[0m: no task is set'
+            return
         cur_cmd = _img._current_cmd
+    if not hasattr(cur_cmd, 'arg_list'):
+        print '\033[31;1mERROR\033[0m: not a valid task'
+        return
     cur_cmd()
 
         
@@ -77,6 +87,9 @@ def default(cur_cmd=None):
     """
     global _img
     if cur_cmd == None:
+        if not hasattr(_img, '_current_cmd'):
+            print '\033[31;1mERROR\033[0m: no task is set'
+            return
         cur_cmd = _img._current_cmd
 
     if hasattr(cur_cmd, 'arg_list'):
@@ -681,7 +694,12 @@ try:
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
     from IPython.config.loader import Config
     cfg = Config()
-    cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
+    try:
+        # ipython >= 0.12
+        cfg.InteractiveShellEmbed.in_template = "BDSM <\#>: "
+    except:
+        # ipython = 0.11
+        cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
     cfg.InteractiveShellEmbed.autocall = 2
     ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, 
                                     user_ns=locals())

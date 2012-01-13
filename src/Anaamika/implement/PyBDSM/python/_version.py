@@ -26,6 +26,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2012/01/13 - Fixed minor bugs in the interactive shell and updated 
+                 pybdsm.py to support IPython 0.12.
+                 
     2011/12/21 - Fixed bug in gaul2srl module due to rare cases in which
                  an island has a negative rms value. Fixed a memory issue
                  in which memory was not released after using show_fit.
