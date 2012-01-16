@@ -742,6 +742,15 @@ def hArray_toNumpy(self):
 
     return array
 
+def hArray_checksum(self):
+    """ array.checksum() -> Returns CRC32 checksum of a 'list' representation of the array
+    Used for (bug)checking if subsequent calls to the same function with the same inputs yields the same result.
+    
+    Uses crc32 from the module zlib. Converts array to list, list to string, then takes the checksum of that.
+    """
+    from zlib import crc32 # here?
+    return hex(crc32(str(self.list())) & 0xffffffff)
+
 # Pickling
 def hArray_getinitargs(self):
     """Get arguments for hArray constructor.
@@ -1355,6 +1364,7 @@ for v in hAllArrayTypes:
     setattr(v,"__setstate__",hArray_setstate)
     setattr(v,"__getstate_manages_dict__",1)
     setattr(v,"toNumpy", hArray_toNumpy)
+    setattr(v,"checksum", hArray_checksum)
     setattr(v,"setPar",hArray_setPar)
     setattr(v,"shape",hArray_shape)
     setattr(v,"reshape",hArray_reshape)
