@@ -690,18 +690,23 @@ _set_current_cmd(process_image)
 # ipython with version 0.11, we must support both versions until 0.11 or 
 # greater is in common use.
 try:
-    # ipython >= 0.11
+    # IPython >= 0.11
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
     from IPython.config.loader import Config
     cfg = Config()
     prompt_config = cfg.PromptManager
-    prompt_config.in_template = "BDSM <\#>: "
+    if prompt_config.has_key('in_template'):
+        # IPython >= 0.12
+        prompt_config.in_template = "BDSM <\#>: "
+    else:
+        # IPython = 0.11
+        cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
     cfg.InteractiveShellEmbed.autocall = 2
     ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, 
                                     user_ns=locals())
     ipshell.set_hook('complete_command', _opts_completer, re_key = '.*')
 except ImportError:
-    # ipython < 0.11
+    # IPython < 0.11
     from IPython.Shell import IPShellEmbed
     argv = ['-prompt_in1','BDSM <\#>: ','-autocall','2']
     ipshell = IPShellEmbed(argv=argv, banner=banner, user_ns=locals())
