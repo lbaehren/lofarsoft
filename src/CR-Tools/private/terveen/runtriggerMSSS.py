@@ -1,23 +1,24 @@
 #! /usr/bin/env python
 
-import bfdata as bfd
-#from pycrtools import bfdata as bfd
+#import bfdata as bfd
+from pycrtools import bfdata as bfd
 import sys
 import time
 import os
+import numpy as np
 
 
 #Set up parameters
 # Which fraction of the rest of the data to analyze
 fraction=1.0
 # Use the specified nr blocks to analyze? If not is will use the fraction of the total
-use_absolute_nrblocks=False
-nrblocks=15
-pulsehomedir="/Users/STV/Astro/Analysis/FRAT/"
-SBsPerBeam=80
+use_absolute_nrblocks=True
+nrblocks=60
+pulsehomedir="/home/veen/analysis/"
+SBsPerBeam=240
 
 #
-DM="1 26.83"
+DM="2 0 26.83"
 #DM="32 0 10 10.5 11 11.5 12 12.5 13 13.5 14 14.5 15 15.5 16 16.5 17 17.5 18 18.5 19 19.5 20 20.5 21 21.5 22 22.5 23 23.5 24 24.5 25"
 #DM="10 0 1 2 3 4 5 6 7 8 9" 
 #10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29"
@@ -27,12 +28,12 @@ UseVerbose=False
 UsePad=True
 calcCoinNr=True
 calcnrCSB=False
-coincidenceNumber=2
-nrCSB=5
+coincidenceNumber=8
+nrCSB=15
 triggerlength=1
-coincidenceTime=15
-triggerlevel=4
-
+coincidenceTime=30
+triggerlevel=10
+badchannels=np.load("/home/veen/logs/badchannels.npy")
 
 # Check if an observation ID is provided
 if len(sys.argv)>=2:
@@ -53,10 +54,10 @@ else:
 # Library containing all parameters
 ObsPar = {}
 # Get the observation parameters
-#parsetdir='/globalhome/lofarsystem/production/lofar/bgfen/log/'
-#parsetsubdir=ObsID+'/'
-parsetdir='/Users/STV/Astro/Analysis/FRAT/'
-parsetsubdir=''
+parsetdir='/globalhome/lofarsystem/production/lofar/bgfen/log/'
+parsetsubdir=ObsID+'/'
+#parsetdir='/Users/STV/Astro/Analysis/FRAT/'
+#parsetsubdir=''
 p=bfd.get_parameters_new(parsetdir+parsetsubdir+'/'+ObsID+'.parset',True)
 
 #if not p["incoherentstokes"]:
@@ -179,7 +180,7 @@ elif 'lce' in hostname:
     fileselection="sub"+str(subcluster)
     useLSE=False
     useLOCAL=False
-elif 'sander' in hostname:
+elif 'sander' in hostname or 'locus' in hostname:
     print "Program is on own laptop",hostname
     useLOCAL=True
     useLSE=False
@@ -273,7 +274,11 @@ if True:
     ObsPar["freq"]=str(len(frequencies))
     for freq in frequencies:
         ObsPar["freq"]+=" "+str(freq)
-    command="/Users/STV/Astro/Analysis/FRAT/apps/FRATStrigger"
+    command="/home/veen/apps/FRATStrigger"
+
+    ObsPar["badch"]=str(len(badchannels))
+    for ch in badchannels:
+        ObsPar["badch"]+=" "+str(ch)
     #command="/home/veen/TransientTriggerV9"
     args=[]
     args.append(command)
@@ -293,9 +298,9 @@ if True:
     set.write(command)
     set.close()
 
-    #beamf=open(ObsPar["pulsedir"]+'/beam'+str(beamnr)+'_'+obsid,'w')
-    #beamf.write(command)
-    #beamf.close()
+    beamf=open(ObsPar["pulsedir"]+'/beam'+str(beamnr)+'_'+obsid,'w')
+    beamf.write(command)
+    beamf.close()
 
 
     import subprocess
