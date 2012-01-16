@@ -693,14 +693,13 @@ try:
     # IPython >= 0.11
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
     from IPython.config.loader import Config
+    from IPython import __version__ as ipython_version
     cfg = Config()
     prompt_config = cfg.PromptManager
-    if prompt_config.has_key('in_template'):
-        # IPython >= 0.12
-        prompt_config.in_template = "BDSM <\#>: "
-    else:
-        # IPython = 0.11
+    if ipython_version == '0.11':
         cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
+    else:
+        prompt_config.in_template = "BDSM <\#>: "
     cfg.InteractiveShellEmbed.autocall = 2
     ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, 
                                     user_ns=locals())
