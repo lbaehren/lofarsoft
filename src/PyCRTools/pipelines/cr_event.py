@@ -815,7 +815,7 @@ for full_filename in files:
         # apply cable delays 
 #        self.delays = hArray(float,dimensions=[nofAntennas])
         cabledelays = hArray(datafile["DIPOLE_CALIBRATION_DELAY"])
-        cabledelays.negate()
+#        cabledelays.negate()
 #        cabledelays = hArray(float, dimensions=[len(datafile["CHANNEL_ID"])], fill=cabledelays_toomany)
         # wrong values but see if it doesnt crash anymore
         
