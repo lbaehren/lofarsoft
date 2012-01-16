@@ -51,7 +51,7 @@
 // forward declaration
 #define FRAT_TASK_BUFFER_LENGTH (20000)
 #define FRAT_TRIGGER_PORT_0 (0x7BA0)
-#define FRAT_TRIGGER_PORT_1 (0x7BA1)
+#define FRAT_TRIGGER_PORT_1 (31661)
 
 
 struct triggerEvent {
@@ -193,7 +193,7 @@ namespace FRAT {
 			  //SubbandTrigger();
 			  ~SubbandTrigger();
 			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, int obsID=0, int beam=0);
-              SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, int obsID=0, int beam=0);
+              SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, int obsID=0, int beam=0);
 			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  int CalculateBufferSize();
 			  void InitDedispersionOffset();

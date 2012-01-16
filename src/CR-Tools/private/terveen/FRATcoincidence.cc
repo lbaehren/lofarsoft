@@ -198,12 +198,15 @@ namespace FRAT {
 			itsBufferLength=1000;
 			InitDedispersionOffset();
 			verbose=true;
-			hostname="127.0.0.1";
+			hostname="10.135.252.101";
 			send_data = new char[sizeof(struct triggerEvent)];
 			host= (struct hostent *) gethostbyname(hostname);
-			
+		    std::cout << "Resizing dedispersionBuffer "  << std::endl;	
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
+		    std::cout << "Resizing sum Buffer "  << std::endl;	
 			SumDeDispersed.resize(itsBufferLength, 0.0);
+		    std::cout << "Setting network connection "  << std::endl;	
+            
 			if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 			{
 				perror("socket");
@@ -267,12 +270,15 @@ namespace FRAT {
 			itsBufferLength=1000;
 			InitDedispersionOffset(FREQvalues);
 			verbose=true;
-			hostname="127.0.0.1";
+			hostname="10.135.252.101";
 			send_data = new char[sizeof(struct triggerEvent)];
 			host= (struct hostent *) gethostbyname(hostname);
 			
+		    std::cout << "Resizing dedispersionBuffer "  << itsBufferLength << std::endl;	
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
+		    std::cout << "Resizing sum Buffer "  << std::endl;	
 			SumDeDispersed.resize(itsBufferLength, 0.0);
+		    std::cout << "Setting network connection "  << std::endl;	
 			if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 			{
 				perror("socket");
@@ -509,7 +515,9 @@ namespace FRAT {
 		}
 		
 		int SubbandTrigger::CalculateBufferSize(){
-			itsBufferLength=2*(dedispersionoffset[itsNrChannels]+itsIntegrationLength+itsNrSamples);
+            printf("Started ... %i %i %i ",dedispersionoffset[itsNrChannels-1],itsIntegrationLength,itsNrSamples);
+			itsBufferLength=std::max(2000,2*(dedispersionoffset[itsNrChannels-1]+itsIntegrationLength+itsNrSamples));
+            printf("Done.");
 			return itsBufferLength;
 		}
 
@@ -521,7 +529,7 @@ namespace FRAT {
 				
 				float freq2=freq1+channel*itsFreqResolution;
 				float offset=4.15e-3*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))/itsTimeResolution;
-				// printf("%f ",offset);
+			//	 printf("%f ",offset);
 				
 				// dedispersionoffset[fc][channel]=(int) (nrCHANNELS-channel-1)*(64*64)/(channels_p*channels_p);
 				
@@ -536,23 +544,26 @@ namespace FRAT {
         
         
         void SubbandTrigger::InitDedispersionOffset(std::vector<float> FREQvalues){
-			dedispersionoffset.resize(itsNrChannels);
+            std::cout << itsNrChannels << std::endl;
+            dedispersionoffset.resize(itsNrChannels);
             // Frequency= FREQvalues[itsStartChannel+currentChannel]
-            printf("Setting offsets with timeresolution %f", itsTimeResolution);
+            printf("Setting offsets with timeresolution %f start %i number %i tot number %i ", itsTimeResolution,itsStartChannel, itsNrChannels, itsTotNrChannels);	
             float freq1=FREQvalues[itsStartChannel]-0.5*itsChannelsPerSubband*itsFreqResolution;
 			for(int channel=0;channel<itsNrChannels;channel++){
-				
 				float freq2=FREQvalues[itsStartChannel+channel]; //freq2=freq1+channel*itsFreqResolution;
 				float offset=4.15e-3*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))*1e18/itsTimeResolution;
-                printf("%f ",offset);
+                //printf("%f %i ",offset,int(offset));
 				
 				// dedispersionoffset[fc][channel]=(int) (nrCHANNELS-channel-1)*(64*64)/(channels_p*channels_p);
 				
 				dedispersionoffset[channel]=(int)offset;
 			}
-			float freqA=itsReferenceFreq+0.5*itsFreqResolution;
-			float freqB=FREQvalues[itsStartChannel]+0.5*itsFreqResolution;
+			float freqA=FREQvalues[0];//itsReferenceFreq+0.5*itsChannelsPerSubband*itsFreqResolution;
+			float freqB=FREQvalues[itsStartChannel];//+0.5*itsChannelsPerSubband*itsFreqResolution;
+            freqA/=1e9;
+            freqB/=1e9;
 			float offset=4.15e-3*itsDM*(1/(freqA*freqA)-1/(freqB*freqB))/itsTimeResolution;
+            printf("ref Freq A, %g B %g, offset %f,",freqA,freqB,offset);
 			itsReferenceTime=(int) offset;
 			CalculateBufferSize();
 		}
@@ -564,7 +575,8 @@ namespace FRAT {
 			pulselogfile.open(pulselogfilename.c_str());
 			int buflen=SumDeDispersed.size();
 			//pulselogfile.width(11);
-                        pulselogfile.precision(10);
+            printf("SeqNr, NrSam, BufLen, SumDeDispSize %i %i %i %i ",itsSequenceNumber, itsNrSamples, itsBufferLength, buflen);
+            pulselogfile.precision(10);
 			for(int j=intstart+1;j<buflen;j++){
 				pulselogfile << (totaltime-buflen+j)*itsTimeResolution <<  " " << SumDeDispersed[j] << std::endl;
 				

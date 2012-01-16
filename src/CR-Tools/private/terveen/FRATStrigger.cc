@@ -155,6 +155,8 @@ int main (int argc,
     int nFreqs=0;
     vector<float> DMvalues;
     vector<float> FREQvalues;
+    int nBadChannels=0;
+    vector<int> BadChannels;
 	//	std::string infile="/Users/STV/Astro/data/pulsars/L2009_13298/SB0.MS", outfile="/Users/STV/Documents/GiantPulse/";
 	std::string logfilename = "/Users/STV/Documents/GiantPulse/excesslog_pdt.txt";
 	std::string triggerlogfilename = "/Users/STV/Astro/Programming/pulsar/trigger.log";
@@ -318,12 +320,23 @@ int main (int argc,
 		} else if(topic == "-freq"){
 			argcounter++;
 			nFreqs = atoi(argv[argcounter]);
-			cout << "frequency values: " ;
+			cout << nFreqs << "frequency values: " ;
 			FREQvalues.resize(nFreqs);
 			for(int i=0;i<nFreqs;i++){
 				argcounter++;
 			    FREQvalues[i]=atof(argv[argcounter]);
                 if(i<20){ cout << " " << FREQvalues[i]; }
+			}		
+            cout << endl;	
+		} else if(topic == "-badch"){
+			argcounter++;
+			nBadChannels = atoi(argv[argcounter]);
+			cout << nBadChannels << "bad channels that will be skipped " ;
+			BadChannels.resize(nBadChannels);
+			for(int i=0;i<nBadChannels;i++){
+				argcounter++;
+			    BadChannels[i]=atoi(argv[argcounter]);
+                if(i<20){ cout << " " << BadChannels[i]; }
 			}		
             cout << endl;	
 		} else if(topic == "-tInt"){
@@ -386,9 +399,11 @@ int main (int argc,
     int SB=firstSB;
     std::string temp;
     for(int stream=0; stream<nstreams; stream++){
+        std::cout << "stream " << stream << std::endl;
         SB+=nrCombinedSBs;
 		for(int DMcounter=0;DMcounter<nDMs;DMcounter++){
 			DMval=DMvalues[DMcounter];
+            std::cout << "DMval " << DMval << std::endl;
 			cout << "StreamNr " << StreamCounter << " DMcounter " << DMcounter << " DM " << DMval << endl;
 			float SBFreq = SubbandToFreq(SB+startsubbandnumber,HBAmode);
             if(nFreqs<1) {
@@ -399,7 +414,7 @@ int main (int argc,
                 // total number of channels in this stream
                 printf("Channel, %i, Integration, %i ",channels,timeintegration);
                 //if(stream==1 && DMcounter==0){
-                    SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, startpos, integrationlength, DoPadding, DoPadding); // Add obsid and beam    
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, startpos, integrationlength, DoPadding, DoPadding); // Add obsid and beam    
                 
                 //}
             }
@@ -520,9 +535,10 @@ int main (int argc,
 	unsigned num;
 	fpos_t pos;
     // New datasize, allchannels for the samples of the integration time, no header anymore
-	int blockdatasize=nFreqs*samples*sizeof(float);
-	int stokesdatasize=blockdatasize;
+	long blockdatasize=nFreqs*samples*sizeof(float);
+	long stokesdatasize=blockdatasize;
 	float *data=(float*)malloc(blockdatasize);
+
 	if (data==NULL)
 	{
 		cerr << "Memory could not be allocated\n";
@@ -531,13 +547,18 @@ int main (int argc,
 	
 	cout << "stokesdatasize " << stokesdatasize << endl;
 	
-    
-	fseek(pFile, startpos*(stokesdatasize), SEEK_SET);
+    int ch;
+	fseek(pFile, startpos*blockdatasize, SEEK_SET);
+    cout << "Current positions before reading " <<  startpos << " " << ftell(pFile)/blockdatasize << " " << startpos*blockdatasize <<  endl;
+
 	for(int blockNr = 0; blockNr< nrblocks; blockNr++){
         // Read data
         fgetpos(pFile,&pos);
+        cout << "Current positions " << blockNr << " " << startpos << " " << ftell(pFile)/blockdatasize << endl;
         
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
+        //flagdata
+
         if( !num) {
             //	cout << "Error, EOF reached.\n";
         }
@@ -549,6 +570,12 @@ int main (int argc,
             
             //i--; //1 file k--
             continue;
+        }
+        for(int i=0; i<BadChannels.size(); i++){
+                ch=BadChannels[i];
+            for(int sa; sa<samples ; sa++){ 
+                data[sa*TotNrChannels+ch]=0.0;
+            }
         }
         
 		for(int sc=0; sc < nstreams; sc++){
