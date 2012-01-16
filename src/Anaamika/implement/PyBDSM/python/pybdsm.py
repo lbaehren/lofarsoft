@@ -694,12 +694,8 @@ try:
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
     from IPython.config.loader import Config
     cfg = Config()
-    try:
-        # ipython >= 0.12
-        cfg.InteractiveShellEmbed.in_template = "BDSM <\#>: "
-    except:
-        # ipython = 0.11
-        cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
+    prompt_config = cfg.PromptManager
+    prompt_config.in_template = "BDSM <\#>: "
     cfg.InteractiveShellEmbed.autocall = 2
     ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, 
                                     user_ns=locals())
