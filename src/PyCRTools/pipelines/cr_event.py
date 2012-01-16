@@ -1036,6 +1036,15 @@ for full_filename in files:
         good_pulse_antenna_positions[...].copy(antenna_positions[antennas_with_strong_pulses,...,0:3])
         good_pulse_cabledelays=delays[antennas_with_strong_pulses] # i.e. put in zeros (!)
 
+        # testing direct plane-wave direction fit
+        directionPlaneWave = trerun("DirectionFitPlaneWave", "directionPlaneWave", pardict=par, positions=good_pulse_antenna_positions, timelags = good_pulse_lags, verbose=True, doplot=True)
+        
+        print "========================================================================"
+        print "Plane Wave Fit Az/EL -> ", directionPlaneWave.meandirection_azel_deg,"deg"
+        print " "
+        print "Delays =",directionPlaneWave.total_delays * 1e9
+        
+        # perform Triangle fit
         direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags, cabledelays=good_pulse_cabledelays, verbose=True,doplot=True)
           # put in zeros for 'cable delays' as they are fitted and put into the same array...
         if direction.ngood == 0:

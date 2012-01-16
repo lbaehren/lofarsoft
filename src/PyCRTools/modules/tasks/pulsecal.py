@@ -11,6 +11,7 @@ import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import pytmf
 import math
+import numpy as np
 
 deg=math.pi/180.
 pi2=math.pi/2.
@@ -464,6 +465,225 @@ class FitMaxima(tasks.Task):
             self.lags*=self.sampleinterval
         if not self.refant==None:
             self.lags-=self.lags[self.refant]
+
+class DirectionFitPlaneWave(tasks.Task):
+    """ Fit a plane wave through arrival times and positions.
+        Taken from module srcfind.
+        Parameters taken from DirectionFitTriangles.
+        
+        Outlier removal and iteration to be implemented.
+    """
+        
+    parameters=dict(
+        positions = dict(doc="hArray with Cartesian coordinates of the antenna positions",
+                         unit="m"),
+
+        timelags = dict(doc="hArray with the measured time lags for each event and each antenna",
+                        unit="s"),
+
+        good_positions = dict(doc="hArray with Cartesian coordinates of the antenna positions for good antennas",
+                              default=lambda self:cr.hArray(properties=self.positions),
+                              unit="m",output=True),
+
+        n_timelags = dict(doc="Number of time lags provided",default=lambda self:len(self.timelags),output=True),
+
+        n_good_antennas = dict(doc="Number of good antenna time lags",default=lambda self:len(self.timelags),output=True),
+
+        good_timelags = dict(doc="hArray the measured time lags for each event and all good antennas",
+                              default=lambda self:cr.hArray(properties=self.timelags),
+                              unit="s",output=True),
+
+        good_antennas = dict(doc="List of integer indices pointing to the good antennas in the original list",
+                             default=lambda self:range(n_timelags),output=True),
+
+        expected_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Expected Time Lags"),
+                                "Exact time lags expected for each antenna for a given source position",
+                                unit="s"),
+
+        measured_geometric_timelags=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Geometric Time Lags"),
+                                          "Time lags minus cable delay = pure geometric delay if no error",
+                                          unit="s"),
+
+        direction_guess = dict(default=False,doc="If a tuple of two numbers (azimut, elevation) then this is an initial guess for the direction (currently only for plotting).",unit="degree"),
+
+        direction_guess_label = dict(default="direction guess",doc="A label for plotting indicating where the direction guess was coming from."),
+
+        cabledelays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Cable Delays",fill=0),
+                          "Know (fixed) cable delays that one needs to correct measured delays for.",
+                          unit="s"),
+
+        total_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Total Delays"),
+                           "Total instrumental (residual+cable) delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",
+                           unit="s"),
+
+        residual_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Residual Delays"),
+                              "Residual delays needed to calibrate the array after correction for known cable delays. Will be subtracted from the measured lags (correced for cable delays) or added to the expected. The array will be updated during iteration",
+                              unit="s"),
+
+        delta_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),
+                           "Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",
+                           unit="s"),
+
+        delta_delays_mean_history=sc.p_([],
+                                        "Mean of the difference between expected and currently calibrated measured delays for each iteration",
+                                        unit="s",
+                                        output=True),
+
+        delta_delays_rms_history=sc.p_([],
+                                       "RMS of the difference between expected and currently calibrated measured delays for each iteration",
+                                       unit="s",
+                                       output=True),
+
+        delays_history=sc.p_(lambda self:cr.hArray(float,[self.maxiter,self.NAnt],name="Delays"),
+                             "Instrumental delays for each iteration (for plotting)",
+                             unit="s"),
+
+        delays_historyT=sc.p_(lambda self:cr.hArray(float,[self.NAnt,self.maxiter],name="Delays"),
+                              "Instrumental delays for each iteration (for plotting)",
+                              unit="s"),
+
+        maxiter=sc.p_(1,
+                      "if >1 iterate (maximally tat many times) position and delays until solution converges."),
+
+        delay_error=sc.p_(1e-12,
+                          "Target for the RMS of the delta delays where iteration can stop.",
+                          unit="s"),
+
+        rmsfactor=sc.p_(3.,
+                        "How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
+
+        minrmsfactor=sc.p_(1.,
+                           "Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
+
+        unitscalefactor=sc.p_(1e-9,
+                              "Scale factor to apply for printing and plotting."),
+
+        unitname=sc.p_("ns",
+                       "Unit corresponding to scale factor."),
+
+        doplot=sc.p_(False,
+                     "Plot results."),
+
+        plotant_start=sc.p_(0,
+                            "First antenna to plot."),
+
+        plotant_end=sc.p_(lambda self:self.NAnt,
+                          "Last antenna to plot plus one."),
+
+        verbose=sc.p_(False,
+                      "Print progress information."),
+
+        refant=sc.p_(0,
+                     "Reference antenna for which geometric delay is zero."),
+
+        solution=sc.p_(1,
+                       "Can be ``+/-1``, determine whether to take the upper or the lower ('into the ground') solution."),
+
+        NAnt=sc.p_(lambda self: self.timelags.shape()[-1],
+                   "Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
+
+        NTriangles=sc.p_(lambda self:self.NAnt*(self.NAnt-1)*(self.NAnt-2)/6,
+                         "Number of Triangles ``= NAnt*(NAnt-1)*(NAnt-2)/6``."),
+
+        directions=sc.p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Directions"),
+                         "Cartesian direction vector for each triangle"),
+
+        centers=sc.p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Centers of Triangles"),
+                      "Cartesian coordinates of center for each triangle.",
+                      unit="m"),
+
+        errors=sc.p_(lambda self:cr.hArray(float,[self.NTriangles],name="Closure Errors"),
+                     "Closure errors for each triangle (nor error if = 0)."),
+
+        triangles_size=sc.p_(lambda self:cr.hArray(float,[self.NTriangles],name="Triangle Size"),
+                             "Average size for each triangle.",
+                             unit="m"),
+
+        index=sc.p_(lambda self:cr.hArray(int,[self.NTriangles],name="Index"),
+                    "Index array of good triangles.",
+                    workarray=True),
+
+        error_tolerance=sc.p_(1e-10,
+                              "Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
+
+        max_delay=dict(default=15*10**-9,
+                       doc="Maximum allowed delay. If a delay for an antenna is larger than this it will be flagged and igrnored"),
+
+        ngood=sc.p_(0,
+                    "Number of good triangles (i.e., without closure errors)",
+                    output=True),
+
+        ngooddelays=sc.p_(0,
+                          "Number of good delays (i.e., with only minor deviation)",
+                          output=True),
+
+        delayindex=sc.p_(lambda self:cr.hArray(int,[self.NAnt],name="Delay index"),
+                         "Index array of good delays.",
+                         workarray=True),
+
+        meandirection=sc.p_(lambda self:cr.hArray(float,[3]),
+                            "Cartesian coordinates of mean direction from all good triangles",
+                            output=True),
+
+        meancenter=sc.p_(lambda self:cr.hArray(float,[3]),
+                         "Cartesian coordinates of mean central position of all good triangles",
+                         output=True),
+
+        goodones=sc.p_(lambda self:cr.hArray(float,[self.NTriangles,3],name="Scratch array"),
+                       "Scratch array to hold good directions.",
+                       unit="m"),
+
+        meandirection_spherical = sc.p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),
+                                        "Mean direction in spherical coordinates."),
+
+        meandirection_azel=sc.p_(lambda self:(math.pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),
+                                 "Mean direction as Azimuth (``N->E``), Elevation tuple."),
+
+        meandirection_azel_deg = sc.p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),
+                                       "Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
+
+        plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
+                           doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
+
+        plot_name = dict(default="",
+                         doc="Extra name to be added to plot filename.")
+        )
+
+    def call(self):
+        pass
+
+    def run(self):
+        self.farfield=True
+        c = 299792458.0 # speed of ligth in m/s
+        rad2deg = 180.0 / math.pi
+
+        positions = self.positions.toNumpy().ravel()
+        times = self.timelags.toNumpy()
+        
+        # make x, y arrays out of the input position array
+        #    N = len(positions)
+        x = positions[0:-1:3]
+        y = positions[1:-1:3]
+
+        # now a crude test for nonzero z-input, |z| > 0.5
+        z = positions[2:-1:3]
+        if max(abs(z)) > 0.5:
+            raise ValueError("Your antenna positions have nonzero z-coordinates (z > 0.5) !")
+            #return (-1, -1)
+
+        M = np.vstack([x, y, np.ones(len(x))]).T # says the linalg.lstsq doc
+        
+        (A, B, C) = np.linalg.lstsq(M, c * times)[0]
+        self.meandirection[0] = - A
+        self.meandirection[1] = - B
+        self.meandirection[2] = np.sqrt(1 - A*A - B*B) # gets converted by pytmf
+        el = np.arccos(np.sqrt(A*A + B*B))
+        az = math.pi / 2 - np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
+        # note: Changed to az = 90_deg - phi [ checks with pytmf ]
+
+#        print az * rad2deg
+#        print el * rad2deg
+#    return (az, el)
 
 
 class DirectionFitTriangles(tasks.Task):
