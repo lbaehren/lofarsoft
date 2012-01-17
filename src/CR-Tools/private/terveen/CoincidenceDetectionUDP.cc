@@ -23,6 +23,8 @@
 using namespace FRAT::coincidence;
 using namespace std;
 
+
+
 int main(int argc , char *argv[])
 {
 
@@ -49,11 +51,11 @@ int main(int argc , char *argv[])
 	     }
 	    
         
-	    int sock;
+	    int sock, out_sock;
         int bytes_read;
         socklen_t addr_len;
         char recv_data[sizeof(struct triggerEvent)];
-        struct sockaddr_in server_addr , client_addr;
+        struct sockaddr_in server_addr , client_addr, out_server_addr;
         triggerEvent * trigger;
         trigger = new triggerEvent;
         int latestindex;
@@ -67,8 +69,28 @@ int main(int argc , char *argv[])
 //        int time;
 //        int max;
         string temp;
-        
-        
+        unsigned char TBBdumpMessage[11];        
+        TBBdumpMessage[0]=0x99;
+        TBBdumpMessage[1]=0xA0;
+        TBBdumpMessage[2]='F';
+        TBBdumpMessage[3]='U';
+        TBBdumpMessage[4]='L';
+        TBBdumpMessage[5]='L';
+        TBBdumpMessage[6]='D';
+        TBBdumpMessage[7]='U';
+        TBBdumpMessage[8]='M';
+        TBBdumpMessage[9]='P';
+        //data[2]--> data[5] event time in UTC
+        //data[6]--> data[9] event time in nanoseconds
+        TBBdumpMessage[10]=0x68;
+        char* out_hostname;
+        out_hostname="10.135.252.101";
+        if((out_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1){
+            perror("Socket");
+            exit(1);
+        }
+
+
 
         if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
             perror("Socket");
@@ -79,7 +101,12 @@ int main(int argc , char *argv[])
         server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
         server_addr.sin_addr.s_addr = INADDR_ANY;
         bzero(&(server_addr.sin_zero),8);
-
+        struct hostent *out_host;
+        out_host= (struct hostent *) gethostbyname(out_hostname);
+        out_server_addr.sin_family = AF_INET;
+        out_server_addr.sin_port = htons(FRAT_TRIGGER_PORT_1);
+        out_server_addr.sin_addr = *((struct in_addr *)out_host->h_addr);
+        bzero(&(out_server_addr.sin_zero),8);
 
         if (bind(sock,(struct sockaddr *)&server_addr,
             sizeof(struct sockaddr)) == -1)
@@ -99,8 +126,7 @@ int main(int argc , char *argv[])
 	{
           cout << " Waiting for new event ..." << endl;
 
-          bytes_read = recvfrom(sock,recv_data,sizeof(struct triggerEvent),0,
-	                    (struct sockaddr *)&client_addr, &addr_len);
+          bytes_read = recvfrom(sock,recv_data,sizeof(struct triggerEvent),0, (struct sockaddr *)&client_addr, &addr_len);
 	  
           
 	      recv_data[bytes_read] = '\0';
@@ -115,10 +141,10 @@ int main(int argc , char *argv[])
 				continue; 
 			 }
 	      }
-          if(trigger->beam>=nrbeams) {
-              cerr << "Receiving trigger from a higher beam number than expected, discarding trigger" << endl;
+          /*if(trigger->beam >= nrbeams) {
+              cerr << "Receiving trigger from a higher beam number than expected, discarding trigger" << trigger->beam << " > " nrbeams << endl;
               continue;
-          }
+          }*/
 		  
 		  iter=DMtoID.find(trigger->DM);
 		  if ( iter==DMtoID.end() ) {
@@ -148,6 +174,11 @@ int main(int argc , char *argv[])
 
 
                 cout << _timestamp << "." << _timestamp_msec  << " Trigger found in beam " << trigger->beam << " at time: " << trigger->time << " with DM: " << trigger->DM << endl;
+
+                 int n = sendto(out_sock, TBBdumpMessage, sizeof(TBBdumpMessage), 0,
+                                    (struct sockaddr *)&out_server_addr, sizeof(struct sockaddr));
+                 if ( n < 0 ) {
+                     cerr << "Failed to send message to request dump." << endl; }
                 //cout << cc->printEvent();
 			  if(nrbeams > mincoinbeams) {
 			    trigger->subband=trigger->beam;
@@ -165,3 +196,4 @@ int main(int argc , char *argv[])
     }
     return 0;
 }
+
