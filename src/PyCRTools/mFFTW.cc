@@ -71,7 +71,7 @@ FFTWPlanManyDft::FFTWPlanManyDft (int N, int howmany, int istride, int idist, in
   out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * osize);
 
   // Create FFTW plan
-  p = fftw_plan_many_dft(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, sign, flags | FFTW_DESTROY_INPUT);
+  p = fftw_plan_many_dft(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, sign, flags);
 }
   
 FFTWPlanManyDft::~FFTWPlanManyDft ()
@@ -99,7 +99,7 @@ FFTWPlanManyDftR2c::FFTWPlanManyDftR2c (int N, int howmany, int istride, int idi
   out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * osize);
 
   // Create FFTW plan
-  p = fftw_plan_many_dft_r2c(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags | FFTW_DESTROY_INPUT);
+  p = fftw_plan_many_dft_r2c(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags);
 }
 
 FFTWPlanManyDftR2c::~FFTWPlanManyDftR2c ()
@@ -127,7 +127,7 @@ FFTWPlanManyDftC2r::FFTWPlanManyDftC2r (int N, int howmany, int istride, int idi
   out = (double*) fftw_malloc(sizeof(double) * osize);
 
   // Create FFTW plan
-  p = fftw_plan_many_dft_c2r(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags | FFTW_DESTROY_INPUT);
+  p = fftw_plan_many_dft_c2r(1, &N, howmany, in, NULL, istride, idist, out, NULL, ostride, odist, flags);
 }
 
 FFTWPlanManyDftC2r::~FFTWPlanManyDftC2r ()
