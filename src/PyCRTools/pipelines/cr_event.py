@@ -1043,7 +1043,8 @@ for full_filename in files:
         print "Plane Wave Fit Az/EL -> ", directionPlaneWave.meandirection_azel_deg,"deg"
         print " "
         print "Delays =",directionPlaneWave.total_delays * 1e9
-        
+        print "#DirectionFitPlaneWave: delta delays =",directionPlaneWave.delta_delays_mean_history[0],"+/-",directionPlaneWave.delta_delays_rms_history[0]
+
         # perform Triangle fit
         direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags, cabledelays=good_pulse_cabledelays, verbose=True,doplot=True)
           # put in zeros for 'cable delays' as they are fitted and put into the same array...
