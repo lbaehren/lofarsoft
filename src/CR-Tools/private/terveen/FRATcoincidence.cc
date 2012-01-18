@@ -166,8 +166,8 @@ namespace FRAT {
 	namespace analysis {
 		
 		
-		SubbandTrigger::SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, int obsID, int beam)
-		{
+    SubbandTrigger::SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, bool verbose, int obsID, int beam)
+    {
 			
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
 			DoPadding=InDoPadding;
@@ -189,16 +189,18 @@ namespace FRAT {
 			itsFreqResolution = FreqResolution;
 			itsTimeResolution = TimeResolution;
 			itsSequenceNumber = startBlock-1;
+            itsStarttime_utc_sec=starttime_utc_sec;
+            itsStarttime_utc_ns=starttime_utc_nanosec;
 			itsBlockNumber = 0;
 			itsTotalValidSamples = 0;
 			itsSBaverage=1e22;
 			itsSBstdev=1e10;
 			itsTriggerThreshold=10;
 			itsTotalZeros=0;
-			itsBufferLength=1000;
+			itsBufferLength=2000;
 			InitDedispersionOffset();
-			verbose=true;
-			hostname="10.135.252.101";
+			verbose=verbose;
+			hostname=FRAT_HOSTNAME;
 			send_data = new char[sizeof(struct triggerEvent)];
 			host= (struct hostent *) gethostbyname(hostname);
 		    std::cout << "Resizing dedispersionBuffer "  << std::endl;	
@@ -230,11 +232,13 @@ namespace FRAT {
 			trigger.obsID=obsID;
 			trigger.beam=beam;
 			trigger.DM=DM;
+            trigger.utc_second=5000;
+            trigger.utc_nanosecond=10000;
 			
 		}
         
         
-        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, int obsID, int beam)
+        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, bool verbose, int obsID, int beam)
 		{
 			
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
@@ -261,6 +265,8 @@ namespace FRAT {
 			itsFreqResolution = FreqResolution;
 			itsTimeResolution = TimeResolution;
 			itsSequenceNumber = startBlock-1;
+            itsStarttime_utc_sec=starttime_utc_sec;
+            itsStarttime_utc_ns=starttime_utc_nanosec;            
 			itsBlockNumber = 0;
 			itsTotalValidSamples = 0;
 			itsSBaverage=1e22;
@@ -269,8 +275,8 @@ namespace FRAT {
 			itsTotalZeros=0;
 			itsBufferLength=1000;
 			InitDedispersionOffset(FREQvalues);
-			verbose=true;
-			hostname="10.135.252.101";
+			verbose=verbose;
+			hostname=FRAT_HOSTNAME;
 			send_data = new char[sizeof(struct triggerEvent)];
 			host= (struct hostent *) gethostbyname(hostname);
 			
@@ -302,6 +308,8 @@ namespace FRAT {
 			trigger.obsID=obsID;
 			trigger.beam=beam;
 			trigger.DM=DM;
+            trigger.utc_second=1234;
+            trigger.utc_nanosecond=56789;
 			
 		}
 		
@@ -375,7 +383,7 @@ namespace FRAT {
 				
 				std::cout << "Processing block " << sequenceNumber << std::endl;
 				float value;
-				int totaltime;
+				unsigned long int totaltime;
 				int rest;
 				float blocksum =0.0;
 				int validsamples=0;
@@ -441,6 +449,12 @@ namespace FRAT {
 									if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
 								}
 							} else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                                //trigger.utc_second=10000;
+                                unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                                unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                                std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond;
+                                trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                                trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
 								SendTriggerMessage(trigger);
 								
 								int latestindex = cc->add2buffer(trigger);
@@ -501,7 +515,8 @@ namespace FRAT {
 				//SBaverageAlt*=itsIntegrationLength;
 				//SBaverageAlt/=SBsumsamples;
 				if(verbose){
-					std::cerr << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
+                    
+					std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
 				}
 				char output[200];
 				//std::string output;
@@ -517,6 +532,7 @@ namespace FRAT {
 		int SubbandTrigger::CalculateBufferSize(){
             printf("Started ... %i %i %i ",dedispersionoffset[itsNrChannels-1],itsIntegrationLength,itsNrSamples);
 			itsBufferLength=std::max(2000,2*(dedispersionoffset[itsNrChannels-1]+itsIntegrationLength+itsNrSamples));
+            //itsBufferLength=std::max(2000,500*(itsBufferLength/500+1);
             printf("Done.");
 			return itsBufferLength;
 		}

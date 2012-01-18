@@ -1,11 +1,16 @@
 #! /usr/bin/env python
 
 #import bfdata as bfd
-from pycrtools import bfdata as bfd
+try:
+    from pycrtools import bfdata as bfd
+except:
+    print "Loading local bfdata"
+    import bfdata as bfd
 import sys
 import time
 import os
 import numpy as np
+import stat
 
 
 #Set up parameters
@@ -13,27 +18,25 @@ import numpy as np
 fraction=1.0
 # Use the specified nr blocks to analyze? If not is will use the fraction of the total
 use_absolute_nrblocks=True
-nrblocks=60
-pulsehomedir="/home/veen/analysis/"
+nrblocks=50
+homedir=os.environ["HOME"]+"/Astro/Analysis/FRAT/"
+#pulsehomedir="/home/veen/analysis/"
+pulsehomedir=homedir+"/analysis/"
 SBsPerBeam=240
+command=homedir+"/apps/FRATStrigger"
+useTargetDM=True
 
-#
-DM="2 0 26.83"
-#DM="32 0 10 10.5 11 11.5 12 12.5 13 13.5 14 14.5 15 15.5 16 16.5 17 17.5 18 18.5 19 19.5 20 20.5 21 21.5 22 22.5 23 23.5 24 24.5 25"
-#DM="10 0 1 2 3 4 5 6 7 8 9" 
-#10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29"
-# 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59"
 
-UseVerbose=False
+UseVerbose=True
 UsePad=True
 calcCoinNr=True
 calcnrCSB=False
-coincidenceNumber=8
-nrCSB=15
+coincidenceNumber=3
+nrCSB=60
 triggerlength=1
 coincidenceTime=30
-triggerlevel=10
-badchannels=np.load("/home/veen/logs/badchannels.npy")
+triggerlevel=5
+badchannels=np.load(homedir+"/logs/badchannels.npy")
 
 # Check if an observation ID is provided
 if len(sys.argv)>=2:
@@ -60,6 +63,21 @@ parsetsubdir=ObsID+'/'
 #parsetsubdir=''
 p=bfd.get_parameters_new(parsetdir+parsetsubdir+'/'+ObsID+'.parset',True)
 
+knownDMs=dict()
+knownDMs['B1919+21']=12.55
+knownDMs['B0329+54']=26.83
+#
+if useTargetDM and p['target'] in knownDMs.keys():
+    print "Using target DM"
+    DM="2 0 "+str(knownDMs[p['target']])
+
+else:
+    print "Using predefind DMs"
+    DM="2 0 26.83"
+#DM="32 0 10 10.5 11 11.5 12 12.5 13 13.5 14 14.5 15 15.5 16 16.5 17 17.5 18 18.5 19 19.5 20 20.5 21 21.5 22 22.5 23 23.5 24 24.5 25"
+#DM="10 0 1 2 3 4 5 6 7 8 9" 
+#10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29"
+# 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59"
 #if not p["incoherentstokes"]:
 #    print "No incoherent stokes data to trigger on"
 #    quit()
@@ -142,7 +160,7 @@ if not os.path.isdir(pulsedir):
     os.mkdir(pulsedir)
 
 ObsPar["pulsedir"]=pulsedir
-
+ObsPar["obsstart"]=str(int(starttime))+" 0"
 ObsPar["indirs"]=""
 ObsPar["log"]=pulsedir+"TransientTrigger.log"
 #ObsPar["ext"]=""
@@ -180,7 +198,7 @@ elif 'lce' in hostname:
     fileselection="sub"+str(subcluster)
     useLSE=False
     useLOCAL=False
-elif 'sander' in hostname or 'locus' in hostname:
+elif 'terveen' in hostname or 'sander' in hostname or 'locus' in hostname:
     print "Program is on own laptop",hostname
     useLOCAL=True
     useLSE=False
@@ -274,7 +292,6 @@ if True:
     ObsPar["freq"]=str(len(frequencies))
     for freq in frequencies:
         ObsPar["freq"]+=" "+str(freq)
-    command="/home/veen/apps/FRATStrigger"
 
     ObsPar["badch"]=str(len(badchannels))
     for ch in badchannels:
@@ -298,11 +315,13 @@ if True:
     set.write(command)
     set.close()
 
-    beamf=open(ObsPar["pulsedir"]+'/beam'+str(beamnr)+'_'+obsid,'w')
+    beamf=open(ObsPar["pulsedir"]+'/beam'+str(beamnr)+'_'+p['obsid']+'.sh','w')
     beamf.write(command)
     beamf.close()
 
 
+    os.chmod(beamf.name,stat.S_IXUSR + stat.S_IRUSR + stat.S_IWUSR + stat.S_IXGRP + stat.S_IRGRP)
+    print "execute: os.popen(beamf.name) to run the program"
     import subprocess
     #print args
     #os.popen(command)

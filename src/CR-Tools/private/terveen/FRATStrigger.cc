@@ -163,13 +163,15 @@ int main (int argc,
 	int channels=CHANNELS;
 	int samples=SAMPLES;
 	int startsubbandnumber=321;
-	bool DoPadding=0, verbose=false;
+	bool DoPadding=0, verbose=true;
 	std::string extension=".stokes";
 	int timeintegration=1;
 	int nrCombinedSBs = 1;
 	int HBAmode = 1;
 	string pulsedir = "pulses";
     int sleeptime = 0;
+    unsigned long int starttime_sec=0;
+    unsigned long int starttime_ns=0;
 	
 	/*
 	 Check if filename of the dataset is provided on the command line; if only
@@ -343,6 +345,12 @@ int main (int argc,
 			argcounter++;
 			timeintegration = atoi(argv[argcounter]);
 			cout << "timeintegration number: " << timeintegration << endl;
+        } else if(topic == "-obsstart"){
+			argcounter++;
+			starttime_sec = atoi(argv[argcounter]);
+            argcounter++;
+			starttime_ns = atoi(argv[argcounter]);            
+			cout << "start time of observation: " << timeintegration << endl;
 		} else if(topic == "-nrCSB"){
 			argcounter++;
 			nrCombinedSBs = atoi(argv[argcounter]);
@@ -407,14 +415,14 @@ int main (int argc,
 			cout << "StreamNr " << StreamCounter << " DMcounter " << DMcounter << " DM " << DMval << endl;
 			float SBFreq = SubbandToFreq(SB+startsubbandnumber,HBAmode);
             if(nFreqs<1) {
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, startpos, integrationlength, DoPadding, DoPadding);
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns, startpos, integrationlength, DoPadding, DoPadding, verbose);
             } else {
                 StartChannel=stream*NrChannels;
                 // start channel of this stream
                 // total number of channels in this stream
                 printf("Channel, %i, Integration, %i ",channels,timeintegration);
-                //if(stream==1 && DMcounter==0){
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, startpos, integrationlength, DoPadding, DoPadding); // Add obsid and beam    
+                //if(stream==1 && DMcounter==0)
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, startpos, integrationlength, DoPadding, DoPadding, verbose); // Add obsid and beam    
                 
                 //}
             }
@@ -538,6 +546,7 @@ int main (int argc,
 	long blockdatasize=nFreqs*samples*sizeof(float);
 	long stokesdatasize=blockdatasize;
 	float *data=(float*)malloc(blockdatasize);
+    bool Transposed=true;
 
 	if (data==NULL)
 	{
@@ -560,9 +569,6 @@ int main (int argc,
         //flagdata
 
         if( !num) {
-            //	cout << "Error, EOF reached.\n";
-        }
-        if( !num) {
             cout << "*";
             usleep(50000);
             fsetpos(pFile,&pos);
@@ -572,71 +578,18 @@ int main (int argc,
             continue;
         }
         for(int i=0; i<BadChannels.size(); i++){
-                ch=BadChannels[i];
-            for(int sa; sa<samples ; sa++){ 
-                data[sa*TotNrChannels+ch]=0.0;
+            ch=BadChannels[i];
+//            cout << "Flagging channel " << ch << endl;
+            if( ch < TotNrChannels ){
+                for(int sa; sa<samples ; sa++){ 
+                    data[sa*TotNrChannels+ch]=0.0;
+                }
             }
         }
         
 		for(int sc=0; sc < nstreams; sc++){
 			
-			/*for(int fc=0; fc < nrCombinedSBs; fc++){
-				//cout << "fc = " << fc << endl;
-				int i=sc*nrCombinedSBs+fc; //file identifier
-				fgetpos(pFile[i],&pos);
-				
-				num = fread( &(sequence_nr[i]), sizeof(sequence_nr[i]), 1, pFile[i]); //read sequence number
-				if( !num) {
-					//	cout << "Error, EOF reached.\n";
-				}
-				
-
-				
-				if(DoPadding){
-					num = fread( &(pad),sizeof(pad), 1, pFile[i]); //read padding
-					if( !num) {
-						//		cout << "Error, EOF reached.\n";
-					}
-				}
-				//cout << "Data read start " << fc*channels*samplesOr2 << endl;
-				num = fread( &(data[fc*channels*samplesOr2]), blockdatasize, 1, pFile[i]); //read data
-				if( !num) {
-					//	cout << "Error, EOF reached.\n";
-				}
-				if( !num) {
-					cout << "*";
-					usleep(50000);
-					fsetpos(pFile[i],&pos);
-					fc--;
-					
-					//i--; //1 file k--
-					continue;
-				}
-				else {		  
-					swap_endian( (char*)&(sequence_nr[i]) );
-					if(i==0){  
-						cerr << "reading sequence number: " << sequence_nr[i] << endl;
-					}		
-					//	if (i%nrCombinedSBs==0){
-					//		blockvalidsamples[fc]=0; blocksum[fc]=0;
-					// 	}//  }
-				}
-				if(prev_sequence_nr[i]!=(sequence_nr[i]-1) && blockNr !=0)
-				{
-				    cout << "Data missing for block " << blockNr;
-					if(failsafe){
-						cout << "\n Failsafe is on, stopping the trigger ";
-						cout << "numbers: " << prev_sequence_nr[i] << " " << sequence_nr[i];
-						return 43;
-					}
-					cout << endl;
-				}
-				prev_sequence_nr[i]=sequence_nr[i];
-
-			} // for files
-            */ 
 			for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
-				bool Transposed=true;
 				cout << "Processing " << sc << " " << DMcounter << endl;
 				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
 

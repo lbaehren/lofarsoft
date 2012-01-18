@@ -29,6 +29,7 @@ int main(int argc , char *argv[])
 {
 
          if(argc<4){
+             
              cout << "usage: " << argv[4] << " <CoincidenceNumber> <CoincidenceTime> <nrbeams> <nrDMs>" << endl;
              return 200;
          }
@@ -69,22 +70,27 @@ int main(int argc , char *argv[])
 //        int time;
 //        int max;
         string temp;
-        unsigned char TBBdumpMessage[11];        
-        TBBdumpMessage[0]=0x99;
-        TBBdumpMessage[1]=0xA0;
-        TBBdumpMessage[2]='F';
-        TBBdumpMessage[3]='U';
-        TBBdumpMessage[4]='L';
-        TBBdumpMessage[5]='L';
-        TBBdumpMessage[6]='D';
-        TBBdumpMessage[7]='U';
-        TBBdumpMessage[8]='M';
-        TBBdumpMessage[9]='P';
+        TBBtriggerMessage TBBdumpMessage;        
+        //TBBdumpMessage = new TBBtriggerMessage;
+        TBBdumpMessage.Magic0=(char) 0x99;
+        TBBdumpMessage.Magic1=(char) 0xA0;
+ 
+    
+        //long int *utc_sec = new long int;
+        //long int *utc_nanosec = new long int;
+        //utc_sec = 20000;
+        //utc_nanosec= 10000;
+        //TBBdumpMessage.utc_second=  &utc_sec;
+        //TBBdumpMessage.utc_nanosecond= &utc_nanosec;
+        TBBdumpMessage.MagicProject=(char) 0x68;
+        char* send_data;
+        send_data=new char[11];
+        
         //data[2]--> data[5] event time in UTC
         //data[6]--> data[9] event time in nanoseconds
-        TBBdumpMessage[10]=0x68;
         char* out_hostname;
-        out_hostname="10.135.252.101";
+        out_hostname="127.0.0.1";
+        //out_hostname="10.135.252.101";
         if((out_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1){
             perror("Socket");
             exit(1);
@@ -175,7 +181,23 @@ int main(int argc , char *argv[])
 
                 cout << _timestamp << "." << _timestamp_msec  << " Trigger found in beam " << trigger->beam << " at time: " << trigger->time << " with DM: " << trigger->DM << endl;
 
-                 int n = sendto(out_sock, TBBdumpMessage, sizeof(TBBdumpMessage), 0,
+              unsigned long int utc_sec = trigger->utc_second;
+              unsigned long int utc_nanosec = trigger->utc_nanosecond;
+              //unsigned char byteArray[4];
+              
+              // convert from an unsigned long int to a 4-byte array
+              cout << "timestamp" << utc_sec << " " << utc_nanosec;
+              TBBdumpMessage.utc_second[0] = (int)((utc_sec >> 24) & 0xFF) ;
+              TBBdumpMessage.utc_second[1] = (int)((utc_sec >> 16) & 0xFF) ;
+              TBBdumpMessage.utc_second[2] = (int)((utc_sec >> 8) & 0XFF);
+              TBBdumpMessage.utc_second[3] = (int)((utc_sec & 0XFF));
+              
+              TBBdumpMessage.utc_nanosecond[0] = (int)((utc_nanosec >> 24) & 0xFF) ;
+              TBBdumpMessage.utc_nanosecond[1] = (int)((utc_nanosec >> 16) & 0xFF) ;
+              TBBdumpMessage.utc_nanosecond[2] = (int)((utc_nanosec >> 8) & 0XFF);
+              TBBdumpMessage.utc_nanosecond[3] = (int)((utc_nanosec & 0XFF));
+              send_data = (char* ) &TBBdumpMessage;
+                 int n = sendto(out_sock, send_data, 2*sizeof(long)+3*sizeof(char), 0,
                                     (struct sockaddr *)&out_server_addr, sizeof(struct sockaddr));
                  if ( n < 0 ) {
                      cerr << "Failed to send message to request dump." << endl; }
