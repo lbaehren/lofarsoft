@@ -342,7 +342,7 @@ for full_filename in files:
         block_number=blocknumber
         sample_number=samplenumber
 
-
+        checksums = []
         ########################################################################
         #Open the data file
         ########################################################################
@@ -662,6 +662,10 @@ for full_filename in files:
             print "# Antenna Flagging: All antennas OK!"
             averagespectrum_good_antennas=avspectrum.power
 
+        checksum = averagespectrum_good_antennas.checksum()
+        checksums.append('Checksum after average spectrum: ' + checksum)
+        print checksums[-1]
+
         ########################################################################
         #Baseline Fitting
         ########################################################################
@@ -795,7 +799,11 @@ for full_filename in files:
             print "Error reading file - skipping this file"
             finish_file(laststatus="READ ERROR")
             continue
-
+        
+        checksum = timeseries_data.checksum()
+        checksums.append('Checksum after reading in timeseries data: ' + checksum)
+        print checksums[-1]
+            
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
         timeseries_data.par.xvalues.setUnit("","s")
@@ -811,6 +819,10 @@ for full_filename in files:
         #FFT
         hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
         fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
+
+        checksum = fft_data.checksum()
+        checksums.append('Checksum after fft_data: ' + checksum)
+        print checksums[-1]
         
         # apply cable delays 
 #        self.delays = hArray(float,dimensions=[nofAntennas])
@@ -831,6 +843,11 @@ for full_filename in files:
         # back to time domain to get calibrated timeseries data
         hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
         timeseries_data /= blocksize
+        
+        checksum = timeseries_data.checksum()
+        checksums.append('Checksum after applying cable delays and invfft: ' + checksum)
+        print checksums[-1]
+
 #        import pdb; pdb.set_trace()
         ########################################################################
         #RFI excision
@@ -865,6 +882,10 @@ for full_filename in files:
         results.update(dict(
             pulse_height_rms=timeseries_calibrated_data_rms
             ))
+
+        checksum = timeseries_calibrated_data.checksum()
+        checksums.append('Checksum after getting timeseries_calibrated_data: ' + checksum)
+        print checksums[-1]
 
         # Note: to finish calibration, we have to know the pulse location first
         # Then we divide out by the rms per antenna in this block, while excluding the pulse region.
@@ -937,6 +958,10 @@ for full_filename in files:
 # calibration complete.
         print "---> Saving calibrated time series to",calibrated_timeseries_file
         timeseries_calibrated_data.write(calibrated_timeseries_file)
+
+        checksum = timeseries_calibrated_data.checksum()
+        checksums.append('Checksum after getting FINAL timeseries_calibrated_data: ' + checksum)
+        print checksums[-1]
 
         if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
         Pause("Plotted time series data. ",name="calibrated-imeseries")
@@ -1196,6 +1221,16 @@ for full_filename in files:
         pulse_height=beam_maxima.maxy.val()
         pulse_direction=direction.meandirection_azel_deg
 
+        # gather checksums if present
+        if len(checksums) > 0:
+            checksumArray = hArray(checksums)
+            masterChecksum = checksumArray.checksum()
+            results.update(dict(checksums = checksums, masterChecksum = masterChecksum))
+            print '*** Checksums: '
+            for item in checksums:
+                print item
+            print '*** Master checksum = %s' % masterChecksum
+            
         results.update(dict(
             antennas_flagged_delays=list(flagged_delays.vec()),
             antennas_final_cable_delays=list(final_cable_delays.vec()), # include metadata-cabledelays again here?? (AC)
