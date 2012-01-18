@@ -549,8 +549,8 @@ class DirectionFitPlaneWave(tasks.Task):
                           "Target for the RMS of the delta delays where iteration can stop.",
                           unit="s"),
 
-        rmsfactor=sc.p_(3.,
-                        "How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
+        rmsfactor=sc.p_(2.0,
+                        "How many sigma (times RMS) above the average can a delay deviate from the expected timelag (from latest fit iteration) before it is considered bad and removed as outlier."),
 
         minrmsfactor=sc.p_(1.,
                            "Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
@@ -570,7 +570,7 @@ class DirectionFitPlaneWave(tasks.Task):
         plotant_end=sc.p_(lambda self:self.NAnt,
                           "Last antenna to plot plus one."),
 
-        verbose=sc.p_(False,
+        verbose=sc.p_(True,
                       "Print progress information."),
 
         refant=sc.p_(0,
@@ -653,37 +653,63 @@ class DirectionFitPlaneWave(tasks.Task):
         pass
 
     def run(self):
+        from pycrtools import srcfind 
+        from numpy import cos, sin
         self.farfield=True
         c = 299792458.0 # speed of ligth in m/s
         rad2deg = 180.0 / math.pi
 
-        positions = self.positions.toNumpy().ravel()
+        positions = self.positions.toNumpy()
         times = self.timelags.toNumpy()
+        times -= times[0]
         
-        # make x, y arrays out of the input position array
-        #    N = len(positions)
-        x = positions[0:-1:3]
-        y = positions[1:-1:3]
-
-        # now a crude test for nonzero z-input, |z| > 0.5
-        z = positions[2:-1:3]
-        if max(abs(z)) > 0.5:
-            raise ValueError("Your antenna positions have nonzero z-coordinates (z > 0.5) !")
-            #return (-1, -1)
-
-        M = np.vstack([x, y, np.ones(len(x))]).T # says the linalg.lstsq doc
+        indicesOfGoodAntennas = np.arange(len(times))
+        goodSubset = np.arange(len(times)) # start with all 'good'
+        goodcount = len(goodSubset)
+        niter = 0
+        while True:
+            niter += 1
+            goodpositions = positions[indicesOfGoodAntennas].ravel()
+            goodtimes = times[indicesOfGoodAntennas]
+            (az, el) = srcfind.directionForHorizontalArray(goodpositions, goodtimes)
+                        
+            # get residuals
+            expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el)) 
+            expectedDelays -= expectedDelays[0]
+            self.delta_delays = goodtimes - expectedDelays
+            # remove > k-sigma outliers and iterate
+            spread = np.std(self.delta_delays)
+            k = self.rmsfactor 
+            goodSubset = np.where(abs(self.delta_delays - np.mean(self.delta_delays)) < k * spread)
+            # gives subset of 'indicesOfGoodAntennas' that is 'good' after this iteration
+            if self.verbose:
+                print 'iteration # %d' %niter
+                print 'az = %f, el = %f' % (az*rad2deg, el*rad2deg)
+                print 'good count = %d' % goodcount
+            if len(goodSubset[0]) == goodcount:
+                break
+            else:                
+                goodcount = len(goodSubset[0])
+                indicesOfGoodAntennas = indicesOfGoodAntennas[goodSubset] 
         
-        (A, B, C) = np.linalg.lstsq(M, c * times)[0]
-        self.meandirection[0] = - A
-        self.meandirection[1] = - B
-        self.meandirection[2] = np.sqrt(1 - A*A - B*B) # gets converted by pytmf
-        el = np.arccos(np.sqrt(A*A + B*B))
-        az = math.pi / 2 - np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
-        # note: Changed to az = 90_deg - phi [ checks with pytmf ]
-
-#        print az * rad2deg
-#        print el * rad2deg
-#    return (az, el)
+        cartesianDirection = [cos(el)*sin(az), cos(el)*cos(az), sin(el)]
+        self.meandirection = cr.hArray(cartesianDirection)                
+        # now redo arrays for full antenna set
+        expectedDelays = srcfind.timeDelaysFromDirection(positions.ravel(), (az, el)) # need positions as flat 1-D array
+        expectedDelays -= expectedDelays[0] # subtract ref ant
+        self.delta_delays = times - expectedDelays
+        self.delta_delays_mean_history = [np.mean(self.delta_delays)] # comply with DirectionFitTriangles, return as list...
+        self.delta_delays_rms_history = [np.std(self.delta_delays)]
+        self.delta_delays = cr.hArray(self.delta_delays)
+        
+        if self.doplot:
+            import matplotlib.pyplot as plt
+            plt.figure()
+            plt.plot(self.delta_delays)
+            plt.figure()
+    #        cr.trerun("PlotAntennaLayout","Delsdays",positions = cr.hArray(goodpositions), colors=cr.hArray(self.delta_delays), sizes=100,title="Residuals for plane wave fit",plotlegend=True)            
+    #        plt.figure()
+    
 
 
 class DirectionFitTriangles(tasks.Task):
