@@ -194,7 +194,7 @@ class obsinfo:
 		self.nodeslist=[]
 		self.subcluster = 'locus?'
 		self.BF=self.FD=self.IM="?"
-		self.IS=self.CS=self.FE="?"
+		self.IS=self.CS=self.CV=self.FE="?"
 		self.rarad=self.decrad=0
                 self.rastring="????"
                 self.decstring="_????"
@@ -207,10 +207,12 @@ class obsinfo:
 		self.nrSubbands = 0        # number of subbands
 		self.subbandList="?"       # range of subbands, e.g. 77..320
 		self.subbandWidth = 0      # width of subband in kHz
-		self.nrChanPerSub = 0      # number of channels per subband
+		self.nrChanPerSubIS = 0    # number of channels per subband (for IS)
+		self.nrChanPerSubCS = 0    # number of channels per subband (for CS)
 		self.sampleClock = 0       # clock in MHz (200 or 160)
 		self.integrationSteps = 0  # stokes integration steps
-		self.timeres = 0           # sampling interval (depends on on integration steps, clock, number of channels)
+		self.timeresIS = 0           # sampling interval (depends on on integration steps, clock, number of channels)
+		self.timeresCS = 0
 		self.bw = 0                # bandwidth (in MHz)
 		self.cfreq = 0             # central freq (in MHz)
 		self.nrBeams = 0           # number of station beams
@@ -455,10 +457,10 @@ class obsinfo:
 				self.stations_html += stations_array[n] + ","
 			self.stations_html += stations_array[-1]
 
-		# checking first new "mountpoints" keywords in the parset file to get Nodeslist and Datadir
-		# if they are empty or not exist the checking later old keywords for storageNodes and storageDirectory
+		# checking "locations" keywords first as in the new parset files (as from Jan 27, 2012), 
+		# "mountpoints" can give wrong values
 		self.nodeslist_string = "[]"
-        	cmd="grep mountpoints %s | awk '{print $3}' - | tr -d '[]' | sed -e 's/locus//g'" % (self.parset,)
+        	cmd="grep locations %s | awk '{print $3}' - | tr -d '[]' | sed -e 's/locus//g'" % (self.parset,)
 		try:
 			mountpoints=",".join([ss[:-1] for ss in os.popen(cmd).readlines()])
 			mountpoints_arr=np.array(mountpoints.split(","))
@@ -467,6 +469,19 @@ class obsinfo:
 				self.datadir=",".join(np.unique([m.split(":")[-1] for m in mountpoints_arr]))
 				self.nodeslist_string="[" + ",".join(np.unique([m.split(":")[0] for m in mountpoints_arr])) + "]"
 		except: pass
+
+		# and now checking "mountpoints" keywords in the parset file to get Nodeslist and Datadir
+		# if they are empty or not exist the checking later old keywords for storageNodes and storageDirectory
+		if self.nodeslist_string == "[]":
+        		cmd="grep mountpoints %s | awk '{print $3}' - | tr -d '[]' | sed -e 's/locus//g'" % (self.parset,)
+			try:
+				mountpoints=",".join([ss[:-1] for ss in os.popen(cmd).readlines()])
+				mountpoints_arr=np.array(mountpoints.split(","))
+				mountpoints_arr=mountpoints_arr.compress(mountpoints_arr!="")
+				if np.size(mountpoints_arr) > 0:
+					self.datadir=",".join(np.unique([m.split(":")[-1] for m in mountpoints_arr]))
+					self.nodeslist_string="[" + ",".join(np.unique([m.split(":")[0] for m in mountpoints_arr])) + "]"
+			except: pass
 
 	        # reading the parset file
 	        # getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
@@ -672,21 +687,40 @@ class obsinfo:
 				self.subbandList = self.subbandList[:8] + "..."
 
 		# Getting number of channels per subband
+		# for old datasets (before Jan 27, 2012) this number is the same for IS and CS
 		cmd="grep Observation.channelsPerSubband %s" % (self.parset,)
 		status=os.popen(cmd).readlines()
 		if np.size(status)>0:
 			# getting number of channels
 			try:
-				self.nrChanPerSub=int(status[0][:-1].split(" = ")[-1])
-			except: self.nrChanPerSub = 0
-		if self.nrChanPerSub == 0: # if for some reason parset file does not have this keyword 'Observation.channelsPerSubband'
+				self.nrChanPerSubIS=int(status[0][:-1].split(" = ")[-1])
+			except: self.nrChanPerSubIS = 0
+		if self.nrChanPerSubIS == 0: # if for some reason parset file does not have this keyword 'Observation.channelsPerSubband'
 			cmd="grep OLAP.Stokes.channelsPerSubband %s" % (self.parset,)
 			status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				# getting number of channels
 				try:
-					self.nrChanPerSub=int(status[0][:-1].split(" = ")[-1])
-				except: self.nrChanPerSub = 0
+					self.nrChanPerSubIS=int(status[0][:-1].split(" = ")[-1])
+				except: self.nrChanPerSubIS = 0
+		self.nrChanPerSubCS = self.nrChanPerSubIS
+		# in new parset files (after Jan 27, 2012) there are new keywords for number of
+		# chans per subband and this number can be different for IS and CS
+		if self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
+			cmd="grep OLAP.CNProc_IncoherentStokes.channelsPerSubband %s" % (self.parset,)
+			status=os.popen(cmd).readlines()
+			if np.size(status)>0:
+				# getting number of channels
+				try:
+					self.nrChanPerSubIS=int(status[0][:-1].split(" = ")[-1])
+				except: self.nrChanPerSubIS = 0
+			cmd="grep OLAP.CNProc_CoherentStokes.channelsPerSubband %s" % (self.parset,)
+			status=os.popen(cmd).readlines()
+			if np.size(status)>0:
+				# getting number of channels
+				try:
+					self.nrChanPerSubCS=int(status[0][:-1].split(" = ")[-1])
+				except: self.nrChanPerSubCS = 0
 
 		# Getting the sample clock
 		cmd="grep Observation.sampleClock %s" % (self.parset,)
@@ -734,8 +768,11 @@ class obsinfo:
 				except: self.integrationSteps = 0
 
 		# Calculating the sampling interval (in ms)
-		if self.integrationSteps != 0 and self.sampleClock != 0 and self.nrChanPerSub != 0:
-			self.timeres = self.integrationSteps / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSub) * 1000.
+		if self.integrationSteps != 0 and self.sampleClock != 0:
+			if self.nrChanPerSubIS != 0:
+				self.timeresIS = self.integrationSteps / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSubIS) * 1000.
+			if self.nrChanPerSubCS != 0:
+				self.timeresCS = self.integrationSteps / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSubCS) * 1000.
 
 		# Calculating the total BW (in MHz)
 		if self.nrSubbands != 0 and self.subbandWidth != 0:
@@ -758,10 +795,15 @@ class obsinfo:
 						lower_band_edge = 80
 					else: lower_band_edge = 0
 
-				if self.subbandList != "?" and self.subbandWidth != 0 and self.nrChanPerSub != 0:
+				if self.subbandList != "?" and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
 					try:
 						subband_first = int(self.subbandList.split("..")[0].split(",")[0])
-						lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / self.nrChanPerSub)
+						# CS has a priority
+						if self.nrChanPerSubIS != 0:
+							nchanpersub = self.nrChanPerSubCS
+						else:
+							nchanpersub = self.nrChanPerSubIS
+						lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
 						self.cfreq = lofreq + 0.5 * self.bw
 					except: pass
 			except: pass
@@ -820,8 +862,23 @@ class obsinfo:
 						self.ringSize=float(status[0][:-1].split(" = ")[-1])
 						self.ringSize = self.ringSize * (180./3.1415926)
 					except: self.ringSize = 0
+
+		# in the new parset files (as of Jan 27, 2012), keywords "enabled" for CS and IS will not
+		# work anymore. Not sure if they will stay, but even if they do, they will show wrong 'false'
+		# So, we have to check this by other way and correct our values of self.CS and self.IS
+		cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep T" % (self.parset,)
+		status=os.popen(cmd).readlines()
+		if np.size(status) > 0:
+			self.CS = "+"
+		cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep F" % (self.parset,)
+		status=os.popen(cmd).readlines()
+		if np.size(status) > 0:
+			self.IS = "+"
+			# so, in the array of TiedArrayBeams we have at least one IS beam, so we have to
+			# decrease then the number of TiedArrayBeams 
+			self.nrTiedArrayBeams -= np.size(status)
 		
-		
+
 	# return True if parset file was found, and False otherwise
 	def is_parset (self):
 		if self.parset == "":
@@ -930,13 +987,21 @@ class outputInfo:
 		# Compiling obs setup ascii and html strings
 		obssetup=""
 		obssetup_html=""
+		sampling_setup=""
+		sampling_setup_html=""
+		if self.oi.nrChanPerSubIS == self.oi.nrChanPerSubCS or self.oi.nrChanPerSubIS == 0 or self.oi.nrChanPerSubCS == 0:
+			sampling_setup="Channels/Sub:%d|Sampling:%g_ms" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS, self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
+			sampling_setup_html="Channels/Sub: %d<br>Sampling: %g ms" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS, self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
+		else:
+			sampling_setup="Channels/Sub:%d(IS),%d(CS)|Sampling:%g_ms(IS),%g_ms(CS)" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS, self.oi.timeresIS, self.oi.timeresCS)
+			sampling_setup_html="Channels/Sub: %d (IS), %d (CS)<br>Sampling: %g ms (IS), %g ms (CS)" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS, self.oi.timeresIS, self.oi.timeresCS)
 		if self.comment == "":
 			if self.oi.nrRings > 0:
-				obssetup="%s|Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-				obssetup_html="%s&nbsp;&nbsp;&nbsp;Station Beams: %d<br>TA beams: %d [%d ring(s), %g deg]<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup="%s|Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|%s|Stokes:%s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup, self.oi.stokes)
+				obssetup_html="%s&nbsp;&nbsp;&nbsp;Station Beams: %d<br>TA beams: %d [%d ring(s), %g deg]<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>%s<br>Stokes: %s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup_html, self.oi.stokes)
 			else:
-				obssetup="%s|Station_Beams:%d|TA_beams:%d|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|Channels/Sub:%d|SamplingTime:%g_ms|Stokes:%s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
-				obssetup_html="%s&nbsp;&nbsp;&nbsp;Station Beams: %d<br>TA beams: %d<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>Channels/Sub: %d<br>Sampling Time: %g ms<br>Stokes: %s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, self.oi.nrChanPerSub, self.oi.timeres, self.oi.stokes)
+				obssetup="%s|Station_Beams:%d|TA_beams:%d|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|%s|Stokes:%s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup, self.oi.stokes)
+				obssetup_html="%s&nbsp;&nbsp;&nbsp;Station Beams: %d<br>TA beams: %d<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>%s<br>Stokes: %s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup_html, self.oi.stokes)
 
 		# forming first Info (not html) string
 		if viewtype == "brief":
@@ -984,7 +1049,7 @@ class outputInfo:
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>" % (self.id, self.colspan, self.comment)
 
-			# adding CS/BF combined_plot column
+			# adding CS/CV combined_plot column
 			if self.filestem_array[0] == "":
 				self.infohtml = self.infohtml + "\n <td align=center></td>"
 			else:
@@ -1072,30 +1137,30 @@ class writeHtmlList:
 	def header (self, viewtype, storage_nodes_string_html):
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n</tr>\n")
 		elif viewtype == "plots":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
 		elif viewtype == "mega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (storage_nodes_string_html,))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (storage_nodes_string_html,))
 		elif viewtype == "smega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
 		else:
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>IM</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Status</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Status</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
 	def linkedheader (self, viewtype, storage_nodes_string_html):
 		sf=["-obsid.html", "-time.html", "-size.html", "-source.html"]
 		sf=["%s%s" % (self.linkedhtmlstem.split("/")[-1], i) for i in sf]
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">IM</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver))
 		elif viewtype == "plots":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">IM</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n " % (sf[0], sf[3], sf[1], imserver))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n " % (sf[0], sf[3], sf[1], imserver))
 		elif viewtype == "mega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">IM</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, storage_nodes_string_html, sf[2]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, storage_nodes_string_html, sf[2]))
 		elif viewtype == "smega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">IM</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/BF Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/BF Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, sf[2]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, sf[2]))
 		else:
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">IM</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Status</th>\n <th align=center><a href=\"%s\">Pointing</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n</tr>\n" % (sf[0], sf[1], storage_nodes_string_html, sf[2], imserver, sf[3], sf[3]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center>BF</th>\n <th align=center>FD</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>FE</th>\n <th align=center>Status</th>\n <th align=center><a href=\"%s\">Pointing</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n</tr>\n" % (sf[0], sf[1], storage_nodes_string_html, sf[2], imserver, sf[3], sf[3]))
 
 	def record (self, lineclass, index, line):
 		self.htmlptr.write ("\n<tr class='%s' align=left>\n <td>%d</td>\n %s\n</tr>" % (lineclass, index, line))
@@ -1300,7 +1365,7 @@ class obsstat:
 			field = "%d [%.1f / %.1f]" % (self.dbinfo[sub]["Ntotal"], self.dbinfo[sub]["totDuration"], self.dbinfo[sub]["totDuration"]/24.)
 			line += "%-23s" % (field)
 		print line
-		line="Number of observations w/o IM-only [hours / days]:   "
+		line="Number of observations w/o Im-only [hours / days]:   "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d [%.1f / %.1f]" % (self.dbinfo[sub]["Ntotal"]-self.dbinfo[sub]["Nimtype_only"], self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"], (self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"])/24.)
 			line += "%-23s" % (field)
@@ -1328,12 +1393,12 @@ class obsstat:
 			field = "%d" % (self.dbinfo[sub]["Niscs"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of IS+IM observations only:                   "
+		line="Number of IS+Im observations only:                   "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Nisim"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of IS+CS+IM observations only:                "
+		line="Number of IS+CS+Im observations only:                "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Niscsim"])
 			line += "%-23s" % (field)
@@ -1343,7 +1408,7 @@ class obsstat:
 			field = "%d [%d]" % (self.dbinfo[sub]["Ncstype"], self.dbinfo[sub]["Ncstype_only"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of CS+IM observations only:                   "
+		line="Number of CS+Im observations only:                   "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Ncsim"])
 			line += "%-23s" % (field)
@@ -1363,7 +1428,7 @@ class obsstat:
 			field = "%d" % (self.dbinfo[sub]["Nisfe"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of FE+IM observations only:                   "
+		line="Number of FE+Im observations only:                   "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Nimfe"])
 			line += "%-23s" % (field)
@@ -1373,7 +1438,7 @@ class obsstat:
 			field = "%d" % (self.dbinfo[sub]["Niscsfe"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of IM observations [only IM]:                 "
+		line="Number of Im observations [only Im]:                 "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d [%d]" % (self.dbinfo[sub]["Nimtype"], self.dbinfo[sub]["Nimtype_only"])
 			line += "%-23s" % (field)
@@ -1416,7 +1481,7 @@ class obsstat:
 			field = "%.1f" % (self.dbinfo[sub]["totRawsize"])
 			line += "%-23s" % (field)
 		print line
-		line="Total size of raw data w/o IM-only (TB):             "
+		line="Total size of raw data w/o Im-only (TB):             "
 		for sub in np.append("Total", self.subclusters):
 			field = "%.1f" % (self.dbinfo[sub]["totRawsize"]-self.dbinfo[sub]["IMonlyRawsize"])
 			line += "%-23s" % (field)
@@ -1473,7 +1538,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):	
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"], self.dbinfo[sub]["totDuration"], self.dbinfo[sub]["totDuration"]/24.))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o IM-only", "hours", "days"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font>]</td>" % ("Number of observations w/o Im-only", "hours", "days"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Ntotal"]-self.dbinfo[sub]["Nimtype_only"], self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"], (self.dbinfo[sub]["totDuration"]-self.dbinfo[sub]["IMonlyDuration"])/24.))
 		self.htmlptr.write ("\n</tr>")
@@ -1499,11 +1564,11 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Niscs"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of IS+IM observations only"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of IS+Im observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nisim"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of IS+CS+IM observations only"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of IS+CS+Im observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Niscsim"]))
 		self.htmlptr.write ("\n</tr>")
@@ -1511,7 +1576,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d<b></font>]</td>" % (self.dbinfo[sub]["Ncstype"], self.dbinfo[sub]["Ncstype_only"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of CS+IM observations only"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of CS+Im observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Ncsim"]))
 		self.htmlptr.write ("\n</tr>")
@@ -1527,7 +1592,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nisfe"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of FE+IM observations only"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of FE+Im observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nimfe"]))
 		self.htmlptr.write ("\n</tr>")
@@ -1535,7 +1600,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Niscsfe"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of IM observations", "only IM"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of Im observations", "only Im"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nimtype"], self.dbinfo[sub]["Nimtype_only"]))
 		self.htmlptr.write ("\n</tr>")
@@ -1573,7 +1638,7 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totRawsize"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Total size of raw data w/o IM-only (TB)"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Total size of raw data w/o Im-only (TB)"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totRawsize"]-self.dbinfo[sub]["IMonlyRawsize"]))
 		self.htmlptr.write ("\n</tr>")
@@ -2390,7 +2455,7 @@ if __name__ == "__main__":
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	CSBFLocation		ISLocation		Status"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD Im IS CS FE	CSBFLocation		ISLocation		Status"
 		print equalstring
 	elif viewtype == "plots":
 		equalstring_size=202
@@ -2399,7 +2464,7 @@ if __name__ == "__main__":
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	CSBFLocation		ISLocation		Status      Archive"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD Im IS CS FE	CSBFLocation		ISLocation		Status      Archive"
 		print equalstring
 	elif viewtype == "mega":
 		equalstring_size=279+8*Nnodes
@@ -2408,7 +2473,7 @@ if __name__ == "__main__":
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	NodesList (locus)	%s	Total(GB)	Obs Setup	Stations		CSBFLocation		ISLocation                Status      Archive" % (storage_nodes_string,)
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD Im IS CS FE	NodesList (locus)	%s	Total(GB)	Obs Setup	Stations		CSBFLocation		ISLocation                Status      Archive" % (storage_nodes_string,)
 		print equalstring
 	elif viewtype == "smega":
 		equalstring_size=279
@@ -2417,7 +2482,7 @@ if __name__ == "__main__":
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD IM IS CS FE	NodesList (locus) 	Total(GB)	Obs Setup	Stations		CSBFLocation 		ISLocation               Status      Archive"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    BF FD Im IS CS FE	NodesList (locus) 	Total(GB)	Obs Setup	Stations		CSBFLocation 		ISLocation               Status      Archive"
 		print equalstring
 	else: # usual
 		equalstring_size=161+8*Nnodes
@@ -2426,7 +2491,7 @@ if __name__ == "__main__":
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		MMDD	Dur	NodesList (locus)	Datadir	%s	Total(GB)	BF FD IM IS CS FE	Status				Pointing    Source" % (storage_nodes_string,)
+		print "# No.	ObsID		MMDD	Dur	NodesList (locus)	Datadir	%s	Total(GB)	BF FD Im IS CS FE	Status				Pointing    Source" % (storage_nodes_string,)
 		print equalstring
 		
 
