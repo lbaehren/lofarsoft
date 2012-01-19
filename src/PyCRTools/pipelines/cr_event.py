@@ -114,7 +114,7 @@ parser.add_option("-q","--nopause", action="store_true",help="Do not pause after
 parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip file if results directory already exists")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
-
+parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging; default OFF")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -196,7 +196,7 @@ else:
     max_data_length=options.max_data_length
     min_data_length=options.min_data_length
     maxnchunks=max_data_length/blocksize
-
+    do_checksums = options.checksum
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
 
@@ -662,9 +662,10 @@ for full_filename in files:
             print "# Antenna Flagging: All antennas OK!"
             averagespectrum_good_antennas=avspectrum.power
 
-        checksum = averagespectrum_good_antennas.checksum()
-        checksums.append('Checksum after average spectrum: ' + checksum)
-        print checksums[-1]
+        if do_checksums:
+            checksum = averagespectrum_good_antennas.checksum()
+            checksums.append('Checksum after average spectrum: ' + checksum)
+            print checksums[-1]
 
         ########################################################################
         #Baseline Fitting
@@ -799,9 +800,11 @@ for full_filename in files:
             print "Error reading file - skipping this file"
             finish_file(laststatus="READ ERROR")
             continue
-        checksum = timeseries_data.checksum()
-        checksums.append('Checksum after reading in timeseries data: ' + checksum)
-        print checksums[-1]
+
+        if do_checksums:
+            checksum = timeseries_data.checksum()
+            checksums.append('Checksum after reading in timeseries data: ' + checksum)
+            print checksums[-1]
 
         for i in bad_antennas_index:
             print "FLAGGING ANTENNA", i
@@ -823,9 +826,10 @@ for full_filename in files:
         hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
         fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
 
-        checksum = fft_data.checksum()
-        checksums.append('Checksum after fft_data: ' + checksum)
-        print checksums[-1]
+        if do_checksums:
+            checksum = fft_data.checksum()
+            checksums.append('Checksum after fft_data: ' + checksum)
+            print checksums[-1]
         
         cabledelays = hArray(dimensions=datafile["NOF_SELECTED_DATASETS"], Type=float, fill=0)
         try:
@@ -853,9 +857,10 @@ for full_filename in files:
                 DIPOLE_CALIBRATION_DELAY_APPLIED=False
                 ))
 
-        checksum = timeseries_data.checksum()
-        checksums.append('Checksum after applying cable delays and invfft: ' + checksum)
-        print checksums[-1]
+        if do_checksums:
+            checksum = timeseries_data.checksum()
+            checksums.append('Checksum after applying cable delays and invfft: ' + checksum)
+            print checksums[-1]
 
         ########################################################################
         #RFI excision
@@ -891,9 +896,10 @@ for full_filename in files:
             pulse_height_rms=timeseries_calibrated_data_rms
             ))
 
-        checksum = timeseries_calibrated_data.checksum()
-        checksums.append('Checksum after getting timeseries_calibrated_data: ' + checksum)
-        print checksums[-1]
+        if do_checksums:
+            checksum = timeseries_calibrated_data.checksum()
+            checksums.append('Checksum after getting timeseries_calibrated_data: ' + checksum)
+            print checksums[-1]
 
         # Note: to finish calibration, we have to know the pulse location first
         # Then we divide out by the rms per antenna in this block, while excluding the pulse region.
@@ -967,9 +973,10 @@ for full_filename in files:
         print "---> Saving calibrated time series to",calibrated_timeseries_file
         timeseries_calibrated_data.write(calibrated_timeseries_file)
 
-        checksum = timeseries_calibrated_data.checksum()
-        checksums.append('Checksum after getting FINAL timeseries_calibrated_data: ' + checksum)
-        print checksums[-1]
+        if do_checksums:
+            checksum = timeseries_calibrated_data.checksum()
+            checksums.append('Checksum after getting FINAL timeseries_calibrated_data: ' + checksum)
+            print checksums[-1]
 
         if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
         Pause("Plotted time series data. ",name="calibrated-imeseries")
@@ -1228,12 +1235,16 @@ for full_filename in files:
         pulse_normalized_height=beam_maxima.maxy.val()/lora_energy*10**17 if lora_energy>0 else -1.0 #Need Horneffer formula here
         pulse_height=beam_maxima.maxy.val()
         pulse_direction=direction.meandirection_azel_deg
-
+        pulse_direction_planewave = directionPlaneWave.meandirection_azel_deg
+        
         # gather checksums if present
         if len(checksums) > 0:
             checksumArray = hArray(checksums)
             masterChecksum = checksumArray.checksum()
-            results.update(dict(checksums = checksums, masterChecksum = masterChecksum))
+            s = ''
+            for item in checksums:
+                s += item + '\n'
+            results.update(dict(checksums = s, masterChecksum = masterChecksum))
             print '*** Checksums: '
             for item in checksums:
                 print item
@@ -1257,6 +1268,7 @@ for full_filename in files:
             pulse_height_incoherent=pulse_height_incoherent,
             pulse_normalized_height=pulse_normalized_height,
             pulse_direction=pulse_direction,
+            pulse_direction_planewave = pulse_direction_planewave,
             pulse_direction_delta_delays_start=direction.delta_delays_mean_history[0],
             pulse_direction_delta_delays_final=direction.delta_delays_mean_history[-1]
             ))
