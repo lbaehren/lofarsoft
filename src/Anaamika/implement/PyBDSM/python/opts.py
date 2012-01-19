@@ -455,6 +455,12 @@ class Opts(object):
                                  "PA of the line joining them, they belong to the "\
                                  "same island.",
                              group="advanced_opts")
+    blank_zeros     =   Bool(False,
+                             doc="Blank zeros in the image\n"\
+                                "If True, all pixels with a value of 0 are blanked."\
+                                "If False, any such pixels are left unblanked (and"\
+                                "hence will affect the rms and mean maps, etc.",
+                             group="advanced_opts")
 
     
     #--------------------------------A-TROUS OPTIONS--------------------------------

@@ -121,6 +121,11 @@ class Op_readimage(Op):
             if opdir == 'overwrite': os.system("rm -fr "+basedir+"/*")
             os.mkdir(img.basedir)
 
+        # Check for zeros and blank if img.opts.blank_zeros is True
+        if img.opts.blank_zeros:
+            zero_pixels = N.where(img.image[0] == 0.0)
+            img.image[0][zero_pixels] = N.nan
+        
         return img
 
     def init_wcs(self, img):
@@ -153,11 +158,7 @@ class Op_readimage(Op):
              
         if img.use_io == 'fits':
           crval = [hdr['crval1'], hdr['crval2']]
-          if img.opts.trim_box != None:
-              xmin, xmax, ymin, ymax = img.trim_box
-              crpix = [hdr['crpix1']-xmin, hdr['crpix2']-ymin]
-          else:
-              crpix = [hdr['crpix1'], hdr['crpix2']]
+          crpix = [hdr['crpix1'], hdr['crpix2']]
           cdelt = [hdr['cdelt1'], hdr['cdelt2']]
           acdelt = [abs(hdr['cdelt1']), abs(hdr['cdelt2'])]
           ctype = [hdr['ctype1'], hdr['ctype2']]
@@ -173,21 +174,27 @@ class Op_readimage(Op):
         if img.use_io == 'rap':
           wcs_dict = hdr['coordinates']['direction0']
           coord_dict = {'degree' : 1.0, 'arcsec' : 1.0/3600, 'rad' : 180.0/pi}
-          co_conv = [coord_dict[wcs_dict['units'][i]] for i in range(2)]
-          n = 2
-          crval = [wcs_dict.get('crval')[i]*co_conv[i] for i in range(n)]
-          crpix = [wcs_dict.get('crpix')[i] for i in range(n)]
-          cdelt = [wcs_dict.get('cdelt')[i]*co_conv[i] for i in range(n)]
-          acdelt = [abs(wcs_dict.get('cdelt')[i])*co_conv[i] for i in range(n)]
+          iterlist = range(2)
+          co_conv = [coord_dict[wcs_dict['units'][i]] for i in iterlist]
+          crval = [wcs_dict.get('crval')[i]*co_conv[i] for i in iterlist]
+          crpix = [wcs_dict.get('crpix')[i] for i in iterlist]
+          cdelt = [wcs_dict.get('cdelt')[i]*co_conv[i] for i in iterlist]
+          acdelt = [abs(wcs_dict.get('cdelt')[i])*co_conv[i] for i in iterlist]
           ctype = ['RA---' + wcs_dict.get('projection'), 'DEC--' + wcs_dict.get('projection')]
           if wcs_dict.has_key('crota1'):
-            crota = [wcs_dict.get('crota')[i] for i in range(n)]
+            crota = [wcs_dict.get('crota')[i] for i in iterlist]
           else:
             crota = []
           if wcs_dict.has_key('cunit1'): 
-            cunit = [wcs_dict.get('cunit')[i] for i in range(n)]
+            cunit = [wcs_dict.get('cunit')[i] for i in iterlist]
           else:
             cunit = []
+
+        # Check if user has specified a subimage. If so, adjust crpix
+        if img.opts.trim_box != None:
+            xmin, xmax, ymin, ymax = img.trim_box
+            crpix[0] -= xmin
+            crpix[1] -= ymin
 
         if img.use_wcs == 'wcslib':
             t.crval = tuple(crval)

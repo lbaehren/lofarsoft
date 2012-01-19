@@ -26,6 +26,11 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2012/01/18 - Fixed a bug that resulted in incorrect coordinates when
+                 the trim_box option was used with a CASA image. Added 
+                 option (blank_zeros) to blank pixels in the input image
+                 that are exactly zero.
+
     2012/01/13 - Fixed minor bugs in the interactive shell and updated 
                  pybdsm.py to support IPython 0.12.
                  
