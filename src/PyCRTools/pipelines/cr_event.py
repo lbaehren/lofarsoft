@@ -321,6 +321,7 @@ else:
 
 for full_filename in files:
     for current_polarization in polarizations:
+        results={}
         t0=time.clock()
         file_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
         file_time_short=time.strftime("%Y-%m-%d  %H:%M:%S")
@@ -454,7 +455,7 @@ for full_filename in files:
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
         data_length=datafile["DATA_LENGTH"][0]
 
-        results=dict(
+        results.update(dict(
             TELESCOPE=datafile["TELESCOPE"],
             ANTENNA_SET=datafile["ANTENNA_SET"],
             NYQUIST_ZONE=datafile["NYQUIST_ZONE"][0],
