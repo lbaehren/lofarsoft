@@ -214,8 +214,13 @@ class cabledelays(tasks.Task):
             return
 
         if self.write_database:
-            outfile = open(os.path.join(self.topdir, 'Cabledelays.pic'), 'wb')
-            pickle.dump(self.cabledelays_database, outfile)
+#            outfile = open(os.path.join(self.topdir, 'Cabledelays.pic'), 'wb')
+#            pickle.dump(self.cabledelays_database, outfile)
+#            outfile.close()
+            outfile = open(os.path.join(self.topdir, 'Cabledelays.dat'), 'w')
+            for key in self.cabledelays_database:
+                s = format('%09d' % int(key)) + ' ' + str(self.cabledelays_database[key]["cabledelay"]) + '\n'
+                outfile.write(s)
             outfile.close()
             print 'Cabledelays.pic written'
         
@@ -249,7 +254,7 @@ class cabledelays(tasks.Task):
             antennasPerStationID[thisStationID].append(id)
         
         for station in antennasPerStationID:
-            theseAntennas = antennasPerStationID[station]
+            theseAntennas = antennasPerStationID[station] # antenna IDs 
             theseAntennas.sort()   # will sort by RCU number 
             thisStationName = md.idToStationName(station)
             
@@ -311,6 +316,18 @@ class cabledelays(tasks.Task):
             plt.xlabel('Antenna number (RCU)')
             plt.title('Difference between fitted cable delays and LOFAR Caltables\nStation '+thisStationName)
             plt.grid()
+            
+            plt.figure() # plot antenna layout of difference: fitted delays - Caltable delays
+            # get antenna positions for this station only, for the used antennas only
+            thesePositions = md.get('RelativeAntennaPositions', theseAntennas, 'LBA_OUTER', return_as_hArray = True)
+            
+#            thisStationsPositions = md.getRelativeAntennaPositions(thisStationName, 'LBA_OUTER', return_as_hArray=True)
+            difference = cr.hArray(y_avg_total - delayfromphasetables)
+            # hacked LBA_OUTER, remove...
+            cr.trerun("PlotAntennaLayout","Delays",positions = thesePositions, colors= difference, sizes=100,
+                      names = self.names,title="Cable delays",plotlegend=True)
+            plt.title('Difference between fitted delays and LOFAR Caltables\nStation '+thisStationName)
+            
             self.plot_finish(filename=self.plot_name + '-' + thisStationName,filetype=self.filetype)   
 
         # end for station in antennasPerStationID
