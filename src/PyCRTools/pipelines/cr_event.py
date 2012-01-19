@@ -843,8 +843,15 @@ for full_filename in files:
             # back to time domain to get calibrated timeseries data
             hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
             timeseries_data /= blocksize
+
+            results.update(dict(
+                DIPOLE_CALIBRATION_DELAY_APPLIED=True
+                ))
+            
         except IOError:
-            print "DIPOLE_CALIBRATION_DELAY not in file so not applied."
+            results.update(dict(
+                DIPOLE_CALIBRATION_DELAY_APPLIED=False
+                ))
 
         checksum = timeseries_data.checksum()
         checksums.append('Checksum after applying cable delays and invfft: ' + checksum)
