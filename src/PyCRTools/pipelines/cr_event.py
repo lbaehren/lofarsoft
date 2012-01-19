@@ -471,7 +471,7 @@ for full_filename in files:
             polarization=current_polarization,
             filedir=filedir,
             plotfiles=Pause.plotfiles
-            )
+            ))
 
         if "HBA" in datafile["ANTENNA_SET"]:
             statuslist.append("HBA SKIPPED")
