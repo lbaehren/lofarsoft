@@ -34,8 +34,6 @@ def getfile(ws):
         return None
     if ws.file_start_number < len(ws.filenames):
         f=cr.open(ws.filenames[ws.file_start_number])
-        if ws.lofarmode:
-            f["ANTENNA_SET"]=ws.lofarmode
         return f
     else:
         print "ERROR: File number "+ws.file_start_number+" too large!"
@@ -253,9 +251,6 @@ class BeamFormer2(tasks.Task):
         header = sc.p_(lambda self:self.datafile.getHeader() if self.datafile else {},
                        "Header of datafile",
                        export=False),
-
-        lofarmode = dict(default="LBA_OUTER",
-                         doc="Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."),
 
         verbose = dict(default=True,
                        doc="Print progress information."),

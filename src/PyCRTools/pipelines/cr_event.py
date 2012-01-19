@@ -13,8 +13,6 @@ beamforming.
 *filename*              filename(s) of raw data to be processed (can include directory,
                         evironment vaiables, asterisk, etc.)
 
-*lofarmode*             'LBA_INNER' or 'LBA_OUTER'
-
 *polarization*          either 0 or 1 for selecting even or odd antennas
 
 *outputdir*             directory where to store the final results (will be stored in a
@@ -59,14 +57,14 @@ There is also a summary of the results ``summary.html`` and
 ::
     chmod a+x $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py
 
-    $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R -p0
+    $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5 --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R -p0
 
-run  $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-*.h5 --lofarmode=LBA_OUTER --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R
+run  $LOFARSOFT/src/PyCRTools/pipelines/cr_event.py ~/LOFAR/work/data/VHECR_LORA-*.h5 --outputdir=/Users/falcke/LOFAR/work/results --loradir /Users/falcke/LOFAR/work/data/ --lora_logfile LORAtime4 --search_window_width=4000 --nsigma=3 --max_data_length=12289024 -R
 
 ------------------------------------------------------------------------
 
 Test event: Event-1, LBA_OUTER
-filename="lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
+filename="lora-event-1-station-2.h5"
 Azimuth (Eastwards from North) 232 degrees, Elevation 62.5 degrees
 LORA estimate: 229.1 degrees, 62.4 degrees
 
@@ -99,7 +97,6 @@ parser.add_option("-o","--outputdir", type="str", default="",help="directory whe
 parser.add_option("-L","--lora_logfile", type="str", default="LORAtime4",help="LORA logfile (LORAtime4)")
 parser.add_option("--loradir", type="str", default="/data/VHECR/LORAtriggered/LORA/",help="Directory to find LORA information")
 parser.add_option("-d","--datadir", type="str", default="",help="Will be added to each of the filename arguments (hence, use quotations for the main arguments if you use this option and have asterisks in the argument!)")
-parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=-1,help="either 0 or 1 for selecting even or odd antennas, or -1 for both")
 parser.add_option("-t","--nsigma", type="float", default=4.0,help="Threshold for identifying peaks")
 parser.add_option("-b","--block", type="int", default=-1,help="in which block do you expect the peak  (use LORA guess if -1 or central block if no guess is present)")
@@ -143,9 +140,9 @@ start_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
 
 if not parser.get_prog_name()=="cr_event.py":
 #   Program was run from within python
-    filefilter="~/LOFAR/work/CR/lora-event-1-station-2.h5"; lofarmode="LBA_OUTER"
-    filefilter="~/LOFAR/work/CR/LORAweekdump--2-15.h5"; lofarmode="LBA_INNER"
-    filefilter="~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5"; lofarmode="LBA_OUTER"
+    filefilter="~/LOFAR/work/CR/lora-event-1-station-2.h5"
+    filefilter="~/LOFAR/work/CR/LORAweekdump--2-15.h5"
+    filefilter="~/LOFAR/work/data/VHECR_LORA-20110716T094509.665Z-002.h5"
 
 
     outputdir="/Users/falcke/LOFAR/work/results"
@@ -175,7 +172,6 @@ else:
 
     datadir = options.datadir
     filefilter = [os.path.join(datadir,f) for f in args]
-    lofarmode = options.lofarmode
     lora_logfile=options.lora_logfile
     loradir=options.loradir
     outputdir = options.outputdir
@@ -556,7 +552,6 @@ for full_filename in files:
                 output_subdir=outputdir_with_subdirectories,
                 filefilter=os.path.join(filedir,filename),
                 root_filename=outfilename,
-                lofarmode=lofarmode,
                 antennas_start=current_polarization,
                 antennas_stride=2,maxpeak=7,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=7,
                 blocklen=4096, # only used for quality checking within one block

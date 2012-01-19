@@ -73,9 +73,6 @@ def getfile(ws):
     """
     if ws.file_start_number < len(ws.filenames):
         f=cr.open(ws.filenames[ws.file_start_number])
-        if ws.lofarmode:
-            print "Setting ANTENNA_SET=",ws.lofarmode,"in the data file!"
-            f["ANTENNA_SET"]=ws.lofarmode
         return f
     else:
         print "ERROR: File "+ws.filefilter+" not found!"
@@ -386,9 +383,6 @@ class BeamFormer(tasks.Task):
                     "Header of datafile",
                     export=False),
 
-        lofarmode = dict(default="LBA_OUTER",
-                         doc="Which ``ANTENNA_SET``/``LOFAR`` mode was used (``HBA_DUAL``/``LBA_OUTER``/``LBA_INNER``,etc.). If not **None** or **False** it will set the ``ANTENNA_SET`` parameter in the datafile to this value."),
-
         antenna_positions = dict(default=lambda self:dict(map(lambda x: (x[0],x[1].array()),zip(self.datafile["DIPOLE_NAMES"],self.datafile["ANTENNA_POSITIONS"]))),
                                  doc="A dict containing *x*, *y*, *z*-Antenna positions for each antenna in seconds as values. Key is the antenna ID.",
                                  unit="m"),
@@ -597,7 +591,7 @@ class BeamFormer(tasks.Task):
                     self.data[...].read(self.datafile,"TIMESERIES_DATA",blocks)
                     if self.qualitycheck:
                         self.count=len(self.quality)
-                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=self.count,blockoffset=nchunk*self.blocks_per_sect))
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=self.count,blockoffset=nchunk*self.blocks_per_sect))
                         if not self.quality_db_filename=="":
                             qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
                             mean+=self.quality[self.count]["mean"]
@@ -909,12 +903,8 @@ Text will disappear soon. Just reminder for myself ...
            self.beams.setHeader("FREQUENCY_INTERVAL"=self.delta_frequency)
            self.datafile["SELECTED_DIPOLES"]=[antennaID]
 
-           lofarmode = dict(default="LBA_OUTER",
-                            doc="Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."),
-
    getfile:
-           if ws.lofarmode:
-               f["ANTENNA_SET"]=ws.lofarmode
+
    ************************************************************************
    Example:
    file=crfile(LOFARSOFT+"/data/lopes/example.event")

@@ -23,7 +23,6 @@ def CRQualityCheckAntenna(dataarray,
                           date=None,
                           datafile=None,
                           observatory=None,
-                          observatorymode=None,
                           verbose=True,
                           filename="",
                           count=0,
@@ -116,8 +115,6 @@ def CRQualityCheckAntenna(dataarray,
 
     *observatory* - for output and archiving only
 
-    *observatorymode* - for output and archiving only
-
     *filename* - for output and archiving only
 
     *count* - a unique identifier to print in front of flag
@@ -147,7 +144,6 @@ def CRQualityCheckAntenna(dataarray,
         if antennaID==None: antennaID=datafile["SELECTED_DIPOLES"][0]
         if date==None: date=datafile["TIME"][0]
         #if observatory==None: observatory=datafile["TELESCOPE"]
-        if observatorymode==None: observatorymode=datafile["ANTENNA_SET"]
         if filename=="": filename=datafile["FILENAME"]
 #Calculate probabilities to find peaks
     if nsigma<0:
@@ -226,7 +222,7 @@ def CRQualityCheckAntenna(dataarray,
     if nblocksflagged>=4:
         print "]"
 
-    return {"filename":filename,"type":"QualityFx","observatory":observatory,"mode":observatorymode,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"chunk":chunk,"count":count,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":flags,"flaglist":qualityflaglist}
+    return {"filename":filename,"type":"QualityFx","observatory":observatory,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"chunk":chunk,"count":count,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":flags,"flaglist":qualityflaglist}
 
 
 def CRDatabaseWrite(filename, quality):
@@ -234,7 +230,7 @@ def CRDatabaseWrite(filename, quality):
 
     """
     qkeys=quality.keys()
-    orderedkeys=["type","observatory","mode","antenna","idate","date","size","blocksize","offset","nblocks","mean","rms","npeaks","npeaksexpected","peaksexcess","nblocksflagged","flaggedblocks","flags"]
+    orderedkeys=["type","observatory","antenna","idate","date","size","blocksize","offset","nblocks","mean","rms","npeaks","npeaksexpected","peaksexcess","nblocksflagged","flaggedblocks","flags"]
     keys=orderedkeys+list(set(qkeys).difference(orderedkeys))
     f=open(filename,"a")
     f.write("#"+time.strftime("%Y-%m-%d %H:%M:%S %z")+"\n")

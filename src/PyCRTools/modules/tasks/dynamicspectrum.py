@@ -45,9 +45,6 @@ def dynamicspectrum_getfile(ws):
     """
     if ws.file_start_number < len(ws.filenames):
         f=open(ws.filenames[ws.file_start_number])
-        if ws.lofarmode:
-            print "Setting ANTENNA_SET=",ws.lofarmode,"in the data file!"
-            f["ANTENNA_SET"]=ws.lofarmode
         return f
     else:
         print "ERROR: File "+ws.filefilter+" not found!"
@@ -408,9 +405,6 @@ class DynamicSpectrum(tasks.Task):
         freqs = sc.p_(lambda self:self.datafile["FREQUENCY_DATA"],
                       export=False),
 
-        lofarmode = dict(default="LBA_OUTER",
-                         doc="Which LOFAR mode was used ('HBA'/'LBA_OUTER'/'LBA_INNER') - only used for quality output."),
-
         #Now define all the work arrays used internally
         data = dict(workarray=True,
                     doc="Main input array of raw data.",
@@ -485,7 +479,7 @@ class DynamicSpectrum(tasks.Task):
                     self.data[...].read(self.datafile,"TIMESERIES_DATA",blocks)
                     if self.qualitycheck:
                         self.count=len(self.quality)
-                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,observatorymode=self.lofarmode,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=nchunk,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
+                        self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=nchunk,count=self.count,blockoffset=nchunk*self.blocks_per_sect))
                         if not self.quality_db_filename=="":
                             qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
                         mean+=self.quality[self.count]["mean"]

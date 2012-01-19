@@ -61,15 +61,12 @@ def make_frequencies(spectrum,offset=-1,frequencies=None,setxvalues=True):
 #    """
 
 
-def averagespectrum_getfile(current_file_number,filenames,nfiles,lofarmode,filefilter):
+def averagespectrum_getfile(current_file_number,filenames,nfiles,filefilter):
     """
     To produce an error message in case the file does not exist
     """
     if current_file_number < nfiles:
         f=cr.open(filenames[current_file_number])
-        if lofarmode:
-            print "Setting ANTENNA_SET=",lofarmode,"in the data file!"
-            f["ANTENNA_SET"]=lofarmode
         return f
     else:
         print "ERROR: File "+filefilter+" not found!"
@@ -113,12 +110,9 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         load_if_file_exists = dict(default=False,
                                    doc="If average spectrum file (``spectrumfile``) already exists, skip calculation and load existing file."),
 
-        datafile = dict(default=lambda self:averagespectrum_getfile(self.current_file_number,self.filenames,self.nfiles,self.lofarmode,self.filefilter),
+        datafile = dict(default=lambda self:averagespectrum_getfile(self.current_file_number,self.filenames,self.nfiles,self.filefilter),
                         export=False,
                         doc="Data file object pointing to raw data."),
-
-        lofarmode = dict(default="LBA_OUTER",
-                         doc="Which ANTENNA_SET/LOFAR mode was used (HBA_DUAL/LBA_OUTER/LBA_INNER,etc.). If not None or False it will set the ANTENNA_SET parameter in the datafile to this value."),
 
         addantennas = dict(default=True,
                            doc="If True, add all antennas into one average spectrum, otherwise keep them separate in memory per file."),
@@ -897,7 +891,6 @@ class AverageSpectrum(tasks.Task):
                                     datafile=self.datafile,
                                     normalize=False,
                                     blockoffset=offset+nchunk*self.nsubblocks if self.doublefft else 0,
-                                    observatorymode=self.lofarmode,
                                     spikeexcess=self.spikeexcess,
                                     spikyness=100000,
                                     maxpeak=self.maxpeak,
