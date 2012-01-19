@@ -454,7 +454,7 @@ for full_filename in files:
 
 
         tbb_starttime=datafile["TIME"][0]
-        tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
+        tbb_samplenumber=max(datafile["SAMPLE_NUMBER"])
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
         data_length=datafile["DATA_LENGTH"][0]
 
@@ -799,11 +799,14 @@ for full_filename in files:
             print "Error reading file - skipping this file"
             finish_file(laststatus="READ ERROR")
             continue
-        
         checksum = timeseries_data.checksum()
         checksums.append('Checksum after reading in timeseries data: ' + checksum)
         print checksums[-1]
-            
+
+        for i in bad_antennas_index:
+            print "FLAGGING ANTENNA", i
+            timeseries_data[i] = 0
+
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
         timeseries_data.par.xvalues.setUnit("","s")
@@ -824,31 +827,29 @@ for full_filename in files:
         checksums.append('Checksum after fft_data: ' + checksum)
         print checksums[-1]
         
-        # apply cable delays 
-#        self.delays = hArray(float,dimensions=[nofAntennas])
-        cabledelays = hArray(datafile["DIPOLE_CALIBRATION_DELAY"])
-#        cabledelays.negate()
-#        cabledelays = hArray(float, dimensions=[len(datafile["CHANNEL_ID"])], fill=cabledelays_toomany)
-        # wrong values but see if it doesnt crash anymore
-        
-        zerodelays = hArray(dimensions=cabledelays, fill=0.0)
-        weights = hArray(complex,dimensions = fft_data,name="Complex Weights")
-        freqs = hArray(datafile["FREQUENCY_DATA"]) # a FloatVec comes out, so put it into hArray
-        phases = hArray(float,dimensions=fft_data,name="Phases",xvalues=datafile["FREQUENCY_DATA"])
+        cabledelays = hArray(dimensions=datafile["NOF_SELECTED_DATASETS"], Type=float, fill=0)
+        try:
+            # apply cable delays 
+            cabledelays = hArray(datafile["DIPOLE_CALIBRATION_DELAY"])
+            weights = hArray(complex,dimensions = fft_data,name="Complex Weights")
+            freqs = hArray(datafile["FREQUENCY_DATA"]) # a FloatVec comes out, so put it into hArray
+            phases = hArray(float,dimensions=fft_data,name="Phases",xvalues=datafile["FREQUENCY_DATA"])
+    
+            hDelayToPhase(phases, freqs, cabledelays)
+            hPhaseToComplex(weights, phases)
+            
+            fft_data.mul(weights)
 
-        hDelayToPhase(phases, freqs, cabledelays)
-        hPhaseToComplex(weights, phases)
-        
-        fft_data.mul(weights) # dimensions OK...??
-        # back to time domain to get calibrated timeseries data
-        hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
-        timeseries_data /= blocksize
-        
+            # back to time domain to get calibrated timeseries data
+            hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
+            timeseries_data /= blocksize
+        except IOError:
+            print "DIPOLE_CALIBRATION_DELAY not in file so not applied."
+
         checksum = timeseries_data.checksum()
         checksums.append('Checksum after applying cable delays and invfft: ' + checksum)
         print checksums[-1]
 
-#        import pdb; pdb.set_trace()
         ########################################################################
         #RFI excision
         ########################################################################
@@ -903,7 +904,7 @@ for full_filename in files:
 
         if lora_direction:
             print "---> Now make an incoherent beam in the LORA direction, locate pulse, and cut time series around it."
-            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1),cable_delays = zerodelays, calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
+            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1), calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
             # removed cabledelays
             tbeam_incoherent=hArray(beamformer_full.tbeam_incoherent.vec(),[blocksize])#make this a one-dimensional array to not confuse LocatePulseTrain ...
         else:
@@ -920,7 +921,7 @@ for full_filename in files:
         # Otherwise take the previously found window with the most pulses
         if not lora_direction or (lora_direction and pulse.npeaks==0):
             print "searching per antenna"
-            pulse=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
+            pulse=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=False,search_per_antenna=True)
             pulse_npeaks=pulse.npeaks
 
             #How many antennas have pulses? Also: determine a finer window where the pulses are
@@ -1151,7 +1152,7 @@ for full_filename in files:
 
         #Beamform short data set first for inspection (and possibly for
         #maximizing later)
-        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=zerodelays, calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3), calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
             # removed cabledelays = final_cable_delays in beamformer (AC)
         #Use the above later also for maximizing peak Beam-formed timeseries
         #is in ---> bf.tbeams[bf.mainbeam]
@@ -1173,7 +1174,7 @@ for full_filename in files:
 
         print "---> Plotting full beam-formed data set"
         #Beamform full data set (not really necessary, but fun).
-        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=zerodelays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1), calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
             # removed cabledelays = final_cable_delays in beamformer (AC)
         ########################################################################
         #Data Analysis ... (to be expanded)

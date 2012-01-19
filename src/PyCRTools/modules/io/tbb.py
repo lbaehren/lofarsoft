@@ -257,7 +257,16 @@ class TBBData(IOInterface):
     def items(self,excludedata=False):
         """Return list of keyword/content tuples of all header variables
         """
-        return [(k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]) for k in self.keys(excludedata)]
+
+        lst = []
+
+        for k in self.keys(excludedata):
+            try:
+                lst.append((k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]))
+            except IOError:
+                pass
+
+        return lst
     
     def getHeader(self):
         """Return a dict with keyword/content pairs for all header variables."""

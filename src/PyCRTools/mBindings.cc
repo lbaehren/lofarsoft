@@ -154,7 +154,7 @@ namespace PyCR { // Namespace PyCR -- begin
 #ifdef HAS_EXCEPTION_HANDLING
   void translateDALIOError(DAL::IOError const& e)
   {
-    PyErr_SetString(PyExc_IOError, "DAL cannot open file!");
+    PyErr_SetString(PyExc_IOError, e.message.c_str()); 
   }
 #endif
 
