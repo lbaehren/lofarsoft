@@ -16,7 +16,7 @@ if [ `uname` == "Darwin" ]; then
 else
     LD_LIBRARY_PATH=@CMAKE_INSTALL_PREFIX@/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 fi
-PYTHONPATH=@CMAKE_INSTALL_PREFIX@/lib/python${PYTHONPATH:+:${PYTHONPATH}}
+PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}@CMAKE_INSTALL_PREFIX@/lib/python
 
 # And execute pybdsm.py.
 exec @PYTHON_EXECUTABLE@ @CMAKE_INSTALL_PREFIX@/lib/python/bdsm/pybdsm.py
