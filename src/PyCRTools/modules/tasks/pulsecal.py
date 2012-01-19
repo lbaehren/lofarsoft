@@ -672,7 +672,10 @@ class DirectionFitPlaneWave(tasks.Task):
             goodpositions = positions[indicesOfGoodAntennas].ravel()
             goodtimes = times[indicesOfGoodAntennas]
             (az, el) = srcfind.directionForHorizontalArray(goodpositions, goodtimes)
-                        
+            if np.isnan(el) or np.isnan(az):
+                print 'WARNING: plane wave fit returns NaN. Setting elevation to 0.0'
+                el = 0.0 # need to propagate the warning...!
+                break
             # get residuals
             expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el)) 
             expectedDelays -= expectedDelays[0]
