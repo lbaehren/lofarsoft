@@ -111,7 +111,8 @@ parser.add_option("-q","--nopause", action="store_true",help="Do not pause after
 parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip file if results directory already exists")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
-parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging; default OFF")
+parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging")
+parser.add_option("-I","--imager", action="store_true", help="Run imager")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -1147,12 +1148,13 @@ for full_filename in files:
         ########################################################################
 #        ar=trerun("AntennaResponse", "ar", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], nantennas = antenna_positions.shape()[0], polarization=current_polarization, antennaset = datafile["ANTENNA_SET"])
 
-        print "\n--->Imaging"
+        if options.imager:
+            print "\n--->Imaging"
 
-        ########################################################################
-        #Imaging
-        ########################################################################
-        im=trerun("CRImager", "im", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], antpos = antenna_positions, output=os.path.join(outputdir_with_subdirectories,"crimage.fits"))
+            ########################################################################
+            #Imaging
+            ########################################################################
+            im=trerun("CRImager", "im", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], antpos = antenna_positions, output=os.path.join(outputdir_with_subdirectories,"crimage.fits"))
 
         print "\n--->Beamforming"
 
