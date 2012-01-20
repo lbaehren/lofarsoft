@@ -482,12 +482,11 @@ for full_filename in files:
         if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
             print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             statuslist.append("DATA_LENGTH BAD")
-#            finish_file(status="FILE TOO LARGE")
-#            continue
 
         if min(datafile["DATA_LENGTH"])<min_data_length or min(datafile["DATA_LENGTH"]) < blocksize:
             print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
-            finish_file(laststatus="FILE TOO SMALL")
+            statuslist.append("FILE TOO SMALL")
+            finish_file()
             continue
 
         if blocknumber<0:
@@ -509,7 +508,8 @@ for full_filename in files:
                     (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
                 except ValueError:
                     print "#ERROR - LORA trigger information not found"
-                    finish_file(laststatus="TRIGGER TOO LATE")
+                    statuslist.append("TRIGGER TOO LATE")
+                    finish_file()
                     continue
                 print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
                 if blocknumber<0:
@@ -519,7 +519,8 @@ for full_filename in files:
                 print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
                 lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
             else:
-                finish_file(laststatus="TIMESTAMP NOT IN LORA LOGFILE")
+                statuslist.append("TIMESTAMP NOT IN LORA LOGFILE")
+                finish_file()
                 continue
 #                print "WARNING: LORA logfile found but no info for this event time in LORAtime4 file!"
         else:
@@ -646,7 +647,8 @@ for full_filename in files:
         results["ndipoles"]=ndipoles
         if ndipoles<minimum_number_good_antennas:
             print "#ERROR: To few good antennas ("+str(ndipoles)+")"
-            finish_file(laststatus="TOO FEW ANTENNAS")
+            statuslist.append("TOO FEW ANTENNAS")
+            finish_file()
             continue
 
         #Create new average spectrum with only good antennas
@@ -688,7 +690,8 @@ for full_filename in files:
             results["ndipoles"]=ndipoles
             if ndipoles<minimum_number_good_antennas:
                 print "#ERROR: To few good antennas ("+str(ndipoles)+")"
-                finish_file(laststatus="TOO FEW ANTENNAS")
+                statuslist.append("TOO FEW ANTENNAS")
+                finish_file()
                 continue
 
             #Create new average spectrum with only good antennas
@@ -795,7 +798,8 @@ for full_filename in files:
             timeseries_data.read(datafile,"TIMESERIES_DATA")
         except RuntimeError:
             print "Error reading file - skipping this file"
-            finish_file(laststatus="READ ERROR")
+            statuslist.append("READ ERROR")
+            finish_file()
             continue
 
         if do_checksums:
@@ -947,7 +951,8 @@ for full_filename in files:
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"
             print "ERROR: LocatePulseTrain: No pulses found!"
-            finish_file(laststatus="NO PULSE")
+            statuslist.append("NO PULSE")
+            finish_file()
             continue
 
 # Finish gain calibration - also apply gain calibration on time series data in 'pulse' result workspace.
@@ -1026,7 +1031,8 @@ for full_filename in files:
 
         if nantennas_with_strong_pulses<min_number_of_antennas_with_pulses:
             print "ERROR: LocatePulseTrain: Not enough pulses found for beam forming!"
-            finish_file(laststatus="TOO FEW PULSES")
+            statuslist.append("TOO FEW PULSES")
+            finish_file()
             continue
 
 
@@ -1086,7 +1092,8 @@ for full_filename in files:
         direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags, cabledelays=good_pulse_cabledelays, verbose=True,doplot=True)
           # put in zeros for 'cable delays' as they are fitted and put into the same array...
         if direction.ngood == 0:
-            finish_file(laststatus="NO GOOD TRIANGLES FOUND")
+            statuslist.append("NO GOOD TRIANGLES FOUND")
+            finish_file()
             continue
 
         print "========================================================================"
@@ -1248,7 +1255,10 @@ for full_filename in files:
                 print item
             print '*** Master checksum = %s' % masterChecksum
             
+        statuslist.append("OK" if delay_quality_error<1 else "BAD")
+
         results.update(dict(
+            status="/".join(statuslist),
             antennas_flagged_delays=list(flagged_delays.vec()),
             antennas_final_cable_delays=list(final_cable_delays.vec()), # include metadata-cabledelays again here?? (AC)
             antennas_residual_cable_delays = list(final_residual_delays.vec()),
@@ -1284,6 +1294,6 @@ for full_filename in files:
         # Writing results to XML file
         xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
 
-        finish_file(laststatus="OK" if delay_quality_error<1 else "BAD")
+        finish_file()
 
 plt.ion()
