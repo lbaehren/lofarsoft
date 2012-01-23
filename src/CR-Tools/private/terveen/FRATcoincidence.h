@@ -52,8 +52,8 @@
 #define FRAT_TASK_BUFFER_LENGTH (20000)
 #define FRAT_TRIGGER_PORT_0 (0x7BA0)
 #define FRAT_TRIGGER_PORT_1 (31661)
-#define FRAT_HOSTNAME ("127.0.0.1")
-//#define FRAT_HOSTNAME ("10.135.252.101")s
+//#define FRAT_HOSTNAME ("127.0.0.1")
+#define FRAT_HOSTNAME ("10.135.252.101")
 
 
 struct triggerEvent {
