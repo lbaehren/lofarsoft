@@ -44,7 +44,7 @@ namespace FRAT {
 			first = 0;
 			last = FRAT_TASK_BUFFER_LENGTH-1;
 			trigBuffer[first].prev = FRAT_TASK_BUFFER_LENGTH; //This means "not there"
-			
+            std::cout << "Coincheck constructed" << std::endl;
 			// LOG_DEBUG ("FRAT construction");
 		}
 		
@@ -392,101 +392,132 @@ namespace FRAT {
 				float SBaverage=0;
 				float SBstdev=0;
 				int SBsumsamples=0;
+                int channeltimeindex=-itsTotNrChannels;
+                int channelindex;
 				for(int time=0; time<itsNrSamples; time++){
 					//std::cout << std::endl << " time " << time ;
 					totaltime=itsSequenceNumber*itsNrSamples+time;
 					rest=totaltime%itsBufferLength;
-					for(int channel=itsNrChannels-1; channel>=0; channel--){
+                    channeltimeindex+=itsTotNrChannels;
+                    channelindex=channeltimeindex+itsStartChannel+itsNrChannels;
+                    
+					for(int channel=itsNrChannels-1; channel>0; channel--){
+                        channelindex--;
 						//value = data[channel*(itsNrSamplesOr2)+time];
-						value = data[time*itsTotNrChannels+itsStartChannel+channel];
+
+                        
+                        
+						//value = data[time*itsTotNrChannels+itsStartChannel+channel];
+						value = data[channelindex];
 						
-                        if(DoPadding){value = FloatSwap(value);} //outside BG/P
-						if( !isnan( value ) && value!=0 ) {
+                        //if(DoPadding){value = FloatSwap(value);} //outside BG/P
+						//if( !isnan( value ) && value!=0 ) {
 							//value = 0;
-							validsamples++;
+						//	validsamples++;
 							// blockvalidsamples[fc]++;
-					    }
-					    else { value = 0; }
-						if(value == 0 && channel % itsNrChannels ==1) { zerocounter++; std::cout << 0;}
-					    blocksum+=value;
-						
-						
-						
+					    //}
+					    //else { value = 0; }
+						//if(value == 0 && channel % itsNrChannels ==1) { zerocounter++; std::cout << 0;}
 					    
 						
 						
-						if(channel!=0){
-							DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=value;
-						} else {
-							DeDispersedBuffer[rest]+=value;
-							SumDeDispersed[rest]=DeDispersedBuffer[rest];
-							float subsum=0;
-							for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
-							SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
-							SBsumsamples++;
-							SBaverage+=subsum;
-							if(subsum>itsTriggerThreshold) {
-								//ADD TRIGGER ALGORITHM OR FUNCTION
-								if(totaltime+itsReferenceTime-trigger.time>5){
-									//new trigger
-									//trigger.average[fc]/=triggerlength[fc];
-									//trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-									trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
-									
-									trigger.sum=subsum;
-									trigger.length=1;
-									trigger.sample=time;
-									trigger.block=itsBlockNumber;
-									trigger.max=subsum;
-								
-								}
-								else{
-									//old trigger, or trigger accross blocks
-									trigger.sum+=subsum;
-									trigger.length++;
-									//trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-									trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-									if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
-								}
-							} else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
-                                //trigger.utc_second=10000;
-                                unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
-                                unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                                std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond;
-                                trigger.utc_second=itsStarttime_utc_sec+utc_second;
-                                trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
-								SendTriggerMessage(trigger);
-								
-								int latestindex = cc->add2buffer(trigger);
-								
-								if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
-									
-									
-									float triggerstrength = (trigger.max-itsSBaverage)/itsSBstdev;
-									char output2[400];
-									std::string output;
-									
-									//sprintf(output,"%f4.2 %d %e %e %e %e %e" ,itsDM,itsSequenceNumber,1000*itsStartFreq,itsSBaverage,itsSBstdev,itsSBstdev/itsSBaverage,itsPrevTriggerLevel);
+						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=value;
+					    
+						
+                        
+                    
+                    } // for channel
+                    //***  channel=0; *******
+                    channelindex--;
+                    
+                    
+                    //value = data[channel*(itsNrSamplesOr2)+time];
+                    //value = data[time*itsTotNrChannels+itsStartChannel];
+                    value = data[channelindex];
+                    //if(DoPadding){value = FloatSwap(value);} //outside BG/P
+                    //if( !isnan( value ) && value!=0 ) {
+                        //value = 0;
+                    //    validsamples++;
+                        // blockvalidsamples[fc]++;
+                    //}
+                    //else { value = 0; }
+                    //if(value == 0 && channel % itsNrChannels ==1) { zerocounter++; std::cout << 0;}
+                        
+                            
+                            
+                            
+                            
+                            
+                        DeDispersedBuffer[rest]+=value;
+                        blocksum+=DeDispersedBuffer[rest];
+                        SumDeDispersed[rest]=DeDispersedBuffer[rest];
+                        float subsum=0;
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                        SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
+                        SBsumsamples++;
+                        SBaverage+=subsum;
+                        if(subsum>itsTriggerThreshold) {
+                            //ADD TRIGGER ALGORITHM OR FUNCTION
+                            if(totaltime+itsReferenceTime-trigger.time>5){
+                                //new trigger
+                                //trigger.average[fc]/=triggerlength[fc];
+                                //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
+                                trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
+                                
+                                trigger.sum=subsum;
+                                trigger.length=1;
+                                trigger.sample=time;
+                                trigger.block=itsBlockNumber;
+                                trigger.max=subsum;
+                            
+                            }
+                            else{
+                                //old trigger, or trigger accross blocks
+                                trigger.sum+=subsum;
+                                trigger.length++;
+                                //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
+                                trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
+                                if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
+                            }
+                        } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                            //trigger.utc_second=10000;
+                            unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                            unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond;
+                            trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                            trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
+                            SendTriggerMessage(trigger);
+                            
+                            int latestindex = cc->add2buffer(trigger);
+                            
+                            if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
+                                
+                                
+                                float triggerstrength = (trigger.max-itsSBaverage)/itsSBstdev;
+                                char output2[400];
+                                std::string output;
+                                
+                                //sprintf(output,"%f4.2 %d %e %e %e %e %e" ,itsDM,itsSequenceNumber,1000*itsStartFreq,itsSBaverage,itsSBstdev,itsSBstdev/itsSBaverage,itsPrevTriggerLevel);
 
-									sprintf(output2,"COINCIDENCE TRIGGER FOUND with DM %f at block %i / %i time: %f strength %f \n",itsDM,itsSequenceNumber,itsBlockNumber,totaltime*itsTimeResolution,triggerstrength);
-									itsFoundTriggers=itsFoundTriggers+std::string(output2);
-									std::cout << "\n\n\n\n COINCIDENCE TRIGGER FOUND with DM " << itsDM << " at block" << itsSequenceNumber << " / " << itsBlockNumber << " time: " << totaltime*itsTimeResolution   << " strength " << triggerstrength << "\n\n";	
-									//usleep(1000000);
-									pulsefound=true;
-								}
-								
+                                sprintf(output2,"COINCIDENCE TRIGGER FOUND with DM %f at block %i / %i time: %f strength %f \n",itsDM,itsSequenceNumber,itsBlockNumber,totaltime*itsTimeResolution,triggerstrength);
+                                itsFoundTriggers=itsFoundTriggers+std::string(output2);
+                                std::cout << "\n\n\n\n COINCIDENCE TRIGGER FOUND with DM " << itsDM << " at block" << itsSequenceNumber << " / " << itsBlockNumber << " time: " << totaltime*itsTimeResolution   << " strength " << triggerstrength << "\n\n";	
+                                //usleep(1000000);
+                                pulsefound=true;
+                            }
+                            
 								
 								
 								
 							}
 							DeDispersedBuffer[rest]=0;
 
-						}
+                    
 						
 						
 						
 						
-					} // for channel
+					 
 					
 					
 					

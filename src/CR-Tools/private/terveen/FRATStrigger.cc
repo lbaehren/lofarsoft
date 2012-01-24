@@ -20,7 +20,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 //#include <crtools.h>
 //#include <Data/LOFAR_TBB.h>
 //#include <Display/SimplePlot.h>
@@ -65,6 +67,26 @@ struct stokesdata {
 	/* little endian (intel) */
 	float         samples[CHANNELS][SAMPLES|2];
 };
+
+//public static unsafe 
+void SwapFloats(unsigned char* data, int cnt) {
+    //int cnt = data.Length / 4;
+    unsigned char* d = data;
+    unsigned char* p = d;
+    while (cnt-- > 0) {
+            char a = *p; //0
+            p++;      //p=1
+            char b = *p; //1, 
+            *p = *(p + 1); //2 --> 1
+            p++;   //p=2
+            *p = b; // 3--> 2
+            p++;   //p=3
+            *(p - 3) = *p; //0=3
+            *p = a;  //3=0
+            p++;
+    }
+    
+}
 
 //_______________________________________________________________________________
 //                                                                      show_data
@@ -398,8 +420,22 @@ int main (int argc,
 	// Initialize SBtriggers and coincidence mechanism
 	
 	float DMval=DM;
+    cout << "Making Subband triggers and Coincidence checks" << endl;
 	SubbandTrigger* SBTs[nstreams][nDMs];
-	CoinCheck cc[nDMs];
+    cout << "* " <<  sizeof(CoinCheck) << endl;
+    //float *data=(float*)malloc(blockdatasize);
+    CoinCheck *cc = (CoinCheck*)malloc(nDMs*sizeof(CoinCheck));
+    //for(int i=nDMs-1;i>=0;i--){
+    //   cc[i]=new CoinCheck();
+    //}
+    
+    if (cc==NULL)
+	{
+		cerr << "Memory could not be allocated\n";
+		return 1;
+	}
+	//CoinCheck cc[nDMs];
+    cout << "* " << endl;
 	
 	
 	
@@ -567,7 +603,39 @@ int main (int argc,
         
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
         //flagdata
+        cout << "About to swap " << blockdatasize << " floats" << endl;
+        
+        unsigned char *datachar=(unsigned char*) data;
 
+        
+        if(DoPadding){
+            SwapFloats(datachar,nFreqs*samples);
+            /*
+            for(int i=0;i<nFreqs*samples;i++) 
+            {
+              data[i] = FloatSwap(data[i]);
+            }  
+             */
+        }
+        cout << "Done swapping floats" << endl;
+        /*
+        float FloatSwap( float f )
+        {
+            union
+            {
+                float f;
+                unsigned char b[4];
+            } dat1, dat2;
+            
+            dat1.f = f;
+            dat2.b[0] = dat1.b[3];
+            dat2.b[1] = dat1.b[2];
+            dat2.b[2] = dat1.b[1];
+            dat2.b[3] = dat1.b[0];
+            return dat2.f;
+        }*/
+    
+        
         if( !num) {
             cout << "*";
             usleep(50000);
@@ -588,7 +656,12 @@ int main (int argc,
         }
         
 		for(int sc=0; sc < nstreams; sc++){
-			
+            #ifdef _OPENMP
+                std::cout<<"Running in parallel mode"<<std::endl;
+            #pragma omp parallel for private(foundpulse)
+            #else
+                std::cout<<"Running in serial mode"<<std::endl;
+            #endif // _OPENMP
 			for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
 				cout << "Processing " << sc << " " << DMcounter << endl;
 				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
