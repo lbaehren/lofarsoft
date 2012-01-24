@@ -113,6 +113,7 @@ parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh p
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging")
 parser.add_option("-I","--imager", action="store_true", help="Run imager")
+parser.add_option("-O", "--max_outliers", type="int", default=5, help="Maximum allowed number of outliers in calculated cable delays")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -188,6 +189,7 @@ else:
     refresh = not options.norefresh
     plotpause = (not options.nopause and refresh)
     maximum_allowed_delay = options.maximum_allowed_delay
+    max_outliers = options.max_outliers
     search_window_width=options.search_window_width
     sample_number=options.sample_number
     max_data_length=options.max_data_length
@@ -1103,19 +1105,29 @@ for full_filename in files:
 
         print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
 
-
         (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="x")
         (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
         (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
             # NB! What does this return? Really fitted cable delays?
         Pause(name="fitted-cable-delays")
 
-        scrt = hArray(copy=direction.residual_delays).vec() # NB! Need to copy the hArray
+        scrt = hArray(copy=direction.residual_delays) # NB! Need to copy the hArray
         # otherwise, the original array will get modified by scrt.abs().
+        scrt -= scrt.mean()
         scrt.abs();
-        delay_quality_error=scrt.median()/maximum_allowed_delay
+        scrt_numpy = scrt.toNumpy()
+        # remove > k-sigma outliers, then process again
+        # one outlier can push the mean upwards so all delays get > maximum_allowed_delay... Therefore the k-sigma is needed.
+        spread = np.std(scrt_numpy)
+        k = 3.0
+        goodSubset = np.where(scrt_numpy < k * spread)
+        goodDelays = scrt_numpy[goodSubset]
+        delay_quality_error = np.std(goodDelays) / maximum_allowed_delay
+        delay_outliers = len(scrt_numpy) - len(goodDelays)
+        # also count # outliers, impose maximum
         print "#Delay Quality Error:",delay_quality_error
-
+        print "#Delay Outlier count:",delay_outliers
+        
         if delay_quality_error>1:
             print "************************************************************************"
             print "********ATTENTION: Fitted delays deviate too strongly!******************"
@@ -1254,8 +1266,15 @@ for full_filename in files:
             for item in checksums:
                 print item
             print '*** Master checksum = %s' % masterChecksum
-            
-        statuslist.append("OK" if delay_quality_error<1 else "BAD")
+        
+        
+        if delay_quality_error >= 1:
+            final_status = "BAD"
+        elif delay_outliers > max_outliers:
+            final_status = "BAD: TOO MANY OUTLIERS (" + str(delay_outliers) + ")"
+        else:
+            final_status = "OK"
+        statuslist.append(final_status)
 
         results.update(dict(
             status="/".join(statuslist),
