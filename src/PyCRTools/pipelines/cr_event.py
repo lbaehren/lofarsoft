@@ -1113,20 +1113,30 @@ for full_filename in files:
 
         scrt = hArray(copy=direction.residual_delays) # NB! Need to copy the hArray
         # otherwise, the original array will get modified by scrt.abs().
-        scrt -= scrt.mean()
-        scrt.abs();
+
         scrt_numpy = scrt.toNumpy()
+
         # remove > k-sigma outliers, then process again
         # one outlier can push the mean upwards so all delays get > maximum_allowed_delay... Therefore the k-sigma is needed.
-        spread = np.std(scrt_numpy)
         k = 3.0
-        goodSubset = np.where(scrt_numpy < k * spread)
-        goodDelays = scrt_numpy[goodSubset]
-        delay_quality_error = np.std(goodDelays) / maximum_allowed_delay
-        delay_outliers = len(scrt_numpy) - len(goodDelays)
+        good_delays = scrt_numpy
+        spread = np.std(good_delays)
+
+        nremoved = 1
+        delay_outliers = 0
+        while (nremoved > 0 and delay_outliers < max_outliers):
+            nbefore = len(good_delays)
+            good_delays = good_delays[np.abs(good_delays - np.mean(good_delays)) < k * spread]
+            nremoved = nbefore - len(good_delays)
+            spread = np.std(good_delays)
+            delay_outliers = abs(len(good_delays) - len(scrt_numpy))
+            print "delay fitting ... removed",nremoved,"outliers"
+
+        delay_quality_error = spread / maximum_allowed_delay
+
         # also count # outliers, impose maximum
         print "#Delay Quality Error:",delay_quality_error
-        print "#Delay Outlier count:",delay_outliers
+        print "#Delay Outlier Count:",delay_outliers
         
         if delay_quality_error>1:
             print "************************************************************************"
