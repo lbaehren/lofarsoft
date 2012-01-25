@@ -113,7 +113,7 @@ parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh p
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging")
 parser.add_option("-I","--imager", action="store_true", help="Run imager")
-parser.add_option("-O", "--max_outliers", type="int", default=5, help="Maximum allowed number of outliers in calculated cable delays")
+parser.add_option("-O", "--max_outliers", type="int", default=24, help="Maximum allowed number of outliers in calculated cable delays")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -1281,7 +1281,7 @@ for full_filename in files:
         if delay_quality_error >= 1:
             final_status = "BAD"
         elif delay_outliers > max_outliers:
-            final_status = "BAD: TOO MANY OUTLIERS (" + str(delay_outliers) + ")"
+            final_status = "OK BUT TOO MANY OUTLIERS (" + str(delay_outliers) + ")"
         else:
             final_status = "OK"
         statuslist.append(final_status)
