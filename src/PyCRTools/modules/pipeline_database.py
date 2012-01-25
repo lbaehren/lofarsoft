@@ -18,7 +18,7 @@ class PipelineDatabase:
         ============= =====================================
         Parameter     Description
         ============= =====================================
-        *filename*    filename of the database
+        *filename*    filename of the database.
         *inputpath*   path where the datafiles are stored.
         *outputpath*  path where the results are stored.
         ============= =====================================
@@ -901,7 +901,7 @@ class Event:
         ========== ================================
         Parameter  Description
         ========== ================================
-        *status*   new value of the status
+        *status*   new value of the status.
         ========== ================================
         """
         # Set the status in the object.
@@ -931,7 +931,7 @@ class Event:
         ============= ================================
         Parameter     Description
         ============= ================================
-        *timestamp*   new value of the timestamp
+        *timestamp*   new value of the timestamp.
         ============= ================================
         """
         # Set the timestamp in the object.
@@ -1240,7 +1240,7 @@ class Datafile:
         ========== ===========================================
         Parameter  Description
         ========== ===========================================
-        *status*   new value of the status
+        *status*   new value of the status.
         ========== ===========================================
         """
         self._status = status
@@ -1443,7 +1443,7 @@ class Station:
         ========== ===========================================
         Parameter  Description
         ========== ===========================================
-        *status*   new value of the status
+        *status*   new value of the status.
         ========== ===========================================
         """
         self._status = status
@@ -1467,7 +1467,7 @@ class Station:
         ==============  ========================================
         Parameter       Description
         ==============  ========================================
-        *polarisation*  VHECR polaristaion information object.
+        *polarisation*  VHECR polarisation information object.
         ==============  ========================================
         """
         if polarisation:
@@ -1529,12 +1529,12 @@ class Polarisation:
 
         **Properties**
 
-        =========  ===================================================
+        =========  ========================================================
         Parameter  Description
-        =========  ===================================================
+        =========  ========================================================
         *db*       database to which to link this polarisation object to.
         *id*       id of the new polarisation object.
-        =========  ===================================================
+        =========  ========================================================
         """
         self._db = db
 
@@ -1637,7 +1637,7 @@ class Polarisation:
         ========== ===========================================
         Parameter  Description
         ========== ===========================================
-        *status*   new value of the status
+        *status*   new value of the status.
         ========== ===========================================
         """
         self._status = status
@@ -1784,6 +1784,7 @@ class Filter:
         self.filters = []
 
 
+
     def read(self):
         """Read filter from the database."""
         self.filters = []
@@ -1900,3 +1901,4 @@ class Filter:
                 print "    %s" %(f)
 
         print "="*linewidth
+
