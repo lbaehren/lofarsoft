@@ -242,7 +242,6 @@ class PipelineDatabase:
 
 
 
-
     def hasDatafile(self, id=''):
         """Check if there is a VHECR datafile with the corresponding
         *id* in the database.
@@ -773,8 +772,12 @@ class Event:
         self._id = id
         self._status = "UNDEFINED"
         self._timestamp = "UNDEFINED"
-        self._resultspath = "UNDEFINED"
+
+        self._archivename = "UNDEFINED"
+        self._archivepath = "UNDEFINED"
         self._datafilepath = "UNDEFINED"
+        self._resultspath = "UNDEFINED"
+
         self._datafiles = []
         self._properties = {}
 
@@ -1897,4 +1900,3 @@ class Filter:
                 print "    %s" %(f)
 
         print "="*linewidth
-
