@@ -390,8 +390,21 @@ For this you can just use the package manager::
   sudo apt-get install python-dev python-tk python-pyfits tk8.5-dev fftw3-dev
 
 
-Installing the PyCRTools
-------------------------
+Building the PyCRTools
+----------------------
+
+.. note::
+
+  **Building PyCRTools on CEP1**
+
+  Before building the :mod:`PyCRTools` on CEP1, you need to make the following
+  adjustments to the build settings:
+
+  * Change the DAL build environment such that it uses the same HDF5 libraries as the rest of the LUS;
+  * Force the build of :mod:`matplotlib`, :mod:`numpy` and :mod:`pyfits` since the available version of :mod:`matplotlib` at CEP is not compatible with :mod:`PyCRTools`;
+  * Since this version of :mod:`matplotlib` is not compatible with the available :mod:`python-tk`, force :mod:`pyplot` to use :mod:`pyqt4` instead by changing the ``matplotlibrc``;
+  * In order to be able to use :mod:`pyrap` and :mod:`PyCRTools` at the same time, give the default location of the casacore library (``/opt/cep/casacore``) by hand, again both for LUS and DAL separately, since the DAL has its own cmake environment.
+
 
 Now we are ready to install PyCRTools itself. First get the latest
 source code from the LOFAR USG Subversion repository::
@@ -427,4 +440,5 @@ Compile the PyCRTools::
 
 Grab a cup of coffee and if all is well, in about 30 minutes you
 should have your very own working installation of the PyCRTools.
+
 
