@@ -199,7 +199,7 @@ class TBBData(IOInterface):
         for k in key:
             s = ""
             if k == 'DATA_LENGTH_TIME' and not(verbose): 
-                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'               			
+                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'               
                 if show: print s
                 output += '\n'+s 
                 continue
@@ -212,31 +212,34 @@ class TBBData(IOInterface):
                 output += '\n'+s 
                 continue
             if k == 'NOF_DIPOLE_DATASETS' and not(verbose):
-                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '               			
+                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '               
                 if show: print s
                 output += '\n'+s 
                 continue
             
-            if type(self[k])==type([0,0]) and len(self[k])>7 :
-                if all(x == self[k][0] for x in self[k]):
-                    if verbose:
-                        s =  ss+'[ '+str(self[k][0])+', ...] x'+ str(len(self[k]))+' with '+str(type(self[k][0]))
+            try:
+                if type(self[k])==type([0,0]) and len(self[k])>7 :
+                    if all(x == self[k][0] for x in self[k]):
+                        if verbose:
+                            s =  ss+'[ '+str(self[k][0])+', ...] x'+ str(len(self[k]))+' with '+str(type(self[k][0]))
+                        else:
+                            s =  ss+str(self[k][0])               
                     else:
-                        s =  ss+str(self[k][0])               
+                        s = ss+str(self[k][:3]+['...']+self[k][-3:])
                 else:
-                    s = ss+str(self[k][:3]+['...']+self[k][-3:])
-            else:
-                if isinstance(self[k],(cr.core.hftools._hftools.ComplexArray,cr.core.hftools._hftools.IntArray,cr.core.hftools._hftools.BoolArray,cr.core.hftools._hftools.FloatArray,cr.core.hftools._hftools.StringArray)):
-                    s = ss + str(self[k].__repr__(maxlen=10))
-                else:    
-                    if self[k]=='UNDEFINED':
-                        und += k+' , '
-                        continue
-                    else:
-                        s = ss + str(self[k])                       
-            if show: print s
-            output += '\n'+s 
-            
+                    if isinstance(self[k],(cr.core.hftools._hftools.ComplexArray,cr.core.hftools._hftools.IntArray,cr.core.hftools._hftools.BoolArray,cr.core.hftools._hftools.FloatArray,cr.core.hftools._hftools.StringArray)):
+                        s = ss + str(self[k].__repr__(maxlen=10))
+                    else:    
+                        if self[k]=='UNDEFINED':
+                            und += k+' , '
+                            continue
+                        else:
+                            s = ss + str(self[k])                       
+                if show: print s
+                output += '\n'+s
+                
+            except IOError:
+                pass
         if len(und) > 0:
             s = 'These keywords are UNDEFINED : ['+str(und)+']'
             if show: print s
