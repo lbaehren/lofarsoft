@@ -581,7 +581,8 @@ complex<double> integrateLamdaSqInv(vector<complex<double> > &QU,vector<double> 
   * "innverse Fourier" transformation. The matrix for this transformation is \
   * intended to be maximal similar to an unitary matrix. 
   * \param	QU		: QU values of lambdadependece which must be transformed
-  * \param	lambdas		: lambda^2-lambda0^2 of the QU values
+  * \param	lambC		: centers of the lambda^2 intervals 
+  * \param      lambI           : lengths of the lambda^2 intervals 
   * \param	faradays	: faraday depths for which the new QU values are calculated */
 vector<complex<double> > performRMSynthesis(vector<complex<double> > &QU, vector<double> &lambC,vector<double> &lambI, vector<double> &faradays,  double nu_0, double alpha, double epsilon) {
   uint N = faradays.size() ;  
