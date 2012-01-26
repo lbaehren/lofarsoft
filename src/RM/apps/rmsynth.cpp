@@ -82,29 +82,31 @@ vector<complex<double> > performWaveletSynthesis(vector<complex<double> > &arr, 
 //  cout << fars.size() << " " << res.size() << endl ;
   return res ;
 }
-/*! procedure performs the signal reconstruction.
+/*! procedure performs the actual signal reconstruction on one line of sight
+ *  Depending on the used method, it calls a specialized procedure either for 
+ *  rmSynthesis of Wiener filtering or wavelet based rmSynthesis.
  */
 vector<complex<double> > signalReconst(wienerfilter &Wiener, cvec &data, vector<double> &freqsC, vector<double> &freqsI, vector<double> &faras, double phi_min, double phi_max, uint nFara, int method, double nu_0, double alpha, double epsilon,double minWave, double maxWave, double stepWave ) {
   vector<complex<double> > P_farad ;
   /* get the gaps of the lambdasquared intervals for the rm-synthesis */
   vector<double> lcenter ;
   vector<double> linterv ;
-  /* convert frequencies to lambda squared values,if this is neccesary */
+  /* convert frequencies to lambda squared values,if this is neccesary  (only for the fourier based rmSynthesis)*/
   if ((method == Meth_RMSynth) || (method==Meth_Wavelet)) {
      freqToLambdaSq(freqsC,freqsI,lcenter,linterv) ;
   }
-
-  if (method==Meth_RMSynth)  {    
+  /* select the method for the rmSynthesis */
+  if (method==Meth_RMSynth)  {    // fourier based rmSynthesis
     P_farad = performRMSynthesis(data.data,lcenter,linterv,faras, nu_0, alpha, epsilon) ;
   }
-  else if (method==Meth_Wiener) {
+  else if (method==Meth_Wiener) { /* Wiener filtering */
     P_farad =Wiener.applyWF(data.data) ;
   }
-  else if (method==Meth_Eigen) {
+  else if (method==Meth_Eigen) {  /* svd based filrering */
 //     cout << Wiener.D.rows() << endl ;
     P_farad =Wiener.applyWF(data.data) ;
   }
-  else if (method==Meth_Wavelet) {
+  else if (method==Meth_Wavelet) { /* wavelet based filtering */
     double deltaPhi=(phi_max-phi_min)/(nFara-1);
     P_farad = performWaveletSynthesis(data.data,lcenter, minWave, maxWave, stepWave, phi_min, phi_max, deltaPhi) ;
   }
