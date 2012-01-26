@@ -592,13 +592,15 @@ complex<double> testComplexPerform (vector<complex<double> > &v1,
 
 int main (int argc, char * const argv[]) {
 
-if ( argc <= 1 ) {
+  /* check for getting parameter file name */
+  if ( argc <= 1 ) {
     cout << endl << "Too few parameters..." << endl << endl;
     cout << "Procedure needs the name of the used parameter file" << endl;
     cout << endl;
     return -1;
   }  // end of checking parameter
-  paramfile inp(argv[1]);
+  paramfile inp(argv[1]); // open parameter file 
+  /* start getting parameter values */
   string input = inp.find("input");
   string outDat = inp.find("output") ;
   rmIO io(outDat,true) ;
@@ -625,6 +627,7 @@ if ( argc <= 1 ) {
     rmFakt = inp.findDouble("clean_weight");
   }
   int fits = inp.findInt("file_format") ;
+  /* end getting parameter values */
   cvec vals ;
   vec freqsC ; // centers of frequencies
   vec freqsI ; // interval widths of frequencies
