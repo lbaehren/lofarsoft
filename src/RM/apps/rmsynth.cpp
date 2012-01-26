@@ -520,14 +520,15 @@ void processCube (double phi_min,
   PagedImage<Float> imag2(tShape,neu,outDat);
   /* generate logging information for the new image object 
      1. copy the logging information from the input image object */
-  imag2.logger().append(cube.get_log()) ;
-  writeLogging(imag2,method, useClean) ;
-  cube.copyMetaData(imag2);
+  imag2.logger().append(cube.get_log()) ; 
+  writeLogging(imag2,method, useClean) ; // write logging into the casa object
+  cube.copyMetaData(imag2);  // copy meta data from image object into rmCube
   IPosition pos(/*ipos.size()+1*/4) ;
-  for (uint j=0; j<pos.size(); j++) {
+  for (uint j=0; j<pos.size(); j++) { // init position vector 
     pos[j] =0 ;
   }
   uint curIndx = 0 ;
+  /* loop over all faraday depths */
   for (uint j=0; j<nFara ; j++) {
     pos[inds[2]] = j ;  // set the frequency coordinate inside the current image
     /* loop over the first dimension of the current image */
