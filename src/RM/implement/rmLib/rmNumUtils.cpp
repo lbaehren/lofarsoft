@@ -154,10 +154,12 @@ namespace RM {
 }
 
 /*!
-  \brief Convert from frequencies to lambda squared
-  \param frequency - frequency vector 
-  \return lambda_sq - converted lambda squared vector
-*/
+ * \brief Convert from frequencies to lambda squared
+ * \param center centers of the frequency intervals
+ * \param intervals interval lengths of the frequency intervals
+ * \param lcenter return vector for the centers of the lambda^2 intervals
+ * \param linterv retutn vector for the interval lengths of the lambda^2 intervals
+ */
 void freqToLambdaSq(const vector<double> &center, const vector<double> &intervals, vector<double> &lcenter, vector<double> &linterv)
 {
   // lambda squared to be calculated, same size as frequency vector
