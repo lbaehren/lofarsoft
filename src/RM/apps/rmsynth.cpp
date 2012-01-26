@@ -353,9 +353,28 @@ complex<double> integrateLamdaSq(vector<complex<double> > &QU,vector<double> &la
     return erg ;
 }
 
+ /*! performs the reconstruction of the polarized emission for one line of sight. 
+     \param data  vector of the data depend of the frequencies for the current line of sight 
+     \param Wiener Wienerfilter object, which is needed if one of the methods for Wiener filtering is selected 
+     \param P_farad vector to return the polarized emission as function of the faraday depths 
+     \param freqsC vector of the centers of the frequency intervals of the measurement 
+     \param freqsI vector of the intervals of the frequencz intervals of the measurement 
+     \param faras vector of the faraday depths, at which the procedure shoul reconstruct the polarised emission 
+     \param phi_min minimal value of the used faraday depths 
+     \param phi_max maximal value of the used faraday depths 
+     \param nFara number of faraday depths
+     \param method used method for the reconstruction rm synthesis of wiener filter or reconstruction using svd
+     \param nu_0 value for the reference frequency used for creating the response matrix
+     \param alpha value for the exponent of the powerlaw part of the response matrix 
+     \param epsilon value for the emission factor for the response matrix 
+     \param useClean flag for the using of clean. The flag determines the way of using clean im rmsynthesis 
+     \param maxIter maximal number of iterations for using rmClean
+     \param cleanRatio value to trigger the termination of clean iterations
+     \param minWave value needed for wavelets
+     \param maxWave value needed for wavelets
+     \param stepWave value needed for wavelets
+     */
 void processLine(cvec &data, wienerfilter &Wiener, vector<complex<double> > &P_farad , vec &freqsC, vec &freqsI, vector<double> &faras, double phi_min, double phi_max, uint nFara, int method, double nu_0, double alpha, double epsilon, string outDat, int useClean, double rmFakt, uint maxIter, double cleanRatio, int addRes, double minWave, double maxWave, double stepWave) {
-  /* perform the actual calculation of the polarized emission 
-     as a function of the faraday depth */
   if (!useClean) {
     Wiener.prepare(freqsC.data, freqsI.data, faras, nu_0, alpha, epsilon, method) ;
     P_farad = signalReconst(Wiener, data,freqsC.data,freqsI.data,faras,phi_min,phi_max,nFara,method,nu_0,alpha,epsilon, minWave, maxWave, stepWave);
