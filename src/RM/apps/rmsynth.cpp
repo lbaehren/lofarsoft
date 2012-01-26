@@ -584,8 +584,10 @@ complex<double> testComplexPerform (vector<complex<double> > &v1,
 
 // ==============================================================================
 //
-//  Main routine for the pulsar rm-synthesis
-//
+//  Main routine for the rm-synthesis
+//  The routine needs as input argument the name of a parameter file
+//  This file has to be built up with pairs of name and value optional a comment
+//  parametername = parametervalue  # comment
 // ==============================================================================
 
 int main (int argc, char * const argv[]) {
