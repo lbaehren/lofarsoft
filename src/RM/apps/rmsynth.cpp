@@ -429,7 +429,10 @@ void convLine(cvec &data, vec &freqsC, vec &freqsI, double phi_min, double phi_m
 /*! Procedure to read a test dataset of one line of sight 
     of polarized antennasignal into a cvec object.
     The data set must be stored into two ascii files of 
-    real and imaginary data, named by nameR and nameI */
+    real and imaginary data, named by nameR and nameI 
+    \param nameR name of the inputfile for the Q part of the data 
+    \param nameI name of the inputfile for the U part of the data
+    \param vals complex vector to store the read data into */
 void testRead(string nameR, string nameI, cvec &vals) {
   ifstream f1(nameR.c_str(), ios::in);
   ifstream f2(nameI.c_str(), ios::in);
