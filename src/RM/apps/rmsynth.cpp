@@ -445,7 +445,9 @@ void writeLogging (PagedImage<Float> image,
 
 //_______________________________________________________________________________
 //                                                                    processCube
-
+/*! procedure for procedure processcube makes a rmsynthesis for a complete imagecube.
+ *  The result is written into a rmCube object, which is in the current state handled 
+ *  as a casa core cube. The frequency axis is replaced by the faraday depth .*/
 void processCube (double phi_min,
 		  double phi_max,
 		  uint nFara,
@@ -465,33 +467,34 @@ void processCube (double phi_min,
 		  double maxWave,
 		  double stepWave)
 {
-  Vector<int> inds;
-  rmCube cube(input,"",casaQuery, inds) ;
-  vec freqsC = cube.getFreqsCenters() ;
-  vec freqsI = cube.getFreqsLengths() ;
+  Vector<int> inds; // integervector for indexes of x,y of the image and the 3. component of the cube (frequencies for image cube and faraday depth for the resulting rmCube)
+  rmCube cube(input,"",casaQuery, inds) ; // read imageCube from casa files
+  vec freqsC = cube.getFreqsCenters() ; // get frequency centers from image cube
+  vec freqsI = cube.getFreqsLengths() ; // get frequencu interval length form cube
   cout << cube.getXSize() << " " << cube.getYSize() << " " << nFara << " " << inds << endl ;
-  vector<double> faras(nFara) ;
-  wienerfilter Wiener;
-  fillFaras(phi_min, phi_max, nFara, faras) ;
+  vector<double> faras(nFara) ;  // vector for the values of the faraday depths for the rmSynthesis
+  wienerfilter Wiener; 
+  fillFaras(phi_min, phi_max, nFara, faras) ; // create the vector of faraday depths from userinput out of the parameter file
   int xSize = cube.getXSize() ; 
   int ySize = cube.getYSize() ;
-  rmCube result(xSize, ySize, faras) ;
-  Wiener.prepare(freqsC.data, freqsI.data, faras, nu_0, alpha, epsilon, method) ;
-//   Array<Float> feld = arr2Col.getColumn( );
-  /*performing the rm-synthesis for all pixels of the image. For each pixel, the
-    rmsynthesis is done separatly by using the line procedure */
+  rmCube result(xSize, ySize, faras) ; // create a rmCube to store the result of rmSynthesis in (in memory not on file)
+  Wiener.prepare(freqsC.data, freqsI.data, faras, nu_0, alpha, epsilon, method) ; // prepare Wiener filter if requested by the user
+  
+  /* performing the rm-synthesis for all pixels of the image. For each pixel, the
+     rmsynthesis is done separatly by using the line procedure */
   #pragma omp parallel 
   {
     for (int x=0; x<result.getXSize(); x++ ) {
       cout << "x= "<< x+1 << " / " << cube.getXSize() << endl ;
 //       #pragma omp for
       for (int y=0; y<result.getYSize(); y++ ) {
-        cvec data(freqsC.size()) ;
-        cube.getLineOfSight(x,y,data) ;
-        vector<complex<double> > P_farad ;
-        print=((x==0) && (y==0));
+        cvec data(freqsC.size()) ;  // define vector for the current line of sight (of the image cube)
+        cube.getLineOfSight(x,y,data) ;  // store the current line of sight into the vector
+        vector<complex<double> > P_farad ; // create vector for line of sight in the rmCube
+        print=((x==0) && (y==0)); // flag for controle printing
+        /* call the procedure to perform the rmsynthesis on the current line of sight */
         processLine(data, Wiener, P_farad , freqsC, freqsI, faras, phi_min, phi_max, nFara, method, nu_0, alpha, epsilon, outDat, useClean, rmFakt, maxIter, cleanRatio, addRes, minWave, maxWave, stepWave) ;
-        result.setLineOfSight(x,y,P_farad) ;
+        result.setLineOfSight(x,y,P_farad) ; // store the result of processLine into the rmCube object 
       }
     }
   }
