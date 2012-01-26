@@ -386,6 +386,25 @@ void processLine(cvec &data, wienerfilter &Wiener, vector<complex<double> > &P_f
   }
 }
 
+/*! procedure converts the data of the mesurement from a 
+ *  function which depends of frequencies to a function whilch  
+ *  depends of lambda^2. This is need for rmSynthesis 
+ *  using the fourier transformation .Then the rmSynthe of the given line is performed
+ * \param freqsC centers of the frequency intervals of the measurement 
+ * \param freqsI interval lengths of the frequencies intervals of the measurement 
+ * \param phi_min minimal value of the used faraday depths 
+ * \param phi_max maximal value of the used faraday depths 
+ * \param method used method for the reconstruction rm synthesis of wiener filter or reconstruction using svd
+ * \param nu_0 value for the reference frequency used for creating the response matrix
+ * \param alpha value for the exponent of the powerlaw part of the response matrix 
+ * \param epsilon value for the emission factor for the response matrix 
+ * \param useClean flag for the using of clean. The flag determines the way of using clean im rmsynthesis 
+ * \param maxIter maximal number of iterations for using rmClean
+ * \param cleanRatio value to trigger the termination of clean iterations
+ * \param minWave value needed for wavelets
+ * \param maxWave value needed for wavelets
+ * \param stepWave value needed for wavelets
+*/
 void convLine(cvec &data, vec &freqsC, vec &freqsI, double phi_min, double phi_max, uint nFara, int method, double nu_0, double alpha, double epsilon, string outDat, int useClean, double rmFakt, uint maxIter, double cleanRatio, int addRes, double minWave, double maxWave, double stepWave) {
   vector<double> faras(nFara) ;
   wienerfilter Wiener;
