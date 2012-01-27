@@ -59,15 +59,11 @@ class Opts(object):
                                  "If the beam is not given "\
                                  "by the user, then it is looked for in the "\
                                  "image header. If not found, then an error "\
-                                 "is raised. PyBDSM will not work without the "\
+                                 "is raised. PyBDSM will not work without "\
                                  "knowledge of the restoring beam.")                             
     filename        = String(doc="Input image file name\n"\
-                                 "If the filename ends in '_I', then similar files "\
-                                 "with '_Q', '_U' and '_V' are looked for, and "\
-                                 "if not present, the parameter polarisation_do "\
-                                 "is set to False. Eventually, PyBDSM will be able "\
-                                 "to handle 4-D cubes and this convention will "\
-                                 "no longer be necessary.")
+                                 "The input image can be a FITS or CASA 2-, "\
+                                 "3-, or 4-D cube.")
     flagging_opts   =   Bool(False,
                              doc="Show options for Gaussian flagging\n"\
                                  "Gaussians which are likely in error "\
@@ -91,7 +87,7 @@ class Opts(object):
                                  "parameter. If the frequency is not given "\
                                  "by the user, then it is looked for in the "\
                                  "image header. If not found, then an error "\
-                                 "is raised. PyBDSM will not work without the "\
+                                 "is raised. PyBDSM will not work without "\
                                  "knowledge of the frequency.")
     interactive     =   Bool(False,
                              doc="Use interactive mode\n"\
@@ -217,7 +213,7 @@ class Opts(object):
                                  "Generally, None works well. However, if there is "\
                                  "significant extended emission in the image, "\
                                  "it is often necessary to force the use of a "\
-                                 "constant rms map by setting rms_map=False.")
+                                 "constant rms map by setting rms_map = False.")
     shapelet_do     =   Bool(False,
                              doc="Decompose islands into shapelets\n"\
                                  "If True, then each island is decomposed using shapelets, "\
@@ -299,7 +295,7 @@ class Opts(object):
                                      "if the smallest extra sub islands while opening "\
                                      "with a 5x5 footprint add up to at least this "\
                                      "fraction of the island area, and if the largest "\
-                                     "sub island is less than 75% is size of the "\
+                                     "sub island is less than 75% the size of the "\
                                      "largest when opened with a 3x3 footprint, a "\
                                      "5x5 opening is taken.",
                              group='advanced_opts')
@@ -325,7 +321,7 @@ class Opts(object):
     peak_maxsize    =  Float(30.0,
                              doc="If island size in beam area is more than this, "\
                                  "attempt to fit peaks separately (if "\
-                                 "peak_fit=True). Min value is 30",
+                                 "peak_fit = True). Min value is 30",
                              group='advanced_opts')
     fdr_alpha       =  Float(0.05,
                              doc="Alpha for FDR algorithm for thresholds\n"\
@@ -347,7 +343,7 @@ class Opts(object):
                                  "determined. This is done iteratively, whereby the actual "\
                                  "dispersion is first computed. Then, all pixels whose "\
                                  "value exceeds kappa clip times this rms are excluded and "\
-                                 "the rms is computed again. This process is repeated till "\
+                                 "the rms is computed again. This process is repeated until "\
                                  "no more pixels are excluded. For well behaved noise "\
                                  "statistics, this process will converge to the true noise "\
                                  "rms with a value for this parameter ~3-5. A large "\
@@ -385,7 +381,7 @@ class Opts(object):
                                  "This is an integer and is the minimum number of pixels "\
                                  "in an island (whose values are greater thresh isl) for "\
                                  "the island to be included. If None, the number of "\
-                                 "pixels is set to the area of an unresolved source "\
+                                 "pixels is set to 1/3 of the area of an unresolved source "\
                                  "using the beam and pixel size information in the "\
                                  "image header. It is set to 4 pixels for all "\
                                  "wavelet images.",
@@ -458,8 +454,9 @@ class Opts(object):
     blank_zeros     =   Bool(False,
                              doc="Blank zeros in the image\n"\
                                 "If True, all pixels with a value of 0 are blanked."\
-                                "If False, any such pixels are left unblanked (and"\
-                                "hence will affect the rms and mean maps, etc.",
+                                "If False, any such pixels are left unblanked (and "\
+                                "hence will affect the rms and mean maps, etc.) "\
+                                "Pixels with a value of NaN are always blanked.",
                              group="advanced_opts")
 
     
@@ -477,7 +474,7 @@ class Opts(object):
                                  'and l is the length of the filter a-trous lpf (see '\
                                  'the atrous_lpf parameter for more info).\nA sensible '\
                                  'value of jmax is such that the size of the kernel is '\
-                                 'not more 3-4 times smaller than the smallest image '\
+                                 'not more than 3-4 times smaller than the smallest image '\
                                  'dimension.',
                              group="atrous_do")
     atrous_lpf      =   Enum('b3', 'tr',
@@ -593,7 +590,7 @@ class Opts(object):
     frequency_sp    = Option(None, List(Float()),
                              doc="Frequency in Hz of channels in input image when "\
                                  "more than one channel is present. "\
-                                 "E.g., frequency = [74e6, 153e6]. "\
+                                 "E.g., frequency_sp = [74e6, 153e6]. "\
                                  "None => get from header\n"\
                                  "If the frequency is not given "\
                                  "by the user, then it is looked for in the "\
@@ -638,7 +635,7 @@ class Opts(object):
                                  "Average channels with weights = 1 or 1/rms_clip^2 if " \
                                  "collapse_mode = 'average'\n"\
                                  "When collapse_mode is 'average', then if this value "\
-                                 "is 'unity', the channels given by collapse av are "\
+                                 "is 'unity', the channels given by collapse_av are "\
                                  "averaged with unit weights and if 'rms', then they "\
                                  "are averaged with weights which are inverse square "\
                                  "of the clipped rms of each channel image.",
@@ -686,7 +683,7 @@ class Opts(object):
                              doc='Plotim for each wavelet plane if decomposed '\
                                  'into Gaussians',
                              group="hidden")
-    output_all      =   Bool(True,
+    output_all      =   Bool(False,
                              doc="Write out all files automatically to directory "\
                                  "'filename_pybdsm'",
                              group="output_opts")
@@ -723,7 +720,7 @@ class Opts(object):
                                  "from filename",
                              group="output_opts")
     output_fbdsm    =   Bool(False,
-                             doc="write out fBDSM format output files "\
+                             doc="Write out fBDSM format output files "\
                                  "for use in Anaamika",
                              group="output_opts")
     savefits_residim=   Bool(False,
@@ -763,7 +760,7 @@ class Opts(object):
                                  "all sources between psf_snrbot and psf_snrtop are "\
                                  "secondary generators to be used in tessellating. "\
                                  "Currently, the 'field' option is not implemented.",
-                             group="psf_vary_do")
+                             group="hidden")
     psf_nsig        =  Float(3.0,
                              doc = "Kappa for clipping within each bin\n"\
                                  "When constructing a set of 'unresolved' sources "\
@@ -808,7 +805,7 @@ class Opts(object):
                                  "psf_snrtop of the highest SNR Gaussians are taken as "\
                                  "Voronoi generators. That is, for a value of 0.2, the "\
                                  "top 20% (in terms of SNR) of Gaussians are taken.",
-                             group="psf_vary_do")
+                             group="hidden")
     psf_snrcutstack =  Float(15.0,
                              doc = "Unresolved sources with higher SNR "\
                                  "taken for stacked psfs\n"\
@@ -829,12 +826,12 @@ class Opts(object):
                                  "'file' to be used, a list of good sources whose "\
                                  "psfs are believed to close to theoretical (e.g. strong "\
                                  "calibrators) need to be supplied with the metadata.",
-                             group="psf_vary_do")
+                             group="hidden")
     psf_primarygen  = String('',
                              doc = "Filename for primary gens if psf_gencode='file'\n"\
                                  "This is the filename with the generators if psf_gencode "\
                                  "is 'file'. This is not yet implemented.",
-                             group="psf_vary_do")
+                             group="hidden")
     psf_itess_method=    Int(0,
                              doc = "0 = normal, 1 = 0 + round, 2 = LogSNR, "\
                                  "3 = SqrtLogSNR\n"\
@@ -856,14 +853,23 @@ class Opts(object):
                                  "pixels can belong to more than one tile. However, we do "\
                                  "not yet process the result of fuzzy tessellation and hence "\
                                  "it is advisable to use 's'.",
-                             group="psf_vary_do")
+                             group="hidden")
     psf_tess_fuzzy  =  Float(0.05,
                              doc = "Fraction of overlap for fuzzy tessellation\n"\
                                  "If psf_tess_sc is 'c', then this determines the fraction "\
                                  "of overlap between adjacent tiles for fuzzy tessellation.",
-                             group="psf_vary_do")
+                             group="hidden")
     psf_use_shap    =   Bool(False,
                              doc="Use shapelets for PSF variation",
+                             group="hidden")
+                             
+    psf_high_snr    =  Option(None, Float(),
+                             doc = "SNR above which all sources are taken to be unresolved. "\
+                                 "E.g., psf_high_snr = 20.0. None => no such selection is made\n"\
+                                 "Gaussians with SNR greater than this are "\
+                                 "used to determine the PSF variation, even if they are deemed "\
+                                 "to be resolved. This corrects for the unreliability at high SNRs in the "\
+                                 "algorithm used to find unresolved sources. The minimum value is 20.0",
                              group="psf_vary_do")
     
     #-----------------------------SHAPELET OPTIONS--------------------------------
@@ -926,7 +932,7 @@ class Opts(object):
                                       "For sources with code='M', all gaussians with "\
                                       "peak flux less than specind_Msrc_exclude1 times "\
                                       "the maximum peak flux of the constituent Gaussians "\
-                                      "(of the channel collapsed image) is excluded from "\
+                                      "(of the channel collapsed image) are excluded from "\
                                       "the initial model fit to each channel image. See "\
                                       "also specind_Msrc_exclude2.",
                              group="spectralindex_do")

@@ -26,6 +26,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2012/01/27 - Fixed bug in psf_vary module that affected tesselation. 
+                 Fixed many small typos in parameter descriptions.
+
     2012/01/18 - Fixed a bug that resulted in incorrect coordinates when
                  the trim_box option was used with a CASA image. Added 
                  option (blank_zeros) to blank pixels in the input image

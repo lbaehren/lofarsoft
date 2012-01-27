@@ -157,8 +157,8 @@ def tput(filename=None, quiet=False):
 
     A file name may be given (e.g., "tput 'savefile.sav'"), in which case the
     parameters are saved to the file specified. If no file name is given, the
-    parameters are saved to the file 'pybdsm.last'. The save parameter can be
-    loaded using the tget command (try "help tget" for more info).
+    parameters are saved to the file 'pybdsm.last'. The saved parameters can
+    be loaded using the tget command (try "help tget" for more info).
     
     The save file is a "pickled" python dictionary which can be loaded into
     python and edited by hand. See the pickle module for more information.
@@ -697,9 +697,9 @@ try:
     cfg = Config()
     prompt_config = cfg.PromptManager
     if ipython_version == '0.11':
-        cfg.InteractiveShellEmbed.prompt_in1 = "BDSM <\#>: "
+        cfg.InteractiveShellEmbed.prompt_in1 = "BDSM [\#]: "
     else:
-        prompt_config.in_template = "BDSM <\#>: "
+        prompt_config.in_template = "BDSM [\#]: "
     cfg.InteractiveShellEmbed.autocall = 2
     ipshell = InteractiveShellEmbed(config=cfg, banner1=banner, 
                                     user_ns=locals())
@@ -707,7 +707,7 @@ try:
 except ImportError:
     # IPython < 0.11
     from IPython.Shell import IPShellEmbed
-    argv = ['-prompt_in1','BDSM <\#>: ','-autocall','2']
+    argv = ['-prompt_in1','BDSM [\#]: ','-autocall','2']
     ipshell = IPShellEmbed(argv=argv, banner=banner, user_ns=locals())
     ipshell.IP.set_hook('complete_command', _opts_completer, re_key = '.*')
 ipshell()

@@ -35,12 +35,22 @@ class Op_psf_vary(Op):
         snrtop = opts.psf_snrtop; snrbot = opts.psf_snrbot; snrcutstack = opts.psf_snrcutstack
         gencode = opts.psf_gencode; primarygen = opts.psf_primarygen; itess_method = opts.psf_itess_method
         tess_sc = opts.psf_tess_sc; tess_fuzzy= opts.psf_tess_fuzzy
+        bright_snr_cut = opts.psf_high_snr
         if opts.psf_snrcut < 5.0: 
-          mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 5")
-          snrcut = 5.0
+            mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 5")
+            snrcut = 5.0
         else:
-          snrcut = opts.psf_snrcut
+            snrcut = opts.psf_snrcut
         img.psf_snrcut = snrcut
+        if opts.psf_high_snr != None:
+            if opts.psf_high_snr < 20.0: 
+                mylogger.userinfo(mylog, "Value of psf_high_snr too low; increasing to 20")
+                high_snrcut = 20.0
+            else:
+                high_snrcut = opts.psf_high_snr
+        else:
+            high_snrcut = opts.psf_high_snr
+        img.psf_high_snr = high_snrcut
           
         wtfns=['unity', 'roundness', 'log10', 'sqrtlog10']
         if 0 <= itess_method < 4: tess_method=wtfns[itess_method]
@@ -61,7 +71,7 @@ class Op_psf_vary(Op):
         # takes gaussians with code=S and snr > snrcut.
         tr = [n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
         g_gauls = self.trans_gaul(tr)
-        mylogger.userinfo(mylog, 'Number of generators for PSF variation', str(len(g_gauls[0])))
+        mylogger.userinfo(mylog, 'Number of unresolved sources', str(len(g_gauls[0])))
 
         # computes statistics of fitted sizes. Same as psfvary_fullstat.f in fBDSM.
         bmaj_a, bmaj_r, bmaj_ca, bmaj_cr, ni = _cbdsm.bstat(bmaj, None, nsig)
@@ -69,49 +79,40 @@ class Op_psf_vary(Op):
         bpa_a, bpa_r, bpa_ca, bpa_cr, ni = _cbdsm.bstat(bpa, None, nsig)
 
         # get subset of sources deemed to be unresolved. Same as size_ksclip_wenss.f in fBDSM.
-        flag_unresolved = self.get_unresolved(g_gauls, img.beam, nsig, kappa2, over, plot)
+        flag_unresolved = self.get_unresolved(g_gauls, img.beam, nsig, kappa2, over, img.psf_high_snr, plot)
 
         # see how much the SNR-weighted sizes of unresolved sources differ from the synthesized beam.
         wtsize_beam_snr = self.av_psf(g_gauls, img.beam, flag_unresolved)
 
+        # filter out resolved sources
+        tr_gaul = self.trans_gaul(g_gauls)
+        tr = [n for i, n in enumerate(tr_gaul) if flag_unresolved[i]]
+        g_gauls = self.trans_gaul(tr)
+
         # get a list of voronoi generators. vorogenS has values (and not None) if generators='field'.
-        vorogenP, vorogenS = self.get_voronoi_generators(g_gauls, generators, gencode, snrcut, snrtop, snrbot)
+        vorogenP, vorogenS = self.get_voronoi_generators(g_gauls, generators, gencode, snrcut, snrtop, snrbot, snrcutstack)
+        mylogger.userinfo(mylog, 'Number of generators for PSF variation', str(len(vorogenP[0])))
 
         # group generators into tiles
-        tile_prop = self.edit_vorogenlist(vorogenP, frac=50.0)
+        tile_prop = self.edit_vorogenlist(vorogenP, frac=0.9)
 
         # tesselate the image 
         #volrank, volrank_tilenum, wts = tesselate(vorogenP, vorogenS, tile_prop, tess_method, tess_sc, tess_fuzzy, \
         volrank, vorowts = self.tesselate(vorogenP, vorogenS, tile_prop, tess_method, tess_sc, tess_fuzzy, \
                   generators, gencode, image.shape)
+        if opts.output_all:
+            func.write_image_to_file(img.use_io, img.imagename + '.volrank.fits', N.transpose(volrank), img, dir)
 
-        tile_list, tile_coord, tile_snr = tile_prop
-        ntile = len(tile_list)
-        ngenpertile=N.zeros(ntile)
-        tr_gaul = self.trans_gaul(g_gauls)
-        tr=[n for i, n in enumerate(tr_gaul) if flag_unresolved[i] and n[1]/n[8] >= snrcutstack]
-        for itile in range(ntile):
-            tile_gauls = [n for n in tr if volrank[int(round(n[2])),int(round(n[3]))]-1 \
-                       == itile]
-            ngenpertile[itile]=len(tile_gauls)
-
-        # filter for (almost) empty tiles with unresolved sources < num, and change volrank accordingly
-        ltnum=1
-        ngenpertile, tile_prop, r2t = self.edit_tile(ltnum, g_gauls, flag_unresolved, snrcutstack, volrank, \
-                            tile_prop, tess_sc, tess_fuzzy, vorowts, tess_method, plot)
         tile_list, tile_coord, tile_snr = tile_prop
         ntile = len(tile_list)
         bar = statusbar.StatusBar('Determining PSF variation ............... : ', 0, ntile)
         mylogger.userinfo(mylog, 'Number of tiles for PSF variation', str(ntile))
 
-        if opts.output_all:
-            func.write_image_to_file(img.use_io, img.imagename + '.volrank.fits', N.transpose(volrank), img, dir)
-
         # For each tile, calculate the weighted averaged psf image. Also for all the sources in the image.
         cdelt = list(img.wcs_obj.acdelt[0:2])
         factor=3.
-        psfimages, psfcoords, totpsfimage = self.psf_in_tile(image, img.beam, g_gauls, flag_unresolved, \
-                   cdelt, factor, snrcutstack, volrank, tile_prop, r2t, plot)
+        psfimages, psfcoords, totpsfimage = self.psf_in_tile(image, img.beam, g_gauls, \
+                   cdelt, factor, snrcutstack, volrank, tile_prop, plot)
         npsf = len(psfimages)
 
         if opts.psf_use_shap:
@@ -159,100 +160,112 @@ class Op_psf_vary(Op):
                  basis, beta, cen, totpsfimage, plot)
             img.psf_images = aa
         else:
-            # Fit stacked PSFs with Gaussians
-            bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
-            psf_maj = N.zeros(npsf)
-            psf_min = N.zeros(npsf)
-            psf_pa = N.zeros(npsf)
-            for i in range(ntile):
-                psfim = psfimages[i]
-                mask = N.zeros(psfim.shape, dtype=bool)
-                x_ax, y_ax = N.indices(psfim.shape) 
-                maxv = N.max(psfim)
-                p_ini = [maxv, (psfim.shape[0]-1)/2.0*1.1, (psfim.shape[1]-1)/2.0*1.1, bm_pix[0]/fwsig*1.3, 
-                         bm_pix[1]/fwsig*1.1, bm_pix[2]*2]
-                para, ierr = func.fit_gaus2d(psfim, p_ini, x_ax, y_ax, mask)
-                psf_maj[i] = para[3]
-                psf_min[i] = para[4]
-                psf_pa[i] = para[5]
-                if img.opts.quiet == False:
-                    bar.increment()
-
-            # Interpolate grid using griddata
-            maj_array = N.zeros(image.shape)
-            min_array = N.zeros(image.shape)
-            pa_array = N.zeros(image.shape)
-            for i, coord in enumerate(psfcoords):
-                maj_array[tuple(coord)] = psf_maj[i]
-                min_array[tuple(coord)] = psf_min[i]
-                pa_array[tuple(coord)] = psf_pa[i]
-            points = N.where(maj_array > 0.0)
-            x = N.array(points[0], dtype=float)
-            y = N.array(points[1], dtype=float)
-            maj_values = N.array(maj_array[points])
-            min_values = N.array(min_array[points])
-            pa_values = N.array(pa_array[points])
-            xi = N.linspace(0,image.shape[0],image.shape[0])
-            yi = N.linspace(0,image.shape[1],image.shape[1])
-            maj_interp = griddata(x, y, maj_values, xi, yi)
-            min_interp = griddata(x, y, min_values, xi, yi)
-            pa_interp = griddata(x, y, pa_values, xi, yi)
-            
-            # Now fill in regions outside the grid.
-            # First check if they are masked arrays and, if so, convert to 
-            # normal arrays.
-            if hasattr(maj_interp, 'filled'):
-                maj_interp.filled(N.nan)
-                min_interp.filled(N.nan)
-                pa_interp.filled(N.nan)
-                maj_interp = N.array(maj_interp)
-                min_interp = N.array(min_interp)
-                pa_interp = N.array(pa_interp)
-            nodata = N.where(N.isnan(maj_interp))
-            # Now fill NaNs with values in tiles
-            if len(nodata[0]) > 0:
-                maj_interp_nearest = N.zeros(image.shape)
-                min_interp_nearest = N.zeros(image.shape)
-                pa_interp_nearest = N.zeros(image.shape)
+            if ntile < 3:
+                mylog.warning('Insufficient number of tiles to do interpolation of PSF variation')
+                return
+            else:
+                # Fit stacked PSFs with Gaussians
+                bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+                psf_maj = N.zeros(npsf)
+                psf_min = N.zeros(npsf)
+                psf_pa = N.zeros(npsf)
+                for i in range(ntile):
+                    psfim = psfimages[i]
+                    mask = N.zeros(psfim.shape, dtype=bool)
+                    x_ax, y_ax = N.indices(psfim.shape) 
+                    maxv = N.max(psfim)
+                    p_ini = [maxv, (psfim.shape[0]-1)/2.0*1.1, (psfim.shape[1]-1)/2.0*1.1, bm_pix[0]/fwsig*1.3, 
+                             bm_pix[1]/fwsig*1.1, bm_pix[2]*2]
+                    para, ierr = func.fit_gaus2d(psfim, p_ini, x_ax, y_ax, mask)
+                    psf_maj[i] = para[3]
+                    psf_min[i] = para[4]
+                    psf_pa[i] = para[5]
+                    if img.opts.quiet == False:
+                        bar.increment()
+    
+                # Interpolate grid using griddata
+                maj_array = N.zeros(image.shape)
+                min_array = N.zeros(image.shape)
+                pa_array = N.zeros(image.shape)
                 for i, coord in enumerate(psfcoords):
-                    intile = N.where(volrank == volrank[tuple(coord)])
-                    maj_interp_nearest[intile] = maj_values[i]
-                    min_interp_nearest[intile] = min_values[i]
-                    pa_interp_nearest[intile] = pa_values[i]
-                blanktiles = N.where(maj_interp_nearest == 0)
-                maj_interp_nearest[blanktiles] = N.mean(maj_values)
-                min_interp_nearest[blanktiles] = N.mean(min_values)
-                pa_interp_nearest[blanktiles] = N.mean(pa_values)         
-                maj_interp[nodata] = maj_interp_nearest[nodata]
-                min_interp[nodata] = min_interp_nearest[nodata]
-                pa_interp[nodata] = pa_interp_nearest[nodata]
-                        
-            # Store interpolated images
-            img.psf_vary_maj = maj_interp
-            img.psf_vary_min = min_interp
-            img.psf_vary_pa = pa_interp
-            if opts.output_all:
-                func.write_image_to_file(img.use_io, img.imagename + '.maj_interp.fits', N.transpose(maj_interp), img, dir)
-                func.write_image_to_file(img.use_io, img.imagename + '.min_interp.fits', N.transpose(min_interp), img, dir)
-                func.write_image_to_file(img.use_io, img.imagename + '.pa_interp.fits', N.transpose(pa_interp), img, dir)
-            
-            # Loop through source and Gaussian lists and deconvolve the sizes using appropriate beam
-            bar = statusbar.StatusBar('Correcting deconvolved source sizes ..... : ', 0, img.nsrc)
-            for src in img.sources:
-                src_pos = img.sky2pix(src.posn_sky_centroid)
-                src_pos_int = (int(src_pos[0]), int(src_pos[1]))
-                gaus_c = img.beam2pix(src.size_sky)
-                gaus_bm = [maj_interp[src_pos_int]*fwsig, min_interp[src_pos_int]*fwsig, pa_interp[src_pos_int]*fwsig]
-                gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
-                src.deconv_size_sky = img.pix2beam(gaus_dc)
-                src.deconv_size_skyE = [0.0, 0.0, 0.0]
-                for g in src.gaussians:
-                    gaus_c = img.beam2pix(g.size_sky)
+                    maj_array[tuple(coord)] = psf_maj[i]
+                    min_array[tuple(coord)] = psf_min[i]
+                    posang = psf_pa[i]
+                    while posang >= 180.0:
+                        posang -= 180.0
+                    pa_array[tuple(coord)] = posang
+                points = N.where(maj_array > 0.0)
+                x = N.array(points[0], dtype=float)
+                y = N.array(points[1], dtype=float)
+                maj_values = N.array(maj_array[points])
+                min_values = N.array(min_array[points])
+                pa_values = N.array(pa_array[points])
+                
+                # Before proceeding, check whether the variation is significant.
+                # If not, stop here
+                
+                
+                xi = N.linspace(0,image.shape[0],image.shape[0])
+                yi = N.linspace(0,image.shape[1],image.shape[1])
+                maj_interp = griddata(x, y, maj_values, xi, yi)
+                min_interp = griddata(x, y, min_values, xi, yi)
+                pa_interp = griddata(x, y, pa_values, xi, yi)
+                
+                # Now fill in regions outside the grid.
+                # First check if they are masked arrays and, if so, convert to 
+                # normal arrays.
+                if hasattr(maj_interp, 'filled'):
+                    maj_interp.filled(N.nan)
+                    min_interp.filled(N.nan)
+                    pa_interp.filled(N.nan)
+                    maj_interp = N.array(maj_interp)
+                    min_interp = N.array(min_interp)
+                    pa_interp = N.array(pa_interp)
+                nodata = N.where(N.isnan(maj_interp))
+                # Now fill NaNs with values in tiles
+                if len(nodata[0]) > 0:
+                    maj_interp_nearest = N.zeros(image.shape)
+                    min_interp_nearest = N.zeros(image.shape)
+                    pa_interp_nearest = N.zeros(image.shape)
+                    for i, coord in enumerate(psfcoords):
+                        intile = N.where(volrank == volrank[tuple(coord)])
+                        maj_interp_nearest[intile] = maj_values[i]
+                        min_interp_nearest[intile] = min_values[i]
+                        pa_interp_nearest[intile] = pa_values[i]
+                    blanktiles = N.where(maj_interp_nearest == 0)
+                    maj_interp_nearest[blanktiles] = N.mean(maj_values)
+                    min_interp_nearest[blanktiles] = N.mean(min_values)
+                    pa_interp_nearest[blanktiles] = N.mean(pa_values)         
+                    maj_interp[nodata] = maj_interp_nearest[nodata]
+                    min_interp[nodata] = min_interp_nearest[nodata]
+                    pa_interp[nodata] = pa_interp_nearest[nodata]
+                            
+                # Store interpolated images
+                img.psf_vary_maj = maj_interp
+                img.psf_vary_min = min_interp
+                img.psf_vary_pa = pa_interp
+                if opts.output_all:
+                    func.write_image_to_file(img.use_io, img.imagename + '.maj_interp.fits', N.transpose(maj_interp), img, dir)
+                    func.write_image_to_file(img.use_io, img.imagename + '.min_interp.fits', N.transpose(min_interp), img, dir)
+                    func.write_image_to_file(img.use_io, img.imagename + '.pa_interp.fits', N.transpose(pa_interp), img, dir)
+                
+                # Loop through source and Gaussian lists and deconvolve the sizes using appropriate beam
+                bar = statusbar.StatusBar('Correcting deconvolved source sizes ..... : ', 0, img.nsrc)
+                for src in img.sources:
+                    src_pos = img.sky2pix(src.posn_sky_centroid)
+                    src_pos_int = (int(src_pos[0]), int(src_pos[1]))
+                    gaus_c = img.beam2pix(src.size_sky)
+                    gaus_bm = [maj_interp[src_pos_int]*fwsig, min_interp[src_pos_int]*fwsig, pa_interp[src_pos_int]*fwsig]
                     gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
-                    g.deconv_size_sky = img.pix2beam(gaus_dc)
-                    g.deconv_size_skyE = [0.0, 0.0, 0.0]
-                    bar.spin()
-                bar.increment()
+                    src.deconv_size_sky = img.pix2beam(gaus_dc)
+                    src.deconv_size_skyE = [0.0, 0.0, 0.0]
+                    for g in src.gaussians:
+                        gaus_c = img.beam2pix(g.size_sky)
+                        gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
+                        g.deconv_size_sky = img.pix2beam(gaus_dc)
+                        g.deconv_size_skyE = [0.0, 0.0, 0.0]
+                        bar.spin()
+                    bar.increment()
 
 ##################################################################################################
 
@@ -362,8 +375,13 @@ class Op_psf_vary(Op):
         return s_c, s_dm
     
 ##################################################################################################
-    def get_unresolved(self, g_gauls, beam, nsig, kappa2, over, plot):
-        "Gets subset of unresolved sources"
+    def get_unresolved(self, g_gauls, beam, nsig, kappa2, over, bright_snr_cut=20.0, plot=False):
+        """"Gets subset of unresolved sources
+        
+        Also flags as unresolved all sources with SNRs above 
+        bright_cut_snr, since fitting below is unreliable for bright
+        sources.
+        """
     
         num=len(g_gauls[0])
         b1=N.asarray(g_gauls[4])/(beam[0]*3600.)
@@ -397,7 +415,15 @@ class Op_psf_vary(Op):
           dumr = N.sqrt(s_c[0]*s_c[0]+s_c[1]*s_c[1]/(snr*snr))
           med = s_dm[0]+s_dm[1]*logsnr+s_dm[2]*(logsnr*logsnr)
           f_sclip[idx] = N.abs((nbeam-med)/(med*dumr)) < N.array([kappa2]*num)
-          f_s = f_sclip[0]*f_sclip[1]
+        f_s = f_sclip[0]*f_sclip[1]
+    
+        # Add bright sources
+        if bright_snr_cut != None:
+            if bright_snr_cut < 20.0:
+                bright_snr_cut = 20.0
+            bright_srcs = N.where(snr >= bright_snr_cut)
+            if len(bright_srcs[0]) > 0:
+                f_s[bright_srcs] = True
     
           # now make plots
 #           if plot:
@@ -443,7 +469,7 @@ class Op_psf_vary(Op):
         return (wtavbm - N.array([beam[0]*3600.0, beam[1]*3600.0, beam[2]]))/wtstdbm
     
 ##################################################################################################
-    def get_voronoi_generators(self, g_gauls, generators, gencode, snrcut, snrtop, snrbot):
+    def get_voronoi_generators(self, g_gauls, generators, gencode, snrcut, snrtop, snrbot, snrcutstack):
         """This gets the list of all voronoi generators. It is either the centres of the brightest
         sources, or is imported from metadata (in future). generators=calib implies only one source
         per facet, and sources between snrtop and snrmax are primary generators. generators=field 
@@ -453,39 +479,29 @@ class Op_psf_vary(Op):
         from math import sqrt
     
         num=len(g_gauls[0])
-        snr=N.array(N.asarray(g_gauls[1])/N.array(g_gauls[8]))
+        snr=N.asarray(g_gauls[1])/N.asarray(g_gauls[8])
+
         index=snr.argsort()
         snr = snr[index]
         x = N.asarray(g_gauls[2])[index]
         y = N.asarray(g_gauls[3])[index]
-    
-        # choose brightest source even if flagged as resolved since flagging isnt 
-        # that reliable at high snr.
+        
         cutoff = 0; npts = 0
         if generators == 'calibrators':
             if gencode != 'file': gencode = 'list'
             if gencode == 'list':
-                if snrtop == 0.:
-                    minnum = min(20,num)  # atleast 20 sources
-                    maxsnr = 0.1*snr[num] # go downto atleast 0.1*maxsnr
-                    minsnr=20.0
-                    if minsnr < snrcut: minsnr = snrcut
-                    if snr[0] > maxsnr: maxsnr = snr[0]
-                    if maxsnr < minsnr: maxsnr = sqrt(minsnr*snr[num])
-                    dumi = snr.searchsorted(maxsnr)
-                    dumi1 = snr.searchsorted(minsnr)
-                    cutoff = min(dumi, num-minnum)
-                    if snr[num-minnum] < maxsnr:
-                        cutoff = num - minnum
-                    else:
-                        cutoff = dumi
-                    if snr[cutoff] < minsnr: cutoff = dumi1
-                else:
-                    cutoff = int(round(num*(1.0-snrtop)))
+                cutoff = int(round(num*(1.0-snrtop)))
+                # Make sure we don't fall below snrcutstack (SNR cut for stacking of PSFs), since
+                # it makes no sense to make tiles with generators that fall below this cut.
+                if snr[cutoff] < snrcutstack: cutoff = snr.searchsorted(snrcutstack)
+                if cutoff < 2:
+                    cutoff = 2
                 npts = num - cutoff + 1
     
         if generators == 'field':
             cutoff = int(round(num*(1.0-snrtop)))
+            if cutoff < 2:
+                cutoff = 2
             npts = num - cutoff + 1
             cutoffs = int(round(num*(1.0-snrbot)))
             nptss = cutoff - cutoffs
@@ -493,8 +509,17 @@ class Op_psf_vary(Op):
         if generators == 'calibrators':
             if gencode == 'file':
                 raise NotImplementedError, "gencode=file not yet implemented."
-    # for all generator/gencode combinations
-        vorogenP = N.asarray([x[num-1:cutoff-2:-1], y[num-1:cutoff-2:-1], snr[num-1:cutoff-2:-1]])
+
+        x1 = x.tolist()
+        y1 = y.tolist()
+        x1.reverse()
+        y1.reverse()
+        x=x1
+        y=y1
+        snr1 = snr.tolist()
+        snr1.reverse()
+        snr = snr1
+        vorogenP = N.asarray([x[0:cutoff-2], y[0:cutoff-2], snr[0:cutoff-2]])
     
     # for generator=field
         vorogenS = None
@@ -522,7 +547,7 @@ class Op_psf_vary(Op):
             dist = N.array(map(lambda t: func.dist_2pt(coord[i], t), coord))
             indi = N.argsort(dist)
             sortdist = dist[indi]
-            if dist[1] < frac*dist[2]:    # first is the element itself
+            if sortdist[1] < frac * sortdist[2]:    # first is the element itself
               if flag[indi[1]] + flag[i] == 0:   #  not already deleted from other pair
                 tile_list.append([i, indi[1]])
                 tile_coord.append((coord[i]*snrgen[i]+coord[indi[1]]*snrgen[indi[1]])/(snrgen[i]+snrgen[indi[1]]))
@@ -531,7 +556,7 @@ class Op_psf_vary(Op):
                 flag[indi[1]] = 1
             else:
               if len(dist) > 3:
-                if dist[1]+dist[2] < frac*dist[3]: # for 3 close-by sources
+                if sortdist[1]+sortdist[2] < 2.0*frac*sortdist[3]: # for 3 close-by sources
                   in1=indi[1]
                   in2=indi[2]
                   if flag[in1]+flag[in2]+flag[i] == 0: # not already deleted from others
@@ -546,7 +571,14 @@ class Op_psf_vary(Op):
                 tile_list.append([i])
                 tile_coord.append(coord[i])
                 tile_snr.append(snrgen[i])
-    
+
+        # Assign any leftover generators
+        for i in range(len(xgen)):
+            if flag[i] == 0:
+                tile_list.append([i])
+                tile_coord.append(coord[i])
+                tile_snr.append(snrgen[i])
+                   
         return tile_list, tile_coord, tile_snr
        
 ##################################################################################################
@@ -721,8 +753,8 @@ class Op_psf_vary(Op):
         return psfimage
     
 ##################################################################################################
-    def psf_in_tile(self, image, beam, g_gauls, flag_unresolved, cdelt, factor, snrcutstack, volrank, \
-                    tile_prop, r2t, plot):
+    def psf_in_tile(self, image, beam, g_gauls, cdelt, factor, snrcutstack, volrank, \
+                    tile_prop, plot):
         """ For each tile given by tile_prop, make a list of all gaussians in the constituent tesselations
         and pass it to stackpsf with a weight for each gaussian, to calculate the average psf per tile.
     
@@ -730,7 +762,7 @@ class Op_psf_vary(Op):
     
         tile_list, tile_coord, tile_snr = tile_prop
         tr_gaul = self.trans_gaul(g_gauls)
-        tr=[n for i, n in enumerate(tr_gaul) if flag_unresolved[i] and n[1]/n[8] >= snrcutstack]
+        tr=[n for i, n in enumerate(tr_gaul) if n[1]/n[8] >= snrcutstack]
         ntile = len(tile_list)
         psfimages = []
         psfcoords = []
@@ -748,10 +780,11 @@ class Op_psf_vary(Op):
             pl.text(xt[i], yt[i], str(i))
     
         for itile in range(ntile):
-            tile_gauls = [n for n in tr if r2t[volrank[int(round(n[2])),int(round(n[3]))]-1] \
+            tile_gauls = [n for n in tr if volrank[int(round(n[2])),int(round(n[3]))]-1 \
                        == itile]
             t_gauls = self.trans_gaul(tile_gauls)
-            srcpertile[itile] = len(t_gauls[0])
+
+            srcpertile[itile] = len(tile_gauls)
             if plot: 
               pl.plot(t_gauls[2], t_gauls[3], 'x'+'k', mew=1.3)#colours[itile])
               for i, ig in enumerate(t_gauls[2]):
@@ -791,7 +824,8 @@ class Op_psf_vary(Op):
            pl.contour(im,15)
            pl.title(titl, fontsize='small')
            pl.setp(a, xticks=[], yticks=[])
-    
+         pl.show()
+         
         return psfimages, psfcoords, totpsfimage
     
     

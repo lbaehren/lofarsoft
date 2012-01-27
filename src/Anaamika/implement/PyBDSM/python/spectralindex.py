@@ -1,7 +1,6 @@
-
 """Module Spectral index.
-   See detailed notes at http://www/LofarWiki/doku.php?id=wiki:pybdsm_spin 
-   for the implementation model.
+    
+    This module calculates spectral indices for Gaussians and sources for a multichannel cube. 
 
    img.opts.beam_spectrum is None for now, assumed to be constant. Else is list of beam per channel,
    beam being list of 3.
@@ -84,7 +83,7 @@ class Op_spectralindex(Op):
                                                 # calculate the rms of each channel
 
         nchan = avimage.shape[0]
-        rms_spec = self.rms_spectrum(img, avimage)
+        rms_spec = self.rms_spectrum(img, avimage) # bar1 updated here
 
         bar2 = statusbar.StatusBar('Calculating spectral indices for sources  : ', 0, img.nsrc)
         if img.opts.quiet == False:
