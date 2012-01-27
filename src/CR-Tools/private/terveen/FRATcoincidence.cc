@@ -448,42 +448,42 @@ namespace FRAT {
                             
                             
                             
-                        DeDispersedBuffer[rest]+=value;
-                        blocksum+=DeDispersedBuffer[rest];
-                        SumDeDispersed[rest]=DeDispersedBuffer[rest];
-                        float subsum=0;
-                        for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
-                        SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
-                        SBsumsamples++;
-                        SBaverage+=subsum;
-                        if(subsum>itsTriggerThreshold) {
-                            //ADD TRIGGER ALGORITHM OR FUNCTION
-                            if(totaltime+itsReferenceTime-trigger.time>5){
-                                //new trigger
-                                //trigger.average[fc]/=triggerlength[fc];
-                                //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-                                trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
-                                
-                                trigger.sum=subsum;
-                                trigger.length=1;
-                                trigger.sample=time;
-                                trigger.block=itsBlockNumber;
-                                trigger.max=subsum;
+                    DeDispersedBuffer[rest]+=value;
+                    blocksum+=DeDispersedBuffer[rest];
+                    SumDeDispersed[rest]=DeDispersedBuffer[rest];
+                    float subsum=0;
+                    for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                    SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
+                    SBsumsamples++;
+                    SBaverage+=subsum;
+                    if(subsum>itsTriggerThreshold) {
+                        //ADD TRIGGER ALGORITHM OR FUNCTION
+                        if(totaltime+itsReferenceTime-trigger.time>5){
+                            //new trigger
+                            //trigger.average[fc]/=triggerlength[fc];
+                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
+                            trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
                             
-                            }
-                            else{
-                                //old trigger, or trigger accross blocks
-                                trigger.sum+=subsum;
-                                trigger.length++;
-                                //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-                                trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                                if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
-                            }
-                        } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
-                            //trigger.utc_second=10000;
-                            unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
-                            unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond;
+                            trigger.sum=subsum;
+                            trigger.length=1;
+                            trigger.sample=time;
+                            trigger.block=itsBlockNumber;
+                            trigger.max=subsum;
+                        
+                        }
+                        else{
+                            //old trigger, or trigger accross blocks
+                            trigger.sum+=subsum;
+                            trigger.length++;
+                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
+                            trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
+                            if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
+                        }
+                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                        //trigger.utc_second=10000;
+                        unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                        unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
                             trigger.utc_second=itsStarttime_utc_sec+utc_second;
                             trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
                             SendTriggerMessage(trigger);

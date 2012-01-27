@@ -424,9 +424,11 @@ int main (int argc,
 	SubbandTrigger* SBTs[nstreams][nDMs];
     cout << "* " <<  sizeof(CoinCheck) << endl;
     //float *data=(float*)malloc(blockdatasize);
-    CoinCheck *cc = (CoinCheck*)malloc(nDMs*sizeof(CoinCheck));
+    //CoinCheck *cc = (CoinCheck*)malloc(nDMs*sizeof(CoinCheck));
+    CoinCheck *cc = new CoinCheck[nDMs];
+    //CoinCheck cc[nDMs];
     //for(int i=nDMs-1;i>=0;i--){
-    //   cc[i]=new CoinCheck();
+    //   cc[i]=new CoinCheck;
     //}
     
     if (cc==NULL)
@@ -435,7 +437,6 @@ int main (int argc,
 		return 1;
 	}
 	//CoinCheck cc[nDMs];
-    cout << "* " << endl;
 	
 	
 	
@@ -603,20 +604,6 @@ int main (int argc,
         
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
         //flagdata
-        cout << "About to swap " << blockdatasize << " floats" << endl;
-        
-        unsigned char *datachar=(unsigned char*) data;
-
-        
-        if(DoPadding){
-            SwapFloats(datachar,nFreqs*samples);
-            /*
-            for(int i=0;i<nFreqs*samples;i++) 
-            {
-              data[i] = FloatSwap(data[i]);
-            }  
-             */
-        }
         cout << "Done swapping floats" << endl;
         /*
         float FloatSwap( float f )
@@ -645,6 +632,20 @@ int main (int argc,
             //i--; //1 file k--
             continue;
         }
+        cout << "About to swap " << blockdatasize << " floats" << endl;
+        
+        unsigned char *datachar=(unsigned char*) data;
+
+        
+        if(DoPadding){
+            SwapFloats(datachar,nFreqs*samples);
+            /*
+            for(int i=0;i<nFreqs*samples;i++) 
+            {
+              data[i] = FloatSwap(data[i]);
+            }  
+             */
+        }
         for(int i=0; i<BadChannels.size(); i++){
             ch=BadChannels[i];
 //            cout << "Flagging channel " << ch << endl;
@@ -656,18 +657,21 @@ int main (int argc,
         }
         
 		for(int sc=0; sc < nstreams; sc++){
+            /*
             #ifdef _OPENMP
                 std::cout<<"Running in parallel mode"<<std::endl;
-            #pragma omp parallel for private(foundpulse)
+            //#pragma omp parallel for private(foundpulse)
             #else
                 std::cout<<"Running in serial mode"<<std::endl;
             #endif // _OPENMP
-			for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
+		    */
+        	for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
 				cout << "Processing " << sc << " " << DMcounter << endl;
 				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
-
+                cout << "f" <<  foundpulse << endl;
 				datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
 				if(foundpulse){ 
+                    cout << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
 					triggerlogfile << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
                     alltriggerlogfile << "pulse " << pulsenr << " " <<SBTs[sc][DMcounter]->FoundTriggers();
                     alltriggerlogfile.close();

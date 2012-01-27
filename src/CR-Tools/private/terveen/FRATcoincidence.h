@@ -20,8 +20,8 @@
 //#
 //#  $Id: FRATcoincidence.cc 2010-05-06 14:22:43Z veen $
 
-#ifndef STATIONCU_TBBCONTROL_VHECRTASK_H
-#define STATIONCU_TBBCONTROL_VHECRTASK_H
+#ifndef FRAT_COINCIDENCE_H
+#define FRAT_COINCIDENCE_H
 
 //# Common Includes
 //#include <Common/LofarLogger.h>
