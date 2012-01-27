@@ -16,7 +16,7 @@ import numpy as np
 deg=pi/180.
 pi2=pi/2.
 
-def gatherresults(filefilter,pol,excludelist,plotlora):
+def gatherresults(filefilter,pol,excludelist,plotlora,goodonly):
     """This function returns a dictionary with selected results from file in the subdirectories (/pol?/*/) of the filedir that are needed for the plotfootprint task."""
     if not filefilter:
         return None
@@ -43,34 +43,55 @@ def gatherresults(filefilter,pol,excludelist,plotlora):
             resfile=open(os.path.join(datadir,"results.py"))
             res={}
             execfile(os.path.join(datadir,"results.py"),res)
+            
             res=res["results"]
-            antid[res["polarization"]].extend([int(v) for v in res["antennas"].values()])
-            positions2[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])
-            signal[res["polarization"]].extend(res["pulses_maxima_y"])
-            ndipoles[res["polarization"]]+=res["ndipoles"]
+            try:
+                status = res["status"]
+            except:
+                status = "OK assumed" #the status has not be propagated for old files
+                
+            pulseoffset=res["SAMPLE_NUMBER"]+res["pulse_start_sample"]+res["BLOCKSIZE"]
+            pulseoffset/=res["SAMPLE_FREQUENCY"]
+            antset=res["ANTENNA_SET"]
+            par["loracore"] = res["pulse_core_lora"]
+            par["loradirection"] = res['pulse_direction_lora']
+            
+            if goodonly:
+                if 'OK' in status:
+                    print status
+                    antid[res["polarization"]].extend([int(v) for v in res["antennas"].values()])
+                    positions2[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])
+                    signal[res["polarization"]].extend(res["pulses_maxima_y"])
+                    ndipoles[res["polarization"]]+=res["ndipoles"]
+                    stationtimelags=[l+pulseoffset for l in res["pulses_timelags_ns"]]
+                    timelags[res["polarization"]].extend(stationtimelags)
+            else:
+                antid[res["polarization"]].extend([int(v) for v in res["antennas"].values()])
+                positions2[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])
+                signal[res["polarization"]].extend(res["pulses_maxima_y"])
+                ndipoles[res["polarization"]]+=res["ndipoles"]
+                stationtimelags=[l+pulseoffset for l in res["pulses_timelags_ns"]]
+                timelags[res["polarization"]].extend(stationtimelags)   
+            
             if not "BLOCKSIZE" in res.keys():
                 print "Warning blocksize not provided, using default of 65536"
                 res["BLOCKSIZE"]=65536
-            pulseoffset=res["SAMPLE_NUMBER"]+res["pulse_start_sample"]+res["BLOCKSIZE"]
-            pulseoffset/=res["SAMPLE_FREQUENCY"]
+
             
-            stationtimelags=[l+pulseoffset for l in res["pulses_timelags_ns"]]
-            timelags[res["polarization"]].extend(stationtimelags)
-            #timelags[res["polarization"]].extend(res["pulses_timelags_ns"])
+
 
     if "res" not in dir():
         return None
-    antset=res["ANTENNA_SET"]
+    
     if "TIME" not in res.keys():
         assert False
-#res["TIME"]=1307920753 if "event-1" in res["FILENAME"] else None
+    
     if plotlora:
         lorainfo=lora.loraInfo(res["TIME"])
         for k in ["core","direction","energy"]:
             par["lora"+k]=lorainfo[k]
     
         par["loraarrivaltimes"]=cr.hArray(float,dimensions=len(lorainfo["10*nsec"]),fill=lorainfo["10*nsec"])/1e10
-    
         par["lorapositions"]=[]
         for k in ["posX","posY","posZ"]:
             par["lorapositions"].extend(lorainfo[k])
@@ -79,14 +100,8 @@ def gatherresults(filefilter,pol,excludelist,plotlora):
 
 
     clockcorrection=cr.metadata.get("ClockCorrection",antid[pol],antset,return_as_hArray=True)
-    #par["positions"]=cr.metadata.get("AntennaPositions",antid[pol],antset,return_as_hArray=True)
     par["positions"] = cr.hArray(float,[ndipoles[pol],3],positions2[pol],name="Antenna Positions",units="m")
-    #par["positions"]=cr.metadata.get("RelativeAntennaPositions",antid[pol],antset,return_as_hArray=True)
     par["power"]=cr.hArray(signal[pol])
-#indexvec=cr.hArray(int,dimensions=par["power"])
-#nrgrt=cr.hFindGreaterThan(indexvec,par["power"],1.0e15)
-#zerovec=cr.hArray(float,dimensions=nrgrt.val(),fill=1e-5)
-#par["power"][indexvec[0:3]]=par["power"].min()
     par["arrivaltime"]=cr.hArray(timelags[pol])+clockcorrection
     par["arrivaltime"]-=min(par["arrivaltime"])
     par["arrivaltime"]*=1e9
@@ -159,9 +174,11 @@ class plotfootprint(tasks.Task):
     parameters=dict(
         filefilter={default:None,doc:"Obtains results from subdirectories of these files (from results.py)"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
-        plotlora={default:True,doc:"Plot the LORA data when positions are present?"},
+        plotlora={default:True,doc:"Plot the LORA data when positions are present"},
+        plotlorashower={default:True,doc:"Plot LORA shower data, when stored in LOFAR results"},
         excludelist={default:None,doc:"List with stations not to take into account when making the footprint"},
-        results=p_(lambda self:gatherresults(self.filefilter,self.pol,self.excludelist,self.plotlora),"hArray with BLAAT transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
+        goodonly={default:False,doc:"Enables drawing of only stations that have been reconstructed as goog"},
+        results=p_(lambda self:gatherresults(self.filefilter,self.pol,self.excludelist,self.plotlora,self.goodonly),"hArray with BLAAT transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
         positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
         size={default:300,doc:"Size of largest point."},
         sizes_min={default:None,doc:"If set, then use this as the minimum scale for the sizes, when normalizing and plotting."},
@@ -191,7 +208,6 @@ class plotfootprint(tasks.Task):
         lofarshape={default:"o",doc:"Shape of LOFAR antennas. e.g. 'o' for circle, '^' for triangle"},
         loracolor={default:"#730909",doc:"Color used for LORA plots. If set to 'time' uses the arrival time" },
         plotlayout={default:True,doc:"Plot the LOFAR layout of the stations as the background"},
-        plotbarycenter={default:True,doc:"Indicate barycenter obtained from LOFAR signals"},
         filetype={default:"png",doc:"extension/type of output file"},
         usecolorbar={default:True,doc:"print the colorbar?"},
         save_images = {default:False,doc:"Enable if images should be saved to disk in default folder"},
@@ -199,28 +215,6 @@ class plotfootprint(tasks.Task):
         
         )
         
-
-    def CalculateBaryCenter(self,positions, signals):
-
-        pos1 = cr.hArray_transpose(positions)[0].vec()
-        pos1 = cr.hArray(pos1)
-        pos2 = cr.hArray_transpose(positions)[1].vec()
-        pos2 = cr.hArray(pos2)
-
-        SumSig = signals.sum()
-        
-        x_val = pos1*signals
-        sum_x = x_val.sum()
-        sum_x = sum_x/SumSig
-        
-        y_val = pos2*signals
-        sum_y = y_val.sum()
-        sum_y = sum_y/SumSig
-                
-        core = [sum_x[0],sum_y[0]]
-        
-        print "Calculated", core
-        return core
         
     def call(self):
         pass
@@ -260,8 +254,6 @@ class plotfootprint(tasks.Task):
         else:
             raise TypeError("PlotAntennaLayout: parameter 'colors' needs to be string or an hArray thereof.")
             
-        if self.positions and self.power:
-            LofarCore = self.CalculateBaryCenter(self.positions,self.power)
                
 
         if self.loracolor is "time": 
@@ -292,6 +284,7 @@ class plotfootprint(tasks.Task):
         if self.usecolorbar:
             self.cbar=cr.plt.colorbar()
             self.cbar.set_label("Time of arrival (ns)")
+       
         if self.plotlora:
             if isinstance(self.lorapower,(list)):
                 self.lorapower=cr.hArray(self.lorapower)
@@ -323,8 +316,16 @@ class plotfootprint(tasks.Task):
                     dsin=cr.sin(cr.radians(self.loradirection[0]))
                     elev=self.loradirection[1]
                     cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=3,color='red',ls='dashed',hatch='\\')
-        if self.plotbarycenter:
-            cr.plt.scatter(LofarCore[0],LofarCore[1],s=80,c = "black", marker='d')            
+        elif self.plotlorashower:
+            if self.loracore:
+                cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=200,color='red',linewidth=3)
+                if self.loradirection:
+                    dcos=cr.cos(cr.radians(self.loradirection[0]))
+                    dsin=cr.sin(cr.radians(self.loradirection[0]))
+                    elev=self.loradirection[1]
+                    cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=3,color='red',ls='dashed',hatch='\\')    
+        
+            
         if self.names and self.plotnames:
             for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
                 cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
