@@ -58,6 +58,7 @@ def gatherresults(topdir, maxspread):
     #        if res["status"] != 'OK':
             # A 'status' keyword would be nice... Number of delay outliers above (say) 10 ns is in 'delay_outliers' key.
             noutliers = res["delay_outliers"] if "delay_outliers" in res.keys() else 0 
+            print '# outliers = %d' % noutliers
             if res["delay_quality_error"] >= 1 or noutliers > 5: # have status criterion in pipeline...
                 print 'File status not OK, dir = %s, delay quality = %s, # outliers = %s' % (datadir, res["delay_quality_error"], noutliers)
                 continue
@@ -65,8 +66,18 @@ def gatherresults(topdir, maxspread):
             positions.extend(res["antenna_positions_array_XYZ_m"]) # in flat list
             antid.extend([str(int(v)) for v in res["antennas"].values()])
             # check: same ordering for ant-id's and cable delaysin 'res'??? Relying on that.
-            cabledelays.extend(res["antennas_final_cable_delays"])  
-            residualdelays.extend(res["antennas_residual_cable_delays"])
+            cabledelays.extend(res["antennas_residual_cable_delays"])  #antennas_final_cable_delays
+            residualdelays.extend(res["antennas_residual_cable_delays_planewave"])
+            # test for spread and outliers
+            theseDelays = np.array(res["antennas_residual_cable_delays_planewave"])
+            avg = theseDelays.mean()
+            spread = theseDelays.std() * 1.0e9
+            outliercount = len(np.where(abs(theseDelays) > 3.0 * spread)[0])
+            print theseDelays
+            print 'length of array = %d' % len(theseDelays)
+            print 'Spread = %3.3f ns' % spread
+            print '# outliers for this event = %d' % outliercount
+            
             timelist = [res["TIME"]] * len(res["antennas"])
             timestamps.extend(timelist)
 
@@ -87,6 +98,12 @@ def gatherresults(topdir, maxspread):
         theseDelays = np.array(theseDelays)
         theseResiduals = np.array(cabledelays_database[key]["residuallist"])
     #    theseDelays[np.where(abs(theseDelays) > 20.0)] = float('nan')
+        # remove outliers by kicking out everything above 10.0 ns abs.
+        goodindices = np.where(abs(theseDelays) < 10.0e-9)
+        theseDelays = theseDelays[goodindices]
+        goodindices = np.where(abs(theseResiduals) < 10.0e-9)
+        theseResiduals = theseResiduals[goodindices]
+        
         avg = theseDelays.mean()
         residualavg = theseResiduals.mean()
         spread = theseDelays.std()
