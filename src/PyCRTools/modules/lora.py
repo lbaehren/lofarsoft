@@ -151,5 +151,78 @@ def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
     else:
        return (None,None)
 
+def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_average=1,cumulative=True,plotAllowed=True,plotNotAllowed=True,plotNoObservation=True,stacked=True):
+    """
+    Plot the triggers that were received from LORA at LOFAR. The trigger can be 
+    handled in three ways. Either there is no observation, so nothing is done. 
+    If there is an observation, it can do two things. Either triggering was 
+    allowed and TBB data should have been obtained, or triggering was not 
+    allowed and no TBB data was obtained.
 
+    Input parameters:
+    ===================  =====
+    *logfile*            location of LORAreceived file
+    *days_to_average*    plot histogram averaged of these many days (<1 allowed)
+    *cumulative*         intgrate over time
+    *plotAllowed*        plot triggers that were allowed to obtain TBB data
+    *plotNotAllowed*     plot triggers that were not allowed to obtain TBB data
+    *plotNoObservation*  plot triggers during a time when no observation was running
+    *stacked*            stack the triggers together
 
+    """
+    import matplotlib.pyplot as plt
+    from numpy import arange
+    import time
+    # Read in logfile
+    file=open(logfile)
+    lines=file.readlines()
+    # Only send the lines triggered by LORA
+    lines=[l for l in lines if 'LORA' in l]
+    # Select which type of trigger the timestamp belongs to
+    allowed=[int(l.split()[0]) for l in lines if 'allowed' in l and 'not' not in l]
+    notallowed=[int(l.split()[0]) for l in lines if 'allowed' in l and 'not' in l]
+    noobservation=[int(l.split()[0]) for l in lines if 'no observation' in l]
+    # Filter out false timestamps that occasionally occor
+    allowed=[a for a in allowed if a > 1000000000] 
+    notallowed=[a for a in notallowed if a > 1000000000] 
+    noobservation=[a for a in noobservation if a > 1000000000] 
+    # Convert to MJD
+    allowed=[a/86400.+40588 for a in allowed]
+    notallowed=[a/86400.+40588 for a in notallowed]
+    noobservation=[a/86400.+40588 for a in noobservation]
+    
+    plotdata=[]
+    plotlength=0
+    mylegend=[]
+    if plotAllowed:
+        plotdata.append(allowed)
+        mylegend.append('allowed')
+        plotlength+=1
+    if plotNotAllowed:
+        plotdata.append(notallowed)
+        mylegend.append('not allowed')
+        plotlength+=1
+    if plotNoObservation:
+        plotdata.append(noobservation)
+        mylegend.append('no observation')
+        plotlength+=1
+
+    if stacked:
+        histtype='barstacked'
+    else:
+        histtype='bar'
+    
+    if plotlength==1:
+        plotdata=plotdata[0]
+
+    startdate=min(allowed[0],notallowed[0],noobservation[0])
+    enddate=max(allowed[-1],notallowed[-1],noobservation[-1])
+    if days_to_average > enddate- startdate:
+        days_to_average = enddate - startdate
+    bins=arange(startdate,enddate,days_to_average)
+    plot=plt.hist(plotdata,bins=bins,histtype=histtype, cumulative=cumulative,label=mylegend)
+
+    plt.legend()
+    plt.title('Triggers send by LORA and received by LOFAR \n current date '+str(time.time()/86400+40588)[0:8]) 
+    
+    return plot 
