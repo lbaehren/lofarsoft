@@ -1949,6 +1949,7 @@ HInteger HFPP_FUNC_NAME (const Iter vecin , const Iter vecin_end,
 
   HNumber scale(abs(hfcast<HNumber>(upper_limit)-hfcast<HNumber>(lower_limit)));
   scale /= RAND_MAX;
+  srand(0xDEADBEEF); // (AC) Put in the same random number seed on each call, in order to ensure reproducible behavior.
 
   while (itin != vecin_end) {
     if (Outside(*itin,lower_limit,upper_limit)) {
@@ -2006,6 +2007,8 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   HNumber amplitude_t=hfcast<HNumber>(amplitude);
   HNumber real_part, imag_part, scale(2.0/RAND_MAX);
   HInteger r;
+  srand(0xDEADBEEF); // (AC) Put in the same random number seed on each call, in order to ensure reproducible behavior.
+
   while (itidx != index_end) {
     it = vec + *itidx;
     if ((it < vec_end) && (it >= vec)) {
@@ -2067,6 +2070,8 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, const IterI index, const
   IterA  amplitude;
   HNumber real_part, amplitude_t, imag_part, scale(2.0/RAND_MAX);
   HInteger r;
+  srand(0xDEADBEEF); // (AC) Put in the same random number seed on each call, in order to ensure reproducible behavior.
+
   while (itidx != index_end) {
     it = vec + *itidx;
     amplitude = amplitude_vec + *itidx;
