@@ -17,7 +17,7 @@ import sys
 import numpy as np
 
 
-def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
+def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
 
     eventdirs=cr.listFiles([os.path.join(topdir,event) for event in events])
     
@@ -43,45 +43,80 @@ def GetInformationFromFile(topdir, events, plot_parameter="pulses_maxima_y"):
             if not os.path.isfile(os.path.join(datadir,"results.py")):
                 continue
             resfile=open(os.path.join(datadir,"results.py"))
-#            if "nan" in resfile.read():
-#                print "WARNING nan found. skipping file", resfile.name
-#                continue
             print "Processing data results directory:",datadir
             
-            execfile(os.path.join(datadir,"results.py"),res)
-            res=res["results"]
+            try:
+                execfile(os.path.join(datadir,"results.py"),res)
+                res=res["results"]
+            except:
+                continue
+                print "File skipped, NaN found!" 
             
-            antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
-             
-            positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
+            try:
+                status = res["status"]
+            except:
+                status = "OK assumed" #the status has not be propagated for old files
+            
+            if goodonly:
 
-            # check, which pulse definition most suitable for LDF ploting
+                if "OK" in status: 
+                    antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
+                    positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
+    
+                    # Comment: Still to check, which pulse definition most suitable for LDF ploting
+                  
+                    signal[res["polarization"]].extend(res[plot_parameter])
+                    rms[res["polarization"]].extend(res["timeseries_rms"])
+                    ndipoles[res["polarization"]]+=res["ndipoles"]
+                
+                    # Average Station data
+                
+                    MPos = cr.hArray(float,[3])
+                    MSig = cr.hArray(float,[1]) 
+                    postemp = cr.hArray(float,[res["ndipoles"],3],res["antenna_positions_array_XYZ_m"])
+                    sigtemp = cr.hArray(float,[res["ndipoles"],1],res[plot_parameter])
+                    MPos.mean(postemp)
+                    MSig.mean(sigtemp)
+                
+                    stationname=res["antennas"][0][0:3]
+                
+                    meansignal[res["polarization"]].extend(MSig)
+                    meanpos[res["polarization"]].extend(MPos)
+                
+                    if res["polarization"] == 0:
+                        names0.append(stationname)
+                    else:
+                        names1.append(stationname)
+                    
+            else:
+                antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
+                positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
+
+            # Comment: Still to check, which pulse definition most suitable for LDF ploting
               
-            signal[res["polarization"]].extend(res[plot_parameter])
-            
-            rms[res["polarization"]].extend(res["timeseries_rms"])
-            
-            
-            ndipoles[res["polarization"]]+=res["ndipoles"]
+                signal[res["polarization"]].extend(res[plot_parameter])
+                rms[res["polarization"]].extend(res["timeseries_rms"])
+                ndipoles[res["polarization"]]+=res["ndipoles"]
             
             # Average Station data
             
-            MPos = cr.hArray(float,[3])
-            MSig = cr.hArray(float,[1]) 
-            postemp = cr.hArray(float,[res["ndipoles"],3],res["antenna_positions_array_XYZ_m"])
-            sigtemp = cr.hArray(float,[res["ndipoles"],1],res[plot_parameter])
-            MPos.mean(postemp)
-            MSig.mean(sigtemp)
+                MPos = cr.hArray(float,[3])
+                MSig = cr.hArray(float,[1]) 
+                postemp = cr.hArray(float,[res["ndipoles"],3],res["antenna_positions_array_XYZ_m"])
+                sigtemp = cr.hArray(float,[res["ndipoles"],1],res[plot_parameter])
+                MPos.mean(postemp)
+                MSig.mean(sigtemp)
             
-            stationname=res["antennas"][0][0:3]
+                stationname=res["antennas"][0][0:3]
             
-            meansignal[res["polarization"]].extend(MSig)
-            meanpos[res["polarization"]].extend(MPos)
+                meansignal[res["polarization"]].extend(MSig)
+                meanpos[res["polarization"]].extend(MPos)
             
-            if res["polarization"] == 0:
-                names0.append(stationname)
-            else:
-                names1.append(stationname)    
+                if res["polarization"] == 0:
+                    names0.append(stationname)
+                else:
+                    names1.append(stationname)           
+                        
         
         #print "rms:", rms
         if res == {}:
@@ -172,7 +207,7 @@ class ldf(tasks.Task):
         topdir=dict(default="/data/VHECR/LORAtriggered/results",doc="provide topdir",unit=""),
         eventslist=dict(default=lambda self:self.events if isinstance(self.events,list) else [self.events],doc="list with event names to process (directories in topdir)",unit=""),
         events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="Event directories in topdir - either as list or as single string",unit=""),
-        results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.eventslist,plot_parameter=self.plot_parameter),doc="Provide task with topdirectory",unit=""),
+        results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.eventslist,plot_parameter=self.plot_parameter,goodonly=self.goodonly),doc="Provide task with topdirectory",unit=""),
         positions1=dict(default=lambda self:self.results["positions1"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 1 (x0,y0,z0,...)",unit="m"),
         positions0=dict(default=lambda self:self.results["positions0"],doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions in pol 0 (x0,y0,z0,...)",unit="m"),
         signals1=dict(default=lambda self:self.results["signals1"],doc="hArray of dimension [NAnt,1] with signals in antennas, pol 1",unit="a.u."),
@@ -193,6 +228,7 @@ class ldf(tasks.Task):
         plot_xmax = dict(default=300,doc="Maximum value of x-axis. To use turn plot_auto_scale off."),
         remove_outliers = dict(default=False,doc="enable plotting with useful axes"),
         plot_scale_auto = dict(default=True, doc="Will scales axes to maximum values, will override manual plotting boundaries and whatever plt thinks it is doing."),
+        goodonly = dict(default=False, doc="Plotting LDF only with good stations"),
         antenna_set = dict(default=lambda self:self.results["antenna_set"],doc="determines labelling of polarizations"),
         color_pol0 = dict(default='#B30424',doc="color pol 0"),
         color_pol1 = dict(default='#68C8F7',doc="color pol 1"),
@@ -392,7 +428,10 @@ class ldf(tasks.Task):
             if self.remove_outliers:
                 for i in xrange(len(self.signals0)):
                     if self.signals0[i] > 100000:
-                        self.signals0[i] = 10        
+                        self.signals0[i] = 10 
+                    if self.signals0[i] < 0.001:
+                        self.signals0[i] = 1                        
+
             
             if self.plot_scale_auto:
                 y_max0 = self.signals0.max()[0]*1.5
@@ -402,7 +441,7 @@ class ldf(tasks.Task):
                 if self.logplot:
                     #exception for too large errorbars in logplot (reaching negative numbers)
                     sig_lower0 = cr.hArray(copy=self.signaluncertainties0)
-                    sig_lower0.fill(0.00001)
+                    sig_lower0.fill(0.001)
                     cr.hMaximum(sig_lower0,self.signals0 - self.signaluncertainties0)
                     sig_uncer0 = self.signals0 - sig_lower0
                     
@@ -420,7 +459,9 @@ class ldf(tasks.Task):
             if self.remove_outliers:
                 for i in xrange(len(self.signals1)):
                     if self.signals1[i] > 100000:
-                        self.signals1[i] = 10
+                        self.signals1[i] = 10       
+                    if self.signals1[i] < 0.001:
+                        self.signals1[i] = 1
         
             if self.plot_scale_auto:
                 y_min = self.signals1.min()[0]*0.5
@@ -460,9 +501,11 @@ class ldf(tasks.Task):
             cr.plt.ylabel("Power [a.u.]")
             
         if self.plot_scale_auto:
-            cr.plt.axis(xmin=0,xmax=x_max,ymin=y_min,ymax=y_max)
+            cr.plt.xlim(0,x_max)
+            cr.plt.ylim(y_min,y_max)
         else:
-            cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
+            cr.plt.xlim(self.plot_xmin,self.plot_xmax)
+            cr.plt.ylim(0.01,10000)
         
         if self.save_images:
             directory = str(self.topdir)+"/VHECR_LORA-"+str(self.event_id)+"/"
