@@ -490,7 +490,22 @@ void writeLogging (PagedImage<Float> image,
 //                                                                    processCube
 /*! procedure for procedure processcube makes a rmsynthesis for a complete imagecube.
  *  The result is written into a rmCube object, which is in the current state handled 
- *  as a casa core cube. The frequency axis is replaced by the faraday depth .*/
+ *  as a casa core cube. The frequency axis is replaced by the faraday depth .
+ *   \param phi_min  mininal value for the reconstructed faraday depth
+ *   \param phi_max  mininal value for the reconstructed faraday depth 
+ *   \param nFara    number of values for the fararaday depth = dimension of the signal space
+ *   \param method   used method for reconstruction
+ *   \param nu_0     reference value for the frequency
+ *   \param alpha    expontent of the powerlaw part for the polarized emission
+ *   \param epsilon  emissioncoefficient 
+ *   \param input    name of the input files for the image cube
+ *   \param casaquery string to find the data inside the casa image
+ *   \param outDat   name for the output as a casa cube (rmCube)
+ *   \param useClean flag determines wether clean is used, and if it is so, which method
+ *   \param rmFakt   factor to reduce the size of the subtracted peak out of the measured data in rmClean 
+ *   \param maxIter  maximal number of separate iterations (used point sources) for rmClean
+ *   \param CleanRatio ratio for biggest peak to mean peak when the rmClean search for more point sources is stoped
+*/
 void processCube (double phi_min,
 		  double phi_max,
 		  uint nFara,
