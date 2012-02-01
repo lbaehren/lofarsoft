@@ -731,7 +731,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '\033[91mERROR\033[0m: File exists and clobber = False.'
             return False
         else:
-            print '--> Wrote ascii file ' + repr(filename)
+            print '--> Wrote ASCII file ' + repr(filename)
             return True
     if format == 'bbs':
         filename = output.write_bbs_gaul(img, filename=filename,

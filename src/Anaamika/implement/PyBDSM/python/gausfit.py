@@ -301,6 +301,8 @@ class Op_gausfit(Op):
             sub_labels, count = nd.label(act_pixels, connectivity)
             # slices has limits of bounding box of each such island
             slices = nd.find_objects(sub_labels)
+            if len(slices) == 0:
+                break
             size = []
             for idx, s in enumerate(slices):
                 idx += 1 # nd.labels indices are counted from 1

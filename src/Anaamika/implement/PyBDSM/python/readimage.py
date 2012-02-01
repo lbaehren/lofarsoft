@@ -316,13 +316,18 @@ class Op_readimage(Op):
                 except:
                     ### try see if AIPS as put the beam in HISTORY as usual
                    for h in hdr.get_history():
-                      if N.all(['BMAJ' in h, 'BMIN' in h, 'BPA' in h, 'CLEAN' in h]):
+                      # Check if h is a string or a FITS Card object (long headers are
+                      # split into Cards as of PyFITS 3.0.4)
+                      if not isinstance(h, str):
+                        hstr = h.value                        
+                      else:
+                        hstr = h
+                      if N.all(['BMAJ' in hstr, 'BMIN' in hstr, 'BPA' in hstr, 'CLEAN' in hstr]):
                         try:
-                            dum, dum, dum, bmaj, dum, bmin, dum, bpa = h.split()
+                            dum, dum, dum, bmaj, dum, bmin, dum, bpa = hstr.split()
                         except ValueError:
                             try:
-                                print h.split()
-                                dum, dum, bmaj, dum, bmin, dum, bpa, dum, dum = h.split()
+                                dum, dum, bmaj, dum, bmin, dum, bpa, dum, dum = hstr.split()
                             except ValueError:
                                 break    
                         beam = (float(bmaj), float(bmin), float(bpa))
