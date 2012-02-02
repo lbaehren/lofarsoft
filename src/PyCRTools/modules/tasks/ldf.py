@@ -188,7 +188,7 @@ def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
 class ldf(tasks.Task):
 
     """
-    This task will use the information given by the LOFAR stations (signal strength) together with information from LORA (shower core and direction) to create a plot showing the dependecy of the signal strength in the antennas on the distance to the shower axis as measured with LORA. In cosmic ray physics this is usually referred to as the lateral distribution or LDF. 
+    This task will use the information given by the LOFAR stations (signal strength) together with information from LORA (shower core and direction) to create a plot showing the dependecy of the signal strength in the antennas on the distance to the shower axis as measured with LORA. In cosmic ray physics this is usually referred to as the lateral distribution or LDF. This only works on reconstructed data. 
     
     It can take into account uncertainties on the signal strength (as soon as provided by the pipeline) as well as uncertainties on the core position and direction. If none of the uncertainties are provided the LDF will be drawn with default errors and an output warning will remind the user. 
     
@@ -242,13 +242,14 @@ class ldf(tasks.Task):
         stationnames1 = dict(default=lambda self:self.results["stationnames1"],doc="Stations in run in pol 1."),
         draw_global = dict(default=False, doc="Draw position and average signal of a LOFAR station in LDF"),
         CalcHorneffer = dict(default=False,doc="Draw expected field strength from Horneffer parametrization"),
-        Draw3D = dict(default=True,doc="Draw 2D LDF"),
+        Draw3D = dict(default=False,doc="Draw 2D LDF"),
         save_images = dict(default=False,doc="Enable if images should be saved to disk in default folder"),
         generate_html = dict(default=False,doc="Default output to altair webserver"),
         use_lofar_information = dict(default=False,doc="Use minimization to draw different LDF"),
         draw_bary_center = dict(default=False,doc="Use barycenter to draw different LDF"),
         use_lofar_with_pol = dict(default=2,doc="Calculate LOFAR core for the polarization 0 or 1 or 2=both"),
-        parameters_for_fitting = dict(default=[50,5], doc="Give minimization parameters [bins,size]")
+        parameters_for_fitting = dict(default=[50,5], doc="Give minimization parameters [bins,size]"),
+        show_azimuth_distribution = dict(default=False, doc="plot for azimuth dependence of signals" )
         
         )
         
@@ -936,9 +937,40 @@ class ldf(tasks.Task):
                 cr.plt.axis(xmin=self.plot_xmin,xmax=self.plot_xmax)
 
                             
+        if self.show_azimuth_distribution:
+             
+            self.DistPol0 = self.GetDistance(self.loracore,self.loradirection,self.positions0)
             
-                         
+            
+            self.XPos = cr.hArray_transpose(self.positions0)[0].vec()
+            self.YPos = cr.hArray_transpose(self.positions0)[1].vec()
+            
+            self.DistPlane = cr.hArray(copy=self.XPos).vec()
 
+            self.DistPlane = self.XPos*self.XPos + self.YPos*self.YPos
+            self.DistPlane.sqrt()
+            
+            #print "d", self.DistPlane
+            #print "x", self.XPos
+            
+            self.angle = cr.hArray(copy=self.XPos).vec()
+            
+            self.angle=self.XPos/self.DistPlane
+            #print "x/d", self.angle
+            self.angle.asin()
+            self.angle = self.angle * 180/(2*cr.pi)
+            #print "asin degree", self.angle
+            DistPol0 = cr.hArray(self.DistPol0).toNumpy()
+            Angle = cr.hArray(self.angle).toNumpy()
+            SignalPol0 = cr.hArray(self.signals0).toNumpy()
+            
+            #print DistPol0
+            sc = (150<DistPol0)& (DistPol0<250)
+            #print sc
+            cr.plt.clf()
+            cr.plt.plot(Angle[sc],SignalPol0[sc],linestyle="None",marker=self.marker_pol0)
+           
+            #5<DistPol>4
                
          
 
