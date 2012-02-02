@@ -26,6 +26,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
+    2010/02/02 - Improved polarisation module. Polarization quantities are
+                 now calculated for Gaussians instead of sources.
+
     2012/01/27 - Fixed bug in psf_vary module that affected tesselation. 
                  Fixed many small typos in parameter descriptions.
 
