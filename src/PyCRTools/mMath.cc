@@ -5533,3 +5533,63 @@ void HFPP_FUNC_NAME (const NIter target, const NIter target_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Returns true if all values are finite
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hIsFinite
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class NIter>
+bool HFPP_FUNC_NAME (const NIter vec, const NIter vec_end)
+{
+  bool status = true;
+
+  // Get iterator
+  NIter it_vec = vec;
+
+  while (it_vec != vec_end)
+  {
+    if (!boost::math::isfinite(*it_vec)) status = false;
+    ++it_vec;
+  }
+
+  return status;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns true if all values are normal
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hIsNormal
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class NIter>
+bool HFPP_FUNC_NAME (const NIter vec, const NIter vec_end)
+{
+  bool status = true;
+
+  // Get iterator
+  NIter it_vec = vec;
+
+  while (it_vec != vec_end)
+  {
+    if (!boost::math::isnormal(*it_vec)) status = false;
+    ++it_vec;
+  }
+
+  return status;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

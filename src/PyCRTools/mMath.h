@@ -26,6 +26,7 @@
 #include "mArray.h"
 #include "mModule.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
 
 // ========================================================================
 //  Type definitions
