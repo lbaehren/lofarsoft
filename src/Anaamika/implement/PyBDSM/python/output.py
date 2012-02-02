@@ -567,10 +567,9 @@ def make_bbs_str(img, glist, gnames, patchnames):
                   specin = str("%.3e" % (spin1[1]))
           sep = ', '
           if img.opts.polarisation_do:
-              src = get_src(img.sources, g.source_id)
-              Q_flux = str("%.3e" % (src.total_flux_Q))
-              U_flux = str("%.3e" % (src.total_flux_U))
-              V_flux = str("%.3e" % (src.total_flux_V))
+              Q_flux = str("%.3e" % (g.total_flux_Q))
+              U_flux = str("%.3e" % (g.total_flux_U))
+              V_flux = str("%.3e" % (g.total_flux_V))
           else:
               Q_flux = '0.0'
               U_flux = '0.0'
