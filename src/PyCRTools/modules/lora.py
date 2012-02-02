@@ -187,9 +187,9 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
     notallowed=[a for a in notallowed if a > 1000000000] 
     noobservation=[a for a in noobservation if a > 1000000000] 
     # Convert to MJD
-    allowed=[a/86400.+40588 for a in allowed]
-    notallowed=[a/86400.+40588 for a in notallowed]
-    noobservation=[a/86400.+40588 for a in noobservation]
+    allowed=[a/86400.+40587 for a in allowed]
+    notallowed=[a/86400.+40587 for a in notallowed]
+    noobservation=[a/86400.+40587 for a in noobservation]
     
     plotdata=[]
     plotlength=0
@@ -215,8 +215,8 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
     if plotlength==1:
         plotdata=plotdata[0]
 
-    startdate=min(allowed[0],notallowed[0],noobservation[0])
-    enddate=max(allowed[-1],notallowed[-1],noobservation[-1])
+    startdate=int(min(allowed[0],notallowed[0],noobservation[0]))
+    enddate=int(max(allowed[-1],notallowed[-1],noobservation[-1]))+2
     if days_to_average > enddate- startdate:
         days_to_average = enddate - startdate
     bins=arange(startdate,enddate,days_to_average)
