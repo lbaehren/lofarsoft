@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.30
+VERSION=3.32
  
 #####################################################################
 # Usage #
@@ -13,7 +13,7 @@ VERSION=3.30
 USAGE1="\nusage : make_subs_SAS_Ncore_Mmodes.sh -id OBS_ID -p Pulsar_names -o Output_Processing_Location [-raw input_raw_data_location] [-par parset_location] [-core N] [-all] [-all_pproc] [-rfi] [-rfi_ppoc] [-C] [-del] [-incoh_only] [-coh_only] [-incoh_redo] [-coh_redo] [-transpose] [-nofold] [-help] [-test] [-debug] [-subs]\n\n"\
 "      -id OBS_ID  ==> Specify the Observation ID (i.e. L2010_06296) \n"\
 "      -p Pulsar_names ==> Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or\n"\
-"         specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or\n"\
+"         specify the word 'position' (lower case) find associated known Pulsars in the rm FOV of observation or\n"\
 "         specify the word 'NONE' (upper case) when you want to skip the folding step of the processing\n"\
 "         (i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) \n"\
 "         (i.e. up to 3 brights pulsars to fold at location of FOV: position \n"\
@@ -355,6 +355,10 @@ else
        PARSET=`find_lofar_parset.sh $OBSID`
    else
        PARSET=$parset_location/${OBSID}.parset
+       if [[ ! -f $PARSET ]]
+       then
+          PARSET="ERROR"
+       fi
    fi
    
    if [[ $PARSET == "ERROR" ]]
@@ -404,21 +408,36 @@ echo "PARSET:" $PARSET
 #Append to the parset some additional relevant info and calc TA beam locations
 #####################################################################
 hold_pythonpath=`echo $PYTHONPATH`
+IS2=0
+nrTArings=-1
+nrTiedArrayBeams=-1
 
 if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 then
    #unsetenv PYTHONPATH
    export PYTHONPATH=""
-   echo "python /home/alexov/LOFAR/RTCP/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
-   python /home/alexov/LOFAR/RTCP/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
+###A2 changed this
+###   echo "python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
+###   python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
+   cp $PARSET ${location}/${OBSID}.parset
    PARSET=${location}/${OBSID}.parset
    #setenv PYTHONPATH $hold_pythonpath
    export PYTHONPATH="$hold_pythonpath"
+
+   # check if IS data are under the 2nd transpose
+   keyword=""
+   keyword=`grep OLAP.IncoherentStokesAreTransposed $PARSET | awk '{print $3}'`
+   if [[ $keyword == "True" ]]
+   then
+      IS2=1
+   else
+      IS2=0
+   fi
    
    #set up the beam ra,dec positions based on TA beam offsets, if TA raings > 0
-   nrTArings=-1
    nrTArings=`cat $PARSET | grep -i "nrTabRings" | head -1 | awk -F "= " '{print $2}'`
-   if [[ $nrTArings > 0 ]]
+   nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
+   if [[ $nrTArings > 0 ]] || [[ $nrTiedArrayBeams > 0 ]]
    then
       nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
       ra_center=`cat $PARSET | grep -i "Observation.Beam\[0\].angle1" | head -1 | awk -F "= " '{print $2}'`
@@ -431,8 +450,8 @@ then
          dec_offset=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].angle2" | head -1 | awk -F "= " '{print $2}'`
          ra_beam=`echo $ra_center $ra_offset | awk '{printf("%17.16f\n",$1 + $2)}'`
          dec_beam=`echo $dec_center $dec_offset | awk '{printf("%18.17f\n",$1 + $2)}'`
-         echo "Observation.Beam[$ii].angle1 = $ra_beam" >> $PARSET
-         echo "Observation.Beam[$ii].angle2 = $dec_beam" >> $PARSET
+         echo "Pulp.Beam[$ii].angle1 = $ra_beam" >> $PARSET
+         echo "Pulp.Beam[$ii].angle2 = $dec_beam" >> $PARSET
          echo "RA (rad) of TiedArrayBeam[$ii] == $ra_beam" >> $log
          echo "Dec (rad) of TiedArrayBeam[$ii] == $dec_beam" >> $log
          echo "RA (rad) of TiedArrayBeam[$ii] == $ra_beam" 
@@ -445,7 +464,8 @@ then
    fi
 else
    nrTArings=`cat $PARSET | grep -i "nrTabRings" | head -1 | awk -F "= " '{print $2}'`
-   if [[ $nrTArings > 0 ]]
+   nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
+   if [[ $nrTArings > 0 ]] || [[ $nrTiedArrayBeams > 0 ]]
    then
       nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
    else
@@ -464,10 +484,23 @@ date_seconds=`date -d "$date_obs"  "+%s"`
 date1_Apr26=`date -d "2011-04-26 00:00:00" "+%s"`
 
 #name of some parameters changed on Apr 26, 2011
-if (( $date_seconds >= $date1_Apr26 ))
+if (( $date_seconds >= $date1_Apr26 )) && (( $IS2 == 0 ))
 then
 	INCOHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_IncoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
 	COHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_CoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
+elif (( $IS2 == 1 ))
+then 
+    # always turn on coherentstokes (IS or CS beams) after IS 2nd transpose change
+	COHERENTSTOKES=true
+    INCOHERENTSTOKES=false
+    # get the IS beam number and store for later move of beam number to incoherentstokes directory
+    IS_BEAM=-1
+    IS_exist=""
+    IS_exist=`cat $PARSET | grep "coherent = F"`
+    if [[ $IS_exist != "" ]]
+    then
+       IS_BEAM=`cat $PARSET | grep "coherent = F"  | head -1 | awk -F "[" '{print $3}' | awk -F "]" '{print $1}'`
+    fi
 else 
 	INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
 	COHERENTSTOKES=`cat $PARSET | grep "OLAP.outputCoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
@@ -479,18 +512,37 @@ nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{pri
 NBEAMS=`cat $PARSET | grep "OLAP.storageStationNames" | grep -v Control | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F\, '{print NF}'`
 ARRAY=`cat $PARSET | grep "Observation.bandFilter" | awk -F "= " '{print $2}' | awk -F "_" '{print $1}'`
 CHAN=`cat $PARSET | grep "Observation.channelsPerSubband" | awk -F "= " '{print $2}'`
+if (( $IS2 == 1 ))
+then
+  CHAN_IS=`cat $PARSET | grep "OLAP.CNProc_IncoherentStokes.channelsPerSubband" | awk -F "= " '{print $2}'`
+  CHAN_CS=`cat $PARSET | grep "OLAP.CNProc_CoherentStokes.channelsPerSubband" | awk -F "= " '{print $2}'`
+fi
 DOWN=`cat $PARSET | grep "OLAP.Stokes.integrationSteps" | grep -v ObservationControl | awk -F "= " '{print $2}'`
 MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{print $2}'`
 SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
-CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
-SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
+
+# these are no longer needed
+#CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
+#SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
+
 nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
 ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
-whichStokes=`grep OLAP.Stokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+
+whichStokes=TBD
+whichStokesIS=TBD
+whichStokesCS=TBD
+if (( $IS2 == 0 ))
+then
+   whichStokes=`grep OLAP.Stokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+else
+   whichStokesIS=`grep OLAP.CNProc_IncoherentStokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+   whichStokesCS=`grep OLAP.CNProc_CoherentStokes.which *parset | head -1 | awk -F "= " '{print $2}' | sed "s/'//g"`
+fi
+
 obs_duration_min=`cat $PARSET | grep duration | grep Observation\.Beam | head -1 | awk -F "= " '{print $2/60.0}'`
 
-# set depsr -L flag based on the observation duration time (in unites of minutes)
+# set dspsr -L flag based on the observation duration time (in unites of minutes)
 if (( $obs_duration_min < 10.0 ))
 then
    dspsr_Lflag=10
@@ -498,7 +550,19 @@ else
    dspsr_Lflag=60
 fi
 
-if [[ $whichStokes != "I" ]]
+if [[ $whichStokes != "I" ]] && [[ $IS2 == 0 ]]
+then
+   echo ""
+   echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed."
+   echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed." >> $log
+   exit 1
+elif [[ $whichStokesIS != "I" ]] && [[ $IS2 == 1 ]] 
+then
+   echo ""
+   echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed."
+   echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed." >> $log
+   exit 1
+elif [[ $whichStokesCS != "I" ]] && [[ $IS2 == 1 ]] 
 then
    echo ""
    echo "ERROR: Pipeline can only process Stokes-I data;  parset shows OLAP.Stokes.which = '$whichStokes'; unable to proceed."
@@ -519,20 +583,6 @@ then
       fi
    fi
 fi
-
-## change the nrBeams to start at 1 instead of zero
-#nrBeams=$(( $nrBeams + 1 ))
-#NBEAMS=$(( $NBEAMS + 1 ))
-
-#if [[ $PULSAR == "position" ]]
-#then
-#   if [ $nrBeams > 1 ] || [ $NBEAMS > 1 ]
-#   then
-#      echo "Unable to run pipeline based on input position of multiple beams;  single beam only"
-#      echo "Unable to run pipeline based on input position of multiple beams;  single beam only" >> $log
-#      exit 1
-#   fi
-#fi
 
 #####################################################################
 #Figure out pulsars in FOV if the -p position input switch was used
@@ -698,10 +748,10 @@ echo "CHANNELS:" $CHAN
 echo "CHANNELS:" $CHAN >> $log
 echo "Number of SAMPLES:" $SAMPLES
 echo "Number of SAMPLES:" $SAMPLES >> $log
-echo "Number of Channels per Frame:" $CHANPFRAME
-echo "Number of Channels per Frame:" $CHANPFRAME >> $log
-echo "Number of Subbands per Pset:" $SUBSPPSET 
-echo "Number of Subbands per Pset:" $SUBSPPSET >> $log
+#echo "Number of Channels per Frame:" $CHANPFRAME
+#echo "Number of Channels per Frame:" $CHANPFRAME >> $log
+#echo "Number of Subbands per Pset:" $SUBSPPSET 
+#echo "Number of Subbands per Pset:" $SUBSPPSET >> $log
 echo "Number of Subbands:" $nSubbands 
 echo "Number of Subbands:" $nSubbands >> $log
 echo "Incoherentstokes set to:" $INCOHERENTSTOKES
@@ -3000,6 +3050,24 @@ do
        fi
     fi
 
+    # IS 2nd transpose, move the IS beam to the incoherentstokes directory
+    if (( $IS2 == 1 ))
+    then
+       cd ${location}
+       if [[ ! -d incoherentstokes ]]
+       then
+          mkdir incoherentstokes
+       fi
+       mv stokes/RSP$IS_BEAM incoherentstokes/
+       cp stokes/* incoherentstokes
+       # lower the number of TA beams by one, since one is an IS beam
+       nrTiedArrayBeams=`echo $nrTiedArrayBeams - 1 | bc`
+       if (( $nrTiedArrayBeams == 0 ))
+       then
+          nrTArings=0
+       fi
+    fi
+
 	#create a delete list of subband files for future clean up
 	if [[ $STOKES == "incoherentstokes" ]] && [[ $subsformat == 1 ]]
 	then
@@ -3108,9 +3176,21 @@ then
 	date
 	date >> $log
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
-	tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
-	echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
-	tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
+	if (( $IS2 == 0 ))
+	then
+	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
+	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
+	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
+	   ln -s ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz
+	   ln -s ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz
+	else
+	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search | grep -v "/stokes/"`
+	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz  $tar_list" >> $log
+	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz $tar_list
+	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search | grep -v "/incoherentstokes/"`
+	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz  $tar_list" >> $log
+	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz $tar_list
+	fi
 	
 	#echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
 	#gzip ${PULSAR}_${OBSID}_plots.tar

@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/ksh  
 
 USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix [ -splits number ] \n\n"\
 "      -infile obs_finished.xml  ==> Specify the finished xml file name (i.e. Obs_B1254-10_HBA.xml) \n"\
@@ -173,7 +173,7 @@ else # if [[ $cep2 == 1 ]]
            # check if IS data are under the 2nd transpose
            keyword=""
            keyword=`grep OLAP.IncoherentStokesAreTransposed $PARSET | awk '{print $3}'`
-           if [[ $keyword == "T" ]]
+           if [[ $keyword == "True" ]]
            then
               IS2=1
            else
@@ -217,11 +217,20 @@ else # if [[ $cep2 == 1 ]]
            else
               echo '#cexec -f /etc/c3.conf locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            fi
-           echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
+           echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*CS*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
            echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/TA_heatmap.sh .; ./TA_heatmap.sh; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png status.png; convert -append *TA_heatmap_log.png  *TA_heatmap_linear.png status.png; convert -scale 200x140-0-0 status.png status.th.png; mv status_diag.png status.png"'  >> $outfile.$obsid.CS.sh
            echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset -name \*.par -name \*pdmp\* \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
 
            echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/'${obsid}'_CSplots ;  mv '${obsid}'_CSplots /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/"' >> $outfile.$obsid.CS.sh
+
+           if [[ $IS2 == 1 ]]
+           then
+              echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_redIS;  mkdir -p '${obsid}'_redIS ; cd '${obsid}'_redIS ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/incoherentstokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*IS*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
+              echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_redIS/; thumbnail_combine.sh; lofar_status_map.py; mv status_diag.png status.png"'  >> $outfile.$obsid.CS.sh
+              echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_redIS/ ; tar cvzf '${obsid}'_combinedIS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset -name \*.par -name \*pdmp\* \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
+
+              echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS ;  mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/"' >> $outfile.$obsid.CS.sh            
+           fi
 
 	       echo "./$outfile.$obsid.CS.sh > $outfile.$obsid.CS.log &" >> $outfile.all.sh	  
 	            
@@ -235,7 +244,7 @@ else # if [[ $cep2 == 1 ]]
 	
 		       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
 		    else
-		       echo "IS 2nd transpose data processing is done within the 'CS' scripts now."
+		       echo "Incoherentstokes (IS) 2nd transpose data processing is done within the 'CS' scripts now."
 		    fi
         fi
 	    ii=`expr $ii + 1`
