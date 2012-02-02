@@ -18,8 +18,8 @@ import os, sys
 lofarsoft=os.environ['LOFARSOFT']
 
 chisq_file="chi-squared.txt"  # file from the pipeline
-stations_file="%s/release/share/pulsar/data/stations.txt" % (lofarsoft,) # location of George's stations.txt file
-#stations_file="/home/kondratiev/bin/stations.txt" # location of George's stations.txt file
+#stations_file="%s/release/share/pulsar/data/stations.txt" % (lofarsoft,) # location of George's stations.txt file
+stations_file="/home/kondratiev/bin/stations.txt" # location of George's stations.txt file
 
 # at the core location, how many meters per degree latitude,longitude?
 # Assuming that http://www.csgnetwork.com/degreelenllavcalc.html is right,
@@ -80,6 +80,8 @@ zooms={ 'intl': (-10.90, 43.4, 31.90, 60.4, 'lcc', 51, 12, 'i', 100.),
         'remote': (4.1, 52.2, 7.7, 53.5, 'lcc', 52.85, 5.9, 'h', 10.),
         'core': (6.83, 52.90, 6.93, 52.9362, 'lcc', 52.9181, 6.88, 'c', 10000.)
        }
+
+
 
 
 # function that return pixel coordinates from the station coordinates
@@ -202,19 +204,28 @@ for z in zooms.keys():
 	for i in np.arange(len(x)):
 		try:
 			if cols[i] != 'red':
+				label=ss[i]
 				if antenna == 'HBA' and z == 'core':
-					for ear in ['0', '1']:
-						os.system("convert %s -flatten -background white -crop %dx%d+25+16 -background %s -pointsize 14 label:'%s' +swap -gravity Center -append  %s.%c.map.png 2>/dev/null" % \
-							(station_info['%s%s%c' % (ss[i], antenna, ear)][0], imw_orig/2, imh_orig-16, (ear == '0' and 'Khaki' or 'Plum'), station_info['%s%s%c' % (ss[i], antenna, ear)][1], ss[i], ear))
-					os.system("convert %s.0.map.png %s.1.map.png +append -scale %dx%d-0 temp%s.map.png 2>/dev/null" % \
-						(ss[i], ss[i], imw, imh, ss[i]))
-					os.system("rm -f %s.[01].map.png" % (ss[i]))
-				else:
+					# checking if both HBA ears were used
+					if '%s%s0' % (ss[i], antenna) in station_info and '%s%s1' % (ss[i], antenna) in station_info:
+						for ear in ['0', '1']:
+							os.system("convert %s -flatten -background white -crop %dx%d+25+16 -background %s -pointsize 14 label:'%s' +swap -gravity Center -append  %s.%c.map.png 2>/dev/null" % \
+								(station_info['%s%s%c' % (ss[i], antenna, ear)][0], imw_orig/2, imh_orig-16, (ear == '0' and 'Khaki' or 'Plum'), station_info['%s%s%c' % (ss[i], antenna, ear)][1], ss[i], ear))
+						os.system("convert %s.0.map.png %s.1.map.png +append -scale %dx%d-0 temp%s.map.png 2>/dev/null" % \
+							(ss[i], ss[i], imw, imh, ss[i]))
+						os.system("rm -f %s.[01].map.png" % (ss[i]))
+					else: # only one HBA ear was used
+						if '%s%s0' % (ss[i], antenna) in station_info: statkey = '%s%s0' % (ss[i], antenna)
+						else: statkey = '%s%s1' % (ss[i], antenna)
+						label='%s  %s%c' % (ss[i], antenna, statkey[-1])
+						os.system("convert %s -flatten -background white -crop %dx%d+0+16 -background Khaki -pointsize 14 label:'%s' +swap -gravity Center -append -scale %dx%d-0 temp%s.map.png 2>/dev/null" % \
+							(station_info[statkey][0], imw_orig, imh_orig-16, station_info[statkey][1], imw, imh, ss[i]))
+				else: # for LBA or remore/international stations
 					os.system("convert %s -flatten -background white -crop %dx%d+0+16 -background Khaki -pointsize 14 label:'%s' +swap -gravity Center -append -scale %dx%d-0 temp%s.map.png 2>/dev/null" % \
 						(station_info['%s%s' % (ss[i], antenna)][0], imw_orig, imh_orig-16, station_info['%s%s' % (ss[i], antenna)][1], imw, imh, ss[i]))
 				# adding the station name label
 				os.system("convert temp%s.map.png -background LightBlue -pointsize 10 label:'%s' +swap -gravity Center -append  %s.map.png>/dev/null ; rm -f temp%s.map.png" % \
-					(ss[i], ss[i], ss[i], ss[i]))
+					(ss[i], label, ss[i], ss[i]))
 
 				im = plt.imread('%s.map.png' % (ss[i]))	
 				if offsets[ss[i]][2] == 0:
