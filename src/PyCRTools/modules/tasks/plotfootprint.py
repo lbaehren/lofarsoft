@@ -42,9 +42,14 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly):
                     continue
             resfile=open(os.path.join(datadir,"results.py"))
             res={}
-            execfile(os.path.join(datadir,"results.py"),res)
             
-            res=res["results"]
+            try:
+                execfile(os.path.join(datadir,"results.py"),res)
+                res=res["results"]
+            except:
+                continue
+                print "File skipped, nan found!"    
+                
             try:
                 status = res["status"]
             except:
@@ -357,4 +362,4 @@ class plotfootprint(tasks.Task):
                     html_file.write("\"><img src=\"%s\" width=800></a><br>"%name)
                     html_file.close()
             
-        self.plot_finish(filename=self.plot_name,filetype=self.filetype)   
+        #self.plot_finish(filename=self.plot_name,filetype=self.filetype)   
