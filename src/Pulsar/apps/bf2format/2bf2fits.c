@@ -34,6 +34,8 @@ int AVERAGE_OVER = 600;
 int NUM_BLOCKGROUPS = -1;
 float N_sigma = 7;
 int zapFirstChannel = 1;   // By default, set first frequency channel of each subband to zero
+int IS2 = 0;  // Incoherentstokes 2nd transpose turned on/off phase
+int CSIS_MODE = 0;  // CSIS_MODE = 0 for Coherentstokes;  CSIS_MODE = 1 for Incoherentstokes
 
 #define WRITEFUNC(b)			(b[STOKES_SWITCH]) // I=0,Q=1,U/2=2,V/2=3
 //#define WRITEFUNC(b)			(b[0]+b[1]) // X power * 2
@@ -1699,6 +1701,8 @@ int main( int argc, char **argv )
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
   double lofreq;
   long skipNrBlocks, truncNrBlocks;
+  int  is_IS2 = 0; // 0 for old/orginal names ; 1 = Incoherentstokes 2nd transpose parset names 
+  char IncoherentStokesAreTransposed[6]="";  // exists and True for Incoherentstokes 2nd transpose parset names
 
   //  char header_txt[parsetmaxnrlines][1001], *txt[parsetmaxnrlines],;
   char *header_txt[parsetmaxnrlines];
@@ -1777,6 +1781,9 @@ int main( int argc, char **argv )
       }else if(strcmp(argv[i], "-H") == 0) {
 	puts("Enable H5 format.");
 	is_H5 = 1;
+      }else if(strcmp(argv[i], "-IS") == 0) {
+	puts("Post-IS 2nd transpose;  this is really an IS beam for parset reading (processed as CS data)");
+	CSIS_MODE = 1;
       }else if(strcmp(argv[i], "-append") == 0) {
 	is_append = 1;
       }else if(strcmp(argv[i], "-o") == 0) {
@@ -1849,6 +1856,7 @@ int main( int argc, char **argv )
 
     nrlines = 0;
     ret = 0;
+
     //    for(i = 0; i < parsetmaxnrlines; i++)
     //      txt[i] = header_txt[i];
     do {
@@ -1864,13 +1872,96 @@ int main( int argc, char **argv )
     fclose(fin);    
     if(application.verbose) printf("Read %d lines from header.\n", nrlines);
 
-    s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", header_txt, nrlines, "=");
+    // first check whether 2nd transpose IS has been set;  parset names vary before and after this transition
+    s_ptr = get_ptr_entry("OLAP.IncoherentStokesAreTransposed", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
-      sscanf(s_ptr, "%d", &(SUBBANDS));
+      sscanf(s_ptr, "%s", IncoherentStokesAreTransposed);
     }else {
-      fprintf(stderr, "2bf2fits: OLAP.Storage.subbandsPerPart not set\n");
-      return 0;     
+      strcpy(IncoherentStokesAreTransposed, "False");
     }
+    if(strcmp(IncoherentStokesAreTransposed, "True") == 0) {
+      puts("Post-IS 2nd transpose;  reading new keywords");
+      IS2 = 1;
+    }else if(strcmp(IncoherentStokesAreTransposed, "False") == 0) {
+      IS2 = 0;
+    }
+
+    if(IS2 == 0) {
+      s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", header_txt, nrlines, "=");
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(SUBBANDS));
+      }else {
+        fprintf(stderr, "2bf2fits: OLAP.Storage.subbandsPerPart not set\n");
+        return 0; 
+      }    
+      s_ptr = get_ptr_entry("OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(integrationSteps));
+      }else {
+        fprintf(stderr, "2bf2fits: OLAP.Stokes.integrationSteps not set\n");
+        return 0;     
+      }
+      s_ptr = get_ptr_entry("Observation.channelsPerSubband", header_txt, nrlines, "=");
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(CHANNELS));
+      }else {
+        fprintf(stderr, "2bf2fits: Observation.channelsPerSubband not set\n");
+        return 0;     
+      }
+      s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
+      }else {
+        fprintf(stderr, "2bf2fits: Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps not set\n");
+        return 0;     
+      }
+    }else{
+      if (CSIS_MODE == 0) { // was called OLAP.Storage.subbandsPerPart
+         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
+      }else {
+         s_ptr = get_ptr_entry("OLAP.CNProc_IncoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
+      }
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(SUBBANDS));
+      }else {
+        fprintf(stderr, "2bf2fits: subbandsPerFile not set\n");
+        return 0;
+      }
+      if (CSIS_MODE == 0) { // was called OLAP.Stokes.integrationSteps
+         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.timeIntegrationFactor", header_txt, nrlines, "=");
+      }else {
+         s_ptr = get_ptr_entry("OLAP.CNProc_IncoherentStokes.timeIntegrationFactor", header_txt, nrlines, "=");
+      }
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(integrationSteps));
+      }else {
+        fprintf(stderr, "2bf2fits: timeIntegrationFactor not set\n");
+        return 0;      
+      }
+      if (CSIS_MODE == 0) { // was called Observation.channelsPerSubband
+         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.channelsPerSubband", header_txt, nrlines, "=");
+      }else {
+         s_ptr = get_ptr_entry("OLAP.CNProc_IncoherentStokes.channelsPerSubband", header_txt, nrlines, "=");
+      }
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(CHANNELS));
+      }else {
+        fprintf(stderr, "2bf2fits: channelsPerSubband not set\n");
+        return 0;   
+      } 
+      if (CSIS_MODE == 0) { // was called Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps
+         s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.CNProc_CoherentStokes.timeIntegrationFactor", header_txt, nrlines, "=");
+      }else {
+         s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.CNProc_IncoherentStokes.timeIntegrationFactor", header_txt, nrlines, "=");
+      }
+      if(s_ptr != NULL) {
+        sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
+      }else {
+        fprintf(stderr, "2bf2fits: channelsPerSubband not set\n");
+        return 0;   
+      } 
+    }
+
     s_ptr = get_ptr_entry("OLAP.CNProc.integrationSteps", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%d", &(blocksperStokes));
@@ -1878,28 +1969,11 @@ int main( int argc, char **argv )
       fprintf(stderr, "2bf2fits: OLAP.CNProc.integrationSteps not set\n");
       return 0;     
     }
-    s_ptr = get_ptr_entry("OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
-    if(s_ptr != NULL) {
-      sscanf(s_ptr, "%d", &(integrationSteps));
-    }else {
-      fprintf(stderr, "2bf2fits: OLAP.Stokes.integrationSteps not set\n");
-      return 0;     
-    }
+
+
     SAMPLES = blocksperStokes/integrationSteps;
-    s_ptr = get_ptr_entry("Observation.channelsPerSubband", header_txt, nrlines, "=");
-    if(s_ptr != NULL) {
-      sscanf(s_ptr, "%d", &(CHANNELS));
-    }else {
-      fprintf(stderr, "2bf2fits: Observation.channelsPerSubband not set\n");
-      return 0;     
-    }
-    s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
-    if(s_ptr != NULL) {
-      sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
-    }else {
-      fprintf(stderr, "2bf2fits: Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps not set\n");
-      return 0;     
-    }
+
+
     s_ptr = get_ptr_entry("Observation.Beam[0].angle1", header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.ra));
