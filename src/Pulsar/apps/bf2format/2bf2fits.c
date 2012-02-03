@@ -65,11 +65,13 @@ void usage(){
   puts("-parset\t\tRead this parset file to obtain header parameters.");
   puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum.");
   puts("-CS\t\tInput data is CS data (one file, total I only)");
+  puts("-IS\t\tInput data is IS 2nd transpose data (one file, total I only, process like CS, header IS values)");
   puts("-H\t\tHDF5 Data Mode, only working in combination with -CS");
   puts("-append\t\tfor IS data append output fits files together");
   puts("-skip\t\tSkip this number of blocks in the output. Only works with -CS option.");
   puts("-trunc\t\tTruncate output after this number of blocks. Only works with -CS option.");
   puts("-noZap0\t\tDo NOT zap the first frequency channel in each subband");
+  puts("-nsubs\t\tThe number of subbands in the input file.");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -1793,6 +1795,13 @@ int main( int argc, char **argv )
 	  return 0;
 	}
         i++;
+      }else if(strcmp(argv[i], "-nsubs") == 0) {
+	j = sscanf(argv[i+1], "%d", &SUBBANDS);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
       }else if(strcmp(argv[i], "-noZap0") == 0) {
 	zapFirstChannel = 0;
       }else if(strcmp(argv[i], "-debugpacking") == 0) {
@@ -1887,13 +1896,13 @@ int main( int argc, char **argv )
     }
 
     if(IS2 == 0) {
-      s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", header_txt, nrlines, "=");
-      if(s_ptr != NULL) {
-        sscanf(s_ptr, "%d", &(SUBBANDS));
-      }else {
-        fprintf(stderr, "2bf2fits: OLAP.Storage.subbandsPerPart not set\n");
-        return 0; 
-      }    
+//      s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", header_txt, nrlines, "=");
+//      if(s_ptr != NULL) {
+//        sscanf(s_ptr, "%d", &(SUBBANDS));
+//      }else {
+//        fprintf(stderr, "2bf2fits: OLAP.Storage.subbandsPerPart not set\n");
+//        return 0; 
+//      }    
       s_ptr = get_ptr_entry("OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
       if(s_ptr != NULL) {
         sscanf(s_ptr, "%d", &(integrationSteps));
@@ -1916,17 +1925,17 @@ int main( int argc, char **argv )
         return 0;     
       }
     }else{
-      if (CSIS_MODE == 0) { // was called OLAP.Storage.subbandsPerPart
-         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
-      }else {
-         s_ptr = get_ptr_entry("OLAP.CNProc_IncoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
-      }
-      if(s_ptr != NULL) {
-        sscanf(s_ptr, "%d", &(SUBBANDS));
-      }else {
-        fprintf(stderr, "2bf2fits: subbandsPerFile not set\n");
-        return 0;
-      }
+//      if (CSIS_MODE == 0) { // was called OLAP.Storage.subbandsPerPart
+//         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
+//      }else {
+//         s_ptr = get_ptr_entry("OLAP.CNProc_IncoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
+//      }
+//      if(s_ptr != NULL) {
+//        sscanf(s_ptr, "%d", &(SUBBANDS));
+//      }else {
+//        fprintf(stderr, "2bf2fits: subbandsPerFile not set\n");
+//        return 0;
+//      }
       if (CSIS_MODE == 0) { // was called OLAP.Stokes.integrationSteps
          s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.timeIntegrationFactor", header_txt, nrlines, "=");
       }else {
