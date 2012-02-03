@@ -680,12 +680,7 @@ void wienerfilter::iteratePowerSpectrum(cvec freqs, cvec faradays, cvec power0, 
 /*! procdure to iterate the signal powerspectrum and the reconstructed signal
     for a couple of data sets, which are assumed to share the same signal covariance matrix
     which can be represented by a powerspectrum.
-    Relaying on 
-    Torsten Ensslin, Mona Frommert 
-    Reconstruction of signals with unknown spectrain information field theory 
-    with parameter uncertainty
-    arXiv 1002.2928 using Jeffery Prior and critical filter
-    page 8 formula 48 
+    
     \param power0 initial guess for the powerspectrum
     \param datas vector of datas for which the common powerspectrum is to be generated 
     \param gaps is the vector of the gaps in the frequency achs
