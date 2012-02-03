@@ -5563,7 +5563,37 @@ bool HFPP_FUNC_NAME (const NIter vec, const NIter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Returns true if all values are normal
+//$DOCSTRING: Returns true if both the real and imaginary part of all values are finite
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hIsFiniteComplex
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (bool)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter>
+bool HFPP_FUNC_NAME (const CIter vec, const CIter vec_end)
+{
+  bool status = true;
+
+  // Get iterator
+  CIter it_vec = vec;
+
+  while (it_vec != vec_end)
+  {
+    if (!boost::math::isfinite(real(*it_vec)) || !boost::math::isfinite(imag(*it_vec))) status = false;
+    ++it_vec;
+  }
+
+  return status;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Returns true if all values are finite and not denormalised
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hIsNormal
 //-----------------------------------------------------------------------
