@@ -1004,7 +1004,7 @@ class outputInfo:
 		if self.oi.source[0] == "B" or self.oi.source[0] == "J":
 			link = atnflink_start + self.oi.source.replace("+", "%2B") + atnflink_end
 		# if source name starts on "Pos" -> it's survey pointing -> coordinate search of Simbad
-		elif self.oi.source[:3] == "Pos":
+		elif self.oi.source[:3] == "Pos" and re.match("^[\d+-.]*$", self.oi.source[3:]) == True:
 			rad=self.oi.source.split(" ")[1]
 			decd=self.oi.source.split(" ")[2].split("+")[-1]
 			link = simbadlinkregion_start + rad
