@@ -101,11 +101,11 @@ parser.add_option("--loradir", type="str", default="/data/VHECR/LORAtriggered/LO
 parser.add_option("-d","--datadir", type="str", default="",help="Will be added to each of the filename arguments (hence, use quotations for the main arguments if you use this option and have asterisks in the argument!)")
 parser.add_option("-l","--lofarmode", type="str", default="LBA_OUTER",help="'LBA_INNER' or 'LBA_OUTER'")
 parser.add_option("-p","--polarization", type="int", default=-1,help="either 0 or 1 for selecting even or odd antennas, or -1 for both")
-parser.add_option("-t","--nsigma", type="float", default=4.0,help="Threshold for identifying peaks")
-parser.add_option("-b","--block", type="int", default=-1,help="in which block do you expect the peak  (use LORA guess if -1 or central block if no guess is present)")
-parser.add_option("-w","--search_window_width", type="int", default=-1,help="Width of search window for peak around sample_number (in samples) - full block if not given")
-parser.add_option("-n","--sample_number", type="int", default=-1,help="Sample number within block where peak is expected (use LORA guess if -1 or center if no guess is present)")
-parser.add_option("-s","--blocksize", type="int", default=2**16,help="Blocksize with which to read blocks of data.")
+parser.add_option("-t","--nsigma", type="float", default=3.0,help="Threshold for identifying peaks")
+parser.add_option("-b","--block", type="int", default=0,help="in which block do you expect the peak  (use LORA guess if -1 or central block if no guess is present)")
+parser.add_option("-w","--search_window_width", type="int", default=2048,help="Width of search window for peak around sample_number (in samples) - full block if not given")
+parser.add_option("-n","--sample_number", type="int", default=65536 + 512,help="Sample number within block where peak is expected (use LORA guess if -1 or center if no guess is present)")
+parser.add_option("-s","--blocksize", type="int", default=2**17,help="Blocksize with which to read blocks of data.")
 parser.add_option("--max_data_length", type="int", default=-1,help="Maximum length the file is allowed to have (avoid hangups for corrupted files)")
 parser.add_option("--min_data_length", type="int", default=-1,help="Minimum length the file should have (sanity check)")
 parser.add_option("-T","--timestamp", type="str", default="",help="Timestamp of observation for creating output directory (if not to be deduced from filename)")
@@ -117,12 +117,11 @@ parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,hel
 parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging; default OFF")
 parser.add_option("-O", "--max_outliers", type="int", default=5, help="Maximum allowed number of outliers in calculated cable delays")
 
-if parser.get_prog_name()=="cr_event_radio.py":
-    (options, args) = parser.parse_args()
-    if options.norefresh:
-        nogui=True
-        import matplotlib
-        matplotlib.use('Agg')
+(options, args) = parser.parse_args()
+if options.norefresh:
+    nogui=True
+    import matplotlib
+    matplotlib.use('Agg')
 
 
 from pycrtools import *
@@ -233,6 +232,8 @@ for full_filename in files:
         sample_number=samplenumber
 
         checksums = []
+        results = {}
+        search_window = True
         ########################################################################
         #Open the data file
         ########################################################################
@@ -255,7 +256,9 @@ for full_filename in files:
             continue
         
 
+        (filedir,filename)=os.path.split(full_filename)
         outputdir_expanded=os.path.expandvars(os.path.expanduser(outputdir))
+        (rootfilename,fileextensions)=os.path.splitext(filename)
 #        topdir_name=projectname+"-"+time_stamp
         topdir_name = rootfilename
 
@@ -330,11 +333,14 @@ for full_filename in files:
             invfftplan = FFTWPlanManyDftC2r(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
 
         antennalist=datafile["CHANNEL_ID"] # just the names of all antennas
+        str_antennalist = [format('%09d' % int(id)) for id in antennalist]
+        
         indexlist = range(0, len(antennalist), 2)
         
         
         #Select antennas to be used, impose polarisation
-        good_antennas = [id for id in antennalist if id % 2 == pol]
+        good_antennas = [id for id in str_antennalist if int(id) % 2 == current_polarization]
+        ndipoles = len(good_antennas)
         
         print "---> Load the block with the peak", block_number, blocksize
         datafile["BLOCKSIZE"]=blocksize #2**16
@@ -351,7 +357,7 @@ for full_filename in files:
             timeseries_data.read(datafile,"TIMESERIES_DATA")
         except RuntimeError:
             print "Error reading file - skipping this file"
-            finish_file(laststatus="READ ERROR")
+            finish_file(full_filename, "READ ERROR")
             continue
 
         if do_checksums:
@@ -413,10 +419,15 @@ for full_filename in files:
 #            search_window=(max(0, sample_number-search_window_width/2), min(timeseries_calibrated_data.shape()[1] - 1, sample_number+search_window_width/2))
 #        else:
 #        search_window=
-
+        y = timeseries_calibrated_data.toNumpy()
+        plt.plot(y[0])
+        plt.plot(y[1])
+        plt.plot(y[23])
         print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
         tbeam_incoherent=None
 
+        search_window=(max(0, sample_number-search_window_width/2), min(timeseries_calibrated_data.shape()[1] - 1, sample_number+search_window_width/2))
+        print search_window
         #If we had a pre-determined direction use this to find the dominant peak and cut out the time series around it
         # Otherwise take the previously found window with the most pulses
         print "searching per antenna"
@@ -436,7 +447,7 @@ for full_filename in files:
             print "********          ATTENTION: No pulses found          ******************"
             print "************************************************************************"
             print "ERROR: LocatePulseTrain: No pulses found!"
-            finish_file(laststatus="NO PULSE")
+            finish_file(full_filename, "NO PULSE")
             continue
 
         if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
@@ -456,7 +467,7 @@ for full_filename in files:
 
         if nantennas_with_strong_pulses<min_number_of_antennas_with_pulses:
             print "ERROR: LocatePulseTrain: Not enough pulses found for beam forming!"
-            finish_file(laststatus="TOO FEW PULSES")
+            finish_file(full_filename, "TOO FEW PULSES")
             continue
 
 
