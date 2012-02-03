@@ -158,6 +158,13 @@ bool FileExists(string strFilename) {
 int main (int argc,
 		  char *argv[])
 {
+    unsigned int total_time_ticks;
+    clock_t time_c;
+    clock_t time_d;
+    clock_t time_e;
+    
+    time_c=clock();
+    bool printpulses=true;
 	bool failsafe=0;
 	cout<<"This file outputs histograms of pulsar data to /Users/STV/Documents/GiantPulse/."<<endl;
 	int integrationlength = 1; //average length
@@ -545,7 +552,7 @@ int main (int argc,
     // Create file objects for summary of datastreams
 	ofstream pulselogfile;
 	int pulsenr=1;
-	bool foundpulse;
+	bool foundpulse[nstreams][nDMs];
 	ofstream datamonitor[nstreams][nDMs];
 	stringstream datamonitorfilename;//[nstreams][nDMs];
 	string datamonitorfilen;
@@ -580,9 +587,10 @@ int main (int argc,
 	unsigned num;
 	fpos_t pos;
     // New datasize, allchannels for the samples of the integration time, no header anymore
-	long blockdatasize=nFreqs*samples*sizeof(float);
+    long totValuesPerBlock=nFreqs*samples;
+	long blockdatasize=totValuesPerBlock*sizeof(float);
 	long stokesdatasize=blockdatasize;
-	float *data=(float*)malloc(blockdatasize);
+	float *data=(float*)calloc(totValuesPerBlock,sizeof(float));
     bool Transposed=true;
 
 	if (data==NULL)
@@ -596,7 +604,13 @@ int main (int argc,
     int ch;
 	fseek(pFile, startpos*blockdatasize, SEEK_SET);
     cout << "Current positions before reading " <<  startpos << " " << ftell(pFile)/blockdatasize << " " << startpos*blockdatasize <<  endl;
+    unsigned int process_total_time_ticks;
+    clock_t time_a;
+    clock_t time_b;
+    
+    
 
+    time_e = clock();
 	for(int blockNr = 0; blockNr< nrblocks; blockNr++){
         // Read data
         fgetpos(pFile,&pos);
@@ -604,7 +618,7 @@ int main (int argc,
         
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
         //flagdata
-        cout << "Done swapping floats" << endl;
+        
         /*
         float FloatSwap( float f )
         {
@@ -633,9 +647,7 @@ int main (int argc,
             continue;
         }
         cout << "About to swap " << blockdatasize << " floats" << endl;
-        
-        unsigned char *datachar=(unsigned char*) data;
-
+                unsigned char *datachar=(unsigned char*) data;
         
         if(DoPadding){
             SwapFloats(datachar,nFreqs*samples);
@@ -646,6 +658,8 @@ int main (int argc,
             }  
              */
         }
+        cout << "Done swapping floats" << endl;
+        
         for(int i=0; i<BadChannels.size(); i++){
             ch=BadChannels[i];
 //            cout << "Flagging channel " << ch << endl;
@@ -656,47 +670,105 @@ int main (int argc,
             }
         }
         
+#ifdef _OPENMP
+        std::cout<<"Running in parallel mode"<<std::endl;
+#pragma omp parallel for 
+#else
+        std::cout<<"Running in serial mode"<<std::endl;
+#endif // _OPENMP        
 		for(int sc=0; sc < nstreams; sc++){
-            /*
-            #ifdef _OPENMP
-                std::cout<<"Running in parallel mode"<<std::endl;
-            //#pragma omp parallel for private(foundpulse)
-            #else
-                std::cout<<"Running in serial mode"<<std::endl;
-            #endif // _OPENMP
-		    */
-        	for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
-				cout << "Processing " << sc << " " << DMcounter << endl;
-				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
-                cout << "f" <<  foundpulse << endl;
-				datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
-				if(foundpulse){ 
-                    cout << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
-					triggerlogfile << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
-                    alltriggerlogfile << "pulse " << pulsenr << " " <<SBTs[sc][DMcounter]->FoundTriggers();
-                    alltriggerlogfile.close();
-                    triggerlogfile.close();
-					usleep(2000);
-					triggerlogfile.open(triggerlogfilename.c_str());
-			    		alltriggerlogfile.open(alltriggerlogfilename.c_str(),ios::out | ios::app);
-					for(int fc2=0;fc2<nstreams;fc2++){
-						
-						stringstream pulselogfn;
-						pulselogfn << pulsedir << "/pulse" << pulsenr << "_" << fc2 << ".log";
-						string pulselogfilename;
-						pulselogfn >> pulselogfilename;
-						
-						SBTs[fc2][DMcounter]->makeplotBuffer(pulselogfilename);
+        #ifdef _OPENMP
+            std::cout<<"Running in parallel mode"<<std::endl;
+            #pragma omp parallel for 
+        #else
+            std::cout<<"Running in serial mode"<<std::endl;
+        #endif // _OPENMP 
+            for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
+				
+                time_a = clock();
+                
+                //...run block of code
+                
 
-					}
-					pulsenr++;
-				}
-			}
+                
+				foundpulse[sc][DMcounter]=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+                
+                time_b = clock();
+                datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
+                
+                if (time_a == ((clock_t)-1) || time_b == ((clock_t)-1))
+                {
+                    perror("Unable to calculate elapsed time");
+                }
+                else
+                {
+                    process_total_time_ticks += (unsigned int)(time_b - time_a);
+                }
+                //cout << "Processing " << sc << " " << DMcounter << "in " << total_time_ticks << "  ticks" << endl;
+				
+            
+            } //for DMcounter
+        } // for sc
+#pragma omp critical
+        if(printpulses){
+
+
+            for(int DMcounter=0; DMcounter<nDMs; DMcounter++){
+                char pulselogfilename [20];
+                for(int sc=0; sc < nstreams; sc++){
+                    if(foundpulse[sc][DMcounter]){ 
+                        //cout << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
+                        //triggerlogfile << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
+                        alltriggerlogfile << "pulse " << pulsenr << " " <<SBTs[sc][DMcounter]->FoundTriggers();
+                        //alltriggerlogfile.close();
+                        //triggerlogfile.close();
+                       // usleep(2000);
+                        //triggerlogfile.open(triggerlogfilename.c_str());
+			    		//alltriggerlogfile.open(alltriggerlogfilename.c_str(),ios::out | ios::app);
+
+                        for(int fc2=0;fc2<nstreams;fc2++){
+                            //string pulselogfilename;
+                            //stringstream pulselogfn;
+                            //pulselogfn << pulsedir << "/pulse" << pulsenr << "_" << fc2 << ".log";
+                            
+                            sprintf(pulselogfilename,"/pulse%i_%i.log",pulsenr,fc2);
+                            //pulselogfn >> pulselogfilename;
+                            
+                                      SBTs[fc2][DMcounter]->makeplotBuffer(pulsedir+string(pulselogfilename));
+                            //SBTs[fc2][DMcounter]->makeplotBuffer(pulselogfilename);
+                            
+                        }
+                        pulsenr++;
+                        break;
+                    }
+                    
+                } // for DMcounter
+        }
+
 			
 
-		}
-        usleep(sleeptime);
+        }
+        //usleep(sleeptime);
 	}
+    
+    alltriggerlogfile.close();
+    triggerlogfile.close();
+    time_d = clock();
+    
+    if (time_c == ((clock_t)-1) || time_d == ((clock_t)-1))
+    {
+        perror("Unable to calculate elapsed time");
+    }
+    else
+    {
+        total_time_ticks += (unsigned int)(time_d - time_c);
+    }
+    cout << "Total pulses found: " << pulsenr << endl;
+    cout << "Processdata run time: " << process_total_time_ticks << endl;
+    cout << "Total process data time: " << (unsigned int)(time_d - time_e) << endl;
+    cout << "Total run time: " << total_time_ticks << " from " << time_c << " " << time_d << endl;
+    cout << "Overhead: " << 100* (float)( total_time_ticks - process_total_time_ticks ) / total_time_ticks << "%" << endl;
+    
 	return nofFailedTests;
 }
 

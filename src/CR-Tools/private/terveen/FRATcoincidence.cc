@@ -562,7 +562,7 @@ namespace FRAT {
 		
 		int SubbandTrigger::CalculateBufferSize(){
             printf("Started ... %i %i %i ",dedispersionoffset[itsNrChannels-1],itsIntegrationLength,itsNrSamples);
-			itsBufferLength=std::max(2000,2*(dedispersionoffset[itsNrChannels-1]+itsIntegrationLength+itsNrSamples));
+			itsBufferLength=std::max(4096,2*(dedispersionoffset[itsNrChannels-1]+itsIntegrationLength+itsNrSamples));
             //itsBufferLength=std::max(2000,500*(itsBufferLength/500+1);
             printf("Done.");
 			return itsBufferLength;
@@ -616,16 +616,23 @@ namespace FRAT {
 		}
 		
 		bool SubbandTrigger::makeplotBuffer(std::string pulselogfilename){
-			std::ofstream pulselogfile;
+			std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out | std::ios::binary);
 			int totaltime=(itsSequenceNumber+1)*itsNrSamples;
 			int intstart=(itsSequenceNumber+1)*itsNrSamples%itsBufferLength;
-			pulselogfile.open(pulselogfilename.c_str());
+			//pulselogfile.open;
 			int buflen=SumDeDispersed.size();
 			//pulselogfile.width(11);
-            printf("SeqNr, NrSam, BufLen, SumDeDispSize %i %i %i %i ",itsSequenceNumber, itsNrSamples, itsBufferLength, buflen);
-            pulselogfile.precision(10);
+            //printf("SeqNr, NrSam, BufLen, SumDeDispSize %i %i %i %i ",itsSequenceNumber, itsNrSamples, itsBufferLength, buflen);
+            //pulselogfile.precision(10);
+            pulselogfile.write((char*) &totaltime, sizeof(totaltime));
+            pulselogfile.write((char*) &intstart, sizeof(intstart));
+            pulselogfile.write((char*) &itsTimeResolution,sizeof(itsTimeResolution));
+            pulselogfile.write((char*) &buflen, sizeof(buflen));
+
+            pulselogfile.write((char*) &SumDeDispersed[0], SumDeDispersed.size()*sizeof(float));
+            /*
 			for(int j=intstart+1;j<buflen;j++){
-				pulselogfile << (totaltime-buflen+j)*itsTimeResolution <<  " " << SumDeDispersed[j] << std::endl;
+				pulselogfile << (totaltime-buflen+j)*itsTimeResolution <<  SumDeDispersed[j] << std::endl;
 				
 			}
                         float time;
@@ -638,6 +645,7 @@ namespace FRAT {
                                 pulselogfile << time << " " << SumDeDispersed[r] << std::endl;
                                // std::cout << time << std::endl;
 			}
+            */
 			pulselogfile.close();
 			
 			return true;

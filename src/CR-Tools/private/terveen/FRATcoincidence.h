@@ -258,8 +258,8 @@ namespace FRAT {
 			  struct sockaddr_in server_addr;
 			  struct hostent *host;
 			  //char send_data[1024];
-			  char* send_data;
-			  char* hostname;
+			  const char* send_data;
+			  const char* hostname;
               std::vector<float> itsFREQvalues;
 			  
 			  std::string itsFoundTriggers;
