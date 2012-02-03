@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.32
+VERSION=3.33
  
 #####################################################################
 # Usage #
@@ -511,13 +511,22 @@ nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{pri
 # number of coherent beams/stations
 NBEAMS=`cat $PARSET | grep "OLAP.storageStationNames" | grep -v Control | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F\, '{print NF}'`
 ARRAY=`cat $PARSET | grep "Observation.bandFilter" | awk -F "= " '{print $2}' | awk -F "_" '{print $1}'`
-CHAN=`cat $PARSET | grep "Observation.channelsPerSubband" | awk -F "= " '{print $2}'`
 if (( $IS2 == 1 ))
 then
-  CHAN_IS=`cat $PARSET | grep "OLAP.CNProc_IncoherentStokes.channelsPerSubband" | awk -F "= " '{print $2}'`
-  CHAN_CS=`cat $PARSET | grep "OLAP.CNProc_CoherentStokes.channelsPerSubband" | awk -F "= " '{print $2}'`
+  CHAN_IS=`cat $PARSET | grep "OLAP.CNProc_IncoherentStokes.channelsPerSubband" | head -1 | awk -F "= " '{print $2}'`
+  CHAN_CS=`cat $PARSET | grep "OLAP.CNProc_CoherentStokes.channelsPerSubband" |  head -1 | awk -F "= " '{print $2}'`
+  #A2 fix CHAN -- setting to CS for now
+  CHAN=$CHAN_CS
+
+  DOWN_CS=`cat $PARSET | grep "OLAP.CNProc_CoherentStokes.timeIntegrationFactor" |  head -1 | awk -F "= " '{print $2}'`
+  DOWN_IS=`cat $PARSET | grep "OLAP.CNProc_IncoherentStokes.timeIntegrationFactor" |  head -1 | awk -F "= " '{print $2}'`
+  #A2 fix DOWN -- setting to CS for now
+  DOWN=$DOWN_CS
+else
+  CHAN=`cat $PARSET | grep "Observation.channelsPerSubband" | awk -F "= " '{print $2}'`
+  DOWN=`cat $PARSET | grep "OLAP.Stokes.integrationSteps" | grep -v ObservationControl | awk -F "= " '{print $2}'`
 fi
-DOWN=`cat $PARSET | grep "OLAP.Stokes.integrationSteps" | grep -v ObservationControl | awk -F "= " '{print $2}'`
+
 MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{print $2}'`
 SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
@@ -1407,12 +1416,13 @@ do
                  pulsar_name=${PULSAR_ARRAY_PRIMARY[0]}
               else
                  pulsar_name=${PULSAR_ARRAY_PRIMARY[$ii]}
+                 nSubbands=${array_nSubbands[$ii]}
               fi
               
 			  if [[ $transpose == 0 ]] 
 			  then
-			     echo ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
-			     ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			     echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
+			     ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_BusyWeek/incoherentstokes/RSP$ii/*sub0000 ${STOKES}/RSP$ii/
 #                 ln -s /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_BusyWeek/incoherentstokes/RSP$ii/*sub[0-9]* ${STOKES}/RSP$ii/
@@ -1423,8 +1433,8 @@ do
                  then
                     extra_flags="$extra_flags -t"
                  fi
-			     echo ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
-			     ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			     echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
+			     ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
 #                 cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			     bf2presto_pid[$ii]=$!  
@@ -1438,8 +1448,8 @@ do
 	                   extra_flags="$extra_flags -M -T ${nSubbands}"
 	                fi
 
-			        echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			        ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			        echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			        ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
 #                    cp /net/sub6/lse016/data4/2nd_transpose/L2010_21144_red_test/incoherentstokes/RSP$ii/*sub[0-9]* ${location}/${STOKES}/RSP$ii/
 			        bf2presto_pid[$ii]=$!  
@@ -1455,8 +1465,8 @@ do
 		                   extra_flags="$extra_flags -M -T ${nSubbands}"
 		                fi
 
-			            echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			            ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			            echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			            ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			           bf2presto_pid[$ii][$counter]=$!  
 				       counter=$(( $counter + 1 )) 
 			        done
@@ -1475,6 +1485,7 @@ do
                    pulsar_name=${PULSAR_ARRAY_PRIMARY[0]}
                 else
                    pulsar_name=${PULSAR_ARRAY_PRIMARY[$ii]}
+                   nSubbands=${array_nSubbands[$ii]}
                 fi
 	
 #		 	    echo 'Converting subbands: '`cat RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 
@@ -1486,8 +1497,8 @@ do
 	                  extra_flags="$extra_flags -b ${NBEAMS}"
 	               fi
 
-			       echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			       ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			       echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			       ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!  
 			    elif [[ $transpose == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
                 then
@@ -1497,8 +1508,8 @@ do
 	                  extra_flags="$extra_flags -t -b ${NBEAMS}"
 	               fi
 
-			       echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-			       ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+			       echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+			       ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			       bf2presto_pid[$ii]=$!
                 else #    # [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]]
                    if (( $TiedArray == 0 ))
@@ -1509,8 +1520,8 @@ do
 		                  extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
 		               fi
 
-				       echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-				       ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+				       echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+				       ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 			       
 			           bf2presto_pid[$ii]=$!
 			           
@@ -1525,8 +1536,8 @@ do
 			                   extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
 			                fi
 
-				            echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
-				            ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
+				            echo ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
+				            ${converter_exe} ${extra_flags} -nsubs $nSubbands -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
 				            bf2presto_pid[$ii][$counter]=$!
 				            counter=$(( $counter + 1 )) 
 				        done
@@ -1644,7 +1655,7 @@ do
 ##############################################################################################
      # clean up data and excise every 0th channel from each subband (make blank .subXXXX files)
      # A2 to-do: check for the number of channels and is 1, don't excise data
-	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $CHAN != 1 ] 
+	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]  
 	then
 	    if (( $subsformat == 1 ))
 	    then
@@ -1659,6 +1670,7 @@ do
 		then
 			for ii in $num_dir
 			do
+                nSubbands=${array_nSubbands[$ii]}
 			    cd ${location}/${STOKES}/RSP${ii}
 			    if (( $subsformat == 1 ))
 			    then
@@ -1681,9 +1693,15 @@ do
 				    then
 					    # prepare for psrfits channel excision via the rfifind mask file
 					    max=`echo "($nSubbands * $CHAN) - 1" | bc` 
-					    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits
-					    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-					    rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.rfiout 2>&1 &
+					    if (( $CHAN > 1 ))
+					    then
+					       zap_str="-zapchan 0:$max:$CHAN"
+					    else
+					       zap_str=""
+					    fi					    
+					    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 $zap_str ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits
+					    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 $zap_str ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+					    rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 $zap_str ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.rfiout 2>&1 &
 	  			        rfifind_pid[$ii]=$!  
                     fi
 				fi # end if (( $subsformat == 1 ))
@@ -1698,6 +1716,7 @@ do
 		    counter=0
 		    for jjj in $loop_beams
 		    do
+                nSubbands=${array_nSubbands[$counter]}
 		        for ii in $num_dir
 		        do
 				    cd ${location}/${STOKES}/RSP${ii}/${jjj}
@@ -1722,9 +1741,15 @@ do
 					    then
 						    # prepare for psrfits channel excision via the rfifind mask file
 						    max=`echo "($nSubbands * $CHAN) - 1" | bc` 
-						    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits
-						    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-						    rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 -zapchan 0:$max:$CHAN ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.rfiout 2>&1 &
+						    if (( $CHAN > 1 ))
+						    then
+						       zap_str="-zapchan 0:$max:$CHAN"
+						    else
+						       zap_str=""
+						    fi					    
+						    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 $zap_str ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits
+						    echo rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 $zap_str ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						    rfifind -o ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -psrfits -noclip -blocks 16 $zap_str ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.rfiout 2>&1 &
 	  			            rfifind_pid[$ii][$counter]=$!  
                         fi
 					fi # end if (( $subsformat == 1 ))
@@ -1734,7 +1759,7 @@ do
 		
 		fi # end if (( $flyseye == 0 ))
        
-	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $CHAN != 1 ]
+	fi # end if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] 
 	cd ${location}
 
 	#RFI-Report
@@ -1844,7 +1869,7 @@ do
 	# wait for rfifind to finish
 	if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 	then
-	    if (( $subsformat == 0 ))
+	    if (( $subsformat == 0 )) 
 	    then
 			for ii in $num_dir
 			do
@@ -1871,7 +1896,7 @@ do
 			        done
 			   fi
 			done					
-	    fi # end if (( $subsformat == 0 ))
+	    fi # end if (( $subsformat == 0 )) 
 	fi # end if [ $rfi == 1 ] || [ $rfi_pproc == 1 ]
 	
 	if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
@@ -1884,6 +1909,7 @@ do
 		        beam_counter=0
 				while (( $beam_counter < $nrBeams ))
 				do
+                    nSubbands=${array_nSubbands[$beam_counter]}
 					echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
 					cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 					#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
@@ -1974,6 +2000,7 @@ do
 	        then
 				for ii in $num_dir
 				do	        
+                    nSubbands=${array_nSubbands[$ii]}
 					echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf >> $log
 					cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf
 					#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
@@ -2139,6 +2166,8 @@ do
 
     if (( $subsformat == 0 ))
     then
+         # note, this is an approximation -- taking the subbands from the first beam
+         nSubbands=${array_nSubbands[0]}
          total_channels=`echo "$nSubbands * $CHAN" | bc`
          if (( $total_channels >= 256 )) && (( $total_channels <= 6000 ))
          then 
@@ -2172,6 +2201,8 @@ do
         
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] #&& [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
 	then	
+        # note, this is an approximation -- taking the subbands from the first beam
+        nSubbands=${array_nSubbands[0]}
 	    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
 	    # find the max divisor for the subbands if nSubbands % $CHAN != 0
 		ii=$CHAN
@@ -2220,6 +2251,8 @@ do
 				    then
 						for ii in $num_dir
 					    do
+                           nSubbands=${array_nSubbands[ii]}
+
 						   cd ${location}/${STOKES}/RSP${ii}
 						   cp ${location}/$fold_pulsar_cut.par .
 						   echo cd ${location}/${STOKES}/RSP${ii} >> $log
@@ -2235,7 +2268,12 @@ do
 						      else
 						         echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout
 						      fi
-						      echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						      if (( $CHAN > 1 ))
+						      then
+						         echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						      else
+						         echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						      fi
 
 						   fi
 						   
@@ -2261,9 +2299,15 @@ do
   						             prepfold_pid[$ii]=$!  
  						             echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
  						          fi
- 						          echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
- 						          dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
- 						          pid=$!
+ 						          if (( $CHAN > 1 ))
+ 						          then
+	 						          echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+	 						          dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+	 						      else
+	 						          echo "Running: " dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+	 						          dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+	 						      fi
+	 						      pid=$!
  						          wait $pid
  						          echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
  						          pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar 
@@ -2291,6 +2335,7 @@ do
 					    counter=0
 					    for jjj in $loop_beams
 					    do
+                            nSubbands=${array_nSubbands[counter]}
 							for ii in $num_dir
 						    do
 							   cd ${location}/${STOKES}/RSP${ii}/${jjj}
@@ -2308,7 +2353,12 @@ do
 							       else
 							          echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 
 							       fi
-						           echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+							       if (( $CHAN > 1 ))
+							       then
+						              echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						           else
+						              echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						           fi
 							   fi
 						       if [ $test == 0 ]
 						       then
@@ -2332,8 +2382,14 @@ do
 								           prepfold_pid[$ii][$counter]=$!  
 								           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
 							           fi
-							           echo "Running: " echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-							           dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+							           if (( $CHAN > 1 ))
+							           then
+							              echo "Running: " echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							              dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+							           else
+							              echo "Running: " echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							              dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+							           fi
  						               pid=$!
  						               wait $pid
  						               echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
@@ -2443,8 +2499,13 @@ do
 						        echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii}_nomask ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout_nomask 		
 						    else
 						        echo prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.prepout 		
-						    fi				
-                            echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						    fi	
+						    if (( $CHAN > 1 ))
+						    then			
+                               echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+                            else
+                               echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+                            fi
 						fi
 
 						if [ $test == 0 ]
@@ -2469,8 +2530,14 @@ do
 							       prepfold_pid[$ii]=$!  
 						           echo "Running: " prepfold -noscales -nooffsets -noxwin -psr ${fold_pulsar} -nsub $prepfold_nsubs -n 256 -fine -nopdsearch -o ${fold_pulsar}_${OBSID}_RSP${ii} ${PULSAR_ARRAY_PRIMARY[$ii]}_${OBSID}_RSP${ii}.fits >> $log
 						        fi
-						        echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-						        dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+						        if (( $CHAN > 1 ))
+						        then
+						           echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						           dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s ' ' 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+						        else
+						           echo "Running: " dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						           dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+						        fi
 						        pid=$!
 				                wait $pid
  						        echo "Running: " pam --setnchn $nSubbands -m ${fold_pulsar}_${OBSID}_RSP${ii}.ar | tee -a $log
@@ -3224,4 +3291,3 @@ else  # end if [[ $proc != 0 ]]
 fi
 
 exit 0
-
