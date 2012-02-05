@@ -200,6 +200,7 @@ class obsinfo:
 		self.subcluster = 'locus?'
 		self.BF=self.FD=self.IM="?"     # BF flag is for CV - complex voltage data
 		self.IS=self.CS=self.CV=self.FE="?"
+		self.OCD="-"  # online coherent dedispersion
 		self.rarad=self.decrad=0
                 self.rastring="????"
                 self.decstring="_????"
@@ -320,16 +321,15 @@ class obsinfo:
 	# will be further corrected
 	def get_subcluster (self):
 		try:
-			snames = np.unique([cexec_nodes[i].split(":")[0] for i in self.nodeslist])
+			snames = np.unique([cexec_nodes[i].split(":")[1] for i in self.nodeslist])
 			if np.size(snames) == 0:
-				self.subcluster = 'locus?'
+				return "locus?"
 			elif np.size(snames) > 1:
-				self.subcluster = "locusA"
+				return "locusA"
 			else:
-				self.subcluster = snames[0]
+				return "locus"
 		except:
-			self.subcluster = 'locus?'
-
+			return "locus?"
 
 	# search for raw data in all datadirs and storage nodes
 	# this function is called when no parset file was found
@@ -355,7 +355,7 @@ class obsinfo:
 		iddirs=np.unique(iddirs)
 		self.nodeslist=np.unique(self.nodeslist)
 		self.datadir = ",".join(iddirs)
-		self.get_subcluster()  # getting sub-cluster name
+		self.subcluster = self.get_subcluster()  # getting sub-cluster name
 		# forming string of nodes
 		self.nodeslist_string=re.sub("locus", "", "[" + ",".join(self.nodeslist) + "]")
         	if len(self.nodeslist_string)>13:
@@ -520,7 +520,7 @@ class obsinfo:
 			self.nodeslist=["locus%s" % (i) for i in self.nodeslist_string.split("[")[1].split("]")[0].split(",")]
 
 		# getting the subcluster
-		self.get_subcluster()
+		self.subcluster = self.get_subcluster()
 
 		# After we figured the correct subcluster, then we cut the nodeslist string
         	# cut the string of nodes if it is too long
@@ -540,6 +540,17 @@ class obsinfo:
 				status=os.popen(cmd).readlines()
 				if np.size(status) > 0:
         				self.datadir="/" + status[0][:-1].split(" = ")[-1].split("/")[1]
+
+	        # check if online coherent dedispersion (OCD) was used
+        	cmd="grep OLAP.coherentDedisperseChannels %s" % (self.parset,)
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
+                	# this info exists in parset file
+                	self.OCD=status[0][:-1].split(" = ")[-1].lower()[:1]
+                	if self.OCD == 'f':
+                        	self.OCD = "-"
+                	else:
+                        	self.OCD = "+"
 
 		# for new parset files (after Jan 27, 2012)
 		# getting info about the Type of the data (BF, Imaging, etc.)
@@ -1002,9 +1013,9 @@ class outputInfo:
 	def get_link (self):
 		# if source name starts on "B" or "J" -> it is pulsar
 		if self.oi.source[0] == "B" or self.oi.source[0] == "J":
-			link = atnflink_start + self.oi.source.replace("+", "%2B") + atnflink_end
+			link = atnflink_start + self.oi.source.split(" ")[0].replace("+", "%2B") + atnflink_end
 		# if source name starts on "Pos" -> it's survey pointing -> coordinate search of Simbad
-		elif self.oi.source[:3] == "Pos" and re.match("^[\d+-.]*$", self.oi.source[3:]) == True:
+		elif self.oi.source[:3] == "Pos" and re.match("^[\+\-\.\d\s]*$", self.oi.source[3:]) != None:
 			rad=self.oi.source.split(" ")[1]
 			decd=self.oi.source.split(" ")[2].split("+")[-1]
 			link = simbadlinkregion_start + rad
@@ -1099,46 +1110,46 @@ class outputInfo:
 		# forming first Info (not html) string
 		if viewtype == "brief":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c	%s		%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.CSredlocation, self.ISredlocation, self.IMredlocation, self.statusline)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.IMredlocation, self.statusline)
 			else: # no parset file
 				self.info = "%s	%s										%s		%s		%-27s" % (self.id, self.comment, self.CSredlocation, self.ISredlocation, self.statusline)
 		elif viewtype == "plots":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%s		%s		%-27s   %s" % (self.id, self.comment, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 		elif viewtype == "mega":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c	%-16s %s%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.nodeslist_string, self.dirsize_string, self.totsize, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.oi.nodeslist_string, self.dirsize_string, self.totsize, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%-16s %s%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.dirsize_string, self.totsize, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 		elif viewtype == "smega":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c	%-16s %-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.nodeslist_string, self.totsize, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.oi.nodeslist_string, self.totsize, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%-16s %-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.totsize, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 		else: # usual
 			if self.comment == "":
-				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.statusline, self.oi.pointing, self.oi.source)
+				self.info = "%s	%s	%s	%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.statusline, self.oi.pointing, self.oi.source)
 			else: # no parset file
-				self.info = "%s	%s		%-16s %s	%s%s		%c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.statusline, self.oi.pointing, self.oi.source)
+				self.info = "%s	%s		%-16s %s	%s%s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.statusline, self.oi.pointing, self.oi.source)
 
 		# now forming first Info html string
 		if viewtype == "brief":
 			if self.comment == "":
 				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.CSredlocation, self.ISredlocation)
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.CSredlocation, self.ISredlocation)
 				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.CSredlocation, self.ISredlocation)
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.CSredlocation, self.ISredlocation)
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.CSredlocation, self.ISredlocation)
 
 		elif viewtype == "plots" or viewtype == "mega" or viewtype == "smega":
 			if self.comment == "":
 				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF)
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD)
 				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF)
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD)
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>" % (self.id, self.colspan, self.comment)
 
@@ -1168,9 +1179,9 @@ class outputInfo:
 
 		else: # usual
 			if self.comment == "":
-				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
+				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 			else: # no parset file
-				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.FE == "-" and "&#8211;" or self.oi.FE, (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
+				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, self.oi.FE == "-" and "&#8211;" or self.oi.FE, (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source)
 
 
 
@@ -1230,30 +1241,30 @@ class writeHtmlList:
 	def header (self, viewtype, storage_nodes_string_html):
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n</tr>\n")
 		elif viewtype == "plots":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
 		elif viewtype == "mega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (storage_nodes_string_html,))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (storage_nodes_string_html,))
 		elif viewtype == "smega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>Source</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Total (GB)</th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n")
 		else:
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>Status</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th>ObsID</th>\n <th align=center>MMDD</th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center>Total (GB)</th>\n <th align=center>FE</th>\n <th align=center>Im</th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>Status</th>\n <th align=center>Pointing</th>\n <th align=center>Source</th>\n</tr>\n" % (storage_nodes_string_html,))
 
 	def linkedheader (self, viewtype, storage_nodes_string_html):
 		sf=["-obsid.html", "-time.html", "-size.html", "-source.html"]
 		sf=["%s%s" % (self.linkedhtmlstem.split("/")[-1], i) for i in sf]
 		self.htmlptr.write ("\n<p align=left>\n<table border=0 cellspacing=0 cellpadding=3>\n")
 		if viewtype == "brief":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver))
 		elif viewtype == "plots":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n " % (sf[0], sf[3], sf[1], imserver))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n " % (sf[0], sf[3], sf[1], imserver))
 		elif viewtype == "mega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, storage_nodes_string_html, sf[2]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, storage_nodes_string_html, sf[2]))
 		elif viewtype == "smega":
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, sf[2]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>Antenna</th>\n <th align=center>Band</th>\n <th align=center>#Stations</th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>CS/CV Summary</th>\n <th align=center>IS Summary</th>\n <th align=center>FE Summary</th>\n <th align=center>NodesList (locus)</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center style=\"white-space: nowrap;\">Obs Setup</th>\n <th align=center style=\"white-space: nowrap;\">Stations</th>\n <th align=center>CS/CV Location</th>\n <th align=center>IS Location</th>\n <th align=center>Status</th>\n <th align=center>Archive</th>\n</tr>\n" % (sf[0], sf[3], sf[1], imserver, sf[2]))
 		else:
-			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>Status</th>\n <th align=center><a href=\"%s\">Pointing</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n</tr>\n" % (sf[0], sf[1], storage_nodes_string_html, sf[2], imserver, sf[3], sf[3]))
+			self.htmlptr.write ("\n<tr class='d' align=left>\n <th>No.</th>\n <th><a href=\"%s\">ObsID</a></th>\n <th align=center><a href=\"%s\">MMDD</a></th>\n <th align=center>Duration</th>\n <th align=center>NodesList (locus)</th>\n <th align=center>Raw Datadir</th>\n <th align=center>%s</th>\n <th align=center><a href=\"%s\">Total (GB)</a></th>\n <th align=center>FE</th>\n <th align=center><a href=\"%s\">Im</a></th>\n <th align=center>IS</th>\n <th align=center>CS</th>\n <th align=center>CV</th>\n <th align=center>OCD</th>\n <th align=center>Status</th>\n <th align=center><a href=\"%s\">Pointing</a></th>\n <th align=center><a href=\"%s\">Source</a></th>\n</tr>\n" % (sf[0], sf[1], storage_nodes_string_html, sf[2], imserver, sf[3], sf[3]))
 
 	def record (self, lineclass, index, line):
 		self.htmlptr.write ("\n<tr class='%s' align=left>\n <td>%d</td>\n %s\n</tr>" % (lineclass, index, line))
@@ -1288,7 +1299,7 @@ class obsstat:
                                             "Nfetype": 0, "Nfetype_only": 0, "Nimtype": 0, "Nimtype_only": 0,
                                             "Nbftype": 0, "Nbftype_only": 0, "Nfdtype": 0, "Nfdtype_only": 0,
                                             "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, 
-                                            "Nisfe": 0, "Niscsfe": 0, "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nbfiscsfe": 0,
+                                            "Nisfe": 0, "Niscsfe": 0, "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nocd" : 0, 
                                             "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0,
                                             "Archivedsize": 0.0, "Archivedsize_raw": 0.0, "Archivedsize_sub": 0.0, 
                                             "Archivedsize_meta": 0.0 } # sizes in TB
@@ -1371,8 +1382,9 @@ class obsstat:
 					self.dbinfo[sub]["Nbffe"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbfisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
-					self.dbinfo[sub]["Nbfiscsfe"] += 1
+				if obstable[r].comment == "" and obstable[r].oi.OCD == "+":
+					self.dbinfo[sub]["Nocd"] += 1
+
 				# getting the sizes
 				if obstable[r].comment == "":
 					self.dbinfo[sub]["totRawsize"] += float(obstable[r].totsize)
@@ -1431,7 +1443,7 @@ class obsstat:
 			self.dbinfo["Total"]["Nbfis"] += self.dbinfo[sub]["Nbfis"]
 			self.dbinfo["Total"]["Nbffe"] += self.dbinfo[sub]["Nbffe"]
 			self.dbinfo["Total"]["Nbfisfe"] += self.dbinfo[sub]["Nbfisfe"]
-			self.dbinfo["Total"]["Nbfiscsfe"] += self.dbinfo[sub]["Nbfiscsfe"]
+			self.dbinfo["Total"]["Nocd"] += self.dbinfo[sub]["Nocd"]
 			
 
 	def printstat (self):
@@ -1536,34 +1548,29 @@ class obsstat:
 			field = "%d [%d]" % (self.dbinfo[sub]["Nimtype"], self.dbinfo[sub]["Nimtype_only"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of BF observations [only BF]:                 "
+		line="Number of CV observations [only CV]:                 "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d [%d]" % (self.dbinfo[sub]["Nbftype"], self.dbinfo[sub]["Nbftype_only"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of BF+IS observations only:                   "
+		line="Number of CV+IS observations only:                   "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Nbfis"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of BF+FE observations only:                   "
+		line="Number of CV+FE observations only:                   "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Nbffe"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of BF+IS+FE observations only:                "
+		line="Number of CV+IS+FE observations only:                "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d" % (self.dbinfo[sub]["Nbfisfe"])
 			line += "%-23s" % (field)
 		print line
-		line="Number of BF+IS+CS+FE observations only:             "
+		line="Number of observations with OCD:                     "
 		for sub in np.append("Total", self.subclusters):
-			field = "%d" % (self.dbinfo[sub]["Nbfiscsfe"])
-			line += "%-23s" % (field)
-		print line
-		line="Number of FD observations [only FD]:                 "
-		for sub in np.append("Total", self.subclusters):
-			field = "%d [%d]" % (self.dbinfo[sub]["Nfdtype"], self.dbinfo[sub]["Nfdtype_only"])
+			field = "%d" % (self.dbinfo[sub]["Nocd"])
 			line += "%-23s" % (field)
 		print line
 
@@ -1697,29 +1704,25 @@ class obsstat:
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nimtype"], self.dbinfo[sub]["Nimtype_only"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of BF observations", "only BF"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of CV observations", "only CV"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nbftype"], self.dbinfo[sub]["Nbftype_only"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of BF+IS observations only"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of CV+IS observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbfis"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of BF+FE observations only"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of CV+FE observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbffe"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of BF+IS+FE observations only"))
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of CV+IS+FE observations only"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbfisfe"]))
 		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of BF+IS+CS+FE observations only"))
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Number of observations with OCD"))
 		for sub in np.append("Total", self.subclusters):
-			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nbfiscsfe"]))
-		self.htmlptr.write ("\n</tr>")
-		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font>]</td>" % ("Number of FD observations", "only FD"))
-		for sub in np.append("Total", self.subclusters):
-			self.htmlptr.write ("\n <td align=left><b>%d<b> [<font color=\"brown\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Nfdtype"], self.dbinfo[sub]["Nfdtype_only"]))
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nocd"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>")
@@ -2253,7 +2256,7 @@ if __name__ == "__main__":
 				oi=obstable[id].oi
 			else: # initializing the obsinfo class
 				oi=obsinfo(id)
-		
+
 			if not oi.is_parset():
 				comment = "NO PARSET FILE FOUND!"
 				# search for nodeslist and datadir with raw data
@@ -2542,49 +2545,49 @@ if __name__ == "__main__":
 
 	equalstrs=[]
 	if viewtype == "brief":
-		equalstring_size=190
+		equalstring_size=194
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV	CSBFLocation		ISLocation		Status"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV OCD	CSCVLocation		ISLocation		Status"
 		print equalstring
 	elif viewtype == "plots":
-		equalstring_size=199
+		equalstring_size=203
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV	CSBFLocation		ISLocation		Status      Archive"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV OCD	CSCVLocation		ISLocation		Status      Archive"
 		print equalstring
 	elif viewtype == "mega":
-		equalstring_size=276+8*Nnodes
+		equalstring_size=280+8*Nnodes
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV	NodesList (locus)	%s	Total(GB)	Obs Setup	Stations		CSBFLocation		ISLocation                Status      Archive" % (storage_nodes_string,)
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV OCD	NodesList (locus)	%s	Total(GB)	Obs Setup	Stations		CSCVLocation		ISLocation                Status      Archive" % (storage_nodes_string,)
 		print equalstring
 	elif viewtype == "smega":
-		equalstring_size=276
+		equalstring_size=280
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV	NodesList (locus) 	Total(GB)	Obs Setup	Stations		CSBFLocation 		ISLocation               Status      Archive"
+		print "# No.	ObsID		Source		MMDD	Dur	Ant	Band	   #Stations	    FE Im IS CS CV OCD	NodesList (locus) 	Total(GB)	Obs Setup	Stations		CSCVLocation 		ISLocation               Status      Archive"
 		print equalstring
 	else: # usual
-		equalstring_size=158+8*Nnodes
+		equalstring_size=162+8*Nnodes
 		for e in np.arange(equalstring_size):
 			equalstrs = np.append(equalstrs, "=")
 		equalstring="#" + "".join(equalstrs)
 		
 		print equalstring
-		print "# No.	ObsID		MMDD	Dur	NodesList (locus)	Datadir	%s	Total(GB)	FE Im IS CS CV	Status				Pointing    Source" % (storage_nodes_string,)
+		print "# No.	ObsID		MMDD	Dur	NodesList (locus)	Datadir	%s	Total(GB)	FE Im IS CS CV OCD	Status				Pointing    Source" % (storage_nodes_string,)
 		print equalstring
 		
 
