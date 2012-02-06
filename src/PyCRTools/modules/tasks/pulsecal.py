@@ -656,7 +656,7 @@ class DirectionFitPlaneWave(tasks.Task):
         from pycrtools import srcfind 
         from numpy import cos, sin
         self.farfield=True
-        c = 299792458.0 # speed of ligth in m/s
+        c = 299792458.0 # speed of light in m/s
         rad2deg = 180.0 / math.pi
 
         positions = self.positions.toNumpy()
@@ -696,7 +696,12 @@ class DirectionFitPlaneWave(tasks.Task):
                 indicesOfGoodAntennas = indicesOfGoodAntennas[goodSubset] 
         
         cartesianDirection = [cos(el)*sin(az), cos(el)*cos(az), sin(el)]
-        self.meandirection = cr.hArray(cartesianDirection)                
+        self.meandirection = cr.hArray(cartesianDirection)     
+        # NB! Have to update the dependent parameters, or the previous value will come out.
+        self.ws.updateParameter("meandirection_spherical",forced=True)
+        self.ws.updateParameter("meandirection_azel_deg",forced=True)
+        self.ws.updateParameter("meandirection_azel",forced=True)
+           
         # now redo arrays for full antenna set
         expectedDelays = srcfind.timeDelaysFromDirection(positions.ravel(), (az, el)) # need positions as flat 1-D array
         expectedDelays -= expectedDelays[0] # subtract ref ant
@@ -705,6 +710,7 @@ class DirectionFitPlaneWave(tasks.Task):
         self.delta_delays_rms_history = [np.std(self.delta_delays)]
         self.delta_delays = cr.hArray(self.delta_delays)
         
+        self.residual_delays = self.delta_delays
         if self.doplot:
             import matplotlib.pyplot as plt
             plt.figure()
