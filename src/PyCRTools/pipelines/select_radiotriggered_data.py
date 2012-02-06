@@ -116,7 +116,8 @@ parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh p
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
 parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging; default OFF")
 parser.add_option("-O", "--max_outliers", type="int", default=5, help="Maximum allowed number of outliers in calculated cable delays")
-
+parser.add_option("-Y","--cabledelays", action="store_true", help="Apply metadata cable delays if present. Default OFF")
+#parser.add_option("-F", "--filelist", type="string", help="Process the files listed in a list file with this name")
 (options, args) = parser.parse_args()
 if options.norefresh:
     nogui=True
@@ -133,11 +134,21 @@ def finish_file(filename, status):
     # write to output file, to 'good' list if status= 'OK', to 'bad' list if not, with reason
     goodlist = 'goodfiles.txt'
     badlist = 'badfiles.txt'
+    
+    goodlistfile = os.path.join(outputdir, goodlist)
+    badlistfile = os.path.join(outputdir, badlist)
+    
     if status == 'OK':
-        f = open(os.path.join(outputdir, goodlist), 'a')
+        #if not os.path.exists(goodlistfile):
+        #    f = open(goodlistfile, "w")
+        #else:
+        f = open(goodlistfile, "a")
         f.write(filename + '\n')
     else:
-        f = open(os.path.join(outputdir, badlist), 'a')
+        #if not os.path.exists(badlistfile):
+        #    f = open(badlistfile, "w")
+        #else:
+        f = open(badlistfile, "a")
         f.write(filename + ' ' + status + '\n')
     f.close()
     
@@ -194,6 +205,7 @@ maxnchunks=max_data_length/blocksize
 do_checksums = options.checksum
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
+do_cabledelays = options.cabledelays
 
 plt.ioff()
 #------------------------------------------------------------------------
@@ -262,10 +274,14 @@ for full_filename in files:
 #        topdir_name=projectname+"-"+time_stamp
         topdir_name = rootfilename
 
+        #Create output dir if needed
+        if not os.path.exists(outputdir_expanded):
+            print "# Creating output directory", outputdir_expanded
+            os.makedirs(outputdir_expanded)
+
         ########################################################################
         #Continued opening the data file
         ########################################################################
-
 
         tbb_starttime=datafile["TIME"][0]
         tbb_samplenumber=max(datafile["SAMPLE_NUMBER"])
@@ -377,22 +393,59 @@ for full_filename in files:
         fft_data.par.xvalues.setUnit("","Hz")
         fft_data.par.xvalues.setUnit("M","")
 
-        #FFT
-        hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
-        fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
+        # subtract DC offset
+        timeseries_data[...] -= timeseries_data[...].mean()
 
-        if do_checksums:
-            checksum = fft_data.checksum()
-            checksums.append('Checksum after fft_data: ' + checksum)
-            print checksums[-1]
-        
+        #### 
+        # Apply metadata cable delays if present, and if desired
+        ####
+        if do_cabledelays:
+            
+            #FFT only when used for cable delay stuffs
+            hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
+            fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
 
+            if do_checksums:
+                checksum = fft_data.checksum()
+                checksums.append('Checksum after fft_data: ' + checksum)
+                print checksums[-1]
+            
+            cabledelays = hArray(dimensions=datafile["NOF_SELECTED_DATASETS"], Type=float, fill=0)
+            try:
+                # apply cable delays 
+                cabledelays = hArray(datafile["DIPOLE_CALIBRATION_DELAY"])
+                weights = hArray(complex,dimensions = fft_data,name="Complex Weights")
+                freqs = hArray(datafile["FREQUENCY_DATA"]) # a FloatVec comes out, so put it into hArray
+                phases = hArray(float,dimensions=fft_data,name="Phases",xvalues=datafile["FREQUENCY_DATA"])
+
+                hDelayToPhase(phases, freqs, cabledelays)
+                hPhaseToComplex(weights, phases)
+                
+                fft_data.mul(weights)
+
+                # back to time domain to get calibrated timeseries data
+                hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
+                timeseries_data /= blocksize
+                print 'Cable delays applied'
+                results.update(dict(
+                    DIPOLE_CALIBRATION_DELAY_APPLIED=True
+                    ))
+                
+            except IOError:
+                print 'NO cable delays found in file'
+                results.update(dict(
+                    DIPOLE_CALIBRATION_DELAY_APPLIED=False
+                    ))
+        else:
+            print 'No cable delay calibration used (add --cabledelays if needed)'
+            
         ########################################################################
         #Back to time domain
         ########################################################################
         timeseries_calibrated_data=hArray(properties=timeseries_data)
+        timeseries_calibrated_data.copy(timeseries_data)
         #fft_data[...,0]=0 # take out zero offset (-> offset/mean==0)
-        hFFTWExecutePlan(timeseries_calibrated_data[...], fft_data[...], invfftplan)
+#        hFFTWExecutePlan(timeseries_calibrated_data[...], fft_data[...], invfftplan)
 
         timeseries_calibrated_data /= blocksize # normalize back to original value
 
@@ -462,13 +515,28 @@ for full_filename in files:
         #Determine antennas that have pulses with a high enough SNR for beamforming
         ########################################################################
 
-        antennas_with_strong_pulses=list(pulses_snr.Find(">",pulses_sigma))
+        antennas_with_strong_pulses=pulse.peaks_found_list
         nantennas_with_strong_pulses=len(antennas_with_strong_pulses)
 
         if nantennas_with_strong_pulses<min_number_of_antennas_with_pulses:
             print "ERROR: LocatePulseTrain: Not enough pulses found for beam forming!"
             finish_file(full_filename, "TOO FEW PULSES")
             continue
+
+        # NB. Used to cut out pulses in a small window for each antenna... Slight complication but faster, maybe
+        print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
+        timeseries_power=hArray(copy=pulse.timeseries_data_cut)
+        timeseries_power.square()
+#        import pdb; pdb.set_trace()
+        timeseries_power[...].runningaverage(7,hWEIGHTS.GAUSSIAN) # NB. [...] put in, want to ensure average per antenna... (AC)
+#        timeseries_power *= 10 # parameter...
+        maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+        timeseries_power_mean=timeseries_power[...,0:pulse.start].mean()
+        timeseries_power_rms=timeseries_power[...,0:pulse.start].stddev(timeseries_power_mean)
+        Pause(name="pulse-maxima-power")
+
+        pulses_snr=maxima_power.maxy/timeseries_power_rms
+        pulses_refant=pulses_snr.maxpos()
 
 
         ########################################################################
@@ -504,7 +572,7 @@ for full_filename in files:
 
         #cabledelays.negate()
 #        delays=hArray(copy=cabledelays)
-        delays = hArray(dimensions=cabledelays, fill=0.0) # no cable delay propagation anymore! Has been applied.
+        delays = hArray(dimensions=datafile["NOF_SELECTED_DATASETS"], fill=0.0) # no cable delay propagation anymore! Has been applied.
         #cabledelays *= 2
         #delays.fill(0)
 
@@ -534,7 +602,7 @@ for full_filename in files:
         scrt = hArray(copy=directionPlaneWave.residual_delays) # NB! Need to copy the hArray
         # otherwise, the original array will get modified by scrt.abs().
         scrt.abs()
-        delay_quality_error=scrt.median()/maximum_allowed_delay
+        delay_quality_error=scrt.median()[0]/maximum_allowed_delay
         print "#Delay Quality Error:",delay_quality_error
 
         # also count # outliers, impose maximum
