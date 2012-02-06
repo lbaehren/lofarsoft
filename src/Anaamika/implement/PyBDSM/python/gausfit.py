@@ -74,24 +74,25 @@ class Op_gausfit(Op):
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active),'; size = ',size
             
           if size > maxsize:
-            tosplit = misc.isl_tosplit(isl, img)
-            if tosplit[0] > 0 and opts.split_isl:
-              n_subisl, sub_labels = tosplit[1], tosplit[2]
-              gaul = []; fgaul = []
-              if opts.verbose_fitting:
-                print 'SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
-              for i_sub in range(n_subisl):
-                islcp = isl.copy(img)
-                islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
-                islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
-                size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
-                if opts.peak_fit and size_subisl > peak_size:
-                    sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
-                else:
-                    sgaul, sfgaul = self.fit_island(islcp, opts, img)
-                gaul = gaul + sgaul; fgaul = fgaul + sfgaul
-                if bar.started: bar.spin()
-              if bar.started: bar.increment()
+            if opts.split_isl:
+              tosplit = misc.isl_tosplit(isl, img)
+              if tosplit[0] > 0:
+                n_subisl, sub_labels = tosplit[1], tosplit[2]
+                gaul = []; fgaul = []
+                if opts.verbose_fitting:
+                  print 'SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
+                for i_sub in range(n_subisl):
+                  islcp = isl.copy(img)
+                  islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
+                  islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
+                  size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
+                  if opts.peak_fit and size_subisl > peak_size:
+                      sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
+                  else:
+                      sgaul, sfgaul = self.fit_island(islcp, opts, img)
+                  gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+                  if bar.started: bar.spin()
+                if bar.started: bar.increment()
             else:
               if img.waveletimage:
                 isl.islmean = 0.0
@@ -267,7 +268,7 @@ class Op_gausfit(Op):
 
         return gaul, fgaul
 
-    def deblend_and_fit(self, img, isl, split_i_sub=None, split_sub_labels=None):
+    def deblend_and_fit(self, img, isl):#, split_i_sub=None, split_sub_labels=None):
         """Deblends an island and then fits it"""
         import functions as func
         sgaul = []; sfgaul = []
@@ -290,10 +291,11 @@ class Op_gausfit(Op):
                 if int(factor) == 1:
                     slices = []
                 break
+            mask_active_orig = isl.mask_noisy
             act_pixels = (isl.image-isl.islmean-isl.mean)/thresh_isl/factor >= rms
-            if split_i_sub != None:       
-                mask_active = N.where(split_sub_labels == split_i_sub+1, False, True)
-                N.logical_and(act_pixels, ~mask_active, act_pixels)
+            
+#             if split_i_sub != None:       
+            N.logical_and(act_pixels, ~mask_active_orig, act_pixels)
             rank = len(isl.shape)
             # generates matrix for connectivity, in this case, 8-conn
             connectivity = nd.generate_binary_structure(rank, rank)
@@ -340,7 +342,7 @@ class Op_gausfit(Op):
                 ffimg_tot[bbox] += ffimg
         if N.max(isl.image-ffimg_tot-isl.islmean-isl.mean)/thresh_pix >= rms:
             sgaul, sfgaul = self.fit_island(isl, opts, img, ffimg=ffimg_tot)
-            gaul = gaul + sgaul; fgaul = fgaul + sfgaul   
+            gaul = gaul + sgaul; fgaul = fgaul + sfgaul
         
         return gaul, fgaul
 

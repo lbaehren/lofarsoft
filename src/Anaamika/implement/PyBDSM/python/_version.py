@@ -25,9 +25,12 @@ def changelog():
     """
     PyBDSM Changelog.
     -----------------------------------------------------------------------
+    
+    2012/02/06 - Fixed bug in island splitting code that could result in 
+                 duplicate Gaussians. 
 
-    2010/02/02 - Improved polarisation module. Polarization quantities are
-                 now calculated for Gaussians instead of sources.
+    2012/02/02 - Improved polarisation module. Polarization quantities are
+                 now calculated for Gaussians as well as sources.
 
     2012/01/27 - Fixed bug in psf_vary module that affected tesselation. 
                  Fixed many small typos in parameter descriptions.

@@ -9,6 +9,7 @@ towards East.
 
 from image import *
 from islands import *
+from gausfit import Gaussian
 from gaul2srl import *
 import mylogger
 import numpy as N
@@ -170,100 +171,93 @@ class Op_polarisation(Op):
             ngaus_in_island = 0
             for src in isl.sources:
                   ngaus_in_island += src.ngaus
-            # Cut out images for each island
-            ch0_Q = img.ch0_Q[isl.bbox]
-            ch0_U = img.ch0_U[isl.bbox]
-            ch0_V = img.ch0_V[isl.bbox]
+            # Cut out images for each island, subtract mean
+            ch0_Q = img.ch0_Q[isl.bbox] #- img.mean_QUV[0][isl.bbox]
+            ch0_U = img.ch0_U[isl.bbox] #- img.mean_QUV[1][isl.bbox]
+            ch0_V = img.ch0_V[isl.bbox] #- img.mean_QUV[2][isl.bbox]
            
             for i, src in enumerate(isl.sources):
-              if ngaus_in_island == 1:
-                # Just one Gaussian in the island: add up all unmasked pixels:
-                ind = N.where(~isl.mask_active)
-                pixels_in_source = N.size(ind) # number of unmasked pixels assigned to current source
-                flux_Q = N.sum(ch0_Q[ind])/pixels_per_beam # Jy
-                flux_Q_err = N.mean(img.rms_QUV[0][isl.bbox]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
-                flux_U = N.sum(ch0_U[ind])/pixels_per_beam # Jy
-                flux_U_err = N.mean(img.rms_QUV[1][isl.bbox]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
-                flux_V = N.sum(ch0_V[ind])/pixels_per_beam # Jy
-                flux_V_err = N.mean(img.rms_QUV[2][isl.bbox]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
-                
-                src_flux_Q = flux_Q
-                src_flux_U = flux_U
-                src_flux_V = flux_V
-                src_flux_Q_err_sq = flux_Q_err**2
-                src_flux_U_err_sq = flux_U_err**2
-                src_flux_V_err_sq = flux_V_err**2
+              # First, reconstruct sources from the Gaussians:
+              if i == 0: # only need to do this once per island
+                x1, x2 = N.mgrid[isl.bbox]
+                tot_im = N.zeros((isl.shape[0], isl.shape[1]), dtype=float)
+                for src_in_isl in isl.sources:
+                  for gaus in src_in_isl.gaussians:
+                    tot_im += func.gaussian_fcn(gaus, x1, x2)
 
-              else:
-                # More than one Gaussian in the island: determine fractional flux from each Gaussian.
-                # First, reconstruct sources from the Gaussians:
-                if i == 0: # only need to do this once per island
-                  x1, x2 = N.mgrid[isl.bbox]
-                  tot_im = N.zeros((isl.shape[0], isl.shape[1]), dtype=float)
-                  for src_in_isl in isl.sources:
-                    for gaus in src_in_isl.gaussians:
-                      tot_im += func.gaussian_fcn(gaus, x1, x2)
+              # Now, compare each Gaussian image pixel by pixel in the bbox, 
+              # and assign a fractional flux to each.
+              src_flux_Q = 0
+              src_flux_U = 0
+              src_flux_V = 0
+              src_flux_Q_err_sq = 0
+              src_flux_U_err_sq = 0
+              src_flux_V_err_sq = 0
 
-                # Now, compare each Gaussian image pixel by pixel in the bbox, 
-                # and assign a fractional flux to each.
-                src_flux_Q = 0
-                src_flux_U = 0
-                src_flux_V = 0
-                src_flux_Q_err_sq = 0
-                src_flux_U_err_sq = 0
-                src_flux_V_err_sq = 0
- 
-                for g, gaussian in enumerate(src.gaussians):
-                    # First, make an array giving fractional contribution to the flux of the 
-                    # current Gaussian:
-                    g_im = func.gaussian_fcn(gaussian, x1, x2)
-                    frac_flux = g_im / tot_im * ~isl.mask_active 
-                    in_current_gaus = N.where(frac_flux > 0.0) # indices of pixels assigned to current Gaussian
-                    pixels_in_source = N.size(in_current_gaus) # number of umasked pixels assigned to current Gaussian
-                    
-                    # Sum pixels in the cutout ch0 images that are assigned to current Gaussian
-                    flux_Q = N.sum(ch0_Q[in_current_gaus])/pixels_per_beam # Jy
-                    flux_Q_err = N.mean(img.rms_QUV[0][isl.bbox]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
-                    flux_U = N.sum(ch0_U[in_current_gaus])/pixels_per_beam # Jy
-                    flux_U_err = N.mean(img.rms_QUV[1][isl.bbox]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
-                    flux_V = N.sum(ch0_V[in_current_gaus])/pixels_per_beam # Jy
-                    flux_V_err = N.mean(img.rms_QUV[2][isl.bbox]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
+              for g, gaussian in enumerate(src.gaussians):
+                  # First, make an array giving fractional contribution to the flux of the 
+                  # current Gaussian:
+                  g_im = func.gaussian_fcn(gaussian, x1, x2)
+                  low_vals = N.where(g_im/N.max(g_im) < 0.1)
+                  g_im[low_vals] = 0.0  
+                  frac_flux = g_im / tot_im * ~isl.mask_active 
+                  
+                  in_current_gaus = N.where(frac_flux > 0.0) # indices of pixels assigned to current Gaussian
+                  pixels_in_source = N.size(in_current_gaus) # number of umasked pixels assigned to current Gaussian
+                  
+                  # Sum pixels in the cutout ch0 images that are assigned to current Gaussian
+                  flux_Q = N.sum(ch0_Q[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
+                  flux_Q_err = N.mean(img.rms_QUV[0][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
+                  flux_U = N.sum(ch0_U[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
+                  flux_U_err = N.mean(img.rms_QUV[1][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
+                  flux_V = N.sum(ch0_V[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
+                  flux_V_err = N.mean(img.rms_QUV[2][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
 
-                    # Store fluxes and errors for each Gaussian in the source
-                    gaussian.total_flux_Q = flux_Q
-                    gaussian.total_flux_U = flux_U
-                    gaussian.total_flux_V = flux_V
-                    gaussian.total_fluxE_Q = flux_Q_err
-                    gaussian.total_fluxE_U = flux_U_err
-                    gaussian.total_fluxE_V = flux_V_err
-                    
-                    src_flux_Q += flux_Q
-                    src_flux_U += flux_U
-                    src_flux_V += flux_V
-                    src_flux_Q_err_sq += flux_Q_err**2
-                    src_flux_U_err_sq += flux_U_err**2
-                    src_flux_V_err_sq += flux_V_err**2
-                    
-                    # Calculate and store polarisation fractions and angle for each Gaussian in the island
-                    # For this we need the I flux, which we can just take from g.total_flux and src.total_flux
-                    flux_I = gaussian.total_flux
-                    flux_I_err = gaussian.total_fluxE
-                    stokes = [flux_I, flux_Q, flux_U, flux_V]
-                    stokes_err = [flux_I_err, flux_Q_err, flux_U_err, flux_V_err]
-      
-                    lpol_frac, lpol_frac_err = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
-                    lpol_ang, lpol_ang_err = self.calc_lpol_angle(stokes, stokes_err) # linear pol angle
-                    cpol_frac, cpol_frac_err = self.calc_cpol_fraction(stokes, stokes_err) # circular pol fraction
-                    tpol_frac, tpol_frac_err = self.calc_tpol_fraction(stokes, stokes_err) # total pol fraction
-      
-                    gaussian.lpol_fraction = lpol_frac
-                    gaussian.lpol_fraction_err = lpol_frac_err
-                    gaussian.cpol_fraction = cpol_frac
-                    gaussian.cpol_fraction_err = cpol_frac_err
-                    gaussian.tpol_fraction = tpol_frac
-                    gaussian.tpol_fraction_err = tpol_frac_err
-                    gaussian.lpol_angle = lpol_ang
-                    gaussian.lpol_angle_err = lpol_ang_err
+#                   if gaussian.gaus_num == 48 or gaussian.gaus_num == 50:
+#                     0/0
+#                   # Check whether fluxes are significant (>= thresh_pix * error)
+#                   if abs(flux_Q) < img.opts.thresh_pix * flux_Q_err:
+#                       flux_Q = 0.0
+#                   if abs(flux_U) < img.opts.thresh_pix * flux_U_err:
+#                       flux_U = 0.0
+#                   if abs(flux_V) < img.opts.thresh_pix * flux_V_err:
+#                       flux_V = 0.0
+                  
+                  # Store fluxes and errors for each Gaussian in the source
+                  gaussian.total_flux_Q = flux_Q
+                  gaussian.total_flux_U = flux_U
+                  gaussian.total_flux_V = flux_V
+                  gaussian.total_fluxE_Q = flux_Q_err
+                  gaussian.total_fluxE_U = flux_U_err
+                  gaussian.total_fluxE_V = flux_V_err
+                  
+                  src_flux_Q += flux_Q
+                  src_flux_U += flux_U
+                  src_flux_V += flux_V
+                  src_flux_Q_err_sq += flux_Q_err**2
+                  src_flux_U_err_sq += flux_U_err**2
+                  src_flux_V_err_sq += flux_V_err**2
+                  
+                  # Calculate and store polarisation fractions and angle for each Gaussian in the island
+                  # For this we need the I flux, which we can just take from g.total_flux and src.total_flux
+                  flux_I = gaussian.total_flux
+                  flux_I_err = gaussian.total_fluxE
+                  stokes = [flux_I, flux_Q, flux_U, flux_V]
+                  stokes_err = [flux_I_err, flux_Q_err, flux_U_err, flux_V_err]
+    
+                  lpol_frac, lpol_frac_err = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
+                  lpol_ang, lpol_ang_err = self.calc_lpol_angle(stokes, stokes_err) # linear pol angle
+                  cpol_frac, cpol_frac_err = self.calc_cpol_fraction(stokes, stokes_err) # circular pol fraction
+                  tpol_frac, tpol_frac_err = self.calc_tpol_fraction(stokes, stokes_err) # total pol fraction
+    
+                  gaussian.lpol_fraction = lpol_frac
+                  gaussian.lpol_fraction_err = lpol_frac_err
+                  gaussian.cpol_fraction = cpol_frac
+                  gaussian.cpol_fraction_err = cpol_frac_err
+                  gaussian.tpol_fraction = tpol_frac
+                  gaussian.tpol_fraction_err = tpol_frac_err
+                  gaussian.lpol_angle = lpol_ang
+                  gaussian.lpol_angle_err = lpol_ang_err
        
               # Store fluxes for each source in the island
               src.total_flux_Q = src_flux_Q
@@ -275,10 +269,10 @@ class Op_polarisation(Op):
 
               # Calculate and store polarisation fractions and angle for each source in the island
               # For this we need the I flux, which we can just take from g.total_flux and src.total_flux
-              flux_I = src.total_flux
-              flux_I_err = src.total_fluxE
-              stokes = [flux_I, flux_Q, flux_U, flux_V]
-              stokes_err = [flux_I_err, flux_Q_err, flux_U_err, flux_V_err]
+              src_flux_I = src.total_flux
+              src_flux_I_err = src.total_fluxE
+              stokes = [src_flux_I, src_flux_Q, src_flux_U, src_flux_V]
+              stokes_err = [src_flux_I_err, N.sqrt(src_flux_Q_err_sq), N.sqrt(src_flux_U_err_sq), N.sqrt(src_flux_V_err_sq)]
 
               lpol_frac, lpol_frac_err = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
               lpol_ang, lpol_ang_err = self.calc_lpol_angle(stokes, stokes_err) # linear pol angle
@@ -306,6 +300,8 @@ class Op_polarisation(Op):
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
         QUerr = N.mean([Qerr, Uerr])
+        if Q - Qerr < 0.0 and U - Uerr < 0.0:
+            return 0.0, 0.0
         
         lpol = N.sqrt(Q**2 + U**2)
         lpol_debiased = self.debias(lpol, QUerr) # debias (to first order)
@@ -330,6 +326,8 @@ class Op_polarisation(Op):
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
 
+        if I - Ierr < 0.0 or V - Verr < 0.0:
+            return 0.0, 0.0
         cfrac = abs(V) / I
         dcfrac = cfrac * N.sqrt((Ierr/I)**2 + (Verr/V)**2)
 
@@ -345,6 +343,8 @@ class Op_polarisation(Op):
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
         QUerr = N.mean([Qerr, Uerr])
+        if Q - Qerr < 0.0 and U - Uerr < 0.0 and V - Verr < 0.0:
+            return 0.0, 0.0
 
         lpol = N.sqrt(Q**2 + U**2)
         lpol_debiased = self.debias(lpol, QUerr)
@@ -369,6 +369,8 @@ class Op_polarisation(Op):
         """
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
+        if Q - Qerr < 0.0 and U - Uerr < 0.0:
+            return 0.0, 0.0
 
         ang = 0.5 * N.arctan2(U, Q) * 180.0 / N.pi
         dang = 0.5 / (1.0 + (U/Q)**2) * N.sqrt((Uerr/Q)**2 + (U*Qerr/Q**2)**2) * 180.0 / N.pi
