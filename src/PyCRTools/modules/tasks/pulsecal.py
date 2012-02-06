@@ -696,7 +696,7 @@ class DirectionFitPlaneWave(tasks.Task):
                 indicesOfGoodAntennas = indicesOfGoodAntennas[goodSubset] 
         
         cartesianDirection = [cos(el)*sin(az), cos(el)*cos(az), sin(el)]
-        self.meandirection = cr.hArray(cartesianDirection)     
+        self.meandirection.copy(cr.hArray(cartesianDirection))
         # NB! Have to update the dependent parameters, or the previous value will come out.
         self.ws.updateParameter("meandirection_spherical",forced=True)
         self.ws.updateParameter("meandirection_azel_deg",forced=True)
