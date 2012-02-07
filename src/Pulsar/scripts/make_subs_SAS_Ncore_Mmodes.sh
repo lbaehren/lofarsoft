@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.33
+VERSION=3.34
  
 #####################################################################
 # Usage #
@@ -414,29 +414,34 @@ nrTiedArrayBeams=-1
 
 if [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ]
 then
-   #unsetenv PYTHONPATH
-   export PYTHONPATH=""
-###A2 changed this
-###   echo "python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
-###   python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
-   cp $PARSET ${location}/${OBSID}.parset
-   PARSET=${location}/${OBSID}.parset
-   #setenv PYTHONPATH $hold_pythonpath
-   export PYTHONPATH="$hold_pythonpath"
-
    # check if IS data are under the 2nd transpose
    keyword=""
    keyword=`grep OLAP.IncoherentStokesAreTransposed $PARSET | awk '{print $3}'`
    if [[ $keyword == "True" ]]
    then
       IS2=1
+      
+      cp $PARSET ${location}/${OBSID}.parset
+      PARSET=${location}/${OBSID}.parset
+      
+      nrTArings=`cat $PARSET | grep -i "nrTabRings" | head -1 | awk -F "= " '{print $2}'`
    else
       IS2=0
+
+      #unsetenv PYTHONPATH
+      export PYTHONPATH=""
+      echo "python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
+      python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
+      PARSET=${location}/${OBSID}.parset
+      #setenv PYTHONPATH $hold_pythonpath
+      export PYTHONPATH="$hold_pythonpath"
+
+      nrTArings=`cat $PARSET | grep -i "OLAP.PencilInfo.nrRings" | head -1 | awk -F "= " '{print $2}'`
    fi
    
-   #set up the beam ra,dec positions based on TA beam offsets, if TA raings > 0
-   nrTArings=`cat $PARSET | grep -i "nrTabRings" | head -1 | awk -F "= " '{print $2}'`
+   nrTiedArrayBeams=-1
    nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
+   #set up the beam ra,dec positions based on TA beam offsets, if TA raings > 0
    if [[ $nrTArings > 0 ]] || [[ $nrTiedArrayBeams > 0 ]]
    then
       nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
@@ -3202,28 +3207,28 @@ done # for loop over modes in $mode_str
 
 if [[ $proc != 0 ]]
 then
-    if (( (( $flyseye == 0 )) && (( $nrTArings == 0 )) ))
-    then
-	    # creat combined _diag.png based on any that exist;  call is status_diag.png
-	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
-	    diag_exist=`find ./ -name "*_diag.png" -print`
-	    if [[ $diag_exist != "" ]]
-	    then
-		   echo "Creating combined diagnostic plots"
-		   echo "Creating combined diagnostic plots" >> $log
-		   
-		   echo "convert `find ./ -name \*_diag.png -print` -append -background white -flatten status_diag.png"
-		   echo "convert `find ./ -name \*_diag.png -print` -append -background white -flatten status_diag.png" >> $log
-	       convert `find ./ -name \*_diag.png -print` -append -background white -flatten status_diag.png
-	       
-	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png"
-	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png" >> $log
-	       convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png
-	    else
-		   echo "No diagnostic dspsr plots to combine"
-		   echo "No diagnostic dspsr plots to combine" >> $log
-	    fi
-    fi
+#    if (( (( $flyseye == 0 )) && (( $nrTArings == 0 )) ))
+#    then
+#	    # creat combined _diag.png based on any that exist;  call is status_diag.png
+#	    # note that status_diag.png gets moved to status.png by pulp_cep2.sh
+#	    diag_exist=`find ./ -name "*_diag.png" -print`
+#	    if [[ $diag_exist != "" ]]
+#	    then
+#		   echo "Creating combined diagnostic plots"
+#		   echo "Creating combined diagnostic plots" >> $log
+#		   
+#		   echo "convert `find ./ -name \*_diag.png -print` -append -background white -flatten status_diag.png"
+#		   echo "convert `find ./ -name \*_diag.png -print` -append -background white -flatten status_diag.png" >> $log
+#	       convert `find ./ -name \*_diag.png -print` -append -background white -flatten status_diag.png
+#	       
+#	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png"
+#	       echo "convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png" >> $log
+#	       convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage status_diag.png status.th.png
+#	    else
+#		   echo "No diagnostic dspsr plots to combine"
+#		   echo "No diagnostic dspsr plots to combine" >> $log
+#	    fi
+#    fi
 
 	#Make a combined png of all the th.png files
 	echo "Combining all th.png files into one"
@@ -3245,7 +3250,7 @@ then
 	#tar_list="*/*profiles.pdf */RSP*/*pfd.ps */RSP*/*pfd.pdf */RSP*/*pfd.png */RSP*/*pfd.th.png */RSP*/*pfd.bestprof */RSP*/*.sub.inf */*.rfirep"
 	if (( $IS2 == 0 ))
 	then
-	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search`
+	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" -o -name "*diag.png" \) | grep -v search`
 	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz  $tar_list" >> $log
 	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz $tar_list
 	   ln -s ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz
@@ -3254,7 +3259,7 @@ then
 	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search | grep -v "/stokes/"`
 	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz  $tar_list" >> $log
 	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz $tar_list
-	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search | grep -v "/incoherentstokes/"`
+	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" -o -name "*diag.png" \) | grep -v search | grep -v "/incoherentstokes/"`
 	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz  $tar_list" >> $log
 	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz $tar_list
 	fi
