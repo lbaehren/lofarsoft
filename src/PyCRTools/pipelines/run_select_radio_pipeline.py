@@ -7,20 +7,30 @@ import os
 import glob
 import multiprocessing
 import subprocess
+from optparse import OptionParser
 
+
+usage = "usage: %prog [options] datafile.h5 "
+parser = OptionParser(usage=usage)
+parser.add_option("-l","--local", action="store_true", help="Indicate we run locally on our laptop (instead of altair)")
+(options, args) = parser.parse_args()
+
+run_locally = options.local
 max_threads = 12 # maximum number of threads to use
 max_attempts = 1 # maximum number of times to attempt processing a file before adding to failed
 
-#input_dir = "/data/VHECR/LORAtriggered/data"
-#processed_files = "/data/VHECR/LORAtriggered/processed.log"
-#failed_files = "/data/VHECR/LORAtriggered/failed.log"
-#log_dir = "/data/VHECR/LORAtriggered/log"
-
-input_dir = "/Users/acorstanje/triggering/fullLOFAR-12hr/cs002_caltable"
-output_dir = "/Users/acorstanje/triggering/CR/results_preselect"
-processed_files = os.path.join(output_dir, "processed.log")
-failed_files = os.path.join(output_dir, "failed.log")
-log_dir = output_dir
+if run_locally:
+    input_dir = "/Users/acorstanje/triggering/fullLOFAR-12hr/cs002_caltable"
+    output_dir = "/Users/acorstanje/triggering/CR/results_preselect"
+    processed_files = os.path.join(output_dir, "processed.log")
+    failed_files = os.path.join(output_dir, "failed.log")
+    log_dir = output_dir
+else: # Altair-specific
+    input_dir = "/data/VHECR/Radiotriggered/data"
+    output_dir = "/data/VHECR/Radiotriggered"
+    processed_files = "/data/VHECR/Radiotriggered/processed.log"
+    failed_files = "/data/VHECR/Radiotriggered/failed.log"
+    log_dir = "/data/VHECR/Radiotriggered/log"
 
 def call_pipeline(filename):
     """Function that actually calls the subprocess for each file.
@@ -32,8 +42,10 @@ def call_pipeline(filename):
 
         while (attempt <= max_attempts and status != 0):
             print filename
-#            status = subprocess.call("/opt/lofarsoft/src/PyCRTools/pipelines/select_radiotriggered_data.py "+filename+" --datadir=/data/VHECR/LORAtriggered/data --outputdir=/data/VHECR/LORAtriggered/results --loradir /data/VHECR/LORAtriggered/LORA --lora_logfile LORAtime4 --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R", stdout=f, stderr=subprocess.STDOUT, shell=True)
-            status = subprocess.call("/Users/acorstanje/usg/src/PyCRTools/pipelines/select_radiotriggered_data.py "+filename+" --datadir=/Users/acorstanje/triggering/fullLOFAR-12hr/cs002_caltable --outputdir=/Users/acorstanje/triggering/CR/results_preselect --nsigma=3 -R", stdout=f, stderr=subprocess.STDOUT, shell=True)
+            if run_locally:
+                status = subprocess.call("/Users/acorstanje/usg/src/PyCRTools/pipelines/select_radiotriggered_data.py "+filename+" --datadir=/Users/acorstanje/triggering/fullLOFAR-12hr/cs002_caltable --cabledelays --outputdir="+output_dir + " --nsigma=3 -R", stdout=f, stderr=subprocess.STDOUT, shell=True)
+            else:
+                status = subprocess.call("/Users/acorstanje/pipelines/select_radiotriggered_data.py "+filename+" --datadir=" + input_dir + " --outputdir="+output_dir + " --cabledelays --nsigma=3 -R", stdout=f, stderr=subprocess.STDOUT, shell=True)
 
             attempt += 1
 

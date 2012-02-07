@@ -143,7 +143,7 @@ def finish_file(filename, status):
         #    f = open(goodlistfile, "w")
         #else:
         f = open(goodlistfile, "a")
-        f.write(filename + '\n')
+        f.write(filename + ' ' + str(directionPlaneWave.meandirection_azel_deg[0]) + ' ' + str(directionPlaneWave.meandirection_azel_deg[1]) + ' ' + str(delay_quality_error) + ' ' + str(delay_outliers) + '\n')
     else:
         #if not os.path.exists(badlistfile):
         #    f = open(badlistfile, "w")
