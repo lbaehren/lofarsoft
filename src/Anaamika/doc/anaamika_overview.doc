@@ -6,8 +6,7 @@
   \page Anaamika Anaamika
   \defgroup Anaamika Anaamika - Blob Detection and Source Measurement
 
-  The current version of BDSM is in fortran77, and is primarily in use for LOFAR
-  CS1 data. It is currently maintained and developed at Sterrewacht Leiden.
+  The current version of BDSM is the Python version PyBDSM. It is currently maintained and developed at Sterrewacht Leiden.
 
   \section anaamika_code_tree Organiation of the source code
 
@@ -27,11 +26,10 @@
       |-- DAL
       `-- Anaamika                 <-- Project top-level directory
           |-- implement
-          |   |-- fbdsm
+          |   |-- fBDSM
 	  |   |-- fits
-	  |   |-- minpack
-	  |   |-- port3
-	  |   `-- pybdsm
+	  |   |-- shaplelets
+	  |   `-- PyBDSM
           |-- apps
           |-- data
           |-- doc
