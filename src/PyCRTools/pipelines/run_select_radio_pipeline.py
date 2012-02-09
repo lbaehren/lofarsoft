@@ -16,7 +16,7 @@ parser.add_option("-l","--local", action="store_true", help="Indicate we run loc
 (options, args) = parser.parse_args()
 
 run_locally = options.local
-max_threads = 12 # maximum number of threads to use
+max_threads = 22 # maximum number of threads to use
 max_attempts = 1 # maximum number of times to attempt processing a file before adding to failed
 
 if run_locally:
@@ -72,7 +72,7 @@ count = multiprocessing.cpu_count()
 print "Using", min(max_threads, count), "out of", count, "available CPU's."
 
 # Create a thread pool
-pool = multiprocessing.Pool(processes=min(max_threads,count))
+pool = multiprocessing.Pool(processes = min(max_threads,count)) # use all cores
 
 # Execute the pipeline for each file
 pool.map(call_pipeline, files)
