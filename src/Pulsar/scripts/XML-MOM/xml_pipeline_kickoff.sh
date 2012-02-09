@@ -240,9 +240,10 @@ else # if [[ $cep2 == 1 ]]
            then 
 	           echo 'cexec -f /etc/c3.conf hoover:1 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/; mount_locus_nodes.sh; '$line' -del' | sed -e "s/ cd/ \'cd/" -e "s/del/del\'/g" >> $outfile.$obsid.IS.sh  
 	
-	           echo 'cexec -f /etc/c3.conf hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd '${obsid}'_redIS ; mv status_diag.png status.png"' >> $outfile.$obsid.IS.sh
-	
-		       echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
+	           echo 'cexec -f /etc/c3.conf hoover:1 "cd /data/LOFAR_PULSAR_ARCHIVE_locus102/ ; mount_locus_nodes.sh;  rm -rf /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/'${obsid}'_redIS  ; mv '${obsid}'_redIS /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd /cep2/locus094_data/LOFAR_PULSAR_ARCHIVE_locus094/; cd '${obsid}'_redIS ; mv status_diag.png status.png; rm *tar.gz"' >> $outfile.$obsid.IS.sh
+	           echo 'cexec -f /etc/c3.conf locus:93 cd /data/LOFAR_PULSAR_ARCHIVE_locus102/'${obsid}'_redIS/ ; tar cvzf '${obsid}'_combinedIS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset -name \*.par -name \*pdmp\* \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.IS.sh
+		   echo "./$outfile.$obsid.IS.sh > $outfile.$obsid.IS.log &" >> $outfile.all.sh
+
 		    else
 		       echo "Incoherentstokes (IS) 2nd transpose data processing is done within the 'CS' scripts now."
 		    fi
