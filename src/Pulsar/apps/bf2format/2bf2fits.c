@@ -1944,7 +1944,7 @@ int main( int argc, char **argv )
       if(s_ptr != NULL) {
         sscanf(s_ptr, "%d", &(integrationSteps));
       }else {
-        fprintf(stderr, "2bf2fits: timeIntegrationFactor not set\n");
+        fprintf(stderr, "2bf2fits: OLAP timeIntegrationFactor not set\n");
         return 0;      
       }
       if (CSIS_MODE == 0) { // was called Observation.channelsPerSubband
@@ -1966,8 +1966,14 @@ int main( int argc, char **argv )
       if(s_ptr != NULL) {
         sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
       }else {
-        fprintf(stderr, "2bf2fits: channelsPerSubband not set\n");
-        return 0;   
+        // transition case, try again with old name Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps
+        s_ptr = get_ptr_entry("Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps", header_txt, nrlines, "=");
+        if(s_ptr != NULL) {
+          sscanf(s_ptr, "%d", &(SAMPLESPERSTOKESINTEGRATION));
+        }else {
+	  fprintf(stderr, "2bf2fits: Observation timeIntegrationFactor not set\n");
+          return 0; 
+	}  
       } 
     }
 
