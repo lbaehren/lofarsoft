@@ -67,16 +67,16 @@ endforeach (src)
 #endif (HAVE_HDF5)
 
 ##____________________________________________________________________
-## Test programs which require the DAL
+## Test programs which require the DAL1
 
-if (HAVE_DAL AND HAVE_ROOT)
+if (HAVE_DAL1 AND HAVE_ROOT)
   ## compiler instructions
   add_executable (tTBBData tTBBData.cc)
   ## linker instructions
   target_link_libraries (tTBBData
     cr
     ${ROOT_LIBRARIES}
-    ${DAL_LIBRARIES}
+    ${DAL1_LIBRARIES}
     ${HDF5_LIBRARIES}
     )
   ## testing
@@ -89,14 +89,14 @@ if (HAVE_DAL AND HAVE_ROOT)
   target_link_libraries (tTBBAnalysis
     cr
     ${ROOT_LIBRARIES}
-    ${DAL_LIBRARIES}
+    ${DAL1_LIBRARIES}
     ${HDF5_LIBRARIES}
     )
   ## testing
   add_test (tTBBAnalysis tTBBAnalysis)
   ## installation
   list (APPEND tests tTBBAnalysis)
-endif (HAVE_DAL AND HAVE_ROOT)
+endif (HAVE_DAL1 AND HAVE_ROOT)
 
 
 

@@ -64,7 +64,7 @@ else (APPLE)
   option (WCSLIB_PYTHON_WRAPPER   "Generate Python wrapper for WCSLIB?"      YES )
 endif (APPLE)
 
-option (CR_WITH_DAL             "Build and use the Data Access Library?"   YES )
+option (CR_WITH_DAL1             "Build and use the Data Access Library?"   YES )
 option (CR_WITH_GLISH           "Support for Glish applications?"          NO  )
 option (CR_WITH_PYCR            "Support for Python applications?"         NO  )
 option (CR_WITH_PLOTTING        "Support for generation of plots?"         YES )
@@ -80,7 +80,7 @@ option (PYCRTOOLS_WITH_OPTIMIZATIONS     "Compile PyCRTools with optimization fl
 option (PYCRTOOLS_WITH_RUNTIME_WARNINGS  "Compile PyCRTools with runtime warnings enabled?"          YES )
 option (PYCRTOOLS_WITH_AERA              "Compile PyCRTools with AERA data support?"                 NO )
 option (PYCRTOOLS_WITH_CASACORE          "Compile PyCRTools with CASACore support?"                  YES )
-option (PYCRTOOLS_WITH_DAL               "Compile PyCRTools with DAL support?"                       YES )
+option (PYCRTOOLS_WITH_DAL1               "Compile PyCRTools with DAL1 support?"                       YES )
 option (PYCRTOOLS_WITH_FFTW              "Compile PyCRTools with FFTW support?"                      YES )
 option (PYCRTOOLS_WITH_GSL               "Compile PyCRTools with GSL support?"                       YES )
 option (PYCRTOOLS_WITH_NUMPY             "Compile PyCRTools with Numpy support?"                     YES )
@@ -126,7 +126,7 @@ foreach (varSystemPackage
     CFITSIO
     CUDA
     CppUnit
-    DAL
+    DAL1
     Doxygen
     FFTW3
     FLEX

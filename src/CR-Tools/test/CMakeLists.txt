@@ -102,10 +102,10 @@ if (HAVE_WCSLIB)
 endif (HAVE_WCSLIB)
 
 ## -----------------------------------------------------------------------------
-## Test for working with ROOT (includes working with the DAL)
+## Test for working with ROOT (includes working with the DAL1)
 
 if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
-  if (HAVE_DAL)
+  if (HAVE_DAL1)
     ## compiler instructions
     add_executable (tUseROOT tUseROOT.cc)
     ## linker instructions
@@ -115,7 +115,7 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	${CASA_LIBRARIES}
-	${DAL_LIBRARIES}
+	${DAL1_LIBRARIES}
 	${HAVE_LIBUTIL}
 	${HAVE_LIBDL}
 	)
@@ -125,20 +125,20 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	${CASA_LIBRARIES}
-	${DAL_LIBRARIES}
+	${DAL1_LIBRARIES}
 	)
     endif (HAVE_LIBUTIL AND HAVE_LIBDL)
     ## extra properties to take care of
     if (APPLE)
       set_target_properties (tUseROOT
 	PROPERTIES
-	COMPILE_FLAGS "-I${DAL_INCLUDES} -I${ROOT_INCLUDES} -I${FFTW3_INCLUDES}"
+	COMPILE_FLAGS "-I${DAL1_INCLUDES} -I${ROOT_INCLUDES} -I${FFTW3_INCLUDES}"
 	LINK_FLAGS "-bind_at_load"
 	)
     else (APPLE)
       set_target_properties (tUseROOT
 	PROPERTIES
-	COMPILE_FLAGS "-I${DAL_INCLUDES} -I${ROOT_INCLUDES} -I${FFTW3_INCLUDES}"
+	COMPILE_FLAGS "-I${DAL1_INCLUDES} -I${ROOT_INCLUDES} -I${FFTW3_INCLUDES}"
 	)
     endif (APPLE)
     ## testing
@@ -147,9 +147,9 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
     else (dataset_event)
 	  add_test (tUseROOT tUseROOT) 
     endif (dataset_event)
-  else (HAVE_DAL)
+  else (HAVE_DAL1)
     message (STATUS "[CR-Tools] Unable to build test program tUseROOT.")
-  endif (HAVE_DAL)
+  endif (HAVE_DAL1)
 endif (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 
 ## -----------------------------------------------------------------------------

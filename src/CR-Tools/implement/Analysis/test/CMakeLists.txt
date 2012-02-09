@@ -66,7 +66,7 @@ endforeach (src)
 ## ==============================================================================
 
 ##____________________________________________________________________
-## Test programs which require the DAL
+## Test programs which require the DAL1
 
 if (dataset_beamformed)
   add_test (tppfinversion tppfinversion ${dataset_beamformed})
@@ -272,7 +272,7 @@ endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING AND HAVE_ROOT)
 ##                                                    tAntennasDisplay
 ##                                                    tPulseProperties
 
-if (HAVE_STARTOOLS AND HAVE_DAL)
+if (HAVE_STARTOOLS AND HAVE_DAL1)
 
   foreach (src
       tAntennasDisplay
@@ -290,7 +290,7 @@ if (HAVE_STARTOOLS AND HAVE_DAL)
       ${STARTOOLS_LIBRARIES}
       ${FFTW3_LIBRARIES}
       ${ROOT_LIBRARIES}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
@@ -303,7 +303,7 @@ if (HAVE_STARTOOLS AND HAVE_DAL)
     list (APPEND tests ${src})
   endforeach (src)
   
-endif (HAVE_STARTOOLS AND HAVE_DAL)
+endif (HAVE_STARTOOLS AND HAVE_DAL1)
 
 ## ==============================================================================
 ##

@@ -4,9 +4,9 @@
 
 file (GLOB tests_IO *.cc)
 
-if (NOT HAVE_CASACORE OR NOT DAL_LIBRARIES OR NOT HDF5_LIBRARIES)
+if (NOT HAVE_CASACORE OR NOT DAL1_LIBRARIES OR NOT HDF5_LIBRARIES)
   list (REMOVE_ITEM tests_IO ${CURRENT_SOURCE_DIR}/LOFAR_TBB.cc)
-endif (NOT HAVE_CASACORE OR NOT DAL_LIBRARIES OR NOT HDF5_LIBRARIES)
+endif (NOT HAVE_CASACORE OR NOT DAL1_LIBRARIES OR NOT HDF5_LIBRARIES)
 
 ##_______________________________________________________________________________
 ##                                                     Build/Install instructions

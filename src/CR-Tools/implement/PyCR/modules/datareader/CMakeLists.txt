@@ -50,7 +50,7 @@ if (CR_WITH_PYCR)
   ## linker instructions
   target_link_libraries(_datareader
     cr
-    ${DAL_LIBRARIES}
+    ${DAL1_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${CASA_LIBRARIES}
     ${PYTHON_LIBRARIES}

@@ -159,7 +159,7 @@ set (cr_cmake_modules
   AERA
   Boost
   CFITSIO
-  DAL
+  DAL1
   FFTW3
   GFortran
   GSL
@@ -432,14 +432,14 @@ if (HAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
 endif (HAVE_CFITSIO)
 
-if (HAVE_DAL)
-  include_directories (${DAL_INCLUDES})
+if (HAVE_DAL1)
+  include_directories (${DAL1_INCLUDES})
   ## additional compiler flags
   if (HAVE_CASA OR HAVE_CASACORE)
     set (WITH_CASA YES)
     add_definitions (-DWITH_CASA)
   endif (HAVE_CASA OR HAVE_CASACORE)
-endif (HAVE_DAL)
+endif (HAVE_DAL1)
 
 if (GFORTRAN_INCLUDES)
   include_directories (${GFORTRAN_INCLUDES})
@@ -491,9 +491,9 @@ endif (HAVE_WCSLIB)
 ##
 ## =============================================================================
 
-if (DAL_LIBRARIES)
-  list (APPEND cr_link_libraries ${DAL_LIBRARIES})
-endif (DAL_LIBRARIES)
+if (DAL1_LIBRARIES)
+  list (APPEND cr_link_libraries ${DAL1_LIBRARIES})
+endif (DAL1_LIBRARIES)
 
 if (CASA_LIBRARIES)
   list (APPEND cr_link_libraries ${CASA_LIBRARIES})
@@ -601,7 +601,6 @@ if (tar_executable AND gzip_executable)
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/python
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/root
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn external/startools
-    COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn src/DAL
     COMMAND ${tar_executable} -rvf crtools.tar --exclude .svn src/CR-Tools
     COMMAND ${gzip_executable} crtools.tar
     COMMAND mv crtools.tar.gz crtools.tgz
@@ -632,10 +631,10 @@ message (STATUS " .. libboost_thread_time    : ${BOOST_THREAD_LIBRARY}"    )
 message (STATUS " CASA ...................... : ${HAVE_CASA}"               )
 message (STATUS " CASACORE .................. : ${HAVE_CASACORE}")
 message (STATUS " CFITSIO ................... : ${HAVE_CFITSIO}")
-message (STATUS " Data Access Library (DAL) . : ${HAVE_DAL}")
-message (STATUS " .. Library version ........ : ${DAL_VERSION}")
-message (STATUS " .. Include directory ...... : ${DAL_INCLUDES}")
-message (STATUS " .. Library path ........... : ${DAL_DAL_LIBRARY}")
+message (STATUS " Data Access Library (DAL1) . : ${HAVE_DAL1}")
+message (STATUS " .. Library version ........ : ${DAL1_VERSION}")
+message (STATUS " .. Include directory ...... : ${DAL1_INCLUDES}")
+message (STATUS " .. Library path ........... : ${DAL1_DAL_LIBRARY}")
 message (STATUS " FFTW3 ..................... : ${HAVE_FFTW3}")
 message (STATUS " GFortran .................. : ${HAVE_GFORTRAN}")
 message (STATUS " Glish ..................... : ${HAVE_GLISH}")

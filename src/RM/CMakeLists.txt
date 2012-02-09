@@ -62,7 +62,7 @@ foreach (externalPackage
     Boost
     CASACORE
     CFITSIO
-    DAL
+    DAL1
     FFTW3
     GFortran
     GSL
@@ -201,14 +201,14 @@ if (RM_WITH_ARMADILLO)
   endif (HAVE_ARMADILLO OR ARMADILLO_FOUND)
 endif (RM_WITH_ARMADILLO)
 
-if (HAVE_DAL)
-  include_directories (${DAL_INCLUDES})
+if (HAVE_DAL1)
+  include_directories (${DAL1_INCLUDES})
   ## additional compiler flags
   if (CASACORE_INCLUDES)
     set (WITH_CASA YES)
     add_definitions (-DWITH_CASA)
   endif (CASACORE_INCLUDES)
-endif (HAVE_DAL)
+endif (HAVE_DAL1)
 
 if (CASACORE_INCLUDES)
   include_directories (${CASACORE_INCLUDES})
@@ -255,7 +255,7 @@ endif (HAVE_WCSLIB OR WCSLIB_FOUND)
 ## =============================================================================
 
 set (rm_link_libraries
-  ${DAL_LIBRARIES}
+  ${DAL1_LIBRARIES}
   ${CASA_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${WCSLIB_LIBRARIES}

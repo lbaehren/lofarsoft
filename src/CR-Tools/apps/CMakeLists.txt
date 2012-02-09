@@ -48,7 +48,7 @@ endif (HAVE_CASACORE)
 ##____________________________________________________________________
 ##                                                              imager
 
-if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
+if (HAVE_CASACORE AND HAVE_DAL1 AND HAVE_BOOST)
   ## compiler instructions
   add_executable (imager imager.cc)
   ## linker instructions
@@ -56,7 +56,7 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
     cr
     ${HAVE_LIBZ}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
-    ${DAL_LIBRARIES}
+    ${DAL1_LIBRARIES}
     ${HDF5_LIBRARIES}
     )
   ## installation instructions
@@ -65,7 +65,7 @@ if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
   add_test (imager_test01 imager --help)
   add_test (imager_test02 imager --infile ${dataset_lopes})
   add_test (imager_test03 imager --infile ${dataset_lopes} --blocksize 4096)
-endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
+endif (HAVE_CASACORE AND HAVE_DAL1 AND HAVE_BOOST)
 
 ##____________________________________________________________________
 ##                                                             trigrun
@@ -211,7 +211,7 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 
 if (HAVE_CASA OR HAVE_CASACORE)
 
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
 
     ## compiler instructions
     add_executable (tbbTest tbbTest.cc)
@@ -219,187 +219,187 @@ if (HAVE_CASA OR HAVE_CASACORE)
     target_link_libraries (tbbTest
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps tbbTest)
     
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
     message (STATUS "[CR-Tools] Unable to build executable tbbTest.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES AND CR_WITH_LEGACY AND CR_WITH_PLOTTING)
   
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
 ##                                                 testLOPESskymapping
 
-if (HAVE_CASACORE AND HAVE_DAL)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+if (HAVE_CASACORE AND HAVE_DAL1)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (testLOPESskymapping testLOPESskymapping.cc)
     ## linker instructions
     target_link_libraries (testLOPESskymapping 
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps testLOPESskymapping)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable testLOPESskymapping.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL1)
 
 ## -------------------------------------------------------------------
 ##                                                          CalDynSpec
 
 if (HAVE_CASA OR HAVE_CASACORE)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (CalDynSpec CalDynSpec.cc)
     ## linker instructions
     target_link_libraries (CalDynSpec
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps CalDynSpec)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable CalDynSpec.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ##_______________________________________________________________________________
 ##                                                                    imagetofits
 
-if (HAVE_CASACORE AND HAVE_DAL)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+if (HAVE_CASACORE AND HAVE_DAL1)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (imagetofits imagetofits.cc)
     ## linker instructions
     target_link_libraries (imagetofits 
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps imagetofits)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable imagetofits.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL1)
 
 ##_______________________________________________________________________________
 ##                                                                  imagefromfits
 
-if (HAVE_CASACORE AND HAVE_DAL)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+if (HAVE_CASACORE AND HAVE_DAL1)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (imagefromfits imagefromfits.cc)
     ## linker instructions
     target_link_libraries (imagefromfits 
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps imagefromfits)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable imagefromfits.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL1)
 
 ##_______________________________________________________________________________
 ##                                                                     checkimage
 
-if (HAVE_CASACORE AND HAVE_DAL)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+if (HAVE_CASACORE AND HAVE_DAL1)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (checkimage checkimage.cc)
     ## linker instructions
     target_link_libraries (checkimage 
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps checkimage)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable checkimage.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL1)
 
 ##_______________________________________________________________________________
 ##                                                                        cccheck
 
-if (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+if (HAVE_CASACORE AND HAVE_DAL1 AND CR_WITH_PLOTTING)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (cccheck cccheck.cc)
     ## linker instructions
     target_link_libraries (cccheck 
       cr 
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps cccheck)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable cccheck.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL1 AND CR_WITH_PLOTTING)
 
 ##_______________________________________________________________________________
 ##                                                                       cccheck2
 
-if (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+if (HAVE_CASACORE AND HAVE_DAL1 AND CR_WITH_PLOTTING)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (cccheck2 cccheck2.cc)
     ## linker instructions
     target_link_libraries (cccheck2 
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps cccheck2)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable cccheck2.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-endif (HAVE_CASACORE AND HAVE_DAL AND CR_WITH_PLOTTING)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASACORE AND HAVE_DAL1 AND CR_WITH_PLOTTING)
 
 ##_______________________________________________________________________________
 ##                                                                  tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  if (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     ## compiler instructions
     add_executable (tbbStatistics tbbStatistics.cc)
     ## linker instructions
     target_link_libraries (tbbStatistics
       cr
       ${HAVE_LIBZ}
-      ${DAL_LIBRARIES}
+      ${DAL1_LIBRARIES}
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${CFITSIO_LIBRARIES}
@@ -410,9 +410,9 @@ if (HAVE_CASA OR HAVE_CASACORE)
     if (dataset_tbb)
       add_test (tbbStatistics tbbStatistics ${dataset_tbb})
     endif (dataset_tbb)
-  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  else (DAL1_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable tbbStatistics.")
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  endif (DAL1_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ##_______________________________________________________________________________
@@ -551,7 +551,7 @@ endif (CR_WITH_STARTOOLS AND CR_WITH_LEGACY)
 ##_______________________________________________________________________________
 ##                                                             tbbTriggerAnalysis
 
-if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
+if (HAVE_CASACORE AND DAL1_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
   
   ## compiler instructions
   add_executable (tbbTriggerAnalysis tbbTriggerAnalysis.cc)
@@ -559,7 +559,7 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
   target_link_libraries (tbbTriggerAnalysis
     cr
     ${HAVE_LIBZ}
-    ${DAL_LIBRARIES}
+    ${DAL1_LIBRARIES}
     ${CASA_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
@@ -567,7 +567,7 @@ if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
   ## installation instructions
   list (APPEND cr_apps tbbTriggerAnalysis)
   
-endif (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
+endif (HAVE_CASACORE AND DAL1_LIBRARIES AND HDF5_LIBRARIES AND HAVE_BOOST)
 
 
 

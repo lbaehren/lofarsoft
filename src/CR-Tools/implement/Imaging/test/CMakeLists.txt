@@ -46,7 +46,7 @@ endforeach (src)
 ##____________________________________________________________________
 ## tSkymapper
 
-if (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
+if (HAVE_DAL1 AND HAVE_HDF5 AND positions_lopes08)
   
   configure_file (${CR_SOURCE_DIR}/implement/Imaging/test/tSkymapper.sh
     ${CR_BINARY_DIR}/implement/Imaging/test/tSkymapper.sh
@@ -68,7 +68,7 @@ if (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
   ## installation
   list (APPEND tests tSkymapper)
 
-endif (HAVE_DAL AND HAVE_HDF5 AND positions_lopes08)
+endif (HAVE_DAL1 AND HAVE_HDF5 AND positions_lopes08)
 
 ## ==============================================================================
 ##

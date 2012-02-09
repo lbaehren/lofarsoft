@@ -59,7 +59,7 @@ add_library (hfget MODULE
 
 target_link_libraries (hfget
   cr
-  ${DAL_LIBRARIES}
+  ${DAL1_LIBRARIES}
   ${HDF5_LIBRARIES}
   ${CASA_LIBRARIES}
   ${QT4_LIBRARIES}
