@@ -143,7 +143,8 @@ def finish_file(filename, status):
         #    f = open(goodlistfile, "w")
         #else:
         f = open(goodlistfile, "a")
-        f.write(filename + ' ' + str(directionPlaneWave.meandirection_azel_deg[0]) + ' ' + str(directionPlaneWave.meandirection_azel_deg[1]) + ' ' + str(delay_quality_error) + ' ' + str(delay_outliers) + '\n')
+        time_of_file = float(tbb_starttime) + float(tbb_samplenumber) / 200.0e6
+        f.write(filename + ' ' + str(time_of_file) + ' ' + str(directionPlaneWave.meandirection_azel_deg[0]) + ' ' + str(directionPlaneWave.meandirection_azel_deg[1]) + ' ' + str(delay_quality_error) + ' ' + str(delay_outliers) + '\n')
     else:
         #if not os.path.exists(badlistfile):
         #    f = open(badlistfile, "w")
@@ -255,7 +256,8 @@ for full_filename in files:
             print "File size wrong, file marked as BAD!"
             status = "File too small" if filesize < 24 * 1048576 else "File too large"
             finish_file(full_filename, status)
-        
+            continue
+            
         print "---> Open data file",full_filename
         try:
             datafile=open(full_filename);
