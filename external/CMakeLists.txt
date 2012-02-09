@@ -40,6 +40,7 @@ set (external_packages
   valgrind
   wcslib
   wcstools
+  dal1
   )
 
 if (OPENGL_FOUND)

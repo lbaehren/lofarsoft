@@ -108,104 +108,6 @@ endmacro (lus_package_experimental)
 
 ## ==============================================================================
 ##
-##                                                             $LOFARSOFT/src/DAL
-##
-##  As the DAL is not hosted within the LUS Subversion repository, by default
-##  there is no local copy of the code base. Hence when building and installing
-##  the DAL as part of the LUS software collection a checkout from the repository
-##  on Github is required.
-##
-## ==============================================================================
-
-set (DAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DAL)
-set (DAL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/DAL)
-set (DAL_GIT_REPOSITORY http://github.com/nextgen-astrodata/DAL.git CACHE STRING "DAL git repository.")
-
-##__________________________________________________________
-##                                                   Options
-
-option (DAL_SOURCE_VERSION     "DAL release version"                         0.2.0 )
-option (DAL_FORCE_BUILD        "Force build and installation of package?"    NO    )
-option (DAL_FROM_RELEASE       "Use release version instead of trunk?"       NO    )
-option (DAL_ENABLE_TESTING     "Enable testing and experimental builds?"     YES   )
-option (DOCUMENTATION_ONLY     "Configure for building documentation only?"  NO    )
-option (DAL_WITH_DOCUMENTATION "Generate documentation for the DAL?"         YES   )
-option (DAL_SHARED_LIBRARY     "Build DAL as shared library?"                NO    )
-option (DAL_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"   YES   )
-option (DAL_PYTHON_BINDINGS    "Create python bindings?"                     YES   )
-option (DAL_DEBUGGING_MESSAGES "Print debugging information?"                NO    ) 
-option (DAL_VERBOSE_CONFIGURE  "Verbose output during configuration?"        NO    )
-option (DAL_WITH_MYSQL         "Build with support for MySQL database?"      NO    )
-
-##__________________________________________________________
-##                              Build & Testing instructions
-
-if (${DAL_FOUND})
-  if (${DAL_SOURCE_VERSION} VERSION_GREATER ${DAL_VERSION})
-    set (DAL_FORCE_BUILD TRUE)
-  endif (${DAL_SOURCE_VERSION} VERSION_GREATER ${DAL_VERSION})
-endif (${DAL_FOUND})
-
-if (NOT DAL_FROM_RELEASE)
-  set (DAL_FORCE_BUILD TRUE)
-endif (NOT DAL_FROM_RELEASE)
-
-if (NOT DAL_FOUND OR DAL_FORCE_BUILD)
-  ## Create configuration file for initial CMake cache
-  configure_file (
-    ${DAL_SOURCE_DIR}/dal.cmake.in
-    ${DAL_BINARY_DIR}/dal.cmake
-    )
-  
-  if (DAL_FROM_RELEASE)
-    ## Install from "release" branch
-    ExternalProject_Add (dal
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-      GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
-      GIT_TAG release
-      CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
-      )
-  else (DAL_FROM_RELEASE)
-    ## Install from "master" branch
-    ExternalProject_Add (dal
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-      GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
-      CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
-      )
-  endif (DAL_FROM_RELEASE)
-
-else (NOT DAL_FOUND OR DAL_FORCE_BUILD)
-  add_custom_target (dal
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "[DAL] Found system-wide installation; skipping rebuild!"
-    )
-endif (NOT DAL_FOUND OR DAL_FORCE_BUILD)
-
-ExternalProject_Add (dal_Experimental
-  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DAL
-  GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
-  CMAKE_ARGS -C ${DAL_BINARY_DIR}/dal.cmake
-  TEST_BEFORE_INSTALL 1
-  TEST_COMMAND make Experimental
-  )
-
-##__________________________________________________________
-##                                      Package dependencies
-
-if (DAL_PYTHON_BINDINGS)
-  if (TEST_DATASETS)
-    add_dependencies (dal num_util test-data casacore git num_util test-data)
-  else(TEST_DATASETS)
-    add_dependencies (dal casacore git num_util)
-  endif (TEST_DATASETS)
-else (DAL_PYTHON_BINDINGS)
-  if (TEST_DATASETS)
-    add_dependencies (dal casacore git test-data)
-  endif (TEST_DATASETS)
-endif (DAL_PYTHON_BINDINGS)
-
-## ==============================================================================
-##
 ##                                                        $LOFARSOFT/src/Anaamika
 ##
 ## ==============================================================================
@@ -268,7 +170,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
 ##__________________________________________________________
 ##                                      Package dependencies
 
-add_dependencies (contrib dal)
+add_dependencies (contrib dal1)
 
 ##__________________________________________________________
 ##                                                   Testing
@@ -314,7 +216,7 @@ endif (IS_DIRECTORY ${CR_SOURCE_DIR})
 add_dependencies (cr plplot fftw3 gsl)
 
 if (CR_WITH_DAL)
-  add_dependencies (cr dal)
+  add_dependencies (cr dal1)
 endif (CR_WITH_DAL)
 
 if (CR_WITH_GUI)
@@ -425,7 +327,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyCRTools)
 ##__________________________________________________________
 ##                                      Package dependencies
 
-add_dependencies (pycrtools dal casacore fftw3 gsl tmf num_util)
+add_dependencies (pycrtools dal1 casacore fftw3 gsl tmf num_util)
 
 if (PYCRTOOLS_WITH_AERA)
   add_dependencies (pycrtools aera)
@@ -471,7 +373,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/RM)
 ##__________________________________________________________
 ## Package dependencies
 
-add_dependencies (rm wcslib cfitsio dal casacore)
+add_dependencies (rm wcslib cfitsio dal1 casacore)
 
 if (RM_WITH_ARMADILLO)
   add_dependencies (rm armadillo)
