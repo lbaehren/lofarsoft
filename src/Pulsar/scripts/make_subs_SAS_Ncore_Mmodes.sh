@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.35
+VERSION=3.36
  
 #####################################################################
 # Usage #
@@ -417,7 +417,7 @@ then
    # check if IS data are under the 2nd transpose
    keyword=""
    keyword=`grep OLAP.IncoherentStokesAreTransposed $PARSET | awk '{print $3}'`
-   if [[ $keyword == "True" ]]
+   if [[ $keyword == "True" ]] || [[ $keyword == "true" ]] || [[ $keyword == "T" ]]
    then
       IS2=1
       
@@ -447,7 +447,7 @@ then
       nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
       ra_center=`cat $PARSET | grep -i "Observation.Beam\[0\].angle1" | head -1 | awk -F "= " '{print $2}'`
       dec_center=`cat $PARSET | grep -i "Observation.Beam\[0\].angle2" | head -1 | awk -F "= " '{print $2}'`
-      ii=1
+      ii=0
       while (( $ii < $nrTiedArrayBeams ))
       do
          #get the offsets
@@ -461,6 +461,30 @@ then
          echo "Dec (rad) of TiedArrayBeam[$ii] == $dec_beam" >> $log
          echo "RA (rad) of TiedArrayBeam[$ii] == $ra_beam" 
          echo "Dec (rad) of TiedArrayBeam[$ii] == $dec_beam" 
+         
+         # pick up the TAB info in the IS2 parsets and put into arrays
+         PARSET_TAB_angle1[$ii]=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].angle1" | head -1 | awk -F "= " '{print $2}'`
+         PARSET_TAB_angle2[$ii]=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].angle2" | head -1 | awk -F "= " '{print $2}'`
+         if [[ $IS2 == 1 ]]
+         then 
+	         PARSET_TAB_coherent[$ii]=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].coherent" | head -1 | awk -F "= " '{print $2}'`
+	         if [[ ${PARSET_TAB_coherent[ii]} == "True" ]] || [[ ${PARSET_TAB_coherent[ii]} == "true" ]] || [[ ${PARSET_TAB_coherent[ii]} == "T" ]]
+	         then
+	            PARSET_TAB_CS[$ii]=1
+	         else
+	            PARSET_TAB_CS[$ii]=0
+	         fi
+         fi 
+         PARSET_TAB_DM[$ii]=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].dispersionMeasure" | head -1 | awk -F "= " '{print $2}'`
+         PARSET_TAB_specificationType[$ii]=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].specificationType" | head -1 | awk -F "= " '{print $2}'`
+         if [[ ${PARSET_TAB_specificationType[ii]} == "flyseye" ]] || [[ ${PARSET_TAB_coherent[ii]} == "Flyseye" ]] 
+         then
+            PARSET_TAB_FE[$ii]=1
+         else
+            PARSET_TAB_FE[$ii]=0
+         fi
+         PARSET_TAB_stationList[$ii]=`cat $PARSET | grep -i "Observation.Beam\[0\].TiedArrayBeam\[$ii\].stationList" | head -1 | awk -F "= " '{print $2}' | sed -e 's/\[//g' -e 's/\]//g'`
+
          ii=$(( $ii + 1 ))
       done
    else 
@@ -501,10 +525,10 @@ then
     # get the IS beam number and store for later move of beam number to incoherentstokes directory
     IS_BEAM=-1
     IS_exist=""
-    IS_exist=`cat $PARSET | grep "coherent = F"`
+    IS_exist=`cat $PARSET | egrep "coherent = F|coherent = f"`
     if [[ $IS_exist != "" ]]
     then
-       IS_BEAM=`cat $PARSET | grep "coherent = F"  | head -1 | awk -F "[" '{print $3}' | awk -F "]" '{print $1}'`
+       IS_BEAM=`cat $PARSET | egrep "coherent = F|coherent = f"  | head -1 | awk -F "[" '{print $3}' | awk -F "]" '{print $1}'`
     fi
 else 
 	INCOHERENTSTOKES=`cat $PARSET | grep "OLAP.outputIncoherentStokes"  | head -1 | awk -F "= " '{print $2}'`
@@ -1449,6 +1473,7 @@ do
                  if (( $TiedArray == 0 ))
                  then
                     cd ${location}/${STOKES}/RSP$ii/
+ echo A2-1 #A2delete
 
 	                if (( $subsformat == 1 ))
 	                then
@@ -1464,8 +1489,10 @@ do
 			        bf2presto_pid[$ii]=$!  
 			     else # (( $TiedArray == 1 ))
 			        counter=0
+
 			        for jjj in $beams
 			        do
+ echo A2-2 #A2delete
 			            ## -- not sure about this line:    ${STOKES}/"RSP"${ii}/${jjj}
                         cd ${location}/${STOKES}/RSP$ii/${jjj}
 
@@ -1473,7 +1500,17 @@ do
 		                then
 		                   extra_flags="$extra_flags -M -T ${nSubbands}"
                         else
-                           extra_flags="$extra_flags -nsubs $nSubbands"
+	                       if (( $IS2 == 1 ))
+	                       then
+	                          if (( ${PARSET_TAB_CS[ii]} == 0 ))
+	                          then  # treat as IS beam for 2bf2fits
+	                             extra_flags="$extra_flags -nsubs $nSubbands -IS"
+	                          else
+	                             extra_flags="$extra_flags -nsubs $nSubbands"
+	                          fi
+	                       else
+	                          extra_flags="$extra_flags -nsubs $nSubbands"
+	                       fi
 		                fi
 
 			            echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
@@ -1488,6 +1525,8 @@ do
 		else # if (( $flyseye != 0 ))
 			for ii in $num_dir
 			do	
+ echo A2-3 #A2delete
+
 			    # note, should be in STOKES/RSP? directory because output gets "beam_N" PREFIX
 			    cd ${location}/${STOKES}/"RSP"${ii}
 
@@ -1530,6 +1569,7 @@ do
                    if (( $TiedArray == 0 ))
                    then
 
+ echo A2-4 #A2delete
 		               if (( $subsformat == 1 ))
 		               then
 		                  extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
@@ -1546,13 +1586,25 @@ do
 				        counter=0
 				        for jjj in $beams
 				        do
+ echo A2-5 #A2delete
 	                        cd ${location}/${STOKES}/RSP$ii/${jjj}
 
 			                if (( $subsformat == 1 ))
 			                then
 			                   extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
                             else
-                               extra_flags="$extra_flags -nsubs $nSubbands"
+		                       if (( $IS2 == 1 ))
+		                       then
+		                          if (( ${PARSET_TAB_CS[ii]} == 0 ))
+		                          then  # treat as IS beam for 2bf2fits
+		                             extra_flags="$extra_flags -nsubs $nSubbands -IS"
+		                          else
+		                             extra_flags="$extra_flags -nsubs $nSubbands"
+		                          fi
+		                       else
+		                          extra_flags="$extra_flags -nsubs $nSubbands"
+		                       fi
+
 			                fi
 
 				            echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
@@ -2945,6 +2997,7 @@ do
 	#Rename the RSP?/beam_? to their actual names based on the observation parset names -> NAME/beam_?
     if [ $flyseye == 1 ] && [ $all_pproc == 0 ] && [ $rfi_pproc == 0 ] && [ $TiedArray == 0 ]
     then
+ echo A2-6 #A2delete
         cd ${location}/${STOKES}/
 		for ii in $num_dir
 		do
@@ -2952,11 +3005,33 @@ do
 			N=$ii
 			N=`echo "$N+1" | bc`
 			beam_index=`sed -n "$N"p SB_master.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
-			beam_index=`echo "$beam_index+1" | bc`
-			NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$beam_index'}'`
-			echo "mv RSP${ii} $NAME" >> $log
-			echo "mv RSP${ii} $NAME"
-			mv RSP${ii} $NAME
+			if (( $IS2 == 0 ))
+			then
+			   beam_index=`echo "$beam_index+1" | bc`
+			   NAME=`cat $PARSET| grep "OLAP.storageStationNames" | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F "," '{print $'$beam_index'}'`
+			   MOVE=1
+			else
+			   if (( ${PARSET_TAB_FE[beam_index]} == 1 ))
+			   then
+			      NAME=${PARSET_TAB_stationList[beam_index]}
+			      MOVE=1
+			   else
+			      # name stays the same as before for non-FLY's eye beams
+			      NAME=RSP${beam_index}
+			      if (( $ii == $beam_index ))
+			      then
+			         MOVE=0
+			      else
+			         MOVE=1
+			      fi
+			   fi
+			fi
+			if (( $MOVE == 1 ))
+			then
+			   echo "mv RSP${ii} $NAME" >> $log
+			   echo "mv RSP${ii} $NAME"
+			   mv RSP${ii} $NAME
+			fi
 			cd ${location}/${STOKES}/$NAME
 
             # add to the beam_process_node.txt for fly's eye mode here, since you know the station name
@@ -3003,6 +3078,7 @@ do
 	#Rename the TA beams RSP0 to RSP<beam numner>
     elif [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $STOKES == "stokes" ]] && [ $TiedArray == 0 ]
     then
+ echo A2-7 #A2delete
         cd ${location}/${STOKES}/
 		for ii in $num_dir
 		do
@@ -3038,6 +3114,8 @@ do
 		cd ${location}	
     elif [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] && [[ $STOKES == "stokes" ]] && [[ $TiedArray == 1 ]]
     then
+ echo A2-8 #A2delete
+
         cd ${location}/${STOKES}/
 		for ii in $num_dir
 		do
@@ -3139,6 +3217,8 @@ do
     # IS 2nd transpose, move the IS beam to the incoherentstokes directory
     if (( $IS2 == 1 ))
     then
+ echo A2-9 #A2delete
+
        cd ${location}
        if [[ ! -d incoherentstokes ]]
        then
@@ -3310,4 +3390,3 @@ else  # end if [[ $proc != 0 ]]
 fi
 
 exit 0
-
