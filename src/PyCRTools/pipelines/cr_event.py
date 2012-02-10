@@ -114,6 +114,7 @@ parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,hel
 parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging")
 parser.add_option("-I","--imager", action="store_true", help="Run imager")
 parser.add_option("-O", "--max_outliers", type="int", default=24, help="Maximum allowed number of outliers in calculated cable delays")
+parser.add_option("-r", "--randomize_rfi", action="store_true", help="Replace RFI lines with mean value at random phase.")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -811,7 +812,6 @@ for full_filename in files:
 
         for i in bad_antennas_index:
             print "FLAGGING ANTENNA", i
-            timeseries_data[i] = 0
 
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
@@ -868,6 +868,8 @@ for full_filename in files:
         ########################################################################
         #RFI excision
         ########################################################################
+        if not options.randomize_rfi:
+            amplitudes.fill(0.)
         fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
 
         ########################################################################
@@ -1170,13 +1172,6 @@ for full_filename in files:
 
         trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=final_residual_delays[antennas_with_strong_pulses],sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
 
-        print "\n--->AntennaResponse"
-
-        ########################################################################
-        #AntennaResponse
-        ########################################################################
-#        ar=trerun("AntennaResponse", "ar", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], nantennas = antenna_positions.shape()[0], polarization=current_polarization, antennaset = datafile["ANTENNA_SET"])
-
         if options.imager:
             print "\n--->Imaging"
 
@@ -1215,6 +1210,7 @@ for full_filename in files:
 
         print "---> Plotting full beam-formed data set"
         #Beamform full data set (not really necessary, but fun).
+
         beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1), calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
             # removed cabledelays = final_cable_delays in beamformer (AC)
         ########################################################################
