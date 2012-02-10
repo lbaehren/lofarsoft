@@ -9,8 +9,10 @@ Task: Event Statistics for LORA/LOFAR
 
 import pycrtools as cr
 import pycrtools.tasks as tasks
+import os
+import time
 
-def GetInformationFromFile(topdir, event):
+def GetInformationFromFile(topdir, events):
 
     eventdirs=cr.listFiles([os.path.join(topdir,event) for event in events])
     
@@ -57,7 +59,7 @@ def GetInformationFromFile(topdir, event):
             print "No results file found"
             sys.exit(0)
         
-        print "Number of dipoles found:",ndipoles
+        #print "Number of dipoles found:",ndipoles
         
         timesec=res["TIME"]
         timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
@@ -96,8 +98,8 @@ class eventstatistics(tasks.Task):
     parameters = dict(
         topdir=dict(default="/data/VHECR/LORAtriggered/results",doc="provide topdir",unit=""),
         eventslist=dict(default=lambda self:self.events if isinstance(self.events,list) else [self.events],doc="list with event names to process (directories in topdir)",unit=""),
-        events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="Event directories in topdir - either as list or as single string",unit=""),        
-        results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.eventslist,plot_parameter=self.plot_parameter,goodonly=self.goodonly),doc="Provide task with topdirectory",unit=""),
+        events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="Event directories in topdir - either as list or as single string",unit=""), 
+        results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.eventslist),doc="Provide task with topdirectory",unit=""),
         direction_lora=dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees")
         # to add other quantities
         )
@@ -114,9 +116,10 @@ class eventstatistics(tasks.Task):
         Making all sorts of things. 
         
         """
-   
-        
+        print self.eventslist
+        print self.events
         print " This is where it will start doing statistics"
+        print self.direction_lora
         
         
         
