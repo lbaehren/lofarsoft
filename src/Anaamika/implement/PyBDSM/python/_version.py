@@ -26,7 +26,7 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
 
-    2012/02/10 - Sources that appear only in the Stokes Q or U (and 
+    2012/02/10 - Sources that appear only in Stokes Q or U (and 
                  hence not in Stokes I) are now identified and included 
                  in the polarisation module. This identification is done
                  using the polarized intensity (PI) image. show_fit() and 

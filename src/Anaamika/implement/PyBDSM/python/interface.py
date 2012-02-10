@@ -742,6 +742,9 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '--> Wrote ASCII file ' + repr(filename)
             return True
     if format == 'bbs':
+        if catalog_type != 'gaul':
+            print "At the moment, only catalog_type = 'gaul' is supported with BBS files."
+            return False
         filename = output.write_bbs_gaul(img, filename=filename,
                                             srcroot=srcroot,
                                             patch=patch,
@@ -755,6 +758,9 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '--> Wrote BBS sky model ' + repr(filename)
             return True
     if format == 'ds9':
+        if catalog_type != 'gaul':
+            print "At the moment, only catalog_type = 'gaul' is supported with ds9 files."
+            return False
         filename = output.write_ds9_list(img, filename=filename,
                                             srcroot=srcroot,
                                             incl_wavelet=incl_wavelet,
@@ -766,6 +772,9 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '--> Wrote ds9 region file ' + repr(filename)
             return True
     if format == 'star':
+        if catalog_type != 'gaul':
+            print "At the moment, only catalog_type = 'gaul' is supported with star files."
+            return False
         filename = output.write_star(img, filename=filename,
                                         incl_wavelet=incl_wavelet,
                                         clobber=clobber)
@@ -776,6 +785,9 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '--> Wrote AIPS STAR file ' + repr(filename)
             return True
     if format == 'kvis':
+        if catalog_type != 'gaul':
+            print "At the moment, only catalog_type = 'gaul' is supported with kvis files."
+            return False
         filename = output.write_kvis_ann(img, filename=filename,
                                             incl_wavelet=incl_wavelet,
                                             clobber=clobber)
