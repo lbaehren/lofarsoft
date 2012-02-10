@@ -145,22 +145,20 @@ class Opts(object):
                              doc="Show output options")
     polarisation_do =   Bool(False,
                              doc="Find polarisation properties\n"\
-                                 "Finds the flux of sources detected in the Stokes I "\
-                                 "image in each of the other Stokes images and calculates the "\
-                                 "polarisation fraction and angle for each source.\n"\
-                                 "If True, then polarisation properties -- polarisation "\
-                                 "fraction (linear, circular, total) and polarisation "\
-                                 "angle -- are determined. These parameters are estimated "\
-                                 "only for sources which are found in the Stokes I image. "\
-                                 "Currently, each Stokes image has to be in a "\
-                                 "separate file, with names of the form 'filename_I.ext', "\
-                                 "'filename_Q.ext', 'filename_U.ext', and 'filename_V.ext'.\n"\
+                                 "First, source detection is done on the polarized intensity "\
+                                 "(PI) image and sources not detected in "\
+                                 "the Stokes I image are identified.\n"\
+                                 "Next, for any such PI-only sources, "\
+                                 "plus all sources detected in the Stokes I image, "\
+                                 "the fluxes in each of the other Stokes images are found. "\
                                  "Fluxes are calculated by summing all nonmasked "\
-                                 "pixels assigned to the source. If a pixel contains "\
-                                 "contributions from two or more sources, its flux is "\
-                                 "assigned to the source with the largest contribution. "\
+                                 "pixels assigned to a Gaussian. If a pixel contains "\
+                                 "contributions from two or more Gaussians, its flux is "\
+                                 "divided among the Gaussians by their relative I or PI fluxes. "\
                                  "Errors on the fluxes are derived by summing the same "\
                                  "pixels in the rms maps in quadrature.\n"\
+                                 "Lastly, the polarisation fraction and angle for each source "\
+                                 "are calculated.\n"\
                                  "For linearly polarised emission, the signal and noise "\
                                  "add vectorially, giving a Rice distribution "\
                                  "(Vinokur 1965) instead of a Gaussian one. To correct "\
@@ -1024,14 +1022,15 @@ class Opts(object):
                                  "supported)",
                              group='hidden')
     img_type        =   Enum('gaus_resid', 'shap_resid', 'rms', 'mean', 'gaus_model',
-                             'shap_model', 'ch0',
+                             'shap_model', 'ch0', 'pi',
                              doc="Type of image to export: 'gaus_resid', "\
                                  "'shap_resid', 'rms', 'mean', 'gaus_model', "\
-                                 "'shap_model', 'ch0'\nThe following images "\
+                                 "'shap_model', 'ch0', 'pi'\nThe following images "\
                                  "can be exported:\n"\
                                  "'ch0' - image used for source detection\n"\
                                  "'rms' - rms map image\n"\
                                  "'mean' - mean map image\n"\
+                                 "'pi' - polarized intensity image\n"\
                                  "'gaus_resid' - Gaussian model residual image\n"\
                                  "'gaus_model' - Gaussian model image\n"\
                                  "'shap_resid' - Shapelet model residual image\n"\
@@ -1066,6 +1065,9 @@ class Opts(object):
                              group="hidden")
     smodel_image    =   Bool(False,
                              doc="Show the shapelet model image",
+                             group="hidden")
+    pi_image        =   Bool(False,
+                             doc="Show the polarized intensity image",
                              group="hidden")
     pyramid_srcs    =   Bool(False,
                              doc="Plot the wavelet pyramidal sources",

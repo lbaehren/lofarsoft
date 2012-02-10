@@ -169,7 +169,7 @@ class Op_gausfit(Op):
                           tot_flux)
  
         # Check if model flux is very different from sum of flux in image
-        if img.ch0_sum_jy > 0:
+        if img.ch0_sum_jy > 0 and not hasattr(img, '_pi'):
             if img.total_flux_gaus/img.ch0_sum_jy < 0.5 or \
                     img.total_flux_gaus/img.ch0_sum_jy > 2.0:
                 mylog.warn('Total flux in model is %0.2f times sum of pixels '\
@@ -773,10 +773,7 @@ class Gaussian(object):
 
         if flag == 0:
           errors = func.get_errors(img, p+[tot], img.islands[isl_idx].rms)
-          if img.use_wcs == 'wcslib':
-              self.centre_sky = img.pix2sky(p[1:3])
-          elif img.use_wcs == 'pywcs':
-              self.centre_sky = img.pix2sky(p[1:3])
+          self.centre_sky = img.pix2sky(p[1:3])
         else:
           errors = [0]*7
           self.centre_sky = [0., 0.]

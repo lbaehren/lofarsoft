@@ -44,6 +44,8 @@ Each of the parameters is described in detail below.
         
         * ``'mean'`` - mean map image
         
+        * ``'pi'`` - polarized intensity image
+        
         * ``'gaus_resid'`` - Gaussian model residual image
         
         * ``'gaus_model'`` - Gaussian model image

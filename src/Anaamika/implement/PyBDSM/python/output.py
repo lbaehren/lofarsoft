@@ -907,9 +907,10 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
         names += ['spin1', 'espin1']
     if incl_pol:    
         names += ['total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
-                  'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_err',
-                  'cpol_fraction', 'cpol_fraction_err', 'tpol_fraction', 
-                  'tpol_fraction_err', 'lpol_angle', 'lpol_angle_err']
+                  'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_loerr',
+                  'lpol_fraction_hierr', 'cpol_fraction', 'cpol_fraction_loerr', 
+                  'cpol_fraction_hierr', 'tpol_fraction',  'tpol_fraction_loerr', 
+                  'tpol_fraction_hierr', 'lpol_angle', 'lpol_angle_err']
     cnames = []
     cformats = []
     cunits = []

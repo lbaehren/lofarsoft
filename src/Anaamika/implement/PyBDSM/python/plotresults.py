@@ -37,7 +37,7 @@ def _isl2border(img, isl):
 def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                 ch0_islands=True, gresid_image=True, sresid_image=False,
                 gmodel_image=True, smodel_image=False, pyramid_srcs=False,
-                source_seds=False, ch0_flagged=False):
+                source_seds=False, ch0_flagged=False, pi_image=False):
     """Show the results of a fit.
 
     Should be done as follows:
@@ -70,7 +70,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     import numpy as N
     global img_ch0, img_rms, img_mean, img_gaus_mod, img_shap_mod
     global img_gaus_resid, img_shap_resid, pixels_per_beam, pix2sky
-    global vmin, vmax, vmin_cur, vmax_cur, ch0min, ch0max
+    global vmin, vmax, vmin_cur, vmax_cur, ch0min, ch0max, img_pi
     global low, fig, images, src_list, srcid_cur, sky2pix, markers
 
     # Define the images. The images are used both by imshow and by the
@@ -98,7 +98,9 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     else:
         img_shap_mod = None
         img_shap_resid = None
-
+    if hasattr(img, 'ch0_pi'):
+        img_pi = img.ch0_pi
+    
     # Construct lists of images, titles, etc.
     images = []
     titles = []
@@ -125,6 +127,13 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
             images.append(img_ch0)
             titles.append('Flagged Gaussians')
         names.append('ch0')
+    if pi_image:
+        if not hasattr(img, 'ch0_pi'):
+            print 'Polarization module not run. Skipping PI image.'
+        else:
+            images.append(img_pi)
+            titles.append('Polarized Intensity Image')
+            names.append('ch0_pi')    
     if rms_image:
         images.append(img_rms)
         titles.append('Background rms Image')
@@ -251,8 +260,12 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
             if 'Islands' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
                     xb, yb = _isl2border(img, isl)
-                    cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='#afeeee', "\
-                        "markersize=8)"
+                    if hasattr(isl, '_pi'):
+                        cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='r', "\
+                              "markersize=8)"                    
+                    else:
+                        cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='#afeeee', "\
+                              "markersize=8)"
                     exec cmd
                     ax = pl.gca()
                     marker = ax.text(N.max(xb)+2, N.max(yb), str(isl.island_id),
@@ -408,7 +421,7 @@ def on_press(event):
     import numpy
     
     global img_ch0, img_rms, img_mean, img_gaus_mod, img_shap_mod
-    global pixels_per_beam, vmin, vmax, vmin_cur, vmax_cur
+    global pixels_per_beam, vmin, vmax, vmin_cur, vmax_cur, img_pi
     global ch0min, ch0max, low, fig, images, src_list, srcid_cur
     global markers
 #     print 'Testing...'
@@ -565,6 +578,13 @@ def format_coord_ch0(x, y):
     """Custom coordinate format for ch0 image"""
     global img_ch0
     im = img_ch0
+    coord_str = make_coord_str(x, y, im)
+    return coord_str
+
+def format_coord_ch0_pi(x, y):
+    """Custom coordinate format for ch0 image"""
+    global img_pi
+    im = img_pi
     coord_str = make_coord_str(x, y, im)
     return coord_str
 

@@ -548,6 +548,7 @@ def export_image(img, outfile=None, img_format='fits',
         'ch0' - image used for source detection
         'rms' - rms map image
         'mean' - mean map image
+        'pi' - polarized intensity image
         'resid_gaus' - Gaussian model residual image
         'model_gaus' - Gaussian model image
         'resid_shap' - Shapelet model residual image
@@ -561,7 +562,10 @@ def export_image(img, outfile=None, img_format='fits',
         return False    
     elif img.opts.shapelet_do == False and 'shap' in img_type:
         print 'Shapelets have not been fit. Please run process_image first.'
-        return False    
+        return False
+    elif img.opts.polarisation_do == False and 'pi' in img_type:
+        print 'Polarization properties have not been calculated. Please run process_image first.'
+        return False
     elif img.mean == None:
         print 'Image has not been processed. Please run process_image first.'
         return False    
@@ -595,6 +599,10 @@ def export_image(img, outfile=None, img_format='fits',
         elif img_type == 'mean':
             func.write_image_to_file(use_io, filename,
                                      img.mean, img, bdir,
+                                     clobber=clobber)
+        elif img_type == 'pi':
+            func.write_image_to_file(use_io, filename,
+                                     img.ch0_pi, img, bdir,
                                      clobber=clobber)
         elif img_type == 'gaus_resid':
             if hasattr(img, 'ngaus'):

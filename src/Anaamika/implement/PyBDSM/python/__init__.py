@@ -115,7 +115,7 @@ def _run_op_list(img, chain):
             answ = raw_input_no_history(prompt)
             while answ != '':
                 if answ == 'q':
-                    return
+                    return False
                 answ = raw_input_no_history(prompt)
         op.__start_time = time()
         op(img)
@@ -145,6 +145,7 @@ def _run_op_list(img, chain):
         print "%15s : %f" % ("Total",
                              (chain[-1].__stop_time - chain[0].__start_time))
 
+    return True
 
 def process_image(input_file, **kwargs):
     """Run a standard analysis and returns the associated Image object.

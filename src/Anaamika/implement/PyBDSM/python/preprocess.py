@@ -109,8 +109,9 @@ class Op_preprocess(Op):
         img.omega = N.product(shape)*abs(N.product(cdelt))/(180.*180./pi/pi)
 
         ### Total flux in ch0 image
-        if 'atrous' in img.filename:
-            # Don't do this estimate for atrous wavelet images,
+        if 'atrous' in img.filename or hasattr(img, '_pi'):
+            # Don't do this estimate for atrous wavelet images 
+            # or polarized intensity image,
             # as it doesn't give the correct flux
             img.ch0_sum_jy = 0
         else:

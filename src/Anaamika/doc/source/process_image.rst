@@ -958,24 +958,22 @@ The options for this module are as follows:
 
 Polarization module
 -------------------
-If ``polarisation_do = True``, then the polarization properties of the sources are calculated. The polarization module calculates the Q, U, and V fluxes, the total, linear, and circular polarisation fractions and the linear polarisation angle of each Gaussian and source identified in the I image. The linear polarisation angle is defined from North, with positive angles towards East.
+If ``polarisation_do = True``, then the polarization properties of the sources are calculated. First, source detection is performed on the polarized intensity (PI) image [#f3]_ to detect sources without Stokes I counterparts. The polarization module then calculates the I, Q, U, and V fluxes, the total, linear, and circular polarisation fractions and the linear polarisation angle of each Gaussian and source. The linear polarisation angle is defined from North, with positive angles towards East.
 
-Fluxes are calculated by summing all nonmasked pixels assigned to each Gaussian.
-If a pixel contains contributions from two or more Gaussian, its flux is divided between the Gaussians according to their relative fluxes. Errors on the fluxes are derived
-by summing the same pixels in the rms maps in quadrature. Source detection is also performed on the polarized intensity image to detect sources without Stokes I counterparts. 
+Fluxes are calculated by summing all nonmasked pixels assigned to each Gaussian. If a pixel contains contributions from two or more Gaussian, its flux is divided between the Gaussians according to their relative fluxes. Errors on the fluxes are derived by summing the same pixels in the rms maps in quadrature.  
 
 For linearly polarised emission, the signal and noise add vectorially, giving a
 Rice distribution instead of a Gaussian one. To correct for this, a bias 
 is estimated and removed from the polarisation fraction using the same method used for the
 NVSS catalog (see ftp://ftp.cv.nrao.edu/pub/nvss/catalog.ps). Errors on the linear and total
 polarisation fractions and polarisation angle are estimated using the debiased polarised flux
-and standard error propagation. See Sparks & Axon (1999) [#f3]_ for a more detailed treatment.
+and standard error propagation. See Sparks & Axon (1999) [#f4]_ for a more detailed treatment.
 
 .. _shapelet_do:
 
 Shapelet decomposition module
 -----------------------------
-If ``shapelet_do = True``, then islands are decomposed into shapelets. Shapelets are a set of 2-D basis functions (for details, see Refregier 2003 [#f4]_) that can be used to completely model any source, typically with far fewer parameters than pixels in the source. Shapelets are useful in particular for modeling complex islands that are not well modeled by Gaussians alone. PyBDSM can currently fit cartesian shapelets to an image. The shapelet parameters can be written to a catalog using ``write_catalog`` (see :ref:`write_catalog`).
+If ``shapelet_do = True``, then islands are decomposed into shapelets. Shapelets are a set of 2-D basis functions (for details, see Refregier 2003 [#f5]_) that can be used to completely model any source, typically with far fewer parameters than pixels in the source. Shapelets are useful in particular for modeling complex islands that are not well modeled by Gaussians alone. PyBDSM can currently fit cartesian shapelets to an image. The shapelet parameters can be written to a catalog using ``write_catalog`` (see :ref:`write_catalog`).
 
 For each island of emission, a shapelet decomposition is done after estimating the best values of the
 center, the scale :math:`\beta`, and nmax in the following way. First, an initial guess of :math:`\beta` is taken as :math:`2\sqrt{[m2(x)m2(y)]}`,
@@ -1027,6 +1025,8 @@ The options for this module are as follows:
 
 .. [#f2] Hopkins, A. M., Miller, C. J., Connolly, A. J., et al.  2002, AJ, 123, 1086
 
-.. [#f3] Sparks, W. B., & Axon, D. J. 1999, PASP, 111, 1298
+.. [#f3] The polarized intensity image is calculated as :math:`\sqrt{(Q^2 + U^2)}`.
 
-.. [#f4] Refregier, A. 2003, MNRAS, 338, 35.
+.. [#f4] Sparks, W. B., & Axon, D. J. 1999, PASP, 111, 1298
+
+.. [#f5] Refregier, A. 2003, MNRAS, 338, 35.

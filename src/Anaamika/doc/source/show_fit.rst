@@ -18,7 +18,8 @@ PyBDSM includes a task named ``show_fit`` that allows the user to quickly check 
                                    any) overplotted                            
     :term:`gmodel_image` .......... True : Show the Gaussian model image               
     :term:`gresid_image` .......... True : Show the Gaussian residual image            
-    :term:`mean_image` ............ True : Show the background mean image              
+    :term:`mean_image` ............ True : Show the background mean image
+    :term:`pi_image` ............. False : Show the polarized intensity image                   
     :term:`pyramid_srcs` ......... False : Plot the wavelet pyramidal sources          
     :term:`rms_image` ............. True : Show the background rms image               
     :term:`smodel_image` ......... False : Show the shapelet model image               
@@ -50,6 +51,9 @@ Each of the parameters is described in detail below.
         
     mean_image
         This parameter is a Boolean (default is ``True``) that determines whether to plot the background mean image.
+        
+    pi_image
+        This parameter is a Boolean (default is ``False``) that determines whether to plot the polarized intensity image.
         
     pyramid_srcs
         This parameter is a Boolean (default is ``False``) that determines whether to plot the pyramidal sources constructed during wavelet decomposition.

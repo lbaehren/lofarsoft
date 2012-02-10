@@ -11,6 +11,15 @@ from image import *
 from islands import *
 from gausfit import Gaussian
 from gaul2srl import *
+from preprocess import Op_preprocess
+from rmsimage import Op_rmsimage
+from threshold import Op_threshold
+from islands import Op_islands
+from gausfit import Op_gausfit
+from analysis import plotresults
+from gaul2srl import Op_gaul2srl
+from make_residimage import Op_make_residimage
+from const import fwsig
 import mylogger
 import numpy as N
 import functions as func
@@ -31,16 +40,22 @@ Gaussian.total_fluxE_V       = Float(doc="Error in total flux (Jy), Stokes V", c
                                    units='Jy')
 Gaussian.lpol_fraction       = Float(doc="Linear polarisation fraction", 
                                    colname='Linear_Pol_frac', units=None)
-Gaussian.lpol_fraction_err   = Float(doc="Linear polarisation fraction error", 
-                                   colname='E_Linear_Pol_frac', units=None)
+Gaussian.lpol_fraction_loerr   = Float(doc="Linear polarisation fraction low error", 
+                                   colname='Elow_Linear_Pol_frac', units=None)
+Gaussian.lpol_fraction_hierr   = Float(doc="Linear polarisation fraction high error", 
+                                   colname='Ehigh_Linear_Pol_frac', units=None)
 Gaussian.cpol_fraction       = Float(doc="Circular polarisation fraction", 
                                    colname='Circ_Pol_Frac', units=None)
-Gaussian.cpol_fraction_err   = Float(doc="Circular polarisation fraction error", 
-                                   colname='E_Circ_Pol_Frac', units=None)
+Gaussian.cpol_fraction_loerr   = Float(doc="Circular polarisation fraction low error", 
+                                   colname='Elow_Circ_Pol_Frac', units=None)
+Gaussian.cpol_fraction_hierr   = Float(doc="Circular polarisation fraction high error", 
+                                   colname='Ehigh_Circ_Pol_Frac', units=None)
 Gaussian.tpol_fraction       = Float(doc="Total polarisation fraction", 
                                    colname='Total_Pol_Frac', units=None)
-Gaussian.tpol_fraction_err   = Float(doc="Total polarisation fraction error", 
-                                   colname='E_Total_Pol_Frac', units=None)
+Gaussian.tpol_fraction_loerr   = Float(doc="Total polarisation fraction low error", 
+                                   colname='Elow_Total_Pol_Frac', units=None)
+Gaussian.tpol_fraction_hierr   = Float(doc="Total polarisation fraction high error", 
+                                   colname='Ehigh_Total_Pol_Frac', units=None)
 Gaussian.lpol_angle          = Float(doc="Polarisation angle (deg from North towards East)", 
                                    colname='Linear_Pol_Ang', units='deg')
 Gaussian.lpol_angle_err      = Float(doc="Polarisation angle error (deg)",
@@ -60,16 +75,22 @@ Source.total_fluxE_V       = Float(doc="Error in total flux (Jy), Stokes V", col
                                    units='Jy')
 Source.lpol_fraction       = Float(doc="Linear polarisation fraction", 
                                    colname='Linear_Pol_frac', units=None)
-Source.lpol_fraction_err   = Float(doc="Linear polarisation fraction error", 
-                                   colname='E_Linear_Pol_frac', units=None)
+Source.lpol_fraction_loerr   = Float(doc="Linear polarisation fraction low error", 
+                                   colname='Elow_Linear_Pol_frac', units=None)
+Source.lpol_fraction_hierr   = Float(doc="Linear polarisation fraction high error", 
+                                   colname='Ehigh_Linear_Pol_frac', units=None)
 Source.cpol_fraction       = Float(doc="Circular polarisation fraction", 
                                    colname='Circ_Pol_Frac', units=None)
-Source.cpol_fraction_err   = Float(doc="Circular polarisation fraction error", 
-                                   colname='E_Circ_Pol_Frac', units=None)
+Source.cpol_fraction_loerr   = Float(doc="Circular polarisation fraction low error", 
+                                   colname='Elow_Circ_Pol_Frac', units=None)
+Source.cpol_fraction_hierr   = Float(doc="Circular polarisation fraction high error", 
+                                   colname='Ehigh_Circ_Pol_Frac', units=None)
 Source.tpol_fraction       = Float(doc="Total polarisation fraction", 
                                    colname='Total_Pol_Frac', units=None)
-Source.tpol_fraction_err   = Float(doc="Total polarisation fraction error", 
-                                   colname='E_Total_Pol_Frac', units=None)
+Source.tpol_fraction_loerr   = Float(doc="Total polarisation fraction low error", 
+                                   colname='Elow_Total_Pol_Frac', units=None)
+Source.tpol_fraction_hierr   = Float(doc="Total polarisation fraction high error", 
+                                   colname='Ehigh_Total_Pol_Frac', units=None)
 Source.lpol_angle          = Float(doc="Polarisation angle (deg from North towards East)", 
                                    colname='Linear_Pol_Ang', units='deg')
 Source.lpol_angle_err      = Float(doc="Polarisation angle error (deg)",
@@ -84,12 +105,12 @@ class Op_polarisation(Op):
     Gaussians, its flux is divided between the Gaussians by the ratio of
     fluxes that they contribute to the pixel. Errors on the fluxes are
     derived by summing the same pixels in the rms maps in quadrature.
-    The results are stored in the Gaussian and Source structure.
+    The results are stored in the Gaussian and Source structures.
 
-    Fits are also done to Q, U, and V images to determine if there are
-    any islands of emission that lie outside those found in the I image.
-    If there are, they are fit and the process above is done for them
-    too.
+    Fits are also done to the polarized intensity (PI) image to
+    determine if there are any islands of emission that lie outside
+    those found in the I image. If there are, they are fit and the
+    process above is done for them too.
 
     For linearly polarised emission, the signal and noise add
     vectorially, giving a Rice distribution (Vinokur 1965) instead of a
@@ -108,60 +129,89 @@ class Op_polarisation(Op):
         if img.opts.polarisation_do:
           mylog.info('Extracting polarisation properties for all sources')
           
-          # Run gausfit and gual2srl on Q, U, and V ch0 images to look for sources
+          # Run gausfit and gual2srl on PI image to look for polarized sources
           # undetected in I
-          fit_QUV = False
-          if fit_QUV:
-              ch0_list = [img.ch0_Q, img.ch0_U, img.ch0_V]
+          fit_PI = True
+          if fit_PI:
+              from bdsm import _run_op_list
+              mylogger.userinfo(mylog, "\nChecking PI image for new sources")
+ 
+              ch0_pi = N.sqrt(img.ch0_Q**2 + img.ch0_U**2)
+              img.ch0_pi = ch0_pi
               thresh_isl = img.opts.thresh_isl
+              thresh_pix = img.opts.thresh_pix
               mask = img.mask
-              for i, ch0_im in enumerate(ch0_list):
-                  # For each polarization, find islands and check if any are new
-                  rms = img.rms_QUV[i]
-                  mean = img.mean_QUV[i]
-                  
-                  # act_pixels is true if significant emission
-                  act_pixels = (ch0_im-mean)/thresh_isl >= rms
-                  if isinstance(mask, N.ndarray):
-                      act_pixels[mask] = False
+              minsize = img.opts.minpix_isl
     
-                  rank = len(ch0_im.shape)
-                                  # generates matrix for connectivity, in this case, 8-conn
-                  connectivity = nd.generate_binary_structure(rank, rank)
-                                  # labels = matrix with value = (initial) island number
-                  labels, count = nd.label(act_pixels, connectivity)
-                                  # slices has limits of bounding box of each such island
-                  slices = nd.find_objects(labels)
-          
-                  ### apply cuts on island size and peak value
-                  pyrank = N.zeros(ch0_im.shape, dtype=bool)
-                  res = []
-                  islid = 0
-                  for idx, s in enumerate(slices):
-                      idx += 1 # nd.labels indices are counted from 1
-                                  # number of pixels inside bounding box which are in island
-                      isl_size = (labels[s] == idx).sum()
-                      isl_peak = nd.maximum(image[s], labels[s], idx)
-                      isl_maxposn = tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+\
-                                    N.array((s[0].start, s[1].start)))
-                      if (isl_size >= minsize) and (isl_peak - mean[isl_maxposn])/thresh_pix > rms[isl_maxposn]:
-                          isl = Island(image, mask, mean, rms, labels, s, idx)
-                          res.append(isl)
-                          pyrank[isl.bbox] += N.invert(isl.mask_active)
-    
-                  # Loop over island and check if they are also found in I
-                  # for isl in res:
-                      
+              # Set up image object for PI image.
+              pi_chain, pi_opts = self.setpara_bdsm(img)
+              pimg = Image(pi_opts)
+              pimg.beam = img.beam
+              pimg.pixel_beam = img.pixel_beam
+              pimg.pixel_beamarea = img.pixel_beamarea
+              pimg.pixel_restbeam = img.pixel_restbeam
+              pimg.log = 'PI.'
+              pimg.pix2beam = img.pix2beam
+              pimg.beam2pix = img.beam2pix
+              pimg.pix2sky = img.pix2sky
+              pimg.sky2pix = img.sky2pix
+              pimg.pix2coord = img.pix2coord
+              pimg.wcs_obj = img.wcs_obj
+              pimg.mask = mask
+              pimg.use_wcs = img.use_wcs
+              pimg.ch0 = ch0_pi      
+              pimg._pi = True     
               
-                  pimg = Image(wopts)
-                  pimg.pixel_beam = (wopts['beam'][0]/fwsig/cdelt[0], wopts['beam'][1]/fwsig/cdelt[1], wopts['beam'][2])
-                  pimg.pixel_beamarea = 1.1331*wimg.pixel_beam[0]*wimg.pixel_beam[1]*fwsig*fwsig
-                  pimg.pixel_restbeam = img.pixel_restbeam
-                  pimg.ch0 = ch0_im
-          
+              success = _run_op_list(pimg, pi_chain)                    
+              if not success:
+                  return
+
+              img.pi_islands = pimg.islands
+              img.pi_gaussians = pimg.gaussians
+              img.pi_sources = pimg.sources
+
+              # Now check for new sources in the PI image that are not
+              # found in the Stokes I image. If any new sources are found,
+              # adjust their IDs to follow after those found in I.
+              new_isl = []
+              new_src = []
+              n_new_src = 0
+              isl_id = img.islands[-1].island_id
+              src_id = img.sources[-1].source_id
+              gaus_id = img.gaussians[-1].gaus_num
+              for pi_isl in pimg.islands:
+                  new_sources = []
+                  for pi_src in pi_isl.sources:
+                      if img.pyrank[int(img.sky2pix(pi_src.posn_sky_centroid)[0]), int(img.sky2pix(pi_src.posn_sky_centroid)[1])] == -1:
+                          src_id += 1
+                          pi_src._pi = True
+                          pi_src.island_id = isl_id
+                          pi_src.source_id = src_id
+                          new_sources.append(pi_src)
+                          new_src.append(pi_src)
+                          n_new_src += 1
+                          for g in pi_src.gaussians:
+                              gaus_id += 1
+                              g.gaus_num = gaus_id
+                  if len(new_sources) > 0:
+                      isl_id += 1
+                      pi_isl.sources = new_sources
+                      pi_isl.island_id = isl_id
+                      pi_isl._pi = True
+                      new_isl.append(pi_isl)
+                      
+              n_new = len(new_isl)              
+              mylogger.userinfo(mylog, "New sources found in PI image", '%i (%i total)' %
+                                (n_new, img.nsrc+n_new))
+                  
           # Get number of pixels per beam from img.beam (gives FWHM in deg) and img.beam2pix (deg->pix)
           gfactor = 2.0 * N.sqrt(2.0 * N.log(2.0))
           pixels_per_beam = 2.0 * N.pi * (img.beam2pix(img.beam)[0] * img.beam2pix(img.beam)[1]) / gfactor**2
+          if n_new > 0:
+              img.islands += new_isl
+              img.sources += new_src
+              img.nsrc += n_new_src
+            
           bar = statusbar.StatusBar('Calculating polarisation properties ....  : ', 0, img.nsrc)
           if img.opts.quiet == False:
               bar.start()
@@ -172,6 +222,7 @@ class Op_polarisation(Op):
             for src in isl.sources:
                   ngaus_in_island += src.ngaus
             # Cut out images for each island, subtract mean
+            ch0_I = img.ch0[isl.bbox]
             ch0_Q = img.ch0_Q[isl.bbox] #- img.mean_QUV[0][isl.bbox]
             ch0_U = img.ch0_U[isl.bbox] #- img.mean_QUV[1][isl.bbox]
             ch0_V = img.ch0_V[isl.bbox] #- img.mean_QUV[2][isl.bbox]
@@ -187,9 +238,11 @@ class Op_polarisation(Op):
 
               # Now, compare each Gaussian image pixel by pixel in the bbox, 
               # and assign a fractional flux to each.
+              src_flux_I = 0
               src_flux_Q = 0
               src_flux_U = 0
               src_flux_V = 0
+              src_flux_I_err_sq = 0
               src_flux_Q_err_sq = 0
               src_flux_U_err_sq = 0
               src_flux_V_err_sq = 0
@@ -206,24 +259,20 @@ class Op_polarisation(Op):
                   pixels_in_source = N.size(in_current_gaus) # number of umasked pixels assigned to current Gaussian
                   
                   # Sum pixels in the cutout ch0 images that are assigned to current Gaussian
+                  if hasattr(src, '_pi'):
+                      flux_I = N.sum(ch0_I[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
+                      flux_I_err = N.mean(img.rms[isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) *           N.sqrt(pixels_in_source/pixels_per_beam) # Jy                  
                   flux_Q = N.sum(ch0_Q[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
                   flux_Q_err = N.mean(img.rms_QUV[0][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
                   flux_U = N.sum(ch0_U[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
                   flux_U_err = N.mean(img.rms_QUV[1][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
                   flux_V = N.sum(ch0_V[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
                   flux_V_err = N.mean(img.rms_QUV[2][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
-
-#                   if gaussian.gaus_num == 48 or gaussian.gaus_num == 50:
-#                     0/0
-#                   # Check whether fluxes are significant (>= thresh_pix * error)
-#                   if abs(flux_Q) < img.opts.thresh_pix * flux_Q_err:
-#                       flux_Q = 0.0
-#                   if abs(flux_U) < img.opts.thresh_pix * flux_U_err:
-#                       flux_U = 0.0
-#                   if abs(flux_V) < img.opts.thresh_pix * flux_V_err:
-#                       flux_V = 0.0
                   
                   # Store fluxes and errors for each Gaussian in the source
+                  if hasattr(src, '_pi'):
+                      gaussian.total_flux = flux_I
+                      gaussian.total_fluxE = flux_I_err
                   gaussian.total_flux_Q = flux_Q
                   gaussian.total_flux_U = flux_U
                   gaussian.total_flux_V = flux_V
@@ -231,6 +280,9 @@ class Op_polarisation(Op):
                   gaussian.total_fluxE_U = flux_U_err
                   gaussian.total_fluxE_V = flux_V_err
                   
+                  if hasattr(src, '_pi'):
+                      src_flux_I += flux_I
+                      src_flux_I_err_sq += flux_I_err**2
                   src_flux_Q += flux_Q
                   src_flux_U += flux_U
                   src_flux_V += flux_V
@@ -245,21 +297,27 @@ class Op_polarisation(Op):
                   stokes = [flux_I, flux_Q, flux_U, flux_V]
                   stokes_err = [flux_I_err, flux_Q_err, flux_U_err, flux_V_err]
     
-                  lpol_frac, lpol_frac_err = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
+                  lpol_frac, lpol_frac_loerr, lpol_frac_hierr = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
                   lpol_ang, lpol_ang_err = self.calc_lpol_angle(stokes, stokes_err) # linear pol angle
-                  cpol_frac, cpol_frac_err = self.calc_cpol_fraction(stokes, stokes_err) # circular pol fraction
-                  tpol_frac, tpol_frac_err = self.calc_tpol_fraction(stokes, stokes_err) # total pol fraction
+                  cpol_frac, cpol_frac_loerr, cpol_frac_hierr = self.calc_cpol_fraction(stokes, stokes_err) # circular pol fraction
+                  tpol_frac, tpol_frac_loerr, tpol_frac_hierr = self.calc_tpol_fraction(stokes, stokes_err) # total pol fraction
     
                   gaussian.lpol_fraction = lpol_frac
-                  gaussian.lpol_fraction_err = lpol_frac_err
+                  gaussian.lpol_fraction_loerr = lpol_frac_loerr
+                  gaussian.lpol_fraction_hierr = lpol_frac_hierr
                   gaussian.cpol_fraction = cpol_frac
-                  gaussian.cpol_fraction_err = cpol_frac_err
+                  gaussian.cpol_fraction_loerr = cpol_frac_loerr
+                  gaussian.cpol_fraction_hierr = cpol_frac_hierr
                   gaussian.tpol_fraction = tpol_frac
-                  gaussian.tpol_fraction_err = tpol_frac_err
+                  gaussian.tpol_fraction_loerr = tpol_frac_loerr
+                  gaussian.tpol_fraction_hierr = tpol_frac_hierr
                   gaussian.lpol_angle = lpol_ang
                   gaussian.lpol_angle_err = lpol_ang_err
        
               # Store fluxes for each source in the island
+              if hasattr(src, '_pi'):
+                  src.total_flux = src_flux_I
+                  src.total_fluxE = N.sqrt(src_flux_I_err_sq)
               src.total_flux_Q = src_flux_Q
               src.total_flux_U = src_flux_U
               src.total_flux_V = src_flux_V
@@ -274,17 +332,20 @@ class Op_polarisation(Op):
               stokes = [src_flux_I, src_flux_Q, src_flux_U, src_flux_V]
               stokes_err = [src_flux_I_err, N.sqrt(src_flux_Q_err_sq), N.sqrt(src_flux_U_err_sq), N.sqrt(src_flux_V_err_sq)]
 
-              lpol_frac, lpol_frac_err = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
+              lpol_frac, lpol_frac_loerr, lpol_frac_hierr = self.calc_lpol_fraction(stokes, stokes_err) # linear pol fraction
               lpol_ang, lpol_ang_err = self.calc_lpol_angle(stokes, stokes_err) # linear pol angle
-              cpol_frac, cpol_frac_err = self.calc_cpol_fraction(stokes, stokes_err) # circular pol fraction
-              tpol_frac, tpol_frac_err = self.calc_tpol_fraction(stokes, stokes_err) # total pol fraction
+              cpol_frac, cpol_frac_loerr, cpol_frac_hierr = self.calc_cpol_fraction(stokes, stokes_err) # circular pol fraction
+              tpol_frac, tpol_frac_loerr, tpol_frac_hierr = self.calc_tpol_fraction(stokes, stokes_err) # total pol fraction
 
               src.lpol_fraction = lpol_frac
-              src.lpol_fraction_err = lpol_frac_err
+              src.lpol_fraction_loerr = lpol_frac_loerr
+              src.lpol_fraction_hierr = lpol_frac_hierr
               src.cpol_fraction = cpol_frac
-              src.cpol_fraction_err = cpol_frac_err
+              src.cpol_fraction_loerr = cpol_frac_loerr
+              src.cpol_fraction_hierr = cpol_frac_hierr
               src.tpol_fraction = tpol_frac
-              src.tpol_fraction_err = tpol_frac_err
+              src.tpol_fraction_loerr = tpol_frac_loerr
+              src.tpol_fraction_hierr = tpol_frac_hierr
               src.lpol_angle = lpol_ang
               src.lpol_angle_err = lpol_ang_err
               if bar.started:
@@ -300,21 +361,27 @@ class Op_polarisation(Op):
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
         QUerr = N.mean([Qerr, Uerr])
-        if Q - Qerr < 0.0 and U - Uerr < 0.0:
-            return 0.0, 0.0
-        
-        lpol = N.sqrt(Q**2 + U**2)
-        lpol_debiased = self.debias(lpol, QUerr) # debias (to first order)
-        if lpol_debiased > 0.0:
-            lfrac = lpol_debiased / I
-            dlfrac = lfrac * N.sqrt((Ierr/I)**2 + (Q*Qerr/lpol_debiased**2)**2 + (U*Uerr/lpol_debiased**2)**2)
-        else:
-            # if debiased fraction is consistent with zero, estimate a ballpark error with biased value
-            lfrac = 0.0
-            lpolsq = Q**2 + U**2
-            dlfrac = N.sqrt(lpolsq) / I * N.sqrt((Ierr/I)**2 + (Q*Qerr/lpolsq)**2 + (U*Uerr/lpolsq)**2)
+        stokes_lpol = [I, Q, U, 0.0]
+        err_lpol = [Ierr, Qerr, Uerr, 0.0]
 
-        return lfrac, dlfrac
+        lfrac, loerr, uperr, Iup, Qup, Uup, Vup = self.estimate_err_frac_with_limits(stokes_lpol, err_lpol)
+        
+        # If all are detections, debias and use error propagation instead
+        if not Iup and not Qup and not Uup:
+            lpol = N.sqrt(Q**2 + U**2)
+            lpol_debiased = self.debias(lpol, QUerr) # debias (to first order)
+            if lpol_debiased > 0.0:
+                lfrac = lpol_debiased / I
+                dlfrac = lfrac * N.sqrt((Ierr/I)**2 + (Q*Qerr/lpol_debiased**2)**2 + (U*Uerr/lpol_debiased**2)**2)
+            else:
+                # if debiased fraction is consistent with zero, estimate a ballpark error with biased value
+                lfrac = 0.0
+                lpolsq = Q**2 + U**2
+                dlfrac = N.sqrt(lpolsq) / I * N.sqrt((Ierr/I)**2 + (Q*Qerr/lpolsq)**2 + (U*Uerr/lpolsq)**2)
+            loerr = dlfrac
+            uperr = dlfrac
+            
+        return lfrac, loerr, uperr
 
 
   ####################################################################################
@@ -325,13 +392,19 @@ class Op_polarisation(Op):
         """
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
+        stokes_cpol = [I, 0.0, 0.0, V]
+        err_cpol = [Ierr, 0.0, 0.0, Verr]
 
-        if I - Ierr < 0.0 or V - Verr < 0.0:
-            return 0.0, 0.0
-        cfrac = abs(V) / I
-        dcfrac = cfrac * N.sqrt((Ierr/I)**2 + (Verr/V)**2)
+        cfrac, loerr, uperr, Iup, Qup, Uup, Vup = self.estimate_err_frac_with_limits(stokes_cpol, err_cpol)
+        
+        # If all are detections, debias and use error propagation instead
+        if not Iup and not Qup and not Uup:
+            cfrac = abs(V) / I
+            dcfrac = cfrac * N.sqrt((Ierr/I)**2 + (Verr/V)**2)
+            loerr = dcfrac
+            uperr = dcfrac
 
-        return cfrac, dcfrac
+        return cfrac, loerr, uperr
 
 
   ####################################################################################
@@ -343,22 +416,26 @@ class Op_polarisation(Op):
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
         QUerr = N.mean([Qerr, Uerr])
-        if Q - Qerr < 0.0 and U - Uerr < 0.0 and V - Verr < 0.0:
-            return 0.0, 0.0
 
-        lpol = N.sqrt(Q**2 + U**2)
-        lpol_debiased = self.debias(lpol, QUerr)
-        tpol_debiased = N.sqrt(Q**2 + U**2 + V**2) - (lpol - lpol_debiased) # debias (to first order)
-        if tpol_debiased > 0.0:
-            tfrac = tpol_debiased / I
-            dtfrac = tfrac * N.sqrt((Ierr/I)**2 + (Q*Qerr/tpol_debiased**2)**2 + (U*Uerr/tpol_debiased**2)**2 + (V*Verr/tpol_debiased**2)**2)
-        else:
-            # if debiased fraction is consistent with zero, estimate a ballpark error with biased value
-            tfrac = 0.0
-            tpolsq = Q**2 + U**2 + V**2
-            dtfrac = N.sqrt(tpolsq) / I * N.sqrt((Ierr/I)**2 + (Q*Qerr/tpolsq)**2 + (U*Uerr/tpolsq)**2 + (V*Verr/tpolsq)**2)
+        tfrac, loerr, uperr, Iup, Qup, Uup, Vup = self.estimate_err_frac_with_limits(stokes, err)
+        
+        # If all are detections, debias and use error propagation instead
+        if not Iup and not Qup and not Uup:
+            lpol = N.sqrt(Q**2 + U**2)
+            lpol_debiased = self.debias(lpol, QUerr)
+            tpol_debiased = N.sqrt(Q**2 + U**2 + V**2) - (lpol - lpol_debiased) # debias (to first order)
+            if tpol_debiased > 0.0:
+                tfrac = tpol_debiased / I
+                dtfrac = tfrac * N.sqrt((Ierr/I)**2 + (Q*Qerr/tpol_debiased**2)**2 + (U*Uerr/tpol_debiased**2)**2 + (V*Verr/tpol_debiased**2)**2)
+            else:
+                # if debiased fraction is consistent with zero, estimate a ballpark error with biased value
+                tfrac = 0.0
+                tpolsq = Q**2 + U**2 + V**2
+                dtfrac = N.sqrt(tpolsq) / I * N.sqrt((Ierr/I)**2 + (Q*Qerr/tpolsq)**2 + (U*Uerr/tpolsq)**2 + (V*Verr/tpolsq)**2)
+            loerr = dtfrac
+            uperr = dtfrac
 
-        return tfrac, dtfrac
+        return tfrac, loerr, uperr
 
 
   ####################################################################################
@@ -369,7 +446,7 @@ class Op_polarisation(Op):
         """
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
-        if Q - Qerr < 0.0 and U - Uerr < 0.0:
+        if abs(Q) < Qerr and abs(U) < Uerr:
             return 0.0, 0.0
 
         ang = 0.5 * N.arctan2(U, Q) * 180.0 / N.pi
@@ -409,3 +486,97 @@ class Op_polarisation(Op):
         pflux_debiased = pflux - bias * QUerr
         
         return pflux_debiased
+
+  ####################################################################################
+    def setpara_bdsm(self, img):
+        from types import ClassType, TypeType
+
+        chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
+               Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
+
+        opts={'thresh':'hard'}
+        opts['thresh_pix'] = img.opts.thresh_pix
+        opts['kappa_clip'] = 3.0
+        opts['rms_map'] = True
+        opts['thresh_isl'] = img.opts.thresh_isl
+        opts['minpix_isl'] = img.opts.minpix_isl
+        opts['takemeanclip'] = False
+        opts['savefits_rmsim'] = False
+        opts['savefits_meanim'] = False
+        opts['savefits_rankim'] = False
+        opts['savefits_normim'] = False
+        opts['output_fbdsm'] = False
+        opts['polarisation_do'] = False
+        opts['group_by_isl'] = img.opts.group_by_isl
+        opts['rms_box'] = img.opts.rms_box
+        opts['filename'] = ''
+        opts['output_all'] = img.opts.output_all
+        opts['verbose_fitting'] = img.opts.verbose_fitting
+        opts['split_isl'] = img.opts.split_isl
+        opts['peak_fit'] = img.opts.peak_fit
+        opts['peak_maxsize'] = img.opts.peak_maxsize
+        opts['interactive'] = False
+        
+        ops = []
+        for op in chain:
+          if isinstance(op, (ClassType, TypeType)):
+            ops.append(op())
+          else:
+            ops.append(op)
+
+        return ops, opts
+
+    def estimate_err_frac_with_limits(self, stokes, err):
+        """Estimate reasonable errors on polarization fraction when upper
+        limits are present.
+        
+        """
+        I, Q, U, V = stokes
+        Ierr, Qerr, Uerr, Verr = err
+
+        Iup = False
+        Qup = False
+        Uup = False
+        Vup = False
+            
+        if abs(I) < 3.0 * Ierr:
+            I = 3.0 * Ierr
+            Iup = True
+        if abs(Q) < 3.0 * Qerr:
+            Q = 3.0 * Qerr
+            Qerr *= 3.0
+            Qup = True
+        if abs(U) < 3.0 * Uerr:
+            U = 3.0 * Uerr
+            Uup = True
+        if abs(V) < 3.0 * Verr:
+            V = 3.0 * Verr
+            Vup = True
+
+        pol = N.sqrt(Q**2 + U**2 + V**2)
+        frac = pol / I
+        if frac < 0.0:
+            frac = 0.0
+        if frac > 1.0:
+            frac = 1.0
+        
+        if Iup:
+            if Qup and Uup and Vup:
+                frac = 0.0
+                loerr = 0.0
+                uperr = 0.0
+            else:
+                loerr = frac - N.sqrt((abs(Q) - Qerr)**2 + (abs(U) - Uerr)**2 + (abs(V) - Verr)**2) / I
+                uperr = 1.0 - frac
+        else:
+            loerr = frac - N.sqrt((abs(Q) - Qerr)**2 + (abs(U) - Uerr)**2 + (abs(V) - Verr)**2) / (I + Ierr)
+            uperr = N.sqrt((abs(Q) + Qerr)**2 + (abs(U) + Uerr)**2 + (abs(V) + Verr)**2) / (I - Ierr) - frac
+    
+        if loerr < 0.0:
+            loerr = frac
+        if frac + uperr > 1.0:
+            uperr = 1.0 - frac
+        if frac== 1.0 and uperr >0.0:
+            0/0
+
+        return frac, loerr, uperr, Iup, Qup, Uup, Vup

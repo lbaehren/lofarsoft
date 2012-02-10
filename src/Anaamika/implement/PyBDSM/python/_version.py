@@ -25,7 +25,14 @@ def changelog():
     """
     PyBDSM Changelog.
     -----------------------------------------------------------------------
-    
+
+    2012/02/10 - Sources that appear only in the Stokes Q or U (and 
+                 hence not in Stokes I) are now identified and included 
+                 in the polarisation module. This identification is done
+                 using the polarized intensity (PI) image. show_fit() and 
+                 export_image() were updated to allow display and export
+                 of the PI image.
+                 
     2012/02/06 - Fixed bug in island splitting code that could result in 
                  duplicate Gaussians. 
 

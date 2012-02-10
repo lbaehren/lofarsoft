@@ -1,4 +1,4 @@
-.. _basics
+.. _basics:
 
 *************
 PyBDSM Basics

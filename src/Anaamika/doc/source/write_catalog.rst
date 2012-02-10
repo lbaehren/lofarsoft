@@ -113,63 +113,63 @@ The information included in the catalog varies by format and can include the fol
 
 * **DEC:** the J2000 declination of the source, in degrees
 
-* **E_DEC:** the error on the declination of the source, in degrees
+* **E_DEC:** the 1-:math:`\sigma` error on the declination of the source, in degrees
 
 * **Total_flux:** the total, integrated Stokes I flux of the source at the reference frequency, in Jy
 
-* **E_Total_flux:** the error on the total flux of the source, in Jy
+* **E_Total_flux:** the 1-:math:`\sigma` error on the total flux of the source, in Jy
 
 * **Peak_flux:** the peak Stokes I flux of the source, in Jy/beam
 
-* **E_Peak_flux:** the error on the peak flux of the source, in Jy/beam
+* **E_Peak_flux:** the 1-:math:`\sigma` error on the peak flux of the source, in Jy/beam
 
 * **RA_max:** the J2000 right ascension of the maximum of the source, in degrees (``'srl'`` catalogs only)
 
-* **E_RA_max:** the error on the right ascension of the maximum of the source, in degrees (``'srl'`` catalogs only)
+* **E_RA_max:** the 1-:math:`\sigma` error on the right ascension of the maximum of the source, in degrees (``'srl'`` catalogs only)
 
 * **DEC_max:** the J2000 declination of the maximum of the source, in degrees (``'srl'`` catalogs only)
 
-* **E_DEC_max:** the error on the declination of the maximum of the source, in degrees (``'srl'`` catalogs only)
+* **E_DEC_max:** the 1-:math:`\sigma` error on the declination of the maximum of the source, in degrees (``'srl'`` catalogs only)
 
 * **Xposn:** the x image coordinate of the source, in pixels
 
-* **E_Xposn:** the error on the x image coordinate of the source, in pixels
+* **E_Xposn:** the 1-:math:`\sigma` error on the x image coordinate of the source, in pixels
 
 * **Yposn:** the y image coordinate of the source, in pixels
 
-* **E_Yposn:** the error on the y image coordinate of the source, in pixels
+* **E_Yposn:** the 1-:math:`\sigma` error on the y image coordinate of the source, in pixels
 
 * **Xposn_max:** the x image coordinate of the maximum of the source, in pixels (``'srl'`` catalogs only)
 
-* **E_Xposn_max:** the error on the x image coordinate of the maximum of the source, in pixels (``'srl'`` catalogs only)
+* **E_Xposn_max:** the 1-:math:`\sigma` error on the x image coordinate of the maximum of the source, in pixels (``'srl'`` catalogs only)
 
 * **Yposn_max:** the y image coordinate of the maximum of the source, in pixels (``'srl'`` catalogs only)
 
-* **E_Yposn_max:** the error on the y image coordinate of the maximum of the source, in pixels (``'srl'`` catalogs only)
+* **E_Yposn_max:** the 1-:math:`\sigma` error on the y image coordinate of the maximum of the source, in pixels (``'srl'`` catalogs only)
 
 * **Maj:** the FWHM of the major axis of the source, in degrees
 
-* **E_Maj:** the error on the FWHM of the major axis of the source, in degrees
+* **E_Maj:** the 1-:math:`\sigma` error on the FWHM of the major axis of the source, in degrees
 
 * **Min:** the FWHM of the minor axis of the source, in degrees
 
-* **E_Min:** the error on the FWHM of the minor axis of the source, in degrees
+* **E_Min:** the 1-:math:`\sigma` error on the FWHM of the minor axis of the source, in degrees
 
 * **PA:** the position angle of the major axis of the source measured east of north, in degrees
 
-* **E_PA:** the error on the position angle of the major axis of the source, in degrees
+* **E_PA:** the 1-:math:`\sigma` error on the position angle of the major axis of the source, in degrees
 
 * **DC_Maj:** the FWHM of the deconvolved major axis of the source, in degrees
 
-* **E_DC_Maj:** the error on the FWHM of the deconvolved major axis of the source, in degrees
+* **E_DC_Maj:** the 1-:math:`\sigma` error on the FWHM of the deconvolved major axis of the source, in degrees
 
 * **DC_Min:** the FWHM of the deconvolved minor axis of the source, in degrees
 
-* **E_DC_Min:** the error on the FWHM of the deconvolved minor axis of the source, in degrees
+* **E_DC_Min:** the 1-:math:`\sigma` error on the FWHM of the deconvolved minor axis of the source, in degrees
 
 * **DC_PA:** the position angle of the deconvolved major axis of the source measured east of north, in degrees
 
-* **E_DC_PA:** the error on the position angle of the deconvolved major axis of the source, in degrees
+* **E_DC_PA:** the 1-:math:`\sigma` error on the position angle of the deconvolved major axis of the source, in degrees
 
 * **Isl_rms:** the average background rms value of the island, in Jy/beam
 
@@ -186,37 +186,43 @@ The information included in the catalog varies by format and can include the fol
 
 * **Spec_Indx1:** the first-order spectral index of the source
 
-* **E_Spec_Indx1:** the error on the first-order spectral index of the source
+* **E_Spec_Indx1:** the 1-:math:`\sigma` error on the first-order spectral index of the source
 
 * **Spec_Indx2:** the second-order spectral index of the source
 
-* **E_Spec_Indx2:** the error on the second-order spectral index of the source
+* **E_Spec_Indx2:** the 1-:math:`\sigma` error on the second-order spectral index of the source
 
 * **Total_Q:** the total, integrated Stokes Q flux of the source at the reference frequency, in Jy
 
-* **E_Total_Q:** the error on the total Stokes Q flux of the source at the reference frequency, in Jy
+* **E_Total_Q:** the 1-:math:`\sigma` error on the total Stokes Q flux of the source at the reference frequency, in Jy
 
 * **Total_U:** the total, integrated Stokes U flux of the source at the reference frequency, in Jy
 
-* **E_Total_U:** the error on the total Stokes U flux of the source at the reference frequency, in Jy
+* **E_Total_U:** the 1-:math:`\sigma` error on the total Stokes U flux of the source at the reference frequency, in Jy
 
 * **Total_V:** the total, integrated Stokes V flux of the source at the reference frequency, in Jy
 
-* **E_Total_V:** the error on the total Stokes V flux of the source at the reference frequency, in Jy
+* **E_Total_V:** the 1-:math:`\sigma` error on the total Stokes V flux of the source at the reference frequency, in Jy
 
 * **Linear_Pol_frac:** the linear polarization fraction of the source
 
-* **E_Linear_Pol_frac:** the error on the linear polarization fraction of the source
+* **Elow_Linear_Pol_frac:** the 1-:math:`\sigma` error on the linear polarization fraction of the source
+
+* **Ehigh_Linear_Pol_frac:** the 1-:math:`\sigma` error on the linear polarization fraction of the source
 
 * **Circ_Pol_Frac:** the circular polarization fraction of the source
 
-* **E_Circ_Pol_Frac:** the error on the circular polarization fraction of the source
+* **Elow_Circ_Pol_Frac:** the 1-:math:`\sigma` error on the circular polarization fraction of the source
+
+* **Ehigh_Circ_Pol_Frac:** the 1-:math:`\sigma` error on the circular polarization fraction of the source
 
 * **Total_Pol_Frac:** the total polarization fraction of the source
 
-* **E_Total_Pol_Frac:** the error on the total polarization fraction of the source
+* **Elow_Total_Pol_Frac:** the 1-:math:`\sigma` error on the total polarization fraction of the source
+
+* **Ehigh_Total_Pol_Frac:** the 1-:math:`\sigma` error on the total polarization fraction of the source
 
 * **Linear_Pol_Ang:** the linear polarization angle, measured east of north, in degrees
 
-* **E_Linear_Pol_Ang:** the error on the linear polarization angle, in degrees
+* **E_Linear_Pol_Ang:** the 1-:math:`\sigma` error on the linear polarization angle, in degrees
 
