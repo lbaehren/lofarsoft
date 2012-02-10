@@ -193,6 +193,7 @@ void converthms_string(char *hms, double number, int precision)
 {
   char dummy_str[100], dummy_str2[100];
   int hour, minute;
+
   if(number < 0) {
     sprintf(hms, "-");
     number *= -1;
@@ -217,11 +218,14 @@ void converthms_string(char *hms, double number, int precision)
     sprintf(hms, "%02d:%02d", hour, minute);
   }else {
     if(precision == 0)
+    {
       sprintf(dummy_str2, "%%0%d.%df", 2, precision);
+    }
     else
+    {
       sprintf(dummy_str2, "%%0%d.%df", precision+3, precision);
-    sprintf(dummy_str, dummy_str2, number);
-    
+    }
+    sprintf(dummy_str, dummy_str2, number);   
     if(dummy_str[0] == '6' && dummy_str[1] == '0') {
       dummy_str[0] = '0';
       dummy_str[1] = '0';
@@ -231,7 +235,11 @@ void converthms_string(char *hms, double number, int precision)
 	hour += 1;
       }
     }
-    sprintf(hms, "%02d:%02d:%s", hour, minute, dummy_str);
+    // account for negative dec
+    if (hms[0] == '-')   
+       sprintf(hms, "-%02d:%02d:%s", hour, minute, dummy_str);
+    else
+       sprintf(hms, "%02d:%02d:%s", hour, minute, dummy_str);    
   }
 }
 
