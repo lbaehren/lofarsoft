@@ -114,6 +114,7 @@ parser.add_option("-q","--nopause", action="store_true",help="Do not pause after
 parser.add_option("-k","--skip_existing_files", action="store_true",help="Skip file if results directory already exists")
 parser.add_option("-R","--norefresh", action="store_true",help="Do not refresh plotting window after each plot, don't stop, no plotting window in command line mode (use for batch operation).")
 parser.add_option("-D","--maximum_allowed_delay", type="float", default=1e-8,help="maximum differential mean cable delay that the expected positions can differ rom the measured ones, before we consider something to be wrong")
+parser.add_option("-C","--checksum", action="store_true", help="Calculate checksums used for debugging; default OFF")
 parser.add_option("-O", "--max_outliers", type="int", default=5, help="Maximum allowed number of outliers in calculated cable delays")
 
 if parser.get_prog_name()=="cr_event_radio.py":
@@ -197,7 +198,7 @@ else:
     max_data_length=options.max_data_length
     min_data_length=options.min_data_length
     maxnchunks=max_data_length/blocksize
-
+    do_checksums = options.checksum
 #The Pause instance will pause (or not) after each plot and write the plotfiles
 Pause=plotfinish(plotpause=plotpause,refresh=refresh)
 
@@ -249,7 +250,7 @@ def finish_file(laststatus=""):
         if not good_old_time_stamp == time_stamp:
             topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
             good_old_time_stamp = time_stamp
-        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+        topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b>, checksum={checksum:s}<p><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status,checksum=masterChecksum))
         topsummaryfile.close()
 
     topsummaryfile=open(allsummaryfilename,"a")
@@ -262,7 +263,7 @@ def finish_file(laststatus=""):
     htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
     htmlfile.write("<b><i>"+pretty_time_stamp+": </i></b>")
     htmlfile.write("<i>processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
-    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2g} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2g} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b>, checksum = {checksum:s}<p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status, checksum=masterChecksum))
 
     htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
     htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
@@ -344,18 +345,18 @@ for full_filename in files:
         block_number=blocknumber
         sample_number=samplenumber
 
-
+        checksums = []
         ########################################################################
         #Open the data file
         ########################################################################
         print "---> Open data file",full_filename
         try:
-            datafile=open(full_filename); 
-            if datafile["ANTENNA_SET"]=="UNDEFINED": 
-                datafile["ANTENNA_SET"]=lofarmode
-        except RuntimeError:
+            datafile=open(full_filename);
+            if datafile["ANTENNA_SET"]=="UNDEFINED":
+                datafile["ANTENNA_SET"]="LBA_OUTER"
+        except RuntimeError as e:
             print "ERROR opening file - skipping this file!"
-            statuslist.append("OPEN FAILED")
+            statuslist.append("OPEN FAILED "+str(e))
             finish_file()
             continue
 
@@ -381,16 +382,17 @@ for full_filename in files:
         timems = int(datafile["SAMPLE_INTERVAL"][0]*datafile["SAMPLE_NUMBER"][0]*1000)
         timems = str(timems).zfill(3) # make 3 digits with leading zeros if needed.
         # NOTE: chosen to take int part of time in ms; i.e. not rounding to nearest ms.
-        
+
         #time_stamp=filename_split[-2] if not timestamp else timestamp
         time_stamp=timestr+"."+timems+"Z" if not timestamp else timestamp
 
         pretty_time_stamp=time.strftime("%Y-%m-%d %H:%M:%S."+timems,time.gmtime(timesec))
 
-        station_name=metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+        #station_name = metadata.idToStationName(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+        station_name = "%03d" %(datafile["CHANNEL_ID"][0]/1000000) if not station else station
+        station_name = "CS{0}".format(station_name)
 
-
-        #station_name=filename_split[-1] 
+        #station_name=filename_split[-1]
         old_time_stamp=time_stamp
         #time_stamp=filename_split[-2] if not timestamp else timestamp
         #pretty_time_stamp=time_stamp[0:4]+"-"+time_stamp[4:6]+"-"+time_stamp[6:8]+" "+time_stamp[9:11]+":"+time_stamp[11:13]+":"+time_stamp[13:-1] if len(time_stamp)>13 else time_stamp
@@ -456,7 +458,7 @@ for full_filename in files:
 
 
         tbb_starttime=datafile["TIME"][0]
-        tbb_samplenumber=datafile["SAMPLE_NUMBER"][0]
+        tbb_samplenumber=max(datafile["SAMPLE_NUMBER"])
         sample_interval=datafile["SAMPLE_INTERVAL"][0]
         data_length=datafile["DATA_LENGTH"][0]
 
@@ -478,13 +480,18 @@ for full_filename in files:
             plotfiles=Pause.plotfiles
             )
 
+        if "HBA" in datafile["ANTENNA_SET"]:
+            statuslist.append("HBA SKIPPED")
+            finish_file()
+            continue
+             
         if max_data_length>0 and max(datafile["DATA_LENGTH"])>max_data_length:
             print "ERROR: Data file size is too large (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             statuslist.append("DATA_LENGTH BAD")
 #            finish_file(status="FILE TOO LARGE")
 #            continue
 
-        if min(datafile["DATA_LENGTH"])<min_data_length:
+        if min(datafile["DATA_LENGTH"])<min_data_length or min(datafile["DATA_LENGTH"]) < blocksize:
             print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             finish_file(laststatus="FILE TOO SMALL")
             continue
@@ -498,34 +505,8 @@ for full_filename in files:
         ########################################################################
         #Getting information from LORA if present
         ########################################################################
-        print "---> Reading information from LORA, if present"
+        print "---> Not using LORA information as this is a radio-triggered pipeline (cross-check with LORA to be implemented later)"
         lora_event_info = 0 # to check with 'if lora_event_info:'
-        if os.path.exists(lora_logfile):
-            (tbb_starttime_sec,tbb_starttime_nsec)=lora.nsecFromSec(tbb_starttime,logfile=lora_logfile)
-
-            if tbb_starttime_sec:
-                try:
-                    (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
-                except ValueError:
-                    print "#ERROR - LORA trigger information not found"
-                    finish_file(laststatus="NO TRIGGER")
-                    continue
-                print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
-                if blocknumber<0:
-                    block_number=block_number_lora
-                if samplenumber<0:
-                    sample_number=sample_number_lora
-                print "---> Taking as initial guess: block =",block_number,"sample =",sample_number
-                lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
-        else:
-            print "WARNING: No LORA logfile found - ",lora_logfile
-
-        #lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
-
-        if lora_event_info:
-                lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
-                lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
-                lora_energy=lora_event_info["Energy(eV)"]
 
         results.update(dict(
             pulse_direction_lora=lora_direction,
@@ -548,6 +529,7 @@ for full_filename in files:
                 addantennas=False,
                 output_subdir=outputdir_with_subdirectories,
                 filefilter=os.path.join(filedir,filename),
+                datafile = datafile,
                 root_filename=outfilename,
                 lofarmode=lofarmode,
                 antennas_start=current_polarization,
@@ -658,13 +640,17 @@ for full_filename in files:
             print "# Antenna Flagging: All antennas OK!"
             averagespectrum_good_antennas=avspectrum.power
 
+        if do_checksums:
+            checksum = averagespectrum_good_antennas.checksum()
+            checksums.append('Checksum after average spectrum: ' + checksum)
+            print checksums[-1]
+
         ########################################################################
         #Baseline Fitting
         ########################################################################
 
         print "---> Fit a baseline to the average spectrum"
         fitbaseline=trerun("FitBaseline","",averagespectrum_good_antennas,extendfit=0.5,pardict=par,doplot=3 if Pause.doplot else 0)
-
 
         #Create new average spectrum with only good antennas, based on quality checking from fitbaseline ...
         if fitbaseline.nbadantennas>0:
@@ -741,7 +727,8 @@ for full_filename in files:
 
         datafile["SELECTED_DIPOLES"]=good_antennas
         antenna_positions=datafile["ANTENNA_POSITIONS"]
-
+        print 'Good antennas: ' 
+        print good_antennas
         results.update(dict(
             svn_revision=PYCRREVNR,
             BLOCK=block_number,
@@ -756,32 +743,32 @@ for full_filename in files:
 
         #Getting original cabledelays
 #        import pdb; pdb.set_trace()
-        nofChannels = len(datafile["CHANNEL_ID"]) # already noted somewhere else?
-        cabledelayList = [0.0] * nofChannels
-#        cabledelays = hArray(float, dimensions = [nofChannels]) 
+#        nofChannels = len(datafile["CHANNEL_ID"]) # already noted somewhere else?
+#        cabledelayList = [0.0] * nofChannels
+#        cabledelays = hArray(float, dimensions = [nofChannels])
         # check if 'Cabledelays.pic' exists in results dir
-        delayfile = os.path.join(outputdir, 'Cabledelays.pic')
-        print delayfile
-        if os.path.isfile(delayfile):
-            print 'Reading cable delays'
-            infile = open(delayfile, 'rb')
-            cabledelay_database = pickle.load(infile)
-            n=0
-            for id in datafile["CHANNEL_ID"]:
-                key = str(id)
-                if key in cabledelay_database:
-                    cabledelayList[n] = cabledelay_database[str(id)]["cabledelay"]
-                n+=1 
-            print cabledelayList
-        else:
-            print 'Cable delays file does not exist yet.'
-        cabledelays = hArray(cabledelayList) # zeros if file isn't there. Other choice: take from metadata 
-        
+#        delayfile = os.path.join(outputdir, 'Cabledelays.pic')
+#        print delayfile
+#        if os.path.isfile(delayfile):
+#            print 'Reading cable delays'
+#            infile = open(delayfile, 'rb')
+#            cabledelay_database = pickle.load(infile)
+#            n=0
+#            for id in datafile["CHANNEL_ID"]:
+#                key = str(id)
+#                if key in cabledelay_database:
+#                    cabledelayList[n] = cabledelay_database[str(id)]["cabledelay"]
+#                n+=1
+#            print cabledelayList
+#        else:
+#            print 'Cable delays file does not exist yet.'
+#        cabledelays = hArray(cabledelayList) # zeros if file isn't there. Other choice: take from metadata
+
 #        cabledelays_full=metadata.get("CableDelays",datafile["CHANNEL_ID"],datafile["ANTENNA_SET"])  # Obtain cabledelays
 #        cabledelays_full-=cabledelays_full[0] # Correct w.r.t. referecence antenna
 #        cabledelays=cabledelays_full % sample_interval #Only sub-sample correction has not been appliedcabledelays=cabledelays_full % 5e-9  # Only sub-sample correction has not been applied
-        cabledelays=hArray(cabledelays)
-  # ??????????????      cabledelays *= -1.0
+#        cabledelays=hArray(cabledelays)
+
         ########################################################################
         #Read block with peak and FFT
         ########################################################################
@@ -792,6 +779,15 @@ for full_filename in files:
             print "Error reading file - skipping this file"
             finish_file(laststatus="READ ERROR")
             continue
+
+        if do_checksums:
+            checksum = timeseries_data.checksum()
+            checksums.append('Checksum after reading in timeseries data: ' + checksum)
+            print checksums[-1]
+
+        for i in bad_antennas_index:
+            print "FLAGGING ANTENNA", i
+            timeseries_data[i] = 0
 
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
@@ -809,10 +805,46 @@ for full_filename in files:
         hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
         fft_data[...,0]=0 # take out zero (DC) offset (-> offset/mean==0)
 
+        if do_checksums:
+            checksum = fft_data.checksum()
+            checksums.append('Checksum after fft_data: ' + checksum)
+            print checksums[-1]
+        
+        cabledelays = hArray(dimensions=datafile["NOF_SELECTED_DATASETS"], Type=float, fill=0)
+        try:
+            # apply cable delays 
+            cabledelays = hArray(datafile["DIPOLE_CALIBRATION_DELAY"])
+            weights = hArray(complex,dimensions = fft_data,name="Complex Weights")
+            freqs = hArray(datafile["FREQUENCY_DATA"]) # a FloatVec comes out, so put it into hArray
+            phases = hArray(float,dimensions=fft_data,name="Phases",xvalues=datafile["FREQUENCY_DATA"])
+    
+            hDelayToPhase(phases, freqs, cabledelays)
+            hPhaseToComplex(weights, phases)
+            
+            fft_data.mul(weights)
+
+            # back to time domain to get calibrated timeseries data
+            hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
+            timeseries_data /= blocksize
+
+            results.update(dict(
+                DIPOLE_CALIBRATION_DELAY_APPLIED=True
+                ))
+            
+        except IOError:
+            results.update(dict(
+                DIPOLE_CALIBRATION_DELAY_APPLIED=False
+                ))
+
+        if do_checksums:
+            checksum = timeseries_data.checksum()
+            checksums.append('Checksum after applying cable delays and invfft: ' + checksum)
+            print checksums[-1]
+
         ########################################################################
         #RFI excision
         ########################################################################
-        fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
+#HACK        fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
 
         ########################################################################
         #Gain calibration of data
@@ -821,7 +853,7 @@ for full_filename in files:
         calcbaseline_galactic=trerun("CalcBaseline","galactic",averagespectrum_good_antennas,pardict=par,invert=True,normalize=False,powerlaw=0.5,doplot=Pause.doplot)
         #import pdb; pdb.set_trace()
         # and apply
-        fft_data.mul(calcbaseline_galactic.baseline)
+#HACK        fft_data.mul(calcbaseline_galactic.baseline)
 
         #Plotting just for quality control
         power=hArray(float,properties=fft_data)
@@ -843,6 +875,11 @@ for full_filename in files:
             pulse_height_rms=timeseries_calibrated_data_rms
             ))
 
+        if do_checksums:
+            checksum = timeseries_calibrated_data.checksum()
+            checksums.append('Checksum after getting timeseries_calibrated_data: ' + checksum)
+            print checksums[-1]
+
         # Note: to finish calibration, we have to know the pulse location first
         # Then we divide out by the rms per antenna in this block, while excluding the pulse region.
         # so we use [0:pulse.start] ( and [pulse.end:] to be implemented).
@@ -853,36 +890,40 @@ for full_filename in files:
         #First determine where the pulse is in a simple incoherent sum of all time series data
         if (search_window_width > 0) and (sample_number > 0):
             # only narrow the search window if we have a 'good' guess for sample_number...
-            search_window=(sample_number-search_window_width/2,sample_number+search_window_width/2)
-            print search_window
+            search_window=(max(0, sample_number-search_window_width/2), min(timeseries_calibrated_data.shape()[1] - 1, sample_number+search_window_width/2))
         else:
             search_window=False
 
         if lora_direction:
             print "---> Now make an incoherent beam in the LORA direction, locate pulse, and cut time series around it."
-            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1),cable_delays=cabledelays,calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
+            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1), calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
+            # removed cabledelays
             tbeam_incoherent=hArray(beamformer_full.tbeam_incoherent.vec(),[blocksize])#make this a one-dimensional array to not confuse LocatePulseTrain ...
         else:
             print "---> Now add all antennas in the time domain, locate pulse, and cut time series around it."
             tbeam_incoherent=None
 
-        #Get a list of pulses in the search window
-        pulses=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True)
-        #How many antennas have pulses? Also: determine a finer window where the pulses are
-        if pulses.npeaks>0:
-            antennas_with_peaks=list(asvec(hArray(good_antennas)[pulses.peaks_found_list]))
-            print "#LocatePulses - ",pulses.npeaks,"antennas with a pulse found. Pulse window start=",pulses.start,"+/-",pulses.start_rms,"pulse range:",pulses.start_min,"-",pulses.start_max
-            print "#LocatePulses - antennas with pulses:",antennas_with_peaks
-
         #If we had a pre-determined direction use this to find the dominant peak and cut out the time series around it
         if lora_direction:
+            print 'Have lora direction...'
             pulse=trerun("LocatePulseTrain","",timeseries_calibrated_data,timeseries_data_sum=tbeam_incoherent,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=False)
+            antennas_with_peaks=good_antennas
+            pulse_npeaks=pulse.npeaks
 
         # Otherwise take the previously found window with the most pulses
-        else:
-            pulse=pulses
-        pulse_npeaks=pulses.npeaks
+        if not lora_direction or (lora_direction and pulse.npeaks==0):
+            print "searching per antenna"
+            pulse=trerun("LocatePulseTrain","separate",timeseries_calibrated_data,pardict=par,doplot=Pause.doplot,search_window=search_window,search_per_antenna=True) # want window here, it's welldefined radio triggered data!
+            pulse_npeaks=pulse.npeaks
+
+            #How many antennas have pulses? Also: determine a finer window where the pulses are
+            if pulse.npeaks>0:
+                antennas_with_peaks=list(asvec(hArray(good_antennas)[pulse.peaks_found_list]))
+                print "#LocatePulses - ",pulse.npeaks,"antennas with a pulse found. Pulse window start=",pulse.start,"+/-",pulse.start_rms,"pulse range:",pulse.start_min,"-",pulse.start_max
+                print "#LocatePulses - antennas with pulse:",antennas_with_peaks
+
         print "#LocatePulse: ",pulse_npeaks,"pulses found."
+
         if pulse_npeaks==0:
             print "************************************************************************"
             print "********          ATTENTION: No pulses found          ******************"
@@ -906,10 +947,15 @@ for full_filename in files:
 #        timeseries_raw_rms = hArray(dimensions=timeseries_calibrated_data_antennas_rms)
         # get raw rms value to see how much calibration was done in total
         timeseries_raw_rms = timeseries_data[..., 0:pulse.start].stddev() # no DC offset correction was done
-        
+
 # calibration complete.
         print "---> Saving calibrated time series to",calibrated_timeseries_file
         timeseries_calibrated_data.write(calibrated_timeseries_file)
+
+        if do_checksums:
+            checksum = timeseries_calibrated_data.checksum()
+            checksums.append('Checksum after getting FINAL timeseries_calibrated_data: ' + checksum)
+            print checksums[-1]
 
         if Pause.doplot: timeseries_calibrated_data[0:min(2,ndipoles),...].plot(title="Calibrated time series of first 2 antennas")
         Pause("Plotted time series data. ",name="calibrated-imeseries")
@@ -925,7 +971,6 @@ for full_filename in files:
             npeaks_found=pulse_npeaks
             ))
 
-        
         #Store the small version of the calibrated timeseries, e.g. for the imager
         print "---> Saving ",calibrated_timeseries_cut_file
         pulse.timeseries_data_cut.write(calibrated_timeseries_cut_file)
@@ -950,7 +995,8 @@ for full_filename in files:
 
         antennas_with_strong_pulses=list(pulses_snr.Find(">",pulses_sigma))
         nantennas_with_strong_pulses=len(antennas_with_strong_pulses)
-
+        print 'ANTENNAS WITH SOTRNG PULSES:'
+        print antennas_with_strong_pulses
         results.update(dict(
             pulses_sigma=pulses_sigma,
             timeseries_power_mean=list(timeseries_power_mean),
@@ -999,7 +1045,8 @@ for full_filename in files:
         #solution
 
         #cabledelays.negate()
-        delays=hArray(copy=cabledelays)
+#        delays=hArray(copy=cabledelays)
+        delays = hArray(dimensions=cabledelays, fill=0.0) # no cable delay propagation anymore! Has been applied.
         #cabledelays *= 2
         #delays.fill(0)
 
@@ -1007,9 +1054,27 @@ for full_filename in files:
         good_pulse_lags=hArray(time_lags)[antennas_with_strong_pulses]
         good_pulse_antenna_positions=hArray(float,[nantennas_with_strong_pulses,3])
         good_pulse_antenna_positions[...].copy(antenna_positions[antennas_with_strong_pulses,...,0:3])
-        good_pulse_cabledelays=cabledelays[antennas_with_strong_pulses]
+        good_pulse_cabledelays=delays[antennas_with_strong_pulses] # i.e. put in zeros (!)
 
-        direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags,cabledelays=good_pulse_cabledelays,verbose=True,doplot=True)
+        # testing direct plane-wave direction fit
+        directionPlaneWave = trerun("DirectionFitPlaneWave", "directionPlaneWave", pardict=par, positions=good_pulse_antenna_positions, timelags = good_pulse_lags, verbose=True, doplot=True)
+        directionPlaneWave = trerun("DirectionFitPlaneWave", "directionPlaneWave", pardict=par, positions=good_pulse_antenna_positions, timelags = good_pulse_lags, verbose=True, doplot=True)
+
+        print "========================================================================"
+        print "Plane Wave Fit Az/EL -> ", directionPlaneWave.meandirection_azel_deg,"deg"
+        print " "
+        print "Delays =",directionPlaneWave.total_delays * 1e9
+        print "#DirectionFitPlaneWave: delta delays =",directionPlaneWave.delta_delays_mean_history[0],"+/-",directionPlaneWave.delta_delays_rms_history[0]
+        
+
+        
+        # perform Triangle fit
+        direction=trerun("DirectionFitTriangles","direction",pardict=par,positions=good_pulse_antenna_positions,timelags=good_pulse_lags, cabledelays=good_pulse_cabledelays, verbose=True,doplot=True)
+          # put in zeros for 'cable delays' as they are fitted and put into the same array...
+        if direction.ngood == 0:
+            finish_file(laststatus="NO GOOD TRIANGLES FOUND")
+            continue
+
         print "========================================================================"
         print "Triangle Fit Az/EL -> ", direction.meandirection_azel_deg,"deg"
         print " "
@@ -1017,23 +1082,24 @@ for full_filename in files:
 
         print "#DirectionFitTriangles: delta delays =",direction.delta_delays_mean_history[0],"+/-",direction.delta_delays_rms_history[0]
 
-      #  import pdb; pdb.set_trace()
-        (direction.total_delays*1e9).plot(xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="x")
-        (direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
-        (cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
+
+        #(direction.total_delays*1e9).plot(xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="x")
+        #(direction.delays_history*1e9)[1].plot(clf=False,xvalues=good_antennas_IDs[antennas_with_strong_pulses],linestyle="None",marker="o")
+        #(cabledelays*1e9).plot(clf=False,xlabel="Antenna",ylabel="Delay [ns]",xvalues=good_antennas_IDs,title="Fitted cable delays",legend=(["fitted delay","1st step","cable delay"]))
+        (directionPlaneWave.residual_delays * 1.0e9).plot(clf=False, xlabel="RCU number", ylabel = "Delay [ns]", xvalues = good_antennas_IDs, title = "Fit residual delays")
+            # NB! What does this return? Really fitted cable delays?
         Pause(name="fitted-cable-delays")
 
-        scrt = hArray(copy=direction.residual_delays); scrt.abs(); # NB! Need to copy the hArray
+        scrt = hArray(copy=direction.residual_delays) # NB! Need to copy the hArray
         # otherwise, the original array will get modified by scrt.abs().
-        delay_quality_error=scrt.median()[0]/maximum_allowed_delay
+        scrt.abs()
+        delay_quality_error=scrt.median()[0]/maximum_allowed_delay # otherwise a Vector with length 1 comes back
         print "#Delay Quality Error:",delay_quality_error
 
         # also count # outliers, impose maximum
         number = hArray(int, dimensions=scrt)
         delay_outliers = number.findgreaterthanabs(scrt, maximum_allowed_delay)[0] # returns count, indices in 'number' array
-        
         print "# delay outliers: ", delay_outliers
-
         if delay_quality_error>1:
             print "************************************************************************"
             print "********ATTENTION: Fitted delays deviate too strongly!******************"
@@ -1055,17 +1121,23 @@ for full_filename in files:
                 final_residual_delays.set(flagged_delays,0)
         else:
             print "#Delay flagging - all delays seem OK."
-        final_cable_delays=final_residual_delays+cabledelays
-
+        final_cable_delays=final_residual_delays # +cabledelays
+        final_residual_delays_planewave = directionPlaneWave.residual_delays # chck dimensions
         # include average cable delays (as in cable delay database) in time lags per pulse
         time_lags = hArray(time_lags)
-        time_lags -= cabledelays
-        
-     #   import pdb; pdb.set_trace()
-        
+#        time_lags -= cabledelays
+
         #plotdirection=trerun("PlotDirectionTriangles","plotdirection",pardict=par,centers=direction.centers,positions=direction.positions,directions=direction.directions,title="Sub-Beam directions")
         #Pause(name="sub-beam-directions")
+
         trerun("PlotAntennaLayout","Delays",pardict=par,positions=good_pulse_antenna_positions,colors=final_residual_delays[antennas_with_strong_pulses],sizes=100,names=good_antennas_IDs[antennas_with_strong_pulses],title="Delay errors in station",plotlegend=True)
+
+        print "\n--->AntennaResponse"
+
+        ########################################################################
+        #AntennaResponse
+        ########################################################################
+#        ar=trerun("AntennaResponse", "ar", data = pulse.timeseries_data_cut, blocksize = pulse.timeseries_data_cut.shape()[1], nantennas = antenna_positions.shape()[0], polarization=current_polarization, antennaset = datafile["ANTENNA_SET"])
 
         print "\n--->Imaging"
 
@@ -1082,8 +1154,8 @@ for full_filename in files:
 
         #Beamform short data set first for inspection (and possibly for
         #maximizing later)
-        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3),cable_delays=final_cable_delays,calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
-
+        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3), calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+            # removed cabledelays = final_cable_delays in beamformer (AC)
         #Use the above later also for maximizing peak Beam-formed timeseries
         #is in ---> bf.tbeams[bf.mainbeam]
 
@@ -1104,8 +1176,8 @@ for full_filename in files:
 
         print "---> Plotting full beam-formed data set"
         #Beamform full data set (not really necessary, but fun).
-        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1),cable_delays=final_cable_delays,calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
-
+        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1), calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+            # removed cabledelays = final_cable_delays in beamformer (AC)
         ########################################################################
         #Data Analysis ... (to be expanded)
         ########################################################################
@@ -1151,11 +1223,27 @@ for full_filename in files:
         pulse_normalized_height=beam_maxima.maxy.val()/lora_energy*10**17 if lora_energy>0 else -1.0 #Need Horneffer formula here
         pulse_height=beam_maxima.maxy.val()
         pulse_direction=direction.meandirection_azel_deg
+        pulse_direction_planewave = directionPlaneWave.meandirection_azel_deg
 
+        masterChecksum = str(0)
+        # gather checksums if present
+        if len(checksums) > 0:
+            checksumArray = hArray(checksums)
+            masterChecksum = checksumArray.checksum()
+            s = ''
+            for item in checksums:
+                s += item + '\n'
+            results.update(dict(checksums = s, masterChecksum = masterChecksum))
+            print '*** Checksums: '
+            for item in checksums:
+                print item
+            print '*** Master checksum = %s' % masterChecksum
+            
         results.update(dict(
             antennas_flagged_delays=list(flagged_delays.vec()),
-            antennas_final_cable_delays=list(final_cable_delays.vec()),
+            antennas_final_cable_delays=list(final_cable_delays.vec()), # include metadata-cabledelays again here?? (AC)
             antennas_residual_cable_delays = list(final_residual_delays.vec()),
+            antennas_residual_cable_delays_planewave = list(final_residual_delays_planewave),
             antennas_with_peaks=antennas_with_peaks,
             delay_quality_error=delay_quality_error,
             delay_outliers = delay_outliers,
@@ -1171,6 +1259,7 @@ for full_filename in files:
             pulse_height_incoherent=pulse_height_incoherent,
             pulse_normalized_height=pulse_normalized_height,
             pulse_direction=pulse_direction,
+            pulse_direction_planewave = pulse_direction_planewave,
             pulse_direction_delta_delays_start=direction.delta_delays_mean_history[0],
             pulse_direction_delta_delays_final=direction.delta_delays_mean_history[-1]
             ))
