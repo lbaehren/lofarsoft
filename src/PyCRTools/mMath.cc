@@ -2927,6 +2927,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 #define HFPP_FUNC_NAME hRMS
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
