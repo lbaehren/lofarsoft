@@ -66,7 +66,7 @@ def gatherresults(topdir, maxspread):
             positions.extend(res["antenna_positions_array_XYZ_m"]) # in flat list
             antid.extend([str(int(v)) for v in res["antennas"].values()])
             # check: same ordering for ant-id's and cable delaysin 'res'??? Relying on that.
-            cabledelays.extend(res["antennas_residual_cable_delays"])  #antennas_final_cable_delays
+            cabledelays.extend(res["antennas_residual_cable_delays_planewave"])  #antennas_final_cable_delays
             residualdelays.extend(res["antennas_residual_cable_delays_planewave"])
             # test for spread and outliers
             theseDelays = np.array(res["antennas_residual_cable_delays_planewave"])
@@ -99,10 +99,10 @@ def gatherresults(topdir, maxspread):
         theseResiduals = np.array(cabledelays_database[key]["residuallist"])
     #    theseDelays[np.where(abs(theseDelays) > 20.0)] = float('nan')
         # remove outliers by kicking out everything above 10.0 ns abs.
-        goodindices = np.where(abs(theseDelays) < 10.0e-9)
-        theseDelays = theseDelays[goodindices]
-        goodindices = np.where(abs(theseResiduals) < 10.0e-9)
-        theseResiduals = theseResiduals[goodindices]
+#        goodindices = np.where(abs(theseDelays) < 10.0e-9)
+#        theseDelays = theseDelays[goodindices]
+#        goodindices = np.where(abs(theseResiduals) < 10.0e-9)
+#        theseResiduals = theseResiduals[goodindices]
         
         avg = theseDelays.mean()
         residualavg = theseResiduals.mean()
@@ -209,7 +209,7 @@ class cabledelays(tasks.Task):
 #        plotnames={default:False,doc:"plot names of dipoles"},
 #        title=p_(lambda self:obtainvalue(self.results,"title"),doc="Title for the plot (e.g., event or filename)"),
 #        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        plot_finish={default: lambda self:cr.plotfinish(doplot=True,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        plot_finish={default: lambda self:cr.plotfinish(doplot=True,filename="cabledelays",plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
         plot_name={default:"cabledelays",doc:"Extra name to be added to plot filename."},
 #        plotlegend={default:False,doc:"Plot a legend"},
 #        positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
@@ -315,7 +315,9 @@ class cabledelays(tasks.Task):
             plt.xlabel('Antenna number (RCU)')
             plt.title('Residual cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='best')
-
+            
+            self.plot_finish(name="layout")
+            
             plt.figure()
 #            plt.scatter(x, y_total, label='Individual events')
             plt.scatter(x_avg, y_avg_total, c = 'r', label='Average cable delay')
@@ -326,6 +328,8 @@ class cabledelays(tasks.Task):
             plt.xlabel('Antenna number (RCU)')
             plt.title('Total cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='center right')
+            
+            self.plot_finish(name="residualvsRCU")
             
             plt.figure()
             plt.scatter(x_avg, y_avg_total - delayfromphasetables, c = 'r', label='Difference: fit vs Caltables')
