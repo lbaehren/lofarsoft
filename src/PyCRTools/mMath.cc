@@ -2922,6 +2922,34 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate the root mean square.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRMS
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter, class T>
+HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
+{
+  double rms = 0.0;
+
+  int n = std::distance(vec, vec_end);
+
+  Iter it = vec;
+  for (int i=0; i<n; i++)
+  {
+    // Less efficient but prevents overflow
+    rms += (*it * *it) / n;
+    it++;
+  }
+
+  return sqrt(rms);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Calculates the standard deviation around a mean value.
 //$COPY_TO HFILE START --------------------------------------------------
