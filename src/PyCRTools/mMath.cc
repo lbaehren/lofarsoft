@@ -2933,10 +2933,10 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
   \brief $DOCSTRING
   $PARDOCSTRING
 */
-template <class Iter, class T>
+template <class Iter>
 HNumber HFPP_FUNC_NAME (const Iter vec, const Iter vec_end)
 {
-  double rms = 0.0;
+  HNumber rms = 0.0;
 
   int n = std::distance(vec, vec_end);
 
