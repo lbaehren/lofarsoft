@@ -440,3 +440,30 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply a Hilbert transform on a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hApplyHilbertTransform
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
+{
+  HInteger N = std::distance(data, data_end);
+
+  Iter it = data;
+
+  for (HInteger n; n<N; n++)
+  {
+    *it = HComplex(0, -1) * sgn(*it) * *it;
+    it++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

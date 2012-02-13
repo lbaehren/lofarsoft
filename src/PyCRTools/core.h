@@ -277,7 +277,11 @@ long int hSum(const long int*, long int*);
 #define hfeven(a) (hfcast<HInteger>(a)%2==0)
 #define hfodd(a)  (hfcast<HInteger>(a)%2!=0)
 
-
+// Signum function
+template<typename T> inline int sgn(T val)
+{
+  return (val > T(0)) - (val < T(0));
+}
 
 //Identity
 template<class T> inline T hfcast(/*const*/ T v){return v;}
