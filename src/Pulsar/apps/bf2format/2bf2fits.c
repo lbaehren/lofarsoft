@@ -2193,7 +2193,12 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     return 0;
    }
 
-   subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+   if (CHANNELS > 1) {
+      subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+   } else {  // bypass 2PPF, freq_cent calculation changes
+      subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS) * subintdata.bw;
+   }
+
    // outname
    sprintf(buf, "%s.fits", OUTNAME);
    printf("Output file \"%s\" at center frequency %f MHz\n", buf, subintdata.freq_cent);
@@ -2248,16 +2253,26 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       for(subbandnr_h5 = subbandnr_h5_first; subbandnr_h5 <= subbandnr_h5_last; subbandnr_h5++) {
 
       if(is_H5) {
-	if(is_append == 0)
+	if(is_append == 0){
 	  subintdata.freq_cent = (double) lofreq + subbandnr_h5 * subintdata.bw;
-	else
-	  subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+        }
+	else {
+          if (CHANNELS > 1) {
+	     subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+           } else {  // bypass 2PPF, freq_cent calculation changes
+	     subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS) * subintdata.bw;
+           }
+        }
       }else if (is_CS == 0) { // IS data
          sbpointer = strstr (filename, "_SB");
          sscanf(sbpointer, "%*3c%d", &subbandnr);
          subintdata.freq_cent = (double) lofreq + subbandnr * subintdata.bw;
       } else { // CS data
-	subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+        if (CHANNELS > 1) {
+	   subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS-1) * subintdata.bw;
+        } else { // bypass 2PPF, freq_cent calculation changes
+	   subintdata.freq_cent = (double) lofreq + 0.5 * (SUBBANDS) * subintdata.bw;
+        }
       }
       if(is_H5) {
 	if(is_append == 0) {
