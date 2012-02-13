@@ -316,8 +316,7 @@ class cabledelays(tasks.Task):
             plt.title('Residual cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='best')
             
-            print 'Writing plot: layout'
-            self.plot_finish(name="layout")
+            self.plot_finish(name=thisStationName + "-residuals_vs_RCU")
             
             plt.figure()
 #            plt.scatter(x, y_total, label='Individual events')
@@ -330,9 +329,8 @@ class cabledelays(tasks.Task):
             plt.title('Total cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='center right')
             
-            print 'Writing plot: residualsvsRCU'
-            self.plot_finish(name="residualvsRCU")
-            print 'Done writing plots'
+#            self.plot_finish(name="residualvsRCU")
+            
             plt.figure()
             plt.scatter(x_avg, y_avg_total - delayfromphasetables, c = 'r', label='Difference: fit vs Caltables')
             plt.ylabel('Total cable delay [ns]')
@@ -351,7 +349,7 @@ class cabledelays(tasks.Task):
                       names = self.names,title="Cable delays",plotlegend=True)
             plt.title('Difference between fitted delays and LOFAR Caltables\nStation '+thisStationName)
             
-            self.plot_finish(filename=self.plot_name + '-' + thisStationName,filetype=self.filetype)   
+            self.plot_finish(filename=self.plot_name + '-' + thisStationName + "-layout",filetype=self.filetype)   
 
         # end for station in antennasPerStationID
         
