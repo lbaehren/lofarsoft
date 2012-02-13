@@ -749,7 +749,7 @@ def hArray_checksum(self):
     Uses crc32 from the module zlib. Converts array to list, list to string, then takes the checksum of that.
     """
     from zlib import crc32 # here?
-    return hex(crc32(str(self.list())) & 0xffffffff)
+    return hex(crc32(str(self.val())) & 0xffffffff)
 
 # Pickling
 def hArray_getinitargs(self):
