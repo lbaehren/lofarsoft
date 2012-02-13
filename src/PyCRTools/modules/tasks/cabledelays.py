@@ -316,6 +316,7 @@ class cabledelays(tasks.Task):
             plt.title('Residual cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='best')
             
+            print 'Writing plot: layout'
             self.plot_finish(name="layout")
             
             plt.figure()
@@ -329,8 +330,9 @@ class cabledelays(tasks.Task):
             plt.title('Total cable delays per antenna after last pipeline iteration\nStation '+thisStationName)
             plt.legend(loc='center right')
             
+            print 'Writing plot: residualsvsRCU'
             self.plot_finish(name="residualvsRCU")
-            
+            print 'Done writing plots'
             plt.figure()
             plt.scatter(x_avg, y_avg_total - delayfromphasetables, c = 'r', label='Difference: fit vs Caltables')
             plt.ylabel('Total cable delay [ns]')
