@@ -282,6 +282,7 @@ class cabledelays(tasks.Task):
             x = []
             x_avg = []
             y_avg_residual = []
+            y_err = []
             y_avg_total = []
             y_total = []
             y_residual = []
@@ -292,8 +293,12 @@ class cabledelays(tasks.Task):
                 thisAvg = 1.0e9 * thisAnt["residualdelay"]
                 thisTotal = 1.0e9 * thisAnt["cabledelay"]
                 thisSpread = 1.0e9 * thisAnt["spread"]
+                thisN = len(thisAnt["delaylist"])
                 x_avg.extend([n])
                 y_avg_residual.extend([thisAvg])
+                
+                y_err.extend([2 * thisSpread / np.sqrt(thisN)]) # / np.sqrt(thisN)
+                
                 y_avg_total.extend([thisTotal])
                 if thisSpread < self.maxspread:
                     for k in range(len(thisAnt["residuallist"])): # residual and total lists are the same size...
@@ -317,6 +322,14 @@ class cabledelays(tasks.Task):
             plt.legend(loc='best')
             
             self.plot_finish(name=thisStationName + "-residuals_vs_RCU")
+            
+            plt.figure()
+            plt.errorbar(x_avg, y_avg_residual, yerr=y_err, fmt='ro')
+            plt.ylabel('Residual cable delay [ns]')
+            plt.xlabel('Antenna number (RCU)')
+            plt.title('Residual cable delays per antenna with 2-sigma/sqrt(N) errorbars\nStation '+thisStationName)
+            
+            self.plot_finish(name=thisStationName + "-residuals_errorbars")
             
             plt.figure()
 #            plt.scatter(x, y_total, label='Individual events')
