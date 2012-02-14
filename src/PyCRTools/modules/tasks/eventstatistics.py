@@ -26,7 +26,7 @@ def GetInformationFromFile(topdir, events):
         signal={0:[],1:[]}
         positions={0:[],1:[]}
         rms = {0:[],1:[]}
-
+        spectral_power ={0:[],1:[]}
         res={}
     
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
@@ -58,7 +58,7 @@ def GetInformationFromFile(topdir, events):
             
             #signal[res["polarization"]].extend(res[plot_parameter])
             rms[res["polarization"]].extend(res["timeseries_power_rms"])
-
+            spectral_power[res["polarization"]].append(res["station_spectral_power"])
                     
         if res == {}:
             print "No results file found"
@@ -92,7 +92,7 @@ def GetInformationFromFile(topdir, events):
         par["rms"]=rms
         par["antid"]=antid
         par["time"]=timesec
-
+        par["spectral_power"]=spectral_power
     return par
 
 
@@ -114,7 +114,8 @@ class eventstatistics(tasks.Task):
         rms = dict(default=lambda self:self.results["rms"]),
         antid = dict(default=lambda self:self.results["antid"]),
         time = dict(default=lambda self:self.results["time"]),
-        status = dict(default=lambda self:self.results["status"])
+        status = dict(default=lambda self:self.results["status"]),
+        spectral_power = dict(default=lambda self:self.results["spectral_power"])
         # to add other quantities
         )
         
@@ -148,7 +149,7 @@ class eventstatistics(tasks.Task):
             value = -10 
             print "Station not found"   
         
-        return value, self.time, self.direction_lora, self.status
+        return value, self.time, self.direction_lora, self.status, self.spectral_power
         
         
         
