@@ -1888,7 +1888,7 @@ int main( int argc, char **argv )
     }else {
       strcpy(IncoherentStokesAreTransposed, "False");
     }
-    if(strcmp(IncoherentStokesAreTransposed, "True") == 0) {
+    if((strcmp(IncoherentStokesAreTransposed, "True") == 0) || (strcmp(IncoherentStokesAreTransposed, "true") == 0) || (strcmp(IncoherentStokesAreTransposed, "T") == 0)){
       puts("Post-IS 2nd transpose;  reading new keywords");
       IS2 = 1;
     }else if(strcmp(IncoherentStokesAreTransposed, "False") == 0) {
@@ -2378,3 +2378,4 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
   return 0;
 }
+
