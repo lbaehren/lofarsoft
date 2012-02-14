@@ -224,8 +224,8 @@ else # if [[ $cep2 == 1 ]]
 		      fi
 		   else
 		      # dummy default strings imply positive results
-		      iS_exist=1
-		      cS_exist=1
+		      is_exist=1
+		      cs_exist=1
 		   fi
         fi
 
