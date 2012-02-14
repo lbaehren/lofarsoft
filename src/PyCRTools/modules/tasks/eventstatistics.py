@@ -11,6 +11,7 @@ import pycrtools as cr
 import pycrtools.tasks as tasks
 import os
 import time
+import numpy as np
 
 def GetInformationFromFile(topdir, events):
 
@@ -24,16 +25,17 @@ def GetInformationFromFile(topdir, events):
         antid={0:[],1:[]}
         signal={0:[],1:[]}
         positions={0:[],1:[]}
+        rms = {0:[],1:[]}
 
         res={}
     
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
-
+        overallstatus = False
         for datadir in datadirs:
             if not os.path.isfile(os.path.join(datadir,"results.py")):
                 continue
             resfile=open(os.path.join(datadir,"results.py"))
-            print "Processing data results directory:",datadir
+            #print "Processing data results directory:",datadir
             
             try:
                 execfile(os.path.join(datadir,"results.py"),res)
@@ -46,13 +48,16 @@ def GetInformationFromFile(topdir, events):
                 status = res["status"]
             except:
                 status = "OK assumed" #the status has not be propagated for old files
+            
+            if status == "OK":
+                overallstatus = True
+            
+            antid[res["polarization"]].extend(res["antennas"][key] for key in res["antennas"].keys())
+            positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
 
-                antid[res["polarization"]].extend([int(v) for v in res["antennas"]])
-                positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
-
-                # Comment: Still to check, which pulse definition most suitable for LDF ploting
-                
-                signal[res["polarization"]].extend(res[plot_parameter])
+            
+            #signal[res["polarization"]].extend(res[plot_parameter])
+            rms[res["polarization"]].extend(res["timeseries_power_rms"])
 
                     
         if res == {}:
@@ -80,9 +85,13 @@ def GetInformationFromFile(topdir, events):
                 par["loracore"] = lorcore
             else:
                 print "Warning, Coreposition of LORA seems to contain the wrong number of coordinates"
-                
+        
+        par["status"]=overallstatus        
         par["loradirection"]=cr.hArray(res["pulse_direction_lora"])
         par["loraenergy"]=res["pulse_energy_lora"]
+        par["rms"]=rms
+        par["antid"]=antid
+        par["time"]=timesec
 
     return par
 
@@ -100,7 +109,12 @@ class eventstatistics(tasks.Task):
         eventslist=dict(default=lambda self:self.events if isinstance(self.events,list) else [self.events],doc="list with event names to process (directories in topdir)",unit=""),
         events=dict(default=["VHECR_LORA-20110612T231913.199Z"],doc="Event directories in topdir - either as list or as single string",unit=""), 
         results=dict(default=lambda self:GetInformationFromFile(self.topdir,self.eventslist),doc="Provide task with topdirectory",unit=""),
-        direction_lora=dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees")
+        antennaquery=dict(default=['002000002','005008071']),
+        direction_lora=dict(default=lambda self:self.results["loradirection"],doc="hArray of shower direction [az, el] as provided by Lora. Az is eastwards from north and El is up from horizon.", unit="degrees"),
+        rms = dict(default=lambda self:self.results["rms"]),
+        antid = dict(default=lambda self:self.results["antid"]),
+        time = dict(default=lambda self:self.results["time"]),
+        status = dict(default=lambda self:self.results["status"])
         # to add other quantities
         )
         
@@ -116,10 +130,26 @@ class eventstatistics(tasks.Task):
         Making all sorts of things. 
         
         """
-        print self.eventslist
-        print self.events
-        print " This is where it will start doing statistics"
-        print self.direction_lora
+       
+        
+        rms_0 = self.rms[0]
+        rms_1 = self.rms[1]
+        
+        antid_0 = self.antid[0]
+        antid_1 = self.antid[1]
+        
+        #print "Search:", self.antennaquery
+        #print "In: ", antid_0
+        
+        try:
+            station_0 = antid_0.index(self.antennaquery[0])
+            value = rms_0[station_0]
+        except:
+            value = -10 
+            print "Station not found"   
+        
+        return value, self.time, self.direction_lora, self.status
+        
         
         
         
