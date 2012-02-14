@@ -204,6 +204,29 @@ else # if [[ $cep2 == 1 ]]
            else 
               echo "Using the following locus nodes for processing: cexec -f /etc/c3.conf locus:$locus_list"
            fi
+           
+           if [[ $IS2 == 1 ]]
+           then
+              # find out if there are coherent and/or incoherent beams, to summarize results
+		      IS_exist=`cat $PARSET | egrep "coherent = F|coherent = f"`
+		      if [[ $IS_exist != "" ]]
+		      then
+		         is_exist=1
+		      else
+		         is_exist=0
+		      fi
+		      CS_exist=`cat $PARSET | egrep "coherent = T|coherent = t"`
+		      if [[ $CS_exist != "" ]]
+		      then
+		         cs_exist=1
+		      else
+		         cs_exist=0
+		      fi
+		   else
+		      # dummy default strings imply positive results
+		      iS_exist=1
+		      cS_exist=1
+		   fi
         fi
 
         # CS stokes processing
@@ -217,15 +240,19 @@ else # if [[ $cep2 == 1 ]]
            else
               echo '#cexec -f /etc/c3.conf locus:'${locus_list}' "cd /data/LOFAR_PULSAR_ARCHIVE_locus*/; '$line' -del"'  >> $outfile.$obsid.CS.sh
            fi
-           echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*CS*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
-           echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/TA_heatmap.sh .; ./TA_heatmap.sh; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png map_status.png; convert -append *TA_heatmap_log.png  *TA_heatmap_linear.png heat_status.png; convert */*/*_diag.png -append -background white -flatten diag_status.png; mv diag_status.png status.png; mv heat_status.png status.png; mv map_status.png status.png; convert -scale 200x140-0-0 status.png status.th.png"'  >> $outfile.$obsid.CS.sh
-           echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset -name \*.par -name \*pdmp\* \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
-
-           echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/'${obsid}'_CSplots ;  mv '${obsid}'_CSplots /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/"' >> $outfile.$obsid.CS.sh
-
-           if [[ $IS2 == 1 ]]
+           
+           if (( $IS2 == 0 )) || (( (( $IS2 == 1 )) && (( $cs_exist == 1 )) ))
            then
-              echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_redIS;  mkdir -p '${obsid}'_redIS ; cd '${obsid}'_redIS ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*IS*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
+              echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_CSplots;  mkdir -p '${obsid}'_CSplots ; cd '${obsid}'_CSplots ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*CS*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
+              echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/; thumbnail_combine.sh; lofar_status_map.py; cp /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/TA_heatmap.sh .; ./TA_heatmap.sh; convert -append *_core_status.png  *_remote_status.png  *_intl_status.png map_status.png; convert -append *TA_heatmap_log.png  *TA_heatmap_linear.png heat_status.png; convert */*/*_diag.png -append -background white -flatten diag_status.png; mv diag_status.png status.png; mv heat_status.png status.png; mv map_status.png status.png; convert -scale 200x140-0-0 status.png status.th.png"'  >> $outfile.$obsid.CS.sh
+              echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_CSplots/ ; tar cvzf '${obsid}'_combinedCS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset -name \*.par -name \*pdmp\* \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
+
+              echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/ ; mount_locus_nodes.sh; rm -rf /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/'${obsid}'_CSplots ;  mv '${obsid}'_CSplots /cep2/locus092_data/LOFAR_PULSAR_ARCHIVE_locus092/"' >> $outfile.$obsid.CS.sh
+           fi
+           
+           if (( $IS2 == 1 )) && (( $is_exist == 1 ))
+           then
+              echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/; rm -rf '${obsid}'_redIS;  mkdir -p '${obsid}'_redIS ; cd '${obsid}'_redIS ; mount_locus_nodes.sh;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*log >> '${obsid}'_combined.log  ;  cat /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*stokes/beam_process_node.txt >> beam_process_node.txt ; ls /cep2/locus???_data/LOFAR_PULSAR_ARCHIVE_locus???/'${obsid}'_red/*IS*tar.gz | grep tar | sed -e "s/^/tar xvzf /g" > untar.sh; chmod 777 untar.sh ; ./untar.sh ; rm untar.sh' |  sed -e "s/:0 /:0 \'/" -e "s/rm untar.sh/rm untar.sh\'/"  >> $outfile.$obsid.CS.sh      
               echo 'cexec -f /etc/c3.conf hoover:0 "cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_redIS/; thumbnail_combine.sh; lofar_status_map.py; convert */*/*_diag.png -append -background white -flatten diag_status.png; mv diag_status.png status.png; mv map_status.png status.png; convert -scale 200x140-0-0 status.png status.th.png"'  >> $outfile.$obsid.CS.sh
               echo 'cexec -f /etc/c3.conf hoover:0 cd /data/LOFAR_PULSAR_ARCHIVE_locus101/'${obsid}'_redIS/ ; tar cvzf '${obsid}'_combinedIS_nopfd.tar.gz `find ./ -type f \( -name \*.pdf -o -name \*.ps -o -name \*.inf -o -name \*.rfirep -o -name \*.png -name \*.parset -name \*.par -name \*pdmp\* \)`end' | sed -e "s/:0 /:0 \'/" -e "s/end/\'/" >> $outfile.$obsid.CS.sh
 
@@ -276,4 +303,5 @@ then
    cat $outfile.all.sh
    ./$outfile.all.sh
 fi
+
 
