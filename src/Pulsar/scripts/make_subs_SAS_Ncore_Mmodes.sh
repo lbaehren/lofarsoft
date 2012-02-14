@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.36
+VERSION=3.38
  
 #####################################################################
 # Usage #
@@ -513,6 +513,7 @@ date_seconds=`date -d "$date_obs"  "+%s"`
 date1_Apr26=`date -d "2011-04-26 00:00:00" "+%s"`
 
 #name of some parameters changed on Apr 26, 2011
+IS_BEAM=-1
 if (( $date_seconds >= $date1_Apr26 )) && (( $IS2 == 0 ))
 then
 	INCOHERENTSTOKES=`cat $PARSET | grep -i "Observation.DataProducts.Output_IncoherentStokes.enabled"  | head -1 | awk -F "= " '{print $2}'`
@@ -523,7 +524,6 @@ then
 	COHERENTSTOKES=true
     INCOHERENTSTOKES=false
     # get the IS beam number and store for later move of beam number to incoherentstokes directory
-    IS_BEAM=-1
     IS_exist=""
     IS_exist=`cat $PARSET | egrep "coherent = F|coherent = f"`
     if [[ $IS_exist != "" ]]
@@ -540,24 +540,23 @@ nrBeams=`cat $PARSET | grep "Observation.nrBeams"  | head -1 | awk -F "= " '{pri
 # number of coherent beams/stations
 NBEAMS=`cat $PARSET | grep "OLAP.storageStationNames" | grep -v Control | awk -F '[' '{print $2}' | awk -F ']' '{print $1}'| awk -F\, '{print NF}'`
 ARRAY=`cat $PARSET | grep "Observation.bandFilter" | awk -F "= " '{print $2}' | awk -F "_" '{print $1}'`
+MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{print $2}'`
 if (( $IS2 == 1 ))
 then
   CHAN_IS=`cat $PARSET | grep "OLAP.CNProc_IncoherentStokes.channelsPerSubband" | head -1 | awk -F "= " '{print $2}'`
   CHAN_CS=`cat $PARSET | grep "OLAP.CNProc_CoherentStokes.channelsPerSubband" |  head -1 | awk -F "= " '{print $2}'`
-  #A2 fix CHAN -- setting to CS for now
-  CHAN=$CHAN_CS
 
   DOWN_CS=`cat $PARSET | grep "OLAP.CNProc_CoherentStokes.timeIntegrationFactor" |  head -1 | awk -F "= " '{print $2}'`
   DOWN_IS=`cat $PARSET | grep "OLAP.CNProc_IncoherentStokes.timeIntegrationFactor" |  head -1 | awk -F "= " '{print $2}'`
-  #A2 fix DOWN -- setting to CS for now
-  DOWN=$DOWN_CS
+  
+  SAMPLES_CS=`echo ${MAGIC_NUM}/${DOWN_CS}| bc`
+  SAMPLES_IS=`echo ${MAGIC_NUM}/${DOWN_IS}| bc`
 else
   CHAN=`cat $PARSET | grep "Observation.channelsPerSubband" | awk -F "= " '{print $2}'`
   DOWN=`cat $PARSET | grep "OLAP.Stokes.integrationSteps" | grep -v ObservationControl | awk -F "= " '{print $2}'`
+  SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 fi
 
-MAGIC_NUM=`cat $PARSET | grep "OLAP.CNProc.integrationSteps" | awk -F "= " '{print $2}'`
-SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
 FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{print $2}'`
 
 # these are no longer needed
@@ -756,7 +755,7 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 		   PULSAR_ARRAY_PRIMARY[$beam_counter]=$PULSAR
 		fi
 	    
-	    # get the subbands per beam
+	    # get the subbands per station beam (SAP)
 	    array_nSubbands[$beam_counter]=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
 	    array_SubbandList[$beam_counter]=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}'`
 	
@@ -782,22 +781,34 @@ fi #end if [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 #####################################################################
 echo "ARRAY:" $ARRAY 
 echo "ARRAY:" $ARRAY >> $log
-echo "CHANNELS:" $CHAN 
-echo "CHANNELS:" $CHAN >> $log
-echo "Number of SAMPLES:" $SAMPLES
-echo "Number of SAMPLES:" $SAMPLES >> $log
+if (( $IS2 == 0 ))
+then
+   echo "Number of SAMPLES:" $SAMPLES
+   echo "Number of SAMPLES:" $SAMPLES >> $log
+   echo "CHANNELS:" $CHAN 
+   echo "CHANNELS:" $CHAN >> $log
+   echo "Number of Subbands:" $nSubbands 
+   echo "Number of Subbands:" $nSubbands >> $log
+   echo "Incoherentstokes set to:" $INCOHERENTSTOKES
+   echo "Incoherentstokes set to:" $INCOHERENTSTOKES >> $log
+   echo "Coherentstokes set to:" $COHERENTSTOKES
+   echo "Coherentstokes set to:" $COHERENTSTOKES >> $log
+   echo "FlysEye set to:" $FLYSEYE 
+   echo "FlysEye set to:" $FLYSEYE >> $log
+else
+   echo "Number of SAMPLES IS:" $SAMPLES_IS
+   echo "Number of SAMPLES IS:" $SAMPLES_IS >> $log
+   echo "Number of SAMPLES CS:" $SAMPLES_CS
+   echo "Number of SAMPLES CS:" $SAMPLES_CS >> $log
+   echo "CHANNELS IS:" $CHAN_IS 
+   echo "CHANNELS IS:" $CHAN_IS >> $log
+   echo "CHANNELS CS:" $CHAN_CS 
+   echo "CHANNELS CS:" $CHAN_CS >> $log
+fi
 #echo "Number of Channels per Frame:" $CHANPFRAME
 #echo "Number of Channels per Frame:" $CHANPFRAME >> $log
 #echo "Number of Subbands per Pset:" $SUBSPPSET 
 #echo "Number of Subbands per Pset:" $SUBSPPSET >> $log
-echo "Number of Subbands:" $nSubbands 
-echo "Number of Subbands:" $nSubbands >> $log
-echo "Incoherentstokes set to:" $INCOHERENTSTOKES
-echo "Incoherentstokes set to:" $INCOHERENTSTOKES >> $log
-echo "Coherentstokes set to:" $COHERENTSTOKES
-echo "Coherentstokes set to:" $COHERENTSTOKES >> $log
-echo "FlysEye set to:" $FLYSEYE 
-echo "FlysEye set to:" $FLYSEYE >> $log
 
 echo "Starting Time"
 echo "Starting Time" >> $log
@@ -1420,20 +1431,26 @@ do
 	    elif [[ $subsformat == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 0 ]]
 	    then
 	       converter_exe="bf2presto8"
-	       extra_flags="-f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+#	       extra_flags="-f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+	       extra_flags="-f 0 ${COLLAPSE} -A 10"
 	    elif [[ $subsformat == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $H5_exist == 1 ]]
 	    then
 	       converter_exe="bf2presto8"
-	       extra_flags="-H -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+#	       extra_flags="-H -f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+	       extra_flags="-H -f 0 ${COLLAPSE} -A 10"
 	    else # [[ $subsformat == 1 ]] && [[ $STOKES == "incoherentstokes" ]] 
 	       converter_exe="bf2presto8"
-	       extra_flags="-f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+#	       extra_flags="-f 0 -c ${CHAN} -n ${DOWN} -N ${SAMPLES} ${COLLAPSE} -A 10"
+	       extra_flags="-f 0 ${COLLAPSE} -A 10"
 	    fi
 		echo "Starting $converter_exe conversion with flags=$extra_flags for RSP-splits"
 		echo "Starting $converter_exe conversion with flags=$extra_flags for RSP-splits" >> $log
         
 		date
 		date >> $log
+
+        #set the default beam number to 0
+        beam_number=0
 		
 		if (( $flyseye == 0 ))
 		then
@@ -1445,11 +1462,47 @@ do
                  pulsar_name=${PULSAR_ARRAY_PRIMARY[0]}
               else
                  pulsar_name=${PULSAR_ARRAY_PRIMARY[$ii]}
-                 nSubbands=${array_nSubbands[$ii]}
+                 if (( $IS2 == 1 ))
+                 then
+                    sap_beam_number=`cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                    nSubbands=${array_nSubbands[$sap_beam_number]}
+                 else
+                    nSubbands=$nSubbands
+                 fi
+              fi
+              
+              if (( $IS2 == 1 ))
+              then 
+                 beam_number=`cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+              else
+                 #set the beam number to 0
+                 beam_number=0
               fi
               
 			  if [[ $transpose == 0 ]] 
 			  then
+                 if (( $subsformat == 1 ))
+                 then
+                   if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                   then 
+                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+                   then
+                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+                   else
+                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+                   fi
+                   else
+                      if (( $IS_BEAM == $beam_number ))
+                      then  # treat as IS beam for 2bf2fits
+                         nSubbands=$nSubbands
+                            extra_flags="$extra_flags -nsubs $nSubbands -IS"
+                      else
+                         nSubbands=$nSubbands
+                            extra_flags="$extra_flags -nsubs $nSubbands"
+                      fi   
+                 fi
+
 			     echo ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
 			     ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
@@ -1460,10 +1513,11 @@ do
               then
                  if (( $subsformat == 1 ))
                  then
-                    extra_flags="$extra_flags -t"
+                    extra_flags="$extra_flags -t -n ${DOWN} -N ${SAMPLES} -c ${CHAN}"
                  else
                     extra_flags="$extra_flags -nsubs $nSubbands"
                  fi
+                 echo A2-1
 			     echo ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> $log  
 			     ${converter_exe} ${extra_flags} -o ${STOKES}"/RSP"${ii}"/"${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat ${STOKES}"/RSP"${ii}"/RSP"${ii}".list"` >> ${STOKES}"/RSP"${ii}"/"${converter_exe}"_RSP"${ii}".out" 2>&1 &
 #A2test
@@ -1475,12 +1529,29 @@ do
                     cd ${location}/${STOKES}/RSP$ii/
  echo A2-1 #A2delete
 
+                    beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 	                if (( $subsformat == 1 ))
 	                then
-	                   extra_flags="$extra_flags -M -T ${nSubbands}"
+                       if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                       then 
+	                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+	                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+	                   then
+	                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+	                   else
+	                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+	                   fi
                     else
-                       extra_flags="$extra_flags -nsubs $nSubbands"
+                       if (( $IS_BEAM == $beam_number ))
+                       then  # treat as IS beam for 2bf2fits
+                          nSubbands=$nSubbands
+                             extra_flags="$extra_flags -nsubs $nSubbands -IS"
+                       else
+                          nSubbands=$nSubbands
+                             extra_flags="$extra_flags -nsubs $nSubbands"
+                       fi   
 	                fi
+                 echo A2-2
 
 			        echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
 			        ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
@@ -1496,22 +1567,34 @@ do
 			            ## -- not sure about this line:    ${STOKES}/"RSP"${ii}/${jjj}
                         cd ${location}/${STOKES}/RSP$ii/${jjj}
 
+		                beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 		                if (( $subsformat == 1 ))
 		                then
-		                   extra_flags="$extra_flags -M -T ${nSubbands}"
+	                       if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+	                       then
+		                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+		                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+		                   then
+		                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+		                   else
+		                      extra_flags="$extra_flags -M -T ${nSubbands} -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+		                   fi
                         else
 	                       if (( $IS2 == 1 ))
 	                       then
-	                          if (( ${PARSET_TAB_CS[ii]} == 0 ))
-	                          then  # treat as IS beam for 2bf2fits
-	                             extra_flags="$extra_flags -nsubs $nSubbands -IS"
-	                          else
-	                             extra_flags="$extra_flags -nsubs $nSubbands"
-	                          fi
+		                       if (( $IS_BEAM == $beam_number ))
+		                       then  # treat as IS beam for 2bf2fits
+		                          nSubbands=$nSubbands
+	                              extra_flags="$extra_flags -nsubs $nSubbands -IS"
+		                       else
+		                          nSubbands=$nSubbands
+	                              extra_flags="$extra_flags -nsubs $nSubbands"
+		                       fi   
 	                       else
 	                          extra_flags="$extra_flags -nsubs $nSubbands"
 	                       fi
 		                fi
+                 echo A2-3
 
 			            echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
 			            ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
@@ -1525,7 +1608,7 @@ do
 		else # if (( $flyseye != 0 ))
 			for ii in $num_dir
 			do	
- echo A2-3 #A2delete
+ echo A2-4 #A2delete
 
 			    # note, should be in STOKES/RSP? directory because output gets "beam_N" PREFIX
 			    cd ${location}/${STOKES}/"RSP"${ii}
@@ -1533,21 +1616,45 @@ do
                 if [[ $nrBeams == 1 ]]
                 then 
                    pulsar_name=${PULSAR_ARRAY_PRIMARY[0]}
+                   nSubbands=$nSubbands
                 else
                    pulsar_name=${PULSAR_ARRAY_PRIMARY[$ii]}
-                   nSubbands=${array_nSubbands[$ii]}
+                   if (( $IS2 == 1 ))
+                   then 
+                      sap_beam_number=`cat "RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                      nSubbands=${array_nSubbands[$sap_beam_number]}
+                   else
+                      nSubbands=$nSubbands
+                   fi
                 fi
 	
 #		 	    echo 'Converting subbands: '`cat RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 
 		 	    if [[ $transpose == 0 ]] 
 			    then
 
+                   beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 	               if (( $subsformat == 1 ))
 	               then
-	                  extra_flags="$extra_flags -b ${NBEAMS}"
+                       if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                       then  
+                       	  extra_flags="$extra_flags -b ${NBEAMS} -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+                       elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+                       then
+                       	  extra_flags="$extra_flags -b ${NBEAMS} -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+                       else
+                       	  extra_flags="$extra_flags -b ${NBEAMS} -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+                       fi
                    else
-                       extra_flags="$extra_flags -nsubs $nSubbands"
+                       if (( $IS_BEAM == $beam_number ))
+                       then  # treat as IS beam for 2bf2fits
+                          nSubbands=$nSubbands
+                          extra_flags="$extra_flags -nsubs $nSubbands -IS"
+                       else
+                          nSubbands=$nSubbands
+                          extra_flags="$extra_flags -nsubs $nSubbands"
+                       fi   
 	               fi
+                 echo A2-5
 
 			       echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
 			       ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
@@ -1555,12 +1662,29 @@ do
 			    elif [[ $transpose == 1 ]] && [[ $STOKES == "incoherentstokes" ]]
                 then
 
+                   beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 	               if (( $subsformat == 1 ))
 	               then
-	                  extra_flags="$extra_flags -t -b ${NBEAMS}"
+                       if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                       then 
+	                      extra_flags="$extra_flags -t -b ${NBEAMS} -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+	                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+	                   then
+	                      extra_flags="$extra_flags -t -b ${NBEAMS} -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+	                   else
+	                      extra_flags="$extra_flags -t -b ${NBEAMS} -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+	                   fi
                    else
-                      extra_flags="$extra_flags -nsubs $nSubbands"
+                       if (( $IS_BEAM == $beam_number ))
+                       then  # treat as IS beam for 2bf2fits
+                          nSubbands=$nSubbands
+                          extra_flags="$extra_flags -nsubs $nSubbands -IS"
+                       else
+                          nSubbands=$nSubbands
+                          extra_flags="$extra_flags -nsubs $nSubbands"
+                       fi   
 	               fi
+                 echo A2-6
 
 			       echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
 			       ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
@@ -1570,12 +1694,29 @@ do
                    then
 
  echo A2-4 #A2delete
+	                   beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 		               if (( $subsformat == 1 ))
 		               then
-		                  extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
+	                      if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+	                      then
+		                     extra_flags="$extra_flags -T ${nSubbands} -M -b 1 -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+		                  elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+		                  then
+		                     extra_flags="$extra_flags -T ${nSubbands} -M -b 1 -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+		                  else
+		                     extra_flags="$extra_flags -T ${nSubbands} -M -b 1 -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+		                  fi
                        else
-                          extra_flags="$extra_flags -nsubs $nSubbands"
+	                       if (( $IS_BEAM == $beam_number ))
+	                       then  # treat as IS beam for 2bf2fits
+	                          nSubbands=$nSubbands
+	                          extra_flags="$extra_flags -nsubs $nSubbands -IS"
+	                       else
+	                          nSubbands=$nSubbands
+	                          extra_flags="$extra_flags -nsubs $nSubbands"
+	                       fi   
 		               fi
+                 echo A2-7
 
 				       echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
 				       ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
@@ -1589,23 +1730,32 @@ do
  echo A2-5 #A2delete
 	                        cd ${location}/${STOKES}/RSP$ii/${jjj}
 
+			                beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
 			                if (( $subsformat == 1 ))
 			                then
-			                   extra_flags="$extra_flags -T ${nSubbands} -M -b 1"
+			                   if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+			                   then  
+			                      extra_flags="$extra_flags -T ${nSubbands} -M -b 1 -N ${SAMPLES_IS} -c ${CHAN_IS} -n ${DOWN_IS}"
+			                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+			                   then
+			                      extra_flags="$extra_flags -T ${nSubbands} -M -b 1 -N ${SAMPLES_CS} -c ${CHAN_CS} -n ${DOWN_CS}"
+			                   else
+			                      extra_flags="$extra_flags -T ${nSubbands} -M -b 1 -N ${SAMPLES} -c ${CHAN} -n ${DOWN}"
+			                   fi
                             else
 		                       if (( $IS2 == 1 ))
 		                       then
-		                          if (( ${PARSET_TAB_CS[ii]} == 0 ))
-		                          then  # treat as IS beam for 2bf2fits
-		                             extra_flags="$extra_flags -nsubs $nSubbands -IS"
-		                          else
-		                             extra_flags="$extra_flags -nsubs $nSubbands"
-		                          fi
-		                       else
-		                          extra_flags="$extra_flags -nsubs $nSubbands"
-		                       fi
-
+			                       if (( $IS_BEAM == $beam_number ))
+			                       then  # treat as IS beam for 2bf2fits
+			                          nSubbands=$nSubbands
+			                          extra_flags="$extra_flags -nsubs $nSubbands -IS"
+			                       else
+			                          nSubbands=$nSubbands
+			                          extra_flags="$extra_flags -nsubs $nSubbands"
+			                       fi  
+			                    fi 
 			                fi
+                 echo A2-8
 
 				            echo ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> $log  
 				            ${converter_exe} ${extra_flags} -o ${pulsar_name}"_"${OBSID}"_RSP"${ii} `cat "RSP"${ii}".list"` >> ${converter_exe}"_RSP"${ii}".out" 2>&1 &
@@ -1679,9 +1829,15 @@ do
 	    elif [[ $transpose == 1 ]] && [[ $STOKES == "stokes" ]] && [[ $nrBeams == 1 ]] && [[ $subsformat == 0 ]] && [[ $flyseye == 1 ]] && [[ $TiedArray == 0 ]]
 	    then
 	       # create beam_0 directory so that the psrfits logic can follow multi-beam logic for FE mode
-	       cd ${location}/${STOKES}/RSP0/
-	       mkdir beam_0
-	       mv * beam_0/
+		   for ii in $num_dir
+		   do
+		       cd ${location}/${STOKES}/RSP${ii}/
+		       if [[ ! -d beam_0 ]]
+		       then 
+		          mkdir beam_0
+		          mv * beam_0/
+		       fi
+	       done
 	    fi
 
        # clean up dummy files
@@ -1741,7 +1897,25 @@ do
 		then
 			for ii in $num_dir
 			do
-                nSubbands=${array_nSubbands[$ii]}
+                if (( $IS2 == 1 ))
+                then
+                   sap_beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                   nSubbands=${array_nSubbands[$sap_beam_number]}
+
+			       beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                   if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                   then  
+                      CHAN=${CHAN_IS}
+                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+                   then
+                      CHAN=${CHAN_CS}
+                   else
+                      CHAN=${CHAN}
+                   fi
+                else
+                   nSubbands=${array_nSubbands[$ii]}
+                fi
+
 			    cd ${location}/${STOKES}/RSP${ii}
 			    if (( $subsformat == 1 ))
 			    then
@@ -1787,7 +1961,24 @@ do
 		    counter=0
 		    for jjj in $loop_beams
 		    do
-                nSubbands=${array_nSubbands[$counter]}
+                if (( $IS2 == 1 ))
+                then
+                   sap_beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/beam_"${counter}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                   nSubbands=${array_nSubbands[$sap_beam_number]}
+			       beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/beam_"${counter}"/RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                   if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                   then  
+                      CHAN=${CHAN_IS}
+                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+                   then
+                      CHAN=${CHAN_CS}
+                   else
+                      CHAN=${CHAN}
+                   fi
+                else
+                   nSubbands=${array_nSubbands[$counter]}
+                fi
+
 		        for ii in $num_dir
 		        do
 				    cd ${location}/${STOKES}/RSP${ii}/${jjj}
@@ -1846,6 +2037,20 @@ do
 		      then
 		         echo cd ${location}/${STOKES}/RSP${ii} >> $log
 		         cd ${location}/${STOKES}/RSP${ii}
+	             beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                 if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                 then  
+                    CHAN=${CHAN_IS}
+                    SAMPLES=${SAMPLES_IS}
+                 elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+                 then
+                    CHAN=${CHAN_CS}
+                    SAMPLES=${SAMPLES_CS}
+                 else
+                    CHAN=${CHAN}
+                    SAMPLES=${SAMPLES}
+                 fi
+
 		         if (( $subsformat == 1 ))
 		         then
 		            echo python ${LOFARSOFT}/release/share/pulsar/bin/subdyn.py --saveonly -n `echo ${SAMPLES}*10 | bc` *.sub[0-9]???  >> $log
@@ -1883,6 +2088,19 @@ do
 			         else
 			            echo cd ${location}/${STOKES}/${jjj}/beam_${ii}/ >> $log
 			            cd ${location}/${STOKES}/${jjj}/beam_${ii}/
+	                 fi
+		             beam_number=`cat *.list | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+	                 if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+	                 then  
+	                    CHAN=${CHAN_IS}
+	                    SAMPLES=${SAMPLES_IS}
+	                 elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+	                 then
+	                    CHAN=${CHAN_CS}
+	                    SAMPLES=${SAMPLES_CS}
+	                 else
+	                    CHAN=${CHAN}
+	                    SAMPLES=${SAMPLES}
 	                 fi
 	                 
 		             if (( $subsformat == 1 ))
@@ -1980,7 +2198,14 @@ do
 		        beam_counter=0
 				while (( $beam_counter < $nrBeams ))
 				do
-                    nSubbands=${array_nSubbands[$beam_counter]}
+	                if (( $IS2 == 1 ))
+	                then
+	                   sap_beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+	                   nSubbands=${array_nSubbands[$sap_beam_number]}
+	                else
+	                   nSubbands=${array_nSubbands[$beam_counter]}
+	                fi
+
 					echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf >> $log
 					cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf default.inf
 					#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
@@ -2071,7 +2296,14 @@ do
 	        then
 				for ii in $num_dir
 				do	        
-                    nSubbands=${array_nSubbands[$ii]}
+	                if (( $IS2 == 1 ))
+	                then
+	                   sap_beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+	                   nSubbands=${array_nSubbands[$sap_beam_number]}
+	                else
+	                   nSubbands=${array_nSubbands[$ii]}
+	                fi
+
 					echo cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf >> $log
 					cp ${LOFARSOFT}/release/share/pulsar/data/lofar_default.inf ${location}/${STOKES}/default.inf
 					#python ${LOFARSOFT}/release/share/pulsar/bin/par2inf.py -S ${PULSAR} -o test -N ${NSAMPL} -n `echo $all_num 248 | awk '{print $1 / $2}'` -r $core ./${OBSID}.parset
@@ -2237,8 +2469,18 @@ do
 
     if (( $subsformat == 0 ))
     then
-         # note, this is an approximation -- taking the subbands from the first beam
+         # note, this is an approximation -- taking the subbands and channels from the first beam within this processing round
          nSubbands=${array_nSubbands[0]}
+         if (( $IS2 == 1 )) && (( $IS_BEAM == 0 ))
+         then  
+            CHAN=${CHAN_IS}
+         elif (( $IS2 == 1 )) && (( $IS_BEAM != 0 ))
+         then
+            CHAN=${CHAN_CS}
+         else
+            CHAN=${CHAN}
+         fi
+
          total_channels=`echo "$nSubbands * $CHAN" | bc`
          if (( $total_channels >= 256 )) && (( $total_channels <= 6000 ))
          then 
@@ -2274,6 +2516,16 @@ do
 	then	
         # note, this is an approximation -- taking the subbands from the first beam
         nSubbands=${array_nSubbands[0]}
+        if (( $IS2 == 1 )) && (( $IS_BEAM == 0 ))
+        then  
+           CHAN=${CHAN_IS}
+        elif (( $IS2 == 1 )) && (( $IS_BEAM != 0 ))
+        then
+           CHAN=${CHAN_CS}
+        else
+           CHAN=${CHAN}
+        fi
+
 	    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
 	    # find the max divisor for the subbands if nSubbands % $CHAN != 0
 		ii=$CHAN
@@ -2294,6 +2546,7 @@ do
         echo "Successfully found $ii to use for pav -f"
 		pav_f=$ii
 
+        ii=0
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
 		then 
@@ -2322,7 +2575,23 @@ do
 				    then
 						for ii in $num_dir
 					    do
-                           nSubbands=${array_nSubbands[ii]}
+				           if (( $IS2 == 1 ))
+				           then
+				              sap_beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+				              nSubbands=${array_nSubbands[$sap_beam_number]}
+						      beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+			                  if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+			                  then  
+			                     CHAN=${CHAN_IS}
+			                  elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+			                  then
+			                     CHAN=${CHAN_CS}
+			                  else
+			                     CHAN=${CHAN}
+			                  fi
+				           else
+				              nSubbands=${array_nSubbands[$ii]}
+				           fi
 
 						   cd ${location}/${STOKES}/RSP${ii}
 						   cp ${location}/$fold_pulsar_cut.par .
@@ -2406,12 +2675,30 @@ do
 					    counter=0
 					    for jjj in $loop_beams
 					    do
-                            nSubbands=${array_nSubbands[counter]}
 							for ii in $num_dir
 						    do
-							   cd ${location}/${STOKES}/RSP${ii}/${jjj}
-							   cp ${location}/$fold_pulsar_cut.par .
-							   echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
+							    cd ${location}/${STOKES}/RSP${ii}/${jjj}
+							    cp ${location}/$fold_pulsar_cut.par .
+							    echo cd ${location}/${STOKES}/RSP${ii}/${jjj} >> $log
+
+					            if (( $IS2 == 1 ))
+					            then
+					               sap_beam_number=`cat "RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+					               nSubbands=${array_nSubbands[$sap_beam_number]}
+							       beam_number=`cat "RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+				                   if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+				                   then  
+				                      CHAN=${CHAN_IS}
+				                   elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+				                   then
+				                      CHAN=${CHAN_CS}
+				                   else
+				                      CHAN=${CHAN}
+				                   fi
+					            else
+					               nSubbands=${array_nSubbands[$counter]}
+					            fi
+
 
 							   if (( $subsformat == 1 ))
 							   then
@@ -2540,6 +2827,17 @@ do
 		else # nrBeams > 1
 			for ii in $num_dir
 		    do
+                beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+                if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
+                then  
+                   CHAN=${CHAN_IS}
+                elif (( $IS2 == 1 )) && (( $IS_BEAM != $beam_number ))
+                then
+                   CHAN=${CHAN_CS}
+                else
+                   CHAN=${CHAN}
+                fi
+
                 PULSAR_LIST=${PULSAR_ARRAY[$ii]}
 				for fold_pulsar in $PULSAR_LIST
 				do
@@ -3215,23 +3513,30 @@ do
     fi
 
     # IS 2nd transpose, move the IS beam to the incoherentstokes directory
-    if (( $IS2 == 1 ))
+    if (( $IS2 == 1 )) && (( $IS_BEAM > -1 ))
     then
- echo A2-9 #A2delete
-
-       cd ${location}
-       if [[ ! -d incoherentstokes ]]
+       if [[ -d stokes/RSP$IS_BEAM ]]
        then
-          mkdir incoherentstokes
-       fi
-       mv stokes/RSP$IS_BEAM incoherentstokes/
-       cp stokes/* incoherentstokes
-       # lower the number of TA beams by one, since one is an IS beam
-       nrTiedArrayBeams=`echo $nrTiedArrayBeams - 1 | bc`
-       if (( $nrTiedArrayBeams == 0 ))
-       then
-          nrTArings=0
-       fi
+	       cd ${location}
+	       if [[ ! -d incoherentstokes ]]
+	       then
+	          mkdir incoherentstokes
+	       fi
+	       echo "Moving IS beam (RSP$IS_BEAM) to incoherentstokes directory"
+	       echo "Moving IS beam (RSP$IS_BEAM) to incoherentstokes directory" >> $log
+	
+	       echo mv stokes/RSP$IS_BEAM incoherentstokes/
+	       echo mv stokes/RSP$IS_BEAM incoherentstokes/  >> $log
+	       mv stokes/RSP$IS_BEAM incoherentstokes/
+	       echo "cp stokes/* incoherentstokes" >> $log
+	       cp stokes/* incoherentstokes
+	       # lower the number of TA beams by one, since one is an IS beam
+	       nrTiedArrayBeams=`echo $nrTiedArrayBeams - 1 | bc`
+	       if (( $nrTiedArrayBeams == 0 ))
+	       then
+	          nrTArings=0
+	       fi
+	    fi
     fi
 
 	#create a delete list of subband files for future clean up
@@ -3324,6 +3629,16 @@ then
 #	    fi
 #    fi
 
+	cd ${location}
+
+    # if there are no stokes/RSP* directories, then clean up, assume no CS beams done in this round
+    found_cs=`find ./stokes -type d -name "RSP*" -print`
+    found_is=`find ./incoherentstokes -type d -name "RSP*" -print`
+    if [[ $found_cs == "" ]]
+    then 
+       rm -rf stokes
+    fi
+
 	#Make a combined png of all the th.png files
 	echo "Combining all th.png files into one"
 	echo "Combining all th.png files into one" >> $log
@@ -3334,8 +3649,6 @@ then
 	echo "running:  thumbnail_combine.sh $log" >> $log
 	thumbnail_combine.sh $log
 		
-	cd ${location}
-
 	#Make a tarball of all the plots
 	echo "Creating tar file of plots"
 	echo "Creating tar file of plots" >> $log
@@ -3350,12 +3663,18 @@ then
 	   ln -s ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz
 	   ln -s ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plots.tar.gz ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz
 	else
-	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search | grep -v "/stokes/"`
-	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz  $tar_list" >> $log
-	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz $tar_list
-	   tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" -o -name "*diag.png" \) | grep -v search | grep -v "/incoherentstokes/"`
-	   echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz  $tar_list" >> $log
-	   tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz $tar_list
+	   if [[ $found_is != "" ]]
+	   then
+	      tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" \) | grep -v search | grep -v "/stokes/"`
+	      echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz  $tar_list" >> $log
+	      tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsIS.tar.gz $tar_list
+	   fi
+	   if [[ $found_cs != "" ]]
+	   then
+	      tar_list=`find ./ -type f \( -name "*.pdf" -o -name "*.ps" -o -name "*.pfd" -o -name "*.inf" -o -name "*.rfirep" -o -name "*png" -o -name "*out" -o -name "*parset" -o -name "*.par" -o -name "*.ar" -o -name "*.AR" -o -name "*pdmp*" -o -name "*diag.png" \) | grep -v search | grep -v "/incoherentstokes/"`
+	      echo "tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz  $tar_list" >> $log
+	      tar cvzf ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_plotsCS.tar.gz $tar_list
+	   fi
 	fi
 	
 	#echo gzip ${PULSAR}_${OBSID}_plots.tar >> $log
@@ -3390,3 +3709,4 @@ else  # end if [[ $proc != 0 ]]
 fi
 
 exit 0
+
