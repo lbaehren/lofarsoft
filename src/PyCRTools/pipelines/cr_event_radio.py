@@ -533,7 +533,7 @@ for full_filename in files:
                 root_filename=outfilename,
                 lofarmode=lofarmode,
                 antennas_start=current_polarization,
-                antennas_stride=2,maxpeak=7000,meanfactor=3,peak_rmsfactor=5,rmsfactor=2,spikeexcess=500,
+                antennas_stride=2,maxpeak=7000,meanfactor=3,peak_rmsfactor=5,rmsfactor=20,spikeexcess=5000,
                 blocklen=4096, # only used for quality checking within one block
         #        delta_nu=3000, # -> blocksize=2**16
                 quality_db_filename="",
@@ -785,9 +785,9 @@ for full_filename in files:
             checksums.append('Checksum after reading in timeseries data: ' + checksum)
             print checksums[-1]
 
-        for i in bad_antennas_index:
-            print "FLAGGING ANTENNA", i
-            timeseries_data[i] = 0
+        #for i in bad_antennas_index:
+        #    print "FLAGGING ANTENNA", i
+        #    timeseries_data[i] = 0
 
         timeseries_data.setUnit("","ADC Counts")
         timeseries_data.par.xvalues=datafile["TIME_DATA"]
@@ -844,7 +844,7 @@ for full_filename in files:
         ########################################################################
         #RFI excision
         ########################################################################
-#HACK        fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
+        fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
 
         ########################################################################
         #Gain calibration of data
@@ -853,7 +853,7 @@ for full_filename in files:
         calcbaseline_galactic=trerun("CalcBaseline","galactic",averagespectrum_good_antennas,pardict=par,invert=True,normalize=False,powerlaw=0.5,doplot=Pause.doplot)
         #import pdb; pdb.set_trace()
         # and apply
-#HACK        fft_data.mul(calcbaseline_galactic.baseline)
+        fft_data.mul(calcbaseline_galactic.baseline)
 
         #Plotting just for quality control
         power=hArray(float,properties=fft_data)
@@ -1057,7 +1057,7 @@ for full_filename in files:
         good_pulse_cabledelays=delays[antennas_with_strong_pulses] # i.e. put in zeros (!)
 
         # testing direct plane-wave direction fit
-        directionPlaneWave = trerun("DirectionFitPlaneWave", "directionPlaneWave", pardict=par, positions=good_pulse_antenna_positions, timelags = good_pulse_lags, verbose=True, doplot=True)
+#        directionPlaneWave = trerun("DirectionFitPlaneWave", "directionPlaneWave", pardict=par, positions=good_pulse_antenna_positions, timelags = good_pulse_lags, verbose=True, doplot=True)
         directionPlaneWave = trerun("DirectionFitPlaneWave", "directionPlaneWave", pardict=par, positions=good_pulse_antenna_positions, timelags = good_pulse_lags, verbose=True, doplot=True)
 
         print "========================================================================"
@@ -1122,7 +1122,16 @@ for full_filename in files:
         else:
             print "#Delay flagging - all delays seem OK."
         final_cable_delays=final_residual_delays # +cabledelays
-        final_residual_delays_planewave = directionPlaneWave.residual_delays # chck dimensions
+        
+        # WRONG final_residual_delays_planewave = directionPlaneWave.residual_delays # chck dimensions
+        final_residual_delays_planewave = hArray(float, [ndipoles], fill=-9999.0)
+        final_residual_delays_planewave[antennas_with_strong_pulses,...]=directionPlaneWave.residual_delays[...]
+        print 'Triangle # ants: %d' % len(direction.residual_delays)
+        print 'Planewave # ants %d' % len(directionPlaneWave.residual_delays)
+        if len(directionPlaneWave.residual_delays) != len(direction.residual_delays):
+            print '*** ERROR: length of antenna arrays mismatches!'
+            finish_file(laststatus = "ARRAY LENGTH MISMATCH!!")
+            continue
         # include average cable delays (as in cable delay database) in time lags per pulse
         time_lags = hArray(time_lags)
 #        time_lags -= cabledelays
