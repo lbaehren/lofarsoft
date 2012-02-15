@@ -58,7 +58,7 @@ def GetInformationFromFile(topdir, events):
             
             #signal[res["polarization"]].extend(res[plot_parameter])
             rms[res["polarization"]].extend(res["timeseries_power_rms"])
-            spectral_power[res["polarization"]].append(res["station_spectral_power"])
+            spectral_power[res["polarization"]].extend(res["antennas_spectral_power"])
                     
         if res == {}:
             print "No results file found"
@@ -135,9 +135,13 @@ class eventstatistics(tasks.Task):
         
         rms_0 = self.rms[0]
         rms_1 = self.rms[1]
+       
         
         antid_0 = self.antid[0]
         antid_1 = self.antid[1]
+        
+        spectral_power_0 = self.spectral_power[0]
+        spectral_power_1 = self.spectral_power[1]
         
         #print "Search:", self.antennaquery
         #print "In: ", antid_0
@@ -145,11 +149,14 @@ class eventstatistics(tasks.Task):
         try:
             station_0 = antid_0.index(self.antennaquery[0])
             value = rms_0[station_0]
+            power = spectral_power_0[station_0]
+            
         except:
-            value = -10 
+            value = -100 
+            power = -100
             print "Station not found"   
         
-        return value, self.time, self.direction_lora, self.status, self.spectral_power
+        return value, self.time, self.direction_lora, self.status, power
         
         
         
