@@ -50,14 +50,21 @@ class PipelineDatabase:
         else:
             self.results_path = self.base_path + "/results"
 
+        # Status dictionary
+        self.status = {}
+
         # Create database structure
         self.__createTables()
+
+        self.readStatus()
+
+        print self.status
 
 
     def __createTables(self):
         """Create the pipeline database tables if they not already exist."""
         # Check Event table
-        sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY NOT NULL UNIQUE, status TEXT, timestamp TEXT, resultspath TEXT);"
+        sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY NOT NULL UNIQUE, status TEXT, quality TEXT, timestamp TEXT, resultspath TEXT);"
         self._db.execute(sql)
 
         # Check EventProperties table
@@ -92,9 +99,19 @@ class PipelineDatabase:
         sql = "CREATE TABLE IF NOT EXISTS main.station_polarisation (stationID INTEGER NOT NULL, polarisationID INTEGER NOT NULL)"
         self._db.execute(sql)
 
+        # Status table
+        sql = """
+        CREATE TABLE IF NOT EXISTS main.status (statusID INTEGER UNIQUE, status TEXT NOT NULL);
+        INSERT OR IGNORE INTO main.status (statusID, status) VALUES (-1, 'UNPROCESSED');
+        INSERT OR IGNORE INTO main.status (statusID, status) VALUES (0, 'UNKNOWN');
+        INSERT OR IGNORE INTO main.status (statusID, status) VALUES (1, 'PROCESSED');
+        """
+        self._db.executescript(sql)
+
         # Check Filter table
         sql = "CREATE TABLE IF NOT EXISTS main.filters (name TEXT, filter TEXT NOT NULL UNIQUE);"
         self._db.execute(sql)
+
 
 
     def __reset(self):
@@ -118,6 +135,14 @@ class PipelineDatabase:
         # Create all tables.
         self.__createTables()
 
+
+
+    def readStatus(self):
+        sql = "SELECT statusID, status FROM main.status"
+        records = self._db.select(sql)
+        for record in records:
+            print "record[0]={0}, record[1]={1}".format(record[0], record[1])
+            self.status[record[1]]=record[0]
 
 
     def hasEvent(self, id=0):
@@ -748,6 +773,100 @@ class PipelineDatabase:
 
 
         print "="*linewidth
+
+
+
+class PipelineDatabase2:
+    """Functionality to let the VHECR pipeline communicate with an SQL database."""
+
+    def __init__(self, filename=":memory:", datapath="", resultpath=""):
+        # TODO: PipelineDatabase2.__init__() - Add implementation
+
+        raise NotImplementedError("Function needs to be implemented.")
+
+
+    def __createTables(self):
+        """Create the pipeline database tables if they not already exist."""
+        # Event table
+        sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, statusID INTEGER)"
+        self._db.execute(sql)
+
+        # Event properties table
+        sql = "CREATE TABLE IF NOT EXISTS main.eventproperties (propertyID INTEGER, eventID INTEGER, key TEXT, value TEXT)"
+        self._db.execute(sql)
+
+        # Datafile table
+        sql = "CREATE TABLE IF NOT EXISTS main.datafile (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, statusID INTEGER)"
+        self._db.execute(sql)
+
+        # Stations table
+        sql = "CREATE TABLE IF NOT EXISTS main.stations (stationID INTEGER PRIMARY KEY, stationName TEXT, statusID INTEGER)"
+        self._db.execute(sql)
+
+        # Polarisations table
+        sql = "CREATE TABLE IF NOT EXISTS main.polarisations (polarisationID INTEGER PRIMARY KEY, pol_type INTEGER, pol_dir INTEGER, statusID INTEGER, resultpath TEXT)"
+        self._db.execute(sql)
+
+        # Polarisation properties table
+        sql = "CREATE TABLE IF NOT EXISTS main.polarisationproperties (propertyID INTEGER PRIMARY KEY, polarisationID, key TEXT, value TEXT)"
+        self._db.execute(sql)
+
+        # event_datafile table (linking events to datafiles)
+        sql = "CREATE TABLE IF NOT EXISTS main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE)"
+        self._db.execute(sql)
+
+        # datafile_station table (linking datafiles to stations)
+        sql = "CREATE TABLE IF NOT EXISTS main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE)"
+        self._db.execute(sql)
+
+        # station_polarisation table (linking stations to polarisations)
+        sql = "CREATE TABLE IF NOT EXISTS main.station_polarisation (stationID INTEGER NOT NULL, polarisationID INTEGER NOT NULL UNIQUE)"
+        self._db.execute(sql)
+
+        # Status table
+        sql = """
+        CREATE TABLE IF NOT EXISTS main.status (statusID INTEGER UNIQUE, status TEXT NOT NULL);
+        INSERT OR IGNORE INTO main.status (statusID, status) VALUES (-1, 'UNPROCESSED');
+        INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 0, 'UNKNOWN');
+        INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 1, 'PROCESSED');
+        """
+        self._db.executescript(sql)
+
+        # TODO: PipelineDatabase2.__createTables() - Add implementation
+
+        raise NotImplementedError("Function needs to be implemented.")
+
+
+    def __reset(self):
+        """Reset all tables and create a clean table structure."""
+        # Remove all tables.
+        self._db.execute("DROP TABLE IF EXISTS main.events")
+        self._db.execute("DROP TABLE IF EXISTS main.eventproperties")
+        self._db.execute("DROP TABLE IF EXISTS main.datafiles")
+        self._db.execute("DROP TABLE IF EXISTS main.stations")
+        self._db.execute("DROP TABLE IF EXISTS main.polarisations")
+        self._db.execute("DROP TABLE IF EXISTS main.polarisationproperties")
+        self._db.execute("DROP TABLE IF EXISTS main.event_datafile")
+        self._db.execute("DROP TABLE IF EXISTS main.datafile_station")
+        self._db.execute("DROP TABLE IF EXISTS main.station_polarisation")
+        self._db.execute("DROP TABLE IF EXISTS main.filters")
+        self._db.execute("DROP TABLE IF EXISTS main.status")
+
+        # Database needs to be closed to properly drop the tables before creating them again.
+        self._db.close()
+        self._db.open()
+
+        # Create all tables.
+        self.__createTables()
+
+
+    def readStatus(self):
+        """Fill the status dictionary with valid status values from the database."""
+        sql = "SELECT statusID, status FROM main.status"
+        records = self._db.select(sql)
+        for record in records:
+            print "statusID={0}, status={1}".format(record[0], record[1])
+            self.status[record[1]] = record[0]
 
 
 
