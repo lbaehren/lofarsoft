@@ -41,7 +41,7 @@ Example::
 
 
 
-#import pdb; pdb.set_trace()
+import pdb;# pdb.set_trace()
 
 import pycrtools as cr
 #from pycrtools import *
@@ -51,6 +51,7 @@ from pycrtools import qualitycheck
 import time
 import pytmf
 import math
+import os
 
 #from pycrtools import IO
 """
@@ -261,7 +262,7 @@ class BeamFormer(tasks.Task):
                            doc="Root filename for temporary data files.",
                            export=False),
 
-        filenames = dict(default=lambda self:listFiles(self.filefilter),
+        filenames = dict(default=lambda self:cr.listFiles(self.filefilter),
                          doc="List of filenames of data file to read raw data from."),
 
         output_dir = dict(default="",
@@ -372,7 +373,7 @@ class BeamFormer(tasks.Task):
                            "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
                            output=True),
 
-        antennaIDs = sc.p_(lambda self:ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
+        antennaIDs = sc.p_(lambda self:cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
                         "Antenna IDs to be selected from for current file."),
 
         nantennas_total = sc.p_(0,
@@ -427,7 +428,7 @@ class BeamFormer(tasks.Task):
                              doc="Actual frequency resolution of dynamic spectrum",
                              unit="Hz"),
 
-        max_nblocks = dict(default=lambda self:int(floor(self.filesize/self.stride/self.blocklen)),
+        max_nblocks = dict(default=lambda self:int(math.floor(self.filesize/self.stride/self.blocklen)),
                            doc="Maximum number of blocks in file."),
 
         chunklen = dict(default=lambda self:min(self.filesize/self.stride,self.maxchunklen),
@@ -456,7 +457,7 @@ class BeamFormer(tasks.Task):
         blocks_per_sect = dict(default=lambda self:self.nblocks*self.stride,
                                doc="Number of blockse per section of data."),
 
-        nchunks = dict(default=lambda self:min(int(floor(self.filesize/self.sectlen)),self.maxnchunks),
+        nchunks = dict(default=lambda self:min(int(math.floor(self.filesize/self.sectlen)),self.maxnchunks),
                        doc="Maximum number of spectral chunks to average."),
 
         start_frequency = dict(default=lambda self:self.datafile["FREQUENCY_RANGE"][0][0],
@@ -497,7 +498,7 @@ class BeamFormer(tasks.Task):
                      doc="Output array containing the FFTed data for each beam.",
                      default=lambda self:cr.hArray(complex,[self.nblocks,self.nbeams,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
+        pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.yconvert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
                             doc="Array of shape ``[nbeams,3]`` with *x*, *y*, *z* positions for each beam on the sky."),
 
         phases = dict(workarray=True,

@@ -1,3 +1,10 @@
+2012-02-13
+==========
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+ - bug fixes to beamformer.py task  
+
 2011-11-07
 ==========
 
