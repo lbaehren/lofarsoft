@@ -123,8 +123,9 @@ def gatherresults(topdir, maxspread):
         spread = theseDelays.std()
 
         if spread > maxspread * 1.0e-9: # parameter!
-            avg = 0.0 # remove inconsistent fit values (improve?)
-            residualavg = 0.0 
+            avg = float('nan') # remove inconsistent fit values (improve?)
+            residualavg = float('nan')
+            spread = 0.0
         cabledelays_database[key]["cabledelay"] = avg
         cabledelays_database[key]["residualdelay"] = residualavg
         cabledelays_database[key]["spread"] = spread
