@@ -40,7 +40,7 @@ class Database:
         if filename != "":
             self._filename = filename
 
-        self._db = sqlite.connect(self._filename)
+        self._db = sqlite3.connect(self._filename)
 
 
     def close(self):
