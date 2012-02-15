@@ -1,0 +1,1198 @@
+from pycrtools.io import database as db
+import os
+
+class CRDatabase:
+    """Functionality to let the VHECR pipeline communicate with an SQL database."""
+
+    def __init__(self, filename=":memory:", datapath="", resultspath=""):
+        """Initialisation of the CRDatabase object.
+
+        **Properties**
+
+        ============= =====================================
+        Parameter     Description
+        ============= =====================================
+        *filename*    filename of the database.
+        *datapath*    path where the datafiles are stored.
+        *resultspath* path where the results are stored.
+        ============= =====================================
+
+        If *inputpath* is an empty string the ''data'' directory of
+        the directory in which the database file is located is used.
+
+        If *outputpath* is an empty string the ''results'' directory of
+        the directory in which the database file is located is used.
+        """
+
+        # Full filename of the datapath
+        self.filename = os.path.realpath(filename)
+
+        self.basepath = os.path.dirname(self.filename)
+
+        # Location of the datapath
+        if len(datapath) > 0:
+            self.datapath = datapath
+        else:
+            self.datapath = self.basepath + "/data"
+
+        # Location of the resultspath
+        if len(resultspath) > 0:
+            self.resultspath = resultspath
+        else:
+            self.resultspath = self.basepath + "/results"
+
+        # Database object
+        self.db = db.Database(self.filename)
+
+        # Initialize database structure
+        self.db.open()
+        self.__createTables()
+
+        # Status dictionary (placeholder)
+        # self.status = {}
+        # print self.status
+        pass
+
+
+    def __createTables(self):
+        """Create the pipeline database tables if they not already exist."""
+
+        if self.db:
+            # Event table
+            sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT)"
+            self.db.execute(sql)
+
+            # Event properties table
+            sql = "CREATE TABLE IF NOT EXISTS main.eventproperties (propertyID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT)"
+            self.db.execute(sql)
+
+            # Datafile table
+            sql = "CREATE TABLE IF NOT EXISTS main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT)"
+            self.db.execute(sql)
+
+            # Stations table
+            sql = "CREATE TABLE IF NOT EXISTS main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT)"
+            self.db.execute(sql)
+
+            # Polarisations table
+            sql = "CREATE TABLE IF NOT EXISTS main.polarisations (polarisationID INTEGER PRIMARY KEY, type TEXT, direction TEXT, status TEXT, resultspath TEXT)"
+            self.db.execute(sql)
+
+            # Polarisation properties table
+            sql = "CREATE TABLE IF NOT EXISTS main.polarisationproperties (propertyID INTEGER PRIMARY KEY, polarisationID INTEGER NOT NULL, key TEXT, value TEXT)"
+            self.db.execute(sql)
+
+            # event_datafile table (linking events to datafiles)
+            sql = "CREATE TABLE IF NOT EXISTS main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE)"
+            self.db.execute(sql)
+
+            # datafile_station table (linking datafiles to stations)
+            sql = "CREATE TABLE IF NOT EXISTS main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE)"
+            self.db.execute(sql)
+
+            # station_polarisation table (linking stations to polarisations)
+            sql = "CREATE TABLE IF NOT EXISTS main.station_polarisation (stationID INTEGER NOT NULL, polarisationID INTEGER NOT NULL UNIQUE)"
+            self.db.execute(sql)
+
+            # Status table
+            sql = """
+            CREATE TABLE IF NOT EXISTS main.status (statusID INTEGER UNIQUE, status TEXT NOT NULL);
+            INSERT OR IGNORE INTO main.status (statusID, status) VALUES (-1, 'UNPROCESSED');
+            INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 0, 'UNKNOWN');
+            INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 1, 'PROCESSED');
+            """
+            self.db.executescript(sql)
+
+            # Filters table
+            sql = "CREATE TABLE IF NOT EXISTS main.filters (name TEXT, filter TEXT NOT NULL UNIQUE);"
+            self.db.execute(sql)
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def __resetTables(self):
+        """Reset all tables and create a clean table structure."""
+
+        if self.db:
+            # Remove all tables.
+            self.db.execute("DROP TABLE IF EXISTS main.events")
+            self.db.execute("DROP TABLE IF EXISTS main.eventproperties")
+            self.db.execute("DROP TABLE IF EXISTS main.datafiles")
+            self.db.execute("DROP TABLE IF EXISTS main.stations")
+            self.db.execute("DROP TABLE IF EXISTS main.polarisations")
+            self.db.execute("DROP TABLE IF EXISTS main.polarisationproperties")
+            self.db.execute("DROP TABLE IF EXISTS main.event_datafile")
+            self.db.execute("DROP TABLE IF EXISTS main.datafile_station")
+            self.db.execute("DROP TABLE IF EXISTS main.station_polarisation")
+            self.db.execute("DROP TABLE IF EXISTS main.filters")
+            self.db.execute("DROP TABLE IF EXISTS main.status")
+
+            # Database needs to be closed to properly drop the tables before creating them again.
+            self.db.close()
+            self.db.open()
+
+            # Create all tables.
+            self.__createTables()
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def summary(self):
+        """Summary of the CRDatabase object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the CRDatabase object."
+        print "="*linewidth
+
+        if self.db:
+            dbstatus = "opened"
+        else:
+            dbstatus = "closed"
+        print "  %-40s : '%s'" %("Database", dbstatus)
+
+        print "  %-40s : '%s'" %("Filename", self.filename)
+        print "  %-40s : '%s'" %("Filename", self.filename)
+        print "  %-40s : '%s'" %("Data path", self.datapath)
+        print "  %-40s : '%s'" %("Results path", self.resultspath)
+
+        print "-"*linewidth
+
+        # Events
+        if self.db:
+            sql = "SELECT COUNT(eventID) AS nevents FROM main.events"
+            n_events = self.db.select(sql)[0][0]
+            print "  %-40s : %d" %("Nr. of events", n_events)
+
+        # print "-"*linewidth
+
+        # Datafiles
+        if self.db:
+            sql = "SELECT COUNT(datafileID) AS ndatafiles FROM main.datafiles"
+            n_datafiles = self.db.select(sql)[0][0]
+            print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
+
+        # Filters
+        if self.db:
+            # Number of filter groups
+            sql = "SELECT COUNT(DISTINCT name) FROM main.filters"
+            result = self.db.select(sql)
+            n_filtergroups = result[0][0]
+            print "  %-40s : %d" %("Nr. of filter groups", n_filtergroups)
+
+            # Number of filters
+            sql = "SELECT COUNT(name) FROM main.filters"
+            result = self.db.select(sql)
+            n_filters = result[0][0]
+            print "  %-40s : %d" %("Nr. of filters", n_filters)
+
+        print "="*linewidth
+
+
+
+class Event:
+    """CR event information."""
+
+    def __init__(self, db=None, id=0):
+        """Initialisation of the Event object.
+
+        **Properties**
+
+        ========== ===========================================
+        Parameter  Description
+        ========== ===========================================
+        *db*       database to which to link this event to.
+        *id*       id of the new event.
+        ========== ===========================================
+        """
+        self._db = db
+        self._id = id
+
+        # Set default values
+        self.timestamp = 0
+        self.status = "UNDEFINED"
+        self.datafiles = []
+        self.property = {}
+
+        # Initialize attributes
+        if self.inDatabase():           # Read from database
+            self.read()
+
+
+    def read(self):
+        """Read event information from the database."""
+        if self._db:
+            if self.inDatabase():
+                # Read attributes
+                sql = "SELECT eventID, timestamp, status FROM main.events WHERE eventID={0}".format(int(self._id))
+                records = self._db.select(sql)
+                if len(records) == 1:
+                    self._id = int(records[0][0])
+                    self.timestamp = int(records[0][1])
+                    self.status = str(records[0][2])
+                elif len(records) == 0:
+                    raise ValueError("No records found for eventID={0}".format(self._id))
+                else:
+                    raise ValueError("Multiple records found for eventID={0}".format(self._id))
+
+                # Read datafiles
+                self.datafiles = []
+                sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    datafileID = int(record[0])
+                    datafile = Datafile(self._db, id=datafileID)
+                    self.datafiles.append(datafile)
+
+                # Reading properties
+                sql = "SELECT key, value FROM main.eventproperties WHERE eventID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    self.property[str(record[0])] = record[1]
+            else:
+                print "WARNING: This event (id={0}) is not available in the database.".format(self._id)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def write(self):
+        """Write event information to the database."""
+        if self._db:
+            # Writing attributes
+            if self.inDatabase():       # Update values
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status))
+                self._db.execute(sql)
+            else:                       # Create new record
+                if self._id == 0:
+                    sql = "INSERT INTO main.events (timestamp, status) VALUES ({0}, '{1}')".format(int(self.timestamp), str(self.status))
+                else:
+                    sql = "INSERT INTO main.events (eventID, timestamp, status) VALUES ({0}, {1}, '{2}')".format(self._id, int(self.timestamp), str(self.status))
+                self._id = self._db.insert(sql)
+
+            # Writing datafile information
+            for datafile in self.datafiles:
+                datafileID = datafile.getID()
+                datafile.write()
+
+                sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
+                result = self._db.select(sql)[0][0]
+                print "blabla: ",result
+                if result == 0:
+                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
+                    self._db.insert(sql)
+
+            # Writing properties
+            for key in self.property:
+                value = self.property[key]
+
+                # Check if property is already in database
+                sql = "SELECT propertyID FROM main.eventproperties WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
+                records = self._db.select(sql)
+
+                # Add/Update property
+                if len(records) > 0:
+                    sql = "UPDATE main.eventproperties SET value='{0}' WHERE eventID={1} AND key='{2}'".format(str(value), self._id, str(key))
+                else:
+                    sql = "INSERT INTO main.eventproperties (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(value))
+                self._db.execute(sql)
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def inDatabase(self):
+        """Check if event information is available in the database.
+
+        This method checks if the event information of this object,
+        uniquely identified by the *id* and the *timestamp*, is
+        already in the database.
+
+        If the event information is in the database *True* is
+        returned, *False* otherwise.
+        """
+        result = False
+
+        if self._db:
+            sql = "SELECT eventID FROM main.events WHERE eventID={0}".format(int(self._id))
+            records = self._db.select(sql)
+            if len(records) > 0:
+                result = True
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def getID(self):
+        """Return the ID of the object as it is identified in the database."""
+        return self._id
+
+
+    def addDatafile(self, datafile=None):
+        """Add a datafile object to this event.
+
+        This adds a datafile object to the current event object and
+        updates the database.
+
+        **Properties**
+
+        ===========  =====================================================
+        Parameter    Description
+        ===========  =====================================================
+        *datafile*   datafile object to be linked to the current event.
+        ===========  =====================================================
+
+        Returns *True* if adding the datafile object went
+        successfully, *False* otherwise.
+        """
+        result = False
+
+        if datafile:
+            # Update object
+            datafileID = datafile.getID()
+
+            # Check for duplicate
+            isNew = True
+            for d in self.datafiles:
+                if d.getID() == datafileID:
+                    isNew = False
+                    break
+            if isNew:
+                self.datafiles.append(datafile)
+
+            # Update database
+            if self._db:
+                # Add datafile object to database if it does not yet exist.
+                if not datafile.inDatabase():
+                    datafile.write()
+                # Update the linking table.
+                sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
+                if len(self._db.select(sql)) == 0:
+                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
+                    self._db.insert(sql)
+                    result = True
+            else:
+                raise ValueError("Unable to write to database: no database was set.")
+
+        return result
+
+
+    def removeDatafile(self, datafileID=0):
+        """Remove datafile object with id=*datafileID* from this event.
+
+        This removes the datafile information object from this event
+        object and updates the database. Note that the datafile info
+        is not deleted from the database: only the link between the
+        event and the datafile objects is deleted.
+
+        **Properties**
+
+        ============  =============================================================
+        Parameter     Description
+        ============  =============================================================
+        *datafileID*  id of the datafile that needs to be removed from this event.
+        ============  =============================================================
+
+        Returns *True* if removing the datafile object went
+        successfully, *False* otherwise.
+        """
+        result = False
+
+        if datafileID > 0:
+            # Update object
+            for d in self.datafiles:
+                if d.getID() == datafileID:
+                    self.datafiles.remove(d)
+
+            # Update database
+            if self._db:
+                sql = "DELETE FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
+                self._db.execute(sql)
+            else:
+                raise ValueError("Unable to write to database: no database was set.")
+        else:
+            print "WARNING: invalid datafileID!"
+
+        return result
+
+
+    def summary(self):
+        """Summary of the Event object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Event object."
+        print "="*linewidth
+
+        # Event info
+        print "  %-40s : %d" %("ID", self._id)
+        print "  %-40s : %s" %("Timestamp", self.timestamp)
+        print "  %-40s : %s" %("Status", self.status)
+
+        # Datafiles
+        n_datafiles = len(self.datafiles)
+        print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
+        if n_datafiles > 0:
+            print "  Datafiles:"
+            for datafile in self.datafiles:
+                print "    %-6d - %s" %(datafile.getID(), datafile.filename)
+
+        # Properties
+        if len(self.property) > 0:
+            print "  Properties:"
+            for key in self.property.keys():
+                print "    %-38s : %s" %(key, self.property[key])
+
+        print "="*linewidth
+
+
+
+class Datafile:
+    """CR datafile information."""
+
+    def __init__(self, db=None, id=0):
+        """Initialisation of Datafile object.
+
+        **Properties**
+
+        ========= ===========================================
+        Parameter Description
+        ========= ===========================================
+        *db*      database to which to link this datafile to.
+        *id*      id of the new datafile.
+        ========= ===========================================
+        """
+        self._db = db
+        self._id = id
+
+        self.filename = ""
+        self.status = "UNDEFINED"
+        self.stations = []
+
+        # Initialize attributes
+        if self.inDatabase():
+            self.read()
+
+
+    def read(self):
+        """Read datafile information from the database."""
+        if self._db:
+            if self.inDatabase():
+                # Read attributes
+                sql = "SELECT datafileID, filename, status FROM main.datafiles WHERE datafileID={0}".format(int(self._id))
+                records = self._db.select(sql)
+                if len(records) == 1:
+                    self._id = int(records[0][0])
+                    self.filename = str(records[0][1])
+                    self.status = str(records[0][2])
+                elif len(records) == 0:
+                    raise ValueError("No records found for datafileID={0}".format(self._id))
+                else:
+                    raise ValueError("Multiple records found for datafileID={0}".format(self._id))
+
+                # Read station information
+                self.stations = []
+                sql = "SELECT stationID FROM main.datafile_station WHERE datafileID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    stationID = int(record[0])
+                    station = Station(self._db, id=stationID)
+                    self.stations.append(station)
+
+            else:
+                print "WARNING: This datafile (id={0}) is not available in the database.".format(self._id)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def write(self):
+        """Write datafile information to the database. """
+        if self._db:
+            # Write attributes
+            if self.inDatabase():
+                sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status))
+                self._db.execute(sql)
+            else:
+                # Check uniqueness (filename)
+                sql = "SELECT datafileID FROM main.datafiles WHERE filename='{0}'".format(self.filename)
+                if len(self._db.select(sql)) > 0:
+                    print "ERROR: Filename is not uniquely defined"
+                    return
+                # Add to database
+                if self._id == 0:
+                    sql = "INSERT INTO main.datafiles (filename, status) VALUES ('{0}', '{1}')".format(str(self.filename), str(self.status))
+                else:
+                    sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.filename), str(self.status))
+                self._id = self._db.insert(sql)
+
+            # Write station information
+            for station in self.stations:
+                stationID = station.getID()
+                station.write()
+
+                sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
+                result = self._db.select(sql)[0][0]
+                if result == 0:
+                    sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
+                    self._db.insert(sql)
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def inDatabase(self):
+        """Check if the datafile information is available in the database.
+
+        This method checks if the datafile information of this object,
+        uniquely identified by the *id* and the *filename*, is in the
+        database.
+
+        If the datafile information is in the database *True* is
+        returned, *False* otherwise.
+        """
+        result = False
+
+        if self._db:
+            sql = "SELECT datafileID FROM main.datafiles WHERE datafileID={0}".format(int(self._id))
+            records = self._db.select(sql)
+            if len(records) > 0:
+                result = True
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def getID(self):
+        """Return the ID of the object as it is identified in the database."""
+        return self._id
+
+
+    def addStation(self, station=None):
+        """Add a station object to this event.
+
+        This adds a station object to the list of stations of the
+        current datafile object and updates the database.
+
+        **Properties**
+
+        =========  ================================================================================
+        Parameter  Description
+        =========  ================================================================================
+        *station*  station object to be added to the list of stations of this datafile object.
+        =========  ================================================================================
+
+        Returns *True* if adding the station object went successfully,
+        *False* otherwise.
+        """
+        result = False
+
+        if station:
+            # Update object
+            stationID = station.getID()
+
+            # Check for duplicate
+            isNew = True
+            for s in self.stations:
+                if s.getID() == stationID:
+                    isNew = False
+                    break
+            if isNew:
+                self.stations.append(station)
+
+            # Update database
+            if self._db:
+                # Add station object to database if it does not yet exist.
+                if not station.inDatabase():
+                    station.write()
+                # Update linking table
+                sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
+                if len(self._db.select(sql)) == 0:
+                    sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
+                    self._db.insert(sql)
+                    result = True
+            else:
+                raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def removeStation(self, stationID=0):
+        """Remove station object with id=*stationID* from this datafile.
+
+        This removes the station information object from this datafile
+        object and updates the database. Note that the station info
+        is not deleted from the database: only the link between the
+        datafile and the station objects is deleted.
+
+        **Properties**
+
+        ============  ===============================================================
+        Parameter     Description
+        ============  ===============================================================
+        *stationID*   id of the station that needs to be removed from this datafile.
+        ============  ===============================================================
+
+        Returns *True* if removing the station object went
+        successfully, *False* otherwise.
+        """
+        result = False
+
+        if stationID > 0:
+            # Update object
+            for s in self.stations:
+                if s.getID() == stationID:
+                    self.stations.remove(s)
+
+            # Update database
+            if self._db:
+                sql = "DELETE FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
+                self._db.execute(sql)
+            else:
+                raise ValueError("Unable to write to database: no database was set.")
+        else:
+            print "WARNING: invalid stationID!"
+
+        return result
+
+
+    def summary(self):
+        """Summary of the Datafile object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Datafile object."
+        print "="*linewidth
+
+        # Datafile info
+        print "  %-40s : %s" %("ID", self._id)
+        print "  %-40s : %s" %("Filename", self.filename)
+        print "  %-40s : %s" %("Status", self.status)
+        # print "  %-40s : %s" %("Timestamp", self.timestamp)
+        # print "  %-40s : %s" %("Results path", self.resultspath)
+
+        # Stations
+        n_stations = len(self.stations)
+        print "  %-40s : %d" %("Number of stations", n_stations)
+        if n_stations > 0:
+            print "  Stations:"
+            for station in self.stations:
+                print "  %-6d - %s" %(station.getID(), station.stationname)
+
+        print "="*linewidth
+
+
+
+class Station:
+    """CR station information"""
+
+    def __init__(self, db=None, id=0):
+        """Initialisation of Station object.
+
+        **Properties**
+
+        ========= ===========================================
+        Parameter Description
+        ========= ===========================================
+        *db*      database to which to link this datafile to.
+        *id*      id of the new station.
+        ========= ===========================================
+        """
+        self._db = db
+        self._id = id
+
+        self.stationname = ""
+        self.status = "UNDEFINED"
+        self.polarisations = []
+
+        if self.inDatabase():
+            self.read()
+
+
+    def read(self):
+        """Read station information from the database."""
+        if self._db:
+            if self.inDatabase():
+                # Read attributes
+                sql = "SELECT stationID, stationname, status FROM main.stations WHERE stationID={0}".format(int(self._id))
+                records = self._db.select(sql)
+                if len(records) == 1:
+                    self._id = int(records[0][0])
+                    self.stationname = str(records[0][1])
+                    self.status = str(records[0][2])
+                elif len(records) == 0:
+                    raise ValueError("No records found for stationID={0}".format(self._id))
+                else:
+                    raise ValueError("Multiple records found for stationID={0}".format(self._id))
+
+                # Read polarisation information
+                self.polarisations = []
+                sql = "SELECT polarisationID FROM main.station_polarisation WHERE stationID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    polarisationID = int(record[0])
+                    polarisation = Polarisation(self._db, id=polarisationID)
+                    self.polarisations.append(polarisation)
+
+            else:
+                print "WARNING: This station (id={0}) is not available in the database.".format(self._id)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def write(self):
+        """Write station information to the database. """
+        if self._db:
+            # Write attributes
+            if self.inDatabase():
+                sql = "UPDATE main.stations SET stationname='{1}', status='{2}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status))
+                self._db.execute(sql)
+            else:
+                if self._id == 0:
+                    sql = "INSERT INTO main.stations (stationname, status) VALUES ('{0}', '{1}')".format(str(self.stationname), str(self.status))
+                else:
+                    sql = "INSERT INTO main.stations (stationID, stationname, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.stationname), str(self.status))
+                self._id = self._db.insert(sql)
+
+            # Write polarisation information
+            for polarisation in self.polarisations:
+                polarisationID = polarisation.getID()
+                polarisation.write()
+
+                sql = "SELECT COUNT(stationID) FROM main.station_polarisation WHERE polarisationID={0}".format(polarisationID)
+                result = self._db.select(sql)[0][0]
+                if result == 0:
+                    sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
+                    self._db.insert(sql)
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def inDatabase(self):
+        """Check if the station information is available in the database.
+
+        This method checks if the station information of this object,
+        uniquely identified by *id*, is in the database.
+
+        If the station information is in the database *True* is
+        returned, *False* otherwise.
+        """
+        result = False
+
+        if self._db:
+            sql = "SELECT stationID FROM main.stations WHERE stationID={0}".format(int(self._id))
+            records = self._db.select(sql)
+            if len(records) > 0:
+                result = True
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def getID(self):
+        """Return the ID of the object as it is identified in the database."""
+        return self._id
+
+
+    def addPolarisation(self, polarisation=None):
+        """Add a polarisation object to this station.
+
+        This adds a polarisation object to the current station object and
+        updates the database.
+
+        **Properties**
+
+        ===============  =========================================================
+        Parameter        Description
+        ===============  =========================================================
+        *polarisation*   polarisation object to be linked to the current station.
+        ===============  =========================================================
+
+        Returns *True* if adding the polarisation object went
+        successfully, *False* otherwise.
+        """
+        result = False
+
+        if polarisation:
+            # Update object
+            polarisationID = polarisation.getID()
+
+            # Check for duplicate
+            isNew = True
+            for p in self.polarisations:
+                if p.getID() == polarisationID:
+                    isNew = False
+                    break
+            if isNew:
+                self.polarisations.append(polarisation)
+
+            # Update database
+            if self._db:
+                # Add polarisation object to database if it does not yet exist.
+                if not polarisation.inDatabase():
+                    polarisation.write()
+                # Update linking table
+                sql = "SELECT stationID FROM main.station_polarisation WHERE stationID={0} AND polarisationID={1}".format(self._id, polarisationID)
+                if len(self._db.select(sql)) == 0:
+                    sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
+                    self._db.insert(sql)
+                    result = True
+            else:
+                raise ValueError("Unable to write to database: no database was set.")
+
+        return result
+
+
+    def removePolarisation(self, polarisationID=0):
+        """Remove polarisation object with id=*polarisationID* from
+        this station.
+
+        This removes the polarisation information object from this station
+        object and updates the database. Note that the polarisation info
+        is not deleted from the database: only the link between the
+        station and the polarisation objects is deleted.
+
+        **Properties**
+
+        ================  ===================================================================
+        Parameter         Description
+        ================  ===================================================================
+        *polarisationID*  id of the polarisation that needs to be removed from this station.
+        ================  ===================================================================
+
+        Returns *True* if removing the polarisation object went
+        successfully, *False* otherwise.
+        """
+        result = False
+
+        if polarisationID > 0:
+            # Update object
+            for p in self.polarisations:
+                if p.getID() == polarisationID:
+                    self.polarisations.remove(p)
+
+            # Update database
+            if self._db:
+                sql = "DELETE FROM main.station_polarisation WHERE stationID={0} AND polarisationID={1}".format(self._id, polarisationID)
+                self._db.execute(sql)
+            else:
+                raise ValueError("Unable to write to database: no database was set.")
+        else:
+            print "WARNING: invalid polarisationID!"
+
+        return result
+
+
+    def summary(self):
+        """Summary of the Station object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Station object."
+        print "="*linewidth
+
+        # Station information
+        print "  %-40s : %d" %("ID", self._id)
+        print "  %-40s : %s" %("Station name", self.stationname)
+        print "  %-40s : %s" %("Status", self.status)
+
+        # Polarisations
+        n_polarisations = len(self.polarisations)
+        print "  %-40s : %d" %("Nr. of polarisations",n_polarisations)
+        if n_polarisations > 0:
+            print "Polarisations:"
+            for polarisation in self.polarisations:
+                print "  %-6d - %s" %(polarisation.getID(), polarisation.resultspath)
+            pass
+
+        print "="*linewidth
+
+
+
+class Polarisation:
+    """CR polarisation information."""
+
+    def __init__(self, db=None, id=0):
+        """Initialisation of the Polarisation object.
+
+        **Properties**
+
+        ========== ===========================================
+        Parameter  Description
+        ========== ===========================================
+        *db*       database to which to link this event to.
+        *id*       id of the new polarisation.
+        ========== ===========================================
+        """
+        self._db = db
+        self._id = id
+
+        self.type = ""
+        self.direction = ""
+        self.status = "UNDEFINED"
+        self.resultspath = ""
+        self.property = {}
+
+        if self.inDatabase():
+            self.read()
+
+
+    def read(self):
+        """Read polarisation information from the database."""
+        if self._db:
+            if self.inDatabase():
+                # Read attributes
+                sql = "SELECT polarisationID, type, direction, status, resultspath FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
+                records = self._db.select(sql)
+                if len(records) == 1:
+                    self._id = int(records[0][0])
+                    self.type = str(records[0][1])
+                    self.direction = str(records[0][2])
+                    self.status = str(records[0][3])
+                    self.resultspath = str(records[0][4])
+                elif len(records) == 0:
+                    raise ValueError("No records found for eventID={0}".format(self._id))
+                else:
+                    raise ValueError("Multiple records found for eventID={0}".format(self._id))
+
+                # Read properties
+                sql = "SELECT key, value FROM main.polarisationproperties WHERE polarisationID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    self.property[str(record[0])] = record[1]
+
+            else:
+                print "WARNING: This polarisation (id={0}) is not available in the database.".format(self._id)
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def write(self):
+        """Write polarisation information to the database."""
+        if self._db:
+            # Write attributes
+            if self.inDatabase():
+                sql = "UPDATE main.polarisations SET type={1}, direction={2}, status='{3}', resultspath='{4}' WHERE polarisationID={0}".format(self._id, str(self.type), str(self.direction), str(self.status), str(self.resultspath))
+                self._db.execute(sql)
+            else:
+                if self._id == 0:
+                    sql = "INSERT INTO main.polarisations (type, direction, status, resultspath) VALUES ({0}, {1}, '{2}', '{3}')".format(str(self.type), str(self.direction), str(self.status), str(self.resultspath))
+                else:
+                    sql = "INSERT INTO main.polarisations (polarisationID, type, direction, status, resultspath) VALUES ({0}, {1}, {2}, '{3}', '{4}')".format(self._id, str(self.type), str(self.direction), str(self.status), str(self.resultspath))
+                self._id = self._db.insert(sql)
+
+            # Write properties
+            for key in self.property:
+                value = self.property[key]
+
+                # Check if property is already in database
+                sql = "SELECT propertyID FROM main.polarisationproperties WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key))
+                records = self._db.select(sql)
+
+                # Add/Update property
+                if len(records) > 0:
+                    sql = "UPDATE main.polarisationproperties SET value='{1}' WHERE polarisationID={0} AND key='{2}'".format(self._id, str(value), str(key))
+                else:
+                    sql = "INSERT INTO main.polarisationproperties (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(value))
+                self._db.execute(sql)
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def inDatabase(self):
+        """Check if the polarisation information is available in the
+        database.
+
+        This method checks if the polarisation information of this
+        object, uniquely identified by *id*, is in the database.
+
+        If the polarisation information is in the database *True* is
+        returned, *False* otherwise.
+        """
+        result = False
+
+        if self._db:
+            sql = "SELECT polarisationID FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
+            records = self._db.select(sql)
+            if len(records) > 0:
+                result = True
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def getID(self):
+        """Return the ID of the object as it is identified in the database."""
+        return self._id
+
+
+    def summary(self):
+        """Summary of the Polarisation object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Polarisation object."
+        print "="*linewidth
+
+        # Polarisation information
+        print "  %-40s : %d" %("ID", self._id)
+        print "  %-40s : %s" %("Type", self.type)
+        print "  %-40s : %s" %("Direction", self.direction)
+        print "  %-40s : %s" %("Status", self.status)
+        print "  %-40s : %s" %("Results directory", self.resultspath)
+
+        # Properties
+        if len(self.property) > 0:
+            print "  Properties:"
+            for key in self.property.keys():
+                print "    %-38s : %s" %(key, self.property[key])
+
+        print "="*linewidth
+
+
+
+class Filter:
+    """Filter"""
+
+    def __init__(self, db=None, name="DEFAULT"):
+        """Initialisation of Filter object.
+
+        **Properties**
+
+        ========== ==============================================
+        Parameter  Description
+        ========== ==============================================
+        *db*       database in which the filters are stored.
+        *name*     name of the filter.
+        ========== ==============================================
+        """
+        self._db = db
+        self.name = name
+        self.filters = []
+
+
+    def read(self):
+        """Read filter from the database."""
+        self.filters = []
+
+        if self._db:
+            sql = "SELECT filter FROM main.filters WHERE name='{0}'".format(self.name)
+            for record in self._db.select(sql):
+                self.filters.append(str(record[0]))
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return self.filters
+
+
+    def write(self):
+        """Write filter to database."""
+        if self._db:
+            for filtervalue in self.filters:
+                # Check if filtervalue already exists
+                sql = "SELECT filter FROM main.filters WHERE name='{0}' AND filter='{1}'".format(self.name, filtervalue)
+                n = len(self._db.select(sql))
+                # Only write new filters
+                if n == 0:
+                    sql = "INSERT INTO main.filters (name, filter) VALUES ('{0}', '{1}');".format(self.name, filtervalue)
+                    self._db.insert(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def add(self, filtervalue=""):
+        """Add a filtervalue to the database.
+
+        **Properties**
+
+        ===============  ========================
+        Parameter        Description
+        ===============  ========================
+        *filtervalue*    content of the filter.
+        ===============  ========================
+        """
+        # Write filtervalue to database
+        if self._db:
+            # Check if filtervalue already exists
+            sql = "SELECT filter FROM main.filters WHERE name='{0}' AND filter='{1}'".format(self.name, filtervalue)
+            n = len(self._db.select(sql))
+            # Only write new filters
+            if n == 0:
+                sql = "INSERT INTO main.filters (name, filter) VALUES ('{0}', '{1}');".format(self.name, filtervalue)
+                self._db.insert(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        # Add filtervalue to object
+        if not filtervalue in self.filters:
+            self.filters.append(filtervalue)
+
+
+    def delete(self, filtervalue=""):
+        """Delete a filtervalue from the database.
+
+        **Properties**
+
+        ===============  ========================
+        Parameter        Description
+        ===============  ========================
+        *filtervalue*    content of the filter.
+        ===============  ========================
+        """
+        if self._db:
+            sql = "DELETE FROM main.filters WHERE name='{0}' AND filter='{1}';".format(self.name, filtervalue)
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        self.filters.remove(filtervalue)
+
+
+    def execute(self, string=""):
+        """Execute the filtering of a string.
+
+        **Properties**
+
+        ===========  =======================================================
+        Parameter    Description
+        ===========  =======================================================
+        *string*     String with which the filters are tested.
+        ===========  =======================================================
+
+        Returns *True* if at least one subfilter matches a sunstring
+        of *string*, *False* otherwise.
+        """
+        result = False
+
+        if len(string) > 0:
+            for f in self.filters:
+                if f in string:
+                    return True
+        else:
+            raise ValueError("Unable to check empty string.")
+
+        return result
+
+
+    def summary(self):
+        """Summary of the filter object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Filter object."
+        print "="*linewidth
+
+        print "  %-40s : %s" %("Filter name", self.name)
+        print "  %-40s : %d" %("Nr. of filters", len(self.filters))
+
+        if len(self.filters) > 0:
+            for f in self.filters:
+                print "    %s" %(f)
+
+        print "="*linewidth
