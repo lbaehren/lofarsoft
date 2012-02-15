@@ -64,8 +64,17 @@ def gatherresults(topdir, maxspread):
                 continue
             # read in antenna positions from file
             positions.extend(res["antenna_positions_array_XYZ_m"]) # in flat list
-            antid.extend([str(int(v)) for v in res["antennas"].values()])
-            # check: same ordering for ant-id's and cable delaysin 'res'??? Relying on that.
+            nof_new_antids = len([str(int(v)) for v in res["antennas"]])
+            nof_new_cabledelays = len(res["antennas_residual_cable_delays_planewave"])
+            nof_new_triangledelays = len(res["antennas_residual_cable_delays"])
+            
+           # print '*** New ant-ids: %d' % nof_new_antids
+           # print '*** New cable delays: %d' % nof_new_cabledelays
+           # print '*** New triangle delays: %d' % nof_new_triangledelays
+            if nof_new_cabledelays != nof_new_antids:
+                raw_input('WRONG NUMBER OF ANTENNAS!')
+            antid.extend([str(int(v)) for v in res["antennas"].values()]) # res["antennas"] is a dict!
+            # check: same ordering for ant-id's and cable delays in 'res'??? Relying on that.
             cabledelays.extend(res["antennas_residual_cable_delays_planewave"])  #antennas_final_cable_delays
             residualdelays.extend(res["antennas_residual_cable_delays_planewave"])
             # test for spread and outliers
@@ -81,6 +90,9 @@ def gatherresults(topdir, maxspread):
             timelist = [res["TIME"]] * len(res["antennas"])
             timestamps.extend(timelist)
 
+    print len(cabledelays)
+    print len(antid)
+#    import pdb; pdb.set_trace()
     count = dict()
     antennapositions = dict() # will contain positions for each (unique) antenna id
     for i in range(len(antid)):
@@ -88,9 +100,11 @@ def gatherresults(topdir, maxspread):
         if not antid[i] in cabledelays_database.keys():
             cabledelays_database[antid[i]] = dict(cabledelay = 0.0, residualdelay = 0.0, spread = 0.0, delaylist = [], residuallist = [], timelist = [])
             antennapositions[antid[i]] = positions[i * 3: (i+1)*3]
-        cabledelays_database[antid[i]]["delaylist"].extend([cabledelays[i]])
-        cabledelays_database[antid[i]]["residuallist"].extend([residualdelays[i]])
-        cabledelays_database[antid[i]]["timelist"].extend([timestamps[i]])
+#        print "%d" % i
+        if cabledelays[i] > -9998.0: # check if the value is valid, i.e. was actually calculated for this antenna
+            cabledelays_database[antid[i]]["delaylist"].extend([cabledelays[i]]) # cabledelays[i] is a number; same antid occurs more than once, so the delaylist will grow...
+            cabledelays_database[antid[i]]["residuallist"].extend([residualdelays[i]])
+            cabledelays_database[antid[i]]["timelist"].extend([timestamps[i]])
 
     # get averages of cable delays. Zero out if stddev spread too high. Better use zero than a (probably) wrong value (?)
     for key in cabledelays_database:
@@ -266,6 +280,8 @@ class cabledelays(tasks.Task):
         antennasPerStationID = dict()
         for id in self.antid.val(): # loop over list rather than hArray
             thisStationID = int(id) / 1000000
+#            print thisStationID
+#            print id
             if not thisStationID in antennasPerStationID.keys():
                 antennasPerStationID[thisStationID] = []
             antennasPerStationID[thisStationID].append(id)
@@ -356,7 +372,8 @@ class cabledelays(tasks.Task):
             thesePositions = md.get('RelativeAntennaPositions', theseAntennas, 'LBA_OUTER', return_as_hArray = True)
             
 #            thisStationsPositions = md.getRelativeAntennaPositions(thisStationName, 'LBA_OUTER', return_as_hArray=True)
-            difference = cr.hArray(y_avg_total - delayfromphasetables)
+            # difference = cr.hArray(y_avg_total - delayfromphasetables)
+            difference = cr.hArray(y_avg_residual)
             # hacked LBA_OUTER, remove...
             cr.trerun("PlotAntennaLayout","Delays",positions = thesePositions, colors= difference, sizes=100,
                       names = self.names,title="Cable delays",plotlegend=True)
