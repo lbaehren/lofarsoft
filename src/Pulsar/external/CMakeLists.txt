@@ -13,9 +13,9 @@ add_subdirectory (fftw)
 ##
 ## ==============================================================================
 
-set (tempo_version         "20120213")
-set (tempo_name            "tempo-${tempo_version}")
-set (tempo_directory       "tempo/tempo-${tempo_version}")
+set (tempo_version         "11.010")
+set (tempo_name            "tempo${tempo_version}-modified")
+set (tempo_directory       "tempo/tempo${tempo_version}-modified")
 set (tempo_archive         "${tempo_directory}.tar.gz")
 set (tempo_ephem_name      "tempo_ephem${tempo_version}")
 set (tempo_ephem_directory "tempo/tempo_ephem${tempo_version}")
@@ -28,20 +28,19 @@ add_custom_target (tempo_unpack
   )
 
 add_custom_target (tempo_build
-  COMMAND ./prepare
-  COMMAND ./configure TEMPO=${CMAKE_INSTALL_PREFIX} --srcdir=${PULSAR_BINARY_DIR}/apps/${tempo_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} PGPLOT_DIR=${PGPLOT_INCLUDES}  
-  COMMAND make
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo_name}/
-  COMMENT "Building project Tempo in ${PULSAR_BINARY_DIR}/apps/${tempo_name}/ ..."
+  COMMAND make 
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${tempo_name}/src
+  COMMENT "Building project Tempo in ${PULSAR_BINARY_DIR}/apps/${tempo_name}/src ..."
   )
 add_dependencies (tempo_build tempo_unpack)
 
 add_custom_target (tempo_install
-  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/tempo.hlp ${CMAKE_INSTALL_PREFIX}/bin/obsys.dat ${CMAKE_INSTALL_PREFIX}/bin/tztot.dat ${CMAKE_INSTALL_PREFIX}/bin/ephem ${CMAKE_INSTALL_PREFIX}/bin/clock ${CMAKE_INSTALL_PREFIX}/bin/test ${CMAKE_INSTALL_PREFIX}/bin/tzpar ${CMAKE_INSTALL_PREFIX}/bin/tztot.dat
-  COMMAND make install
-#  COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
-  COMMAND sed -e \"s|CMAKE_CHANGE|${CMAKE_INSTALL_PREFIX}/bin|g\" tempo.cfg.cmake > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg
-  COMMAND cp tempo.hlp obsys.dat ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND cp src/tempo ${CMAKE_INSTALL_PREFIX}/bin
+  COMMAND sed -e \"s|CMAKE_CHANGE|${CMAKE_INSTALL_PREFIX}/bin|g\" tempo.cfg > ${CMAKE_INSTALL_PREFIX}/bin/tempo.cfg
+  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/tempo.hlp ${CMAKE_INSTALL_PREFIX}/bin/obsys.dat ${CMAKE_INSTALL_PREFIX}/bin/tztot.dat $
+{CMAKE_INSTALL_PREFIX}/bin/ephem ${CMAKE_INSTALL_PREFIX}/bin/clock ${CMAKE_INSTALL_PREFIX}/bin/test ${CMAKE_INSTALL_PREFIX}/bin/tzpa
+r ${CMAKE_INSTALL_PREFIX}/bin/tztot.dat
+  COMMAND cp tempo.hlp obsys.dat tztot.dat ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r ephem ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r clock ${CMAKE_INSTALL_PREFIX}/bin
   COMMAND cp -r test ${CMAKE_INSTALL_PREFIX}/bin
