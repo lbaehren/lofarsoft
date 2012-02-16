@@ -171,13 +171,13 @@ class CRDatabase:
             # Processing selection criteria
             sql_selection = []
             if timestamp_start:
-                sql_selection.append("timestamp > {0}".format(timestamp_start))
+                sql_selection.append("timestamp>{0}".format(int(timestamp_start)))
                 pass
             if timestamp_end:
-                sql_selection.append("timestamp < {0}".format(timestamp_end))
+                sql_selection.append("timestamp<{0}".format(int(timestamp_end)))
                 pass
             if status:
-                sql_selection.append("status='{0}'".format(status))
+                sql_selection.append("status='{0}'".format(str(status)))
 
             # Building SQL expression
             sql = "SELECT eventID FROM main.events"
@@ -221,9 +221,9 @@ class CRDatabase:
             # Processing selection criteria
             sql_selection = []
             if filename:
-                sql_selection.append("filename='{0}'".format(filename))
+                sql_selection.append("filename='{0}'".format(str(filename)))
             if status:
-                sql_selection.append("status='{0}'".format(status))
+                sql_selection.append("status='{0}'".format(str(status)))
 
             # Building SQL expression
             sql = "SELECT datafileID FROM main.datafiles"
@@ -1206,7 +1206,7 @@ class Settings:
 
         if self._db:
             sql = "SELECT value FROM main.settings WHERE key='datapath'"
-            result = self._db.select(sql)[0][0]
+            result = str(self._db.select(sql)[0][0])
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -1216,7 +1216,7 @@ class Settings:
     def setDataPath(self, value):
         """Set the value of the datapath in the database."""
         if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', value)
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
             self._db.execute(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1228,7 +1228,7 @@ class Settings:
 
         if self._db:
             sql = "SELECT value FROM main.settings WHERE key='resultspath'"
-            result = self._db.select(sql)[0][0]
+            result = str(self._db.select(sql)[0][0])
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -1238,7 +1238,7 @@ class Settings:
     def setResultsPath(self, value):
         """Set the value of the resultspath in the database."""
         if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',value)
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
             self._db.execute(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
