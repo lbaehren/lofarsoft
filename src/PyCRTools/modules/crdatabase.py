@@ -27,20 +27,6 @@ class CRDatabase:
         # Full filename of the datapath
         self.filename = os.path.realpath(filename)
 
-        self.basepath = os.path.dirname(self.filename)
-
-        # Location of the datapath
-        if len(datapath) > 0:
-            self.datapath = datapath
-        else:
-            self.datapath = self.basepath + "/data"
-
-        # Location of the resultspath
-        if len(resultspath) > 0:
-            self.resultspath = resultspath
-        else:
-            self.resultspath = self.basepath + "/results"
-
         # Database object
         self.db = db.Database(self.filename)
 
@@ -48,10 +34,25 @@ class CRDatabase:
         self.db.open()
         self.__createTables()
 
-        # Status dictionary (placeholder)
-        # self.status = {}
-        # print self.status
-        pass
+        # Settings
+        self.settings = Settings(self.db)
+
+        # Path settings
+        self.basepath = os.path.dirname(self.filename)
+
+        # Location of the datapath
+        if len(datapath) > 0:
+            self.datapath = datapath
+        else:
+            self.datapath = self.basepath + "/data"
+        self.settings.setDataPath(self.datapath)
+
+        # Location of the resultspath
+        if len(resultspath) > 0:
+            self.resultspath = resultspath
+        else:
+            self.resultspath = self.basepath + "/results"
+        self.settings.setResultsPath(self.resultspath)
 
 
     def __createTables(self):
@@ -93,6 +94,14 @@ class CRDatabase:
             # station_polarisation table (linking stations to polarisations)
             sql = "CREATE TABLE IF NOT EXISTS main.station_polarisation (stationID INTEGER NOT NULL, polarisationID INTEGER NOT NULL UNIQUE)"
             self.db.execute(sql)
+
+            # settings table
+            sql = """
+            CREATE TABLE IF NOT EXISTS main.settings (key TEXT, value TEXT);
+            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');
+            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');
+            """
+            self.db.executescript(sql)
 
             # Status table
             sql = """
@@ -138,6 +147,103 @@ class CRDatabase:
             raise ValueError("Unable to read from database: no database was set.")
 
 
+    def getEventIDs(self, timestamp_start=None, timestamp_end=None, status=None):
+        """Return a list of eventIDs satifying the values of this
+        functions arguments.
+
+        **Properties**
+
+        =================  ==============================================================
+        Parameter          Description
+        =================  ==============================================================
+        *timestamp_start*  timestamp of the event is larger than this value.
+        *timestamp_end*    timestamp of the event is smaller than this value.
+        *status*           status of the event.
+        =================  ==============================================================
+
+        If no arguments are given all eventIDs are selected. When
+        multiple arguments are provided, all returned eventIDs satisfy
+        all argument values.
+        """
+        result = []
+
+        if self.db:
+            # Processing selection criteria
+            sql_selection = []
+            if timestamp_start:
+                sql_selection.append("timestamp > {0}".format(timestamp_start))
+                pass
+            if timestamp_end:
+                sql_selection.append("timestamp < {0}".format(timestamp_end))
+                pass
+            if status:
+                sql_selection.append("status='{0}'".format(status))
+
+            # Building SQL expression
+            sql = "SELECT eventID FROM main.events"
+            if len(sql_selection) > 0:
+                sql += " WHERE "
+                for i in range(len(sql_selection)):
+                    sql += sql_selection[i]
+                    if i < len(sql_selection) - 1:
+                        sql += " AND "
+
+            # Extracting eventIDs
+            records = self.db.select(sql)
+            for record in records:
+                result.append(record[0])
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def getDatafileIDs(self, filename=None, status=None):
+        """Return a list of datafileIDs satifying the values of this
+        functions arguments.
+
+        **Properties**
+
+        =================  ==============================================================
+        Parameter          Description
+        =================  ==============================================================
+        *filename*         name of the datafile.
+        *status*           status of the datafile.
+        =================  ==============================================================
+
+        If no arguments are given all datafileIDs are selected. When
+        multiple arguments are provided, all returned datafileIDs satisfy
+        all argument values.
+        """
+        result = []
+
+        if self.db:
+            # Processing selection criteria
+            sql_selection = []
+            if filename:
+                sql_selection.append("filename='{0}'".format(filename))
+            if status:
+                sql_selection.append("status='{0}'".format(status))
+
+            # Building SQL expression
+            sql = "SELECT datafileID FROM main.datafiles"
+            if len(sql_selection) > 0:
+                sql += " WHERE "
+                for i in range(len(sql_selection)):
+                    sql += sql_selection[i]
+                    if i < len(sql_selection) - 1:
+                        sql += " AND "
+
+            # Extracting datafileIDs
+            records = self.db.select(sql)
+            for record in records:
+                result.append(record[0])
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
     def summary(self):
         """Summary of the CRDatabase object."""
         linewidth = 80
@@ -153,7 +259,7 @@ class CRDatabase:
         print "  %-40s : '%s'" %("Database", dbstatus)
 
         print "  %-40s : '%s'" %("Filename", self.filename)
-        print "  %-40s : '%s'" %("Filename", self.filename)
+        print "  %-40s : '%s'" %("Base path", self.basepath)
         print "  %-40s : '%s'" %("Data path", self.datapath)
         print "  %-40s : '%s'" %("Results path", self.resultspath)
 
@@ -165,13 +271,25 @@ class CRDatabase:
             n_events = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of events", n_events)
 
-        # print "-"*linewidth
-
         # Datafiles
         if self.db:
             sql = "SELECT COUNT(datafileID) AS ndatafiles FROM main.datafiles"
             n_datafiles = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
+
+        # Stations
+        if self.db:
+            sql = "SELECT COUNT(stationID) AS nstations FROM main.stations"
+            n_stations = self.db.select(sql)[0][0]
+            print "  %-40s : %d" %("Nr. of stations", n_stations)
+
+        # Polarisations
+        if self.db:
+            sql = "SELECT COUNT(polarisationID) AS npolarisations FROM main.polarisations"
+            n_polarisations = self.db.select(sql)[0][0]
+            print "  %-40s : %d" %("Nr. of polarisations", n_polarisations)
+
+        print "-"*linewidth
 
         # Filters
         if self.db:
@@ -214,6 +332,8 @@ class Event:
         self.status = "UNDEFINED"
         self.datafiles = []
         self.property = {}
+
+        self.settings = Settings(db)
 
         # Initialize attributes
         if self.inDatabase():           # Read from database
@@ -470,6 +590,8 @@ class Datafile:
         self.status = "UNDEFINED"
         self.stations = []
 
+        self.settings = Settings(db)
+
         # Initialize attributes
         if self.inDatabase():
             self.read()
@@ -706,6 +828,8 @@ class Station:
         self.status = "UNDEFINED"
         self.polarisations = []
 
+        self.settings = Settings(db)
+
         if self.inDatabase():
             self.read()
 
@@ -936,6 +1060,8 @@ class Polarisation:
         self.resultspath = ""
         self.property = {}
 
+        self.settings = Settings(db)
+
         if self.inDatabase():
             self.read()
 
@@ -1054,6 +1180,80 @@ class Polarisation:
                 print "    %-38s : %s" %(key, self.property[key])
 
         print "="*linewidth
+
+
+
+class Settings:
+    """Global settings for the CR database."""
+
+    def __init__(self, db=None):
+        """Initialisation of the settings.
+
+        **Properties**
+
+        =========  ==============================================
+        Parameter  Description
+        =========  ==============================================
+        *db*       database to which to link the settings to.
+        =========  ==============================================
+        """
+        self._db = db
+
+
+    def getDataPath(self):
+        """Get the value of the datapath from the database."""
+        result = None
+
+        if self._db:
+            sql = "SELECT value FROM main.settings WHERE key='datapath'"
+            result = self._db.select(sql)[0][0]
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def setDataPath(self, value):
+        """Set the value of the datapath in the database."""
+        if self._db:
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', value)
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def getResultsPath(self):
+        """Get the value of the resultspath from the database."""
+        result = None
+
+        if self._db:
+            sql = "SELECT value FROM main.settings WHERE key='resultspath'"
+            result = self._db.select(sql)[0][0]
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    def setResultsPath(self, value):
+        """Set the value of the resultspath in the database."""
+        if self._db:
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',value)
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def summary(self):
+        """Summary of the Settings object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Settings object."
+        print "="*linewidth
+
+        print "  %-40s : %s" %("datapath", self.getDataPath())
+        print "  %-40s : %s" %("resultspath", self.getResultsPath())
 
 
 
