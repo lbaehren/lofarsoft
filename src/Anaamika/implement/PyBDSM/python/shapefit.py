@@ -69,9 +69,11 @@ class Op_shapelets(Op):
 
          if fixed[0]*fixed[1]==0:
              (m1, m2, m3)=func.moment(image, mask)
-
+             
          if fixed[0]==0:
              beta=sqrt(m3[0]*m3[1])*2.0
+             if beta == 0.0:
+                beta = 0.5
 	 if fixed[1]==0:
              cen=m2
          if fixed[2]==0:

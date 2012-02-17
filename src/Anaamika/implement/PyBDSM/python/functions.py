@@ -545,6 +545,7 @@ def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
 
     if mask == None: mask = N.zeros(data.shape, bool)
     g_ind = N.where(~N.ravel(mask))[0]
+
     if err == None:
         errorfunction = lambda p: N.ravel(gaus_2d(p, x, y) - data)[g_ind]
     else:  

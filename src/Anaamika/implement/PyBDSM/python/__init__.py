@@ -164,8 +164,8 @@ def process_image(input_file, **kwargs):
     """
     from interface import load_pars
     from image import Image
-          
-    # Try to load input_file assuming it's a parameter save file.
+    
+    # Try to load input_file assuming it's a parameter save file or a dictionary.
     # load_pars returns None if this doesn't work.
     img = load_pars(input_file)
 

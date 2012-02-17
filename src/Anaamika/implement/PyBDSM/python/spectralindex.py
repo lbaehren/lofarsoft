@@ -303,7 +303,7 @@ class Op_spectralindex(Op):
         S0 = src.peak_flux_max
         K = img.opts.specind_kappa
         n,m = image.shape[1:]
-        if img.opts.rms_map:
+        if img.use_rms_map:
           rms_i = N.zeros(nchan)
           for ichan in range(nchan):
             rms_i[ichan] = rms_spec[ichan][src.bbox].mean()
@@ -554,11 +554,15 @@ class Op_spectralindex(Op):
               win_size1 = func.get_windowsize_av(S_i, rms_i, chanmask, K=4.0, minchan=4)
               if win_size1 == 0: win_size1 = nchan/3
               new_nchan = nchan/win_size1
-              ipimage = avimage[srcslice]; opimage = N.zeros((new_nchan, ipimage.shape[1], ipimage.shape[2]))
+              ipimage_temp = avimage[srcslice]
+              ipimage = N.zeros((1, ipimage_temp.shape[0], ipimage_temp.shape[1], ipimage_temp.shape[2]))
+              ipimage[0,:,:,:] = ipimage_temp
+              opimage = N.zeros((1, new_nchan, ipimage_temp.shape[1], ipimage_temp.shape[2]))
               d = collapse.windowaverage_cube(imagein=ipimage, imageout=opimage, fac=win_size1, chanrms=src.rms_chan, \
                 iniflags=chanmask, c_wts='rms', kappa=img.opts.kappa_clip, sbeam=N.array(img.beam_spec_av), 
                 freqin=img.freq_av, calcrms_fromim=False)
               opimage, src_beam_spec_av, src_freq_av, src_avimage_flags, src_crms_av = d
+              opimage = opimage[0,:,:,:]
 
               s_im = N.zeros(isl.image.shape); x1, x2 = N.mgrid[isl.bbox]
               for g in src.gaussians:
@@ -589,7 +593,8 @@ class Op_spectralindex(Op):
                 errors = [float("NaN")]*7
               else:
                 data = opimage[ichan]
-                if ichan in caseIind_1:
+                g_ind = N.where(~N.ravel(rmask))[0]
+                if ichan in caseIind_1 and len(g_ind) >= 6:
                   x_ax, y_ax = N.indices(data.shape) 
                   p_ini = func.g2param(src.gaussians[0])
                   p_ini[1] = p_ini[1]-isl.origin[0]; p_ini[2] = p_ini[2]-isl.origin[1]
@@ -758,7 +763,8 @@ class Op_spectralindex(Op):
           cbmaj, cbmin, cbpa = N.transpose(src_beam_spec_av) 
           cdeltsq = img.wcs_obj.acdelt[0]*img.wcs_obj.acdelt[1]
           for ichan in range(new_nchan):
-            if not src_avimage_flags[ichan]:
+            g_ind = N.where(~N.ravel(srcmask))[0]
+            if not src_avimage_flags[ichan] and len(g_ind) >= 12:
               p, ep = func.fit_mulgaus2d(image[ichan], gg, x, y, srcmask, fitfix)
               total = N.zeros(len(fitfix))
               for ig in range(len(fitfix)):

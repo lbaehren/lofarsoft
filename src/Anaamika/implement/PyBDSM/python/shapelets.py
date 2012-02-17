@@ -93,12 +93,15 @@ def shapelet_image(basis, beta, centre, hc, nx, ny, size):
     order nx,ny on an image of size size. Does what getcartim.f does in fBDSM. nx,ny -> 0-nmax
     Centre is by Python convention, for retards who count from zero. """
     from math import sqrt,pi
-    import scipy
+    try:
+        from scipy import factorial
+    except ImportError:
+        from scipy.misc.common import factorial
 
     hcx = hc[nx,:]
     hcy = hc[ny,:]
     ind = N.array([nx,ny])
-    fact = scipy.factorial(ind)
+    fact = factorial(ind)
     dumr1 = N.sqrt((2.0**(ind))*sqrt(pi)*fact)
 
     x = (N.arange(size[0],dtype=float)-centre[0])/beta

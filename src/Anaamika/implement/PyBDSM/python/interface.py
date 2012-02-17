@@ -97,7 +97,7 @@ def get_op_chain(img):
     
     
 def load_pars(filename):
-    """Load parameters from a save file.
+    """Load parameters from a save file or dictionary.
 
     The file must be a pickled opts dictionary.
 
@@ -110,15 +110,24 @@ def load_pars(filename):
     except ImportError:
         import pickle
 
-    try:
-        pkl_file = open(filename, 'rb')
-        pars = pickle.load(pkl_file)
-        pkl_file.close()
-        timg = Image(pars)
-        print "--> Loaded parameters from file '" + filename + "'."
-        return timg
-    except:
-        return None
+    # First, check if input is a dictionary
+    if isinstance(filename, dict):
+        try:
+            timg = Image(pars)
+            print "--> Loaded parameters from dictionary '" + filename + "'."
+            return timg
+        except:
+            return None
+    else:
+        try:
+            pkl_file = open(filename, 'rb')
+            pars = pickle.load(pkl_file)
+            pkl_file.close()
+            timg = Image(pars)
+            print "--> Loaded parameters from file '" + filename + "'."
+            return timg
+        except:
+            return None
         
 def save_pars(img, savefile=None, quiet=False):
     """Save parameters to a file.
@@ -672,7 +681,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
         "fits"  - FITS binary table
         "ascii" - ASCII text file
         "bbs"   - BBS sky model (Gaussian list only)
-        "ds9"   - ds9 region file (Gaussian list only)
+        "ds9"   - ds9 region file
         "star"  - AIPS STAR file (Gaussian list only)
         "kvis"  - kvis file (Gaussian list only)
     srcroot - root for source and patch names (BBS/ds9 only);
@@ -758,9 +767,6 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             print '--> Wrote BBS sky model ' + repr(filename)
             return True
     if format == 'ds9':
-        if catalog_type != 'gaul':
-            print "At the moment, only catalog_type = 'gaul' is supported with ds9 files."
-            return False
         filename = output.write_ds9_list(img, filename=filename,
                                             srcroot=srcroot,
                                             incl_wavelet=incl_wavelet,

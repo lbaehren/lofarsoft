@@ -74,26 +74,25 @@ class Op_gausfit(Op):
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active),'; size = ',size
             
           if size > maxsize:
-            if opts.split_isl:
-              tosplit = misc.isl_tosplit(isl, img)
-              if tosplit[0] > 0:
-                n_subisl, sub_labels = tosplit[1], tosplit[2]
-                gaul = []; fgaul = []
-                if opts.verbose_fitting:
-                  print 'SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
-                for i_sub in range(n_subisl):
-                  islcp = isl.copy(img)
-                  islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
-                  islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
-                  size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
-                  if opts.peak_fit and size_subisl > peak_size:
-                      sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
-                  else:
-                      sgaul, sfgaul = self.fit_island(islcp, opts, img)
-                  gaul = gaul + sgaul; fgaul = fgaul + sfgaul
-                  if bar.started: bar.spin()
-                if bar.started: bar.increment()
-            else:
+#             tosplit = misc.isl_tosplit(isl, img)
+#             if opts.split_isl and tosplit[0] > 0:
+#                 n_subisl, sub_labels = tosplit[1], tosplit[2]
+#                 gaul = []; fgaul = []
+#                 if opts.verbose_fitting:
+#                   print 'SPLITTING ISLAND INTO ',n_subisl,' PARTS FOR ISLAND ',isl.island_id
+#                 for i_sub in range(n_subisl):
+#                   islcp = isl.copy(img)
+#                   islcp.mask_active = N.where(sub_labels == i_sub+1, False, True)
+#                   islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
+#                   size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
+#                   if opts.peak_fit and size_subisl > peak_size:
+#                       sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
+#                   else:
+#                       sgaul, sfgaul = self.fit_island(islcp, opts, img)
+#                   gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+#                   if bar.started: bar.spin()
+#                 if bar.started: bar.increment()         
+#             else:
               if img.waveletimage:
                 isl.islmean = 0.0
               else:
