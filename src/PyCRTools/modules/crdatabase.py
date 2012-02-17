@@ -45,14 +45,14 @@ class CRDatabase:
             self.datapath = datapath
         else:
             self.datapath = self.basepath + "/data"
-        self.settings.setDataPath(self.datapath)
+        self.settings.datapath = self.datapath
 
         # Location of the resultspath
         if len(resultspath) > 0:
             self.resultspath = resultspath
         else:
             self.resultspath = self.basepath + "/results"
-        self.settings.setResultsPath(self.resultspath)
+        self.settings.resultspath = self.resultspath
 
 
     def __createTables(self):
@@ -499,7 +499,7 @@ class Event:
 
 
     def removeDatafile(self, datafileID=0):
-        """Remove datafile object with id=*datafileID* from this event.
+        """Remove datafile object with id= *datafileID* from this event.
 
         This removes the datafile information object from this event
         object and updates the database. Note that the datafile info
@@ -741,7 +741,7 @@ class Datafile:
 
 
     def removeStation(self, stationID=0):
-        """Remove station object with id=*stationID* from this datafile.
+        """Remove station object with id= *stationID* from this datafile.
 
         This removes the station information object from this datafile
         object and updates the database. Note that the station info
@@ -971,7 +971,7 @@ class Station:
 
 
     def removePolarisation(self, polarisationID=0):
-        """Remove polarisation object with id=*polarisationID* from
+        """Remove polarisation object with id= *polarisationID* from
         this station.
 
         This removes the polarisation information object from this station
@@ -1200,7 +1200,7 @@ class Settings:
         self._db = db
 
 
-    def getDataPath(self):
+    def _getDataPath(self):
         """Get the value of the datapath from the database."""
         result = None
 
@@ -1213,8 +1213,17 @@ class Settings:
         return result
 
 
-    def setDataPath(self, value):
-        """Set the value of the datapath in the database."""
+    def _setDataPath(self, value):
+        """Set the value of the datapath in the database.
+
+        **Properties**
+
+        =========  ===========================================
+        Parameter  Description
+        =========  ===========================================
+        *value*    new value of the *datapath* attribute.
+        =========  ===========================================
+        """
         if self._db:
             sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
             self._db.execute(sql)
@@ -1222,7 +1231,9 @@ class Settings:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getResultsPath(self):
+    datapath = property(_getDataPath, _setDataPath)
+
+    def _getResultsPath(self):
         """Get the value of the resultspath from the database."""
         result = None
 
@@ -1235,14 +1246,25 @@ class Settings:
         return result
 
 
-    def setResultsPath(self, value):
-        """Set the value of the resultspath in the database."""
+    def _setResultsPath(self, value):
+        """Set the value of the resultspath in the database.
+
+        **Properties**
+
+        =========  ===========================================
+        Parameter  Description
+        =========  ===========================================
+        *value*    new value of the *resultspath* attribute.
+        =========  ===========================================
+        """
         if self._db:
             sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
             self._db.execute(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
+
+    resultspath = property(_getResultsPath, _setResultsPath)
 
     def summary(self):
         """Summary of the Settings object."""
@@ -1252,8 +1274,8 @@ class Settings:
         print "  Summary of the Settings object."
         print "="*linewidth
 
-        print "  %-40s : %s" %("datapath", self.getDataPath())
-        print "  %-40s : %s" %("resultspath", self.getResultsPath())
+        print "  %-40s : %s" %("datapath", self.datapath)
+        print "  %-40s : %s" %("resultspath", self.resultspath)
 
 
 

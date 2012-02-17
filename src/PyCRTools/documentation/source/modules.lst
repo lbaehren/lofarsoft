@@ -19,11 +19,11 @@ pycrtools.core.hftools.mRF
 pycrtools.core.hftools.mTBB
 pycrtools.core.hftools.mEndPointRadiation
 pycrtools.core.hftools.mCalibration
+pycrtools.crdatabase
 pycrtools.metadata
 pycrtools.grid
 pycrtools.matching
 pycrtools.srcfind
-pycrtools.pipeline_database
 pycrtools.ppf
 pycrtools.lora
 pycrtools.tasks
