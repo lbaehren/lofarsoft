@@ -82,7 +82,7 @@ void printHeaderPSRData(datafile_definition datafile, int ident)
   for(i = 0; i < ident; i++) printf(" ");
   printf("Period=%f SampTime=%f  mjd=%.9lf\n",datafile.Period,datafile.SampTime,datafile.mjd);
   for(i = 0; i < ident; i++) printf(" ");
-  printf("freq_cent=%f bw=%f channelbw=%f\n",datafile.freq_cent,datafile.bw, datafile.channelbw);
+  printf("freq_cent=%5.10f bw=%3.10f channelbw=%3.10f\n",datafile.freq_cent,datafile.bw, datafile.channelbw);
   for(i = 0; i < ident; i++) printf(" ");
   printf("Header length = %ld bytes\n", (long)datafile.datastart);
   for(i = 0; i < ident; i++) printf(" ");
@@ -406,8 +406,8 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-  dummy_float = datafile->bw;
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSBW", &dummy_float, "[MHz] Bandwidth for observation", &status) != 0) {
+  dummy_double = datafile->bw;
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "OBSBW", &dummy_double, "[MHz] Bandwidth for observation", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
@@ -460,9 +460,8 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
-
-
-  if(fits_write_key(datafile->fits_fptr, TFLOAT, "OBSFREQ", &datafile->freq_cent, "[MHz] Centre frequency for observation", &status) != 0) {
+  dummy_double=(double)datafile->freq_cent;
+  if(fits_write_key(datafile->fits_fptr, TDOUBLE, "OBSFREQ", &dummy_double, "[MHz] Centre frequency for observation", &status) != 0) {
     fprintf(stderr, "ERROR writePSRFITSHeader: Cannot write keyword.\n");
     return 0;
   }
