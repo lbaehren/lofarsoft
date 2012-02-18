@@ -514,6 +514,7 @@ class Op_polarisation(Op):
         opts['verbose_fitting'] = img.opts.verbose_fitting
         opts['split_isl'] = img.opts.split_isl
         opts['peak_fit'] = img.opts.peak_fit
+        opts['quiet'] = img.opts.quiet
         opts['peak_maxsize'] = img.opts.peak_maxsize
         opts['interactive'] = False
         

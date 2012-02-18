@@ -225,6 +225,7 @@ class Op_wavelet_atrous(Op):
         opts['output_fbdsm'] = False
         opts['polarisation_do'] = False
         opts['group_by_isl'] = img.opts.group_by_isl
+        opts['quiet'] = img.opts.quiet
 
         opts['flag_smallsrc'] = False
         opts['flag_minsnr'] = 0.5

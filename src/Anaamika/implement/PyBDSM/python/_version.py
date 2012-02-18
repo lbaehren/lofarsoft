@@ -25,6 +25,9 @@ def changelog():
     """
     PyBDSM Changelog.
     -----------------------------------------------------------------------
+    
+    2012/02/17 - In scripts, process_image() will now accept a 
+                 dictionary of parameters as input.
 
     2012/02/10 - Sources that appear only in Stokes Q or U (and 
                  hence not in Stokes I) are now identified and included 

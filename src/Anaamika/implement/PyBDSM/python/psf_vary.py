@@ -169,6 +169,8 @@ class Op_psf_vary(Op):
                 psf_maj = N.zeros(npsf)
                 psf_min = N.zeros(npsf)
                 psf_pa = N.zeros(npsf)
+                if img.opts.quiet == False:
+                    bar.start()
                 for i in range(ntile):
                     psfim = psfimages[i]
                     mask = N.zeros(psfim.shape, dtype=bool)
@@ -250,7 +252,9 @@ class Op_psf_vary(Op):
                     func.write_image_to_file(img.use_io, img.imagename + '.pa_interp.fits', N.transpose(pa_interp), img, dir)
                 
                 # Loop through source and Gaussian lists and deconvolve the sizes using appropriate beam
-                bar = statusbar.StatusBar('Correcting deconvolved source sizes ..... : ', 0, img.nsrc)
+                bar2 = statusbar.StatusBar('Correcting deconvolved source sizes ..... : ', 0, img.nsrc)
+                if img.opts.quiet == False:
+                    bar2.start()
                 for src in img.sources:
                     src_pos = img.sky2pix(src.posn_sky_centroid)
                     src_pos_int = (int(src_pos[0]), int(src_pos[1]))
@@ -264,8 +268,10 @@ class Op_psf_vary(Op):
                         gaus_dc, err = func.deconv2(gaus_bm, gaus_c)
                         g.deconv_size_sky = img.pix2beam(gaus_dc)
                         g.deconv_size_skyE = [0.0, 0.0, 0.0]
-                        bar.spin()
-                    bar.increment()
+                        if img.opts.quiet == False:
+                            bar2.spin()
+                    if img.opts.quiet == False:
+                        bar2.increment()
 
 ##################################################################################################
 
