@@ -113,8 +113,8 @@ def load_pars(filename):
     # First, check if input is a dictionary
     if isinstance(filename, dict):
         try:
-            timg = Image(pars)
-            print "--> Loaded parameters from dictionary '" + filename + "'."
+            timg = Image(filename)
+            print "--> Loaded parameters from dictionary."
             return timg
         except:
             return None
