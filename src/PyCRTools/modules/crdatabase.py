@@ -1,7 +1,8 @@
 from pycrtools.io import database as db
 import os
 
-class CRDatabase:
+
+class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
     def __init__(self, filename=":memory:", datapath="", resultspath=""):
@@ -41,18 +42,16 @@ class CRDatabase:
         self.basepath = os.path.dirname(self.filename)
 
         # Location of the datapath
-        if len(datapath) > 0:
-            self.datapath = datapath
-        else:
-            self.datapath = self.basepath + "/data"
-        self.settings.datapath = self.datapath
+        if "" != datapath:
+            self.settings.datapath = datapath
+        elif "" == self.settings.datapath:
+            self.settings.datapath = self.basepath + "/data"
 
         # Location of the resultspath
-        if len(resultspath) > 0:
-            self.resultspath = resultspath
-        else:
-            self.resultspath = self.basepath + "/results"
-        self.settings.resultspath = self.resultspath
+        if "" != resultspath:
+            self.settings.resultspath = resultspath
+        elif "" == self.settings.resultspath:
+            self.settings.resultspath = self.basepath + "/results"
 
 
     def __createTables(self):
@@ -97,7 +96,7 @@ class CRDatabase:
 
             # settings table
             sql = """
-            CREATE TABLE IF NOT EXISTS main.settings (key TEXT, value TEXT);
+            CREATE TABLE IF NOT EXISTS main.settings (key TEXT NOT NULL UNIQUE, value TEXT);
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');
             """
@@ -260,8 +259,8 @@ class CRDatabase:
 
         print "  %-40s : '%s'" %("Filename", self.filename)
         print "  %-40s : '%s'" %("Base path", self.basepath)
-        print "  %-40s : '%s'" %("Data path", self.datapath)
-        print "  %-40s : '%s'" %("Results path", self.resultspath)
+        print "  %-40s : '%s'" %("Data path", self.settings.datapath)
+        print "  %-40s : '%s'" %("Results path", self.settings.resultspath)
 
         print "-"*linewidth
 
@@ -309,7 +308,7 @@ class CRDatabase:
 
 
 
-class Event:
+class Event(object):
     """CR event information."""
 
     def __init__(self, db=None, id=0):
@@ -568,7 +567,7 @@ class Event:
 
 
 
-class Datafile:
+class Datafile(object):
     """CR datafile information."""
 
     def __init__(self, db=None, id=0):
@@ -806,7 +805,7 @@ class Datafile:
 
 
 
-class Station:
+class Station(object):
     """CR station information"""
 
     def __init__(self, db=None, id=0):
@@ -1036,7 +1035,7 @@ class Station:
 
 
 
-class Polarisation:
+class Polarisation(object):
     """CR polarisation information."""
 
     def __init__(self, db=None, id=0):
@@ -1183,7 +1182,7 @@ class Polarisation:
 
 
 
-class Settings:
+class Settings(object):
     """Global settings for the CR database."""
 
     def __init__(self, db=None):
@@ -1197,10 +1196,13 @@ class Settings:
         *db*       database to which to link the settings to.
         =========  ==============================================
         """
-        self._db = db
+        if db:
+            self._db = db
+        else:
+            raise ValueError("Unable to set database: no database was provided.")
 
 
-    def _getDataPath(self):
+    def _getDatapath(self):
         """Get the value of the datapath from the database."""
         result = None
 
@@ -1213,7 +1215,7 @@ class Settings:
         return result
 
 
-    def _setDataPath(self, value):
+    def _setDatapath(self, value):
         """Set the value of the datapath in the database.
 
         **Properties**
@@ -1231,9 +1233,9 @@ class Settings:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    datapath = property(_getDataPath, _setDataPath)
+    datapath = property(_getDatapath, _setDatapath)
 
-    def _getResultsPath(self):
+    def _getResultspath(self):
         """Get the value of the resultspath from the database."""
         result = None
 
@@ -1246,7 +1248,7 @@ class Settings:
         return result
 
 
-    def _setResultsPath(self, value):
+    def _setResultspath(self, value):
         """Set the value of the resultspath in the database.
 
         **Properties**
@@ -1264,7 +1266,7 @@ class Settings:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    resultspath = property(_getResultsPath, _setResultsPath)
+    resultspath = property(_getResultspath, _setResultspath)
 
     def summary(self):
         """Summary of the Settings object."""
@@ -1279,7 +1281,7 @@ class Settings:
 
 
 
-class Filter:
+class Filter(object):
     """Filter"""
 
     def __init__(self, db=None, name="DEFAULT"):
