@@ -45,10 +45,14 @@ class Op_islands(Op):
         mylogger.userinfo(mylog, "Number of islands found", '%i' %
                           len(img.islands))
         
-        pyrank = N.zeros(img.ch0.shape) - 1
+        pyrank = N.zeros(img.ch0.shape, dtype=int) - 1
         for i, isl in enumerate(img.islands):
             isl.island_id = i
-            pyrank[isl.bbox] += N.invert(isl.mask_active)*i
+            if i == 0:
+                pyrank[isl.bbox] = N.invert(isl.mask_active)-1
+            else:
+                pyrank[isl.bbox] = N.invert(isl.mask_active)*i
+            
 
         if opts.output_all: write_islands(img)
         if opts.output_fbdsm and has_fbdsm:

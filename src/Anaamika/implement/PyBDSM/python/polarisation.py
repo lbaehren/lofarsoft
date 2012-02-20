@@ -182,7 +182,8 @@ class Op_polarisation(Op):
               for pi_isl in pimg.islands:
                   new_sources = []
                   for pi_src in pi_isl.sources:
-                      if img.pyrank[int(img.sky2pix(pi_src.posn_sky_centroid)[0]), int(img.sky2pix(pi_src.posn_sky_centroid)[1])] == -1:
+                      if img.pyrank[int(img.sky2pix(pi_src.posn_sky_max)[0]), 
+                                    int(img.sky2pix(pi_src.posn_sky_max)[1])] == -1:
                           src_id += 1
                           pi_src._pi = True
                           pi_src.island_id = isl_id
