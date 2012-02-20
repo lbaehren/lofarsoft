@@ -1027,7 +1027,13 @@ def get_parameters_new(obsid, useFilename=False):
         for i in range(len(sbspernode)):
             sbspernode[i]=int(sbspernode[i].split('*')[0])
         parameters["sbspernode"]=sbspernode
-    parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
+    if "OLAP.Stokes.integrationSteps" in allparameters.keys():
+        parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
+    else:
+        parameters["CStimeintegration"]=int(allparameters["OLAP.CNProc_CoherentStokes.timeIntegrationFactor"])
+        parameters["IStimeintegration"]=int(allparameters["OLAP.CNProc_IncoherentStokes.timeIntegrationFactor"])
+        if True or parameters["CStimeintegration"]==parameters["IStimeintegration"]:
+            parameters["timeintegration"]=parameters["CStimeintegration"]
     
     subbands=allparameters["Observation.subbandList"].strip('[]').split(',')
     subbands=[range(int(a.split('..')[0]),int(a.split('..')[1])+1) if '..' in a else [a] for a in subbands if '..' in a]
@@ -1057,10 +1063,17 @@ def get_parameters_new(obsid, useFilename=False):
         parameters["beamformeddata"]=allparameters["Observation.DataProducts.Output_Beamformed.enabled"]=='true'
         parameters["complexvoltages"]=parameters["beamformeddata"]
         parameters["correlateddata"]=allparameters["Observation.DataProducts.Output_Correlated.enabled"]=='true'
-        parameters["filtereddata"]=allparameters["Observation.DataProducts.Output_Filtered.enabled"]=='true'
+        if "Observation.DataProducts.Output_Filtered.enabled" in allparameters.keys():
+            parameters["filtereddata"]=allparameters["Observation.DataProducts.Output_Filtered.enabled"]=='true'
 
     parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true'
-    parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
+    if "OLAP.Stokes.which" in allparameters.keys():
+        parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
+    else:
+        parameters["ISstokestype"]=allparameters["OLAP.CNProc_IncoherentStokes.which"]
+        parameters["CSstokestype"]=allparameters["OLAP.CNProc_CoherentStokes.which"]
+        if parameters["ISstokestype"]==parameters["CSstokestype"]:
+            parameters["stokestype"]=parameters["ISstokestype"]
     if "Observation.Beam[0].target" in allparameters.keys():
         parameters["target"]=allparameters["Observation.Beam[0].target"]
 
@@ -1143,6 +1156,8 @@ def get_parameters_new(obsid, useFilename=False):
                     names.append(name2)
         elif "Observation.DataProducts.Output_CoherentStokes.filenames" in allparameters.keys():
              DPprefix="Observation.DataProducts.Output_CoherentStokes."
+             if "OLAP.IncoherentStokesAreTransposed" in allparameters.keys():
+                 DPprefix="Observation.DataProducts.Output_Beamformed."
              DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
              DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
              DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
@@ -1153,26 +1168,27 @@ def get_parameters_new(obsid, useFilename=False):
 
 
     if parameters["incoherentstokes"]:
-        sb=0
-        for i in range(len(parameters["storagenodes"])):
-            node=parameters["storagenodes"][i]
-            nrpernode=parameters["sbspernode"][i]
-            if "namemask" in parameters.keys():
-                mask=parameters["namemask"]
-                for j in range(int(nrpernode)):
-                    name='/net/'+subcluster[node]+'/'+node
-                    name=name+mask.replace('${YEAR}_${MSNUMBER}',year+'_'+parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_SB'+sb2str(sb))
-                    name=name+'_bf.incoherentstokes'
-                    names.append(name)
-                    sb+=1
-            elif "Observation.DataProducts.Output_IncoherentStokes.filenames" in allparameters.keys():
-                 DPprefix="Observation.DataProducts.Output_IncoherentStokes."
-                 DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
-                 DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
-                 DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
-                 for num,name in enumerate(DPfilenames):
-                     names.append(DPdir+name)
-                     fullnames.append(DPfulldir[num%len(DPfulldir)]+name)
+        if False:
+            sb=0
+            for i in range(len(parameters["storagenodes"])):
+                node=parameters["storagenodes"][i]
+                nrpernode=parameters["sbspernode"][i]
+                if "namemask" in parameters.keys():
+                    mask=parameters["namemask"]
+                    for j in range(int(nrpernode)):
+                        name='/net/'+subcluster[node]+'/'+node
+                        name=name+mask.replace('${YEAR}_${MSNUMBER}',year+'_'+parameters['obsid']).replace('/SB${SUBBAND}','/L'+parameters['obsid']+'_SB'+sb2str(sb))
+                        name=name+'_bf.incoherentstokes'
+                        names.append(name)
+                        sb+=1
+                elif "Observation.DataProducts.Output_IncoherentStokes.filenames" in allparameters.keys():
+                     DPprefix="Observation.DataProducts.Output_IncoherentStokes."
+                     DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
+                     DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
+                     DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
+                     for num,name in enumerate(DPfilenames):
+                         names.append(DPdir+name)
+                         fullnames.append(DPfulldir[num%len(DPfulldir)]+name)
 
     if parameters["beamformeddata"]:
         sb=0
@@ -1215,18 +1231,19 @@ def get_parameters_new(obsid, useFilename=False):
                 print "Names for correlated data not supported yet"
 
 
-    if parameters["filtereddata"]:
-        sb=0
-        for i in range(len(parameters["storagenodes"])):
-            node=parameters["storagenodes"][i]
-            nrpernode=parameters["sbspernode"][i]
-            mask=parameters["namemask"]
-            for j in range(int(nrpernode)):
-                name='/net/'+subcluster[node]+'/'+node
-                name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
-                name=name+'.unknown'
-                names.append(name)
-                sb+=1
+    if "filteredddata" in parameters.keys():
+        if parameters["filtereddata"]:
+            sb=0
+            for i in range(len(parameters["storagenodes"])):
+                node=parameters["storagenodes"][i]
+                nrpernode=parameters["sbspernode"][i]
+                mask=parameters["namemask"]
+                for j in range(int(nrpernode)):
+                    name='/net/'+subcluster[node]+'/'+node
+                    name=name+mask.replace('${YEAR}',year).replace('${MSNUMBER}',parameters['obsid']).replace('${SUBBAND}',sb2str(sb))
+                    name=name+'.unknown'
+                    names.append(name)
+                    sb+=1
 
     parameters["files"]=names
     parameters["locations"]=fullnames
