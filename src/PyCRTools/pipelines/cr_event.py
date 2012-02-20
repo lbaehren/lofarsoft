@@ -46,7 +46,7 @@ with all figures can be viwed with a web browser from
 outputdir/project-timestamp/polN/NNNN/index.html.
 
 The results dict can also be read stand-alone from the file
-results.py. Just use execfile(os.path.join(outputdir,"results.py")) and look for ``results``.
+results.xml. Just use ``results=xmldict.load(os.path.join(outputdir,"results.xml"))``.
 
 There is also a summary of the results ``summary.html`` and
 ``summary-good.html``in the top level results directory.
@@ -115,6 +115,7 @@ parser.add_option("-C","--checksum", action="store_true", help="Calculate checks
 parser.add_option("-I","--imager", action="store_true", help="Run imager")
 parser.add_option("-O", "--max_outliers", type="int", default=24, help="Maximum allowed number of outliers in calculated cable delays")
 parser.add_option("-r", "--randomize_rfi", action="store_true", help="Replace RFI lines with mean value at random phase.")
+parser.add_option("-F", "--full_output", action="store_true", help="Write data arrays to pcr files and task parameters to par files.")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -302,7 +303,7 @@ def finish_file(laststatus=""):
 
     print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
     print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
-    print "which can be found in `results.py`(use, e.g., execfile)."
+    print "which can be found in `results.xml`(use, e.g., xmldict)."
     print "Shifted time series data of all antennas is in event.par.time_series."
     print "Open",htmlfilename,"in your browser to get a summary."
     print "-----------------------------------------------------------------------------------------------------------"
@@ -413,7 +414,10 @@ for full_filename in files:
         goodsummaryfilename=os.path.join(outputdir,"summary-good.html")
         allsummaryfilename=os.path.join(outputdir,"summary.html")
 
-        tasks.task_write_parfiles=True
+        if options.full_output:
+            tasks.task_write_parfiles=True
+        else:
+            tasks.task_write_parfiles=False
         tasks.task_outputdir=outputdir_with_subdirectories
         nparfiles = len(tasks.task_parfiles)
 
@@ -552,6 +556,7 @@ for full_filename in files:
             plot_finish=Pause,
             output_dir=outputdir_with_subdirectories,
             AverageSpectrum = dict(
+                store_spectra = options.full_output,
                 maxnchunks=maxnchunks, #To avoid too many empty blocks being read in, if DATA_LENGTH is wrong
                 calc_incoherent_sum=True,
                 addantennas=False,
@@ -922,7 +927,7 @@ for full_filename in files:
 
         if lora_direction:
             print "---> Now make an incoherent beam in the LORA direction, locate pulse, and cut time series around it."
-            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1), calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False)
+            beamformer_full=trerun("BeamFormer2","bf_full",data=timeseries_calibrated_data,fftdata=fft_data,dofft=False,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(lora_direction[0]*deg,lora_direction[1]*deg,1,nx=1,ny=1), calc_timeseries=True,doplot=False,doabs=True,smooth_width=5,plotspec=False,verbose=False,calc_tbeams=False,store_spectrum=options.full_output)
             # removed cabledelays
             tbeam_incoherent=hArray(beamformer_full.tbeam_incoherent.vec(),[blocksize])#make this a one-dimensional array to not confuse LocatePulseTrain ...
         else:
@@ -976,8 +981,9 @@ for full_filename in files:
         timeseries_raw_rms = timeseries_data[..., 0:pulse.start].stddev() # no DC offset correction was done
 
 # calibration complete.
-        print "---> Saving calibrated time series to",calibrated_timeseries_file
-        timeseries_calibrated_data.write(calibrated_timeseries_file)
+        if options.full_output:
+            print "---> Saving calibrated time series to",calibrated_timeseries_file
+            timeseries_calibrated_data.write(calibrated_timeseries_file)
 
         if do_checksums:
             checksum = timeseries_calibrated_data.checksum()
@@ -999,8 +1005,9 @@ for full_filename in files:
             ))
 
         #Store the small version of the calibrated timeseries, e.g. for the imager
-        print "---> Saving ",calibrated_timeseries_cut_file
-        pulse.timeseries_data_cut.write(calibrated_timeseries_cut_file)
+        if options.full_output:
+            print "---> Saving ",calibrated_timeseries_cut_file
+            pulse.timeseries_data_cut.write(calibrated_timeseries_cut_file)
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
@@ -1188,7 +1195,7 @@ for full_filename in files:
 
         #Beamform short data set first for inspection (and possibly for
         #maximizing later)
-        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3), calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False)
+        bf=trerun("BeamFormer2","bf",data=pulse.timeseries_data_cut,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=3,ny=3), calc_timeseries=True,doplot=2 if Pause.doplot else False,doabs=True,smooth_width=5,plotspec=False,verbose=False,store_spectrum=options.full_output)
             # removed cabledelays = final_cable_delays in beamformer (AC)
         #Use the above later also for maximizing peak Beam-formed timeseries
         #is in ---> bf.tbeams[bf.mainbeam]
@@ -1211,7 +1218,7 @@ for full_filename in files:
         print "---> Plotting full beam-formed data set"
         #Beamform full data set (not really necessary, but fun).
 
-        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1), calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False)
+        beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1), calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False,store_spectrum=options.full_output)
             # removed cabledelays = final_cable_delays in beamformer (AC)
         ########################################################################
         #Data Analysis ... (to be expanded)
@@ -1317,12 +1324,9 @@ for full_filename in files:
         event.par.quality=quality
         event.par.timeseries_data=pulse.timeseries_data_cut
         event.par.results=results
-        event.write(result_file)
 
-        #Writing results.py
-        f=open(os.path.join(outputdir_with_subdirectories,"results.py"),"w")
-        f.write("#"+outfilename+"\nresults="+str(results))
-        f.close()
+        if options.full_output:
+            event.write(result_file)
 
         # Writing results to XML file
         xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)

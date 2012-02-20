@@ -515,7 +515,8 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
                     doc="Wrapper array for ``cdata``",
                     default=lambda self:cr.hArray(self.cdata.vec(),[self.blocklen,self.nblocks],header=self.header)),
 
-# Parameters to calculate a dynamic spectrum - not yet functional
+        store_spectra = dict(default=True,
+                             doc="Write calculated spectra to disk."),
 
         calc_dynspec = dict(default=False,doc="Calculate a dynamic spectrum as well (if no doublefft)"),
 
@@ -972,7 +973,8 @@ class AverageSpectrum(tasks.Task):
                                     self.power.spectralpower(self.specT)
                                 self.frequencies.fillrange((self.start_frequency+offset*self.delta_band)/10**6,self.delta_frequency/10**6)
                                 self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraflagged","antennas_used","quality"])
-                                self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)
+                                if self.store_spectra:
+                                    self.power.write(self.spectrum_file,nblocks=self.nbands,block=offset,clearfile=clearfile)
                                 clearfile=False
                                 if self.doplot>1 and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power2[self.plot_antenna,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot()
@@ -1063,7 +1065,8 @@ class AverageSpectrum(tasks.Task):
                 self.power2[...].sqrt() # dimensions?
                 self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","quality"],
                                   fftLength="speclen",blocksize="fullsize")
-                self.power.write(self.spectrum_file)# same as power2, just nicer dimensions
+                if self.store_spectra:
+                    self.power.write(self.spectrum_file)# same as power2, just nicer dimensions
                 self.output_files["average_spectrum"].append(self.spectrum_file)
                 if self.doplot:
                     title=("Spectrum of Antenna #"+str(self.plot_antenna) if not self.addantennas else "Average Spectrum of Antennas")+"\n"+self.root_filename
@@ -1077,7 +1080,8 @@ class AverageSpectrum(tasks.Task):
                 #Normalize the incoherent time series power
                 self.ntimeseries_data_added_per_chunk.max(1)
                 self.incoherent_sum[...] /= self.ntimeseries_data_added_per_chunk.vec()
-                self.incoherent_sum.write(self.incoherent_sum_file)
+                if self.store_spectra:
+                    self.incoherent_sum.write(self.incoherent_sum_file)
                 self.output_files["incoherent_sum"].append(self.incoherent_sum_file)
 
             if self.calc_dynspec:
@@ -1093,7 +1097,8 @@ class AverageSpectrum(tasks.Task):
                     self.cleanspec /= self.avspec
                 except ValueError:
                     hprint ("Error: avspec contains zeros")
-                self.dynspec.write(self.dynspec_file)
+                if self.store_spectra:
+                    self.dynspec.write(self.dynspec_file)
                 self.output_files["dynamic_spectrum"].append(self.dynspec_file)
 
                 if self.doplot:
@@ -1143,7 +1148,8 @@ class AverageSpectrum(tasks.Task):
                 self.all_cleanspec /= self.all_avspec
             except ValueError:
                 hprint ("Error: all_avspec contains zeros!")
-            self.all_dynspec.write(self.all_dynspec_file)
+            if self.store_spectra:
+                self.all_dynspec.write(self.all_dynspec_file)
             self.output_files["all_dynamic_spectrum"].append(self.all_dynspec_file)
 
             if self.doplot:

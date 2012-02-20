@@ -217,6 +217,9 @@ class BeamFormer2(tasks.Task):
         spectrum_file = dict(default=lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
                              doc="Complete filename including directory to store the final spectrum."),
 
+        store_spectrum = dict(default=True,
+                             doc="Store the final spectrum."),
+
         nantennas = dict(default=lambda self:len(self.antennas),
                          doc="The actual number of antennas available for calculation in the file (<maxnantennas)."),
 
@@ -478,7 +481,7 @@ class BeamFormer2(tasks.Task):
                 self.beams[...].muladdsum(self.weights[...],self.fftdata)  #[nbeam,speclen] - [nbeam,nant,speclen] - [nant,speclen]
                 if self.avspec:
                     self.avspec.squareadd(self.beams)
-                if self.spectrum_file:
+                if self.spectrum_file and self.store_spectrum:
                     self.beams.write(self.spectrum_file,nblocks=self.nblocks,block=block,clearfile=clearfile)
                     clearfile=False
                 if self.calc_timeseries:
