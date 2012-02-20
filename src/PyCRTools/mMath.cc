@@ -2351,7 +2351,7 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Piecewise subtraction of the elements in a vector and summing of the results.
+//$DOCSTRING: Piecewise subtraction of the elements beteen two vector and summing of the results.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDiffSum
 //-----------------------------------------------------------------------
@@ -2380,7 +2380,40 @@ IterValueType HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate the first-difference of a vector (difference of subsequent elements) and store in a second vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDifferentiate
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec1)()("Numeric input vector of length N")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_TYPE)(vec2)()("Numeric output vector of length N-1")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+\brief $DOCSTRING
+$PARDOCSTRING
 
+Usage:
+hDifferentiate(Vector([a,b,c,...]), outputVector) -> [b-a,c-b,...]
+ 
+Will stop if the end of either input or output vector is reached.
+ 
+See Also: 
+ hDiffSum, hDiff
+*/
+template <class Iter>
+void HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const Iter vec2_end)
+{
+  Iter it1a=vec1,it1b=vec1+1,it2=vec2;
+  if (it1b > vec1_end) return;
+  while ((it1b!=vec1_end) && (it2!=vec2_end)) {
+      (*it2) = (*it1b) - (*it1a);
+      ++it1a; ++it1b; ++it2;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+      
+      
+      
 //$DOCSTRING: Piecewise subtraction of the elements in a vector and summing of the square of the results.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDiffSquaredSum
