@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.38
+VERSION=3.39
  
 #####################################################################
 # Usage #
@@ -3560,7 +3560,7 @@ do
        then
 	      find `pwd`/stokes -name "*.fits" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > CS_delete_fits.list
        else
-	      find `pwd`/stokes -name "*fits" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > FE_delete_fits.list
+	      find `pwd`/stokes -name "*.fits" -print | egrep -v "RSPA|inf|ps|pdf|png|rfirep" | awk '{print "if [ -f "$1" ]\nthen  \n   rm -f "$1 "\n echo rm -f "$1 "\nfi"}' > FE_delete_fits.list
        fi	
 	fi
 	
@@ -3632,8 +3632,8 @@ then
 	cd ${location}
 
     # if there are no stokes/RSP* directories, then clean up, assume no CS beams done in this round
-    found_cs=`find ./stokes -type d -name "RSP*" -print`
-    found_is=`find ./incoherentstokes -type d -name "RSP*" -print`
+    found_cs=`find ./stokes -type d -print`
+    found_is=`find ./incoherentstokes -type d -print`
     if [[ $found_cs == "" ]]
     then 
        rm -rf stokes
