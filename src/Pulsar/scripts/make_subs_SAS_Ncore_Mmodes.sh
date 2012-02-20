@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.39
+VERSION=3.41
  
 #####################################################################
 # Usage #
@@ -551,7 +551,12 @@ then
   
   SAMPLES_CS=`echo ${MAGIC_NUM}/${DOWN_CS}| bc`
   SAMPLES_IS=`echo ${MAGIC_NUM}/${DOWN_IS}| bc`
+  
+  # for now, use the first beam subband list;  grab the rest in logic beloe 
+  nSubbands=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
+
 else
+  nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
   CHAN=`cat $PARSET | grep "Observation.channelsPerSubband" | awk -F "= " '{print $2}'`
   DOWN=`cat $PARSET | grep "OLAP.Stokes.integrationSteps" | grep -v ObservationControl | awk -F "= " '{print $2}'`
   SAMPLES=`echo ${MAGIC_NUM}/${DOWN}| bc`
@@ -563,7 +568,6 @@ FLYSEYE=`cat $PARSET | grep "OLAP.PencilInfo.flysEye" | head -1 | awk -F "= " '{
 #CHANPFRAME=`cat $PARSET | grep "OLAP.nrSubbandsPerFrame"  | head -1 | awk -F "= " '{print $2}'`
 #SUBSPPSET=`cat $PARSET | grep "OLAP.subbandsPerPset"  | head -1 | awk -F "= " '{print $2}'`
 
-nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
 ANT_SHORT=`cat $PARSET | grep "Observation.antennaArray"  | head -1 | awk -F "= " '{print $2}'`
 
 whichStokes=TBD
@@ -1178,10 +1182,17 @@ do
                NBEAMS=$all_num
 	  		   echo "TiedArray Beams: 2nd transpose has $nSubbands subbands in $all_num files" 
 	  		   echo "TiedArray Beams: 2nd transpose has $nSubbands subbands in $all_num files" >> $log
-           else
+           elif (( $IS2 == 0 ))
+           then
 	           all_num=$nrBeams
 	  		   echo "2nd transpose has $nSubbands subbands in $all_num files" 
 	  		   echo "2nd transpose has $nSubbands subbands in $all_num files" >> $log
+	  	   elif (( $IS2 == 1 ))
+	  	   then
+	           all_num=`wc -l $master_list | awk '{print $1}'`
+	           core=1
+	  		   echo "2nd transpose has $nSubbands subbands in $all_num files; resetting core=1" 
+	  		   echo "2nd transpose has $nSubbands subbands in $all_num files; resetting core=1" >> $log
 	  	   fi
         fi
 
@@ -3536,6 +3547,29 @@ do
 	       then
 	          nrTArings=0
 	       fi
+	       
+	       # name to the SAP beams if they exist
+	       for ii in $num_dir
+		   do
+               sap_beam_number=`cat "incoherentstokes/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+               prev_name="RSP"${ii}
+               new_name="RSP"${sap_beam_number}
+               if (( $sap_beam_number != $ii ))
+               then 
+			      echo mv incoherentstokes/RSP${ii} incoherentstokes/RSP${sap_beam_number}
+			      echo mv incoherentstokes/RSP${ii} incoherentstokes/RSP${sap_beam_number} >> $log
+			      mv incoherentstokes/RSP${ii} incoherentstokes/RSP${sap_beam_number}
+			      echo cd incoherentstokes/RSP${sap_beam_number}
+			      echo cd incoherentstokes/RSP${sap_beam_number}  >> $log
+			      cd incoherentstokes/RSP${sap_beam_number}
+			      echo rename "s/$prev_name/$new_name/" *
+			      echo rename "s/$prev_name/$new_name/" *  >> $log
+                  rename "s/$prev_name/$new_name/" *
+                  echo cd ${location}
+                  echo cd ${location} >> $log
+                  cd ${location}
+                fi
+            done
 	    fi
     fi
 
