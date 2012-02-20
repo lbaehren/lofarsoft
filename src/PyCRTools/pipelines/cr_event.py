@@ -569,7 +569,7 @@ for full_filename in files:
                                   #hence we check for power excesses or
                                   #deficits in an antenna.
                 ),
-            FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="BSPLINE",splineorder=3),
+            FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="POLY",splineorder=3),
             CalcBaseline = dict(baseline=False), # Make sure baseline is recreated when the task is run a second time
             LocatePulseTrain = dict(nsigma=nsigma,maxgap=5,minlen=128,minpulselen=3,maxlen=128,prepulselen=32),  #nisgma=7
         #    DirectionFitTriangles = dict(maxiter=2,rmsfactor=0,minrmsfactor=0), # only do one step,all atennas at once

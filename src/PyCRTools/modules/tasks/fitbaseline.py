@@ -246,7 +246,7 @@ class FitBaseline(tasks.Task):
                             workarray=True),
 
         clean_bins_y = dict(doc="""Array holding the powers of the clean bins. (work vector)""",
-                            default=lambda self:self.small_spectrum,
+                            default=lambda self:self.small_spectrum.new(),
                             workarray=True),
 
         fitted_bins_y = dict(doc="""Array holding the fitted, binned spectrum - for plotting and control. (work vector)""",
@@ -414,7 +414,9 @@ class FitBaseline(tasks.Task):
         self.endpoints=cr.hArray(int,[self.nofAntennas,1],fill=self.nselected_bins-1)
         self.selected_bins[...].set(self.endpoints[...],len(self.freqs)-1)
         #Now copy only those bins with average RMS, i.e. likely with little RFI and take the log
+        self.clean_bins_x.fill(0.)
         self.clean_bins_x[...].copy(self.freqs,self.selected_bins[...],cr.asvec(self.nselected_bins))
+        self.clean_bins_y.fill(0.)
         self.clean_bins_y[...].copy(self.small_spectrum[...],self.selected_bins[...],cr.asvec(self.nselected_bins))
         #    self.weights.copy(self.clean_bins_y)
         if self.logfit:
