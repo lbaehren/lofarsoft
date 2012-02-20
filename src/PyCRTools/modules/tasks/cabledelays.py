@@ -36,6 +36,7 @@ def gatherresults(topdir, maxspread):
     positions = []
     timestamps = []
     cabledelays_database = dict()
+    outputstring = "" # make output string summarizing outlier counts etc.
     for eventdir in eventlist:        
         print "Processing event in directory:",eventdir
         if os.path.isdir(os.path.join(eventdir,"pol0")) or os.path.isdir(os.path.join(eventdir, "pol1")):
@@ -72,8 +73,9 @@ def gatherresults(topdir, maxspread):
            # print '*** New cable delays: %d' % nof_new_cabledelays
            # print '*** New triangle delays: %d' % nof_new_triangledelays
             if nof_new_cabledelays != nof_new_antids:
-                raw_input('WRONG NUMBER OF ANTENNAS!')
-            antid.extend([str(int(v)) for v in res["antennas"].values()]) # res["antennas"] is a dict!
+                print '*** ERROR: WRONG NUMBER OF ANTENNAS!'
+            theseAntIDs = [str(int(v)) for v in res["antennas"].values()]
+            antid.extend(theseAntIDs) # res["antennas"] is a dict!
             # check: same ordering for ant-id's and cable delays in 'res'??? Relying on that.
             cabledelays.extend(res["antennas_residual_cable_delays_planewave"])  #antennas_final_cable_delays
             residualdelays.extend(res["antennas_residual_cable_delays_planewave"])
@@ -81,17 +83,24 @@ def gatherresults(topdir, maxspread):
             theseDelays = np.array(res["antennas_residual_cable_delays_planewave"])
             avg = theseDelays.mean()
             spread = theseDelays.std() * 1.0e9
-            outliercount = len(np.where(abs(theseDelays) > 3.0 * spread)[0])
-            print theseDelays
-            print 'length of array = %d' % len(theseDelays)
-            print 'Spread = %3.3f ns' % spread
-            print '# outliers for this event = %d' % outliercount
+            outlierIndices = np.where(abs(theseDelays) > 3*spread * 1.0e-9)
+            outliercount = len(outlierIndices[0])
+            if outliercount > 0:
+                outlierList = np.array(theseAntIDs)[outlierIndices]
+                outlierList = np.array([int(id) % 100 for id in outlierList])
+                outlierValues = theseDelays[outlierIndices] * 1.0e9
+                outputstring += format('File %s has %d outliers, in RCUs: %s, values = %s' % (datadir, outliercount, str(outlierList), str(outlierValues))) + '\n'
+#            print theseDelays
+#            print 'length of array = %d' % len(theseDelays)
+#            print 'Spread = %3.3f ns' % spread
+#            print '# outliers for this event = %d' % outliercount
             
             timelist = [res["TIME"]] * len(res["antennas"])
             timestamps.extend(timelist)
 
     print len(cabledelays)
     print len(antid)
+    print outputstring
 #    import pdb; pdb.set_trace()
     count = dict()
     antennapositions = dict() # will contain positions for each (unique) antenna id
@@ -314,7 +323,7 @@ class cabledelays(tasks.Task):
                 x_avg.extend([n])
                 y_avg_residual.extend([thisAvg])
                 
-                y_err.extend([2 * thisSpread / np.sqrt(thisN)]) # / np.sqrt(thisN)
+                y_err.extend([thisSpread / np.sqrt(thisN)]) # / np.sqrt(thisN)
                 
                 y_avg_total.extend([thisTotal])
                 if thisSpread < self.maxspread:
