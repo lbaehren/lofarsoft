@@ -98,7 +98,8 @@ else
   if [[ $is_combined == "" ]]; then
    :
   else
-   prepfold_png=`ls -1 $procdir/stokes/RSP*/*.pfd.png | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
+   # pattern allows both RSP* and BEAM* directories to be looked at
+   prepfold_png=`ls -1 $procdir/stokes/[RB][SE][PA]*/*.pfd.png | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
    echo $prepfold_png
   fi
   exit 0
@@ -113,6 +114,7 @@ else
   else
    statusline="$statusline (+tar"
   fi
+  # there is no BEAMA directory as it is introduces already after IS 2nd transpose (now there is only one fits file for IS data)
   isRSPA=`ls -d $procdir/incoherentstokes/RSPA 2>/dev/null | grep -v such`
   if [[ $isRSPA == "" ]]; then
    statusline="$statusline,-all"
@@ -144,7 +146,8 @@ else
    :
   else
    if [[ $isRSPA == "" ]]; then
-    prepfold_png=`ls -1 $procdir/incoherentstokes/RSP*/*.pfd.png | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
+    # pattern allows both RSP* and BEAM* directories to be looked at
+    prepfold_png=`ls -1 $procdir/incoherentstokes/[RB][SE][PA]*/*.pfd.png | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
    else
     prepfold_png=`ls -1 $procdir/incoherentstokes/RSPA/*.pfd.png | grep RSPA_PSR | head -n 1`
    fi

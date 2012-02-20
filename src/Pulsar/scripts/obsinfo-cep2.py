@@ -541,6 +541,17 @@ class obsinfo:
 				if np.size(status) > 0:
         				self.datadir="/" + status[0][:-1].split(" = ")[-1].split("/")[1]
 
+		# check the presence in the parset file the keyword for IS 2nd Transpose
+		# if such keyword exists then it means that parset format is "new" (as of Jan 27, 2012)
+		# so, we can sometimes skip checking other "old" keywords...
+		incoh_transposed=False
+		cmd="grep OLAP.IncoherentStokesAreTransposed %s" % (self.parset,)
+        	status=os.popen(cmd).readlines()
+        	if np.size(status) > 0:
+                	# this info exists in parset file
+                	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
+				incoh_transposed=True
+
 	        # check if online coherent dedispersion (OCD) was used
         	cmd="grep OLAP.coherentDedisperseChannels %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
@@ -561,6 +572,7 @@ class obsinfo:
                         self.CS=status[0][:-1].split(" = ")[-1].lower()[:1]
                         if self.CS == 'f':
                                 self.CS = "-"
+                                self.BF = "-"
                         else:
                                 self.CS = "+"
                                 self.BF = "-"
@@ -575,6 +587,28 @@ class obsinfo:
                                         if self.stokes == "XXYY" or self.stokes == "XY":
                                                 self.BF = "+"
                                                 self.CS = "-"
+		
+		# in case keyword 'Output_CoherentStokes.enabled' does not exist, but format is new (after Jan 27, 2012)
+		if incoh_transposed and self.CS == "?":
+			cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep 'True\|T\|true\|t\|1'" % (self.parset,)
+			status=os.popen(cmd).readlines()
+			if np.size(status) > 0:
+				self.CS = "+"
+                                self.BF = "-"
+                                cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
+                                status=os.popen(cmd).readlines()
+                                if np.size(status) > 0:
+                                        # getting Stokes string
+                                        self.stokes=status[0][:-1].split(" = ")[-1]
+					# in the transition phase there were some parset with just XY
+					# this means just 2 files, one for X, another Y
+					# now is always XXYY, i.e. 4 files get written
+                                        if self.stokes == "XXYY" or self.stokes == "XY":
+                                                self.BF = "+"
+                                                self.CS = "-"
+			else:
+				self.CS = "-"
+				self.BF = "-"
 
 	        # check if data are incoherent stokes data
         	cmd="grep Output_IncoherentStokes.enabled %s" % (self.parset,)
@@ -655,27 +689,28 @@ class obsinfo:
                 # for parset files with old format
                 # getting info about the Type of the data (BF, Imaging, etc.)
                 # check first if data are beamformed
-                if self.CS == "+": self.BF = "-"
-                if self.BF == "?":
-                        cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
-                        status=os.popen(cmd).readlines()
-                        if np.size(status) > 0:
-                                # this info exists in parset file
-                                self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
-                                if self.BF == 'f':
-                                        self.BF = "-"
-                                else:
-                                        self.BF = "+"
-                        else:
-                                cmd="grep outputBeamFormedData %s" % (self.parset,)
-                                status=os.popen(cmd).readlines()
-                                if np.size(status) > 0:
-                                        # this info exists in parset file
-                                        self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
-                                        if self.BF == 'f':
-                                                self.BF = "-"
-                                        else:
-                                                self.BF = "+"
+		if not incoh_transposed:
+                	if self.CS == "+": self.BF = "-"
+                	if self.BF == "?":
+                        	cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
+                        	status=os.popen(cmd).readlines()
+                        	if np.size(status) > 0:
+                                	# this info exists in parset file
+                                	self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
+                                	if self.BF == 'f':
+                                        	self.BF = "-"
+                                	else:
+                                        	self.BF = "+"
+                        	else:
+                                	cmd="grep outputBeamFormedData %s" % (self.parset,)
+                                	status=os.popen(cmd).readlines()
+                                	if np.size(status) > 0:
+                                        	# this info exists in parset file
+                                        	self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
+                                        	if self.BF == 'f':
+                                                	self.BF = "-"
+                                        	else:
+                                                	self.BF = "+"
 
 	        # check if data are fly's eye mode data
         	cmd="grep PencilInfo.flysEye %s" % (self.parset,)
@@ -967,22 +1002,24 @@ class obsinfo:
 						self.ringSize = self.ringSize * (180./3.1415926)
 					except: self.ringSize = 0
 
-		# in the new parset files (as of Jan 27, 2012), keywords "enabled" for CS and IS will not
-		# work anymore. Not sure if they will stay, but even if they do, they will show wrong 'false'
-		# So, we have to check this by other way and correct our values of self.CS and self.IS
-		cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep T" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status) > 0:
-			self.CS = "+"
-		cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep F" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status) > 0:
-			self.IS = "+"
-			# so, in the array of TiedArrayBeams we have at least one IS beam, so we have to
-			# decrease then the number of TiedArrayBeams 
-			self.nrTiedArrayBeams -= np.size(status)
+		# in case keyword 'Output_IncoherentStokes.enabled' does not exist, but format is new (after Jan 27, 2012)
+		# also we need then decrease the number of TA beams as one of them is IS beam now
+		if incoh_transposed:
+			cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep 'False\|false\|F\|f\|0'" % (self.parset,)
+			status=os.popen(cmd).readlines()
+			if np.size(status) > 0:
+				# so, in the array of TiedArrayBeams we have at least one IS beam, so we have to
+				# decrease then the number of TiedArrayBeams 
+				self.nrTiedArrayBeams -= np.size(status)
+				if self.IS == "?":
+                        		self.IS = "+"
+					if self.stokes == "?":
+						cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
+						status=os.popen(cmd).readlines()
+						if np.size(status) > 0:
+							# getting Stokes string
+							self.stokes=status[0][:-1].split(" = ")[-1]
 		
-
 	# return True if parset file was found, and False otherwise
 	def is_parset (self):
 		if self.parset == "":
@@ -1783,9 +1820,8 @@ def usage (prg):
                                        in addition to start time, duration, source, etc. fields that present in all formats.\n\
                                        Second <mode> is \"brief\" that lists antenna array, band filter, number of stations\n\
                                        used. Third <mode> is \"plots\" which is the same as \"brief\" mode in ascii output,\n\
-                                       but in html-format it also provides the profiles (if existed) for RSP0 split and\n\
-                                       in the full band (RSPA) together with chi-squared values of profiles, and with\n\
-                                       the combined profiles from all RSPs together. Fourth <mode> is \"mega\" which is huge\n\
+                                       but in html-format it also provides the profile summaries together with chi-squared\n\
+                                       values of profiles. Fourth <mode> is \"mega\" which is huge\n\
                                        table like for \"plots\" but also with all other info from \"usual\" mode together with\n\
                                        list of all stations. Fifth <mode> is \"smega\" which is shortened \"mega\", the same as\n\
                                        \"mega\" without datasize for each of the node, only the total size of data is shown.\n\
@@ -2401,7 +2437,7 @@ if __name__ == "__main__":
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[1]="IScombined"
-							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
+							if oi.nrBeams > 1:
 								combined="combined"
 								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], ISredlocation, combined, ISredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[1], plotsdir, id, combined, plotsdir, id, profiles_array[1])
 							else:
