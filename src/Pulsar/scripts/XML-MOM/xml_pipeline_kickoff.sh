@@ -188,9 +188,10 @@ else # if [[ $cep2 == 1 ]]
            else
               keyword=Observation.DataProducts.Output_Beamformed.locations
            fi
-           # collect the locus info from the parset
+           # collect the locus info from the parset;  nasty parsing of the locations:
+           # strip the locus name;  sometimes locus numbers repeat, so must sort and uniq the list to remove dumplicates
            locus_list=NONE
-           locus_list=`grep locus $PARSET | grep $keyword | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g'`
+           locus_list=`grep locus $PARSET | grep $keyword | sed -e 's/\[//g' -e 's/\]//g' -e 's/\:\/data//g' -e 's/,/ /g' -e 's/^.*= //g' -e 's/locus//g' | awk '{ for (i = 1; i <= NF; i++) $i = $i -1 ; print }' | sed 's/ /,/g' | tr -s "[, ]" "\n" | sort | uniq | sed -e :a -e 'N;s/\n/,/;ba'`
            status=$?
            if [[ $status != 0 ]]
            then
@@ -303,5 +304,4 @@ then
    cat $outfile.all.sh
    ./$outfile.all.sh
 fi
-
 
