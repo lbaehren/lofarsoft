@@ -117,15 +117,6 @@ class WorkSpace(tasks.WorkSpace(taskname="AverageSpectrum")):
         addantennas = dict(default=True,
                            doc="If True, add all antennas into one average spectrum, otherwise keep them separate in memory per file."),
 
-        write_html = dict(default=False, doc="Write an html file summarizing the input"),
-
-        logfile = dict(default=lambda self:os.path.join(self.output_dir,"logfile.txt"),
-                       doc="Write output also to a logfile."),
-
-        hprint = dict(default=lambda self:cr.hPrint(textbuffer=[] if self.write_html else None,logfile=self.logfile),
-                      doc="Instance of the hprint class that writes output to stdout and a logfile and stores it for html output.",
-                      export=False),
-
         doplot = dict(default=False,
                       doc="Produce output plots. If doplot>1 plot while processing."),
 
@@ -763,16 +754,13 @@ class AverageSpectrum(tasks.Task):
         del self.starttimes_local
         del self.starttimes_UTC
 
-        hprint = self.hprint.open()
-        hprint.textbuffer=[]
-
         self.quality=[]
         self.antennas_used=set()
         self.antennacharacteristics={}
         self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
         self.dostride=(self.stride>1)
         if not self.addantennas and (self.stride>1 or self.doublefft):
-            hprint("ERROR: averagespectrum - Can't use'addantennas=True with self.stride>1 or doublefft=True")
+            print "ERROR: averagespectrum - Can't use'addantennas=True with self.stride>1 or doublefft=True"
             return
 #        self.power.getHeader()["FREQUENCY_INTERVAL"]=self.delta_frequency
 #        self.updateHeader(self.power,["nofAntennas","nspectraadded","nspectraadded_per_antenna","filenames","antennas_used","antennas","antenna_list"],fftLength="speclen",blocksize="fullsize",filename="spectrum_file")
@@ -788,7 +776,7 @@ class AverageSpectrum(tasks.Task):
 
         if self.calc_dynspec:
             if self.stride>1 or self.doublefft:
-                hprint("ERROR: averagespectrum - Can't calculate dynspec with self.stride>1 or doublefft=True")
+                print "ERROR: averagespectrum - Can't calculate dynspec with self.stride>1 or doublefft=True"
                 return
             self.all_dynspec.fill(0)
             self.all_cleanspec.fill(0)
@@ -837,7 +825,7 @@ class AverageSpectrum(tasks.Task):
                     self.output_subdir,self.root_filename+self.__taskname__+
                     ("-"+self.plot_name+"-" if self.plot_name else ""))
 
-            hprint("# Using File",str(self.current_file_number)+":",self.filename)
+            print "# Using File",str(self.current_file_number)+":",self.filename
             if self.stride==1:
                 self.datafile["BLOCKSIZE"]=self.chunksize_used #Setting initial block size
             else:
@@ -846,7 +834,7 @@ class AverageSpectrum(tasks.Task):
 
             #Creating output directory, if needed
             if not os.path.exists(self.output_subdir):
-                hprint("# AverageSpectrum: creating new output directory",self.output_subdir)
+                print "# AverageSpectrum: creating new output directory",self.output_subdir
                 os.makedirs(self.output_subdir)
 
 
@@ -861,7 +849,7 @@ class AverageSpectrum(tasks.Task):
                 rms=0; mean=0; npeaks=0
                 self.datafile["SELECTED_DIPOLES"]=[int(antenna)]
                 antennaID=self.antennaIDs[antenna]
-                hprint("# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:")
+                print "# Start antenna =",antenna,"(ID=",str(antennaID)+") -",npass,"passes:"
 
                 #Loop over all chunks (determining spectal resolution)
                 for nchunk in range(self.nchunks):
@@ -880,7 +868,7 @@ class AverageSpectrum(tasks.Task):
                                 blocks=range(offset+nchunk*self.nsubblocks,(nchunk+1)*self.nsubblocks,self.stride)
                                 self.tdata[...].read(self.datafile,"TIMESERIES_DATA",blocks)
                         except RuntimeError:
-                            hprint("#Error reading chunk",nchunk)
+                            print "#Error reading chunk",nchunk
                             self.tdata.fill(0)
 
                         #Do a quality check of the data
@@ -912,7 +900,7 @@ class AverageSpectrum(tasks.Task):
                             dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
 
                         if not dataok:
-                            hprint(" # Data flagged!")
+                            print " # Data flagged!"
                             break
 
                         #Randomize peaks in the time series data, if desired
@@ -944,7 +932,6 @@ class AverageSpectrum(tasks.Task):
                             #Now sort the different blocks together (which requires a transpose over passes/strides)
                             for offset in range(self.stride):
                                 if self.dostride:
-                                    #hprint("#    Offset",offset)
                                     self.tmpspecT[...].readfilebinary(cr.Vector(ofiles),cr.Vector(int,self.stride,fill=offset)*(self.nblocks_section*self.blocklen))
                                     #This transpose is to make sure the blocks are properly interleaved
                                     cr.hTranspose(self.tmpspec,self.tmpspecT,self.stride,self.nblocks_section)
@@ -953,7 +940,6 @@ class AverageSpectrum(tasks.Task):
                                     ofile=self.tmpfilename+str(offset)+"b"+self.fileext
                                     self.specT.writefilebinary(ofile)
                                     ofiles2+=[ofile]
-                                #hprint("Time:",time.clock()-self.t0,"s for 2nd FFT now doing final transpose. Now finalizing (adding/rearranging) spectrum."                            for offset in range(self.nbands):)
                                 if (self.nspectraadded==1): # first chunk
                                     self.power.fill(0.0)
                                 else: #2nd or higher chunk, so read data in and add new spectrum to it
@@ -961,7 +947,6 @@ class AverageSpectrum(tasks.Task):
                                         self.power.readfilebinary(self.spectrum_file_bin,self.subspeclen*offset)
                                     self.power *= (self.nspectraadded-1.0)/(self.nspectraadded)
                                 if self.dostride:
-                                    #hprint("#    Offset",offset)
                                     self.specT2[...].readfilebinary(cr.Vector(ofiles2),cr.Vector(int,self.stride,fill=offset)*(self.blocklen*self.nblocks_section))
                                     cr.hTranspose(self.spec,self.specT2,self.stride,self.blocklen) # Make sure the blocks are properly interleaved
                                     if self.nspectraadded>1:
@@ -978,7 +963,6 @@ class AverageSpectrum(tasks.Task):
                                 clearfile=False
                                 if self.doplot>1 and offset==self.nbands/2 and self.nspectraadded%self.plotskip==0:
                                     self.power2[self.plot_antenna,max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].plot()
-                                    #hprint("mean=",self.power[max(self.power_size/2-self.plotlen,0):min(self.power_size/2+self.plotlen,self.power_size)].mean())
                                     cr.plt.draw()
 
 
@@ -1014,11 +998,10 @@ class AverageSpectrum(tasks.Task):
                     else: #data not ok
                         self.nspectraflagged+=1
                         self.nspectraflagged_per_antenna[antenna_output_index]+=1
-                        #hprint("#  Time:",time.clock()-self.t0,"s for reading and ignoring this chunk.  Number of spectra flagged =",self.nspectraflagged)
 
                     #end loop over chunks
 
-                hprint("# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged)
+                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded,"nspectraflagged =",self.nspectraflagged
 
                 # Now prepare writing the output for the different spectra
 
@@ -1029,7 +1012,7 @@ class AverageSpectrum(tasks.Task):
                     self.rms_antenna[self.nantennas_total]=rms
                     self.npeaks_antenna[self.nantennas_total]=npeaks
                     self.antennacharacteristics[antennaID]={"mean":mean,"rms":rms,"npeaks":npeaks,"quality":self.quality[-self.nchunks:]}
-                    hprint("#          mean =",mean,"rms =",rms,"npeaks =",npeaks)
+                    print "#          mean =",mean,"rms =",rms,"npeaks =",npeaks
                     if not self.quality_db_filename=="":
                         f=open(self.quality_db_filename+".py","a")
                         f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
@@ -1051,10 +1034,10 @@ class AverageSpectrum(tasks.Task):
                 self.homogeneity_factor=-self.npeaks_rms/2./self.npeaks if self.npeaks>0 else 0.5
                 self.homogeneity_factor-=self.rms_rms/2./self.rms if self.rms>0 else 0.5
                 self.homogeneity_factor+=1
-                hprint("Mean values for all antennas in file: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
-                hprint("RMS values for all antennas in file: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
-                hprint("NPeaks values for all antennas in file: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")
-                hprint("Quality factor =",self.homogeneity_factor * 100,"%")
+                print "Mean values for all antennas in file: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
+                print "RMS values for all antennas in file: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
+                print "NPeaks values for all antennas in file: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
+                print "Quality factor =",self.homogeneity_factor * 100,"%"
                 self.updateHeader(self.power,["mean","mean_rms","rms","rms_rms","npeaks","npeaks_rms","homogeneity_factor","rms_antenna","npeaks_antenna","antennacharacteristics"],
                                   fftLength="speclen",blocksize="fullsize")
 
@@ -1096,7 +1079,7 @@ class AverageSpectrum(tasks.Task):
                 try:
                     self.cleanspec /= self.avspec
                 except ValueError:
-                    hprint ("Error: avspec contains zeros")
+                    print "Error: avspec contains zeros"
                 if self.store_spectra:
                     self.dynspec.write(self.dynspec_file)
                 self.output_files["dynamic_spectrum"].append(self.dynspec_file)
@@ -1119,11 +1102,7 @@ class AverageSpectrum(tasks.Task):
 
             self.nantennas_total_last_file = self.nantennas_total
 
-            #Write hmtl results file already now.
-            if self.write_html:
-                self.writehtml(text=hprint.textbuffer)
-
-            hprint("# End File",str(self.current_file_number)+":",self.filename)
+            print "# End File",str(self.current_file_number)+":",self.filename
         if self.qualitycheck and self.nantennas_total>1:
             self.mean=cr.asvec(self.mean_antenna[:self.nantennas_total]).mean()
             self.mean_rms=cr.asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
@@ -1134,10 +1113,10 @@ class AverageSpectrum(tasks.Task):
             self.homogeneity_factor=-self.npeaks_rms/2./self.npeaks if self.npeaks>0 else 0.5
             self.homogeneity_factor-=self.rms_rms/2./self.rms if self.rms>0 else 0.5
             self.homogeneity_factor+=1
-            hprint("Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)")
-            hprint("RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)")
-            hprint("NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)")
-            hprint("Quality factor =",self.homogeneity_factor * 100,"%")
+            print "Mean values for all antennas: Task.mean =",self.mean,"+/-",self.mean_rms,"(Task.mean_rms)"
+            print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
+            print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
+            print "Quality factor =",self.homogeneity_factor * 100,"%"
 
 
         if self.calc_all_dynspec:
@@ -1147,7 +1126,7 @@ class AverageSpectrum(tasks.Task):
             try:
                 self.all_cleanspec /= self.all_avspec
             except ValueError:
-                hprint ("Error: all_avspec contains zeros!")
+                print "Error: all_avspec contains zeros!"
             if self.store_spectra:
                 self.all_dynspec.write(self.all_dynspec_file)
             self.output_files["all_dynamic_spectrum"].append(self.all_dynspec_file)
@@ -1168,20 +1147,12 @@ class AverageSpectrum(tasks.Task):
                     self.all_avspec[self.plot_zoom_slice].plot(title=title)
                     self.plot_finish(name="-average_spectrum_all_files_zoom",same_row=True)
 
-        #Final HTML output
-        if self.write_html:
-            self.writehtml(text=hprint.textbuffer)
-
-
-        hprint("Finished - total time used:",time.clock()-self.t0,"s.")
-        hprint("To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'")
-        hprint("These output files were created, use the folowing lines to read them back in:")
+        print "Finished - total time used:",time.clock()-self.t0,"s."
+        print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '#Flagged: chunk= ...'"
+        print "These output files were created, use the folowing lines to read them back in:"
         for k,v in self.output_files.items():
             for f in v:
-                hprint("f =",k,"= hArrayRead('"+f+"')")
-
-        hprint.clear() # make sure the file is closed and textbuffer is emptied
-
+                print "f =",k,"= hArrayRead('"+f+"')"
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
