@@ -433,7 +433,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 
   Iter it = data;
 
-  for (HInteger n; n<N; n++)
+  for (HInteger n=0; n<N; n++)
   {
     *it++ = 0.54 - 0.46 * cos(2 * M_PI * n / (N - 1));
   }
@@ -459,7 +459,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 
   Iter it = data;
 
-  for (HInteger n; n<N; n++)
+  for (HInteger n=0; n<N; n++)
   {
     *it = HComplex(0, -1) * sgn(*it) * *it;
     it++;
