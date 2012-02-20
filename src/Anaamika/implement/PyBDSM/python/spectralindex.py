@@ -785,38 +785,56 @@ class Op_spectralindex(Op):
               pl.figure(); pl.suptitle('M src : '+str(src.island_id)+' gaus '+str(i))
               for ii in range(6): pl.subplot(2,3,ii+1); pl.plot(apara[:,i*7+inds[ii]], '*-g'); pl.title(tit[ii])
 
-          q_spec = self.spectralquality(img, para, epara, src.island_id, src_freq_av, src_avimage_flags, img.opts.specind_dolog)
-                                                        # quality control and flagging
-          self.spectral_qc_flag(src, q_spec, src_avimage_flags)
-
-          if N.any(src.phot_mask):
-            mylog = img.mylog
-            mylog.debug('%s %i %s %i %s ' % ('Island ',isl.island_id, ' : flagged ', \
-               N.sum(src.phot_mask), ' channels for fitting spectral index'))
-                                                        #fit sp.in., calc quality flag
-          pp = N.array(para); epp = N.array(epara)
-          ctr = 0
-          for i, g in enumerate(src.gaussians):                 
-            if i in fitgaus_ind:
-              g_par = pp[:,ctr*7:ctr*7+7]
-              g_epar = epp[:,ctr*7:ctr*7+7]
-              spin_para = self.fit_spectralindex(img, src, g_par, g_epar, src_freq_av, img.opts.specind_dolog)
-              spin, espin, spin1, espin1, take2nd = spin_para
-              g.spin1 = spin; g.espin1 = espin; g.spin2 = spin1; g.espin2 = espin1; g.take2nd = take2nd
-              ctr += 1
-              ind1 = N.where(src.phot_mask == False)[0]
-              if img.opts.specind_flux =='peak': ind2 = 0
-              else: ind2 = 6
-              g.specin_freq = src_freq_av[ind1]
-              g.specin_freq0 = img.freq0
-              g.specin_flux = g_par[:,ind2][ind1]
-              g.specin_fluxE = g_epar[:,ind2][ind1]
+          for i, g in enumerate(src.gaussians):
+            if para != None:
+                parray = N.array(para)
+                pp = parray[:, i*7:i*7+7]
             else:
-              g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
-              g.specin_freq = None
-              g.specin_freq0 = img.freq0
-              g.specin_flux = None
-              g.specin_fluxE = None
+                pp = False
+          if N.isnan(pp).any():
+              para = epara = q_spec = None; spin_para = [None]*5
+              src.phot_mask = chanmask
+              src_freq_av = img.freq_av
+              ind1 = N.where(src.phot_mask == False)[0]
+              for g in src.gaussians:
+                g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
+                g.specin_freq = None
+                g.specin_freq0 = img.freq0
+                g.specin_flux = None
+                g.specin_fluxE = None            
+          else:
+              q_spec = self.spectralquality(img, para, epara, src.island_id, src_freq_av, src_avimage_flags, img.opts.specind_dolog)
+                                                        # quality control and flagging
+              self.spectral_qc_flag(src, q_spec, src_avimage_flags)
+
+              if N.any(src.phot_mask):
+                mylog = img.mylog
+                mylog.debug('%s %i %s %i %s ' % ('Island ',isl.island_id, ' : flagged ', \
+                   N.sum(src.phot_mask), ' channels for fitting spectral index'))
+                                                            #fit sp.in., calc quality flag
+              pp = N.array(para); epp = N.array(epara)
+              ctr = 0
+              for i, g in enumerate(src.gaussians):                 
+                if i in fitgaus_ind:
+                  g_par = pp[:,ctr*7:ctr*7+7]
+                  g_epar = epp[:,ctr*7:ctr*7+7]
+                  spin_para = self.fit_spectralindex(img, src, g_par, g_epar, src_freq_av, img.opts.specind_dolog)
+                  spin, espin, spin1, espin1, take2nd = spin_para
+                  g.spin1 = spin; g.espin1 = espin; g.spin2 = spin1; g.espin2 = espin1; g.take2nd = take2nd
+                  ctr += 1
+                  ind1 = N.where(src.phot_mask == False)[0]
+                  if img.opts.specind_flux =='peak': ind2 = 0
+                  else: ind2 = 6
+                  g.specin_freq = src_freq_av[ind1]
+                  g.specin_freq0 = img.freq0
+                  g.specin_flux = g_par[:,ind2][ind1]
+                  g.specin_fluxE = g_epar[:,ind2][ind1]
+                else:
+                  g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
+                  g.specin_freq = None
+                  g.specin_freq0 = img.freq0
+                  g.specin_flux = None
+                  g.specin_fluxE = None
         else:                                                   # extended
           para = epara = q_spec = None; spin_para = [None]*5
           src.phot_mask = chanmask

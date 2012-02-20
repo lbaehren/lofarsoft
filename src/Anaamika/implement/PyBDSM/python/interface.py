@@ -541,7 +541,7 @@ def round_list_of_tuples(val):
 # The following functions give convenient access to the output functions in 
 # output.py
 def export_image(img, outfile=None, img_format='fits',
-                 img_type='resid_gaus', incl_wavelet=True,
+                 img_type='gaus_resid', incl_wavelet=True,
                  clobber=False):
     """Write an image to a file. Returns True if successful, False if not. 
 
@@ -558,10 +558,10 @@ def export_image(img, outfile=None, img_format='fits',
         'rms' - rms map image
         'mean' - mean map image
         'pi' - polarized intensity image
-        'resid_gaus' - Gaussian model residual image
-        'model_gaus' - Gaussian model image
-        'resid_shap' - Shapelet model residual image
-        'model_shap' - Shapelet model image
+        'gaus_resid' - Gaussian model residual image
+        'gaus_model' - Gaussian model image
+        'shap_resid' - Shapelet model residual image
+        'shap_model' - Shapelet model image
     """
     import os
     import functions as func

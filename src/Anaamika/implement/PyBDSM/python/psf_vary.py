@@ -71,7 +71,6 @@ class Op_psf_vary(Op):
         # takes gaussians with code=S and snr > snrcut.
         tr = [n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
         g_gauls = self.trans_gaul(tr)
-        mylogger.userinfo(mylog, 'Number of unresolved sources', str(len(g_gauls[0])))
 
         # computes statistics of fitted sizes. Same as psfvary_fullstat.f in fBDSM.
         bmaj_a, bmaj_r, bmaj_ca, bmaj_cr, ni = _cbdsm.bstat(bmaj, None, nsig)
@@ -88,6 +87,7 @@ class Op_psf_vary(Op):
         tr_gaul = self.trans_gaul(g_gauls)
         tr = [n for i, n in enumerate(tr_gaul) if flag_unresolved[i]]
         g_gauls = self.trans_gaul(tr)
+        mylogger.userinfo(mylog, 'Number of unresolved sources', str(len(g_gauls[0])))
 
         # get a list of voronoi generators. vorogenS has values (and not None) if generators='field'.
         vorogenP, vorogenS = self.get_voronoi_generators(g_gauls, generators, gencode, snrcut, snrtop, snrbot, snrcutstack)
@@ -493,7 +493,7 @@ class Op_psf_vary(Op):
         y = N.asarray(g_gauls[3])[index]
         
         cutoff = 0; npts = 0
-        if generators == 'calibrators':
+        if generators == 'calibrators' or generators == 'field':
             if gencode != 'file': gencode = 'list'
             if gencode == 'list':
                 cutoff = int(round(num*(1.0-snrtop)))
@@ -504,13 +504,13 @@ class Op_psf_vary(Op):
                     cutoff = 2
                 npts = num - cutoff + 1
     
-        if generators == 'field':
-            cutoff = int(round(num*(1.0-snrtop)))
-            if cutoff < 2:
-                cutoff = 2
-            npts = num - cutoff + 1
-            cutoffs = int(round(num*(1.0-snrbot)))
-            nptss = cutoff - cutoffs
+#         if generators == 'field':
+#             cutoff = int(round(num*(1.0-snrtop)))
+#             if cutoff < 2:
+#                 cutoff = 2
+#             npts = num - cutoff + 1
+#             cutoffs = int(round(num*(1.0-snrbot)))
+#             nptss = cutoff - cutoffs
     
         if generators == 'calibrators':
             if gencode == 'file':
@@ -768,7 +768,7 @@ class Op_psf_vary(Op):
     
         tile_list, tile_coord, tile_snr = tile_prop
         tr_gaul = self.trans_gaul(g_gauls)
-        tr=[n for i, n in enumerate(tr_gaul) if n[1]/n[8] >= snrcutstack]
+        tr=[n for i, n in enumerate(tr_gaul)]# if n[1]/n[8] >= snrcutstack]
         ntile = len(tile_list)
         psfimages = []
         psfcoords = []
