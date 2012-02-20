@@ -13,8 +13,13 @@ from pycrtools import metadata as md
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
-def gatherresults(topdir, maxspread):
+def timeStringNow():
+    now = datetime.now()
+    return now.strftime("%Y-%m-%d_%H:%M:%S")
+
+def gatherresults(topdir, maxspread, antennaSet):
     """
     Gather fitted cable delay results from all 'results.py' files in the subdirectories of 'topdir'.
     """
@@ -55,6 +60,9 @@ def gatherresults(topdir, maxspread):
                 print 'Warning: NAN found in results.py (Name error)! Skipping dir %s ' % datadir
                 continue
             res = res["results"]
+            if res["ANTENNA_SET"] != antennaSet:
+                print 'Skipping file in dir %s, wrong antenna set %s' % (datadir, res["ANTENNA_SET"])
+                continue
             # check result status
     #        if res["status"] != 'OK':
             # A 'status' keyword would be nice... Number of delay outliers above (say) 10 ns is in 'delay_outliers' key.
@@ -83,7 +91,7 @@ def gatherresults(topdir, maxspread):
             theseDelays = np.array(res["antennas_residual_cable_delays_planewave"])
             avg = theseDelays.mean()
             spread = theseDelays.std() * 1.0e9
-            outlierIndices = np.where(abs(theseDelays) > 3*spread * 1.0e-9)
+            outlierIndices = np.where(abs(theseDelays) > 3*spread * 1.0e-9) # 3-sigma outliers output to screen
             outliercount = len(outlierIndices[0])
             if outliercount > 0:
                 outlierList = np.array(theseAntIDs)[outlierIndices]
@@ -221,11 +229,14 @@ class cabledelays(tasks.Task):
         topdir={default:None, doc:"Top-level results directory from which to gather cable delays"},
 #        filefilter={default:None,doc:"Obtains results from subdirectories of these files (from results.py)"},
         doPlot = {default:False, doc:"Produce output plots"},
-        write_database = {default: True, doc: "Produce the Cabledelays.pic output file. Replaces an old one if it is there"},
+        antennaSet = {default: "LBA_OUTER", doc:"Antenna set to use. Note: we can use only one antenna set at a time!"},
+        write_database = {default: True, doc: "Produce delay calibration output file. It is merged with the original delays as found in 'origdelayfile'."},
+        origdelayfile = {default: lambda self: os.environ["LOFARSOFT"].rstrip('/')+'/data/lofar/dipole_calibration_delay/LOFAR_DIPOLE_CALIBRATION_DELAY_' + self.antennaSet, doc:"Location of the original (LOFAR) calibration delay file. Must match with the antennaSet parameter."},
+        delayfile = {default: lambda self: os.environ["LOFARSOFT"].rstrip('/')+'/data/lofar/merged_dipole_calibration_delay_' + timeStringNow() + '/LOFAR_DIPOLE_CALIBRATION_DELAY_' + self.antennaSet, doc:"Output file for the new (merged) delay calibration"},
         maxspread = {default: 5.0, doc: "Maximum spread (stddev) [ns] in fitted cable delays to accept as valid. Invalid delays are set to zero, as the value is considered not reliable."},
 #        pol={default:0,doc:"0 or 1 for even or odd polarization"},
 ##        excludelist={default:None,doc:"List with stations not to take into account when making the footprint"},
-        results=p_(lambda self:gatherresults(self.topdir, self.maxspread),doc="Results dict containing cabledelays_database, antenna positions and names"),
+        results=p_(lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc="Results dict containing cabledelays_database, antenna positions and names"),
         cabledelays_database=p_(lambda self:obtainvalue(self.results, "cabledelays_database"), doc="Cable delays database dict as gathered from all good results.py files in the given file filter"),
         positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
         antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
@@ -248,6 +259,29 @@ class cabledelays(tasks.Task):
     def call(self):
         pass
 
+    def writeDatabase(self, origfile, filename):
+        # create output directory 
+        (outpath, outfilename) = os.path.split(filename)
+        if not os.path.exists(outpath):
+            os.mkdir(outpath)
+        else: # should not happen as the path name includes the time 'now' in seconds...
+            print 'Warning: output path already exists: %s' % outpath            
+        outfile = open(os.path.join(self.topdir, filename), 'w')
+        infile = open(origfile, 'r')
+        for line in infile:
+            thisID = line.split()[0] # first element is the antenna ID
+            thisOrigDelay = float(line.split()[1])
+            newDelay = thisOrigDelay # use original (LOFAR) delay if no correction data present
+
+            if str(int(thisID)) in self.cabledelays_database: # leading zeros stripped; change in cabledelays_database?
+                thisCorrection = self.cabledelays_database[str(int(thisID))]["cabledelay"]
+                newDelay += thisCorrection
+            s = thisID + ' ' + str(newDelay) + '\n'
+            outfile.write(s)
+
+        outfile.close()
+
+
     def run(self):
        
         if not self.doPlot and not self.write_database:
@@ -255,15 +289,11 @@ class cabledelays(tasks.Task):
             return
 
         if self.write_database:
+            self.writeDatabase(self.origdelayfile, self.delayfile)
 #            outfile = open(os.path.join(self.topdir, 'Cabledelays.pic'), 'wb')
 #            pickle.dump(self.cabledelays_database, outfile)
 #            outfile.close()
-            outfile = open(os.path.join(self.topdir, 'Cabledelays.dat'), 'w')
-            for key in self.cabledelays_database:
-                s = format('%09d' % int(key)) + ' ' + str(self.cabledelays_database[key]["cabledelay"]) + '\n'
-                outfile.write(s)
-            outfile.close()
-            print 'Cabledelays.pic written'
+            print 'Calibration delay file written'
         
         if not self.doPlot:
             return
