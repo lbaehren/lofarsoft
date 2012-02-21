@@ -186,7 +186,7 @@ def parseOptions():
 
     # parser.add_option("-a", "--archive", type="str", dest="archivepath", default="", help="directory where the archive can be found.")
     parser.add_option("-d", "--datapath", type="str", dest="datapath", default="", help="directory where the datafiles can be found.")
-    parser.add_option("-o", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
+    parser.add_option("-r", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
 
     (options, args) = parser.parse_args()
 
