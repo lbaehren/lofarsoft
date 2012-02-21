@@ -146,7 +146,7 @@ class CRDatabase(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getEventIDs(self, timestamp_start=None, timestamp_end=None, status=None):
+    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None):
         """Return a list of eventIDs satifying the values of this
         functions arguments.
 
@@ -155,26 +155,29 @@ class CRDatabase(object):
         =================  ==============================================================
         Parameter          Description
         =================  ==============================================================
+        *timestamp*        timestamp of the event is equal to this value.
         *timestamp_start*  timestamp of the event is larger than this value.
         *timestamp_end*    timestamp of the event is smaller than this value.
         *status*           status of the event.
         =================  ==============================================================
 
-        If no arguments are given all eventIDs are selected. When
-        multiple arguments are provided, all returned eventIDs satisfy
-        all argument values.
+        If *timestamp* is provided, than *timestamp_start* and
+        *timestamp_end* are ignored.  If no arguments are given all
+        eventIDs are selected. When multiple arguments are provided,
+        all returned eventIDs satisfy all argument values.
         """
         result = []
 
         if self.db:
             # Processing selection criteria
             sql_selection = []
-            if timestamp_start:
-                sql_selection.append("timestamp>{0}".format(int(timestamp_start)))
-                pass
-            if timestamp_end:
-                sql_selection.append("timestamp<{0}".format(int(timestamp_end)))
-                pass
+            if timestamp:
+                sql_selection.append("timestamp={0}".format(int(timestamp)))
+            else:
+                if timestamp_start:
+                    sql_selection.append("timestamp>{0}".format(int(timestamp_start)))
+                if timestamp_end:
+                    sql_selection.append("timestamp<{0}".format(int(timestamp_end)))
             if status:
                 sql_selection.append("status='{0}'".format(str(status)))
 
