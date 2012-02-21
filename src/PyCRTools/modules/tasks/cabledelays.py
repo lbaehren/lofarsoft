@@ -17,7 +17,7 @@ from datetime import datetime
 
 def timeStringNow():
     now = datetime.now()
-    return now.strftime("%Y-%m-%d_%H:%M:%S")
+    return now.strftime("%Y-%m-%d_%H%M%S")
 
 def gatherresults(topdir, maxspread, antennaSet):
     """
@@ -275,7 +275,12 @@ class cabledelays(tasks.Task):
 
             if str(int(thisID)) in self.cabledelays_database: # leading zeros stripped; change in cabledelays_database?
                 thisCorrection = self.cabledelays_database[str(int(thisID))]["cabledelay"]
-                newDelay += thisCorrection
+                if not np.isnan(thisCorrection):
+                    newDelay += thisCorrection
+                else:
+                    print 'New value is NaN, using old value: %s %f' % (thisID, thisCorrection)
+        #    else:
+                #print 'Ant-id NOT updated: %s' % thisID
             s = thisID + ' ' + str(newDelay) + '\n'
             outfile.write(s)
 
@@ -383,7 +388,7 @@ class cabledelays(tasks.Task):
             plt.errorbar(x_avg, y_avg_residual, yerr=y_err, fmt='ro')
             plt.ylabel('Residual cable delay [ns]')
             plt.xlabel('Antenna number (RCU)')
-            plt.title('Residual cable delays per antenna with 2-sigma/sqrt(N) errorbars\nStation '+thisStationName)
+            plt.title('Residual cable delays per antenna\nStation '+thisStationName)
             
             self.plot_finish(name=thisStationName + "-residuals_errorbars")
             
