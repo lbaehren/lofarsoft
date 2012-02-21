@@ -2540,38 +2540,6 @@ do
         
 	if [[ $all_pproc == 0 ]] && [[ $rfi_pproc == 0 ]] #&& [[ $PULSAR_ARRAY_PRIMARY[0] != "NONE" ]]
 	then	
-        # note, this is an approximation -- taking the subbands from the first beam
-        nSubbands=${array_nSubbands[0]}
-        if (( $IS2 == 1 )) && (( $IS_BEAM == 0 ))
-        then  
-           CHAN=${CHAN_IS}
-        elif (( $IS2 == 1 )) && (( $IS_BEAM != 0 ))
-        then
-           CHAN=${CHAN_CS}
-        else
-           CHAN=${CHAN}
-        fi
-
-	    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
-	    # find the max divisor for the subbands if nSubbands % $CHAN != 0
-		ii=$CHAN
-		while (( $ii <= $nSubbands ))
-		do 
-		     modulo_files=`echo $nSubbands $ii | awk '{print ($1 % $2)}'`
-		     if (( $modulo_files == 0 ))
-		     then
-		        echo "Success: $ii divides into $nSubbands subbands;  use for pav -f"
-		        break
-		     else
-		        echo "Tried $ii, but still not divisble into $nSubbands" >> $log
-		        echo "Tried $ii, but still not divisble into $nSubbands"
-		     fi
-	      ii=`expr $ii + 1`
-		done
-        echo "Successfully found $ii to use for pav -f" >> $log
-        echo "Successfully found $ii to use for pav -f"
-		pav_f=$ii
-
         ii=0
 		# Fold data per requested Pulsar
 		if [[ $nrBeams == 1 ]] 
@@ -2618,6 +2586,55 @@ do
 				           else
 				              nSubbands=${array_nSubbands[$ii]}
 				           fi
+
+						    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
+						    # find the max divisor for the subbands if nSubbands % $CHAN != 0
+							kk=$CHAN
+							while (( $kk <= $nSubbands ))
+							do 
+							     modulo_files=`echo $nSubbands $kk | awk '{print ($1 % $2)}'`
+							     if (( $modulo_files == 0 ))
+							     then
+							        echo "Success: $kk divides into $nSubbands subbands;  use for pav -f"
+							        break
+							     else
+							        echo "Tried $kk, but still not divisble into $nSubbands" >> $log
+							        echo "Tried $kk, but still not divisble into $nSubbands"
+							     fi
+						      cc=`expr $kk + 1`
+							done
+					        echo "Successfully found $kk to use for pav -f" >> $log
+					        echo "Successfully found $kk to use for pav -f"
+							pav_f=$kk
+
+					         total_channels=`echo "$nSubbands * $CHAN" | bc`
+					         if (( $total_channels >= 256 )) && (( $total_channels <= 6000 ))
+					         then 
+					            prepfold_nsubs=256 
+					         elif (( $total_channels > 6000 ))
+					         then
+					            prepfold_nsubs=512 
+					         else
+					            prepfold_nsubs=$total_channels
+					         fi        
+					         # if total_channels is not divisible by prepfold_nsubs (prepfold fails), find one which is divisible
+							 ll=$prepfold_nsubs
+							 while (( $ll <= $total_channels ))
+							 do 
+							       modulo_files=`echo $total_channels $ll | awk '{print ($1 % $2)}'`
+							       if (( $modulo_files == 0 ))
+							       then
+							          echo "Success: $ll divides into $total_channels total channels;  use for -nsubs"
+							          break
+							       else
+							          echo "Tried $ll nsubs, but still not divisble into $total_channels" >> $log
+							          echo "Tried $ll nsubs, but still not divisble into $total_channels"
+							       fi
+							       ll=`expr $ll + 1`
+							 done
+					         echo "Successfully found $ll to use as nsubs for prepfold" >> $log
+					         echo "Successfully found $ll to use as nsubs for prepfold"
+							 prepfold_nsubs=$ll
 
 						   cd ${location}/${STOKES}/RSP${ii}
 						   cp ${location}/$fold_pulsar_cut.par .
@@ -2722,8 +2739,57 @@ do
 				                      CHAN=${CHAN}
 				                   fi
 					            else
-					               nSubbands=${array_nSubbands[$counter]}
+					               nSubbands=${array_nSubbands[$beam_number]}
 					            fi
+
+							    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
+							    # find the max divisor for the subbands if nSubbands % $CHAN != 0
+								kk=$CHAN
+								while (( $kk <= $nSubbands ))
+								do 
+								     modulo_files=`echo $nSubbands $kk | awk '{print ($1 % $2)}'`
+								     if (( $modulo_files == 0 ))
+								     then
+								        echo "Success: $kk divides into $nSubbands subbands;  use for pav -f"
+								        break
+								     else
+								        echo "Tried $kk, but still not divisble into $nSubbands" >> $log
+								        echo "Tried $kk, but still not divisble into $nSubbands"
+								     fi
+							      cc=`expr $kk + 1`
+								done
+						        echo "Successfully found $kk to use for pav -f" >> $log
+						        echo "Successfully found $kk to use for pav -f"
+								pav_f=$kk
+
+						         total_channels=`echo "$nSubbands * $CHAN" | bc`
+						         if (( $total_channels >= 256 )) && (( $total_channels <= 6000 ))
+						         then 
+						            prepfold_nsubs=256 
+						         elif (( $total_channels > 6000 ))
+						         then
+						            prepfold_nsubs=512 
+						         else
+						            prepfold_nsubs=$total_channels
+						         fi        
+						         # if total_channels is not divisible by prepfold_nsubs (prepfold fails), find one which is divisible
+								 ll=$prepfold_nsubs
+								 while (( $ll <= $total_channels ))
+								 do 
+								       modulo_files=`echo $total_channels $ll | awk '{print ($1 % $2)}'`
+								       if (( $modulo_files == 0 ))
+								       then
+								          echo "Success: $ll divides into $total_channels total channels;  use for -nsubs"
+								          break
+								       else
+								          echo "Tried $ll nsubs, but still not divisble into $total_channels" >> $log
+								          echo "Tried $ll nsubs, but still not divisble into $total_channels"
+								       fi
+								       ll=`expr $ll + 1`
+								 done
+						         echo "Successfully found $ll to use as nsubs for prepfold" >> $log
+						         echo "Successfully found $ll to use as nsubs for prepfold"
+								 prepfold_nsubs=$ll
 
 
 							   if (( $subsformat == 1 ))
@@ -2854,6 +2920,15 @@ do
 			for ii in $num_dir
 		    do
                 beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/^.*\///g' | sed 's/.*_B//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+ 	            sap_beam_number=`cat ${location}/${STOKES}"/RSP"${ii}"/RSP"${ii}".list" | sed 's/.*_SAP//g' | sed 's/_.*raw//g' | sed 's/^0//g' | sed 's/^0//g'`
+
+	            if (( $IS2 == 1 ))
+	            then
+	               nSubbands=${array_nSubbands[$sap_beam_number]}
+	            else
+	               nSubbands=${array_nSubbands[$ii]}
+	            fi
+
                 if (( $IS2 == 1 )) && (( $IS_BEAM == $beam_number ))
                 then  
                    CHAN=${CHAN_IS}
@@ -2863,6 +2938,57 @@ do
                 else
                    CHAN=${CHAN}
                 fi
+
+			    max=`echo "($nSubbands * $CHAN) - 1" | bc`	
+			    # find the max divisor for the subbands if nSubbands % $CHAN != 0
+				kk=$CHAN
+				while (( $kk <= $nSubbands ))
+				do 
+				     modulo_files=`echo $nSubbands $kk | awk '{print ($1 % $2)}'`
+				     if (( $modulo_files == 0 ))
+				     then
+				        echo "Success: $kk divides into $nSubbands subbands;  use for pav -f"
+				        break
+				     else
+				        echo "Tried $kk, but still not divisble into $nSubbands" >> $log
+				        echo "Tried $kk, but still not divisble into $nSubbands"
+				     fi
+			      cc=`expr $kk + 1`
+				done
+		        echo "Successfully found $kk to use for pav -f" >> $log
+		        echo "Successfully found $kk to use for pav -f"
+				pav_f=$kk
+
+		         total_channels=`echo "$nSubbands * $CHAN" | bc`
+		         if (( $total_channels >= 256 )) && (( $total_channels <= 6000 ))
+		         then 
+		            prepfold_nsubs=256 
+		         elif (( $total_channels > 6000 ))
+		         then
+		            prepfold_nsubs=512 
+		         else
+		            prepfold_nsubs=$total_channels
+		         fi        
+		         # if total_channels is not divisible by prepfold_nsubs (prepfold fails), find one which is divisible
+				 ll=$prepfold_nsubs
+				 while (( $ll <= $total_channels ))
+				 do 
+				       modulo_files=`echo $total_channels $ll | awk '{print ($1 % $2)}'`
+				       if (( $modulo_files == 0 ))
+				       then
+				          echo "Success: $ll divides into $total_channels total channels;  use for -nsubs"
+				          break
+				       else
+				          echo "Tried $ll nsubs, but still not divisble into $total_channels" >> $log
+				          echo "Tried $ll nsubs, but still not divisble into $total_channels"
+				       fi
+				       ll=`expr $ll + 1`
+				 done
+		         echo "Successfully found $ll to use as nsubs for prepfold" >> $log
+		         echo "Successfully found $ll to use as nsubs for prepfold"
+				 prepfold_nsubs=$ll
+
+
 
                 PULSAR_LIST=${PULSAR_ARRAY[$ii]}
 				for fold_pulsar in $PULSAR_LIST
