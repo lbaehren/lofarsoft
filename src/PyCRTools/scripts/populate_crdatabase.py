@@ -54,11 +54,20 @@ class CRDatabasePopulator(object):
         includefilter = crdb.Filter(self._db, "INCLUDE")
         includefilter.add("h5")
         filename_list = filter(lambda f: includefilter.execute(f), filename_list)
+
         #   - excludefilter (no 'test' or 'bkp' files)
         excludefilter = crdb.Filter(self._db, "EXCLUDE")
         excludefilter.add("test")
         excludefilter.add("bkp")
         filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
+
+        # - File filter
+        if options.filefilter != "":
+            filefilter = crdb.Filter(self._db, "FILE")
+            print "options.filefilter = %s" %(options.filefilter)
+            filefilter.add(options.filefilter)
+            filename_list = filter(lambda f: filefilter.execute(f), filename_list)
+            filefilter.delete(options.filefilter)
 
         # Loop over all filenames in the filelist
         for filename in filename_list:
@@ -189,6 +198,7 @@ def parseOptions():
     # parser.add_option("-a", "--archive", type="str", dest="archivepath", default="", help="directory where the archive can be found.")
     parser.add_option("-d", "--datapath", type="str", dest="datapath", default="", help="directory where the datafiles can be found.")
     parser.add_option("-r", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
+    parser.add_option("-f", "--filefilter", type="str", dest="filefilter", default="", help="filter to select which files are processed.")
 
     (options, args) = parser.parse_args()
 
@@ -199,6 +209,7 @@ def parseOptions():
 
     print "datapath = %s" %(options.datapath)
     print "resultspath = %s" %(options.resultspath)
+    print "filefilter = %s" %(options.filefilter)
 
     return (options, args)
 
