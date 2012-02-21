@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.42
+VERSION=3.43
  
 #####################################################################
 # Usage #
@@ -767,7 +767,15 @@ else # [ $all_pproc == 1 ] || [ $rfi_pproc == 1 ]
 		fi
 	    
 	    # get the subbands per station beam (SAP)
-	    array_nSubbands[$beam_counter]=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
+		tmp=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g'`
+		tmp_has_range=`echo $tmp | grep "\.\."`
+		if [[ $tmp_has_range != "" ]]
+		then 
+	       array_nSubbands[$beam_counter]=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
+		else
+	       array_nSubbands[$beam_counter]=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' |awk -F"," '{print NF}'`
+		fi
+
 	    array_SubbandList[$beam_counter]=`cat $PARSET | grep "Observation.Beam\[$beam_counter\].subbandList"  | head -1 | awk -F "= " '{print $2}'`
 	
 		beam_counter=$(( $beam_counter + 1 ))
