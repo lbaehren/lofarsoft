@@ -308,6 +308,105 @@ class CRDatabase(object):
 
 
 
+class Settings(object):
+    """Global settings of the CR database."""
+
+    def __init__(self, db=None):
+        """Initialisation of the settings.
+
+        **Properties**
+
+        =========  ===================================================
+        Parameter  Description
+        =========  ===================================================
+        *db*       database object to which to link the settings to.
+        =========  ===================================================
+        """
+        if db:
+            self._db = db
+        else:
+            raise ValueError("Unable to set database: no database was provided.")
+
+
+    @property
+    def datapath(self):
+        """Get the value of the datapath variable as set in the database."""
+        result = None
+
+        if self._db:
+            sql = "SELECT value FROM main.settings WHERE key='datapath'"
+            result = str(self._db.select(sql)[0][0])
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    @datapath.setter
+    def datapath(self, value):
+        """Set the value of the datapath variable in the database.
+
+        **Properties**
+
+        =========  ===========================================
+        Parameter  Description
+        =========  ===========================================
+        *value*    new value of the *datapath* variable.
+        =========  ===========================================
+        """
+        if self._db:
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    @property
+    def resultspath(self):
+        """Get the value of the resultspath variable as set in the database."""
+        result = None
+
+        if self._db:
+            sql = "SELECT value FROM main.settings WHERE key='resultspath'"
+            result = str(self._db.select(sql)[0][0])
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    @resultspath.setter
+    def resultspath(self, value):
+        """Set the value of the resultspath variable in the database.
+
+        **Properties**
+
+        =========  ===========================================
+        Parameter  Description
+        =========  ===========================================
+        *value*    new value of the *resultspath* variable.
+        =========  ===========================================
+        """
+        if self._db:
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def summary(self):
+        """Summary of the Settings object."""
+        linewidth = 80
+
+        print "="*linewidth
+        print "  Summary of the Settings object."
+        print "="*linewidth
+
+        print "  %-40s : %s" %("datapath", self.datapath)
+        print "  %-40s : %s" %("resultspath", self.resultspath)
+
+
+
 class Event(object):
     """CR event information."""
 
@@ -391,12 +490,11 @@ class Event(object):
 
             # Writing datafile information
             for datafile in self.datafiles:
-                datafileID = datafile.getID()
+                datafileID = datafile.ID
                 datafile.write()
 
                 sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
                 result = self._db.select(sql)[0][0]
-                print "blabla: ",result
                 if result == 0:
                     sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
                     self._db.insert(sql)
@@ -443,7 +541,8 @@ class Event(object):
         return result
 
 
-    def getID(self):
+    @property
+    def ID(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -469,12 +568,12 @@ class Event(object):
 
         if datafile:
             # Update object
-            datafileID = datafile.getID()
+            datafileID = datafile.ID
 
             # Check for duplicate
             isNew = True
             for d in self.datafiles:
-                if d.getID() == datafileID:
+                if d.ID == datafileID:
                     isNew = False
                     break
             if isNew:
@@ -521,7 +620,7 @@ class Event(object):
         if datafileID > 0:
             # Update object
             for d in self.datafiles:
-                if d.getID() == datafileID:
+                if d.ID == datafileID:
                     self.datafiles.remove(d)
 
             # Update database
@@ -555,7 +654,7 @@ class Event(object):
         if n_datafiles > 0:
             print "  Datafiles:"
             for datafile in self.datafiles:
-                print "    %-6d - %s" %(datafile.getID(), datafile.filename)
+                print "    %-6d - %s" %(datafile.ID, datafile.filename)
 
         # Properties
         if len(self.property) > 0:
@@ -649,7 +748,7 @@ class Datafile(object):
 
             # Write station information
             for station in self.stations:
-                stationID = station.getID()
+                stationID = station.ID
                 station.write()
 
                 sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
@@ -685,7 +784,8 @@ class Datafile(object):
         return result
 
 
-    def getID(self):
+    @property
+    def ID(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -711,12 +811,12 @@ class Datafile(object):
 
         if station:
             # Update object
-            stationID = station.getID()
+            stationID = station.ID
 
             # Check for duplicate
             isNew = True
             for s in self.stations:
-                if s.getID() == stationID:
+                if s.ID == stationID:
                     isNew = False
                     break
             if isNew:
@@ -763,7 +863,7 @@ class Datafile(object):
         if stationID > 0:
             # Update object
             for s in self.stations:
-                if s.getID() == stationID:
+                if s.ID == stationID:
                     self.stations.remove(s)
 
             # Update database
@@ -799,7 +899,7 @@ class Datafile(object):
         if n_stations > 0:
             print "  Stations:"
             for station in self.stations:
-                print "  %-6d - %s" %(station.getID(), station.stationname)
+                print "  %-6d - %s" %(station.ID, station.stationname)
 
         print "="*linewidth
 
@@ -880,7 +980,7 @@ class Station(object):
 
             # Write polarisation information
             for polarisation in self.polarisations:
-                polarisationID = polarisation.getID()
+                polarisationID = polarisation.ID
                 polarisation.write()
 
                 sql = "SELECT COUNT(stationID) FROM main.station_polarisation WHERE polarisationID={0}".format(polarisationID)
@@ -915,7 +1015,8 @@ class Station(object):
         return result
 
 
-    def getID(self):
+    @property
+    def ID(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -941,12 +1042,12 @@ class Station(object):
 
         if polarisation:
             # Update object
-            polarisationID = polarisation.getID()
+            polarisationID = polarisation.ID
 
             # Check for duplicate
             isNew = True
             for p in self.polarisations:
-                if p.getID() == polarisationID:
+                if p.ID == polarisationID:
                     isNew = False
                     break
             if isNew:
@@ -994,7 +1095,7 @@ class Station(object):
         if polarisationID > 0:
             # Update object
             for p in self.polarisations:
-                if p.getID() == polarisationID:
+                if p.ID == polarisationID:
                     self.polarisations.remove(p)
 
             # Update database
@@ -1028,7 +1129,7 @@ class Station(object):
         if n_polarisations > 0:
             print "Polarisations:"
             for polarisation in self.polarisations:
-                print "  %-6d - %s" %(polarisation.getID(), polarisation.resultspath)
+                print "  %-6d - %s" %(polarisation.ID, polarisation.resultspath)
             pass
 
         print "="*linewidth
@@ -1152,7 +1253,8 @@ class Polarisation(object):
         return result
 
 
-    def getID(self):
+    @property
+    def ID(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -1179,105 +1281,6 @@ class Polarisation(object):
                 print "    %-38s : %s" %(key, self.property[key])
 
         print "="*linewidth
-
-
-
-class Settings(object):
-    """Global settings for the CR database."""
-
-    def __init__(self, db=None):
-        """Initialisation of the settings.
-
-        **Properties**
-
-        =========  ==============================================
-        Parameter  Description
-        =========  ==============================================
-        *db*       database to which to link the settings to.
-        =========  ==============================================
-        """
-        if db:
-            self._db = db
-        else:
-            raise ValueError("Unable to set database: no database was provided.")
-
-
-    def _getDatapath(self):
-        """Get the value of the datapath from the database."""
-        result = None
-
-        if self._db:
-            sql = "SELECT value FROM main.settings WHERE key='datapath'"
-            result = str(self._db.select(sql)[0][0])
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-        return result
-
-
-    def _setDatapath(self, value):
-        """Set the value of the datapath in the database.
-
-        **Properties**
-
-        =========  ===========================================
-        Parameter  Description
-        =========  ===========================================
-        *value*    new value of the *datapath* attribute.
-        =========  ===========================================
-        """
-        if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
-            self._db.execute(sql)
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-
-    datapath = property(_getDatapath, _setDatapath)
-
-    def _getResultspath(self):
-        """Get the value of the resultspath from the database."""
-        result = None
-
-        if self._db:
-            sql = "SELECT value FROM main.settings WHERE key='resultspath'"
-            result = str(self._db.select(sql)[0][0])
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-        return result
-
-
-    def _setResultspath(self, value):
-        """Set the value of the resultspath in the database.
-
-        **Properties**
-
-        =========  ===========================================
-        Parameter  Description
-        =========  ===========================================
-        *value*    new value of the *resultspath* attribute.
-        =========  ===========================================
-        """
-        if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
-            self._db.execute(sql)
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-
-    resultspath = property(_getResultspath, _setResultspath)
-
-    def summary(self):
-        """Summary of the Settings object."""
-        linewidth = 80
-
-        print "="*linewidth
-        print "  Summary of the Settings object."
-        print "="*linewidth
-
-        print "  %-40s : %s" %("datapath", self.datapath)
-        print "  %-40s : %s" %("resultspath", self.resultspath)
 
 
 
