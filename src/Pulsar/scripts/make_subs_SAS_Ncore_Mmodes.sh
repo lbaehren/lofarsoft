@@ -555,7 +555,7 @@ then
   # for now, use the first beam subband list;  grab the rest in logic beloe 
   tmp=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g'`
   tmp_has_range=`echo $tmp | grep "\.\."`
-  if [[ $tmp_has_range != "" ]
+  if [[ $tmp_has_range != "" ]]
   then 
      nSubbands=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
   else
