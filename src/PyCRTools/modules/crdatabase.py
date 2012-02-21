@@ -502,7 +502,7 @@ class Event(object):
 
             # Writing datafile information
             for datafile in self.datafiles:
-                datafileID = datafile.ID
+                datafileID = datafile.id
                 if recursive:
                     datafile.write()
 
@@ -555,7 +555,7 @@ class Event(object):
 
 
     @property
-    def ID(self):
+    def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -581,12 +581,12 @@ class Event(object):
 
         if datafile:
             # Update object
-            datafileID = datafile.ID
+            datafileID = datafile.id
 
             # Check for duplicate
             isNew = True
             for d in self.datafiles:
-                if d.ID == datafileID:
+                if d.id == datafileID:
                     isNew = False
                     break
             if isNew:
@@ -633,7 +633,7 @@ class Event(object):
         if datafileID > 0:
             # Update object
             for d in self.datafiles:
-                if d.ID == datafileID:
+                if d.id == datafileID:
                     self.datafiles.remove(d)
 
             # Update database
@@ -667,7 +667,7 @@ class Event(object):
         if n_datafiles > 0:
             print "  Datafiles:"
             for datafile in self.datafiles:
-                print "    %-6d - %s" %(datafile.ID, datafile.filename)
+                print "    %-6d - %s" %(datafile.id, datafile.filename)
 
         # Properties
         if len(self.property) > 0:
@@ -770,7 +770,7 @@ class Datafile(object):
 
             # Write station information
             for station in self.stations:
-                stationID = station.ID
+                stationID = station.id
                 if recursive:
                     station.write()
 
@@ -808,7 +808,7 @@ class Datafile(object):
 
 
     @property
-    def ID(self):
+    def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -834,12 +834,12 @@ class Datafile(object):
 
         if station:
             # Update object
-            stationID = station.ID
+            stationID = station.id
 
             # Check for duplicate
             isNew = True
             for s in self.stations:
-                if s.ID == stationID:
+                if s.id == stationID:
                     isNew = False
                     break
             if isNew:
@@ -886,7 +886,7 @@ class Datafile(object):
         if stationID > 0:
             # Update object
             for s in self.stations:
-                if s.ID == stationID:
+                if s.id == stationID:
                     self.stations.remove(s)
 
             # Update database
@@ -922,7 +922,7 @@ class Datafile(object):
         if n_stations > 0:
             print "  Stations:"
             for station in self.stations:
-                print "  %-6d - %s" %(station.ID, station.stationname)
+                print "  %-6d - %s" %(station.id, station.stationname)
 
         print "="*linewidth
 
@@ -1012,7 +1012,7 @@ class Station(object):
 
             # Write polarisation information
             for polarisation in self.polarisations:
-                polarisationID = polarisation.ID
+                polarisationID = polarisation.id
                 if recursive:
                     polarisation.write()
 
@@ -1049,7 +1049,7 @@ class Station(object):
 
 
     @property
-    def ID(self):
+    def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
@@ -1075,12 +1075,12 @@ class Station(object):
 
         if polarisation:
             # Update object
-            polarisationID = polarisation.ID
+            polarisationID = polarisation.id
 
             # Check for duplicate
             isNew = True
             for p in self.polarisations:
-                if p.ID == polarisationID:
+                if p.id == polarisationID:
                     isNew = False
                     break
             if isNew:
@@ -1128,7 +1128,7 @@ class Station(object):
         if polarisationID > 0:
             # Update object
             for p in self.polarisations:
-                if p.ID == polarisationID:
+                if p.id == polarisationID:
                     self.polarisations.remove(p)
 
             # Update database
@@ -1162,7 +1162,7 @@ class Station(object):
         if n_polarisations > 0:
             print "Polarisations:"
             for polarisation in self.polarisations:
-                print "  %-6d - %s" %(polarisation.ID, polarisation.resultspath)
+                print "  %-6d - %s" %(polarisation.id, polarisation.resultspath)
             pass
 
         print "="*linewidth
@@ -1287,7 +1287,7 @@ class Polarisation(object):
 
 
     @property
-    def ID(self):
+    def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
 
