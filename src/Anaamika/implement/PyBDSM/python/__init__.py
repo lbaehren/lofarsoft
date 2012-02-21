@@ -7,6 +7,22 @@ execute chain of operations properly. Also define the
 options as arguments rather than as a dictionary (as
 required by 'execute').
 """
+# Set use of AGG backend to avoid problems when there
+# is no DISPLAY variable set
+try:
+    import matplotlib.pyplot as pl
+except RuntimeError:
+    import sys
+    modules = []
+    for module in sys.modules:
+        if module.startswith('matplotlib'):
+            modules.append(module)
+    
+    for module in modules:
+        sys.modules.pop(module)
+
+    import matplotlib as mpl
+    mpl.use('Agg')
 from readimage import Op_readimage
 from collapse import Op_collapse
 from preprocess import Op_preprocess
@@ -164,16 +180,26 @@ def process_image(input_file, **kwargs):
     """
     from interface import load_pars
     from image import Image
+    import os
     
     # Try to load input_file assuming it's a parameter save file or a dictionary.
     # load_pars returns None if this doesn't work.
-    img = load_pars(input_file)
+    try:
+        img = load_pars(input_file)
+    except RuntimeError, err:
+        print '\n\033[31;1mERROR\033[0m: ' + str(err)
+        return
 
     # If load_pars fails, assume that input_file is an image
     if img == None:
-        img = Image({'filename': input_file})
+        if os.path.exists(input_file):
+            img = Image({'filename': input_file})
+        else:
+            print "\n\033[31;1mERROR\033[0m: File '"+\
+                input_file+"' not found."
+            return
 
     # Now process it. Any kwargs specified by the user will
-    # override those read in from the parameter save file.
+    # override those read in from the parameter save file or dictionary.
     img.process(**kwargs)
     return img

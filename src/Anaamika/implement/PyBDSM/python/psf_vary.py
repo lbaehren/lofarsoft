@@ -4,7 +4,8 @@ from image import *
 import mylogger
 import debug_figs as df
 from copy import deepcopy as cp
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import scipy
 import scipy.signal as S
 import _cbdsm

@@ -5,7 +5,8 @@
 import numpy as N
 from image import *
 import mylogger, os
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import functions as func
 import matplotlib.cm as cm
 

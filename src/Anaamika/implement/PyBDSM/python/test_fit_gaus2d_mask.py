@@ -1,6 +1,7 @@
 
 import numpy as N
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import functions as func
 import scipy
 

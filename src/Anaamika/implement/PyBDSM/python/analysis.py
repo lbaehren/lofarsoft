@@ -2,7 +2,8 @@
 """ Plot stuff """
 
 from image import *
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 from math import log10
 import matplotlib.cm as cm
 import functions as func

@@ -941,7 +941,8 @@ def watershed(image, mask=None, markers=None, beam=None, thr=None):
       import numpy as N
       from copy import deepcopy as cp
       import scipy.ndimage as nd
-      import pylab as pl
+      import matplotlib.pyplot as pl
+      #import pylab as pl
 
       if thr==None: thr = -1e9
       if mask==None: mask = N.zeros(image.shape, bool)

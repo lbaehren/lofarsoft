@@ -308,7 +308,8 @@ class Op_gaul2srl(Op):
         if img.opts.flag_smallsrc and (N.sum(mask[xind, yind]==N.ones((2,2))*isrc) != 4):
             mylog.debug('Island = '+str(isl.island_id))
             mylog.debug('Mask = '+repr(mask[xind, yind])+'xind, yind, x1, y1 = '+repr(xind)+' '+repr(yind)+' '+repr(x1)+' '+repr(y1))
-            import pylab as pl
+            import matplotlib.pyplot as pl
+            #import pylab as pl
             pl.subplot(1,2,1); pl.imshow(N.transpose(data*~rmask), origin='lower', interpolation='nearest')
             pl.subplot(1,2,2); pl.imshow(N.transpose(isl.image*~isl.mask_active), origin='lower', interpolation='nearest')
             pl.suptitle('Image of M source where it crashed, island '+str(isl.island_id))

@@ -8,7 +8,8 @@ import numpy as N
 from image import *
 import mylogger
 import os
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import _cbdsm
 from math import log, floor, sqrt
 import scipy.signal as S

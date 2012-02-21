@@ -12,7 +12,7 @@ inside your script.
 
 .. note::
 
-     If you are working on the LOFAR CEP I/II clusters, then you may also need to do::
+     If you are working on the LOFAR CEP I/II clusters, then you will also need to do::
     
         $ use Pythonlibs
 

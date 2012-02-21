@@ -9,7 +9,8 @@ Order n => J=n, where J=0 is the gaussian.
 import numpy as N
 import pyfits
 from scipy.optimize import leastsq
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 
 def decompose_shapelets(image, mask, basis, beta, centre, nmax, mode):
     """ Decomposes image (with mask) and beta, centre (2-tuple) , nmax into basis

@@ -3,7 +3,8 @@
 import functions as func
 import scipy.ndimage as nd
 import numpy as N
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 
 def test_split(isl):
 

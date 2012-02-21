@@ -5,7 +5,8 @@ import pyfits
 import libs
 import shapelets as sh
 import compute as comp
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import _anaamika as A
 import sys
 

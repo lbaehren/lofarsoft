@@ -1,7 +1,8 @@
 
 import numpy as N
 import functions as func
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 
 n = 1000
 subn = 10

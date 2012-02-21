@@ -32,7 +32,8 @@ def isl_tosplit(isl, img):
     #print 'CONVEX = ',convex_def
 
     if img.opts.plot_islands:
-        import pylab as pl
+        import matplotlib.pyplot as pl
+        #import pylab as pl
         pl.figure()
         pl.suptitle('Island '+str(isl.island_id) + ' ' + repr(img.waveletimage))
         pl.subplot(2,2,1); pl.imshow(N.transpose(isl.image*~isl.mask_active), origin='lower', interpolation='nearest'); pl.title('Image')

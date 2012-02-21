@@ -14,7 +14,8 @@ import debug_figs as df
 from gaul2srl import Source
 from copy import deepcopy as cp
 import _cbdsm
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import collapse 
 import sys
 import functions as func

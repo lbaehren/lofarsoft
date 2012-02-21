@@ -1,7 +1,8 @@
 
 import numpy as N
 from math import *
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 
 def readinfile(fname, skip=0):
     """ Read the rows in fname and returns a column-wise list. If the column is a 

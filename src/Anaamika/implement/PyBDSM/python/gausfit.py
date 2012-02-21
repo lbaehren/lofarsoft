@@ -20,7 +20,8 @@ import time
 import statusbar
 import misc
 import _cbdsm
-import pylab as pl
+import matplotlib.pyplot as pl
+#import pylab as pl
 import scipy.ndimage as nd
 
 
@@ -464,7 +465,8 @@ class Op_gausfit(Op):
             gaul.append(g)
             coords.append([xcen, ycen])
           if img.opts.debug_figs_6_ini_nobeam:
-            import pylab as pl
+            import matplotlib.pyplot as pl
+            #import pylab as pl
             pl.figure(); pl.suptitle(img.imagename+' Island : '+str(isl.island_id))
             resid = N.zeros(im.shape); x, y = N.indices(im.shape); xp, yp = N.transpose(coords)
             for g in gaul:

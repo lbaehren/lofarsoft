@@ -17,7 +17,8 @@ def momfit(img):
         from _cbdsm import lmder_fit, dn2g_fit, dnsg_fit
         fit = lmder_fit
 
-        import pylab as pl
+        import matplotlib.pyplot as pl
+        #import pylab as pl
         import matplotlib.cm as cm
         pl.figure()
 

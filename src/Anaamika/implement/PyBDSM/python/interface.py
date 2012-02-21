@@ -105,6 +105,7 @@ def load_pars(filename):
     Returns None if no file can be loaded successfully.
     """
     from image import Image
+    import mylogger 
     try:
         import cPickle as pickle
     except ImportError:
@@ -112,12 +113,8 @@ def load_pars(filename):
 
     # First, check if input is a dictionary
     if isinstance(filename, dict):
-        try:
-            timg = Image(filename)
-            print "--> Loaded parameters from dictionary."
-            return timg
-        except:
-            return None
+        timg = Image(filename)
+        return timg
     else:
         try:
             pkl_file = open(filename, 'rb')
