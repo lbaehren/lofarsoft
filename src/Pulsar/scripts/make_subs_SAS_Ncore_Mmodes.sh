@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.41
+VERSION=3.42
  
 #####################################################################
 # Usage #
@@ -553,7 +553,14 @@ then
   SAMPLES_IS=`echo ${MAGIC_NUM}/${DOWN_IS}| bc`
   
   # for now, use the first beam subband list;  grab the rest in logic beloe 
-  nSubbands=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
+  tmp=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g'`
+  tmp_has_range=`echo $tmp | grep "\.\."`
+  if [[ $tmp_has_range != "" ]
+  then 
+     nSubbands=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
+  else
+     nSubbands=`cat $PARSET | grep "Observation.Beam\[0\].subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | awk -F"," '{print NF}'`
+  fi
 
 else
   nSubbands=`cat $PARSET | grep "Observation.subbandList"  | head -1 | awk -F "= " '{print $2}' | sed 's/\[//g' | sed 's/\]//g' | expand_sblist.py |awk -F"," '{print NF}'`
