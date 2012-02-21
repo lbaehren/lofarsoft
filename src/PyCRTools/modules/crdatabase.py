@@ -474,8 +474,17 @@ class Event(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self):
-        """Write event information to the database."""
+    def write(self, recursive=True):
+        """Write event information to the database.
+
+        **Properties**
+
+        ===========  =================================================================
+        Parameter    Description
+        ===========  =================================================================
+        *recursive*  if *True* write all underlying datastructures (datafiles, etc.)
+        ===========  =================================================================
+        """
         if self._db:
             # Writing attributes
             if self.inDatabase():       # Update values
@@ -491,7 +500,8 @@ class Event(object):
             # Writing datafile information
             for datafile in self.datafiles:
                 datafileID = datafile.ID
-                datafile.write()
+                if recursive:
+                    datafile.write()
 
                 sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
                 result = self._db.select(sql)[0][0]
@@ -726,8 +736,17 @@ class Datafile(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self):
-        """Write datafile information to the database. """
+    def write(self, recursive=True):
+        """Write datafile information to the database.
+
+        **Properties**
+
+        ===========  =================================================================
+        Parameter    Description
+        ===========  =================================================================
+        *recursive*  if *True* write all underlying datastructures (stations, etc.)
+        ===========  =================================================================
+        """
         if self._db:
             # Write attributes
             if self.inDatabase():
@@ -749,7 +768,8 @@ class Datafile(object):
             # Write station information
             for station in self.stations:
                 stationID = station.ID
-                station.write()
+                if recursive:
+                    station.write()
 
                 sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
                 result = self._db.select(sql)[0][0]
@@ -964,8 +984,17 @@ class Station(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self):
-        """Write station information to the database. """
+    def write(self, recursive=True):
+        """Write station information to the database.
+
+        **Properties**
+
+        ===========  =================================================================
+        Parameter    Description
+        ===========  =================================================================
+        *recursive*  if *True* write all underlying datastructures (polarisations)
+        ===========  =================================================================
+        """
         if self._db:
             # Write attributes
             if self.inDatabase():
@@ -981,7 +1010,8 @@ class Station(object):
             # Write polarisation information
             for polarisation in self.polarisations:
                 polarisationID = polarisation.ID
-                polarisation.write()
+                if recursive:
+                    polarisation.write()
 
                 sql = "SELECT COUNT(stationID) FROM main.station_polarisation WHERE polarisationID={0}".format(polarisationID)
                 result = self._db.select(sql)[0][0]
