@@ -31,7 +31,9 @@ class CRDatabasePopulator(object):
         if not self._options:
             raise ValueError("No options provided.")
 
-        self.dbManager = crdb.CRDatabase(filename=self._db_filename)
+        self.dbManager = crdb.CRDatabase(filename=self._db_filename,
+                                         datapath=options.datapath,
+                                         resultspath=options.resultspath)
 
         if self.dbManager:
             self._db = self.dbManager.db
@@ -194,6 +196,9 @@ def parseOptions():
         parser.error("Incorrect number of arguments.")
 
     options.basepath = os.path.dirname(os.path.abspath(args[0]))
+
+    print "datapath = %s" %(options.datapath)
+    print "resultspath = %s" %(options.resultspath)
 
     return (options, args)
 
