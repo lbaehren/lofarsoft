@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.43
+VERSION=3.44
  
 #####################################################################
 # Usage #
@@ -2601,7 +2601,7 @@ do
 							        echo "Tried $kk, but still not divisble into $nSubbands" >> $log
 							        echo "Tried $kk, but still not divisble into $nSubbands"
 							     fi
-						      cc=`expr $kk + 1`
+						         kk=`expr $kk + 1`
 							done
 					        echo "Successfully found $kk to use for pav -f" >> $log
 					        echo "Successfully found $kk to use for pav -f"
@@ -2756,7 +2756,7 @@ do
 								        echo "Tried $kk, but still not divisble into $nSubbands" >> $log
 								        echo "Tried $kk, but still not divisble into $nSubbands"
 								     fi
-							      cc=`expr $kk + 1`
+							         kk=`expr $kk + 1`
 								done
 						        echo "Successfully found $kk to use for pav -f" >> $log
 						        echo "Successfully found $kk to use for pav -f"
@@ -2953,7 +2953,7 @@ do
 				        echo "Tried $kk, but still not divisble into $nSubbands" >> $log
 				        echo "Tried $kk, but still not divisble into $nSubbands"
 				     fi
-			      cc=`expr $kk + 1`
+			         kk=`expr $kk + 1`
 				done
 		        echo "Successfully found $kk to use for pav -f" >> $log
 		        echo "Successfully found $kk to use for pav -f"
