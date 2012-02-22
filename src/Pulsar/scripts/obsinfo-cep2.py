@@ -938,7 +938,7 @@ class obsinfo:
 					try:
 						subband_first = int(self.subbandList.split("..")[0].split(",")[0])
 						# CS has a priority
-						if self.nrChanPerSubIS != 0:
+						if self.nrChanPerSubCS != 0:
 							nchanpersub = self.nrChanPerSubCS
 						else:
 							nchanpersub = self.nrChanPerSubIS
