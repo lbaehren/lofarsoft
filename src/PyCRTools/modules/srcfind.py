@@ -159,6 +159,49 @@ def timeDelaysFromDirection(positions, direction):
 
     return timeDelays
 
+def timeDelaysFromDirectionAndDistance(positions, direction):
+    """
+    Get time delays for antennas at given position for a given direction and distance.
+    Time delays come out as an np-array.
+
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *positions* ``(np-array x1, y1, z1, x2, y2, z2, ...)``
+    *direction* (az, el, R) in radians, meters.
+    =========== =================================================
+
+    Example:
+
+    .. doctest::
+
+        >>> pos = np.array([0, 0, 0, 23, -21, 54, 11, 21, 33])
+        >>> dir = (1.2, 0.7)
+        >>> timeDelaysFromDirection(pos, dir)
+        array([ -0.00000000e+00,  -8.73671261e-08,  -1.31017019e-07])
+
+    """
+
+    n = len(positions) / 3
+    phi = halfpi - direction[0] # warning, 90 degree? -- Changed to az = 90_deg - phi
+    theta = halfpi - direction[1] # theta as in standard spherical coords, while el=90 means zenith...
+    R = direction[2]
+    
+    cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
+    cartesianSourcePoint = R * cartesianDirection
+
+    timeDelays = np.zeros(n)
+    for i in range(n):
+        thisPosition = np.array(positions[3*i:3*(i+1)])
+        distanceVector = cartesianSourcePoint + thisPosition
+        
+        timeDelays[i] = (1/c) * np.linalg.norm(distanceVector) # check accuracy!
+        
+    return timeDelays
+
+
 def testDirectionCalculationForThreeAntennas(positions):
     """
     Given antenna positions, calculate time delays for 'every' signal vector on the sky.
@@ -207,7 +250,8 @@ def mse(az, el, pos, times):
     =========== =================================================
     *az*        Azimuth in radians
     *el*        Elevation in radians
-    *pos*       times as in the other functions
+    *pos*       Positions as in the other functions
+    *times*     Times as in the other functions
     =========== =================================================
 
     """
@@ -219,6 +263,32 @@ def mse(az, el, pos, times):
     mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
 
     return mse * c * c
+
+def mseWithDistance(az, el, R, pos, times):
+    """
+    Mean-squared error in the times for a given direction and distance, as used in brute force or similar searches.
+
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *az*        Azimuth in radians
+    *el*        Elevation in radians
+    *R*         Distance in m; reference is the 0-th element of 'pos' and 'times'.
+    *pos*       Positions as in the other functions
+    *times*     Times as in the other functions
+    =========== =================================================
+    """
+    
+    N = len(times)
+    calcTimes = timeDelaysFromDirectionAndDistance(pos, (az, el, R))
+    timeOffsets = calcTimes - times
+    mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
+    mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+    
+    
+
 
 def directionBruteForceSearch(positions, times):
     """
