@@ -315,14 +315,6 @@ Now bootstrap the build system::
 Then run::
 
   cd build
-  ccmake .
-
-and set ``WCSLIB_PYTHON_WRAPPER = OFF``, and ``DAL_PYTHON_BINDINGS =
-OFF``. Finalize the cmake configuration by pressing ``c``
-(configuration) and ``g`` (generating build scripts). If the ``g``
-option is not available, run the configuration again by pressing
-``c``.
-
 
 Compile the PyCRTools::
 
@@ -426,13 +418,6 @@ Now bootstrap the build system::
 Then run::
 
   cd build
-  ccmake .
-
-and set ``WCSLIB_PYTHON_WRAPPER = OFF``, and ``DAL_PYTHON_BINDINGS =
-OFF``. Finalize the cmake configuration by pressing ``c``
-(configuration) and ``g`` (generating build scripts). If the ``g``
-option is not available, run the configuration again by pressing
-``c``.
 
 Compile the PyCRTools::
 
