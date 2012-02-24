@@ -5,7 +5,7 @@
 
 from datetime import datetime
 import pycrtools as cr
-from pytmf import deg2rad, rad2deg, gregorian2jd #gregoriandate2jd
+from pytmf import deg2rad, rad2deg, gregorian2jd
 from pytmf import deg2rad, rad2deg
 
 def casaRefcodes(**kwargs):
@@ -207,7 +207,7 @@ class CoordinateGrid(object):
             m = float(self.obstime.minute)
             s = float(self.obstime.second) + float(self.obstime.microsecond) * 1.e-6
 
-            self.utc = gregoriandate2jd(Y, M, D + ((h + m / 60. + s / 3600.) / 24.))
+            self.utc = gregorian2jd(Y, M, D + ((h + m / 60. + s / 3600.) / 24.))
 
             cr.hEquatorial2Horizontal(temp, self.j2000, self.utc, self.ut1_utc, self.L, self.phi)
 
