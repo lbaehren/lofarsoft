@@ -18,8 +18,9 @@ class StationBeamformer(Task):
 
     parameters = dict(
         filename = dict ( default = "test.h5" ),
-        output_filename = dict ( default = lambda self : self.filename.rstrip(".h5")+".beam.dat" ),
         data = dict ( default = lambda self : cr.open(self.filename, self.blocksize) ),
+        output_filename = dict ( default = lambda self : self.filename.rstrip(".h5")+".beam.dat" ),
+        antennas = dict ( default = None, doc = "List of antennas or string (odd/even)." ),
         blocksize = dict ( default = 2**16 ),
         startblock = dict( default = 0 ),
         nblocks = dict( default = lambda self : self.data["MAXIMUM_READ_LENGTH"] / self.data["BLOCKSIZE"] ),
@@ -36,6 +37,10 @@ class StationBeamformer(Task):
     def init(self):
         """Initialize imager.
         """
+
+        # Set antenna selection
+        if self.antennas:
+            self.data["SELECTED_DIPOLES"] = self.antennas
 
         # Generate coordinate grid with only one pixel
         print "Calculating beam direction"
