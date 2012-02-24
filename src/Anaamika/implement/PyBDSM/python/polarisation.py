@@ -222,16 +222,19 @@ class Op_polarisation(Op):
             ngaus_in_island = 0
             for src in isl.sources:
                   ngaus_in_island += src.ngaus
+                  
             # Cut out images for each island, subtract mean
-            ch0_I = img.ch0[isl.bbox]
-            ch0_Q = img.ch0_Q[isl.bbox] #- img.mean_QUV[0][isl.bbox]
-            ch0_U = img.ch0_U[isl.bbox] #- img.mean_QUV[1][isl.bbox]
-            ch0_V = img.ch0_V[isl.bbox] #- img.mean_QUV[2][isl.bbox]
+            # First, expand the bbox a little
+            isl_bbox = isl.bbox #isl.__expand_bbox(isl.bbox, shape)
+            ch0_I = img.ch0[isl_bbox]
+            ch0_Q = img.ch0_Q[isl_bbox] #- img.mean_QUV[0][isl.bbox]
+            ch0_U = img.ch0_U[isl_bbox] #- img.mean_QUV[1][isl.bbox]
+            ch0_V = img.ch0_V[isl_bbox] #- img.mean_QUV[2][isl.bbox]
            
             for i, src in enumerate(isl.sources):
               # First, reconstruct sources from the Gaussians:
               if i == 0: # only need to do this once per island
-                x1, x2 = N.mgrid[isl.bbox]
+                x1, x2 = N.mgrid[isl_bbox]
                 tot_im = N.zeros((isl.shape[0], isl.shape[1]), dtype=float)
                 for src_in_isl in isl.sources:
                   for gaus in src_in_isl.gaussians:
@@ -247,14 +250,15 @@ class Op_polarisation(Op):
               src_flux_Q_err_sq = 0
               src_flux_U_err_sq = 0
               src_flux_V_err_sq = 0
-
+              frac_cutoff = 0.1
+              
               for g, gaussian in enumerate(src.gaussians):
                   # First, make an array giving fractional contribution to the flux of the 
                   # current Gaussian:
                   g_im = func.gaussian_fcn(gaussian, x1, x2)
-                  low_vals = N.where(g_im/N.max(g_im) < 0.1)
+                  low_vals = N.where(g_im/N.max(g_im) < frac_cutoff)
                   g_im[low_vals] = 0.0  
-                  frac_flux = g_im / tot_im * ~isl.mask_active 
+                  frac_flux = g_im / tot_im #* ~isl.mask_active 
                   
                   in_current_gaus = N.where(frac_flux > 0.0) # indices of pixels assigned to current Gaussian
                   pixels_in_source = N.size(in_current_gaus) # number of umasked pixels assigned to current Gaussian
@@ -262,13 +266,13 @@ class Op_polarisation(Op):
                   # Sum pixels in the cutout ch0 images that are assigned to current Gaussian
                   if hasattr(src, '_pi'):
                       flux_I = N.sum(ch0_I[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
-                      flux_I_err = N.mean(img.rms[isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) *           N.sqrt(pixels_in_source/pixels_per_beam) # Jy                  
+                      flux_I_err = N.mean(img.rms[isl_bbox][in_current_gaus] * frac_flux[in_current_gaus]) *                       N.sqrt(pixels_in_source/pixels_per_beam) # Jy                  
                   flux_Q = N.sum(ch0_Q[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
-                  flux_Q_err = N.mean(img.rms_QUV[0][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
+                  flux_Q_err = N.mean(img.rms_QUV[0][isl_bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
                   flux_U = N.sum(ch0_U[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
-                  flux_U_err = N.mean(img.rms_QUV[1][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
+                  flux_U_err = N.mean(img.rms_QUV[1][isl_bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
                   flux_V = N.sum(ch0_V[in_current_gaus] * frac_flux[in_current_gaus])/pixels_per_beam # Jy
-                  flux_V_err = N.mean(img.rms_QUV[2][isl.bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
+                  flux_V_err = N.mean(img.rms_QUV[2][isl_bbox][in_current_gaus] * frac_flux[in_current_gaus]) * N.sqrt(pixels_in_source/pixels_per_beam) # Jy
                   
                   # Store fluxes and errors for each Gaussian in the source
                   if hasattr(src, '_pi'):

@@ -149,7 +149,8 @@ def ra2hhmmss(deg):
 
     from math import modf
     if deg < 0:
-        raise RuntimeError("Negative RA")
+        deg += 360.0
+        #raise RuntimeError("Negative RA")
     x, hh = modf(deg/15.)
     x, mm = modf(x*60)
     ss = x*60

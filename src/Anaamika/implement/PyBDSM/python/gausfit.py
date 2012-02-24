@@ -608,8 +608,8 @@ class Op_gausfit(Op):
         border = opts.flag_bordersize
         flag_max = False
         if A < opts.flag_minsnr*thr: flag += 1
-        if x1 >= 0 and x2 >= 0 and x1 <= shape[0] and x2 <= shape[1]:
-            if A > opts.flag_maxsnr*1.5*isl_image[x1, x2]: flag_max = True
+#         if x1 >= 0 and x2 >= 0 and x1 <= shape[0] and x2 <= shape[1]:
+#             if A > opts.flag_maxsnr*thr: flag_max = True
         if A > opts.flag_maxsnr*peak or flag_max: flag += 2
         if N.isnan(x1) or x1 < border or x1 > shape[0] - border -1: flag += 4
         if N.isnan(x2) or x2 < border or x2 > shape[1] - border -1: flag += 8
