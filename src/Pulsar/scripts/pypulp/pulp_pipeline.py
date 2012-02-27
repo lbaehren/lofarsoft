@@ -58,25 +58,16 @@ class Pipeline:
 		for uid in toremove: del(self.units[uid])
 
 		# creating main output directory on locus092 for CS data and on locus094 for IS data
-		for unit in self.units:
-			if unit.tab.is_coherent:
-				locus="locus092"
-				output_dir="%s_%s/%s_CSplots" % (cep2.processed_dir_prefix, locus, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir)
-				log.info("Creating output directory on %s: %s" % (locus, output_dir))
-				cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[locus], output_dir)
-				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
-				p.communicate()
-				break
-
-		for unit in self.units:
-			if not unit.tab.is_coherent:
-				locus="locus094"
-				output_dir="%s_%s/%s_redIS" % (cep2.processed_dir_prefix, locus, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir)
-				log.info("Creating output directory on %s: %s" % (locus, output_dir))
-				cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[locus], output_dir)
-				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
-				p.communicate()
-				break
+		unique_outdirs=["%s:%s_%s/%s%s" % (unit.summary_node, cep2.processed_dir_prefix, unit.summary_node, \
+			cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, unit.summary_node_dir_suffix) for unit in self.units]
+		unique_outdirs=np.unique(unique_outdirs)
+		for uo in unique_outdirs:
+			node=uo.split(":")[0]
+			sumdir=uo.split(":")[1]
+			log.info("Creating output directory on %s: %s" % (node, sumdir))
+			cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
+			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+			p.communicate()
 
 		for unit in self.units:
 			# if data for this beam are on several nodes, then we have to log in to hoover node...

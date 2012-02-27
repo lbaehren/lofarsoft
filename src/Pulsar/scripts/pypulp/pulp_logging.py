@@ -61,10 +61,3 @@ class PulpLogger(object):
 			line = process.stdout.readline()
 			if not line: break
 			self.info(line.rstrip())
-
-	# to log stdout/stderr from the process
-#	def stdout2log(self, stream):
-#		while True:
-#			line = stream.readline()
-#			if not line: break
-#			self.info(line.rstrip())
