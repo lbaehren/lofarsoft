@@ -181,7 +181,9 @@ class PipeUnit:
 		"""
 		try:
 			self.log.info("Waiting for %s to finish, pid=%d" % (prg, popen.pid))
-			popen.communicate()
+			(sout, serr) = popen.communicate()
+			# we pipe serr to sout, so no need to log serr
+			self.stdout2log(sout)
 			self.log.info("Process pid=%d (%s) has finished, status=%d" % (popen.pid, prg, popen.returncode))
 			self.log.info("")
 			# if job is not successful
