@@ -15,6 +15,7 @@ import time
 import os
 import sys
 import numpy as np
+from pycrtools import xmldict
 
 
 def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
@@ -40,14 +41,15 @@ def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 
         for datadir in datadirs:
-            if not os.path.isfile(os.path.join(datadir,"results.py")):
+            if not os.path.isfile(os.path.join(datadir,"results.xml")):
                 continue
-            resfile=open(os.path.join(datadir,"results.py"))
-            print "Processing data results directory:",datadir
+            #resfile=open(os.path.join(datadir,"results.py"))
+            #print "Processing data results directory:",datadir
 
             try:
-                execfile(os.path.join(datadir,"results.py"),res)
-                res=res["results"]
+                #execfile(os.path.join(datadir,"results.py"),res)
+                res = xmldict.load(os.path.join(datadir,"results.xml"))
+                #res=res["results"]
             except:
                 continue
                 print "File skipped, NaN found!"
