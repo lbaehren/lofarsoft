@@ -12,6 +12,8 @@ import pycrtools.tasks as tasks
 import os
 import time
 import numpy as np
+import sys
+from pycrtools import xmldict
 
 def GetInformationFromFile(topdir, events):
 
@@ -32,14 +34,13 @@ def GetInformationFromFile(topdir, events):
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
         overallstatus = False
         for datadir in datadirs:
-            if not os.path.isfile(os.path.join(datadir,"results.py")):
+            if not os.path.isfile(os.path.join(datadir,"results.xml")):
                 continue
-            resfile=open(os.path.join(datadir,"results.py"))
             #print "Processing data results directory:",datadir
             
             try:
-                execfile(os.path.join(datadir,"results.py"),res)
-                res=res["results"]
+                res = xmldict.load(os.path.join(datadir,"results.xml"))
+                #res=res["results"]
             except:
                 continue
                 print "File skipped, NaN found!" 
@@ -51,6 +52,7 @@ def GetInformationFromFile(topdir, events):
             
             if status == "OK":
                 overallstatus = True
+                
             
             antid[res["polarization"]].extend(res["antennas"][key] for key in res["antennas"].keys())
             positions[res["polarization"]].extend(res["antenna_positions_array_XYZ_m"])  
@@ -62,7 +64,8 @@ def GetInformationFromFile(topdir, events):
                     
         if res == {}:
             print "No results file found"
-            sys.exit(0)
+            continue
+            #sys.exit(0)
         
         #print "Number of dipoles found:",ndipoles
         
