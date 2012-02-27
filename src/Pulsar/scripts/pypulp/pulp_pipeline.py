@@ -120,6 +120,9 @@ class PipeUnit:
                                      # if returncode == None, it means that process is still running
 		self.outdir = ""     # root directory with processed data
 		self.curdir = ""     # current processing directory
+		self.summary_node = "" # summary node, for CS - locus092, for IS - locus094
+		self.summary_node_dir_suffix = ""  # for CS this is "_CSplots" and for IS - "_redIS"
+		self.outdir_suffix = "" #  for CS this is "_red" (if user did not specify) and "_redIS" for IS
 		self.log = None
 		self.start_time = 0  # start time of the processing (in s)
 		self.end_time = 0    # end time (in s)
@@ -244,6 +247,9 @@ class PipeUnit:
 class CSUnit(PipeUnit):
 	def __init__(self, tab):
 		PipeUnit.__init__(self, tab)
+		self.summary_node = "locus092"
+		self.summary_node_dir_suffix = "_CSplots_py" # "_CSplots"
+		self.outdir_suffix = "_red_py" # "_red"
 
 	def run(self, obs, cep2, cmdline, log):
 		self.log = log
@@ -256,7 +262,7 @@ class CSUnit(PipeUnit):
 		if cmdline.opts.outdir != "":
 			self.outdir = "%s_%s/%s" % (cep2.processed_dir_prefix, cep2.current_node, cmdline.opts.outdir)
 		else: # if output dir was not set
-			self.outdir = "%s_%s/%s_red" % (cep2.processed_dir_prefix, cep2.current_node, obs.id)
+			self.outdir = "%s_%s/%s%s" % (cep2.processed_dir_prefix, cep2.current_node, obs.id, self.outdir_suffix)
 		# deleting previous results if option --del was set
 		if cmdline.opts.is_delete:
 			self.log.info("Deleting previous processed results in %s" % (self.outdir))
@@ -446,11 +452,11 @@ class CSUnit(PipeUnit):
 		self.execute(cmd, workdir=self.outdir)
 
 		# copying archive file to locus092
-		locus="locus092"
-		output_dir="%s_%s/%s_CSplots" % (cep2.processed_dir_prefix, locus, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir)
+		output_dir="%s_%s/%s%s" % \
+			(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
 		output_archive="%s/%s_sap%03d_tab%04d_plotsCS.tar.gz" % (output_dir, obs.id, self.sapid, self.tabid)
-		self.log.info("Copying archive file to %s:%s" % (locus, output_dir))
-		cmd="rsync -avxP %s_plotsCS.tar.gz %s:%s" % (obs.id, locus, output_archive)
+		self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
+		cmd="rsync -avxP %s_plotsCS.tar.gz %s:%s" % (obs.id, self.summary_node, output_archive)
 		self.execute(cmd, workdir=self.outdir)
 
 		# combining all *.th.png files into one (for summary)
@@ -468,12 +474,15 @@ class CSUnit(PipeUnit):
 		self.log.flush()
 		cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
 		os.system(cmd)
-		cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), locus, output_dir)
+		cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
 		os.system(cmd)
 
 class ISUnit(PipeUnit):
 	def __init__(self, tab):
 		PipeUnit.__init__(self, tab)
+		self.summary_node = "locus094"
+		self.summary_node_dir_suffix = "_redIS_py" # "_redIS"
+		self.outdir_suffix = "_redIS_py" # "_redIS"
 
 	def run(self, obs, cep2, cmdline, log):
 		self.log = log
@@ -486,7 +495,7 @@ class ISUnit(PipeUnit):
 		if cmdline.opts.outdir != "":
 			self.outdir = "%s_%s/%s" % (cep2.processed_dir_prefix, cep2.current_node, cmdline.opts.outdir)
 		else: # if output dir was not set
-			self.outdir = "%s_%s/%s_redIS" % (cep2.processed_dir_prefix, cep2.current_node, obs.id)
+			self.outdir = "%s_%s/%s%s" % (cep2.processed_dir_prefix, cep2.current_node, obs.id, self.outdir_suffix)
 		# deleting previous results if option --del was set
 		if cmdline.opts.is_delete:
 			self.log.info("Deleting previous processed results in %s" % (self.outdir))
@@ -676,11 +685,11 @@ class ISUnit(PipeUnit):
 		self.execute(cmd, workdir=self.outdir)
 
 		# copying archive file to locus094
-		locus="locus094"
-		output_dir="%s_%s/%s_redIS" % (cep2.processed_dir_prefix, locus, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir)
+		output_dir="%s_%s/%s%s" % \
+			(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
 		output_archive="%s/%s_sap%03d_tab%04d_plotsIS.tar.gz" % (output_dir, obs.id, self.sapid, self.tabid)
-		self.log.info("Copying archive file to %s:%s" % (locus, output_dir))
-		cmd="rsync -avxP %s_plotsIS.tar.gz %s:%s" % (obs.id, locus, output_archive)
+		self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
+		cmd="rsync -avxP %s_plotsIS.tar.gz %s:%s" % (obs.id, self.summary_node, output_archive)
 		self.execute(cmd, workdir=self.outdir)
 
 		# combining all *.th.png files into one (for summary)
@@ -698,7 +707,7 @@ class ISUnit(PipeUnit):
 		self.log.flush()
 		cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
 		os.system(cmd)
-		cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), locus, output_dir)
+		cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
 		os.system(cmd)
 
 class CVUnit(PipeUnit):
