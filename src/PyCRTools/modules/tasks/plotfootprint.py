@@ -12,6 +12,7 @@ from pycrtools import lora
 from math import *
 import pycrtools.rftools as rf
 import numpy as np
+from pycrtools import xmldict
 
 deg=pi/180.
 pi2=pi/2.
@@ -35,17 +36,18 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly):
         datadirs=cr.listFiles(os.path.join(os.path.join(eventdir,"pol?"),"*"))
 
         for datadir in datadirs:
-            if not os.path.isfile(os.path.join(datadir,"results.py")):
+            if not os.path.isfile(os.path.join(datadir,"results.xml")):
                 continue
             if excludelist:
                 if True in [st in datadir for st in excludelist]:
                     continue
-            resfile=open(os.path.join(datadir,"results.py"))
+            #resfile=open(os.path.join(datadir,"results.py"))
             res={}
             
             try:
-                execfile(os.path.join(datadir,"results.py"),res)
-                res=res["results"]
+                #execfile(os.path.join(datadir,"results.py"),res)
+                res = xmldict.load(os.path.join(datadir,"results.xml"))
+                #res=res["results"]
             except:
                 continue
                 print "File skipped, nan found!"    
