@@ -1,3 +1,10 @@
+"""
+Interface classes to communicate with the Cosmic Ray Pipeline Database.
+
+:Author: Martin van den Akker <martinva@astro.ru.nl>
+"""
+
+
 from pycrtools.io import database as db
 import os
 
@@ -246,6 +253,64 @@ class CRDatabase(object):
         return result
 
 
+    def getStationIDs(self, eventID=None, datafileID=None, stationname=None, status=None):
+        """Return a list of stationIDs that satisfy the values of the
+        provided arguments of this method.
+
+        **Properties**
+
+        =================  ==============================================================
+        Parameter          Description
+        =================  ==============================================================
+        *eventID*          id of the event.
+        *datafileID*       id of the datafile.
+        *stationname*      name of the station.
+        *status*           status of the station.
+        =================  ==============================================================
+
+        If no arguments are given all stationIDs are selected. When
+        multiple arguments are provided, the returned stationIDs satisfy
+        all argument values that are provided.
+        """
+        # TEST: CRDatabase.getStationIDs() - Test implementation
+        results = []
+
+        if self.db:
+            sql_fields = ""
+            sql_table = ""
+            sql_selection = []
+            if eventID:                 # EventID
+                sql_fields = "ed.eventID, s.stationID "
+                sql_table = "event_datafile AS ed INNER JOIN (datafile_station AS ds INNER JOIN stations AS s ON s.stationID=dsstationID) ON ds.datafileID=ed.datafileID"
+                sql_selection.append("ed.eventID={0}".format(eventID))
+            elif datafileID:            # DatafileID
+                sql_fields = "s.stationID"
+                sql_table = "datafile_station AS ds INNER JOIN stations AS s ON ds.stationID=s.stationID"
+                sql_selection.append("ds.datafileID={0}".format(datafileID))
+            # Other selections
+            if stationname:
+                sql_selection.append("s.stationname='{0}'".format(stationname))
+            if status:
+                sql_selection.append("s.status='{0}'".format(status))
+
+            sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
+            if len(sql_selection) > 0:
+                sql += " WHERE "
+                for i in range(len(sql_selection)):
+                    sql += sql_selection[i]
+                    if i < len(sql_selection) - 1:
+                        sql += " AND "
+
+            print "sql = ",sql          # DEBUG
+            records = self.db.select(sql)
+            print "records = ",records  # DEBUG
+
+        return results
+
+
+    # def getPolarisationIDs(self):
+    #     pass
+
     def summary(self):
         """Summary of the CRDatabase object."""
         linewidth = 80
@@ -440,6 +505,9 @@ class Event(object):
         if self.inDatabase():           # Read from database
             self.read()
 
+
+    def __repr__(self):
+        return "EventID=%d   timestampe=%d   status='%s'" %(self._id, self.timestamp, self.status)
 
     def read(self):
         """Read event information from the database."""
@@ -708,6 +776,10 @@ class Datafile(object):
             self.read()
 
 
+    def __repr__(self):
+        return "DatafileID=%d   filename='%s'   status='%s'" %(self._id, self.filename, self.status)
+
+
     def read(self):
         """Read datafile information from the database."""
         if self._db:
@@ -956,6 +1028,10 @@ class Station(object):
             self.read()
 
 
+    def __repr__(self):
+        return "StationID=%d   stationname='%s'   status='%s'" %(self._id, self.stationname, self.status)
+
+
     def read(self):
         """Read station information from the database."""
         if self._db:
@@ -1199,6 +1275,10 @@ class Polarisation(object):
             self.read()
 
 
+    def __repr__(self):
+        return "polarisationID=%d,   results='%s'   status='%s'" %(self._id, self.resultspath, self.status)
+
+
     def read(self):
         """Read polarisation information from the database."""
         if self._db:
@@ -1335,6 +1415,10 @@ class Filter(object):
         self._db = db
         self.name = name
         self.filters = []
+
+
+    def __repr__(self):
+        return "name='%s'" %(self.name)
 
 
     def read(self):
