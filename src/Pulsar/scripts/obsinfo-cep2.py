@@ -942,7 +942,10 @@ class obsinfo:
 							nchanpersub = self.nrChanPerSubCS
 						else:
 							nchanpersub = self.nrChanPerSubIS
-						lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+						if nchanpersub > 1:
+							lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+						else:
+							lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.)
 						self.cfreq = lofreq + 0.5 * self.bw
 					except: pass
 			except: pass
