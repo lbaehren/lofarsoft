@@ -82,7 +82,7 @@ class CRDatabase(object):
             self.db.execute(sql)
 
             # Polarisations table
-            sql = "CREATE TABLE IF NOT EXISTS main.polarisations (polarisationID INTEGER PRIMARY KEY, type TEXT, direction TEXT, status TEXT, resultspath TEXT)"
+            sql = "CREATE TABLE IF NOT EXISTS main.polarisations (polarisationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT)"
             self.db.execute(sql)
 
             # Polarisation properties table
@@ -112,7 +112,7 @@ class CRDatabase(object):
             # Status table
             sql = """
             CREATE TABLE IF NOT EXISTS main.status (statusID INTEGER UNIQUE, status TEXT NOT NULL);
-            INSERT OR IGNORE INTO main.status (statusID, status) VALUES (-1, 'UNPROCESSED');
+            INSERT OR IGNORE INTO main.status (statusID, status) VALUES (-1, 'NEW');
             INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 0, 'UNKNOWN');
             INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 1, 'PROCESSED');
             """
@@ -272,8 +272,8 @@ class CRDatabase(object):
         multiple arguments are provided, the returned stationIDs satisfy
         all argument values that are provided.
         """
-        # TEST: CRDatabase.getStationIDs() - Test implementation
         results = []
+        records = []
 
         if self.db:
             sql_fields = ""
@@ -301,15 +301,22 @@ class CRDatabase(object):
                     if i < len(sql_selection) - 1:
                         sql += " AND "
 
-            print "sql = ",sql          # DEBUG
             records = self.db.select(sql)
-            print "records = ",records  # DEBUG
+
+        if records:
+            results = [r[0] for r in records]
 
         return results
 
 
     # def getPolarisationIDs(self):
-    #     pass
+    #     """Return a list of polarisationIDs that satisfy the values of the
+    #     provided arguments of this method.
+    #     """
+    #     # TODO: CRDatabase.getPolarisationIDs() - Add implementation
+
+    #     raise NotImplementedError("Function needs to be implemented.")
+
 
     def summary(self):
         """Summary of the CRDatabase object."""
@@ -495,7 +502,7 @@ class Event(object):
 
         # Set default values
         self.timestamp = 0
-        self.status = "UNDEFINED"
+        self.status = "NEW"
         self.datafiles = []
         self.property = {}
 
@@ -766,7 +773,7 @@ class Datafile(object):
         self._id = id
 
         self.filename = ""
-        self.status = "UNDEFINED"
+        self.status = "NEW"
         self.stations = []
 
         self.settings = Settings(db)
@@ -986,7 +993,7 @@ class Datafile(object):
         print "  %-40s : %s" %("Filename", self.filename)
         print "  %-40s : %s" %("Status", self.status)
         # print "  %-40s : %s" %("Timestamp", self.timestamp)
-        # print "  %-40s : %s" %("Results path", self.resultspath)
+        # print "  %-40s : %s" %("Results path", self.resultsfile)
 
         # Stations
         n_stations = len(self.stations)
@@ -1019,7 +1026,7 @@ class Station(object):
         self._id = id
 
         self.stationname = ""
-        self.status = "UNDEFINED"
+        self.status = "NEW"
         self.polarisations = []
 
         self.settings = Settings(db)
@@ -1238,7 +1245,7 @@ class Station(object):
         if n_polarisations > 0:
             print "Polarisations:"
             for polarisation in self.polarisations:
-                print "  %-6d - %s" %(polarisation.id, polarisation.resultspath)
+                print "  %-6d - %s" %(polarisation.id, polarisation.resultsfile)
             pass
 
         print "="*linewidth
@@ -1263,10 +1270,10 @@ class Polarisation(object):
         self._db = db
         self._id = id
 
-        self.type = ""
+        self.antennaset = ""
         self.direction = ""
-        self.status = "UNDEFINED"
-        self.resultspath = ""
+        self.status = "NEW"
+        self.resultsfile = ""
         self.property = {}
 
         self.settings = Settings(db)
@@ -1276,7 +1283,7 @@ class Polarisation(object):
 
 
     def __repr__(self):
-        return "polarisationID=%d,   results='%s'   status='%s'" %(self._id, self.resultspath, self.status)
+        return "polarisationID=%d,   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status)
 
 
     def read(self):
@@ -1284,14 +1291,14 @@ class Polarisation(object):
         if self._db:
             if self.inDatabase():
                 # Read attributes
-                sql = "SELECT polarisationID, type, direction, status, resultspath FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
+                sql = "SELECT polarisationID, antennaset, direction, status, resultsfile FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if len(records) == 1:
                     self._id = int(records[0][0])
-                    self.type = str(records[0][1])
+                    self.antennaset = str(records[0][1])
                     self.direction = str(records[0][2])
                     self.status = str(records[0][3])
-                    self.resultspath = str(records[0][4])
+                    self.resultsfile = str(records[0][4])
                 elif len(records) == 0:
                     raise ValueError("No records found for eventID={0}".format(self._id))
                 else:
@@ -1315,13 +1322,13 @@ class Polarisation(object):
         if self._db:
             # Write attributes
             if self.inDatabase():
-                sql = "UPDATE main.polarisations SET type={1}, direction={2}, status='{3}', resultspath='{4}' WHERE polarisationID={0}".format(self._id, str(self.type), str(self.direction), str(self.status), str(self.resultspath))
+                sql = "UPDATE main.polarisations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarisationID={0}".format(self._id, str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
                 self._db.execute(sql)
             else:
                 if self._id == 0:
-                    sql = "INSERT INTO main.polarisations (type, direction, status, resultspath) VALUES ({0}, {1}, '{2}', '{3}')".format(str(self.type), str(self.direction), str(self.status), str(self.resultspath))
+                    sql = "INSERT INTO main.polarisations (antennaset, direction, status, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}')".format(str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
                 else:
-                    sql = "INSERT INTO main.polarisations (polarisationID, type, direction, status, resultspath) VALUES ({0}, {1}, {2}, '{3}', '{4}')".format(self._id, str(self.type), str(self.direction), str(self.status), str(self.resultspath))
+                    sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
                 self._id = self._db.insert(sql)
 
             # Write properties
@@ -1382,10 +1389,10 @@ class Polarisation(object):
 
         # Polarisation information
         print "  %-40s : %d" %("ID", self._id)
-        print "  %-40s : %s" %("Type", self.type)
+        print "  %-40s : %s" %("Antennaset", self.antennaset)
         print "  %-40s : %s" %("Direction", self.direction)
         print "  %-40s : %s" %("Status", self.status)
-        print "  %-40s : %s" %("Results directory", self.resultspath)
+        print "  %-40s : %s" %("Results file", self.resultsfile)
 
         # Properties
         if len(self.property) > 0:

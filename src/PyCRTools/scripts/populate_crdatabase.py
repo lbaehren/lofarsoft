@@ -1,10 +1,13 @@
 """Populate the CR Database with datafile and event information.
 
 This is required to process the datafiles in the pipeline.
+
+:Author: Martin van den Akker <martinva@astro.ru.nl>
 """
 
 import os
 from optparse import OptionParser
+import time
 
 class CRDatabasePopulator(object):
 
@@ -71,18 +74,19 @@ class CRDatabasePopulator(object):
 
         # Loop over all filenames in the filelist
         for filename in filename_list:
+            dx = None
             filename_full = datapath + "/" + filename
 
             # Find file information
             datafileIDs = self.dbManager.getDatafileIDs(filename=filename)
             if not datafileIDs:
                 print "Processing %s ..." %(filename_full)
-                dataExtractor = DataExtractor(filename_full)
-                if not dataExtractor.isOpen():
+                dx = DataExtractor(filename_full)
+                if not dx.isOpen():
                     # Skip to next file when unable to open datafile
                     continue
 
-                timestamp = dataExtractor.timestamp
+                timestamp = dx.timestamp
 
                 datafile = crdb.Datafile(self._db)
                 datafile.filename = filename
@@ -101,6 +105,39 @@ class CRDatabasePopulator(object):
                 # Add datafile to event
                 event.addDatafile(datafile)
                 event.write()
+
+            datafileIDs = self.dbManager.getDatafileIDs(filename=filename)
+            if datafileIDs:
+                datafileID = datafileIDs[0]
+                if not dx:
+                    dx = DataExtractor(filename_full)
+                else:
+                    # Already open
+                    pass
+
+                datafile = crdb.Datafile(self._db, id=datafileID)
+
+                # Find station information
+                # - Station names
+                for stationname in dx.stationnames:
+                    stationIDs = self.dbManager.getStationIDs(datafileID=datafile.id, stationname=stationname)
+                    if not stationIDs:
+                        # Create stations
+                        station = crdb.Station(self._db)
+                        station.stationname = stationname
+                        station.write()
+                        datafile.addStation(station)
+
+                        # Create polarisations
+                        for pol_direction in [0,1]:
+                            p = crdb.Polarisation(self._db)
+                            p.antennaset = dx.antennaset
+                            p.direction = "%d" %(pol_direction)
+                            p.resultsfile = dx.resultsfile(pol_direction)
+                            print "Resultsfile: ", p.resultsfile
+                            print "Resultspath: ", os.path.join(self.settings.resultspath, p.resultsfile)
+                            p.write()   # Write to db and get ID
+                            station.addPolarisation(p)
 
 
     def summary(self):
@@ -166,10 +203,68 @@ class DataExtractor(object):
 
         if self.isOpen():
             seconds = self._datafile["TIME"][0]
-            subsec  = self._datafile["SAMPLE_NUMBER"][0] / self._datafile["SAMPLE_FREQUENCY"][0]
+            subsec  = self._datafile["SAMPLE_NUMBER"][0] * self._datafile["SAMPLE_INTERVAL"][0]
             result = int(seconds + round(subsec + 0.5))
         else:
             raise ValueError("No open datafile")
+
+        return result
+
+
+    @property
+    def stationnames(self):
+        """List of station names."""
+        result = []
+
+        if self.isOpen():
+            result = list(set(self._datafile["STATION_NAME"]))
+
+        return result
+
+
+    @property
+    def antennaset(self):
+        """Name of the used antennaset in the datafile."""
+        result = ""
+
+        if self.isOpen():
+            result = self._datafile["ANTENNA_SET"]
+
+        return result
+
+
+    def resultsfile(self, pol=0):
+        """Name of the resultsfile where the pipeline results are stored.
+
+        **Properties**
+
+        =========  ===================================================
+        Parameter  Datafile
+        =========  ===================================================
+        *pol*      polarisation direction.
+        =========  ===================================================
+        """
+        result = ""
+
+        if self.isOpen():
+            # The filename of the resultsfile is created/derived in the same way as in cr_event.py
+            root_pathname = "VHECR_LORA-"
+
+            # Timestamp
+            time_s      = self._datafile["TIME"][0]
+            time_s_str  = time.strftime("%Y%m%dT%H%M%S",time.gmtime(time_s))
+            time_ms     = int(self._datafile["SAMPLE_INTERVAL"][0]*self._datafile["SAMPLE_NUMBER"][0]*1000)
+            time_ms_str = str(time_ms).zfill(3)
+            time_stamp  = time_s_str+"."+time_ms_str+"Z"
+
+            polname = "pol%d" %(pol)
+
+            stationname = self.stationnames[0]
+
+            rel_pathname = os.path.join(root_pathname+time_stamp, polname, stationname)
+            rel_filename = os.path.join(rel_pathname, "results.xml")
+
+            result = rel_filename
 
         return result
 
@@ -185,7 +280,6 @@ class DataExtractor(object):
         print "  %-40s : %s" %("Filename", self._filename)
 
         print "="*linewidth
-
 
 
 
