@@ -50,13 +50,13 @@ class CRDatabase(object):
 
         # Location of the datapath
         if "" != datapath:
-            self.settings.datapath = datapath
+            self.settings.datapath = os.path.realpath(datapath)
         elif "" == self.settings.datapath:
             self.settings.datapath = self.basepath + "/data"
 
         # Location of the resultspath
         if "" != resultspath:
-            self.settings.resultspath = resultspath
+            self.settings.resultspath = os.path.realpath(resultspath)
         elif "" == self.settings.resultspath:
             self.settings.resultspath = self.basepath + "/results"
 
