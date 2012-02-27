@@ -191,13 +191,14 @@ def timeDelaysFromDirectionAndDistance(positions, direction):
     
     cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
     cartesianSourcePoint = R * cartesianDirection
-
+    referenceTime = (1/c) * np.linalg.norm(cartesianSourcePoint) # the time delay at position (0, 0, 0)
+    
     timeDelays = np.zeros(n)
     for i in range(n):
         thisPosition = np.array(positions[3*i:3*(i+1)])
-        distanceVector = cartesianSourcePoint + thisPosition
+        distanceVector = cartesianSourcePoint - thisPosition
         
-        timeDelays[i] = (1/c) * np.linalg.norm(distanceVector) # check accuracy!
+        timeDelays[i] = (1/c) * np.linalg.norm(distanceVector) - referenceTime # check accuracy!
         
     return timeDelays
 
@@ -264,7 +265,7 @@ def mse(az, el, pos, times):
 
     return mse * c * c
 
-def mseWithDistance(az, el, R, pos, times):
+def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount=0):
     """
     Mean-squared error in the times for a given direction and distance, as used in brute force or similar searches.
 
@@ -285,9 +286,17 @@ def mseWithDistance(az, el, R, pos, times):
     calcTimes = timeDelaysFromDirectionAndDistance(pos, (az, el, R))
     timeOffsets = calcTimes - times
     mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
-    mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+    if allowOutlierCount == 0:
+        mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+    else:
+        timeOffsets.sort() # ascending, we'll throw out the last ones if needed
+        removeCount = min(len(np.where(timeOffsets > outlierThreshold)[0]), allowOutlierCount)
+        # remove at most 'allowOutlierCount', but only those which are larger than OutlierThreshold
+        # as we operate on a sorted list, we only need to discard the last 'removeCount' entries...
+        timeOffsetsSqr = timeOffsets * timeOffsets
+        mse = (1.0/N) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu*mu * (N - removeCount) / N
     
-    
+    return mse * c * c
 
 
 def directionBruteForceSearch(positions, times):
