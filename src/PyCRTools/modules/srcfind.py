@@ -284,17 +284,19 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
     
     N = len(times)
     calcTimes = timeDelaysFromDirectionAndDistance(pos, (az, el, R))
-    timeOffsets = calcTimes - times
-    mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
+    timeOffsets = times - calcTimes
+    mu = np.mean(timeOffsets) # overall time offset to be subtracted in MSE
     if allowOutlierCount == 0:
         mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
     else:
-        timeOffsets.sort() # ascending, we'll throw out the last ones if needed
-        removeCount = min(len(np.where(timeOffsets > outlierThreshold)[0]), allowOutlierCount)
+        timeOffsets.sort() # can be done ascending only; we'll throw out the last ones if needed
+        # NB. To be implemented: negative offsets at the beginning are not taken care of...
+        removeCount = min(len(np.where(timeOffsets - mu > outlierThreshold)[0]), allowOutlierCount)
         # remove at most 'allowOutlierCount', but only those which are larger than OutlierThreshold
         # as we operate on a sorted list, we only need to discard the last 'removeCount' entries...
+        mu = np.mean(timeOffsets[0:-removeCount]) # average only over used entries
         timeOffsetsSqr = timeOffsets * timeOffsets
-        mse = (1.0/N) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu*mu * (N - removeCount) / N
+        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu*mu 
     
     return mse * c * c
 
