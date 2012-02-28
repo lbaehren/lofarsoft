@@ -516,6 +516,7 @@ class Event(object):
     def __repr__(self):
         return "EventID=%d   timestampe=%d   status='%s'" %(self._id, self.timestamp, self.status)
 
+
     def read(self):
         """Read event information from the database."""
         if self._db:
@@ -588,19 +589,23 @@ class Event(object):
                     self._db.insert(sql)
 
             # Writing properties
-            for key in self.property:
-                value = self.property[key]
+            sql = "SELECT key FROM main.eventproperties WHERE eventID={0}".format(self._id)
+            db_keys = [record[0] for record in self._db.select(sql)]
+            py_keys = [key for key in self.property]
 
-                # Check if property is already in database
-                sql = "SELECT propertyID FROM main.eventproperties WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
-                records = self._db.select(sql)
-
-                # Add/Update property
-                if len(records) > 0:
-                    sql = "UPDATE main.eventproperties SET value='{0}' WHERE eventID={1} AND key='{2}'".format(str(value), self._id, str(key))
+            # - Insert/update properties
+            for key in py_keys:
+                if key in db_keys:
+                    sql = "UPDATE main.eventproperties SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), str(self.property[key]))
                 else:
-                    sql = "INSERT INTO main.eventproperties (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(value))
+                    sql = "INSERT INTO main.eventproperties (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(self.property[key]))
                 self._db.execute(sql)
+
+            # - delete unused properties
+            for key in db_keys:
+                if not key in py_keys:
+                    sql = "DELETE FROM main.eventproperties WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
+                    self._db.execute(sql)
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1331,20 +1336,24 @@ class Polarisation(object):
                     sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
                 self._id = self._db.insert(sql)
 
-            # Write properties
-            for key in self.property:
-                value = self.property[key]
+            # Writing properties
+            sql = "SELECT key FROM main.polarisationproperties WHERE polarisationID={0}".format(self._id)
+            db_keys = [record[0] for record in self._db.select(sql)]
+            py_keys = [key for key in self.property]
 
-                # Check if property is already in database
-                sql = "SELECT propertyID FROM main.polarisationproperties WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key))
-                records = self._db.select(sql)
-
-                # Add/Update property
-                if len(records) > 0:
-                    sql = "UPDATE main.polarisationproperties SET value='{1}' WHERE polarisationID={0} AND key='{2}'".format(self._id, str(value), str(key))
+            # - Insert/update properties
+            for key in py_keys:
+                if key in db_keys:
+                    sql = "UPDATE main.polarisationproperties SET value='{2}' WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key), str(self.property[key]))
                 else:
-                    sql = "INSERT INTO main.polarisationproperties (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(value))
+                    sql = "INSERT INTO main.polarisationproperties (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(self.property[key]))
                 self._db.execute(sql)
+
+            # - delete unused properties
+            for key in db_keys:
+                if not key in py_keys:
+                    sql = "DELETE FROM main.polarisationproperties WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key))
+                    self._db.execute(sql)
 
         else:
             raise ValueError("Unable to read from database: no database was set.")

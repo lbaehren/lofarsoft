@@ -84,6 +84,7 @@ class CRDatabasePopulator(object):
                 dx = DataExtractor(filename_full)
                 if not dx.isOpen():
                     # Skip to next file when unable to open datafile
+                    print "WARNING: Unable to open '{0}', skipping to next file.".format(filename_full)
                     continue
 
                 timestamp = dx.timestamp
@@ -134,9 +135,9 @@ class CRDatabasePopulator(object):
                             p.antennaset = dx.antennaset
                             p.direction = "%d" %(pol_direction)
                             p.resultsfile = dx.resultsfile(pol_direction)
-                            print "Resultsfile: ", p.resultsfile
-                            print "Resultspath: ", os.path.join(self.settings.resultspath, p.resultsfile)
+
                             p.write()   # Write to db and get ID
+
                             station.addPolarisation(p)
 
 
@@ -235,6 +236,8 @@ class DataExtractor(object):
 
     def resultsfile(self, pol=0):
         """Name of the resultsfile where the pipeline results are stored.
+
+        This filename is derived from metadata in the datafile.
 
         **Properties**
 
