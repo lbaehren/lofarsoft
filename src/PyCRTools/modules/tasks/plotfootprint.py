@@ -57,7 +57,9 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly):
             except:
                 status = "OK assumed" #the status has not be propagated for old files
                 
-            pulseoffset=res["SAMPLE_NUMBER"]+res["pulse_start_sample"]+res["BLOCKSIZE"]
+            pulseblock = res["BLOCK"]
+            blocksize = res["BLOCKSIZE"]
+            pulseoffset = pulseblock * blocksize + res["SAMPLE_NUMBER"] + res["pulse_start_sample"] #+ res["BLOCKSIZE"]
             pulseoffset/=res["SAMPLE_FREQUENCY"]
             antset=res["ANTENNA_SET"]
             par["loracore"] = res["pulse_core_lora"]
