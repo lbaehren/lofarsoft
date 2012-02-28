@@ -1150,7 +1150,7 @@ class outputInfo:
 		# forming first Info (not html) string
 		if viewtype == "brief":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, IMredlocation, self.statusline)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.statusline)
 			else: # no parset file
 				self.info = "%s	%s										%s		%s		%-27s" % (self.id, self.comment, self.CSredlocation, self.ISredlocation, self.statusline)
 		elif viewtype == "plots":
