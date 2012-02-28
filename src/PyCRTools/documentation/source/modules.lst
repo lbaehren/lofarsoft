@@ -20,12 +20,13 @@ pycrtools.core.hftools.mTBB
 pycrtools.core.hftools.mEndPointRadiation
 pycrtools.core.hftools.mCalibration
 pycrtools.crdatabase
-pycrtools.metadata
 pycrtools.grid
-pycrtools.matching
-pycrtools.srcfind
-pycrtools.ppf
 pycrtools.lora
+pycrtools.metadata
+pycrtools.matching
+pycrtools.qualitycheck
+pycrtools.ppf
+pycrtools.srcfind
 pycrtools.tasks
 pycrtools.tasks.averagespectrum
 pycrtools.tasks.beamformer
