@@ -1283,7 +1283,7 @@ class Polarisation(object):
 
 
     def __repr__(self):
-        return "polarisationID=%d,   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status)
+        return "polarisationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status)
 
 
     def read(self):
