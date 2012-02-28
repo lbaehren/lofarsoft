@@ -1008,7 +1008,7 @@ class obsinfo:
 		# in case keyword 'Output_IncoherentStokes.enabled' does not exist, but format is new (after Jan 27, 2012)
 		# also we need then decrease the number of TA beams as one of them is IS beam now
 		if incoh_transposed:
-			cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep 'False\|false\|F\|f\|0'" % (self.parset,)
+			cmd="grep 'Observation.Beam\[0\].TiedArrayBeam' %s | grep coherent | awk '{print $3}' - | grep 'False\|false\|F\|f\|0'" % (self.parset,)
 			status=os.popen(cmd).readlines()
 			if np.size(status) > 0:
 				# so, in the array of TiedArrayBeams we have at least one IS beam, so we have to
@@ -1150,7 +1150,7 @@ class outputInfo:
 		# forming first Info (not html) string
 		if viewtype == "brief":
 			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.IMredlocation, self.statusline)
+				self.info = "%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, IMredlocation, self.statusline)
 			else: # no parset file
 				self.info = "%s	%s										%s		%s		%-27s" % (self.id, self.comment, self.CSredlocation, self.ISredlocation, self.statusline)
 		elif viewtype == "plots":
