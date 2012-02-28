@@ -165,7 +165,8 @@ class Op_gausfit(Op):
 
         mylogger.userinfo(mylog, "Total number of Gaussians fit to image",
                           str(n))
-        mylogger.userinfo(mylog, "Total flux in model", '%.3f Jy' %
+        if not hasattr(img, '_pi'):
+            mylogger.userinfo(mylog, "Total flux in model", '%.3f Jy' %
                           tot_flux)
  
         # Check if model flux is very different from sum of flux in image

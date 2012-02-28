@@ -145,18 +145,16 @@ class Opts(object):
                              doc="Show output options")
     polarisation_do =   Bool(False,
                              doc="Find polarisation properties\n"\
-                                 "First, source detection is done on the polarized intensity "\
+                                 "First, if pi_fit = True, source detection is done on the polarized intensity "\
                                  "(PI) image and sources not detected in "\
-                                 "the Stokes I image are identified.\n"\
+                                 "the Stokes I image are identified. The thresholds for island "\
+                                 "detection can be controlled using the pi_thresh_isl and "\
+                                 "pi_thresh_pix parameters.\n"\
                                  "Next, for any such PI-only sources, "\
                                  "plus all sources detected in the Stokes I image, "\
                                  "the fluxes in each of the other Stokes images are found. "\
-                                 "Fluxes are calculated by summing all nonmasked "\
-                                 "pixels assigned to a Gaussian. If a pixel contains "\
-                                 "contributions from two or more Gaussians, its flux is "\
-                                 "divided among the Gaussians by their relative I or PI fluxes. "\
-                                 "Errors on the fluxes are derived by summing the same "\
-                                 "pixels in the rms maps in quadrature.\n"\
+                                 "Fluxes are calculated by fitting for the normalization of the Gaussians "\
+                                 "found from the Stokes I or PI images."\
                                  "Lastly, the polarisation fraction and angle for each source "\
                                  "are calculated.\n"\
                                  "For linearly polarised emission, the signal and noise "\
@@ -748,6 +746,43 @@ class Opts(object):
                                  "still sent to the log file as usual",
                              group="output_opts")
 
+
+    #------------------------POLARISATION OPTIONS------------------------------
+    pi_fit         =   Bool(True,
+                             doc="Check the polarized intesity (PI) image for "\
+                                 "sources not found in Stokes I\n"\
+                                 "If True, the polarized intensity image is "\
+                                 "searched for sources not present in the Stokes "\
+                                 "I image. If any such sources are found, they are "\
+                                 "added to the the Stokes I source lists. Use the "\
+                                 "pi_thresh_pix and pi_thresh_isl parameters to "\
+                                 "control island detection in the PI image.",
+                             group="polarisation_do")
+    pi_thresh_isl  =  Option(None, Float(),
+                             doc="Threshold for PI island boundary in number of sigma "\
+                                 "above the mean. None => use thresh_isl\n"\
+                                 "This parameter determines the region to which fitting "\
+                                 "is done in the polarized intensity (PI) image. "\
+                                 "A higher value will produce smaller islands, "\
+                                 "and hence smaller regions that are considered in the "\
+                                 "fits. A lower value will produce larger islands. "\
+                                 "Use the pi_thresh_pix parameter to set the detection "
+                                 "threshold for sources. Generally, pi_thresh_isl should "\
+                                 "be lower than pi_thresh_pix.",
+                             group="polarisation_do")
+    pi_thresh_pix   =  Option(None, Float(),
+                             doc="Source detection threshold for PI image: threshold for the "\
+                                 "island peak in number of sigma "\
+                                 "above the mean. None => use thresh_pix\n"\
+                                 "This parameter sets the overall detection threshold "\
+                                 "for islands in the polarized intensity (PI) image "\
+                                 "(i.e. pi_thresh_pix = 5 will find all sources "\
+                                 "with peak fluxes of 5-sigma or greater). Use the "\
+                                 "pi_thresh_isl parameter to control how much of each island "\
+                                 "is used in fitting. Generally, pi_thresh_pix should be larger "\
+                                 "than pi_thresh_isl.",
+                             group="polarisation_do")
+    
     
     #-----------------------------PSF VARY OPTIONS--------------------------------
     psf_generators  =   Enum('calibrators', 'field',

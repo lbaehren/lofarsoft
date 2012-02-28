@@ -137,7 +137,7 @@ def _run_op_list(img, chain):
         op(img)
         op.__stop_time = time()
 
-    if img.opts.interactive:
+    if img.opts.interactive and not hasattr(img, '_pi'):
         print dc + 'Fitting complete. Displaying results...' + nc
         if img.opts.shapelet_do:
             show_smod = True

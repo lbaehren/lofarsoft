@@ -26,6 +26,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/02/27 - Implemented fitting of Gaussians in polarisation module,
+                 instead of simple summation of pixel values, to determine
+                 polarized fluxes. 
+    
     2012/02/17 - In scripts, process_image() will now accept a 
                  dictionary of parameters as input.
 

@@ -113,10 +113,13 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     if ch0_islands:
         images.append(img_ch0)
         if hasattr(img, 'ngaus'):
-            if hasattr(img, 'atrous_gaussians'):
-                titles.append('Islands (hatched boundaries) and\nGaussians (red = wavelet)')
+            if hasattr(img, 'ch0_pi'):
+                ch0_str = 'Islands (hatched boundaries; red = PI only) and\nGaussians'
             else:
-                titles.append('Islands (hatched boundaries) and\nGaussians')
+                ch0_str = 'Islands (hatched boundaries) and\nGaussians'
+            if hasattr(img, 'atrous_gaussians'):
+                ch0_str += ' (red = wavelet)'
+            titles.append(ch0_str)
         else:
             titles.append('Islands (hatched boundaries)')
         names.append('ch0')

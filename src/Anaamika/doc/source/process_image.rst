@@ -935,7 +935,7 @@ The options for this module are as follows:
         large, with very different errors on fluxes.
     
     specind_flux
-        parameter is a string (default is ``'total'``) that determines whether spectral indices are calculated for total fluxes
+        This parameter is a string (default is ``'total'``) that determines whether spectral indices are calculated for total fluxes
         (``'total'``) or peak fluxes (``'peak'``) if ``spectralindex_do`` is ``True``.
                          
     specind_kappa
@@ -958,9 +958,7 @@ The options for this module are as follows:
 
 Polarization module
 -------------------
-If ``polarisation_do = True``, then the polarization properties of the sources are calculated. First, source detection is performed on the polarized intensity (PI) image [#f3]_ to detect sources without Stokes I counterparts. The polarization module then calculates the I, Q, U, and V fluxes, the total, linear, and circular polarisation fractions and the linear polarisation angle of each Gaussian and source. The linear polarisation angle is defined from North, with positive angles towards East.
-
-Fluxes are calculated by summing all nonmasked pixels assigned to each Gaussian. If a pixel contains contributions from two or more Gaussian, its flux is divided between the Gaussians according to their relative fluxes. Errors on the fluxes are derived by summing the same pixels in the rms maps in quadrature.  
+If ``polarisation_do = True``, then the polarization properties of the sources are calculated. First, if ``pi_fit = True``, source detection is performed on the polarized intensity (PI) image [#f3]_ to detect sources without Stokes I counterparts. The polarization module then calculates the I, Q, U, and V fluxes, the total, linear, and circular polarisation fractions and the linear polarisation angle of each Gaussian and source. The linear polarisation angle is defined from North, with positive angles towards East. Fluxes are calculated by fitting the normalization of the Gaussians found using the Stokes I or PI images.
 
 For linearly polarised emission, the signal and noise add vectorially, giving a
 Rice distribution instead of a Gaussian one. To correct for this, a bias 
@@ -968,6 +966,42 @@ is estimated and removed from the polarisation fraction using the same method us
 NVSS catalog (see ftp://ftp.cv.nrao.edu/pub/nvss/catalog.ps). Errors on the linear and total
 polarisation fractions and polarisation angle are estimated using the debiased polarised flux
 and standard error propagation. See Sparks & Axon (1999) [#f4]_ for a more detailed treatment.
+
+The options for this module are as follows:
+
+.. parsed-literal::
+
+    polarisation_do ....... True : Find polarisation properties                
+      :term:`pi_fit` .............. True : Check the polarized intesity (PI) image for 
+                                   sources not found in Stokes I                                    
+      :term:`pi_thresh_isl` ....... None : Threshold for PI island boundary in number 
+                                   of sigma above the mean. None => use thresh_isl                
+      :term:`pi_thresh_pix` ....... None : Source detection threshold for PI image: 
+                                   threshold for the island peak in number of sigma 
+                                   above the mean. None => use thresh_pix
+
+.. glossary::
+
+    pi_fit    
+        This parameter is a Boolean (default is ``True``). If ``True``, the polarized intensity image is searched for sources not
+        present in the Stokes I image. If any such sources are found, they are
+        added to the the Stokes I source lists. Use the ``pi_thresh_pix`` and
+        ``pi_thresh_isl`` parameters to control island detection in the PI image.
+    
+    pi_thresh_isl
+        This parameter is a float (default is ``None``) that determines the region to which fitting is done in the
+        polarized intensity (PI) image. If ``None``, the value is set to that of the ``thresh_isl`` parameter. A higher value will produce smaller
+        islands, and hence smaller regions that are considered in the fits. A
+        lower value will produce larger islands. Use the ``pi_thresh_pix`` parameter
+        to set the detection threshold for sources. Generally, ``pi_thresh_isl``
+        should be lower than ``pi_thresh_pix``.
+
+    pi_thresh_pix
+        This parameter is a float (default is ``None``) that sets the overall detection threshold for islands in the
+        polarized intensity (PI) image (i.e. pi_thresh_pix = 5 will find all
+        sources with peak fluxes of 5-sigma or greater). If ``None``, the value is set to that of the ``thresh_pix`` parameter. Use the ``pi_thresh_isl``
+        parameter to control how much of each island is used in fitting.
+        Generally, ``pi_thresh_pix`` should be larger than ``pi_thresh_isl``.
 
 .. _shapelet_do:
 
