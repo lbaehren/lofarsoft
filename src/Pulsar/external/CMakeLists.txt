@@ -493,7 +493,11 @@ add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 ##
 ## ==============================================================================
 
-add_subdirectory (psrfits_utils)
+# Note, Lars added another psrfits_utils makefile and build target in the subdir,
+# however, it does not work multiple files without a make clean; taking out this
+# new extra target.
+
+#add_subdirectory (psrfits_utils)
 
 if (NOT TARGET psrfits_utils)
   
