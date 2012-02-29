@@ -26,6 +26,7 @@ class Op_psf_vary(Op):
 
       if img.opts.psf_vary_do:
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary  ")
+        mylogger.userinfo(mylog, '\nEstimating PSF variation')
         opts = img.opts
         plot = opts.debug_figs_7_psf_vary
         dir = img.basedir + '/misc/'

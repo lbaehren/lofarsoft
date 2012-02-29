@@ -398,6 +398,7 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
     from scipy.optimize import leastsq
     from math import sqrt, pow
     import numpy as N
+    import sys
     #import pylab as pl
 
     ind=N.where(~N.array(mask))[0]
@@ -428,8 +429,13 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
       try:
         (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True, warning=False)
       except TypeError:
+        # This error means no warning argument is available, so redirect stdout to a null device 
+        # to suppress printing of warning messages
+        original_stdout = sys.stdout  # keep a reference to STDOUT
+        sys.stdout = NullDevice()  # redirect the real STDOUT
         (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True)
-  
+        sys.stdout = original_stdout  # turn STDOUT back on
+
       if do_err: 
         if cov != None:
           if N.sum(sig != 1.) > 0:
@@ -535,6 +541,7 @@ def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
         Takes an optional error array and a mask array (True => pixel is masked). """
     from scipy.optimize import leastsq
     import numpy as N
+    import sys
 
     if mask != None and mask.shape != data.shape:
         print 'Data and mask array dont have the same shape, ignoring mask'
@@ -553,7 +560,13 @@ def fit_gaus2d(data, p_ini, x, y, mask = None, err = None):
     try:
         p, success = leastsq(errorfunction, p_ini, warning=False)
     except TypeError:
+        # This error means no warning argument is available, so redirect stdout to a null device 
+        # to suppress printing of warning messages
+        original_stdout = sys.stdout  # keep a reference to STDOUT
+        sys.stdout = NullDevice()  # redirect the real STDOUT
         p, success = leastsq(errorfunction, p_ini)
+        sys.stdout = original_stdout  # turn STDOUT back on
+
 
     return p, success
 
@@ -812,6 +825,7 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
     """ fitcode : 0=fit all; 1=fit amp; 2=fit amp, posn; 3=fit amp, size """
     from scipy.optimize import leastsq
     import numpy as N
+    import sys
    
     if mask != None and mask.shape != image.shape:
         print 'Data and mask array dont have the same shape, ignoring mask'
@@ -846,8 +860,12 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
       try:
           p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind), warning=False)
       except TypeError:
-          p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind))
-
+          # This error means no warning argument is available, so redirect stdout to a null device 
+          # to suppress printing of warning messages
+          original_stdout = sys.stdout  # keep a reference to STDOUT
+          sys.stdout = NullDevice()  # redirect the real STDOUT
+          p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind), xtol=1e-3, maxfev=100)
+          sys.stdout = original_stdout  # turn STDOUT back on
     else:
       p, sucess = None, 1
 
@@ -1455,6 +1473,11 @@ def approx_equal(x, y, *args, **kwargs):
     # comparison.
     return _float_approx_equal(x, y, *args, **kwargs)
 
+
+class NullDevice():
+    """Null device to suppress stdout, etc."""
+    def write(self, s):
+        pass
 
     
 

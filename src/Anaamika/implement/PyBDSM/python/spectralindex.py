@@ -55,7 +55,7 @@ class Op_spectralindex(Op):
      mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
      img.mylog = mylog
      if img.opts.spectralindex_do:
-      mylog.info('Extracting spectral indices for all sources')
+      mylogger.userinfo(mylog, '\nExtracting spectral indices for all sources')
       shp = img.image.shape
       if shp[1] > 1:
         bar1 = statusbar.StatusBar('Determing rms for channels in image ..... : ', 0, shp[1])

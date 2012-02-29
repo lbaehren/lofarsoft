@@ -653,3 +653,23 @@ Alphabetical listing of all parameters
     srcroot
         This parameter is a string (default is ``None``) that sets the root for source names in the output catalog.
         
+    pi_fit    
+        This parameter is a Boolean (default is ``True``). If ``True``, the polarized intensity image is searched for sources not
+        present in the Stokes I image. If any such sources are found, they are
+        added to the the Stokes I source lists. Use the ``pi_thresh_pix`` and
+        ``pi_thresh_isl`` parameters to control island detection in the PI image.
+    
+    pi_thresh_isl
+        This parameter is a float (default is ``None``) that determines the region to which fitting is done in the
+        polarized intensity (PI) image. If ``None``, the value is set to that of the ``thresh_isl`` parameter. A higher value will produce smaller
+        islands, and hence smaller regions that are considered in the fits. A
+        lower value will produce larger islands. Use the ``pi_thresh_pix`` parameter
+        to set the detection threshold for sources. Generally, ``pi_thresh_isl``
+        should be lower than ``pi_thresh_pix``.
+
+    pi_thresh_pix
+        This parameter is a float (default is ``None``) that sets the overall detection threshold for islands in the
+        polarized intensity (PI) image (i.e. pi_thresh_pix = 5 will find all
+        sources with peak fluxes of 5-sigma or greater). If ``None``, the value is set to that of the ``thresh_pix`` parameter. Use the ``pi_thresh_isl``
+        parameter to control how much of each island is used in fitting.
+        Generally, ``pi_thresh_pix`` should be larger than ``pi_thresh_isl``.

@@ -49,7 +49,7 @@ order:
    
 #. Groups nearby Gaussians within an island into sources. See :ref:`grouping` for details.
 
-#. Continues with further processing, if the users has specified that one or more of the following modules be used:
+#. Continues with further processing, if the user has specified that one or more of the following modules be used:
 
     * Shapelet decomposition (see :ref:`shapelet_do` for details)
     
