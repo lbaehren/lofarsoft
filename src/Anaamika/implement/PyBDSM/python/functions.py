@@ -864,7 +864,7 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
           # to suppress printing of warning messages
           original_stdout = sys.stdout  # keep a reference to STDOUT
           sys.stdout = NullDevice()  # redirect the real STDOUT
-          p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind), xtol=1e-3, maxfev=100)
+          p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind))
           sys.stdout = original_stdout  # turn STDOUT back on
     else:
       p, sucess = None, 1
