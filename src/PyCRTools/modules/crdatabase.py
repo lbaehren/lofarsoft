@@ -168,10 +168,14 @@ class CRDatabase(object):
         *status*           status of the event.
         =================  ==============================================================
 
-        If *timestamp* is provided, than *timestamp_start* and
-        *timestamp_end* are ignored.  If no arguments are given all
-        eventIDs are selected. When multiple arguments are provided,
-        all returned eventIDs satisfy all argument values.
+        The *timestamp*, *timestamp_start* and *timestamp_end*
+        parameters are integers representing the unix-time of the
+        timestamp.  If *timestamp* is provided, than *timestamp_start*
+        and *timestamp_end* are ignored.  If no arguments are given
+        all eventIDs are selected.
+
+        When multiple arguments are provided, all returned eventIDs
+        satisfy all argument values.
         """
         result = []
 
@@ -247,6 +251,7 @@ class CRDatabase(object):
             records = self.db.select(sql)
             for record in records:
                 result.append(record[0])
+            result = [record[0] for record in self.db.select(sql)]
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -307,15 +312,6 @@ class CRDatabase(object):
             results = [r[0] for r in records]
 
         return results
-
-
-    # def getPolarisationIDs(self):
-    #     """Return a list of polarisationIDs that satisfy the values of the
-    #     provided arguments of this method.
-    #     """
-    #     # TODO: CRDatabase.getPolarisationIDs() - Add implementation
-
-    #     raise NotImplementedError("Function needs to be implemented.")
 
 
     def summary(self):
@@ -540,6 +536,7 @@ class Event(object):
                 for record in records:
                     datafileID = int(record[0])
                     datafile = Datafile(self._db, id=datafileID)
+                    datafile.event = self
                     self.datafiles.append(datafile)
 
                 # Reading properties
@@ -815,6 +812,7 @@ class Datafile(object):
                 for record in records:
                     stationID = int(record[0])
                     station = Station(self._db, id=stationID)
+                    station.datafile = self
                     self.stations.append(station)
 
             else:
@@ -1067,6 +1065,7 @@ class Station(object):
                 for record in records:
                     polarisationID = int(record[0])
                     polarisation = Polarisation(self._db, id=polarisationID)
+                    polarisation.station = self
                     self.polarisations.append(polarisation)
 
             else:
@@ -1556,3 +1555,4 @@ class Filter(object):
                 print "    %s" %(f)
 
         print "="*linewidth
+
