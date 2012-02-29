@@ -14,6 +14,10 @@ import logging
 from socket import gethostname
 import commands
 import time
+import copy
+from pyparsing import (Literal, Word, nums, Combine, 
+                       delimitedList, oneOf, alphas, Suppress)
+
 
 def init_logger(logfilename, quiet=False, debug=False):
   logging.USERINFO = logging.INFO + 1
@@ -26,8 +30,9 @@ def init_logger(logfilename, quiet=False, debug=False):
   while len(logger.handlers) > 0:
     logger.removeHandler(logger.handlers[0])
   
-  # File handler
-  fh = logging.FileHandler(logfilename)
+  # File handlers
+  fh = ColorStripperHandler(logfilename)
+#  fh = logging.FileHandler(logfilename)
   if debug:
     # For log file and debug on, print name and levelname
     fh.setLevel(logging.DEBUG)
@@ -41,9 +46,10 @@ def init_logger(logfilename, quiet=False, debug=False):
     fmt1 = logging.Formatter('%(asctime)s:: %(message)s',
                              datefmt='%a %d-%m-%Y %H:%M:%S')
   fh.setFormatter(fmt1)
-  logger.addHandler(fh)
+  logger.addHandler(fh)  
 
   # Console handler for warning and critical: format includes levelname
+  # ANSI colors are used
   ch = logging.StreamHandler()
   ch.setLevel(logging.WARNING)
   fmt2 = logging.Formatter('\033[31;1m%(levelname)s\033[0m: %(message)s')
@@ -52,6 +58,7 @@ def init_logger(logfilename, quiet=False, debug=False):
 
   # Console handler for USERINFO only: format does not include levelname
   # (the user does not need to see the levelname, as it has no meaning to them)
+  # ANSI colors are allowed
   chi = logging.StreamHandler()
   chi.addFilter(InfoFilter())
   if quiet:
@@ -75,10 +82,10 @@ def userinfo(mylog, desc_str, val_str=''):
 
   mylog = logger
   desc_str = description string / message
-  val_str = value string, printed in blue
+  val_str = value string
 
   Message is constructed as:
-    'desc_str : val_str'
+    'desc_str .... : val_str'
   """
   bc = '\033[1;34m' # Blue
   nc = '\033[0m'    # Normal text color
@@ -100,3 +107,16 @@ def userinfo(mylog, desc_str, val_str=''):
       while len(desc_str) < 41:
         desc_str += ' '       
   mylog.log(logging.USERINFO, desc_str+sep+val_str)
+
+
+class ColorStripperHandler(logging.FileHandler):
+  def emit(self, record):
+      """Strips ANSI color codes from file stream"""
+      myrecord = copy.copy(record)
+      ESC = Literal('\033')
+      integer = Word(nums)
+      escapeSeq = Combine(ESC + '[' + delimitedList(integer,';') + oneOf(list(alphas)))
+      
+      myrecord.msg = Suppress(escapeSeq).transformString(str(myrecord.msg))
+      
+      logging.FileHandler.emit( self, myrecord )

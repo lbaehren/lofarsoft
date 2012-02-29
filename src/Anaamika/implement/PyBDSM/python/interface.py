@@ -49,9 +49,7 @@ def process(img, **kwargs):
     img.log = ''
     mylogger.init_logger(log, quiet=img.opts.quiet,
                          debug=img.opts.debug)
-    f = open(log, 'a')
-    f.write('\n' + '='*72 + '\n')
-    f.close()
+    add_break_to_logfile(log)
     mylog = mylogger.logging.getLogger("PyBDSM.Process")
     mylog.info("Running PyBDSM on "+img.opts.filename)
 
@@ -808,3 +806,8 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
     #         print '\033[91mERROR\033[0m: File exists and clobber=False.'
     #     else:
     #         print '--> Wrote CASA clean box file ' + filename
+    
+def add_break_to_logfile(logfile):
+    f = open(logfile, 'a')
+    f.write('\n' + '='*72 + '\n')
+    f.close()
