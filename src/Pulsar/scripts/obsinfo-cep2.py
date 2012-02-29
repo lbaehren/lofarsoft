@@ -2025,7 +2025,7 @@ def check_connection (storage_nodes, is_debug):
 	if len(storage_nodes) > 1:
 		for s in storage_nodes[1:]:
 			cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-	cmd="%s %s date | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus)
+	cmd="%s %s date | grep -v xauth | grep -v connect | grep -v Permission | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus)
 	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 	# finding all locus nodes that have the dir with raw data
 	for l in np.arange(len(cexec_output)):
