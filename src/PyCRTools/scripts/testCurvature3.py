@@ -5,12 +5,23 @@
 
 from pycrtools import *
 import numpy as np
+from scipy.optimize import fmin # the downhill-simplex search method
 from pycrtools import srcfind
+
+def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0):
+    az = direction[0]
+    el = direction[1]
+    R = 1000.0 / direction[2] # using 1/R as parameter - curvature dependence is on 1/R to lowest order; will work better in simplex search.
+    mse = srcfind.mseWithDistance(az, el, R, pos, times, outlierThreshold, allowOutlierCount)
+    print 'Evaluated direction: az = %f, el = %f, R = %f: MSE = %f' % (az / deg2rad, el / deg2rad, R, mse)
+
+    return mse
+    
 
 deg2rad = 2*np.pi / 360.0
 
-#event = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110716T094509.665Z/'
-event = '/Users/acorstanje/triggering/CR/results_3jan2012/VHECR_LORA-20120103T003111.187Z/'
+event = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110716T094509.665Z/'
+#event = '/Users/acorstanje/triggering/CR/results_3jan2012/VHECR_LORA-20120103T003111.187Z/'
 
 polarization = 0
 
@@ -37,13 +48,23 @@ print 'Az, el = %f, %f' % (bestfitDirection[0] / deg2rad, bestfitDirection[1] / 
 
 # Use this as a starting point for a brute-force search
 rangesize = deg2rad * 5.0 # -10..+10 degrees
-step = 0.2 * deg2rad 
+step = 5.0 * deg2rad 
 Rsteps = 20
 Rstart = 500.0
 az = bestfitDirection[0]
 el = bestfitDirection[1]
 azrange = np.arange(az - rangesize, az + rangesize, step)
 elrange = np.arange(max(0.0, el - rangesize), min(el + rangesize, np.pi / 2), step)
+
+startPosition = (az, el, 1.0) # 1.0 means R = 1000.0 ...
+print 'Doing simplex search for minimum MSE...'
+optimum = fmin(mseMinimizer, startPosition, (positions, times, 0, 3), xtol=1e-5, ftol=1e-5, full_output=1)
+#raw_input('Done simplex search.')
+
+simplexDirection = optimum[0]
+simplexMSE = optimum[1]
+(simplexAz, simplexEl, simplexR) = simplexDirection
+simplexR = 1000.0 / simplexR    
 
 print azrange
 print elrange
@@ -59,7 +80,17 @@ for az in azrange:
                 minMSE = thisMSE
                 bestDirection = (az, el, R)
                 print 'New MSE: %f; best direction = (%f, %f, %f)' % (thisMSE, az / deg2rad, el / deg2rad, R)
-                
+
+print '-----'
+print 'Brute force search: '
+(bruteAz, bruteEl, bruteR) = bestDirection
+print 'Best MSE: %f; best direction = (%f, %f, %f)' % (minMSE, bruteAz / deg2rad, bruteEl / deg2rad, bruteR)
+msePlanar = srcfind.mseWithDistance(bruteAz, bruteEl, 1.0e6, positions, times, allowOutlierCount = 3)
+print 'Best MSE for R = 10^6 (approx. planar): %f' % msePlanar
+print '-----'
+print 'Simplex search: '
+print 'Best MSE: %f; best direction = (%f, %f, %f)' % (simplexMSE, simplexAz / deg2rad, simplexEl / deg2rad, simplexR)
+print '-----'
 # get the calculated delays according to this plane wave
 bestfitDelays = srcfind.timeDelaysFromDirectionAndDistance(positions, bestDirection)
 bestfitDelaysPlanar = srcfind.timeDelaysFromDirection(positions, bestDirection)
@@ -70,17 +101,24 @@ bestfitDelaysPlanar -= bestfitDelaysPlanar.mean()
 
 residu = times - bestfitDelays
 residu *= 1.0e9
+residuPlanar = times - bestfitDelaysPlanar
+residuPlanar *= 1.0e9
 #print residu
 residu[np.where(abs(residu) > 30.0)] = np.float('nan') # hack
+residuPlanar[np.where(abs(residuPlanar) > 30.0)] = np.float('nan') # don't show outliers
 
-residues = hArray(residu)
-
+#residues = hArray(residu)
+#residuesPlanar = hArray
 #residues = hArray(residuForAllAntennas)
 #residues *= 1.0e9
 
-plotsizes = hArray(dimensions=residues, fill=50.0)
-fptask = trerun("plotfootprint", "1", colormap = 'jet', filefilter = event, arrivaltime=residues, power = plotsizes, pol=polarization) 
-fptask = trerun("plotfootprint", "2", colormap = 'jet', filefilter = event, arrivaltime=hArray(1.0e9*bestfitDelays - 1.0e9*bestfitDelaysPlanar), power = plotsizes, pol=polarization)
+plotsizes = hArray(dimensions=[len(residu)], fill=50.0)
+# plot residu = data times - bestfit times
+fptask = trerun("plotfootprint", "1", colormap = 'jet', filefilter = event, arrivaltime=hArray(residu), power = plotsizes, pol=polarization) 
+# plot residuPlanar = data times - bestfit planewave times
+fptask = trerun("plotfootprint", "2", colormap = 'jet', filefilter = event, arrivaltime=hArray(residuPlanar), power = plotsizes, pol=polarization) 
+# plot residu - residuPlanar; show curvature from the best-fitted function
+fptask = trerun("plotfootprint", "3", colormap = 'jet', filefilter = event, arrivaltime=hArray(1.0e9*bestfitDelays - 1.0e9*bestfitDelaysPlanar), power = plotsizes, pol=polarization)
 
 #plt.figure()
 # Make lateral distribution of curvature delays. 
