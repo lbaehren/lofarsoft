@@ -1134,11 +1134,18 @@ class outputInfo:
 		sampling_setup=""
 		sampling_setup_html=""
 		if self.oi.nrChanPerSubIS == self.oi.nrChanPerSubCS or self.oi.nrChanPerSubIS == 0 or self.oi.nrChanPerSubCS == 0:
-			sampling_setup="Channels/Sub:%d|Sampling:%g_ms" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS, self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
-			sampling_setup_html="Channels/Sub: %d<br>Sampling: %g ms" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS, self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
+			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS)
+			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS)
 		else:
-			sampling_setup="Channels/Sub:%d(IS),%d(CS)|Sampling:%g_ms(IS),%g_ms(CS)" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS, self.oi.timeresIS, self.oi.timeresCS)
-			sampling_setup_html="Channels/Sub: %d (IS), %d (CS)<br>Sampling: %g ms (IS), %g ms (CS)" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS, self.oi.timeresIS, self.oi.timeresCS)
+			sampling_setup="Channels/Sub:%d(IS),%d(CS)|" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS)
+			sampling_setup_html="Channels/Sub: %d (IS), %d (CS)<br>" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS)
+		if self.oi.timeresIS == self.oi.timeresCS or self.oi.timeresIS == 0 or self.oi.timeresCS == 0:
+			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
+			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
+		else:
+			sampling_setup+="Sampling:%g_ms(IS),%g_ms(CS)" % (self.oi.timeresIS, self.oi.timeresCS)
+			sampling_setup_html+="Sampling: %g ms (IS), %g ms (CS)" % (self.oi.timeresIS, self.oi.timeresCS)
+
 		if self.comment == "":
 			if self.oi.nrRings > 0:
 				obssetup="%s|Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|%s|Stokes:%s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup, self.oi.stokes)
