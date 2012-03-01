@@ -37,8 +37,6 @@
                 <stokesSelection>I</stokesSelection>
                 <integrateChannels>false</integrateChannels>
                 <integrationSteps>INTEG STEPS</integrationSteps>
-                <stokesDownsamplingStepsCS>INTEG STEPS</stokesDownsamplingStepsCS>
-                <stokesDownsamplingStepsIS>INTEG STEPS</stokesDownsamplingStepsIS>
             </stokes>
             <stationSet>Custom</stationSet>
             <stations>
