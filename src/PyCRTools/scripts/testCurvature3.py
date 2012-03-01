@@ -20,9 +20,10 @@ def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0)
 
 deg2rad = 2*np.pi / 360.0
 
-event = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110716T094509.665Z/'
-#event = '/Users/acorstanje/triggering/CR/results_3jan2012/VHECR_LORA-20120103T003111.187Z/'
+#event = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110716T094509.665Z/'
+event = '/Users/acorstanje/triggering/CR/results_3jan2012/VHECR_LORA-20120103T003111.187Z/'
 
+doBruteForce = False
 polarization = 0
 
 # run task to get arrival times for all antennas in the event
@@ -63,37 +64,41 @@ optimum = fmin(mseMinimizer, startPosition, (positions, times, 0, 3), xtol=1e-5,
 
 simplexDirection = optimum[0]
 simplexMSE = optimum[1]
+simplexDirection[2] = 1000.0 / simplexDirection[2] # invert again to get R
 (simplexAz, simplexEl, simplexR) = simplexDirection
-simplexR = 1000.0 / simplexR    
 
 print azrange
 print elrange
 
-minMSE = 1.0e10
-for az in azrange:
-    for el in elrange:
-        R = Rstart
-        for i in range(Rsteps):
-            R *= 1.2
-            thisMSE = srcfind.mseWithDistance(az, el, R, positions, times, allowOutlierCount = 3)
-            if thisMSE < minMSE:
-                minMSE = thisMSE
-                bestDirection = (az, el, R)
-                print 'New MSE: %f; best direction = (%f, %f, %f)' % (thisMSE, az / deg2rad, el / deg2rad, R)
+if doBruteForce:
+    minMSE = 1.0e10
+    for az in azrange:
+        for el in elrange:
+            R = Rstart
+            for i in range(Rsteps):
+                R *= 1.2
+                thisMSE = srcfind.mseWithDistance(az, el, R, positions, times, allowOutlierCount = 3)
+                if thisMSE < minMSE:
+                    minMSE = thisMSE
+                    bestDirection = (az, el, R)
+                    print 'New MSE: %f; best direction = (%f, %f, %f)' % (thisMSE, az / deg2rad, el / deg2rad, R)
 
-print '-----'
-print 'Brute force search: '
-(bruteAz, bruteEl, bruteR) = bestDirection
-print 'Best MSE: %f; best direction = (%f, %f, %f)' % (minMSE, bruteAz / deg2rad, bruteEl / deg2rad, bruteR)
-msePlanar = srcfind.mseWithDistance(bruteAz, bruteEl, 1.0e6, positions, times, allowOutlierCount = 3)
-print 'Best MSE for R = 10^6 (approx. planar): %f' % msePlanar
+    print '-----'
+    print 'Brute force search: '
+    (bruteAz, bruteEl, bruteR) = bestDirection
+    print 'Best MSE: %f; best direction = (%f, %f, %f)' % (minMSE, bruteAz / deg2rad, bruteEl / deg2rad, bruteR)
+    msePlanar = srcfind.mseWithDistance(bruteAz, bruteEl, 1.0e6, positions, times, allowOutlierCount = 3)
+    print 'Best MSE for R = 10^6 (approx. planar): %f' % msePlanar
+
 print '-----'
 print 'Simplex search: '
 print 'Best MSE: %f; best direction = (%f, %f, %f)' % (simplexMSE, simplexAz / deg2rad, simplexEl / deg2rad, simplexR)
+msePlanar = srcfind.mseWithDistance(simplexAz, simplexEl, 1.0e6, positions, times, allowOutlierCount = 3)
+print 'Best MSE for R = 10^6 (approx. planar): %f' % msePlanar
 print '-----'
 # get the calculated delays according to this plane wave
-bestfitDelays = srcfind.timeDelaysFromDirectionAndDistance(positions, bestDirection)
-bestfitDelaysPlanar = srcfind.timeDelaysFromDirection(positions, bestDirection)
+bestfitDelays = srcfind.timeDelaysFromDirectionAndDistance(positions, simplexDirection)
+bestfitDelaysPlanar = srcfind.timeDelaysFromDirection(positions, simplexDirection)
 # is it necessary / correct to subtract mean times and mean calculated times?
 times -= times.mean()
 bestfitDelays -= bestfitDelays.mean()
