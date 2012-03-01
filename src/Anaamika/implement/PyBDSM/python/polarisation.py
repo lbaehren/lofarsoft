@@ -246,7 +246,7 @@ class Op_polarisation(Op):
                 # First, fit all source Gaussians to each Stokes image:
                 x, y = N.mgrid[isl_bbox]
                 gg = src.gaussians
-                fitfix = N.ones(len(gg)) + 2 # fit only normalization
+                fitfix = N.ones(len(gg)) # fit only normalization
                 srcmask = isl.mask_active 
                 total_flux = N.zeros((4, len(fitfix))) # array of fluxes: N_Stokes x N_Gaussians
                 errors = N.zeros((4, len(fitfix))) # array of fluxes: N_Stokes x N_Gaussians
@@ -260,14 +260,14 @@ class Op_polarisation(Op):
                         errors[sind] = func.get_errors(img, p, src.rms_isl)[6]
 
                 # Now, assign fluxes to each Gaussian.
-                src_flux_I = 0
-                src_flux_Q = 0
-                src_flux_U = 0
-                src_flux_V = 0
-                src_flux_I_err_sq = 0
-                src_flux_Q_err_sq = 0
-                src_flux_U_err_sq = 0
-                src_flux_V_err_sq = 0
+                src_flux_I = 0.0
+                src_flux_Q = 0.0
+                src_flux_U = 0.0
+                src_flux_V = 0.0
+                src_flux_I_err_sq = 0.0
+                src_flux_Q_err_sq = 0.0
+                src_flux_U_err_sq = 0.0
+                src_flux_V_err_sq = 0.0
                 
                 for ig, gaussian in enumerate(src.gaussians):
                     flux_I = total_flux[0, ig]
