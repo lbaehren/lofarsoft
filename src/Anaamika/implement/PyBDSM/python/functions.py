@@ -862,10 +862,10 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
       except TypeError:
           # This error means no warning argument is available, so redirect stdout to a null device 
           # to suppress printing of warning messages
-#           original_stdout = sys.stdout  # keep a reference to STDOUT
-#           sys.stdout = NullDevice()  # redirect the real STDOUT
+          original_stdout = sys.stdout  # keep a reference to STDOUT
+          sys.stdout = NullDevice()  # redirect the real STDOUT
           p, success = leastsq(errorfunction, p_tofit, args=(x, y, p_tofix, ind, image, err, g_ind))
-#           sys.stdout = original_stdout  # turn STDOUT back on
+          sys.stdout = original_stdout  # turn STDOUT back on
     else:
       p, sucess = None, 1
 

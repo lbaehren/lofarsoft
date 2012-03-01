@@ -26,6 +26,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/01 - Fixed a bug in the polarisation module that could result
+                 in incorrect fluxes. Changed logging module to suppress
+                 output of ANSI color codes to the log file.
+    
     2012/02/27 - Implemented fitting of Gaussians in polarisation module,
                  instead of simple summation of pixel values, to determine
                  polarized fluxes. 
