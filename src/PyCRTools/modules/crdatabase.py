@@ -70,8 +70,8 @@ class CRDatabase(object):
             sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT)"
             self.db.execute(sql)
 
-            # Event properties table
-            sql = "CREATE TABLE IF NOT EXISTS main.eventproperties (propertyID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT)"
+            # Event parameters table
+            sql = "CREATE TABLE IF NOT EXISTS main.eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT)"
             self.db.execute(sql)
 
             # Datafile table
@@ -86,8 +86,8 @@ class CRDatabase(object):
             sql = "CREATE TABLE IF NOT EXISTS main.polarisations (polarisationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT)"
             self.db.execute(sql)
 
-            # Polarisation properties table
-            sql = "CREATE TABLE IF NOT EXISTS main.polarisationproperties (propertyID INTEGER PRIMARY KEY, polarisationID INTEGER NOT NULL, key TEXT, value TEXT)"
+            # Polarisation parameters table
+            sql = "CREATE TABLE IF NOT EXISTS main.polarisationparameters (parameterID INTEGER PRIMARY KEY, polarisationID INTEGER NOT NULL, key TEXT, value TEXT)"
             self.db.execute(sql)
 
             # event_datafile table (linking events to datafiles)
@@ -134,11 +134,11 @@ class CRDatabase(object):
             # Remove all tables.
             self.db.execute("DROP TABLE IF EXISTS main.settings")
             self.db.execute("DROP TABLE IF EXISTS main.events")
-            self.db.execute("DROP TABLE IF EXISTS main.eventproperties")
+            self.db.execute("DROP TABLE IF EXISTS main.eventparameters")
             self.db.execute("DROP TABLE IF EXISTS main.datafiles")
             self.db.execute("DROP TABLE IF EXISTS main.stations")
             self.db.execute("DROP TABLE IF EXISTS main.polarisations")
-            self.db.execute("DROP TABLE IF EXISTS main.polarisationproperties")
+            self.db.execute("DROP TABLE IF EXISTS main.polarisationparameters")
             self.db.execute("DROP TABLE IF EXISTS main.event_datafile")
             self.db.execute("DROP TABLE IF EXISTS main.datafile_station")
             self.db.execute("DROP TABLE IF EXISTS main.station_polarisation")
@@ -497,7 +497,7 @@ class Event(object):
         self.timestamp = 0
         self.status = "NEW"
         self.datafiles = []
-        self.property = {}
+        self.parameter = {}
 
         self.settings = Settings(db)
 
@@ -536,11 +536,11 @@ class Event(object):
                     datafile.event = self
                     self.datafiles.append(datafile)
 
-                # Reading properties
-                sql = "SELECT key, value FROM main.eventproperties WHERE eventID={0}".format(self._id)
+                # Reading parameters
+                sql = "SELECT key, value FROM main.eventparameters WHERE eventID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
-                    self.property[str(record[0])] = _load_parameter(record[1])
+                    self.parameter[str(record[0])] = _load_parameter(record[1])
             else:
                 print "WARNING: This event (id={0}) is not available in the database.".format(self._id)
         else:
@@ -582,23 +582,23 @@ class Event(object):
                     sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
                     self._db.insert(sql)
 
-            # Writing properties
-            sql = "SELECT key FROM main.eventproperties WHERE eventID={0}".format(self._id)
+            # Writing parameters
+            sql = "SELECT key FROM main.eventparameters WHERE eventID={0}".format(self._id)
             db_keys = [record[0] for record in self._db.select(sql)]
-            py_keys = [key for key in self.property]
+            py_keys = [key for key in self.parameter]
 
-            # - Insert/update properties
+            # - Insert/update parameters
             for key in py_keys:
                 if key in db_keys:
-                    sql = "UPDATE main.eventproperties SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.property[key]))
+                    sql = "UPDATE main.eventparameters SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.parameter[key]))
                 else:
-                    sql = "INSERT INTO main.eventproperties (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.property[key]))
+                    sql = "INSERT INTO main.eventparameters (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.parameter[key]))
                 self._db.execute(sql)
 
-            # - delete unused properties
+            # - delete unused parameters
             for key in db_keys:
                 if not key in py_keys:
-                    sql = "DELETE FROM main.eventproperties WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
+                    sql = "DELETE FROM main.eventparameters WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
                     self._db.execute(sql)
 
         else:
@@ -745,10 +745,10 @@ class Event(object):
                 print "    %-6d - %s" %(datafile.id, datafile.filename)
 
         # Properties
-        if len(self.property) > 0:
-            print "  Properties:"
-            for key in self.property.keys():
-                print "    %-38s : %s" %(key, self.property[key])
+        if len(self.parameter) > 0:
+            print "  Parameters:"
+            for key in self.parameter.keys():
+                print "    %-38s : %s" %(key, self.parameter[key])
 
         print "="*linewidth
 
@@ -1276,7 +1276,7 @@ class Polarisation(object):
         self.direction = ""
         self.status = "NEW"
         self.resultsfile = ""
-        self.property = {}
+        self.parameter = {}
 
         self.settings = Settings(db)
 
@@ -1306,11 +1306,11 @@ class Polarisation(object):
                 else:
                     raise ValueError("Multiple records found for eventID={0}".format(self._id))
 
-                # Read properties
-                sql = "SELECT key, value FROM main.polarisationproperties WHERE polarisationID={0}".format(self._id)
+                # Read parameters
+                sql = "SELECT key, value FROM main.polarisationparameters WHERE polarisationID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
-                    self.property[str(record[0])] = _load_parameter(record[1])
+                    self.parameter[str(record[0])] = _load_parameter(record[1])
 
             else:
                 print "WARNING: This polarisation (id={0}) is not available in the database.".format(self._id)
@@ -1333,23 +1333,23 @@ class Polarisation(object):
                     sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
                 self._id = self._db.insert(sql)
 
-            # Writing properties
-            sql = "SELECT key FROM main.polarisationproperties WHERE polarisationID={0}".format(self._id)
+            # Writing parameters
+            sql = "SELECT key FROM main.polarisationparameters WHERE polarisationID={0}".format(self._id)
             db_keys = [record[0] for record in self._db.select(sql)]
-            py_keys = [key for key in self.property]
+            py_keys = [key for key in self.parameter]
 
-            # - Insert/update properties
+            # - Insert/update parameters
             for key in py_keys:
                 if key in db_keys:
-                    sql = "UPDATE main.polarisationproperties SET value='{2}' WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.property[key]))
+                    sql = "UPDATE main.polarisationparameters SET value='{2}' WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.parameter[key]))
                 else:
-                    sql = "INSERT INTO main.polarisationproperties (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.property[key]))
+                    sql = "INSERT INTO main.polarisationparameters (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.parameter[key]))
                 self._db.execute(sql)
 
-            # - delete unused properties
+            # - delete unused parameters
             for key in db_keys:
                 if not key in py_keys:
-                    sql = "DELETE FROM main.polarisationproperties WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key))
+                    sql = "DELETE FROM main.polarisationparameters WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key))
                     self._db.execute(sql)
 
         else:
@@ -1401,10 +1401,10 @@ class Polarisation(object):
         print "  %-40s : %s" %("Results file", self.resultsfile)
 
         # Properties
-        if len(self.property) > 0:
-            print "  Properties:"
-            for key in self.property.keys():
-                print "    %-38s : %s" %(key, self.property[key])
+        if len(self.parameter) > 0:
+            print "  Parameters:"
+            for key in self.parameter.keys():
+                print "    %-38s : %s" %(key, self.parameter[key])
 
         print "="*linewidth
 
