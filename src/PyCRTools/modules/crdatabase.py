@@ -4,9 +4,10 @@ Interface classes to communicate with the Cosmic Ray Pipeline Database.
 :Author: Martin van den Akker <martinva@astro.ru.nl>
 """
 
-
 from pycrtools.io import database as db
 import os
+import re
+import pickle
 
 
 class CRDatabase(object):
@@ -52,13 +53,13 @@ class CRDatabase(object):
         if "" != datapath:
             self.settings.datapath = os.path.realpath(datapath)
         elif "" == self.settings.datapath:
-            self.settings.datapath = self.basepath + "/data"
+            self.settings.datapath = os.path.join(self.basepath, "data")
 
         # Location of the resultspath
         if "" != resultspath:
             self.settings.resultspath = os.path.realpath(resultspath)
         elif "" == self.settings.resultspath:
-            self.settings.resultspath = self.basepath + "/results"
+            self.settings.resultspath = os.path.join(self.basepath, "results")
 
 
     def __createTables(self):
@@ -131,6 +132,7 @@ class CRDatabase(object):
 
         if self.db:
             # Remove all tables.
+            self.db.execute("DROP TABLE IF EXISTS main.settings")
             self.db.execute("DROP TABLE IF EXISTS main.events")
             self.db.execute("DROP TABLE IF EXISTS main.eventproperties")
             self.db.execute("DROP TABLE IF EXISTS main.datafiles")
@@ -202,9 +204,7 @@ class CRDatabase(object):
                         sql += " AND "
 
             # Extracting eventIDs
-            records = self.db.select(sql)
-            for record in records:
-                result.append(record[0])
+            result = [record[0] for record in self.db.select(sql)]
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -248,9 +248,6 @@ class CRDatabase(object):
                         sql += " AND "
 
             # Extracting datafileIDs
-            records = self.db.select(sql)
-            for record in records:
-                result.append(record[0])
             result = [record[0] for record in self.db.select(sql)]
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -543,7 +540,7 @@ class Event(object):
                 sql = "SELECT key, value FROM main.eventproperties WHERE eventID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
-                    self.property[str(record[0])] = record[1]
+                    self.property[str(record[0])] = _load_parameter(record[1])
             else:
                 print "WARNING: This event (id={0}) is not available in the database.".format(self._id)
         else:
@@ -593,9 +590,9 @@ class Event(object):
             # - Insert/update properties
             for key in py_keys:
                 if key in db_keys:
-                    sql = "UPDATE main.eventproperties SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), str(self.property[key]))
+                    sql = "UPDATE main.eventproperties SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.property[key]))
                 else:
-                    sql = "INSERT INTO main.eventproperties (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(self.property[key]))
+                    sql = "INSERT INTO main.eventproperties (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.property[key]))
                 self._db.execute(sql)
 
             # - delete unused properties
@@ -659,6 +656,7 @@ class Event(object):
         if datafile:
             # Update object
             datafileID = datafile.id
+            datafile.event = self       # Reference to parent (event)
 
             # Check for duplicate
             isNew = True
@@ -917,6 +915,7 @@ class Datafile(object):
         if station:
             # Update object
             stationID = station.id
+            station.datafile = self     #  Reference to parent (datafile)
 
             # Check for duplicate
             isNew = True
@@ -995,8 +994,6 @@ class Datafile(object):
         print "  %-40s : %s" %("ID", self._id)
         print "  %-40s : %s" %("Filename", self.filename)
         print "  %-40s : %s" %("Status", self.status)
-        # print "  %-40s : %s" %("Timestamp", self.timestamp)
-        # print "  %-40s : %s" %("Results path", self.resultsfile)
 
         # Stations
         n_stations = len(self.stations)
@@ -1163,6 +1160,7 @@ class Station(object):
         if polarisation:
             # Update object
             polarisationID = polarisation.id
+            polarisation.station = self # Reference to parent (station)
 
             # Check for duplicate
             isNew = True
@@ -1287,7 +1285,7 @@ class Polarisation(object):
 
 
     def __repr__(self):
-        return "polarisationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status)
+        return "PolarisationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status)
 
 
     def read(self):
@@ -1312,7 +1310,7 @@ class Polarisation(object):
                 sql = "SELECT key, value FROM main.polarisationproperties WHERE polarisationID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
-                    self.property[str(record[0])] = record[1]
+                    self.property[str(record[0])] = _load_parameter(record[1])
 
             else:
                 print "WARNING: This polarisation (id={0}) is not available in the database.".format(self._id)
@@ -1343,9 +1341,9 @@ class Polarisation(object):
             # - Insert/update properties
             for key in py_keys:
                 if key in db_keys:
-                    sql = "UPDATE main.polarisationproperties SET value='{2}' WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key), str(self.property[key]))
+                    sql = "UPDATE main.polarisationproperties SET value='{2}' WHERE polarisationID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.property[key]))
                 else:
-                    sql = "INSERT INTO main.polarisationproperties (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), str(self.property[key]))
+                    sql = "INSERT INTO main.polarisationproperties (polarisationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.property[key]))
                 self._db.execute(sql)
 
             # - delete unused properties
@@ -1442,8 +1440,7 @@ class Filter(object):
 
         if self._db:
             sql = "SELECT filter FROM main.filters WHERE name='{0}'".format(self.name)
-            for record in self._db.select(sql):
-                self.filters.append(str(record[0]))
+            self.filters = [str(record[0]) for record in self._db.select(sql)]
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -1555,4 +1552,18 @@ class Filter(object):
                 print "    %s" %(f)
 
         print "="*linewidth
+
+
+
+def _dump_parameter(p):
+    """Return parameter as database friendly pickle representation.
+    """
+    return re.sub("'", '"', pickle.dumps(p))
+
+
+def _load_parameter(s):
+    """Return parameter resulting from parsing database friendly
+    pickle representation.
+    """
+    return pickle.loads(re.sub('"', "'", str(s)))
 
