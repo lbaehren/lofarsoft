@@ -769,9 +769,16 @@ class Gaussian(object):
         size = func.corrected_size(size)  # gives fwhm and P.A.
         self.size_pix = size
         self.size_sky = img.pix2beam(size)
-        bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
-        bm_pix1 = N.array([img.pixel_restbeam[0]*fwsig, img.pixel_restbeam[1]*fwsig, img.pixel_restbeam[2]])
-        tot = p[0]*size[0]*size[1]/(bm_pix1[0]*bm_pix1[1])
+        
+        # Check if this is a wavelet image. If so, use orig_pixel_beam
+        # for flux calculation, as pixel_beam has been altered to match 
+        # the wavelet scale.
+        if 'atrous' in img.filename:
+            pixel_beam = img.orig_pixel_beam
+        else:
+            pixel_beam = img.pixel_beam
+        bm_pix = N.array([pixel_beam[0]*fwsig, pixel_beam[1]*fwsig, pixel_beam[2]])
+        tot = p[0]*size[0]*size[1]/(bm_pix[0]*bm_pix[1])
 
         if flag == 0:
           errors = func.get_errors(img, p+[tot], img.islands[isl_idx].rms)
@@ -780,8 +787,6 @@ class Gaussian(object):
           errors = [0]*7
           self.centre_sky = [0., 0.]
         self.total_flux = tot
-        self.total_flux_name = 'Total'
-        self.total_flux_unit = 'Jy'
         self.total_fluxE = errors[6]
 
         self.peak_fluxE = errors[0]
@@ -799,8 +804,8 @@ class Gaussian(object):
         # that for resolved sources, the two algorithms give the
         # same answer.
         if flag == 0:
-            #gaus_dc = func.deconv(bm_pix1, size)
-            gaus_dc, err = func.deconv2(bm_pix1, size)
+            #gaus_dc = func.deconv(bm_pix, size)
+            gaus_dc, err = func.deconv2(bm_pix, size)
             self.deconv_size_sky = img.pix2beam(gaus_dc)
             self.deconv_size_skyE  = [0., 0., 0.]
         else:

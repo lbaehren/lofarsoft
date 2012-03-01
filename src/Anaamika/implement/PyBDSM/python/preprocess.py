@@ -115,11 +115,7 @@ class Op_preprocess(Op):
             # as it doesn't give the correct flux
             img.ch0_sum_jy = 0
         else:
-            gfactor = 2.0 * N.sqrt(2.0 * N.log(2.0))
-            pixels_per_beam = 2.0 * N.pi * (img.beam2pix(img.beam)[0]
-                                            * img.beam2pix(img.beam)[1])\
-                                            / gfactor**2
-            im_flux = N.nansum(img.ch0)/pixels_per_beam # Jy
+            im_flux = N.nansum(img.ch0)/img.pixel_beamarea # Jy
             img.ch0_sum_jy = im_flux
             mylogger.userinfo(mylog, 'Flux from sum of (non-blank) pixels',
                               '%.3f Jy' % (im_flux,))
@@ -149,7 +145,6 @@ class Op_preprocess(Op):
 
         ### box size for rms/mean map calculations
         fwsig = const.fwsig
-#        if opts.rms_map in [True, None] or opts.mean_map not in ['zero', 'const']:
         if opts.rms_box is None:
             # 'size' of brightest source
             kappa1 = 3.0

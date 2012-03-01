@@ -131,8 +131,7 @@ class Op_wavelet_atrous(Op):
               wimg = Image(wopts)
               wimg.pixel_beam = (wopts['beam'][0]/fwsig/cdelt[0], wopts['beam'][1]/fwsig/cdelt[1], wopts['beam'][2])
               wimg.pixel_beamarea = 1.1331*wimg.pixel_beam[0]*wimg.pixel_beam[1]*fwsig*fwsig
-              wimg.pixel_restbeam = img.pixel_restbeam
-              #wimg.opts.minpix_isl = wimg.pixel_beamarea
+              wimg.orig_pixel_beam = img.pixel_beam
               wimg.log = 'Wavelet.'
               wimg.basedir = img.basedir
               wimg.extraparams['bbsprefix'] = suffix

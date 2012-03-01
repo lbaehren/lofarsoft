@@ -163,12 +163,13 @@ def _run_op_list(img, chain):
 
     return True
 
-def process_image(input_file, **kwargs):
+def process_image(input, **kwargs):
     """Run a standard analysis and returns the associated Image object.
 
-    The input file can be a FITS or CASA image or a PyBDSM parameter save
-    file. Partial names are allowed for the parameters as long as they are
-    unique. Parameters are set to default values if par = ''.
+    The input can be a FITS or CASA image, a PyBDSM parameter save
+    file, or a dictionary of options. Partial names are allowed for the 
+    parameters as long as they are unique. Parameters are set to default 
+    values if par = ''.
 
     Examples:
         > img = bdsm.process_image('example.fits', thresh_isl=4)
@@ -182,21 +183,23 @@ def process_image(input_file, **kwargs):
     from image import Image
     import os
     
-    # Try to load input_file assuming it's a parameter save file or a dictionary.
+    # Try to load input assuming it's a parameter save file or a dictionary.
     # load_pars returns None if this doesn't work.
     try:
-        img = load_pars(input_file)
+        img = load_pars(input)
     except RuntimeError, err:
         print '\n\033[31;1mERROR\033[0m: ' + str(err)
         return
 
-    # If load_pars fails, assume that input_file is an image
+    # If load_pars fails, assume that input is an image file. If it's not a
+    # valid image file (but is an existing file), an error will be raised
+    # by img.process() during reading of the file.
     if img == None:
-        if os.path.exists(input_file):
-            img = Image({'filename': input_file})
+        if os.path.exists(input):
+            img = Image({'filename': input})
         else:
             print "\n\033[31;1mERROR\033[0m: File '"+\
-                input_file+"' not found."
+                input+"' not found."
             return
 
     # Now process it. Any kwargs specified by the user will

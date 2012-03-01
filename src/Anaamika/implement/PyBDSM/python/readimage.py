@@ -344,8 +344,7 @@ class Op_readimage(Op):
         img.pix2coord = pix2coord
         img.beam = beam   # FWHM size
         img.pixel_beam = pbeam   # IN SIGMA UNITS
-        img.pixel_beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig # area of FWHM size
-        img.pixel_restbeam = pbeam
+        img.pixel_beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig # area of restoring beam in pixels
         mylogger.userinfo(mylog, 'Beam shape (major, minor, pos angle)',
                           '(%s, %s, %s) degrees' % (round(beam[0],5),
                                                     round(beam[1],5),
