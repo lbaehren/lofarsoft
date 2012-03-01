@@ -539,11 +539,15 @@ for full_filename in files:
                 lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
                 lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
                 lora_energy=lora_event_info["Energy(eV)"]
+                lora_coreuncertainties=lora_event_info["coreuncertainties"]
+                lora_moliere=lora_event_info["moliere"]
 
         results.update(dict(
             pulse_direction_lora=lora_direction,
             pulse_energy_lora=lora_energy,
-            pulse_core_lora=lora_core
+            pulse_core_lora=lora_core,
+            pulse_coreuncertainties_lora=lora_coreuncertainties,
+            pulse_moliere_lora=lora_moliere
             ))
 
         ########################################################################
