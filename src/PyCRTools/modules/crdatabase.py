@@ -744,7 +744,7 @@ class Event(object):
             for datafile in self.datafiles:
                 print "    %-6d - %s" %(datafile.id, datafile.filename)
 
-        # Properties
+        # Parameters
         if len(self.parameter) > 0:
             print "  Parameters:"
             for key in self.parameter.keys():
@@ -1400,7 +1400,7 @@ class Polarisation(object):
         print "  %-40s : %s" %("Status", self.status)
         print "  %-40s : %s" %("Results file", self.resultsfile)
 
-        # Properties
+        # Parameters
         if len(self.parameter) > 0:
             print "  Parameters:"
             for key in self.parameter.keys():
