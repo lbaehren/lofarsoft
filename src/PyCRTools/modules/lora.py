@@ -89,13 +89,15 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         return None
     firstline=lines[0].strip('/').split()
     secondline=lines[1].strip('/').split()
-    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)','CoreE(X)','CoreE(Y)']
+    # Coreuncertainties and Moliere radius have been added later
+    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)','CoreE(X)','CoreE(Y)','Moliere_rad(m)']
     len_firstline = len(firstline)
     loradata={}
-    if len_firstline != 9:
-        if len_firstline != 7:
-            print "Check LORA file format, update version ?!"
-            assert False
+    if len_firstline != 10:
+        if len_firstline != 9:
+            if len_firstline != 7:
+                print "Check LORA file format, update version ?!"
+                assert False
     for (a,b,c) in zip(firstline,reference[0:len_firstline],secondline):
         # "Check if data format is still as defined"
         assert a==b
@@ -114,9 +116,20 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
             print a,b
             loradata[a].append(float(b))
         loradata[detectorkeys[-1]].append(float(info[-1]))
+        
     loradata["core"]=cr.hArray([loradata["Core(X)"],loradata["Core(Y)"],0.],name="shower core parameters from lora",unit="m")
     loradata["energy"]=loradata["Energy(eV)"]
     loradata["direction"]=cr.hArray([loradata["Azimuth"],loradata["Elevation"]],name="shower direction from lora",unit="degrees")
+    
+    #Paramaters added in later versions, keeping compatibility with old versions
+    if len_firstline >= 9:
+        loradata["coreuncertainties"]=cr.hArray([loradata["CoreE(X)"],loradata["CoreE(Y)"],0],name="shower core uncertainties from lora",unit="m")
+    else:
+        loradata["coreuncertainties"]=cr.hArray([-1.,-1.,0.],name="shower core uncertainties default",unit="m")
+    if len_firstline == 10:
+        loradata["moliere"]=loradata['Moliere_rad(m)']
+    else:
+        loradata["moliere"]=-1  
 
     return loradata
 
