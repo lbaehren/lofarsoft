@@ -182,26 +182,34 @@ class CRDatabase(object):
         result = []
 
         if self.db:
-            # Processing selection criteria
-            sql_selection = []
+            # Construct SQL table
+            sql_fields = "e.eventID"
+            sql_table = "events AS e"
+            sql_selection_list = []
+
+            # Construct selection
             if timestamp:
-                sql_selection.append("timestamp={0}".format(int(timestamp)))
+                sql_selection_list.append("e.timestamp={0}".format(int(timestamp)))
             else:
                 if timestamp_start:
-                    sql_selection.append("timestamp>{0}".format(int(timestamp_start)))
+                    sql_selection_list.append("e.timestamp>{0}".format(int(timestamp_start)))
                 if timestamp_end:
-                    sql_selection.append("timestamp<{0}".format(int(timestamp_end)))
+                    sql_selection_list.append("e.timestamp<{0}".format(int(timestamp_end)))
             if status:
-                sql_selection.append("status='{0}'".format(str(status)))
+                sql_selection_list.append("e.status='{0}'".format(str(status).upper()))
 
-            # Building SQL expression
-            sql = "SELECT eventID FROM main.events"
-            if len(sql_selection) > 0:
-                sql += " WHERE "
-                for i in range(len(sql_selection)):
-                    sql += sql_selection[i]
-                    if i < len(sql_selection) - 1:
-                        sql += " AND "
+            sql_selection = ""
+            if sql_selection_list:
+                n_sql_selection_list = len(sql_selection_list)
+                for i in range(n_sql_selection_list):
+                    sql_selection += sql_selection_list[i]
+                    if i < (n_sql_selection_list - 1):
+                        sql_selection += " AND "
+
+            #  Building SQL expression
+            sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
+            if sql_selection_list:
+                sql += " WHERE {0}".format(sql_selection)
 
             # Extracting eventIDs
             result = [record[0] for record in self.db.select(sql)]
@@ -211,7 +219,7 @@ class CRDatabase(object):
         return result
 
 
-    def getDatafileIDs(self, filename=None, status=None):
+    def getDatafileIDs(self, eventID=None, filename=None, status=None):
         """Return a list of datafileIDs satifying the values of this
         functions arguments.
 
@@ -220,6 +228,7 @@ class CRDatabase(object):
         =================  ==============================================================
         Parameter          Description
         =================  ==============================================================
+        *eventID*          id of the event.
         *filename*         name of the datafile.
         *status*           status of the datafile.
         =================  ==============================================================
@@ -231,21 +240,34 @@ class CRDatabase(object):
         result = []
 
         if self.db:
-            # Processing selection criteria
-            sql_selection = []
-            if filename:
-                sql_selection.append("filename='{0}'".format(str(filename)))
-            if status:
-                sql_selection.append("status='{0}'".format(str(status)))
+            # Construct SQL table
+            sql_fields = "d.datafileID"
+            sql_table_d = "datafiles AS d"
+            sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.datafileID=d.datafileID)"
+            sql_table = sql_table_d     # Default sql_table value
+            sql_selection_list = []
+            if eventID:
+                sql_table = sql_table_e
+                sql_selection_list.append("ed.eventID={0}".format(int(eventID)))
 
-            # Building SQL expression
-            sql = "SELECT datafileID FROM main.datafiles"
-            if len(sql_selection) > 0:
-                sql += " WHERE "
-                for i in range(len(sql_selection)):
-                    sql += sql_selection[i]
-                    if i < len(sql_selection) - 1:
-                        sql += " AND "
+            # Construct SQL selection
+            if filename:
+                sql_selection_list.append("d.filename='{0}'".format(str(filename)))
+            if status:
+                sql_selection_list.append("d.status='{0}'".format(str(status.upper())))
+
+            sql_selection = ""
+            if sql_selection_list:
+                n_sql_selection_list = len(sql_selection_list)
+                for i in range(n_sql_selection_list):
+                    sql_selection += sql_selection_list[i]
+                    if i < (n_sql_selection_list - 1):
+                        sql_selection += " AND "
+
+            # Constructing SQL expression
+            sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
+            if sql_selection_list:
+                sql += " WHERE {0}".format(sql_selection)
 
             # Extracting datafileIDs
             result = [record[0] for record in self.db.select(sql)]
@@ -274,41 +296,115 @@ class CRDatabase(object):
         multiple arguments are provided, the returned stationIDs satisfy
         all argument values that are provided.
         """
-        results = []
-        records = []
+        result = []
 
         if self.db:
-            sql_fields = ""
-            sql_table = ""
-            sql_selection = []
-            if eventID:                 # EventID
-                sql_fields = "ed.eventID, s.stationID "
-                sql_table = "event_datafile AS ed INNER JOIN (datafile_station AS ds INNER JOIN stations AS s ON s.stationID=dsstationID) ON ds.datafileID=ed.datafileID"
-                sql_selection.append("ed.eventID={0}".format(eventID))
-            elif datafileID:            # DatafileID
-                sql_fields = "s.stationID"
-                sql_table = "datafile_station AS ds INNER JOIN stations AS s ON ds.stationID=s.stationID"
-                sql_selection.append("ds.datafileID={0}".format(datafileID))
-            # Other selections
+            # Construct SQL table
+            sql_fields = "s.stationID"
+            sql_table_s = "stations AS s"
+            sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " ON (ds.stationID=s.stationID)"
+            sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
+            sql_table = sql_table_s     # Default sql_table value
+            sql_selection_list = []
+            if datafileID:
+                sql_table = sql_table_d
+                sql_selection_list.append("ds.datafileID={0}".format(int(datafileID)))
+            if eventID:
+                sql_table = sql_table_e
+                sql_selection_list.append("ed.eventID={0}".format(int(eventID)))
+
+            # Construct selection
             if stationname:
-                sql_selection.append("s.stationname='{0}'".format(stationname))
+                sql_selection_list.append("s.stationname='{0}'".format(str(stationname)))
             if status:
-                sql_selection.append("s.status='{0}'".format(status))
+                sql_selection_list.append("s.status='{0}'".format(str(status.upper())))
 
+            sql_selection = ""
+            if sql_selection_list:
+                n_sql_selection_list = len(sql_selection_list)
+                for i in range(n_sql_selection_list):
+                    sql_selection += sql_selection_list[i]
+                    if i < (n_sql_selection_list - 1):
+                        sql_selection += " AND "
+
+            # Construct SQL statement
             sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
-            if len(sql_selection) > 0:
-                sql += " WHERE "
-                for i in range(len(sql_selection)):
-                    sql += sql_selection[i]
-                    if i < len(sql_selection) - 1:
-                        sql += " AND "
+            if sql_selection_list:
+                sql += " WHERE {0}".format(sql_selection)
 
-            records = self.db.select(sql)
+            result = [record[0] for record in self.db.select(sql)]
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
 
-        if records:
-            results = [r[0] for r in records]
+        return result
 
-        return results
+
+    def getPolarisationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None):
+        """Return a list of polarisationIDs that satisfy the values of the
+        provided arguments of this method.
+
+        **Properties**
+
+        =================  ==============================================================
+        Parameter          Description
+        =================  ==============================================================
+        *eventID*          id of the event.
+        *datafileID*       id of the datafile.
+        *stationID*        id of the station.
+        *antennaset*       type of antennaset.
+        *status*           status of the polarisation.
+        =================  ==============================================================
+
+        If no arguments are given all polarisationIDs are selected. When
+        multiple arguments are provided, the returned polarisationIDs satisfy
+        all argument values that are provided.
+        """
+        result = []
+
+        if self.db:
+            # Construct SQL table
+            sql_fields = "p.polarisationID"
+            sql_table_p = "polarisations AS p"
+            sql_table_s = "station_polarisation AS sp INNER JOIN " + sql_table_p + " ON (sp.polarisationID=p.polarisationID)"
+            sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " AND (ds.stationID=sp.stationID)"
+            sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
+            sql_table = sql_table_p     # Default sql_table value
+            sql_selection_list = []
+            if stationID:
+                sql_table = sql_table_s
+                sql_selection_list.append("sp.stationID={0}".format(int(stationID)))
+            if datafileID:
+                sql_table = sql_table_d
+                sql_selection_list.append("ds.datafileID={0}".format(int(datafileID)))
+            if eventID:
+                sql_table = sql_table_e
+                sql_selection_list.append("ed.eventID={0}".format(int(eventID)))
+
+            # Construct selection
+            if antennaset:
+                sql_selection_list.append("p.antennaset='{0}'".format(str(antennaset.upper())))
+            if status:
+                sql_selection_list.append("p.status='{0}'".format(str(status.upper())))
+
+            sql_selection = ""
+            if sql_selection_list:
+                n_sql_selection_list = len(sql_selection_list)
+                for i in range(n_sql_selection_list):
+                    sql_selection += sql_selection_list[i]
+                    if i < (n_sql_selection_list - 1):
+                        sql_selection += " AND "
+
+            # Construct SQL statement
+            sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
+            if sql_selection_list:
+                sql += " WHERE {0}".format(sql_selection)
+
+            result = [record[0] for record in self.db.select(sql)]
+
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
 
 
     def summary(self):
@@ -507,7 +603,7 @@ class Event(object):
 
 
     def __repr__(self):
-        return "EventID=%d   timestampe=%d   status='%s'" %(self._id, self.timestamp, self.status)
+        return "EventID=%d   timestampe=%d   status='%s'" %(self._id, self.timestamp, self.status.upper())
 
 
     def read(self):
@@ -517,17 +613,17 @@ class Event(object):
                 # Read attributes
                 sql = "SELECT eventID, timestamp, status FROM main.events WHERE eventID={0}".format(int(self._id))
                 records = self._db.select(sql)
-                if len(records) == 1:
+                if 1 == len(records):
                     self._id = int(records[0][0])
                     self.timestamp = int(records[0][1])
-                    self.status = str(records[0][2])
-                elif len(records) == 0:
+                    self.status = str(records[0][2]).upper()
+                elif 0 == len(records):
                     raise ValueError("No records found for eventID={0}".format(self._id))
                 else:
                     raise ValueError("Multiple records found for eventID={0}".format(self._id))
 
-                # Read datafiles
                 self.datafiles = []
+                # Read datafiles
                 sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
@@ -561,13 +657,13 @@ class Event(object):
         if self._db:
             # Writing attributes
             if self.inDatabase():       # Update values
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status))
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()))
                 self._db.execute(sql)
             else:                       # Create new record
-                if self._id == 0:
-                    sql = "INSERT INTO main.events (timestamp, status) VALUES ({0}, '{1}')".format(int(self.timestamp), str(self.status))
+                if 0 == self._id:
+                    sql = "INSERT INTO main.events (timestamp, status) VALUES ({0}, '{1}')".format(int(self.timestamp), str(self.status.upper()))
                 else:
-                    sql = "INSERT INTO main.events (eventID, timestamp, status) VALUES ({0}, {1}, '{2}')".format(self._id, int(self.timestamp), str(self.status))
+                    sql = "INSERT INTO main.events (eventID, timestamp, status) VALUES ({0}, {1}, '{2}')".format(self._id, int(self.timestamp), str(self.status.upper()))
                 self._id = self._db.insert(sql)
 
             # Writing datafile information
@@ -578,7 +674,7 @@ class Event(object):
 
                 sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
                 result = self._db.select(sql)[0][0]
-                if result == 0:
+                if 0 == result:
                     sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
                     self._db.insert(sql)
 
@@ -674,7 +770,7 @@ class Event(object):
                     datafile.write()
                 # Update the linking table.
                 sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
-                if len(self._db.select(sql)) == 0:
+                if 0 == len(self._db.select(sql)):
                     sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
                     self._db.insert(sql)
                     result = True
@@ -784,7 +880,7 @@ class Datafile(object):
 
 
     def __repr__(self):
-        return "DatafileID=%d   filename='%s'   status='%s'" %(self._id, self.filename, self.status)
+        return "DatafileID=%d   filename='%s'   status='%s'" %(self._id, self.filename, self.status.upper())
 
 
     def read(self):
@@ -794,11 +890,11 @@ class Datafile(object):
                 # Read attributes
                 sql = "SELECT datafileID, filename, status FROM main.datafiles WHERE datafileID={0}".format(int(self._id))
                 records = self._db.select(sql)
-                if len(records) == 1:
+                if 1 == len(records):
                     self._id = int(records[0][0])
                     self.filename = str(records[0][1])
-                    self.status = str(records[0][2])
-                elif len(records) == 0:
+                    self.status = str(records[0][2]).upper()
+                elif 0 == len(records):
                     raise ValueError("No records found for datafileID={0}".format(self._id))
                 else:
                     raise ValueError("Multiple records found for datafileID={0}".format(self._id))
@@ -833,7 +929,7 @@ class Datafile(object):
         if self._db:
             # Write attributes
             if self.inDatabase():
-                sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status))
+                sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
                 self._db.execute(sql)
             else:
                 # Check uniqueness (filename)
@@ -842,10 +938,10 @@ class Datafile(object):
                     print "ERROR: Filename is not uniquely defined"
                     return
                 # Add to database
-                if self._id == 0:
-                    sql = "INSERT INTO main.datafiles (filename, status) VALUES ('{0}', '{1}')".format(str(self.filename), str(self.status))
+                if 0 == self._id:
+                    sql = "INSERT INTO main.datafiles (filename, status) VALUES ('{0}', '{1}')".format(str(self.filename), str(self.status.upper()))
                 else:
-                    sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.filename), str(self.status))
+                    sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.filename), str(self.status.upper()))
                 self._id = self._db.insert(sql)
 
             # Write station information
@@ -856,7 +952,7 @@ class Datafile(object):
 
                 sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
                 result = self._db.select(sql)[0][0]
-                if result == 0:
+                if 0 == result:
                     sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
                     self._db.insert(sql)
 
@@ -933,7 +1029,7 @@ class Datafile(object):
                     station.write()
                 # Update linking table
                 sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
-                if len(self._db.select(sql)) == 0:
+                if 0 == len(self._db.select(sql)):
                     sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
                     self._db.insert(sql)
                     result = True
@@ -1036,7 +1132,7 @@ class Station(object):
 
 
     def __repr__(self):
-        return "StationID=%d   stationname='%s'   status='%s'" %(self._id, self.stationname, self.status)
+        return "StationID=%d   stationname='%s'   status='%s'" %(self._id, self.stationname, self.status.upper())
 
 
     def read(self):
@@ -1046,11 +1142,11 @@ class Station(object):
                 # Read attributes
                 sql = "SELECT stationID, stationname, status FROM main.stations WHERE stationID={0}".format(int(self._id))
                 records = self._db.select(sql)
-                if len(records) == 1:
+                if 1 == len(records):
                     self._id = int(records[0][0])
                     self.stationname = str(records[0][1])
-                    self.status = str(records[0][2])
-                elif len(records) == 0:
+                    self.status = str(records[0][2]).upper()
+                elif 0 == len(records):
                     raise ValueError("No records found for stationID={0}".format(self._id))
                 else:
                     raise ValueError("Multiple records found for stationID={0}".format(self._id))
@@ -1085,13 +1181,13 @@ class Station(object):
         if self._db:
             # Write attributes
             if self.inDatabase():
-                sql = "UPDATE main.stations SET stationname='{1}', status='{2}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status))
+                sql = "UPDATE main.stations SET stationname='{1}', status='{2}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()))
                 self._db.execute(sql)
             else:
-                if self._id == 0:
-                    sql = "INSERT INTO main.stations (stationname, status) VALUES ('{0}', '{1}')".format(str(self.stationname), str(self.status))
+                if 0 == self._id:
+                    sql = "INSERT INTO main.stations (stationname, status) VALUES ('{0}', '{1}')".format(str(self.stationname), str(self.status.upper()))
                 else:
-                    sql = "INSERT INTO main.stations (stationID, stationname, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.stationname), str(self.status))
+                    sql = "INSERT INTO main.stations (stationID, stationname, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.stationname), str(self.status.upper()))
                 self._id = self._db.insert(sql)
 
             # Write polarisation information
@@ -1102,7 +1198,7 @@ class Station(object):
 
                 sql = "SELECT COUNT(stationID) FROM main.station_polarisation WHERE polarisationID={0}".format(polarisationID)
                 result = self._db.select(sql)[0][0]
-                if result == 0:
+                if 0 == result:
                     sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
                     self._db.insert(sql)
 
@@ -1178,7 +1274,7 @@ class Station(object):
                     polarisation.write()
                 # Update linking table
                 sql = "SELECT stationID FROM main.station_polarisation WHERE stationID={0} AND polarisationID={1}".format(self._id, polarisationID)
-                if len(self._db.select(sql)) == 0:
+                if 0 == len(self._db.select(sql)):
                     sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
                     self._db.insert(sql)
                     result = True
@@ -1285,7 +1381,7 @@ class Polarisation(object):
 
 
     def __repr__(self):
-        return "PolarisationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status)
+        return "PolarisationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status.upper())
 
 
     def read(self):
@@ -1295,13 +1391,13 @@ class Polarisation(object):
                 # Read attributes
                 sql = "SELECT polarisationID, antennaset, direction, status, resultsfile FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
                 records = self._db.select(sql)
-                if len(records) == 1:
+                if 1 == len(records):
                     self._id = int(records[0][0])
-                    self.antennaset = str(records[0][1])
+                    self.antennaset = str(records[0][1]).upper()
                     self.direction = str(records[0][2])
-                    self.status = str(records[0][3])
+                    self.status = str(records[0][3]).upper()
                     self.resultsfile = str(records[0][4])
-                elif len(records) == 0:
+                elif 0 == len(records):
                     raise ValueError("No records found for eventID={0}".format(self._id))
                 else:
                     raise ValueError("Multiple records found for eventID={0}".format(self._id))
@@ -1324,13 +1420,13 @@ class Polarisation(object):
         if self._db:
             # Write attributes
             if self.inDatabase():
-                sql = "UPDATE main.polarisations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarisationID={0}".format(self._id, str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
+                sql = "UPDATE main.polarisations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarisationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._db.execute(sql)
             else:
-                if self._id == 0:
-                    sql = "INSERT INTO main.polarisations (antennaset, direction, status, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}')".format(str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
+                if 0 == self._id:
+                    sql = "INSERT INTO main.polarisations (antennaset, direction, status, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}')".format(str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 else:
-                    sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset), str(self.direction), str(self.status), str(self.resultsfile))
+                    sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._id = self._db.insert(sql)
 
             # Writing parameters
@@ -1455,7 +1551,7 @@ class Filter(object):
                 sql = "SELECT filter FROM main.filters WHERE name='{0}' AND filter='{1}'".format(self.name, filtervalue)
                 n = len(self._db.select(sql))
                 # Only write new filters
-                if n == 0:
+                if 0 == n:
                     sql = "INSERT INTO main.filters (name, filter) VALUES ('{0}', '{1}');".format(self.name, filtervalue)
                     self._db.insert(sql)
         else:
@@ -1479,7 +1575,7 @@ class Filter(object):
             sql = "SELECT filter FROM main.filters WHERE name='{0}' AND filter='{1}'".format(self.name, filtervalue)
             n = len(self._db.select(sql))
             # Only write new filters
-            if n == 0:
+            if 0 == n:
                 sql = "INSERT INTO main.filters (name, filter) VALUES ('{0}', '{1}');".format(self.name, filtervalue)
                 self._db.insert(sql)
         else:
