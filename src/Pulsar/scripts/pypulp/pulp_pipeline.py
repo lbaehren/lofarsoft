@@ -262,7 +262,7 @@ class Pipeline:
 			for unit in [u for u in self.units if u.summary_node == sumnode]: 
 				for node in unit.tab.location:
 					for rf in unit.tab.rawfiles[node]:
-						bpnf.write("%s %s%s" % \
+						bpnf.write("%s %s%s\n" % \
 						(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
               	        bpnf.close()
 
