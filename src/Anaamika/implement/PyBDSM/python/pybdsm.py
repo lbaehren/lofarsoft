@@ -387,7 +387,8 @@ def show_fit(**kwargs):
     Parameters: ch0_image, rms_image, mean_image, ch0_islands,
                 gresid_image, sresid_image, gmodel_image,
                 smodel_image, pyramid_srcs, source_seds,
-                ch0_flagged, pi_image
+                ch0_flagged, pi_image, psf_major, psf_minor,
+                psf_pa
 
     For more information about a parameter, use help.  E.g.,
       > help 'ch0_image'
@@ -412,7 +413,8 @@ def show_fit(**kwargs):
 show_fit.arg_list = ['ch0_image', 'rms_image', 'mean_image', 'ch0_islands',
                      'gresid_image', 'sresid_image', 'gmodel_image',
                      'smodel_image', 'pyramid_srcs', 'source_seds',
-                     'ch0_flagged', 'pi_image']
+                     'ch0_flagged', 'pi_image', 'psf_major', 'psf_minor',
+                     'psf_pa']
 show_fit.use_groups = False
 
     

@@ -1057,10 +1057,12 @@ class Opts(object):
                                  "supported)",
                              group='hidden')
     img_type        =   Enum('gaus_resid', 'shap_resid', 'rms', 'mean', 'gaus_model',
-                             'shap_model', 'ch0', 'pi',
+                             'shap_model', 'ch0', 'pi', 'psf_major', 'psf_minor',
+                             'psf_pa',
                              doc="Type of image to export: 'gaus_resid', "\
                                  "'shap_resid', 'rms', 'mean', 'gaus_model', "\
-                                 "'shap_model', 'ch0', 'pi'\nThe following images "\
+                                 "'shap_model', 'ch0', 'pi', 'psf_major', "\
+                                 "'psf_minor', 'psf_pa'\nThe following images "\
                                  "can be exported:\n"\
                                  "'ch0' - image used for source detection\n"\
                                  "'rms' - rms map image\n"\
@@ -1069,7 +1071,10 @@ class Opts(object):
                                  "'gaus_resid' - Gaussian model residual image\n"\
                                  "'gaus_model' - Gaussian model image\n"\
                                  "'shap_resid' - Shapelet model residual image\n"\
-                                 "'shap_model' - Shapelet model image\n",
+                                 "'shap_model' - Shapelet model image\n"\
+                                 "'psf_major' - PSF major axis FWHM (in pixels) image\n"\
+                                 "'psf_minor' - PSF minor axis FWHM (in pixels) image\n"\
+                                 "'psf_pa' - PSF position angle (in degrees) image\n",
                              group='hidden')
     ch0_image       =   Bool(True,
                              doc="Show the ch0 image. This is the image used for "\
@@ -1114,6 +1119,15 @@ class Opts(object):
                                  "Sources may be chosen by ID with the 'c' key "\
                                  "or, if ch0_islands = True, by picking a source with "\
                                  "the mouse",
+                             group="hidden")
+    psf_major       =   Bool(False,
+                             doc="Show the PSF major axis variation",
+                             group="hidden")
+    psf_minor       =   Bool(False,
+                             doc="Show the PSF minor axis variation",
+                             group="hidden")
+    psf_pa          =   Bool(False,
+                             doc="Show the PSF position angle variation",
                              group="hidden")
 
     

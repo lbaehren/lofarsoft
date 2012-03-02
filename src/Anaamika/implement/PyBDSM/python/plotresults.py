@@ -37,41 +37,15 @@ def _isl2border(img, isl):
 def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                 ch0_islands=True, gresid_image=True, sresid_image=False,
                 gmodel_image=True, smodel_image=False, pyramid_srcs=False,
-                source_seds=False, ch0_flagged=False, pi_image=False):
-    """Show the results of a fit.
-
-    Should be done as follows:
-
-    make fig --> add pix2sky, vmin, vmax, etc.
-    make_subplots(img, fig, **kwargs)
-      image_list = make_image_lists(img, **kwargs) --> make list of images, names, titles, sharexy
-      make axes --> add image names 
-      make_plot(fig, image_name)
-        ax = find axis with right name
-        if island/gaussians:
-           gline, = ax.plot(...)
-           gline.gaussian_idx = ...
-           etc.
-           same for islands
-        if image:
-           add_custom_coord_to_axis(fig) --> add coord listers
-        if sed:
-           fitline, = ax.plot(...)
-           fitline.alpha = ...
-           fitline.chisq, etc.
-           legend?
-        if pyramidsrc:
-           pyrline, = ax.plot(...)
-           pyrline.?
-
-    --> only fig needs to be global (for picker/keypress handlers)
-      
-    """
+                source_seds=False, ch0_flagged=False, pi_image=False,
+                psf_major=False, psf_minor=False, psf_pa=False):
+    """Show the results of a fit."""
     import numpy as N
     global img_ch0, img_rms, img_mean, img_gaus_mod, img_shap_mod
     global img_gaus_resid, img_shap_resid, pixels_per_beam, pix2sky
     global vmin, vmax, vmin_cur, vmax_cur, ch0min, ch0max, img_pi
     global low, fig, images, src_list, srcid_cur, sky2pix, markers
+    global img_psf_maj, img_psf_min, img_psf_pa
 
     # Define the images. The images are used both by imshow and by the
     # on_press() and coord_format event handlers
@@ -100,6 +74,10 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
         img_shap_resid = None
     if hasattr(img, 'ch0_pi'):
         img_pi = img.ch0_pi
+    if hasattr(img, 'psf_vary_maj'):
+        img_psf_maj = img.psf_vary_maj
+        img_psf_min = img.psf_vary_min
+        img_psf_pa = img.psf_vary_pa
     
     # Construct lists of images, titles, etc.
     images = []
@@ -202,6 +180,23 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
             for i in range(len(j_with_gaus)):
                 images.append('wavelets')
                 names.append('pyrsrc'+str(i))
+    if psf_major or psf_minor or psf_pa:
+        if img.opts.psf_vary_do == False:
+            print 'PSF variation not calculated. Skipping PSF varyiation images.'
+        else:
+            if psf_major:
+                images.append(img_psf_maj)
+                titles.append('PSF Major Axis FWHM (pixels)')
+                names.append('psf_maj')
+            if psf_minor:
+                images.append(img_psf_min)
+                titles.append('PSF Minor Axis FWHM (pixels)')
+                names.append('psf_min')
+            if psf_pa:
+                images.append(img_psf_pa)
+                titles.append('PSF Pos. Angle FWhM (degrees)')
+                names.append('psf_pa')
+    
     if images == []:
         print 'No images to display.'
         return
@@ -259,7 +254,10 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                     ', ' + str(numy) + ', ' + str(i+1) + ', sharex=ax1' + \
                     ', sharey=ax1)'
             exec cmd
-            im = N.log10(image + low)
+            if 'PSF' in titles[i]:
+                im = image
+            else:
+                im = N.log10(image + low)
             if 'Islands' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
                     xb, yb = _isl2border(img, isl)
@@ -332,8 +330,12 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                                          linestyle = style, picker=3)
                         gline.flag = g.flag
 
-            cmd = 'ax' + str(i+1) + ".imshow(N.transpose(im), origin=origin, "\
-                    "interpolation='bilinear',vmin=vmin, vmax=vmax, cmap=gray_palette)"
+            if 'PSF' in titles[i]:
+                cmd = 'ax' + str(i+1) + ".imshow(N.transpose(im), origin=origin, "\
+                      "interpolation='bilinear', cmap=gray_palette)"            
+            else:
+                cmd = 'ax' + str(i+1) + ".imshow(N.transpose(im), origin=origin, "\
+                      "interpolation='bilinear',vmin=vmin, vmax=vmax, cmap=gray_palette)"
             exec cmd
             cmd = 'ax' + str(i+1) + '.format_coord = format_coord_'+names[i]
             exec cmd
@@ -633,6 +635,26 @@ def format_coord_shap_resid(x, y):
     coord_str = make_coord_str(x, y, im)
     return coord_str
 
+def format_coord_psf_maj(x, y):
+    """Custom coordinate format for PSF major image"""
+    global img_psf_maj
+    im = img_psf_maj
+    coord_str = make_coord_str(x, y, im)
+    return coord_str
+
+def format_coord_psf_min(x, y):
+    """Custom coordinate format for PSF minor image"""
+    global img_psf_min
+    im = img_psf_min
+    coord_str = make_coord_str(x, y, im)
+    return coord_str
+
+def format_coord_psf_pa(x, y):
+    """Custom coordinate format for PSF pos. ang. image"""
+    global img_psf_pa
+    im = img_psf_pa
+    coord_str = make_coord_str(x, y, im)
+    return coord_str
     
 def xy_to_radec_str(x, y):
     """Converts x, y in image coords to a sexigesimal string"""

@@ -33,7 +33,7 @@ class Op_rmsimage(Op):
     """
     def __call__(self, img):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"RMSimage  ")
-        mylog.info("Calculating background rms and mean images")
+        mylogger.userinfo(mylog, "Calculating background rms and mean images")
         if img.opts.polarisation_do:
             pols = ['I', 'Q', 'U', 'V']
         else:

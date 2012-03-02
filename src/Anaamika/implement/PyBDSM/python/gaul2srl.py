@@ -35,7 +35,9 @@ class Op_gaul2srl(Op):
     def __call__(self, img):
         #  for each island, get the gaussians into a list and then send them to process
         #  src_index is source number, starting from 0
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gaul2Srl  ")
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Gaul2Srl")
+        mylogger.userinfo(mylog, 'Grouping Gaussians into sources')
+
         src_index = -1
         sources = []
         for iisl, isl in enumerate(img.islands):

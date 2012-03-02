@@ -26,7 +26,7 @@ class Op_psf_vary(Op):
 
       if img.opts.psf_vary_do:
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary  ")
-        mylogger.userinfo(mylog, '\nEstimating PSF variation')
+        mylogger.userinfo(mylog, '\nEstimating PSF variations')
         opts = img.opts
         plot = opts.debug_figs_7_psf_vary
         dir = img.basedir + '/misc/'
@@ -94,7 +94,11 @@ class Op_psf_vary(Op):
         # get a list of voronoi generators. vorogenS has values (and not None) if generators='field'.
         vorogenP, vorogenS = self.get_voronoi_generators(g_gauls, generators, gencode, snrcut, snrtop, snrbot, snrcutstack)
         mylogger.userinfo(mylog, 'Number of generators for PSF variation', str(len(vorogenP[0])))
+        if len(vorogenP[0]) < 3:
+            mylog.warning('Insufficient number of generators')
+            return
 
+        mylogger.userinfo(mylog, '\nTesselating image')
         # group generators into tiles
         tile_prop = self.edit_vorogenlist(vorogenP, frac=0.9)
 
@@ -181,6 +185,13 @@ class Op_psf_vary(Op):
                     p_ini = [maxv, (psfim.shape[0]-1)/2.0*1.1, (psfim.shape[1]-1)/2.0*1.1, bm_pix[0]/fwsig*1.3, 
                              bm_pix[1]/fwsig*1.1, bm_pix[2]*2]
                     para, ierr = func.fit_gaus2d(psfim, p_ini, x_ax, y_ax, mask)
+                    ### first extent is major
+                    if para[3] < para[4]:
+                        para[3:5] = para[4:2:-1]
+                        para[5] += 90    
+                    ### clip position angle
+                    para[5] = divmod(para[5], 180)[1]
+
                     psf_maj[i] = para[3]
                     psf_min[i] = para[4]
                     psf_pa[i] = para[5]
@@ -211,9 +222,11 @@ class Op_psf_vary(Op):
                 
                 xi = N.linspace(0,image.shape[0],image.shape[0])
                 yi = N.linspace(0,image.shape[1],image.shape[1])
-                maj_interp = griddata(x, y, maj_values, xi, yi)
-                min_interp = griddata(x, y, min_values, xi, yi)
-                pa_interp = griddata(x, y, pa_values, xi, yi)
+                mylogger.userinfo(mylog, 'Interpolating PSF variations across image')
+
+                maj_interp = N.transpose(griddata(x, y, maj_values, xi, yi))
+                min_interp = N.transpose(griddata(x, y, min_values, xi, yi))
+                pa_interp = N.transpose(griddata(x, y, pa_values, xi, yi))
                 
                 # Now fill in regions outside the grid.
                 # First check if they are masked arrays and, if so, convert to 
