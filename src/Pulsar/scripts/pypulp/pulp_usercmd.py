@@ -21,10 +21,10 @@ class CMDLine:
                            help="Specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
         	self.cmd.add_option('-p', '--pulsar', dest='psr', metavar='PSRS',
                            help="Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
-				specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation or \
-				specify the word 'NONE' (upper case) when you want to skip the folding step of the processing \
+				specify the word 'position' (lower case) find associated known Pulsars in the FOV of observation \
 				(i.e. single Pulsar: B2111+46) (i.e. multiple pulsars to fold:  B2111+46,B2106+44) \
-				(i.e. up to 3 brights pulsars to fold at location of FOV: position. This option is required", default="", type='str')
+				(i.e. up to 3 brights pulsars to fold at location of FOV: position. To skip folding either \
+                                use option --nofold or do not specify any pulsars at all", default="", type='str')
         	self.cmd.add_option('-o', '-O', '--output', dest='outdir', metavar='DIR',
                            help="Specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
                                  Default is corresponding *_red or *_redIS directory", default="", type='str')
@@ -51,15 +51,20 @@ class CMDLine:
 #                           help="optional parameter to redo processing for Incoherentstokes (deletes previous incoh results!)", default=False)
 #        	self.cmd.add_option('--coh_redo', action="store_true", dest='is_coh_redo',
 #                           help="optional parameter to redo processing for Coherentstokes (deletes previous coh results!)", default=False)
-#        	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
-#                           help="optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible", default=False)
+        	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
+                           help="optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible", default=False)
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
                            help="do not initialize classes but instead read all info from saved config file", default=False)
-        	self.cmd.add_option('--beam', dest='beam_str', metavar='SAP#:TAB#',
-                           help="beam to process written as station beam number, colon, TA beam number, with no spaces. This \
-                                 option assumes that data are on the current node, or current node is hoover node", default="", type='str')
+        	self.cmd.add_option('--beams', dest='beam_str', metavar='SAP#:TAB#[,SAP#:TAB#,...]',
+                           help="user-specified beams to process separated by commas and written as station beam number, colon, \
+                                 TA beam number, with no spaces", default="", type='str')
+        	self.cmd.add_option('--local', action="store_true", dest='is_local', 
+                           help="To process the data locally on current locus node for one beam only. Should only be used together with --beams option \
+				and only the first beam will be used if there are several specified in --beams", default=False)
+        	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
+                           help="run only summary actions on already processed data", default=False)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
@@ -84,9 +89,16 @@ class CMDLine:
 		if log != None and self.opts.is_debug:
 			log.set_loglevel(logging.DEBUG)
 
+		# checking if --local is used without specified beam
+		if self.opts.is_local and self.opts.beam_str == "":
+			msg="You have to use --beams option with --local!"
+			if log != None: log.error(msg)
+			else: print msg
+			sys.exit(1)
+
 		# check if all required options are given
-		if self.opts.obsid == "" or self.opts.psr == "":
-			msg="It is required to set _all two_ parameters: ObsID and PSRS!"
+		if self.opts.obsid == "":
+			msg="ObsID is not given. What do you want to process?"
 			if log != None: log.error(msg)
 			else: print msg
 			sys.exit(1)
@@ -101,10 +113,9 @@ class CMDLine:
 		# checking if given psr(s) names are valid, and these pulsars are in the catalog
 		if self.opts.psr == "position":
 			pass  #  I should add a proper action when "position" is given
-                self.psrs=self.opts.psr.split(",")
-		self.psrs=list(np.unique(self.psrs))
 		# if NONE is given for pulsar together wiht other pulsar names, then NONE is ignored
-		if "NONE" in self.psrs and len(self.psrs)>1: self.psrs.remove("NONE")
+                self.psrs=[psr for psr in self.opts.psr.split(",") if psr != "NONE"]
+		self.psrs=list(np.unique(self.psrs))
 		if len(self.psrs) > 3:
 			msg="%d pulsars are given, but only first 3 will be used for folding" % (len(self.psrs))
 			if log != None: log.warning(msg)
@@ -113,12 +124,20 @@ class CMDLine:
 		# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
 		psrbs, psrjs = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,2), dtype=str, unpack=True)
 		for psr in self.psrs:
-			if psr == "NONE": continue
 			if psr not in psrbs and psr not in psrjs:
 				msg="Pulsar %s is not in the catalog: '%s'! Exiting." % (psr, cep2.psrcatalog)
 				if log != None: log.error(msg)
 				else: print msg
 				sys.exit(1)
+		# checking --nofold and pulsar list
+		if not self.opts.is_nofold and len(self.psrs) == 0:
+			msg="Warning: Pulsar is not specified and PULP will not do any folding"
+			if log != None: log.warning(msg)
+			else: print msg
+		# if --nofold switch is used then we are not folding and empty pulsar list
+		if self.opts.is_nofold:
+			self.psrs=[]
+		if len(self.psrs) == 0: self.opts.is_nofold = True
 			
 
 	# print summary of all set input parameters
@@ -130,9 +149,10 @@ class CMDLine:
 			log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options)))
 			log.info("")
 			log.info("ObsID = %s" % (self.opts.obsid))
-			log.info("PSR(s) = %s" % (self.opts.psr))
+			log.info("PSR(s) = %s" % (self.opts.is_nofold and "No folding" or ", ".join(self.psrs)))
 			log.info("Output Dir = %s_*/%s" % (cep2.processed_dir_prefix, self.opts.outdir != "" and self.opts.outdir or self.opts.obsid + "_red*"))
 			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
+			log.info("Summaries ONLY = %s" % (self.opts.is_summary and "yes" or "no"))
 			log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
 			log.info("pdmp = %s" % (self.opts.is_nopdmp and "no" or "yes"))
 			log.info("IS Only = %s" % (self.opts.is_incoh_only and "yes" or "no"))

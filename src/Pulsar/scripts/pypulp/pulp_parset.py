@@ -122,6 +122,9 @@ class TABeam:
 		self.stationList=[]        # stations that form this beam, only used to FE now (?) to indicate one station
 		self.specificationType=""  # "flyseye" for FE, "manual" (or "ring"?) for coherent 
 		self.location=[]           # list of locus nodes with the data for this beam
+		self.rawfiles={}           # dictionary that keeps info about all raw files
+                                           # key - locus node, value - list of rawfiles on this node (with full path)
+                                           # self.location - is just a list of keys
 		self.nrSubbands = nrSubbands # duplicating number of subbands from parent SAP
 
 	        # getting info about the pointing (offsets from the SAP center)
@@ -179,12 +182,16 @@ class TABeam:
                 if len(root.nodeslist) > 1:
                         for s in root.nodeslist[1:]:
                                 cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
-                cmd="%s %s 'ls -1 /data/%s/%s_SAP%03d_B%03d_S*_bf.raw 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, root.id, root.id, sapid, self.tabid)
+                cmd="%s %s 'ls -1 %s/%s/%s_SAP%03d_B%03d_S*_bf.raw 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, sapid, self.tabid)
                 cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-                # finding all locus nodes that have the dir with raw data
-                for l in np.arange(len(cexec_output)):
-                        if re.match("^-----", cexec_output[l]) is None:
-                                self.location.append(cexec_output[l-1].split(" ")[1])
+		for l in range(len(cexec_output)):
+			if re.match("^-----", cexec_output[l]) is not None:
+				loc=cexec_output[l].split(" ")[1]
+			else:
+				if loc in self.rawfiles: self.rawfiles[loc].append(cexec_output[l])
+				else: self.rawfiles[loc]=[cexec_output[l]]	
+		# list of all nodes
+		self.location=self.rawfiles.keys()
 
 
 
@@ -276,11 +283,12 @@ class Observation:
 
 	# check if raw data are indeed exist in nodeslist from parset file
 	# if not, we call rawdata_search to update them
+	# rawdir - dir with raw data - /data
 	# alive_nodes - the complete list of alive locus nodes on CEP2
 	# cexec_nodes - the full dictionary of all CEP2 nodes, key - is the node name (e.g. locus014)
 	#    and value is how it's used with cexec (locus:13)
 	# cexeccmd - exact cexec command to use (cexec -f /etc/c3.conf.full)
-	def rawdata_check (self, alive_nodes, cexec_nodes, cexeccmd):
+	def rawdata_check (self, rawdir, alive_nodes, cexec_nodes, cexeccmd):
 		# getting the sizes only from the intersection of oi.nodeslist and storage_nodes
 		insecnodes=list(set(self.nodeslist).intersection(set(storage_nodes)))
 		is_ok = True  # if False, we will update nodeslist
@@ -290,7 +298,7 @@ class Observation:
 		if len(insecnodes) > 1:
 			for s in insecnodes[1:]:
 				cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-		cmd="%s %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, "/data/" + self.id)
+		cmd="%s %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, rawdir + "/" + self.id)
 		cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 		# see how many directories with raw data we have. Their number should be the same as number of insecnodes
 		dirlines=[line for line in cexec_output if re.match("^-----", line) is None]
@@ -300,14 +308,14 @@ class Observation:
 			self.rawdata_search(alive_nodes, cexec_nodes, cexeccmd)
 
 	# search for raw data in all alive locus nodes
-	def rawdata_search (self, alive_nodes, cexec_nodes, cexeccmd):
+	def rawdata_search (self, rawdir, alive_nodes, cexec_nodes, cexeccmd):
 		self.nodeslist=[]
 		# forming string with all locus nodes to check in one cexec command
 		cexeclocus=cexec_nodes[alive_nodes[0]] # there is always at least one alive locus node
 		if len(alive_nodes) > 1:
 			for s in alive_nodes[1:]:
 				cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-		cmd="%s %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, "/data/" + self.id)
+		cmd="%s %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, rawdir + "/" + self.id)
 		cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 		# finding all locus nodes that have the dir with raw data
 		for l in np.arange(len(cexec_output)):

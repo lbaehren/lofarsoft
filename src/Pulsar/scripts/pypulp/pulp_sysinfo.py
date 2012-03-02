@@ -31,13 +31,16 @@ class CEP2Info:
 		self.logfile = ""
 		# directory where all parset files live
 		self.parset_dir="/globalhome/lofarsystem/log"
+		# directory with raw data (can be changed by user from command line)
+		self.rawdir = "/data"
 		# prefix for default directory with processed data
 		self.processed_dir_prefix="/data/LOFAR_PULSAR_ARCHIVE"
 		# data directory prefix on hoover nodes
 		self.hoover_data_dir="/cep2"
 		# full list of nodes and its cexec corresponding table
 		self.locus_nodes=["locus%03d" % (num+1) for num in range(100)]
-		self.hoover_nodes=["locus101", "locus102"]
+		self.hoover_nodes=["locus101", "locus102"]   # first is used to process CS data (if files per beam distributed over many nodes)
+							     # second - to process IS data
 		self.cexec_nodes={}
 		for num in range(100): # we have 100 locus nodes
 			key="locus%03d" % (num+1)
@@ -67,7 +70,7 @@ class CEP2Info:
 	        if len(self.hoover_nodes) > 1:
         	        for s in self.hoover_nodes[1:]:
                 	        cexeclocus += ",%s" % (self.cexec_nodes[s].split(":")[1])
-	        cmd="%s %s date | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (self.cexeccmd, cexeclocus)
+	        cmd="%s %s date | grep -v xauth | grep -v connect | grep -v Permission | egrep -v \'\\*\\*\\*\\*\\*\'" % (self.cexeccmd, cexeclocus)
         	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 	        # finding all locus nodes that have the dir with raw data
         	for l in range(len(cexec_output)):
@@ -83,8 +86,9 @@ class CEP2Info:
 	def print_down_nodes(self, log=None):
 		all_nodes = self.cexec_nodes.keys()
 		self.down_nodes=list(set(all_nodes)-set(all_nodes).intersection(set(self.alive_nodes)))
-		if log != None: log.info("Nodes are down: %s" % (", ".join(self.down_nodes)))
-		else: print "Nodes are down: %s" % (", ".join(self.down_nodes))
+		msg="Nodes are down [%d]: %s" % (len(self.down_nodes), ", ".join(self.down_nodes))
+		if log != None: log.info(msg)
+		else: print msg
 
 	# return list of alive nodes
 	def get_alive_nodes(self):

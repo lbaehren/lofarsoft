@@ -29,7 +29,10 @@ class PulpLogger(object):
 
 	def addHandler(self, handler):
 		self.logger.addHandler(handler)
-		
+
+	def removeHandler(self, handler):
+		self.logger.removeHandler(handler)
+
 	def write(self, msg):
 		self.logger.log(self.log_level, msg)
 #		for line in msg.rstrip().splitlines():

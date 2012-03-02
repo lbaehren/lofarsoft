@@ -12,6 +12,7 @@ import time
 import cPickle
 import re
 import subprocess, shlex
+from subprocess import PIPE, STDOUT, Popen
 import logging
 from pulp_parset import Observation
 from pulp_usercmd import CMDLine
@@ -31,13 +32,23 @@ if __name__ == "__main__":
 	# creating name of the Logger
 	logger_name = "PULP"
 	logfile = cmdline.opts.obsid
-	if cmdline.opts.beam_str != "":
-		logger_name += cmdline.opts.beam_str 
-		### I should add checking if beam_str is given correctly
-		sapid = int(cmdline.opts.beam_str.split(":")[0])
-		tabid = int(cmdline.opts.beam_str.split(":")[1])
-		logfile = "%s_sap%03d_beam%04d" % (cmdline.opts.obsid, sapid, tabid)
-	logfile += "_pulp.log"
+	if cmdline.opts.is_local and cmdline.opts.beam_str != "":
+		if not cmdline.opts.is_summary:
+			logger_name += cmdline.opts.beam_str.split(",")[0] 
+			### I should add checking if beam_str is given correctly
+			sapid = int(cmdline.opts.beam_str.split(",")[0].split(":")[0])
+			tabid = int(cmdline.opts.beam_str.split(",")[0].split(":")[1])
+			logfile = "%s_sap%03d_beam%04d.log" % (cmdline.opts.obsid, sapid, tabid)
+		else:   # when --summary then name of the summary locus node should be given in --beams
+			# when run locally
+			logger_name += "_summary_%s" % (cmdline.opts.beam_str)
+			# in this case summary locus node is given in --beams option
+			logfile += "_summary_%s.log" % (cmdline.opts.beam_str)
+	else:
+		if cmdline.opts.is_summary:
+			logfile += "_summary.log"
+		else:
+			logfile += "_pulp.log"
 
 	# initializing the Logger
 	log = PulpLogger(logger_name)
@@ -51,7 +62,7 @@ if __name__ == "__main__":
 		cep2.set_logfile(logfile)
 
 		# adding file handler to our Logger
-		logfh = logging.FileHandler(cep2.get_logfile(), mode='%c' % (cmdline.opts.is_delete and 'w' or 'a'))
+		logfh = logging.FileHandler(cep2.get_logfile(), mode='%c' % ((cmdline.opts.is_delete or cmdline.opts.is_summary) and 'w' or 'a'))
 		log.addHandler(logfh)
 
 		# starting logging...
@@ -88,32 +99,54 @@ if __name__ == "__main__":
 			obsfd.close()
 
 		# if --beam option is not set, it means that we start the pipeline from main node
-		if cmdline.opts.beam_str == "":	
+		if not cmdline.opts.is_local:	
 			# initializing pulsar pipeline
-			psrpipe = Pipeline(obs, log)
+			psrpipe = Pipeline(obs, cep2, cmdline, log)
 			# saving pipeline config to file
                 	pipefd = open (pipeline_file, "wb")
                 	cPickle.dump(psrpipe, pipefd, True)
 			pipefd.close()
 			# kick off the pipeline
-			psrpipe.start(cep2, cmdline, log)
+			if not cmdline.opts.is_summary:
+				psrpipe.start(cep2, cmdline, log)
 			# wait for all childs to finish and prepare logs, all files in order
 			# convert, FE maps, etc.
-			psrpipe.finish(log)
+			psrpipe.finish(obs, cep2, cmdline, log)
 			# end of the pipeline...
 			end_pipe_time=time.time()
 			pipe_total_time = end_pipe_time - start_pipe_time
 			log.info("Finished")
 			log.info("UTC time is:  %s" % (time.asctime(time.gmtime())))
 			log.info("Total wall time:  %.1f s (%.2f hrs)" % (pipe_total_time, pipe_total_time/3600.))
+
+	                # flushing log file and copy it to summary nodes
+			log.flush()
+			for (sumnode, sumdir) in psrpipe.summary_dirs.items():
+				cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), sumnode, sumdir)
+                        	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+                        	proc.communicate()
 		else:
 			# loading pipeline config from the file
 			pipefd = open(pipeline_file, "rb")
 			psrpipe=cPickle.load(pipefd)
 			pipefd.close()
-			# running processing for particular beam
-			for unit in psrpipe.units:
-				if unit.sapid == sapid and unit.tabid == tabid:
-					unit.run(obs, cep2, cmdline, log)
+			if not cmdline.opts.is_summary:
+				# running processing for particular beam
+				for unit in psrpipe.units:
+					if unit.sapid == sapid and unit.tabid == tabid:
+						unit.run(obs, cep2, cmdline, log)
+			else:   # running local pulp to make summary actions
+				psrpipe.make_summary(obs, cep2, cmdline, log)
+
 	except Exception:
 		log.exception("Oops... pulp has crashed!")
+		sys.exit(1)
+
+	log.flush()
+	logfh.close()
+	log.removeHandler(logfh)
+	# removing log file from ~/.pulp/obsid dir if it is for pulp on local node
+	if cmdline.opts.is_local:
+		cmd="rm -rf %s" % (cep2.get_logfile())
+		os.system(cmd)
+	logging.shutdown()
