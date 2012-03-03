@@ -423,7 +423,7 @@ class PipeUnit:
 			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, self.process.returncode))
 			sys.exit(1)
 
-	def waiting(self, prg, popen, job_start):
+	def waiting(self, prg, popen):
 		"""
 		Waiting for process to finish
 		"""
@@ -561,16 +561,14 @@ class PipeUnit:
 					zapstr="-zapchan 0:%d:%d" % (total_chan-1, self.nrChanPerSub)
 				self.log.info("Creating RFI mask...")
 				cmd="rfifind -o %s -psrfits -noclip -blocks 16 %s %s.fits" % (self.output_prefix, zapstr, self.output_prefix)
-				rfifind_start_time = time.time()
 				rfifind_popen = self.start_and_go(cmd, workdir=self.curdir)
 				self.log.info("Producing RFI report...")
 				samples_to_average=int(10000. / self.sampling) # 10 s worth of data
 				cmd="python %s/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n %d %s.fits" % (cep2.lofarsoft, samples_to_average, self.output_prefix)
-				subdyn_start_time = time.time()
 				subdyn_popen = self.start_and_go(cmd, workdir=self.curdir)
 
 				# waiting for rfifind to finish
-				self.waiting("rfifind", rfifind_popen, rfifind_start_time)
+				self.waiting("rfifind", rfifind_popen)
 
 			# running prepfold with and without mask
 			if total_chan >= 256 and total_chan <= 6000:
@@ -693,7 +691,7 @@ class PipeUnit:
 				self.execute(cmd, workdir=self.outdir)
 
 			# waiting for subdyn to finish
-			self.waiting("subdyn.py", subdyn_popen, subdyn_start_time)
+			self.waiting("subdyn.py", subdyn_popen)
 
 			# waiting for pdmp to finish
 			if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
