@@ -1,3 +1,10 @@
+2012-03-03
+==========
+
+  :Author: Pim Schellart <P.Schellart@astro.ru.nl>
+
+ - Added :func:`hFFTWResample` to quickly and easily (up/down)sample a (periodic) signal.
+
 2012-02-13
 ==========
 
