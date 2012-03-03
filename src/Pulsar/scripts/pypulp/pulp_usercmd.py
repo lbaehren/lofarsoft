@@ -110,35 +110,40 @@ class CMDLine:
 			else: print msg
 			sys.exit(1)
 
-		# checking if given psr(s) names are valid, and these pulsars are in the catalog
-		if self.opts.psr == "position":
-			pass  #  I should add a proper action when "position" is given
-		# if NONE is given for pulsar together wiht other pulsar names, then NONE is ignored
-                self.psrs=[psr for psr in self.opts.psr.split(",") if psr != "NONE"]
-		self.psrs=list(np.unique(self.psrs))
-		if len(self.psrs) > 3:
-			msg="%d pulsars are given, but only first 3 will be used for folding" % (len(self.psrs))
-			if log != None: log.warning(msg)
-			else: print msg
-			self.psrs=self.psrs[:3]
-		# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
-		psrbs, psrjs = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,2), dtype=str, unpack=True)
-		for psr in self.psrs:
-			if psr not in psrbs and psr not in psrjs:
-				msg="Pulsar %s is not in the catalog: '%s'! Exiting." % (psr, cep2.psrcatalog)
-				if log != None: log.error(msg)
-				else: print msg
-				sys.exit(1)
+		# NONE is ignored as pulsar name
+		if self.opts.psr != "":
+       	        	self.psrs=[psr for psr in self.opts.psr.split(",") if psr != "NONE"]
+			self.psrs=list(np.unique(self.psrs))
+
 		# checking --nofold and pulsar list
 		if not self.opts.is_nofold and len(self.psrs) == 0:
-			msg="Warning: Pulsar is not specified and PULP will not do any folding"
+			msg="***\n*** Warning: Pulsar is not specified and PULP will not do any folding!\n***"
 			if log != None: log.warning(msg)
 			else: print msg
 		# if --nofold switch is used then we are not folding and empty pulsar list
 		if self.opts.is_nofold:
 			self.psrs=[]
 		if len(self.psrs) == 0: self.opts.is_nofold = True
-			
+
+		if not self.opts.is_nofold:
+			# checking if given psr(s) names are valid, and these pulsars are in the catalog
+			if self.opts.psr == "position":
+				pass  #  I should add a proper action when "position" is given
+			if len(self.psrs) > 3:
+				msg="%d pulsars are given, but only first 3 will be used for folding" % (len(self.psrs))
+				if log != None: log.warning(msg)
+				else: print msg
+				self.psrs=self.psrs[:3]
+
+			# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
+			psrbs, psrjs = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,2), dtype=str, unpack=True)
+			for psr in self.psrs:
+				if psr not in psrbs and psr not in psrjs:
+					msg="Pulsar %s is not in the catalog: '%s'! Exiting." % (psr, cep2.psrcatalog)
+					if log != None: log.error(msg)
+					else: print msg
+					sys.exit(1)
+
 
 	# print summary of all set input parameters
 	def print_summary(self, cep2, log=None):
@@ -154,12 +159,11 @@ class CMDLine:
 			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
 			log.info("Summaries ONLY = %s" % (self.opts.is_summary and "yes" or "no"))
 			log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
-			log.info("pdmp = %s" % (self.opts.is_nopdmp and "no" or "yes"))
+			log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
 			log.info("IS Only = %s" % (self.opts.is_incoh_only and "yes" or "no"))
 			log.info("CS Only = %s" % (self.opts.is_coh_only and "yes" or "no"))
 #			log.info("          REDO OF INCOHERENTSTOKES PROCESSING = %s" % (self.opts.is_incoh_redo and "yes" or "no"))
 #			log.info("            REDO OF COHERENTSTOKES PROCESSING = %s" % (self.opts.is_coh_redo and "yes" or "no"))
-#			log.info("                      TURN OF FOLDING OF DATA = %s" % (self.opts.is_nofold and "yes" or "no"))
 			if self.opts.rawdir != "":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
