@@ -428,6 +428,7 @@ class PipeUnit:
 		Waiting for process to finish
 		"""
 		try:
+			job_start = time.time()
 			self.log.info("Waiting for %s to finish, pid=%d" % (prg, popen.pid))
 			(sout, serr) = popen.communicate()
 			# we pipe serr to sout, so no need to log serr
@@ -435,7 +436,7 @@ class PipeUnit:
 			self.log.info(sout)
 			job_end = time.time()
 			job_total_time = job_end - job_start
-			self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Total runnung time: %.1f s (%.2f hrs)" % \
+			self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Waiting time: %.1f s (%.2f hrs)" % \
 				(popen.pid, prg, time.asctime(time.gmtime()), popen.returncode, job_total_time, job_total_time/3600.))
 			self.log.info("")
 			# if job is not successful
@@ -450,6 +451,7 @@ class PipeUnit:
 		Waiting for list of processes to finish
 		"""
 		try:
+			job_start = time.time()
 			self.log.info("Waiting for %s processes to finish..." % (prg))
 			run_units = [u.pid for u in popen_list if u.poll() is None]
 			self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
@@ -461,6 +463,11 @@ class PipeUnit:
 					if fu.poll() != 0:
 						raise Exception
 				if len(run_units) > 0: self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
+			job_end = time.time()
+			job_total_time = job_end - job_start
+			self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % \
+				(prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
+			self.log.info("")
 		except Exception:
 			fu = [u for u in popen_list if u.poll() is not None][0]
 			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
