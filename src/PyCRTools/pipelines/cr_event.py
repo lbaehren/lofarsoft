@@ -881,6 +881,10 @@ for full_filename in files:
             amplitudes.fill(0.)
         fft_data[...].randomizephase(applybaseline.dirty_channels[...,[0]:applybaseline.ndirty_channels.vec()],amplitudes[...])
 
+        results.update(dict(
+            dirty_channels=list(set(applybaseline.dirty_channels.vec()))
+            ))
+
         ########################################################################
         #Gain calibration of data
         ########################################################################
