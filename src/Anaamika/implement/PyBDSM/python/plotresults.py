@@ -639,21 +639,21 @@ def format_coord_psf_maj(x, y):
     """Custom coordinate format for PSF major image"""
     global img_psf_maj
     im = img_psf_maj
-    coord_str = make_coord_str(x, y, im)
+    coord_str = make_coord_str(x, y, im, unit='pixels')
     return coord_str
 
 def format_coord_psf_min(x, y):
     """Custom coordinate format for PSF minor image"""
     global img_psf_min
     im = img_psf_min
-    coord_str = make_coord_str(x, y, im)
+    coord_str = make_coord_str(x, y, im, unit='pixels')
     return coord_str
 
 def format_coord_psf_pa(x, y):
     """Custom coordinate format for PSF pos. ang. image"""
     global img_psf_pa
     im = img_psf_pa
-    coord_str = make_coord_str(x, y, im)
+    coord_str = make_coord_str(x, y, im, unit='degrees')
     return coord_str
     
 def xy_to_radec_str(x, y):
@@ -670,7 +670,7 @@ def xy_to_radec_str(x, y):
     return sra, sdec
 
 
-def make_coord_str(x, y, im):
+def make_coord_str(x, y, im, unit='Jy/beam'):
     """Makes the x, y, ra, dec, flux string"""
     rastr, decstr = xy_to_radec_str(x, y)
     col = int(x + 0.5)
@@ -679,7 +679,7 @@ def make_coord_str(x, y, im):
     if col >= 0 and col < numcols\
             and row >= 0 and row < numrows:
         z = im[col, row]
-        return 'x=%1.1f, y=%1.1f, RA=%s, Dec=%s, F=%+1.4f Jy/beam' % (x, y, rastr, decstr, z)
+        return 'x=%1.1f, y=%1.1f, RA=%s, Dec=%s, F=%+1.4f %s' % (x, y, rastr, decstr, z, unit)
     else:
         return 'x=%1.1f, y=%1.1f' % (x, y)
 

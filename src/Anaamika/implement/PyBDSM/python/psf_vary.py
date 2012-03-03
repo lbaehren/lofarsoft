@@ -98,7 +98,7 @@ class Op_psf_vary(Op):
             mylog.warning('Insufficient number of generators')
             return
 
-        mylogger.userinfo(mylog, '\nTesselating image')
+        mylogger.userinfo(mylog, 'Tesselating image')
         # group generators into tiles
         tile_prop = self.edit_vorogenlist(vorogenP, frac=0.9)
 
@@ -765,10 +765,15 @@ class Op_psf_vary(Op):
             shift=cc-(gcen_ind-(rc-cs2))
             cutimage = image[rc[0]-cs2:rc[0]+cs2,rc[1]-cs2:rc[1]+cs2]
             if len(cutimage.shape) == 3: cutimage=cutimage[:,:,0]
-            if sum(sum(N.isnan(cutimage))) == 0:
-              im_shift = func.imageshift(cutimage, shift)
-              im_shift = im_shift/peak[isrc]*wts[isrc]
-              psfimage += im_shift[cc[0]-cpsf[0]:cc[0]-cpsf[0]+psfimsize,cc[1]-cpsf[1]:cc[1]-cpsf[1]+psfimsize]
+            if 0 not in cutimage.shape:
+                if sum(sum(N.isnan(cutimage))) == 0:
+                  im_shift = func.imageshift(cutimage, shift)
+                  im_shift = im_shift/peak[isrc]*wts[isrc]
+                  subim_shift = im_shift[cc[0]-cpsf[0]:cc[0]-cpsf[0]+psfimsize,cc[1]-cpsf[1]:cc[1]-cpsf[1]+psfimsize]
+                  if subim_shift.shape == psfimage.shape:
+                    # Check shapes, as they can differ if source is near edge of image.
+                    # If they do differ, don't use that source (may be distorted).
+                    psfimage += subim_shift
         psfimage = psfimage/wt
     
         return psfimage
