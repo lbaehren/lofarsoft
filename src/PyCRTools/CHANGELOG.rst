@@ -1,3 +1,10 @@
+2012-03-05
+==========
+
+  :Author: Pim Schellart <P.Schellart@astro.ru.nl>
+
+ - Added PulseEnvelope task to calculate pulse envelope using Hilbert transform and find delays between maxima thereof.
+
 2012-03-03
 ==========
 
