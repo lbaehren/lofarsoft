@@ -7,6 +7,7 @@ import numpy as np
 from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 import logging
+import time
 
 class CMDLine:
 	# parsing a command line
@@ -80,7 +81,11 @@ class CMDLine:
 #			os.system("cat %s" % (pulp_file_help))
 #			sys.exit(0)
 
-
+	# prints countdown (only to terminal)
+	def press_controlc(self, fr, cur):
+		msg="\bPress Control-C to stop in: %s" % (" ".join(str(i) for i in range(fr, cur-1, -1)))
+		print "\b" * int("%d" % (29 + 2*(fr-cur))), msg,
+		sys.stdout.flush()
 
 	# checks if given arguments are OK and not mutually exclusive, etc.
 	def check_options(self, cep2, log=None):
@@ -120,6 +125,13 @@ class CMDLine:
 			msg="***\n*** Warning: Pulsar is not specified and PULP will not do any folding!\n***"
 			if log != None: log.warning(msg)
 			else: print msg
+			secs_to_wait = 10
+			msg="Waiting %d seconds before starting..." % (secs_to_wait)
+			if log != None: log.info(msg)
+			else: print msg
+			for sec in range(secs_to_wait, 0, -1):
+				self.press_controlc(secs_to_wait, sec)
+				time.sleep(1)
 		# if --nofold switch is used then we are not folding and empty pulsar list
 		if self.opts.is_nofold:
 			self.psrs=[]

@@ -241,14 +241,6 @@ class Observation:
 			else: print msg
 			sys.exit(1)
 
-		# checking if raw data is located on one of the down nodes
-		# if so, then terminate the pipeline
-		no_nodes = self.is_rawdata_available(si)
-		if len(no_nodes) > 0:
-			msg="Data are not available on these nodes: %s\nExiting." % (", ".join(no_nodes))
-			if log != None: log.error(msg)
-			else: print msg
-			sys.exit(1)
 
 	# return True if parset file was found, and False otherwise
 	def is_parset (self):
@@ -261,7 +253,7 @@ class Observation:
 
 	# checking if raw data is located on one of the down nodes	
 	# returns list of unavailable nodes
-	def is_rawdata_available(self, si):
+	def is_rawdata_available(self, si, log=None):
 		# first will check if nodes in nodeslist are all alive
 		no_nodes=list(set(self.nodeslist)-set(self.nodeslist).intersection(set(si.alive_nodes)))
 		# now checking if there are TABs that have raw data in several locations
@@ -269,16 +261,20 @@ class Observation:
 		# and we need to check if hoover nodes are up
 		avail_hoover_nodes=list(set(si.hoover_nodes).intersection(set(si.alive_nodes)))
 		# all hoover nodes are up, so no need to check each TAB
-		if len(avail_hoover_nodes) == len(si.hoover_nodes): return no_nodes
-		for sap in self.saps:
-			for tab in sap.tabs:
-				# only interested in beams with >1 locations
-				if len(tab.location) > 1:
-					# if beam is coherent and locus101 is unavailable
-					if tab.is_coherent and "locus101" not in avail_hoover_nodes: no_nodes.append("locus101")
-					if not tab.is_coherent and "locus102" not in avail_hoover_nodes: no_nodes.append("locus102")
-		no_nodes=np.unique(no_nodes)
-		return no_nodes
+		if len(avail_hoover_nodes) != len(si.hoover_nodes):
+			for sap in self.saps:
+				for tab in sap.tabs:
+					# only interested in beams with >1 locations
+					if len(tab.location) > 1:
+						# if beam is coherent and locus101 is unavailable
+						if tab.is_coherent and "locus101" not in avail_hoover_nodes: no_nodes.append("locus101")
+						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: no_nodes.append("locus102")
+			no_nodes=np.unique(no_nodes)
+		if len(no_nodes) > 0:
+			msg="Data are not available on these nodes: %s\nExiting." % (", ".join(no_nodes))
+			if log != None: log.error(msg)
+			else: print msg
+			sys.exit(1)
 		
 
 	# check if raw data are indeed exist in nodeslist from parset file
@@ -353,6 +349,7 @@ class Observation:
 			c1 = time.strptime(self.startdate, "%Y-%m-%d %H:%M:%S")
 			c2 = time.strptime(stoptime, "%Y-%m-%d %H:%M:%S")
 			self.duration=time.mktime(c2)-time.mktime(c1)  # difference in seconds
+			self.startdate  = self.startdate.split(" ")[0]
 		
 		# Getting the Antenna info (HBA or LBA)
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
@@ -593,4 +590,46 @@ class Observation:
 		for sid in np.arange(self.nrBeams):
 			sap=SAPBeam(sid, self.parset, si, self)
 			self.saps.append(sap)
-		
+
+	# prints info about the observation
+	def print_info(self, log=None):
+		"""
+		prints info about the observation
+		"""
+		if log != None:
+			log.info("\n==============================================================")
+			log.info("ObsID: %s" % (self.id))	
+			log.info("Parset: %s" % (self.parset))
+			log.info("Start UTC: %s %s  Duration: %s" % \
+				(self.startdate, self.starttime, self.duration>=3600. and "%.1fh" % \
+				(float(self.duration/3600.)) or "%.1fm" % (float(self.duration/60.))))
+			mode=""
+			if self.FE: mode+="FE "
+			if self.IM: mode+="Im "
+			if self.IS: mode+="IS "
+			if self.CS: mode+="CS "
+			if self.CV: mode+="CV "
+			log.info("%s   Band: %s   Mode: %s   OCD: %s   Stokes: %s" % (self.antenna_config, self.band, mode, self.OCD and "yes" or "no", self.stokes))
+			log.info("#stations: %d [%dCS, %dRS]" % (self.nstations, self.ncorestations, self.nremotestations))
+			log.info("Clock: %d MHz   Fc: %g MHz   BW: %g MHz" % (self.sampleClock, self.cfreq, self.bw))
+			log.info("#subbands: %d [%s]   SubWidth: %g kHz" % (self.nrSubbands, self.subbandList, self.subbandWidth))
+			if self.nrChanPerSubIS == self.nrChanPerSubCS or self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
+				nchanspersub = (self.nrChanPerSubIS != 0 and str(self.nrChanPerSubIS) or str(self.nrChanPerSubCS))
+			else: nchanspersub = "%d (IS), %d (CS)" % (self.nrChanPerSubIS, self.nrChanPerSubCS)
+			if self.downsample_factorIS == self.downsample_factorCS or self.downsample_factorIS == 0 or self.downsample_factorCS == 0:
+				dfactor = (self.downsample_factorIS != 0 and str(self.downsample_factorIS) or str(self.downsample_factorCS))
+			else: dfactor = "%d (IS), %d (CS)" % (self.downsample_factorIS, self.downsample_factorCS)
+			if self.samplingIS == self.samplingCS or self.samplingIS == 0.0 or self.samplingCS == 0.0:
+				sampling = (self.samplingIS != 0.0 and str(self.samplingIS) or str(self.samplingCS)) + " ms"
+			else: sampling = "%g ms (IS), %g ms (CS)" % (self.samplingIS, self.samplingCS)
+			log.info("#chans/sub: %s   Downsample Factor: %s" % (nchanspersub, dfactor))
+			log.info("Sampling: %s" % (sampling))
+			if self.nrBeams > 1:
+				log.info("#SAPs: %d" % (self.nrBeams))
+				for sap in self.saps:
+					log.info("%d Target: %s   #TABs: %d%s" % (sap.sapid, sap.source, sap.nrTiedArrayBeams, \
+						sap.nrRings > 0 and " #Rings: %d RingSize: %g deg" % (sap.nrRings, sap.ringSize) or ""))
+			else:
+				log.info("#SAPs: %d   Target: %s   #TABs: %d%s" % (self.nrBeams, self.saps[0].source, self.saps[0].nrTiedArrayBeams, \
+					self.saps[0].nrRings > 0 and " #Rings: %d RingSize: %g deg" % (self.saps[0].nrRings, self.saps[0].ringSize) or ""))
+			log.info("==============================================================")

@@ -69,34 +69,41 @@ if __name__ == "__main__":
 		start_pipe_time=time.time()
 		log.info("UTC time is:  %s" % (time.asctime(time.gmtime())))
 
+		obsconf_file = cep2.get_logdir() + "/" + "obs.b"
+		pipeline_file = cep2.get_logdir() + "/" + "pipeline.b"
+
 		# checking validity of the options
 		cmdline.check_options(cep2, log)
-		if cmdline.opts.beam_str == "": cmdline.print_summary(cep2, log)
+
+		if not cmdline.opts.is_noinit:
+			# initializing our Observation, collecting info from parset, etc.
+			obs = Observation(cmdline.opts.obsid, cep2, log)
+		else:
+			# loading obs setup from the file
+			obsfd = open(obsconf_file, "rb")
+			obs=cPickle.load(obsfd)
+			obsfd.close()
+
+		# printing info about observation
+		obs.print_info(log)
+
+		if not cmdline.opts.is_local: cmdline.print_summary(cep2, log)
 
 		# printing info both to STDOUT and logfile
 		cep2.print_info(log)
-
-		obsconf_file = cep2.get_logdir() + "/" + "obs.b"
-		pipeline_file = cep2.get_logdir() + "/" + "pipeline.b"
 
 		if not cmdline.opts.is_noinit:
 			# checking connections to locus nodes
 			cep2.check_connection(log)
 			# print down nodes
 			cep2.print_down_nodes(log)
-
-			# initializing our Observation, collecting info from parset, etc.
-			obs = Observation(cmdline.opts.obsid, cep2, log)
+			# checking if rawdata available on the cluster
+			obs.is_rawdata_available(cep2, log)
 
 			# saving obs configuration to file
                 	obsfd = open (obsconf_file, "wb")
 	                cPickle.dump(obs, obsfd, True)  # when False, the dumpfile is ascii
         	        obsfd.close()
-		else:
-			# loading obs setup from the file
-			obsfd = open(obsconf_file, "rb")
-			obs=cPickle.load(obsfd)
-			obsfd.close()
 
 		# if --beam option is not set, it means that we start the pipeline from main node
 		if not cmdline.opts.is_local:	
