@@ -458,14 +458,14 @@ class CRDatabase(object):
         if self.db:
             # Number of filter groups
             sql = "SELECT COUNT(DISTINCT name) FROM main.filters"
-            result = self.db.select(sql)
-            n_filtergroups = result[0][0]
+            records = self.db.select(sql)
+            n_filtergroups = records[0][0]
             print "  %-40s : %d" %("Nr. of filter groups", n_filtergroups)
 
             # Number of filters
             sql = "SELECT COUNT(name) FROM main.filters"
-            result = self.db.select(sql)
-            n_filters = result[0][0]
+            records = self.db.select(sql)
+            n_filters = records[0][0]
             print "  %-40s : %d" %("Nr. of filters", n_filters)
 
         print "="*linewidth
@@ -473,7 +473,14 @@ class CRDatabase(object):
 
 
 class Settings(object):
-    """Global settings of the CR database."""
+    """Global settings of the CR database.
+
+    This container class contains the following settings from the database:
+
+    * *datapath*: basepath from which the datafiles can be found.
+    * *resultspath*: basepath from which the results can be found.
+
+    """
 
     def __init__(self, db=None):
         """Initialisation of the settings.
@@ -572,7 +579,16 @@ class Settings(object):
 
 
 class Event(object):
-    """CR event information."""
+    """CR event information.
+
+    This object contains the following information of an event:
+
+    * *timestamp*:  the timestamp of the event in UTC stored as the number of seconds after 1 January 1970.
+    * *status*: the status of the event.
+    * *datafiles*: a list of datafile information objects (:class:`Datafile`) associated with this event.
+    * *parameter*: a dictionary of optional parameters with additional information for this specific event.
+
+    """
 
     def __init__(self, db=None, id=0):
         """Initialisation of the Event object.
@@ -851,7 +867,15 @@ class Event(object):
 
 
 class Datafile(object):
-    """CR datafile information."""
+    """CR datafile information.
+
+    This object contains the following information of a datafile:
+
+    * *filename*: the filename of the datafile.
+    * *status*: the status of the datafile.
+    * *stations*: a list of station information objects (:class:`Station`) that are stored in the datafile.
+
+    """
 
     def __init__(self, db=None, id=0):
         """Initialisation of Datafile object.
@@ -1104,7 +1128,15 @@ class Datafile(object):
 
 
 class Station(object):
-    """CR station information"""
+    """CR station information.
+
+    This object contains the following information of a station:
+
+    * *stationname*: the name of the station, e.g. CS001, RS203.
+    * *status*: the status of the station.
+    * *polarisations*: a list of polarisation information objects (:class:`Polarisation`) stored in this station.
+
+    """
 
     def __init__(self, db=None, id=0):
         """Initialisation of Station object.
@@ -1351,7 +1383,17 @@ class Station(object):
 
 
 class Polarisation(object):
-    """CR polarisation information."""
+    """CR polarisation information.
+
+    This object contains the following information of a polarisation:
+
+    * *antennaset*: the name of the antennaset (e.g. `LBA_OUTER`, `LBA_INNER`, etc.).
+    * *direction*: the direction of the polarisation component.
+    * *status*: the status of the polarisation.
+    * *resultsfile*: the name of the resultsfile, where all the results from the pipeline are stored.
+    * *parameter*: a dictionary of optional parameters. This contains also resulting information from the pipeline.
+
+    """
 
     def __init__(self, db=None, id=0):
         """Initialisation of the Polarisation object.
