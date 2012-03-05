@@ -114,8 +114,6 @@ def gatherresults(eventdir, antennaSet):
                 oddID = oddID[0]
                 y[thisRCU / 2] = thisEventsArrivalTimes[oddID] - thisEventsArrivalTimes[id]
         
-        print x
-        print y
         y = np.array(y) * 1.0e9
         plt.figure()
         plt.scatter(x, y, label = 'time differences')
@@ -124,7 +122,7 @@ def gatherresults(eventdir, antennaSet):
         plt.title('Time difference between odd and even polarization per antenna\nStation '+thisStationName)
         plt.legend(loc='best')
                         
-eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110716T094509.665Z'
+eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20111228T200122.223Z'
 antennaset = 'LBA_OUTER'
 gatherresults(eventdir, antennaset)
 
