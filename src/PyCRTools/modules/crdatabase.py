@@ -78,8 +78,16 @@ class CRDatabase(object):
             sql = "CREATE TABLE IF NOT EXISTS main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT)"
             self.db.execute(sql)
 
+            # Datafile parameters table
+            sql = "CREATE TABLE IF NOT EXISTS main.datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT)"
+            self.db.execute(sql)
+
             # Stations table
             sql = "CREATE TABLE IF NOT EXISTS main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT)"
+            self.db.execute(sql)
+
+            # Station parameters table
+            sql = "CREATE TABLE IF NOT EXISTS main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT)"
             self.db.execute(sql)
 
             # Polarisations table
@@ -136,7 +144,9 @@ class CRDatabase(object):
             self.db.execute("DROP TABLE IF EXISTS main.events")
             self.db.execute("DROP TABLE IF EXISTS main.eventparameters")
             self.db.execute("DROP TABLE IF EXISTS main.datafiles")
+            self.db.execute("DROP TABLE IF EXISTS main.datafileparameters")
             self.db.execute("DROP TABLE IF EXISTS main.stations")
+            self.db.execute("DROP TABLE IF EXISTS main.stationparameters")
             self.db.execute("DROP TABLE IF EXISTS main.polarisations")
             self.db.execute("DROP TABLE IF EXISTS main.polarisationparameters")
             self.db.execute("DROP TABLE IF EXISTS main.event_datafile")
@@ -851,13 +861,13 @@ class Event(object):
         # Datafiles
         n_datafiles = len(self.datafiles)
         print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
-        if n_datafiles > 0:
+        if self.datafiles:
             print "  Datafiles:"
             for datafile in self.datafiles:
                 print "    %-6d - %s" %(datafile.id, datafile.filename)
 
         # Parameters
-        if len(self.parameter) > 0:
+        if self.parameter:
             print "  Parameters:"
             for key in self.parameter.keys():
                 print "    %-38s : %s" %(key, self.parameter[key])
@@ -895,6 +905,7 @@ class Datafile(object):
         self.filename = ""
         self.status = "NEW"
         self.stations = []
+        self.parameter = {}
 
         self.settings = Settings(db)
 
@@ -933,6 +944,11 @@ class Datafile(object):
                     station.datafile = self
                     self.stations.append(station)
 
+                # TEST: Datafile.read() - Reading parameters
+                sql = "SELECT key, value FROM main.datafileparameters WHERE datafileID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    self.parameter[str(record[0])] = _load_parameter(record[1])
             else:
                 print "WARNING: This datafile (id={0}) is not available in the database.".format(self._id)
         else:
@@ -979,6 +995,25 @@ class Datafile(object):
                 if 0 == result:
                     sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
                     self._db.insert(sql)
+
+            # Write parameter information
+            sql = "SELECT key FROM main.datafileparameters WHERE datafileID={0}".format(self._id)
+            db_keys = [record[0] for record in self._db.select(sql)]
+            py_keys = [key for key in self.parameter]
+
+            # - Insert/update parameters
+            for key in py_keys:
+                if key in db_keys:
+                    sql = "UPDATE main.datafileparameters SET value='{2}' WHERE datafileID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.parameter[key]))
+                else:
+                    sql = "INSERT INTO main.datafileparameters (datafileID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.parameter[key]))
+                self._db.execute(sql)
+
+            # - delete unused parameters
+            for key in db_keys:
+                if not key in py_keys:
+                    sql = "DELETE FROM main.datafileparameters WHERE datafileID={0} AND key='{1}'".format(self._id, str(key))
+                    self._db.execute(sql)
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1118,10 +1153,16 @@ class Datafile(object):
         # Stations
         n_stations = len(self.stations)
         print "  %-40s : %d" %("Number of stations", n_stations)
-        if n_stations > 0:
+        if self.stations:
             print "  Stations:"
             for station in self.stations:
                 print "  %-6d - %s" %(station.id, station.stationname)
+
+        # Parameters
+        if self.parameter:
+            print "  Parameters:"
+            for key in self.parameter.keys():
+                print "    %-38s : %s" %(key, self.parameter[key])
 
         print "="*linewidth
 
@@ -1156,6 +1197,7 @@ class Station(object):
         self.stationname = ""
         self.status = "NEW"
         self.polarisations = []
+        self.parameter = {}
 
         self.settings = Settings(db)
 
@@ -1192,6 +1234,12 @@ class Station(object):
                     polarisation = Polarisation(self._db, id=polarisationID)
                     polarisation.station = self
                     self.polarisations.append(polarisation)
+
+                # TEST: Station.read() - Read parameter information
+                sql = "SELECT key, value FROM main.stationparameters WHERE stationID={0}".format(self._id)
+                records = self._db.select(sql)
+                for record in records:
+                    self.parameter[str(record[0])] = _load_parameter(record[1])
 
             else:
                 print "WARNING: This station (id={0}) is not available in the database.".format(self._id)
@@ -1233,6 +1281,25 @@ class Station(object):
                 if 0 == result:
                     sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
                     self._db.insert(sql)
+
+            # Write parameter information
+            sql = "SELECT key FROM main.stationparameters WHERE stationID={0}".format(self._id)
+            db_keys = [record[0] for record in self._db.select(sql)]
+            py_keys = [key for key in self.parameter]
+
+            # - Insert/update parameters
+            for key in py_keys:
+                if key in db_keys:
+                    sql = "UPDATE main.stationparameters SET value='{2}' WHERE stationID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.parameter[key]))
+                else:
+                    sql = "INSERT INTO main.stationparameters (stationID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.parameter[key]))
+                self._db.execute(sql)
+
+            # - delete unused parameters
+            for key in db_keys:
+                if not key in py_keys:
+                    sql = "DELETE FROM main.stationparameters WHERE stationID={0} AND key='{1}'".format(self._id, str(key))
+                    self._db.execute(sql)
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1372,11 +1439,17 @@ class Station(object):
         # Polarisations
         n_polarisations = len(self.polarisations)
         print "  %-40s : %d" %("Nr. of polarisations",n_polarisations)
-        if n_polarisations > 0:
+        if self.polarisations:
             print "Polarisations:"
             for polarisation in self.polarisations:
                 print "  %-6d - %s" %(polarisation.id, polarisation.resultsfile)
             pass
+
+        # Parameters
+        if self.parameter:
+            print "  Parameters:"
+            for key in self.parameter.keys():
+                print "    %-38s : %s" %(key, self.parameter[key])
 
         print "="*linewidth
 
@@ -1539,7 +1612,7 @@ class Polarisation(object):
         print "  %-40s : %s" %("Results file", self.resultsfile)
 
         # Parameters
-        if len(self.parameter) > 0:
+        if self.parameter:
             print "  Parameters:"
             for key in self.parameter.keys():
                 print "    %-38s : %s" %(key, self.parameter[key])
