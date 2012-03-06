@@ -12,6 +12,8 @@ class AntennaResponse(Task):
     """
 
     parameters = dict(
+        direction = dict( default = (0, 0),
+            doc = "Direction in degrees." ),
     )
 
     def run(self):
