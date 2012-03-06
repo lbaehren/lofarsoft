@@ -10,7 +10,7 @@ import cPickle
 import logging
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
-from pulp_parset import Observation
+from pulp_parset import Observation, radial_distance, find_pulsars
 from pulp_usercmd import CMDLine
 from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
@@ -46,20 +46,20 @@ class Pipeline:
 		for sap in obs.saps:
 			for tab in sap.tabs:
 				if not tab.is_coherent:
-					unit = ISUnit(obs, cep2, tab)
+					unit = ISUnit(obs, cep2, cmdline, tab, log)
 				if tab.is_coherent and tab.specificationType != "flyseye":
 					if obs.CS:
-						unit = CSUnit(obs, cep2, tab)
+						unit = CSUnit(obs, cep2, cmdline, tab, log)
 					elif obs.CV:
-						unit = CVUnit(obs, cep2, tab)
+						unit = CVUnit(obs, cep2, cmdline, tab, log)
 					else:
 						log.error("Can't initialize processing pipeline unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
 						sys.exit(1)
 				if tab.is_coherent and tab.specificationType == "flyseye":
 					if obs.CS:
-						unit = FE_CSUnit(obs, cep2, tab)
+						unit = FE_CSUnit(obs, cep2, cmdline, tab, log)
 					elif obs.CV:
-						unit = FE_CVUnit(obs, cep2, tab)
+						unit = FE_CVUnit(obs, cep2, cmdline, tab, log)
 					else:
 						log.error("Can't initialize processing pipeline FE unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
 						sys.exit(1)
@@ -267,11 +267,18 @@ class Pipeline:
               	        bpnf.close()
 
 			# creating TA heatmaps 
-			if data_code == "CS" and not cmdline.opts.is_nofold:
+			# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' keywords are used (or
+			# nothing is given for --pulsar option
+			# otherwise, different TA beams will be folded for different pulsars, and TA heatmap does not have sense
+			if data_code == "CS" and not cmdline.opts.is_nofold and (len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] != "tabfind")):
 				for sap in obs.saps:
 					if sap.nrRings > 0:
+						if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
+							psrs = cmdline.psrs # getting list of pulsars from command line
+						else: # getting list of pulsars from SAP
+							psrs = sap.psrs
 						log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
-						for psr in cmdline.psrs:
+						for psr in psrs:
 							log.info(psr)
 							cmd="cat %s/chi-squared.txt | grep _SAP%d | grep %s > %s/%s-chi-squared.txt" % (sumdir, sap.sapid, psr, sumdir, psr)
 							self.execute(cmd, log, is_os=True)
@@ -352,7 +359,7 @@ class Pipeline:
 
 # base class for the single processing (a-ka beam)
 class PipeUnit:
-	def __init__(self, obs, cep2, tab):
+	def __init__(self, obs, cep2, cmdline, tab, log):
 		self.code = ""  # 2-letter code, CS, IS, CV, FE
 		self.sapid = tab.parent_sapid
 		self.tabid = tab.tabid
@@ -377,6 +384,66 @@ class PipeUnit:
 		self.total_time = 0  # total time in s 
 		# extensions of the files to copy to archive
 		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.inf", "*.rfirep", "*png", "*parset", "*.par", "*.ar", "*.AR", "*pdmp*"]
+
+		# pulsars to fold for this unit
+		self.psrs = []
+		if not cmdline.opts.is_nofold:
+			self.psrs = self.get_pulsars_to_fold(obs, cep2, cmdline, log)
+
+	# function to get the list of pulsars to fold for this TAB (unit)
+	def get_pulsars_to_fold(self, obs, cep2, cmdline, log):
+		# get pulsar name from the parset
+		# if pulsar is not given in the command line, I also have to find pulsar if parset entry is empty
+		if len(cmdline.psrs) == 0 or cmdline.psrs[0] == "parset":
+			for sap in obs.saps:
+				if self.sapid == sap.sapid and sap.source != "":
+					self.psrs.append(sap.source)
+		# if --pulsar is not given and source field in parset is empty
+		if len(cmdline.psrs) == 0 and len(self.psrs) == 0:
+			for sap in obs.saps:
+				if self.sapid == sap.sapid:
+					self.psrs[:] = sap.psrs
+					break
+			if len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+		# if special word "tabfind" is given
+		if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind":
+			log.info("Searching for best pulsar for folding in SAP=%d TAB=%d..." % (self.sapid, self.tabid))
+			self.psrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cep2.tabfind)
+			if len(self.psrs) > 0: 
+				self.psrs = self.psrs[:1] # leave only one pulsar
+				log.info("%s" % (" ".join(self.psrs)))
+		if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "sapfind3"):
+			for sap in obs.saps:
+				if self.sapid == sap.sapid:
+					self.psrs[:] = sap.psrs
+					break
+			if cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+		# if --pulsar is used but no special word
+		if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "tabfind" and \
+				cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
+			self.psrs[:] = cmdline.psrs # copying all items
+		# if pulsar list is still empty, and we did not set --nofold then exit
+		if len(self.psrs) == 0:
+			log.error("*** No pulsar found to fold and --nofold is not used for SAP=%d TAB=%d. Exiting..." % (self.sapid, self.tabid))
+			sys.exit(1)
+			
+		# checking if pulsars are in ATNF catalog, or if not par-files do exist fo them, if not - exit
+		for psr in self.psrs:
+			if psr not in cmdline.psrbs:
+				log.info("Warning [SAP=%d TAB=%d]: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % \
+					(self.sapid, self.tabid, psr, cep2.psrcatalog))
+				# checking if par-file exist
+				parfile="%s/%s.par" % (cep2.parfile_dir, re.sub(r'[BJ]', '', psr))
+				if not os.path.exists(parfile):
+					# checking another parfile name
+					parfile="%s/%s.par" % (cep2.parfile_dir, psr)
+					if not os.path.exists(parfile):
+						log.info("SAP=%d TAB=%d: No parfile found for pulsar %s. Exiting..." % (self.sapid, self.tabid, psr))
+						sys.exit(1)
+					else: log.info("SAP=%d TAB=%d: Found parfile '%s'. Continue..." % (self.sapid, self.tabid, parfile))
+				else: log.info("SAP=%d TAB=%d: Found parfile '%s'. Continue..." % (self.sapid, self.tabid, parfile))
+		return self.psrs
+
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
 	    	"""
@@ -507,20 +574,22 @@ class PipeUnit:
 			self.execute(cmd)
 
 			# creating Par-file in the output directory or copying existing one
-			for psr in cmdline.psrs:
-				psr2=re.sub(r'[BJ]', '', psr)
-				parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
-				if os.path.exists(parfile):
-					cmd="cp -f %s %s" % (parfile, self.outdir)
-					self.execute(cmd)
-					continue
-				parfile="%s/%s.par" % (cep2.parfile_dir, psr)
-				if os.path.exists(parfile):
-					cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
-					self.execute(cmd)
-					continue
-				cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
-				self.execute(cmd, is_os=True)
+			if not cmdline.opts.is_nofold:
+				for psr in self.psrs:
+					psr2=re.sub(r'[BJ]', '', psr)
+					parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
+					if os.path.exists(parfile):
+						cmd="cp -f %s %s" % (parfile, self.outdir)
+						self.execute(cmd)
+						continue
+					parfile="%s/%s.par" % (cep2.parfile_dir, psr)
+					if os.path.exists(parfile):
+						cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
+						self.execute(cmd)
+						continue
+					self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
+					cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
+					self.execute(cmd, is_os=True)
 
 			# Creating output dir
 			self.curdir = "%s/%s/SAP%d/BEAM%d" % (self.outdir, self.beams_root_dir, self.sapid, self.tabid)
@@ -581,7 +650,7 @@ class PipeUnit:
 			prepfold_nsubs = self.lcd(prepfold_nsubs, total_chan)
 			self.log.info("Number of subbands, -nsubs, for prepfold is %d" % (prepfold_nsubs))
 			prepfold_popens=[]  # list of prepfold Popen objects
-			for psr in cmdline.psrs:
+			for psr in self.psrs:
 				# first running prepfold with mask (if --norfi was not set)
 				if not cmdline.opts.is_norfi:
 					cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
@@ -605,7 +674,7 @@ class PipeUnit:
 			if self.nrChanPerSub > 1:
 				zapstr="-j 'zap chan %s'" % (" ".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
 			dspsr_popens=[] # list of dspsr Popen objects
-			for psr in cmdline.psrs:
+			for psr in self.psrs:
 				psr2=re.sub(r'[BJ]', '', psr)
 				cmd="dspsr -E %s/%s.par %s -q -b 256 -fft-bench -O %s_%s -K -A -L 60 %s.fits" % \
 					(self.outdir, psr2, zapstr, psr, self.output_prefix, self.output_prefix)
@@ -622,7 +691,7 @@ class PipeUnit:
 			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
 			# calculating the least common denominator of obs.nrSubbands starting from self.nrChanPerSub
 			pav_nchans = self.lcd(self.nrChanPerSub, obs.nrSubbands)
-			for psr in cmdline.psrs:
+			for psr in self.psrs:
 				cmd="pam --setnchn %d -m %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
 				self.execute(cmd, workdir=self.curdir)
 				# creating DSPSR diagnostic plot
@@ -633,7 +702,7 @@ class PipeUnit:
 			if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
 				self.log.info("Running pdmp...")
 				pdmp_popens=[]  # list of pdmp Popen objects	
-				for psr in cmdline.psrs:
+				for psr in self.psrs:
 					cmd="pdmp -mc %d -mb 128 -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
 						(obs.nrSubbands, psr, self.output_prefix, psr, self.output_prefix)
 					pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
@@ -697,7 +766,7 @@ class PipeUnit:
 			if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
 				self.waiting_list("pdmp", pdmp_popens)
 				# when pdmp is finished do extra actions with files...
-				for psr in cmdline.psrs:
+				for psr in self.psrs:
 					cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 					self.execute(cmd, is_os=True)
 					cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
@@ -754,8 +823,8 @@ class PipeUnit:
 
 
 class CSUnit(PipeUnit):
-	def __init__(self, obs, cep2, tab):
-		PipeUnit.__init__(self, obs, cep2, tab)
+	def __init__(self, obs, cep2, cmdline, tab, log):
+		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CS"
 		self.beams_root_dir = "stokes"
 		self.raw2fits_extra_options="-CS -H"
@@ -770,8 +839,8 @@ class CSUnit(PipeUnit):
 		PipeUnit.run(self, obs, cep2, cmdline, log)
 
 class ISUnit(PipeUnit):
-	def __init__(self, obs, cep2, tab):
-		PipeUnit.__init__(self, obs, cep2, tab)
+	def __init__(self, obs, cep2, cmdline, tab, log):
+		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "IS"
 		self.beams_root_dir = "incoherentstokes"
 		self.raw2fits_extra_options = "-CS -H -IS"
@@ -786,8 +855,8 @@ class ISUnit(PipeUnit):
 		PipeUnit.run(self, obs, cep2, cmdline, log)
 
 class CVUnit(PipeUnit):
-	def __init__(self, obs, cep2, tab):
-		PipeUnit.__init__(self, obs, cep2, tab)
+	def __init__(self, obs, cep2, cmdline, tab, log):
+		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CV"
 		self.beams_root_dir = ""
 		self.raw2fits_extra_options=""
@@ -812,8 +881,8 @@ class CVUnit(PipeUnit):
 		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
 
 class FE_CSUnit(PipeUnit):
-	def __init__(self, obs, cep2, tab):
-		PipeUnit.__init__(self, obs, cep2, tab)
+	def __init__(self, obs, cep2, cmdline, tab, log):
+		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "FE"
 		self.beams_root_dir = ""
 		self.raw2fits_extra_options=""
@@ -838,8 +907,8 @@ class FE_CSUnit(PipeUnit):
 		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
 
 class FE_CVUnit(PipeUnit):
-	def __init__(self, obs, cep2, tab):
-		PipeUnit.__init__(self, obs, cep2, tab)
+	def __init__(self, obs, cep2, cmdline, tab, log):
+		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "FE"
 		self.beams_root_dir = ""
 		self.raw2fits_extra_options=""

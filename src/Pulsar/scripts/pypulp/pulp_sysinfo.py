@@ -20,6 +20,10 @@ class CEP2Info:
 		self.psrcatdb = self.lofarsoft + "/release/share/pulsar/data/psrcat.db"
 		# ATNF pulsar catalog
 		self.psrcatalog = self.lofarsoft + "/release/share/pulsar/data/PSR_catalog.txt"
+		# maximum radial distance (in deg) to find pulsars in FOV
+		self.fov_lba = 9.
+		self.fov_hba = 3.
+		self.tabfind = 1. # for TABs pulsars usually sit in the center of the beam, so use the same value for both HBA and LBA
 		self.pythonpath = os.environ['PYTHONPATH']
 		# get the node where the scripts run
 		self.current_node = os.popen('hostname').readlines()[0][:-1]

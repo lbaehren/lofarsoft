@@ -10,14 +10,56 @@ import os, sys
 import numpy as np
 import time
 import re
+import math
 from pulp_logging import PulpLogger
+
+# Global function that calculates the distance between two points on sphere
+def radial_distance(rarad1, decrad1, rarad2, decrad2):
+	"""
+	radial_distance: prog calculates radial distance between
+	given (rarad1, decrad1) and (rarad2, decrad2) position (in radians). 
+	It uses the formula used in ATNF pulsar catalogue to calculate distances 
+	between the pulsars (Haversine formula).
+	Return value: distance (in deg)
+	"""
+	dist = 2.*math.asin(math.sqrt((math.sin((decrad1-decrad2)/2.))**2 + math.cos(decrad1)*math.cos(decrad2)*(math.sin((rarad1-rarad2)/2.))**2))
+	dist = (180. * dist) / math.pi
+	return dist
+
+# find all pulsars within max distance from selected center, sort them by flux
+# and return 3 brightest ones
+# coordinates are in radians
+# max distance in degrees
+def find_pulsars(rarad, decrad, cmdline, max_distance):
+	radeg = (180. * rarad) / math.pi
+	decdeg = (180. * decrad) / math.pi
+	psrras=np.abs(cmdline.ras - radeg)
+	psrdecs=np.abs(cmdline.decs - decdeg)
+	# first, select only pulsars _roughly_ within required distance
+	crit=(psrras<1.5*max_distance)&(psrdecs<1.5*max_distance)
+	psrbs=cmdline.psrbs[crit]
+	psrras=cmdline.ras[crit]
+	psrdecs=cmdline.decs[crit]
+	psrs400=cmdline.s400[crit]
+	# for selected pulsars calculate the distance precisely
+	psrdist=np.array([radial_distance(rarad, decrad, (psrras[ii]/180.)*math.pi, (psrdecs[ii]/180.)*math.pi) for ii in np.arange(np.size(psrras))])
+	psrdist-=max_distance
+	crit=(psrdist<0)
+	psrs400[:]=psrs400[crit]
+	psrbs[:]=psrbs[crit]
+	psrs400=[float(s=='*' and 0 or s) for s in psrs400]
+	# sort by flux in reverse order (getting the reversed list of indices)
+	ind=[ii for ii in reversed(np.argsort(psrs400))]
+	psrbs=psrbs[ind]
+	if np.size(psrbs) > 3: psrbs=psrbs[:3]
+	return psrbs
 
 # Class SAPBeam or "Station" beam describes the parameters specific for this particular 
 # station beam
 class SAPBeam:
 	# si - system info object
 	# root - "parent" class of the sap beam
-	def __init__(self, id, parset, si, root):
+	def __init__(self, id, parset, si, cmdline, root):
 		self.sapid = id            # ID number of the SAP beam
 
 		self.rarad=self.decrad=0
@@ -31,6 +73,7 @@ class SAPBeam:
 		self.nrSubbands = 0        # number of subbands (can be different for different SAPs)
 		self.subbandList=""        # range of subbands, e.g. 77..320
 		self.subbands=[]           # list of subbands
+		self.psrs = []             # up to 3 brightest pulsars in the SAP
 
 		# Getting the list of subbands
 		cmd="grep 'Observation.Beam\[%d\].subbandList' %s" % (self.sapid, parset)
@@ -101,6 +144,14 @@ class SAPBeam:
 					self.ringSize=np.float64(status[0][:-1].split(" = ")[-1])
 					self.ringSize = self.ringSize * (180./3.1415926)
 				except: pass
+
+		# find up to 3 brightest pulsars in the SAP
+		if not cmdline.opts.is_nofold:
+			if len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind") or \
+				(len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind3"):
+				if root.antenna == "LBA": self.psrs = find_pulsars(self.rarad, self.decrad, cmdline, si.fov_lba)
+				if root.antenna == "HBA": self.psrs = find_pulsars(self.rarad, self.decrad, cmdline, si.fov_hba)
+				if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for tid in np.arange(self.nrTiedArrayBeams):
@@ -199,10 +250,13 @@ class TABeam:
 class Observation:
 	# si - system info
 	# log - logger class
-	def __init__(self, id, si, log=None, parset=""):
+	def __init__(self, id, si, cmdline, log=None, parset=""):
 		self.id = id
 		self.parset = parset
 		self.parset_dir = si.parset_dir
+
+		self.project = "" # the name of the campaign
+		self.projectPI = "" # PI of the project
 
 		self.nrBeams = 0  # number of station beams
 		self.saps=[]      # list of SAP beams (objects of SAPBeam class)
@@ -234,7 +288,7 @@ class Observation:
 		self.cfreq = 0             # central freq (in MHz)
 
 		# check if parset file exists and if so, then update the info
-		if self.is_parset(): self.update(si)
+		if self.is_parset(): self.update(si, cmdline)
 		else:
 			msg="Can't find the parset file '%s' for ObsID = %s" % (self.parset, self.id)
 			if log != None: log.error(msg)
@@ -331,7 +385,7 @@ class Observation:
 		return subs
 
 	# update info based on parset file
-	def update (self, si):
+	def update (self, si, cmdline):
 		# Getting the Date of observation
 	        cmd="grep Observation.startTime %s | tr -d \\'" % (self.parset,)
         	status=os.popen(cmd).readlines()
@@ -364,6 +418,20 @@ class Observation:
         	if np.size(status)>0:
                 	# Antenna Set setting exists in parset file
                 	self.antenna_config=status[0][:-1].split(" = ")[-1]
+
+		# Getting the name of the Campaign
+        	cmd="grep 'Observation.Campaign.name' %s" % (self.parset,)
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
+                	# Campaign name setting exists in parset file
+                	self.project=status[0][:-1].split(" = ")[-1]
+
+		# Getting the name of the Campaign's PI
+        	cmd="grep 'Observation.Campaign.PI' %s" % (self.parset,)
+        	status=os.popen(cmd).readlines()
+        	if np.size(status)>0:
+                	# Campaign's PI name setting exists in parset file
+                	self.projectPI=status[0][:-1].split(" = ")[-1].split("'")[1]
 
 		# Getting the Filter setting
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
@@ -588,7 +656,7 @@ class Observation:
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for sid in np.arange(self.nrBeams):
-			sap=SAPBeam(sid, self.parset, si, self)
+			sap=SAPBeam(sid, self.parset, si, cmdline, self)
 			self.saps.append(sap)
 
 	# prints info about the observation
@@ -598,7 +666,7 @@ class Observation:
 		"""
 		if log != None:
 			log.info("\n==============================================================")
-			log.info("ObsID: %s" % (self.id))	
+			log.info("ObsID: %s   Project: %s   PI: %s" % (self.id, self.project, self.projectPI))	
 			log.info("Parset: %s" % (self.parset))
 			log.info("Start UTC: %s %s  Duration: %s" % \
 				(self.startdate, self.starttime, self.duration>=3600. and "%.1fh" % \

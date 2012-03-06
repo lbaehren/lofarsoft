@@ -62,7 +62,7 @@ if __name__ == "__main__":
 		cep2.set_logfile(logfile)
 
 		# adding file handler to our Logger
-		logfh = logging.FileHandler(cep2.get_logfile(), mode='%c' % ((cmdline.opts.is_delete or cmdline.opts.is_summary) and 'w' or 'a'))
+		logfh = logging.FileHandler(cep2.get_logfile(), mode='w')
 		log.addHandler(logfh)
 
 		# starting logging...
@@ -75,9 +75,10 @@ if __name__ == "__main__":
 		# checking validity of the options
 		cmdline.check_options(cep2, log)
 
+		log.info("Initializing...")
 		if not cmdline.opts.is_noinit:
 			# initializing our Observation, collecting info from parset, etc.
-			obs = Observation(cmdline.opts.obsid, cep2, log)
+			obs = Observation(cmdline.opts.obsid, cep2, cmdline, log)
 		else:
 			# loading obs setup from the file
 			obsfd = open(obsconf_file, "rb")
@@ -87,7 +88,7 @@ if __name__ == "__main__":
 		# printing info about observation
 		obs.print_info(log)
 
-		if not cmdline.opts.is_local: cmdline.print_summary(cep2, log)
+		if not cmdline.opts.is_local: cmdline.print_summary(cep2, obs, log)
 
 		# printing info both to STDOUT and logfile
 		cep2.print_info(log)
@@ -133,6 +134,7 @@ if __name__ == "__main__":
                         	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
                         	proc.communicate()
 		else:
+			sys.exit(0)
 			# loading pipeline config from the file
 			pipefd = open(pipeline_file, "rb")
 			psrpipe=cPickle.load(pipefd)
