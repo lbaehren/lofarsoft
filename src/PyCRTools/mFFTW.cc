@@ -376,6 +376,14 @@ void HFPP_FUNC_NAME(const NIter out, const NIter out_end, const NIter in, const 
   // Copy data to output array
   memcpy(&(*out), buffer, Nout * sizeof(double));
 
+  // Compensate for normalization
+  NIter out_it = out;
+  while (out_it != out_end)
+  {
+    *out_it = *out_it / Nin;
+    out_it++;
+  }
+
   // cleanup
   fftw_free(tmp_fd);
   fftw_free(buffer);
