@@ -126,7 +126,7 @@ class CRDatabasePopulator(object):
                         # Create stations
                         station = crdb.Station(self._db)
                         station.stationname = stationname
-                        station.write()
+                        station.write(recursive=False)
                         datafile.addStation(station)
 
                         # Create polarisations
