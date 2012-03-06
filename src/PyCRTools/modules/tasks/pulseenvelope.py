@@ -18,66 +18,61 @@ class PulseEnvelope(Task):
     parameters = dict(
         timeseries_data = dict( default = None,
             doc = "Timeseries data." ),
-        fft_data = dict( default = lambda self : cr.hArray(complex, dimensions=(self.nantennas, self.nfreq)),
-            doc = "Fourier transform of timeseries_data. Calculated if not given." ),
         nantennas = dict( default = lambda self : self.timeseries_data.shape()[0],
             doc = "Number of antennas." ),
-        blocksize = dict( default = lambda self : self.timeseries_data.shape()[1],
-            doc = "Blocksize (e.g. number of samples per antenna)." ),
-        nfreq = dict( default = lambda self : self.blocksize / 2 + 1,
-            doc = "Number of frequencies." ),
         pulse_start = dict( default = 0,
             doc = "Start of pulse window." ),
-        pulse_end = dict( default = lambda self : self.blocksize,
+        pulse_end = dict( default = lambda self : self.timeseries_data.shape[1],
             doc = "End of pulse window." ),
         pulse_width = dict( default = lambda self : self.pulse_end - self.pulse_start,
             doc = "Width of pulse window." ),
-        sampling_frequency = dict(default = 200.e6,
-            doc = "Sampling frequency of timeseries_data." ),
         resample_factor = dict( default = 1,
             doc = "Resample factor." ),
-        delays = dict( default = lambda self : cr.hArray(float, self.timeseries_data.shape()[0]), output = True,
-            doc = "Delays corresponding to the position of the maximum of the envelope relative to the first antenna." ),
-        hilbertt = dict( default = lambda self : self.timeseries_data.new(), workarray = True,
+        pulse_width_resampled = dict( default = lambda self : self.pulse_width * self.resample_factor,
+            doc = "Width of pulse window after resampling." ),
+        timeseries_data_resampled = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.pulse_width_resampled)),
+            doc = "Resampled timeseries data." ),
+        nfreq = dict( default = lambda self : self.pulse_width_resampled / 2 + 1,
+            doc = "Number of frequencies." ),
+        fft_data = dict( default = lambda self : cr.hArray(complex, dimensions=(self.nantennas, self.nfreq)),
+            doc = "Fourier transform of timeseries_data_resampled." ),
+        sampling_frequency = dict(default = 200.e6,
+            doc = "Sampling frequency of timeseries_data." ),
+        hilbertt = dict( default = lambda self : self.timeseries_data_resampled.new(), workarray = True,
             doc = "Hilbert transform of *fft_data*." ),
-        envelope = dict( default = lambda self : self.timeseries_data.new(), workarray = True,
+        envelope = dict( default = lambda self : self.timeseries_data_resampled.new(), workarray = True,
             doc = "Envelope calculated using Hilbert transform." ),
-        envelope_resampled = dict( default = lambda self : cr.hArray(float, dimensions = (self.nantennas, self.pulse_width * self.resample_factor)), workarray = True,
-            doc = "Envelope (up/down)sampled using *resample_factor*." ),
+        fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE) ),
+        ifftwplan = dict( default = lambda self : cr.FFTWPlanManyDftC2r(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE) ),
+        delays = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
+            doc = "Delays corresponding to the position of the maximum of the envelope relative to the first antenna." ),
     )
-
-    def init(self):
-        """Initialize the task.
-        """
-
-        # Create FFTW plans
-        self.fftplan = cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-        self.invfftplan = cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
     def run(self):
         """Run the task.
         """
 
+        # Resample singal
+        cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.pulse_start:self.pulse_end])
+
         # Compute FFT
-        cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data[...], self.fftplan)
+        cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
 
         # Apply Hilbert transform
         cr.hApplyHilbertTransform(self.fft_data[...])
 
         # Get inverse FFT
-        cr.hFFTWExecutePlan(self.hilbertt[...], self.fft_data[...], self.invfftplan)
-        self.hilbertt /= self.blocksize
+        cr.hFFTWExecutePlan(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
+        self.hilbertt /= self.pulse_width_resampled
 
         # Get envelope
+        self.envelope.fill(0)
         cr.hSquareAdd(self.envelope, self.hilbertt)
-        cr.hSquareAdd(self.envelope, self.timeseries_data)
+        cr.hSquareAdd(self.envelope, self.timeseries_data_resampled)
         cr.hSqrt(self.envelope)
 
-        # Resample envelope and find maximum
-        cr.hFFTWResample(self.envelope_resampled[...], self.envelope[..., self.pulse_start:self.pulse_end])
-
         # Find maxima
-        self.maxpos = self.envelope_resampled[...].maxpos()
+        self.maxpos = self.envelope[...].maxpos()
 
         # Convert to delay
         self.delays[:] = self.maxpos[:]
