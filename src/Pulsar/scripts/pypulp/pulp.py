@@ -134,7 +134,6 @@ if __name__ == "__main__":
                         	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
                         	proc.communicate()
 		else:
-			sys.exit(0)
 			# loading pipeline config from the file
 			pipefd = open(pipeline_file, "rb")
 			psrpipe=cPickle.load(pipefd)
