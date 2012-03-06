@@ -12,7 +12,8 @@ class PulseEnvelope(Task):
     """Calculate pulse envelope using Hilbert transform.
 
     Optionally the envelope will be (up/down)sampled using the *resample_factor* and the *delays* between the
-    maxima will be computed.
+    maxima will be computed with respect to a reference antenna that is either given or taken to be the one
+    with the highest signal to noise.
     """
 
     parameters = dict(
@@ -44,8 +45,16 @@ class PulseEnvelope(Task):
             doc = "Envelope calculated using Hilbert transform." ),
         fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE) ),
         ifftwplan = dict( default = lambda self : cr.FFTWPlanManyDftC2r(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE) ),
+        snr = dict( default = None, output = True,
+            doc = "Signal to noise ratio of pulse maximum." ),
+        refant = dict( default = lambda self : self.snr.maxpos().val(),
+            doc = "Reference antenna for delays, taken as antenna with highest signal to noise." ),
         delays = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
             doc = "Delays corresponding to the position of the maximum of the envelope relative to the first antenna." ),
+        nsigma = dict( default = 7,
+            doc = "Number of standard deviations that pulse needs to be above noise level." ),
+        antennas_with_significant_pulses = dict( default = lambda self : [i for i in range(self.nantennas) if self.snr[i] > self.nsigma],
+            doc = "Indices of antennas with pulses more than nsigma above the noise limit." ),
     )
 
     def run(self):
@@ -74,8 +83,11 @@ class PulseEnvelope(Task):
         # Find maxima
         self.maxpos = self.envelope[...].maxpos()
 
+        # Find signal to noise ratio
+        self.snr = cr.hArray((self.envelope[...].max() - self.envelope[...].mean()) / self.envelope[...].stddev())
+
         # Convert to delay
         self.delays[:] = self.maxpos[:]
         self.delays /= (self.sampling_frequency * self.resample_factor)
-        self.delays -= self.delays[0]
+        self.delays -= self.delays[self.refant]
 
