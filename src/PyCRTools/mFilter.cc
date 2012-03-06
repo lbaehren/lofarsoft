@@ -459,9 +459,20 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 
   Iter it = data;
 
-  for (HInteger n=0; n<N; n++)
+  // Shift phases of positive frequencies by -pi/2
+  for (HInteger n=0; n<N/2; n++)
   {
-    *it = HComplex(0, -1) * sgn(*it) * *it;
+    *it = HComplex(0, -1) * *it;
+    it++;
+  }
+
+  // Skip center frequency
+  it++;
+
+  // Shift phases of negative frequencies by +pi/2
+  for (HInteger n=0; n<N/2; n++)
+  {
+    *it = HComplex(0, 1) * *it;
     it++;
   }
 }
