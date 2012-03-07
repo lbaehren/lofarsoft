@@ -44,7 +44,8 @@ def autogen(list,output_path):
             f.write('.. currentmodule:: '+m+'\n\n')
             f.write('.. autosummary::\n\n')
             for module_member in module_members:
-                if isinstance(eval(m+"."+module_member), (types.ClassType, types.TypeType, types.FunctionType)):
+                if (isinstance(eval(m+"."+module_member), (types.ClassType, types.TypeType, types.FunctionType))
+                    and(module_member[0]!='_')):
                     f.write('   '+module_member+'\n')
             f.write('\n\n')
 
