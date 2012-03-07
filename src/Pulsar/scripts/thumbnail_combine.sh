@@ -39,6 +39,26 @@ then
    rm combined.png
 fi
 
+if [ -f combined.pdf ]
+then 
+   echo "WARNING: deleting previous version of results: combined.pdf"
+   if [ $log != "NONE" ]
+   then
+      echo "WARNING: deleting previous version of results: combined.pdf" >> $log
+   fi
+   rm combined.pdf
+fi
+
+if [ -f combined.th.pdf ]
+then 
+   echo "WARNING: deleting previous version of results: combined.th.pdf"
+   if [ $log != "NONE" ]
+   then
+      echo "WARNING: deleting previous version of results: combined.th.pdf" >> $log
+   fi
+   rm combined.th.pdf
+fi
+
 if [ -f chi-squared.txt ]
 then 
    echo "WARNING: deleting previous version of results: chi-squared.txt"
@@ -111,9 +131,11 @@ if [[ $has_beams != "" ]]
 then
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$3" "$2"\\nChiSq = " $4"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none "$0" combined.png"}' > combine_png.sh
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt |  sed 's/\\n//g' | awk '{print "file="$1" beam="$2" obs="$3" chi-sq="$4}'   > chi-squared.txt
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col4.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | sed 's/\.pfd\.th\.png/\.pfd\.pdf/g'  | awk '{print "-label \""$3" "$2"\\nChiSq = " $4"\" "$1" "}' | tr -d '\n' | awk '{print "montage "$0" -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 combined.pdf"}' > combine_pdf.sh
 else
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage -background none -pointsize 10.2 "$0" combined.png"}' > combine_png.sh
    paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt |  sed 's/\\n//g' | awk '{print "file="$1" obs="$2" chi-sq="$3}' > chi-squared.txt
+   paste /tmp/$$_combine_col1.txt /tmp/$$_combine_col2.txt /tmp/$$_combine_col3.txt | sed 's/\.pfd\.th\.png/\.pfd\.pdf/g' | awk '{print "-label \""$2"\\nChiSq = " $3"\" "$1" "}' | tr -d '\n' | awk '{print "montage "$0" -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 combined.pdf"}' > combine_pdf.sh
 fi
 
 #delete intermediate files
@@ -124,13 +146,14 @@ wc_convert=`wc -l combine_png.sh | awk '{print $1}'`
 
 if [[ $wc_convert > 0 ]]
 then
-   chmod 777 combine_png.sh
+   chmod 777 combine_png.sh combine_pdf.sh
    echo "Executing the following comamnd: "
 
    if [ $log != "NONE" ]
    then
       echo "Executing the following comamnd: " >> $log
       cat combine_png.sh >> $log
+      cat combine_pdf.sh >> $log
    fi
 
    cat combine_png.sh
@@ -141,9 +164,18 @@ then
    echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)"
    echo ""
 
+   cat combine_pdf.sh
+   ./combine_pdf.sh
+   convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.pdf combined.th.pdf
+   chmod 775 combined.pdf combined.th.pdf
+   echo ""
+   echo "Results:  combined.pdf (large scale) and combined.th.pdf (thumbnail for the web summaries)"
+   echo ""
+
    if [ $log != "NONE" ]
    then
       echo "Results:  combined.png (large scale) and combined.th.png (thumbnail for the web summaries)" >> $log
+      echo "Results:  combined.pdf (large scale) and combined.th.pdf (thumbnail for the web summaries)" >> $log
    fi
 
 else
