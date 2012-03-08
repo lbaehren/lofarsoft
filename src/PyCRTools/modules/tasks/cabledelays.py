@@ -63,6 +63,7 @@ def gatherresults(topdir, maxspread, antennaSet):
             if res["ANTENNA_SET"] != antennaSet:
                 print 'Skipping file in dir %s, wrong antenna set %s' % (datadir, res["ANTENNA_SET"])
                 continue
+            print 'Antenna set: %s ' % res["ANTENNA_SET"]
             # check result status
     #        if res["status"] != 'OK':
             # A 'status' keyword would be nice... Number of delay outliers above (say) 10 ns is in 'delay_outliers' key.
@@ -349,13 +350,16 @@ class cabledelays(tasks.Task):
             y_residual = []
             n = 0
             plotparameter = "residualdelay"
+           # if station == 7:
+           #     import pdb; pdb.set_trace()
             for id in theseAntennas:
                 thisAnt = self.cabledelays_database[id]
                 thisAvg = 1.0e9 * thisAnt["residualdelay"]
                 thisTotal = 1.0e9 * thisAnt["cabledelay"]
                 thisSpread = 1.0e9 * thisAnt["spread"]
                 thisN = len(thisAnt["delaylist"])
-                x_avg.extend([n])
+                thisRCUNumber = int(id) % 100
+                x_avg.extend([thisRCUNumber]) # the actual RCU number, not the n'th value we process...
                 y_avg_residual.extend([thisAvg])
                 
                 y_err.extend([thisSpread / np.sqrt(thisN)]) # / np.sqrt(thisN)
@@ -363,7 +367,7 @@ class cabledelays(tasks.Task):
                 y_avg_total.extend([thisTotal])
                 if thisSpread < self.maxspread:
                     for k in range(len(thisAnt["residuallist"])): # residual and total lists are the same size...
-                        x.extend([n])
+                        x.extend([thisRCUNumber])
                         thisResidualDelay = 1.0e9 * thisAnt["residuallist"][k]
                         thisTotalDelay = 1.0e9 * thisAnt["delaylist"][k]
             #            thisDiff = thisDelay - thisAvg
