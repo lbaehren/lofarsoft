@@ -182,7 +182,7 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 
 if (NOT TARGET psrchive)
 
-  set (psrchive_version   "13.3")
+  set (psrchive_version   "20120308")
   set (psrchive_name      "psrchive-${psrchive_version}")
   set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
   
@@ -214,6 +214,7 @@ if (NOT TARGET psrchive)
 if (UNIX)
  if (APPLE)
 add_custom_target (psrchive_configure
+  COMMAND ./bootsrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${psrchive_name}/cmake_bootstrap.log 2>&1
   COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=mac --x-includes=${X11_X11_INCLUDE_PATH} --x-libraries=${X11_X11_INCLUDE_PATH}/../lib --build=mac --enable-debug --disable-local --with-mpi --with-fftw-include-dir=${CMAKE_INSTALL_PREFIX}/include --with-fftw-lib-dir=${CMAKE_INSTALL_PREFIX}/lib --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${psrchive_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
@@ -221,6 +222,7 @@ add_custom_target (psrchive_configure
 add_dependencies (psrchive_configure psrchive_unpack)
  else (APPLE)
 add_custom_target (psrchive_configure
+  COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${psrchive_name}/cmake_bootstrap.log 2>&1
   COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --srcdir=${PULSAR_BINARY_DIR}/apps/${psrchive_name} --prefix=${CMAKE_INSTALL_PREFIX} --exec-prefix=${CMAKE_INSTALL_PREFIX} --with-x LOGIN_ARCH=linux --enable-shared 1> ${PULSAR_BINARY_DIR}/apps/${psrchive_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${psrchive_name} 
   COMMENT "Configuring project psrchive in ${PULSAR_BINARY_DIR}/apps/${psrchive_name} ..."
@@ -323,7 +325,7 @@ add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_i
 
 if (NOT TARGET dspsr)
   
-  set (dspsr_version   "1.0")
+  set (dspsr_version   "20120308")
   set (dspsr_name      "dspsr-${dspsr_version}")
   set (dspsr_directory "dspsr/dspsr-${dspsr_version}")
   
