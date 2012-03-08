@@ -29,7 +29,7 @@ class DirectionFitPlaneWave(tasks.Task):
         timelags = dict(doc="hArray with the measured time lags for each event and each antenna",
                         unit="s"),
                         
-        good_antennas = dict(doc="List with indices of antennas to be used for the plane fit. This shoudl aready exclude stations that were flagged or do not show a reliable pulse"),                
+        good_antennas = dict(doc="List with indices of antennas to be used for the plane fit. This should aready exclude stations that were flagged or do not show a reliable pulse"),                
 
         doplot=sc.p_(False,
                      "Plot results."),
@@ -72,6 +72,7 @@ class DirectionFitPlaneWave(tasks.Task):
 
         meandirection_azel_deg = sc.p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),
                                        "Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
+        fit_failed = sc.p_(lambda self:False, "Indication if fit failed",output = True)
 
 #        plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
 #                           doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
@@ -85,6 +86,7 @@ class DirectionFitPlaneWave(tasks.Task):
     def run(self):
         from pycrtools import srcfind 
         from numpy import cos, sin
+        print "Running PlaneWaveFit ..."
         self.farfield=True
         c = 299792458.0 # speed of light in m/s
         rad2deg = 180.0 / math.pi
@@ -111,6 +113,7 @@ class DirectionFitPlaneWave(tasks.Task):
             if np.isnan(el) or np.isnan(az):
                 print 'WARNING: plane wave fit returns NaN. Setting elevation to 0.0'
                 el = 0.0 # need to propagate the warning...!
+                self.fit_failed = True
                 break
             # get residuals
             expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el)) 
