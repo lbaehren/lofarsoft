@@ -20,7 +20,7 @@ project (DSPSR C CXX Fortran)
 ##
 ## ==============================================================================
 
-set (DSPSR_VERSION          "1.0")
+set (DSPSR_VERSION          "20120308")
 set (DSPSR_SOURCE_DIRECTORY "dspsr-${DSPSR_VERSION}" )
 set (DSPSR_SOURCE_ARCHIVE   "${DSPSR_SOURCE_DIRECTORY}.tgz")
 
