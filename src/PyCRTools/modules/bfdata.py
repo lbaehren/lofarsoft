@@ -49,6 +49,9 @@ def getpar(parameters,keyword):
     else:
         return "UNDEFINED"
 
+def partolist(par):
+    return par.strip('[]').split(',')
+
 class BFDataReader():
     """Class to read in beamformed data"""
 
@@ -1168,7 +1171,6 @@ def get_parameters_new(obsid, useFilename=False):
 
 
     if parameters["incoherentstokes"]:
-        if False:
             sb=0
             for i in range(len(parameters["storagenodes"])):
                 node=parameters["storagenodes"][i]
@@ -1183,6 +1185,8 @@ def get_parameters_new(obsid, useFilename=False):
                         sb+=1
                 elif "Observation.DataProducts.Output_IncoherentStokes.filenames" in allparameters.keys():
                      DPprefix="Observation.DataProducts.Output_IncoherentStokes."
+                     if "OLAP.IncoherentStokesAreTransposed" in allparameters.keys():
+                         DPprefix="Observation.DataProducts.Output_Beamformed."
                      DPfilenames=allparameters[DPprefix+"filenames"].strip('[]').split(',')
                      DPdir=allparameters[DPprefix+'locations'].strip('[]').split(':')[1].split(',')[0]
                      DPfulldir=allparameters[DPprefix+'locations'].strip('[]').split(',')
