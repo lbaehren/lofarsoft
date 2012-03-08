@@ -5,10 +5,10 @@ import numpy as np
 import pycrtools as cr
 from pycrtools import crdatabase as crdb
 
-# Making par output optional
-cr.tasks.task_write_parfiles = False
-
 from optparse import OptionParser
+
+# Don't write output to all tasks
+cr.tasks.task_write_parfiles = False
 
 # Parse commandline options
 parser = OptionParser()
@@ -91,28 +91,26 @@ for station in stations:
 
     # Get first estimate of pulse direction
     pulse_direction = station.polarisations[0].parameter["pulse_direction"]
+    print "database results for direction", pulse_direction
 
     # Start direction fitting loop
     n = 0
     converged = False
     while True:
 
-        print "pulse_direction =", pulse_direction
-
         # Unfold antenna pattern
         antenna_response = cr.trun("AntennaResponse", direction = pulse_direction)
 
         # Calculate delays
         pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
-              
         
         # Fit pulse direction
-        direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses)
+        direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses,verbose=True)
 
         pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
         n += 1
-        if converged or n > options.maximum_nof_iterations:
+        if converged or n > options.maximum_nof_iterations or direction_fit_plane_wave.fit_failed:
             break # Exit fitting loop
 
 # Project polarizations onto x,y,z frame
