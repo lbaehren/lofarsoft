@@ -5,6 +5,9 @@ import numpy as np
 import pycrtools as cr
 from pycrtools import crdatabase as crdb
 
+# Making par output optional
+cr.tasks.task_write_parfiles = False
+
 from optparse import OptionParser
 
 # Parse commandline options
@@ -101,7 +104,8 @@ for station in stations:
 
         # Calculate delays
         pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
-
+              
+        
         # Fit pulse direction
         direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses)
 
