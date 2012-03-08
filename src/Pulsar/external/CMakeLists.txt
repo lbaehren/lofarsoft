@@ -494,7 +494,7 @@ add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 ##
 ## ==============================================================================
 
-add_subdirectory (psrfits_utils)
+#add_subdirectory (psrfits_utils)
 
 if (NOT TARGET psrfits_utils)
   
