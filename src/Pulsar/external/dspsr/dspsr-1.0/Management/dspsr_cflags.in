@@ -1,6 +1,0 @@
-#! /bin/csh -f
-
-# @configure_input@
-
-echo -IPREFIX/include
-
