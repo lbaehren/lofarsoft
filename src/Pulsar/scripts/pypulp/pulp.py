@@ -88,7 +88,9 @@ if __name__ == "__main__":
 		# printing info about observation
 		obs.print_info(log)
 
-		if not cmdline.opts.is_local: cmdline.print_summary(cep2, obs, log)
+		if not cmdline.opts.is_local: 
+			# print summary
+			cmdline.print_summary(cep2, obs, log)
 
 		# printing info both to STDOUT and logfile
 		cep2.print_info(log)

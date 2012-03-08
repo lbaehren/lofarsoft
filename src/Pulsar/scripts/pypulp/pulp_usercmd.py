@@ -10,6 +10,24 @@ import logging
 import time
 import re
 
+# checks if given pulsar is good ones, i.e. either in ATNF catalog
+# or par-file do exis
+# return value is True (psr is good), or False (psr is bad)
+def check_pulsars(psr, cmdline, cep2, log=None):
+	if psr not in cmdline.psrbs and psr not in cmdline.psrjs:
+		msg="warning: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % (psr, cep2.psrcatalog)
+		if log != None: log.warning(msg)
+		# checking if par-file exist
+		parfile="%s/%s.par" % (cep2.parfile_dir, re.sub(r'[BJ]', '', psr))
+		if not os.path.exists(parfile):
+			# checking another parfile name
+			parfile="%s/%s.par" % (cep2.parfile_dir, psr)
+			if not os.path.exists(parfile): 
+				return False
+		msg="Found parfile '%s'. Continue..." % (parfile)
+		if log != None: log.info(msg)
+	return True
+
 class CMDLine:
 	# parsing a command line
         def __init__(self, version=""):
@@ -17,7 +35,7 @@ class CMDLine:
 		self.options = sys.argv[1:]  # storing original cmd line
 		self.version = version
 		self.psrs = []  # list of pulsars to fold
-		self.psrbs = [] # list of B and J names of pulsars from ATNF catalog
+		self.psrbs = self.psrjs = [] # list of B and J names of pulsars from ATNF catalog
 		self.ras = self.decs = self.s400 = [] # lists of RA, DEC, and S400 of catalog pulsars
         	self.usage = "Usage: %prog <-id ObsID> -p <Pulsar name(s)> [-h|--help] [OPTIONS]"
         	self.cmd = opt.OptionParser(self.usage, version="%prog " + self.version)
@@ -25,35 +43,33 @@ class CMDLine:
                            help="Specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
         	self.cmd.add_option('-p', '--pulsar', dest='psr', metavar='PSRS|word',
                            help="Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
-                                give one of the 5 special words: \"parset\" - to take pulsar name from the source name for each SAP \
-				separately, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV of the particular \
-				SAP, or \"tabfind\" to find best pulsar for each TAB individually. If no pulsars are given and no \
-				special words used, then pipeline will try to take source names from parset first, and then look for \
-				the best pulsars in SAP's FOV (same as \"sapfind\")", default="", type='str')
+                                give one of the 4 special words: \"parset\" - to take pulsar name from the source field for each SAP \
+				separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
+				of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually. \
+				If no pulsars are given and no special words used, then pipeline will try to take source names from \
+				parset file first, and then look for the best pulsars in SAP's FOV (same as \"sapfind\"). \
+                                Word 'NONE' as a pulsar name is ignored", default="", type='str')
         	self.cmd.add_option('-o', '-O', '--output', dest='outdir', metavar='DIR',
                            help="Specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
                                  Default is corresponding *_red or *_redIS directory", default="", type='str')
-        	self.cmd.add_option('--raw', dest='rawdir', metavar='DIR',
-                           help="when pipeline is not run on CEPI, input raw data locations can be specified; directory structure \
-				assumed as: input_raw_data_location/<OBSID> . Wildcards can be used for multiple input locations, \
-				but MUST be quoted: (i.e. -raw \"/state/partition2/lofarpwg/RAW?\")", default="", type='str')
+        	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
+                           help="Specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
         	self.cmd.add_option('--par', '--parset', dest='parset', metavar='FILE',
-                           help="when pipeline is not run on CEPI, input parameter file location can be specified; directory structure \
-				assumed as: parset_location/<any_path>/LObsId.parset \
-				(i.e. -par /state/partition2/lofarpwg/PARSET)", default="", type='str')
+                           help="Specify explicitely the input parameter file (parset file). By default, it will be looked for \
+                                 in standard system directory", default="", type='str')
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
-                           help="optional parameter to skip Vlad's RFI checker", default=False)
+                           help="optional parameter to skip subdyn.py RFI checker", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
                            help="Turn off running pdmp in the pipeline", default=False)
         	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
-                           help="optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists (override \
-				previous results!)", default=False)
+                           help="optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists. \
+				Otherwise, the new results will be overwritten/added to existing directory", default=False)
         	self.cmd.add_option('--incoh_only', action="store_true", dest='is_incoh_only',
                            help="optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)", default=False)
         	self.cmd.add_option('--coh_only', action="store_true", dest='is_coh_only',
                            help="optional parameter to process ONLY Coherentstokes  (even though incoherentstokes data exist)", default=False)
         	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
-                           help="optional parameter to turn off folding of data (prepfold is not run);  multiple pulsar names are not possible", default=False)
+                           help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
@@ -133,7 +149,11 @@ class CMDLine:
 *** You may want to use --del to have clean run, or specify new output directory.\n***"
 			if log != None: log.warning(msg)
 			else: print msg
-			self.waiting_for_user(20, log)
+			self.waiting_for_user(10, log)
+
+		# checking if rawdir is specified
+		if self.opts.rawdir != "/data":
+			cep2.rawdir = self.opts.rawdir
 
 		# NONE is ignored as pulsar name
 		if self.opts.psr != "":
@@ -154,7 +174,7 @@ class CMDLine:
 		if not self.opts.is_nofold:
 			# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
 			# also reading coordinates and flux
-			self.psrbs, self.s400 = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,9), dtype=str, unpack=True)
+			self.psrbs, self.psrjs, self.s400 = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,2,9), dtype=str, unpack=True)
 			self.ras, self.decs = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(5,6), dtype=float, unpack=True)
 
 			# checking if given psr(s) names are valid, and these pulsars are in the catalog
@@ -165,31 +185,13 @@ class CMDLine:
 					if log != None: log.warning(msg)
 					else: print msg
 					self.psrs=self.psrs[:3]
-
-				# checking the pulsar names and if parfiles exist
+				# checking if given pulsar names are good
 				for psr in self.psrs:
-					if psr not in self.psrbs:
-						msg="warning: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % (psr, cep2.psrcatalog)
-						if log != None: log.warning(msg)
+					if not check_pulsars(psr, self, cep2, log):
+						msg="No parfile found for pulsar %s. Exiting..." % (psr)
+						if log != None: log.error(msg)
 						else: print msg
-        	                                # checking if par-file exist
-                	                        parfile="%s/%s.par" % (cep2.parfile_dir, re.sub(r'[BJ]', '', psr))
-                        	                if not os.path.exists(parfile):
-                                	                # checking another parfile name
-                                        	        parfile="%s/%s.par" % (cep2.parfile_dir, psr)
-                                                	if not os.path.exists(parfile):
-								msg="No parfile found for pulsar %s. Exiting..." % (psr)
-								if log != None: log.error(msg)
-								else: print msg
-                                        	                sys.exit(1)
-							else: 
-								msg="Found parfile '%s'. Continue..." % (parfile)
-								if log != None: log.info(msg)
-								else: print msg
-                                        	else:
-							msg="Found parfile '%s'. Continue..." % (parfile)
-							if log != None: log.info(msg)
-							else: print msg
+                                        	sys.exit(1)
 			else:
 				msg="No pulsar names are given. PULP will find the proper pulsar(s) to fold..."
 				if log != None: log.info(msg)
@@ -216,9 +218,11 @@ class CMDLine:
 			if not self.opts.is_nofold:
 				if len(self.psrs) == 0:
 					for sap in obs.saps:
-						if sap.source != "": log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
-						else: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, ", ".join(sap.psrs)))
-				if (len(self.psrs) != 0 and self.psrs[0] == "sapfind") or (len(self.psrs) != 0 and self.psrs[0] == "sapfind3"):
+						if sap.source != "" and check_pulsars(sap.source, self, cep2, None): log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
+						else: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, len(sap.psrs)>0 and sap.psrs[0] or ""))
+				if len(self.psrs) != 0 and self.psrs[0] == "sapfind":
+					for sap in obs.saps: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, len(sap.psrs)>0 and sap.psrs[0] or ""))
+				if len(self.psrs) != 0 and self.psrs[0] == "sapfind3":
 					for sap in obs.saps: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, ", ".join(sap.psrs)))
 				if len(self.psrs) != 0 and self.psrs[0] == "parset":
 					for sap in obs.saps: log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
@@ -229,7 +233,7 @@ class CMDLine:
 			log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
 			log.info("IS Only = %s" % (self.opts.is_incoh_only and "yes" or "no"))
 			log.info("CS Only = %s" % (self.opts.is_coh_only and "yes" or "no"))
-			if self.opts.rawdir != "":
+			if self.opts.rawdir != "/data":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
 				log.info("User-specified Parset file = %s" % (self.opts.parset))

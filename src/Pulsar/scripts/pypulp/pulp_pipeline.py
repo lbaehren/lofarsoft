@@ -11,7 +11,7 @@ import logging
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
 from pulp_parset import Observation, radial_distance, find_pulsars
-from pulp_usercmd import CMDLine
+from pulp_usercmd import CMDLine, check_pulsars
 from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 
@@ -208,16 +208,21 @@ class Pipeline:
 			log.info("Extracting archives in summary nodes, removing archives, moving log-files...")
 			for unit in [u for u in self.units if u.summary_node == sumnode]: 
 				result_archive="%s_sap%03d_tab%04d%s" % (obs.id, unit.sapid, unit.tabid, unit.archive_suffix)
-				# extracting archive
-				cmd="tar xvfz %s" % (result_archive)
-				self.execute(cmd, log, workdir=sumdir)
-				# removing archive
-				cmd="rm -f %s" % (result_archive)
-				self.execute(cmd, log, workdir=sumdir)
-				# moving log-file to corresponding SAP/BEAM directory
-				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
-					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/BEAM%d" % (obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.tabid)
+				if os.path.exists("%s/%s" % (sumdir, result_archive)):
+					# extracting archive
+					cmd="tar xvfz %s" % (result_archive)
 					self.execute(cmd, log, workdir=sumdir)
+					# removing archive
+					cmd="rm -f %s" % (result_archive)
+					self.execute(cmd, log, workdir=sumdir)
+					# moving log-file to corresponding SAP/BEAM directory
+					if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
+						cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/BEAM%d" % \
+							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.tabid)
+						self.execute(cmd, log, workdir=sumdir)
+				else:
+					log.error("Archive file %s does not exist in: %s" % (result_archive, sumdir))
+					raise Exception
 
 			# either "CS", "IS", "CV", .. 
 			data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
@@ -361,6 +366,7 @@ class Pipeline:
 class PipeUnit:
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		self.code = ""  # 2-letter code, CS, IS, CV, FE
+		self.stokes = "" # Stokes I, IQUV, or XXYY
 		self.sapid = tab.parent_sapid
 		self.tabid = tab.tabid
 		self.tab = tab
@@ -396,8 +402,9 @@ class PipeUnit:
 		# if pulsar is not given in the command line, I also have to find pulsar if parset entry is empty
 		if len(cmdline.psrs) == 0 or cmdline.psrs[0] == "parset":
 			for sap in obs.saps:
-				if self.sapid == sap.sapid and sap.source != "":
+				if self.sapid == sap.sapid and sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None):
 					self.psrs.append(sap.source)
+
 		# if --pulsar is not given and source field in parset is empty
 		if len(cmdline.psrs) == 0 and len(self.psrs) == 0:
 			for sap in obs.saps:
@@ -405,6 +412,7 @@ class PipeUnit:
 					self.psrs[:] = sap.psrs
 					break
 			if len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+
 		# if special word "tabfind" is given
 		if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind":
 			log.info("Searching for best pulsar for folding in SAP=%d TAB=%d..." % (self.sapid, self.tabid))
@@ -412,16 +420,20 @@ class PipeUnit:
 			if len(self.psrs) > 0: 
 				self.psrs = self.psrs[:1] # leave only one pulsar
 				log.info("%s" % (" ".join(self.psrs)))
+
+		# using pulsars from SAP
 		if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "sapfind3"):
 			for sap in obs.saps:
 				if self.sapid == sap.sapid:
 					self.psrs[:] = sap.psrs
 					break
 			if cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+
 		# if --pulsar is used but no special word
 		if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "tabfind" and \
 				cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
 			self.psrs[:] = cmdline.psrs # copying all items
+
 		# if pulsar list is still empty, and we did not set --nofold then exit
 		if len(self.psrs) == 0:
 			log.error("*** No pulsar found to fold and --nofold is not used for SAP=%d TAB=%d. Exiting..." % (self.sapid, self.tabid))
@@ -429,19 +441,9 @@ class PipeUnit:
 			
 		# checking if pulsars are in ATNF catalog, or if not par-files do exist fo them, if not - exit
 		for psr in self.psrs:
-			if psr not in cmdline.psrbs:
-				log.info("Warning [SAP=%d TAB=%d]: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % \
-					(self.sapid, self.tabid, psr, cep2.psrcatalog))
-				# checking if par-file exist
-				parfile="%s/%s.par" % (cep2.parfile_dir, re.sub(r'[BJ]', '', psr))
-				if not os.path.exists(parfile):
-					# checking another parfile name
-					parfile="%s/%s.par" % (cep2.parfile_dir, psr)
-					if not os.path.exists(parfile):
-						log.info("SAP=%d TAB=%d: No parfile found for pulsar %s. Exiting..." % (self.sapid, self.tabid, psr))
-						sys.exit(1)
-					else: log.info("SAP=%d TAB=%d: Found parfile '%s'. Continue..." % (self.sapid, self.tabid, parfile))
-				else: log.info("SAP=%d TAB=%d: Found parfile '%s'. Continue..." % (self.sapid, self.tabid, parfile))
+			if not check_pulsars(psr, cmdline, cep2, log):
+				log.info("*** No parfile found for pulsar %s for SAP=%d TAB=%d. Exiting..." % (psr, self.sapid, self.tabid))
+				sys.exit(1)
 		return self.psrs
 
 
@@ -556,8 +558,8 @@ class PipeUnit:
 			self.start_time=time.time()	
 
 			# start logging
-			self.log.info("%s SAP=%d TAB=%d (%s)    UTC start time is: %s  @node: %s" % \
-				(obs.id, self.sapid, self.tabid, self.code, time.asctime(time.gmtime()), cep2.current_node))
+			self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % \
+				(obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
 
 			# if user specified output dir (relative to /data/LOFAR_PULSAR_....)
 			if cmdline.opts.outdir != "":
@@ -826,6 +828,7 @@ class CSUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CS"
+		self.stokes = obs.stokesCS
 		self.beams_root_dir = "stokes"
 		self.raw2fits_extra_options="-CS -H"
 		self.nrChanPerSub = obs.nrChanPerSubCS
@@ -836,12 +839,27 @@ class CSUnit(PipeUnit):
 		self.outdir_suffix = "_red_py" # "_red"
 
 	def run(self, obs, cep2, cmdline, log):
-		PipeUnit.run(self, obs, cep2, cmdline, log)
+		# currently can only process Stokes I
+		if self.stokes == "I":
+			PipeUnit.run(self, obs, cep2, cmdline, log)
+		else:   # stub for Stokes IQUV
+			self.log = log
+			self.start_time=time.time()	
+
+			# start logging
+			self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
+
+			# finish
+			self.end_time=time.time()
+			self.total_time= self.end_time- self.start_time
+			self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
+			self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
 
 class ISUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "IS"
+		self.stokes = obs.stokesIS
 		self.beams_root_dir = "incoherentstokes"
 		self.raw2fits_extra_options = "-CS -H -IS"
 		self.nrChanPerSub = obs.nrChanPerSubIS
@@ -852,12 +870,27 @@ class ISUnit(PipeUnit):
 		self.outdir_suffix = "_redIS_py" # "_redIS"
 
 	def run(self, obs, cep2, cmdline, log):
-		PipeUnit.run(self, obs, cep2, cmdline, log)
+		# currently can only process Stokes I
+		if self.stokes == "I":
+			PipeUnit.run(self, obs, cep2, cmdline, log)
+		else:   # stub for Stokes IQUV
+			self.log = log
+			self.start_time=time.time()	
+
+			# start logging
+			self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
+
+			# finish
+			self.end_time=time.time()
+			self.total_time= self.end_time- self.start_time
+			self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
+			self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
 
 class CVUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CV"
+		self.stokes = obs.stokesCS
 		self.beams_root_dir = ""
 		self.raw2fits_extra_options=""
 		self.nrChanPerSub = obs.nrChanPerSubCS
@@ -872,7 +905,7 @@ class CVUnit(PipeUnit):
 		self.start_time=time.time()	
 
 		# start logging
-		self.log.info("%s SAP=%d TAB=%d (CV)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, time.asctime(time.gmtime()), cep2.current_node))
+		self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
 
 		# finish
 		self.end_time=time.time()
@@ -883,7 +916,8 @@ class CVUnit(PipeUnit):
 class FE_CSUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
-		self.code = "FE"
+		self.code = "FE/CS"
+		self.stokes = obs.stokesCS
 		self.beams_root_dir = ""
 		self.raw2fits_extra_options=""
 		self.nrChanPerSub = obs.nrChanPerSubCS
@@ -898,7 +932,7 @@ class FE_CSUnit(PipeUnit):
 		self.start_time=time.time()	
 
 		# start logging
-		self.log.info("%s SAP=%d TAB=%d (CS/FE)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, time.asctime(time.gmtime()), cep2.current_node))
+		self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
 
 		# finish
 		self.end_time=time.time()
@@ -909,7 +943,8 @@ class FE_CSUnit(PipeUnit):
 class FE_CVUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
-		self.code = "FE"
+		self.code = "FE/CV"
+		self.stokes = obs.stokesCS
 		self.beams_root_dir = ""
 		self.raw2fits_extra_options=""
 		self.nrChanPerSub = obs.nrChanPerSubCS
@@ -924,7 +959,7 @@ class FE_CVUnit(PipeUnit):
 		self.start_time=time.time()	
 
 		# start logging
-		self.log.info("%s SAP=%d TAB=%d (CV/FE)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, time.asctime(time.gmtime()), cep2.current_node))
+		self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
 
 		# finish
 		self.end_time=time.time()

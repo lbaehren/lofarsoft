@@ -45,9 +45,9 @@ def find_pulsars(rarad, decrad, cmdline, max_distance):
 	psrdist=np.array([radial_distance(rarad, decrad, (psrras[ii]/180.)*math.pi, (psrdecs[ii]/180.)*math.pi) for ii in np.arange(np.size(psrras))])
 	psrdist-=max_distance
 	crit=(psrdist<0)
-	psrs400[:]=psrs400[crit]
-	psrbs[:]=psrbs[crit]
-	psrs400=[float(s=='*' and 0 or s) for s in psrs400]
+	psrs400=psrs400[crit]
+	psrbs=psrbs[crit]
+	psrs400=[float(re.sub(r'^\*$', '0.0', s)) for s in psrs400]
 	# sort by flux in reverse order (getting the reversed list of indices)
 	ind=[ii for ii in reversed(np.argsort(psrs400))]
 	psrbs=psrbs[ind]
@@ -264,11 +264,13 @@ class Observation:
 		self.startdate=self.starttime=""
                 self.duration=0  # duration of obs in seconds
 
-                self.antenna=self.antenna_config=self.band=self.stokes=""
+                self.antenna=self.antenna_config=self.band=""
 		self.nstations=self.ncorestations=self.nremotestations=0
 		self.stations=[]
 		self.nodeslist=[]
 		self.IM=self.IS=self.CS=self.CV=self.FE=self.OCD=False    # False until it's checked to be otherwise
+		self.stokesIS = ""         # Stokes parameters for IS and CS
+		self.stokesCS = ""
 
 		self.nrSubbands = 0        # number of subbands
 		self.subbandList=""        # range of subbands, e.g. 77..320
@@ -484,11 +486,11 @@ class Observation:
                                 status=os.popen(cmd).readlines()
                                 if np.size(status) > 0:
                                         # getting Stokes string
-                                        self.stokes=status[0][:-1].split(" = ")[-1]
+                                        self.stokesCS=status[0][:-1].split(" = ")[-1]
                                         # in the transition phase there were some parset with just XY
                                         # this means just 2 files, one for X, another Y
                                         # now is always XXYY, i.e. 4 files get written
-                                        if self.stokes == "XXYY" or self.stokes == "XY":
+                                        if self.stokesCS == "XXYY" or self.stokesCS == "XY":
                                                 self.CV = True
                                                 self.CS = False
 
@@ -499,12 +501,11 @@ class Observation:
                 	# this info exists in parset file
                 	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
                         	self.IS = True
-				if self.stokes == "":
-					cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
-					status=os.popen(cmd).readlines()
-					if np.size(status) > 0:
-						# getting Stokes string
-						self.stokes=status[0][:-1].split(" = ")[-1]
+				cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
+				status=os.popen(cmd).readlines()
+				if np.size(status) > 0:
+					# getting Stokes string
+					self.stokesIS=status[0][:-1].split(" = ")[-1]
 
 	        # check if data are imaging
         	cmd="grep Output_Correlated.enabled %s" % (self.parset,)
@@ -523,12 +524,18 @@ class Observation:
 
                 # if Stokes are still undetermined (e.g. if obs is IM), then
                 # rereading default stokes for CS
-                if self.stokes == "":
+                if self.stokesCS == "":
                         cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
                         status=os.popen(cmd).readlines()
                         if np.size(status) > 0:
                                 # getting Stokes string
-                                self.stokes=status[0][:-1].split(" = ")[-1]
+                                self.stokesCS=status[0][:-1].split(" = ")[-1]
+                if self.stokesIS == "":
+                        cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
+                        status=os.popen(cmd).readlines()
+                        if np.size(status) > 0:
+                                # getting Stokes string
+                                self.stokesIS=status[0][:-1].split(" = ")[-1]
 
 		# Getting the list of subbands
 		cmd="grep Observation.subbandList %s" % (self.parset,)
@@ -665,7 +672,7 @@ class Observation:
 		prints info about the observation
 		"""
 		if log != None:
-			log.info("\n==============================================================")
+			log.info("\n================================================================")
 			log.info("ObsID: %s   Project: %s   PI: %s" % (self.id, self.project, self.projectPI))	
 			log.info("Parset: %s" % (self.parset))
 			log.info("Start UTC: %s %s  Duration: %s" % \
@@ -674,10 +681,10 @@ class Observation:
 			mode=""
 			if self.FE: mode+="FE "
 			if self.IM: mode+="Im "
-			if self.IS: mode+="IS "
-			if self.CS: mode+="CS "
+			if self.IS: mode+="IS (" + self.stokesIS + ") "
+			if self.CS: mode+="CS (" + self.stokesCS + ") "
 			if self.CV: mode+="CV "
-			log.info("%s   Band: %s   Mode: %s   OCD: %s   Stokes: %s" % (self.antenna_config, self.band, mode, self.OCD and "yes" or "no", self.stokes))
+			log.info("%s   Band: %s   Mode: %s   OCD: %s" % (self.antenna_config, self.band, mode, self.OCD and "yes" or "no"))
 			log.info("#stations: %d [%dCS, %dRS]" % (self.nstations, self.ncorestations, self.nremotestations))
 			log.info("Clock: %d MHz   Fc: %g MHz   BW: %g MHz" % (self.sampleClock, self.cfreq, self.bw))
 			log.info("#subbands: %d [%s]   SubWidth: %g kHz" % (self.nrSubbands, self.subbandList, self.subbandWidth))
@@ -700,4 +707,4 @@ class Observation:
 			else:
 				log.info("#SAPs: %d   Target: %s   #TABs: %d%s" % (self.nrBeams, self.saps[0].source, self.saps[0].nrTiedArrayBeams, \
 					self.saps[0].nrRings > 0 and " #Rings: %d RingSize: %g deg" % (self.saps[0].nrRings, self.saps[0].ringSize) or ""))
-			log.info("==============================================================")
+			log.info("================================================================")
