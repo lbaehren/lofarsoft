@@ -85,7 +85,7 @@ for station in stations:
         station.polarisations[0].parameter["antennas_spectral_power"]+station.polarisations[1].parameter["antennas_spectral_power"]
         ))
 
-    antennas_spectral_power_correction = cr.hArray([antennas_spectral_power [k] for k in selected_dipoles])
+    antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
 
     # Correct to expected level
     cr.hInverse(antennas_spectral_power_correction)
