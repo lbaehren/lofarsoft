@@ -320,7 +320,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 ##
 ## ==============================================================================
 
-add_subdirectory (dspsr)
+#add_subdirectory (dspsr)
 add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install)
 
 if (NOT TARGET dspsr)
