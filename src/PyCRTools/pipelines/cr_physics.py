@@ -76,6 +76,22 @@ for station in stations:
 
     fft_data.mul(weights)
 
+    # Get expected galactic noise strength
+    galactic_noise = cr.trun("GalacticNoise", timestamp = f["TIME"][0])
+
+    # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
+    antennas_spectral_power = dict(zip(
+        station.polarisations[0].parameter["antennas"].values()+station.polarisations[1].parameter["antennas"].values(),
+        station.polarisations[0].parameter["antennas_spectral_power"]+station.polarisations[1].parameter["antennas_spectral_power"]
+        ))
+
+    antennas_spectral_power_correction = cr.hArray([antennas_spectral_power [k] for k in selected_dipoles])
+
+    # Correct to expected level
+    cr.hInverse(antennas_spectral_power_correction)
+    cr.hMul(antennas_spectral_power_correction, galactic_noise.galactic_noise)
+    cr.hMul(fft_data[...], antennas_spectral_power_correction[...])
+
     # Get timeseries data
     timeseries_data = f.empty("TIMESERIES_DATA")
 

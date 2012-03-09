@@ -724,8 +724,8 @@ for full_filename in files:
 
         antennas_power=hArray(amplitudes[...].mean())
         results.update(dict(
-            antennas_spectral_power=list(antennas_power[good_antennas_index]),
-            station_spectral_power=antennas_power[good_antennas_index].mean().val()
+            antennas_spectral_power=list(antennas_power),
+            station_spectral_power=antennas_power.mean().val()
             ))
 
         print "---> Calculate baseline again, but now for multiplication with data to flatten the spectrum."
