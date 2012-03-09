@@ -147,10 +147,11 @@ if (UNIX)
 endif (UNIX)
 
 add_dependencies (presto
+  psrchive_install
   dspsr
   psrcat_install
   psrdada_install
-  psrchive_install
+#  psrchive_install
   tempo2_install
   fftw
   tempo_install
