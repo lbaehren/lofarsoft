@@ -182,7 +182,7 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 
 if (NOT TARGET psrchive)
 
-  set (psrchive_version   "20120308")
+  set (psrchive_version   "20120309")
   set (psrchive_name      "psrchive-${psrchive_version}")
   set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
   
@@ -321,7 +321,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 ## ==============================================================================
 
 #add_subdirectory (dspsr)
-add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install)
+#add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install)
 
 if (NOT TARGET dspsr)
   
@@ -385,7 +385,8 @@ add_custom_target (dspsr
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
-add_dependencies (dspsr dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+
 
 endif (NOT TARGET dspsr)
 

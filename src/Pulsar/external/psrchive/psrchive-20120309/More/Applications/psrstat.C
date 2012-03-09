@@ -37,7 +37,7 @@ public:
   void process (Pulsar::Archive*);
 
   void add_expressions (const std::string& str)
-  { separate (str, expressions, ","); }
+  { standard_separation (expressions, str); }
 
   void add_loop (const std::string& str)
   { loop.add_index( new TextIndex(optarg) ); }

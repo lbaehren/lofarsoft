@@ -1392,6 +1392,10 @@ T* TextInterface::factory (C& ptrs, std::string name_parse)
 {
   std::string name = stringtok (name_parse, ":");
 
+#ifdef _DEBUG
+  std::cerr << "TextInterface::factory name=" << name << std::endl;
+#endif
+
   Reference::To<T> result;
 
   if (name == "help")
@@ -1425,13 +1429,16 @@ T* TextInterface::factory (C& ptrs, std::string name_parse)
     throw Error (InvalidState, std::string(),
 		 "no instance named '" + name + "'");
 
+#ifdef _DEBUG
+  std::cerr << "TextInterface::factory options=" << name_parse << std::endl;
+#endif
+
   Reference::To<TextInterface::Parser> interface = result->get_interface();
 
-  while (!name_parse.empty())
-  {
-    std::string option = stringtok (name_parse, ",");
-    interface->process (option);
-  }
+  std::vector<std::string> options;
+  standard_separation (options, name_parse);
+  for (unsigned i=0; i<options.size(); i++)
+    interface->process (options[i]);
 
   return result.release();
 }
