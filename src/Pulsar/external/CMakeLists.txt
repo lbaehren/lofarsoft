@@ -378,15 +378,19 @@ add_custom_target (dspsr_preinstall
   )
 add_dependencies (dspsr_preinstall  tempo2_install psrchive_install psrdada_install psrcat_install dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
-add_custom_target (dspsr
+add_custom_target (dspsr_install
   COMMAND cp -r bin/* ${CMAKE_INSTALL_PREFIX}/bin/
   COMMAND cp -r include/* ${CMAKE_INSTALL_PREFIX}/include/
   COMMAND cp -r lib/* ${CMAKE_INSTALL_PREFIX}/lib/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
-add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_install tempo2_install psrchive_install psrdada_install psrcat_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
+
+  ## Register last step in the chain with the actual target
+  add_custom_target (dspsr ALL)
+  add_dependencies (dspsr_install tempo2_install psrchive_install psrdada_install psrcat_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
 endif (NOT TARGET dspsr)
 
