@@ -233,49 +233,6 @@ def avspc_blanks(c_list, image, rmsarr, c_wts, wtarr=None):
     return ch0, wtarr
 
 ########################################################################################
-    
-def windowaverage_cube(imagein, imageout, fac, chanrms, iniflags, c_wts, kappa, sbeam, freqin, calcrms_fromim):
-    from math import sqrt
-
-    nchan = imagein.shape[1]
-    new_n = imageout.shape[1]
-    beamlist = []
-    avimage_flags = N.zeros(new_n, bool)
-    crms_av = N.zeros(new_n)
-    freq_av = N.zeros(new_n)
-    for ichan in range(new_n):
-      if ichan < new_n-1:
-        strt = fac*ichan; stp = fac*ichan+fac
-      else:
-        strt = fac*ichan; stp = nchan
-      subim = imagein[0,strt:stp,:,:]
-      rmsarr = chanrms[strt:stp]
-      flags = iniflags[strt:stp]
-      c_list = N.arange(subim.shape[0])
-      c_list = c_list[N.where(~flags)[0]]    # only use unflagged channels
-      blank = N.isnan(subim)
-      hasblanks = blank.any()
-      if not hasblanks: 
-          imageout[0, ichan], dum = avspc_direct(c_list, subim, rmsarr, c_wts)
-      else:
-          imageout[0, ichan], dum = avspc_blanks(c_list, subim, rmsarr, c_wts)
-      beamlist.append(tuple(N.mean(sbeam[strt:stp][c_list], axis=0)))
-      dumr = freqin[strt:stp]
-      goodfreqs = dumr[N.where(~flags)[0]]
-      freq_av[ichan] = N.mean(goodfreqs)
-      avimage_flags[ichan] = N.product(flags)
-      subnan = N.isnan(imageout[0, ichan])
-      if not N.all(subnan):
-        if calcrms_fromim:  # then calculate rms from the averaged image, assumed to be large enuff
-          mean, rms, cmean, crms_av[ichan], cnt = _cbdsm.bstat(imageout[0, ichan], N.isnan(imageout[0, ichan]), kappa)
-        else:  # else just compute theoretical rms
-          crms_av[ichan] = 1.0/sqrt(N.sum(1.0/rmsarr[c_list]/rmsarr[c_list]))
-      else:
-        crms_av[ichan] = 0
-
-    return imageout, beamlist, freq_av, avimage_flags, crms_av 
-        
-########################################################################################
 
 def init_freq_collapse(img, wtarr):
     # Place appropriate, post-collapse frequency info in img

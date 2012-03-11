@@ -644,10 +644,7 @@ def make_ascii_str(img, glist, objtype='gaul'):
     """Makes a list of string entries for an ascii region file."""
     from _version import __version__, __revision__
     outstr_list = []
-    if img.opts.spectralindex_do: 
-        freq = "%.5e" % img.freq0
-    else:
-        freq = "%.5e" % img.cfreq
+    freq = "%.5e" % img.cfreq
 
     if objtype == 'gaul':
         outstr_list.append('# Gaussian list for '+img.filename+'\n')
@@ -905,7 +902,7 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
         print 'Object type unrecongnized.'
         return None
     if incl_spin:
-        names += ['spin1', 'espin1']
+        names += ['spec_indx', 'e_spec_indx']
     if incl_pol:    
         names += ['total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
                   'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_loerr',

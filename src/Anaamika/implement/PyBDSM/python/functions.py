@@ -439,11 +439,11 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
       if do_err: 
         if cov != None:
           if N.sum(sig != 1.) > 0:
-            err = N.array([sqrt(cov[i,i]) for i in range(len(p))])
+            err = N.array([sqrt(abs(cov[i,i])) for i in range(len(p))])
           else:
             chisq=sum(info["fvec"]*info["fvec"])
             dof=len(info["fvec"])-len(p)
-            err = N.array([sqrt(cov[i,i]*chisq/dof) for i in range(len(p))])
+            err = N.array([sqrt(abs(cov[i,i])*chisq/dof) for i in range(len(p))])
         else:
           p, err = [0, 0], [0, 0]
       else: err = [0]
@@ -696,7 +696,7 @@ def deconv2(gaus_bm, gaus_c):
     return (bmaj, bmin, bpa), ifail
 
 
-def get_errors(img, p, stdav):
+def get_errors(img, p, stdav, bm_pix=None):
 
     from const import fwsig
     from math import sqrt, log, pow, pi
@@ -715,14 +715,14 @@ def get_errors(img, p, stdav):
       size = pp[3:6]
       size = corrected_size(size)
       sq2 = sqrt(2.0)
-      bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
+      if bm_pix == None:
+          bm_pix = N.array([img.pixel_beam[0]*fwsig, img.pixel_beam[1]*fwsig, img.pixel_beam[2]])
       dumr = sqrt(abs(size[0]*size[1]/(4.0*bm_pix[0]*bm_pix[1])))
       dumrr1 = 1.0+bm_pix[0]*bm_pix[1]/(size[0]*size[0])
       dumrr2 = 1.0+bm_pix[0]*bm_pix[1]/(size[1]*size[1])
       dumrr3 = dumr*pp[0]/stdav
       d1 = sqrt(8.0*log(2.0))
       d2 = (size[0]*size[0]-size[1]*size[1])/(size[0]*size[0])
-
       try:
           e_peak = pp[0]*sq2/(dumrr3*pow(dumrr1,0.75)*pow(dumrr2,0.75))
           e_x0=size[0]/fwsig*sq2/(d1*dumrr3*pow(dumrr1,1.25)*pow(dumrr2,0.25))
@@ -731,9 +731,7 @@ def get_errors(img, p, stdav):
           e_min=size[1]*sq2/(dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))  # in fw
           e_pa=2.0/(d2*dumrr3*pow(dumrr1,0.25)*pow(dumrr2,1.25))
           e_pa=e_pa*180.0/pi
-          e_tot=pp[0]*sqrt(e_peak*e_peak/(pp[0]*pp[0])+
-                           (0.25/dumr/dumr)*(e_maj*e_maj/(size[0]*size[0])+
-                                             e_min*e_min/(size[1]*size[1])))
+          e_tot=pp[0]*sqrt(e_peak*e_peak/(pp[0]*pp[0])+(0.25/dumr/dumr)*(e_maj*e_maj/(size[0]*size[0])+e_min*e_min/(size[1]*size[1])))
       except:
           e_peak = 0.0
           e_x0 = 0.0
@@ -742,7 +740,6 @@ def get_errors(img, p, stdav):
           e_min = 0.0
           e_pa = 0.0
           e_tot = 0.0
-          
       if abs(e_pa) > 180.0: e_pa=180.0  # dont know why i did this
       errors = errors + [e_peak, e_x0, e_y0, e_maj, e_min, e_pa, e_tot]
 
@@ -752,7 +749,6 @@ def fit_chisq(x, p, ep, mask, funct, order):
     import numpy as N
 
     ind = N.where(N.array(mask)==False)[0]
-
     if order == 0: 
       fit = [funct(p)]*len(p)
     else:

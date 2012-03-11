@@ -86,7 +86,7 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     markers = []
     if ch0_image:
         images.append(img_ch0)
-        titles.append('Original Image\n(arbitrary logarithmic scale)')
+        titles.append('Original (ch0) Image\n(arbitrary logarithmic scale)')
         names.append('ch0')
     if ch0_islands:
         images.append(img_ch0)
@@ -688,21 +688,15 @@ def plot_sed(src, ax):
     global sky2pix
     global fig
     ax.cla()
-    spin = src.spin1
-    espin = src.espin1
-    spin1 = src.spin2
-    espin1 = src.espin2
-    take2nd = src.take2nd
+    norm = src.spec_norm
+    spin = src.spec_indx
+    espin = src.e_spec_indx
     y = src.specin_flux
     ey = src.specin_fluxE
     x = src.specin_freq
     ax.errorbar(N.log10(x/1e6), N.log10(y), yerr=ey/y, fmt='bo')
-    ax.plot(N.log10(x/1e6), N.log10(spin[0])+N.log10(x/src.specin_freq0)*spin[1], 
-            '-g', label="alpha = %.2f" % (spin[0],))
-    ax.plot(N.log10(x/1e6), N.log10(spin1[0])+N.log10(x/src.specin_freq0)*
-            spin1[1]+N.log10(x/src.specin_freq0)*
-            N.log10(x/src.specin_freq0)*spin1[2], '-m',
-            label="alpha1,2 = %.2f, %.2f" % (spin1[0], spin1[1]))
+    ax.plot(N.log10(x/1e6), N.log10(norm)+N.log10(x/src.specin_freq0)*spin, 
+            '-g', label="alpha = %.2f" % (spin,))
     pos = sky2pix(src.posn_sky_centroid)
     xpos = int(pos[0])
     ypos = int(pos[1])

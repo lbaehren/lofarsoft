@@ -18,6 +18,11 @@ import mylogger
 import pyfits
 import functions as func
 from output import write_islands
+from readimage import Op_readimage
+from preprocess import Op_preprocess
+from rmsimage import Op_rmsimage
+from threshold import Op_threshold
+from collapse import Op_collapse
 
 nisl = Int(doc="Total number of islands detected")
 
@@ -27,6 +32,12 @@ class Op_islands(Op):
     All detected islands are stored in the list img.islands,
     where each individual island is represented as an instance 
     of class Island.
+    
+    The option to detect islands on a different "detection" 
+    image is also available. This option is useful for example
+    when a beam correction is used in AWImager -- it is generally
+    better to detect sources on the uncorrected image, but 
+    to measure them on the corrected image.
 
     Prerequisites: module rmsimage should be run first.
     """
@@ -39,28 +50,52 @@ class Op_islands(Op):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands")
         opts = img.opts
 
-        img.islands = self.ndimage_alg(img, opts)
-        img.nisl = len(img.islands)
+        if opts.detection_image != '':
+            # Use a different image for island detection
+            #
+            # First, set up up an Image object and run a limited
+            # op_chain.
+            from bdsm import _run_op_list
+            mylogger.userinfo(mylog, "\nDetermining islands from detection image")
 
-        mylogger.userinfo(mylog, "Number of islands found", '%i' %
-                          len(img.islands))
-        
-        pyrank = N.zeros(img.ch0.shape, dtype=int) - 1
-        for i, isl in enumerate(img.islands):
-            isl.island_id = i
-            if i == 0:
-                pyrank[isl.bbox] = N.invert(isl.mask_active)-1
-            else:
-                pyrank[isl.bbox] = N.invert(isl.mask_active)*i
+            det_chain, det_opts = self.setpara_bdsm(img, opts.detection_image)
+            det_img = Image(det_opts)
+            det_img.log = 'Detection image'            
+            success = _run_op_list(det_img, det_chain)                    
+            if not success:
+                return
+
+            # Run through islands and correct the rms, mean and max values
+            img.island_labels = det_img.island_labels
+            corr_islands = []
+            for isl in det_img.islands:
+                corr_islands.append(isl.copy(img))
+            img.islands = corr_islands
+            img.nisl = len(img.islands)
+            img.pyrank = det_img.pyrank
             
+        else:
+            img.islands = self.ndimage_alg(img, opts)
+            img.nisl = len(img.islands)
+    
+            mylogger.userinfo(mylog, "Number of islands found", '%i' %
+                              len(img.islands))
+            
+            pyrank = N.zeros(img.ch0.shape, dtype=int) - 1
+            for i, isl in enumerate(img.islands):
+                isl.island_id = i
+                if i == 0:
+                    pyrank[isl.bbox] = N.invert(isl.mask_active)-1
+                else:
+                    pyrank[isl.bbox] = N.invert(isl.mask_active)*i
+                
+            if opts.output_all: write_islands(img)
+            if opts.output_fbdsm and has_fbdsm:
+                opf.write_fbdsm_islands(img)
+            if opts.savefits_rankim:
+                func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
 
-        if opts.output_all: write_islands(img)
-        if opts.output_fbdsm and has_fbdsm:
-            opf.write_fbdsm_islands(img)
-        if opts.savefits_rankim:
-            func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
-
-        img.pyrank = pyrank
+            img.pyrank = pyrank
         return img
 
     def ndimage_alg(self, img, opts):
@@ -139,6 +174,23 @@ class Op_islands(Op):
 
         #if saverank: func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
         return res
+
+    def setpara_bdsm(self, img, det_file):
+        from types import ClassType, TypeType
+
+        chain=[Op_readimage(), Op_collapse(), Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands()]
+        opts = img.opts.to_dict()
+        opts['filename'] = det_file
+        opts['detection_image'] = ''
+        
+        ops = []
+        for op in chain:
+          if isinstance(op, (ClassType, TypeType)):
+            ops.append(op())
+          else:
+            ops.append(op)
+
+        return ops, opts
 
 
 from image import *

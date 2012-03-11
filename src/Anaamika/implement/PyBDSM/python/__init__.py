@@ -119,10 +119,10 @@ def _run_op_list(img, chain):
         if stopat == 'isl' and isinstance(op, Op_islands): break
 
     # Run all op's
+    dc = '\033[34;1m'
+    nc = '\033[0m'
     for op in ops:
         if isinstance(op, Op_gausfit) and img.opts.interactive:
-            dc = '\033[34;1m'
-            nc = '\033[0m'
             print dc + '--> Displaying islands and rms image...' + nc
             img.show_fit(rms_image=True, mean_image=True,
                 ch0_islands=True, gresid_image=False, sresid_image=False,

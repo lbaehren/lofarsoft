@@ -353,7 +353,7 @@ class Op_readimage(Op):
     def init_freq(self, img):
         """Initialize frequency parameters and store them"""
         mylog = mylogger.logging.getLogger("PyBDSM.InitFreq")
-        if img.opts.frequency_sp != None and len(data.shape) == 3:
+        if img.opts.frequency_sp != None and img.image.shape[1] > 1:
             # If user specifies multiple frequencies, then let
             # collapse.py do the initialization 
             img.cfreq = img.opts.frequency_sp[0]

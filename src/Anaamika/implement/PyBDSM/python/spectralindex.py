@@ -1,118 +1,233 @@
 """Module Spectral index.
     
-    This module calculates spectral indices for Gaussians and sources for a multichannel cube. 
+   This module calculates spectral indices for Gaussians and sources for a multichannel cube. 
 
-   img.opts.beam_spectrum is None for now, assumed to be constant. Else is list of beam per channel,
-   beam being list of 3.
 """
 
 import numpy as N
 from image import *
 import mylogger
 import debug_figs as df
-#import test
 from gaul2srl import Source
 from copy import deepcopy as cp
 import _cbdsm
 import matplotlib.pyplot as pl
-#import pylab as pl
 import collapse 
 import sys
 import functions as func
 import time
 import statusbar
-
-specQC_phot = NArray(doc="Array of abs(fitted peak-expected value for str8 line fit excl data)/rms excl data")
-raw_rms = Float(doc=" ")
-phot_mask = NArray(doc = "")
-beam_spec_av = Option(None, List(Tuple(Float(), Float(), Float())), doc = "syn. beam per averaged channel")
-avimage = NArray(doc = "Averaged cube")
-freq = NArray(doc = "Freqs of unaveraged cube")
-case = String(doc = "Case of source")
-freq_av = NArray(doc = "Freqs of averaged cube")
-freq0 = Float(doc = "Fiducial frequency for calculating spectral indices")
-spin1 = Float(doc = "spectral index (1st order in log)", colname='Spec_Indx1', units=None)
-espin1 = Float(doc = "error in spectral index (1st order in log)", colname='E_Spec_Indx1', units=None)
-spin2 = Float(doc = "spectral index (2nd order in log)", colname='Spec_Indx2', units=None)
-espin2 = Float(doc = "error in spectral index (2nd order in log)", colname='E_Spec_Indx2', units=None)
-take2nd = Bool(doc = "spectral index fit with 2nd order in log makes sense or not")
-spec_descr = String(doc = "Description of source, if multiple")
-specind_win_size = Int(doc = "Size of averaging window for spectral index of M sources")
-specin_freq = NArray(doc = 'Frequency array used to calculate spectral index')
-specin_freq0 = NArray(doc = 'Reference frequency used to calculate spectral index')
-specin_flux = NArray(doc = 'Flux density array used to calculate spectral index')
-specin_fluxE = NArray(doc = 'Flux density error array used to calculate spectral index')
+from gausfit import Gaussian
 
 
-        #check size vs freq wrt beam and see if consistent
+# beam_spec_av = Option(None, List(Tuple(Float(), Float(), Float())), doc = "syn. beam per averaged channel")
+# avimage = NArray(doc = "Averaged cube")
+# freq = NArray(doc = "Freqs of unaveraged cube")
+# freq_av = NArray(doc = "Freqs of averaged cube")
+# freq0 = Float(doc = "Fiducial frequency for calculating spectral indices")
+Gaussian.spec_indx = Float(doc = "Spectral index", colname='Spec_Indx', units=None)
+Gaussian.e_spec_indx = Float(doc = "Error in spectral index", colname='E_Spec_Indx', units=None)
+Source.spec_indx = Float(doc = "Spectral index", colname='Spec_Indx', units=None)
+Source.e_spex_indx = Float(doc = "Error in spectral index", colname='E_Spec_Indx', units=None)
+# take2nd = Bool(doc = "spectral index fit with 2nd order in log makes sense or not")
+# spec_descr = String(doc = "Description of source, if multiple")
+# specind_win_size = Int(doc = "Size of averaging window for spectral index of M sources")
+# specin_freq = NArray(doc = 'Frequency array used to calculate spectral index')
+# specin_freq0 = NArray(doc = 'Reference frequency used to calculate spectral index')
+# specin_flux = NArray(doc = 'Flux density array used to calculate spectral index')
+# specin_fluxE = NArray(doc = 'Flux density error array used to calculate spectral index')
 
 class Op_spectralindex(Op):
-    """Computes spectral index of every gaussian and every source """
+    """Computes spectral index of every gaussian and every source.
+    
+    First do a quick fit to all channels to determine whether averaging over
+    frequency is needed to obtain desired SNR (set by img.opts.specind_snr).
+    This averaging should be done separately for both Gaussians and 
+    sources. For S and C sources, averaging only needs to be done once
+    (as the sources have only one Gaussian).
+                        
+    For M sources, averaging is needed twice: once to obtain the desired
+    SNR for the faintest Gaussian in the source, and once to obtain the
+    desired SNR for the source as a whole.
+                        
+    If averaging is needed for a given source, don't let the
+    number of resulting channels fall below 2. If it is not possible
+    to obtain the desired SNR in 2 or more channels, set spec_indx of
+    Gaussian/source to NaN.
+      
+   """
 
     def __call__(self, img):
-     global bar1
+        global bar1
+         
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
+        img.mylog = mylog
+        if img.opts.spectralindex_do:
+            mylogger.userinfo(mylog, '\nExtracting spectral indices for all ch0 sources')
+            shp = img.image.shape
+            if shp[1] > 1:
+                # calc freq, beam_spectrum for nchan channels
+                self.freq_beamsp_unav(img)
+                sbeam = img.beam_spectrum
+                freqin = img.freq
+                # calc initial channel flags if needed
+                iniflags = self.iniflag(img)    
+                img.specind_iniflags = iniflags
+                good_chans = N.where(iniflags == False)
+                unav_image = img.image[0][good_chans]
+                unav_freqs = freqin[good_chans]
+                nmax_to_avg = img.opts.specind_maxchan
+                nchan = unav_image.shape[0]
+                if nmax_to_avg == 0:
+                    nmax_to_avg = nchan
+                
+                # calculate the rms map of each unflagged channel
+                bar1 = statusbar.StatusBar('Determing rms for channels in image ..... : ', 0, nchan)
+                if img.opts.quiet == False:
+                    bar1.start()
+                rms_spec = self.rms_spectrum(img, unav_image) # bar1 updated here
+        
+                bar2 = statusbar.StatusBar('Calculating spectral indices for sources  : ', 0, img.nsrc)
+                c_wts = img.opts.collapse_wt
+                snr_desired = img.opts.specind_snr
+        
+                if img.opts.quiet == False and img.opts.verbose_fitting == False:
+                    bar2.start()
+                for src in img.sources:
+                    isl = img.islands[src.island_id]
+                    isl_bbox = isl.bbox
+                    
+                    # Fit each channel with ch0 Gaussian(s) of the source, 
+                    # allowing only the normalization to vary.
+                    chan_images = unav_image[:, isl_bbox[0], isl_bbox[1]]
+                    chan_rms = rms_spec[:, isl_bbox[0], isl_bbox[1]]
+                    beamlist = img.beam_spectrum
+                    unavg_total_flux, e_unavg_total_flux = self.fit_channels(img, chan_images, chan_rms, src, beamlist)
 
-     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"SpectIndex")
-     img.mylog = mylog
-     if img.opts.spectralindex_do:
-      mylogger.userinfo(mylog, '\nExtracting spectral indices for all sources')
-      shp = img.image.shape
-      if shp[1] > 1:
-        bar1 = statusbar.StatusBar('Determing rms for channels in image ..... : ', 0, shp[1])
-                                                # calc freq, beam_spectrum for nchan channels
-        if img.opts.quiet == False:
-          bar1.start()
-        self.freq_beamsp_unav(img)
-                                                # calc initial channel flags if needed
-        iniflags = self.iniflag(img)    
-        img.iniflags = iniflags
-                                                # preaverage to ~nchan0 channels; get modified beam sp
-        if shp[1] >= 2*img.opts.specind_nchan0:  
-            avimage, avimage_flags = self.pre_av(img, shp, iniflags)
-            img.avimage_flags = avimage_flags
-        else:   
-            avimage = img.image[0]
-            img.beam_spec_av = img.beam_spectrum
-            img.freq_av = img.freq
-            img.freq0 = N.median(img.freq) # this should not be cfreq
-            img.avimage_flags = iniflags
-            img.avimage_crms = img.channel_clippedrms
-            mylog.info('%s %i %s' % ('Kept all ',shp[1]," channels "))
-        img.avimage = avimage
-        if img.opts.output_all:
-            func.write_image_to_file(img.use_io, img.imagename + '.avimage.fits', N.transpose(img.avimage, (0,2,1)), img, img.indir)
-                                                # calculate the rms of each channel
+                    # Check for upper limits and mask. gaus_mask is array of (N_channels x N_gaussians)
+                    # and is True if measured flux is upper limit. n_good_chan_per_gaus is array of N_gaussians
+                    # that gives number of unmasked channels for each Gaussian.
+                    gaus_mask, n_good_chan_per_gaus = self.mask_upper_limits(unavg_total_flux, e_unavg_total_flux, snr_desired)
+        
+                    # Average if needed and fit again
+                    # First find flux of faintest Gaussian of source and use it to estimate rms_desired
+                    gflux = []
+                    for g in src.gaussians:
+                        gflux.append(g.peak_flux)
+                    rms_desired = min(gflux)/snr_desired
+                    total_flux = unavg_total_flux
+                    e_total_flux = e_unavg_total_flux   
+                    freq_av = unav_freqs     
+                    nchan = chan_images.shape[0]
+                    nchan_prev = nchan
+                    while min(n_good_chan_per_gaus) < 2 and nchan > 2:
+                        avimages, beamlist, freq_av, crms_av = self.windowaverage_cube(chan_images, rms_desired, chan_rms, 
+                                    c_wts, sbeam, freqin, nmax_to_avg=nmax_to_avg)
+                        total_flux, e_total_flux = self.fit_channels(img, avimages, crms_av, src, beamlist)                
+                        gaus_mask, n_good_chan_per_gaus = self.mask_upper_limits(total_flux, e_total_flux, snr_desired)
+                        nchan = avimages.shape[0]
+                        if nchan == nchan_prev:
+                            break
+                        nchan_prev = nchan
+                        rms_desired *= 0.8
+                    
+                    # Now fit Gaussian fluxes to obtain spectral indices.
+                    # Only fit if there are detections (at specified sigma threshold) 
+                    # in at least two bands. If not, don't fit and set spec_indx 
+                    # and error to NaN.
+                    for ig, gaussian in enumerate(src.gaussians):
+                        npos = len(N.where(total_flux[:, ig] > 0.0)[0])
+                        if img.opts.verbose_fitting:
+                            print 'Gaussian #%i : averaged to %i channels, of which %i meet SNR criterion' % (gaussian.gaus_num, 
+                                   len(total_flux[:, ig]), n_good_chan_per_gaus[ig])
+                        if n_good_chan_per_gaus[ig] < 2 or npos < 2:
+                            gaussian.spec_indx = N.NaN
+                            gaussian.e_spec_indx = N.NaN
+                            gaussian.spec_norm = N.NaN
+                            gaussian.specin_flux = N.NaN
+                            gaussian.specin_fluxE = N.NaN
+                            gaussian.specin_freq = N.NaN
+                            gaussian.specin_freq0 = N.NaN
+                        else:
+                            good_fluxes_ind = N.where(gaus_mask[:, ig] == False)
+                            fluxes_to_fit = total_flux[:, ig][good_fluxes_ind]
+                            e_fluxes_to_fit = e_total_flux[:, ig][good_fluxes_ind]
+                            freqs_to_fit = freq_av[good_fluxes_ind]
+                            fit_res = self.fit_specindex(freqs_to_fit, fluxes_to_fit, e_fluxes_to_fit)
+                            gaussian.spec_norm, gaussian.spec_indx, gaussian.e_spec_indx = fit_res
+                            gaussian.specin_flux = fluxes_to_fit
+                            gaussian.specin_fluxE = e_fluxes_to_fit
+                            gaussian.specin_freq = freqs_to_fit
+                            gaussian.specin_freq0 = N.median(freqs_to_fit)
+        
+                    # Next fit total source fluxes for spectral index.
+                    if len(src.gaussians) > 1:
+                        # First, check unaveraged SNRs for total source.
+                        src_total_flux = N.zeros((chan_images.shape[0], 1))
+                        src_e_total_flux = N.zeros((chan_images.shape[0], 1))
+                        src_total_flux[:,0] = N.sum(unavg_total_flux, 1) # sum over all Gaussians in source to obtain total fluxes in each channel
+                        src_e_total_flux[:,0] = N.sqrt(N.sum(N.power(e_unavg_total_flux, 2.0), 1))
+                        src_mask, n_good_chan = self.mask_upper_limits(src_total_flux, src_e_total_flux, snr_desired)
+                    
+                        # Average if needed and fit again
+                        rms_desired = src.peak_flux_max/snr_desired
+                        total_flux = unavg_total_flux
+                        e_total_flux = e_unavg_total_flux
+                        freq_av = unav_freqs     
+                        nchan = chan_images.shape[0]
+                        nchan_prev = nchan
+                        while n_good_chan < 2 and nchan > 2:
+                            avimages, beamlist, freq_av, crms_av = self.windowaverage_cube(chan_images, rms_desired, chan_rms, 
+                                        c_wts, sbeam, freqin, nmax_to_avg=nmax_to_avg)
+                            total_flux, e_total_flux = self.fit_channels(img, avimages, crms_av, src, beamlist)                
+                            src_total_flux = N.sum(total_flux, 1) # sum over all Gaussians in source to obtain total fluxes in each channel
+                            src_e_total_flux = N.sqrt(N.sum(N.power(e_total_flux, 2.0), 1))
+                            src_mask, n_good_chan = self.mask_upper_limits(src_total_flux, src_e_total_flux, snr_desired)
+                            nchan = avimages.shape[0]
+                            if nchan == nchan_prev:
+                                break
+                            nchan_prev = nchan
+                            rms_desired *= 0.8
+                        
+                        # Now fit source for spectral index.
+                        if img.opts.verbose_fitting:
+                            print 'Source #%i : averaged to %i channels, of which %i meet SNR criterion' % (src.source_id, 
+                                  len(src_total_flux), nchan)
+                        npos = len(N.where(src_total_flux > 0.0))
+                        if n_good_chan < 2 or npos < 2:
+                            src.spec_indx = N.NaN
+                            src.e_spec_indx = N.NaN
+                            src.spec_norm = N.NaN
+                            src.specin_flux = N.NaN
+                            src.specin_fluxE = N.NaN
+                            src.specin_freq = N.NaN
+                            src.specin_freq0 = N.NaN
+                        else:
+                            good_fluxes_ind = N.where(src_mask == False)
+                            fluxes_to_fit = src_total_flux[good_fluxes_ind]
+                            e_fluxes_to_fit = src_e_total_flux[good_fluxes_ind]
+                            freqs_to_fit = freq_av[good_fluxes_ind[0]]
+                            fit_res = self.fit_specindex(freqs_to_fit, fluxes_to_fit, e_fluxes_to_fit)
+                            src.spec_norm, src.spec_indx, src.e_spec_indx = fit_res
+                            src.specin_flux = fluxes_to_fit
+                            src.specin_fluxE = e_fluxes_to_fit
+                            src.specin_freq = freqs_to_fit
+                            src.specin_freq0 = N.median(freqs_to_fit)
+                    else:
+                        src.spec_norm = src.gaussians[0].spec_norm
+                        src.spec_indx = src.gaussians[0].spec_indx
+                        src.e_spec_indx = src.gaussians[0].e_spec_indx
+                        src.specin_flux = src.gaussians[0].specin_flux
+                        src.specin_fluxE = src.gaussians[0].specin_fluxE
+                        src.specin_freq = src.gaussians[0].specin_freq
+                        src.specin_freq0 = src.gaussians[0].specin_freq0
 
-        nchan = avimage.shape[0]
-        rms_spec = self.rms_spectrum(img, avimage) # bar1 updated here
-
-        bar2 = statusbar.StatusBar('Calculating spectral indices for sources  : ', 0, img.nsrc)
-        if img.opts.quiet == False:
-            bar2.start()
-        for src in img.sources:
-          if src.code in ['S', 'C']:
-            isl = img.islands[src.island_id]
-            case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
-            src.case = str(case)
-            if case == 1: para, epara, q_spec, spin_para = self.sc_case1(img, src, avimage, isl.bbox, nchan, True, \
-                               img.freq_av, img.beam_spec_av, src.rms_chan)
-            if case == 2 or case == 3: para, epara, q_spec, spin_para = self.sc_case23(img, src, casepara, avimage, nchan)
-            src.spec_descr = " "; src.specind_win_size = 0
-            gaus = src.gaussians[0]
-            spin, espin, spin1, espin1, take2nd = spin_para
-            gaus.spin1 = spin; gaus.espin1 = espin; gaus.spin2 = spin1; gaus.espin2 = espin1; gaus.take2nd = take2nd
-          if src.code == 'M':
-            isl = img.islands[src.island_id]
-            case, casepara = self.findcase(img, src, nchan, avimage, rms_spec)
-            src.case = str(case)
-            para, epara, q_spec, spin_para = self.msource(img, src, rms_spec, avimage, casepara, nchan)
-            
-          if bar2.started:
-            bar2.increment()
-  
-      else:
-        mylog.warning('Image has only one channel. Spectral index module disabled.')
-        img.opts.spectralindex_do = False
+                    if bar2.started:
+                        bar2.increment()
+       
+            else:
+              mylog.warning('Image has only one channel. Spectral index module disabled.')
+              img.opts.spectralindex_do = False
 
 ####################################################################################
     def flagchans_rmschan(self, crms, zeroflags, iniflags, cutoff):
@@ -121,24 +236,19 @@ class Op_spectralindex(Op):
         which are more than cutoff*r1 away from median of rms. If this is less than 10 %
         of all channels, flag them. 
         
-        #Also, if you include channels which are more than 
-        #cutoff2*r1 away AND right next to a zeroflags (NaN image) channel,  and you get <10%
-        #flags, flag that too. Obviously cutoff2 < cutoff to make sense. 
-        
         """
 
-                                                                # crms_rms and median dont include rms=0 channels
+        # crms_rms and median dont include rms=0 channels
         nchan = len(crms)
         mean, rms, cmean, crms_rms, cnt = _cbdsm.bstat(crms, zeroflags, cutoff)
         zeroind = N.where(crms==0)[0]
         median = N.median(N.delete(crms, zeroind))
         badind = N.where(N.abs(N.delete(crms, zeroind) - median)/crms_rms >=cutoff)[0]
         frac = len(badind)/(nchan - len(zeroind))
-        #for i in range(nchan):
             
         if frac <= 0.1: 
-          badind = N.where(N.abs(crms - median)/crms_rms >=cutoff)[0]
-          iniflags[badind] = True
+            badind = N.where(N.abs(crms - median)/crms_rms >=cutoff)[0]
+            iniflags[badind] = True
 
         return iniflags
 
@@ -156,11 +266,11 @@ class Op_spectralindex(Op):
         crms = img.channel_clippedrms
 
         for ichan in range(nchan):
-          if crms[ichan] == 0: zeroflags[ichan] = True
+            if crms[ichan] == 0: zeroflags[ichan] = True
         iniflags = cp(zeroflags)
 
         if img.opts.flagchan_rms:
-          iniflags = self.flagchans_rmschan(crms, zeroflags, iniflags, 4.0) 
+            iniflags = self.flagchans_rmschan(crms, zeroflags, iniflags, 4.0) 
 
         return iniflags
         
@@ -173,68 +283,26 @@ class Op_spectralindex(Op):
         sbeam = img.opts.beam_spectrum 
         if sbeam != None and len(sbeam) != shp[1]: sbeam = None  # sanity check
         if sbeam == None:
-          sbeam = [img.beam]*shp[1]
+            sbeam = [img.beam]*shp[1]
 
         img.beam_spectrum = sbeam
         img.freq = N.zeros(shp[1])
         crval, cdelt, crpix = img.freq_pars
         if crval == 0.0 and cdelt == 0.0 and crpix == 0.0 and \
-                img.opts.frequency == None:
+                img.opts.frequency_sp == None:
             raise RuntimeError("Frequency info not found in header "\
                                    "and frequencies not specified by user")
         else:
-            if img.opts.frequency == None:
+            if img.opts.frequency_sp == None:
                 for ichan in range(shp[1]):
                     ich = ichan+1
-                    img.freq[ichan] = crval+cdelt*(ich-crpix)
+                    img.freq[ichan] = crval+cdelt*(ich-crpix) #ff = crval+cdelt*(1.-crpix)
             else:
-                if len(img.opts.frequency) != shp[1]:
+                if len(img.opts.frequency_sp) != shp[1]:
                     raise RuntimeError("Number of channels does not match number "\
                                  "of frequencies specified by user")
                 for ichan in range(shp[1]):
-                    img.freq[ichan] = img.opts.frequency[ichan]
-
-
-####################################################################################
-    def pre_av(self, img, shp, iniflags):
-        """ Pre-averages the image cube so that it has roughly img.opts.specind_nchan0 number of channels.
-            Does this only when nchan > twice this value.
-        """
-        import math
-        mylog = img.mylog
-
-        nchan0 = img.opts.specind_nchan0
-        nchan = shp[1]
-        fac = nchan/nchan0
-        nn = nchan*1.0/fac
-        remain = nn-math.floor(nn)
-        if remain <= 0.5:
-          new_n = int(math.floor(nn))
-        else:
-          new_n = int(math.ceil(nn))
-        image = N.zeros((new_n, shp[2], shp[3]))
-
-        d = collapse.windowaverage_cube(imagein=img.image[0], imageout=image, fac=fac, chanrms=img.channel_clippedrms, \
-                iniflags=iniflags, c_wts='rms', kappa=img.opts.kappa_clip, sbeam=N.array(img.beam_spectrum), 
-                freqin=img.freq, calcrms_fromim=True)
-        image, img.beam_spec_av, freq_av, avimage_flags, crms_av = d
-        img.freq_av = freq_av
-        img.freq0 = N.median(img.freq_av) # this is not the same as cfreq
-        img.avimage_crms = crms_av
-                                                   # flag channels based on high rms if asked for, again
-        if img.opts.flagchan_rms:
-          avimage_flags = self.flagchans_rmschan(crms_av, avimage_flags, avimage_flags, 3.0) 
-                                                        # calc beams directly if needed
-        if img.opts.beam_sp_derive:
-          f0 = img.freq0
-          bmaj, bmin, bpa = img.beam
-          for ichan in range(new_n):
-            f = img.freq_av[ichan]
-            img.beam_spec_av[ichan] = tuple([bmaj*f0/f, bmin*f0/f, bpa])
-           
-        mylog.info('%i %s %i %s' % (nchan," channels first averaged to ",new_n," channels"))
-        
-        return image, avimage_flags
+                    img.freq[ichan] = img.opts.frequency_sp[ichan]
 
 ####################################################################################
     def rms_spectrum(self, img, image):
@@ -245,786 +313,62 @@ class Op_spectralindex(Op):
         nchan = image.shape[0]
         rms_map = img.use_rms_map
         map_opts = (img.opts.kappa_clip, img.rms_box, img.opts.spline_rank)
-        chanflag = img.avimage_flags
 
         if rms_map:
-          rms_spec = N.zeros(image.shape)
-          mean = N.zeros(image.shape[1:])
-          rms = N.zeros(image.shape[1:])
-          median_rms = N.zeros(nchan)
-          for ichan in range(nchan):
-            if bar1.started:
-                bar1.increment()
-            if not chanflag[ichan]:
-              dumi = Op_rmsimage()
-              Op_rmsimage.map_2d(dumi, image[ichan], mean, rms, None, *map_opts)
-              rms_spec[ichan,:,:] = rms
-              median_rms[ichan] = N.median(rms)
+            rms_spec = N.zeros(image.shape)
+            mean = N.zeros(image.shape[1:])
+            rms = N.zeros(image.shape[1:])
+            median_rms = N.zeros(nchan)
+            for ichan in range(nchan):
+                if bar1.started:
+                    bar1.increment()
+                dumi = Op_rmsimage()
+                Op_rmsimage.map_2d(dumi, image[ichan], mean, rms, None, *map_opts)
+                rms_spec[ichan,:,:] = rms
+                median_rms[ichan] = N.median(rms)
         else:
-          rms_spec = N.zeros(nchan)
-          avimage_crms = img.avimage_crms
-          for ichan in range(nchan):
-            if bar1.started:
-                bar1.increment()
-            if not chanflag[ichan]:
+            rms_spec = N.zeros(nchan)
+            avimage_crms = img.avimage_crms
+            for ichan in range(nchan):
+              if bar1.started:
+                  bar1.increment()
               rms_spec[ichan] = avimage_crms[ichan]
-          median_rms = rms_spec
-          ### plot for debugging
-          if img.opts.debug_figs_3_flaggedchan:
-            pl.figure() 
-            pl.subplot(211); pl.plot(img.channel_clippedrms, '*r-'); ind=N.where(img.iniflags)[0]; 
-            pl.plot(N.arange(len(img.iniflags))[ind], img.channel_clippedrms[ind], '*b')
-            pl.title('All channels (blue=flagged)')
-            pl.subplot(212); pl.plot(avimage_crms, '*r-'); ind=N.where(chanflag)[0]; 
-            pl.plot(N.arange(len(chanflag))[ind], avimage_crms[ind], '*b')
-            pl.title('Averaged channels (blue=flagged)')
+            median_rms = rms_spec
+            ### plot for debugging
+            if img.opts.debug_figs_3_flaggedchan:
+                pl.figure() 
+                pl.subplot(211); pl.plot(img.channel_clippedrms, '*r-'); ind=N.where(img.iniflags)[0]; 
+                pl.plot(N.arange(len(img.iniflags))[ind], img.channel_clippedrms[ind], '*b')
+                pl.title('All channels (blue=flagged)')
+                pl.subplot(212); pl.plot(avimage_crms, '*r-'); ind=N.where(chanflag)[0]; 
+                pl.plot(N.arange(len(chanflag))[ind], avimage_crms[ind], '*b')
+                pl.title('Averaged channels (blue=flagged)')
 
         str1 = " ".join(["%9.4e" % n for n in median_rms])
         if rms_map:        
-          mylog.debug('%s %s ' % ('Median rms of channels : ', str1))
-          mylog.info('RMS image made for each channel')
+            mylog.debug('%s %s ' % ('Median rms of channels : ', str1))
+            mylog.info('RMS image made for each channel')
         else:
-          mylog.debug('%s %s ' % ('RMS of channels : ', str1))
-          mylog.info('Clipped rms calculated for each channel')
+            mylog.debug('%s %s ' % ('RMS of channels : ', str1))
+            mylog.info('Clipped rms calculated for each channel')
 
         return rms_spec
 
-####################################################################################
-    def findcase(self, img, src, nchan, image, rms_spec):
-        """ Case I, II or III.
 
-        S0 = ch0 flux; K = threshold
-        rms_i = rms for channel i for island isl; S_i = maxflux in channel i.
+####################################################################################
+    def fit_specindex(self, freqarr, fluxarr, efluxarr, do_log=False):
+        """ Fits spectral index to data.
         
-        Case I  : S0 >= K * rms_i for all  i and S_i >= K * rms_i for all  i
-        Case II : S0 >= K * rms_i for all  i and S_i >= K * rms_i for some i
-        Case III: S0 >= K * rms_i for some i 
-        """
-
-        S0 = src.peak_flux_max
-        K = img.opts.specind_kappa
-        n,m = image.shape[1:]
-        if img.use_rms_map:
-          rms_i = N.zeros(nchan)
-          for ichan in range(nchan):
-            rms_i[ichan] = rms_spec[ichan][src.bbox].mean()
-        else:
-          rms_i = rms_spec
-        src.rms_chan = rms_i
-
-        posn = img.sky2pix(src.posn_sky_max)
-        x, y = N.array(posn).round()
-        S_i = N.zeros(nchan)
-        for ichan in range(nchan):
-          S_i[ichan] = N.max(image[ichan,max(0,x-1):min(n,x+2),max(0,y-1):min(m,y+2)])
-          
-        cond1 = S0 >= K * rms_i 
-        cond2 = S_i >= K * rms_i 
-        flags = img.avimage_flags
-        ind = N.where(~flags)[0]
-        cond1 = cond1[ind]; cond2 = cond2[ind]
-
-        case = 0
-        if cond1.all() and cond2.all(): case = 1
-        if cond1.all() and not cond2.all(): case = 2
-        if not cond1.all(): case = 3
-
-        return case, [S0, S_i, K, rms_i]
-
-####################################################################################
-    def findcase_1(self, fl, noise, mask):
-
-        cond = fl >= noise
-        ind = N.where(~mask)[0]
-        cond = cond[ind]
-
-        if cond.all(): 
-          case = 1
-        else:
-          if cond.any(): 
-            case = 2
-          else:
-            case = 3
-
-        return case
-####################################################################################
-    def sc_case1(self, img, src, avimage, bbox, nchan, direct, freqarr, beams, src_rms_chan, chanmask = None):
-
-      import functions as func
-      from const import fwsig
-      import math
-      mylog = img.mylog
-
-      isl = img.islands[src.island_id]
-      para = []; epara = []; mompara = []; 
-      cdeltsq = img.wcs_obj.acdelt[0]*img.wcs_obj.acdelt[1]
-      cbmaj, cbmin, cbpa = N.transpose(beams) 
-      if chanmask == None: chanmask = img.avimage_flags
-                                                      # get the region to fit, for each source. rank val=gausnum+1
-      reg_rank, reg_bbox = self.get_case1_region(img, src)
-      gaus = src.gaussians[0]
-      g_id = gaus.gaussian_idx+1
-      rmask = N.where(reg_rank == g_id, False, True)
-      p_ini = func.g2param(gaus)
-      p_ini[1] = p_ini[1]-isl.origin[0]; p_ini[2] = p_ini[2]-isl.origin[1]
-      for ichan in range(nchan):
-                                                      # fit a 6-para gaussian using scipy (not yet MGFunction)
-        if not chanmask[ichan]: 
-          chimage = avimage[ichan]
-          data = chimage[bbox]
-          x_ax, y_ax = N.indices(data.shape) 
-          if N.isnan(data[N.where(isl.mask_active==False)]).any():
-            p_fit = [float("NaN")]*7
-            errors = [float("NaN")]*7
-            chanmask[ichan] = True
-          else:
-            p_fit, ierr = func.fit_gaus2d(data, p_ini, x_ax, y_ax, rmask)
-                                                        # calc total flux as well, for that channel
-            p_fit = list(p_fit) 
-            total = p_fit[0]*p_fit[3]*p_fit[4]/(cbmaj[ichan]*cbmin[ichan])*cdeltsq*fwsig*fwsig
-            p_fit.append(total)
-            errors = func.get_errors(img, p_fit, src_rms_chan[ichan])
-          if img.opts.debug_figs_1_gaufit_ch: 
-            df.test_spectralindex_chfit1(img, isl, data, rmask, x_ax, y_ax, p_ini, p_fit, ichan)
-        else:
-          p_fit = [float("NaN")]*7
-          errors = [float("NaN")]*7
-                                                        # add to list
-        para.append(list(p_fit))
-        epara.append(list(errors))
-
-      if img.opts.debug_figs_2_gaufit_ch: 
-        df.test_spectralindex_chfit2(para, epara, nchan, p_ini, src.island_id)
-                                                        # get 6-moments
-                                                        # check quality for astrometry and photometry
-      q_spec = self.spectralquality(img, para, epara, src.island_id, freqarr, chanmask, img.opts.specind_dolog)
-
-                                                        # quality control and flagging
-      self.spectral_qc_flag(src, q_spec, chanmask) 
-      if N.any(src.phot_mask): mylog.debug('%s %i %s %i %s ' % ('Island ',isl.island_id, ' : flagged ', \
-         N.sum(src.phot_mask), ' channels for fitting spectral index'))
-
-                                                        #fit sp.in., calc quality flag
-      d = self.fit_spectralindex(img, src, para, epara, freqarr, img.opts.specind_dolog)
-                                                        # spin for src itself
-      srcslice = [slice(0, nchan, None)]+bbox
-      im = avimage[srcslice]
-      self.calc_src_spin(img, src, im, rmask, freqarr)
-      ind1 = N.where(src.phot_mask == False)[0]
-      gaus.specin_freq = freqarr[ind1]
-      gaus.specin_freq0 = img.freq0
-      if img.opts.specind_flux =='peak': ind = 0
-      else: ind = 6
-      gaus.specin_flux = N.array(para)[:,ind][ind1]
-      gaus.specin_fluxE = N.array(epara)[:,ind][ind1]
-
-      ### plots for debug_figs
-      if img.opts.debug_figs_4_caseI_spin: 
-        if direct: 
-          pl.figure()
-          pl.title('Case I: source no. '+str(src.island_id))
-        spin, espin, spin1, espin1, take2nd = d
-        y = N.array(para)[:,6]; ey = N.array(epara)[:,6]; x = freqarr/img.freq0
-        ind = N.where(~chanmask)[0]; ind1 = N.where(chanmask)[0]
-        pl.plot(N.log10(x[ind]), N.log10(y[ind]), '*-b')
-        pl.errorbar(N.log10(x[ind]), N.log10(y[ind]), ey[ind]/y[ind])
-        pl.plot(N.log10(x[ind1]), N.log10([N.median(y[ind])]*len(ind1)), '*r')
-        pl.plot(N.log10(x), N.log10(spin[0])+N.log10(x)*spin[1], '-g')
-        pl.plot(N.log10(x), N.log10(spin1[0])+N.log10(x)*spin1[1]+N.log10(x)*N.log10(x)*spin1[2], '-m')
-
-      return para, epara, q_spec, d
-          
-
-####################################################################################
-    def sc_case23(self, img, src, casepara, avimage, nchan):
-        """ First calculate expected flux at caseII channels. 
-        
-        If the end channels are caseII, just flag them. If just one channel is case II or, 
-        apart from edge, only one channel in the middle is case II, flag it. Now if you dont 
-        have any more caseII channels, proceed as in case I.
-        If you still have caseII channels, then do the following:
-        
-        Compute expected spectrum using Case I points alone (case II can be due to curvature but 
-        also due to high rms, and bad channels so fit straight line and use this conservatively).
-
-        If all unflagged caseII channels are within 3sigma range of expected value, then its ok, just 
-        average channels a bit and proceed since this can be due to curvature but is probably due to 
-        high rms instead.
-
-        If some channels are outside 3sigma expected range, then definitely curvature is important 
-        (or bad channels but then should be flagged through some other method like really high 
-        channel rms - DO THAT) and ASURV should be used.
-
-        Also do case 3 here.
-
-        """
-
-        import functions as func
-        from const import fwsig
-        from math import sqrt
-        mylog = img.mylog
-
-        minchan = img.opts.specind_minchan
-        S0, S_i, K, rms_i = casepara
-        freqs = img.freq_av; nf = len(freqs)
-        chanmask = cp(img.avimage_flags)
-        caseIind = N.where(S_i >= K*rms_i)[0]; caseIIind = N.where(S_i < K*rms_i)[0]
-        if 0 in caseIIind: chanmask[0] = True
-        if nf-1 in caseIIind: chanmask[-1] = True
-        if len(caseIIind) == 1: chanmask[caseIIind[0]] = True
-        c = list(cp(caseIIind))
-        try: c.remove(0)
-        except: pass
-        try: c.remove(nf-1)
-        except: pass
-        if len(c) == 1 and c[0] in range(2,nf-2): chanmask[c[0]] = True
-        isl = img.islands[src.island_id]
-
-        sl0 = src.bbox
-        srcslice = [slice(0, nchan, None)]+sl0
-        gaus = src.gaussians[0]
-        g_id = gaus.gaussian_idx+1
-        reg_rank, reg_bbox = self.get_case1_region(img, src)
-        rmask = N.where(reg_rank == g_id, False, True)
-        do_log = img.opts.specind_dolog
-                                                # no unflagged case II channels remain, proceed as in case I
-        # set up debug plots first
-        if img.opts.debug_figs_4_caseI_spin:
-          pl.figure(); pl.suptitle('Case '+src.case+': source no. '+str(src.island_id))
-          y = cp(S_i); ey = rms_i; x = img.freq_av/img.freq0
-          y = N.where(N.isnan(y), N.median(y), y)
-          ind = N.where(~chanmask)[0]; ind1 = N.where(chanmask)[0]; pl.subplot(2,1,1); 
-          pl.plot(N.log10(x), N.log10(y), '*-r'); 
-          pl.plot(N.log10(x[ind]), N.log10(y[ind]), '*-b'); 
-          pl.plot(N.log10(x[ind1]), N.log10(y[ind1]), '*r'); pl.subplot(2,1,2)
-
-        if N.sum(chanmask[caseIIind]) == len(caseIIind): 
-                                                # now fit as Case I
-          para, epara, q_spec, spin_para = self.sc_case1(img, src, avimage, isl.bbox, nchan, False, img.freq_av, \
-                          img.beam_spec_av, src.rms_chan, chanmask)
-          casetype='a'
-        else:                                   # calculate 'expected' spectrum assuming linear sp.
-          x = N.log10(freqs[caseIind]/img.freq0)
-          if len(caseIind) < 3: 
-            sp = -0.8; inter = N.mean(N.log10(S_i[caseIind]) - sp*x)
-            fitp = N.array([inter, sp])
-          else: 
-            fitp, efitp = func.fit_mask_1d(x, N.log10(S_i[caseIind]), N.ones(len(caseIind)), \
-                          N.zeros(len(caseIind), bool), func.poly, do_err=True, order=1)
-          xall = N.log10(freqs/img.freq0)
-          expected = N.power(10.0, fitp[0] + fitp[1]*xall)
-          gooddata = abs(S_i-expected) < 3.0*rms_i
-          unflaggedcaseIIchanind = N.array([i for i in caseIIind if ~chanmask[i]])
-          asurv_nolog = False
-                                        # if all caseII chan data are as expected then average and case I it or asurv
-          if N.all(gooddata[unflaggedcaseIIchanind]):   
-            win_size = func.get_windowsize_av(S_i, rms_i, chanmask, K, minchan)
-            if win_size == 0:
-              casetype='c'
-              if do_log:
-                #self.asurv()
-                raise RuntimeError('Survival analysis for polynomial regression not yet implemented.')
-              else:
-                asurv_nolog = True
-            else:          #av it and send it to case I
-              casetype='b'
-              new_nchan = nchan/win_size
-              ipimage = avimage[srcslice]; opimage = N.zeros((new_nchan, ipimage.shape[1], ipimage.shape[2]))
-              d = collapse.windowaverage_cube(imagein=ipimage, imageout=opimage, fac=win_size, chanrms=src.rms_chan, \
-                iniflags=chanmask, c_wts='rms', kappa=img.opts.kappa_clip, sbeam=N.array(img.beam_spec_av), 
-                freqin=img.freq_av, calcrms_fromim=False)
-              opimage, src_beam_spec_av, src_freq_av, src_avimage_flags, src_crms_av = d
-              newslice = [slice(0, opimage.shape[i], None) for i in range(1,3)]
-              para, epara, q_spec, spin_para = self.sc_case1(img, src, opimage, newslice, new_nchan, False, src_freq_av, \
-                          src_beam_spec_av, src_crms_av, src_avimage_flags)
-          else:
-            casetype='c'
-            if do_log:
-              mylog.error('Survival analysis for polynomial regression not yet implemented. ')
-              mylog.error('Change img.opts.specin_dolog to False')
-              mylog.error('Stopping PyBDSM now')
-              self.asurv()
-              raise RuntimeError()
-            else:
-              asurv_nolog = True
-              src.phot_mask = chanmask
-
-          if asurv_nolog:
-            n_caseI = len(caseIind); n_caseII = len(caseIIind)
-            if n_caseII > 0.2*n_caseI:          # if not many case II chan, just get flux by summing, else average first
-              win_size1 = func.get_windowsize_av(S_i, rms_i, chanmask, K=4.0, minchan=4)
-              if win_size1 == 0: win_size1 = nchan/3
-              new_nchan = nchan/win_size1
-              ipimage_temp = avimage[srcslice]
-              ipimage = N.zeros((1, ipimage_temp.shape[0], ipimage_temp.shape[1], ipimage_temp.shape[2]))
-              ipimage[0,:,:,:] = ipimage_temp
-              opimage = N.zeros((1, new_nchan, ipimage_temp.shape[1], ipimage_temp.shape[2]))
-              d = collapse.windowaverage_cube(imagein=ipimage, imageout=opimage, fac=win_size1, chanrms=src.rms_chan, \
-                iniflags=chanmask, c_wts='rms', kappa=img.opts.kappa_clip, sbeam=N.array(img.beam_spec_av), 
-                freqin=img.freq_av, calcrms_fromim=False)
-              opimage, src_beam_spec_av, src_freq_av, src_avimage_flags, src_crms_av = d
-              opimage = opimage[0,:,:,:]
-
-              s_im = N.zeros(isl.image.shape); x1, x2 = N.mgrid[isl.bbox]
-              for g in src.gaussians:
-                s_im = s_im + func.gaussian_fcn(g, x1, x2)
-              a, b = N.array(N.unravel_index(N.argmax(s_im), s_im.shape))  # stupid way of doing this ... 
-              n, m = isl.mask_active.shape
-              li = []
-              for ia in range(a-2,a+3):
-                for ib in range(b-2,b+3):
-                  if 0 <= ia < n and 0 <= ib < m and not isl.mask_active[ia, ib]: li.append([ia, ib])
-              li = N.array(li).transpose(); ind1 = (li[0], li[1])
-              S_max = N.zeros(new_nchan)
-              for i in range(new_nchan):
-                S_max[i] = N.max(opimage[i][ind1])
-            else:
-              opimage, src_beam_spec_av, src_freq_av, src_avimage_flags, src_crms_av = avimage[srcslice], \
-                       img.beam_spec_av, img.freq_av, chanmask, src.rms_chan
-              new_nchan = nchan
-              S_max = S_i
-            caseIind_1 = N.where(S_max >= 4.0*src_crms_av)[0]; caseIIind_1 = N.where(S_max < 4.0*src_crms_av)[0]
-            beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig
-            cbmaj, cbmin, cbpa = N.transpose(src_beam_spec_av) 
-            cdeltsq = img.wcs_obj.acdelt[0]*img.wcs_obj.acdelt[1]
-            para = []; epara = []
-            for ichan in range(new_nchan):
-              if src_avimage_flags[ichan]:
-                p_fit = [float("NaN")]*7
-                errors = [float("NaN")]*7
-              else:
-                data = opimage[ichan]
-                g_ind = N.where(~N.ravel(rmask))[0]
-                if ichan in caseIind_1 and len(g_ind) >= 6:
-                  x_ax, y_ax = N.indices(data.shape) 
-                  p_ini = func.g2param(src.gaussians[0])
-                  p_ini[1] = p_ini[1]-isl.origin[0]; p_ini[2] = p_ini[2]-isl.origin[1]
-                  p_fit, ierr = func.fit_gaus2d(data, p_ini, x_ax, y_ax, rmask)
-                  p_fit = list(p_fit) 
-                  total = p_fit[0]*p_fit[3]*p_fit[4]/(cbmaj[ichan]*cbmin[ichan])*cdeltsq*fwsig*fwsig
-                  p_fit.append(total)
-                  errors = func.get_errors(img, p_fit, src_crms_av[ichan])
-                else:
-                  ind = N.where(rmask == False); p_fit = [1.]*7; errors = [1.]*7
-                  p_fit[0] = p_fit[6] = N.sum(data[ind])/beamarea
-                  errors[0] = errors[6] = isl.rms*sqrt(beamarea/len(ind[0]))
-              para.append(list(p_fit))
-              epara.append(list(errors))
-
-            q_spec = self.spectralquality(img, para, epara, src.island_id, src_freq_av, src_avimage_flags, False)
-            self.spectral_qc_flag(src, q_spec, src_avimage_flags) 
-            src.phot_mask = src_avimage_flags
-            spin_para = self.fit_spectralindex(img, src, para, epara, src_freq_av, False)
-       
-            src.phot_mask = chanmask
-            self.calc_src_spin(img, src, avimage[srcslice], rmask, img.freq_av)
-            ind1 = N.where(src.phot_mask == False)[0]
-            gaus.specin_freq = img.freq_av[ind1]
-            gaus.specin_freq0 = img.freq0
-            gaus.spin1 = None; gaus.espin1 = None; gaus.spin2 = None; gaus.espin2 = None; gaus.take2nd = None
-            gaus.specin_flux = None
-            gaus.specin_fluxE = None
-
-        src.case = src.case+casetype
-        para = None; epara = None; q_spec = None; chanmask = None
-
-        return para, epara, q_spec, spin_para
-       
-####################################################################################
-    def asurv(self):
-        """ Either put in an ASURV code here or change all the fitting to freq-flux instead of log-log and then
-        you dont need ASURV at all."""
-
-        print "ASURV : Needs to be implemented"
-
-####################################################################################
-    def msource(self, img, src, rms_spec, avimage, casepara, nchan):
-        """
-        Calculate source area in terms of beam_area (take sum of mask_active if all of island has only one source else 
-        calc from the individual gaussians). If more than 10 then truly extended and mark as such. dont do sp.in. for
-        each gaussian  but just for whole source and also calc sp.in map based on astrometry (centroid) and mark for wavelet.
-
-        Else, do sp.in for gaussians and source as a whole. source as a whole -- just add all flux within mask and calc sp.in.
-
-        Use C and S astrometry as fn of channel to figure out astrometric correction if any, later.
-
-        For each gaussian, fix posn and size of each gaussian and fit only amplitudes and calc sp.in. for each. 
-        Also, fix posn alone and let size vary and do for that too. 
-
-        For whole source, it doesnt matter if its case 1 or 2. For each gaussian, need to average in order to fit gaussians. If each
-        gaussian in case I, thats simple. Calculate this by just using the ch0 fluxes.
-        If not, then take weakest gaussian and strongest gaussian - calc reqd averaging. If for 
-        weakest, u need more than 4/8 channels, take that for everything. If u cant do weakest gaussian then take mean of channels
-        for max (weakest, 4/8) and for strongest and average and fit. for those gaussians below detectability, fix the size always.
-
-        get case for each gaussian. if all 1 then easy. if not, then calc winsize for weakest and if reasonable take that. if not
-        reasonable then exclude gaussians below 1/15th of max gaussian and then redo. if still no good winsize for weakest but ok 
-        for strongest then take mean and proceed and fix posn and size for weaker ones. if not even for strongest then extended.
-
-        fitcode : 0=fit all; 1=fit amp; 2=fit amp, posn; 3=fit amp, size
-
-        """
-        import functions as func
-        from math import pi, sqrt
-        from const import fwsig
-
-        isl = img.islands[src.island_id]                        # set up parameters
-        S0, S_i, K, rms_i = casepara
-        chanmask = cp(img.avimage_flags); nchan = len(S_i)
-        srcslice = [slice(0, nchan, None)]+src.bbox
-        image = avimage[srcslice]
-        nsrc_in_isl = len(isl.sources)
-        bm_pix = img.beam2pix(src.size_sky); n_bm_pix = 2.0*pi/2.3548/2.3548*bm_pix[0]*bm_pix[1]
-        ngaus = len(src.gaussians)
-        if nsrc_in_isl == 1:
-          srcmask = isl.mask_active
-          npix = N.sum(~isl.mask_active)
-        else:                                                   # If >1 src in island, compute mask, and area
-          s_im = N.zeros(isl.image.shape); x1, x2 = N.mgrid[isl.bbox]
-          for g in src.gaussians:
-            s_im = s_im + func.gaussian_fcn(g, x1, x2)
-          srcmask = N.where(s_im > src.rms_isl*img.opts.thresh_isl, False, True)
-          npix = N.sum(srcmask)
-        src_in_bms = npix/n_bm_pix                              # number of beams in the source
-        extended = False
-        if src_in_bms > 10.0:                                   # mark the source as truly extended if > 10 beams big
-          extended = True
-          src.spec_descr = "Extended source; too big"
-        else:                                                   # else process further
-          fitfix = N.zeros(ngaus)
-          win_size = 1
-          g_peaks = N.zeros(ngaus)
-          gaucase = N.zeros(ngaus)
-          for i, g in enumerate(src.gaussians):                 # find the case for each gaussian first
-            g_peaks[i] = g.peak_flux
-            gaucase[i] = self.findcase_1([g_peaks[i]]*nchan, K*rms_i, chanmask)
-          if N.all(gaucase==1):                                 # If ALL gaussians are case I, no averaging reqd., fitfix=0
-            src.spec_descr = "All gaussians are Case I with full spectral resolution"
-          else:                                                 ### WIN_SIZE FOR THE SOURCE 
-            winsizes = N.ones(ngaus, int)                            # Calc winsize for all gaussians
-            for i, g in enumerate(src.gaussians):                 
-              if gaucase[i] > 1:
-                winsizes[i] = func.get_windowsize_av(N.ones(nchan)*g.peak_flux, rms_i, chanmask, K, img.opts.specind_minchan)
-            if N.all(winsizes > 0):                             # all gaussians can be case I with averaging, fitfix=0
-              win_size = N.max(winsizes)
-              src.spec_descr = "All gaussians are Case I after averaging every "+str(win_size)+" channels"
-            else:                                               # exclude gaussians < 1/15th of max and then see
-              maxpk = N.max(g_peaks)
-              brightgaus_ind = N.where(g_peaks > maxpk/10.0)[0]
-              weakgaus_ind  = N.where(g_peaks <= maxpk/10.0)[0]
-              dum = winsizes[brightgaus_ind]
-              fitfix[weakgaus_ind] = 1                          # gaus < 0.1*max peak : fit only amp
-              if N.all(dum > 0):                                # after exclusion, rest are case I
-                win_size = N.max(dum)
-                src.spec_descr = "Remaining "+str(len(brightgaus_ind))+" gaussians are Case I after excluding "+ \
-                                  str(len(weakgaus_ind))+" weak gaussians"
-              else:                                             # some bright gaussians also case II/III
-                nonzero = [i for i in winsizes if i > 0]
-                if len(nonzero) > 0:
-                  win_size = 0.5*(min(nonzero)+max(nonzero))      # take mean window size of max and min
-                  case2_g = N.where(winsizes > 0)[0]
-                  mediumgaus_ind  = [i for i in range(ngaus) if i in brightgaus_ind and winsizes[i] == 0]
-                  fitfix[mediumgaus_ind] = 3                        # gaus > 0.1*max peak but still not case I --> fix the posn
-                  src.spec_descr = "Not all gaussians are Case I even after averaging"
-            if N.all(winsizes ==0):                             # If no gaussian is strong enough even after averaging
-              extended = True
-              src.spec_descr = "No gaussian is bright enough even after averaging; take as extended"
-          src.specind_win_size = win_size
-
-                                                                # Now average the subcube if win_size > 1
-        if not extended: 
-          if win_size == 1:
-            src_beam_spec_av, src_freq_av, src_avimage_flags, src_crms_av = img.beam_spec_av, \
-                               img.freq_av, chanmask, src.rms_chan
-            new_nchan = nchan
-          else:
-            new_nchan = int(round(nchan/win_size))
-            ipimage = avimage[srcslice]
-            image = N.zeros((new_nchan, ipimage.shape[1], ipimage.shape[2]))    # now average
-            d = collapse.windowaverage_cube(imagein=ipimage, imageout=image, fac=win_size, chanrms=src.rms_chan, \
-                iniflags=chanmask, c_wts='rms', kappa=img.opts.kappa_clip, sbeam=N.array(img.beam_spec_av), 
-                freqin=img.freq_av, calcrms_fromim=False)
-            image, src_beam_spec_av, src_freq_av, src_avimage_flags, src_crms_av = d    # averaged cube properties
-
-          x, y = N.mgrid[isl.bbox]; para = []; epara = []
-                                                        # exclude gaussians < factor*maxpeak from fit
-          if img.opts.specind_Msrc_exclude1 > 1.0: img.opts.specind_Msrc_exclude1 = 0.0
-          gg = []; ff = []
-          fitgaus_ind = []
-          for i, g in enumerate(src.gaussians):                 
-            goodrms = src_crms_av[N.where(~src_avimage_flags)[0]]
-            snr = g.peak_flux/goodrms
-            if (g.peak_flux/N.max(g_peaks) >= img.opts.specind_Msrc_exclude1) and \
-                N.mean(snr) >= img.opts.specind_Msrc_exclude2:
-              gg.append(src.gaussians[i])
-              ff.append(fitfix[i])
-              fitgaus_ind.append(i)
-          fitfix = N.array(ff)
-
-          cbmaj, cbmin, cbpa = N.transpose(src_beam_spec_av) 
-          cdeltsq = img.wcs_obj.acdelt[0]*img.wcs_obj.acdelt[1]
-          for ichan in range(new_nchan):
-            g_ind = N.where(~N.ravel(srcmask))[0]
-            if not src_avimage_flags[ichan] and len(g_ind) >= 12:
-              p, ep = func.fit_mulgaus2d(image[ichan], gg, x, y, srcmask, fitfix)
-              total = N.zeros(len(fitfix))
-              for ig in range(len(fitfix)):
-                total[ig] = p[ig*6]*p[ig*6+3]*p[ig*6+4]/(cbmaj[ichan]*cbmin[ichan])*cdeltsq*fwsig*fwsig
-                if p[ig*6] < 0: src_avimage_flags[ichan] = True  # hence doesnt matter that u have a value in para
-              p = N.insert(p, N.arange(len(fitfix))*6+6, total)
-              errors = func.get_errors(img, p, src_crms_av[ichan])
-            else:
-              p = [float("NaN")]*7*len(gg)
-              errors = [float("NaN")]*7*len(gg)
-            para.append(list(p))
-            epara.append(list(errors))
-
-          if img.opts.debug_figs_5_Msrc_spin:
-            apara = N.array(para); tit = ['Amp', 'Posn x', 'Posn y', 'Bmaj', 'Bmin', 'Tot']
-            inds = N.array([0,1,2,3,4,6])
-            for i in range(len(gg)):
-              pl.figure(); pl.suptitle('M src : '+str(src.island_id)+' gaus '+str(i))
-              for ii in range(6): pl.subplot(2,3,ii+1); pl.plot(apara[:,i*7+inds[ii]], '*-g'); pl.title(tit[ii])
-
-          for i, g in enumerate(src.gaussians):
-            if para != None:
-                parray = N.array(para)
-                pp = parray[:, i*7:i*7+7]
-            else:
-                pp = False
-          if N.isnan(pp).any():
-              para = epara = q_spec = None; spin_para = [None]*5
-              src.phot_mask = chanmask
-              src_freq_av = img.freq_av
-              ind1 = N.where(src.phot_mask == False)[0]
-              for g in src.gaussians:
-                g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
-                g.specin_freq = None
-                g.specin_freq0 = img.freq0
-                g.specin_flux = None
-                g.specin_fluxE = None            
-          else:
-              q_spec = self.spectralquality(img, para, epara, src.island_id, src_freq_av, src_avimage_flags, img.opts.specind_dolog)
-                                                        # quality control and flagging
-              self.spectral_qc_flag(src, q_spec, src_avimage_flags)
-
-              if N.any(src.phot_mask):
-                mylog = img.mylog
-                mylog.debug('%s %i %s %i %s ' % ('Island ',isl.island_id, ' : flagged ', \
-                   N.sum(src.phot_mask), ' channels for fitting spectral index'))
-                                                            #fit sp.in., calc quality flag
-              pp = N.array(para); epp = N.array(epara)
-              ctr = 0
-              for i, g in enumerate(src.gaussians):                 
-                if i in fitgaus_ind:
-                  g_par = pp[:,ctr*7:ctr*7+7]
-                  g_epar = epp[:,ctr*7:ctr*7+7]
-                  spin_para = self.fit_spectralindex(img, src, g_par, g_epar, src_freq_av, img.opts.specind_dolog)
-                  spin, espin, spin1, espin1, take2nd = spin_para
-                  g.spin1 = spin; g.espin1 = espin; g.spin2 = spin1; g.espin2 = espin1; g.take2nd = take2nd
-                  ctr += 1
-                  ind1 = N.where(src.phot_mask == False)[0]
-                  if img.opts.specind_flux =='peak': ind2 = 0
-                  else: ind2 = 6
-                  g.specin_freq = src_freq_av[ind1]
-                  g.specin_freq0 = img.freq0
-                  g.specin_flux = g_par[:,ind2][ind1]
-                  g.specin_fluxE = g_epar[:,ind2][ind1]
-                else:
-                  g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
-                  g.specin_freq = None
-                  g.specin_freq0 = img.freq0
-                  g.specin_flux = None
-                  g.specin_fluxE = None
-        else:                                                   # extended
-          para = epara = q_spec = None; spin_para = [None]*5
-          src.phot_mask = chanmask
-          src_freq_av = img.freq_av
-          ind1 = N.where(src.phot_mask == False)[0]
-          for g in src.gaussians:
-            g.spin1 = None; g.espin1 = None; g.spin2 = None; g.espin2 = None; g.take2nd = None
-            g.specin_freq = None
-            g.specin_freq0 = img.freq0
-            g.specin_flux = None
-            g.specin_fluxE = None
-                                                                # spectral index for src as a whole
-        self.calc_src_spin(img, src, image, srcmask, src_freq_av)
-                            
-        return para, epara, q_spec, spin_para
-              
-####################################################################################
-
-    def get_case1_region(self, img, src):
-      """ Sets mask and bbox for each source. for C sources, first assign each pixel 
-          out to 1.0*fwhm of each gaussian to that source. This will be unique because 
-          of same_island constraints. Next, out to f*FWHM, a pixel belongs to that 
-          gaussian which gives it more flux. After that, the remaining pixels with
-          mask_active=True will be assigned to the gaussian nearest to it.
-      """
-      import functions as func
-
-      if src.island_id >= 0: 
-        fac = 2.0
-        isl = img.islands[src.island_id]
-        if src.code == 'S':
-            rank = ~isl.mask_active
-
-        if src.code == 'C':
-            rank_im = N.zeros(isl.image.shape)
-            mask0 = N.zeros(isl.image.shape, bool)
-            gau_ims = N.zeros((len(isl.gaul)+1, isl.image.shape[0], isl.image.shape[1]))
-            mask_gauim = N.zeros(isl.image.shape, bool)
-            for i,g in enumerate(isl.gaul):
-              rank, dum = func.mask_fwhm(g, 0.0, 1.0, isl.origin, isl.image.shape) 
-              rank_im = rank_im + rank*(g.gaussian_idx+1)
-              mask0 = mask0 + rank
-              dum, gau_ims[i+1,:,:] = func.mask_fwhm(g, 1.0, fac, isl.origin, isl.image.shape) 
-              mask_gauim = mask_gauim + dum*~rank
-            gau_ims = N.argmax(gau_ims, axis=0)
-
-            mask3 = ~(mask0 + mask_gauim + isl.mask_active)
-            rank = gau_ims*~mask0*~isl.mask_active + rank_im
-            coords = N.transpose(N.where(mask3))
-            if len(coords) > 0:
-              for ind in coords:
-                co = tuple(ind)
-                minval = 99e9; minind = -1
-                for i,g in enumerate(isl.gaul):
-                  d1 = func.dist_2pt(N.array(g.centre_pix)-N.array(isl.origin), ind)
-                  if d1 < minval:
-                    minval = d1; minind = i+1
-                rank[co] = minind
-
-      return rank, isl.bbox
-
-####################################################################################
-    def spectralquality(self, img, para, epara, islid, freqarr, chanmask, do_log):
-        """ 
-        Check if astrometry, photometry etc is good for the source. para is array(nchan, 7n) 
-
-        Calculate chisq for const=mean, line and 2d poly.
-        Calculate chisq of line and poly over that of const, check if < 0.5
-        Calculate rms around mean and straight line
-        Calculate for each channel the (para-mean(except that para))/actual_std(except that para) and store
-        for later use.
-        """
-
-        import functions as func
-        import math
-
-        def fn(ip, x, ex):
-            if ip == 0 and do_log: 
-              return N.log10(x), ex/x
-            else:
-              return x, ex
-
-        aa = [len(g) for g in para]
-        params = N.array(para) 
-        eparams = N.array(epara)
-        nchan = params.shape[0]
-        nng = params.shape[1]
-        if nng % 7 > 0: 
-          mylog = img.mylog
-          mylog.error("Dimension of para not multiple of 7")
-        ngaus = nng/7
-        chisq = N.zeros((ngaus, 6)); chisq1 = N.zeros((ngaus, 6)); chisq2 = N.zeros((ngaus, 6) )
-        dev_para = N.zeros((ngaus, nchan, 6)); dev_para1 = N.zeros((ngaus, nchan, 6))
-        rms = N.zeros((ngaus, 6)); rms1 = N.zeros((ngaus, 6)); fitpara = N.zeros((ngaus, 6, 2))
-        for ig in range(ngaus):
-          pp = params[:, ig*7:ig*7+7]
-          epp = eparams[:, ig*7:ig*7+7]
-
-          xc = N.arange(nchan); xf = N.log10(freqarr)
-          ind = N.where(N.array(chanmask) == False)[0]
-          for ip in range(6):
-            if do_log and ip == 0:
-              funct = func.sp_in
-            else:
-              funct = func.poly
-            if ip == 0:
-              x = xf
-            else:
-              x = xc
-            p, ep = fn(ip, pp[:, ip], epp[:, ip])
-            mask = cp(chanmask)
-            chisq[ig, ip]  = func.fit_chisq(x, p, ep, mask, func.nanmean, order=0)     # fit the mean
-            chisq1[ig, ip] = func.fit_chisq(x, p, ep, mask, funct, order=1) # fit straight line
-            try:
-                chisq2[ig, ip] = func.fit_chisq(x, p, ep, mask, funct, order=2) # fit 2nd order
-            except ValueError:
-                # Try to catch math domain errors
-                chisq2[ig, ip] = chisq1[ig, ip]
-            rms[ig, ip] = N.std(p[ind])    # rms around mean
-            fpara, errors = func.fit_mask_1d(x, p, ep, mask, funct, do_err=True, order=1)
-            fit = funct(fpara, x)
-            fitpara[ig, ip, :]=fpara
-            tmp = p-fit
-            rms1[ig, ip] = math.sqrt(N.sum(tmp[ind]*tmp[ind])/(len(ind)-1))   # rms around straight line fit
-                                                        # deviation for each element excl itself
-            dl = N.delete
-            xf = x[ind]; pf = p[ind]; epf = ep[ind]; maskf = N.array(mask)[ind]; 
-            for i in range(len(p)):
-              if not chanmask[i]:
-                                                        # deviation of ele from fit of mean excl it
-                xcl = N.where(ind==i)[0][0]
-                dev_para[ig, i,ip] = abs(p[i]-N.mean(dl(pf,xcl)))/N.std(dl(pf, xcl)) 
-                                                        # deviation of ele from fit of line excl it
-                fitpara1, errors = func.fit_mask_1d(dl(xf,xcl), dl(pf,xcl), dl(epf,xcl), dl(maskf,xcl), funct, \
-                                do_err=True, order=1)
-                fit = funct(fitpara1, dl(xf,xcl))
-                rms_dl = math.sqrt(N.sum((dl(pf,xcl)-fit)*(dl(pf,xcl)-fit))/(len(pf)-1))   # rms around str8 line 
-                fit = funct(fitpara1, N.array([x[i]]))
-                dev_para1[ig, i,ip] = abs(p[i]-fit)/rms_dl
-              else:
-                dev_para[ig, i,ip] = -999; dev_para1[ig, i,ip] = -999
-
-        q_spec = chisq, chisq1, chisq2, rms, rms1, fitpara, dev_para, dev_para1
-        
-        return q_spec
-####################################################################################
-
-    def spectral_qc_flag(self, src, q_spec, chanmask): 
-        """ Store Quality control info on photometry and astrometry. 
-        Flagging of channels based on statistics q_spec. """
-
-        chisq, chisq1, chisq2, rms, rms1, fitpara, dev_para, dev_para1 = q_spec
-        nsrc = len(chisq)
-        nchan, npara = dev_para[0].shape
-                                                        # for photometry
-        phot_mask = cp(chanmask)
-        for ichan in range(nchan):
-          if not chanmask[ichan]:
-            if N.all(dev_para1[:, ichan, 0] > 8.0):
-              phot_mask[ichan] = True
-        src.phot_mask = phot_mask
-
-        para = [dev[:,0] for dev in dev_para1]
-        src.specQC_photo = specQC_photo(para)
-                                                        # for astrometry
-        para = rms[:,1:3], [chisq1[:,1]/chisq[:,1], chisq1[:,2]/chisq[:,2]], [chisq2[:,1]/chisq[:,1], chisq2[:,2]/chisq[:,2]], \
-               [fitpara[:,1,1], fitpara[:,2,1]], [dev_para[:,:,1], dev_para[:,:,2]], [dev_para1[:,:,1], dev_para1[:,:,2]]
-        src.specQC_astro = specQC_astro(para)
-
-####################################################################################
-    def fit_spectralindex(self, img, src, para, epara, freqarr, do_log):
-        """ Fits spectral index to data, with a mask, for 1st and 2nd order. For 2nd order, solution
-        diverges very fast and hence is disabled for now. cflux=peak/total for sp.in of that flux.
         do_log is True/False implies you fit spectral index in logFlux vs logFreq space or not."""
         import functions as func
         import math
         from scipy.optimize import leastsq
 
-        #print 'Need to flag gaussians'
-        cflux = img.opts.specind_flux
-        if cflux=='peak': 
-          ind = 0
-        else:
-          ind = 6
         x = freqarr
-        f0 = img.freq0
-        flux = N.array(para)[:,ind]
-        eflux = N.array(epara)[:,ind]
-        mask = src.phot_mask
+        flux = fluxarr
+        eflux = efluxarr
+        f0 = N.median(x)
+        mask = N.zeros(len(fluxarr), dtype=bool)
 
         if do_log:
           x = N.log10(x/f0); y = N.log10(flux); sig = N.abs(eflux/flux)/2.303
@@ -1032,93 +376,215 @@ class Op_spectralindex(Op):
         else:
           x = x/f0; y = flux; sig = eflux
           funct = func.sp_in
+          
         spin, espin = func.fit_mask_1d(x, y, sig, mask, funct, do_err=True, order=1)
-        spin1, espin1 = func.fit_mask_1d(x, y, sig, mask, funct, do_err=True, order=2)
-        chisq1 = func.calc_chisq(x, y, sig, spin, mask, funct, order=1)
-        chisq2 = func.calc_chisq(x, y, sig, spin1, mask, funct, order=2)
-
-        if abs(spin[1]-spin1[1]) > 0.1 and chisq2/chisq1 > 0.5: 
-          take2nd = False 
-        else:
-          take2nd = True
 
         if do_log:
           spin[0] = math.pow(10.0, spin[0])
           espin[0] = spin[0]*math.log(10.0)*espin[0]
-          spin1[0] = math.pow(10.0, spin1[0])
-          espin1[0] = spin1[0]*math.log(10.0)*espin1[0]
 
-        return spin, espin, spin1, espin1, take2nd
+        return spin[0], spin[1], espin[1]
 
-####################################################################################
-    def calc_src_spin(self, img, src, image, imagemask, freqarr): 
-        """ Fits spectral index to src itself. Since this is the only estimation method for weak source,
-        dont do it in log space."""
-        from const import fwsig
+
+########################################################################################
+    
+    def windowaverage_cube(self, imagein, rms_desired, chanrms, c_wts, sbeam, 
+                            freqin, n_min=2, nmax_to_avg=10):
+        """Average neighboring channels of cube to obtain desired rms in at least n_min channels
+        
+        The clipped rms of each channel is compared to the desired rms. If the
+        clipped rms is too high, the channel is averaged with as many neighboring
+        channels as necessary to obtain at least the desired rms. This is done
+        until the number of OK channels is 2. The averaging is done first at
+        the frequency extremes, as frequency range the resulting averaged flux array 
+        will be maximized.
+        
+        For example, if the desired rms is 0.1 and the list of rms's is: 
+        
+            [0.2, 0.2, 0.3, 0.2, 0.2]
+            
+        the resulting channels that will be averaged are:
+        
+            [[0, 1], [2], [3, 4]]
+        """
         from math import sqrt
+        from collapse import avspc_direct, avspc_blanks
+    
+        nchan = imagein.shape[0]
+        
+        # chan_list is a list of lists of channels to average. E.g., if we have
+        # 5 channels and we want to average only the first 2:
+        #     chan_list = [[0,1], [2], [3], [4]]
+        if len(chanrms.shape) ==3:
+            crms = N.mean(N.mean(chanrms, axis=1), axis=1)
+        else:
+            crms = chanrms
+        chan_list = self.get_avg_chan_list(rms_desired, crms, nmax_to_avg)
+        
+        n_new = len(chan_list)
+        beamlist = []
+        crms_av = N.zeros(n_new)
+        freq_av = N.zeros(n_new)
+        imageout = N.zeros((n_new, imagein.shape[1], imagein.shape[2]))
+        blank = N.isnan(imagein[0])
+        hasblanks = blank.any()
+        for ichan, avg_list in enumerate(chan_list):
+            if len(avg_list) > 1:
+                if not hasblanks: 
+                    imageout[ichan], dum = avspc_direct(avg_list, imagein, crms, c_wts)
+                else:
+                    imageout[ichan], dum = avspc_blanks(avg_list, imagein, crms, c_wts)
+                chan_slice = slice(avg_list[0], avg_list[1]+1)
+                beamlist.append(tuple(N.mean(sbeam[chan_slice], axis=0)))
+                freq_av[ichan] = N.mean(freqin[chan_slice])
+                crms_av[ichan] = 1.0/sqrt(N.sum(1.0/crms[chan_slice]**2))
+            else:
+                imageout[ichan] = imagein[avg_list[0]]
+                beamlist.append(sbeam[avg_list[0]])
+                freq_av[ichan] = N.mean(freqin[avg_list[0]])
+                crms_av[ichan] = 1.0/sqrt(N.sum(1.0/crms[avg_list[0]]**2))
+                      
+        return imageout, beamlist, freq_av, crms_av 
+        
 
-        chanmask = src.phot_mask
-        ind = N.where(imagemask == False)
-        npix = len(ind[0])
-        nchan = image.shape[0]
-        flux = N.zeros(nchan); eflux = N.zeros(nchan)
-        beamarea = 1.1331*img.pixel_beam[0]*img.pixel_beam[1]*fwsig*fwsig
-        para = N.zeros((nchan, 7)); epara = N.ones((nchan, 7))
+    def get_avg_chan_list(self, rms_desired, chanrms, nmax_to_avg):
+        """Returns a list of channels to average to obtain given rms_desired
+        in at least 2 channels"""
+        end = 0
+        chan_list = []
+        nchan = len(chanrms)
+        good_ind = N.where(N.array(chanrms)/rms_desired < 1.0)[0]
+        num_good = len(good_ind)
+        if num_good < 2:
+            # Average channels at start of list
+            rms_avg = chanrms[0]
+            while rms_avg > rms_desired:
+                end += 1
+                chan_slice = slice(0, end)        
+                rms_avg = 1.0/N.sqrt(N.sum(1.0/N.array(chanrms)[chan_slice]**2))
+                if end == nchan or end == nmax_to_avg:
+                    break
+            if end == 0:
+                end = 1
+            chan_list.append(range(end))
+            if end == nchan:
+                # This means all channels are averaged into one. If this happens,
+                # instead average first half and second half to get two channels
+                # and return.
+                chan_list = [range(0, int(float(nchan)/2.0)), range(int(float(nchan)/2.0), nchan)]
+                return chan_list
+                    
+            # Average channels at end of list
+            rms_avg = chanrms[-1]
+            end = nchan
+            start = nchan
+            while rms_avg > rms_desired:
+                start -= 1
+                chan_slice = slice(start, end)        
+                rms_avg = 1.0/N.sqrt(N.sum(1.0/chanrms[chan_slice]/chanrms[chan_slice]))
+                if end-start == nmax_to_avg:
+                    break
+                
+            if start <= max(chan_list[0]):
+                # This means we cannot get two averaged channels with desired rms,
+                # so just average remaining channels
+                chan_list.append(range(max(chan_list[0]), nchan))
+            else:
+                # First append any channels between those averaged at the start
+                # and those at the end
+                for i in range(max(chan_list[0])+1, start):
+                    chan_list.append([i])
+                if start < end:
+                    chan_list.append(range(start, end))
+        else:
+            # No averaging needed
+            for i in range(nchan):
+                chan_list.append([i])
+        return chan_list
+        
 
+    def fit_channels(self, img, chan_images, clip_rms, src, beamlist):
+        """Fits normalizations of Gaussians in source to multiple channels
+        
+        If unresolved, the size of the Gaussians are adjusted to match the 
+        channel's beam size (given by beamlist) before fitting.
+        
+        Returns array of total fluxes (N_channels x N_Gaussians) and array 
+        of errors (N_channels x N_Gaussians).
+        """
+        import functions as func
+        from const import fwsig
+        
         isl = img.islands[src.island_id]
-        for ichan in range(nchan):
-          if not chanmask[ichan]:
-            im = image[ichan]
-            flux[ichan] = N.sum(im[ind])/beamarea
-            eflux[ichan] = isl.rms*sqrt(beamarea/npix)
-            para[ichan, 0] = para[ichan, 6] = flux[ichan]
-            epara[ichan, 0] = epara[ichan,0] = isl.rms*sqrt(beamarea/npix)
+        isl_bbox = isl.bbox
+        nchan = chan_images.shape[0]
+        x, y = N.mgrid[isl_bbox]
+        gg = src.gaussians
+        fitfix = N.ones(len(gg)) # fit only normalization
+        srcmask = isl.mask_active 
 
-        d = self.fit_spectralindex(img, src, para, epara, freqarr, False)
-        spin, espin, spin1, espin1, take2nd = d
-        src.spin1 = spin; src.espin1 = espin; src.spin2 = spin1; src.espin2 = espin1; src.take2nd = take2nd
-        ind = N.where(src.phot_mask == False)[0]
-        src.specin_freq = freqarr[ind]
-        src.specin_freq0 = img.freq0
-        src.specin_flux = flux[ind]
-        src.specin_fluxE = eflux[ind]
+        total_flux = N.zeros((nchan, len(fitfix))) # array of fluxes: N_channels x N_Gaussians
+        errors = N.zeros((nchan, len(fitfix))) # array of fluxes: N_channels x N_Gaussians
+        for cind in range(nchan):
+            image = chan_images[cind]
+            gg_adj = self.adjust_size_by_freq(img.beam, beamlist[cind], gg)
+            p, ep = func.fit_mulgaus2d(image, gg_adj, x, y, srcmask, fitfix)
+            pbeam = img.beam2pix(beamlist[cind])
+            bm_pix = (pbeam[0]/fwsig, pbeam[1]/fwsig, pbeam[2])  # IN SIGMA UNITS
+            for ig in range(len(fitfix)):
+                total_flux[cind, ig] = p[ig*6]*p[ig*6+3]*p[ig*6+4]/(bm_pix[0]*bm_pix[1])
+            p = N.insert(p, N.arange(len(fitfix))*6+6, total_flux[cind])
+            rms_isl = N.mean(clip_rms[cind])
+            errors[cind] = func.get_errors(img, p, rms_isl, bm_pix=(bm_pix[0]*fwsig, bm_pix[1]*fwsig, bm_pix[2]))[6]
+#         errors = 0.1*total_flux
+        return total_flux, errors
 
-
-####################################################################################
-#def globalastrometry(self, img):
-#
-#    pass
-#
-#####################################################################################
-                                                      
-class specQC_astro(object):
-    raw_rms = NArray(doc=" ")
-    chisq_10 = List(NArray(), doc=" ")
-    chisq_20 = List(NArray(), doc=" ")
-    slope = List(NArray(), doc=" ")
-    dev_para = List(NArray(), doc=" ")
-    dev_para1 = List(NArray(), doc=" ")
-
-    def __init__(self, para):
-      raw_rms, chisq_10, chisq_20, slope, dev_para, dev_para1 = para
-      self.raw_rms = raw_rms
-      self.chisq_10 = chisq_10
-      self.chisq_20 = chisq_20
-      self.slope = slope
-      self.dev_para = dev_para
-      self.dev_para1 = dev_para1
-
-####################################################################################
-class specQC_photo(object):
-    dev_para1 = List(NArray(), doc=" ")
-
-    def __init__(self, para):
-      dev_para1 = para
-      self.dev_para1 = dev_para1
-            
-            
-####################################################################################
-Source.specQC_astro = tInstance(specQC_astro)
-Source.specQC_photo = tInstance(specQC_photo)
-
-
+    def adjust_size_by_freq(self, beam_ch0, beam, gg):
+        """Adjust size of unresolved Gaussians to match the channel's beam size"""
+        gg_adj = []
+        for g in gg:
+            gcp = cp(g)
+            gcp.peak_flux = g.peak_flux
+            gcp.centre_pix = g.centre_pix
+            gcp.size_pix = g.size_pix
+            if g.deconv_size_sky[0] == 0.0:
+                gcp.size_pix[0] *= beam[0] / beam_ch0[0]
+            if g.deconv_size_sky[1] == 0.0:
+                gcp.size_pix[1] *= beam[1] / beam_ch0[1]
+            gg_adj.append(gcp)
+        return gg_adj
+        
+    def mask_upper_limits(self, total_flux, e_total_flux, threshold):
+        """Returns mask of upper limits"""
+        mask = N.zeros(total_flux.shape, dtype=bool)
+        if len(total_flux.shape) == 1:
+            is_src = True
+            ndet = 0
+            ncomp = 1
+        else:
+            is_src = False
+            ndet = N.zeros((total_flux.shape[1]), dtype=int)
+            ncomp = len(ndet)
+        for ig in range(ncomp):
+            for ichan in range(total_flux.shape[0]):
+                if is_src:
+                    meas_flux = total_flux[ichan]
+                    e_meas_flux = e_total_flux[ichan]
+                else:
+                    meas_flux = total_flux[ichan, ig]
+                    e_meas_flux = e_total_flux[ichan, ig]
+                if meas_flux < threshold * e_meas_flux:
+                    # Upper limit
+                    if is_src:
+                        mask[ichan] = True                
+                    else:
+                        mask[ichan, ig] = True
+                else:
+                    # Detection
+                    if is_src:
+                        ndet += 1
+                        mask[ichan] = False                    
+                    else:
+                        ndet[ig] += 1
+                        mask[ichan, ig] = False
+        return mask, ndet

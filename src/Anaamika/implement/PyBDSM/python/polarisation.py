@@ -227,7 +227,8 @@ class Op_polarisation(Op):
                 # For each source, assume the morphology does not change
                 # across the Stokes cube. This assumption allows us to fit
                 # the Gaussians of each source to each Stokes image by 
-                # simply fitting only the overall normalization.
+                # simply fitting only the overall normalizations of the
+                # individual Gaussians.
                 #
                 # First, fit all source Gaussians to each Stokes image:
                 x, y = N.mgrid[isl_bbox]
@@ -489,35 +490,14 @@ class Op_polarisation(Op):
         chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
                Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
 
-        opts={'thresh':'hard'}
-        opts['kappa_clip'] = 3.0
-        opts['rms_map'] = True
-        thresh_isl = img.opts.pi_thresh_isl
-        if thresh_isl == None:
-            thresh_isl = img.opts.thresh_isl
-        thresh_pix = img.opts.pi_thresh_pix
-        if thresh_pix == None:
-            thresh_pix = img.thresh_pix
-        opts['thresh_isl'] = thresh_isl
-        opts['thresh_pix'] = thresh_pix
-        opts['minpix_isl'] = img.opts.minpix_isl
-        opts['takemeanclip'] = False
-        opts['savefits_rmsim'] = False
-        opts['savefits_meanim'] = False
-        opts['savefits_rankim'] = False
-        opts['savefits_normim'] = False
-        opts['output_fbdsm'] = False
+        opts = img.opts.to_dict()
+        if img.opts.pi_thresh_isl != None:
+            opts['thresh_isl'] = img.opts.pi_thresh_isl
+        if img.opts.pi_thresh_pix != None:
+            opts['thresh_pix'] = img.opts.pi_thresh_pix
+        opts['thresh'] = 'hard'
         opts['polarisation_do'] = False
-        opts['group_by_isl'] = img.opts.group_by_isl
-        opts['rms_box'] = img.opts.rms_box
         opts['filename'] = ''
-        opts['output_all'] = img.opts.output_all
-        opts['verbose_fitting'] = img.opts.verbose_fitting
-        opts['split_isl'] = img.opts.split_isl
-        opts['peak_fit'] = img.opts.peak_fit
-        opts['quiet'] = img.opts.quiet
-        opts['peak_maxsize'] = img.opts.peak_maxsize
-        opts['interactive'] = img.opts.interactive
         
         ops = []
         for op in chain:

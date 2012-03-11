@@ -454,7 +454,13 @@ class Opts(object):
                                 "hence will affect the rms and mean maps, etc.) "\
                                 "Pixels with a value of NaN are always blanked.",
                              group="advanced_opts")
-
+    detection_image = String(doc="Detection image file name used only for detecting "\
+                                 "islands of emission. Source measurement is still done "\
+                                 "on the main image\n"\
+                                 "The detection image can be a FITS or CASA 2-, "\
+                                 "3-, or 4-D cube and must have the same size and "\
+                                 "WCS parameters as the main image.",
+                             group="advanced_opts")
     
     #--------------------------------A-TROUS OPTIONS--------------------------------
     atrous_jmax     =    Int(0,
@@ -927,21 +933,6 @@ class Opts(object):
 
     
     #-------------------------SPECTRAL INDEX OPTIONS--------------------------------
-    specind_nchan0  =    Int(40,
-                             doc='Rough number of channels to average '\
-                                 'cube to, before attempting to fit spectral index\n'\
-                                 "If the total number of channels is more than twice "\
-                                 "this number, then the data is averaged to roughly "\
-                                 "(+/- 1-2 channels) specind_nchan0 channels before "\
-                                 "attempting to fit spectral indices.",
-                             group="spectralindex_do")
-    specind_flux    =   Enum('total', 'peak',
-                             doc = "Flux to use: 'total' or "\
-                                 "'peak'. Determines which flux to compute "\
-                                 "spectral indices for\nThis determines whether spectral "\
-                                 "indices are calculated for total fluxes or peak fluxes "\
-                                 "if spectralindex_do is True.",
-                             group="spectralindex_do")
     flagchan_rms    =   Bool(True,
                              doc = "Flag channels before (averaging and) "\
                                  "extracting spectral index, if their rms if "\
@@ -957,56 +948,22 @@ class Opts(object):
                                  "total number of these bad channels does not exceed "\
                                  "10% of the total number of channels themselves.",
                              group="spectralindex_do")
-    specind_Msrc_exclude1 = Float(0.06,
-                                  doc = "Exclude Gaussians less than "\
-                                      "this factor * max(Gaussian peaks) "\
-                                      "inside that M source while fitting for "\
-                                      "spectral index for each Gaussian\n"\
-                                      "For sources with code='M', all gaussians with "\
-                                      "peak flux less than specind_Msrc_exclude1 times "\
-                                      "the maximum peak flux of the constituent Gaussians "\
-                                      "(of the channel collapsed image) are excluded from "\
-                                      "the initial model fit to each channel image. See "\
-                                      "also specind_Msrc_exclude2.",
-                             group="spectralindex_do")
-    specind_Msrc_exclude2 = Float(3,
-                                  doc = "Exclude Gaussians whose average "\
-                                      "SNR over channels is less than this\n"\
-                                      "For sources with code='M', all Gaussians with "\
-                                      "average SNR over channels is less than "\
-                                      "specind_Msrc_exclude2 are also excluded from the "\
-                                      "initial model fit to each channel image. See also "\
-                                      "specind_Msrc_exclude1.",
-                             group="spectralindex_do")
-    specind_kappa   =  Float(7.5,
-                             doc = "Kappa for deciding Case I, II, III "\
-                                 "for spectral index\nThis is the kappa used for "\
-                                 "clipping to decide whether a given source "\
-                                 "belongs to Case I, II or III for fitting spectral indices. ",
-                             group="spectralindex_do")
-    specind_minchan =    Int(6,
-                             doc = "Min number of channels to average to, for "\
-                                 "a given source, before deciding to sum "\
-                                 "over pixels if still below specind_kappa * noise\n"\
+    specind_maxchan =    Int(0,
+                             doc = "Maximum number of channels to average for "\
+                                 "a given source when when attempting to meet target SNR. "\
+                                 "1 => no averaging; 0 => no maximum\n"\
                                  "If spectralindex_do is True, then for a given source, "\
                                  "if the fluxes in each channel are below a threshold, "\
-                                 "then this determines the minimum number of channels to "\
-                                 "average the data to. If the fluxes are still below the "\
-                                 "threshold after averaging, then their value is estimated "\
-                                 "by summing over pixels, before calculating the spectral "\
-                                 "index.",
+                                 "then this determines the maximum number of channels to "\
+                                 "average.",
                              group="spectralindex_do")
-    specind_dolog   =   Bool(False,
-                             doc = "Fit flux vs freq in log space or in "\
-                                 "real space\n If True, then spectral indices "\
-                                 "are fit to log(flux) versus log(frequency), else "\
-                                 "they are fit to flux versus frequency. The actual "\
-                                 "function fit to the data is the same in both cases, "\
-                                 "and hence the only difference is in the accuracy of "\
-                                 "fit if the range of frequencies is large, with very "\
-                                 "different errors on fluxes.",
+    specind_snr     =  Float(3.0,
+                             doc = "Target SNR to use when fitting power law. If "\
+                                 "there is insufficient SNR, neighboring channels "\
+                                 "are averaged to obtain the target SNR\n"\
+                                 "The maximum allowable number of channels to average "\
+                                 "is determined by the specind_maxchan parameter.",
                              group="spectralindex_do")
-
     
     #-------------------------HIDDEN OPTIONS--------------------------------
     debug           =   Bool(False,

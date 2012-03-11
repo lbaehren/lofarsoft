@@ -511,7 +511,7 @@ class Op_psf_vary(Op):
         if generators == 'calibrators' or generators == 'field':
             if gencode != 'file': gencode = 'list'
             if gencode == 'list':
-                cutoff = int(round(num*(1.0-snrtop)))
+                cutoff = int(round(num*(snrtop)))
                 # Make sure we don't fall below snrcutstack (SNR cut for stacking of PSFs), since
                 # it makes no sense to make tiles with generators that fall below this cut.
                 if snr[cutoff] < snrcutstack: cutoff = snr.searchsorted(snrcutstack)
