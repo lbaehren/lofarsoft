@@ -31,6 +31,10 @@ namespace Pulsar {
     //! Return the shift estimate
     Estimate<double> get_shift () const;
 
+    //! Set the duty cycle over which flux will be integrated
+    void set_duty_cycle (float dc) { duty_cycle = dc; }
+    float get_duty_cycle () const { return duty_cycle; }
+
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ()
     { return new EmptyInterface<FluxCentroid> ("COF"); }

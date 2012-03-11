@@ -24,6 +24,8 @@
 #include "Pulsar/SNRWeight.h"
 #include "Pulsar/Transposer.h"
 
+#include "Pulsar/FluxCentroid.h"
+
 #include "strutil.h"
 #include "substitute.h"
 #include "tostring.h"
@@ -196,9 +198,10 @@ void Pulsar::Interpreter::init()
   
   add_command 
     ( &Interpreter::centre, 'C',
-      "centre", "centre profiles using polyco or max",
-      "usage: centre <max> \n"
-      "  max               centre on the peak in total intensity \n" );
+      "centre", "centre profiles using either polyco or data",
+      "usage: centre <max|cof> \n"
+      "  max               centre on the peak in total intensity \n"
+      "  cof               centre on flux-weighted mean phase\n");
 
   add_command 
     ( &Interpreter::dedisperse, 'D',
@@ -898,11 +901,28 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+void centre_of_flux (Pulsar::Archive* archive)
+{
+  Reference::To<Pulsar::Archive> total = archive->total();
+ 
+  Pulsar::FluxCentroid cof;
+  cof.set_observation( total->get_Profile(0,0,0) );
+  cof.set_duty_cycle( 1.0 );
+
+  double shift_phase = cof.get_shift().get_value();
+  double period = total->get_Integration(0)->get_folding_period();
+  double shift_time = (shift_phase+0.5) * period;
+
+  archive->rotate (shift_time); 
+}
+
 string Pulsar::Interpreter::centre (const string& args) try
 {
   vector<string> arguments = setup (args);
 
-  if (arguments.size() == 1 && arguments[0] == "max")
+  if (arguments.size() == 1 && arguments[0] == "cof")
+    centre_of_flux( get() );
+  else if (arguments.size() == 1 && arguments[0] == "max")
     get()->centre_max_bin();
   else if (arguments.size() == 0)
     get()->centre();
