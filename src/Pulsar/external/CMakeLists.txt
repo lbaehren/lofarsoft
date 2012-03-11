@@ -182,7 +182,7 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 
 if (NOT TARGET psrchive)
 
-  set (psrchive_version   "20120309")
+  set (psrchive_version   "20120311")
   set (psrchive_name      "psrchive-${psrchive_version}")
   set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
   
