@@ -272,7 +272,10 @@ The advanced options are:
       :term:`blank_zeros` ........ False : Blank zeros in the image                    
       :term:`bmpersrc_th` ......... None : Theoretical estimate of number of beams per 
                                    source. None => calculate inside program    
-      :term:`check_outsideuniv` .. False : Check for pixels outside the universe       
+      :term:`check_outsideuniv` .. False : Check for pixels outside the universe
+      :term:`detection_image` ........ '': Detection image file name used only for 
+                                   detecting islands of emission. Source 
+                                   measurement is still done on the main image
       :term:`fdr_alpha` ........... 0.05 : Alpha for FDR algorithm for thresholds      
       :term:`fdr_ratio` ............ 0.1 : For thresh = None; if #false_pix / #source_pix <
                                    fdr_ratio, thresh = 'hard' else thresh = 'fdr'
@@ -342,6 +345,9 @@ The advanced options are:
         these pixels are blanked (since imaging software do not do this on their
         own). Note that this process takes a lot of time, as every pixel is
         checked in case weird geometries and projections are used.
+        
+    detection_image
+        This parameter is a string (default is ``''``) that sets the detection image file name used only for detecting islands of emission. Source measurement is still done on the main image. The detection image can be a FITS or CASA 2-, 3-, or 4-D cube and must have the same size and WCS parameters as the main image.
         
     fdr_alpha
         This parameter is a float (default is 0.05) that sets the value of alpha for the FDR algorithm for thresholding. If ``thresh`` is ``'fdr'``, then the estimate of ``fdr_alpha`` (see Hopkins et al. 2002 [#f2]_ for details) is stored in this parameter.
@@ -858,27 +864,15 @@ Spectral index module
 ---------------------
 If ``spectralindex_do = True`` (and the input image has more than one frequency), then spectral indices are calculated for the sources in the following way:
 
-* If ``flagchan_rms`` is ``True``, then initial flagging is done based on the overall rms of the channel. Averaging is also done based on the number of channels relative to the ``specind_nchan0`` parameter.
+* The rms maps for the remaining channels are determined.
+
+* Neighboring channels are averages to attempt to obtain the target SNR per channel for a given source, set by the ``specind_snr`` parameter.
 
     .. note::
     
         No color corrections are applied during averaging. However, unless the source spectral index is very steep or the channels are very wide, the correction is minimal. See :ref:`colorcorrections` for details.
-
-* The rms maps for the remaining channels are determined.
-
-* Sources are divided by type as follows:
-
-    * Type 'S' and 'C' sources (which are generally compact sources, see the :ref:`output_cols` section) are treated together. In this case, spectral indices are calculated for individual Gaussians.
-    
-    * Type 'M' sources (which are generally extended, see the :ref:`output_cols` section) are treated separately since source morphology may be expected to change across the spectral cube. The source area is calculated and if it is more than 10 times the beam area the source is considered truly extended. In this case, spectral indices are not calculated for individual Gaussians, but only for the source as a whole.
-    
-* For each source, a case is determined as follows (using the threshold set by the ``specind_kappa`` parameter):
-
-    * Case I: here the Gaussians have enough SNR in each channel that they can be fit reliably. Fluxes are then extracted from fits to each channel at the source location.
-    
-    * Case II/III: some channels have insufficient SNR for reliable fits. In this case, channels are further averaged to obtain significant SNRs. Fluxes are then extracted from fits to the averaged channels at the source location.
-    
-* Fluxes are measured for both individual Gaussians (except in the case of large, extended sources) and for total sources. Once source fluxes have been measured in each channel, the SEDs are fit with a polynomial function. The fit may be performed in either linear space (flux vs. freq) or log space (log(flux) vs log(freq)) as set by the ``specind_dolog`` parameter. In all cases, a first and second order polynomial is fit. The fit may be done to the total flux or to the peak flux (set with the ``specind_flux`` parameter). The best-fit parameters are then included in any catalogs that are written out (see :ref:`write_catalog`). In addition, plots of the fits can be viewed with the ``show_fit`` task (see :ref:`showfit`).
+   
+* Fluxes are measured for both individual Gaussians and for total sources. Once source fluxes have been measured in each channel, the SEDs are fit with a polynomial function. The best-fit parameters are then included in any catalogs that are written out (see :ref:`write_catalog`). In addition, plots of the fits can be viewed with the ``show_fit`` task (see :ref:`showfit`).
 
 The options for this module are as follows:
 
@@ -890,21 +884,12 @@ The options for this module are as follows:
                                    spectral index, if their rms if more than 5 
                                    (clipped) sigma outside the median rms over all
                                    channels, but only if <= 10% of channels    
-      :term:`specind_Msrc_exclude1` .. 0.06 : Exclude Gaussians less than this factor *   
-                                   max(Gaussian peaks) inside that M source while
-                                   fitting for spectral index for each Gaussian
-      :term:`specind_Msrc_exclude2` .. 3.0 : Exclude Gaussians whose average SNR over    
-                                   channels is less than this                  
-      :term:`specind_dolog` ...... False : Fit flux vs freq in log space or in real space
-      :term:`specind_flux` ...... 'total': Flux to use: 'total' or 'peak'. Determines which
-                                   flux to compute spectral indices for        
-      :term:`specind_kappa` ........ 7.5 : Kappa for deciding Case I, II, III for spectral
-                                   index                                       
-      :term:`specind_minchan` ........ 6 : Min number of channels to average to, for a given
-                                   source, before deciding to sum over pixels if
-                                   still below specind_kappa * noise           
-      :term:`specind_nchan0` ........ 40 : Rough number of channels to average cube to,
-                                   before attempting to fit spectral index     
+      :term:`specind_maxchan` ........ 0 : Maximum number of channels to average for a 
+                                           given source when when attempting to meet target
+                                           SNR. 1 => no averaging; 0 => no maximum                                     
+      :term:`specind_snr` .......... 3.0 : Target SNR to use when fitting power law. If 
+                                           there is insufficient SNR, neighboring channels 
+                                           are averaged to obtain the target SNR                                  
 
 .. glossary::
 
@@ -916,44 +901,12 @@ The options for this module are as follows:
         flagged only if the total number of these bad channels does not exceed
         10% of the total number of channels themselves.                 
                          
-    specind_Msrc_exclude1
-        This parameter is a float (default is 0.06). For sources with code='M', all gaussians with peak flux less than
-        ``specind_Msrc_exclude1`` times the maximum peak flux of the constituent
-        Gaussians (of the channel collapsed image) are excluded from the initial
-        model fit to each channel image. See also ``specind_Msrc_exclude2``.
-                         
-    specind_Msrc_exclude2
-        This parameter is a float (default is 3.0). For sources with code='M', all Gaussians with average SNR over channels
-        is less than ``specind_Msrc_exclude2`` are also excluded from the initial
-        model fit to each channel image. See also ``specind_Msrc_exclude1``.
-                         
-    specind_dolog
-        This parameter is a Boolean (default is ``False``). If ``True``, then spectral indices are fit to log(flux) versus
-        log(frequency), else they are fit to flux versus frequency. The actual
-        function fit to the data is the same in both cases, and hence the only
-        difference is in the accuracy of fit if the range of frequencies is
-        large, with very different errors on fluxes.
+    specind_maxchan
+        This parameter is an integer (default is 0) that sets the maximum number of channels that can be averaged together to attempt to reach the target SNR set by the ``specind_snr`` parameter. If 0, there is no limit to the number of channels that can be averaged. If 1, no averaging will be done.
     
-    specind_flux
-        This parameter is a string (default is ``'total'``) that determines whether spectral indices are calculated for total fluxes
-        (``'total'``) or peak fluxes (``'peak'``) if ``spectralindex_do`` is ``True``.
-                         
-    specind_kappa
-        This parameter is a float (default is 7.5) that sets the kappa used for clipping to decide whether a given source
-        belongs to Case I, II or III for fitting spectral indices. 
-                         
-    specind_minchan
-        This parameter is an integer (default is 6). For a given source, if the fluxes in
-        each channel are below a threshold, then this determines the minimum
-        number of channels to average the data to. If the fluxes are still below
-        the threshold after averaging, then their value is estimated by summing
-        over pixels, before calculating the spectral index.      
-                         
-    specind_nchan0
-        This parameter is an integer (default is 40). If the total number of channels is more than twice this number, then the
-        data is averaged to roughly (+/- 1-2 channels) ``specind_nchan0`` channels
-        before attempting to fit spectral indices.
-
+    specind_snr
+        This parameter is a float (default is 3.0) that sets the target SNR to use when fitting for the spectral index. If there is insufficient SNR, neighboring channels are averaged to obtain the target SNR. The maximum allowable number of channels to average is determined by the ``specind_maxchan`` parameter. Channels (after averaging) that fail to meet the target SNR are not used in fitting.
+    
 .. _polarisation_do:
 
 Polarization module
