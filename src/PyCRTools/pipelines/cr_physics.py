@@ -95,9 +95,6 @@ for station in stations:
     # Get timeseries data
     timeseries_data = f.empty("TIMESERIES_DATA")
 
-    cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
-    timeseries_data /= blocksize
-
     # Get antennas positions
     antenna_positions = f["ANTENNA_POSITIONS"]
 
@@ -115,7 +112,11 @@ for station in stations:
     while True:
 
         # Unfold antenna pattern
-        antenna_response = cr.trun("AntennaResponse", direction = pulse_direction)
+        antenna_response = cr.trun("AntennaResponse", fft_data = fft_data, frequencies = frequencies, direction = pulse_direction)
+
+        # Get timeseries data
+        cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarizations[...], invfftplan)
+        timeseries_data /= blocksize
 
         # Calculate delays
         pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
