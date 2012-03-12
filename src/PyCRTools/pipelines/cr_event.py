@@ -1075,11 +1075,16 @@ for full_filename in files:
         Pause(name="pulse-maxima-crosscorr")
 
         #The actual delays are those from the (rounded) peak locations plus the delta form the cross correlation
-        time_lags=(timeseries_data_cut_to_pulse_delays.vec()+maxima_cc.lags)
-
+        time_lags = sample_interval * timeseries_data_cut_pulse_width/2 + (timeseries_data_cut_to_pulse_delays.vec()+maxima_cc.lags) + sample_interval * np.modf(maxima_power.maxx[pulses_refant])[0]
+        # reference antenna has maxima_cc.lags = 0 by def. Offsets to this, in integer samples, are in timeseries_data_cut_to_pulse_delays. The subsample part w.r.t. the ref-ant is in maxima_cc.lags. 
+        # The sub-sample part of the reference antenna time has to be included as well, using np.modf (takes fractional part).
+        
+        # Absolute times of arrival, using reference antenna, from the latest integer Unix / UTC second.
+        # i.e. in seconds between 0.0 and 1.0 excl.
+        absolute_time_of_arrival = sample_interval * (datafile["SAMPLE_NUMBER"][0] + block_number * blocksize + pulse.start) + time_lags
+                                    
         print "Time lag [ns]: ", time_lags
         print " "
-
         ########################################################################
         #Direction fitting based on time lags
         ########################################################################
@@ -1317,6 +1322,7 @@ for full_filename in files:
             pulses_maxima_x=list(maxima_power.maxx),
             pulses_maxima_y=list(maxima_power.maxy),
             pulses_timelags_ns=list(time_lags),
+            pulses_absolute_time_of_arrival = list(absolute_time_of_arrival),
             pulse_start_sample=pulse.start,
             pulse_end_sample=pulse.end,
             pulse_time_ms=pulse_time_ms,
