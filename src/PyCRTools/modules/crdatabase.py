@@ -588,6 +588,200 @@ class Settings(object):
 
 
 
+class _Parameter(object):
+    """General functionality for optional information of an information object."""
+
+    def __init__(self, parent=None):
+        """Initialisation of the _Parameter object.
+
+        **Properties**
+
+        ==============  ===============================================================================
+        Parameter       Description
+        ==============  ===============================================================================
+        *parent*        parent object.
+        *objectname*    name of the parent object, this is used to acces the correct database tables.
+        ==============  ===============================================================================
+        """
+        self._parent = parent
+        self._parent_type = parent.__class__.__name__.lower()
+        self._parameter = {}
+
+        # Check if the parent is of the correct type ()
+        if self._parent_type in ['event','datafile','station','polarisation']:
+            self._tablename = self._parent_type+"parameters"
+            self._idname = self._parent_type+"ID"
+        else:
+            raise TypeError("Parent type does not match any parameter table in the database.")
+
+        self._db = self._parent._db
+        self._id = self._parent._id
+
+
+    def __repr__(self):
+        """Representation of the parameter object."""
+        return self._parameter.__repr__()
+
+
+    def __getitem__(self, key):
+        """Get the value of the parameter *key*."""
+        self._parameter.setdefault(key, self.db_read(key))
+#        self._parameter[key] = self.db_read(key)
+        return self._parameter[key]
+
+
+    def __setitem__(self, key, value):
+        """Set the value of the parameter *key*."""
+        self._parameter[key] = value
+        self.db_write(key, value)
+
+
+    def __delitem__(self, key):
+        """Delete the entry *key* from the list of parameters."""
+        self._parameter.__delitem__(key)
+        self.db_delete(key)
+
+
+    def get(self, key, default=None):
+        return self._parameter.get(key, default=None)
+
+
+    def read(self):
+        """Read all parameters key names from the database."""
+        for key in self.keys():
+            self._parameter.setdefault(key, self.db_read(key))
+
+
+    def write(self):
+        """Write all parameters to the database."""
+        for key in self.keys():
+            self.db_write(key, self._parameter[key])
+
+
+    def keys(self):
+        """List of parameter keys."""
+        keys = self._parameter.keys()
+        if not keys:
+            # Read from database
+            if self._db:
+                sql = "SELECT key FROM main.{0}parameters WHERE {0}ID={1}".format(self._parent_type, self._id)
+                records = self._db.select(sql)
+                keys = [str(r[0]) for r in records]
+
+        return keys
+
+
+    def db_read(self, key):
+        """Read value for parameter *key* from the database.
+
+        **Properties**
+
+        =========  ===================================
+        Parameter  Description
+        =========  ===================================
+        *key*      name of the parameter key.
+        =========  ===================================
+        """
+        value = None
+
+        if self._db:
+            sql = "SELECT value FROM main.{0}parameters WHERE {0}ID={1} AND key='{2}'".format(self._parent_type, self._id, key)
+            records = self._db.select(sql)
+            if records:
+                value = self.unpickle_parameter(records[0][0])
+            else:
+                raise ValueError("Invalid key name")
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return value
+
+
+    def db_write(self, key, value):
+        """Write value for parameter *key* to the database.
+
+        **Properties**
+
+        =========  ============================================
+        Parameter  Description
+        =========  ============================================
+        *key*      name of the parameter key.
+        *value*    value of the parameter with keyword *key*.
+        =========  ============================================
+        """
+        if self._db:
+            if self._id != 0:
+                sql = "SELECT parameterID FROM main.{0}parameters WHERE {0}ID={1} AND key='{2}'".format(self._parent_type, self._id, key)
+                records = self._db.select(sql)
+                if records:
+                    sql = "UPDATE main.{0}parameters SET value='{2}' WHERE parameterID={1}".format(self._parent_type, records[0][0], self.pickle_parameter(value))
+                else:
+                    sql = "INSERT INTO main.{0}parameters ({0}ID, key, value) VALUES ({1}, '{2}', '{3}')".format(self._parent_type, self._id, key, self.pickle_parameter(value))
+                self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def db_delete(self, key):
+        """Delete a parameter entry from the database.
+
+        **Properties**
+
+        =========  ==================================================
+        Parameter  Description
+        =========  ==================================================
+        *key*      Name of the key of the parameter to be deleted.
+        =========  ==================================================
+        """
+        if self._db:
+            sql = "DELETE FROM main.{0}parameters WHERE {0}ID={1} AND key='{2}'".format(self._parent_type, self._id, key)
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def pickle_parameter(self, py_parameter):
+        """Return the parameter as a database friendly pickle
+        representation.
+
+        **Properties**
+
+        ==============  ======================================================
+        Parameter       Description
+        ==============  ======================================================
+        *py_parameter*  Python representation of the value of the parameter.
+        ==============  ======================================================
+        """
+        return re.sub("'", '"', pickle.dumps(py_parameter))
+
+
+    def unpickle_parameter(self, db_parameter):
+        """Return the parameter value from parsing a database friendly
+        representation of the parameter.
+
+        **Properties**
+
+        ==============  ================================================
+        Parameter       Description
+        ==============  ================================================
+        *db_parameter*  Database representation of the parameter value.
+        ==============  ================================================
+        """
+        return pickle.loads(re.sub('"', "'", str(db_parameter)))
+
+
+    def summary(self):
+        """Summary of the parameters."""
+        keys = self.keys()
+
+        if keys:
+            print "  Parameters:"
+            keys.sort()
+            for key in keys:
+                print "    %-38s : %s" %(key, self.__getitem__(key))
+
+
+
 class Event(object):
     """CR event information.
 
@@ -597,7 +791,6 @@ class Event(object):
     * *status*: the status of the event.
     * *datafiles*: a list of datafile information objects (:class:`Datafile`) associated with this event.
     * *parameter*: a dictionary of optional parameters with additional information for this specific event.
-
     """
 
     def __init__(self, db=None, id=0):
@@ -619,7 +812,7 @@ class Event(object):
         self.timestamp = 0
         self.status = "NEW"
         self.datafiles = []
-        self.parameter = {}
+        self.parameter = _Parameter(parent=self)
 
         self.settings = Settings(db)
 
@@ -630,6 +823,16 @@ class Event(object):
 
     def __repr__(self):
         return "EventID=%d   timestampe=%d   status='%s'" %(self._id, self.timestamp, self.status.upper())
+
+
+    def __getitem__(self, key):
+        """Get parameter value for *key*."""
+        return self.parameter[key]
+
+
+    def __setitem__(self, key, value):
+        """Set parameter value for *key*."""
+        self.parameter[key] = value
 
 
     def read(self):
@@ -658,11 +861,8 @@ class Event(object):
                     datafile.event = self
                     self.datafiles.append(datafile)
 
-                # Reading parameters
-                sql = "SELECT key, value FROM main.eventparameters WHERE eventID={0}".format(self._id)
-                records = self._db.select(sql)
-                for record in records:
-                    self.parameter[str(record[0])] = _load_parameter(record[1])
+                # Reading parameters - Done by _Parameter class
+                # self.parameter.read()
             else:
                 print "WARNING: This event (id={0}) is not available in the database.".format(self._id)
         else:
@@ -704,24 +904,25 @@ class Event(object):
                     sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
                     self._db.insert(sql)
 
-            # Writing parameters
-            sql = "SELECT key FROM main.eventparameters WHERE eventID={0}".format(self._id)
-            db_keys = [record[0] for record in self._db.select(sql)]
-            py_keys = [key for key in self.parameter]
+            # Writing parameters - will be done by _Parameter class
+            self.parameter.write()
+            # sql = "SELECT key FROM main.eventparameters WHERE eventID={0}".format(self._id)
+            # db_keys = [record[0] for record in self._db.select(sql)]
+            # py_keys = [key for key in self.parameter]
 
-            # - Insert/update parameters
-            for key in py_keys:
-                if key in db_keys:
-                    sql = "UPDATE main.eventparameters SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.parameter[key]))
-                else:
-                    sql = "INSERT INTO main.eventparameters (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.parameter[key]))
-                self._db.execute(sql)
+            # # - Insert/update parameters
+            # for key in py_keys:
+            #     if key in db_keys:
+            #         sql = "UPDATE main.eventparameters SET value='{2}' WHERE eventID={0} AND key='{1}'".format(self._id, str(key), _dump_parameter(self.parameter[key]))
+            #     else:
+            #         sql = "INSERT INTO main.eventparameters (eventID, key, value) VALUES ({0}, '{1}', '{2}')".format(self._id, str(key), _dump_parameter(self.parameter[key]))
+            #     self._db.execute(sql)
 
-            # - delete unused parameters
-            for key in db_keys:
-                if not key in py_keys:
-                    sql = "DELETE FROM main.eventparameters WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
-                    self._db.execute(sql)
+            # # - delete unused parameters
+            # for key in db_keys:
+            #     if not key in py_keys:
+            #         sql = "DELETE FROM main.eventparameters WHERE eventID={0} AND key='{1}'".format(self._id, str(key))
+            #         self._db.execute(sql)
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -867,10 +1068,7 @@ class Event(object):
                 print "    %-6d - %s" %(datafile.id, datafile.filename)
 
         # Parameters
-        if self.parameter:
-            print "  Parameters:"
-            for key in self.parameter.keys():
-                print "    %-38s : %s" %(key, self.parameter[key])
+        self.parameter.summary()
 
         print "="*linewidth
 
@@ -944,7 +1142,7 @@ class Datafile(object):
                     station.datafile = self
                     self.stations.append(station)
 
-                # TEST: Datafile.read() - Reading parameters
+                # Read parameters
                 sql = "SELECT key, value FROM main.datafileparameters WHERE datafileID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
@@ -1235,7 +1433,7 @@ class Station(object):
                     polarisation.station = self
                     self.polarisations.append(polarisation)
 
-                # TEST: Station.read() - Read parameter information
+                # Read parameter information
                 sql = "SELECT key, value FROM main.stationparameters WHERE stationID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
@@ -1544,7 +1742,7 @@ class Polarisation(object):
                     sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._id = self._db.insert(sql)
 
-            # Writing parameters
+            # Write parameters
             sql = "SELECT key FROM main.polarisationparameters WHERE polarisationID={0}".format(self._id)
             db_keys = [record[0] for record in self._db.select(sql)]
             py_keys = [key for key in self.parameter]
