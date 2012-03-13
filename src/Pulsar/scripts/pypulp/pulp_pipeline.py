@@ -36,6 +36,7 @@ def rglob(base, pattern):
 class Pipeline:
 	def __init__(self, obs, cep2, cmdline, log):
 		self.units = []   # list of processing units
+		self.sum_popens = []  # list of Popen make_summary processes
 		self.summary_dirs = {}  # dictionary, key - locus node of the summaries, value - dir
 		# extensions of the files to copy to archive in summary (*_nopfd*.tgz)
 		self.archive_exts=["*.log", "*.txt", "*.pdf", "*.ps", "*.bestprof", "*.inf", "*.rfirep", "*png", "*parset", "*.par"]
@@ -89,11 +90,25 @@ class Pipeline:
 			# deleting previous results if option --del was set
 			if cmdline.opts.is_delete:
 				log.info("Deleting previous processed results on %s: %s" % (node, sumdir))
-				cmd="%s %s 'rm -rf %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
+#				cmd="%s %s 'rm -rf %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
+				# Using ssh in the background instead of cexec in order to get proper status code if job has failed
+				# with cexec you always get status=0
+				# Also, using "-t" option in ssh allows to send KILL signal to remote command over ssh to finish all processes there
+				# in case when pipeline was interrupted
+				# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
+#				cmd="ssh -t %s 'nohup rm -rf %s </dev/null 2>&1'" % (node, sumdir)
+				cmd="ssh -t %s 'rm -rf %s 2>&1'" % (node, sumdir)
 				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				p.communicate()
 			log.info("Creating output directory on %s: %s" % (node, sumdir))
-			cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
+#			cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
+			# Using ssh in the background instead of cexec in order to get proper status code if job has failed
+			# with cexec you always get status=0
+			# Also, using "-t" option in ssh allows to send KILL signal to remote command over ssh to finish all processes there
+			# in case when pipeline was interrupted
+			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
+#			cmd="ssh -t %s 'nohup mkdir -p %s </dev/null 2>&1'" % (node, sumdir)
+			cmd="ssh -t %s 'mkdir -p %s 2>&1'" % (node, sumdir)
 			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			p.communicate()
 
@@ -109,8 +124,16 @@ class Pipeline:
 				else: locus=cep2.hoover_nodes[1]                    # and another for IS data
 			else:
 				locus=unit.tab.location[0]
-			cmd="%s %s '/home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s'" %  \
-				(cep2.cexeccmd, cep2.cexec_nodes[locus], unit.sapid, unit.tabid, " ".join(cmdline.options))
+#			cmd="%s %s '/home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s'" %  \
+#				(cep2.cexeccmd, cep2.cexec_nodes[locus], unit.sapid, unit.tabid, " ".join(cmdline.options))
+			# Using ssh in the background instead of cexec in order to get proper status code if job has failed
+			# with cexec you always get status=0
+			# Also, using "-t" option in ssh allows to send KILL signal to remote command over ssh to finish all processes there
+			# in case when pipeline was interrupted
+			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
+#			cmd="ssh -t %s 'nohup /home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s </dev/null 2>&1'" % \
+			cmd="ssh -t %s '/home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s 2>&1'" % \
+				(locus, unit.sapid, unit.tabid, " ".join(cmdline.options))
 			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			log.info("SAP=%d TAB=%d (%s) on %s (pid=%d)  [number of locations = %d]" % \
 				(unit.sapid, unit.tabid, unit.tab.is_coherent and "CS" or "IS", locus, unit.parent.pid, len(unit.tab.location)))
@@ -120,44 +143,60 @@ class Pipeline:
 	# create FE status maps, TA heat maps...
 	def finish(self, obs, cep2, cmdline, log):
 
-		# waiting for processing in individual locus nodes to finish
-		# unless we want to do just a summary
-		if not cmdline.opts.is_summary:
-			run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
-			log.info("Still running [%d]: %s" % (len(run_units), run_units))
-			for unit in self.units:
-				log.info("waiting...")
-				unit.parent.communicate()
-				log.info("Process pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
+		try:
+			# waiting for processing in individual locus nodes to finish
+			# unless we want to do just a summary
+			if not cmdline.opts.is_summary:
 				run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
+				log.info("Still running [%d]: %s" % (len(run_units), run_units))
+				for unit in self.units:
+					log.info("waiting...")
+					unit.parent.communicate()
+					log.info("Process pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
+					run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
+					if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
+
+				# loop over finished processes to see if they all finished OK
+				failed_units = [u for u in self.units if u.parent.returncode > 0]
+				log.info("Failed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
+
+			self.sum_popens=[]
+			log.info("Starting summaries...")
+			# starting separate pulp.py on summary nodes just to finish up
+			for (sumnode, sumdir) in self.summary_dirs.items():
+#				cmd="%s %s '/home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s'" %  \
+#					(cep2.cexeccmd, cep2.cexec_nodes[sumnode], sumnode, " ".join(cmdline.options))
+				# Using ssh in the background instead of cexec in order to get proper status code if job has failed
+				# with cexec you always get status=0
+#				cmd="ssh -t %s 'nohup /home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s </dev/null 2>&1'" % \
+				cmd="ssh -t %s '/home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s 2>&1'" % \
+					(sumnode, sumnode, " ".join(cmdline.options))
+				sum_popen = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+				self.sum_popens.append(sum_popen)
+				log.info("Making summaries on %s... (pid=%d)" % (sumnode, sum_popen.pid))
+
+			run_units = [p.pid for p in self.sum_popens if p.poll() is None]
+			log.info("Still running [%d]: %s" % (len(run_units), run_units))
+			for proc in self.sum_popens:
+				log.info("waiting...")
+				proc.communicate()
+				log.info("Process pid=%d has finished, status=%d" % (proc.pid, proc.returncode))
+				run_units = [p.pid for p in self.sum_popens if p.poll() is None]
+				finished_units = [p for p in self.sum_popens if p.poll() is not None]
+				for fu in finished_units:
+					if fu.poll() != 0:
+						raise Exception
+					else: self.sum_popens.remove(fu)
 				if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
 
-			# loop over finished processes to see if they all finished OK
-			failed_units = [u for u in self.units if u.parent.returncode > 0]
-			log.info("Failed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
+			# loop over finished summaries to see if they all finished OK
+			failed_summaries = [s for s in self.sum_popens if s.returncode > 0]
+			log.info("%d failed summaries" % (len(failed_summaries)))
 
-		sum_popens=[]
-		log.info("Starting summaries...")
-		# starting separate pulp.py on summary nodes just to finish up
-		for (sumnode, sumdir) in self.summary_dirs.items():
-			cmd="%s %s '/home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s'" %  \
-				(cep2.cexeccmd, cep2.cexec_nodes[sumnode], sumnode, " ".join(cmdline.options))
-			sum_popen = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
-			sum_popens.append(sum_popen)
-			log.info("Making summaries on %s... (pid=%d)" % (sumnode, sum_popen.pid))
-
-		run_units = [p.pid for p in sum_popens if p.poll() is None]
-		log.info("Still running [%d]: %s" % (len(run_units), run_units))
-		for proc in sum_popens:
-			log.info("waiting...")
-			proc.communicate()
-			log.info("Process pid=%d has finished, status=%d" % (proc.pid, proc.returncode))
-			run_units = [p.pid for p in sum_popens if p.poll() is None]
-			if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
-
-		# loop over finished summaries to see if they all finished OK
-		failed_summaries = [s for s in sum_popens if s.returncode > 0]
-		log.info("%d failed summaries" % (len(failed_summaries)))
+		except Exception:
+			log.exception("Oops... 'finish' function of the pipeline has crashed!")
+			self.kill(log)
+			sys.exit(1)
 
 	# execute command on local node (similar to execute in PipeUnit)
 	def execute(self, cmd, log, workdir=None, shell=False, is_os=False):
@@ -188,6 +227,23 @@ class Pipeline:
 		except Exception:
 			log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, status))
 			sys.exit(1)
+
+	# function that checks all processes in the list and kill them if they are still running
+	def kill(self, log=None):
+		if log != None: log.info("Killing all open processes...")
+		for unit in self.units:
+			if unit.parent != None and unit.parent.poll() is None:
+				unit.parent.kill()
+				if unit.parent != None: unit.parent.communicate()
+				if unit.parent != None: unit.parent.poll()
+		self.units = []
+		# killing summary processes if open
+		for sum_popen in self.sum_popens:
+			if sum_popen != None and sum_popen.poll() is None:
+				sum_popen.kill()
+				if sum_popen != None: sum_popen.communicate()
+				if sum_popen != None: sum_popen.poll()
+		self.sum_popens=[]
 
 
 	# run necessary processes to organize summary info on summary nodes
@@ -371,7 +427,8 @@ class PipeUnit:
 		self.tabid = tab.tabid
 		self.tab = tab
 		self.parent = None   # parent Popen project
-		self.process = None  # own process, process.pid - pid, process.returncode - status
+		self.procs = []      # list of open processes
+				     # process.pid - pid, process.returncode - status
                                      # if returncode == None, it means that process is still running
 		self.outdir = ""     # root directory with processed data
 		self.curdir = ""     # current processing directory
@@ -398,53 +455,59 @@ class PipeUnit:
 
 	# function to get the list of pulsars to fold for this TAB (unit)
 	def get_pulsars_to_fold(self, obs, cep2, cmdline, log):
-		# get pulsar name from the parset
-		# if pulsar is not given in the command line, I also have to find pulsar if parset entry is empty
-		if len(cmdline.psrs) == 0 or cmdline.psrs[0] == "parset":
-			for sap in obs.saps:
-				if self.sapid == sap.sapid and sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None):
-					self.psrs.append(sap.source)
+		try:
+			# get pulsar name from the parset
+			# if pulsar is not given in the command line, I also have to find pulsar if parset entry is empty
+			if len(cmdline.psrs) == 0 or cmdline.psrs[0] == "parset":
+				for sap in obs.saps:
+					if self.sapid == sap.sapid and sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None):
+						self.psrs.append(sap.source)
 
-		# if --pulsar is not given and source field in parset is empty
-		if len(cmdline.psrs) == 0 and len(self.psrs) == 0:
-			for sap in obs.saps:
-				if self.sapid == sap.sapid:
-					self.psrs[:] = sap.psrs
-					break
-			if len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+			# if --pulsar is not given and source field in parset is empty
+			if len(cmdline.psrs) == 0 and len(self.psrs) == 0:
+				for sap in obs.saps:
+					if self.sapid == sap.sapid:
+						self.psrs[:] = sap.psrs
+						break
+				if len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+	
+			# if special word "tabfind" is given
+			if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind":
+				log.info("Searching for best pulsar for folding in SAP=%d TAB=%d..." % (self.sapid, self.tabid))
+				self.psrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cep2.tabfind)
+				if len(self.psrs) > 0: 
+					self.psrs = self.psrs[:1] # leave only one pulsar
+					log.info("%s" % (" ".join(self.psrs)))
 
-		# if special word "tabfind" is given
-		if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind":
-			log.info("Searching for best pulsar for folding in SAP=%d TAB=%d..." % (self.sapid, self.tabid))
-			self.psrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cep2.tabfind)
-			if len(self.psrs) > 0: 
-				self.psrs = self.psrs[:1] # leave only one pulsar
-				log.info("%s" % (" ".join(self.psrs)))
+			# using pulsars from SAP
+			if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "sapfind3"):
+				for sap in obs.saps:
+					if self.sapid == sap.sapid:
+						self.psrs[:] = sap.psrs
+						break
+				if cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
 
-		# using pulsars from SAP
-		if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "sapfind3"):
-			for sap in obs.saps:
-				if self.sapid == sap.sapid:
-					self.psrs[:] = sap.psrs
-					break
-			if cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
+			# if --pulsar is used but no special word
+			if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "tabfind" and \
+					cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
+				self.psrs[:] = cmdline.psrs # copying all items
 
-		# if --pulsar is used but no special word
-		if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "tabfind" and \
-				cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
-			self.psrs[:] = cmdline.psrs # copying all items
-
-		# if pulsar list is still empty, and we did not set --nofold then exit
-		if len(self.psrs) == 0:
-			log.error("*** No pulsar found to fold and --nofold is not used for SAP=%d TAB=%d. Exiting..." % (self.sapid, self.tabid))
-			sys.exit(1)
-			
-		# checking if pulsars are in ATNF catalog, or if not par-files do exist fo them, if not - exit
-		for psr in self.psrs:
-			if not check_pulsars(psr, cmdline, cep2, log):
-				log.info("*** No parfile found for pulsar %s for SAP=%d TAB=%d. Exiting..." % (psr, self.sapid, self.tabid))
+			# if pulsar list is still empty, and we did not set --nofold then exit
+			if len(self.psrs) == 0:
+				log.error("*** No pulsar found to fold and --nofold is not used for SAP=%d TAB=%d. Exiting..." % (self.sapid, self.tabid))
 				sys.exit(1)
-		return self.psrs
+			
+			# checking if pulsars are in ATNF catalog, or if not par-files do exist fo them, if not - exit
+			for psr in self.psrs:
+				if not check_pulsars(psr, cmdline, cep2, log):
+					log.info("*** No parfile found for pulsar %s for SAP=%d TAB=%d. Exiting..." % (psr, self.sapid, self.tabid))
+					sys.exit(1)
+			return self.psrs
+
+		except Exception:
+			self.log.exception("Oops... get_pulsars_to_fold has crashed!")
+			self.kill()  # killing all open processes
+			sys.exit(1)
 
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
@@ -460,10 +523,12 @@ class PipeUnit:
 			status = 1
 			if is_os: status = os.system(cmd)
 			else:
-               			self.process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
-       	        		self.log.process2log(self.process)
-        	       		self.process.communicate()
-				status=self.process.poll()
+               			process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
+				self.procs.append(process)
+       	        		self.log.process2log(process)
+        	       		process.communicate()
+				status=process.poll()
+				self.procs.remove(process)
 			job_end = time.time()
 			job_total_time = job_end - job_start
         	       	self.log.info("Finished at UTC %s, status=%s, Total runnung time: %.1f s (%.2f hrs)" % \
@@ -474,6 +539,7 @@ class PipeUnit:
 				raise Exception
 		except Exception:
 			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, status))
+			self.kill()  # killing all open processes
 			sys.exit(1)
 
 	def start_and_go(self, cmd, workdir=None, shell=False):
@@ -482,14 +548,18 @@ class PipeUnit:
 		This function start the cmd and leaves the fucntion
 		returning the Popen object, it does not wait for process to finish
     		"""
+		status=1
 		try:
 			self.log.info(cmd)
 			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
-               		self.process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
-			self.log.info("Job pid=%d, not waiting for it to finish." % (self.process.pid))
-			return self.process
+               		process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
+			status=process.returncode
+			self.procs.append(process)
+			self.log.info("Job pid=%d, not waiting for it to finish." % (process.pid))
+			return process
 		except Exception:
-			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, self.process.returncode))
+			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, status))
+			self.kill()  # killing all open processes
 			sys.exit(1)
 
 	def waiting(self, prg, popen):
@@ -508,11 +578,13 @@ class PipeUnit:
 			self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Waiting time: %.1f s (%.2f hrs)" % \
 				(popen.pid, prg, time.asctime(time.gmtime()), popen.returncode, job_total_time, job_total_time/3600.))
 			self.log.info("")
+			self.procs.remove(popen)
 			# if job is not successful
 			if popen.poll() != 0:
 				raise Exception
 		except Exception:
 			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, popen.pid, popen.returncode))
+			self.kill()  # killing all open processes
 			sys.exit(1)
 
 	def waiting_list(self, prg, popen_list):
@@ -531,6 +603,7 @@ class PipeUnit:
 				for fu in finished_units:
 					if fu.poll() != 0:
 						raise Exception
+					else: self.procs.remove(fu)
 				if len(run_units) > 0: self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
 			job_end = time.time()
 			job_total_time = job_end - job_start
@@ -540,6 +613,7 @@ class PipeUnit:
 		except Exception:
 			fu = [u for u in popen_list if u.poll() is not None][0]
 			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
+			self.kill()
 			sys.exit(1)
 
 	def lcd(self, low, high):
@@ -549,6 +623,17 @@ class PipeUnit:
 		for ii in range(low, high+1): 
 			if high % ii == 0: return ii
 		return high
+
+	# function that checks all processes in the list and kill them if they are still running
+	def kill(self, cep2):
+		if self.log != None: self.log.info("Killing all open processes for SAP=%d TAB=%d on node %s..." % (self.sapid, self.tabid, cep2.current_node))
+		for proc in self.procs:
+			if proc.poll() is None: # process is still running
+				proc.kill()
+				if proc != None: proc.communicate()
+				if proc != None: proc.poll()
+		self.procs = []
+				
 
 	# main processing function
 	def run(self, obs, cep2, cmdline, log):
@@ -605,8 +690,8 @@ class PipeUnit:
 				for loc in self.tab.location:
 					# first "mounting" corresponding locus node
 					input_dir="%s/%s_data/%d" % (cep2.hoover_data_dir, loc, obs.id)
-					self.process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-					self.process.communicate()
+					process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+					process.communicate()
 #					input_file="%s/%s_SAP%03d_B%03d_S*_bf.raw" % (input_dir, obs.id, self.sapid, self.tabid)
 #					input_files.extend(glob.glob(input_file))
 					input_file=["%s/%s/%s" % (input_dir, obs.id, f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
@@ -815,13 +900,16 @@ class PipeUnit:
 
 		except Exception:
 			self.log.exception("Oops... 'run' function for %s has crashed!" % (self.code))
+			self.kill(cep2)
 			sys.exit(1)
 
+		# kill all open processes
+		self.kill(cep2)
+		self.procs = []
 		# remove reference to PulpLogger class from processing unit
 		self.log = None
 		# remove references to Popen processes
 		self.parent = None
-		self.process = None
 
 
 class CSUnit(PipeUnit):

@@ -114,14 +114,25 @@ if __name__ == "__main__":
 			psrpipe = Pipeline(obs, cep2, cmdline, log)
 			# saving pipeline config to file
                 	pipefd = open (pipeline_file, "wb")
-                	cPickle.dump(psrpipe, pipefd, True)
+              		cPickle.dump(psrpipe, pipefd, True)
 			pipefd.close()
 			# kick off the pipeline
 			if not cmdline.opts.is_summary:
 				psrpipe.start(cep2, cmdline, log)
 			# wait for all childs to finish and prepare logs, all files in order
 			# convert, FE maps, etc.
-			psrpipe.finish(obs, cep2, cmdline, log)
+			try:
+				psrpipe.finish(obs, cep2, cmdline, log)
+			except KeyboardInterrupt:
+				log.exception("User interruption...")
+				if psrpipe != None:
+					psrpipe.kill(log)
+				# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
+				# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
+				# to its default values)
+				os.system("stty sane")
+				sys.exit(1)
+
 			# end of the pipeline...
 			end_pipe_time=time.time()
 			pipe_total_time = end_pipe_time - start_pipe_time
@@ -133,8 +144,8 @@ if __name__ == "__main__":
 			log.flush()
 			for (sumnode, sumdir) in psrpipe.summary_dirs.items():
 				cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), sumnode, sumdir)
-                        	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
-                        	proc.communicate()
+                       		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+                       		proc.communicate()
 		else:
 			# loading pipeline config from the file
 			pipefd = open(pipeline_file, "rb")
@@ -144,9 +155,29 @@ if __name__ == "__main__":
 				# running processing for particular beam
 				for unit in psrpipe.units:
 					if unit.sapid == sapid and unit.tabid == tabid:
-						unit.run(obs, cep2, cmdline, log)
+						try:
+							unit.run(obs, cep2, cmdline, log)
+						except KeyboardInterrupt:
+							log.exception("User interruption...")
+							unit.kill(cep2) # killing all open processes
+							# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
+							# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
+							# to its default values)
+							os.system("stty sane")
+							sys.exit(1)
+					
 			else:   # running local pulp to make summary actions
-				psrpipe.make_summary(obs, cep2, cmdline, log)
+				try:
+					psrpipe.make_summary(obs, cep2, cmdline, log)
+				except KeyboardInterrupt:
+					log.exception("User interruption...")
+					if psrpipe != None:
+						psrpipe.kill(log)
+					# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
+					# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
+					# to its default values)
+					os.system("stty sane")
+					sys.exit(1)
 
 	except Exception:
 		log.exception("Oops... pulp has crashed!")
