@@ -133,8 +133,8 @@ class Op_islands(Op):
         minsize = opts.minpix_isl
         if minsize == None:
             minsize = int(img.pixel_beamarea/3.0) # 1/3 of beam area in pixels
-            if minsize < 4:
-                minsize = 4 # Need at least 4 pixels for fitting
+            if minsize < 6:
+                minsize = 6 # Need at least 4 pixels for fitting
             mylogger.userinfo(mylog, "Minimum number of pixels per island", '%i' %
                           minsize)
         

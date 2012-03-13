@@ -306,10 +306,6 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
 
             if 'Flagged' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
-                    xb, yb = _isl2border(img, isl)
-                    cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='#afeeee', "\
-                        "markersize=8)"
-                    exec cmd
                     ax = pl.gca()
                     style = '-'
                     for ig, g in enumerate(isl.fgaul):
