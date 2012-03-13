@@ -275,7 +275,7 @@ class Opts(object):
     #--------------------------------ADVANCED OPTIONS--------------------------------
     split_isl       =   Bool(True,
                              doc="Split island if it is too large, has a large "\
-                                 "convex deficiency and it opens well. "\
+                                 "convex deficiency and it opens well.\n"\
                                  "If it doesn't open well, then isl.mean = "\
                                  "isl.clipped_mean, and is taken for fitting. "\
                                  "Splitting, if needed, is always done for "\

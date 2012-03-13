@@ -1241,7 +1241,10 @@ def convexhull_deficiency(isl):
     def _angle_to_point(point, centre):
         """calculate angle in 2-D between points and x axis"""
         delta = point - centre
-        res = N.arctan(delta[1] / delta[0])
+        if delta[0] == 0.0:
+            res = N.pi/2.0
+        else:
+            res = N.arctan(delta[1] / delta[0])
         if delta[0] < 0:
             res += N.pi
         return res
@@ -1291,49 +1294,7 @@ def convexhull_deficiency(isl):
     hull_area = area_polygon(hull_pts)
     ratio1 = hull_area/(isl_area - 0.5*len(hull_pts[0]))
 
-    #import pylab as pl
-    #pl.figure(); pl.imshow(N.transpose(~isl.mask_active), origin='lower', interpolation='nearest')
-    #pl.plot(hull_pts[0], hull_pts[1], 'ro-'); pl.title(str(isl.island_id)+' : '+repr(ratio1))
-
     return ratio1
-
-
-def readopts():
-    """ Read input parameters from opts.py and pass it as a list of lists"""
-    import commands
-
-    keyline = 'OPTS PARA FOR GUI'
-    o, dir = commands.getstatusoutput('echo $LOFARSOFT')
-    dir = dir+'/src/pybdsm/implement/bdsm_test/opts.py'
-    f = open(dir)
-    
-    paralist = []
-    line=''
-    while keyline not in line: 
-      line=f.readline()
-    line=''
-    while keyline not in line: 
-        line = f.readline().strip()
-        if keyline in line: break
-        if len(line.strip()) > 0:
-          while line[-1] == '\\': 
-            line = line[:-2] + f.readline().strip()
-            line = line.strip()
-          llist = line.split('=')
-          parameter, descr = llist[0].strip(), llist[1].strip()
-          para_doc = ''.join(llist[2:])
-          para_doc = para_doc.strip()[:-1]
-          if descr[-3:] == 'doc':
-            descr = descr[:-3]
-          else:
-            print 'Problem with keyword ', parameter
-          ind = descr.find('(')
-          para_type = descr[:ind]
-          para_descr = descr[ind+1:]
-          paralist.append([parameter, para_type, para_descr, para_doc])
-    f.close()
-
-    return paralist
 
 
 def open_isl(mask, index):
@@ -1347,10 +1308,13 @@ def open_isl(mask, index):
     open = nd.binary_opening(~mask, ft)
     open = check_1pixcontacts(open)  # check if by removing one pixel from labels, you can split a sub-island
     labels, n_subisl = nd.label(open, connectivity)  # get label/rank image for open. label = 0 for masked pixels
-    labels = assign_leftovers(mask, open, n_subisl, labels)  # add the leftover pixels to some island
+    labels, mask = assign_leftovers(mask, open, n_subisl, labels)  # add the leftover pixels to some island
 
-    isl_pixs = [len(N.where(labels==i)[0]) for i in range(1,n_subisl+1)]
-    isl_pixs = N.array(isl_pixs)/float(N.sum(isl_pixs))
+    if labels != None:
+        isl_pixs = [len(N.where(labels==i)[0]) for i in range(1,n_subisl+1)]
+        isl_pixs = N.array(isl_pixs)/float(N.sum(isl_pixs))
+    else:
+        isl_pixs = None
 
     return n_subisl, labels, isl_pixs
 
@@ -1395,11 +1359,16 @@ def assign_leftovers(mask, open, nisl, labels):
       coords = N.transpose(N.where(mlabels==ii))  # the coordinates of island i of left-out pixels
       for co in coords:
         co8 = [[x,y] for x in range(co[0]-1,co[0]+2) for y in range(co[1]-1,co[1]+2) if x >=0 and y >=0 and x <n and y<m]
+#         co8 = [[x,y] for x in range(co[0]-1,co[0]+2) for y in range(co[1]-1,co[1]+2) if x >=0 and y >=0 and x <n and y<m]
         c_list.extend([tuple(cc) for cc in co8 if mlabels[tuple(cc)] == 0])
       c_list = list(set(c_list))     # to avoid duplicates
       vals = N.array([labels[c] for c in c_list])
       belongs = list(set(vals[N.nonzero(vals)]))
-      if len(belongs) == 0: print 'something wrong in assign_leftovers'
+      if len(belongs) == 0:
+        # No suitable islands found => mask pixels
+        for cc in coords:
+            mask[cc] = True
+            return None, mask
       if len(belongs) == 1: 
         for cc in coords: 
           labels[tuple(cc)] = belongs[0]
@@ -1409,7 +1378,7 @@ def assign_leftovers(mask, open, nisl, labels):
         for cc in coords: 
           labels[tuple(cc)] = addto
 
-    return labels
+    return labels, mask
 
 
 def _float_approx_equal(x, y, tol=1e-18, rel=1e-7):
