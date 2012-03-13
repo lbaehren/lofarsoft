@@ -90,12 +90,12 @@ class CRDatabase(object):
             sql = "CREATE TABLE IF NOT EXISTS main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT)"
             self.db.execute(sql)
 
-            # Polarisations table
-            sql = "CREATE TABLE IF NOT EXISTS main.polarisations (polarisationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT)"
+            # Polarizations table
+            sql = "CREATE TABLE IF NOT EXISTS main.polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT)"
             self.db.execute(sql)
 
-            # Polarisation parameters table
-            sql = "CREATE TABLE IF NOT EXISTS main.polarisationparameters (parameterID INTEGER PRIMARY KEY, polarisationID INTEGER NOT NULL, key TEXT, value TEXT)"
+            # Polarization parameters table
+            sql = "CREATE TABLE IF NOT EXISTS main.polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT)"
             self.db.execute(sql)
 
             # event_datafile table (linking events to datafiles)
@@ -106,8 +106,8 @@ class CRDatabase(object):
             sql = "CREATE TABLE IF NOT EXISTS main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE)"
             self.db.execute(sql)
 
-            # station_polarisation table (linking stations to polarisations)
-            sql = "CREATE TABLE IF NOT EXISTS main.station_polarisation (stationID INTEGER NOT NULL, polarisationID INTEGER NOT NULL UNIQUE)"
+            # station_polarization table (linking stations to polarizations)
+            sql = "CREATE TABLE IF NOT EXISTS main.station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE)"
             self.db.execute(sql)
 
             # settings table
@@ -147,11 +147,11 @@ class CRDatabase(object):
             self.db.execute("DROP TABLE IF EXISTS main.datafileparameters")
             self.db.execute("DROP TABLE IF EXISTS main.stations")
             self.db.execute("DROP TABLE IF EXISTS main.stationparameters")
-            self.db.execute("DROP TABLE IF EXISTS main.polarisations")
-            self.db.execute("DROP TABLE IF EXISTS main.polarisationparameters")
+            self.db.execute("DROP TABLE IF EXISTS main.polarizations")
+            self.db.execute("DROP TABLE IF EXISTS main.polarizationparameters")
             self.db.execute("DROP TABLE IF EXISTS main.event_datafile")
             self.db.execute("DROP TABLE IF EXISTS main.datafile_station")
-            self.db.execute("DROP TABLE IF EXISTS main.station_polarisation")
+            self.db.execute("DROP TABLE IF EXISTS main.station_polarization")
             self.db.execute("DROP TABLE IF EXISTS main.filters")
             self.db.execute("DROP TABLE IF EXISTS main.status")
 
@@ -349,8 +349,8 @@ class CRDatabase(object):
         return result
 
 
-    def getPolarisationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None):
-        """Return a list of polarisationIDs that satisfy the values of the
+    def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None):
+        """Return a list of polarizationIDs that satisfy the values of the
         provided arguments of this method.
 
         **Properties**
@@ -362,20 +362,20 @@ class CRDatabase(object):
         *datafileID*       id of the datafile.
         *stationID*        id of the station.
         *antennaset*       type of antennaset.
-        *status*           status of the polarisation.
+        *status*           status of the polarization.
         =================  ==============================================================
 
-        If no arguments are given all polarisationIDs are selected. When
-        multiple arguments are provided, the returned polarisationIDs satisfy
+        If no arguments are given all polarizationIDs are selected. When
+        multiple arguments are provided, the returned polarizationIDs satisfy
         all argument values that are provided.
         """
         result = []
 
         if self.db:
             # Construct SQL table
-            sql_fields = "p.polarisationID"
-            sql_table_p = "polarisations AS p"
-            sql_table_s = "station_polarisation AS sp INNER JOIN " + sql_table_p + " ON (sp.polarisationID=p.polarisationID)"
+            sql_fields = "p.polarizationID"
+            sql_table_p = "polarizations AS p"
+            sql_table_s = "station_polarization AS sp INNER JOIN " + sql_table_p + " ON (sp.polarizationID=p.polarizationID)"
             sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " AND (ds.stationID=sp.stationID)"
             sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
             sql_table = sql_table_p     # Default sql_table value
@@ -456,11 +456,11 @@ class CRDatabase(object):
             n_stations = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of stations", n_stations)
 
-        # Polarisations
+        # Polarizations
         if self.db:
-            sql = "SELECT COUNT(polarisationID) AS npolarisations FROM main.polarisations"
-            n_polarisations = self.db.select(sql)[0][0]
-            print "  %-40s : %d" %("Nr. of polarisations", n_polarisations)
+            sql = "SELECT COUNT(polarizationID) AS npolarizations FROM main.polarizations"
+            n_polarizations = self.db.select(sql)[0][0]
+            print "  %-40s : %d" %("Nr. of polarizations", n_polarizations)
 
         print "-"*linewidth
 
@@ -608,7 +608,7 @@ class _Parameter(object):
         self._parameter = {}
 
         # Check if the parent is of the correct type ()
-        if self._parent_type in ['event','datafile','station','polarisation']:
+        if self._parent_type in ['event','datafile','station','polarization']:
             self._tablename = "main." + self._parent_type + "parameters"
             self._idlabel = self._parent_type + "ID"
         else:
@@ -1364,7 +1364,7 @@ class Station(object):
 
     * *stationname*: the name of the station, e.g. CS001, RS203.
     * *status*: the status of the station.
-    * *polarisations*: a list of polarisation information objects (:class:`Polarisation`) stored in this station.
+    * *polarizations*: a list of polarization information objects (:class:`Polarization`) stored in this station.
 
     """
 
@@ -1385,7 +1385,7 @@ class Station(object):
 
         self.stationname = ""
         self.status = "NEW"
-        self.polarisations = []
+        self.polarizations = []
         self.parameter = _Parameter(parent=self)
 
         self.settings = Settings(db)
@@ -1429,15 +1429,15 @@ class Station(object):
                 else:
                     raise ValueError("Multiple records found for stationID={0}".format(self._id))
 
-                # Read polarisation information
-                self.polarisations = []
-                sql = "SELECT polarisationID FROM main.station_polarisation WHERE stationID={0}".format(self._id)
+                # Read polarization information
+                self.polarizations = []
+                sql = "SELECT polarizationID FROM main.station_polarization WHERE stationID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
-                    polarisationID = int(record[0])
-                    polarisation = Polarisation(self._db, id=polarisationID)
-                    polarisation.station = self
-                    self.polarisations.append(polarisation)
+                    polarizationID = int(record[0])
+                    polarization = Polarization(self._db, id=polarizationID)
+                    polarization.station = self
+                    self.polarizations.append(polarization)
 
                 # Read parameter information - Done by _Parameter class
                 # self.parameter.read()
@@ -1455,7 +1455,7 @@ class Station(object):
         ===========  =================================================================
         Parameter    Description
         ===========  =================================================================
-        *recursive*  if *True* write all underlying datastructures (polarisations)
+        *recursive*  if *True* write all underlying datastructures (polarizations)
         ===========  =================================================================
         """
         if self._db:
@@ -1470,16 +1470,16 @@ class Station(object):
                     sql = "INSERT INTO main.stations (stationID, stationname, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.stationname), str(self.status.upper()))
                 self._id = self._db.insert(sql)
 
-            # Write polarisation information
-            for polarisation in self.polarisations:
-                polarisationID = polarisation.id
+            # Write polarization information
+            for polarization in self.polarizations:
+                polarizationID = polarization.id
                 if recursive:
-                    polarisation.write()
+                    polarization.write()
 
-                sql = "SELECT COUNT(stationID) FROM main.station_polarisation WHERE polarisationID={0}".format(polarisationID)
+                sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
                 result = self._db.select(sql)[0][0]
                 if 0 == result:
-                    sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
+                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
                     self._db.insert(sql)
 
             # Write parameter information
@@ -1517,10 +1517,10 @@ class Station(object):
         return self._id
 
 
-    def addPolarisation(self, polarisation=None):
-        """Add a polarisation object to this station.
+    def addPolarization(self, polarization=None):
+        """Add a polarization object to this station.
 
-        This adds a polarisation object to the current station object and
+        This adds a polarization object to the current station object and
         updates the database.
 
         **Properties**
@@ -1528,37 +1528,37 @@ class Station(object):
         ===============  =========================================================
         Parameter        Description
         ===============  =========================================================
-        *polarisation*   polarisation object to be linked to the current station.
+        *polarization*   polarization object to be linked to the current station.
         ===============  =========================================================
 
-        Returns *True* if adding the polarisation object went
+        Returns *True* if adding the polarization object went
         successfully, *False* otherwise.
         """
         result = False
 
-        if polarisation:
+        if polarization:
             # Update object
-            polarisationID = polarisation.id
-            polarisation.station = self # Reference to parent (station)
+            polarizationID = polarization.id
+            polarization.station = self # Reference to parent (station)
 
             # Check for duplicate
             isNew = True
-            for p in self.polarisations:
-                if p.id == polarisationID:
+            for p in self.polarizations:
+                if p.id == polarizationID:
                     isNew = False
                     break
             if isNew:
-                self.polarisations.append(polarisation)
+                self.polarizations.append(polarization)
 
             # Update database
             if self._db:
-                # Add polarisation object to database if it does not yet exist.
-                if not polarisation.inDatabase():
-                    polarisation.write(recursive=False)
+                # Add polarization object to database if it does not yet exist.
+                if not polarization.inDatabase():
+                    polarization.write(recursive=False)
                 # Update linking table
-                sql = "SELECT stationID FROM main.station_polarisation WHERE stationID={0} AND polarisationID={1}".format(self._id, polarisationID)
+                sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
                 if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.station_polarisation (stationID, polarisationID) VALUES ({0}, {1})".format(self._id, polarisationID)
+                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
                     self._db.insert(sql)
                     result = True
             else:
@@ -1567,42 +1567,42 @@ class Station(object):
         return result
 
 
-    def removePolarisation(self, polarisationID=0):
-        """Remove polarisation object with id= *polarisationID* from
+    def removePolarization(self, polarizationID=0):
+        """Remove polarization object with id= *polarizationID* from
         this station.
 
-        This removes the polarisation information object from this station
-        object and updates the database. Note that the polarisation info
+        This removes the polarization information object from this station
+        object and updates the database. Note that the polarization info
         is not deleted from the database: only the link between the
-        station and the polarisation objects is deleted.
+        station and the polarization objects is deleted.
 
         **Properties**
 
         ================  ===================================================================
         Parameter         Description
         ================  ===================================================================
-        *polarisationID*  id of the polarisation that needs to be removed from this station.
+        *polarizationID*  id of the polarization that needs to be removed from this station.
         ================  ===================================================================
 
-        Returns *True* if removing the polarisation object went
+        Returns *True* if removing the polarization object went
         successfully, *False* otherwise.
         """
         result = False
 
-        if polarisationID > 0:
+        if polarizationID > 0:
             # Update object
-            for p in self.polarisations:
-                if p.id == polarisationID:
-                    self.polarisations.remove(p)
+            for p in self.polarizations:
+                if p.id == polarizationID:
+                    self.polarizations.remove(p)
 
             # Update database
             if self._db:
-                sql = "DELETE FROM main.station_polarisation WHERE stationID={0} AND polarisationID={1}".format(self._id, polarisationID)
+                sql = "DELETE FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
                 self._db.execute(sql)
             else:
                 raise ValueError("Unable to write to database: no database was set.")
         else:
-            print "WARNING: invalid polarisationID!"
+            print "WARNING: invalid polarizationID!"
 
         return result
 
@@ -1620,13 +1620,13 @@ class Station(object):
         print "  %-40s : %s" %("Station name", self.stationname)
         print "  %-40s : %s" %("Status", self.status)
 
-        # Polarisations
-        n_polarisations = len(self.polarisations)
-        print "  %-40s : %d" %("Nr. of polarisations",n_polarisations)
-        if self.polarisations:
-            print "Polarisations:"
-            for polarisation in self.polarisations:
-                print "  %-6d - %s" %(polarisation.id, polarisation.resultsfile)
+        # Polarizations
+        n_polarizations = len(self.polarizations)
+        print "  %-40s : %d" %("Nr. of polarizations",n_polarizations)
+        if self.polarizations:
+            print "Polarizations:"
+            for polarization in self.polarizations:
+                print "  %-6d - %s" %(polarization.id, polarization.resultsfile)
             pass
 
         # Parameters
@@ -1636,21 +1636,21 @@ class Station(object):
 
 
 
-class Polarisation(object):
-    """CR polarisation information.
+class Polarization(object):
+    """CR polarization information.
 
-    This object contains the following information of a polarisation:
+    This object contains the following information of a polarization:
 
     * *antennaset*: the name of the antennaset (e.g. `LBA_OUTER`, `LBA_INNER`, etc.).
-    * *direction*: the direction of the polarisation component.
-    * *status*: the status of the polarisation.
+    * *direction*: the direction of the polarization component.
+    * *status*: the status of the polarization.
     * *resultsfile*: the name of the resultsfile, where all the results from the pipeline are stored.
     * *parameter*: a dictionary of optional parameters. This contains also resulting information from the pipeline.
 
     """
 
     def __init__(self, db=None, id=0):
-        """Initialisation of the Polarisation object.
+        """Initialisation of the Polarization object.
 
         **Properties**
 
@@ -1658,7 +1658,7 @@ class Polarisation(object):
         Parameter  Description
         ========== ===========================================
         *db*       database to which to link this event to.
-        *id*       id of the new polarisation.
+        *id*       id of the new polarization.
         ========== ===========================================
         """
         self._db = db
@@ -1677,7 +1677,7 @@ class Polarisation(object):
 
 
     def __repr__(self):
-        return "PolarisationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status.upper())
+        return "PolarizationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status.upper())
 
 
     def __getitem__(self, key):
@@ -1696,11 +1696,11 @@ class Polarisation(object):
 
 
     def read(self):
-        """Read polarisation information from the database."""
+        """Read polarization information from the database."""
         if self._db:
             if self.inDatabase():
                 # Read attributes
-                sql = "SELECT polarisationID, antennaset, direction, status, resultsfile FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
+                sql = "SELECT polarizationID, antennaset, direction, status, resultsfile FROM main.polarizations WHERE polarizationID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
@@ -1717,24 +1717,24 @@ class Polarisation(object):
                 # self.parameter.read()
 
             else:
-                print "WARNING: This polarisation (id={0}) is not available in the database.".format(self._id)
+                print "WARNING: This polarization (id={0}) is not available in the database.".format(self._id)
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
     def write(self):
-        """Write polarisation information to the database."""
+        """Write polarization information to the database."""
         if self._db:
             # Write attributes
             if self.inDatabase():
-                sql = "UPDATE main.polarisations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarisationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
+                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:
-                    sql = "INSERT INTO main.polarisations (antennaset, direction, status, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}')".format(str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
+                    sql = "INSERT INTO main.polarizations (antennaset, direction, status, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}')".format(str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 else:
-                    sql = "INSERT INTO main.polarisations (polarisationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
+                    sql = "INSERT INTO main.polarizations (polarizationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._id = self._db.insert(sql)
 
             # Write parameters
@@ -1745,19 +1745,19 @@ class Polarisation(object):
 
 
     def inDatabase(self):
-        """Check if the polarisation information is available in the
+        """Check if the polarization information is available in the
         database.
 
-        This method checks if the polarisation information of this
+        This method checks if the polarization information of this
         object, uniquely identified by *id*, is in the database.
 
-        If the polarisation information is in the database *True* is
+        If the polarization information is in the database *True* is
         returned, *False* otherwise.
         """
         result = False
 
         if self._db:
-            sql = "SELECT polarisationID FROM main.polarisations WHERE polarisationID={0}".format(int(self._id))
+            sql = "SELECT polarizationID FROM main.polarizations WHERE polarizationID={0}".format(int(self._id))
             records = self._db.select(sql)
             if len(records) > 0:
                 result = True
@@ -1774,14 +1774,14 @@ class Polarisation(object):
 
 
     def summary(self):
-        """Summary of the Polarisation object."""
+        """Summary of the Polarization object."""
         linewidth = 80
 
         print "="*linewidth
-        print "  Summary of the Polarisation object."
+        print "  Summary of the Polarization object."
         print "="*linewidth
 
-        # Polarisation information
+        # Polarization information
         print "  %-40s : %d" %("ID", self._id)
         print "  %-40s : %s" %("Antennaset", self.antennaset)
         print "  %-40s : %s" %("Direction", self.direction)
