@@ -35,6 +35,7 @@ class CMDLine:
 		self.options = sys.argv[1:]  # storing original cmd line
 		self.version = version
 		self.psrs = []  # list of pulsars to fold
+		self.beams = [] # list of beams to process
 		self.psrbs = self.psrjs = [] # list of B and J names of pulsars from ATNF catalog
 		self.ras = self.decs = self.s400 = [] # lists of RA, DEC, and S400 of catalog pulsars
         	self.usage = "Usage: %prog <-id ObsID> -p <Pulsar name(s)> [-h|--help] [OPTIONS]"
@@ -143,6 +144,30 @@ class CMDLine:
 			else: print msg
 			sys.exit(1)
 
+		# checking that if --beams used then beams are specified correctly
+		# we have this complicated "if" because we used --beams to pass summary locus node when --summary and --local
+		if self.opts.beam_str != "" and (not self.opts.is_summary or (self.opts.is_summary and not self.opts.is_local)):
+			if re.search(r'[^\,\:\d]+', self.opts.beam_str) is not None:
+				msg="Option --beams can only has digits, colons and commas!"
+				if log != None: log.error(msg)
+				else: print msg
+				sys.exit(1)
+			elif re.search(r'[\:]+', self.opts.beam_str) is None:
+				msg="Option --beams should have at least one colon!"
+				if log != None: log.error(msg)
+				else: print msg
+				sys.exit(1)
+			else:   # forming array of beams
+				self.beams=self.opts.beam_str.split(",")
+				# checking if neither SAP or TAB are empty
+				for bb in self.beams:
+					(sap, tab) = bb.split(":")
+					if sap == "" or tab == "":
+						msg="Option --beams has at least one empty SAP or TAB value!"
+						if log != None: log.error(msg)
+						else: print msg
+						sys.exit(1)
+
 		# warning user that some of the results can still be overwritten, if --del is not used
 		if not self.opts.is_delete:
 			msg="***\n*** Warning: Some of the previous results still can be overwritten.\n\
@@ -237,4 +262,6 @@ class CMDLine:
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
 				log.info("User-specified Parset file = %s" % (self.opts.parset))
+			if len(self.beams) != 0:
+				log.info("User-specified BEAMS to process: %s" % (", ".join(self.beams)))
 			log.info("")

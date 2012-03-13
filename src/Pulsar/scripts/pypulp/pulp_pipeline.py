@@ -77,6 +77,19 @@ class Pipeline:
 		toremove = sorted(toremove, reverse=True)
 		for uid in toremove: del(self.units[uid])
 
+		# if User specified particular beams to process, then we delete all other units from the list
+		toremove = set()
+		if len(cmdline.beams) != 0:
+			for uid in range(len(self.units)):
+				uidbeam="%d:%d" % (self.units[uid].sapid, self.units[uid].tabid)
+				if uidbeam not in cmdline.beams: toremove.add(uid)
+			toremove = sorted(toremove, reverse=True)
+			for uid in toremove: del(self.units[uid])
+
+		if len(self.units) == 0:
+			log.info("None beams to process!")
+			sys.exit(0)	
+
 		# creating main output directory on locus092 for CS data and on locus094 for IS data
 		# before that we also remove this directory if user flag is_del was set
 		unique_outdirs=["%s:%s_%s/%s%s" % (unit.summary_node, cep2.processed_dir_prefix, unit.summary_node, \
@@ -287,7 +300,8 @@ class Pipeline:
 			if not cmdline.opts.is_nofold:
 				log.info("Reading chi-squared values and adding to chi-squared.txt...")
         	                # also preparing montage command to create combined plot
-	        	        montage_cmd="montage -background none "
+	        	        montage_cmd="montage -background none -pointsize 10.2 "
+	        	        montage_cmd_pdf="montage -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 "
         	        	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
      	          	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
         	               	for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
@@ -305,7 +319,9 @@ class Pipeline:
    	                	        else:
 						log.warning("Warning: can't read chi-sq value from %s" % (bp))
 		                        chif.write("file=%s obs=%s_SAP%d_BEAM%d_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curtabid, psr, chi_val))
+					# for FE I will also need to add station name to the label !!! Or to be more precise - station name INSTEAD of TAB !!!
         		                montage_cmd += "-label '%s SAP%d BEAM%d\n%s\nChiSq = %g' %s " % (data_code, cursapid, curtabid, psr, chi_val, thumbfile)
+        		                montage_cmd_pdf += "-label '%s SAP%d BEAM%d\n%s\nChiSq = %g' %s " % (data_code, cursapid, curtabid, psr, chi_val, thumbfile)
               		        chif.close()
 
 				# creating combined plots
@@ -316,6 +332,12 @@ class Pipeline:
 				log.info("Making a thumbnail version of combined plot...")
                		        cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
                        		self.execute(cmd, log, workdir=sumdir)
+
+				# creating combined PDF plot with all prepfold plots - ONLY for FE 
+				if data_code == "CS" and obs.FE:
+        	                	log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
+               		        	montage_cmd_pdf += "combined.pdf"
+					self.execute(montage_cmd_pdf, log, workdir=sumdir)
 
 			# create beam_process_node.txt file
 			log.info("Creating the beam_process_node.txt file...")
