@@ -390,3 +390,172 @@ void HFPP_FUNC_NAME (const CIter polx, const CIter polx_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Get inverse Jones matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetInverseJonesMatrixLBA
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(Jinv)()("Inverse Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Frequency in Hz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(az)()("Azimuth with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(el)()("Elevation with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Calculates the inverse Jones matrix containing the antenna response calculated using the LOFAR provided ElementResponse library.
+  The Jones matrix contains the beam pattern and multiplying by inverse of this matrix gives the polarized signal in the on-sky frame.
+*/
+
+template <class CIter, class NIter>
+void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
+    const NIter frequencies, const NIter frequencies_end,
+    const HNumber az, const HNumber el)
+{
+  std::complex<double> J[2][2]; // Jones matrix for element response
+  std::complex<double> det; // Determinant of Jones matrix (used for matrix inversion)
+
+  // Get lengths
+  const int Nj = std::distance(Jinv, Jinv_end);
+  const int Nf = std::distance(frequencies, frequencies_end);
+
+  // Sanity checks
+  if (Nj != 4*Nf)
+  {
+    throw PyCR::ValueError("[hGetInverseJonesMatrixLBA] Provided storrage has invalid size.");
+  }
+
+  // Get iterators
+  CIter Jinv_it = Jinv;
+  NIter freq_it = frequencies;
+
+  // Loop over frequencies
+  for (int i=0; i<Nf; i++)
+  {
+    // Get element response
+    LOFAR::element_response_lba(*freq_it++, az, el, J);
+
+    // Invert the Jones matrix (J contains beam pattern so J^-1 is the correction)
+    det = (J[0][0] * J[1][1]) - (J[0][1] * J[1][0]);
+
+    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarizationLBA] Jones matrix is singular.");
+
+    *Jinv_it++ = J[1][1] / det;
+    *Jinv_it++ = -1.0 * J[0][1] / det;
+    *Jinv_it++ = -1.0 * J[1][0] / det;
+    *Jinv_it++ = J[0][0] / det;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Get inverse Jones matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetInverseJonesMatrixHBA
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(Jinv)()("Inverse Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Frequency in Hz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(az)()("Azimuth with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(el)()("Elevation with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Calculates the inverse Jones matrix containing the antenna response calculated using the LOFAR provided ElementResponse library.
+  The Jones matrix contains the beam pattern and multiplying by inverse of this matrix gives the polarized signal in the on-sky frame.
+*/
+
+template <class CIter, class NIter>
+void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
+    const NIter frequencies, const NIter frequencies_end,
+    const HNumber az, const HNumber el)
+{
+  std::complex<double> J[2][2]; // Jones matrix for element response
+  std::complex<double> det; // Determinant of Jones matrix (used for matrix inversion)
+
+  // Get lengths
+  const int Nj = std::distance(Jinv, Jinv_end);
+  const int Nf = std::distance(frequencies, frequencies_end);
+
+  // Sanity checks
+  if (Nj != 4*Nf)
+  {
+    throw PyCR::ValueError("[hGetInverseJonesMatrixHBA] Provided storrage has invalid size.");
+  }
+
+  // Get iterators
+  CIter Jinv_it = Jinv;
+  NIter freq_it = frequencies;
+
+  // Loop over frequencies
+  for (int i=0; i<Nf; i++)
+  {
+    // Get element response
+    LOFAR::element_response_lba(*freq_it++, az, el, J);
+
+    // Invert the Jones matrix (J contains beam pattern so J^-1 is the correction)
+    det = (J[0][0] * J[1][1]) - (J[0][1] * J[1][0]);
+
+    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarizationHBA] Jones matrix is singular.");
+
+    *Jinv_it++ = J[1][1] / det;
+    *Jinv_it++ = -1.0 * J[0][1] / det;
+    *Jinv_it++ = -1.0 * J[1][0] / det;
+    *Jinv_it++ = J[0][0] / det;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Apply inverse Jones matrix to get on sky polarizations
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetOnSkyPolarizations
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(pol0)()("Polarization 0.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(pol1)()("Polarization 1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HComplex)(Jinv)()("Inverse Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter pol0, const CIter pol0_end,
+    const CIter pol1, const CIter pol1_end,
+    const CIter Jinv, const CIter Jinv_end)
+{
+  // Temporary variable
+  complex<double> temp[2];
+
+  // Get lengths
+  const int Nj = std::distance(Jinv, Jinv_end);
+  const int N = std::distance(pol0, pol0_end);
+
+  // Sanity checks
+  if (N != std::distance(pol1, pol1_end) | Nj != 4*N)
+  {
+    throw PyCR::ValueError("[hMatrixMultiply2D] input vectors have incompatible sizes.");
+  }
+
+  // Get iterators
+  CIter pol0_it = pol0;
+  CIter pol1_it = pol1;
+  CIter Jinv_it = Jinv;
+
+  for (int i=0; i<N; i++)
+  {
+    temp[0]  = *Jinv_it++ * *pol0_it;
+    temp[0] += *Jinv_it++ * *pol1_it;
+    temp[1]  = *Jinv_it++ * *pol0_it;
+    temp[1] += *Jinv_it++ * *pol1_it;
+
+    *pol0_it++ = temp[0];
+    *pol1_it++ = temp[1];
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+

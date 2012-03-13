@@ -9,7 +9,17 @@ import pycrtools as cr
 import pytmf
 
 class AntennaResponse(Task):
-    """AntennaResponse task documentation.
+    """Calculates and unfolds the LOFAR (LBA or HBA) antenna response.
+
+    Given an array with *fft_data* and a *direction* as (Azimuth, Elevation) the Jones matrix
+    containing the LOFAR (LBA or HBA) antenna response is calculated.
+
+    Mixing the two instrumental polarizations by multiplying with the inverse
+    Jones matrix gives the resulting on-sky polarizations (e.g. perpendicular to the direction and
+    parallel to and perpendicular to the horizon).
+
+    Note that, due to the intrinsic symmetry of the antenna configuration, the direction of Azimuth (CW or CCW)
+    is not relevant.
     """
 
     parameters = dict(
@@ -17,32 +27,35 @@ class AntennaResponse(Task):
             doc = "FFT data." ),
         frequencies = dict( default = None,
             doc = "Frequencies." ),
-        on_sky_polarizations = dict( default = lambda self : self.fft_data.new(), output = True,
-            doc = "FFT data corrected for element response (contains on sky polarizations)." ),
+        direction = dict( default = (0, 0),
+            doc = "Direction in degrees as a (Azimuth, Elevation) tuple." ),
         nantennas = dict( default = lambda self : self.fft_data.shape()[0],
             doc = "Number of antennas." ),
         antennaset = dict ( default = "LBA_OUTER",
             doc = "Antennaset." ),
-        direction = dict( default = (0, 0),
-            doc = "Direction in degrees." ),
+        inverse_jones_matrix = dict( default = lambda self : cr.hArray(complex, dimensions = (self.frequencies.shape()[0], 2, 2)),
+            doc = "Inverse Jones matrix for each frequency." ),
+        on_sky_polarizations = dict( default = lambda self : self.fft_data.new(), output = True,
+            doc = "FFT data corrected for element response (contains on sky polarizations)." ),
     )
 
     def run(self):
         """Run.
         """
 
-        print "Running AntennaResponse..."
-
         # Copy FFT data over for correction
         self.on_sky_polarizations.copy(self.fft_data)
 
-        # Apply correction
+        # Get inverse Jones matrix for each frequency
         if "LBA" in self.antennaset:
-            cr.hCalibratePolarizationLBA(self.on_sky_polarizations[0:self.nantennas:2,...], self.on_sky_polarizations[1:self.nantennas:2,...],
-                self.frequencies, pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
+            cr.hGetInverseJonesMatrixLBA(self.inverse_jones_matrix, self.frequencies,
+                pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
         elif "HBA" in self.antennaset:
-            cr.hCalibratePolarizationHBA(self.on_sky_polarizations[0:self.nantennas:2,...], self.on_sky_polarizations[1:self.nantennas:2,...],
-                self.frequencies, pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
+            cr.hGetInverseJonesMatrixHBA(self.inverse_jones_matrix, self.frequencies,
+                pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
         else:
             raise ValueError("Invalid antennaset " + self.antennaset)
+
+        # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
+        cr.hGetOnSkyPolarizations(self.on_sky_polarizations[0:self.nantennas:2,...], self.on_sky_polarizations[1:self.nantennas:2,...], self.inverse_jones_matrix)
 

@@ -356,6 +356,7 @@ for full_filename in files:
         except RuntimeError as e:
             print "ERROR opening file - skipping this file!"
             statuslist.append("OPEN FAILED "+str(e))
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -443,6 +444,7 @@ for full_filename in files:
         else:
             if skip_existing_files and os.path.exists(htmlfilename):
                 print "# Resultfile ("+htmlfilename+") already exists - skipping file:",outputdir_with_subdirectories
+                xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
                 continue
             else:
                 print "# Using existing output directory",outputdir_with_subdirectories
@@ -483,6 +485,7 @@ for full_filename in files:
 
         if "HBA" in datafile["ANTENNA_SET"]:
             statuslist.append("HBA SKIPPED")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
              
@@ -493,6 +496,7 @@ for full_filename in files:
         if min(datafile["DATA_LENGTH"])<min_data_length or min(datafile["DATA_LENGTH"]) < blocksize:
             print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             statuslist.append("FILE TOO SMALL")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -516,6 +520,7 @@ for full_filename in files:
                 except ValueError:
                     print "#ERROR - LORA trigger information not found"
                     statuslist.append("TRIGGER TOO LATE")
+                    xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
                     finish_file()
                     continue
                 print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
@@ -527,6 +532,7 @@ for full_filename in files:
                 lora_event_info=lora.loraInfo(tbb_starttime_sec,datadir=loradir,checkSurroundingSecond=True,silent=False)
             else:
                 statuslist.append("TIMESTAMP NOT IN LORA LOGFILE")
+                xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
                 finish_file()
                 continue
 #                print "WARNING: LORA logfile found but no info for this event time in LORAtime4 file!"
@@ -660,6 +666,7 @@ for full_filename in files:
         if ndipoles<minimum_number_good_antennas:
             print "#ERROR: To few good antennas ("+str(ndipoles)+")"
             statuslist.append("TOO FEW ANTENNAS")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -703,6 +710,7 @@ for full_filename in files:
             if ndipoles<minimum_number_good_antennas:
                 print "#ERROR: To few good antennas ("+str(ndipoles)+")"
                 statuslist.append("TOO FEW ANTENNAS")
+                xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
                 finish_file()
                 continue
 
@@ -811,6 +819,7 @@ for full_filename in files:
         except RuntimeError:
             print "Error reading file - skipping this file"
             statuslist.append("READ ERROR")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -969,6 +978,7 @@ for full_filename in files:
             print "************************************************************************"
             print "ERROR: LocatePulseTrain: No pulses found!"
             statuslist.append("NO PULSE")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -1051,6 +1061,7 @@ for full_filename in files:
         if nantennas_with_strong_pulses<min_number_of_antennas_with_pulses:
             print "ERROR: LocatePulseTrain: Not enough pulses found for beam forming!"
             statuslist.append("TOO FEW PULSES")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -1117,6 +1128,7 @@ for full_filename in files:
           # put in zeros for 'cable delays' as they are fitted and put into the same array...
         if direction.ngood == 0:
             statuslist.append("NO GOOD TRIANGLES FOUND")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
@@ -1232,6 +1244,7 @@ for full_filename in files:
         #Beamform full data set (not really necessary, but fun).
 
         beamformed=trerun("BeamFormer2","beamformed",data=pulse.timeseries_data,pardict=par,maxnantennas=ndipoles,antpos=antenna_positions,FarField=True,sample_interval=sample_interval,pointings=rf.makeAZELRDictGrid(*(direction.meandirection_azel+(10000,)),nx=1,ny=1), calc_timeseries=False,doabs=False,smooth_width=0,doplot=False,plotspec=False,verbose=False,store_spectrum=options.full_output)
+        print "Beamformer2...done"
             # removed cabledelays = final_cable_delays in beamformer (AC)
         ########################################################################
         #Data Analysis ... (to be expanded)
@@ -1255,13 +1268,18 @@ for full_filename in files:
         beam_maxima=trerun('FitMaxima',"Beam",event_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 
         # Check if found maximum is outside valid range 
+        print "bla"
         maximum = int(floor(beam_maxima.maxx.val())) 
         if maximum < 0 or maximum >= blocksize:
+            print "FITTED MAXIMUM OUTSIDE RANGE"
             statuslist.append("FITTED MAXIMUM OUTSIDE RANGE")
+            xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             finish_file()
             continue
 
+        print "bla"
         pulse_time_ms=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
+        print "bla"
 
         print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
         print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.start]/1000.,"-",timeseries_data.par.xvalues[pulse.end]/1000.,"ms (i.e., {0:d} ms + {1:6.3f}-{2:6.3f} mus)".format(int(timeseries_data.par.xvalues[pulse.start]/1000),round(timeseries_data.par.xvalues[pulse.start] % 1000.,3),round(timeseries_data.par.xvalues[pulse.end] % 1000.,3))
