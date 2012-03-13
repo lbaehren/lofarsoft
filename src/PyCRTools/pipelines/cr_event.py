@@ -1268,7 +1268,6 @@ for full_filename in files:
         beam_maxima=trerun('FitMaxima',"Beam",event_dummy,doplot=Pause.doplot,pardict=par,refant=0,sampleinterval=sample_interval,peak_width=11,splineorder=3)
 
         # Check if found maximum is outside valid range 
-        print "bla"
         maximum = int(floor(beam_maxima.maxx.val())) 
         if maximum < 0 or maximum >= blocksize:
             print "FITTED MAXIMUM OUTSIDE RANGE"
@@ -1277,9 +1276,7 @@ for full_filename in files:
             finish_file()
             continue
 
-        print "bla"
         pulse_time_ms=(timeseries_data.par.xvalues[int(floor(beam_maxima.maxx.val()))]+beam_maxima.maxx.val()%1*sample_interval*1e6)/1000.
-        print "bla"
 
         print "# The pulse is expected between samples ",pulse.start,"and",pulse.end
         print "# This corresponds to the time frame ",timeseries_data.par.xvalues[pulse.start]/1000.,"-",timeseries_data.par.xvalues[pulse.end]/1000.,"ms (i.e., {0:d} ms + {1:6.3f}-{2:6.3f} mus)".format(int(timeseries_data.par.xvalues[pulse.start]/1000),round(timeseries_data.par.xvalues[pulse.start] % 1000.,3),round(timeseries_data.par.xvalues[pulse.end] % 1000.,3))
