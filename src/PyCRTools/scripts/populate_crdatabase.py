@@ -131,14 +131,14 @@ class CRDatabasePopulator(object):
 
                         # Create polarisations
                         for pol_direction in [0,1]:
-                            p = crdb.Polarisation(self._db)
+                            p = crdb.Polarization(self._db)
                             p.antennaset = dx.antennaset
                             p.direction = "%d" %(pol_direction)
                             p.resultsfile = dx.resultsfile(pol_direction)
 
                             p.write()   # Write to db and get ID
 
-                            station.addPolarisation(p)
+                            station.addPolarization(p)
 
 
     def summary(self):
