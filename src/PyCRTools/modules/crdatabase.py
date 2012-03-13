@@ -642,10 +642,6 @@ class _Parameter(object):
         self.db_delete(key)
 
 
-    def get(self, key, default=None):
-        return self._parameter.get(key, default=None)
-
-
     def read(self):
         """Read all parameters key names from the database."""
         for key in self.keys():
@@ -835,6 +831,11 @@ class Event(object):
         self.parameter[key] = value
 
 
+    def __delitem__(self, key):
+        """Delete parameter value for *key*."""
+        self.parameter.__delitem__(key)
+
+
     def read(self):
         """Read event information from the database."""
         if self._db:
@@ -994,7 +995,7 @@ class Event(object):
             if self._db:
                 # Add datafile object to database if it does not yet exist.
                 if not datafile.inDatabase():
-                    datafile.write()
+                    datafile.write(recursive=False)
                 # Update the linking table.
                 sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
                 if 0 == len(self._db.select(sql)):
@@ -1283,7 +1284,7 @@ class Datafile(object):
             if self._db:
                 # Add station object to database if it does not yet exist.
                 if not station.inDatabase():
-                    station.write()
+                    station.write(recursive=False)
                 # Update linking table
                 sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
                 if 0 == len(self._db.select(sql)):
@@ -1568,7 +1569,7 @@ class Station(object):
             if self._db:
                 # Add polarisation object to database if it does not yet exist.
                 if not polarisation.inDatabase():
-                    polarisation.write()
+                    polarisation.write(recursive=False)
                 # Update linking table
                 sql = "SELECT stationID FROM main.station_polarisation WHERE stationID={0} AND polarisationID={1}".format(self._id, polarisationID)
                 if 0 == len(self._db.select(sql)):
