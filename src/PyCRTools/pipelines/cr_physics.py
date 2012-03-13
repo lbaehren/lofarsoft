@@ -35,9 +35,15 @@ for station in stations:
     # Open file
     f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
 
+    # Set reference polarization to the one that had the best pulse
+    if station.polarizations[0].parameter["pulse_height_incoherent"] > station.polarizations[0].parameter["pulse_height_incoherent"]:
+        rp = 0
+    else:
+        rp = 1
+
     # Select block containing pulse
-    blocksize = station.polarisations[0].parameter["BLOCKSIZE"]
-    block = station.polarisations[0].parameter["BLOCK"]
+    blocksize = station.polarizations[rp].parameter["BLOCKSIZE"]
+    block = station.polarizations[rp].parameter["BLOCK"]
     f["BLOCKSIZE"] = blocksize
     f["BLOCK"] = block
 
@@ -47,7 +53,7 @@ for station in stations:
 
     # Select antennas which are marked good for both polarizations
     names = f["DIPOLE_NAMES"]
-    names_good = station.polarisations[0].parameter["antennas"].values() + station.polarisations[1].parameter["antennas"].values()
+    names_good = station.polarizations[0].parameter["antennas"].values() + station.polarizations[1].parameter["antennas"].values()
 
     selected_dipoles = []
     for i in range(len(names)/2):
@@ -62,7 +68,7 @@ for station in stations:
     frequencies = cr.hArray(f["FREQUENCY_DATA"])
 
     # Flag dirty channels (from RFI excission)
-    dirty_channels = list(set(station.polarisations[0].parameter["dirty_channels"] + station.polarisations[1].parameter["dirty_channels"]))
+    dirty_channels = list(set(station.polarizations[0].parameter["dirty_channels"] + station.polarizations[1].parameter["dirty_channels"]))
 
     fft_data[..., dirty_channels] = 0
 
@@ -81,8 +87,8 @@ for station in stations:
 
     # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
     antennas_spectral_power = dict(zip(
-        station.polarisations[0].parameter["antennas"].values()+station.polarisations[1].parameter["antennas"].values(),
-        station.polarisations[0].parameter["antennas_spectral_power"]+station.polarisations[1].parameter["antennas_spectral_power"]
+        station.polarizations[0].parameter["antennas"].values()+station.polarizations[1].parameter["antennas"].values(),
+        station.polarizations[0].parameter["antennas_spectral_power"]+station.polarizations[1].parameter["antennas_spectral_power"]
         ))
 
     antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
@@ -99,11 +105,11 @@ for station in stations:
     antenna_positions = f["ANTENNA_POSITIONS"]
 
     # Get pulse window
-    pulse_start = min(station.polarisations[0].parameter["pulse_start_sample"], station.polarisations[1].parameter["pulse_start_sample"])
-    pulse_end = max(station.polarisations[0].parameter["pulse_end_sample"], station.polarisations[1].parameter["pulse_end_sample"])
+    pulse_start = station.polarizations[rp].parameter["pulse_start_sample"]
+    pulse_end = station.polarizations[rp].parameter["pulse_end_sample"]
 
     # Get first estimate of pulse direction
-    pulse_direction = station.polarisations[0].parameter["pulse_direction"]
+    pulse_direction = station.polarizations[rp].parameter["pulse_direction"]
     print "database results for direction", pulse_direction
 
     # Start direction fitting loop

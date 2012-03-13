@@ -327,6 +327,7 @@ else:
 for full_filename in files:
     for current_polarization in polarizations:
         results={}
+        results["pulse_height_incoherent"]=0.0
         t0=time.clock()
         file_time=time.strftime("%A, %Y-%m-%d at %H:%M:%S")
         file_time_short=time.strftime("%Y-%m-%d  %H:%M:%S")
