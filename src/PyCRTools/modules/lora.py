@@ -59,7 +59,7 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     # Get filename
         timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(lora_second))
         filename="LORAdata-"+timestr+".dat"
-        print os.path.isfile(datadir+filename)
+        #print os.path.isfile(datadir+filename)
         if not os.path.isfile(datadir+filename):
             print "check"
             if checkSurroundingSecond:
@@ -113,7 +113,7 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     for l in lines[4:]:
         info=l.split()
         for a,b in zip(detectorkeys[0:-1],info[0:-1]):
-            print a,b
+            #print a,b
             loradata[a].append(float(b))
         loradata[detectorkeys[-1]].append(float(info[-1]))
         
