@@ -3,7 +3,7 @@
 *************
 PyBDSM Basics
 *************
-PyBDSM has been designed to share many similarities with the CASA interactive environment (``casapy``), which is in turn based on AIPS. Therefore, the commands used in PyBDSM should be familiar to anyone familiar with these software packages.
+PyBDSM has been designed to share many similarities with the CASA interactive environment (known as ``casapy`` [#f1]_), which is in turn based on AIPS. Therefore, the commands used in PyBDSM should be familiar to anyone who has used these software packages.
 
 Starting PyBDSM
 ---------------
@@ -258,3 +258,6 @@ The output Gaussian or source list contains source positions, fluxes, etc.
    :alt: show_fit example output
 
    Output of ``show_fit``, showing the original image with and without sources, the model image, and the residual (original minus model) image. Boundaries of the islands of emission found by PyBDSM are shown in light blue. The fitted Gaussians are shown for each island as ellipses (the sizes of which correspond to the FWHMs of the Gaussians). Gaussians that have been grouped together into a source are shown with the same color. For example, the two red Gaussians of island #1 have been grouped together into one source, and the nine Gaussians of island #0 have been grouped into 4 separate sources. 
+
+.. rubric:: Footnotes
+.. [#f1] http://casa.nrao.edu

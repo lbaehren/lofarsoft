@@ -533,7 +533,7 @@ class Opts(object):
                                  "flag_minsnr times thresh_pix times the local rms "\
                                  "is flagged. The flag value is increased by 1.",
                              group="flagging_opts")
-    flag_maxsnr     =  Float(1.5,
+    flag_maxsnr     =  Float(2.0,
                              doc="Flag Gaussian if peak is greater than "\
                                  "flag_maxsnr times max value in island\n"\
                                  "Any fitted Gaussian whose peak is greater than "\
@@ -657,34 +657,6 @@ class Opts(object):
     plot_allgaus    =   Bool(False,
                              doc='Make a plot of all Gaussians at the end',
                              group="output_opts")
-    debug_figs_1_gaufit_ch = Bool(False,
-                             doc='Plot Gaussian fit images for each source '\
-                                 'for each channel for spectralindex',
-                             group="hidden")
-    debug_figs_2_gaufit_ch = Bool(False,
-                             doc='Plot Gaussian fit parameter plots for '\
-                                 'each source as a fn of channel',
-                             group="hidden")
-    debug_figs_3_flaggedchan = Bool(False,
-                             doc='Plot flagged channels before and after '\
-                                 'averaging for spectralindex for image',
-                             group="hidden")
-    debug_figs_4_caseI_spin = Bool(False,
-                             doc='Plot figs for Case I',
-                             group="hidden")
-    debug_figs_5_Msrc_spin = Bool(False,
-                             doc='Plot for spectral index for M-sources',
-                             group="hidden")
-    debug_figs_6_ini_nobeam = Bool(False,
-                             doc='Plot images for inigaus_nobeam',
-                             group="hidden")
-    debug_figs_7_psf_vary = Bool(False,
-                             doc='Plot images for psf_vary',
-                             group="hidden")
-    debug_figs_8_gaufit_wave = Bool(False,
-                             doc='Plotim for each wavelet plane if decomposed '\
-                                 'into Gaussians',
-                             group="hidden")
     output_all      =   Bool(False,
                              doc="Write out all files automatically to directory "\
                                  "'filename_pybdsm'",

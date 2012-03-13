@@ -465,17 +465,17 @@ class Op_gausfit(Op):
             g = (maxv, xcen, ycen, mom[3]/fwsig, mom[4]/fwsig, mom[5]-90.)
             gaul.append(g)
             coords.append([xcen, ycen])
-          if img.opts.debug_figs_6_ini_nobeam:
-            import matplotlib.pyplot as pl
-            #import pylab as pl
-            pl.figure(); pl.suptitle(img.imagename+' Island : '+str(isl.island_id))
-            resid = N.zeros(im.shape); x, y = N.indices(im.shape); xp, yp = N.transpose(coords)
-            for g in gaul:
-              resid = resid + func.gaus_2d(g, x, y)
-            pl.subplot(2,2,1); pl.imshow(N.transpose(im), interpolation='nearest', origin='lower')
-            pl.subplot(2,2,2); pl.plot(xp, yp, '*k'); pl.imshow(N.transpose(watershed), interpolation='nearest', origin='lower')
-            pl.subplot(2,2,3); pl.imshow(N.transpose(resid), interpolation='nearest', origin='lower')
-            pl.subplot(2,2,4); pl.imshow(N.transpose(im-resid), interpolation='nearest', origin='lower')
+
+#             import matplotlib.pyplot as pl
+#             #import pylab as pl
+#             pl.figure(); pl.suptitle(img.imagename+' Island : '+str(isl.island_id))
+#             resid = N.zeros(im.shape); x, y = N.indices(im.shape); xp, yp = N.transpose(coords)
+#             for g in gaul:
+#               resid = resid + func.gaus_2d(g, x, y)
+#             pl.subplot(2,2,1); pl.imshow(N.transpose(im), interpolation='nearest', origin='lower')
+#             pl.subplot(2,2,2); pl.plot(xp, yp, '*k'); pl.imshow(N.transpose(watershed), interpolation='nearest', origin='lower')
+#             pl.subplot(2,2,3); pl.imshow(N.transpose(resid), interpolation='nearest', origin='lower')
+#             pl.subplot(2,2,4); pl.imshow(N.transpose(im-resid), interpolation='nearest', origin='lower')
 
         return gaul
 

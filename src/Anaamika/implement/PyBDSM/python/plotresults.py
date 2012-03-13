@@ -9,29 +9,7 @@ import functions as func
 import os
 from matplotlib.widgets import Button
 from matplotlib.patches import Ellipse
-
-def _isl2border(img, isl):
-    """From all valid island pixels, generate the border. """
-    fmask = ~isl.mask_active
-    n, m = img.ch0.shape
-    subn, subm = fmask.shape
-    c0 = N.arange(isl.bbox[0].start, isl.bbox[0].stop)
-    c1 = N.arange(isl.bbox[1].start, isl.bbox[1].stop)
-    coords = [(i,j) for i in range(subn) for j in range(subm)]
-    value = [(i,j) for i in c0 for j in c1]
-
-    border = []
-    for k, val in enumerate(value):
-      if fmask[coords[k]]:
-        neigh = [[i,j] for i in range(val[0]-1,val[0]+2) for j in range(val[1]-1,val[1]+2) \
-                       if i>=0 and i<n and j>=0 and j<m and [i,j] != val]
-        dumi = len(neigh)
-        dumi1 = 0
-        for nei in neigh:
-            if fmask[tuple(N.array(nei)-N.array(isl.origin))]: dumi1 += 1
-        if dumi - dumi1 >= 2: border.append(val)
-
-    return N.transpose(N.array(border))
+from matplotlib.lines import Line2D
 
 
 def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
@@ -260,15 +238,15 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                 im = N.log10(image + low)
             if 'Islands' in titles[i]:
                 for iisl, isl in enumerate(img.islands):
-                    xb, yb = _isl2border(img, isl)
-                    if hasattr(isl, '_pi'):
-                        cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='r', "\
-                              "markersize=8)"                    
-                    else:
-                        cmd = "ax" + str(i+1) + ".plot(xb, yb, 'x', color='#afeeee', "\
-                              "markersize=8)"
-                    exec cmd
+                    xb, yb = isl.get_border()
                     ax = pl.gca()
+                    if hasattr(isl, '_pi'):
+                        border_color = 'r'
+                    else:
+                        border_color = '#afeeee'
+                    island_path = Line2D(xb, yb, marker='+', color=border_color,
+                                         linewidth=0.0)
+                    ax.add_artist(island_path)
                     marker = ax.text(N.max(xb)+2, N.max(yb), str(isl.island_id),
                                       color='#afeeee', clip_on=True)
                     marker.set_visible(not marker.get_visible())

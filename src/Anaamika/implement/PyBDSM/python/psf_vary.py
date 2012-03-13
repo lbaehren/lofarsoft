@@ -2,7 +2,6 @@
 import numpy as N
 from image import *
 import mylogger
-import debug_figs as df
 from copy import deepcopy as cp
 import matplotlib.pyplot as pl
 #import pylab as pl
@@ -28,8 +27,8 @@ class Op_psf_vary(Op):
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary  ")
         mylogger.userinfo(mylog, '\nEstimating PSF variations')
         opts = img.opts
-        plot = opts.debug_figs_7_psf_vary
         dir = img.basedir + '/misc/'
+        plot = False # debug figures
         image = img.ch0
 
         over = 2

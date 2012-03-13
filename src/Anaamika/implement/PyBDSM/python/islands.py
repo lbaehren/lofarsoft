@@ -272,10 +272,15 @@ class Island(object):
         return map(__expand, bbox, shape) 
 
     def copy(self, img):
-      mask, mean, rms = img.mask, img.mean, img.rms
-      image = img.ch0; labels = img.island_labels; bbox = self.oldbbox; idx = self.oldidx
-      return Island(image, mask, mean, rms, labels, bbox, idx)
+        mask, mean, rms = img.mask, img.mean, img.rms
+        image = img.ch0; labels = img.island_labels; bbox = self.oldbbox; idx = self.oldidx
+        return Island(image, mask, mean, rms, labels, bbox, idx)
 
+    def get_border(self, shape=None):
+        """ From all valid island pixels, generate the border."""
+        mask = ~self.mask_active
+        border = N.transpose(N.asarray(N.where(mask - nd.binary_erosion(mask)))) + self.origin
+        return N.transpose(N.array(border))
 
 
 ### Insert attribute for island list into Image class

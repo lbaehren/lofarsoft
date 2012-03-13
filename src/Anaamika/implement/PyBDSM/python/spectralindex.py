@@ -7,7 +7,6 @@
 import numpy as N
 from image import *
 import mylogger
-import debug_figs as df
 from gaul2srl import Source
 from copy import deepcopy as cp
 import _cbdsm
@@ -20,22 +19,10 @@ import statusbar
 from gausfit import Gaussian
 
 
-# beam_spec_av = Option(None, List(Tuple(Float(), Float(), Float())), doc = "syn. beam per averaged channel")
-# avimage = NArray(doc = "Averaged cube")
-# freq = NArray(doc = "Freqs of unaveraged cube")
-# freq_av = NArray(doc = "Freqs of averaged cube")
-# freq0 = Float(doc = "Fiducial frequency for calculating spectral indices")
 Gaussian.spec_indx = Float(doc = "Spectral index", colname='Spec_Indx', units=None)
 Gaussian.e_spec_indx = Float(doc = "Error in spectral index", colname='E_Spec_Indx', units=None)
 Source.spec_indx = Float(doc = "Spectral index", colname='Spec_Indx', units=None)
 Source.e_spex_indx = Float(doc = "Error in spectral index", colname='E_Spec_Indx', units=None)
-# take2nd = Bool(doc = "spectral index fit with 2nd order in log makes sense or not")
-# spec_descr = String(doc = "Description of source, if multiple")
-# specind_win_size = Int(doc = "Size of averaging window for spectral index of M sources")
-# specin_freq = NArray(doc = 'Frequency array used to calculate spectral index')
-# specin_freq0 = NArray(doc = 'Reference frequency used to calculate spectral index')
-# specin_flux = NArray(doc = 'Flux density array used to calculate spectral index')
-# specin_fluxE = NArray(doc = 'Flux density error array used to calculate spectral index')
 
 class Op_spectralindex(Op):
     """Computes spectral index of every gaussian and every source.
@@ -70,6 +57,7 @@ class Op_spectralindex(Op):
                 self.freq_beamsp_unav(img)
                 sbeam = img.beam_spectrum
                 freqin = img.freq
+                
                 # calc initial channel flags if needed
                 iniflags = self.iniflag(img)    
                 img.specind_iniflags = iniflags
@@ -78,6 +66,7 @@ class Op_spectralindex(Op):
                 unav_freqs = freqin[good_chans]
                 nmax_to_avg = img.opts.specind_maxchan
                 nchan = unav_image.shape[0]
+                mylog.info('After initial flagging of channels by rms, %i good channels remain' % (nchan,))
                 if nmax_to_avg == 0:
                     nmax_to_avg = nchan
                 
@@ -334,15 +323,6 @@ class Op_spectralindex(Op):
                   bar1.increment()
               rms_spec[ichan] = avimage_crms[ichan]
             median_rms = rms_spec
-            ### plot for debugging
-            if img.opts.debug_figs_3_flaggedchan:
-                pl.figure() 
-                pl.subplot(211); pl.plot(img.channel_clippedrms, '*r-'); ind=N.where(img.iniflags)[0]; 
-                pl.plot(N.arange(len(img.iniflags))[ind], img.channel_clippedrms[ind], '*b')
-                pl.title('All channels (blue=flagged)')
-                pl.subplot(212); pl.plot(avimage_crms, '*r-'); ind=N.where(chanflag)[0]; 
-                pl.plot(N.arange(len(chanflag))[ind], avimage_crms[ind], '*b')
-                pl.title('Averaged channels (blue=flagged)')
 
         str1 = " ".join(["%9.4e" % n for n in median_rms])
         if rms_map:        

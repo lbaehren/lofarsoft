@@ -16,7 +16,7 @@ from rmsimage import Op_rmsimage
 from threshold import Op_threshold
 from islands import Op_islands
 from gausfit import Op_gausfit
-from analysis import plotresults
+
 from gaul2srl import Op_gaul2srl
 from make_residimage import Op_make_residimage
 from const import fwsig

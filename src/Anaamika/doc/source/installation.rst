@@ -9,6 +9,9 @@ Downloading and installing
     
         $ use LUS
         $ use LofIm
+        
+    The order of the above commands is important, as path variable are not set correctly if the order is reversed.
+    
 
 Downloading the code
 --------------------

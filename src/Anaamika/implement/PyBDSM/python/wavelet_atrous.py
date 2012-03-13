@@ -9,7 +9,6 @@ from image import *
 import mylogger
 import os
 import matplotlib.pyplot as pl
-#import pylab as pl
 import _cbdsm
 from math import log, floor, sqrt
 import scipy.signal as S
@@ -23,7 +22,6 @@ from rmsimage import Op_rmsimage
 from threshold import Op_threshold
 from islands import Op_islands
 from gausfit import Op_gausfit
-from analysis import plotresults
 from gaul2srl import Op_gaul2srl
 from make_residimage import Op_make_residimage
 from output import Op_outlist
@@ -150,7 +148,6 @@ class Op_wavelet_atrous(Op):
                 if isinstance(op,Op_gaul2srl): img.atrous_sources.append(wimg.sources)
               if hasattr(wimg, 'gaussians'): 
                 img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
-              if img.opts.debug_figs_8_gaufit_wave: plotresults(wimg)
               img.bbspatchnum = wimg.bbspatchnum
               total_flux += wimg.total_flux_gaus
               if img.opts.interactive and len(wimg.gaussians) > 0:

@@ -26,6 +26,13 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/13 - Improved plotting speed (by factor of ~ 4) in show_fit 
+                 when there is a large number of islands. Simplified the
+                 spectral index module to make it more user friendly and
+                 stable. Added the option to use a "detection" image for
+                 island detection (the "detection_image" option); source
+                 properties are still measured from the main input image.
+    
     2012/03/01 - Fixed a bug in the polarisation module that could result
                  in incorrect fluxes. Changed logging module to suppress
                  output of ANSI color codes to the log file.
