@@ -10,6 +10,7 @@ import os
 from matplotlib.widgets import Button
 from matplotlib.patches import Ellipse
 from matplotlib.lines import Line2D
+from matplotlib import collections
 
 
 def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
@@ -237,16 +238,20 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
             else:
                 im = N.log10(image + low)
             if 'Islands' in titles[i]:
+                island_offsets_x = []
+                island_offsets_y = []
+                border_color = []
                 for iisl, isl in enumerate(img.islands):
-                    xb, yb = isl.get_border()
                     ax = pl.gca()
+                    xb, yb = isl.border
                     if hasattr(isl, '_pi'):
-                        border_color = 'r'
+                        for c in range(len(xb)):
+                            border_color.append('r')
                     else:
-                        border_color = '#afeeee'
-                    island_path = Line2D(xb, yb, marker='+', color=border_color,
-                                         linewidth=0.0)
-                    ax.add_artist(island_path)
+                        for c in range(len(xb)):
+                            border_color.append('#afeeee')
+                    island_offsets_x += xb.tolist()
+                    island_offsets_y += yb.tolist()
                     marker = ax.text(N.max(xb)+2, N.max(yb), str(isl.island_id),
                                       color='#afeeee', clip_on=True)
                     marker.set_visible(not marker.get_visible())
@@ -261,7 +266,8 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             src = isl.sources[isrc]
                             for g in src.gaussians:
                                 gidx = g.gaus_num
-                                e = Ellipse(xy=g.centre_pix, width=g.size_pix[0], height=g.size_pix[1], angle=g.size_pix[2]+90.0)
+                                e = Ellipse(xy=g.centre_pix, width=g.size_pix[0], 
+                                            height=g.size_pix[1], angle=g.size_pix[2]+90.0)
                                 ax.add_artist(e)
                                 e.set_picker(3)
                                 e.set_clip_box(ax.bbox)
@@ -273,7 +279,12 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                                 e.isl_id = g.island_id
                                 e.tflux = g.total_flux
                                 e.pflux = g.peak_flux
-
+                island_offsets = zip(N.array(island_offsets_x), N.array(island_offsets_y))
+                isl_borders = collections.AsteriskPolygonCollection(4, offsets=island_offsets, color=border_color, 
+                                    transOffset=ax.transData, sizes=(10.0,))
+                ax.add_collection(isl_borders)
+                
+                
                 if hasattr(img, 'atrous_gaussians'):
                     for jindx, atrgaus in enumerate(img.atrous_gaussians):
                         for atrg in atrgaus:

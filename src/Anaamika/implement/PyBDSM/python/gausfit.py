@@ -239,10 +239,10 @@ class Op_gausfit(Op):
         iter = 0
         ng1 = 0
 
-        if img.opts.ini_gausfit not in ['default', 'fbdsm', 'nobeam']: img.opts.ini_gausfit = 'default'
-        if img.opts.ini_gausfit == 'default' and ngmax == None: 
+        if img.opts.ini_gausfit not in ['default', 'simple', 'nobeam']: img.opts.ini_gausfit = 'default'
+        if img.opts.ini_gausfit == 'simple' and ngmax == None: 
           ngmax = 25
-        if img.opts.ini_gausfit == 'fbdsm': 
+        if img.opts.ini_gausfit == 'default': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr0, beam, img)
         if img.opts.ini_gausfit == 'nobeam': 
           gaul = self.inigaus_nobeam(isl, thr0, beam, img)
@@ -381,7 +381,7 @@ class Op_gausfit(Op):
         iniposn = iniposn[ind]
         gaul = []
         for i in range(len(inipeak)):
-          g = (float(inipeak[i]), iniposn[i][0], iniposn[i][1]) + beam
+          g = (float(inipeak[i]), int(iniposn[i][0]), int(iniposn[i][1])) + beam
           gaul.append(g)
 
         return gaul, nmulsrc1, len(inipeak)

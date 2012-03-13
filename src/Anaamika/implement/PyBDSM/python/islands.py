@@ -263,6 +263,7 @@ class Island(object):
         bbox_mean_im = mean[bbox]
         in_bbox_and_unmasked = N.where(~N.isnan(bbox_mean_im))
         self.mean  = bbox_mean_im[in_bbox_and_unmasked].mean()
+        self.border = self.get_border()
 
     ### do map etc in case of ndim image
     def __expand_bbox(self, bbox, shape):
@@ -276,10 +277,11 @@ class Island(object):
         image = img.ch0; labels = img.island_labels; bbox = self.oldbbox; idx = self.oldidx
         return Island(image, mask, mean, rms, labels, bbox, idx)
 
-    def get_border(self, shape=None):
+    def get_border(self):
         """ From all valid island pixels, generate the border."""
         mask = ~self.mask_active
         border = N.transpose(N.asarray(N.where(mask - nd.binary_erosion(mask)))) + self.origin
+        
         return N.transpose(N.array(border))
 
 

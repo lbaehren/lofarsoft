@@ -252,13 +252,18 @@ Alphabetical listing of all parameters
         
     ini_gausfit
         This parameter is a string (default is ``'default'``). These are three different ways of estimating the initial guess for
-        fitting of Gaussians to an island of emission: 'default', 'fbdsm', or 'nobeam'. If ``'default'``, no initial guess for the Gaussians is made, and the maximum number of Gaussians to fit to a single island is set to 25. If ``'fbdsm'``, a simple
-        fit is performed to define the initial guess for the Gaussians. The maximum number of Gaussians is determined from this fit. If ``'nobeam'`` (appropriate when source sizes are expected to differ greatly from the restoring beam), 
-        the initial Gaussians sizes are determined from an analysis of the sizes of emission peaks in the image. The maximum number of Gaussians is determined from this analysis.
-        
-        For wavelet images, the value
-        used for the original image is used for wavelet order j <= 3 and
-        'nobeam' for higher orders.
+        fitting of Gaussians to an island of emission. If ``'default'``, the maximum
+        number of Gaussians is estimated from the number of peaks in the island.
+        An initial guess is made for the parameters of these Gaussians before
+        final fitting is done. This method should produce the best results when
+        there are no large sources present. If ``'simple'``, the maximum number of
+        Gaussians per island is set to 25, and no initial guess for the gaussian
+        parameters is made. Lastly, the ``'nobeam'`` method is similar to the
+        ``'default'`` method, but no information about the beam is used. This method
+        is best used when source sizes are expected to be very different from
+        the beam and is generally slower than the other methods. For wavelet
+        images, the value used for the original image is used for wavelet order
+        j <= 3 and ``'nobeam'`` for higher orders.
         
     kappa_clip
         This parameter is a float (default is 3.0) that is the factor used for Kappa-alpha clipping, as in
@@ -557,44 +562,12 @@ Alphabetical listing of all parameters
         flagged only if the total number of these bad channels does not exceed
         10% of the total number of channels themselves.                 
                          
-    specind_Msrc_exclude1
-        This parameter is a float (default is 0.06). For sources with code='M', all gaussians with peak flux less than
-        ``specind_Msrc_exclude1`` times the maximum peak flux of the constituent
-        Gaussians (of the channel collapsed image) is excluded from the initial
-        model fit to each channel image. See also ``specind_Msrc_exclude2``.
-                         
-    specind_Msrc_exclude2
-        This parameter is a float (default is 3.0). For sources with code='M', all Gaussians with average SNR over channels
-        is less than ``specind_Msrc_exclude2`` are also excluded from the initial
-        model fit to each channel image. See also ``specind_Msrc_exclude1``.
-                         
-    specind_dolog
-        This parameter is a Boolean (default is ``False``). If ``True``, then spectral indices are fit to log(flux) versus
-        log(frequency), else they are fit to flux versus frequency. The actual
-        function fit to the data is the same in both cases, and hence the only
-        difference is in the accuracy of fit if the range of frequencies is
-        large, with very different errors on fluxes.
+    specind_maxchan
+        This parameter is an integer (default is 0) that sets the maximum number of channels that can be averaged together to attempt to reach the target SNR set by the ``specind_snr`` parameter. If 0, there is no limit to the number of channels that can be averaged. If 1, no averaging will be done.
     
-    specind_flux
-        parameter is a string (default is ``'total'``) that determines whether spectral indices are calculated for total fluxes
-        (``'total'``) or peak fluxes (``'peak'``) if ``spectralindex_do`` is ``True``.
-                         
-    specind_kappa
-        This parameter is a float (default is 7.5) that sets the kappa used for clipping to decide whether a given source
-        belongs to Case I, II or III for fitting spectral indices. 
-                         
-    specind_minchan
-        This parameter is an integer (default is 6). For a given source, if the fluxes in
-        each channel are below a threshold, then this determines the minimum
-        number of channels to average the data to. If the fluxes are still below
-        the threshold after averaging, then their value is estimated by summing
-        over pixels, before calculating the spectral index.      
-                         
-    specind_nchan0
-        This parameter is an integer (default is 40). If the total number of channels is more than twice this number, then the
-        data is averaged to roughly (+/- 1-2 channels) ``specind_nchan0`` channels
-        before attempting to fit spectral indices.
-
+    specind_snr
+        This parameter is a float (default is 3.0) that sets the target SNR to use when fitting for the spectral index. If there is insufficient SNR, neighboring channels are averaged to obtain the target SNR. The maximum allowable number of channels to average is determined by the ``specind_maxchan`` parameter. Channels (after averaging) that fail to meet the target SNR are not used in fitting.
+ 
     shapelet_basis
         This parameter is a string (default is ``'cartesian'``) that determines the type of shapelet
         basis used. Currently however, only cartesian is supported.
@@ -673,3 +646,6 @@ Alphabetical listing of all parameters
         sources with peak fluxes of 5-sigma or greater). If ``None``, the value is set to that of the ``thresh_pix`` parameter. Use the ``pi_thresh_isl``
         parameter to control how much of each island is used in fitting.
         Generally, ``pi_thresh_pix`` should be larger than ``pi_thresh_isl``.
+
+    detection_image
+        This parameter is a string (default is ``''``) that sets the detection image file name used only for detecting islands of emission. Source measurement is still done on the main image. The detection image can be a FITS or CASA 2-, 3-, or 4-D cube and must have the same size and WCS parameters as the main image.

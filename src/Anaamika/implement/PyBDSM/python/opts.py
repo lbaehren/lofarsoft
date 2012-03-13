@@ -387,13 +387,24 @@ class Opts(object):
                                  "Jy/beam to use if rms_map = False. "\
                                  "None => calculate inside program",
                              group="advanced_opts")
-    ini_gausfit     =   Enum('default', 'fbdsm', 'nobeam',
+    ini_gausfit     =   Enum('default', 'simple', 'nobeam',
                              doc = "Initial guess for Gaussian "\
-                                 "parameters: 'default', 'fbdsm', or 'nobeam'\n"\
+                                 "parameters: 'default', 'simple', or 'nobeam'\n"\
                                  "These are three different ways of estimating the initial "\
-                                 "guess for fitting of Gaussians to an island of emission. The "\
-                                 "details of each procedure are explained in the manual. "\
-                                 "For the wavelet images, the value used for the original "\
+                                 "guess for fitting of Gaussians to an island of emission. "\
+                                 "If 'default', the maximum number of Gaussians is "\
+                                 "estimated from the number of peaks in the island. An initial "\
+                                 "guess is made for the parameters of these Gaussians before "\
+                                 "final fitting is done. This method should produce the best "\
+                                 "results when there are no large sources present. "\
+                                 "If 'simple', the maximum number of Gaussians per island "\
+                                 "is set to 25, and no initial guess for the gaussian parameters "\
+                                 "is made. Lastly, the 'nobeam' method is similar to the "\
+                                 "'default' method, but no information about the beam is "\
+                                 "used. This method is best used when source sizes are "\
+                                 "expected to be very different from the beam and is generally "\
+                                 "slower than the other methods. "\
+                                 "For wavelet images, the value used for the original "\
                                  "image is used for wavelet order j <= 3 and 'nobeam' for "\
                                  "higher orders.",
                              group="advanced_opts")

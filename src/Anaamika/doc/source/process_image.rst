@@ -374,14 +374,19 @@ The advanced options are:
         
     ini_gausfit
         This parameter is a string (default is ``'default'``). These are three different ways of estimating the initial guess for
-        fitting of Gaussians to an island of emission: 'default', 'fbdsm', or 'nobeam'. If ``'default'``, no initial guess for the Gaussians is made, and the maximum number of Gaussians to fit to a single island is set to 25. If ``'fbdsm'``, a simple
-        fit is performed to define the initial guess for the Gaussians. The maximum number of Gaussians is determined from this fit. If ``'nobeam'`` (appropriate when source sizes are expected to differ greatly from the restoring beam), 
-        the initial Gaussians sizes are determined from an analysis of the sizes of emission peaks in the image. The maximum number of Gaussians is determined from this analysis.
-        
-        For wavelet images, the value
-        used for the original image is used for wavelet order j <= 3 and
-        'nobeam' for higher orders.
-        
+        fitting of Gaussians to an island of emission. If ``'default'``, the maximum
+        number of Gaussians is estimated from the number of peaks in the island.
+        An initial guess is made for the parameters of these Gaussians before
+        final fitting is done. This method should produce the best results when
+        there are no large sources present. If ``'simple'``, the maximum number of
+        Gaussians per island is set to 25, and no initial guess for the gaussian
+        parameters is made. Lastly, the ``'nobeam'`` method is similar to the
+        ``'default'`` method, but no information about the beam is used. This method
+        is best used when source sizes are expected to be very different from
+        the beam and is generally slower than the other methods. For wavelet
+        images, the value used for the original image is used for wavelet order
+        j <= 3 and ``'nobeam'`` for higher orders.
+                
     kappa_clip
         This parameter is a float (default is 3.0) that is the factor used for Kappa-alpha clipping, as in
         AIPS. For an image with few source pixels added on to (Gaussian) noise
