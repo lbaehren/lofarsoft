@@ -1044,8 +1044,18 @@ class Event(object):
         return result
 
 
-    def summary(self):
-        """Summary of the Event object."""
+    def summary(self, showParameters=False):
+        """Summary of the Event object.
+
+        **Properties**
+
+        =================  ==========================================================
+        Parameter          Description
+        =================  ==========================================================
+        *showParameters*   Flag to enable/disable (default disabled) the display of
+                           all parameters associated with this information object.
+        =================  ==========================================================
+        """
         linewidth = 80
 
         print "="*linewidth
@@ -1066,7 +1076,8 @@ class Event(object):
                 print "    %-6d - %s" %(datafile.id, datafile.filename)
 
         # Parameters
-        self.parameter.summary()
+        if showParameters:
+            self.parameter.summary()
 
         print "="*linewidth
 
@@ -1329,8 +1340,18 @@ class Datafile(object):
         return result
 
 
-    def summary(self):
-        """Summary of the Datafile object."""
+    def summary(self, showParameters=False):
+        """Summary of the Datafile object.
+
+        **Properties**
+
+        =================  ==========================================================
+        Parameter          Description
+        =================  ==========================================================
+        *showParameters*   Flag to enable/disable (default disabled) the display of
+                           all parameters associated with this information object.
+        =================  ==========================================================
+        """
         linewidth = 80
 
         print "="*linewidth
@@ -1351,7 +1372,8 @@ class Datafile(object):
                 print "  %-6d - %s" %(station.id, station.stationname)
 
         # Parameters
-        self.parameter.summary()
+        if showParameters:
+            self.parameter.summary()
 
         print "="*linewidth
 
@@ -1607,8 +1629,18 @@ class Station(object):
         return result
 
 
-    def summary(self):
-        """Summary of the Station object."""
+    def summary(self, showParameters=False):
+        """Summary of the Station object.
+
+        **Properties**
+
+        =================  ==========================================================
+        Parameter          Description
+        =================  ==========================================================
+        *showParameters*   Flag to enable/disable (default disabled) the display of
+                           all parameters associated with this information object.
+        =================  ==========================================================
+        """
         linewidth = 80
 
         print "="*linewidth
@@ -1630,7 +1662,8 @@ class Station(object):
             pass
 
         # Parameters
-        self.parameter.summary()
+        if showParameters:
+            self.parameter.summary()
 
         print "="*linewidth
 
@@ -1773,8 +1806,18 @@ class Polarization(object):
         return self._id
 
 
-    def summary(self):
-        """Summary of the Polarization object."""
+    def summary(self, showParameters=False):
+        """Summary of the Polarization object.
+
+        **Properties**
+
+        =================  ==========================================================
+        Parameter          Description
+        =================  ==========================================================
+        *showParameters*   Flag to enable/disable (default disabled) the display of
+                           all parameters associated with this information object.
+        =================  ==========================================================
+        """
         linewidth = 80
 
         print "="*linewidth
@@ -1789,7 +1832,8 @@ class Polarization(object):
         print "  %-40s : %s" %("Results file", self.resultsfile)
 
         # Parameters
-        self.parameter.summary()
+        if showParameters:
+            self.parameter.summary()
 
         print "="*linewidth
 
