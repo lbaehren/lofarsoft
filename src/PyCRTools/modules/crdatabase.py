@@ -828,8 +828,10 @@ class Event(object):
 
         self.settings = Settings(db)
 
+        self.inDatabase()
+
         # Initialize attributes
-        if self.inDatabase():           # Read from database
+        if self._inDatabase:           # Read from database
             self.read()
 
 
@@ -855,7 +857,7 @@ class Event(object):
     def read(self):
         """Read event information from the database."""
         if self._db:
-            if self.inDatabase():
+            if self._inDatabase:
                 # Read attributes
                 sql = "SELECT eventID, timestamp, status FROM main.events WHERE eventID={0}".format(int(self._id))
                 records = self._db.select(sql)
@@ -868,8 +870,8 @@ class Event(object):
                 else:
                     raise ValueError("Multiple records found for eventID={0}".format(self._id))
 
-                self.datafiles = []
                 # Read datafiles
+                self.datafiles = []
                 sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
@@ -899,7 +901,7 @@ class Event(object):
         """
         if self._db:
             # Writing attributes
-            if self.inDatabase():       # Update values
+            if self._inDatabase:       # Update values
                 sql = "UPDATE main.events SET timestamp={1}, status='{2}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()))
                 self._db.execute(sql)
             else:                       # Create new record
@@ -908,18 +910,19 @@ class Event(object):
                 else:
                     sql = "INSERT INTO main.events (eventID, timestamp, status) VALUES ({0}, {1}, '{2}')".format(self._id, int(self.timestamp), str(self.status.upper()))
                 self._id = self._db.insert(sql)
+                self._inDatabase = True
 
             # Writing datafile information
             for datafile in self.datafiles:
-                datafileID = datafile.id
                 if recursive:
                     datafile.write(recursive=True)
 
-                sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
-                result = self._db.select(sql)[0][0]
-                if 0 == result:
-                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
-                    self._db.insert(sql)
+            # Handled by addDatafile()
+            #     sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
+            #     result = self._db.select(sql)[0][0]
+            #     if 0 == result:
+            #         sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
+            #         self._db.insert(sql)
 
             # Writing parameters
             self.parameter.write()
@@ -947,6 +950,8 @@ class Event(object):
                 result = True
         else:
             raise ValueError("Unable to read from database: no database was set.")
+
+        self._inDatabase = result
 
         return result
 
@@ -978,13 +983,14 @@ class Event(object):
 
         if datafile:
             # Update object
-            datafileID = datafile.id
+            if 0 == datafile.id:
+                datafile.write(recursive=False)
             datafile.event = self       # Reference to parent (event)
 
             # Check for duplicate
             isNew = True
             for d in self.datafiles:
-                if d.id == datafileID:
+                if d.id == datafile.id:
                     isNew = False
                     break
             if isNew:
@@ -992,23 +998,22 @@ class Event(object):
 
             # Update database
             if self._db:
-                # Add datafile object to database if it does not yet exist.
-                if not datafile.inDatabase():
-                    datafile.write(recursive=False)
+                if not self._inDatabase:
+                    self.write(recursive=False)
+
                 # Update the linking table.
-                if self._id != 0:
-                    sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
-                    if 0 == len(self._db.select(sql)):
-                        sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
-                        self._db.insert(sql)
-                        result = True
+                sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafile.id)
+                if 0 == len(self._db.select(sql)):
+                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafile.id)
+                    self._db.insert(sql)
+                    result = True
             else:
                 raise ValueError("Unable to write to database: no database was set.")
 
         return result
 
 
-    def removeDatafile(self, datafileID=0):
+    def removeDatafile(self, datafile=None, datafileID=0):
         """Remove datafile object with id= *datafileID* from this event.
 
         This removes the datafile information object from this event
@@ -1021,13 +1026,20 @@ class Event(object):
         ============  =============================================================
         Parameter     Description
         ============  =============================================================
+        *datafile*    datafile that needs to be removed from this event.
         *datafileID*  id of the datafile that needs to be removed from this event.
         ============  =============================================================
+
+        If *datafile* is not provided, *datafileID* will be used to remove
+        it from the list of datafiles.
 
         Returns *True* if removing the datafile object went
         successfully, *False* otherwise.
         """
         result = False
+
+        if datafile:
+            datafileID = datafile.id
 
         if datafileID > 0:
             # Update object
@@ -1120,8 +1132,10 @@ class Datafile(object):
 
         self.settings = Settings(db)
 
+        self.inDatabase()
+
         # Initialize attributes
-        if self.inDatabase():
+        if self._inDatabase:
             self.read()
 
 
@@ -1147,7 +1161,7 @@ class Datafile(object):
     def read(self):
         """Read datafile information from the database."""
         if self._db:
-            if self.inDatabase():
+            if self._inDatabase:
                 # Read attributes
                 sql = "SELECT datafileID, filename, status FROM main.datafiles WHERE datafileID={0}".format(int(self._id))
                 records = self._db.select(sql)
@@ -1191,7 +1205,7 @@ class Datafile(object):
         """
         if self._db:
             # Write attributes
-            if self.inDatabase():
+            if self._inDatabase:
                 sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
                 self._db.execute(sql)
             else:
@@ -1206,18 +1220,18 @@ class Datafile(object):
                 else:
                     sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.filename), str(self.status.upper()))
                 self._id = self._db.insert(sql)
+                self._inDatabase = True
 
             # Write station information
             for station in self.stations:
-                stationID = station.id
                 if recursive:
                     station.write(recursive=True)
 
-                sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
-                result = self._db.select(sql)[0][0]
-                if 0 == result:
-                    sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
-                    self._db.insert(sql)
+                # sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
+                # result = self._db.select(sql)[0][0]
+                # if 0 == result:
+                #     sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
+                #     self._db.insert(sql)
 
             # Write parameter information
             self.parameter.write()
@@ -1245,6 +1259,8 @@ class Datafile(object):
                 result = True
         else:
             raise ValueError("Unable to read from database: no database was set.")
+
+        self._inDatabase = result
 
         return result
 
@@ -1276,13 +1292,14 @@ class Datafile(object):
 
         if station:
             # Update object
-            stationID = station.id
+            if 0 == station.id:
+                station.write(recursive=False)
             station.datafile = self     #  Reference to parent (datafile)
 
             # Check for duplicate
             isNew = True
             for s in self.stations:
-                if s.id == stationID:
+                if s.id == station.id:
                     isNew = False
                     break
             if isNew:
@@ -1290,14 +1307,14 @@ class Datafile(object):
 
             # Update database
             if self._db:
-                # Add station object to database if it does not yet exist.
-                if not station.inDatabase():
-                    station.write(recursive=False)
+                if not self._inDatabase:
+                    self.write(recursive=False)
+
                 # Update linking table
                 if self._id != 0:
-                    sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
+                    sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, station.id)
                     if 0 == len(self._db.select(sql)):
-                        sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
+                        sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, station.id)
                         self._db.insert(sql)
                         result = True
             else:
@@ -1306,7 +1323,7 @@ class Datafile(object):
         return result
 
 
-    def removeStation(self, stationID=0):
+    def removeStation(self, station=None, stationID=0):
         """Remove station object with id= *stationID* from this datafile.
 
         This removes the station information object from this datafile
@@ -1319,13 +1336,20 @@ class Datafile(object):
         ============  ===============================================================
         Parameter     Description
         ============  ===============================================================
+        *station*     station that needs to be removed from this datafile.
         *stationID*   id of the station that needs to be removed from this datafile.
         ============  ===============================================================
+
+        If *station* is not provided, *stationID* will be used to remove
+        it from the list of stations.
 
         Returns *True* if removing the station object went
         successfully, *False* otherwise.
         """
         result = False
+
+        if station:
+            stationID = station.id
 
         if stationID > 0:
             # Update object
@@ -1418,7 +1442,9 @@ class Station(object):
 
         self.settings = Settings(db)
 
-        if self.inDatabase():
+        self.inDatabase()
+
+        if self._inDatabase:
             self.read()
 
 
@@ -1444,7 +1470,7 @@ class Station(object):
     def read(self):
         """Read station information from the database."""
         if self._db:
-            if self.inDatabase():
+            if self._inDatabase:
                 # Read attributes
                 sql = "SELECT stationID, stationname, status FROM main.stations WHERE stationID={0}".format(int(self._id))
                 records = self._db.select(sql)
@@ -1488,7 +1514,7 @@ class Station(object):
         """
         if self._db:
             # Write attributes
-            if self.inDatabase():
+            if self._inDatabase:
                 sql = "UPDATE main.stations SET stationname='{1}', status='{2}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()))
                 self._db.execute(sql)
             else:
@@ -1497,18 +1523,18 @@ class Station(object):
                 else:
                     sql = "INSERT INTO main.stations (stationID, stationname, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.stationname), str(self.status.upper()))
                 self._id = self._db.insert(sql)
+                self._inDatabase = True
 
             # Write polarization information
             for polarization in self.polarizations:
-                polarizationID = polarization.id
                 if recursive:
                     polarization.write()
 
-                sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
-                result = self._db.select(sql)[0][0]
-                if 0 == result:
-                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
-                    self._db.insert(sql)
+                # sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
+                # result = self._db.select(sql)[0][0]
+                # if 0 == result:
+                #     sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
+                #     self._db.insert(sql)
 
             # Write parameter information
             self.parameter.write()
@@ -1535,6 +1561,8 @@ class Station(object):
                 result = True
         else:
             raise ValueError("Unable to read from database: no database was set.")
+
+        self._inDatabase = result
 
         return result
 
@@ -1566,13 +1594,14 @@ class Station(object):
 
         if polarization:
             # Update object
-            polarizationID = polarization.id
+            if 0 == polarization.id:
+                polarization.write()
             polarization.station = self # Reference to parent (station)
 
             # Check for duplicate
             isNew = True
             for p in self.polarizations:
-                if p.id == polarizationID:
+                if p.id == polarization.id:
                     isNew = False
                     break
             if isNew:
@@ -1580,23 +1609,22 @@ class Station(object):
 
             # Update database
             if self._db:
-                # Add polarization object to database if it does not yet exist.
-                if not polarization.inDatabase():
-                    polarization.write(recursive=False)
+                if not self._inDatabase:
+                    self.write(recursive=False)
+
                 # Update linking table
-                if self._id != 0:
-                    sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
-                    if 0 == len(self._db.select(sql)):
-                        sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
-                        self._db.insert(sql)
-                        result = True
+                sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarization.id)
+                if 0 == len(self._db.select(sql)):
+                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarization.id)
+                    self._db.insert(sql)
+                    result = True
             else:
                 raise ValueError("Unable to write to database: no database was set.")
 
         return result
 
 
-    def removePolarization(self, polarizationID=0):
+    def removePolarization(self, polarization=None, polarizationID=0):
         """Remove polarization object with id= *polarizationID* from
         this station.
 
@@ -1610,13 +1638,20 @@ class Station(object):
         ================  ===================================================================
         Parameter         Description
         ================  ===================================================================
+        *polarization*    polarization that needs to be removed from this station.
         *polarizationID*  id of the polarization that needs to be removed from this station.
         ================  ===================================================================
+
+        If *polarization* is not provided, *polarizationID* will be used to remove
+        it from the list of polarizations.
 
         Returns *True* if removing the polarization object went
         successfully, *False* otherwise.
         """
         result = False
+
+        if polarization:
+            polarizationID = polarization.id
 
         if polarizationID > 0:
             # Update object
@@ -1713,7 +1748,9 @@ class Polarization(object):
 
         self.settings = Settings(db)
 
-        if self.inDatabase():
+        self._inDatabase = self.inDatabase()
+
+        if self._inDatabase:
             self.read()
 
 
@@ -1739,7 +1776,7 @@ class Polarization(object):
     def read(self):
         """Read polarization information from the database."""
         if self._db:
-            if self.inDatabase():
+            if self._inDatabase:
                 # Read attributes
                 sql = "SELECT polarizationID, antennaset, direction, status, resultsfile FROM main.polarizations WHERE polarizationID={0}".format(int(self._id))
                 records = self._db.select(sql)
@@ -1768,7 +1805,7 @@ class Polarization(object):
         """Write polarization information to the database."""
         if self._db:
             # Write attributes
-            if self.inDatabase():
+            if self._inDatabase:
                 sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._db.execute(sql)
             else:
@@ -1777,6 +1814,7 @@ class Polarization(object):
                 else:
                     sql = "INSERT INTO main.polarizations (polarizationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
                 self._id = self._db.insert(sql)
+                self._inDatabase = True
 
             # Write parameters
             self.parameter.write()
@@ -1804,6 +1842,8 @@ class Polarization(object):
                 result = True
         else:
             raise ValueError("Unable to read from database: no database was set.")
+
+        self._inDatabase = result
 
         return result
 

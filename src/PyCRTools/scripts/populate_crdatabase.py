@@ -38,6 +38,8 @@ class CRDatabasePopulator(object):
                                          datapath=options.datapath,
                                          resultspath=options.resultspath)
 
+        self.doWrite = False
+
         if self.dbManager:
             self._db = self.dbManager.db
             self.settings = self.dbManager.settings
@@ -65,7 +67,7 @@ class CRDatabasePopulator(object):
         filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
 
         # - File filter
-        if options.filefilter != "":
+        if "" != options.filefilter:
             filefilter = crdb.Filter(self._db, "FILE")
             print "options.filefilter = %s" %(options.filefilter)
             filefilter.add(options.filefilter)
@@ -105,39 +107,121 @@ class CRDatabasePopulator(object):
 
                 # Add datafile to event
                 event.addDatafile(datafile)
-                event.write()
 
+            else:
+                continue
+
+            # Find station information
+            # - Station names
+            for stationname in dx.stationnames:
+                stationIDs = self.dbManager.getStationIDs(datafileID=datafile.id, stationname=stationname)
+                if not stationIDs:
+                    # Create stations
+                    station = crdb.Station(self._db)
+                    station.stationname = stationname
+                    station.write(recursive=False)
+                    datafile.addStation(station)
+
+                    # Create polarizations
+                    for pol_direction in [0,1]:
+                        p = crdb.Polarization(self._db)
+                        p.antennaset = dx.antennaset
+                        p.direction = "%d" %(pol_direction)
+                        p.resultsfile = dx.resultsfile(pol_direction)
+                        p.write()
+                        station.addPolarization(p)
+
+            #datafile.write(recursive=True)
+
+    def populate_nodb(self):
+        """Populate the database with datafile and event information."""
+
+        # Build list of filenames
+        datapath = self.settings.datapath
+        filename_list = os.listdir(datapath)
+
+        # - Filter filename_list for appropriate files
+
+        #   - includefilter (.h5 files)
+        includefilter = crdb.Filter(self._db, "INCLUDE")
+        includefilter.add("h5")
+        filename_list = filter(lambda f: includefilter.execute(f), filename_list)
+
+        #   - excludefilter (no 'test' or 'bkp' files)
+        excludefilter = crdb.Filter(self._db, "EXCLUDE")
+        excludefilter.add("test")
+        excludefilter.add("bkp")
+        filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
+
+        # - File filter
+        if "" != options.filefilter:
+            filefilter = crdb.Filter(self._db, "FILE")
+            print "options.filefilter = %s" %(options.filefilter)
+            filefilter.add(options.filefilter)
+            filename_list = filter(lambda f: filefilter.execute(f), filename_list)
+            filefilter.delete(options.filefilter)
+
+        # Loop over all filenames in the filelist
+        for filename in filename_list:
+            dx = None
+            filename_full = datapath + "/" + filename
+
+            # Find file information
             datafileIDs = self.dbManager.getDatafileIDs(filename=filename)
-            if datafileIDs:
-                datafileID = datafileIDs[0]
-                if not dx:
-                    dx = DataExtractor(filename_full)
+            if not datafileIDs:
+                print "Processing %s ..." %(filename_full)
+                dx = DataExtractor(filename_full)
+                if not dx.isOpen():
+                    # Skip to next file when unable to open datafile
+                    print "WARNING: Unable to open '{0}', skipping to next file.".format(filename_full)
+                    continue
+
+                timestamp = dx.timestamp
+
+                datafile = crdb.Datafile(self._db)
+                datafile.filename = filename
+                if self.doWrite:
+                    datafile.write(recursive=False)
+
+                # Find event information
+                eventIDs = self.dbManager.getEventIDs(timestamp=timestamp)
+                if not eventIDs:
+                    event = crdb.Event(self._db)
+                    event.timestamp = timestamp
+                    if self.doWrite:
+                        event.write(recursive=False)
                 else:
-                    # Already open
-                    pass
+                    eventID = eventIDs[0]
+                    event = crdb.Event(self._db, id=eventID)
 
-                datafile = crdb.Datafile(self._db, id=datafileID)
+                # Add datafile to event
+                if self.doWrite:
+                    event.addDatafile(datafile)
+                    event.write(recursive=False)
+            else:
+                continue
 
-                # Find station information
-                # - Station names
-                for stationname in dx.stationnames:
-                    stationIDs = self.dbManager.getStationIDs(datafileID=datafile.id, stationname=stationname)
-                    if not stationIDs:
-                        # Create stations
-                        station = crdb.Station(self._db)
-                        station.stationname = stationname
+            # Find station information
+            # - Station names
+            for stationname in dx.stationnames:
+                stationIDs = self.dbManager.getStationIDs(datafileID=datafile.id, stationname=stationname)
+                if not stationIDs:
+                    # Create stations
+                    station = crdb.Station(self._db)
+                    station.stationname = stationname
+                    if self.doWrite:
                         station.write(recursive=False)
                         datafile.addStation(station)
 
-                        # Create polarisations
-                        for pol_direction in [0,1]:
-                            p = crdb.Polarization(self._db)
-                            p.antennaset = dx.antennaset
-                            p.direction = "%d" %(pol_direction)
-                            p.resultsfile = dx.resultsfile(pol_direction)
+                    # Create polarizations
+                    for pol_direction in [0,1]:
+                        p = crdb.Polarization(self._db)
+                        p.antennaset = dx.antennaset
+                        p.direction = "%d" %(pol_direction)
+                        p.resultsfile = dx.resultsfile(pol_direction)
 
+                        if self.doWrite:
                             p.write()   # Write to db and get ID
-
                             station.addPolarization(p)
 
 
@@ -244,7 +328,7 @@ class DataExtractor(object):
         =========  ===================================================
         Parameter  Datafile
         =========  ===================================================
-        *pol*      polarisation direction.
+        *pol*      polarization direction.
         =========  ===================================================
         """
         result = ""
@@ -311,6 +395,27 @@ def parseOptions():
     return (options, args)
 
 
+def test(options, args):
+    # Populate the database
+    db0_name = args[0]+"0.db"
+    db1_name = args[0]+"1.db"
+
+    dbp0 = CRDatabasePopulator(db_filename=db0_name, options=options)
+    dbp1 = CRDatabasePopulator(db_filename=db1_name, options=options)
+
+    t0 = time.time()
+    dbp0.populate()
+    print "t : ",(time.time() - t0)
+    dbp0.dbManager.summary()
+
+    print "="*80
+
+    t0 = time.time()
+    dbp1.populate_nodb()
+    print "t : ",(time.time() - t0)
+    dbp1.dbManager.summary()
+
+
 if __name__ == '__main__':
     (options, args) = parseOptions()
 
@@ -318,9 +423,12 @@ if __name__ == '__main__':
     import pycrtools as cr
     from pycrtools import crdatabase as crdb
 
-    # Populate the database
-    dbp = CRDatabasePopulator(db_filename=args[0], options=options)
-    dbp.populate()
+    #test(options, args)
 
-    # Give a summary of the database
-    dbp.dbManager.summary()
+    db_name = args[0]+".db"
+    dbp = CRDatabasePopulator(db_filename=db_name, options=options)
+
+    t0 = time.time()
+    dbp.populate()
+    print "time needed: ", (time.time()-t0)
+
