@@ -695,12 +695,13 @@ class _Parameter(object):
         value = None
 
         if self._db:
-            sql = "SELECT value FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, key)
-            records = self._db.select(sql)
-            if records:
-                value = self.unpickle_parameter(records[0][0])
-            else:
-                raise ValueError("Invalid key name")
+            if self._id != 0:
+                sql = "SELECT value FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, key)
+                records = self._db.select(sql)
+                if records:
+                    value = self.unpickle_parameter(records[0][0])
+                else:
+                    raise ValueError("Invalid key name")
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -744,8 +745,9 @@ class _Parameter(object):
         =========  ==================================================
         """
         if self._db:
-            sql = "DELETE FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, key)
-            self._db.execute(sql)
+            if self._id != 0:
+                sql = "DELETE FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, key)
+                self._db.execute(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -911,7 +913,7 @@ class Event(object):
             for datafile in self.datafiles:
                 datafileID = datafile.id
                 if recursive:
-                    datafile.write()
+                    datafile.write(recursive=True)
 
                 sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
                 result = self._db.select(sql)[0][0]
@@ -994,11 +996,12 @@ class Event(object):
                 if not datafile.inDatabase():
                     datafile.write(recursive=False)
                 # Update the linking table.
-                sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
-                if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
-                    self._db.insert(sql)
-                    result = True
+                if self._id != 0:
+                    sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
+                    if 0 == len(self._db.select(sql)):
+                        sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
+                        self._db.insert(sql)
+                        result = True
             else:
                 raise ValueError("Unable to write to database: no database was set.")
 
@@ -1034,8 +1037,9 @@ class Event(object):
 
             # Update database
             if self._db:
-                sql = "DELETE FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
-                self._db.execute(sql)
+                if self._id:
+                    sql = "DELETE FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
+                    self._db.execute(sql)
             else:
                 raise ValueError("Unable to write to database: no database was set.")
         else:
@@ -1207,7 +1211,7 @@ class Datafile(object):
             for station in self.stations:
                 stationID = station.id
                 if recursive:
-                    station.write()
+                    station.write(recursive=True)
 
                 sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
                 result = self._db.select(sql)[0][0]
@@ -1290,11 +1294,12 @@ class Datafile(object):
                 if not station.inDatabase():
                     station.write(recursive=False)
                 # Update linking table
-                sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
-                if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
-                    self._db.insert(sql)
-                    result = True
+                if self._id != 0:
+                    sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
+                    if 0 == len(self._db.select(sql)):
+                        sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
+                        self._db.insert(sql)
+                        result = True
             else:
                 raise ValueError("Unable to read from database: no database was set.")
 
@@ -1330,8 +1335,9 @@ class Datafile(object):
 
             # Update database
             if self._db:
-                sql = "DELETE FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
-                self._db.execute(sql)
+                if self._id != 0:
+                    sql = "DELETE FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
+                    self._db.execute(sql)
             else:
                 raise ValueError("Unable to write to database: no database was set.")
         else:
@@ -1496,7 +1502,7 @@ class Station(object):
             for polarization in self.polarizations:
                 polarizationID = polarization.id
                 if recursive:
-                    polarization.write()
+                    polarization.write(recursive=True)
 
                 sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
                 result = self._db.select(sql)[0][0]
@@ -1578,11 +1584,12 @@ class Station(object):
                 if not polarization.inDatabase():
                     polarization.write(recursive=False)
                 # Update linking table
-                sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
-                if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
-                    self._db.insert(sql)
-                    result = True
+                if self._id != 0:
+                    sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
+                    if 0 == len(self._db.select(sql)):
+                        sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
+                        self._db.insert(sql)
+                        result = True
             else:
                 raise ValueError("Unable to write to database: no database was set.")
 
@@ -1619,8 +1626,9 @@ class Station(object):
 
             # Update database
             if self._db:
-                sql = "DELETE FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
-                self._db.execute(sql)
+                if self._id != 0:
+                    sql = "DELETE FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
+                    self._db.execute(sql)
             else:
                 raise ValueError("Unable to write to database: no database was set.")
         else:
