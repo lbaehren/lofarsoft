@@ -5,11 +5,10 @@ from pycrtools import rftools as rf
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import pytmf
-import math
 import numpy as np
 
-deg=math.pi/180.
-pi2=math.pi/2.
+deg=np.pi/180.
+pi2=np.pi/2.
 
 
 
@@ -29,7 +28,9 @@ class DirectionFitPlaneWave(tasks.Task):
         timelags = dict(doc="hArray with the measured time lags for each event and each antenna",
                         unit="s"),
                         
-        good_antennas = dict(doc="List with indices of antennas to be used for the plane fit. This should aready exclude stations that were flagged or do not show a reliable pulse"),                
+        good_antennas = dict(doc="List with indices of antennas to be used for the plane fit. This should already exclude stations that were flagged or do not show a reliable pulse"),    
+        
+        reference_antenna = dict(doc="Index of antenna with respect to whom the timelags are given. If not given the first antenna is used as reference."),           
 
         doplot=sc.p_(False,
                      "Plot results."),
@@ -67,7 +68,7 @@ class DirectionFitPlaneWave(tasks.Task):
         meandirection_spherical = sc.p_(lambda self:pytmf.cartesian2spherical(self.meandirection[0],self.meandirection[1],self.meandirection[2]),
                                         "Mean direction in spherical coordinates."),
 
-        meandirection_azel=sc.p_(lambda self:(math.pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),
+        meandirection_azel=sc.p_(lambda self:(np.pi-(self.meandirection_spherical[2]+pi2),pi2-(self.meandirection_spherical[1])),
                                  "Mean direction as Azimuth (``N->E``), Elevation tuple."),
 
         meandirection_azel_deg = sc.p_(lambda self:(180-(self.meandirection_spherical[2]+pi2)/deg,90-(self.meandirection_spherical[1])/deg),
@@ -89,12 +90,14 @@ class DirectionFitPlaneWave(tasks.Task):
         print "Running PlaneWaveFit ..."
         self.farfield=True
         c = 299792458.0 # speed of light in m/s
-        rad2deg = 180.0 / math.pi
+        rad2deg = 180.0 / np.pi
 
         positions = self.positions.toNumpy()
         times = self.timelags.toNumpy()
-        times -= times[0]
         
+        if not self.reference_antenna:
+            times -= times[0]
+
         if self.good_antennas:
             indicesOfGoodAntennas = np.array(self.good_antennas)
             goodSubset = np.array(self.good_antennas) # start with all 'good'
@@ -114,7 +117,9 @@ class DirectionFitPlaneWave(tasks.Task):
                 print 'WARNING: plane wave fit returns NaN. Setting elevation to 0.0'
                 el = 0.0 # need to propagate the warning...!
                 self.fit_failed = True
-                break
+            else:
+                self.fit_failed = False
+
             # get residuals
             expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el)) 
             expectedDelays -= expectedDelays[0]
