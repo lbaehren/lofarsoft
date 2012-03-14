@@ -109,10 +109,12 @@ class Op_preprocess(Op):
         img.omega = N.product(shape)*abs(N.product(cdelt))/(180.*180./pi/pi)
 
         ### Total flux in ch0 image
-        if 'atrous' in img.filename or hasattr(img, '_pi'):
+        if 'atrous' in img.filename or hasattr(img, '_pi') or img.log == 'Detection image':
             # Don't do this estimate for atrous wavelet images 
             # or polarized intensity image,
-            # as it doesn't give the correct flux
+            # as it doesn't give the correct flux. Also, ignore
+            # the flux in the detection image, as it's likely 
+            # wrong (e.g., not corrected for the primary beam).
             img.ch0_sum_jy = 0
         else:
             im_flux = N.nansum(img.ch0)/img.pixel_beamarea # Jy
