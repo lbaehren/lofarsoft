@@ -372,14 +372,15 @@ class Opts(object):
                                  "mean map over the entire image.",
                              group="advanced_opts")
     minpix_isl      = Option(None, Int(),
-                             doc="Minimal number of pixels with emission per island. "\
+                             doc="Minimum number of pixels with emission per island "\
+                                 "(minimum is 6 pixels). "\
                                  "None -> calculate inside program\n"\
                                  "This is an integer and is the minimum number of pixels "\
-                                 "in an island (whose values are greater thresh isl) for "\
+                                 "in an island for "\
                                  "the island to be included. If None, the number of "\
                                  "pixels is set to 1/3 of the area of an unresolved source "\
                                  "using the beam and pixel size information in the "\
-                                 "image header. It is set to 4 pixels for all "\
+                                 "image header. It is set to 6 pixels for all "\
                                  "wavelet images.",
                              group="advanced_opts")
     rms_value       = Option(None, Float(),
@@ -469,8 +470,8 @@ class Opts(object):
                                  "islands of emission. Source measurement is still done "\
                                  "on the main image\n"\
                                  "The detection image can be a FITS or CASA 2-, "\
-                                 "3-, or 4-D cube and must have the same size and "\
-                                 "WCS parameters as the main image.",
+                                 "3-, or 4-D cube. The detection image and the main"\
+                                 "image must have the same size and be registered.",
                              group="advanced_opts")
     
     #--------------------------------A-TROUS OPTIONS--------------------------------

@@ -65,6 +65,12 @@ class Op_islands(Op):
             if not success:
                 return
 
+            # Check that the ch0 images are the same size
+            det_shape = det_img.ch0.shape
+            ch0_shape = img.ch0.shape
+            if det_shape != ch0_shape:
+                raise RuntimeError("Detection image shape does not match that of input image.")
+            
             # Run through islands and correct the rms, mean and max values
             img.island_labels = det_img.island_labels
             corr_islands = []
@@ -134,7 +140,7 @@ class Op_islands(Op):
         if minsize == None:
             minsize = int(img.pixel_beamarea/3.0) # 1/3 of beam area in pixels
             if minsize < 6:
-                minsize = 6 # Need at least 4 pixels for fitting
+                minsize = 6 # Need at least 6 pixels to obtain good fits
             mylogger.userinfo(mylog, "Minimum number of pixels per island", '%i' %
                           minsize)
         

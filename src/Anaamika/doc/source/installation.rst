@@ -87,3 +87,17 @@ For the Bash shell::
     
         $ use LUS
         $ use LofIm
+
+
+Keeping up-to-date
+------------------
+PyBDSM is currently under active development, and bug fixes and improvements are frequently committed to the Subversion repository. To update PyBDSM to the latest version, enter the following commands::
+
+    $ cd $LOFARSOFT
+    $ svn update
+    $ cd build
+    $ make anaamika
+    
+Major updates will be listed in :ref:`new`.
+        
+

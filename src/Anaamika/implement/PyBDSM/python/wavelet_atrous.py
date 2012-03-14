@@ -213,7 +213,7 @@ class Op_wavelet_atrous(Op):
         opts['kappa_clip'] = 3.0
         opts['rms_map'] = True
         opts['thresh_isl'] = 3.0
-        opts['minpix_isl'] = 4.0
+        opts['minpix_isl'] = 6
         opts['takemeanclip'] = False
         opts['savefits_rmsim'] = False
         opts['savefits_meanim'] = False
