@@ -1502,7 +1502,7 @@ class Station(object):
             for polarization in self.polarizations:
                 polarizationID = polarization.id
                 if recursive:
-                    polarization.write(recursive=True)
+                    polarization.write()
 
                 sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
                 result = self._db.select(sql)[0][0]
