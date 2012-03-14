@@ -53,36 +53,38 @@ class CMDLine:
         	self.cmd.add_option('-o', '-O', '--output', dest='outdir', metavar='DIR',
                            help="Specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
                                  Default is corresponding *_red or *_redIS directory", default="", type='str')
-        	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
-                           help="Specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
-        	self.cmd.add_option('--par', '--parset', dest='parset', metavar='FILE',
-                           help="Specify explicitely the input parameter file (parset file). By default, it will be looked for \
-                                 in standard system directory", default="", type='str')
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
                            help="optional parameter to skip subdyn.py RFI checker", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
                            help="Turn off running pdmp in the pipeline", default=False)
-        	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
-                           help="optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists. \
-				Otherwise, the new results will be overwritten/added to existing directory", default=False)
+        	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
+                           help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
+        	self.cmd.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
+                           help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
+        	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
+                           help="run only summary actions on already processed data", default=False)
+        	self.cmd.add_option('--beams', dest='beam_str', metavar='SAP#:TAB#[,SAP#:TAB#,...]',
+                           help="user-specified beams to process separated by commas and written as station beam number, colon, \
+                                 TA beam number, with no spaces", default="", type='str')
         	self.cmd.add_option('--incoh_only', action="store_true", dest='is_incoh_only',
                            help="optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)", default=False)
         	self.cmd.add_option('--coh_only', action="store_true", dest='is_coh_only',
                            help="optional parameter to process ONLY Coherentstokes  (even though incoherentstokes data exist)", default=False)
-        	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
-                           help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
+        	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
+                           help="optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists. \
+				Otherwise, the new results will be overwritten/added to existing directory", default=False)
+        	self.cmd.add_option('--par', '--parset', dest='parset', metavar='FILE',
+                           help="Specify explicitely the input parameter file (parset file). By default, it will be looked for \
+                                 in standard system directory", default="", type='str')
+        	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
+                           help="Specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
                            help="do not initialize classes but instead read all info from saved config file", default=False)
-        	self.cmd.add_option('--beams', dest='beam_str', metavar='SAP#:TAB#[,SAP#:TAB#,...]',
-                           help="user-specified beams to process separated by commas and written as station beam number, colon, \
-                                 TA beam number, with no spaces", default="", type='str')
         	self.cmd.add_option('--local', action="store_true", dest='is_local', 
                            help="To process the data locally on current locus node for one beam only. Should only be used together with --beams option \
 				and only the first beam will be used if there are several specified in --beams", default=False)
-        	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
-                           help="run only summary actions on already processed data", default=False)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
@@ -90,12 +92,14 @@ class CMDLine:
 		# check if any input parameters are given
 		if len(sys.argv[1:]) == 0:
 			self.cmd.print_usage()
+			os.system("stty sane")
 			sys.exit(0)
 
 		# print extended help
 #		if self.opts.is_examples:
 #			pulp_file_help = si.get_pulp_help()
 #			os.system("cat %s" % (pulp_file_help))
+#			os.system("stty sane")
 #			sys.exit(0)
 
 	# prints countdown (only to terminal)
@@ -128,6 +132,7 @@ class CMDLine:
 			msg="You have to use --beams option with --local!"
 			if log != None: log.error(msg)
 			else: print msg
+			os.system("stty sane")
 			sys.exit(1)
 
 		# check if all required options are given
@@ -135,6 +140,7 @@ class CMDLine:
 			msg="ObsID is not given. What do you want to process?"
 			if log != None: log.error(msg)
 			else: print msg
+			os.system("stty sane")
 			sys.exit(1)
 
 		# checking if there are mutually exclusive parameters given
@@ -142,6 +148,7 @@ class CMDLine:
 			msg="Mutually exclusive parameters set coh_only=yes and incoh_only=yes; only one allowed to be turned on!"
 			if log != None: log.error(msg)
 			else: print msg
+			os.system("stty sane")
 			sys.exit(1)
 
 		# checking that if --beams used then beams are specified correctly
@@ -151,11 +158,13 @@ class CMDLine:
 				msg="Option --beams can only has digits, colons and commas!"
 				if log != None: log.error(msg)
 				else: print msg
+				os.system("stty sane")
 				sys.exit(1)
 			elif re.search(r'[\:]+', self.opts.beam_str) is None:
 				msg="Option --beams should have at least one colon!"
 				if log != None: log.error(msg)
 				else: print msg
+				os.system("stty sane")
 				sys.exit(1)
 			else:   # forming array of beams
 				self.beams=self.opts.beam_str.split(",")
@@ -166,6 +175,7 @@ class CMDLine:
 						msg="Option --beams has at least one empty SAP or TAB value!"
 						if log != None: log.error(msg)
 						else: print msg
+						os.system("stty sane")
 						sys.exit(1)
 
 		# warning user that some of the results can still be overwritten, if --del is not used
@@ -216,6 +226,7 @@ class CMDLine:
 						msg="No parfile found for pulsar %s. Exiting..." % (psr)
 						if log != None: log.error(msg)
 						else: print msg
+						os.system("stty sane")
                                         	sys.exit(1)
 			else:
 				msg="No pulsar names are given. PULP will find the proper pulsar(s) to fold..."
@@ -255,7 +266,9 @@ class CMDLine:
 			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
 			log.info("Summaries ONLY = %s" % (self.opts.is_summary and "yes" or "no"))
 			log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
-			log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
+			log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
+			if not self.opts.is_skip_dspsr:
+				log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
 			log.info("IS Only = %s" % (self.opts.is_incoh_only and "yes" or "no"))
 			log.info("CS Only = %s" % (self.opts.is_coh_only and "yes" or "no"))
 			if self.opts.rawdir != "/data":

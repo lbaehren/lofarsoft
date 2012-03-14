@@ -219,13 +219,7 @@ class TABeam:
         	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].stationList' %s" % (sapid, self.tabid, parset)
                 status=os.popen(cmd).readlines()
                 if np.size(status)>0:
-                        stations=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
-                        # removing LBA and HBA from station names, replacing HBA ears HBA0 to /0 and HBA1 to /1
-                        stations = re.sub("HBA0", "/0", stations)
-                        stations = re.sub("HBA1", "/1", stations)
-                        stations = re.sub("HBA", "", stations)
-                        stations = re.sub("LBA", "", stations)
-                        self.stationList = stations.split(",")
+                        self.stationList = status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0].split(",")
 
 		# Determining where the raw data are....
                 # forming string with all locus nodes needed to check in one cexec command
@@ -295,6 +289,7 @@ class Observation:
 			msg="Can't find the parset file '%s' for ObsID = %s" % (self.parset, self.id)
 			if log != None: log.error(msg)
 			else: print msg
+			os.system("stty sane")
 			sys.exit(1)
 
 
@@ -330,6 +325,7 @@ class Observation:
 			msg="Data are not available on these nodes: %s\nExiting." % (", ".join(no_nodes))
 			if log != None: log.error(msg)
 			else: print msg
+			os.system("stty sane")
 			sys.exit(1)
 		
 
@@ -373,6 +369,8 @@ class Observation:
 		for l in np.arange(len(cexec_output)):
 			if re.match("^-----", cexec_output[l]) is None: 
 				self.nodeslist.append(cexec_output[l-1].split(" ")[1])
+		# removing repetitions from the nodes list
+		self.nodeslist = np.unique(self.nodeslist)
 
 	# parsing the string with ranges of subbands recorded to get list of subbands
 	def getSubbands(self, sblist):
@@ -460,12 +458,12 @@ class Observation:
 
 		# checking "locations" keywords first as in the new parset files (as from Jan 27, 2012), 
 		# "mountpoints" can give wrong values
-		self.nodeslist_string = "[]"
         	cmd="grep Output_Beamformed.locations %s | awk '{print $3}' - | tr -d '[]'" % (self.parset,)
 		status=os.popen(cmd).readlines()
 		if np.size(status)>0:
 			self.nodeslist=status[0][:-1].split(",")
 			self.nodeslist=[n.split(":")[0] for n in self.nodeslist]
+			self.nodeslist=np.unique(self.nodeslist)
 
 	        # check if online coherent dedispersion (OCD) was used
         	cmd="grep OLAP.coherentDedisperseChannels %s" % (self.parset,)
@@ -690,13 +688,25 @@ class Observation:
 			log.info("#subbands: %d [%s]   SubWidth: %g kHz" % (self.nrSubbands, self.subbandList, self.subbandWidth))
 			if self.nrChanPerSubIS == self.nrChanPerSubCS or self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
 				nchanspersub = (self.nrChanPerSubIS != 0 and str(self.nrChanPerSubIS) or str(self.nrChanPerSubCS))
-			else: nchanspersub = "%d (IS), %d (CS)" % (self.nrChanPerSubIS, self.nrChanPerSubCS)
+			elif self.IS and not self.CS and not self.CV:
+				nchanspersub = str(self.nrChanPerSubIS)
+			elif not self.IS and (self.CS or self.CV):
+				nchanspersub = str(self.nrChanPerSubCS)
+			else: nchanspersub = "%d (IS), %d (%s)" % (self.nrChanPerSubIS, self.nrChanPerSubCS, self.CS and "CS" or "CV")
 			if self.downsample_factorIS == self.downsample_factorCS or self.downsample_factorIS == 0 or self.downsample_factorCS == 0:
 				dfactor = (self.downsample_factorIS != 0 and str(self.downsample_factorIS) or str(self.downsample_factorCS))
-			else: dfactor = "%d (IS), %d (CS)" % (self.downsample_factorIS, self.downsample_factorCS)
+			elif self.IS and not self.CS and not self.CV:
+				dfactor = str(self.downsample_factorIS)
+			elif not self.IS and (self.CS or self.CV):
+				dfactor = str(self.downsample_factorCS)
+			else: dfactor = "%d (IS), %d (%s)" % (self.downsample_factorIS, self.downsample_factorCS, self.CS and "CS" or "CV")
 			if self.samplingIS == self.samplingCS or self.samplingIS == 0.0 or self.samplingCS == 0.0:
 				sampling = (self.samplingIS != 0.0 and str(self.samplingIS) or str(self.samplingCS)) + " ms"
-			else: sampling = "%g ms (IS), %g ms (CS)" % (self.samplingIS, self.samplingCS)
+			elif self.IS and not self.CS and not self.CV:
+				sampling = str(self.samplingIS) + " ms"
+			elif not self.IS and (self.CS or self.CV):
+				sampling = str(self.samplingCS) + " ms"
+			else: sampling = "%g ms (IS), %g ms (%s)" % (self.samplingIS, self.samplingCS, self.CS and "CS" or "CV")
 			log.info("#chans/sub: %s   Downsample Factor: %s" % (nchanspersub, dfactor))
 			log.info("Sampling: %s" % (sampling))
 			if self.nrBeams > 1:

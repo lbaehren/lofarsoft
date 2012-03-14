@@ -118,7 +118,7 @@ if __name__ == "__main__":
 			pipefd.close()
 			# kick off the pipeline
 			if not cmdline.opts.is_summary:
-				psrpipe.start(cep2, cmdline, log)
+				psrpipe.start(obs, cep2, cmdline, log)
 			# wait for all childs to finish and prepare logs, all files in order
 			# convert, FE maps, etc.
 			try:
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 							unit.run(obs, cep2, cmdline, log)
 						except KeyboardInterrupt:
 							log.exception("User interruption...")
-							unit.kill(cep2) # killing all open processes
+							unit.kill() # killing all open processes
 							# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
 							# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
 							# to its default values)
@@ -181,6 +181,7 @@ if __name__ == "__main__":
 
 	except Exception:
 		log.exception("Oops... pulp has crashed!")
+		os.system("stty sane")
 		sys.exit(1)
 
 	log.flush()
