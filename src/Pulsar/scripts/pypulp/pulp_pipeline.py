@@ -205,17 +205,18 @@ class Pipeline:
 				log.info("Still running [%d]: %s" % (len(run_units), run_units))
 				for unit in self.units:
 					os.system("stty sane")
-					log.info("waiting...")
+					log.info("\b\bwaiting...")
 					unit.parent.communicate()
-					log.info("Process pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
+					log.info("\b\bProcess pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
 					run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
-					if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
+					if len(run_units) > 0: log.info("\b\bStill running [%d]: %s" % (len(run_units), run_units))
 
 				# loop over finished processes to see if they all finished OK
 				failed_units = [u for u in self.units if u.parent.returncode > 0]
-				log.info("Failed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
+				os.system("stty sane")
+				log.info("\b\bFailed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
 				if len(failed_units) > 0:
-					log.info("*** Summaries will not be complete! Re-run processing for the failed beams using --beams option. ***")
+					log.info("\b\b*** Summaries will not be complete! Re-run processing for the failed beams using --beams option. ***")
 
 			self.sum_popens=[]
 			log.info("Starting summaries...")
@@ -462,11 +463,21 @@ class Pipeline:
 					self.execute(cmd, log, workdir=sumdir)
 
 			# Combining different status maps into one 'status.png' to be shown in web-summary page 
-			status_pngs=glob.glob("%s/*_status.png" % (sumdir))
-			if len(status_pngs) > 0:
-				log.info("Combining different status maps into one file...")
-				cmd="convert -append *_status.png status.png"
+			if os.path.exists("%s/FE_status.png" % (sumdir)):
+				log.info("Renaming FE status map file to status.png ...")
+				cmd="mv FE_status.png status.png"
 				self.execute(cmd, log, workdir=sumdir)
+			elif os.path.exists("%s/TAheatmap_status.png" % (sumdir)):
+				log.info("Renaming TA heatmap map file to status.png ...")
+				cmd="mv TAheatmap_status.png status.png"
+				self.execute(cmd, log, workdir=sumdir)
+			elif os.path.exists("%s/dspsr_status.png" % (sumdir)):
+				log.info("Renaming dspsr status file to status.png ...")
+				cmd="mv dspsr_status.png status.png"
+				self.execute(cmd, log, workdir=sumdir)
+			else: log.info("No status.png created")
+			# creating thumbnail version of status.png if it exists
+			if os.path.exists("%s/status.png" % (sumdir)):		
 				cmd="convert -scale 200x140-0-0 status.png status.th.png"
 				self.execute(cmd, log, workdir=sumdir)
 
@@ -522,8 +533,8 @@ class PipeUnit:
 		self.start_time = 0  # start time of the processing (in s)
 		self.end_time = 0    # end time (in s)
 		self.total_time = 0  # total time in s 
-		# extensions of the files to copy to archive
-		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.inf", "*.rfirep", "*png", "*parset", "*.par", "*.ar", "*.AR", "*pdmp*"]
+		# extensions of the files to copy to archive (parfile and parset will be also included)
+		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*"]
 		self.procdir = "BEAM%d" % (self.tabid)
 
 		# pulsars to fold for this unit
@@ -946,13 +957,15 @@ class PipeUnit:
 			self.log.info("Copying original parset file to output directory...")
 			cmd="cp -f %s %s" % (obs.parset, self.outdir)
 			self.execute(cmd, workdir=self.outdir)
-			# Make a tarball of all the plots
+			# Make a tarball of all the plots for this beam
 			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
 			tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
 			tar_list=[]
 			for ext in self.extensions:
-				ext_list=rglob(self.outdir, ext)
+				ext_list=rglob(self.curdir, ext)
 				tar_list.extend(ext_list)
+			tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
+			tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
 			cmd="tar cvfz %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
 			self.execute(cmd, workdir=self.outdir)
 
