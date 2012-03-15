@@ -148,9 +148,11 @@ if __name__ == "__main__":
                        		proc.communicate()
 		else:
 			# loading pipeline config from the file
-			pipefd = open(pipeline_file, "rb")
-			psrpipe=cPickle.load(pipefd)
-			pipefd.close()
+			if os.path.exists(pipeline_file):
+				pipefd = open(pipeline_file, "rb")
+				psrpipe=cPickle.load(pipefd)
+				pipefd.close()
+			else: psrpipe = Pipeline(obs, cep2, cmdline, log)
 			if not cmdline.opts.is_summary:
 				# running processing for particular beam
 				for unit in psrpipe.units:

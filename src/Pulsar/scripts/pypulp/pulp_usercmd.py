@@ -168,6 +168,10 @@ class CMDLine:
 				sys.exit(1)
 			else:   # forming array of beams
 				self.beams=self.opts.beam_str.split(",")
+				# also, we have to remove --beams option with argument from self.options
+				# deleting here all instances of --beams (if several) and its arguments
+				for jj in reversed([ii for ii in range(len(self.options)) if self.options[ii] == '--beams']):
+					del(self.options[jj:jj+2])
 				# checking if neither SAP or TAB are empty
 				for bb in self.beams:
 					(sap, tab) = bb.split(":")
@@ -240,7 +244,10 @@ class CMDLine:
 			log.info("")
 			log.info("Pulsar Pipeline, V%s" % (self.version))
 			log.info("Prg: %s" % (self.prg))
-			log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options)))
+			if len(self.beams) == 0:
+				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options)))
+			else:
+				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + self.beams)))
 			log.info("")
 			log.info("ObsID = %s" % (self.opts.obsid))
 			if self.opts.is_nofold: pulsar_status = "No folding"
