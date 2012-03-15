@@ -83,12 +83,17 @@ def gatherresults(eventdir, antennaSet):
 #            if nof_new_cabledelays != nof_new_antids:
 #                print '*** ERROR: WRONG NUMBER OF ANTENNAS!'
         theseAntIDs = [str(int(v)) for v in res["antennas"].values()]
-        if "absolute_time_of_arrival" in res.keys():
-            theseArrivalTimes = res["absolute_time_of_arrival"]
+        if "pulses_absolute_time_of_arrival" in res.keys():
+            theseArrivalTimes = res["pulses_absolute_time_of_arrival"]
+            print 'absolute toa for this file: %s' % datadir 
+            print 'block: %d' % res["BLOCK"]
+            print 'snr  : %d' % res["SAMPLE_NUMBER"]
+            if 'CS003' in datadir:
+                import pdb; pdb.set_trace()
         else:
             theseMaximaX = res["pulses_maxima_x"]
             refant = res["pulses_refant"]
-            fractionalSampleOffset = theseMaximaX[refant]
+            fractionalSampleOffset = np.modf(theseMaximaX[refant])[0]
             theseArrivalTimes = res["SAMPLE_INTERVAL"] * (res["pulse_start_sample"] + fractionalSampleOffset) + np.array(res["pulses_timelags_ns"])
             
         if len(theseAntIDs) != len(theseArrivalTimes):
@@ -130,7 +135,8 @@ def gatherresults(eventdir, antennaSet):
         plt.scatter(x, y, label = 'time differences')
         plt.ylabel('Time differences [ns]')
         plt.xlabel('Antenna number (RCU/2)')
-        plt.title('Time difference between odd and even polarization per antenna\nStation '+thisStationName)
+        eventName = os.path.split(eventdir)[1].strip('VHECR_LORA-')
+        plt.title('Time difference between odd and even polarization per antenna\nEvent '+ eventName + '   Station ' +thisStationName)
         plt.legend(loc='best')
                         
 
