@@ -59,7 +59,13 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly):
                 
             pulseblock = res["BLOCK"]
             blocksize = res["BLOCKSIZE"]
-            pulseoffset = pulseblock * blocksize + res["SAMPLE_NUMBER"] + res["pulse_start_sample"] #+ res["BLOCKSIZE"]
+            
+            theseMaximaX = res["pulses_maxima_x"] # time of maxima in power of the pulses, in (fractional) samples
+            refant = res["pulses_refant"]
+            fractionalSampleOffset = np.modf(theseMaximaX[refant])[0] # fractional part of reference antenna time
+            
+            pulseoffset = pulseblock * blocksize + res["SAMPLE_NUMBER"] + res["pulse_start_sample"] + fractionalSampleOffset 
+            
             pulseoffset/=res["SAMPLE_FREQUENCY"]
             antset=res["ANTENNA_SET"]
             par["loracore"] = res["pulse_core_lora"]
