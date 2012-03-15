@@ -38,9 +38,9 @@ class CMDLine:
 		self.beams = [] # list of beams to process
 		self.psrbs = self.psrjs = [] # list of B and J names of pulsars from ATNF catalog
 		self.ras = self.decs = self.s400 = [] # lists of RA, DEC, and S400 of catalog pulsars
-        	self.usage = "Usage: %prog <-id ObsID> -p <Pulsar name(s)> [-h|--help] [OPTIONS]"
+        	self.usage = "Usage: %prog <--id ObsID> [-h|--help] [OPTIONS]"
         	self.cmd = opt.OptionParser(self.usage, version="%prog " + self.version)
-        	self.cmd.add_option('--id', dest='obsid', metavar='ObsID',
+        	self.cmd.add_option('--id', '--obsid', dest='obsid', metavar='ObsID',
                            help="Specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
         	self.cmd.add_option('-p', '--pulsar', dest='psr', metavar='PSRS|word',
                            help="Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
