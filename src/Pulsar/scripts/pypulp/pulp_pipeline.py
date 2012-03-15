@@ -205,18 +205,18 @@ class Pipeline:
 				log.info("Still running [%d]: %s" % (len(run_units), run_units))
 				for unit in self.units:
 					os.system("stty sane")
-					log.info("\b\bwaiting...")
+					log.info("waiting...")
 					unit.parent.communicate()
-					log.info("\b\bProcess pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
+					log.info("Process pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
 					run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
-					if len(run_units) > 0: log.info("\b\bStill running [%d]: %s" % (len(run_units), run_units))
+					if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
 
 				# loop over finished processes to see if they all finished OK
 				failed_units = [u for u in self.units if u.parent.returncode > 0]
 				os.system("stty sane")
-				log.info("\b\bFailed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
+				log.info("Failed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
 				if len(failed_units) > 0:
-					log.info("\b\b*** Summaries will not be complete! Re-run processing for the failed beams using --beams option. ***")
+					log.info("*** Summaries will not be complete! Re-run processing for the failed beams using --beams option. ***")
 
 			self.sum_popens=[]
 			log.info("Starting summaries...")
