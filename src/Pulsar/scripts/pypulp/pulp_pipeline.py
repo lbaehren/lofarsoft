@@ -339,7 +339,8 @@ class Pipeline:
 							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
 						self.execute(cmd, log, workdir=sumdir)
 				else:
-					log.warning("Warning! Archive file %s does not exist in: %s. Summary won't be complete" % (result_archive, sumdir))
+					if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
+						log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
 
 			# either "CS", "IS", "CV", .. 
 			data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
