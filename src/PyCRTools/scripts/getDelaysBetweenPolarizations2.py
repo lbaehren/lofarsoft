@@ -83,8 +83,8 @@ def gatherresults(eventdir, antennaSet):
 #            if nof_new_cabledelays != nof_new_antids:
 #                print '*** ERROR: WRONG NUMBER OF ANTENNAS!'
         theseAntIDs = [str(int(v)) for v in res["antennas"].values()]
-        if "pulses_absolute_time_of_arrival" in res.keys():
-            theseArrivalTimes = res["pulses_absolute_time_of_arrival"]
+        if "pulses_absolute_arrivaltime" in res.keys():
+            theseArrivalTimes = res["pulses_absolute_arrivaltime"]
             print 'absolute toa for this file: %s' % datadir 
             print 'block: %d' % res["BLOCK"]
             print 'snr  : %d' % res["SAMPLE_NUMBER"]

@@ -1030,11 +1030,19 @@ for full_filename in files:
 
         print "---> Get peaks in power of each antenna (Results in maxima_power.maxy/maxx)."
         timeseries_power=hArray(copy=pulse.timeseries_data_cut)
+#        upsampled_timeseries_data = hArray(float, dimensions=[timeseries_power.shape()[0], 16*timeseries_power.shape()[1]])
+#        hFFTWResample(upsampled_timeseries_data[...], timeseries_power[...])
         timeseries_power.square()
+#        upsampled_timeseries_data.square()
+#        hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.pulse_start:self.pulse_end])
+
 #        import pdb; pdb.set_trace()
+#        upsampled_timeseries_data[...].runningaverage(16*7, hWEIGHTS.GAUSSIAN)
         timeseries_power[...].runningaverage(7,hWEIGHTS.GAUSSIAN) # NB. [...] put in, want to ensure average per antenna... (AC)
 #        timeseries_power *= 10 # parameter...
         maxima_power=trerun('FitMaxima',"Power",timeseries_power,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11,splineorder=3)
+#        maxima_power=trerun('FitMaxima',"Power", upsampled_timeseries_data,pardict=par,doplot=Pause.doplot,refant=0,plotend=ndipoles,sampleinterval=sample_interval,peak_width=11*16,splineorder=3)
+#        maxima_power.maxx /= 16.0
         timeseries_power_mean=timeseries_power[...,0:pulse.start].mean()
         timeseries_power_rms=timeseries_power[...,0:pulse.start].stddev(timeseries_power_mean)
         Pause(name="pulse-maxima-power")
@@ -1086,14 +1094,13 @@ for full_filename in files:
 
         Pause(name="pulse-maxima-crosscorr")
 
-        #The actual delays are those from the (rounded) peak locations plus the delta form the cross correlation
+        #The actual delays are those from the (rounded) peak locations plus the delta from the cross correlation
         time_lags = sample_interval * timeseries_data_cut_pulse_width/2 + (timeseries_data_cut_to_pulse_delays.vec()+maxima_cc.lags) + sample_interval * np.modf(maxima_power.maxx[pulses_refant])[0]
         # reference antenna has maxima_cc.lags = 0 by def. Offsets to this, in integer samples, are in timeseries_data_cut_to_pulse_delays. The subsample part w.r.t. the ref-ant is in maxima_cc.lags. 
         # The sub-sample part of the reference antenna time has to be included as well, using np.modf (takes fractional part).
-        
         # Absolute times of arrival, using reference antenna, from the latest integer Unix / UTC second.
         # i.e. in seconds between 0.0 and 1.0 excl.
-        absolute_time_of_arrival = sample_interval * (datafile["SAMPLE_NUMBER"][0] + block_number * blocksize + pulse.start) + time_lags
+        absolute_arrivaltime = sample_interval * (tbb_samplenumber + block_number * blocksize + pulse.start) + time_lags
                                     
         print "Time lag [ns]: ", time_lags
         print " "
@@ -1338,7 +1345,7 @@ for full_filename in files:
             pulses_maxima_x=list(maxima_power.maxx),
             pulses_maxima_y=list(maxima_power.maxy),
             pulses_timelags_ns=list(time_lags),
-            pulses_absolute_time_of_arrival = list(absolute_time_of_arrival),
+            pulses_absolute_arrivaltime = list(absolute_arrivaltime),
             pulse_start_sample=pulse.start,
             pulse_end_sample=pulse.end,
             pulse_time_ms=pulse_time_ms,
