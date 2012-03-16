@@ -87,7 +87,7 @@ class Op_gausfit(Op):
                   islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
                   size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
                   if opts.peak_fit and size_subisl > peak_size:
-                      sgaul, sfgaul = self.deblend_and_fit(img, islcp, i_sub, sub_labels)
+                      sgaul, sfgaul = self.deblend_and_fit(img, islcp)
                   else:
                       sgaul, sfgaul = self.fit_island(islcp, opts, img)
                   gaul = gaul + sgaul; fgaul = fgaul + sfgaul
