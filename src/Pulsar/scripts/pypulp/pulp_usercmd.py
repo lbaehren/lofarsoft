@@ -66,8 +66,8 @@ class CMDLine:
                            help="run only summary actions on already processed data", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
-                                 TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that specified beams \
-                                 are to be excluded from processing", default="", type='str')
+                                 TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
+                                 specified beams are to be excluded from processing", default="", type='str')
         	self.cmd.add_option('--incoh_only', action="store_true", dest='is_incoh_only',
                            help="optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)", default=False)
         	self.cmd.add_option('--coh_only', action="store_true", dest='is_coh_only',
