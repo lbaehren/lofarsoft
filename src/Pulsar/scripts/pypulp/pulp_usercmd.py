@@ -55,7 +55,7 @@ class CMDLine:
                            help="Specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
                                  Default is corresponding *_red or *_redIS directory", default="", type='str')
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
-                           help="optional parameter to skip subdyn.py RFI checker", default=False)
+                           help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
                            help="Turn off running pdmp in the pipeline", default=False)
         	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
