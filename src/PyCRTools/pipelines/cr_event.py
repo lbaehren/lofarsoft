@@ -335,7 +335,7 @@ for full_filename in files:
         # Initialization of some parameters
         #------------------------------------------------------------------------
         delay_quality_error=99.
-        lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0); pulse_coreuncertainties_lora=(0.0,0.0); pulse_moliere_lora=-1.0
+        lora_direction=False; lora_energy=-1.0; lora_core=(0.0,0.0); lora_coreuncertainties=(0.0,0.0); lora_moliere=-1.0
         pulse_normalized_height=-1.0
         pulse_height=-1.0
         pulse_direction=(-99.,-99.)
