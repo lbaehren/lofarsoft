@@ -323,79 +323,62 @@ class Observation:
 		# if some TABs have raw data in several locations
 		# we also need to check if hoover nodes are up
 		avail_hoover_nodes=list(set(si.hoover_nodes).intersection(set(si.alive_nodes)))
-		# check first if we processing only some user-specified beams
-		# and if so, check if data are available for all of them
-		if len(cmdline.beams) > 0:
-			excluded_beams_id=[]
-			for ii in range(len(cmdline.beams)):
-				sapid=int(cmdline.beams[ii].split(":")[0])
-				tabid=int(cmdline.beams[ii].split(":")[1])
-				tab = self.saps[sapid].tabs[tabid]
-				if len(tab.location) > 0:
-					# if here, it means node is available for this beam
-					if len(tab.location) > 1 and len(avail_hoover_nodes) != len(si.hoover_nodes):
-						loc=""
-						if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
-						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
-						if loc != "":
-							excluded_beams_id.append(ii)
-							msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location)) 
-							if log != None: log.warning(msg)
-							else: print msg
-				else: # no data available
-					excluded_beams_id.append(ii)
-					msg="No data available for the beam %d:%d - excluded" % (sapid, tabid)
-					if log != None: log.warning(msg)
-					else: print msg
 
-			if len(excluded_beams_id) > 0:
-				msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([cmdline.beams[id] for id in excluded_beams_id]))
-				if log != None: log.info(msg)
-				else: print msg
-				# deleting these excluded beams from the cmdline.beams list
-				for id in reversed(excluded_beams_id):
-					del(cmdline.beams[id])
-			else:
-				msg="All data/nodes are available"
-				if log != None: log.info(msg)
-				else: print msg
-		
-		# now we checking all beams excluding those specified by user
+		# first forming the actual list of beams to process taking also into account
+		# cmdline flags, like --noIS, --noCS, --noCV, --noFE
+		if len(cmdline.user_beams) > 0: cmdline.beams = cmdline.user_beams
 		else:
-			excluded_beams=[]
+			cmdline.beams = []
 			for sap in self.saps:
 				for tab in sap.tabs:
 					beam="%d:%d" % (sap.sapid, tab.tabid)
 					# checking if this beam is already excluded
-					if beam in cmdline.excluded_beams: continue
-					if len(tab.location) > 0:
-						# if here, it means node is available for this beam
-						if len(tab.location) > 1 and len(avail_hoover_nodes) != len(si.hoover_nodes):
-							loc=""
-							if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
-							if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
-							if loc != "":
-								excluded_beams.append(beam)
-								msg="Hoover node %s is not available for the beam %s [#locations = %d] - excluded" % (loc, beam, len(tab.location)) 
-								if log != None: log.warning(msg)
-								else: print msg
-					else: # no data available
-						excluded_beams.append(beam)
-						msg="No data available for the beam %s - excluded" % (beam)
+					if beam in cmdline.user_excluded_beams: continue
+					# ignoring IS beams
+					if cmdline.opts.is_noIS and not tab.is_coherent: continue
+					# ignoring FE beams (both CS and CV)
+					if cmdline.opts.is_noFE and tab.is_coherent and tab.specificationType == "flyseye": continue
+					# ignoring CS beams
+					if cmdline.opts.is_noCS and self.CS and tab.is_coherent and tab.specificationType != "flyseye": continue
+					# ignoring CV beams
+					if cmdline.opts.is_noCV and self.CV and tab.is_coherent and tab.specificationType != "flyseye": continue
+					cmdline.beams.append(beam)
+
+		# now we are checking if raw data are available for beams we want to process
+		excluded_beams_id=[]
+		for ii in range(len(cmdline.beams)):
+			sapid=int(cmdline.beams[ii].split(":")[0])
+			tabid=int(cmdline.beams[ii].split(":")[1])
+			tab = self.saps[sapid].tabs[tabid]
+			if len(tab.location) > 0:
+				# if here, it means node is available for this beam
+				if len(tab.location) > 1 and len(avail_hoover_nodes) != len(si.hoover_nodes):
+					loc=""
+					if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
+					if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+					if loc != "":
+						excluded_beams_id.append(ii)
+						msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location)) 
 						if log != None: log.warning(msg)
 						else: print msg
-
-			if len(excluded_beams) > 0:
-				msg="Excluded beams [%d]: %s" % (len(excluded_beams), ", ".join(excluded_beams))
-				if log != None: log.info(msg)
+			else: # no data available
+				excluded_beams_id.append(ii)
+				msg="No data available for the beam %d:%d - excluded" % (sapid, tabid)
+				if log != None: log.warning(msg)
 				else: print msg
-				# adding excluded beams to the list of excluded beams - cmdline.excluded_beams
-				cmdline.excluded_beams.extend(excluded_beams)
-			else:
+		# now giving summary of excluded beams and deleted them from the list
+		if len(excluded_beams_id) > 0:
+			msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([cmdline.beams[id] for id in excluded_beams_id]))
+			if log != None: log.info(msg)
+			else: print msg
+			# deleting these excluded beams from the cmdline.beams list
+			for id in reversed(excluded_beams_id):
+				del(cmdline.beams[id])
+		else:
+			if len(cmdline.beams) > 0:
 				msg="All data/nodes are available"
 				if log != None: log.info(msg)
 				else: print msg
-
 
 	# parsing the string with ranges of subbands recorded to get list of subbands
 	def getSubbands(self, sblist):

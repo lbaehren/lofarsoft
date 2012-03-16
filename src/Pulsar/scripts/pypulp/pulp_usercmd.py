@@ -36,7 +36,8 @@ class CMDLine:
 		self.version = version
 		self.psrs = []  # list of pulsars to fold
 		self.beams = [] # list of beams to process
-		self.excluded_beams = [] # list of excluded beams
+		self.user_beams = [] # list of User beams to process
+		self.user_excluded_beams = [] # list of User excluded beams
 		self.psrbs = self.psrjs = [] # list of B and J names of pulsars from ATNF catalog
 		self.ras = self.decs = self.s400 = [] # lists of RA, DEC, and S400 of catalog pulsars
         	self.usage = "Usage: %prog <--id ObsID> [-h|--help] [OPTIONS]"
@@ -68,10 +69,14 @@ class CMDLine:
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
                                  specified beams are to be excluded from processing", default="", type='str')
-        	self.cmd.add_option('--incoh_only', action="store_true", dest='is_incoh_only',
-                           help="optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)", default=False)
-        	self.cmd.add_option('--coh_only', action="store_true", dest='is_coh_only',
-                           help="optional parameter to process ONLY Coherentstokes  (even though incoherentstokes data exist)", default=False)
+        	self.cmd.add_option('--noIS', action="store_true", dest='is_noIS',
+                           help="optional parameter to turn off processing of Incoherent sum (IS) data", default=False)
+        	self.cmd.add_option('--noCS', action="store_true", dest='is_noCS',
+                           help="optional parameter to turn off processing of Coherent sum (CS) data", default=False)
+        	self.cmd.add_option('--noCV', action="store_true", dest='is_noCV',
+                           help="optional parameter to turn off processing of Complex voltages (CV) data", default=False)
+        	self.cmd.add_option('--noFE', action="store_true", dest='is_noFE',
+                           help="optional parameter to turn off processing of Fly's Eye (FE) data", default=False)
         	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
                            help="optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists. \
 				Otherwise, the new results will be overwritten/added to existing directory", default=False)
@@ -88,7 +93,7 @@ class CMDLine:
                            help="do not initialize classes but instead read all info from saved config file", default=False)
         	self.cmd.add_option('--local', action="store_true", dest='is_local', 
                            help="To process the data locally on current locus node for one beam only. Should only be used together with --beams option \
-				and only the first beam will be used if there are several specified in --beams", default=False)
+                                 and only the first beam will be used if there are several specified in --beams", default=False)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
@@ -98,13 +103,6 @@ class CMDLine:
 			self.cmd.print_usage()
 			os.system("stty sane")
 			sys.exit(0)
-
-		# print extended help
-#		if self.opts.is_examples:
-#			pulp_file_help = si.get_pulp_help()
-#			os.system("cat %s" % (pulp_file_help))
-#			os.system("stty sane")
-#			sys.exit(0)
 
 	# prints countdown (only to terminal)
 	def press_controlc(self, fr, cur):
@@ -142,14 +140,6 @@ class CMDLine:
 		# check if all required options are given
 		if self.opts.obsid == "":
 			msg="ObsID is not given. What do you want to process?"
-			if log != None: log.error(msg)
-			else: print msg
-			os.system("stty sane")
-			sys.exit(1)
-
-		# checking if there are mutually exclusive parameters given
-		if self.opts.is_coh_only and self.opts.is_incoh_only:
-			msg="Mutually exclusive parameters set coh_only=yes and incoh_only=yes; only one allowed to be turned on!"
 			if log != None: log.error(msg)
 			else: print msg
 			os.system("stty sane")
@@ -197,8 +187,8 @@ class CMDLine:
 						os.system("stty sane")
 						sys.exit(1)
 				# defining proper lists of beams
-				if is_excluded: self.excluded_beams = beams
-				else: self.beams = beams
+				if is_excluded: self.user_excluded_beams = beams
+				else: self.user_beams = beams
 
 		# warning user that some of the results can still be overwritten, if --del is not used
 		if not self.opts.is_delete:
@@ -262,12 +252,12 @@ class CMDLine:
 			log.info("")
 			log.info("Pulsar Pipeline, V%s" % (self.version))
 			log.info("Prg: %s" % (self.prg))
-			if len(self.beams) == 0 and len(self.excluded_beams) == 0:
+			if len(self.user_beams) == 0 and len(self.user_excluded_beams) == 0:
 				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options)))
-			elif len(self.beams) != 0:
-				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + [",".join(self.beams)])))
+			elif len(self.user_beams) != 0:
+				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + [",".join(self.user_beams)])))
 			else:
-				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + ["^"+",".join(self.excluded_beams)])))
+				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + ["^"+",".join(self.user_excluded_beams)])))
 			log.info("")
 			log.info("ObsID = %s" % (self.opts.obsid))
 			if self.opts.is_nofold: pulsar_status = "No folding"
@@ -296,14 +286,18 @@ class CMDLine:
 			log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
 			if not self.opts.is_skip_dspsr:
 				log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
-			log.info("IS Only = %s" % (self.opts.is_incoh_only and "yes" or "no"))
-			log.info("CS Only = %s" % (self.opts.is_coh_only and "yes" or "no"))
+			skipped=""
+			if obs.CS and self.opts.is_noCS: skipped += " CS"
+			if obs.IS and self.opts.is_noIS: skipped += " IS"
+			if obs.CV and self.opts.is_noCV: skipped += " CV"
+			if obs.FE and self.opts.is_noFE: skipped += " FE"
+			if skipped != "": log.info("Skip processing of:%s" % (skipped))
 			if self.opts.rawdir != "/data":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
 				log.info("User-specified Parset file = %s" % (self.opts.parset))
-			if len(self.beams) != 0:
-				log.info("User-specified BEAMS to process: %s" % (", ".join(self.beams)))
-			if len(self.excluded_beams) != 0:
-				log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.excluded_beams)))
+			if len(self.user_beams) != 0:
+				log.info("User-specified BEAMS to process: %s" % (", ".join(self.user_beams)))
+			if len(self.user_excluded_beams) != 0:
+				log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
 			log.info("")

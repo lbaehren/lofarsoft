@@ -44,58 +44,35 @@ class Pipeline:
 		self.archive_prefix="_combined"
 		self.archive_suffix="_nopfd.tar.gz"
 
-		for sap in obs.saps:
-			for tab in sap.tabs:
-				if not tab.is_coherent:
-					unit = ISUnit(obs, cep2, cmdline, tab, log)
-				if tab.is_coherent and tab.specificationType != "flyseye":
-					if obs.CS:
-						unit = CSUnit(obs, cep2, cmdline, tab, log)
-					elif obs.CV:
-						unit = CVUnit(obs, cep2, cmdline, tab, log)
-					else:
-						log.error("Can't initialize processing pipeline unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
-						os.system("stty sane")
-						sys.exit(1)
-				if tab.is_coherent and tab.specificationType == "flyseye":
-					if obs.CS:
-						unit = FE_CSUnit(obs, cep2, cmdline, tab, log)
-					elif obs.CV:
-						unit = FE_CVUnit(obs, cep2, cmdline, tab, log)
-					else:
-						log.error("Can't initialize processing pipeline FE unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
-						os.system("stty sane")
-						sys.exit(1)
+		# initializing Processing Units based on the list of beams to process
+                for beam in cmdline.beams:
+                        sapid=int(beam.split(":")[0])
+                        tabid=int(beam.split(":")[1])
+                        tab = obs.saps[sapid].tabs[tabid]
 
-				# adding unit to the list
-				self.units.append(unit)
+			if not tab.is_coherent:
+				unit = ISUnit(obs, cep2, cmdline, tab, log)
+			if tab.is_coherent and tab.specificationType != "flyseye":
+				if obs.CS:
+					unit = CSUnit(obs, cep2, cmdline, tab, log)
+				elif obs.CV:
+					unit = CVUnit(obs, cep2, cmdline, tab, log)
+				else:
+					log.error("Can't initialize processing pipeline unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
+					os.system("stty sane")
+					sys.exit(1)
+			if tab.is_coherent and tab.specificationType == "flyseye":
+				if obs.CS:
+					unit = FE_CSUnit(obs, cep2, cmdline, tab, log)
+				elif obs.CV:
+					unit = FE_CVUnit(obs, cep2, cmdline, tab, log)
+				else:
+					log.error("Can't initialize processing pipeline FE unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
+					os.system("stty sane")
+					sys.exit(1)
 
-		# check first the user flag if we only want to process CS or IS data
-		# and remove those processing units that we will not process from the list
-		toremove = set()
-		for uid in range(len(self.units)):
-			if cmdline.opts.is_coh_only == True and not self.units[uid].tab.is_coherent: toremove.add(uid)
-			if cmdline.opts.is_incoh_only == True and self.units[uid].tab.is_coherent: toremove.add(uid)
-		toremove = sorted(toremove, reverse=True)
-		for uid in toremove: del(self.units[uid])
-
-		# if User specified particular beams to process, then we delete all other units from the list
-		if len(cmdline.beams) != 0:
-			toremove = set()
-			for uid in range(len(self.units)):
-				uidbeam="%d:%d" % (self.units[uid].sapid, self.units[uid].tabid)
-				if uidbeam not in cmdline.beams: toremove.add(uid)
-			toremove = sorted(toremove, reverse=True)
-			for uid in toremove: del(self.units[uid])
-
-		# if User specified beams to be excluded from processing, then we delete these units from the list
-		if len(cmdline.excluded_beams) != 0:
-			toremove = set()
-			for uid in range(len(self.units)):
-				uidbeam="%d:%d" % (self.units[uid].sapid, self.units[uid].tabid)
-				if uidbeam in cmdline.excluded_beams: toremove.add(uid)
-			toremove = sorted(toremove, reverse=True)
-			for uid in toremove: del(self.units[uid])
+			# adding unit to the list
+			self.units.append(unit)
 
 		if len(self.units) == 0:
 			log.info("None beams to process!")

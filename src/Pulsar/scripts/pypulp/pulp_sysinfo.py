@@ -13,7 +13,6 @@ class CEP2Info:
 		self.user = os.environ['USER']
 		self.home = os.environ['HOME']
 		self.lofarsoft = os.environ['LOFARSOFT']
-		self.pulp_help = self.lofarsoft + "/release/share/pulsar/data/pulp_help.txt"
 		# Directory with existing par-files
 		self.parfile_dir = self.lofarsoft + "/release/share/pulsar/data/parfile"
 		# db file from Psrcat
@@ -98,10 +97,6 @@ class CEP2Info:
 	# return list of alive nodes
 	def get_alive_nodes(self):
 		return self.alive_nodes
-
-	# return file name with the extended help
-	def get_pulp_help(self):
-		return self.pulp_help
 
 	# return $LOFARSOFT
 	def get_lofarsoft(self):
