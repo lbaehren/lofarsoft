@@ -64,7 +64,7 @@ class CMDLine:
                            help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
         	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
                            help="run only summary actions on already processed data", default=False)
-        	self.cmd.add_option('--beams', dest='beam_str', metavar='SAP#:TAB#[,SAP#:TAB#,...]',
+        	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that specified beams \
                                  are to be excluded from processing", default="", type='str')
