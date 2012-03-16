@@ -399,7 +399,6 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
     from math import sqrt, pow
     import numpy as N
     import sys
-    #import pylab as pl
 
     ind=N.where(~N.array(mask))[0]
     if len(ind) > 1:
@@ -423,14 +422,16 @@ def fit_mask_1d(x, y, sig, mask, funct, do_err, order=0, p0 = None):
              low = ind1[0]; hi = ind1[-1]
              sp = N.log(yfit[low]/yfit[hi])/N.log(xfit[low]/xfit[hi])
              p0=N.array([yfit[low]/pow(xfit[low], sp), sp] + [0.]*(order-1))
-           else:
+           elif len(ind1) == 1:
              p0=N.array([ind1[0], -0.8] + [0.]*(order-1))
+           else:
+             return [0, 0], [0, 0]
       res=lambda p, xfit, yfit, sigfit: (yfit-funct(p, xfit))/sigfit
       try:
         (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True, warning=False)
       except TypeError:
         # This error means no warning argument is available, so redirect stdout to a null device 
-        # to suppress printing of warning messages
+        # to suppress printing of (unnecessary) warning messages
         original_stdout = sys.stdout  # keep a reference to STDOUT
         sys.stdout = NullDevice()  # redirect the real STDOUT
         (p, cov, info, mesg, flag)=leastsq(res, p0, args=(xfit, yfit, sigfit), full_output=True)

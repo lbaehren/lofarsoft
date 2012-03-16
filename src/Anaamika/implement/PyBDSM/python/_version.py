@@ -26,6 +26,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/16 - Fixed bugs in polarisation module that caused incorrect
+                 polarization fractions.
+    
     2012/03/13 - Improved plotting speed (by factor of ~ 4) in show_fit 
                  when there is a large number of islands. Simplified the
                  spectral index module to make it more user friendly and

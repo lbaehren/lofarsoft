@@ -170,13 +170,13 @@ class Op_preprocess(Op):
 
             bstep = int(round(min(bsize/3., min(shape)/10.)))
             img.rms_box = (bsize, bstep)
-            if (opts.rms_map is not False) and (opts.mean_map not in ['zero', 'const']):
+            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
                 mylogger.userinfo(mylog, 'Derived rms_box (box size, step size)',
                                   '(' + str(img.rms_box[0]) + ', ' +
                                   str(img.rms_box[1]) + ') pixels')
         else:
             img.rms_box = opts.rms_box
-            if (opts.rms_map is not False) and (opts.mean_map not in ['zero', 'const']):
+            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
                 mylogger.userinfo(mylog, 'Using user-specified rms_box',
                                   '(' + str(img.rms_box[0]) + ', ' +
                                   str(img.rms_box[1]) + ') pixels')

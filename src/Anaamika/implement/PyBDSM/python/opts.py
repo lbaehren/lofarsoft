@@ -942,9 +942,10 @@ class Opts(object):
                                  "average.",
                              group="spectralindex_do")
     specind_snr     =  Float(3.0,
-                             doc = "Target SNR to use when fitting power law. If "\
+                             doc = "Target SNR to use when fitting power law; "\
+                                 "channels with SNRs below this will be ignored. If "\
                                  "there is insufficient SNR, neighboring channels "\
-                                 "are averaged to obtain the target SNR\n"\
+                                 "are averaged to attempt to obtain the target SNR\n"\
                                  "The maximum allowable number of channels to average "\
                                  "is determined by the specind_maxchan parameter.",
                              group="spectralindex_do")

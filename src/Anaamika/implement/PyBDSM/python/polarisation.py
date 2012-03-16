@@ -244,7 +244,15 @@ class Op_polarisation(Op):
                         for ig in range(len(fitfix)):
                             total_flux[sind, ig] = p[ig*6]*p[ig*6+3]*p[ig*6+4]/(bm_pix[0]*bm_pix[1])
                         p = N.insert(p, N.arange(len(fitfix))*6+6, total_flux[sind])
-                        errors[sind] = func.get_errors(img, p, src.rms_isl)[6]
+                        if sind > 0:
+                            rms_img = img.rms_QUV[sind-1]
+                        else:
+                            rms_img = img.rms
+                        if len(rms_img.shape) > 1:
+                            rms_isl = rms_img[isl.bbox].mean()
+                        else:
+                            rms_isl = rms_img
+                        errors[sind] = func.get_errors(img, p, rms_isl)[6]
 
                 # Now, assign fluxes to each Gaussian.
                 src_flux_I = 0.0
@@ -258,13 +266,13 @@ class Op_polarisation(Op):
                 
                 for ig, gaussian in enumerate(src.gaussians):
                     flux_I = total_flux[0, ig]
-                    flux_I_err = errors[0, ig]
+                    flux_I_err = abs(errors[0, ig])
                     flux_Q = total_flux[1, ig]
-                    flux_Q_err = errors[1, ig]
+                    flux_Q_err = abs(errors[1, ig])
                     flux_U = total_flux[2, ig]
-                    flux_U_err = errors[2, ig]
+                    flux_U_err = abs(errors[2, ig])
                     flux_V = total_flux[3, ig]
-                    flux_V_err = errors[3, ig]
+                    flux_V_err = abs(errors[3, ig])
                     
                     if hasattr(src, '_pi'):
                         gaussian.total_flux = flux_I
@@ -376,7 +384,8 @@ class Op_polarisation(Op):
                 dlfrac = N.sqrt(lpolsq) / I * N.sqrt((Ierr/I)**2 + (Q*Qerr/lpolsq)**2 + (U*Uerr/lpolsq)**2)
             loerr = dlfrac
             uperr = dlfrac
-            
+
+        lfrac, loerr, uperr = self.check_frac(lfrac, loerr, uperr)       
         return lfrac, loerr, uperr
 
 
@@ -394,12 +403,13 @@ class Op_polarisation(Op):
         cfrac, loerr, uperr, Iup, Qup, Uup, Vup = self.estimate_err_frac_with_limits(stokes_cpol, err_cpol)
         
         # If all are detections, debias and use error propagation instead
-        if not Iup and not Qup and not Uup:
+        if not Iup and not Vup:
             cfrac = abs(V) / I
             dcfrac = cfrac * N.sqrt((Ierr/I)**2 + (Verr/V)**2)
             loerr = dcfrac
             uperr = dcfrac
 
+        cfrac, loerr, uperr = self.check_frac(cfrac, loerr, uperr)       
         return cfrac, loerr, uperr
 
 
@@ -416,7 +426,7 @@ class Op_polarisation(Op):
         tfrac, loerr, uperr, Iup, Qup, Uup, Vup = self.estimate_err_frac_with_limits(stokes, err)
         
         # If all are detections, debias and use error propagation instead
-        if not Iup and not Qup and not Uup:
+        if not Iup and not Qup and not Uup and not Vup:
             lpol = N.sqrt(Q**2 + U**2)
             lpol_debiased = self.debias(lpol, QUerr)
             tpol_debiased = N.sqrt(Q**2 + U**2 + V**2) - (lpol - lpol_debiased) # debias (to first order)
@@ -431,18 +441,19 @@ class Op_polarisation(Op):
             loerr = dtfrac
             uperr = dtfrac
 
+        tfrac, loerr, uperr = self.check_frac(tfrac, loerr, uperr)       
         return tfrac, loerr, uperr
 
 
   ####################################################################################
-    def calc_lpol_angle(self, stokes, err):
+    def calc_lpol_angle(self, stokes, err, sig=3.0):
         """ Calculate linear polarisation angle and error (in degrees) from:
             stokes = [I, Q, U, V] and err = [Ierr, Qerr, Uerr, Verr]
         
         """
         I, Q, U, V = stokes
         Ierr, Qerr, Uerr, Verr = err
-        if abs(Q) < Qerr and abs(U) < Uerr:
+        if abs(Q) < sig*abs(Qerr) and abs(U) < sig*abs(Uerr):
             return 0.0, 0.0
 
         ang = 0.5 * N.arctan2(U, Q) * 180.0 / N.pi
@@ -483,6 +494,17 @@ class Op_polarisation(Op):
         
         return pflux_debiased
 
+    def check_frac(self, frac, loerr, uperr):
+        if frac < 0.0:
+            frac = 0.0
+        if frac > 1.0:
+            frac = 1.0
+        if loerr < 0.0:
+            loerr = frac
+        if frac + uperr > 1.0:
+            uperr = 1.0 - frac
+        return frac, loerr, uperr
+        
   ####################################################################################
     def setpara_bdsm(self, img):
         from types import ClassType, TypeType
@@ -508,7 +530,7 @@ class Op_polarisation(Op):
 
         return ops, opts
 
-    def estimate_err_frac_with_limits(self, stokes, err):
+    def estimate_err_frac_with_limits(self, stokes, err, sig=3.0):
         """Estimate reasonable errors on polarization fraction when upper
         limits are present.
         
@@ -521,18 +543,16 @@ class Op_polarisation(Op):
         Uup = False
         Vup = False
             
-        if abs(I) < 3.0 * Ierr:
-            I = 3.0 * Ierr
+        if abs(I) < sig * abs(Ierr):
             Iup = True
-        if abs(Q) < 3.0 * Qerr:
-            Q = 3.0 * Qerr
-            Qerr *= 3.0
+        if abs(Q) < sig * abs(Qerr):
+            Q = 0.0
             Qup = True
-        if abs(U) < 3.0 * Uerr:
-            U = 3.0 * Uerr
+        if abs(U) < sig * abs(Uerr):
+            U = 0.0
             Uup = True
-        if abs(V) < 3.0 * Verr:
-            V = 3.0 * Verr
+        if abs(V) < sig * abs(Verr):
+            V = 0.0
             Vup = True
 
         pol = N.sqrt(Q**2 + U**2 + V**2)
@@ -546,9 +566,9 @@ class Op_polarisation(Op):
             if Qup and Uup and Vup:
                 frac = 0.0
                 loerr = 0.0
-                uperr = 0.0
+                uperr = 1.0
             else:
-                loerr = frac - N.sqrt((abs(Q) - Qerr)**2 + (abs(U) - Uerr)**2 + (abs(V) - Verr)**2) / I
+                loerr = frac - N.sqrt((abs(Q) - Qerr)**2 + (abs(U) - Uerr)**2 + (abs(V) - Verr)**2) / abs(Ierr)
                 uperr = 1.0 - frac
         else:
             loerr = frac - N.sqrt((abs(Q) - Qerr)**2 + (abs(U) - Uerr)**2 + (abs(V) - Verr)**2) / (I + Ierr)
@@ -558,8 +578,6 @@ class Op_polarisation(Op):
             loerr = frac
         if frac + uperr > 1.0:
             uperr = 1.0 - frac
-        if frac== 1.0 and uperr >0.0:
-            0/0
 
         return frac, loerr, uperr, Iup, Qup, Uup, Vup
         
