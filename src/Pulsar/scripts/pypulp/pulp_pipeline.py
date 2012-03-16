@@ -80,11 +80,20 @@ class Pipeline:
 		for uid in toremove: del(self.units[uid])
 
 		# if User specified particular beams to process, then we delete all other units from the list
-		toremove = set()
 		if len(cmdline.beams) != 0:
+			toremove = set()
 			for uid in range(len(self.units)):
 				uidbeam="%d:%d" % (self.units[uid].sapid, self.units[uid].tabid)
 				if uidbeam not in cmdline.beams: toremove.add(uid)
+			toremove = sorted(toremove, reverse=True)
+			for uid in toremove: del(self.units[uid])
+
+		# if User specified beams to be excluded from processing, then we delete these units from the list
+		if len(cmdline.excluded_beams) != 0:
+			toremove = set()
+			for uid in range(len(self.units)):
+				uidbeam="%d:%d" % (self.units[uid].sapid, self.units[uid].tabid)
+				if uidbeam in cmdline.excluded_beams: toremove.add(uid)
 			toremove = sorted(toremove, reverse=True)
 			for uid in toremove: del(self.units[uid])
 
@@ -184,11 +193,11 @@ class Pipeline:
 				(locus, unit.sapid, unit.tabid, " ".join(cmdline.options))
 			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			os.system("stty sane")
-			log.info("SAP=%d TAB=%d %s(%s%s) on %s (pid=%d)  [number of locations = %d]" % \
+			log.info("SAP=%d TAB=%d %s(%s%s) on %s (pid=%d)  [#locations = %d, #files = %d]" % \
 				(unit.sapid, unit.tabid, unit.tab.specificationType == "flyseye" and ", ".join(unit.tab.stationList) + " " or "", \
 				unit.tab.specificationType == "flyseye" and "FE/" or "", \
 				unit.tab.is_coherent and (obs.CS and "CS" or "CV") or "IS", \
-				locus, unit.parent.pid, len(unit.tab.location)))
+				locus, unit.parent.pid, len(unit.tab.location), unit.tab.numfiles))
 			time.sleep(1) # wait 1 sec (otherwise terminal output gets messed up often)
 
 

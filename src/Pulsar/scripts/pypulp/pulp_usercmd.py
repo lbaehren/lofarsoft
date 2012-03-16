@@ -36,6 +36,7 @@ class CMDLine:
 		self.version = version
 		self.psrs = []  # list of pulsars to fold
 		self.beams = [] # list of beams to process
+		self.excluded_beams = [] # list of excluded beams
 		self.psrbs = self.psrjs = [] # list of B and J names of pulsars from ATNF catalog
 		self.ras = self.decs = self.s400 = [] # lists of RA, DEC, and S400 of catalog pulsars
         	self.usage = "Usage: %prog <--id ObsID> [-h|--help] [OPTIONS]"
@@ -65,7 +66,8 @@ class CMDLine:
                            help="run only summary actions on already processed data", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
-                                 TA beam number, with no spaces", default="", type='str')
+                                 TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that specified beams \
+                                 are to be excluded from processing", default="", type='str')
         	self.cmd.add_option('--incoh_only', action="store_true", dest='is_incoh_only',
                            help="optional parameter to process ONLY Incoherentstokes (even though coherentstokes data exist)", default=False)
         	self.cmd.add_option('--coh_only', action="store_true", dest='is_coh_only',
@@ -78,6 +80,8 @@ class CMDLine:
                                  in standard system directory", default="", type='str')
         	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
                            help="Specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
+        	self.cmd.add_option('--locate-rawdata', action="store_true", dest='is_locate_rawdata',
+                           help="Search for input raw data in ALL alive nodes instead of using the list of nodes from the Parset file", default=False)
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
@@ -154,6 +158,17 @@ class CMDLine:
 		# checking that if --beams used then beams are specified correctly
 		# we have this complicated "if" because we used --beams to pass summary locus node when --summary and --local
 		if self.opts.beam_str != "" and (not self.opts.is_summary or (self.opts.is_summary and not self.opts.is_local)):
+			# checking first if our list of beams is actually the list of excluded beams
+			if self.opts.beam_str[0] == '^':
+				is_excluded = True
+				self.opts.beam_str = self.opts.beam_str[1:]
+				if self.opts.beam_str == "":
+					msg="Option --beams should have at least one excluded beam!"
+					if log != None: log.error(msg)
+					else: print msg
+					os.system("stty sane")
+					sys.exit(1)
+			else: is_excluded = False
 			if re.search(r'[^\,\:\d]+', self.opts.beam_str) is not None:
 				msg="Option --beams can only has digits, colons and commas!"
 				if log != None: log.error(msg)
@@ -167,13 +182,13 @@ class CMDLine:
 				os.system("stty sane")
 				sys.exit(1)
 			else:   # forming array of beams
-				self.beams=self.opts.beam_str.split(",")
+				beams=self.opts.beam_str.split(",")
 				# also, we have to remove --beams option with argument from self.options
 				# deleting here all instances of --beams (if several) and its arguments
 				for jj in reversed([ii for ii in range(len(self.options)) if self.options[ii] == '--beams']):
 					del(self.options[jj:jj+2])
 				# checking if neither SAP or TAB are empty
-				for bb in self.beams:
+				for bb in beams:
 					(sap, tab) = bb.split(":")
 					if sap == "" or tab == "":
 						msg="Option --beams has at least one empty SAP or TAB value!"
@@ -181,6 +196,9 @@ class CMDLine:
 						else: print msg
 						os.system("stty sane")
 						sys.exit(1)
+				# defining proper lists of beams
+				if is_excluded: self.excluded_beams = beams
+				else: self.beams = beams
 
 		# warning user that some of the results can still be overwritten, if --del is not used
 		if not self.opts.is_delete:
@@ -244,10 +262,12 @@ class CMDLine:
 			log.info("")
 			log.info("Pulsar Pipeline, V%s" % (self.version))
 			log.info("Prg: %s" % (self.prg))
-			if len(self.beams) == 0:
+			if len(self.beams) == 0 and len(self.excluded_beams) == 0:
 				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options)))
+			elif len(self.beams) != 0:
+				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + [",".join(self.beams)])))
 			else:
-				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + self.beams)))
+				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options + ['--beams'] + ["^"+",".join(self.excluded_beams)])))
 			log.info("")
 			log.info("ObsID = %s" % (self.opts.obsid))
 			if self.opts.is_nofold: pulsar_status = "No folding"
@@ -284,4 +304,6 @@ class CMDLine:
 				log.info("User-specified Parset file = %s" % (self.opts.parset))
 			if len(self.beams) != 0:
 				log.info("User-specified BEAMS to process: %s" % (", ".join(self.beams)))
+			if len(self.excluded_beams) != 0:
+				log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.excluded_beams)))
 			log.info("")

@@ -61,7 +61,7 @@ class CEP2Info:
 
 	# checking connection to all locus nodes, to determine which ones are "alive"
 	def check_connection(self, log=None):
-		msg="Checking connection to locus nodes..."
+		msg="\nChecking connection to locus nodes..."
 		if log != None: log.info(msg)
 		else: print msg
 	        # forming string with all locus nodes to check in one cexec command

@@ -75,10 +75,24 @@ if __name__ == "__main__":
 		# checking validity of the options
 		cmdline.check_options(cep2, log)
 
-		log.info("Initializing...")
+		if not cmdline.opts.is_noinit:
+			# checking connections to locus nodes
+			cep2.check_connection(log)
+			# print down nodes
+			cep2.print_down_nodes(log)
+
+		log.info("\nInitializing...")
 		if not cmdline.opts.is_noinit:
 			# initializing our Observation, collecting info from parset, etc.
 			obs = Observation(cmdline.opts.obsid, cep2, cmdline, log)
+
+			# checking if rawdata available on the cluster for user-specified beams
+			obs.is_rawdata_available(cep2, cmdline, log)
+
+			# saving obs configuration to file
+                	obsfd = open (obsconf_file, "wb")
+	                cPickle.dump(obs, obsfd, True)  # when False, the dumpfile is ascii
+        	        obsfd.close()
 		else:
 			# loading obs setup from the file
 			obsfd = open(obsconf_file, "rb")
@@ -94,19 +108,6 @@ if __name__ == "__main__":
 
 		# printing info both to STDOUT and logfile
 		cep2.print_info(log)
-
-		if not cmdline.opts.is_noinit:
-			# checking connections to locus nodes
-			cep2.check_connection(log)
-			# print down nodes
-			cep2.print_down_nodes(log)
-			# checking if rawdata available on the cluster
-			obs.is_rawdata_available(cep2, log)
-
-			# saving obs configuration to file
-                	obsfd = open (obsconf_file, "wb")
-	                cPickle.dump(obs, obsfd, True)  # when False, the dumpfile is ascii
-        	        obsfd.close()
 
 		# if --beam option is not set, it means that we start the pipeline from main node
 		if not cmdline.opts.is_local:	

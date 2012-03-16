@@ -59,7 +59,7 @@ def find_pulsars(rarad, decrad, cmdline, max_distance):
 class SAPBeam:
 	# si - system info object
 	# root - "parent" class of the sap beam
-	def __init__(self, id, parset, si, cmdline, root):
+	def __init__(self, id, parset, si, cmdline, root, log=None):
 		self.sapid = id            # ID number of the SAP beam
 
 		self.rarad=self.decrad=0
@@ -155,7 +155,7 @@ class SAPBeam:
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for tid in np.arange(self.nrTiedArrayBeams):
-			tab=TABeam(tid, parset, si, root, self.sapid, self.nrSubbands, self.rarad, self.decrad)
+			tab=TABeam(tid, parset, si, cmdline, root, self.sapid, self.nrSubbands, self.rarad, self.decrad, log)
 			self.tabs.append(tab)
 
 
@@ -163,7 +163,7 @@ class SAPBeam:
 # Class TABeam describes the parameters specific for particular TA beam, which can be truly
 # TA beam or beam from individual station in FE mode
 class TABeam:
-	def __init__(self, id, parset, si, root, sapid, nrSubbands, sapRA, sapDEC):
+	def __init__(self, id, parset, si, cmdline, root, sapid, nrSubbands, sapRA, sapDEC, log=None):
 		self.tabid = id            # ID number of the TA beam
 		self.parent_sapid = sapid  # ID of the parent SAP beam
 
@@ -177,6 +177,7 @@ class TABeam:
                                            # key - locus node, value - list of rawfiles on this node (with full path)
                                            # self.location - is just a list of keys
 		self.nrSubbands = nrSubbands # duplicating number of subbands from parent SAP
+		self.numfiles=0            # number of all files for this beam (sum of rawfiles for each node)
 
 	        # getting info about the pointing (offsets from the SAP center)
         	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].angle1' %s | grep -v AnaBeam" % (sapid, self.tabid, parset)
@@ -223,21 +224,32 @@ class TABeam:
 
 		# Determining where the raw data are....
                 # forming string with all locus nodes needed to check in one cexec command
-                cexeclocus=si.cexec_nodes[root.nodeslist[0]]
-                if len(root.nodeslist) > 1:
-                        for s in root.nodeslist[1:]:
-                                cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
-                cmd="%s %s 'ls -1 %s/%s/%s_SAP%03d_B%03d_S*_bf.raw 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, sapid, self.tabid)
-                cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-		for l in range(len(cexec_output)):
-			if re.match("^-----", cexec_output[l]) is not None:
-				loc=cexec_output[l].split(" ")[1]
-			else:
-				if loc in self.rawfiles: self.rawfiles[loc].append(cexec_output[l])
-				else: self.rawfiles[loc]=[cexec_output[l]]	
-		# list of all nodes
-		self.location=self.rawfiles.keys()
+		# here we are using only nodes that are alive
+		if cmdline.opts.is_locate_rawdata: nodeslist=si.alive_nodes
+		else: nodeslist=root.nodeslist
+		if len(nodeslist) > 0:
+                	cexeclocus=si.cexec_nodes[nodeslist[0]]
+                	if len(nodeslist) > 1:
+                        	for s in nodeslist[1:]:
+                       	        	cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
+			cmd="%s %s 'ls -1 %s/%s/%s_SAP%03d_B%03d_S*_bf.raw 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, sapid, self.tabid)
+                	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+			for l in range(len(cexec_output)):
+				if re.match("^-----", cexec_output[l]) is not None:
+					loc=cexec_output[l].split(" ")[1]
+				else:
+					if loc in self.rawfiles: self.rawfiles[loc].append(cexec_output[l])
+					else: self.rawfiles[loc]=[cexec_output[l]]	
+			# list of all nodes
+			self.location=self.rawfiles.keys()
+			if len(self.location) == 0:
+				msg="No data available for beam %d:%d" % (self.parent_sapid, self.tabid)
+				if log != None: log.warning(msg)
+				else: print msg
 
+			# getting the total number of files available
+			for loc in self.location:
+				self.numfiles += len(self.rawfiles[loc])
 
 
 # Class Observation with info from the parset file
@@ -284,7 +296,7 @@ class Observation:
 		self.cfreq = 0             # central freq (in MHz)
 
 		# check if parset file exists and if so, then update the info
-		if self.is_parset(): self.update(si, cmdline)
+		if self.is_parset(): self.update(si, cmdline, log)
 		else:
 			msg="Can't find the parset file '%s' for ObsID = %s" % (self.parset, self.id)
 			if log != None: log.error(msg)
@@ -302,75 +314,88 @@ class Observation:
 		else:
 			return False
 
-	# checking if raw data is located on one of the down nodes	
-	# returns list of unavailable nodes
-	def is_rawdata_available(self, si, log=None):
-		# first will check if nodes in nodeslist are all alive
-		no_nodes=list(set(self.nodeslist)-set(self.nodeslist).intersection(set(si.alive_nodes)))
-		# now checking if there are TABs that have raw data in several locations
-		# so we would need to process them on hoover nodes
-		# and we need to check if hoover nodes are up
+	# checking if raw data for specified beams are located on one of the down nodes	
+	def is_rawdata_available(self, si, cmdline, log=None):
+		msg="Checking if all data/nodes are available for user-specified beams..."
+		if log != None: log.info(msg)
+		else: print msg
+
+		# if some TABs have raw data in several locations
+		# we also need to check if hoover nodes are up
 		avail_hoover_nodes=list(set(si.hoover_nodes).intersection(set(si.alive_nodes)))
-		# all hoover nodes are up, so no need to check each TAB
-		if len(avail_hoover_nodes) != len(si.hoover_nodes):
+		# check first if we processing only some user-specified beams
+		# and if so, check if data are available for all of them
+		if len(cmdline.beams) > 0:
+			excluded_beams_id=[]
+			for ii in range(len(cmdline.beams)):
+				sapid=int(cmdline.beams[ii].split(":")[0])
+				tabid=int(cmdline.beams[ii].split(":")[1])
+				tab = self.saps[sapid].tabs[tabid]
+				if len(tab.location) > 0:
+					# if here, it means node is available for this beam
+					if len(tab.location) > 1 and len(avail_hoover_nodes) != len(si.hoover_nodes):
+						loc=""
+						if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
+						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+						if loc != "":
+							excluded_beams_id.append(ii)
+							msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location)) 
+							if log != None: log.warning(msg)
+							else: print msg
+				else: # no data available
+					excluded_beams_id.append(ii)
+					msg="No data available for the beam %d:%d - excluded" % (sapid, tabid)
+					if log != None: log.warning(msg)
+					else: print msg
+
+			if len(excluded_beams_id) > 0:
+				msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([cmdline.beams[id] for id in excluded_beams_id]))
+				if log != None: log.info(msg)
+				else: print msg
+				# deleting these excluded beams from the cmdline.beams list
+				for id in reversed(excluded_beams_id):
+					del(cmdline.beams[id])
+			else:
+				msg="All data/nodes are available"
+				if log != None: log.info(msg)
+				else: print msg
+		
+		# now we checking all beams excluding those specified by user
+		else:
+			excluded_beams=[]
 			for sap in self.saps:
 				for tab in sap.tabs:
-					# only interested in beams with >1 locations
-					if len(tab.location) > 1:
-						# if beam is coherent and locus101 is unavailable
-						if tab.is_coherent and "locus101" not in avail_hoover_nodes: no_nodes.append("locus101")
-						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: no_nodes.append("locus102")
-			no_nodes=np.unique(no_nodes)
-		if len(no_nodes) > 0:
-			msg="Data are not available on these nodes: %s\nExiting." % (", ".join(no_nodes))
-			if log != None: log.error(msg)
-			else: print msg
-			os.system("stty sane")
-			sys.exit(1)
-		
+					beam="%d:%d" % (sap.sapid, tab.tabid)
+					# checking if this beam is already excluded
+					if beam in cmdline.excluded_beams: continue
+					if len(tab.location) > 0:
+						# if here, it means node is available for this beam
+						if len(tab.location) > 1 and len(avail_hoover_nodes) != len(si.hoover_nodes):
+							loc=""
+							if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
+							if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+							if loc != "":
+								excluded_beams.append(beam)
+								msg="Hoover node %s is not available for the beam %s [#locations = %d] - excluded" % (loc, beam, len(tab.location)) 
+								if log != None: log.warning(msg)
+								else: print msg
+					else: # no data available
+						excluded_beams.append(beam)
+						msg="No data available for the beam %s - excluded" % (beam)
+						if log != None: log.warning(msg)
+						else: print msg
 
-	# check if raw data are indeed exist in nodeslist from parset file
-	# if not, we call rawdata_search to update them
-	# rawdir - dir with raw data - /data
-	# alive_nodes - the complete list of alive locus nodes on CEP2
-	# cexec_nodes - the full dictionary of all CEP2 nodes, key - is the node name (e.g. locus014)
-	#    and value is how it's used with cexec (locus:13)
-	# cexeccmd - exact cexec command to use (cexec -f /etc/c3.conf.full)
-	def rawdata_check (self, rawdir, alive_nodes, cexec_nodes, cexeccmd):
-		# getting the sizes only from the intersection of oi.nodeslist and storage_nodes
-		insecnodes=list(set(self.nodeslist).intersection(set(storage_nodes)))
-		is_ok = True  # if False, we will update nodeslist
-		if len(insecnodes) == 0: return
-		# forming string with all locus nodes needed to check in one cexec command
-		cexeclocus=cexec_nodes[insecnodes[0]] # there is always at least one insecnodes nodes (we'd do return above otherwise)
-		if len(insecnodes) > 1:
-			for s in insecnodes[1:]:
-				cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-		cmd="%s %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, rawdir + "/" + self.id)
-		cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-		# see how many directories with raw data we have. Their number should be the same as number of insecnodes
-		dirlines=[line for line in cexec_output if re.match("^-----", line) is None]
-		if len(dirlines) < len(insecnodes): is_ok = False
-		# updating nodeslist
-		if not is_ok:
-			self.rawdata_search(alive_nodes, cexec_nodes, cexeccmd)
+			if len(excluded_beams) > 0:
+				msg="Excluded beams [%d]: %s" % (len(excluded_beams), ", ".join(excluded_beams))
+				if log != None: log.info(msg)
+				else: print msg
+				# adding excluded beams to the list of excluded beams - cmdline.excluded_beams
+				cmdline.excluded_beams.extend(excluded_beams)
+			else:
+				msg="All data/nodes are available"
+				if log != None: log.info(msg)
+				else: print msg
 
-	# search for raw data in all alive locus nodes
-	def rawdata_search (self, rawdir, alive_nodes, cexec_nodes, cexeccmd):
-		self.nodeslist=[]
-		# forming string with all locus nodes to check in one cexec command
-		cexeclocus=cexec_nodes[alive_nodes[0]] # there is always at least one alive locus node
-		if len(alive_nodes) > 1:
-			for s in alive_nodes[1:]:
-				cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-		cmd="%s %s 'ls -d %s 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, rawdir + "/" + self.id)
-		cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-		# finding all locus nodes that have the dir with raw data
-		for l in np.arange(len(cexec_output)):
-			if re.match("^-----", cexec_output[l]) is None: 
-				self.nodeslist.append(cexec_output[l-1].split(" ")[1])
-		# removing repetitions from the nodes list
-		self.nodeslist = np.unique(self.nodeslist)
 
 	# parsing the string with ranges of subbands recorded to get list of subbands
 	def getSubbands(self, sblist):
@@ -385,7 +410,7 @@ class Observation:
 		return subs
 
 	# update info based on parset file
-	def update (self, si, cmdline):
+	def update (self, si, cmdline, log=None):
 		# Getting the Date of observation
 	        cmd="grep Observation.startTime %s | tr -d \\'" % (self.parset,)
         	status=os.popen(cmd).readlines()
@@ -464,6 +489,15 @@ class Observation:
 			self.nodeslist=status[0][:-1].split(",")
 			self.nodeslist=[n.split(":")[0] for n in self.nodeslist]
 			self.nodeslist=np.unique(self.nodeslist)
+		# checking if all nodes in nodeslist are in alive
+		# also updating the nodeslist only keeping the ones that are alive
+		if not cmdline.opts.is_locate_rawdata and len(self.nodeslist) > 0:
+			nodes_unavail=list(set(self.nodeslist)-set(si.alive_nodes).intersection(set(self.nodeslist)))
+			self.nodeslist=list(set(si.alive_nodes).intersection(set(self.nodeslist)))
+			if len(nodes_unavail) > 0:
+				msg="Warning! Some raw data are on nodes that are not available [%d]: %s" % (len(nodes_unavail), ", ".join(nodes_unavail))
+				if log != None: log.warning(msg)
+				else: print msg
 
 	        # check if online coherent dedispersion (OCD) was used
         	cmd="grep OLAP.coherentDedisperseChannels %s" % (self.parset,)
@@ -661,8 +695,17 @@ class Observation:
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for sid in np.arange(self.nrBeams):
-			sap=SAPBeam(sid, self.parset, si, cmdline, self)
+			sap=SAPBeam(sid, self.parset, si, cmdline, self, log)
 			self.saps.append(sap)
+
+		# updating the nodeslist if we are looking up for raw data in all alive nodes rather than using the nodeslist from Parset
+		if cmdline.opts.is_locate_rawdata:
+			self.nodeslist=[]
+			for sap in self.saps:
+				for tab in sap.tabs:
+					self.nodeslist.extend(tab.location)
+			self.nodeslist=np.unique(self.nodeslist)
+
 
 	# prints info about the observation
 	def print_info(self, log=None):
