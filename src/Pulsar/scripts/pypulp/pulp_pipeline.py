@@ -117,19 +117,7 @@ class Pipeline:
 		# Defining output directories for all local locus nodes
 		# We have to do it here rather than in 'run' function of PipeUnit because there can be more than 1 beam per node
 		# and then there can be a clash when we will delete (if -del is set) the output directory 
-		unit_outdirs = []
-		for unit in self.units:
-			if len(unit.tab.location) > 1:
-				if unit.tab.is_coherent: locus=cep2.hoover_nodes[0] # we choose one hoover node for CS data
-				else: locus=cep2.hoover_nodes[1]                    # and another for IS data
-			else:
-				locus=unit.tab.location[0]
-			# if user specified output dir (relative to /data/LOFAR_PULSAR_....)
-			if cmdline.opts.outdir != "":
-				unit.outdir = "%s_%s/%s" % (cep2.processed_dir_prefix, locus, cmdline.opts.outdir)
-			else: # if output dir was not set
-				unit.outdir = "%s_%s/%s%s" % (cep2.processed_dir_prefix, locus, obs.id, unit.outdir_suffix)
-			unit_outdirs.append("%s:%s" % (locus, unit.outdir))
+		unit_outdirs = ["%s:%s" % (unit.outdir.split(cep2.processed_dir_prefix + "_")[1].split("/")[0], unit.outdir) for unit in self.units]
 		unit_outdirs=np.unique(unit_outdirs)
 
 		# Deleting all local output directories if --del is set 
@@ -230,13 +218,13 @@ class Pipeline:
 				run_units = [p.pid for p in self.sum_popens if p.poll() is None]
 				finished_units = [p for p in self.sum_popens if p.poll() is not None]
 				for fu in finished_units:
-					if fu.poll() != 0:
-						raise Exception
+					if fu.returncode != 0: raise Exception
 					else: self.sum_popens.remove(fu)
 				if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
 
 			# loop over finished summaries to see if they all finished OK
 			failed_summaries = [s for s in self.sum_popens if s.returncode > 0]
+			os.system("stty sane")
 			log.info("%d failed summaries" % (len(failed_summaries)))
 
 		except Exception:
@@ -339,38 +327,40 @@ class Pipeline:
 	        	        montage_cmd_pdf="montage -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 "
         	        	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
      	          	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
-        	               	for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
-                	               	psr=bp.split("/")[-1].split("_")[0]
-        	        	        thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
-                	        	# getting current number for SAP and TA beam (or station name for FE)
-        	                	cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
-                	                curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
-      	                	        chi_val = 0.0
-        	                	cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
-	                	        chiline=os.popen(cmd).readlines()
-        	                	if np.size(chiline) > 0:
-                	                	chi_val = float(chiline[0].rstrip())
-   	                	        else:
-						log.warning("Warning: can't read chi-sq value from %s" % (bp))
-		                        chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curprocdir, psr, chi_val))
-        		                montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
-        		                montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
+				if len(psr_bestprofs) > 0:
+        	               		for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
+                	               		psr=bp.split("/")[-1].split("_")[0]
+        	        	        	thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+                	        		# getting current number for SAP and TA beam (or station name for FE)
+        	              		  	cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+                	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
+      	                	        	chi_val = 0.0
+        	                		cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
+	                	        	chiline=os.popen(cmd).readlines()
+        	                		if np.size(chiline) > 0:
+                	                		chi_val = float(chiline[0].rstrip())
+   	                	        	else:
+							log.warning("Warning: can't read chi-sq value from %s" % (bp))
+		                        	chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curprocdir, psr, chi_val))
+        		                	montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
+        		                	montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
               		        chif.close()
 
 				# creating combined plots
-        	                log.info("Combining all pfd.th.png files in a single combined plot...")
-               		        montage_cmd += "combined.png"
-				self.execute(montage_cmd, log, workdir=sumdir)
-				# making thumbnail version of the combined plot
-				log.info("Making a thumbnail version of combined plot...")
-               		        cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
-                       		self.execute(cmd, log, workdir=sumdir)
+				if len(psr_bestprofs) > 0:
+        	                	log.info("Combining all pfd.th.png files in a single combined plot...")
+               		        	montage_cmd += "combined.png"
+					self.execute(montage_cmd, log, workdir=sumdir)
+					# making thumbnail version of the combined plot
+					log.info("Making a thumbnail version of combined plot...")
+               		        	cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
+                       			self.execute(cmd, log, workdir=sumdir)
 
-				# creating combined PDF plot with all prepfold plots - ONLY for FE 
-				if data_code == "CS" and obs.FE:
-        	                	log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
-               		        	montage_cmd_pdf += "combined.pdf"
-					self.execute(montage_cmd_pdf, log, workdir=sumdir)
+					# creating combined PDF plot with all prepfold plots - ONLY for FE 
+					if data_code == "CS" and obs.FE:
+        	                		log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
+               		        		montage_cmd_pdf += "combined.pdf"
+						self.execute(montage_cmd_pdf, log, workdir=sumdir)
 
 			# create beam_process_node.txt file
 			log.info("Creating the beam_process_node.txt file...")
@@ -528,6 +518,21 @@ class PipeUnit:
 		self.psrs = []
 		if not cmdline.opts.is_nofold:
 			self.psrs = self.get_pulsars_to_fold(obs, cep2, cmdline, log)
+
+	# function to set outdir and curdir directories
+	def set_outdir(self, obs, cep2, cmdline):
+		if len(self.tab.location) > 1:
+			if self.tab.is_coherent: locus=cep2.hoover_nodes[0] # we choose one hoover node for CS data
+			else: locus=cep2.hoover_nodes[1]                    # and another for IS data
+		else:
+			locus=self.tab.location[0]
+		# if user specified output dir (relative to /data/LOFAR_PULSAR_....)
+		if cmdline.opts.outdir != "":
+			self.outdir = "%s_%s/%s" % (cep2.processed_dir_prefix, locus, cmdline.opts.outdir)
+		else: # if output dir was not set
+			self.outdir = "%s_%s/%s%s" % (cep2.processed_dir_prefix, locus, obs.id, self.outdir_suffix)
+		self.curdir = "%s/%s/SAP%d/%s" % (self.outdir, self.beams_root_dir, self.sapid, self.procdir)
+
 
 	# function to get the list of pulsars to fold for this TAB (unit)
 	def get_pulsars_to_fold(self, obs, cep2, cmdline, log):
@@ -743,8 +748,7 @@ class PipeUnit:
 					cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
 					self.execute(cmd, is_os=True)
 
-			# Creating output dir
-			self.curdir = "%s/%s/SAP%d/%s" % (self.outdir, self.beams_root_dir, self.sapid, self.procdir)
+			# Creating curdir dir
 			cmd="mkdir -p %s" % (self.curdir)
 			self.execute(cmd)
 
@@ -1005,6 +1009,8 @@ class CSUnit(PipeUnit):
 		self.summary_node_dir_suffix = "_CSplots_py" # "_CSplots"
 		self.archive_suffix = "_plotsCS.tar.gz"
 		self.outdir_suffix = "_red_py" # "_red"
+		# setting outdir and curdir directories
+		self.set_outdir(obs, cep2, cmdline)
 
 	def run(self, obs, cep2, cmdline, log):
 		# currently can only process Stokes I
@@ -1036,6 +1042,8 @@ class ISUnit(PipeUnit):
 		self.summary_node_dir_suffix = "_redIS_py" # "_redIS"
 		self.archive_suffix = "_plotsIS.tar.gz"
 		self.outdir_suffix = "_redIS_py" # "_redIS"
+		# setting outdir and curdir directories
+		self.set_outdir(obs, cep2, cmdline)
 
 	def run(self, obs, cep2, cmdline, log):
 		# currently can only process Stokes I
@@ -1067,6 +1075,8 @@ class CVUnit(PipeUnit):
 		self.summary_node_dir_suffix = ""
 		self.archive_suffix = ""
 		self.outdir_suffix = ""
+		# setting outdir and curdir directories
+		self.set_outdir(obs, cep2, cmdline)
 
 	def run(self, obs, cep2, cmdline, log):
 		self.log = log
@@ -1097,6 +1107,8 @@ class FE_CSUnit(PipeUnit):
 		# re-assigning procdir from BEAMN to station name
 		if obs.FE and self.tab.stationList[0] != "": 
 			self.procdir = self.tab.stationList[0]
+		# setting outdir and curdir directories
+		self.set_outdir(obs, cep2, cmdline)
 
 	def run(self, obs, cep2, cmdline, log):
 		# currently can only process Stokes I
@@ -1131,6 +1143,8 @@ class FE_CVUnit(PipeUnit):
 		# re-assigning procdir from BEAMN to station name
 		if obs.FE and self.tab.stationList[0] != "": 
 			self.procdir = self.tab.stationList[0]
+		# setting outdir and curdir directories
+		self.set_outdir(obs, cep2, cmdline)
 
 	def run(self, obs, cep2, cmdline, log):
 		self.log = log
