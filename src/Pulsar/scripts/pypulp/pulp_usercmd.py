@@ -43,28 +43,28 @@ class CMDLine:
         	self.usage = "Usage: %prog <--id ObsID> [-h|--help] [OPTIONS]"
         	self.cmd = opt.OptionParser(self.usage, version="%prog " + self.version)
         	self.cmd.add_option('--id', '--obsid', dest='obsid', metavar='ObsID',
-                           help="Specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
+                           help="specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
         	self.cmd.add_option('-p', '--pulsar', dest='psr', metavar='PSRS|word',
-                           help="Specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
-                                give one of the 4 special words: \"parset\" - to take pulsar name from the source field for each SAP \
-				separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
-				of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually. \
-				If no pulsars are given and no special words used, then pipeline will try to take source names from \
-				parset file first, and then look for the best pulsars in SAP's FOV (same as \"sapfind\"). \
-                                Word 'NONE' as a pulsar name is ignored", default="", type='str')
+                           help="specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
+                                 give one of the 4 special words: \"parset\" - to take pulsar name from the source field for each SAP \
+                                 separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
+                                 of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually. \
+                                 If no pulsars are given and no special words used, then pipeline will try to take source names from \
+                                 parset file first, and then look for the best pulsars in SAP's FOV (same as \"sapfind\"). \
+                                 Word 'NONE' as a pulsar name is ignored", default="", type='str')
         	self.cmd.add_option('-o', '-O', '--output', dest='outdir', metavar='DIR',
-                           help="Specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
+                           help="specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
                                  Default is corresponding *_red or *_redIS directory", default="", type='str')
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
                            help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
-                           help="Turn off running pdmp in the pipeline", default=False)
+                           help="turn off running pdmp in the pipeline", default=False)
         	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
                            help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
         	self.cmd.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
                            help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
         	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
-                           help="run only summary actions on already processed data", default=False)
+                           help="making only summaries on already processed data", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -78,22 +78,23 @@ class CMDLine:
         	self.cmd.add_option('--noFE', action="store_true", dest='is_noFE',
                            help="optional parameter to turn off processing of Fly's Eye (FE) data", default=False)
         	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
-                           help="optional parameter to delete the previous ENTIRE Output_Processing_Location if it exists. \
-				Otherwise, the new results will be overwritten/added to existing directory", default=False)
+                           help="optional parameter to delete the previous entire output processing location if it exists. \
+                                 Otherwise, the new results will be overwritten/added to existing directory", default=False)
         	self.cmd.add_option('--par', '--parset', dest='parset', metavar='FILE',
-                           help="Specify explicitely the input parameter file (parset file). By default, it will be looked for \
+                           help="specify explicitely the input parameter file (parset file). By default, it will be looked for \
                                  in standard system directory", default="", type='str')
         	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
-                           help="Specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
+                           help="specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
         	self.cmd.add_option('--locate-rawdata', action="store_true", dest='is_locate_rawdata',
-                           help="Search for input raw data in ALL alive nodes instead of using the list of nodes from the Parset file", default=False)
+                           help="search for input raw data in all alive nodes instead of using the list of nodes from the parset file", default=False)
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
-                           help="do not initialize classes but instead read all info from saved config file", default=False)
+                           help="do not check for down nodes and available input raw data. Observation config is read from saved file \
+                                 rather then is initialized using parset file", default=False)
         	self.cmd.add_option('--local', action="store_true", dest='is_local', 
-                           help="To process the data locally on current locus node for one beam only. Should only be used together with --beams option \
-                                 and only the first beam will be used if there are several specified in --beams", default=False)
+                           help="to process the data locally on current locus node for one beam only. Should only be used together \
+                                 with --beams option and only the first beam will be used if there are several specified in --beams", default=False)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
