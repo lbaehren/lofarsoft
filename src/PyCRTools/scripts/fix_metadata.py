@@ -50,8 +50,8 @@ for name in filenames:
         for i, dataset in enumerate(station.itervalues()):
 
             # Set dataset level attributes
-
-            dataset.attrs["NYQUIST_ZONE"] = options.nyquist_zone
+            dataset.attrs.modify("NYQUIST_ZONE",[options.nyquist_zone])
+            
             dataset.attrs["ANTENNA_POSITION_VALUE"] = antpos[i]
             dataset.attrs["ANTENNA_POSITION_UNIT"] = ["m", "m", "m"]
             dataset.attrs["ANTENNA_POSITION_FRAME"] = "ITRF"

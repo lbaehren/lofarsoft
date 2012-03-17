@@ -440,7 +440,7 @@ class BeamFormer2(tasks.Task):
                 self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
             if self.datafile:
                 self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
-                self.antennaIDs=list(ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]))
+                self.antennaIDs=list(cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]))
                 self.datafile["SELECTED_DIPOLES"]=self.antennaIDs
                 self.antpos=self.datafile["ANTENNA_POSITIONS"]
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
