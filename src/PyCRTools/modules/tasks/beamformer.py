@@ -4,7 +4,7 @@ the average spectrum in each beam and for an incoherent beam.
 
 Example::
 
-  file=crfile(LOFARSOFT+"/data/lopes/example.event")
+  file=cr.open(LOFARSOFT+"/data/lopes/example.event")
   tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
   tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
   tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
@@ -13,14 +13,14 @@ Example::
   tpar NyquistZone=2
   tpar randomize_peaks=False
 
-  #file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+  #file=cr.open(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
   #file["SelectedAntennasID"]=[0]
   #fx0=file["TIMESERIES_DATA"]
 
 
   # ------------------------------------------------------------------------
   tload "BeamFormer"
-  file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+  file=cr.open(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
   tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
   tpar antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position"))))
   tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
@@ -39,26 +39,25 @@ Example::
 
 """
 
+# KNOWN BUGS (EE):
+# 
+#   1) The modified tparameters are not saved after exiting python. (antennaIDs,cal_delays,..)
+#
 
-
-import pdb;# pdb.set_trace()
 
 import pycrtools as cr
-#from pycrtools import *
 from pycrtools.tasks import shortcuts as sc
 from pycrtools import tasks
 from pycrtools import qualitycheck
-import time
-import pytmf
-import math
-import os
+import time; import pytmf; import math
+import os; import numpy as np
 
-#from pycrtools import IO
+import pdb;# pdb.set_trace()
+
 """
 """
 
 #Defining the workspace parameters
-
 deg=math.pi/180.
 pi2=math.pi/2.
 
@@ -66,7 +65,6 @@ def makeGrid(AZ,EL,Distance,offset=5*deg):
     return [dict(az=AZ-offset, el=EL+offset,r=Distance),dict(az=AZ, el=EL+offset,r=Distance),dict(az=AZ+offset, el=EL+offset,r=Distance),
             dict(az=AZ-offset, el=EL,r=Distance),dict(az=AZ, el=EL,r=Distance),dict(az=AZ+offset, el=EL,r=Distance),
             dict(az=AZ-offset, el=EL-offset,r=Distance),dict(az=AZ, el=EL-offset,r=Distance),dict(az=AZ+offset, el=EL-offset,r=Distance)]
-
 
 def getfile(ws):
     """
@@ -102,7 +100,7 @@ def getfile(ws):
 class BeamFormer(tasks.Task):
     """
     The function will calculate multiple beams for a list of files and
-    a series of antennas (all integrated into one compex spectrum per
+    a series of antennas (all integrated into one complex spectrum per
     beam).
 
     The task will do a basic quality check of each time series data
@@ -130,6 +128,9 @@ class BeamFormer(tasks.Task):
 
     The beam can be FFTed back to time using ``Task.tcalc`` viewed with
     ``Task.tplot``.
+
+    A dynamic spectrum can be calculated with ``Task.dyncalc``and viewed
+    with ``Task.dynplot``.
 
     To avoid the spectrum being influenced by spikes in the time
     series, those spikes can be replaced by random numbers, before the
@@ -171,6 +172,9 @@ class BeamFormer(tasks.Task):
     If the chunks are too long to be entirely plotted, use::
 
         >>> Task.qplot(186,all=False).
+        
+    .. CurrentModuleDeveloper:: Emilio Enriquez <e.enriquez@astro.ru.nl>
+
     """
 
     parameters = dict(
@@ -196,7 +200,7 @@ class BeamFormer(tasks.Task):
 #------------------------------------------------------------------------
 #Some standard parameters
 #------------------------------------------------------------------------
-        filefilter = sc.p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
+        filefilter = sc.p_("",
                         "Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
 
         file_start_number = dict(default=0,
@@ -208,6 +212,9 @@ class BeamFormer(tasks.Task):
 
         doplot = dict(default=False,
                       doc="Plot current spectrum while processing."),
+
+        dohanning = dict(default=False,
+                      doc="Apply a hanning filter to the time series data before ffting, to avoid spectral leakage."),
 
         newfigure = sc.p_(True,"Create a new figure for plotting for each new instance of the task."),
 
@@ -241,12 +248,12 @@ class BeamFormer(tasks.Task):
         maxnantennas = dict(default=96,
                             doc="Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."),
 
-        maxnchunks = dict(default=2**15,
-                          doc="Maximum number of spectral chunks to calculate."),
-
-        maxchunklen = dict(default=10**25,
+        maxchunklen = dict(default=2**18,
                            doc="Maximum length of one chunk of data that is kept in memory.",
                            unit="Samples"),
+                           
+        maxnchunks = dict(default= lambda self:int(math.floor(self.filesize/self.sectlen)),
+                          doc="Maximum number of spectral chunks to calculate."),
 
         maxblocksflagged = dict(default=2,
                                 doc="Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."),
@@ -268,7 +275,10 @@ class BeamFormer(tasks.Task):
         output_dir = dict(default="",
                           doc="Directory where output file is to be written to."),
 
-        output_filename = dict(default=lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".beams"+self.tmpfileext,
+        detail_name = dict(default='',
+                          doc="Name extension to descrive a particular analysis (not the standard one.)"),
+
+        output_filename = dict(default=lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+".beams"+self.detail_name+self.tmpfileext,
                                doc="Filename (without directory, see ``output_dir``) to store the final spectrum."),
 
         spectrum_file = dict(default=lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
@@ -380,16 +390,24 @@ class BeamFormer(tasks.Task):
                              "Total number of antennas that were processed (flagged or not) in this run.",
                              output=True),
 
-        header = sc.p_(lambda self:self.datafile.getHeader(),
+        header = sc.p_(lambda self:self.datafile.getHeader() if self.datafile else {},
                     "Header of datafile",
                     export=False),
 
         antenna_positions = dict(default=lambda self:dict(map(lambda x: (x[0],x[1].array()),zip(self.datafile["DIPOLE_NAMES"],self.datafile["ANTENNA_POSITIONS"]))),
                                  doc="A dict containing *x*, *y*, *z*-Antenna positions for each antenna in seconds as values. Key is the antenna ID.",
                                  unit="m"),
+#*** Need to make this parameter an input parameter.
+        blocklen = dict(default=lambda self:min(2**int(math.floor(math.log(1./self.delta_nu/self.sample_interval,2))),2**int(math.floor(math.log(min(self.maxchunklen,self.filesize/self.stride))))),
+                        doc="The size of a block used for the FFT, limited by filesize.",
+                        unit="Sample"),
+        
+        test_beam_per_antenna = dict(default=False,
+                               doc="Save the all de antennas separatelly. Temporal parameter while task is under developement. Some values are hardcoded."),
 
 #------------------------------------------------------------------------
 # Derived parameters
+
 
         nbeams = dict(default=lambda self:len(self.pointings),
                       doc="Number of beams to calculate."),
@@ -397,12 +415,6 @@ class BeamFormer(tasks.Task):
         phase_center_array = dict(default=lambda self:cr.hArray(list(self.phase_center), name="Phase Center", units=("","m")),
                                   doc="List or vector containing the *x*, *y*, *z* positions of the phase center of the array.",
                                   unit="m"),
-
-        blocklen = dict(default=lambda self:min(2**int(round(math.log(1./self.delta_nu/self.sample_interval,2))),min(self.maxchunklen,self.filesize/self.stride)),
-                        doc="The size of a block used for the FFT, limited by filesize.",
-                        unit="Sample"),
-
-#        blocklen = dict(default=lambda self:min(2*int(round(1./self.delta_nu/self.sample_interval/2)),self.filesize/self.stride),doc="The size of a block used for the FFT, limited by filesize.",unit="Sample"),
 
         block_duration = dict(default=lambda self:self.sample_interval*self.blocklen,
                               doc="The length of a block in time units.",
@@ -431,14 +443,14 @@ class BeamFormer(tasks.Task):
         max_nblocks = dict(default=lambda self:int(math.floor(self.filesize/self.stride/self.blocklen)),
                            doc="Maximum number of blocks in file."),
 
-        chunklen = dict(default=lambda self:min(self.filesize/self.stride,self.maxchunklen),
+        chunklen = dict(default=lambda self:min(self.filesize/self.stride,self.maxchunklen),  
                         doc="Length of one chunk of data treated in memory.",
                         unit="Samples"),
 
         nblocks = dict(default=lambda self:int(min(max(round(self.chunklen/self.blocklen),1),self.max_nblocks)),
                        doc="Number of blocks of length blocklen integrated per spectral chunk. The blocks are also used for quality checking."),
 
-        sectlen = dict(default=lambda self:self.blocklen*self.nblocks*self.stride,
+        sectlen = dict(default=lambda self:self.chunklen*self.stride,
                        doc="Length of one section of data used to extract one chunk of data treated in memory.",
                        unit="Samples"),
 
@@ -455,7 +467,7 @@ class BeamFormer(tasks.Task):
                           unit="s"),
 
         blocks_per_sect = dict(default=lambda self:self.nblocks*self.stride,
-                               doc="Number of blockse per section of data."),
+                               doc="Number of blocks per section of data."),
 
         nchunks = dict(default=lambda self:min(int(math.floor(self.filesize/self.sectlen)),self.maxnchunks),
                        doc="Maximum number of spectral chunks to average."),
@@ -482,21 +494,21 @@ class BeamFormer(tasks.Task):
                        doc="Main input array of raw data.",
                        default=lambda self:cr.hArray(complex,[self.nblocks,self.speclen],name="fftdata",header=self.header)),
 
-        avspec = dict(workarray=True,
-                      doc="Average spectrum in each beam.",
-                      default=lambda self:cr.hArray(float,[self.nbeams,self.speclen],name="Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
+#        avspec = dict(workarray=True,
+#                      doc="Average spectrum in each beam.",
+#                      default=lambda self:cr.hArray(float,[self.nblocks,self.nbeams,self.speclen],name="Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        avspec_incoherent = dict(workarray=True,
-                                 doc="The average spectrum of all blocks in an incoherent beam (i.e. squaring before adding).",default=lambda self:
-                                 cr.hArray(float,[self.speclen],name="Incoherent Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
+#        avspec_incoherent = dict(workarray=True,
+#                                 doc="The average spectrum of all blocks in an incoherent beam (i.e. squaring before adding).",default=lambda self:
+#                                 cr.hArray(float,[self.speclen],name="Incoherent Average Spectrum",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        tbeam_incoherent = dict(workarray=True,
-                                doc="Contains the power as a function of time of an incorehent beam of all antennas (simply the sqaure of the ADC values added).",
-                                default=lambda self: cr.hArray(float,[self.blocklen*self.nblocks],name="Incoherent Time Beam",header=self.header)),
+#        tbeam_incoherent = dict(workarray=True,
+#                                doc="Contains the power as a function of time of an incorehent beam of all antennas (simply the sqaure of the ADC values added).",
+#                                default=lambda self: cr.hArray(float,[self.blocklen*self.nblocks],name="Incoherent Time Beam",header=self.header)),
 
         beams = dict(workarray=True,
                      doc="Output array containing the FFTed data for each beam.",
-                     default=lambda self:cr.hArray(complex,[self.nblocks,self.nbeams,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
+                     default=lambda self:cr.hArray(complex,[self.nblocks,self.nbeams,self.speclen],name="Beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
         pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
                             doc="Array of shape ``[nbeams,3]`` with *x*, *y*, *z* positions for each beam on the sky."),
@@ -521,11 +533,17 @@ class BeamFormer(tasks.Task):
         frequencies = dict(workarray=True,
                            doc="Frequency axis for the final power spectrum.",
                            default=lambda self:cr.hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header))
-)
+    )
+
 
     def run(self):
         """Run the program.
-        """
+        """        
+        
+        if len(self.pointings)>1:
+            'Bugs using multiple beams, need to check code.'
+            stop
+
         self.quality=[]
         self.antennas_used=set()
         self.antennacharacteristics={}
@@ -536,69 +554,73 @@ class BeamFormer(tasks.Task):
         self.count=0
         self.NOF_DIPOLE_DATASETS=0
         self.nantennas_total=0
-        self.beams.setHeader(FREQUENCY_INTERVAL=self.delta_frequency)
-        self.beams.par.avspec=self.avspec
-        self.beams.par.avspec_incoherent=self.avspec_incoherent
-        self.beams.par.tbeam_incoherent=self.tbeam_incoherent
-
-        self.updateHeader(self.beams,["NOF_DIPOLE_DATASETS","nspectraadded","filenames","antennas_used","nchunks"],delta_nu="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",filename="spectrum_file")
+        self.beams.setHeader(FREQUENCY_INTERVAL=self.delta_frequency) 
+#        self.beams.par.avspec=self.avspec
+#        self.beams.par.avspec_incoherent=self.avspec_incoherent
+#        self.beams.par.tbeam_incoherent=self.tbeam_incoherent
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
+        self.updateHeader(self.beams,["NOF_DIPOLE_DATASETS","nspectraadded","filenames","antennas_used","nchunks","frequencies"],delta_nu="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",filename="spectrum_file")
 
         dataok=True
         clearfile=True
-
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
-
         fftplan = cr.FFTWPlanManyDftR2c(self.blocklen, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         if self.doplot:
             cr.plt.ioff()
             if self.newfigure and not self.figure:
                 self.figure=cr.plt.figure()
-
+ 
         original_file_start_number=self.file_start_number
         self.beams.fill(0)
-        self.avspec.fill(0)
-        self.avspec_incoherent.fill(0)
-        self.tbeam_incoherent.fill(0)
+#        self.avspec.fill(0)
+#        self.avspec_incoherent.fill(0)
+#        self.tbeam_incoherent.fill(0)
+        if self.dohanning:
+            hannfilter=cr.hArray(float,self.blocklen)
+            hannfilter.gethanningfilter()
+
         for fname in self.filenames[self.file_start_number:]:
             print "# Start File",str(self.file_start_number)+":",fname
-            self.ws.update(workarrays=False) # since the file_start_number was changed, make an update to get the correct file
+            self.ws.update(workarrays=False) #Since the file_start_number was changed, make an update to get the correct file
             self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
             self.antenna_list[fname]=range(self.nantennas_start,self.nantennas, self.nantennas_stride)
+            if test_beam_per_antenna:
+                test_beam = cr.hArray(Type=complex, dimensions=[len(self.antenna_list[fname]),self.speclen],name="test_BEAM")
+                test_tbeam = cr.hArray(float,dimensions=[len(self.antenna_list[fname]),self.blocklen],name="test_TIMESERIES_DATA")
+                count = 0
             for iantenna in self.antenna_list[fname]:
                 antenna=self.antennas[iantenna]
-                rms=0; mean=0; npeaks=0
+                rms=0; mean=0; npeaks=0                
+                self.antennaIDs=list(cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]))
                 antennaID=self.antennaIDs[iantenna]
                 self.datafile["SELECTED_DIPOLES"]=[antennaID]
-                print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):"
-
-                self.antpos=cr.hArray(copy=self.antenna_positions[antennaID]); #print "Antenna position =",self.antpos
+                print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):" 
+                self.antpos=self.datafile["ANTENNA_POSITIONS"]; #print "Antenna position =",self.antpos
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
-
+                    
                 #Calculate the geometrical delays needed for beamforming
                 cr.hGeometricDelays(self.delays,self.antpos,self.pointingsXYZ, self.FarField)
 
                 #Add the cable/calibration delay
-                cal_delay=self.cal_delays.setdefault(antennaID,0.0); #print "Delay =",cal_delay
+                cal_delay=self.cal_delays.setdefault(antennaID,0.0);# print "Delay =",cal_delay 
                 self.delays+=cal_delay; #print "Total delay =",self.delays
-
+ 
                 self.phases.delaytophase(self.frequencies,self.delays)
                 self.weights.phasetocomplex(self.phases)
-                #cr.hGeometricWeights(self.weights,self.frequencies,self.antpos,self.pointings_cartesian,self.FarField)
-
                 for nchunk in range(self.nchunks):
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
-                    self.data[...].read(self.datafile,"TIMESERIES_DATA",blocks)
+                    for block in blocks:
+                        self.data[block-self.nblocks*nchunk].read(self.datafile,"TIMESERIES_DATA",[block])
                     if self.qualitycheck:
                         self.count=len(self.quality)
                         self.quality.append(qualitycheck.CRQualityCheckAntenna(self.data,datafile=self.datafile,normalize=False,spikeexcess=self.spikeexcess,spikyness=100000,rmsfactor=self.rmsfactor,meanfactor=self.meanfactor,chunk=self.count,blockoffset=nchunk*self.blocks_per_sect))
                         if not self.quality_db_filename=="":
                             qualitycheck.CRDatabaseWrite(self.quality_db_filename+".txt",self.quality[self.count])
-                            mean+=self.quality[self.count]["mean"]
-                            rms+=self.quality[self.count]["rms"]
-                            npeaks+=self.quality[self.count]["npeaks"]
-                            dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
+                        mean+=self.quality[self.count]["mean"]  
+                        rms+=self.quality[self.count]["rms"]
+                        npeaks+=self.quality[self.count]["npeaks"]
+                        dataok=(self.quality[self.count]["nblocksflagged"]<=self.maxblocksflagged)
                     if not dataok:
                         print " # Data flagged!"
                         self.nspectraflagged[nchunk]+=1
@@ -607,34 +629,38 @@ class BeamFormer(tasks.Task):
                         if not antennaID in self.antennas_used:
                             self.antennas_used.add(antennaID)
                             self.NOF_DIPOLE_DATASETS+=1
-                        if self.qualitycheck and self.randomize_peaks and self.quality[self.count]["npeaks"]>0:
+                        if self.qualitycheck and self.randomize_peaks and self.quality[self.count]["npeaks"]>0:        
                             lower_limit=self.quality[self.count]["mean"]-self.peak_rmsfactor*self.quality[self.count]["rms"]
                             upper_limit=self.quality[self.count]["mean"]+self.peak_rmsfactor*self.quality[self.count]["rms"]
                             self.data.randomizepeaks(lower_limit,upper_limit)
-                        cr.hFFTWExecutePlan(self.fftdata, self.data[...], fftplan)
-                        #self.fftdata[...].fftw(self.data[...])
+                        if self.dohanning:
+                            self.data[...] *= hannfilter
+                        cr.hFFTWExecutePlan(self.fftdata[...], self.data[...], fftplan)
                         self.fftdata[...].nyquistswap(self.NyquistZone)
-                        self.avspec_incoherent.spectralpower2(self.fftdata[...])
-                        self.tbeam_incoherent.squareadd(self.data)
-                        if self.nspectraadded[nchunk]>1:
-                            self.fftdata/=float(self.nspectraadded[nchunk])
+#                        self.avspec_incoherent.spectralpower2(self.fftdata[...])
+#                        self.tbeam_incoherent.squareadd(self.data)
+                        self.fftdata/=float(self.nspectraadded[nchunk])     #Used for averanging the antennas. 1/N part.   (the x/(x+1) part comes from a few lines below)
                         if self.NOF_DIPOLE_DATASETS==1:
                             self.beams.fill(0)
-                        elif self.nchunks>1:
+                        elif self.nchunks>1:            #If not working on the 1st antenna, and if using several chunks, need to load self.beams with the values from previous antennas.
                             self.beams.readfilebinary(self.spectrum_file_bin,nchunk*self.speclen*self.nbeams*self.nblocks)
-                        self.beams *= (self.nspectraadded[nchunk]-1.0)/(self.nspectraadded[nchunk])
-                        self.beams[...].muladd(self.weights,self.fftdata[...])
-                        self.avspec.spectralpower2(self.beams[...])
+                        self.beams *= (self.nspectraadded[nchunk]-1.0)/(self.nspectraadded[nchunk])     #Used for averanging the antennas. N-1/N part.
+                        self.beams[...].muladd(self.weights,self.fftdata[...])          #Used for averanging the antennas. (1/N) + (N-1/N), and apply weights to fftdata.
+#                        if iantenna == len(self.antenna_list[fname])-1:
+#                        self.avspec[...].spectralpower2(self.beams[...]) #Debug# This is now done in self.dyncalc, no need for it here...
                         self.beams.write(self.spectrum_file,nblocks=self.nchunks,block=nchunk,clearfile=clearfile)
                         clearfile=False
+                        if test_beam_per_antenna:
+                            test_beam[count]= self.beams[7]
+                            count+=1
                         #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
-                        if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
-                            self.avspec[...,self.plot_start:self.plot_end].plot()
-                            print "RMS of plotted spectra=",self.avspec[...,self.plot_start:self.plot_end].stddev()
-                            self.plotpause()
+#                        if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
+#                            self.avspec[...,self.plot_start:self.plot_end].plot()
+#                            print "RMS of plotted spectra=",self.avspec[...,self.plot_start:self.plot_end].stddev()
+#                        if self.doplot>1:
+#                            self.avspec[...,0,:].plot();self.plotpause()
+#                        pdb.set_trace()
                      #End for nchunk
-                if self.doplot>1:
-                    self.avspec[...].plot();self.plotpause()
                 print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
                 if self.qualitycheck:
                     mean/=self.nchunks
@@ -649,12 +675,13 @@ class BeamFormer(tasks.Task):
                         f.write('antennacharacteristics["'+str(antennaID)+'"]='+str(self.antennacharacteristics[antennaID])+"\n")
                         f.close()
                 self.nantennas_total+=1
+                #End for iantenna
             print "# End File",str(self.file_start_number)+":",fname
             self.updateHeader(self.beams,["NOF_DIPOLE_DATASETS","nspectraadded","filenames","antennas_used"])
             self.file_start_number+=1
-        self.avspec /= self.nspectraadded
-        self.avspec_incoherent /= self.nspectraadded
-        self.tbeam_incoherent /= self.nspectraadded
+#            self.avspec /= self.nspectraadded                      
+#            self.avspec_incoherent /= self.nspectraadded
+#            self.tbeam_incoherent /= self.nspectraadded
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         if self.qualitycheck:
             self.mean=cr.asvec(self.mean_antenna[:self.nantennas_total]).mean()
@@ -676,9 +703,12 @@ class BeamFormer(tasks.Task):
             self.tplot(plotspec=self.plotspec)
             self.plotpause()
             cr.plt.ion()
+        if test_beam_per_antenna:
+            test_tbeam[...].invfftw(test_beam[...])
+            test_tbeam /= self.blocklen
+            test_tbeam[...].plot()
 
-
-    def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
+    def tplot(self,beams=None,block=0,chunk=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
         """
         Take the result of the BeamForm task, i.e. an array of
         dimensions ``[self.nblocks,self.nbeams,self.speclen]``, do a
@@ -689,63 +719,84 @@ class BeamFormer(tasks.Task):
 
         ============= ===== ===================================================================
         *beams*       None  Input array. Take self.beams from task, if None.
-        *recalc*      False If true force a recalculation of the time series beam if it exists.
-        *block*       0     Which  block to plot, or Ellipsis ('...') for all.
+        *block*       0     Which  block to plot, or Ellipsis ('...') for all. 
+        *chunk*       0     Which chunk to plot. If new chunk, need "recalc=True".
         *NyquistZone* 1     NyquistZone=2,4,... means flip the data left to right before FFT.
         *doabs*       True  Take the absolute of the timeseries before plotting.
         *smooth*      0     If > 0 smooth data with a Gaussian kernel of that size.
+        *mosaic*      True  Plots each beam in a different plot, False to overplot.
         *plotspec*    False If True plot the average spectrum instead.
         *xlim*              Tuple with minimum and maximum limits for the *x*-axis.
         *ylim*              Tuple with minimum and maximum limits for the *y*-axis.
+        *recalc*      False If true force a recalculation of the time series beam if it exists.
         ============= ===== ===================================================================
 
         The final time series (all blocks) is stored in ``Task.tbeams``.
         """
+
+        if block > self.nblocks-1 or block < 0:
+            raise ValueError('Block value out of range.')
+        if chunk > self.maxnchunks-1 or chunk < 0:
+            raise ValueError('Chunk value out of range.')
+        self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
         if beams==None:
-            beams=self.beams
-        hdr=beams.getHeader()
+            self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)
+        else:
+            self.beams = beams
+        hdr=self.beams.getHeader()
+        if plotspec:
+            spec = cr.hArray(float,[self.nbeams,self.speclen],name="Frequency Spectrum",header=hdr,par=dict(logplot="y"),xvalues=self.frequencies)
+            spec.spectralpower2(self.beams[block,...])
         if hdr.has_key("BeamFormer"):
             if NyquistZone==None:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
         if not plotspec and (not hasattr(self,"tbeams") or recalc):
-            self.tcalc(beams=beams,NyquistZone=NyquistZone,doabs=doabs,smooth=smooth)
+            self.tcalc(beams=self.beams,NyquistZone=NyquistZone,doabs=doabs,smooth=smooth)
 
         if ylim==None and not plotspec:
-            ylim=(self.tbeams.min().val(),self.tbeams.max().val())
-        if mosaic:
-            npanels=beams.shape()[-2]
-            width=int(ceil(sqrt(npanels)))
-            height=int(ceil(npanels/float(width)))
+            ylim=(self.tbeams[block,...].min().val(),self.tbeams[block,...].max().val())
+        if mosaic and self.nbeams > 1:
+            npanels=self.beams.shape()[-2]
+            width=int(math.ceil(math.sqrt(npanels)))
+            height=int(math.ceil(npanels/float(width)))
             cr.plt.clf()
             for n in range(npanels):
                 cr.plt.subplot(width,height,n+1)
                 if plotspec:
-                    beams.par.avspec[n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
+                    spec[n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
                 else:
                     self.tbeams[block,n].plot(clf=False,title=str(n)+".",xlim=xlim,ylim=ylim)
         else:
             if plotspec:
-                beams.par.avspec[...].plot(clf=True,xlim=xlim,ylim=ylim)
+                spec[...].plot(clf=True,xlim=xlim,ylim=ylim)
             else:
                 self.tbeams[block,...].plot(clf=True,xlim=xlim,ylim=ylim)
 
 
-    def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,smooth=0):
+    def tcalc(self,beams=None,block=0,chunk=0,NyquistZone=1,doabs=False,smooth=0):
         """
         Calculate the time series after beamforming, i.e. take the
         result of the BeamForm task, i.e. an array of dimensions
         [self.nblocks,self.nbeams,self.speclen], do a NyquistSwap, if
         necessary, and then an inverse FFT.
 
-        *beams* = None - Input array. Take self.beams from task, if None.
-        *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
-        *doabs* = False - Take the absolute of the timeseries, if True.
-        *smooth* = 0 - If > 0 smooth datat with a Gaussian kernel of that size.
+        ============= ===== ===================================================================
+        *beams*       None  Input array. Take self.beams from task, if None.
+        *NyquistZone*  1    NyquistZone=2,4,... means flip the data left to right before FFT.
+        *doabs*      False  Take the absolute of the timeseries, if True.
+        *smooth*        0   If > 0 smooth datat with a Gaussian kernel of that size.
+        ============= ===== ===================================================================
 
         The final time series (all blocks) is stored in Task.tbeams and returned.
         """
+        
+        if block > self.nblocks-1 or block < 0:
+            raise ValueError('Block value out of range.')
+        if chunk > self.maxnchunks-1 or chunk < 0:
+            raise ValueError('Chunk value out of range.')        
         if beams==None:
-            beams=self.beams
+            self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)
+            beams = self.beams
         hdr=beams.getHeader()
         if hdr.has_key("BeamFormer"):
             if NyquistZone==None:
@@ -769,51 +820,133 @@ class BeamFormer(tasks.Task):
         return self.tbeams
 
 
-    def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):
+    def dynplot(self,dynspec=None,nbeam=0,plot_cleanspec=False,dmin=None,dmax=None,cmin=None,cmax=None,save_file=False):
         """
-        Plot the dynamic spectrum. Provide the dynamic spectrum
-        computed by the Task DynamicSpectrum as input.
+        Plot the dynamic beamformed spectrum. Provide the dynamic spectrum of the beamformed.
 
         ================ ==== ===================================================================
-        *plot_cleanspec* None If False, don't plot the cleaned spectrum
-                              (provided as dynspec.par.cleanspec).
+        *dynspec*        None Array with dynamic spectrum.
+        *plot_cleanspec* False If False, don't plot the cleaned spectrum
         *dmin*                Minimum z-value (intensity) in dynamic spectrum to plot
         *dmax*                Maximum z-value (intensity) in dynamic spectrum to plot
         *cmin*                Minimum z-value (intensity) in clean dynamic spectrum to plot
         *cmax*                Maximum z-value (intensity) in clean dynamic spectrum to plot
+        *save_file*     False To save a file.
         ================ ==== ===================================================================
 
          Example::
+                tpar filenames=['L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
+                tpar blocklen=2**10
+                tpar maxchunklen=2**16*5
+                Task.dynplot(dmin=-10e1,dmax=10e2)
+                   
+                   or
+         
+                tpar filenames=['L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
+                tpar blocklen=2**10
+                tpar maxchunklen=2**16*5
+                dynspec=Task.dyncalc()
+                Task.dynplot(beams=dyspec,dmin=-10e1,dmax=10e2)
+        Known Bugs::
+        1) Axis values and labels may not be shown when when using 'fraction' in dyncalc.
 
-           >>> tload "DynamicSpectrum"
-           >>> dsp=cr.hArrayRead("Saturn.h5.dynspec.pcr")
-           >>> Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
+        """
 
-          """
-        if hasattr(dynspec,"par") and hasattr(dynspec.par,"cleanspec") and not plot_cleanspec==False:
-            cleanspec=dynspec.par.cleanspec
-            npcleanspec=np.zeros(cleanspec.getDim())
-        else:
-            cleanspec=None
-        hdr=dynspec.getHeader("DynamicSpectrum")
-        npdynspec=np.zeros(dynspec.getDim())
-        cr.hCopy(npdynspec,dynspec)
-        np.log(npdynspec,npdynspec)
-        if cleanspec:
+        if dynspec==None:
+            dynspec=self.dyncalc()
+            
+        if cr.ishArray(dynspec):
+            dynspec = cr.hArray_toNumpy(dynspec)
+            
+        hdr=self.beams.getHeader()
+        
+        if plot_cleanspec:
             cr.plt.subplot(1,2,1)
-        cr.plt.imshow(npdynspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=dmin,vmax=dmax,
-                   extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
-        print "dynspec: min=",math.log(dynspec.min().val()),"max=",math.log(dynspec.max().val()),"rms=",math.log(dynspec.stddev().val())
+        cr.plt.title("Dynamic Spectrum")
+        cr.plt.imshow(dynspec,aspect='auto',vmin=dmin,vmax=dmax,cmap=cr.plt.cm.hot,extent=(self.start_frequency/10**6,self.end_frequency/10**6,self.start_time*1000,self.end_time*1000))
         cr.plt.xlabel("Frequency [MHz]")
         cr.plt.ylabel("+/- Time [ms]")
-        if cleanspec:
-            cr.hCopy(npcleanspec,cleanspec)
+
+        if plot_cleanspec:
             cr.plt.subplot(1,2,2)
-            cr.plt.imshow(npcleanspec,aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=cmin,vmax=cmax,
-                    extent=(hdr["start_frequency"]/10**6,hdr["end_frequency"]/10**6,hdr["start_time"]*1000,hdr["end_time"]*1000));
-            print "cleanspec: min=",cleanspec.min().val(),"max=",cleanspec.max().val(),"rms=",cleanspec.stddev().val()
+            avspec=cr.hArray(float,self.speclen,fill=0.0)
+            dynspec[...].addto(avspec)
+            cleandynspec= dynspec/avspec
+            cleandynspec = cr.hArray_toNumpy(cleandynspec)
+
+            cr.plt.title("Cleaned Dynamic Spectrum")
+            cr.plt.imshow(cleandynspec,aspect='auto',vmin=cmin,vmax=cmax,cmap=cr.plt.cm.hot,extent=(self.start_frequency/10**6,self.end_frequency/10**6,self.start_time*1000,self.end_time*1000))
             cr.plt.xlabel("Frequency [MHz]")
             cr.plt.ylabel("+/- Time [ms]")
+
+        if save_file:
+            print 'WARNING: Not Saving file. Need to code this.'
+        
+    def dyncalc(self,beams=None,nbeam=0,section=0,save_file=False,fraction=False,toNumpy=True,tbin=1):
+        '''
+        Calculates the dynamic spectrum.
+                
+        ================ ==== ===================================================================
+        *save_file*     False Saves a file...(not implemented yet)
+        *fraction*      False If not False, then a list of the form [x,y] such that extracting the fraction x/y of the data.
+        *tbin*            1   Bins blocks toguether. 
+        *toNumpy*       True  Returns a Numpy array instead of an hArray.
+        ================ ==== ===================================================================
+
+         Example::
+                tpar filenames=['L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
+                tpar blocklen=2**10
+                tpar maxchunklen=2**16*5
+                dynspec=Task.dyncalc()
+
+        Known Bugs::
+        1) Fraction only works for the first fraction (ie. 1/N ), other fractions return zeros. (ie. a/N)
+        
+        '''
+
+        if beams==None:                
+            pass
+        else:
+            print 'Need to code this.'
+            stop
+
+        self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
+ 
+        if fraction==False:
+            fraction=[1]
+            chunk_fraction=self.nchunks
+        else:
+            if type(fraction) != type([]) or len(fraction)!=2 or fraction[0] > fraction[1]:
+                raise TypeError('Need a list of lenght 2, with first element "<" or "=" second element.')
+            if fraction[0]==0: fraction[0]=1
+            chunk_fraction=int(self.nchunks/fraction[1])
+            self.start_time=(fraction[0]-1)*self.end_time/fraction[1]
+            self.end_time=fraction[0]*self.end_time/fraction[1]
+
+        dynspec = cr.hArray(float,[self.nblocks*chunk_fraction,self.speclen])
+        chunk_range=range((fraction[0]-1)*chunk_fraction,(fraction[0])*chunk_fraction) 
+
+        for chunk in chunk_range:
+            self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)   
+            for block in range(self.nblocks):
+                dynspec[(chunk-chunk_range[0])*self.nblocks+block].spectralpower(self.beams[block,nbeam])
+
+        if tbin>1:
+            dynspec = cr.hArray_toNumpy(dynspec)
+            dynspec = dynspec.reshape((dynspec.shape[0]/tbin,tbin,dynspec.shape[1]))
+            dynspec = np.sum(dynspec,axis=1)
+            toNumpy = False
+        if toNumpy:
+            dynspec = cr.hArray_toNumpy(dynspec)
+
+        if save_file:
+            print 'WARNING: Not Saving file. Need to code this.'
+#debug# need to check this, maybe saving the dynspec and plot in a different folder...it could be still be saved in same folder, but not as paramenter maybe?
+#            self.beams.par.dynspec=dynspec
+#            self.beams.par.dynspec.write(self.spectrum_file,clearfile=None)
+#            self.dynspec.write(self.spectrum_file)
+
+        return dynspec
 
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
@@ -844,10 +977,15 @@ class BeamFormer(tasks.Task):
 
           >>> Task.qplot(186,all=False).
         """
+        
+        print 'WARNING: Out of Order. Need to be debuged.'
+        stop
+        
         quality_entry=self.quality[entry]
         filename=quality_entry["filename"]
-        datafile=crfile(filename)
-        iantenna=datafile["Antennas"].find(quality_entry["antenna"])
+        datafile=cr.open(filename)
+##EE        iantenna=datafile["CHANNEL_ID"].find(quality_entry["antenna"])
+        iantenna=datafile["CHANNEL_ID"].index(quality_entry["antenna"])
         datafile["selectedAntennas"]=[iantenna]
         if block<0 and flaggedblock<len(quality_entry["flaggedblocks"]):
             block=quality_entry["flaggedblocks"][flaggedblock]
@@ -908,7 +1046,7 @@ Text will disappear soon. Just reminder for myself ...
 
    ************************************************************************
    Example:
-   file=crfile(LOFARSOFT+"/data/lopes/example.event")
+   file=cr.open(LOFARSOFT+"/data/lopes/example.event")
    tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
    tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
    tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
@@ -917,14 +1055,14 @@ Text will disappear soon. Just reminder for myself ...
    tpar NyquistZone=2
    tpar randomize_peaks=False
 
-   #file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+   #file=cr.open(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
    #file["SelectedAntennasID"]=[0]
    #fx0=file["TIMESERIES_DATA"]
 
 
    ------------------------------------------------------------------------
    tload "BeamFormer"
-   file=crfile(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
+   file=cr.open(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
    tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
    tpar antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position"))))
    tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
