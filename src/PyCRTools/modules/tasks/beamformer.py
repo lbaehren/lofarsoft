@@ -498,7 +498,7 @@ class BeamFormer(tasks.Task):
                      doc="Output array containing the FFTed data for each beam.",
                      default=lambda self:cr.hArray(complex,[self.nblocks,self.nbeams,self.speclen],name="beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.yconvert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
+        pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
                             doc="Array of shape ``[nbeams,3]`` with *x*, *y*, *z* positions for each beam on the sky."),
 
         phases = dict(workarray=True,

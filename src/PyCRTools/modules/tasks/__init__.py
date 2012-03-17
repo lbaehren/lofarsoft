@@ -428,6 +428,7 @@ import pycrtools as cr
 
 import shortcuts as sc
 from sys import version_info
+import matplotlib.pyplot as plt
 
 #import pdb
 #pdb.set_trace()
