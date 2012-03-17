@@ -1,6 +1,0 @@
-#! /bin/csh -f
-
-# @configure_input@
-
-echo -n " -LPREFIX/lib -ldspsr -ldspdsp -ldspbase @PSRDADA_LIBS@ @PSRCHIVE_LIBS@"
-
