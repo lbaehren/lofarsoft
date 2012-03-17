@@ -245,6 +245,71 @@ class CMDLine:
 				if log != None: log.info(msg)
 				else: print msg
 
+        # checking if raw data for specified beams are located on one of the down nodes
+        def is_rawdata_available(self, cep2, obs, log=None):
+                msg="Checking if all data/nodes are available for user-specified beams..."
+                if log != None: log.info(msg)
+                else: print msg
+
+                # if some TABs have raw data in several locations
+                # we also need to check if hoover nodes are up
+                avail_hoover_nodes=list(set(cep2.hoover_nodes).intersection(set(cep2.alive_nodes)))
+
+                # first forming the actual list of beams to process taking also into account
+                # cmdline flags, like --noIS, --noCS, --noCV, --noFE
+                if len(self.user_beams) > 0: self.beams = self.user_beams
+                else:
+                        self.beams = []
+                        for sap in obs.saps:
+                                for tab in sap.tabs:
+                                        beam="%d:%d" % (sap.sapid, tab.tabid)
+                                        # checking if this beam is already excluded
+                                        if beam in self.user_excluded_beams: continue
+                                        # ignoring IS beams
+                                        if self.opts.is_noIS and not tab.is_coherent: continue
+                                        # ignoring FE beams (both CS and CV)
+                                        if self.opts.is_noFE and tab.is_coherent and tab.specificationType == "flyseye": continue
+                                        # ignoring CS beams
+                                        if self.opts.is_noCS and obs.CS and tab.is_coherent and tab.specificationType != "flyseye": continue
+                                        # ignoring CV beams
+                                        if self.opts.is_noCV and obs.CV and tab.is_coherent and tab.specificationType != "flyseye": continue
+                                        self.beams.append(beam)
+
+                # now we are checking if raw data are available for beams we want to process
+                excluded_beams_id=[]
+                for ii in range(len(self.beams)):
+                        sapid=int(self.beams[ii].split(":")[0])
+                        tabid=int(self.beams[ii].split(":")[1])
+                        tab = obs.saps[sapid].tabs[tabid]
+                        if len(tab.location) > 0:
+                                # if here, it means node is available for this beam
+                                if len(tab.location) > 1 and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
+                                        loc=""
+                                        if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
+                                        if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+                                        if loc != "":
+                                                excluded_beams_id.append(ii)
+                                                msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location))
+                                                if log != None: log.warning(msg)
+                                                else: print msg
+                        else: # no data available
+                                excluded_beams_id.append(ii)
+                                msg="No data available for the beam %d:%d - excluded" % (sapid, tabid)
+                                if log != None: log.warning(msg)
+                                else: print msg
+                # now giving summary of excluded beams and deleted them from the list
+                if len(excluded_beams_id) > 0:
+                        msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([self.beams[id] for id in excluded_beams_id]))
+                        if log != None: log.info(msg)
+                        else: print msg
+                        # deleting these excluded beams from the cmdline.beams list
+                        for id in reversed(excluded_beams_id):
+                                del(self.beams[id])
+                else:
+                        if len(self.beams) > 0:
+                                msg="All data/nodes are available"
+                                if log != None: log.info(msg)
+                                else: print msg
 
 	# print summary of all set input parameters
 	def print_summary(self, cep2, obs, log=None):

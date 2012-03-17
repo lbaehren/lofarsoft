@@ -21,7 +21,7 @@ from pulp_logging import PulpLogger
 from pulp_pipeline import Pipeline
 
 # PLEASE increment the version number when you edit this file!!!
-VERSION="5.00"
+VERSION="5.13"
 
 ###  M A I N ###
 if __name__ == "__main__":
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 			obs = Observation(cmdline.opts.obsid, cep2, cmdline, log)
 
 			# checking if rawdata available on the cluster for user-specified beams
-			obs.is_rawdata_available(cep2, cmdline, log)
+			cmdline.is_rawdata_available(cep2, obs, log)
 
 			# saving obs configuration to file
                 	obsfd = open (obsconf_file, "wb")
