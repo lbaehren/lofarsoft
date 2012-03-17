@@ -91,10 +91,11 @@ class CMDLine:
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
                            help="do not check for down nodes and available input raw data. Observation config is read from saved file \
-                                 rather then is initialized using parset file", default=False)
+                                 rather then is initialized using parset file (mostly for _internal_ use only)", default=False)
         	self.cmd.add_option('--local', action="store_true", dest='is_local', 
                            help="to process the data locally on current locus node for one beam only. Should only be used together \
-                                 with --beams option and only the first beam will be used if there are several specified in --beams", default=False)
+                                 with --beams option and only the first beam will be used if there are several specified in --beams \
+                                 (mostly for _internal_ use only)", default=False)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
