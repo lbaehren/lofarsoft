@@ -585,7 +585,7 @@ class BeamFormer(tasks.Task):
             self.ws.update(workarrays=False) #Since the file_start_number was changed, make an update to get the correct file
             self.datafile["BLOCKSIZE"]=self.blocklen #Setting initial block size
             self.antenna_list[fname]=range(self.nantennas_start,self.nantennas, self.nantennas_stride)
-            if test_beam_per_antenna:
+            if self.test_beam_per_antenna:
                 test_beam = cr.hArray(Type=complex, dimensions=[len(self.antenna_list[fname]),self.speclen],name="test_BEAM")
                 test_tbeam = cr.hArray(float,dimensions=[len(self.antenna_list[fname]),self.blocklen],name="test_TIMESERIES_DATA")
                 count = 0
@@ -650,7 +650,7 @@ class BeamFormer(tasks.Task):
 #                        self.avspec[...].spectralpower2(self.beams[...]) #Debug# This is now done in self.dyncalc, no need for it here...
                         self.beams.write(self.spectrum_file,nblocks=self.nchunks,block=nchunk,clearfile=clearfile)
                         clearfile=False
-                        if test_beam_per_antenna:
+                        if self.test_beam_per_antenna:
                             test_beam[count]= self.beams[7]
                             count+=1
                         #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
@@ -703,7 +703,7 @@ class BeamFormer(tasks.Task):
             self.tplot(plotspec=self.plotspec)
             self.plotpause()
             cr.plt.ion()
-        if test_beam_per_antenna:
+        if self.test_beam_per_antenna:
             test_tbeam[...].invfftw(test_beam[...])
             test_tbeam /= self.blocklen
             test_tbeam[...].plot()
