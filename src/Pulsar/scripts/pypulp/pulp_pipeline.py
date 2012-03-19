@@ -831,7 +831,7 @@ class PipeUnit:
 			if not cmdline.opts.is_skip_dspsr:
 				zapstr=""
 				if self.nrChanPerSub > 1:
-					zapstr="-j 'zap chan %s'" % (" ".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
+					zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
 				dspsr_popens=[] # list of dspsr Popen objects
 				for psr in self.psrs: # pulsar list is empty if --nofold is used
 					psr2=re.sub(r'[BJ]', '', psr)
