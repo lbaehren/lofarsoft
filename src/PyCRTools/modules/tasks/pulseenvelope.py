@@ -81,6 +81,7 @@ class PulseEnvelope(Task):
         cr.hSqrt(self.envelope)
 
         # Find maxima
+        self.maxima = self.envelope[...].max()
         self.maxpos = self.envelope[...].maxpos()
 
         # Find signal to noise ratio

@@ -1,9 +1,11 @@
 """CR pipeline.
 """
 
+import pytmf
 import numpy as np
 import pycrtools as cr
 from pycrtools import crdatabase as crdb
+from pycrtools import metadata as md
 
 from optparse import OptionParser
 
@@ -29,6 +31,8 @@ event = crdb.Event(db = db, id = options.id)
 stations = []
 for f in event.datafiles:
     stations.extend(f.stations)
+
+out = open("pulse_strength.txt", "w")
 
 for station in stations:
 
@@ -100,6 +104,7 @@ for station in stations:
 
     # Get timeseries data
     timeseries_data = f.empty("TIMESERIES_DATA")
+    nantennas = timeseries_data.shape()[0] / 2
 
     # Get antennas positions
     antenna_positions = f["ANTENNA_POSITIONS"]
@@ -136,9 +141,22 @@ for station in stations:
         if converged or n > options.maximum_nof_iterations or direction_fit_plane_wave.fit_failed:
             break # Exit fitting loop
 
-# Beamform with all stations
+    # Project polarizations onto x,y,z frame
+    xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, blocksize))
+    cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
 
-# Project polarizations onto x,y,z frame
+    # Get Stokes parameters
+    stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+
+    # Get pulse strength
+    pulse_envelope2 = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+
+    # Write stuff to file
+    ap = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"])
+    for i in range(nantennas):
+        out.write("{0} {1} {2} {3} {4} {5}\n".format(ap[2*i,0], ap[2*i,1], ap[2*i,2], pulse_envelope2.maxima[3*i], pulse_envelope2.maxima[3*i+1], pulse_envelope2.maxima[3*i+2]))
+
+# Beamform with all stations
 
 # Compute LDF
 
