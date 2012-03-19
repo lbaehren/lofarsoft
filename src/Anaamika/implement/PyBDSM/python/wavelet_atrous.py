@@ -238,6 +238,7 @@ class Op_wavelet_atrous(Op):
         opts['split_isl'] = True
         opts['peak_fit'] = True
         opts['peak_maxsize'] = 30.0
+        opts['detection_image'] = ''
 
         ops = []
         for op in chain:

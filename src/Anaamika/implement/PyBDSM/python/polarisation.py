@@ -520,6 +520,7 @@ class Op_polarisation(Op):
         opts['thresh'] = 'hard'
         opts['polarisation_do'] = False
         opts['filename'] = ''
+        opts['detection_image'] = ''
         
         ops = []
         for op in chain:

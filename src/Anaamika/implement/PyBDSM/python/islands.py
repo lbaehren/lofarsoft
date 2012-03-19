@@ -188,6 +188,7 @@ class Op_islands(Op):
         opts = img.opts.to_dict()
         opts['filename'] = det_file
         opts['detection_image'] = ''
+        opts['polarisation_do'] = False
         
         ops = []
         for op in chain:
