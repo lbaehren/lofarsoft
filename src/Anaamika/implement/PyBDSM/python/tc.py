@@ -152,7 +152,8 @@ def Option(value, type=None, doc=None, group=None):
 
     return TC(value, tcOption(type), doc, group)
 
-def NArray(value=None, or_none=True, doc=None, group=None):
+def NArray(value=None, or_none=True, doc=None, group=None, colname=None, 
+           units=None):
     """Creates tc-value which holds Numpy arrays
 
     Parameters:
@@ -166,7 +167,7 @@ def NArray(value=None, or_none=True, doc=None, group=None):
         raise tcError, "Can't create tc-value of type NArray " \
             "without access to numpy module"
 
-    return Instance(value, N.ndarray, or_none, doc, group)
+    return Instance(value, N.ndarray, or_none, doc, group, colname, units)
 
 def Instance(value, type=None, or_none=True, doc=None, group=None, 
              colname=None, units=None):

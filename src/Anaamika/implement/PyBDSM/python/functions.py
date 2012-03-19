@@ -223,14 +223,17 @@ def gaus_2d_itscomplicated(c, x, y, p_tofix, ind):
 
     return val
 
-def g2param(g):
+def g2param(g, adj=False):
     """Convert gaussian object g to param list [amp, cenx, ceny, sigx, sigy, theta] """
     from const import fwsig
     from math import pi
 
     A = g.peak_flux
+    if adj and hasattr(g, 'size_pix_adj'):
+        sigx, sigy, th = g.size_pix_adj
+    else:
+        sigx, sigy, th = g.size_pix
     cenx, ceny = g.centre_pix
-    sigx, sigy, th = g.size_pix
     sigx = sigx/fwsig; sigy = sigy/fwsig; th = th+90.0
     params = [A, cenx, ceny, sigx, sigy, th]
 
@@ -818,7 +821,7 @@ def variance_of_wted_windowedmean(S_i, rms_i, chanmask, window_size):
 
     return fluxes, vars, mask 
 
-def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
+def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None, adj=False):
     """ fitcode : 0=fit all; 1=fit amp; 2=fit amp, posn; 3=fit amp, size """
     from scipy.optimize import leastsq
     import numpy as N
@@ -838,7 +841,7 @@ def fit_mulgaus2d(image, gaus, x, y, mask = None, fitfix = None, err = None):
     if ngaus > 0: 
       p_ini = []
       for g in gaus:
-        p_ini = p_ini + g2param(g)
+        p_ini = p_ini + g2param(g, adj)
       p_ini = N.array(p_ini)
 
       if fitfix == None: fitfix = [0]*ngaus

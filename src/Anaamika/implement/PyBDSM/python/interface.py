@@ -689,7 +689,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
     catalog_type - type of catalog
         "gaul"  - Gaussian list
         "srl"   - Source list
-        "shap"  - Shapelet list (not yet supported)
+        "shap"  - Shapelet list ("fits" format only)
     format - format of output list. Supported formats are:
         "fits"  - FITS binary table
         "ascii" - ASCII text file
@@ -735,9 +735,9 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
         print '\033[91mERROR\033[0m: catalog_type must be "gaul", '\
               '"srl", or "shap"'
         return False
-    if catalog_type == 'shap':
-        print '\033[91mERROR\033[0m: Shapelet list not yet supported'
-        return False
+#     if catalog_type == 'shap':
+#         print '\033[91mERROR\033[0m: Shapelet list not yet supported'
+#         return False
     if img.ngaus == 0:
         print 'No Gaussians were fit to image. Output file not written.'
         return False 

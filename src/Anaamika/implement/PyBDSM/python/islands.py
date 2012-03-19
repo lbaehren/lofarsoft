@@ -217,7 +217,7 @@ class Island(object):
     mean        = Float(doc="Average mean value")
     rms         = Float(doc="Average rms")
     max_value   = Float(doc="Maximum value in island")
-    island_id   = Int(doc="Island id, starting from 0")
+    island_id   = Int(doc="Island id, starting from 0", colname='Isl_id')
     gresid_rms  = Float(doc="Rms of residual image of island")
     gresid_mean = Float(doc="Mean of residual image of island")
     connected   = Tuple(String(), Int(), doc="'multiple' or 'single' -ly connected, # of holes inside island")

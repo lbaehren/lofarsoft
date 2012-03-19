@@ -10,11 +10,11 @@ import mylogger
 import statusbar
 
 
-Island.shapelet_basis=String(doc="Coordinate system for shapelet decomposition (cartesian/polar)")
-Island.shapelet_beta=Float(doc="Value of shapelet scale beta")
-Island.shapelet_nmax=Int(doc="Maximum value of shapelet order")
+Island.shapelet_basis=String(doc="Coordinate system for shapelet decomposition (cartesian/polar)", colname='Basis', units=None)
+Island.shapelet_beta=Float(doc="Value of shapelet scale beta", colname='Beta', units=None)
+Island.shapelet_nmax=Int(doc="Maximum value of shapelet order", colname='NMax', units=None)
 Island.shapelet_centre=Tuple(Float(), Float(),doc="Centre for the shapelet decomposition, starts from zero")
-Island.shapelet_cf=NArray(doc="Coefficient matrix of the shapelet decomposition")
+Island.shapelet_cf=NArray(doc="Coefficient matrix of the shapelet decomposition", colname='Coeff_matrix', units=None)
 
 class Op_shapelets(Op):
     """ Get the image and mask from each island and send it to 

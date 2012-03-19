@@ -508,7 +508,7 @@ class Op_spectralindex(Op):
         for cind in range(nchan):
             image = chan_images[cind]
             gg_adj = self.adjust_size_by_freq(img.beam, beamlist[cind], gg)
-            p, ep = func.fit_mulgaus2d(image, gg_adj, x, y, srcmask, fitfix)
+            p, ep = func.fit_mulgaus2d(image, gg_adj, x, y, srcmask, fitfix, adj=True)
             pbeam = img.beam2pix(beamlist[cind])
             bm_pix = (pbeam[0]/fwsig, pbeam[1]/fwsig, pbeam[2])  # IN SIGMA UNITS
             for ig in range(len(fitfix)):
@@ -516,23 +516,26 @@ class Op_spectralindex(Op):
             p = N.insert(p, N.arange(len(fitfix))*6+6, total_flux[cind])
             rms_isl = N.mean(clip_rms[cind])
             errors[cind] = func.get_errors(img, p, rms_isl, bm_pix=(bm_pix[0]*fwsig, bm_pix[1]*fwsig, bm_pix[2]))[6]
-#         errors = 0.1*total_flux
+            self.reset_size(gg)
+            
         return total_flux, errors
 
     def adjust_size_by_freq(self, beam_ch0, beam, gg):
         """Adjust size of unresolved Gaussians to match the channel's beam size"""
         gg_adj = []
         for g in gg:
-            gcp = cp(g)
-            gcp.peak_flux = g.peak_flux
-            gcp.centre_pix = g.centre_pix
-            gcp.size_pix = g.size_pix
+            g.size_pix_adj = g.size_pix[:]
             if g.deconv_size_sky[0] == 0.0:
-                gcp.size_pix[0] *= beam[0] / beam_ch0[0]
+                g.size_pix_adj[0] *= beam[0] / beam_ch0[0]
             if g.deconv_size_sky[1] == 0.0:
-                gcp.size_pix[1] *= beam[1] / beam_ch0[1]
-            gg_adj.append(gcp)
+                g.size_pix_adj[1] *= beam[1] / beam_ch0[1]
+            gg_adj.append(g)
         return gg_adj
+        
+    def reset_size(self, gg):
+        """Reset size of unresolved Gaussians to match the ch0 beam size"""
+        for g in gg:
+            if hasattr(g, 'size_pix_adj'): del g.size_pix_adj
         
     def mask_upper_limits(self, total_flux, e_total_flux, threshold):
         """Returns mask of upper limits"""

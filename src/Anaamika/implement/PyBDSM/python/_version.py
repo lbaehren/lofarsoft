@@ -26,6 +26,10 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/19 - Added output of shapelet parameters to FITS tables.
+                 Fixed issue with resizing of sources in spectral
+                 index module.
+    
     2012/03/16 - Fixed bugs in polarisation module that caused incorrect
                  polarization fractions.
     

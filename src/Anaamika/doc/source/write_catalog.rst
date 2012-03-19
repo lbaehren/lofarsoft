@@ -55,7 +55,7 @@ Each of the parameters is described in detail below.
 
     catalog_type
         This parameter is a string (default is ``'gaul'``) that sets the type of catalog to write:  ``'gaul'`` - Gaussian list, ``'srl'`` - source list
-        (formed by grouping Gaussians), ``'shap'`` - shapelet list (not yet supported)
+        (formed by grouping Gaussians), ``'shap'`` - shapelet list (``'fits'`` format only)
         
         .. note::
         
@@ -94,7 +94,7 @@ Each of the parameters is described in detail below.
 
 Definition of output columns
 ----------------------------
-The information included in the catalog varies by format and can include the following quantities.
+The information included in the Gaussian and source catalogs varies by format and can include the following quantities.
 
 .. note::
     For ACSII and FITS formats, the reference frequency (in Hz) and equinox are stored in the header of the catalog. The header in ASCII catalogs is the first few lines of the catalog. For FITS catalogs, this information is stored in the comments as well as in the FREQ0 and EQUINOX keywords in the primary header.
@@ -226,3 +226,13 @@ The information included in the catalog varies by format and can include the fol
 
 * **E_Linear_Pol_Ang:** the 1-:math:`\sigma` error on the linear polarization angle, in degrees
 
+
+The shapelet catalog contains the following additional columns:
+
+* **shapelet_basis:** the basis coordinate system: 'c' for cartesian, 's' for spherical
+
+* **shapelet_beta:** the :math:`\beta` parameter of the shapelet decomposition
+
+* **shapelet_nmax:** the maximum order of the shapelet
+
+* **shapelet_cf:** a (flattened) array of the shapelet coefficients
