@@ -10,6 +10,7 @@ import re
 class CEP2Info:
 	# setting different attributes
         def __init__(self):
+		self.ncores = 24 # number of cores in one locus nodes. Can be used to limit a number of simultaneous processes
 		self.user = os.environ['USER']
 		self.home = os.environ['HOME']
 		self.lofarsoft = os.environ['LOFARSOFT']

@@ -5,6 +5,7 @@
 #
 
 import os, sys, glob, time, re, os.path
+import math
 import numpy as np
 import cPickle
 import logging
@@ -281,207 +282,272 @@ class Pipeline:
 				if sum_popen != None: sum_popen.poll()
 		self.sum_popens=[]
 
-
 	# run necessary processes to organize summary info on summary nodes
 	# to be run locally on summary node
 	def make_summary(self, obs, cep2, cmdline, log):
-
 		try:
-			start_time=time.time()	
-			sumnode=cep2.get_current_node()
-			sumdir=self.summary_dirs[sumnode]
-
-			# start logging
-			log.info("Summaries on %s:%s    UTC start time is: %s  @node: %s" % \
-					(sumnode, sumdir, time.asctime(time.gmtime()), sumnode))
-
-			# extracting files from archive files for all beams
-			# and moving log-files to corresponding directory
-			log.info("Extracting archives in summary nodes, removing archives, moving log-files...")
-			for unit in [u for u in self.units if u.summary_node == sumnode]: 
-				result_archive="%s_sap%03d_tab%04d%s" % (obs.id, unit.sapid, unit.tabid, unit.archive_suffix)
-				if os.path.exists("%s/%s" % (sumdir, result_archive)):
-					# extracting archive
-					cmd="tar xvfz %s" % (result_archive)
-					self.execute(cmd, log, workdir=sumdir)
-					# removing archive
-					cmd="rm -f %s" % (result_archive)
-					self.execute(cmd, log, workdir=sumdir)
-					# moving log-file to corresponding SAP/BEAM directory
-					if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
-						cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
-							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
-						self.execute(cmd, log, workdir=sumdir)
-				else:
-					if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
-						log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
-
 			# either "CS", "IS", "CV", .. 
 			data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
 
-			# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
-			if not cmdline.opts.is_nofold:
-				log.info("Reading chi-squared values and adding to chi-squared.txt...")
-        	                # also preparing montage command to create combined plot
-	        	        montage_cmd="montage -background none -pointsize 10.2 "
-	        	        montage_cmd_pdf="montage -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 "
-        	        	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
-     	          	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
-				if len(psr_bestprofs) > 0:
-        	               		for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
-                	               		psr=bp.split("/")[-1].split("_")[0]
-        	        	        	thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
-                	        		# getting current number for SAP and TA beam (or station name for FE)
-        	              		  	cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
-                	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
-      	                	        	chi_val = 0.0
-        	                		cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
-	                	        	chiline=os.popen(cmd).readlines()
-        	                		if np.size(chiline) > 0:
-                	                		chi_val = float(chiline[0].rstrip())
-   	                	        	else:
-							log.warning("Warning: can't read chi-sq value from %s" % (bp))
-		                        	chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curprocdir, psr, chi_val))
-        		                	montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
-        		                	montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
-              		        chif.close()
-
-				# creating combined plots
-				if len(psr_bestprofs) > 0:
-        	                	log.info("Combining all pfd.th.png files in a single combined plot...")
-               		        	montage_cmd += "combined.png"
-					self.execute(montage_cmd, log, workdir=sumdir)
-					# making thumbnail version of the combined plot
-					log.info("Making a thumbnail version of combined plot...")
-               		        	cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
-                       			self.execute(cmd, log, workdir=sumdir)
-
-					# creating combined PDF plot with all prepfold plots - ONLY for FE 
-					if data_code == "CS" and obs.FE:
-        	                		log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
-               		        		montage_cmd_pdf += "combined.pdf"
-						self.execute(montage_cmd_pdf, log, workdir=sumdir)
-
-			# create beam_process_node.txt file
-			log.info("Creating the beam_process_node.txt file...")
-        	        bpnf=open("%s/beam_process_node.txt" % (sumdir), 'w')
-			for unit in [u for u in self.units if u.summary_node == sumnode]: 
-				for node in unit.tab.location:
-					for rf in unit.tab.rawfiles[node]:
-						bpnf.write("%s %s%s\n" % \
-						(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
-              	        bpnf.close()
-
-			# creating TA heatmaps 
-			# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' keywords are used (or
-			# nothing is given for --pulsar option
-			# otherwise, different TA beams will be folded for different pulsars, and TA heatmap does not have sense
-			if data_code == "CS" and not cmdline.opts.is_nofold and (len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] != "tabfind")):
-				for sap in obs.saps:
-					if sap.nrRings > 0:
-						if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
-							psrs = cmdline.psrs # getting list of pulsars from command line
-						else: # getting list of pulsars from SAP
-							psrs = sap.psrs
-						log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
-						for psr in psrs:
-							log.info(psr)
-							cmd="cat %s/chi-squared.txt | grep _SAP%d | grep %s > %s/%s-chi-squared.txt" % (sumdir, sap.sapid, psr, sumdir, psr)
-							self.execute(cmd, log, is_os=True)
-							cmd="plot_LOFAR_TA_multibeam2.py --sap %d --chi %s-chi-squared.txt --parset %s.parset --out_logscale %s_SAP%d_%s_TA_heatmap_log.png --out_linscale %s_SAP%d_%s_TA_heatmap_linear.png --target %s" % (sap.sapid, psr, obs.id, obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, psr)
-							self.execute(cmd, log, workdir=sumdir)
-							cmd="rm -f %s-chi-squared.txt" % (psr)
-							self.execute(cmd, log, workdir=sumdir)
-							# combining TA heatmap log and linear plots
-							cmd="convert %s_SAP%d_%s_TA_heatmap_log.png %s_SAP%d_%s_TA_heatmap_linear.png -append ta_heatmap_sap%d_%s.png" % (obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, sap.sapid, psr)
-							self.execute(cmd, log, workdir=sumdir)
-						# combining TA heatmaps for different pulsars
-						heatmaps=glob.glob("%s/ta_heatmap_sap%d_*.png" % (sumdir, sap.sapid))
-						if len(heatmaps) > 1: cmd="convert %s +append ta_heatmap_sap%d.png" % (" ".join(heatmaps), sap.sapid)
-						else: cmd="mv %s ta_heatmap_sap%d.png" % (heatmaps[0], sap.sapid)
-						self.execute(cmd, log, workdir=sumdir)
-						# remove temporary png files
-						cmd="rm -f ta_heatmap_sap%d_*.png" % (sap.sapid)
-						self.execute(cmd, log, workdir=sumdir)
-				# combining TA heatmaps for different SAPs
-				heatmaps=glob.glob("%s/ta_heatmap_sap*.png" % (sumdir))
-				if len(heatmaps) > 0:
-					if len(heatmaps) > 1: cmd="convert %s -append TAheatmap_status.png" % (" ".join(heatmaps))
-					else: cmd="mv %s TAheatmap_status.png" % (heatmaps[0])
-					self.execute(cmd, log, workdir=sumdir)
-					# remove temporary png files
-					cmd="rm -f ta_heatmap_sap*.png"
-					self.execute(cmd, log, workdir=sumdir)
-
-			# creating combined DSPSR plots
-			if not cmdline.opts.is_skip_dspsr:
-				dspsr_diags=rglob(sumdir, "*_diag.png")
-				if len(dspsr_diags) > 0:
-					log.info("Creating DSPSR summary diagnostic plots...")
-					if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
-					else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
-					self.execute(cmd, log, workdir=sumdir)
-
-			# creating FE status maps
-			# FE combined map if exist - should be called FE_status.png
-			if data_code == "CS" and not cmdline.opts.is_nofold and obs.FE:
-				log.info("Creating FE status maps...")
-				cmd="lofar_status_map.py"
-				self.execute(cmd, log, workdir=sumdir)
-				femaps=glob.glob("%s/*_core_status.png" % (sumdir))
-				femaps.extend(glob.glob("%s/*_remote_status.png" % (sumdir)))
-				femaps.extend(glob.glob("%s/*_intl_status.png" % (sumdir)))
-				# creating combined plots
-				if len(femaps) > 0:
-					cmd="convert -append %s FE_status.png" % (" ".join(femaps))
-					self.execute(cmd, log, workdir=sumdir)
-					# removing individual maps
-					cmd="rm -f %s" % (" ".join(femaps))
-					self.execute(cmd, log, workdir=sumdir)
-
-			# Combining different status maps into one 'status.png' to be shown in web-summary page 
-			if os.path.exists("%s/FE_status.png" % (sumdir)):
-				log.info("Renaming FE status map file to status.png ...")
-				cmd="mv FE_status.png status.png"
-				self.execute(cmd, log, workdir=sumdir)
-			elif os.path.exists("%s/TAheatmap_status.png" % (sumdir)):
-				log.info("Renaming TA heatmap map file to status.png ...")
-				cmd="mv TAheatmap_status.png status.png"
-				self.execute(cmd, log, workdir=sumdir)
-			elif os.path.exists("%s/dspsr_status.png" % (sumdir)):
-				log.info("Renaming dspsr status file to status.png ...")
-				cmd="mv dspsr_status.png status.png"
-				self.execute(cmd, log, workdir=sumdir)
-			else: log.info("No status.png created")
-			# creating thumbnail version of status.png if it exists
-			if os.path.exists("%s/status.png" % (sumdir)):		
-				cmd="convert -scale 200x140-0-0 status.png status.th.png"
-				self.execute(cmd, log, workdir=sumdir)
-
-			# Make a tarball of all the plots (summary archive)
-			log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
-			tar_list=[]
-			for ext in self.archive_exts:
-				ext_list=rglob(sumdir, ext)
-				tar_list.extend(ext_list)
-			cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-			self.execute(cmd, log, workdir=sumdir)
-
-			# finish
-			end_time=time.time()
-			total_time= end_time- start_time
-			log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
-			log.info("Total runnung time: %.1f s (%.2f hrs)" % (total_time, total_time/3600.))
-
-			# flushing log file and copy it to summary node
-			log.flush()
-			cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
-			os.system(cmd)
+			if data_code == "CS" or data_code == "IS":
+				self.make_summary_CS_IS(obs, cep2, cmdline, log)
+			if data_code == "CV":
+				self.make_summary_CV(obs, cep2, cmdline, log)
 
 		except Exception:
 			log.exception("Oops... 'make_summary' function on %s has crashed!" % (cep2.get_current_node()))
 			os.system("stty sane")
 			sys.exit(1)
+
+
+	# run necessary processes to organize summary info on summary nodes for CV data
+	# to be run locally on summary node
+	def make_summary_CV(self, obs, cep2, cmdline, log):
+
+		start_time=time.time()	
+		sumnode=cep2.get_current_node()
+		sumdir=self.summary_dirs[sumnode]
+
+		# start logging
+		log.info("Summaries on %s:%s    UTC start time is: %s  @node: %s" % \
+				(sumnode, sumdir, time.asctime(time.gmtime()), sumnode))
+
+		# extracting files from archive files for all beams
+		# and moving log-files to corresponding directory
+		log.info("Extracting archives in summary nodes, removing archives, moving log-files...")
+		for unit in [u for u in self.units if u.summary_node == sumnode]: 
+			result_archive="%s_sap%03d_tab%04d%s" % (obs.id, unit.sapid, unit.tabid, unit.archive_suffix)
+			if os.path.exists("%s/%s" % (sumdir, result_archive)):
+				# extracting archive
+				cmd="tar xvfz %s" % (result_archive)
+				self.execute(cmd, log, workdir=sumdir)
+				# removing archive
+				cmd="rm -f %s" % (result_archive)
+				self.execute(cmd, log, workdir=sumdir)
+				# moving log-file to corresponding SAP/BEAM directory
+				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
+					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
+						(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
+					self.execute(cmd, log, workdir=sumdir)
+			else:
+				if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
+					log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
+
+		# Make a tarball of all the plots (summary archive)
+		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
+		tar_list=[]
+		for ext in self.archive_exts:
+			ext_list=rglob(sumdir, ext)
+			tar_list.extend(ext_list)
+		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		self.execute(cmd, log, workdir=sumdir)
+
+		# finish
+		end_time=time.time()
+		total_time= end_time- start_time
+		log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
+		log.info("Total runnung time: %.1f s (%.2f hrs)" % (total_time, total_time/3600.))
+
+		# flushing log file and copy it to summary node
+		log.flush()
+		cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		os.system(cmd)
+
+
+	# run necessary processes to organize summary info on summary nodes for CS and IS data
+	# to be run locally on summary node
+	def make_summary_CS_IS(self, obs, cep2, cmdline, log):
+
+		start_time=time.time()	
+		sumnode=cep2.get_current_node()
+		sumdir=self.summary_dirs[sumnode]
+
+		# start logging
+		log.info("Summaries on %s:%s    UTC start time is: %s  @node: %s" % \
+				(sumnode, sumdir, time.asctime(time.gmtime()), sumnode))
+
+		# extracting files from archive files for all beams
+		# and moving log-files to corresponding directory
+		log.info("Extracting archives in summary nodes, removing archives, moving log-files...")
+		for unit in [u for u in self.units if u.summary_node == sumnode]: 
+			result_archive="%s_sap%03d_tab%04d%s" % (obs.id, unit.sapid, unit.tabid, unit.archive_suffix)
+			if os.path.exists("%s/%s" % (sumdir, result_archive)):
+				# extracting archive
+				cmd="tar xvfz %s" % (result_archive)
+				self.execute(cmd, log, workdir=sumdir)
+				# removing archive
+				cmd="rm -f %s" % (result_archive)
+				self.execute(cmd, log, workdir=sumdir)
+				# moving log-file to corresponding SAP/BEAM directory
+				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
+					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
+						(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
+					self.execute(cmd, log, workdir=sumdir)
+			else:
+				if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
+					log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
+
+		# either "CS", "IS", "CV", .. 
+		data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
+
+		# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
+		if not cmdline.opts.is_nofold:
+			log.info("Reading chi-squared values and adding to chi-squared.txt...")
+                        # also preparing montage command to create combined plot
+	       	        montage_cmd="montage -background none -pointsize 10.2 "
+	       	        montage_cmd_pdf="montage -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 "
+                	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
+     	       	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
+			if len(psr_bestprofs) > 0:
+                       		for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
+               	               		psr=bp.split("/")[-1].split("_")[0]
+                	        	thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+               	        		# getting current number for SAP and TA beam (or station name for FE)
+                      		  	cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+               	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
+      	               	        	chi_val = 0.0
+                        		cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
+	               	        	chiline=os.popen(cmd).readlines()
+                        		if np.size(chiline) > 0:
+               	                		chi_val = float(chiline[0].rstrip())
+   	               	        	else:
+						log.warning("Warning: can't read chi-sq value from %s" % (bp))
+	                        	chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curprocdir, psr, chi_val))
+        	                	montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
+        	                	montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
+              	        chif.close()
+
+			# creating combined plots
+			if len(psr_bestprofs) > 0:
+                        	log.info("Combining all pfd.th.png files in a single combined plot...")
+        	        	montage_cmd += "combined.png"
+				self.execute(montage_cmd, log, workdir=sumdir)
+				# making thumbnail version of the combined plot
+				log.info("Making a thumbnail version of combined plot...")
+               	        	cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
+               			self.execute(cmd, log, workdir=sumdir)
+
+				# creating combined PDF plot with all prepfold plots - ONLY for FE 
+				if data_code == "CS" and obs.FE:
+                        		log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
+        	        		montage_cmd_pdf += "combined.pdf"
+					self.execute(montage_cmd_pdf, log, workdir=sumdir)
+
+		# create beam_process_node.txt file
+		log.info("Creating the beam_process_node.txt file...")
+                bpnf=open("%s/beam_process_node.txt" % (sumdir), 'w')
+		for unit in [u for u in self.units if u.summary_node == sumnode]: 
+			for node in unit.tab.location:
+				for rf in unit.tab.rawfiles[node]:
+					bpnf.write("%s %s%s\n" % \
+					(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
+		bpnf.close()
+
+		# creating TA heatmaps 
+		# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' keywords are used (or
+		# nothing is given for --pulsar option
+		# otherwise, different TA beams will be folded for different pulsars, and TA heatmap does not have sense
+		if data_code == "CS" and not cmdline.opts.is_nofold and (len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] != "tabfind")):
+			for sap in obs.saps:
+				if sap.nrRings > 0:
+					if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
+						psrs = cmdline.psrs # getting list of pulsars from command line
+					else: # getting list of pulsars from SAP
+						psrs = sap.psrs
+					log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
+					for psr in psrs:
+						log.info(psr)
+						cmd="cat %s/chi-squared.txt | grep _SAP%d | grep %s > %s/%s-chi-squared.txt" % (sumdir, sap.sapid, psr, sumdir, psr)
+						self.execute(cmd, log, is_os=True)
+						cmd="plot_LOFAR_TA_multibeam2.py --sap %d --chi %s-chi-squared.txt --parset %s.parset --out_logscale %s_SAP%d_%s_TA_heatmap_log.png --out_linscale %s_SAP%d_%s_TA_heatmap_linear.png --target %s" % (sap.sapid, psr, obs.id, obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, psr)
+						self.execute(cmd, log, workdir=sumdir)
+						cmd="rm -f %s-chi-squared.txt" % (psr)
+						self.execute(cmd, log, workdir=sumdir)
+						# combining TA heatmap log and linear plots
+						cmd="convert %s_SAP%d_%s_TA_heatmap_log.png %s_SAP%d_%s_TA_heatmap_linear.png -append ta_heatmap_sap%d_%s.png" % (obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, sap.sapid, psr)
+						self.execute(cmd, log, workdir=sumdir)
+					# combining TA heatmaps for different pulsars
+					heatmaps=glob.glob("%s/ta_heatmap_sap%d_*.png" % (sumdir, sap.sapid))
+					if len(heatmaps) > 1: cmd="convert %s +append ta_heatmap_sap%d.png" % (" ".join(heatmaps), sap.sapid)
+					else: cmd="mv %s ta_heatmap_sap%d.png" % (heatmaps[0], sap.sapid)
+					self.execute(cmd, log, workdir=sumdir)
+					# remove temporary png files
+					cmd="rm -f ta_heatmap_sap%d_*.png" % (sap.sapid)
+					self.execute(cmd, log, workdir=sumdir)
+			# combining TA heatmaps for different SAPs
+			heatmaps=glob.glob("%s/ta_heatmap_sap*.png" % (sumdir))
+			if len(heatmaps) > 0:
+				if len(heatmaps) > 1: cmd="convert %s -append TAheatmap_status.png" % (" ".join(heatmaps))
+				else: cmd="mv %s TAheatmap_status.png" % (heatmaps[0])
+				self.execute(cmd, log, workdir=sumdir)
+				# remove temporary png files
+				cmd="rm -f ta_heatmap_sap*.png"
+				self.execute(cmd, log, workdir=sumdir)
+
+		# creating combined DSPSR plots
+		if not cmdline.opts.is_skip_dspsr:
+			dspsr_diags=rglob(sumdir, "*_diag.png")
+			if len(dspsr_diags) > 0:
+				log.info("Creating DSPSR summary diagnostic plots...")
+				if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
+				else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
+				self.execute(cmd, log, workdir=sumdir)
+
+		# creating FE status maps
+		# FE combined map if exist - should be called FE_status.png
+		if data_code == "CS" and not cmdline.opts.is_nofold and obs.FE:
+			log.info("Creating FE status maps...")
+			cmd="lofar_status_map.py"
+			self.execute(cmd, log, workdir=sumdir)
+			femaps=glob.glob("%s/*_core_status.png" % (sumdir))
+			femaps.extend(glob.glob("%s/*_remote_status.png" % (sumdir)))
+			femaps.extend(glob.glob("%s/*_intl_status.png" % (sumdir)))
+			# creating combined plots
+			if len(femaps) > 0:
+				cmd="convert -append %s FE_status.png" % (" ".join(femaps))
+				self.execute(cmd, log, workdir=sumdir)
+				# removing individual maps
+				cmd="rm -f %s" % (" ".join(femaps))
+				self.execute(cmd, log, workdir=sumdir)
+
+		# Combining different status maps into one 'status.png' to be shown in web-summary page 
+		if os.path.exists("%s/FE_status.png" % (sumdir)):
+			log.info("Renaming FE status map file to status.png ...")
+			cmd="mv FE_status.png status.png"
+			self.execute(cmd, log, workdir=sumdir)
+		elif os.path.exists("%s/TAheatmap_status.png" % (sumdir)):
+			log.info("Renaming TA heatmap map file to status.png ...")
+			cmd="mv TAheatmap_status.png status.png"
+			self.execute(cmd, log, workdir=sumdir)
+		elif os.path.exists("%s/dspsr_status.png" % (sumdir)):
+			log.info("Renaming dspsr status file to status.png ...")
+			cmd="mv dspsr_status.png status.png"
+			self.execute(cmd, log, workdir=sumdir)
+		else: log.info("No status.png created")
+		# creating thumbnail version of status.png if it exists
+		if os.path.exists("%s/status.png" % (sumdir)):		
+			cmd="convert -scale 200x140-0-0 status.png status.th.png"
+			self.execute(cmd, log, workdir=sumdir)
+
+		# Make a tarball of all the plots (summary archive)
+		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
+		tar_list=[]
+		for ext in self.archive_exts:
+			ext_list=rglob(sumdir, ext)
+			tar_list.extend(ext_list)
+		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		self.execute(cmd, log, workdir=sumdir)
+
+		# finish
+		end_time=time.time()
+		total_time= end_time- start_time
+		log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
+		log.info("Total runnung time: %.1f s (%.2f hrs)" % (total_time, total_time/3600.))
+
+		# flushing log file and copy it to summary node
+		log.flush()
+		cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		os.system(cmd)
 
 # base class for the single processing (a-ka beam)
 class PipeUnit:
@@ -1143,15 +1209,10 @@ class CVUnit(PipeUnit):
 				sys.exit(1)
 				
 
-			self.log.info("Input data: %s" % (" ".join(input_files)))
+			self.log.info("Input data: %s" % ("\n".join(input_files)))
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
-			# running bf2puma2 command for all frequency splits...
-			# getting the list of "_S0_" files, the number of which is how many freq splits we have
-			self.log.info("Running bf2puma2/dspsr/psradd/paz for all frequency splits one by one...")
-			s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
-			bf2puma2_popens=[] # list of bf2puma2 Popen objects
 			# checking if extra options for complex voltages processing were set in the pipeline
 			nblocks=""
 			if cmdline.opts.nblocks != -1: nblocks = "-b %d" % (cmdline.opts.nblocks)
@@ -1159,82 +1220,81 @@ class CVUnit(PipeUnit):
 			if cmdline.opts.is_all_times: is_all_for_scaling="-all_times"
 			is_write_ascii=""
 			if cmdline.opts.is_write_ascii: is_write_ascii="-t"
+			verbose=""
+			if cmdline.opts.is_debug: verbose="-v"
 
-			obsmjd=""
+			# running bf2puma2 command for all frequency splits...
+			self.log.info("Running bf2puma2 for all frequency splits simultaneously...")
+			# getting the list of "_S0_" files, the number of which is how many freq splits we have
+			s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
+			bf2puma2_popens=[] # list of bf2puma2 Popen objects
 			# loop on frequency splits
 			for ii in range(len(s0_files)):
-				# getting the number of subbands for current frequency split
-				nsubbans=np.min(obs.nrSubsPerFileCS, obs.nrSubbands - ii*obs.nrSubsPerFileCS)
-				self.log.info("Frequency split %d (%d)" % (ii, len(s0_files)))
-				verbose=""
-				if cmdline.opts.is_debug: verbose="-v"
 				cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
-				self.execute(cmd, workdir=self.curdir)
-#				bf2puma2_popen = self.start_and_go(cmd, workdir=self.curdir)
-#				bf2puma2_popens.append(bf2puma2_popen)
+				bf2puma2_popen = self.start_and_go(cmd, workdir=self.curdir)
+				bf2puma2_popens.append(bf2puma2_popen)
 
-#			# waiting for bf2puma2 to finish
-#			self.waiting_list("bf2puma2", bf2puma2_popens)
-
-				# getting the MJD of the observation
-				# for some reason dspsr gets wrong MJD without using -m option
-				if obsmjd == "":
-					self.log.info("Reading MJD of observation from the header of output bf2puma2 files...")
-					cmd="head -25 %s_SB0_CH0 | grep MJD" % (s0_files[ii].split("_S0_")[0])
-					mjdline=os.popen(cmd).readlines()
-					if np.size(mjdline)>0:
-						obsmjd=mjdline[0][:-1].split(" ")[-1]
-					else:
-						self.log.error("Can't read the header of file '%s_SB0_CH0' to get MJD" % (s0_files[ii].split("_S0_")[0]))
-						self.kill()
-						sys.exit(1)
-
-				verbose="-q"
-				if cmdline.opts.is_debug: verbose="-v"
-				# running dspsr for each frequency channel in the current frequency split
-				for ss in range(nsubbands):
-					for cc in range (self.nrChanPerSub):
-						input_file="%s_SB%d_CH%d" % (s0_files[ii].split("_S0_")[0], ss, cc)
-						# loop on pulsars
-						for psr in self.psrs:
-							psr2=re.sub(r'[BJ]', '', psr)
-							cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%d_CH%d %s" % \
-								(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
-									self.outdir, psr2, psr, self.output_prefix, ss, cc, input_file)
-							self.execute(cmd, workdir=self.curdir)
-						# removing file created by bf2puma2 (no reason to keep currently, because for another freq split
-						# the file will be overwritte, otherwise, we could add --skip-bf2puma2 options to be able to run
-						# just dspsr on already created files from bf2puma2
-						cmd="rm -f %s" % (input_file)
-						self.execute(cmd, workdir=self.curdir)
-
-				total_chan = obs.nrSubbands*self.nrChanPerSub
-				# running psradd for each pulsar for current frequency split
-				for psr in self.psrs:
-					# adding in freq
-					cmd="psradd -R -o %s_%s_SPLIT%d.ar %s_%s_SB*_CH*.ar" % (psr, self.output_prefix, ii, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
-					# removing corrupted freq channels
-					if self.nrChanPerSub > 1:
-						cmd="paz -r -m -z \"%s\" %s_%s_SPLIT%d.ar" % \
-							(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix, ii)
-						self.execute(cmd, workdir=self.curdir)
-					# removing ar-files for individual channels
-					cmd="rm -f %s_%s_SB*_CH*.ar" % (psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
-
-			# adding different freq splits together
-			for psr in self.psrs:
-				self.log.info("Adding frequency splits together...")
-				cmd="psradd -R -o %s_%s.ar %s_%s_SPLIT*.ar" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-
+			# waiting for bf2puma2 to finish
+			self.waiting_list("bf2puma2", bf2puma2_popens)
 
 			# removing links for input files
 			cmd="rm -f %s" % (" ".join(input_files))
 			self.execute(cmd, workdir=self.curdir)
 
+			if not cmdline.opts.is_nofold:
+				# getting the MJD of the observation
+				# for some reason dspsr gets wrong MJD without using -m option
+				input_prefix=s0_files[0].split("_S0_")[0]
+				self.log.info("Reading MJD of observation from the header of output bf2puma2 files...")
+				cmd="head -25 %s/%s_SB0_CH0 | grep MJD" % (self.curdir, input_prefix)
+				mjdline=os.popen(cmd).readlines()
+				if np.size(mjdline)>0:
+					obsmjd=mjdline[0][:-1].split(" ")[-1]
+					self.log.info("MJD = %s" % (obsmjd))
+				else:
+					self.log.error("Can't read the header of file '%s_SB0_CH0' to get MJD" % (input_prefix))
+					self.kill()
+					sys.exit(1)
 
+				verbose="-q"
+				if cmdline.opts.is_debug: verbose="-v"
+				total_chan = obs.nrSubbands * self.nrChanPerSub
+
+				# running dspsr for every frequency channel. We run it in bunches of number of channels in subband
+				# usually it is 16 which is less than number of cores in locus nodes. But even if it is 32, then it should be OK (I think...)
+				self.log.info("Running dspsr for each frequency channels...")
+				# loop on pulsars
+				for psr in self.psrs:
+					self.log.info("Running dspsr for pulsar %s..." % (psr))
+					psr2=re.sub(r'[BJ]', '', psr)
+					for sub in range(obs.nrSubbands):
+						self.log.info("Subband %d" % (sub))
+						dspsr_popens=[] # list of dspsr Popen objects
+						for chan in range(self.nrChanPerSub):
+							input_file="%s_SB%d_CH%d" % (input_prefix, sub, chan)
+							cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%d_CH%d %s" % \
+								(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
+								self.outdir, psr2, psr, self.output_prefix, sub, chan, input_file)
+							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
+							dspsr_popens.append(dspsr_popen)
+
+						# waiting for dspsr to finish
+						self.waiting_list("dspsr", dspsr_popens)
+
+					# running psradd to add all freq channels together
+					self.log.info("Adding frequency channels together...")
+					cmd="psradd -R -o %s_%s.ar %s_%s_SB*_CH*.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					# removing corrupted freq channels
+					if self.nrChanPerSub > 1:
+						self.log.info("Zapping every %d channel..." % (self.nrChanPerSub))
+						cmd="paz -r -m -z \"%s\" %s_%s.ar" % \
+							(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+
+				# removing files created by bf2puma2 and dspsr for each freq channel
+				cmd="rm -f %s_SB*_CH*" % (input_prefix)
+				self.execute(cmd, workdir=self.curdir)
 
 			# copying parset file to output directory
 			self.log.info("Copying original parset file to output directory...")
