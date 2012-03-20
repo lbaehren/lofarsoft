@@ -285,6 +285,7 @@ if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
   add_custom_target (pulsar
     COMMAND ${CMAKE_COMMAND} ${PULSAR_SOURCE_DIR}
     COMMAND ${CMAKE_BUILD_TOOL} install
+    COMMAND ${CMAKE_BUILD_TOOL} psrchive_install
     COMMAND ${CMAKE_BUILD_TOOL} dspsr_install
     COMMAND ${CMAKE_BUILD_TOOL} ppgplot_bindings_install
     COMMAND ${CMAKE_BUILD_TOOL} presto_makewisdom
