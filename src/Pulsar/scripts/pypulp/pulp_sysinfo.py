@@ -19,6 +19,8 @@ class CEP2Info:
 		self.psrcatdb = self.lofarsoft + "/release/share/pulsar/data/psrcat.db"
 		# ATNF pulsar catalog
 		self.psrcatalog = self.lofarsoft + "/release/share/pulsar/data/PSR_catalog.txt"
+		# Puma2 header file template for bf2puma2
+		self.puma2header = self.lofarsoft + "/release/share/pulsar/data/header.puma2"
 		# maximum radial distance (in deg) to find pulsars in FOV
 		self.fov_lba = 9.
 		self.fov_hba = 3.

@@ -758,7 +758,7 @@ class PipeUnit:
 				input_files=[]
 				for loc in self.tab.location:
 					# first "mounting" corresponding locus node
-					input_dir="%s/%s_data/%d" % (cep2.hoover_data_dir, loc, obs.id)
+					input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, obs.id)
 					process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
 					process.communicate()
 #					input_file="%s/%s_SAP%03d_B%03d_S*_bf.raw" % (input_dir, obs.id, self.sapid, self.tabid)
@@ -832,11 +832,13 @@ class PipeUnit:
 				zapstr=""
 				if self.nrChanPerSub > 1:
 					zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
+				verbose="-q"
+				if cmdline.opts.is_debug: verbose="-v"
 				dspsr_popens=[] # list of dspsr Popen objects
 				for psr in self.psrs: # pulsar list is empty if --nofold is used
 					psr2=re.sub(r'[BJ]', '', psr)
-					cmd="dspsr -E %s/%s.par %s -q -b 256 -fft-bench -O %s_%s -K -A -L 60 %s.fits" % \
-						(self.outdir, psr2, zapstr, psr, self.output_prefix, self.output_prefix)
+					cmd="dspsr -E %s/%s.par %s %s -b 256 -fft-bench -O %s_%s -K -A -L 60 %s.fits" % \
+						(self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, self.output_prefix)
 					dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 					dspsr_popens.append(dspsr_popen)
 
@@ -1067,17 +1069,226 @@ class CVUnit(PipeUnit):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CV"
 		self.stokes = obs.stokesCS
-		self.beams_root_dir = ""
+		self.beams_root_dir = "rawvoltages"
 		self.raw2fits_extra_options=""
 		self.nrChanPerSub = obs.nrChanPerSubCS
 		self.sampling = obs.samplingCS
-		self.summary_node = ""
-		self.summary_node_dir_suffix = ""
-		self.archive_suffix = ""
-		self.outdir_suffix = ""
+		self.summary_node = "locus093"
+		self.summary_node_dir_suffix = "_CVplots_py"  # "_CVplots"
+		self.archive_suffix = "plotsCV.tar.gz"
+		self.outdir_suffix = "_red_py"  # "_red"
+		# extensions of the files to copy to archive (parfile and parset will be also included)
+		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", ".rv"]
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
+	# main CV processing function
+	def run(self, obs, cep2, cmdline, log):
+		try:
+			self.log = log
+			self.logfile = cep2.get_logfile().split("/")[-1]		
+			self.start_time=time.time()	
+
+			# start logging
+			self.log.info("%s SAP=%d TAB=%d %s(%s%s Stokes: %s)    UTC start time is: %s  @node: %s" % \
+				(obs.id, self.sapid, self.tabid, obs.FE and ", ".join(self.tab.stationList) + " " or "", obs.FE and "FE/" or "", self.code, \
+				self.stokes, time.asctime(time.gmtime()), cep2.current_node))
+
+			# Re-creating root output directory
+			cmd="mkdir -p %s" % (self.outdir)
+			self.execute(cmd)
+
+			# creating Par-file in the output directory or copying existing one
+			if not cmdline.opts.is_nofold:
+				for psr in self.psrs:
+					psr2=re.sub(r'[BJ]', '', psr)
+					parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
+					if os.path.exists(parfile):
+						cmd="cp -f %s %s" % (parfile, self.outdir)
+						self.execute(cmd)
+						continue
+					parfile="%s/%s.par" % (cep2.parfile_dir, psr)
+					if os.path.exists(parfile):
+						cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
+						self.execute(cmd)
+						continue
+					self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
+					cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
+					self.execute(cmd, is_os=True)
+
+			# Creating curdir dir
+			cmd="mkdir -p %s" % (self.curdir)
+			self.execute(cmd)
+
+			if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
+                	                          # also we need to moint locus nodes that we need
+				self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
+				input_files=[]
+				for loc in self.tab.location:
+					# first "mounting" corresponding locus node
+					input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, obs.id)
+					process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+					process.communicate()
+					# bf2puma2 assumes all polarizations S* files to be in the current directory, so we have to
+					# make soft links to input files
+					self.log.info("Making links to input files in the current directory...")
+					for f in self.tab.rawfiles[loc]:
+						cmd="ln -sf %s/%s/%s ." % (input_dir, obs.id, f.split("/" + obs.id + "/")[-1])
+						self.execute(cmd, workdir=self.curdir)
+					input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
+					input_files.extend(input_file)
+			else:
+				self.log.error("Complex voltage data should be on more than 1 locus nodes. Exiting...")
+				self.kill()
+				sys.exit(1)
+				
+
+			self.log.info("Input data: %s" % (" ".join(input_files)))
+			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
+			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
+
+			# running bf2puma2 command for all frequency splits...
+			# getting the list of "_S0_" files, the number of which is how many freq splits we have
+			self.log.info("Running bf2puma2/dspsr/psradd/paz for all frequency splits one by one...")
+			s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
+			bf2puma2_popens=[] # list of bf2puma2 Popen objects
+			# checking if extra options for complex voltages processing were set in the pipeline
+			nblocks=""
+			if cmdline.opts.nblocks != -1: nblocks = "-b %d" % (cmdline.opts.nblocks)
+			is_all_for_scaling=""
+			if cmdline.opts.is_all_times: is_all_for_scaling="-all_times"
+			is_write_ascii=""
+			if cmdline.opts.is_write_ascii: is_write_ascii="-t"
+
+			obsmjd=""
+			# loop on frequency splits
+			for ii in range(len(s0_files)):
+				# getting the number of subbands for current frequency split
+				nsubbans=np.min(obs.nrSubsPerFileCS, obs.nrSubbands - ii*obs.nrSubsPerFileCS)
+				self.log.info("Frequency split %d (%d)" % (ii, len(s0_files)))
+				verbose=""
+				if cmdline.opts.is_debug: verbose="-v"
+				cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
+				self.execute(cmd, workdir=self.curdir)
+#				bf2puma2_popen = self.start_and_go(cmd, workdir=self.curdir)
+#				bf2puma2_popens.append(bf2puma2_popen)
+
+#			# waiting for bf2puma2 to finish
+#			self.waiting_list("bf2puma2", bf2puma2_popens)
+
+				# getting the MJD of the observation
+				# for some reason dspsr gets wrong MJD without using -m option
+				if obsmjd == "":
+					self.log.info("Reading MJD of observation from the header of output bf2puma2 files...")
+					cmd="head -25 %s_SB0_CH0 | grep MJD" % (s0_files[ii].split("_S0_")[0])
+					mjdline=os.popen(cmd).readlines()
+					if np.size(mjdline)>0:
+						obsmjd=mjdline[0][:-1].split(" ")[-1]
+					else:
+						self.log.error("Can't read the header of file '%s_SB0_CH0' to get MJD" % (s0_files[ii].split("_S0_")[0]))
+						self.kill()
+						sys.exit(1)
+
+				verbose="-q"
+				if cmdline.opts.is_debug: verbose="-v"
+				# running dspsr for each frequency channel in the current frequency split
+				for ss in range(nsubbands):
+					for cc in range (self.nrChanPerSub):
+						input_file="%s_SB%d_CH%d" % (s0_files[ii].split("_S0_")[0], ss, cc)
+						# loop on pulsars
+						for psr in self.psrs:
+							psr2=re.sub(r'[BJ]', '', psr)
+							cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%d_CH%d %s" % \
+								(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
+									self.outdir, psr2, psr, self.output_prefix, ss, cc, input_file)
+							self.execute(cmd, workdir=self.curdir)
+						# removing file created by bf2puma2 (no reason to keep currently, because for another freq split
+						# the file will be overwritte, otherwise, we could add --skip-bf2puma2 options to be able to run
+						# just dspsr on already created files from bf2puma2
+						cmd="rm -f %s" % (input_file)
+						self.execute(cmd, workdir=self.curdir)
+
+				total_chan = obs.nrSubbands*self.nrChanPerSub
+				# running psradd for each pulsar for current frequency split
+				for psr in self.psrs:
+					# adding in freq
+					cmd="psradd -R -o %s_%s_SPLIT%d.ar %s_%s_SB*_CH*.ar" % (psr, self.output_prefix, ii, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					# removing corrupted freq channels
+					if self.nrChanPerSub > 1:
+						cmd="paz -r -m -z \"%s\" %s_%s_SPLIT%d.ar" % \
+							(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix, ii)
+						self.execute(cmd, workdir=self.curdir)
+					# removing ar-files for individual channels
+					cmd="rm -f %s_%s_SB*_CH*.ar" % (psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+
+			# adding different freq splits together
+			for psr in self.psrs:
+				self.log.info("Adding frequency splits together...")
+				cmd="psradd -R -o %s_%s.ar %s_%s_SPLIT*.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+
+
+			# removing links for input files
+			cmd="rm -f %s" % (" ".join(input_files))
+			self.execute(cmd, workdir=self.curdir)
+
+
+
+			# copying parset file to output directory
+			self.log.info("Copying original parset file to output directory...")
+			cmd="cp -f %s %s" % (obs.parset, self.outdir)
+			self.execute(cmd, workdir=self.outdir)
+			# Make a tarball of all the plots for this beam
+			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
+			tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
+			tar_list=[]
+			for ext in self.extensions:
+				ext_list=rglob(self.curdir, ext)
+				tar_list.extend(ext_list)
+			tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
+			tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
+			cmd="tar cvfz %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
+			self.execute(cmd, workdir=self.outdir)
+
+			# copying archive file to summary node
+			output_dir="%s_%s/%s%s" % \
+				(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
+			output_archive="%s/%s" % (output_dir, tarname)
+			self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
+			cmd="rsync -avxP %s %s:%s" % (tarname, self.summary_node, output_archive)
+			self.execute(cmd, workdir=self.outdir)
+
+			# finish
+			self.end_time=time.time()
+			self.total_time= self.end_time- self.start_time
+			self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
+			self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
+
+			# flushing log file and copy it to outdir on local node and summary node
+			self.log.flush()
+			cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
+			os.system(cmd)
+			cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
+			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
+			proc.communicate()
+
+		except Exception:
+			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))
+			self.kill()
+			sys.exit(1)
+
+		# kill all open processes
+		self.kill()
+		self.procs = []
+		# remove reference to PulpLogger class from processing unit
+		self.log = None
+		# remove references to Popen processes
+		self.parent = None
+
+
+	"""
 	def run(self, obs, cep2, cmdline, log):
 		self.log = log
 		self.start_time=time.time()	
@@ -1090,6 +1301,8 @@ class CVUnit(PipeUnit):
 		self.total_time= self.end_time- self.start_time
 		self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
 		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
+	"""
+
 
 class FE_CSUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):

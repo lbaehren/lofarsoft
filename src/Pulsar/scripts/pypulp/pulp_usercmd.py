@@ -96,6 +96,21 @@ class CMDLine:
                            help="to process the data locally on current locus node for one beam only. Should only be used together \
                                  with --beams option and only the first beam will be used if there are several specified in --beams \
                                  (mostly for _internal_ use only)", default=False)
+	        self.group = opt.OptionGroup(self.cmd, "Complex voltage extra options")
+        	self.group.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
+                           help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
+                                 clip bright pulsar pulses. Default: %default (no clipping)", default=0.0, type='float')
+        	self.group.add_option('--nblocks', dest='nblocks', metavar='#BLOCKS',
+                           help="only read the first #BLOCKS blocks. Default: all blocks", default=-1, type='int')
+        	self.group.add_option('--all-for-scaling', action="store_true", dest='is_all_times',
+                           help="normalize the data based on entire data set. Otherwise, the scaling is updated after every data block", default=False)
+        	self.group.add_option('--write-ascii', action="store_true", dest='is_write_ascii',
+                           help="write out also ascii files (.rv) containing complex values", default=False)
+        	self.group.add_option('--tsubint', dest='tsubint', metavar='SECS',
+                           help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
+        	self.group.add_option('--output-chans-per-subband', dest='output_chans_per_subband', metavar='#CHANS',
+                           help="set output number of channels per subband. Default: %default (all channels in subband are collapsed)", default=1, type='int')
+		self.cmd.add_option_group(self.group)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
