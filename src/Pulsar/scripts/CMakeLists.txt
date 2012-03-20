@@ -21,6 +21,7 @@ add_custom_target (scripts_install
   COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/pulp_help.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/master.rfi ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/stations.txt ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND ${CMAKE_COMMAND} -E copy ${PULSAR_SOURCE_DIR}/scripts/header.puma2 ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND chmod 755 ${CMAKE_INSTALL_PREFIX}/bin/*.py ${CMAKE_INSTALL_PREFIX}/bin/*.sh ${CMAKE_INSTALL_PREFIX}/bin/*.pl ${CMAKE_INSTALL_PREFIX}/bin/*.csh
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/data/parfile
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/scripts
