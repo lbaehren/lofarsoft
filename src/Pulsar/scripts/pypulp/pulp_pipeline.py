@@ -1133,7 +1133,7 @@ class CVUnit(PipeUnit):
 					# make soft links to input files
 					self.log.info("Making links to input files in the current directory...")
 					for f in self.tab.rawfiles[loc]:
-						cmd="ln -sf %s/%s/%s ." % (input_dir, obs.id, f.split("/" + obs.id + "/")[-1])
+						cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
 						self.execute(cmd, workdir=self.curdir)
 					input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 					input_files.extend(input_file)
