@@ -147,7 +147,7 @@ if (UNIX)
 endif (UNIX)
 
 add_dependencies (presto
-  psrchive_install
+#  psrchive_install
 #  dspsr_install
   psrcat_install
   psrdada_install
