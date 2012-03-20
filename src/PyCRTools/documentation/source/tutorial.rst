@@ -4,31 +4,28 @@
  Tutorial
 ==========
 
-This tutorial will get you started with the pycrtools package.
-
-.. Installation
-.. ============
+This tutorial will get you started with the PyCRTools package.
 
 
 Starting up
 ===========
 
-To work with the pycrtools package it first has to be loaded. This can
+To work with the PyCRTools package it first has to be loaded. This can
 be done by starting Python or iPython and type the following at the
 prompt (``>>>``)::
 
    >>> import pycrtools as cr
 
-which makes all pycrtools functionality available under the namespace
+which makes all PyCRTools functionality available under the namespace
 :mod:`cr`. If you don't want to type the :mod:`cr` prefix for each
-pycrtools function, and have all functionality available in the
+PyCRTools function, and have all functionality available in the
 default namespace, type::
 
    >>> from pycrtools import *
 
 .. note::
 
-   The latter approach is not recommended as all pycrtools
+   The latter approach is not recommended as all PyCRTools
    functions get cluttered up in the current namespace possibly
    overwriting already existing functions.
 
@@ -45,8 +42,8 @@ copy the respective profile file into your home directory
 
    mkdir ~/.ipython/
    cp $LOFARSOFT/src/PyCRTools/extras/ipython_config_pycr.py   ~/.ipython/
-   
-then start ipython (if you installed it) 
+
+then start ipython (if you installed it)
 
    ipython -p pycr
 

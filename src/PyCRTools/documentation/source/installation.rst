@@ -329,7 +329,7 @@ Verification
 
 Afterwards, check if Numpy has been built by the build process. This
 is unwanted as we (normally) use Numpy from EPD. To prevent version
-conflicts (especially a segfault on importing pycrtools), remove it::
+conflicts (especially a segfault on importing PyCRTools), remove it::
 
   cd $LOFARSOFT/release/lib64/python
   rm -rf numpy

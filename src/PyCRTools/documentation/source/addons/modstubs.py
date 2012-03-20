@@ -51,8 +51,8 @@ def autogen(list,output_path):
 
             # Auto module
             f.write('.. automodule:: '+m+'\n')
-            f.write('   :members:\n')
-            f.write('   :undoc-members: \n')
-            f.write('   :show-inheritance:\n')
+            f.write('   :members: \n')
+            # f.write('   :undoc-members: \n')
+            # f.write('   :show-inheritance:\n')
             f.write('\n')
 
