@@ -39,6 +39,8 @@ class Image(object):
     mask   = NArray(doc="Image mask (if present and attribute masked is set)")
     masked = Bool(False, doc="Flag if mask is present")
     basedir = String('DUMMY', doc="Base directory for output files")
+    completed_Ops = List(String(), doc="List of completed operations")
+
 
     def __init__(self, opts):
         self.opts = Opts(opts)

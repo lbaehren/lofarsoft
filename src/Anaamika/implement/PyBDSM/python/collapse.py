@@ -136,7 +136,8 @@ class Op_collapse(Op):
       frac_blank = round(float(img.blankpix)/float(image.shape[0]*image.shape[1]),3)
       mylogger.userinfo(mylog, "Number of blank pixels", str(img.blankpix)
                         +' ('+str(frac_blank*100.0)+'%)')
-
+      img.completed_Ops.append('collapse')
+      
  
 ########################################################################################
 

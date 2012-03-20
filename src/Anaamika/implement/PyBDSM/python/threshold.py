@@ -79,7 +79,8 @@ class Op_threshold(Op):
                 mylogger.userinfo(mylog, "FDR threshold (replaces thresh_pix)", str(round(sigcrit, 4)))
         else:
             img.thresh_pix = opts.thresh_pix
-            
+        
+        img.completed_Ops.append('threshold')
         return img
 
     def get_srcp(self, img):

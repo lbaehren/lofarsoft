@@ -64,6 +64,7 @@ class Op_gaul2srl(Op):
                           str(img.nsrc))
 
         if img.opts.output_fbdsm: opf.write_fbdsm_gaul(img)
+        img.completed_Ops.append('gaul2srl')
 
 ##################################################################################################
 

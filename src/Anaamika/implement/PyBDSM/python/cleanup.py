@@ -45,6 +45,7 @@ class Op_cleanup(Op):
             pl.savefig(bdir+'allgaussians.png')
             pl.close()
 
+        img.completed_Ops.append('cleanup')
 
 
     

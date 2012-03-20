@@ -354,7 +354,7 @@ class Op_polarisation(Op):
                 src.lpol_angle_err = lpol_ang_err
                 if bar.started:
                     bar.increment()
-
+          img.completed_Ops.append('polarisation')
 
   ####################################################################################
     def calc_lpol_fraction(self, stokes, err):

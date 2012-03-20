@@ -50,6 +50,7 @@ class Op_shapelets(Op):
                      str(isl.shapelet_centre[1])+' beta '+str(beta))
                 if img.opts.quiet == False:
                     bar.increment()
+            img.completed_Ops.append('shapelets')
 
 
     def get_shapelet_params(self, image, mask, basis, beam_pix, fixed, ori, mode, beta=None, cen=None, nmax=None):

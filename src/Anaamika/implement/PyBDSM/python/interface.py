@@ -42,6 +42,7 @@ def process(img, **kwargs):
     if hasattr(img, 'model_shap'): del img.model_shap
     if hasattr(img, 'mask'): del img.mask
     if hasattr(img, 'rms_mask'): del img.rms_mask
+    if hasattr(img, 'completed_Ops'): del img.completed_Ops
 
     # Start up logger. We need to initialize it each time process() is
     # called, in case the quiet or debug options have changed
@@ -563,28 +564,35 @@ def export_image(img, outfile=None, img_format='fits',
     """
     import os
     import functions as func
-
-    if hasattr(img, 'ngaus') == False and 'gaus' in img_type:
-        print 'Gaussians have not been fit. Please run process_image first.'
+    
+    # First some checking:
+    if not 'gausfit' in img.completed_Ops and 'gaus' in img_type:
+        print '\033[91mERROR\033[0m: Gaussians have not been fit. Please run process_image first.'
         return False    
-    elif img.opts.shapelet_do == False and 'shap' in img_type:
-        print 'Shapelets have not been fit. Please run process_image first.'
+    elif not 'shapelets' in img.completed_Ops and 'shap' in img_type:
+        print '\033[91mERROR\033[0m: Shapelets have not been fit. Please run process_image first.'
         return False
-    elif img.opts.polarisation_do == False and 'pi' in img_type:
-        print 'Polarization properties have not been calculated. Please run process_image first.'
+    elif not 'polarisation' in img.completed_Ops and 'pi' in img_type:
+        print '\033[91mERROR\033[0m: Polarization properties have not been calculated. Please run process_image first.'
         return False
-    elif img.opts.psf_vary_do == False and 'psf' in img_type:
-        print 'PSF variations have not been calculated. Please run process_image first.'
+    elif not 'psf_vary' in img.completed_Ops and 'psf' in img_type:
+        print '\033[91mERROR\033[0m: PSF variations have not been calculated. Please run process_image first.'
         return False
-    elif img.mean == None:
-        print 'Image has not been processed. Please run process_image first.'
+    elif not 'collapse' in img.completed_Ops and 'ch0' in img_type:
+        print '\033[91mERROR\033[0m: ch0 image has not been calculated. Please run process_image first.'
+        return False
+    elif not 'rmsimage' in img.completed_Ops and ('rms' in img_type or 'mean' in img_type):
+        print '\033[91mERROR\033[0m: Mean and rms maps have not been calculated. Please run process_image first.'
+        return False    
+    elif not 'make_residimage' in img.completed_Ops and ('resid' in img_type or 'model' in img_type):
+        print '\033[91mERROR\033[0m: Residual and model maps have not been calculated. Please run process_image first.'
         return False    
     format = img_format.lower()
     if (format in ['fits', 'casa']) == False:
-        print '\n\033[91mERROR\033[0m: img_format must be "fits" or "casa"'
+        print '\033[91mERROR\033[0m: img_format must be "fits" or "casa"'
         return False 
     if format == 'casa':
-        print "Sorry, only img_format = 'fits' is supported at the moment"
+        print "\033[91mERROR\033[0m: Only img_format = 'fits' is supported at the moment"
         return False 
     filename = outfile
     if filename == None or filename == '':
@@ -627,49 +635,29 @@ def export_image(img, outfile=None, img_format='fits',
                                      img.psf_var_pa, img, bdir,
                                      clobber=clobber)
         elif img_type == 'gaus_resid':
-            if hasattr(img, 'ngaus'):
-                if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-                    im = img.resid_wavelets
-                else:
-                    im = img.resid_gaus
-                func.write_image_to_file(use_io, filename,
-                                         im, img, bdir,
-                                         clobber=clobber)
+            if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+                im = img.resid_wavelets
             else:
-                print 'Gaussians have not been fit. Please run '\
-                    'process_image first.'
-                return False
+                im = img.resid_gaus
+            func.write_image_to_file(use_io, filename,
+                                     im, img, bdir,
+                                     clobber=clobber)
         elif img_type == 'gaus_model':
-            if hasattr(img, 'ngaus'):
-                if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-                    im = img.ch0 - img.resid_wavelets
-                else:
-                    im = img.model_gaus
-                func.write_image_to_file(use_io, filename,
-                                         im, img, bdir,
-                                         clobber=clobber)
+            if incl_wavelet and hasattr(img, 'atrous_gaussians'):
+                im = img.ch0 - img.resid_wavelets
             else:
-                print 'Gaussians have not been fit. Please run '\
-                    'process_image first.'
-                return False
+                im = img.model_gaus
+            func.write_image_to_file(use_io, filename,
+                                     im, img, bdir,
+                                     clobber=clobber)
         elif img_type == 'shap_resid':
-            if hasattr(img, 'resid_shap') and img.opts.shapelet_do:
-                func.write_image_to_file(use_io, filename,
-                                         img.resid_shap, img, bdir,
-                                         clobber=clobber)
-            else:
-                print 'Image has not been decomposed in shapelets. '\
-                    'Please run process_image first.'
-                return False
+            func.write_image_to_file(use_io, filename,
+                                     img.resid_shap, img, bdir,
+                                     clobber=clobber)
         elif img_type == 'shap_model':
-            if hasattr(img, 'model_shap') and img.opts.shapelet_do:
-                func.write_image_to_file(use_io, filename,
-                                         img.model_shap, img, bdir,
-                                         clobber=clobber)
-            else:
-                print 'Image has not been decomposed in shapelets. '\
-                    'Please run process_image first.'
-                return False
+            func.write_image_to_file(use_io, filename,
+                                     img.model_shap, img, bdir,
+                                     clobber=clobber)
         else:
             print "\n\033[91mERROR\033[0m: img_type not recognized."
             return False
@@ -714,9 +702,16 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
     """
     import output
     
-    if hasattr(img, 'ngaus')==False:
-        print 'Image has not been fit. Please run process_image first.'
+    # First some checking:
+    if not 'gausfit' in img.completed_Ops:
+        print '\033[91mERROR\033[0m: Image has not been fit. Please run process_image first.'
         return False      
+    if catalog_type == 'shap' and not 'shapelets' in img.completed_Ops:
+            print '\033[91mERROR\033[0m: Image has not been decomposed into shapelets. Please run process_image first.'
+            return False      
+    if catalog_type == 'srl' and not 'gaul2srl' in img.completed_Ops:
+            print '\033[91mERROR\033[0m: Gaussians have not been grouped into sources. Please run process_image first.'
+            return False      
     format = format.lower()
     patch = bbs_patches
     filename = outfile
@@ -735,13 +730,12 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
         print '\033[91mERROR\033[0m: catalog_type must be "gaul", '\
               '"srl", or "shap"'
         return False
-#     if catalog_type == 'shap':
-#         print '\033[91mERROR\033[0m: Shapelet list not yet supported'
-#         return False
     if img.ngaus == 0:
         print 'No Gaussians were fit to image. Output file not written.'
         return False 
     if filename == '': filename = None
+    
+    # Now go format by format and call appropriate function
     if format == 'fits':
         filename = output.write_fits_list(img, filename=filename,
                                              incl_wavelet=incl_wavelet,
@@ -765,7 +759,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             return True
     if format == 'bbs':
         if catalog_type != 'gaul':
-            print "At the moment, only catalog_type = 'gaul' is supported with BBS files."
+            print "\033[91mERROR\033[0m: Only catalog_type = 'gaul' is supported with BBS files."
             return False
         filename = output.write_bbs_gaul(img, filename=filename,
                                             srcroot=srcroot,
@@ -792,7 +786,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             return True
     if format == 'star':
         if catalog_type != 'gaul':
-            print "At the moment, only catalog_type = 'gaul' is supported with star files."
+            print "\033[91mERROR\033[0m: Only catalog_type = 'gaul' is supported with star files."
             return False
         filename = output.write_star(img, filename=filename,
                                         incl_wavelet=incl_wavelet,
@@ -805,7 +799,7 @@ def write_catalog(img, outfile=None, format='bbs', srcroot=None, catalog_type='g
             return True
     if format == 'kvis':
         if catalog_type != 'gaul':
-            print "At the moment, only catalog_type = 'gaul' is supported with kvis files."
+            print "\033[91mERROR\033[0m: Only catalog_type = 'gaul' is supported with kvis files."
             return False
         filename = output.write_kvis_ann(img, filename=filename,
                                             incl_wavelet=incl_wavelet,

@@ -161,6 +161,18 @@ Alphabetical listing of all parameters
     mean_image
         This parameter is a Boolean (default is ``True``) that determines whether to plot the background mean image.
         
+    pi_image
+        This parameter is a Boolean (default is ``False``) that determines whether to plot the polarized intensity image.
+        
+    psf_major
+        This parameter is a Boolean (default is ``False``) that determines whether to plot the variation of the major axis of the PSF.
+        
+    psf_minor
+        This parameter is a Boolean (default is ``False``) that determines whether to plot the variation of the minor axis of the PSF.
+        
+    psf_pa
+        This parameter is a Boolean (default is ``False``) that determines whether to plot the variation of the position angle of the PSF.
+        
     pyramid_srcs
         This parameter is a Boolean (default is ``False``) that determines whether to plot the pyramidal sources constructed during wavelet decomposition.
         

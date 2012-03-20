@@ -184,6 +184,7 @@ class Op_wavelet_atrous(Op):
               func.write_image_to_file(img.use_io, img.imagename + '.model_all.fits',
                                        N.transpose(img.ch0-img.resid_wavelets), img, bdir)
               mylog.info('%s %s' % ('Wrote ', img.imagename+'.model_all.fits'))
+          img.completed_Ops.append('wavelet_atrous')
 
 
 #######################################################################################################

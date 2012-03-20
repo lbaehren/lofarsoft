@@ -213,7 +213,7 @@ class Op_spectralindex(Op):
 
                     if bar2.started:
                         bar2.increment()
-       
+                img.completed_Ops.append('spectralindex')
             else:
               mylog.warning('Image has only one channel. Spectral index module disabled.')
               img.opts.spectralindex_do = False

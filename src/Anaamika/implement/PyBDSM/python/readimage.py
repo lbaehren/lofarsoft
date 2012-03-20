@@ -126,6 +126,7 @@ class Op_readimage(Op):
             zero_pixels = N.where(img.image[0] == 0.0)
             img.image[0][zero_pixels] = N.nan
         
+        img.completed_Ops.append('readimage')
         return img
 
     def init_wcs(self, img):

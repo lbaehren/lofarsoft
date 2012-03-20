@@ -145,6 +145,7 @@ class Op_rmsimage(Op):
           else:
             img.mean_QUV.append(mean); img.rms_QUV.append(rms)
 
+        img.completed_Ops.append('rmsimage')
         return img
 
     def check_rmsmap(self, img, rms):

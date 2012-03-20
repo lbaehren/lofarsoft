@@ -102,6 +102,8 @@ class Op_islands(Op):
                 func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
 
             img.pyrank = pyrank
+            
+        img.completed_Ops.append('islands')
         return img
 
     def ndimage_alg(self, img, opts):

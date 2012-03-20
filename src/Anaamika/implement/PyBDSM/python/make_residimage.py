@@ -134,6 +134,7 @@ class Op_make_residimage(Op):
                         g.sresid_rms = N.std(resid)
                         g.sresid_mean = N.mean(resid)
 
+        img.completed_Ops.append('make_residimage')
         return img
 
     def find_bbox(self, thresh, g):

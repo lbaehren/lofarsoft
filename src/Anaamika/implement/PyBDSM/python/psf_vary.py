@@ -24,7 +24,7 @@ class Op_psf_vary(Op):
     def __call__(self, img):
 
       if img.opts.psf_vary_do:
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary  ")
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Psf_Vary")
         mylogger.userinfo(mylog, '\nEstimating PSF variations')
         opts = img.opts
         dir = img.basedir + '/misc/'
@@ -286,6 +286,7 @@ class Op_psf_vary(Op):
                             bar2.spin()
                     if img.opts.quiet == False:
                         bar2.increment()
+        img.completed_Ops.append('psf_vary')
 
 ##################################################################################################
 

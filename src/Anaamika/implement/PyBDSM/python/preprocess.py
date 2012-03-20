@@ -181,7 +181,7 @@ class Op_preprocess(Op):
                                   '(' + str(img.rms_box[0]) + ', ' +
                                   str(img.rms_box[1]) + ') pixels')
             
-
+        img.completed_Ops.append('preprocess')
         return img
 
     def outside_univ(self,img):

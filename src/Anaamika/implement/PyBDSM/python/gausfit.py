@@ -185,6 +185,7 @@ class Op_gausfit(Op):
                            "1-D. Unless you're fitting an extended source, "\
                            "beam may be incorrect.")
 
+        img.completed_Ops.append('gausfit')
         return img
 
     def fit_island(self, isl, opts, img, ngmax=None, ffimg=None):
