@@ -1334,7 +1334,7 @@ void writer::filesInit()
 		{
 
 			stringstream the_sub_sstrm;
-			the_sub_sstrm << isub;
+			the_sub_sstrm << SUBBLIST[isub];
 
 			stringstream the_chan_sstrm;
 			the_chan_sstrm << ichan;
