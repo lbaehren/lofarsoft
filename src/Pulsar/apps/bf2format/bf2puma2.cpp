@@ -1263,9 +1263,6 @@ void writer::readParset()
 	NSUBBANDS = jj;
 	SUBBANDS = jj;
 
-	for(int k=0; k<jj; k++)
-		cerr << SUBBLIST[k] << ",";
-	cerr <<endl;
 
 	if (verb)
 		cout << " SUBBAND RANGE = [" << SUBBLIST[0] << "--"
@@ -1294,9 +1291,6 @@ void writer::readParset()
 		SUBBANDS = nbb;
 	}	
 
-	for(int k=0; k<NSUBBANDS; k++)
-		cerr << SUBBLIST[k] << ",";
-	cerr <<endl;
 
 
 // Determine Number of samples:
