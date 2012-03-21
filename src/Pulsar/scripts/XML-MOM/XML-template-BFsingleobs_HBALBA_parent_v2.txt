@@ -1,0 +1,61 @@
+					<lofar:observation>
+					    <name>FILL IN OBSERVATION NAME</name>
+					    <description>FILL IN DESCRIPTION</description>
+					    <currentStatus>
+					        <mom2:openedStatus/>
+					    </currentStatus>
+					    <lofar:observationAttributes>
+					        <observationId></observationId>
+					        <name>FILL IN OBSERVATION NAME</name>
+					        <projectName>PROJECT NAME</projectName>
+					        <instrument>Beam Observation</instrument>
+					     	<tbbPiggybackAllowed>TBB PIGGYBACK</tbbPiggybackAllowed>
+					        
+					        <userSpecification>
+					            <correlatedData>IMAGING</correlatedData>
+					            <coherentStokesData>CS_TF</coherentStokesData>
+					            <incoherentStokesData>IS_TF</incoherentStokesData>
+					            <antenna>ANTENNA SETTING</antenna>
+					            <clock mode="CLOCK MHz"/>
+					            <instrumentFilter>INSTRUMENT FILTER MHz</instrumentFilter>
+					            <integrationInterval>INTEG INTERVAL</integrationInterval>
+					            <channelsPerSubband>CHANNELS PER SUBBAND</channelsPerSubband>
+					            <cnIntegrationSteps>12208</cnIntegrationSteps>
+					            <coherentDedisperseChannels>OCD_TF</coherentDedisperseChannels>
+								<enableSuperterp>ENABLE SUPERTERP</enableSuperterp>
+					            <bypassPff>BYPASS 2PPF</bypassPff>
+					            
+					            <tiedArrayBeams>
+					                <flyseye>FE_TF</flyseye>
+					                <nrTabRings>NOF TA RINGS</nrTabRings>
+					                <tabRingSize>TA RING SIZE</tabRingSize>
+					                <tiedArrayBeamList>
+					                    <tiedArrayBeam>
+					                        <angle1>0.0</angle1>
+					                        <angle2>0.0</angle2>
+					                    	<coherent>CS_TF</coherent>
+					                        <dispersionMeasure>0.0</dispersionMeasure>
+					                    </tiedArrayBeam>
+					                </tiedArrayBeamList>
+					            </tiedArrayBeams>
+					            <stokes>
+        						    <subbandsPerFileCS>SUBS PER FILE CS</subbandsPerFileCS>
+					            	<subbandsPerFileIS>SUBS PER FILE IS</subbandsPerFileIS>
+					         		<numberCollapsedChannelsCS>COLLAPSED CHAN CS</numberCollapsedChannelsCS>
+					            	<numberCollapsedChannelsIS>COLLAPSED CHAN IS</numberCollapsedChannelsIS>
+					            	<stokesDownsamplingStepsCS>DOWNSAMPLING STEPS CS</stokesDownsamplingStepsCS>
+					            	<stokesDownsamplingStepsIS>DOWNSAMPLING STEPS IS</stokesDownsamplingStepsIS>
+					         		<whichCS>WHICH_CS</whichCS>
+					            	<whichIS>WHICH_IS</whichIS>
+					                
+					            </stokes>
+					            <stationSet>Custom</stationSet>
+					            <stations>
+					              	STATION_LIST
+					            </stations>
+								<duration>LENGTH</duration>
+								<timeFrame>UT</timeFrame>
+								<startTime>STARTTIME</startTime>
+								<endTime>ENDTIME</endTime>
+					        </userSpecification>
+					    </lofar:observationAttributes>
