@@ -1,8 +1,13 @@
 #! /bin/sh
 
 hash -r
+echo dspsr bootstrap with the following PATH: $PATH
+echo `which psrchive`
+ls -ltr $LOFARSOFT/release/share/pulsar/bin/
 
-psrchive=`which psrchive 2> /dev/null`
+psrchive=$LOFARSOFT/release/share/pulsar/bin/psrchive
+
+#psrchive=`which psrchive 2> /dev/null`
 
 if test -z $psrchive; then
 
