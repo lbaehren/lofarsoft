@@ -284,17 +284,26 @@ if (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
   ## Trigger build and install
   add_custom_target (pulsar
     COMMAND ${CMAKE_COMMAND} ${PULSAR_SOURCE_DIR}
+    COMMAND date
     COMMAND ${CMAKE_BUILD_TOOL} install
+    COMMAND date
     COMMAND ${CMAKE_BUILD_TOOL} psrchive_install
-    COMMAND ${CMAKE_BUILD_TOOL} dspsr_install
+    COMMAND date
     COMMAND ${CMAKE_BUILD_TOOL} ppgplot_bindings_install
+    COMMAND date
     COMMAND ${CMAKE_BUILD_TOOL} presto_makewisdom
+    COMMAND date
+    COMMAND ${CMAKE_BUILD_TOOL} dspsr_install
+    COMMAND date
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
     )
   ## Experimental build
   add_custom_target (pulsar_Experimental
+    COMMAND date
     COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} ${PULSAR_SOURCE_DIR}
+    COMMAND date
     COMMAND ${CMAKE_BUILD_TOOL} Experimental
+    COMMAND date
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}
     )
 else (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
