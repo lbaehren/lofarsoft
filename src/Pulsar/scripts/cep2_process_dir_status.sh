@@ -99,7 +99,7 @@ else
    :
   else
    # pattern allows both RSP* and BEAM* directories to be looked at
-   prepfold_png=`ls -1 $procdir/stokes/[RB][SE][PA]*/*.pfd.png 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
+   prepfold_png=`find $procdir/stokes -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
    echo $prepfold_png
   fi
   exit 0
@@ -147,11 +147,8 @@ else
   else
    if [[ $isRSPA == "" ]]; then
     # pattern allows both RSP* and BEAM* directories to be looked at
-    prepfold_png=`ls -1 $procdir/incoherentstokes/[RB][SE][PA]*/*.pfd.png 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
+    prepfold_png=`find $procdir/incoherentstokes -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
     # if this is FE observation, then we have to check beam_N subdirectories...
-    if [[ $prepfold_png == "" ]]; then
-     prepfold_png=`ls -1 $procdir/incoherentstokes/[RB][SE][PA]*/beam_*/*.pfd.png 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
-    fi
    else
     prepfold_png=`ls -1 $procdir/incoherentstokes/RSPA/*.pfd.png 2>/dev/null | grep -v such | grep RSPA_PSR | head -n 1`
    fi
