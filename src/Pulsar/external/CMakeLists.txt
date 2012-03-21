@@ -180,7 +180,7 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 ##
 ## ==============================================================================
 
-if (NOT TARGET psrchive)
+#if (NOT TARGET psrchive)
 
 #  set (psrchive_version   "13.3")
   set (psrchive_version   "20120316")
@@ -249,10 +249,10 @@ add_custom_target (psrchive_install
 add_dependencies (psrchive_install psrchive_build psrchive_configure psrchive_unpack psrcat_install)
 
   ## Register last step in the chain with the actual target
-  add_custom_target (psrchive ALL)
-  add_dependencies (psrchive psrchive_install psrchive_build psrchive_configure psrchive_unpack psrcat_install)
+#  add_custom_target (psrchive ALL)
+#  add_dependencies (psrchive psrchive_install psrchive_build psrchive_configure psrchive_unpack psrcat_install)
 
-endif (NOT TARGET psrchive)
+#endif (NOT TARGET psrchive)
 
 ## ==============================================================================
 ##
@@ -324,7 +324,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 #add_subdirectory (dspsr)
 #add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install)
 
-if (NOT TARGET dspsr)
+#if (NOT TARGET dspsr)
   
   set (dspsr_version   "20120316")
 #  set (dspsr_version   "1.0")
@@ -403,12 +403,12 @@ add_dependencies (dspsr_install tempo2_install psrdada_install dspsr_preinstall 
 #add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
   ## Register last step in the chain with the actual target
-  add_custom_target (dspsr ALL)
+#  add_custom_target (dspsr ALL)
 #  add_dependencies (dspsr_install tempo2_install psrchive_install psrdada_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
-  add_dependencies (dspsr_install tempo2_install psrdada_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+#  add_dependencies (dspsr_install tempo2_install psrdada_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 #  add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
-endif (NOT TARGET dspsr)
+#endif (NOT TARGET dspsr)
 
 
 ## ==============================================================================
@@ -519,7 +519,7 @@ add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 
 #add_subdirectory (psrfits_utils)
 
-if (NOT TARGET psrfits_utils)
+#if (NOT TARGET psrfits_utils)
   
   set (psrfits_version   "utils-525dbed")
   set (psrfits_name      "psrfits_${psrfits_version}")
@@ -573,7 +573,7 @@ if (NOT TARGET psrfits_utils)
   add_dependencies (psrfits_install psrfits_build)
 
   ## Register last step in the chain with the actual target
-  add_custom_target (psrfits_utils ALL)
-  add_dependencies (psrfits_utils psrfits_install)
+#  add_custom_target (psrfits_utils ALL)
+#  add_dependencies (psrfits_utils psrfits_install)
   
-endif (NOT TARGET psrfits_utils)
+#endif (NOT TARGET psrfits_utils)
