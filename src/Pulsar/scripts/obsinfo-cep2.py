@@ -2425,10 +2425,33 @@ if __name__ == "__main__":
 
 				# checking if this obs has BF data (then it should not have CS)
 				if oi.BF == "+":
-#					lse=hoover_nodes[0] # locus101
-					lse="locus092"
-					# .... we are not processing BF data yet in the pipeline....
-						
+					lse="locus093"
+					cmd="%s %s '%s -t CV -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
+					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
+					if cmdout[0] != "":
+						CSredlocation=cmdout[0]
+						statusline=cmdout[1]
+						if cmdout[2].isdigit() == True:
+							processed_dirsize + float(cmdout[2]) / 1000. / 1000. / 1000.
+						if cmdout[3] == "yes":  # combined plot exists
+							# copying combined plots and renaming them
+							profiles_array[0]="CVcombined"
+							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
+								combined="combined"
+								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
+							else:
+								thcombined="combined"
+								combined=cmdout[5]
+								basecombined=combined.split("/")[-1].split(".png")[0]
+								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, CSredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[0], plotsdir, id, thcombined, plotsdir, id, profiles_array[0])
+							os.system(cmd)
+						# checking if this obs is FE obs. If so, then get status maps
+						if cmdout[4] == "yes":   # now also checking not just for FE obs (in case there are 'heat' maps for CS data with many TA beams)
+							# copying FE status plots
+							profiles_array[2]="status"
+							combined="status"
+							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id)
+							os.system(cmd)
 
 				# looking for _redIS first on locus102
 				if oi.IS == "+":

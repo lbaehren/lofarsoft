@@ -10,7 +10,7 @@ psrarchive=""
 obsid=""
 mode=""  # either CS or IS
 
-usage="Usage: `basename $0` [-t CS|IS] [-id OBSID] [-d TOP-LEVEL PSRARCHIVE DIR]"
+usage="Usage: `basename $0` [-t CS|IS|CV] [-id OBSID] [-d TOP-LEVEL PSRARCHIVE DIR]"
 
 if [[ $# == 0 ]]; then
  echo $usage
@@ -25,7 +25,7 @@ do
         -d)    psrarchive="$2"; shift;;
         -t)    mode=$2; shift;;
         -*)
-            echo "Usage: `basename $0` [-t CS|IS] [-id OBSID] [-d TOP-LEVEL PSRARCHIVE DIR]"
+            echo "Usage: `basename $0` [-t CS|IS|CV] [-id OBSID] [-d TOP-LEVEL PSRARCHIVE DIR]"
             exit 1;;
         *)  break;;
     esac
@@ -48,6 +48,9 @@ fi
 # getting the processing directory
 if [[ $mode == "CS" ]]; then
  procdir=`find $psrarchive -type d -name "$obsid"_CSplots -print 2>/dev/null | egrep 'CSplots' | grep -v Permission | grep -v such`
+fi
+if [[ $mode == "CV" ]]; then
+ procdir=`find $psrarchive -type d -name "$obsid"_CVplots -print 2>/dev/null | egrep 'CVplots' | grep -v Permission | grep -v such`
 fi
 if [[ $mode == "IS" ]]; then
  procdir=`find $psrarchive -type d -name "$obsid"_redIS -print 2>/dev/null | egrep 'redIS' | grep -v Permission | grep -v such`
@@ -104,6 +107,47 @@ else
   fi
   exit 0
  fi # $mode == "CS"
+
+ # for CV data
+ if [[ $mode == "CV" ]]; then
+  statusline="+CV"
+  procsize=`du -s -B 1 $procdir 2>/dev/null | cut -f 1 | grep -v such`
+  istar=`find $procdir -name "*_nopfd.tar.gz" -print 2>/dev/null | grep -v Permission | grep -v such`
+  if [[ $istar == "" ]]; then
+   statusline="$statusline (-tar"
+  else
+   statusline="$statusline (+tar"
+  fi
+  isrfi=`find $procdir/rawvoltages/*/ -name "*.rfirep" -print 2>/dev/null | grep -v Permission | grep -v such`
+  if [[ $isrfi == "" ]]; then
+   statusline="$statusline,-rfi"
+  else
+   statusline="$statusline,+rfi"
+  fi
+  echo $procdir
+  echo $statusline
+  echo $procsize
+  is_combined=`ls -1 $procdir/combined.th.png 2>/dev/null | grep -v such`
+  if [[ $is_combined == "" ]]; then
+   echo "no" # combined plot does not exist
+  else
+   echo "yes"
+  fi
+  is_status=`ls -1 $procdir/status.th.png 2>/dev/null | grep -v such`
+  if [[ $is_status == "" ]]; then
+   echo "no" # status map plot does not exist
+  else
+   echo "yes"
+  fi
+  if [[ $is_combined == "" ]]; then
+   :
+  else
+   # pattern allows both RSP* and BEAM* directories to be looked at
+   prepfold_png=`find $procdir/rawvoltages -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
+   echo $prepfold_png
+  fi
+  exit 0
+ fi # $mode == "CV"
 
  if [[ $mode == "IS" ]]; then
   statusline="+IS"
