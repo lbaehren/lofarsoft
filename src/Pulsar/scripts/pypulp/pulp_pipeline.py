@@ -286,7 +286,7 @@ class Pipeline:
 	# to be run locally on summary node
 	def make_summary(self, obs, cep2, cmdline, log):
 		try:
-			# either "CS", "IS", "CV", .. 
+			sumnode=cep2.get_current_node()
 			data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
 
 			if data_code == "CS" or data_code == "IS":
@@ -332,6 +332,9 @@ class Pipeline:
 			else:
 				if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
 					log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
+
+                # either "CS", "IS", "CV", ..
+                data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
 
 		# Make a tarball of all the plots (summary archive)
 		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
@@ -1144,7 +1147,7 @@ class CVUnit(PipeUnit):
 		self.archive_suffix = "plotsCV.tar.gz"
 		self.outdir_suffix = "_red_py"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", ".rv"]
+		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out"]
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
@@ -1231,11 +1234,7 @@ class CVUnit(PipeUnit):
 			# loop on frequency splits
 			for ii in range(len(s0_files)):
 				cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
-				bf2puma2_popen = self.start_and_go(cmd, workdir=self.curdir)
-				bf2puma2_popens.append(bf2puma2_popen)
-
-			# waiting for bf2puma2 to finish
-			self.waiting_list("bf2puma2", bf2puma2_popens)
+				self.execute(cmd, workdir=self.curdir)
 
 			# removing links for input files
 			cmd="rm -f %s" % (" ".join(input_files))
@@ -1245,14 +1244,15 @@ class CVUnit(PipeUnit):
 				# getting the MJD of the observation
 				# for some reason dspsr gets wrong MJD without using -m option
 				input_prefix=s0_files[0].split("_S0_")[0]
+				bf2puma_outfiles=glob.glob("%s/%s_SB*_CH*" % (self.curdir, input_prefix))
 				self.log.info("Reading MJD of observation from the header of output bf2puma2 files...")
-				cmd="head -25 %s/%s_SB0_CH0 | grep MJD" % (self.curdir, input_prefix)
+				cmd="head -25 %s | grep MJD" % (bf2puma_outfiles[0])
 				mjdline=os.popen(cmd).readlines()
 				if np.size(mjdline)>0:
 					obsmjd=mjdline[0][:-1].split(" ")[-1]
 					self.log.info("MJD = %s" % (obsmjd))
 				else:
-					self.log.error("Can't read the header of file '%s_SB0_CH0' to get MJD" % (input_prefix))
+					self.log.error("Can't read the header of file '%s' to get MJD" % (bf2puma_outfiles[0]))
 					self.kill()
 					sys.exit(1)
 
@@ -1267,14 +1267,14 @@ class CVUnit(PipeUnit):
 				for psr in self.psrs:
 					self.log.info("Running dspsr for pulsar %s..." % (psr))
 					psr2=re.sub(r'[BJ]', '', psr)
-					for sub in range(obs.nrSubbands):
-						self.log.info("Subband %d" % (sub))
+					for bb in range(0, len(bf2puma_outfiles), self.nrChanPerSub):
+						self.log.info("For %s" % (", ".join(bf2puma_outfiles[bb:bb+self.nrChanPerSub])))
 						dspsr_popens=[] # list of dspsr Popen objects
-						for chan in range(self.nrChanPerSub):
-							input_file="%s_SB%d_CH%d" % (input_prefix, sub, chan)
-							cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%d_CH%d %s" % \
+						for cc in range(bb, bb+self.nrChanPerSub):
+							input_file=bf2puma_outfiles[cc]
+							cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s %s" % \
 								(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
-								self.outdir, psr2, psr, self.output_prefix, sub, chan, input_file)
+								self.outdir, psr2, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
 							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 							dspsr_popens.append(dspsr_popen)
 
@@ -1288,12 +1288,18 @@ class CVUnit(PipeUnit):
 					# removing corrupted freq channels
 					if self.nrChanPerSub > 1:
 						self.log.info("Zapping every %d channel..." % (self.nrChanPerSub))
-						cmd="paz -r -m -z \"%s\" %s_%s.ar" % \
+						cmd="paz -z \"%s\" -m %s_%s.ar" % \
 							(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
 
+					# removing files created by bf2puma2 and dspsr for each freq channel
+					remove_list=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
+					cmd="rm -f %s" % (" ".join(remove_list))
+					self.execute(cmd, workdir=self.curdir)
+
 				# removing files created by bf2puma2 and dspsr for each freq channel
-				cmd="rm -f %s_SB*_CH*" % (input_prefix)
+				remove_list=glob.glob("%s/%s_SB*_CH*" % (self.curdir, input_prefix))
+				cmd="rm -f %s" % (" ".join(remove_list))
 				self.execute(cmd, workdir=self.curdir)
 
 			# copying parset file to output directory
