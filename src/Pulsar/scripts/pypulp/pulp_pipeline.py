@@ -155,8 +155,8 @@ class Pipeline:
 			# in case when pipeline was interrupted
 			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #			cmd="ssh -t %s 'nohup pulp.py --noinit --local --beams %d:%d %s </dev/null 2>&1'" % \
-			cmd="ssh -t %s 'python pulp.py --noinit --local --beams %d:%d %s'" % \
-				(locus, unit.sapid, unit.tabid, " ".join(cmdline.options))
+			cmd="ssh -t %s '%s/release/share/pulsar/bin/pulp.py --noinit --local --beams %d:%d %s'" % \
+				(locus, cep2.lofarsoft, unit.sapid, unit.tabid, " ".join(cmdline.options))
 			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			os.system("stty sane")
 			log.info("SAP=%d TAB=%d %s(%s%s) on %s (pid=%d)  [#locations = %d, #files = %d]" % \
@@ -202,8 +202,8 @@ class Pipeline:
 				# Using ssh in the background instead of cexec in order to get proper status code if job has failed
 				# with cexec you always get status=0
 #				cmd="ssh -t %s 'nohup /home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s </dev/null 2>&1'" % \
-				cmd="ssh -t %s 'python pulp.py --noinit --summary --local --beams %s %s'" % \
-					(sumnode, sumnode, " ".join(cmdline.options))
+				cmd="ssh -t %s '%s/release/share/pulsar/bin/pulp.py --noinit --summary --local --beams %s %s'" % \
+					(sumnode, cep2.lofarsoft, sumnode, " ".join(cmdline.options))
 				sum_popen = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				self.sum_popens.append(sum_popen)
 				log.info("Making summaries on %s... (pid=%d)" % (sumnode, sum_popen.pid))
