@@ -89,6 +89,8 @@ class CMDLine:
                            help="search for input raw data in all alive nodes instead of using the list of nodes from the parset file", default=False)
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
+        	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',
+                           help="optional parameter to turn off user's warnings and waiting time of 10 seconds in the beginning", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
                            help="do not check for down nodes and available input raw data. Observation config is read from saved file \
                                  rather then is initialized using parset file (mostly for _internal_ use only)", default=False)
@@ -213,7 +215,7 @@ class CMDLine:
 *** You may want to use --del to have clean run, or specify new output directory.\n***"
 			if log != None: log.warning(msg)
 			else: print msg
-			self.waiting_for_user(10, log)
+			if not self.opts.is_quiet: self.waiting_for_user(10, log)
 
 		# checking if rawdir is specified
 		if self.opts.rawdir != "/data":
@@ -233,7 +235,7 @@ class CMDLine:
 *** See help for more details.\n***"
 			if log != None: log.warning(msg)
 			else: print msg
-			self.waiting_for_user(10, log)
+			if not self.opts.is_quiet: self.waiting_for_user(10, log)
 
 		if not self.opts.is_nofold:
 			# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
