@@ -211,11 +211,12 @@ class CMDLine:
 
 		# warning user that some of the results can still be overwritten, if --del is not used
 		if not self.opts.is_delete:
-			msg="***\n*** Warning: Some of the previous results still can be overwritten.\n\
+			if not self.opts.is_quiet:
+				msg="***\n*** Warning: Some of the previous results still can be overwritten.\n\
 *** You may want to use --del to have clean run, or specify new output directory.\n***"
-			if log != None: log.warning(msg)
-			else: print msg
-			if not self.opts.is_quiet: self.waiting_for_user(10, log)
+				if log != None: log.warning(msg)
+				else: print msg
+				self.waiting_for_user(10, log)
 
 		# checking if rawdir is specified
 		if self.opts.rawdir != "/data":
@@ -228,14 +229,15 @@ class CMDLine:
 
 		# checking --nofold and pulsar list
 		if not self.opts.is_nofold and len(self.psrs) == 0:
-			msg="***\n*** Warning: Pulsar is not specified and PULP will use source names\n\
+			if not self.opts.is_quiet:
+				msg="***\n*** Warning: Pulsar is not specified and PULP will use source names\n\
 *** from the parset file first if given, and then will look for the best\n\
 *** pulsar in the SAP's FOV for each SAP separately! You also can use\n\
 *** predefined words: \"parset\", \"sapfind\", \"sapfind3\", or \"tabfind\".\n\
 *** See help for more details.\n***"
-			if log != None: log.warning(msg)
-			else: print msg
-			if not self.opts.is_quiet: self.waiting_for_user(10, log)
+				if log != None: log.warning(msg)
+				else: print msg
+				self.waiting_for_user(10, log)
 
 		if not self.opts.is_nofold:
 			# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
