@@ -65,12 +65,12 @@ uint32_t CHANNELS = 16;
 uint32_t SUBBANDS = 32;
 uint32_t SAMPLES = 12208;
 uint32_t NPOL = 2;
+float CLOCKRES = 0.1953125;
 
 int verb = 0; // generic verbosity flag
 int realv = 0; // float-writer flag
 const int_fast32_t INPUT_DATA_BLOCK_HEADER_SIZE = 512;
 
-#define CLOCKRES 0.1953125
 
 using namespace std;
 
@@ -1154,8 +1154,14 @@ void writer::readParset()
 	if (verb)
 		cout << " ANTENNA TYPE = " << ANTENNA << endl;
 
+// Determine clock resolution:
+	string tmp = "Observation.subbandWidth";
+	CLOCKRES = atof(getKeyVal(tmp).c_str())/1000.0;
+	if (verb)
+		cout << " CLOCK RESOLUTION = " <<setprecision(7)<< CLOCKRES << endl;
+
 // Determine number of channels:
-	string tmp = "Observation.channelsPerSubband";
+	tmp = "Observation.channelsPerSubband";
 	NCHANNELS = atoi(getKeyVal(tmp).c_str());
 	CHANNELS = NCHANNELS;
 	if (verb)
@@ -1442,6 +1448,18 @@ void writer::writePuMa2Block(const float global_minmax,
 		{
 			iv++;
 			vsum += reX * reX + imX * imX + reY * reY + imY * imY;
+
+//			float phX = atan2(imX,reX);
+//			float phY = atan2(imY,reY);
+			
+//			vsum = phY-phX;
+//			while(vsum<-3.14) vsum += 6.28;
+//			while(vsum>3.14) vsum -= 6.28;
+			
+//			fwrite(&phY, sizeof(vsum), 1,
+//						realvolt[_the_sub * NCHANNELS + _the_chan]);
+			
+			
 			if (iv == navg)
 			{
 				if (fwrite(&vsum, sizeof(vsum), 1,
