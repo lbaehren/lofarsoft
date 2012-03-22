@@ -96,7 +96,7 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly,loradir):
     
     
     if plotlora:
-        lorainfo=lora.loraInfo(res["TIME"],datadir = loradir)
+        lorainfo=lora.loraInfo(res["TIME"],datadir = loradir, silent=True)
         for k in ["core","direction","energy"]:
             par["lora"+k]=lorainfo[k]
     
@@ -122,6 +122,7 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly,loradir):
     timestr=time.strftime("%Y%m%dT%H%M%S",time.gmtime(timesec))
     timens=str(res["SAMPLE_INTERVAL"]*res["SAMPLE_NUMBER"]*1000)[0:3]
     
+    par["time"] = timestr
     par["title"]="Footprint of CR event "+ timestr + " (pol " + str(pol) + ")"
     par["names"]=[str(a)[:-6]+","+str(a)[-3:] for a in antid[pol]]
     par["antid"] = cr.hArray(antid[pol])
@@ -141,7 +142,8 @@ def obtainvalue(par,key):
         arrivaltime='b',
         antid=None,
         loradirection=None,
-        names=False
+        names=False,
+        event_id = None
     )
 
     
@@ -203,8 +205,9 @@ class plotfootprint(tasks.Task):
         names=p_(lambda self:obtainvalue(self.results,"names"),doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
         plotnames={default:False,doc:"plot names of dipoles"},
         title=p_(lambda self:obtainvalue(self.results,"title"),doc="Title for the plot (e.g., event or filename)"),
+        event_id =p_(lambda self:obtainvalue(self.results,"time"),doc="String formatted time of event"),
         newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        plot_finish={default: lambda self:cr.plotfinish(doplot=True,plotpause=True),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        plot_finish={default: lambda self:cr.plotfinish(doplot=True,plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
         plot_name={default:"footprint",doc:"Extra name to be added to plot filename."},
         plotlegend={default:False,doc:"Plot a legend"},
         positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
@@ -223,7 +226,8 @@ class plotfootprint(tasks.Task):
         filetype={default:"png",doc:"extension/type of output file"},
         usecolorbar={default:True,doc:"print the colorbar?"},
         save_images = {default:False,doc:"Enable if images should be saved to disk in default folder"},
-        generate_html = {default:False,doc:"Default output to altair webserver"}
+        generate_html = {default:False,doc:"Default output to altair webserver"},
+        
         
         )
         
@@ -234,6 +238,7 @@ class plotfootprint(tasks.Task):
     def run(self):
         
         #Checking for sizes of antenna signals
+        
         
         if isinstance(self.power,(list)):
             self.power=cr.hArray(self.power)
@@ -266,10 +271,8 @@ class plotfootprint(tasks.Task):
             raise TypeError("PlotAntennaLayout: parameter 'colors' needs to be string or an hArray thereof.")
             
                
-         #Plotting the LOrA detector with all instances      
+         #Plotting the LORA detector with all instances      
                
-        if self.newfigure and not self.figure:
-            self.figure=cr.plt.figure()
         cr.plt.clf()
         
         if self.plotlora:
@@ -306,104 +309,110 @@ class plotfootprint(tasks.Task):
                 
                             cr.plt.scatter(self.lorapositions[0].vec(),self.lorapositions[1].vec(),s=self.lsizes,c=self.loracolor,marker=self.lorashape,cmap="winter")
                     else:
-                            cr.plt.scatter(self.lorapositions[0].vec(),self.lorapositions[1].vec(),s=self.lsizes,c=self.loracolor,marker=self.lorashape)
+                        cr.plt.scatter(self.lorapositions[0].vec(),self.lorapositions[1].vec(),s=self.lsizes,c=self.loracolor,marker=self.lorashape)
             
             if self.loracore:
             
                 if type(self.loracolor) is str:
-                     cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=200,color=self.loracolor,linewidth=4)
+                     cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=600,color=self.loracolor,linewidth=4)
                 else: 
-                    cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=200,color="#151B8D",linewidth=4)
+                     cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=600,color="#151B8D",linewidth=4)
                 
                 if self.loradirection:
                     dcos=cr.cos(cr.radians(self.loradirection[0]))
                     dsin=cr.sin(cr.radians(self.loradirection[0]))
                     elev=self.loradirection[1]
                     if type(self.loracolor) is str:
-                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.loracolor,ls='dashed',hatch='\\')
+                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.loracolor)
                     else:
-                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color="#151B8D",ls='dashed',hatch='\\')
+                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color="#151B8D")
         
         elif self.plotlorashower:
             if self.loracore:
                 if type(self.loracolor) is str:
-                    cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=200,color=self.loracolor,linewidth=4)
+                    cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=600,color=self.loracolor,linewidth=4)
                 else:
-                    cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=200,color="#151B8D",linewidth=4)    
+                    cr.plt.scatter(self.loracore[0],self.loracore[1],marker='x',s=600,color="#151B8D",linewidth=4)    
                 if self.loradirection:
                     dcos=cr.cos(cr.radians(self.loradirection[0]))
                     dsin=cr.sin(cr.radians(self.loradirection[0]))
                     elev=self.loradirection[1]
+                    
                     if type(self.loracolor) is str:
-                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.loracolor,ls='dashed',hatch='\\')
+                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.loracolor)
                     else:
-                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color="#151B8D",ls='dashed',hatch='\\')    
+                        cr.plt.arrow(self.loracore[0]+elev*dsin,self.loracore[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color="#151B8D")    
 
 
 
         #Getting the background picture of the superterp
         
         if self.plotlayout:
-            from os import environ
-            from os.path import isfile
-            if "LOFARSOFT" in environ.keys():
-                bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
-                if isfile(bgimname):
-                    bgim=cr.plt.imread(bgimname)
-                    cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+            if self.positions:
+                from os import environ
+                from os.path import isfile
+                if "LOFARSOFT" in environ.keys():
+                    bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
+                    if isfile(bgimname):
+                        bgim=cr.plt.imread(bgimname)
+                        cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                    else:
+                        print "WARNING Cannot plot layout. Image file not found. Run an svn update?"
                 else:
-                    print "WARNING Cannot plot layout. Image file not found. Run an svn update?"
-            else:
-                print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
+                    print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
         
         # Plotting the actual signals
         
         if self.positions:
             cr.plt.scatter(self.positionsT[0].vec(),self.positionsT[1].vec(),s=self.ssizes,c=self.scolors,marker=self.lofarshape,cmap=self.colormap)
-        
+
         # Further plotting options
         
-        if self.title:
-            cr.plt.title(self.title)
-        if self.usecolorbar:
-            self.cbar=cr.plt.colorbar()
-            self.cbar.set_label("Time of arrival (ns)")
-
-        if self.names and self.plotnames:
-            for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
-                print self.names
-                cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
-        
-        cr.plt.xlabel("LOFAR East [meters] ")
-        cr.plt.ylabel("LOFAR North [meters] ")
-        
-        if self.plotlegend:
-            cr.plt.colorbar()
-            cr.plt.text(100,-220,"Size denotes signal power")
+            if self.title:
+                cr.plt.title(self.title)
+            if self.usecolorbar:
+                self.cbar=cr.plt.colorbar()
+                self.cbar.set_label("Time of arrival (ns)")
+    
+            if self.names and self.plotnames:
+                for label,x,y in zip(self.names,self.positionsT[0].vec(),self.positionsT[1].vec()):
+                    print self.names
+                    cr.plt.annotate(str(label),xy=(x,y), xytext=(-3,3),textcoords='offset points', ha='right', va='bottom')
             
-        if self.filefilter:
-            name_extension = "footprint_pol"+str(self.pol)
-            self.plot_name=self.filefilter+"pol"+str(self.pol)+"/"+name_extension
-
-        if self.generate_html:
-                status = "new"
-                check_file = open(self.filefilter+'index.html', 'r')
-                for line in check_file:
-                    if "footprint_pol"+str(self.pol) in line:
-                        status = "filled"
-                check_file.close()
+            cr.plt.xlabel("LOFAR East [meters] ")
+            cr.plt.ylabel("LOFAR North [meters] ")
+            
+            if self.plotlegend:
+                cr.plt.colorbar()
+                cr.plt.text(100,-220,"Size denotes signal power")
                 
-                if status == "new":
-                    html_file = open(self.filefilter+'index.html','a')
-                    name = "pol"+str(self.pol)+"/pycrfig-0001-"+name_extension+".png"
+            if self.filefilter:
+                name_extension = "footprint_"+self.event_id+"_pol_"+str(self.pol)
+                self.plot_name=self.filefilter+"/"+name_extension
+                if self.save_images:
                     
-                    html_file.write("\n<a name=\"%s"%name)
-                    html_file.write("\" href=\"%s"%name)
-                    html_file.write("\">%s</a> <br>"%name)
-                    html_file.write("\n<a href=\"%s"%name)
-                    html_file.write("\"><img src=\"%s\" width=800></a><br>"%name)
-                    html_file.close()
+                   cr.plt.savefig(self.plot_name)
+                    
+    
+            if self.generate_html:
+                    status = "new"
+                    check_file = open(self.filefilter+'index.html', 'r')
+                    for line in check_file:
+                        if "footprint_pol"+str(self.pol) in line:
+                            status = "filled"
+                    check_file.close()
+                    
+                    if status == "new":
+                        html_file = open(self.filefilter+'index.html','a')
+                        name = "pol"+str(self.pol)+"/pycrfig-0001-"+name_extension+".png"
+                        
+                        html_file.write("\n<a name=\"%s"%name)
+                        html_file.write("\" href=\"%s"%name)
+                        html_file.write("\">%s</a> <br>"%name)
+                        html_file.write("\n<a href=\"%s"%name)
+                        html_file.write("\"><img src=\"%s\" width=800></a><br>"%name)
+                        html_file.close()
+                
             
-        
-        #self.plot_finish(filename=self.plot_name,filetype=self.filetype)   
-        cr.plt.show()
+            if not self.save_images:
+                cr.plt.show()
