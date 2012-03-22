@@ -177,6 +177,14 @@ class BFDataReader():
 
         return self.data
 
+    def setblocksize(self,blocksize):
+        self.samples=blocksize
+        self.par['nrblocks']=int(self.par['nrblocks']*self.par['samples']/blocksize)
+        self.par['samples']=blocksize
+        self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))
+        self.nrblocks=self.par['nrblocks']
+        
+
 
 def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False,h5=False):
     """Get a lofar datablock from stokes (I or IQUV) raw data format.
@@ -826,7 +834,10 @@ def get_parameters(obsid, useFilename=False):
     parameters["storagenodes"].sort()
     sbspernode=allparameters["OLAP.storageNodeList"].strip('[]').split(',')
     for i in range(len(sbspernode)):
-        sbspernode[i]=int(sbspernode[i].split('*')[0])
+        if '*' in sbspernode[i]:
+            sbspernode[i]=int(sbspernode[i].split('*')[0])
+        else:
+            sbspernode[i]=int(sbspernode[i])
     parameters["sbspernode"]=sbspernode
     parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
 
@@ -869,7 +880,7 @@ def get_parameters(obsid, useFilename=False):
 
     starttime=time.mktime((year,month,day,hour,minute,second,0,0,0))
     stoptime=time.mktime((endyear,endmonth,endday,endhour,endminute,endsecond,0,0,0))
-    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])
+    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])*parameters['timeintegration']
     parameters["nrblocks"]=int((stoptime-starttime)/blockduration)
 
 
@@ -1028,7 +1039,10 @@ def get_parameters_new(obsid, useFilename=False):
     else:
         sbspernode=sbspernode.strip('[]').split(',')
         for i in range(len(sbspernode)):
-            sbspernode[i]=int(sbspernode[i].split('*')[0])
+            if '*' in sbspernode[i]:
+                sbspernode[i]=int(sbspernode[i].split('*')[0])
+            else:
+                sbspernode[i]=1
         parameters["sbspernode"]=sbspernode
     if "OLAP.Stokes.integrationSteps" in allparameters.keys():
         parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
@@ -1097,7 +1111,7 @@ def get_parameters_new(obsid, useFilename=False):
 
     starttime=time.mktime((year,month,day,hour,minute,second,0,0,0))
     stoptime=time.mktime((endyear,endmonth,endday,endhour,endminute,endsecond,0,0,0))
-    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])
+    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])*parameters['timeintegration']
     parameters["nrblocks"]=int((stoptime-starttime)/blockduration)
 
     # Get file names
