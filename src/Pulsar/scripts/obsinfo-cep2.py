@@ -2433,24 +2433,11 @@ if __name__ == "__main__":
 						statusline=cmdout[1]
 						if cmdout[2].isdigit() == True:
 							processed_dirsize + float(cmdout[2]) / 1000. / 1000. / 1000.
-						if cmdout[3] == "yes":  # combined plot exists
+						if cmdout[4] == "yes":  # status DSPSR plots exist
 							# copying combined plots and renaming them
-							profiles_array[0]="CVcombined"
-							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
-								combined="combined"
-								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
-							else:
-								thcombined="combined"
-								combined=cmdout[5]
-								basecombined=combined.split("/")[-1].split(".png")[0]
-								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, CSredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[0], plotsdir, id, thcombined, plotsdir, id, profiles_array[0])
-							os.system(cmd)
-						# checking if this obs is FE obs. If so, then get status maps
-						if cmdout[4] == "yes":   # now also checking not just for FE obs (in case there are 'heat' maps for CS data with many TA beams)
-							# copying FE status plots
-							profiles_array[2]="status"
+							profiles_array[0]="CScombined"
 							combined="status"
-							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id)
+							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
 							os.system(cmd)
 
 				# looking for _redIS first on locus102
