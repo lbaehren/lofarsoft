@@ -2205,6 +2205,14 @@ if __name__ == "__main__":
 		obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_redIS")[0] for i in dirlist])
 		test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_redIS")[0] for i in dirlist if re.search(test_dir, i)])
 
+		# then checking for CV data
+		lse="locus093"
+		# getting the list of *_CSplots directories to get a list of ObsIDs
+		cmd="%s %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexec_nodes[lse], psr_archive_dir + lse, "*_CVplots", cexec_egrep_string)
+		dirlist = os.popen(cmd).readlines()
+		obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_CVplots")[0] for i in dirlist])
+		test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_CVplots")[0] for i in dirlist if re.search(test_dir, i)])
+
 			# also getting the list of *_lta directories to get a list of ObsIDs
 			# in case if data was already processed and archived
 #### commented by now, because we do not yet archive data on CEPII
