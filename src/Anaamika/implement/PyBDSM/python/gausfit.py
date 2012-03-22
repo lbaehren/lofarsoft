@@ -212,9 +212,9 @@ class Op_gausfit(Op):
         """
         from _cbdsm import MGFunction
         if ffimg == None:
-            fcn = MGFunction(isl.image-isl.islmean, isl.mask_noisy, 1)
+            fcn = MGFunction(isl.image-isl.islmean, isl.mask_active, 1)
         else:
-            fcn = MGFunction(isl.image-isl.islmean-ffimg, isl.mask_noisy, 1)
+            fcn = MGFunction(isl.image-isl.islmean-ffimg, isl.mask_active, 1)
         beam = img.pixel_beam
 
         if abs(beam[0]/beam[1]) < 1.1:
@@ -231,6 +231,7 @@ class Op_gausfit(Op):
             # if fit is done to thr1
             thr0 = thr2
             
+        thr0=thr1
         verbose = opts.verbose_fitting
         peak = fcn.find_peak()[0]
         dof = isl.size_active
@@ -242,7 +243,7 @@ class Op_gausfit(Op):
 
         if img.opts.ini_gausfit not in ['default', 'simple', 'nobeam']: img.opts.ini_gausfit = 'default'
         if img.opts.ini_gausfit == 'simple' and ngmax == None: 
-          ngmax = 25
+          ngmax = 10
         if img.opts.ini_gausfit == 'default': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr0, beam, img)
         if img.opts.ini_gausfit == 'nobeam': 
@@ -252,7 +253,7 @@ class Op_gausfit(Op):
             iter += 1
             fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, img.opts.ini_gausfit, ngmax, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr0, peak, shape, isl_image)
+                                              beam, thr0, peak, shape, isl.mask_active)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
                 break
@@ -260,7 +261,7 @@ class Op_gausfit(Op):
                 # If all else fails, try to fit just a single Gaussian to the island
                 fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, img.opts.ini_gausfit, 1, verbose)
                 gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr0, peak, shape, isl_image)
+                                              beam, thr0, peak, shape, isl.mask_active)
 
         ### return whatever we got
         isl.mg_fcn = fcn
@@ -293,7 +294,7 @@ class Op_gausfit(Op):
                 if int(factor) == 1:
                     slices = []
                 break
-            mask_active_orig = isl.mask_noisy
+            mask_active_orig = isl.mask_active
             act_pixels = (isl.image-isl.islmean-isl.mean)/thresh_isl/factor >= rms
             
 #             if split_i_sub != None:       
@@ -516,11 +517,11 @@ class Op_gausfit(Op):
           peak, coords = fcn.find_peak()
           if peak < thr:  ### no good peaks left
               break
-          if len(fcn.parameters) < ngmax and iter == 1 and inifit == 'fbdsm' and len(gaul) >= ng1+1: 
+          if len(fcn.parameters) < ngmax and iter == 1 and inifit == 'default' and len(gaul) >= ng1+1: 
              ng1 = ng1 + 1
              g = gaul[ng1-1]
           else:
-            if len(fcn.parameters) < ngmax and inifit in ['default', 'nobeam']:
+            if len(fcn.parameters) < ngmax and inifit in ['simple', 'nobeam']:
               g = [peak, coords[0], coords[1]] + beam
             else:
               break
@@ -555,7 +556,7 @@ class Op_gausfit(Op):
         else:
             return False
 
-    def flag_gaussians(self, gaul, opts, beam, thr, peak, shape, isl_image=None):
+    def flag_gaussians(self, gaul, opts, beam, thr, peak, shape, isl_mask):
         """Flag gaussians according to some rules.
         Splits list of gaussian parameters in 2, where the first
         one is a list of parameters for accepted gaussians, and
@@ -569,13 +570,12 @@ class Op_gausfit(Op):
         thr: threshold for pixels with signal
         peak: peak data value in the current island
         shape: shape of the current island
-        isl_image: island image (used to determine local pixel value at Gaussian
-        center
+        isl_mask: island mask
         """
         good = []
         bad  = []
         for g in gaul:
-            flag = self._flag_gaussian(g, beam, thr, peak, shape, opts, isl_image)
+            flag = self._flag_gaussian(g, beam, thr, peak, shape, opts, isl_mask)
             if flag:
                 bad.append((flag, g))
             else:
@@ -583,7 +583,7 @@ class Op_gausfit(Op):
 
         return good, bad
 
-    def _flag_gaussian(self, g, beam, thr, peak, shape, opts, isl_image):
+    def _flag_gaussian(self, g, beam, thr, peak, shape, opts, mask):
         """The actual flagging routine. See above for description.
         """
         from math import sqrt, sin, cos, log, pi
@@ -608,15 +608,30 @@ class Op_gausfit(Op):
 
         ### now check all conditions
         border = opts.flag_bordersize
+        x1ok = True
+        x2ok = True
         flag_max = False
         if A < opts.flag_minsnr*thr: flag += 1
-#         if x1 >= 0 and x2 >= 0 and x1 <= shape[0] and x2 <= shape[1]:
-#             if A > opts.flag_maxsnr*thr: flag_max = True
         if A > opts.flag_maxsnr*peak or flag_max: flag += 2
-        if N.isnan(x1) or x1 < border or x1 > shape[0] - border -1: flag += 4
-        if N.isnan(x2) or x2 < border or x2 > shape[1] - border -1: flag += 8
-
-
+        if N.isnan(x1) or x1 - border < 0 or x1 + border + 1 > shape[0]:
+            flag += 4
+            x1ok = False
+        if N.isnan(x2) or x2 - border < 0 or x2 + border + 1 > shape[1]:
+            flag += 8
+            x2ok = False
+        if x1ok and x2ok:
+            borx1_1 = x1 - border
+            if borx1_1 < 0: borx1_1 = 0
+            borx1_2 = x1 + border + 1
+            if borx1_2 > shape[0]: borx1_2 = shape[0]
+            if N.any(mask[borx1_1:borx1_2, x2]):
+                flag += 4
+            borx2_1 = x2 - border
+            if borx2_1 < 0: borx2_1 = 0
+            borx2_2 = x2 + border + 1
+            if borx2_2 > shape[1]: borx2_2 = shape[1]
+            if N.any(mask[x1, borx2_1:borx2_2]):
+                flag += 8
         if xbox > opts.flag_maxsize_isl*shape[0]: flag += 16
         if ybox > opts.flag_maxsize_isl*shape[1]: flag += 32
         if s1*s2 > opts.flag_maxsize_bm*beam[0]*beam[1]: flag += 64

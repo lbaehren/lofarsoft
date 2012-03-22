@@ -3,7 +3,7 @@
 *************
 PyBDSM Basics
 *************
-PyBDSM has been designed to share many similarities with the CASA interactive environment (known as ``casapy`` [#f1]_), which is in turn based on AIPS. Therefore, the commands used in PyBDSM should be familiar to anyone who has used these software packages.
+PyBDSM has been designed to share many similarities with the CASA interactive environment (known as ``casapy`` [#f1]_ ), which is in turn based on AIPS. Therefore, the commands used in PyBDSM should be familiar to anyone who has used these software packages.
 
 Starting PyBDSM
 ---------------

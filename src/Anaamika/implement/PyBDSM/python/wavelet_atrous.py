@@ -115,10 +115,10 @@ class Op_wavelet_atrous(Op):
                 wopts['rms_box'] = img.opts.rms_box # doesnt matter
               else:
                 wopts['rms_box'] = (bs, bs/3)
-              if not img.opts.rms_map: wopts['rms_map'] = False
-              if not wopts['rms_map']: wopts['mean_map'] = 'const'
+              if not img.opts.rms_map or img.opts.atrous_orig_isl: wopts['rms_map'] = False
+              if not wopts['rms_map']: wopts['mean_map'] = 'zero'
               if j <= 3: 
-                wopts['ini_gausfit'] = img.opts.ini_gausfit
+                wopts['ini_gausfit'] = 'default'#img.opts.ini_gausfit
               else:
                 wopts['ini_gausfit'] = 'nobeam'
               wid = (l+(l-1)*(2**(j-1)-1))/3.0; b1, b2 = img.pixel_beam[0:2]
@@ -139,6 +139,11 @@ class Op_wavelet_atrous(Op):
               wimg.waveletimage = True
               wimg.use_wcs = img.use_wcs
               wimg.j = j             
+              if img.opts.atrous_orig_isl:
+                wimg.rms = img.rms
+                wimg.mean = img.mean
+                wimg.rms_QUV = img.rms_QUV
+                wimg.mean_QUV = img.mean_QUV
               self.FITS_simple(wimg, img, w, '.atrous.'+suffix)
               for op in wchain:
                 op(wimg)
@@ -206,13 +211,20 @@ class Op_wavelet_atrous(Op):
     def setpara_bdsm(self, img):
         from types import ClassType, TypeType
 
-        chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
-               Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
+        if img.opts.atrous_orig_isl:
+            # skip Op_rmsimage if original islands are to be used,
+            # as the rms maps will be biased due to masking
+            chain=[Op_preprocess, Op_threshold(), Op_islands(),
+                   Op_gausfit(), Op_gaul2srl, Op_make_residimage()]        
+        else:
+            chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
+                   Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
 
         opts={'thresh':'hard'}
-        opts['thresh_pix'] = 5.0
+        opts['thresh_pix'] = 3.0
         opts['kappa_clip'] = 3.0
         opts['rms_map'] = True
+        opts['mean_map'] = 'zero'
         opts['thresh_isl'] = 3.0
         opts['minpix_isl'] = 6
         opts['takemeanclip'] = False

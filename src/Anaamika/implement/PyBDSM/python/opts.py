@@ -392,19 +392,21 @@ class Opts(object):
                              doc = "Initial guess for Gaussian "\
                                  "parameters: 'default', 'simple', or 'nobeam'\n"\
                                  "These are three different ways of estimating the initial "\
-                                 "guess for fitting of Gaussians to an island of emission. "\
-                                 "If 'default', the maximum number of Gaussians is "\
+                                 "guess for fitting of Gaussians to an island of emission.\n"\
+                                 "If 'default', the number of Gaussians is "\
                                  "estimated from the number of peaks in the island. An initial "\
                                  "guess is made for the parameters of these Gaussians before "\
                                  "final fitting is done. This method should produce the best "\
-                                 "results when there are no large sources present. "\
-                                 "If 'simple', the maximum number of Gaussians per island "\
-                                 "is set to 25, and no initial guess for the gaussian parameters "\
-                                 "is made. Lastly, the 'nobeam' method is similar to the "\
+                                 "results when there are no large sources present.\n"\
+                                 "If 'simple', the maximum allowable number of Gaussians per island "\
+                                 "is set to 10, and no initial guess for the gaussian parameters "\
+                                 "is made. This method is generally the fastest, and can be "\
+                                 "useful in conjunction with wavelet fitting in speeding up "\
+                                 "fits to very large islands.\nLastly, the 'nobeam' method is similar to the "\
                                  "'default' method, but no information about the beam is "\
                                  "used. This method is best used when source sizes are "\
                                  "expected to be very different from the beam and is generally "\
-                                 "slower than the other methods. "\
+                                 "slower than the other methods.\n"\
                                  "For wavelet images, the value used for the original "\
                                  "image is used for wavelet order j <= 3 and 'nobeam' for "\
                                  "higher orders.",
@@ -538,7 +540,7 @@ class Opts(object):
                                  "flag is automatically set to False while "\
                                  "decomposing wavelet images into Gaussians. ",
                              group="flagging_opts")
-    flag_minsnr     =  Float(0.9,
+    flag_minsnr     =  Float(0.6,
                              doc="Flag Gaussian if peak is less than flag_minsnr "\
                                  "times thresh_pix times local rms\n"\
                                  "Any fitted Gaussian whose peak is less than "\
@@ -568,7 +570,7 @@ class Opts(object):
                                  "outside the island bounding box is flagged. The flag "\
                                  "value is increased by 4 (for x) and 8 (for y).",
                              group="flagging_opts")
-    flag_maxsize_bm =  Float(50.0,
+    flag_maxsize_bm =  Float(10.0,
                              doc="Flag Gaussian if area greater than "\
                                  "flag_maxsize_bm times beam area\n"\
                                  "Any fitted "\

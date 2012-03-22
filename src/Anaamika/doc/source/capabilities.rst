@@ -6,7 +6,7 @@ PyBDSM can be run on FITS images (using PyFITS [#f1]_) or CASA images (using pyr
 
 PyBDSM performs the following tasks:
 
-    * Reads in the image, collapses specific frequency channels, with weights, and produces a 'continuum' image (ch0 image) for all polarisations. The stokes I ch0 image is used for all further computation.
+    * Reads in the image, collapses specific frequency channels, with weights, and produces a 'continuum' image (the 'ch0' image) for all polarisations. The Stokes I ch0 image is used for all further computation.
     
     * Preprocessing is done, whereby some basic parameters like image statistics are computed. Also, any input parameters that are left to default are calculated using sensible algorithms.
     
@@ -20,13 +20,13 @@ PyBDSM performs the following tasks:
     
     * Each island can also be decomposed into shapelets. Currently only cartesian shapelets are implemented, and only one shapelet set, with the same scale in both dimensions, can be fit to an island. The shapelets parameters can be written out as ASCII or FITS tables.
     
-    * Residual FITS images are computed, for both Gaussians and shapelets. The Gaussian parameters can be written out in various formats (ASCII, FITS tables, LOFAR BBS, ds9 region files, AIPS star, Kvis, etc).
+    * Residual FITS images are computed, for both Gaussians and shapelets. The Gaussian parameters can be written out in various formats (ASCII, FITS tables, LOFAR BBS, ds9 region files, AIPS star, Kvis, etc). Shapelet parameters can be written out to FITS tables.
     
-    * Gaussians within a given island are grouped in discrete sources.
+    * Gaussians within a given island are grouped into discrete sources.
     
     * If a frequency cube is input, then for each source identified in an island, the spectral index is computed. If possible, a spectral index is calculated for each Gaussian as well. This is done for point as well as extended sources.
     
-    * If all four stokes images are present, then the polarisation percentage and angle are calculated for each source. 
+    * If all four Stokes images are present, then the polarisation percentage and angle are calculated for each source. 
     
     * The residual ch0 image, after subtracting fitted Gaussians, is processed using the *à trous* wavelet transform to generate images at various scales. Islands are identified in each of these wavelet images and fitted with Gaussians, all of which are then grouped to form pyramidal sources. These can be used further by the user as a starting point for morphological filters.
     

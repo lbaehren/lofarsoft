@@ -184,13 +184,9 @@ The information included in the Gaussian and source catalogs varies by format an
     * 'C' = a single-Gaussian source in an island with other sources
     * 'M' = a multi-Gaussian source 
 
-* **Spec_Indx1:** the first-order spectral index of the source
+* **Spec_Indx:** the spectral index of the source
 
-* **E_Spec_Indx1:** the 1-:math:`\sigma` error on the first-order spectral index of the source
-
-* **Spec_Indx2:** the second-order spectral index of the source
-
-* **E_Spec_Indx2:** the 1-:math:`\sigma` error on the second-order spectral index of the source
+* **E_Spec_Indx:** the 1-:math:`\sigma` error on the spectral index of the source
 
 * **Total_Q:** the total, integrated Stokes Q flux of the source at the reference frequency, in Jy
 
