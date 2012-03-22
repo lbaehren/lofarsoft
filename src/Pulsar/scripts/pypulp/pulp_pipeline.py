@@ -1106,9 +1106,9 @@ class CSUnit(PipeUnit):
 		self.nrChanPerSub = obs.nrChanPerSubCS
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus092"
-		self.summary_node_dir_suffix = "_CSplots_py" # "_CSplots"
+		self.summary_node_dir_suffix = "_CSplots" # "_CSplots"
 		self.archive_suffix = "_plotsCS.tar.gz"
-		self.outdir_suffix = "_red_py" # "_red"
+		self.outdir_suffix = "_red" # "_red"
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
@@ -1139,9 +1139,9 @@ class ISUnit(PipeUnit):
 		self.nrChanPerSub = obs.nrChanPerSubIS
 		self.sampling = obs.samplingIS
 		self.summary_node = "locus094"
-		self.summary_node_dir_suffix = "_redIS_py" # "_redIS"
+		self.summary_node_dir_suffix = "_redIS" # "_redIS"
 		self.archive_suffix = "_plotsIS.tar.gz"
-		self.outdir_suffix = "_redIS_py" # "_redIS"
+		self.outdir_suffix = "_redIS" # "_redIS"
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
