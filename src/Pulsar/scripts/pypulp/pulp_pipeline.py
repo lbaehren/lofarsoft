@@ -336,6 +336,35 @@ class Pipeline:
                 # either "CS", "IS", "CV", ..
                 data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
 
+		# create beam_process_node.txt file
+		log.info("Creating the beam_process_node.txt file...")
+                bpnf=open("%s/beam_process_node.txt" % (sumdir), 'w')
+		for unit in [u for u in self.units if u.summary_node == sumnode]: 
+			for node in unit.tab.location:
+				for rf in unit.tab.rawfiles[node]:
+					bpnf.write("%s %s%s\n" % \
+					(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
+		bpnf.close()
+
+		# creating combined DSPSR plots
+		if not cmdline.opts.is_skip_dspsr:
+			dspsr_diags=rglob(sumdir, "*_diag.png")
+			if len(dspsr_diags) > 0:
+				log.info("Creating DSPSR summary diagnostic plots...")
+				if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
+				else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
+				self.execute(cmd, log, workdir=sumdir)
+
+		if os.path.exists("%s/dspsr_status.png" % (sumdir)):
+			log.info("Renaming dspsr status file to status.png ...")
+			cmd="mv dspsr_status.png status.png"
+			self.execute(cmd, log, workdir=sumdir)
+		else: log.info("No status.png created")
+		# creating thumbnail version of status.png if it exists
+		if os.path.exists("%s/status.png" % (sumdir)):		
+			cmd="convert -scale 200x140-0-0 status.png status.th.png"
+			self.execute(cmd, log, workdir=sumdir)
+
 		# Make a tarball of all the plots (summary archive)
 		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
 		tar_list=[]
@@ -1143,9 +1172,9 @@ class CVUnit(PipeUnit):
 		self.nrChanPerSub = obs.nrChanPerSubCS
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus093"
-		self.summary_node_dir_suffix = "_CVplots_py"  # "_CVplots"
+		self.summary_node_dir_suffix = "_CVplots"  # "_CVplots"
 		self.archive_suffix = "plotsCV.tar.gz"
-		self.outdir_suffix = "_red_py"  # "_red"
+		self.outdir_suffix = "_red"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
 		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out"]
 		# setting outdir and curdir directories
@@ -1302,6 +1331,33 @@ class CVUnit(PipeUnit):
 				cmd="rm -f %s" % (" ".join(remove_list))
 				self.execute(cmd, workdir=self.curdir)
 
+				# first, calculating the proper min divisir for the number of subbands
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
+				# calculating the least common denominator of obs.nrSubbands starting from self.nrChanPerSub
+				pav_nchans = self.lcd(self.nrChanPerSub, obs.nrSubbands)
+				for psr in self.psrs:
+					cmd="pam --setnchn %d -e fscr.ar %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					# running rmfit for negative and positive RMs
+					cmd="rmfit -m -100,0,200 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="rmfit -m 0,100,200 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					# creating DSPSR diagnostic plots
+					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
+                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+                                             (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
+                                              psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+
 			# copying parset file to output directory
 			self.log.info("Copying original parset file to output directory...")
 			cmd="cp -f %s %s" % (obs.parset, self.outdir)
@@ -1352,23 +1408,6 @@ class CVUnit(PipeUnit):
 		self.log = None
 		# remove references to Popen processes
 		self.parent = None
-
-
-	"""
-	def run(self, obs, cep2, cmdline, log):
-		self.log = log
-		self.start_time=time.time()	
-
-		# start logging
-		self.log.info("%s SAP=%d TAB=%d (%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
-
-		# finish
-		self.end_time=time.time()
-		self.total_time= self.end_time- self.start_time
-		self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
-		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
-	"""
-
 
 class FE_CSUnit(PipeUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
