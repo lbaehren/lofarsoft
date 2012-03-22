@@ -37,6 +37,8 @@ class AntennaResponse(Task):
             doc = "Inverse Jones matrix for each frequency." ),
         on_sky_polarizations = dict( default = lambda self : self.fft_data.new(), output = True,
             doc = "FFT data corrected for element response (contains on sky polarizations)." ),
+        normalize = dict( default = True,
+            doc = "Normalize to frequency response in zenith." ),
     )
 
     def run(self):
@@ -48,8 +50,12 @@ class AntennaResponse(Task):
 
         # Get inverse Jones matrix for each frequency
         if "LBA" in self.antennaset:
-            cr.hGetInverseJonesMatrixLBA(self.inverse_jones_matrix, self.frequencies,
-                pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
+            if self.normalize:
+                cr.hGetNormalizedInverseJonesMatrixLBA(self.inverse_jones_matrix, self.frequencies,
+                    pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
+            else:
+                cr.hGetInverseJonesMatrixLBA(self.inverse_jones_matrix, self.frequencies,
+                    pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
         elif "HBA" in self.antennaset:
             cr.hGetInverseJonesMatrixHBA(self.inverse_jones_matrix, self.frequencies,
                 pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))

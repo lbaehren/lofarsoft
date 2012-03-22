@@ -451,6 +451,71 @@ void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
 
 //$DOCSTRING: Get inverse Jones matrix
 //$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetNormalizedInverseJonesMatrixLBA
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(Jinv)()("Inverse Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(frequencies)()("Frequency in Hz.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(az)()("Azimuth with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(el)()("Elevation with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Calculates the inverse Jones matrix containing the antenna response calculated using the LOFAR provided ElementResponse library.
+  The Jones matrix contains the beam pattern and multiplying by inverse of this matrix gives the polarized signal in the on-sky frame.
+*/
+
+template <class CIter, class NIter>
+void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
+    const NIter frequencies, const NIter frequencies_end,
+    const HNumber az, const HNumber el)
+{
+  std::complex<double> J[2][2]; // Jones matrix for element response
+  std::complex<double> N[2][2]; // Normalization Jones matrix for element response
+  std::complex<double> det; // Determinant of Jones matrix (used for matrix inversion)
+
+  // Get lengths
+  const int Nj = std::distance(Jinv, Jinv_end);
+  const int Nf = std::distance(frequencies, frequencies_end);
+
+  // Sanity checks
+  if (Nj != 4*Nf)
+  {
+    throw PyCR::ValueError("[hGetInverseJonesMatrixLBA] Provided storrage has invalid size.");
+  }
+
+  // Get iterators
+  CIter Jinv_it = Jinv;
+  NIter freq_it = frequencies;
+
+  // Loop over frequencies
+  for (int i=0; i<Nf; i++)
+  {
+    // Get element response
+    LOFAR::element_response_lba(*freq_it, az, el, J);
+
+    // Get element response for normalization factor
+    LOFAR::element_response_lba(*freq_it, 0.0, 90.0, N);
+
+    freq_it++;
+
+    // Invert the Jones matrix (J contains beam pattern so J^-1 is the correction) and normalize
+    det = (J[0][0] * J[1][1]) - (J[0][1] * J[1][0]) * (N[0][0] * N[1][1]) - (N[0][1] * N[1][0]);
+
+    if (det == std::complex<double>(0,0)) throw PyCR::ValueError("[hCalibratePolarizationLBA] Normalization Jones matrix is singular.");
+
+    *Jinv_it++ = J[1][1] / det;
+    *Jinv_it++ = -1.0 * J[0][1] / det;
+    *Jinv_it++ = -1.0 * J[1][0] / det;
+    *Jinv_it++ = J[0][0] / det;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Get inverse Jones matrix
+//$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetInverseJonesMatrixHBA
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
