@@ -1,7 +1,7 @@
 #!/bin/ksh -x
 
 # Please update the version number when you edit this file:
-VERSION=2.0
+VERSION=2.1
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
