@@ -45,7 +45,6 @@
 
 #include <tmf.h>
 
-
 // ========================================================================
 //
 //  Implementation
@@ -54,6 +53,8 @@
 
 using namespace std;
 using namespace casa;
+
+#define SMALL_OFFSET 1.e-9
 
 #undef HFPP_FILETYPE
 //--------------------
@@ -497,7 +498,7 @@ void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
     LOFAR::element_response_lba(*freq_it, az, el, J);
 
     // Get element response for normalization factor
-    LOFAR::element_response_lba(*freq_it, 0.0, 90.0, N);
+    LOFAR::element_response_lba(*freq_it, 0.0, M_PI / 2 - SMALL_OFFSET, N);
 
     freq_it++;
 
