@@ -325,8 +325,9 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 #add_dependencies (dspsr tempo2_install psrchive_install psrdada_install psrcat_install)
 
 #if (NOT TARGET dspsr)
-  
-  set (dspsr_version   "20120316")
+
+  set (dspsr_version   "20120322")  
+#  set (dspsr_version   "20120316")
 #  set (dspsr_version   "1.0")
   set (dspsr_name      "dspsr-${dspsr_version}")
   set (dspsr_directory "dspsr/dspsr-${dspsr_version}")
