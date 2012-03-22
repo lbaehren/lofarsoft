@@ -232,7 +232,7 @@ class TABeam:
                 	if len(nodeslist) > 1:
                         	for s in nodeslist[1:]:
                        	        	cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
-			cmd="%s %s 'ls -1 %s/%s/%s_SAP%03d_B%03d_S*_bf.raw 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, sapid, self.tabid)
+			cmd="%s %s 'ls -1 %s/%s/%s_SAP%03d_B%03d_S*_bf.raw' | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, sapid, self.tabid)
                 	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 			for l in range(len(cexec_output)):
 				if re.match("^-----", cexec_output[l]) is not None:
