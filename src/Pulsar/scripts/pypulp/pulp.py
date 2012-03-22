@@ -107,7 +107,7 @@ if __name__ == "__main__":
 			cmdline.print_summary(cep2, obs, log)
 
 		# printing info both to STDOUT and logfile
-		cep2.print_info(log)
+		cep2.print_info(cmdline, log)
 
 		# if --beam option is not set, it means that we start the pipeline from main node
 		if not cmdline.opts.is_local:	

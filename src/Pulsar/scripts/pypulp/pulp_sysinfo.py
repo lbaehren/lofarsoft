@@ -132,12 +132,14 @@ class CEP2Info:
 		self.logfile = self.logdir + "/" + f
 
 	# print info of all set attributes
-	def print_info(self, log=None):
+	def print_info(self, cmdline, log=None):
 		if log != None:
 			log.info("")
 			log.info("USER = %s" % (self.user))
 			log.info("Current node = %s" % (self.current_node))
 			log.info("Current directory = %s" % (self.current_dir))
 			log.info("LOFARSOFT = %s" % (self.lofarsoft))
+			if cmdline.opts.is_debug:
+				log.info("PYTHONPATH = %s" % (self.pythonpath))
 			log.info("")
 		
