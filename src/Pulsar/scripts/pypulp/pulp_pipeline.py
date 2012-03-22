@@ -1173,7 +1173,7 @@ class CVUnit(PipeUnit):
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus093"
 		self.summary_node_dir_suffix = "_CVplots"  # "_CVplots"
-		self.archive_suffix = "plotsCV.tar.gz"
+		self.archive_suffix = "_plotsCV.tar.gz"
 		self.outdir_suffix = "_red"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
 		self.extensions=["*.pdf", "*.ps", "*png", "*.AR", "*pdmp*", "*.rv", "*.out"]
