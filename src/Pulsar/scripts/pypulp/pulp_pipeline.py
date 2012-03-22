@@ -100,7 +100,7 @@ class Pipeline:
 				# in case when pipeline was interrupted
 				# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #				cmd="ssh -t %s 'nohup rm -rf %s </dev/null 2>&1'" % (node, sumdir)
-				cmd="ssh -t %s 'rm -rf %s 2>&1'" % (node, sumdir)
+				cmd="ssh -t %s 'rm -rf %s'" % (node, sumdir)
 				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				p.communicate()
 			log.info("Creating output summary directory on %s: %s" % (node, sumdir))
@@ -111,7 +111,7 @@ class Pipeline:
 			# in case when pipeline was interrupted
 			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #			cmd="ssh -t %s 'nohup mkdir -p %s </dev/null 2>&1'" % (node, sumdir)
-			cmd="ssh -t %s 'mkdir -p %s 2>&1'" % (node, sumdir)
+			cmd="ssh -t %s 'mkdir -p %s'" % (node, sumdir)
 			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			p.communicate()
 		
@@ -127,7 +127,7 @@ class Pipeline:
 				node=uo.split(":")[0]
 				outdir=uo.split(":")[1]
 				log.info("Deleting previous processed results on %s: %s" % (node, outdir))
-				cmd="ssh -t %s 'rm -rf %s 2>&1'" % (node, outdir)
+				cmd="ssh -t %s 'rm -rf %s'" % (node, outdir)
 				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				p.communicate()
 				os.system("stty sane")
@@ -147,15 +147,15 @@ class Pipeline:
 				else: locus=cep2.hoover_nodes[1]                    # and another for IS data
 			else:
 				locus=unit.tab.location[0]
-#			cmd="%s %s '/home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s'" %  \
+#			cmd="%s %s 'pulp.py --noinit --local --beams %d:%d %s'" %  \
 #				(cep2.cexeccmd, cep2.cexec_nodes[locus], unit.sapid, unit.tabid, " ".join(cmdline.options))
 			# Using ssh in the background instead of cexec in order to get proper status code if job has failed
 			# with cexec you always get status=0
 			# Also, using "-t" option in ssh allows to send KILL signal to remote command over ssh to finish all processes there
 			# in case when pipeline was interrupted
 			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
-#			cmd="ssh -t %s 'nohup /home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s </dev/null 2>&1'" % \
-			cmd="ssh -t %s '/home/kondratiev/pulp/pulp.py --noinit --local --beams %d:%d %s 2>&1'" % \
+#			cmd="ssh -t %s 'nohup pulp.py --noinit --local --beams %d:%d %s </dev/null 2>&1'" % \
+			cmd="ssh -t %s 'pulp.py --noinit --local --beams %d:%d %s'" % \
 				(locus, unit.sapid, unit.tabid, " ".join(cmdline.options))
 			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			os.system("stty sane")
@@ -197,12 +197,12 @@ class Pipeline:
 			log.info("Starting summaries...")
 			# starting separate pulp.py on summary nodes just to finish up
 			for (sumnode, sumdir) in self.summary_dirs.items():
-#				cmd="%s %s '/home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s'" %  \
+#				cmd="%s %s 'pulp.py --noinit --summary --local --beams %s %s'" %  \
 #					(cep2.cexeccmd, cep2.cexec_nodes[sumnode], sumnode, " ".join(cmdline.options))
 				# Using ssh in the background instead of cexec in order to get proper status code if job has failed
 				# with cexec you always get status=0
 #				cmd="ssh -t %s 'nohup /home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s </dev/null 2>&1'" % \
-				cmd="ssh -t %s '/home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s 2>&1'" % \
+				cmd="ssh -t %s 'pulp.py --noinit --summary --local --beams %s %s'" % \
 					(sumnode, sumnode, " ".join(cmdline.options))
 				sum_popen = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				self.sum_popens.append(sum_popen)
