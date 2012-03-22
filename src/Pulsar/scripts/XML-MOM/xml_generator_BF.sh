@@ -202,8 +202,8 @@ subbandsPerFileIS=512
 nofCollapsedChanCS=0
 nofCollapsedChanIS=0
 # A2 reset these to the defaults
-timeIntegFactorCS=8
-timeIntegFactorIS=8
+timeIntegFactorCS=1
+timeIntegFactorIS=1
 ##timeIntegFactorCS=0
 ##timeIntegFactorIS=0
 which_CS="I"
