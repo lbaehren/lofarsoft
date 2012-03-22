@@ -61,7 +61,6 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         filename="LORAdata-"+timestr+".dat"
         #print os.path.isfile(datadir+filename)
         if not os.path.isfile(datadir+filename):
-            print "check"
             if checkSurroundingSecond:
                if not silent:
                    print "Unable to find file, looking at neighbouring seconds"
