@@ -175,8 +175,6 @@ class Pipeline:
 			# waiting for processing in individual locus nodes to finish
 			# unless we want to do just a summary
 			if not cmdline.opts.is_summary:
-				(out, err) = self.units[0].parent.communicate()
-				log.info(out)
 				run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
 				os.system("stty sane")
 				log.info("Still running [%d]: %s" % (len(run_units), run_units))
