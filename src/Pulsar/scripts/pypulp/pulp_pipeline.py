@@ -1176,7 +1176,7 @@ class CVUnit(PipeUnit):
 		self.archive_suffix = "plotsCV.tar.gz"
 		self.outdir_suffix = "_red"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out"]
+		self.extensions=["*.pdf", "*.ps", "*png", "*.AR", "*pdmp*", "*.rv", "*.out"]
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
@@ -1312,7 +1312,8 @@ class CVUnit(PipeUnit):
 
 					# running psradd to add all freq channels together
 					self.log.info("Adding frequency channels together...")
-					cmd="psradd -R -o %s_%s.ar %s_%s_SB*_CH*.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					ar_files=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
+					cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 					self.execute(cmd, workdir=self.curdir)
 					# removing corrupted freq channels
 					if self.nrChanPerSub > 1:
@@ -1336,21 +1337,21 @@ class CVUnit(PipeUnit):
 				# calculating the least common denominator of obs.nrSubbands starting from self.nrChanPerSub
 				pav_nchans = self.lcd(self.nrChanPerSub, obs.nrSubbands)
 				for psr in self.psrs:
-					cmd="pam --setnchn %d -e fscr.ar %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
+					cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 					# running rmfit for negative and positive RMs
-					cmd="rmfit -m -100,0,200 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="rmfit -m -100,0,200 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="rmfit -m 0,100,200 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="rmfit -m 0,100,200 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 					# creating DSPSR diagnostic plots
-					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
                                              -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
