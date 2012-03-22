@@ -120,9 +120,9 @@ else
   fi
   isrfi=`find $procdir/rawvoltages/*/ -name "*.rfirep" -print 2>/dev/null | grep -v Permission | grep -v such`
   if [[ $isrfi == "" ]]; then
-   statusline="$statusline,-rfi"
+   statusline="$statusline,-rfi)"
   else
-   statusline="$statusline,+rfi"
+   statusline="$statusline,+rfi)"
   fi
   echo $procdir
   echo $statusline
