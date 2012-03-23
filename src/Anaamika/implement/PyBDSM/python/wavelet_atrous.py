@@ -118,7 +118,7 @@ class Op_wavelet_atrous(Op):
               if not img.opts.rms_map or img.opts.atrous_orig_isl: wopts['rms_map'] = False
               if not wopts['rms_map']: wopts['mean_map'] = 'zero'
               if j <= 3: 
-                wopts['ini_gausfit'] = 'default'#img.opts.ini_gausfit
+                wopts['ini_gausfit'] = 'default'
               else:
                 wopts['ini_gausfit'] = 'nobeam'
               wid = (l+(l-1)*(2**(j-1)-1))/3.0; b1, b2 = img.pixel_beam[0:2]

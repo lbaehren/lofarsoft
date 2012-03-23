@@ -26,6 +26,9 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/23 - Tweaked settings that affect fitting of Gaussians to
+                 improve fitting in general. 
+    
     2012/03/19 - Added output of shapelet parameters to FITS tables.
                  Fixed issue with resizing of sources in spectral
                  index module.
