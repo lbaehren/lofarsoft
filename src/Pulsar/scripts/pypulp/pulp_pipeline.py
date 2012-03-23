@@ -1459,9 +1459,9 @@ class FE_CSUnit(PipeUnit):
 		self.nrChanPerSub = obs.nrChanPerSubCS
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus092"
-		self.summary_node_dir_suffix = "_CSplots_py" # "_CSplots"
+		self.summary_node_dir_suffix = "_CSplots" # "_CSplots"
 		self.archive_suffix = "_plotsCS.tar.gz"
-		self.outdir_suffix = "_red_py" # "_red"
+		self.outdir_suffix = "_red" # "_red"
 		# re-assigning procdir from BEAMN to station name
 		if obs.FE and self.tab.stationList[0] != "": 
 			self.procdir = self.tab.stationList[0]
