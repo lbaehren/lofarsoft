@@ -959,9 +959,19 @@ class PipeUnit:
 			# calculating the least common denominator of obs.nrSubbands starting from self.nrChanPerSub
 			pav_nchans = self.lcd(self.nrChanPerSub, obs.nrSubbands)
 			for psr in self.psrs:  # pulsar list is empty if --nofold is used
-				# creating DSPSR diagnostic plot
-				cmd="dspsr_ar_plots.sh %s_%s %d" % (psr, self.output_prefix, pav_nchans)
+				# creating DSPSR diagnostic plots
+				cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
 				self.execute(cmd, workdir=self.curdir)
+				cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				cmd="pav -J -g %s_%s_J.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
+                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+                                     (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+                                      psr, self.output_prefix, psr, self.output_prefix)
 
 			if not cmdline.opts.is_plots_only:
 				if not cmdline.opts.is_skip_dspsr:
