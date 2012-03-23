@@ -340,7 +340,7 @@ class CMDLine:
 	def print_summary(self, cep2, obs, log=None):
 		if log != None:
 			log.info("")
-			log.info("Pulsar Pipeline, V%s" % (self.version))
+			log.info("Pulsar Pipeline, %s" % (self.version))
 			log.info("Prg: %s" % (self.prg))
 			if len(self.user_beams) == 0 and len(self.user_excluded_beams) == 0:
 				log.info("Cmdline: %s %s" % (self.prg.split("/")[-1], " ".join(self.options)))
