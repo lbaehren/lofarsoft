@@ -111,7 +111,7 @@ class Pipeline:
 			# in case when pipeline was interrupted
 			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #			cmd="ssh -t %s 'nohup mkdir -p %s </dev/null 2>&1'" % (node, sumdir)
-			cmd="ssh -t %s 'mkdir -p %s'" % (node, sumdir)
+			cmd="ssh -t %s 'mkdir -m 775 -p %s'" % (node, sumdir)
 			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			p.communicate()
 		
@@ -385,6 +385,10 @@ class Pipeline:
 		cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
 		os.system(cmd)
 
+		# changing the file permissions to be re-writable for group
+		cmd="chmod -R g+w %s" % (sumdir)
+		os.system(cmd)
+
 
 	# run necessary processes to organize summary info on summary nodes for CS and IS data
 	# to be run locally on summary node
@@ -579,6 +583,10 @@ class Pipeline:
 		# flushing log file and copy it to summary node
 		log.flush()
 		cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		os.system(cmd)
+
+		# changing the file permissions to be re-writable for group
+		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
 
 # base class for the single processing (a-ka beam)
@@ -821,7 +829,7 @@ class PipeUnit:
 				self.stokes, time.asctime(time.gmtime()), cep2.current_node))
 
 			# Re-creating root output directory
-			cmd="mkdir -p %s" % (self.outdir)
+			cmd="mkdir -m 775 -p %s" % (self.outdir)
 			self.execute(cmd)
 
 			# creating Par-file in the output directory or copying existing one
@@ -843,7 +851,7 @@ class PipeUnit:
 					self.execute(cmd, is_os=True)
 
 			# Creating curdir dir
-			cmd="mkdir -p %s" % (self.curdir)
+			cmd="mkdir -m 775 -p %s" % (self.curdir)
 			self.execute(cmd)
 
 			# if we run the whole processing and not just plots
@@ -1102,6 +1110,10 @@ class PipeUnit:
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
 			proc.communicate()
 
+			# changing the file permissions to be re-writable for group
+			cmd="chmod -R g+w %s" % (self.outdir)
+			os.system(cmd)
+
 		except Exception:
 			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))
 			self.kill()
@@ -1213,7 +1225,7 @@ class CVUnit(PipeUnit):
 				self.stokes, time.asctime(time.gmtime()), cep2.current_node))
 
 			# Re-creating root output directory
-			cmd="mkdir -p %s" % (self.outdir)
+			cmd="mkdir -m 775 -p %s" % (self.outdir)
 			self.execute(cmd)
 
 			# creating Par-file in the output directory or copying existing one
@@ -1235,7 +1247,7 @@ class CVUnit(PipeUnit):
 					self.execute(cmd, is_os=True)
 
 			# Creating curdir dir
-			cmd="mkdir -p %s" % (self.curdir)
+			cmd="mkdir -m 775 -p %s" % (self.curdir)
 			self.execute(cmd)
 
 			# if not justting making plots...
@@ -1435,6 +1447,10 @@ class CVUnit(PipeUnit):
 			cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
 			proc.communicate()
+
+			# changing the file permissions to be re-writable for group
+			cmd="chmod -R g+w %s" % (self.outdir)
+			os.system(cmd)
 
 		except Exception:
 			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))
