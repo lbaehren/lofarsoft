@@ -379,7 +379,7 @@ The advanced options are:
         An initial guess is made for the parameters of these Gaussians before
         final fitting is done. This method should produce the best results when
         there are no large sources present. If ``'simple'``, the maximum number of
-        Gaussians per island is set to 25, and no initial guess for the gaussian
+        Gaussians per island is set to 25, and no initial guess for the Gaussian
         parameters is made. Lastly, the ``'nobeam'`` method is similar to the
         ``'default'`` method, but no information about the beam is used. This method
         is best used when source sizes are expected to be very different from

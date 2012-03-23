@@ -316,15 +316,14 @@ class Op_spectralindex(Op):
                 rms_spec[ichan,:,:] = rms
                 median_rms[ichan] = N.median(rms)
         else:
-            rms_spec = N.zeros(nchan)
-            avimage_crms = img.avimage_crms
+            rms_spec = N.zeros(image.shape)
             for ichan in range(nchan):
               if bar1.started:
                   bar1.increment()
-              rms_spec[ichan] = avimage_crms[ichan]
+              rms_spec[ichan,:,:] = img.channel_clippedrms[ichan]
             median_rms = rms_spec
 
-        str1 = " ".join(["%9.4e" % n for n in median_rms])
+        str1 = " ".join(["%9.4e" % n for n in img.channel_clippedrms])
         if rms_map:        
             mylog.debug('%s %s ' % ('Median rms of channels : ', str1))
             mylog.info('RMS image made for each channel')

@@ -180,7 +180,6 @@ class Op_islands(Op):
                 res.append(isl)
                 pyrank[isl.bbox] += N.invert(isl.mask_active)*idx / idx
 
-        #if saverank: func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
         return res
 
     def setpara_bdsm(self, img, det_file):
@@ -245,6 +244,9 @@ class Island(object):
         data = img[bbox]
 
         ### create (inverted) masks
+        # Note that mask_active is the island mask; mask_noisy is just
+        # the noisy pixels in the island image. If you want to mask the
+        # noisy pixels as well, set the mask to mask = mask_active + mask_noisy
         isl_mask = (labels[bbox] == idx)
         noise_mask = (labels[bbox] == 0)
         N.logical_or(noise_mask, isl_mask, noise_mask)

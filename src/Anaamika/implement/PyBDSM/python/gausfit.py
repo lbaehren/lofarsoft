@@ -21,7 +21,6 @@ import statusbar
 import misc
 import _cbdsm
 import matplotlib.pyplot as pl
-#import pylab as pl
 import scipy.ndimage as nd
 
 
@@ -94,19 +93,7 @@ class Op_gausfit(Op):
                   if bar.started: bar.spin()
                 if bar.started: bar.increment()         
             else:
-              if img.waveletimage:
-                isl.islmean = 0.0
-              else:
-                if opts.atrous_do:
-                    # If wavelet decomposition and fitting will be done, set islmean
-                    # as clipped island mean. This will speed up fitting and the
-                    # remaining emission will be fit by the wavelet module.
-#                     bstat = _cbdsm.bstat
-#                     islm, islr, islcm, islcr, islcnt = bstat(isl.image, isl.mask_active, opts.kappa_clip)
-#                     isl.islmean = islm
-                    isl.islmean = 0.0
-                else:
-                    isl.islmean = 0.0 
+              isl.islmean = 0.0 
               if opts.peak_fit and size > peak_size:
                 gaul, fgaul = self.deblend_and_fit(img, isl)
               else:
@@ -222,15 +209,6 @@ class Op_gausfit(Op):
 
         thr1 = isl.mean + opts.thresh_isl*isl.rms
         thr2 = isl.mean + img.thresh_pix*isl.rms
-        if img.waveletimage:
-            # Since wavelets are being used, user wants to recover faint 
-            # diffuse emission, so fit all significant emission in island
-            thr0 = thr1
-        else:
-            # Fit only until no high peaks left, as overfitting often occurs
-            # if fit is done to thr1
-            thr0 = thr2
-            
         thr0=thr1
         verbose = opts.verbose_fitting
         peak = fcn.find_peak()[0]
@@ -243,7 +221,7 @@ class Op_gausfit(Op):
 
         if img.opts.ini_gausfit not in ['default', 'simple', 'nobeam']: img.opts.ini_gausfit = 'default'
         if img.opts.ini_gausfit == 'simple' and ngmax == None: 
-          ngmax = 10
+          ngmax = 25
         if img.opts.ini_gausfit == 'default': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr0, beam, img)
         if img.opts.ini_gausfit == 'nobeam': 
@@ -257,11 +235,26 @@ class Op_gausfit(Op):
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
                 break
-            if not fitok and iter == 5:
-                # If all else fails, try to fit just a single Gaussian to the island
-                fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, img.opts.ini_gausfit, 1, verbose)
-                gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr0, peak, shape, isl.mask_active)
+        if not fitok and img.opts.ini_gausfit != 'simple':
+            # If fits using default or nobeam methods did not work,
+            # try using simple instead
+            gaul = []
+            iter = 0
+            ng1 = 0
+            ngmax = 25
+            while iter < 5:
+               iter += 1
+               fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, 'simple', ngmax, verbose)
+               gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
+                                                 beam, thr0, peak, shape, isl.mask_active)
+               ng1 = len(gaul)
+               if fitok and len(fgaul) == 0:
+                   break
+        if not fitok:
+            # If all else fails, try to fit just a single Gaussian to the island
+            fitok = self.fit_iter([], 0, fcn, dof, beam, thr0, 1, 'simple', 1, verbose)
+            gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
+                                          beam, thr0, peak, shape, isl.mask_active)
 
         ### return whatever we got
         isl.mg_fcn = fcn
@@ -269,9 +262,14 @@ class Op_gausfit(Op):
         fgaul = [(flag, self.fixup_gaussian(isl, g))
                                        for flag, g in fgaul]
 
+        if verbose:
+            print 'Number of good Gaussians: %i' % (len(gaul),)
+            print 'Number of flagged Gaussians: %i' % (len(fgaul),)
+            for ifg, fg in enumerate(fgaul):
+                print '    Flagged Gaussian %i: flag = %i' % (ifg, len(fgaul))
         return gaul, fgaul
 
-    def deblend_and_fit(self, img, isl):#, split_i_sub=None, split_sub_labels=None):
+    def deblend_and_fit(self, img, isl):
         """Deblends an island and then fits it"""
         import functions as func
         sgaul = []; sfgaul = []
@@ -295,9 +293,7 @@ class Op_gausfit(Op):
                     slices = []
                 break
             mask_active_orig = isl.mask_active
-            act_pixels = (isl.image-isl.islmean-isl.mean)/thresh_isl/factor >= rms
-            
-#             if split_i_sub != None:       
+            act_pixels = (isl.image-isl.islmean-isl.mean)/thresh_isl/factor >= rms            
             N.logical_and(act_pixels, ~mask_active_orig, act_pixels)
             rank = len(isl.shape)
             # generates matrix for connectivity, in this case, 8-conn
@@ -467,17 +463,6 @@ class Op_gausfit(Op):
             g = (maxv, xcen, ycen, mom[3]/fwsig, mom[4]/fwsig, mom[5]-90.)
             gaul.append(g)
             coords.append([xcen, ycen])
-
-#             import matplotlib.pyplot as pl
-#             #import pylab as pl
-#             pl.figure(); pl.suptitle(img.imagename+' Island : '+str(isl.island_id))
-#             resid = N.zeros(im.shape); x, y = N.indices(im.shape); xp, yp = N.transpose(coords)
-#             for g in gaul:
-#               resid = resid + func.gaus_2d(g, x, y)
-#             pl.subplot(2,2,1); pl.imshow(N.transpose(im), interpolation='nearest', origin='lower')
-#             pl.subplot(2,2,2); pl.plot(xp, yp, '*k'); pl.imshow(N.transpose(watershed), interpolation='nearest', origin='lower')
-#             pl.subplot(2,2,3); pl.imshow(N.transpose(resid), interpolation='nearest', origin='lower')
-#             pl.subplot(2,2,4); pl.imshow(N.transpose(im-resid), interpolation='nearest', origin='lower')
 
         return gaul
 
@@ -789,7 +774,7 @@ class Gaussian(object):
         # Check if this is a wavelet image. If so, use orig_pixel_beam
         # for flux calculation, as pixel_beam has been altered to match 
         # the wavelet scale.
-        if 'atrous' in img.filename:
+        if img.waveletimage:
             pixel_beam = img.orig_pixel_beam
         else:
             pixel_beam = img.pixel_beam

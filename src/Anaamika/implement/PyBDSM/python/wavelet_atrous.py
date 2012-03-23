@@ -90,7 +90,7 @@ class Op_wavelet_atrous(Op):
           total_flux = 0.0
           stop_wav = False
           pix_masked = N.where(N.isnan(resid)  == True)
-          for j in range(1,jmax+1):#+1):  # extra +1 is so we can do bdsm on cJ as well
+          for j in range(1,jmax+1):  # extra +1 is so we can do bdsm on cJ as well
             mylogger.userinfo(mylog, "\nWavelet scale #" +str(j))
             mean, rms, cmean, std, cnt = _cbdsm.bstat(im_old, N.isnan(im_old), img.opts.kappa_clip) # why do i have this here ?
             if cnt > 198: cmean = mean; crms = rms
@@ -145,9 +145,9 @@ class Op_wavelet_atrous(Op):
                 wimg.rms_QUV = img.rms_QUV
                 wimg.mean_QUV = img.mean_QUV
               self.FITS_simple(wimg, img, w, '.atrous.'+suffix)
+              img.atrous_opts.append(wimg.opts)
               for op in wchain:
                 op(wimg)
-                img.atrous_opts.append(wimg.opts)
                 if isinstance(op,Op_islands): img.atrous_islands.append(wimg.islands)
                 if isinstance(op,Op_gausfit): img.atrous_gaussians.append(wimg.gaussians)
                 if isinstance(op,Op_gaul2srl): img.atrous_sources.append(wimg.sources)
@@ -223,8 +223,8 @@ class Op_wavelet_atrous(Op):
         opts={'thresh':'hard'}
         opts['thresh_pix'] = 3.0
         opts['kappa_clip'] = 3.0
-        opts['rms_map'] = True
-        opts['mean_map'] = 'zero'
+        opts['rms_map'] = img.opts.rms_map
+        opts['mean_map'] = img.opts.mean_map
         opts['thresh_isl'] = 3.0
         opts['minpix_isl'] = 6
         opts['takemeanclip'] = False
@@ -238,7 +238,7 @@ class Op_wavelet_atrous(Op):
         opts['quiet'] = img.opts.quiet
 
         opts['flag_smallsrc'] = False
-        opts['flag_minsnr'] = 0.5
+        opts['flag_minsnr'] = 0.2
         opts['flag_maxsnr'] = 1.0
         opts['flag_maxsize_isl'] = 2.5
         opts['flag_bordersize'] = 2
@@ -252,6 +252,7 @@ class Op_wavelet_atrous(Op):
         opts['peak_fit'] = True
         opts['peak_maxsize'] = 30.0
         opts['detection_image'] = ''
+        opts['verbose_fitting'] = img.opts.verbose_fitting
 
         ops = []
         for op in chain:
@@ -278,7 +279,7 @@ class Op_wavelet_atrous(Op):
         if img.opts.atrous_orig_isl:
             mask = N.ones(img.ch0.shape, dtype=bool)
             for isl in img.islands:
-                mask[isl.bbox] = isl.mask_noisy # This will be new mask for island finding and fitting
+                mask[isl.bbox] = isl.mask_active # This will be new mask for island finding and fitting
             if img.mask != None:
                 mask[img.mask] = True # Make sure we pick up all masked pixels in img.mask as well
             wimg.rms_mask = img.mask # use original img.mask only for rms/mean map calculation
@@ -297,7 +298,7 @@ class Op_wavelet_atrous(Op):
         shape = residim.shape
         thresh= opts.fittedimage_clip
 
-        for g in gaussians:#():
+        for g in gaussians:
           C1, C2 = g.centre_pix
           isl = islands[g.island_id]
           b = opp.find_bbox(dummy, thresh*isl.rms, g)

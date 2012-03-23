@@ -129,7 +129,6 @@ class Op_preprocess(Op):
           if n <= 0: 
             n = 1
             mylog.warning('No pixels in image > 5-sigma.')
-            mylog.warning('Either clipped rms is wrong or the image is pure gaussian noise?')
             mylog.info('Taking number of pixels above 5-sigma as 1.')
           img.bmpersrc_th = N.product(shape)/((alpha_sourcecounts-1.)*n)
           mylog.info('%s %6.2f' % ('Estimated bmpersrc_th = ', img.bmpersrc_th))

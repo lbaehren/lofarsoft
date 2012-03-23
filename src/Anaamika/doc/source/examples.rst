@@ -208,7 +208,7 @@ It is clear that a number of spurious sources are being detected. Simply raising
 
 Image with extended emission
 ----------------------------
-If there is extended emission that fills a significant portion of the image, the background rms map will likely be biased high in regions where extended emission is present, affecting the island determination (this can be checked during a run by setting ``interactive=True``). Setting ``rms_map=False`` and ``mean_map='const'`` or ``'zero'`` will force PyBDSM to use a constant mean and rms value across the whole image. Additionally, setting ``atrous_do=True`` will fit Gaussians of various scales to the residual image to recover extended emission missed in the standard fitting. Depending on the source structure, the ``thresh_isl`` and ``thresh_pix`` parameters may also have to be adjusted as well to ensure that PyBDSM finds and fits islands of emission properly. An example analysis of an image with significant extended emission is shown below.
+If there is extended emission that fills a significant portion of the image, the background rms map will likely be biased high in regions where extended emission is present, affecting the island determination (this can be checked during a run by setting ``interactive=True``). Setting ``rms_map=False`` and ``mean_map='const'`` or ``'zero'`` will force PyBDSM to use a constant mean and rms value across the whole image. Additionally, setting ``flag_maxsize_bm`` to a large value (50 to 100) will allow large Gaussians to be fit, and setting ``atrous_do=True`` will fit Gaussians of various scales to the residual image to recover extended emission missed in the standard fitting. Depending on the source structure, the ``thresh_isl`` and ``thresh_pix`` parameters may also have to be adjusted as well to ensure that PyBDSM finds and fits islands of emission properly. An example analysis of an image with significant extended emission is shown below. Note that large, complex sources can require a long time to fit (on the order of hours).
 
 .. figure:: HydraA_74MHz_fit.png
    :scale: 40 %
@@ -216,7 +216,7 @@ If there is extended emission that fills a significant portion of the image, the
    :align: center
    :alt: example output
 
-   Example fit of an image of Hydra A with ``rms_map=False``, ``mean_map='zero'``, and ``atrous_do=True``. The values of ``thresh_isl`` and ``thresh_pix`` were adjusted before fitting (by setting ``interactive=True``) to obtain an island that enclosed all significant emission.
+   Example fit of an image of Hydra A with ``rms_map=False``, ``mean_map='zero'``, ``flag_maxsize_bm=50`` and ``atrous_do=True``. The values of ``thresh_isl`` and ``thresh_pix`` were adjusted before fitting (by setting ``interactive=True``) to obtain an island that enclosed all significant emission.
 
 
 .. _script_example:

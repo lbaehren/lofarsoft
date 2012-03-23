@@ -399,10 +399,8 @@ class Opts(object):
                                  "final fitting is done. This method should produce the best "\
                                  "results when there are no large sources present.\n"\
                                  "If 'simple', the maximum allowable number of Gaussians per island "\
-                                 "is set to 10, and no initial guess for the gaussian parameters "\
-                                 "is made. This method is generally the fastest, and can be "\
-                                 "useful in conjunction with wavelet fitting in speeding up "\
-                                 "fits to very large islands.\nLastly, the 'nobeam' method is similar to the "\
+                                 "is set to 25, and no initial guess for the gaussian parameters "\
+                                 "is made.\nLastly, the 'nobeam' method is similar to the "\
                                  "'default' method, but no information about the beam is "\
                                  "used. This method is best used when source sizes are "\
                                  "expected to be very different from the beam and is generally "\
