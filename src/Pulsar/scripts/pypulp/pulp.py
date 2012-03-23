@@ -20,11 +20,14 @@ from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 from pulp_pipeline import Pipeline
 
-# PLEASE increment the version number when you edit this file!!!
-VERSION="5.33"
-
 ###  M A I N ###
 if __name__ == "__main__":
+
+	# getting the version of the pulp.py (svn revision number)
+	cmd="svn info"
+	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=os.environ["LOFARSOFT"])
+	(out, err) = proc.communicate()
+	VERSION="r" + out.split("Revision: ")[1].split("\n")[0]
 
         # parsing command line
 	cmdline = CMDLine(VERSION)
