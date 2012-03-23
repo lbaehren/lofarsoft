@@ -2096,7 +2096,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     */
 
     int y, m, d, hour, min, sec;
-    float sec_mid;
+    long double sec_mid;
     s_ptr = get_ptr_entry("Observation.startTime", header_txt, nrlines, "=");
     y = 0;
     if(s_ptr != NULL) {
@@ -2114,9 +2114,9 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     i += j;
     j = 275*m/9;
     subintdata.mjd = (367.0 * y) - i + j + d + 1721028.5;
-    subintdata.mjd = (subintdata.mjd - 2400000.5) + sec_mid / 86400;
+    subintdata.mjd = (subintdata.mjd - 2400000.5) + sec_mid / (long double)86400;
 
-    printf("start=%d-%d-%d %d:%d:%d (%s %f)\n", y, m, d, hour, min, sec, s_ptr, subintdata.mjd);
+    printf("start=%d-%d-%d %d:%d:%d (%s %Lf)\n", y, m, d, hour, min, sec, s_ptr, subintdata.mjd);
     /*Observation.startTime = '2010-05-12 08:58:25' */
 
   }  /* End of read parset */

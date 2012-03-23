@@ -80,7 +80,7 @@ void printHeaderPSRData(datafile_definition datafile, int ident)
   for(i = 0; i < ident; i++) printf(" ");
   printf("NrPulses=%ld NrBins=%ld NrPols=%ld nrFreqChan=%ld NrBits=%d\n",datafile.NrPulses,datafile.NrBins,datafile.NrPols, datafile.nrFreqChan,datafile.NrBits);
   for(i = 0; i < ident; i++) printf(" ");
-  printf("Period=%f SampTime=%f  mjd=%.9lf\n",datafile.Period,datafile.SampTime,datafile.mjd);
+  printf("Period=%f SampTime=%f  mjd=%.9Lf\n",datafile.Period,datafile.SampTime,datafile.mjd);
   for(i = 0; i < ident; i++) printf(" ");
   printf("freq_cent=%5.10f bw=%3.10f channelbw=%3.10f\n",datafile.freq_cent,datafile.bw, datafile.channelbw);
   for(i = 0; i < ident; i++) printf(" ");
@@ -851,7 +851,7 @@ int PSRDataHeader_parse_commandline(datafile_definition *psrdata, int argc, char
 	  if(verbose) printf("  hdr.SampTime = %f s\n", psrdata->SampTime);
 	}else if(strcmp(identifier,"mjd") == 0) {
 	  psrdata->mjd = atof(value);
-	  if(verbose) printf("  hdr.mjd = %f\n", psrdata->mjd);
+	  if(verbose) printf("  hdr.mjd = %Lf\n", psrdata->mjd);
 	}else if(strcmp(identifier,"scan") == 0) {
 	  strncpy(psrdata->scanid, value, 100);
 	  if(verbose) printf("  hdr.ScanNum = %s\n", psrdata->scanid);

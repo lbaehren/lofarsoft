@@ -15,7 +15,7 @@ typedef struct
   long NrBins, NrPols, nrFreqChan;
   float Period, SampTime, freq_cent, bw, ra, dec, dm, channelbw;   /* Negative period means not folded */
   float *scales, *offsets, *weights, *data;
-  double mjd;
+  long double mjd;
   char psrname[20], observatory[100], institute[100], instrument[100], scanid[1000];
   long long datastart;      /* undefined in FITS */
   int nrpapoints;
