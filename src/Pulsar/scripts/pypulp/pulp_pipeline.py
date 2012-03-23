@@ -100,8 +100,9 @@ class Pipeline:
 				# in case when pipeline was interrupted
 				# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #				cmd="ssh -t %s 'nohup rm -rf %s </dev/null 2>&1'" % (node, sumdir)
+				# stdin=open(os.devnull, 'rb')  should help to avoid suspending pulp.py when run in the background
 				cmd="ssh -t %s 'rm -rf %s'" % (node, sumdir)
-				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
 				p.communicate()
 			log.info("Creating output summary directory on %s: %s" % (node, sumdir))
 #			cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
@@ -111,8 +112,9 @@ class Pipeline:
 			# in case when pipeline was interrupted
 			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #			cmd="ssh -t %s 'nohup mkdir -p %s </dev/null 2>&1'" % (node, sumdir)
+			# stdin=open(os.devnull, 'rb')  should help to avoid suspending pulp.py when run in the background
 			cmd="ssh -t %s 'mkdir -m 775 -p %s'" % (node, sumdir)
-			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
 			p.communicate()
 		
 		# Defining output directories for all local locus nodes
@@ -128,7 +130,7 @@ class Pipeline:
 				outdir=uo.split(":")[1]
 				log.info("Deleting previous processed results on %s: %s" % (node, outdir))
 				cmd="ssh -t %s 'rm -rf %s'" % (node, outdir)
-				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
 				p.communicate()
 				os.system("stty sane")
 		log.info("")
@@ -155,9 +157,10 @@ class Pipeline:
 			# in case when pipeline was interrupted
 			# with nohup and </dev/null the parent bash process only kiled when interrupted by User..
 #			cmd="ssh -t %s 'nohup pulp.py --noinit --local --beams %d:%d %s </dev/null 2>&1'" % \
+			# stdin=open(os.devnull, 'rb')  should help to avoid suspending pulp.py when run in the background
 			cmd="ssh -t %s '%s/release/share/pulsar/bin/pulp.py --noinit --local --beams %d:%d %s'" % \
 				(locus, cep2.lofarsoft, unit.sapid, unit.tabid, " ".join(cmdline.options))
-			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
 			os.system("stty sane")
 			log.info("SAP=%d TAB=%d %s(%s%s) on %s (pid=%d)  [#locations = %d, #files = %d]" % \
 				(unit.sapid, unit.tabid, unit.tab.specificationType == "flyseye" and ", ".join(unit.tab.stationList) + " " or "", \
@@ -202,9 +205,10 @@ class Pipeline:
 				# Using ssh in the background instead of cexec in order to get proper status code if job has failed
 				# with cexec you always get status=0
 #				cmd="ssh -t %s 'nohup /home/kondratiev/pulp/pulp.py --noinit --summary --local --beams %s %s </dev/null 2>&1'" % \
+				# stdin=open(os.devnull, 'rb')  should help to avoid suspending pulp.py when run in the background
 				cmd="ssh -t %s '%s/release/share/pulsar/bin/pulp.py --noinit --summary --local --beams %s %s'" % \
 					(sumnode, cep2.lofarsoft, sumnode, " ".join(cmdline.options))
-				sum_popen = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
+				sum_popen = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
 				self.sum_popens.append(sum_popen)
 				log.info("Making summaries on %s... (pid=%d)" % (sumnode, sum_popen.pid))
 
