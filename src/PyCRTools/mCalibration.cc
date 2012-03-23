@@ -677,7 +677,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
     // Project onto new coordinate frame
     *polx_it = cos(theta) * cos(phi) * *pol0_it - sin(phi) * *pol1_it;
     *poly_it = cos(theta) * sin(phi) * *pol0_it + cos(phi) * *pol1_it;
-    *polz_it = sin(theta) * *pol0_it;
+    *polz_it = -1.0 * sin(theta) * *pol0_it;
 
     ++pol0_it;
     ++pol1_it;
