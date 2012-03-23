@@ -103,7 +103,7 @@ class CMDLine:
 	        self.group = opt.OptionGroup(self.cmd, "Complex voltage extra options")
         	self.group.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
-                                 clip bright pulsar pulses. Default: %default (no clipping)", default=0.0, type='float')
+                                 clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
         	self.group.add_option('--nblocks', dest='nblocks', metavar='#BLOCKS',
                            help="only read the first #BLOCKS blocks. Default: all blocks", default=-1, type='int')
         	self.group.add_option('--all-for-scaling', action="store_true", dest='is_all_times',
@@ -369,27 +369,29 @@ class CMDLine:
 					for sap in obs.saps: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, ", ".join(sap.psrs)))
 				if len(self.psrs) != 0 and self.psrs[0] == "parset":
 					for sap in obs.saps: log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
-			log.info("Output Dir = %s_*/%s" % (cep2.processed_dir_prefix, self.opts.outdir != "" and self.opts.outdir or self.opts.obsid + "_red*"))
-			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
-			log.info("Summaries ONLY = %s" % (self.opts.is_summary and "yes" or "no"))
-			log.info("Diagnostic plots ONLY = %s" % (self.opts.is_plots_only and "yes" or "no"))
-			log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
-			log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
-			if not self.opts.is_skip_dspsr:
-				log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
-			if obs.CV: log.info("RMFIT = %s" % (self.opts.is_skip_rmfit and "no" or "yes"))
-			skipped=""
-			if obs.CS and self.opts.is_noCS: skipped += " CS"
-			if obs.IS and self.opts.is_noIS: skipped += " IS"
-			if obs.CV and self.opts.is_noCV: skipped += " CV"
-			if obs.FE and self.opts.is_noFE: skipped += " FE"
-			if obs.CV and self.opts.is_skip_rmfit: log.info("rmfit = ")
 			if self.opts.rawdir != "/data":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
 				log.info("User-specified Parset file = %s" % (self.opts.parset))
-			if len(self.user_beams) != 0:
-				log.info("User-specified BEAMS to process: %s" % (", ".join(self.user_beams)))
-			if len(self.user_excluded_beams) != 0:
-				log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
+			log.info("Output Dir = %s_*/%s" % (cep2.processed_dir_prefix, self.opts.outdir != "" and self.opts.outdir or self.opts.obsid + "_red*"))
+			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
+			if self.opts.is_summary: log.info("Summaries ONLY")
+			else:
+				skipped=""
+				if obs.CS and self.opts.is_noCS: skipped += " CS"
+				if obs.IS and self.opts.is_noIS: skipped += " IS"
+				if obs.CV and self.opts.is_noCV: skipped += " CV"
+				if obs.FE and self.opts.is_noFE: skipped += " FE"
+				if obs.CV and self.opts.is_skip_rmfit: log.info("rmfit = ")
+				if len(self.user_beams) != 0:
+					log.info("User-specified BEAMS to process: %s" % (", ".join(self.user_beams)))
+				if len(self.user_excluded_beams) != 0:
+					log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
+				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
+				else:
+					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
+					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
+					if not self.opts.is_skip_dspsr:
+						log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
+					if obs.CV: log.info("rmfit = %s" % (self.opts.is_skip_rmfit and "no" or "yes"))
 			log.info("")

@@ -21,7 +21,7 @@ from pulp_logging import PulpLogger
 from pulp_pipeline import Pipeline
 
 # PLEASE increment the version number when you edit this file!!!
-VERSION="5.27"
+VERSION="5.31"
 
 ###  M A I N ###
 if __name__ == "__main__":
