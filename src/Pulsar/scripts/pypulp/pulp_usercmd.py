@@ -65,6 +65,8 @@ class CMDLine:
                            help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
         	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
                            help="making only summaries on already processed data", default=False)
+        	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
+                           help="creating diagnostic plots only on processing nodes assuming the data required for plots is there already", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -112,6 +114,8 @@ class CMDLine:
                            help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
         	self.group.add_option('--output-chans-per-subband', dest='output_chans_per_subband', metavar='#CHANS',
                            help="set output number of channels per subband. Default: %default (all channels in subband are collapsed)", default=1, type='int')
+        	self.group.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
+                           help="skip running rmfit program", default=False)
 		self.cmd.add_option_group(self.group)
         
 		# reading cmd options
@@ -368,16 +372,18 @@ class CMDLine:
 			log.info("Output Dir = %s_*/%s" % (cep2.processed_dir_prefix, self.opts.outdir != "" and self.opts.outdir or self.opts.obsid + "_red*"))
 			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
 			log.info("Summaries ONLY = %s" % (self.opts.is_summary and "yes" or "no"))
+			log.info("Diagnostic plots ONLY = %s" % (self.opts.is_plots_only and "yes" or "no"))
 			log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
 			log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
 			if not self.opts.is_skip_dspsr:
 				log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
+			if obs.CV: log.info("RMFIT = %s" % (self.opts.is_skip_rmfit and "no" or "yes"))
 			skipped=""
 			if obs.CS and self.opts.is_noCS: skipped += " CS"
 			if obs.IS and self.opts.is_noIS: skipped += " IS"
 			if obs.CV and self.opts.is_noCV: skipped += " CV"
 			if obs.FE and self.opts.is_noFE: skipped += " FE"
-			if skipped != "": log.info("Skip processing of:%s" % (skipped))
+			if obs.CV and self.opts.is_skip_rmfit: log.info("rmfit = ")
 			if self.opts.rawdir != "/data":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
