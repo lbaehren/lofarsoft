@@ -1318,7 +1318,7 @@ class CVUnit(PipeUnit):
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s %s" % \
+								cmd="dspsr -R -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s %s" % \
 									(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
 									self.outdir, psr2, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
@@ -1371,11 +1371,14 @@ class CVUnit(PipeUnit):
 				cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 				self.execute(cmd, workdir=self.curdir)
 				if not cmdline.opts.is_skip_rmfit:
-					# running rmfit for negative and positive RMs
-					cmd="rmfit -m -100,0,200 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="rmfit -m 0,100,200 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
+					try:
+						# running rmfit for negative and positive RMs
+						cmd="rmfit -m -100,0,200 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+						cmd="rmfit -m 0,100,200 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+					except Exception:
+						self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
 				if not cmdline.opts.is_skip_rmfit:
 					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
                                        	    -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
