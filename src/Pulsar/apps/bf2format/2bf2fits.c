@@ -42,9 +42,9 @@ int CSIS_MODE = 0;  // CSIS_MODE = 0 for Coherentstokes;  CSIS_MODE = 1 for Inco
 //#define WRITEFUNC(b)			(b[0]-b[1]) // Y power * 2
 
 #define SCALE				150 /* divide samples by this */
-#define CLOCK				200*1000*1000
+/* #define CLOCK				200*1000*1000 */
 #define FFTLENGTH			1024
-#define SAMPLEDURATION			(SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*CLOCK/FFTLENGTH/CHANNELS))
+/*#define SAMPLEDURATION			(SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*CLOCK/FFTLENGTH/CHANNELS))*/
 
 int constructFITSsearchsubint(datafile_definition datafile, float *data, int subintnr, unsigned char **subintdata, float **scales, float **offsets, int alreadyscaled, int allocmem, int destroymem);
 int writeFITSsubint(datafile_definition datafile, long subintnr, unsigned char *subintdata, float *scales, float *offsets);
@@ -2067,11 +2067,15 @@ int main( int argc, char **argv )
     if (lowerBandFreq < 150.0 && lowerBandFreq > 100.0 && clockparam == 200) {
       lowerBandEdge = 100.0;
       bw = 100.0;
+    }else if(clockparam == 160) {
+      bw = 80;
+      lowerBandEdge = 160.0;
     }else {
       lowerBandEdge = 0.0;
       bw = 100.0;
     }
     subband_width = bw / nsubbands;
+    /*    printf("XXXXX %f = %f / %d\n", subband_width, bw, nsubbands); */
     lofreq = (double) lowerBandEdge + (subbandFirst*subband_width) - (subband_width/(2*CHANNELS));
 
     /*
@@ -2132,7 +2136,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     subintdata.nrFreqChan = CHANNELS * SUBBANDS;
   subintdata.NrPols = 1;
   subintdata.NrBits = nrbits;
-  subintdata.SampTime = SAMPLEDURATION;
+  subintdata.SampTime = (SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*clockparam*1000*1000/FFTLENGTH/CHANNELS));
   subintdata.NrPulses = 1;   
   subintdata.format = MEMORY_format;
   subintdata.Period = -1;   
