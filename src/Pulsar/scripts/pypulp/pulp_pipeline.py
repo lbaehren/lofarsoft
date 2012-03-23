@@ -980,6 +980,7 @@ class PipeUnit:
                                      -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
                                      (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
                                       psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
 
 			if not cmdline.opts.is_plots_only:
 				if not cmdline.opts.is_skip_dspsr:
