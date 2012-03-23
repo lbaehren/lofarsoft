@@ -263,7 +263,7 @@ class Pipeline:
 		except Exception:
 			log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, status))
 			os.system("stty sane")
-			sys.exit(1)
+			raise Exception
 
 	# function that checks all processes in the list and kill them if they are still running
 	def kill(self, log=None):
@@ -718,8 +718,7 @@ class PipeUnit:
 				raise Exception
 		except Exception:
 			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (re.sub("\n", "\\\\n", cmd), status))
-			self.kill()  # killing all open processes
-			sys.exit(1)
+			raise Exception
 
 	def start_and_go(self, cmd, workdir=None, shell=False):
 	    	"""
@@ -738,8 +737,7 @@ class PipeUnit:
 			return process
 		except Exception:
 			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (re.sub("\n", "\\\\n", cmd), status))
-			self.kill()  # killing all open processes
-			sys.exit(1)
+			raise Exception
 
 	def waiting(self, prg, popen):
 		"""
@@ -763,8 +761,7 @@ class PipeUnit:
 				raise Exception
 		except Exception:
 			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, popen.pid, popen.returncode))
-			self.kill()  # killing all open processes
-			sys.exit(1)
+			raise Exception
 
 	def waiting_list(self, prg, popen_list):
 		"""
@@ -790,8 +787,7 @@ class PipeUnit:
 		except Exception:
 			fu = [u for u in popen_list if u.poll() is not None][0]
 			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
-			self.kill()
-			sys.exit(1)
+			raise Exception
 
 	def lcd(self, low, high):
 		"""
