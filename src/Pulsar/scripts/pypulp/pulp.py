@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
 	# getting the version of the pulp.py (svn revision number)
 	cmd="svn info"
-	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=os.environ["LOFARSOFT"])
+	proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=os.environ["LOFARSOFT"] + "src/Pulsar/scripts/pypulp")
 	(out, err) = proc.communicate()
 	VERSION="r" + out.split("Revision: ")[1].split("\n")[0]
 
