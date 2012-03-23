@@ -1314,7 +1314,7 @@ class CVUnit(PipeUnit):
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -skz -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s %s" % \
+								cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s %s" % \
 									(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
 									self.outdir, psr2, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
