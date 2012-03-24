@@ -41,6 +41,7 @@ set (external_packages
   wcslib
   wcstools
   dal1
+  dal
   )
 
 if (OPENGL_FOUND)
