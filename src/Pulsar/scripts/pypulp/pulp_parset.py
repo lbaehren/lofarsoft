@@ -301,9 +301,7 @@ class Observation:
 			msg="Can't find the parset file '%s' for ObsID = %s" % (self.parset, self.id)
 			if log != None: log.error(msg)
 			else: print msg
-			os.system("stty sane")
-			sys.exit(1)
-
+			quit(1)
 
 	# return True if parset file was found, and False otherwise
 	def is_parset (self):

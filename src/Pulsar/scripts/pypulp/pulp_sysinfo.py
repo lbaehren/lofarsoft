@@ -86,8 +86,7 @@ class CEP2Info:
 			msg="The connection to all locus nodes is down. Try again later"
 			if log != None: log.error(msg)
 			else: print msg
-			os.system("stty sane")
-			sys.exit(1)
+			quit(1)
 
 	# print nodes that are down
 	def print_down_nodes(self, log=None):

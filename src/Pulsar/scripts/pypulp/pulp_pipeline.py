@@ -60,8 +60,7 @@ class Pipeline:
 					unit = CVUnit(obs, cep2, cmdline, tab, log)
 				else:
 					log.error("Can't initialize processing pipeline unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
-					os.system("stty sane")
-					sys.exit(1)
+					quit(1)
 			if tab.is_coherent and tab.specificationType == "flyseye":
 				if obs.CS:
 					unit = FE_CSUnit(obs, cep2, cmdline, tab, log)
@@ -69,16 +68,14 @@ class Pipeline:
 					unit = FE_CVUnit(obs, cep2, cmdline, tab, log)
 				else:
 					log.error("Can't initialize processing pipeline FE unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
-					os.system("stty sane")
-					sys.exit(1)
+					quit(1)
 
 			# adding unit to the list
 			self.units.append(unit)
 
 		if len(self.units) == 0:
 			log.info("None beams to process!")
-			os.system("stty sane")
-			sys.exit(0)	
+			quit(0)
 
 		# creating main output directory on locus092 for CS data and on locus094 for IS data
 		# before that we also remove this directory if user flag is_del was set
@@ -102,7 +99,7 @@ class Pipeline:
 #				cmd="ssh -t %s 'nohup rm -rf %s </dev/null 2>&1'" % (node, sumdir)
 				# stdin=open(os.devnull, 'rb')  should help to avoid suspending pulp.py when run in the background
 				cmd="ssh -t %s 'rm -rf %s'" % (node, sumdir)
-				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
+				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				p.communicate()
 			log.info("Creating output summary directory on %s: %s" % (node, sumdir))
 #			cmd="%s %s 'mkdir -p %s'" % (cep2.cexeccmd, cep2.cexec_nodes[node], sumdir)
@@ -114,7 +111,7 @@ class Pipeline:
 #			cmd="ssh -t %s 'nohup mkdir -p %s </dev/null 2>&1'" % (node, sumdir)
 			# stdin=open(os.devnull, 'rb')  should help to avoid suspending pulp.py when run in the background
 			cmd="ssh -t %s 'mkdir -m 775 -p %s'" % (node, sumdir)
-			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
+			p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 			p.communicate()
 		
 		# Defining output directories for all local locus nodes
@@ -130,9 +127,9 @@ class Pipeline:
 				outdir=uo.split(":")[1]
 				log.info("Deleting previous processed results on %s: %s" % (node, outdir))
 				cmd="ssh -t %s 'rm -rf %s'" % (node, outdir)
-				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, stdin=open(os.devnull, 'rb'))
+				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
 				p.communicate()
-				os.system("stty sane")
+				Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 		log.info("")
 
 
@@ -160,7 +157,7 @@ class Pipeline:
 			cmd="ssh -t %s '%s/release/share/pulsar/bin/pulp.py --noinit --local --beams %d:%d %s'" % \
 				(locus, cep2.lofarsoft, unit.sapid, unit.tabid, " ".join(cmdline.options))
 			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
-			os.system("stty sane")
+			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 			log.info("SAP=%d TAB=%d %s(%s%s) on %s (pid=%d)  [#locations = %d, #files = %d]" % \
 				(unit.sapid, unit.tabid, unit.tab.specificationType == "flyseye" and ", ".join(unit.tab.stationList) + " " or "", \
 				unit.tab.specificationType == "flyseye" and "FE/" or "", \
@@ -178,10 +175,10 @@ class Pipeline:
 			# unless we want to do just a summary
 			if not cmdline.opts.is_summary:
 				run_units = [u.parent.pid for u in self.units if u.parent.poll() is None]
-				os.system("stty sane")
+				Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 				log.info("Still running [%d]: %s" % (len(run_units), run_units))
 				for unit in self.units:
-					os.system("stty sane")
+					Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 					log.info("waiting...")
 					unit.parent.communicate()
 					log.info("Process pid=%d has finished, status=%d" % (unit.parent.pid, unit.parent.returncode))
@@ -190,7 +187,7 @@ class Pipeline:
 
 				# loop over finished processes to see if they all finished OK
 				failed_units = [u for u in self.units if u.parent.returncode > 0]
-				os.system("stty sane")
+				Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 				log.info("Failed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
 				if len(failed_units) > 0:
 					log.info("*** Summaries will not be complete! Re-run processing for the failed beams using --beams option. ***")
@@ -211,10 +208,10 @@ class Pipeline:
 				log.info("Making summaries on %s... (pid=%d)" % (sumnode, sum_popen.pid))
 
 			run_units = [p.pid for p in self.sum_popens if p.poll() is None]
-			os.system("stty sane")
+			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 			log.info("Still running [%d]: %s" % (len(run_units), run_units))
 			for proc in self.sum_popens:
-				os.system("stty sane")
+				Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 				log.info("waiting...")
 				proc.communicate()
 				log.info("Process pid=%d has finished, status=%d" % (proc.pid, proc.returncode))
@@ -227,14 +224,13 @@ class Pipeline:
 
 			# loop over finished summaries to see if they all finished OK
 			failed_summaries = [s for s in self.sum_popens if s.returncode > 0]
-			os.system("stty sane")
+			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 			log.info("%d failed summaries" % (len(failed_summaries)))
 
 		except Exception:
 			log.exception("Oops... 'finish' function of the pipeline has crashed!")
 			self.kill(log)
-			os.system("stty sane")
-			sys.exit(1)
+			quit(1)
 
 	# execute command on local node (similar to execute in PipeUnit)
 	def execute(self, cmd, log, workdir=None, shell=False, is_os=False):
@@ -264,7 +260,7 @@ class Pipeline:
 				raise Exception
 		except Exception:
 			log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (cmd, status))
-			os.system("stty sane")
+			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 			raise Exception
 
 	# function that checks all processes in the list and kill them if they are still running
@@ -298,9 +294,7 @@ class Pipeline:
 
 		except Exception:
 			log.exception("Oops... 'make_summary' function on %s has crashed!" % (cep2.get_current_node()))
-			os.system("stty sane")
-			sys.exit(1)
-
+			quit(1)
 
 	# run necessary processes to organize summary info on summary nodes for CV data
 	# to be run locally on summary node

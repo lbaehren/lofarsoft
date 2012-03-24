@@ -124,8 +124,7 @@ class CMDLine:
 		# check if any input parameters are given
 		if len(sys.argv[1:]) == 0:
 			self.cmd.print_usage()
-			os.system("stty sane")
-			sys.exit(0)
+			quit(0)
 
 	# prints countdown (only to terminal)
 	def press_controlc(self, fr, cur):
@@ -157,16 +156,14 @@ class CMDLine:
 			msg="You have to use --beams option with --local!"
 			if log != None: log.error(msg)
 			else: print msg
-			os.system("stty sane")
-			sys.exit(1)
+			quit(1)
 
 		# check if all required options are given
 		if self.opts.obsid == "":
 			msg="ObsID is not given. What do you want to process?"
 			if log != None: log.error(msg)
 			else: print msg
-			os.system("stty sane")
-			sys.exit(1)
+			quit(1)
 
 		# checking that if --beams used then beams are specified correctly
 		# we have this complicated "if" because we used --beams to pass summary locus node when --summary and --local
@@ -179,21 +176,18 @@ class CMDLine:
 					msg="Option --beams should have at least one excluded beam!"
 					if log != None: log.error(msg)
 					else: print msg
-					os.system("stty sane")
-					sys.exit(1)
+					quit(1)
 			else: is_excluded = False
 			if re.search(r'[^\,\:\d]+', self.opts.beam_str) is not None:
 				msg="Option --beams can only has digits, colons and commas!"
 				if log != None: log.error(msg)
 				else: print msg
-				os.system("stty sane")
-				sys.exit(1)
+				quit(1)
 			elif re.search(r'[\:]+', self.opts.beam_str) is None:
 				msg="Option --beams should have at least one colon!"
 				if log != None: log.error(msg)
 				else: print msg
-				os.system("stty sane")
-				sys.exit(1)
+				quit(1)
 			else:   # forming array of beams
 				beams=self.opts.beam_str.split(",")
 				# also, we have to remove --beams option with argument from self.options
@@ -207,8 +201,7 @@ class CMDLine:
 						msg="Option --beams has at least one empty SAP or TAB value!"
 						if log != None: log.error(msg)
 						else: print msg
-						os.system("stty sane")
-						sys.exit(1)
+						quit(1)
 				# defining proper lists of beams
 				if is_excluded: self.user_excluded_beams = beams
 				else: self.user_beams = beams
@@ -263,8 +256,7 @@ class CMDLine:
 						msg="No parfile found for pulsar %s. Exiting..." % (psr)
 						if log != None: log.error(msg)
 						else: print msg
-						os.system("stty sane")
-                                        	sys.exit(1)
+						quit(1)
 			else:
 				msg="No pulsar names are given. PULP will find the proper pulsar(s) to fold..."
 				if log != None: log.info(msg)

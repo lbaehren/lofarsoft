@@ -20,6 +20,14 @@ from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 from pulp_pipeline import Pipeline
 
+# exit function that cleans terminal before exiting
+# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
+# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
+# to its default values)
+def quit (status):
+	Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
+	sys.exit(status)
+
 ###  M A I N ###
 if __name__ == "__main__":
 
@@ -131,11 +139,7 @@ if __name__ == "__main__":
 				log.exception("User interruption...")
 				if psrpipe != None:
 					psrpipe.kill(log)
-				# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
-				# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
-				# to its default values)
-				os.system("stty sane")
-				sys.exit(1)
+				quit(1)
 
 			# end of the pipeline...
 			end_pipe_time=time.time()
@@ -166,11 +170,7 @@ if __name__ == "__main__":
 						except KeyboardInterrupt:
 							log.exception("User interruption...")
 							unit.kill() # killing all open processes
-							# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
-							# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
-							# to its default values)
-							os.system("stty sane")
-							sys.exit(1)
+							quit(1)
 					
 			else:   # running local pulp to make summary actions
 				try:
@@ -179,16 +179,11 @@ if __name__ == "__main__":
 					log.exception("User interruption...")
 					if psrpipe != None:
 						psrpipe.kill(log)
-					# after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
-					# the command "stty sane" allows to reset terminal without clearing it (it puts all esc sequences
-					# to its default values)
-					os.system("stty sane")
-					sys.exit(1)
+					quit(1)
 
 	except Exception:
 		log.exception("Oops... pulp has crashed!")
-		os.system("stty sane")
-		sys.exit(1)
+		quit(1)
 
 	log.flush()
 	logfh.close()
