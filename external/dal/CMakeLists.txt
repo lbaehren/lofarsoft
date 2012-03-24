@@ -22,6 +22,8 @@ set (DAL_GIT_REPOSITORY https://github.com/nextgen-astrodata/DAL.git CACHE STRIN
 ##
 ## ==============================================================================
 
+option (DAL_BUILD_SHARED_LIBS "Build DAL as shared library?" ON)
+
 ## ==============================================================================
 ##
 ##  System inspection
@@ -55,7 +57,7 @@ include (ExternalProject)
 
 ExternalProject_Add (dal
   GIT_REPOSITORY ${DAL_GIT_REPOSITORY}
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DHDF5_C_INCLUDE_DIR=${LUS_SOURCE_DIR}/include/hdf5 -DPYTHON_DEST=${CMAKE_INSTALL_PREFIX}/lib/python
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DHDF5_C_INCLUDE_DIR=${LUS_SOURCE_DIR}/include/hdf5 -DPYTHON_DEST=${CMAKE_INSTALL_PREFIX}/lib/python -DBUILD_SHARED_LIBS=${DAL_BUILD_SHARED_LIBS}
   )
 
 add_dependencies (dal git)
