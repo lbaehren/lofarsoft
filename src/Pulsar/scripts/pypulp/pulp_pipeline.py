@@ -1398,19 +1398,23 @@ class CVUnit(PipeUnit):
 						self.execute(cmd, workdir=self.curdir)
 						cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
+						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
+                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
+							psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 					except Exception:
 						self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
-				if not cmdline.opts.is_skip_rmfit:
-					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
-                                       	    -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-                                       	 (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
-                                       	psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
+						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
+                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+							psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 				else:
 					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
-                                       	    -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-                                       	 (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
-                                       	psr, self.output_prefix, psr, self.output_prefix)
+                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+						(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+						psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 
 			# copying parset file to output directory
