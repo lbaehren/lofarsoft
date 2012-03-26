@@ -19,13 +19,12 @@ def check_pulsars(psr, cmdline, cep2, log=None):
 		if log != None: log.warning(msg)
 		# checking if par-file exist
 		if cmdline.opts.parfile != "":
-			parfile="%s/%s" % (cep2.parfile_dir, cmdline.opts.parfile.split("/")[-1])
-			if os.path.exists(parfile): 
+			if os.path.exists(cmdline.opts.parfile): 
 				msg="Found parfile '%s'. Continue..." % (parfile)
 				if log != None: log.info(msg)
 				return True
 			else: 
-				msg="Can't find user parfile '%s' in %s. Exiting..." % (cmdline.opts.parfile.split("/")[-1], cep2.parfile_dir)
+				msg="Can't find user parfile '%s'. Exiting..." % (cmdline.opts.parfile)
 				if log != None: log.error(msg)
 				else: print msg
 				quit(1)
@@ -264,21 +263,24 @@ class CMDLine:
 					if log != None: log.error(msg)
 					else: print msg
 					quit(1)
-				# copying parfile (if given) to directory with parfiles
+				# copying parfile (if given) to temporary ~/.pulp/<obsid> dir
+				# and re-defining parfile as located either in .pulp/<obsid> dir or dir with all par-files
 				if self.opts.parfile != "":
 					# checking first if parfile is in the current directory. If not then checking
 					# if this parfile exists in the directory with all parfiles
 					if os.path.exists(self.opts.parfile):
-						msg="Parfile is given. Copying '%s' to %s..." % (self.opts.parfile, cep2.parfile_dir)
+						msg="Parfile is given. Copying '%s' to %s..." % (self.opts.parfile, cep2.get_logdir())
 						if log != None: log.info(msg)
 						else: print msg
-						cmd="cp -f %s %s" % (self.opts.parfile, cep2.parfile_dir)
+						cmd="cp -f %s %s" % (self.opts.parfile, cep2.get_logdir())
 						os.system(cmd)
+						self.opts.parfile="%s/%s" % (cep2.get_logdir(), self.opts.parfile.split("/")[-1])
 					else:
 						msg="Checking if given parfile '%s' exists in %s directory..." % (self.opts.parfile, cep2.parfile_dir)
 						if log != None: log.info(msg)
 						else: print msg
-						if not os.path.exists("%s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1])):
+						self.opts.parfile="%s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1])
+						if not os.path.exists(self.opts.parfile):
 							msg="Can't find parfile '%s'. Exiting..." % (self.opts.parfile.split("/")[-1])
 							if log != None: log.error(msg)
 							else: print msg

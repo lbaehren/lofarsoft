@@ -833,15 +833,14 @@ class PipeUnit:
 				for psr in self.psrs:
 					psr2=re.sub(r'[BJ]', '', psr)
 					if cmdline.opts.parfile != "":
-						parfile="%s/%s" % (cep2.parfile_dir, cmdline.opts.parfile.split("/")[-1])
-						if os.path.exists(parfile): 
+						if os.path.exists(cmdline.opts.parfile): 
 							self.log.info("Copying user-specified parfile '%s' to %s. Renaming to %s.par" % \
 								(cmdline.opts.parfile.split("/")[-1], self.outdir, psr2))
 							cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
 							self.execute(cmd)
 							continue
 						else: 
-							self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile.split("/")[-1]))
+							self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile))
 							self.kill()
 							sys.exit(1)
 					parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
@@ -1242,15 +1241,14 @@ class CVUnit(PipeUnit):
 				for psr in self.psrs:
 					psr2=re.sub(r'[BJ]', '', psr)
 					if cmdline.opts.parfile != "":
-						parfile="%s/%s" % (cep2.parfile_dir, cmdline.opts.parfile.split("/")[-1])
-						if os.path.exists(parfile): 
+						if os.path.exists(cmdline.opts.parfile): 
 							self.log.info("Copying user-specified parfile '%s' to %s. Renaming to %s.par" % \
 								(cmdline.opts.parfile.split("/")[-1], self.outdir, psr2))
 							cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
 							self.execute(cmd)
 							continue
 						else: 
-							self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile.split("/")[-1]))
+							self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile))
 							self.kill()
 							sys.exit(1)
 					parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
