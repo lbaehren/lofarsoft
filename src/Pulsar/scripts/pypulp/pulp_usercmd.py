@@ -422,6 +422,7 @@ class CMDLine:
 				log.info("User-specified Parset file = %s" % (self.opts.parset))
 			log.info("Output Dir = %s_*/%s" % (cep2.processed_dir_prefix, self.opts.outdir != "" and self.opts.outdir or self.opts.obsid + "_red*"))
 			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
+			log.info("Log files mode = %s" % (self.opts.is_log_append and "append" or "overwrite"))
 			if self.opts.is_summary: log.info("Summaries ONLY")
 			else:
 				skipped=""
