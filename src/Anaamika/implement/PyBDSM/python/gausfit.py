@@ -56,6 +56,7 @@ class Op_gausfit(Op):
         opts = img.opts
         if opts.quiet == False and opts.verbose_fitting==False:
             bar.start()
+        iter_ngmax  = 10
         min_maxsize = 50.0
         maxsize = opts.splitisl_maxsize
         min_peak_size = 30.0
@@ -86,7 +87,7 @@ class Op_gausfit(Op):
                   islcp.mask_noisy = N.where(sub_labels == i_sub+1, False, True)
                   size_subisl = (~islcp.mask_active).sum()/img.pixel_beamarea*2.0 
                   if opts.peak_fit and size_subisl > peak_size:
-                      sgaul, sfgaul = self.deblend_and_fit(img, islcp)
+                      sgaul, sfgaul = self.fit_island_iteratively(img, islcp, iter_ngmax=iter_ngmax)
                   else:
                       sgaul, sfgaul = self.fit_island(islcp, opts, img)
                   gaul = gaul + sgaul; fgaul = fgaul + sfgaul
@@ -95,14 +96,14 @@ class Op_gausfit(Op):
             else:
               isl.islmean = 0.0 
               if opts.peak_fit and size > peak_size:
-                gaul, fgaul = self.deblend_and_fit(img, isl)
+                gaul, fgaul = self.fit_island_iteratively(img, isl, iter_ngmax=iter_ngmax)
               else:
                 gaul, fgaul = self.fit_island(isl, opts, img)
               if bar.started: bar.increment()
 
           else:
             if opts.peak_fit and size > peak_size:
-              gaul, fgaul = self.deblend_and_fit(img, isl)
+              gaul, fgaul = self.fit_island_iteratively(img, isl, iter_ngmax=iter_ngmax)
             else:
               gaul, fgaul = self.fit_island(isl, opts, img)
             if bar.started: bar.increment()
@@ -175,7 +176,7 @@ class Op_gausfit(Op):
         img.completed_Ops.append('gausfit')
         return img
 
-    def fit_island(self, isl, opts, img, ngmax=None, ffimg=None):
+    def fit_island(self, isl, opts, img, ngmax=None, ffimg=None, ini_gausfit=None):
         """Fit island with a set of 2D gaussians.
 
         Parameters:
@@ -209,7 +210,7 @@ class Op_gausfit(Op):
 
         thr1 = isl.mean + opts.thresh_isl*isl.rms
         thr2 = isl.mean + img.thresh_pix*isl.rms
-        thr0=thr1
+        thr0 = thr1
         verbose = opts.verbose_fitting
         peak = fcn.find_peak()[0]
         dof = isl.size_active
@@ -218,24 +219,27 @@ class Op_gausfit(Op):
         gaul = []
         iter = 0
         ng1 = 0
+        if ini_gausfit == None:
+            ini_gausfit = img.opts.ini_gausfit
 
-        if img.opts.ini_gausfit not in ['default', 'simple', 'nobeam']: img.opts.ini_gausfit = 'default'
-        if img.opts.ini_gausfit == 'simple' and ngmax == None: 
+        if ini_gausfit not in ['default', 'simple', 'nobeam']: 
+            ini_gausfit = 'default'
+        if ini_gausfit == 'simple' and ngmax == None: 
           ngmax = 25
-        if img.opts.ini_gausfit == 'default': 
+        if ini_gausfit == 'default': 
           gaul, ng1, ngmax = self.inigaus_fbdsm(isl, thr0, beam, img)
-        if img.opts.ini_gausfit == 'nobeam': 
+        if ini_gausfit == 'nobeam': 
           gaul = self.inigaus_nobeam(isl, thr0, beam, img)
           ng1 = len(gaul); ngmax = ng1+2
         while iter < 5:
             iter += 1
-            fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, img.opts.ini_gausfit, ngmax, verbose)
+            fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, ini_gausfit, ngmax, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
                                               beam, thr0, peak, shape, isl.mask_active)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
                 break
-        if not fitok and img.opts.ini_gausfit != 'simple':
+        if not fitok and ini_gausfit != 'simple':
             # If fits using default or nobeam methods did not work,
             # try using simple instead
             gaul = []
@@ -344,6 +348,54 @@ class Op_gausfit(Op):
             gaul = gaul + sgaul; fgaul = fgaul + sfgaul
         
         return gaul, fgaul
+
+    def fit_island_iteratively(self, img, isl, iter_ngmax=5):
+        """Fits an island iteratively.
+        
+        For large islands, which can require many Gaussians to fit well,
+        it is much faster to fit a small number of Gaussians simultaneously
+        and iterate."""
+        import functions as func
+        sgaul = []; sfgaul = []
+        gaul = []; fgaul = []
+        beam = img.pixel_beam
+        opts = img.opts
+        thresh_isl = opts.thresh_isl
+        thresh_pix = opts.thresh_pix
+        thresh = opts.fittedimage_clip
+        thr = isl.mean + thresh_isl * isl.rms
+        rms = isl.rms
+        
+        if opts.verbose_fitting:
+            print 'Iteratively fitting island ', isl.island_id
+        gaul = []; fgaul = []
+        ffimg_tot = N.zeros(isl.shape)
+        peak_val = N.max(isl.image - isl.islmean)
+        while peak_val >= thr:
+            sgaul, sfgaul = self.fit_island(isl, opts, img, ffimg=ffimg_tot, ngmax=iter_ngmax, ini_gausfit='simple')
+            gaul = gaul + sgaul; fgaul = fgaul + sfgaul
+            
+            # Calculate residual image
+            if len(sgaul) > 0:
+                gaul_obj_list = [Gaussian(img, par, isl.island_id, gidx) for (gidx, par) in enumerate(sgaul)]
+                for g in gaul_obj_list:
+                    g.centre_pix[0] -= isl.origin[0]
+                    g.centre_pix[1] -= isl.origin[1]
+                    C1, C2 = g.centre_pix
+                    shape = isl.shape
+                    b = find_bbox(thresh*isl.rms, g)
+                    bbox = N.s_[max(0, int(C1-b)):min(shape[0], int(C1+b+1)),
+                                max(0, int(C2-b)):min(shape[1], int(C2+b+1))]
+                    x_ax, y_ax = N.mgrid[bbox]
+                    ffimg = func.gaussian_fcn(g, x_ax, y_ax)
+                    ffimg_tot[bbox] += ffimg
+                peak_val = N.max(isl.image - isl.islmean - ffimg_tot)
+            else:
+                break
+            if bar.started: bar.spin()
+        
+        return gaul, fgaul
+
 
     def inigaus_fbdsm(self, isl, thr, beam, img):
         """ initial guess for gaussians like in fbdsm """
@@ -560,6 +612,7 @@ class Op_gausfit(Op):
         good = []
         bad  = []
         for g in gaul:
+            
             flag = self._flag_gaussian(g, beam, thr, peak, shape, opts, isl_mask)
             if flag:
                 bad.append((flag, g))
@@ -573,10 +626,13 @@ class Op_gausfit(Op):
         """
         from math import sqrt, sin, cos, log, pi
         from const import fwsig
+        import functions as func
 
         A, x1, x2, s1, s2, th = g
         s1, s2 = map(abs, [s1, s2])
         flag = 0
+        if N.any(N.isnan(g)):
+            return -1
 
         if s1 < s2:   # s1 etc are sigma
           ss1=s2; ss2=s1; th1 = divmod(th+90.0, 180)[1]
@@ -598,10 +654,10 @@ class Op_gausfit(Op):
         flag_max = False
         if A < opts.flag_minsnr*thr: flag += 1
         if A > opts.flag_maxsnr*peak or flag_max: flag += 2
-        if N.isnan(x1) or x1 - border < 0 or x1 + border + 1 > shape[0]:
+        if x1 - border < 0 or x1 + border + 1 > shape[0]:
             flag += 4
             x1ok = False
-        if N.isnan(x2) or x2 - border < 0 or x2 + border + 1 > shape[1]:
+        if x2 - border < 0 or x2 + border + 1 > shape[1]:
             flag += 8
             x2ok = False
         if x1ok and x2ok:
@@ -624,6 +680,22 @@ class Op_gausfit(Op):
           if s1*s2 < opts.flag_minsize_bm*beam[0]*beam[1]: flag += 128
         if not opts.flag_smallsrc:
                 if s1*s2 == 0.: flag += 128
+        
+        ellx, elly = func.drawellipse([A, x1, x2, s1*opts.flag_maxsize_fwhm,
+                                       s2*opts.flag_maxsize_fwhm, th])
+        pt1 = [N.min(ellx), elly[N.argmin(ellx)]]
+        pt2 = [ellx[N.argmax(elly)], N.max(elly)]
+        pt3 = [N.max(ellx), elly[N.argmax(ellx)]]
+        pt4 = [ellx[N.argmin(elly)], N.min(elly)]
+        extremes = [pt1, pt2, pt3, pt4]
+        for pt in extremes:
+            if abs(pt[0] - x1) > 2.0 or abs(pt[1] - x2) > 2.0:
+                if pt[0] < 0 or pt[0] >= shape[0] or pt[1] < 0 or pt[1] >= shape[1]:
+                    flag += 256
+                    break
+                elif mask[tuple(pt)]:
+                    flag += 256
+                    break
 
         return flag
 

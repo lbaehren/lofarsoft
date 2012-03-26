@@ -303,20 +303,19 @@ class Opts(object):
                                       "island area, then a 3x3 opening is considered.",
                              group='advanced_opts')
     peak_fit        =   Bool(True,
-                             doc="Find and fit peaks of large islands before fitting entire "\
-                                "island\n"\
-                                 "When enabled, PyBDSM will first identify and "\
+                             doc="Find and fit peaks of large islands iteratively\n"\
+                                 "When enabled, PyBDSM will identify and "\
                                  "fit peaks of emission in "\
-                                 "large islands (the size of islands for which "\
+                                 "large islands iteratively (the size of islands for which "\
                                  "peak fitting is done is controlled with the "\
-                                 "peak_maxsize option). Once the peaks have been fit, the "\
-                                 "residual emission is then fit in the normal "\
-                                 "way. Enabling this option will generally speed up "\
-                                 "fitting, but may result in somewhat higher residuals.",
+                                 "peak_maxsize option), using a maximum of 10 "\
+                                 "Gaussians per iteration. Enabling this option will "\
+                                 "generally speed up fitting, but may result in "\
+                                 "somewhat higher residuals.",
                              group='advanced_opts')
     peak_maxsize    =  Float(30.0,
                              doc="If island size in beam area is more than this, "\
-                                 "attempt to fit peaks separately (if "\
+                                 "attempt to fit peaks iteratively (if "\
                                  "peak_fit = True). Min value is 30",
                              group='advanced_opts')
     fdr_alpha       =  Float(0.05,
@@ -561,6 +560,12 @@ class Opts(object):
                                  "flagged. The flag value is increased by 16 (for x) "\
                                  "and 32 (for y).",
                              group="flagging_opts")
+    flag_maxsize_fwhm=  Float(0.1,
+                             doc="Flag Gaussian if fwhm-contour times factor extends beyond island\n"\
+                                 "Any fitted Gaussian whose contour of flag_maxsize_fwhm times the fwhm "\
+                                 "falls outside the island is "\
+                                 "flagged. The flag value is increased by 256.",
+                             group="flagging_opts")
     flag_bordersize =    Int(0,
                              doc="Flag Gaussian if centre is outside border "\
                                  "- flag_bordersize pixels\n"\
@@ -568,7 +573,7 @@ class Opts(object):
                                  "outside the island bounding box is flagged. The flag "\
                                  "value is increased by 4 (for x) and 8 (for y).",
                              group="flagging_opts")
-    flag_maxsize_bm =  Float(10.0,
+    flag_maxsize_bm =  Float(25.0,
                              doc="Flag Gaussian if area greater than "\
                                  "flag_maxsize_bm times beam area\n"\
                                  "Any fitted "\

@@ -408,16 +408,11 @@ The advanced options are:
         to 4 pixels for all wavelet images.
         
     peak_fit
-        This parameter is a Boolean (default is ``True``). When True, PyBDSM will first identify and fit peaks of emission in
-        large islands (the size of islands for which peak fitting is done is
-        controlled with the ``peak_maxsize`` option). Once the peaks have been fit,
-        the residual emission is then fit in the normal way. Enabling this
-        option will generally speed up fitting, but may result in somewhat
-        higher residuals.
+        This parameter is a Boolean (default is ``True``). When True, PyBDSM will identify and fit peaks of emission in large islands iteratively (the size of islands for which peak fitting is done is controlled with the peak_maxsize option), using a maximum of 10 Gaussians per iteration. Enabling this option will generally speed up fitting (by factors of many for large islands), but may result in somewhat higher residuals.
         
     peak_maxsize
         This parameter is a float (default is 30.0). If island size in beam area is more than this value, attempt to fit peaks
-        separately (if ``peak_fit = True``). The minimum value is 30.
+        iteratively (if ``peak_fit = True``). The minimum value is 30.
         
     rms_value
         This parameter is a float (default is ``None``) that sets the value of constant rms in Jy/beam to use if ``rms_map = False``. If ``None``, the value is 
@@ -469,7 +464,7 @@ If ``flagging_opts = True``, a number of options are listed for flagging unwante
 
 .. note::
 
-    If a fit did not produce good results, it is often useful to check whether there are flagged Gaussians and adjust the flagging options as necessary. 
+    If a fit did not produce good results, it is often useful to check whether there are flagged Gaussians and adjust the flagging options as necessary. Flagged Gaussians can be viewed by setting ``ch0_flagged = True`` in the ``show_fit`` task.
 
 The options for flagging of Gaussians are:
 
@@ -501,6 +496,9 @@ The options for flagging of Gaussians are:
     flag_maxsize_bm
         This parameter is a float (default is 50.0). Any fitted Gaussian whose size is greater than ``flag_maxsize_bm`` times the
         synthesized beam is flagged. The flag value is increased by 64.
+
+    flag_maxsize_fwhm
+        This parameter is a float (default is 0.3). Any fitted Gaussian whose contour of ``flag_maxsize_fwhm`` times the FWHM falls outside the island is flagged. The flag value is increased by 256.
     
     flag_maxsize_isl
         This parameter is a float (default is 1.0). Any fitted Gaussian whose maximum x-dimension is larger than

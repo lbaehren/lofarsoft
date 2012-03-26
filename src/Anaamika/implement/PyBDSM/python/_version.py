@@ -26,6 +26,18 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/26 - Modified fitting of large islands to adopt an
+                 iterative fitting scheme that limits the number
+                 of Gaussians fit simultaneously per iteration to 10.
+                 This change speeds up fitting of large islands
+                 considerably. The options peak_fit and peak_maxsize
+                 control whether iterative fitting is done. Added new 
+                 Gaussian flagging condition (flag_maxsize_fwhm) that 
+                 flags Gaussians whose sigma contour times factor 
+                 extends beyond the island boundary. This flag prevents
+                 fitting of Gaussians that extend far beyond the island 
+                 boundary.
+    
     2012/03/23 - Tweaked settings that affect fitting of Gaussians to
                  improve fitting in general. 
     
@@ -40,7 +52,7 @@ def changelog():
                  when there is a large number of islands. Simplified the
                  spectral index module to make it more user friendly and
                  stable. Added the option to use a "detection" image for
-                 island detection (the "detection_image" option); source
+                 island detection (the detection_image option); source
                  properties are still measured from the main input image.
     
     2012/03/01 - Fixed a bug in the polarisation module that could result
