@@ -836,7 +836,7 @@ class PipeUnit:
 						if os.path.exists(cmdline.opts.parfile): 
 							self.log.info("Copying user-specified parfile '%s' to %s. Renaming to %s.par" % \
 								(cmdline.opts.parfile.split("/")[-1], self.outdir, psr2))
-							cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
+							cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
 							self.execute(cmd)
 							continue
 						else: 
@@ -1244,7 +1244,7 @@ class CVUnit(PipeUnit):
 						if os.path.exists(cmdline.opts.parfile): 
 							self.log.info("Copying user-specified parfile '%s' to %s. Renaming to %s.par" % \
 								(cmdline.opts.parfile.split("/")[-1], self.outdir, psr2))
-							cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
+							cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
 							self.execute(cmd)
 							continue
 						else: 

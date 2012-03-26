@@ -278,15 +278,15 @@ class CMDLine:
 							os.system(cmd)
 							# we should also change the parfile name in self.options in order to pass correct file to processing nodes
 							newpar="%s/%s" % (cep2.get_logdir(), self.opts.parfile.split("/")[-1])
-							self.options = [re.sub(self.opts.parfile, newpar, opt) \
-								for opt in self.options if re.search(self.opts.parfile, opt) is not None]
+							self.options = [re.search(self.opts.parfile, opt) is None and opt or re.sub(self.opts.parfile, newpar, opt) \
+								for opt in self.options]
 							self.opts.parfile=newpar
 					else:
 						msg="Checking if given parfile '%s' exists in %s directory..." % (self.opts.parfile.split("/")[-1], cep2.parfile_dir)
 						if log != None: log.info(msg)
 						else: print msg
 						newpar="%s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1])
-						self.options = [re.sub(self.opts.parfile, newpar, opt) for opt in self.options if re.search(self.opts.parfile, opt) is not None]
+						self.options = [re.search(self.opts.parfile, opt) is None and opt or re.sub(self.opts.parfile, newpar, opt) for opt in self.options]
 						self.opts.parfile=newpar
 						if not os.path.exists(self.opts.parfile):
 							msg="Can't find parfile '%s'. Exiting..." % (self.opts.parfile.split("/")[-1])
