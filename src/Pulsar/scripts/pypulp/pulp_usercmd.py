@@ -399,6 +399,8 @@ class CMDLine:
 					for sap in obs.saps: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, ", ".join(sap.psrs)))
 				if len(self.psrs) != 0 and self.psrs[0] == "parset":
 					for sap in obs.saps: log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
+			if self.opts.parfile != "":
+				log.info("User-specified Parfile = %s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1]))
 			if self.opts.rawdir != "/data":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
