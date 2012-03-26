@@ -8,7 +8,7 @@ from pycrtools.io import database as db
 import os
 import re
 import pickle
-
+import time
 
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
@@ -165,7 +165,7 @@ class CRDatabase(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None):
+    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, order="e.timestamp"):
         """Return a list of eventIDs satifying the values of this
         functions arguments.
 
@@ -178,6 +178,7 @@ class CRDatabase(object):
         *timestamp_start*  timestamp of the event is larger than this value.
         *timestamp_end*    timestamp of the event is smaller than this value.
         *status*           status of the event.
+        *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
 
         The *timestamp*, *timestamp_start* and *timestamp_end*
@@ -195,6 +196,7 @@ class CRDatabase(object):
             # Construct SQL table
             sql_fields = "e.eventID"
             sql_table = "events AS e"
+            sql_order = order
             sql_selection_list = []
 
             # Construct selection
@@ -220,6 +222,8 @@ class CRDatabase(object):
             sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
             if sql_selection_list:
                 sql += " WHERE {0}".format(sql_selection)
+            if len(sql_order) > 0:
+                sql += " ORDER BY {0}".format(sql_order)
 
             # Extracting eventIDs
             result = [record[0] for record in self.db.select(sql)]
@@ -229,7 +233,24 @@ class CRDatabase(object):
         return result
 
 
-    def getDatafileIDs(self, eventID=None, filename=None, status=None):
+    def getEvent(self, id=0):
+        """Get the event with a specific *id*.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested event.
+        =========  ====================================
+        """
+        if (id > 0):
+            return Event(self.db, id=id)
+        else:
+            return None
+
+
+    def getDatafileIDs(self, eventID=None, filename=None, status=None, order=""):
         """Return a list of datafileIDs satifying the values of this
         functions arguments.
 
@@ -241,6 +262,7 @@ class CRDatabase(object):
         *eventID*          id of the event.
         *filename*         name of the datafile.
         *status*           status of the datafile.
+        *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
 
         If no arguments are given all datafileIDs are selected. When
@@ -255,6 +277,7 @@ class CRDatabase(object):
             sql_table_d = "datafiles AS d"
             sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.datafileID=d.datafileID)"
             sql_table = sql_table_d     # Default sql_table value
+            sql_order = order
             sql_selection_list = []
             if eventID:
                 sql_table = sql_table_e
@@ -278,6 +301,8 @@ class CRDatabase(object):
             sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
             if sql_selection_list:
                 sql += " WHERE {0}".format(sql_selection)
+            if len(sql_order) > 0:
+                sql += " ORDER BY {0}".format(sql_order)
 
             # Extracting datafileIDs
             result = [record[0] for record in self.db.select(sql)]
@@ -287,7 +312,24 @@ class CRDatabase(object):
         return result
 
 
-    def getStationIDs(self, eventID=None, datafileID=None, stationname=None, status=None):
+    def getDatafile(self, id=0):
+        """Get the Datafile with a specific *id*.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested datafile.
+        =========  ====================================
+        """
+        if (id > 0):
+            return Datafile(self.db, id=id)
+        else:
+            return none
+
+
+    def getStationIDs(self, eventID=None, datafileID=None, stationname=None, status=None, order="s.stationname"):
         """Return a list of stationIDs that satisfy the values of the
         provided arguments of this method.
 
@@ -300,6 +342,7 @@ class CRDatabase(object):
         *datafileID*       id of the datafile.
         *stationname*      name of the station.
         *status*           status of the station.
+        *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
 
         If no arguments are given all stationIDs are selected. When
@@ -315,6 +358,7 @@ class CRDatabase(object):
             sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " ON (ds.stationID=s.stationID)"
             sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
             sql_table = sql_table_s     # Default sql_table value
+            sql_order = order
             sql_selection_list = []
             if datafileID:
                 sql_table = sql_table_d
@@ -341,6 +385,8 @@ class CRDatabase(object):
             sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
             if sql_selection_list:
                 sql += " WHERE {0}".format(sql_selection)
+            if len(sql_order) > 0:
+                sql += " ORDER BY {0}".format(sql_order)
 
             result = [record[0] for record in self.db.select(sql)]
         else:
@@ -349,7 +395,24 @@ class CRDatabase(object):
         return result
 
 
-    def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None):
+    def getStation(self, id=0):
+        """Get the Station with a specific *id*.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested station.
+        =========  ====================================
+        """
+        if (id > 0):
+            return Station(self.db, id=id)
+        else:
+            return none
+
+
+    def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None, order=""):
         """Return a list of polarizationIDs that satisfy the values of the
         provided arguments of this method.
 
@@ -363,6 +426,7 @@ class CRDatabase(object):
         *stationID*        id of the station.
         *antennaset*       type of antennaset.
         *status*           status of the polarization.
+        *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
 
         If no arguments are given all polarizationIDs are selected. When
@@ -379,6 +443,7 @@ class CRDatabase(object):
             sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " AND (ds.stationID=sp.stationID)"
             sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
             sql_table = sql_table_p     # Default sql_table value
+            sql_order = order
             sql_selection_list = []
             if stationID:
                 sql_table = sql_table_s
@@ -408,6 +473,8 @@ class CRDatabase(object):
             sql = "SELECT {0} FROM {1}".format(sql_fields, sql_table)
             if sql_selection_list:
                 sql += " WHERE {0}".format(sql_selection)
+            if len(sql_order) > 0:
+                sql += " ORDER BY {0}".format(sql_order)
 
             result = [record[0] for record in self.db.select(sql)]
 
@@ -415,6 +482,23 @@ class CRDatabase(object):
             raise ValueError("Unable to read from database: no database was set.")
 
         return result
+
+
+    def getPolarization(self, id=0):
+        """Get the Polarization with a specific *id*.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested polarization.
+        =========  ====================================
+        """
+        if (id > 0):
+            return Polarization(self.db, id=id)
+        else:
+            return none
 
 
     def summary(self):
@@ -1080,7 +1164,7 @@ class Event(object):
 
         # Event info
         print "  %-40s : %d" %("ID", self._id)
-        print "  %-40s : %s" %("Timestamp", self.timestamp)
+        print "  %-40s : %s (%s s)" %("Timestamp", time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(int(self.timestamp))), self.timestamp)
         print "  %-40s : %s" %("Status", self.status)
 
         # Datafiles
