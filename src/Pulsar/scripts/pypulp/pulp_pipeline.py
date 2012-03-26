@@ -889,9 +889,11 @@ class PipeUnit:
 
 			# if we run the whole processing and not just plots
 			if not cmdline.opts.is_plots_only:
+
 				# running data conversion (2bf2fits)
-				cmd="2bf2fits %s -parset %s -append -nbits 8 -A 100 -sigma 3 -v -nsubs %d -o %s %s" % (self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.output_prefix, input_file)
-				self.execute(cmd, workdir=self.curdir)
+				if not cmdline.opts.is_nodecode:
+					cmd="2bf2fits %s -parset %s -append -nbits 8 -A 100 -sigma 3 -v -nsubs %d -o %s %s" % (self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.output_prefix, input_file)
+					self.execute(cmd, workdir=self.curdir)
 
 				# running RFI excision, checking
 				total_chan = obs.nrSubbands*self.nrChanPerSub
@@ -1299,25 +1301,26 @@ class CVUnit(PipeUnit):
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
 			if not cmdline.opts.is_plots_only:
-				# checking if extra options for complex voltages processing were set in the pipeline
-				nblocks=""
-				if cmdline.opts.nblocks != -1: nblocks = "-b %d" % (cmdline.opts.nblocks)
-				is_all_for_scaling=""
-				if cmdline.opts.is_all_times: is_all_for_scaling="-all_times"
-				is_write_ascii=""
-				if cmdline.opts.is_write_ascii: is_write_ascii="-t"
-				verbose=""
-				if cmdline.opts.is_debug: verbose="-v"
 
-				# running bf2puma2 command for all frequency splits...
-				self.log.info("Running bf2puma2 for all frequency splits simultaneously...")
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
 				s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
-				bf2puma2_popens=[] # list of bf2puma2 Popen objects
-				# loop on frequency splits
-				for ii in range(len(s0_files)):
-					cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
-					self.execute(cmd, workdir=self.curdir)
+				if not cmdline.opts.is_nodecode:
+					# checking if extra options for complex voltages processing were set in the pipeline
+					nblocks=""
+					if cmdline.opts.nblocks != -1: nblocks = "-b %d" % (cmdline.opts.nblocks)
+					is_all_for_scaling=""
+					if cmdline.opts.is_all_times: is_all_for_scaling="-all_times"
+					is_write_ascii=""
+					if cmdline.opts.is_write_ascii: is_write_ascii="-t"
+					verbose=""
+					if cmdline.opts.is_debug: verbose="-v"
+
+					# running bf2puma2 command for all frequency splits...
+					self.log.info("Running bf2puma2 for all frequency splits simultaneously...")
+					# loop on frequency splits
+					for ii in range(len(s0_files)):
+						cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
+						self.execute(cmd, workdir=self.curdir)
 
 				# removing links for input files
 				cmd="rm -f %s" % (" ".join(input_files))

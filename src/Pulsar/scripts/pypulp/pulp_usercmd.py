@@ -68,6 +68,8 @@ class CMDLine:
         	self.cmd.add_option('--par', '--parfile', '--eph', dest='parfile', metavar='PARFILE',
                            help="specify the parfile for one pulsar to fold. Pulsar name should be given explicitely using --pulsar option \
                                  and only one pulsar name should be given for --par option to work", default="", type='str')
+        	self.cmd.add_option('--nodecode', action="store_true", dest='is_nodecode',
+                           help="optional parameter to skip decoding the data (2bf2fits/bf2puma2)", default=False)
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
                            help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
@@ -432,6 +434,7 @@ class CMDLine:
 					log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
 				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
 				else:
+					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
 					if not self.opts.is_skip_dspsr:
