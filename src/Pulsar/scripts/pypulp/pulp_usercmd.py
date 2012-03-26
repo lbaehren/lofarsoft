@@ -18,6 +18,17 @@ def check_pulsars(psr, cmdline, cep2, log=None):
 		msg="warning: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % (psr, cep2.psrcatalog)
 		if log != None: log.warning(msg)
 		# checking if par-file exist
+		if cmdline.opts.parfile != "":
+			parfile="%s/%s" % (cep2.parfile_dir, cmdline.opts.parfile.split("/")[-1])
+			if os.path.exists(parfile): 
+				msg="Found parfile '%s'. Continue..." % (parfile)
+				if log != None: log.info(msg)
+				return True
+			else: 
+				msg="Can't find user parfile '%s' in %s. Exiting..." % (cmdline.opts.parfile.split("/")[-1], cep2.parfile_dir)
+				if log != None: log.error(msg)
+				else: print msg
+				quit(1)
 		parfile="%s/%s.par" % (cep2.parfile_dir, re.sub(r'[BJ]', '', psr))
 		if not os.path.exists(parfile):
 			# checking another parfile name
@@ -44,7 +55,7 @@ class CMDLine:
         	self.cmd = opt.OptionParser(self.usage, version="%prog " + self.version)
         	self.cmd.add_option('--id', '--obsid', dest='obsid', metavar='ObsID',
                            help="specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
-        	self.cmd.add_option('-p', '--pulsar', dest='psr', metavar='PSRS|word',
+        	self.cmd.add_option('-p', '-P', '--pulsar', dest='psr', metavar='PSRS|word',
                            help="specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
                                  give one of the 4 special words: \"parset\" - to take pulsar name from the source field for each SAP \
                                  separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
@@ -55,6 +66,9 @@ class CMDLine:
         	self.cmd.add_option('-o', '-O', '--output', dest='outdir', metavar='DIR',
                            help="specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
                                  Default is corresponding *_red or *_redIS directory", default="", type='str')
+        	self.cmd.add_option('--par', '--parfile', '--eph', dest='parfile', metavar='PARFILE',
+                           help="specify the parfile for one pulsar to fold. Pulsar name should be given explicitely using --pulsar option \
+                                 and only one pulsar name should be given for --par option to work", default="", type='str')
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
                            help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
@@ -82,7 +96,7 @@ class CMDLine:
         	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
                            help="optional parameter to delete the previous entire output processing location if it exists. \
                                  Otherwise, the new results will be overwritten/added to existing directory", default=False)
-        	self.cmd.add_option('--par', '--parset', dest='parset', metavar='FILE',
+        	self.cmd.add_option('--parset', dest='parset', metavar='FILE',
                            help="specify explicitely the input parameter file (parset file). By default, it will be looked for \
                                  in standard system directory", default="", type='str')
         	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
@@ -245,6 +259,30 @@ class CMDLine:
 			# checking if given psr(s) names are valid, and these pulsars are in the catalog
 			if len(self.psrs) != 0 and self.psrs[0] != "parset" and self.psrs[0] != "sapfind" and \
 				self.psrs[0] != "sapfind3" and self.psrs[0] != "tabfind":
+				if self.opts.parfile != "" and len(self.psrs) > 1:
+					msg="Parfile '%s' is given, but more than 1 pulsar are given to fold. Exiting..." % (self.opts.parfile)
+					if log != None: log.error(msg)
+					else: print msg
+					quit(1)
+				# copying parfile (if given) to directory with parfiles
+				if self.opts.parfile != "":
+					# checking first if parfile is in the current directory. If not then checking
+					# if this parfile exists in the directory with all parfiles
+					if os.path.exists(self.opts.parfile):
+						msg="Parfile is given. Copying '%s' to %s..." % (self.opts.parfile, cep2.parfile_dir)
+						if log != None: log.info(msg)
+						else: print msg
+						cmd="cp -f %s %s" % (self.opts.parfile, cep2.parfile_dir)
+						os.system(cmd)
+					else:
+						msg="Checking if given parfile '%s' exists in %s directory..." % (self.opts.parfile, cep2.parfile_dir)
+						if log != None: log.info(msg)
+						else: print msg
+						if not os.path.exists("%s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1])):
+							msg="Can't find parfile '%s'. Exiting..." % (self.opts.parfile.split("/")[-1])
+							if log != None: log.error(msg)
+							else: print msg
+							quit(1)
 				if len(self.psrs) > 3:
 					msg="%d pulsars are given, but only first 3 will be used for folding" % (len(self.psrs))
 					if log != None: log.warning(msg)
