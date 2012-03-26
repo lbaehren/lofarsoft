@@ -42,13 +42,26 @@ if __name__ == "__main__":
 
 	# creating name of the Logger
 	logger_name = "PULP"
+	# start forming name of the logfile
 	logfile = cmdline.opts.obsid
 	if cmdline.opts.is_local and cmdline.opts.beam_str != "":
 		if not cmdline.opts.is_summary:
-			logger_name += cmdline.opts.beam_str.split(",")[0] 
-			### I should add checking if beam_str is given correctly
-			sapid = int(cmdline.opts.beam_str.split(",")[0].split(":")[0])
-			tabid = int(cmdline.opts.beam_str.split(",")[0].split(":")[1])
+			beam=cmdline.opts.beam_str.split(",")[0]
+			logger_name += beam
+                        if re.search(r'[^\:\d]+', beam) is not None:
+                                print "Option --beams can only has digits, colons and commas!\nCan't start local processing. Exiting..."
+                                quit(1)
+                        if re.search(r'[\:]+', beam) is None:
+                                print "Option --beams should have at least one colon!\nCan't start local processing. Exiting..."
+                                quit(1)
+			(sap, tab) = beam.split(":")
+			if sap == "" or tab == "":
+                                print "Option --beams has at least one empty SAP or TAB value!\nCan't start local processing. Exiting..."
+                                quit(1)
+			# getting SAP and TAB ids for local processing
+			sapid = int(sap)
+			tabid = int(tab)
+			# forming finally the name of the local log-file
 			logfile = "%s_sap%03d_beam%04d.log" % (cmdline.opts.obsid, sapid, tabid)
 		else:   # when --summary then name of the summary locus node should be given in --beams
 			# when run locally
