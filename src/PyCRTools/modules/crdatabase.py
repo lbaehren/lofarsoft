@@ -698,8 +698,17 @@ class _Parameter(object):
         else:
             raise TypeError("Parent type does not match any parameter table in the database.")
 
-        self._db = self._parent._db
-        self._id = self._parent._id
+
+    @property
+    def _id(self):
+        """Return the ID of the parent object."""
+        return self._parent._id
+
+
+    @property
+    def _db(self):
+        """Return the db reference of the parent object."""
+        return self._parent._db
 
 
     def __repr__(self):
@@ -729,7 +738,12 @@ class _Parameter(object):
     def read(self):
         """Read all parameters key names from the database."""
         for key in self.keys():
-            self._parameter.setdefault(key, self.db_read(key))
+            try:
+                value = self.db_read(key)
+            except:
+                value = None
+            if value:
+                self._parameter.setdefault(key, value)
 
 
     def write(self):
@@ -1844,7 +1858,10 @@ class Polarization(object):
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
-        return self.parameter[key]
+        if key in self.parameter:
+            return self.parameter[key]
+        else:
+            return None
 
 
     def __setitem__(self, key, value):
@@ -1966,6 +1983,8 @@ class Polarization(object):
         # Parameters
         if showParameters:
             self.parameter.summary()
+        else:
+            print "  %-40s : %d" %("# Parameters", len(self.parameter.keys()))
 
         print "="*linewidth
 

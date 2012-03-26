@@ -128,10 +128,55 @@ class CRDatabasePopulator(object):
                         p.antennaset = dx.antennaset
                         p.direction = "%d" %(pol_direction)
                         p.resultsfile = dx.resultsfile(pol_direction)
+
                         p.write()
                         station.addPolarization(p)
+                        # If results.xml file exists add results to properties.
+                        results_filename = os.path.join(self.dbManager.settings.resultspath,
+                                                        p.resultsfile)
+                        if os.path.isfile(results_filename):
+                            if not "xml_processed" in p.parameter.keys():
+                                print "      Processing results file %s" %(results_filename)
+                                parameters = xmldict.load(results_filename)
+                                for key in parameters.keys():
+                                    p[key] = parameters[key]
+                                # p.parameter.db_write(key, parameters[key])
+                                p["xml_processed"] = True
+                        # else:
+                        #     print "      File %s does not exist." %(results_filename)
 
-            #datafile.write(recursive=True)
+            pass
+
+
+    def update(self):
+        """Update already existing database entries."""
+        # TODO: CRDatabasePopulator.update() - Add implementation
+        eventIDs = self.dbManager.getEventIDs()
+
+        resultspath = self.dbManager.settings.resultspath
+        print "Resultspath: ", resultspath
+
+        for eID in eventIDs:
+            e = self.dbManager.getEvent(eID)
+            print "Event: ", e.timestamp
+            for d in e.datafiles:
+                print "  Datafile: ", d.filename
+                for s in d.stations:
+                    print "    Station: ", s.stationname
+                    for p in s.polarizations:
+                        # If results.xml file exists add results to properties.
+                        results_filename = os.path.join(resultspath, p.resultsfile)
+                        if os.path.isfile(results_filename):
+                            if not "xml_processed" in p.parameter.keys():
+                                print "      Processing results file %s" %(results_filename)
+                                parameters = xmldict.load(results_filename)
+                                # - Add all parameters to info object & database
+                                for key in parameters.keys():
+                                    p[key] = parameters[key]
+                                p["xml_processed"] = True
+                        # else:
+                        #     print "      File %s does not exist." %(results_filename)
+
 
     def populate_nodb(self):
         """Populate the database with datafile and event information."""
@@ -378,8 +423,9 @@ def parseOptions():
 
     # parser.add_option("-a", "--archive", type="str", dest="archivepath", default="", help="directory where the archive can be found.")
     parser.add_option("-d", "--datapath", type="str", dest="datapath", default="", help="directory where the datafiles can be found.")
-    parser.add_option("-r", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
     parser.add_option("-f", "--filefilter", type="str", dest="filefilter", default="", help="filter to select which files are processed.")
+    parser.add_option("-r", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
+    parser.add_option("-u", "--update", action="store_true", dest="update", default=False, help="Update instead of populating database.")
 
     (options, args) = parser.parse_args()
 
@@ -422,13 +468,21 @@ if __name__ == '__main__':
     # Load all packages after processing the commandline
     import pycrtools as cr
     from pycrtools import crdatabase as crdb
+    from pycrtools import xmldict
 
     #test(options, args)
 
-    db_name = args[0]+".db"
+    db_name = args[0]
     dbp = CRDatabasePopulator(db_filename=db_name, options=options)
 
     t0 = time.time()
-    dbp.populate()
+
+    if options.update:
+        print "Updating database %s..." %(db_name)
+        dbp.update()
+    else:
+        print "Populating database %s..." %(db_name)
+        dbp.populate()
+
     print "time needed: ", (time.time()-t0)
 
