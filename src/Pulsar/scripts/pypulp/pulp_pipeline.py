@@ -1001,9 +1001,9 @@ class PipeUnit:
 
 			# first, calculating the proper max divisor for the number of subbands
 #			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, 63))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
 			# calculating the greatest common denominator of obs.nrSubbands starting from 63 down
-			pav_nchans = self.hcd(1, 63, obs.nrSubbands)
+			pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
 			for psr in self.psrs:  # pulsar list is empty if --nofold is used
 				# creating DSPSR diagnostic plots
 				cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
@@ -1427,9 +1427,9 @@ class CVUnit(PipeUnit):
 
 			# first, calculating the proper min divisir for the number of subbands
 #			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, 63))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
 			# calculating the greatest common denominator of obs.nrSubbands starting from self.nrChanPerSub
-			pav_nchans = self.hcd(1, 63, obs.nrSubbands)
+			pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
 			self.log.info("Creating diagnostic plots...")
 			for psr in self.psrs:
 				# creating DSPSR diagnostic plots
