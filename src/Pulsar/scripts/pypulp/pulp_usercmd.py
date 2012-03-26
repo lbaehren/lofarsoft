@@ -269,14 +269,16 @@ class CMDLine:
 					# checking first if parfile is in the current directory. If not then checking
 					# if this parfile exists in the directory with all parfiles
 					if os.path.exists(self.opts.parfile):
-						msg="Parfile is given. Copying '%s' to %s..." % (self.opts.parfile, cep2.get_logdir())
-						if log != None: log.info(msg)
-						else: print msg
-						cmd="cp -f %s %s" % (self.opts.parfile, cep2.get_logdir())
-						os.system(cmd)
-						self.opts.parfile="%s/%s" % (cep2.get_logdir(), self.opts.parfile.split("/")[-1])
+						# now checking if the path in parfile has '.pulp'. If not, then copy the file to ~/.pulp/<obsid>
+						if re.search(r'\.pulp', self.opts.parfile) is None:
+							msg="Copying parfile '%s' to %s..." % (self.opts.parfile, cep2.get_logdir())
+							if log != None: log.info(msg)
+							else: print msg
+							cmd="cp -f %s %s" % (self.opts.parfile, cep2.get_logdir())
+							os.system(cmd)
+							self.opts.parfile="%s/%s" % (cep2.get_logdir(), self.opts.parfile.split("/")[-1])
 					else:
-						msg="Checking if given parfile '%s' exists in %s directory..." % (self.opts.parfile, cep2.parfile_dir)
+						msg="Checking if given parfile '%s' exists in %s directory..." % (self.opts.parfile.split("/")[-1], cep2.parfile_dir)
 						if log != None: log.info(msg)
 						else: print msg
 						self.opts.parfile="%s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1])
@@ -285,6 +287,7 @@ class CMDLine:
 							if log != None: log.error(msg)
 							else: print msg
 							quit(1)
+
 				if len(self.psrs) > 3:
 					msg="%d pulsars are given, but only first 3 will be used for folding" % (len(self.psrs))
 					if log != None: log.warning(msg)
@@ -402,7 +405,7 @@ class CMDLine:
 				if len(self.psrs) != 0 and self.psrs[0] == "parset":
 					for sap in obs.saps: log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
 			if self.opts.parfile != "":
-				log.info("User-specified Parfile = %s/%s" % (cep2.parfile_dir, self.opts.parfile.split("/")[-1]))
+				log.info("User-specified Parfile = %s" % (self.opts.parfile))
 			if self.opts.rawdir != "/data":
 				log.info("User-specified Raw data directory = %s" % (self.opts.rawdir))
 			if self.opts.parset != "":
