@@ -913,8 +913,8 @@ class Event(object):
                 self._inDatabase = True
 
             # Writing datafile information
-            for datafile in self.datafiles:
-                if recursive:
+            if recursive:
+                for datafile in self.datafiles:
                     datafile.write(recursive=True)
 
             # Handled by addDatafile()
@@ -1223,8 +1223,8 @@ class Datafile(object):
                 self._inDatabase = True
 
             # Write station information
-            for station in self.stations:
-                if recursive:
+            if recursive:
+                for station in self.stations:
                     station.write(recursive=True)
 
                 # sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
@@ -1526,8 +1526,8 @@ class Station(object):
                 self._inDatabase = True
 
             # Write polarization information
-            for polarization in self.polarizations:
-                if recursive:
+            if recursive:
+                for polarization in self.polarizations:
                     polarization.write()
 
                 # sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
