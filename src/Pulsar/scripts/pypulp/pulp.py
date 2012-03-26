@@ -86,7 +86,7 @@ if __name__ == "__main__":
 		cep2.set_logfile(logfile)
 
 		# adding file handler to our Logger
-		logfh = logging.FileHandler(cep2.get_logfile(), mode='w')
+		logfh = logging.FileHandler(cep2.get_logfile(), mode='%s' % (cmdline.opts.is_log_append and "a" or "w"))
 		log.addHandler(logfh)
 
 		# starting logging...

@@ -104,6 +104,8 @@ class CMDLine:
                            help="specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
         	self.cmd.add_option('--locate-rawdata', action="store_true", dest='is_locate_rawdata',
                            help="search for input raw data in all alive nodes instead of using the list of nodes from the parset file", default=False)
+        	self.cmd.add_option('--log-append', action="store_true", dest='is_log_append',
+                           help="optional parameter to append log output to already existent log files. Default is overwrite", default=False)
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',

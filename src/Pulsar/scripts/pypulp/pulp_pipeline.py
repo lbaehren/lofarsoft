@@ -322,9 +322,18 @@ class Pipeline:
 				self.execute(cmd, log, workdir=sumdir)
 				# moving log-file to corresponding SAP/BEAM directory
 				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
-					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
-						(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
-					self.execute(cmd, log, workdir=sumdir)
+					if not cmdline.opts.is_log_append:	
+						cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
+							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
+						self.execute(cmd, log, workdir=sumdir)
+					else:
+						# appending log from sumdir to the one in corresponing beam directory
+						cmd="cat %s_sap%03d_beam%04d.log >> %s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
+							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
+						self.execute(cmd, log, workdir=sumdir, is_os=True)
+						# removing log from sumdir
+						cmd="rm -f %s_sap%03d_beam%04d.log" % (obs.id, unit.sapid, unit.tabid)
+						self.execute(cmd, log, workdir=sumdir)
 			else:
 				if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
 					log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
@@ -378,7 +387,8 @@ class Pipeline:
 
 		# flushing log file and copy it to summary node
 		log.flush()
-		cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), sumdir, cep2.get_logfile().split("/")[-1])
 		os.system(cmd)
 
 		# changing the file permissions to be re-writable for group
@@ -412,9 +422,18 @@ class Pipeline:
 				self.execute(cmd, log, workdir=sumdir)
 				# moving log-file to corresponding SAP/BEAM directory
 				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
-					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
-						(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
-					self.execute(cmd, log, workdir=sumdir)
+					if not cmdline.opts.is_log_append:	
+						cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
+							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
+						self.execute(cmd, log, workdir=sumdir)
+					else:
+						# appending log from sumdir to the one in corresponing beam directory
+						cmd="cat %s_sap%03d_beam%04d.log >> %s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
+							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
+						self.execute(cmd, log, workdir=sumdir, is_os=True)
+						# removing log from sumdir
+						cmd="rm -f %s_sap%03d_beam%04d.log" % (obs.id, unit.sapid, unit.tabid)
+						self.execute(cmd, log, workdir=sumdir)
 			else:
 				if not os.path.exists("%s/%s" % (sumdir, unit.curdir.split(unit.outdir + "/")[1])):
 					log.warning("Warning! Neither archive file %s nor corresponding directory tree exists in: %s. Summary won't be complete" % (result_archive, sumdir))
@@ -578,7 +597,8 @@ class Pipeline:
 
 		# flushing log file and copy it to summary node
 		log.flush()
-		cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), sumdir)
+		else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), sumdir, cep2.get_logfile().split("/")[-1])
 		os.system(cmd)
 
 		# changing the file permissions to be re-writable for group
@@ -801,6 +821,14 @@ class PipeUnit:
 			if high % ii == 0: return ii
 		return high
 
+	def hcd(self, low, high, value):
+		"""
+		Calculates the highest common denominator of 'value' value between 'low' and 'high'
+		"""
+		for ii in range(high, low-1, -1): 
+			if value % ii == 0: return ii
+		return 1
+
 	# function that checks all processes in the list and kill them if they are still running
 	def kill(self):
 		if self.log != None: self.log.info("Killing all open processes for SAP=%d TAB=%d..." % (self.sapid, self.tabid))
@@ -971,10 +999,11 @@ class PipeUnit:
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
 			# these programs should be run quick, so run them one by one
 
-			# first, calculating the proper min divisir for the number of subbands
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			# calculating the least common denominator of obs.nrSubbands starting from self.nrChanPerSub
-			pav_nchans = self.lcd(self.nrChanPerSub, obs.nrSubbands)
+			# first, calculating the proper max divisor for the number of subbands
+#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, 63))
+			# calculating the greatest common denominator of obs.nrSubbands starting from 63 down
+			pav_nchans = self.hcd(1, 63, obs.nrSubbands)
 			for psr in self.psrs:  # pulsar list is empty if --nofold is used
 				# creating DSPSR diagnostic plots
 				cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
@@ -1114,7 +1143,8 @@ class PipeUnit:
 
 			# flushing log file and copy it to outdir on local node and summary node
 			self.log.flush()
-			cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
+			if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
+			else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 			os.system(cmd)
 			cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
@@ -1396,9 +1426,10 @@ class CVUnit(PipeUnit):
 						self.execute(cmd, workdir=self.curdir)
 
 			# first, calculating the proper min divisir for the number of subbands
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			# calculating the least common denominator of obs.nrSubbands starting from self.nrChanPerSub
-			pav_nchans = self.lcd(self.nrChanPerSub, obs.nrSubbands)
+#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, 63))
+			# calculating the greatest common denominator of obs.nrSubbands starting from self.nrChanPerSub
+			pav_nchans = self.hcd(1, 63, obs.nrSubbands)
 			self.log.info("Creating diagnostic plots...")
 			for psr in self.psrs:
 				# creating DSPSR diagnostic plots
@@ -1468,7 +1499,8 @@ class CVUnit(PipeUnit):
 
 			# flushing log file and copy it to outdir on local node and summary node
 			self.log.flush()
-			cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
+			if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
+			else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 			os.system(cmd)
 			cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
