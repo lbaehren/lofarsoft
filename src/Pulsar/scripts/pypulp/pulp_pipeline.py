@@ -328,9 +328,9 @@ class Pipeline:
 						self.execute(cmd, log, workdir=sumdir)
 					else:
 						# appending log from sumdir to the one in corresponing beam directory
-						cmd="cat %s_sap%03d_beam%04d.log >> %s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
-							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
-						self.execute(cmd, log, workdir=sumdir, is_os=True)
+						cmd="cat %s/%s_sap%03d_beam%04d.log >> %s/%s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
+							(sumdir, obs.id, unit.sapid, unit.tabid, sumdir, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
+						self.execute(cmd, log, is_os=True)
 						# removing log from sumdir
 						cmd="rm -f %s_sap%03d_beam%04d.log" % (obs.id, unit.sapid, unit.tabid)
 						self.execute(cmd, log, workdir=sumdir)
@@ -428,9 +428,9 @@ class Pipeline:
 						self.execute(cmd, log, workdir=sumdir)
 					else:
 						# appending log from sumdir to the one in corresponing beam directory
-						cmd="cat %s_sap%03d_beam%04d.log >> %s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
-							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
-						self.execute(cmd, log, workdir=sumdir, is_os=True)
+						cmd="cat %s/%s_sap%03d_beam%04d.log >> %s/%s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
+							(sumdir, obs.id, unit.sapid, unit.tabid, sumdir, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
+						self.execute(cmd, log, is_os=True)
 						# removing log from sumdir
 						cmd="rm -f %s_sap%03d_beam%04d.log" % (obs.id, unit.sapid, unit.tabid)
 						self.execute(cmd, log, workdir=sumdir)
