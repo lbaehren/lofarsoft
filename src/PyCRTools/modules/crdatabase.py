@@ -1702,10 +1702,8 @@ class Station(object):
 
                 # Update linking table
                 sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, polarization.id)
-                print sql
                 if 0 == len(self._db.select(sql)):
                     sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self.id, polarization.id)
-                    print sql
                     self._db.insert(sql)
                     result = True
             else:
