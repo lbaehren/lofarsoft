@@ -111,7 +111,8 @@ class Imager(Task):
 
         # Generate coordinate grid
         print "Generating grid"
-        self.grid=CoordinateGrid(OBSTIME=self.OBSTIME,
+
+        self.grid=CoordinateGrid(obstime=self.OBSTIME,
                                  L=self.OBSLON,
                                  phi=self.OBSLAT,
                                  NAXIS=self.NAXIS,
@@ -135,7 +136,7 @@ class Imager(Task):
                                  PC002002=self.PC002002)
         print "Grid generation finished"
         print self.grid
-
+         
         # Get frequencies
         self.frequencies=self.data.getFrequencies()
 
@@ -182,7 +183,7 @@ class Imager(Task):
         self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
         # Create image array if none is given as input
-        if not self.image:
+        if self.image==None:
             if self.intgrfreq:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
             elif self.inversefft:

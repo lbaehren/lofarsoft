@@ -6,7 +6,6 @@
 from datetime import datetime
 import pycrtools as cr
 from pytmf import deg2rad, rad2deg, gregorian2jd
-from pytmf import deg2rad, rad2deg
 
 def casaRefcodes(**kwargs):
     """Get CASA reference code and projection from standard WCS parameter

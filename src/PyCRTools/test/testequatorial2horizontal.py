@@ -18,12 +18,12 @@ if old_test:
     utc = gregorian2jd(1987, 4, 10. + ((19. + 21. / 60.) / 24.)) # Obstime 
 
 else: # EE
-    alpha = hms2rad(11, 30, 42.48); # Right assention  (Mars)
-    delta = dms2rad(07, 38, 29.4); # Declination    
-    phi = deg2rad(52.92)  #(LOFAR Superterp)
-    L = deg2rad(6.87)
+    alpha = hms2rad(11, 30, 02.74); # Right assention  (Mars)
+    delta = dms2rad(07, 42, 48.6); # Declination    
+    phi = deg2rad(52.915122495)  #(LOFAR Superterp)
+    L = deg2rad(6.869837540)
     
-    utc= gregorian2jd(2012,02,14.0)
+    utc= gregorian2jd(2012,02,14.00)
 
 print "alpha", rad2deg(alpha), "delta", rad2deg(delta)
 print "L", rad2deg(L), "phi", rad2deg(phi)
@@ -50,10 +50,11 @@ print ''
 #print 'horizontal3'
 #print "A", rad2deg(horizontal3[0])+360, "h", rad2deg(horizontal3[1])
 #print ''
+print 'horizontal2='
 print "A", rad2deg(horizontal[0]), "h", rad2deg(horizontal[1])
 if old_test:
     print "Expected result: A 68.034 h 15.125"
 else:
-    print "Expected result: A 149.9049 h 41.1984"
+    print "Expected result: A 149.9026 h 41.2025" # From HORIZONS (NASA/JPL webtool for ephemerides.)
 
   
