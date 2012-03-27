@@ -1278,10 +1278,17 @@ def get_parameters_new(obsid, useFilename=False):
         parameters["beam"][beam]["RA"]=float(allparameters["Observation.Beam["+str(beam)+"].angle1"])
         parameters["beam"][beam]["DEC"]=float(allparameters["Observation.Beam["+str(beam)+"].angle2"])
         parameters["beam"][beam]["directionType"]=allparameters["Observation.Beam["+str(beam)+"].directionType"]
-        parameters["beam"][beam]["subbands"]=allparameters["Observation.Beam["+str(beam)+"].subbandList"]
+        subbands=allparameters["Observation.Beam["+str(beam)+"].subbandList"]
+        subbands=partolist(subbands)
+
+        subbands=[range(int(a.split('..')[0]),int(a.split('..')[1])+1) if '..' in a else [a] for a in subbands if '..' in a]
+        parameters["beam"][beam]["subbands"]=[]
+        [parameters["beam"][beam]["subbands"].extend(b) for b in subbands]
+        parameters["beam"][beam]["nrsubbands"]=len(parameters["beam"][beam]["subbands"])
         parameters["beam"][beam]["beamletList"]=allparameters["Observation.Beam["+str(beam)+"].beamletList"]
         parameters["beam"][beam]["startTime"]=allparameters["Observation.Beam["+str(beam)+"].startTime"]
         parameters["beam"][beam]["target"]=allparameters["Observation.Beam["+str(beam)+"].target"]
+        parameters["beam"][beam]['frequencies']=sbs2freq(parameters["beam"][beam]["subbands"],parameters['clockfrequency'],parameters['filterselection'],parameters['channels'])
 
     #startfreq=float(parameters['subbands'].strip('[]').split('..')[0])
     #endfreq=float(parameters['subbands'].strip('[]').split('..')[-1])
