@@ -326,7 +326,8 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 
 #if (NOT TARGET dspsr)
 
-  set (dspsr_version   "20120322")  
+  set (dspsr_version   "20120327")  
+#  set (dspsr_version   "20120322")  
 #  set (dspsr_version   "20120316")
 #  set (dspsr_version   "1.0")
   set (dspsr_name      "dspsr-${dspsr_version}")
@@ -578,3 +579,45 @@ add_dependencies (psrcat_install psrcat_build psrcat_unpack)
 #  add_dependencies (psrfits_utils psrfits_install)
   
 #endif (NOT TARGET psrfits_utils)
+
+## ==============================================================================
+##
+##  Handle configuration and build of DAL2 (pydal2)
+##
+## ==============================================================================
+
+set (dal2_version   "f15358f")
+set (dal2_name      "nextgen-astrodata-DAL-${dal2_version}")
+set (dal2_directory "dal2/${dal2_name}")
+
+add_custom_target (dal2_unpack
+  COMMAND rm -rf ${PULSAR_BINARY_DIR}/external/${dal2_name}
+  COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${dal2_directory} ${PULSAR_BINARY_DIR}/external/
+  COMMAND mkdir ${PULSAR_BINARY_DIR}/external/${dal2_name}/build
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external
+  COMMENT "Copying dal2 from ${CMAKE_CURRENT_SOURCE_DIR}/${dal2_directory} to ${PULSAR_BINARY_DIR}/external/${dal2_name}"
+  COMMENT "Running mkdir ${PULSAR_BINARY_DIR}/external/${dal2_name}/build"
+  )
+
+add_custom_target (dal2_bootstrap
+  COMMAND cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PWD -DPYTHON_DEST=$PWD/python
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${dal2_name}/build
+  COMMENT "Running bootstrap for project dal2 in ${PULSAR_BINARY_DIR}/external/${dal2_name}/build ..."
+  )
+add_dependencies (dal2_bootstrap dal2_unpack)
+
+add_custom_target (dal2_build
+  COMMAND make install
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${dal2_name}/build
+  COMMENT "Building project dal2 in ${PULSAR_BINARY_DIR}/external/${dal2_name}..."
+  )
+add_dependencies (psrdada_build psrdada_unpack)
+
+add_custom_target (dal2_install
+  COMMAND echo install dal2
+  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/external/${dal2_name}
+  COMMENT "Install project dal2 into ${CMAKE_INSTALL_PREFIX}/dal2 -- not operation yet..."
+  )
+add_dependencies (dal2_install dal2_build dal2_bootstrap dal2_unpack)
+
+
