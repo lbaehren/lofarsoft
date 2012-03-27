@@ -1535,7 +1535,7 @@ class Station(object):
 
         self.stationname = ""
         self.status = "NEW"
-        self.polarizations = []
+        self.polarization = {}
         self.parameter = _Parameter(parent=self)
 
         self.settings = Settings(db)
@@ -1582,14 +1582,15 @@ class Station(object):
                     raise ValueError("Multiple records found for stationID={0}".format(self._id))
 
                 # Read polarization information
-                self.polarizations = []
+                self.polarization = {}
                 sql = "SELECT polarizationID FROM main.station_polarization WHERE stationID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
                     polarizationID = int(record[0])
                     polarization = Polarization(self._db, id=polarizationID)
                     polarization.station = self
-                    self.polarizations.append(polarization)
+                    key = str(polarization.direction)
+                    self.polarization[key] = polarization
 
                 # Read parameter information - Done by _Parameter class
                 # self.parameter.read()
@@ -1625,14 +1626,8 @@ class Station(object):
 
             # Write polarization information
             if recursive:
-                for polarization in self.polarizations:
-                    polarization.write()
-
-                # sql = "SELECT COUNT(stationID) FROM main.station_polarization WHERE polarizationID={0}".format(polarizationID)
-                # result = self._db.select(sql)[0][0]
-                # if 0 == result:
-                #     sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarizationID)
-                #     self._db.insert(sql)
+                for key in self.polarization.keys():
+                    self.polarization[key].write()
 
             # Write parameter information
             self.parameter.write()
@@ -1695,15 +1690,10 @@ class Station(object):
             if 0 == polarization.id:
                 polarization.write()
             polarization.station = self # Reference to parent (station)
-
-            # Check for duplicate
-            isNew = True
-            for p in self.polarizations:
-                if p.id == polarization.id:
-                    isNew = False
-                    break
-            if isNew:
-                self.polarizations.append(polarization)
+            key = polarization.direction
+            if 0 == len(key):
+                key = "empty"
+            self.polarization[key] = polarization
 
             # Update database
             if self._db:
@@ -1711,9 +1701,11 @@ class Station(object):
                     self.write(recursive=False)
 
                 # Update linking table
-                sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarization.id)
+                sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, polarization.id)
+                print sql
                 if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self._id, polarization.id)
+                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self.id, polarization.id)
+                    print sql
                     self._db.insert(sql)
                     result = True
             else:
@@ -1722,7 +1714,7 @@ class Station(object):
         return result
 
 
-    def removePolarization(self, polarization=None, polarizationID=0):
+    def removePolarization(self, polarization=None, key=None, id=0):
         """Remove polarization object with id= *polarizationID* from
         this station.
 
@@ -1733,39 +1725,52 @@ class Station(object):
 
         **Properties**
 
-        ================  ===================================================================
+        ================  ===========================================================================
         Parameter         Description
-        ================  ===================================================================
+        ================  ===========================================================================
         *polarization*    polarization that needs to be removed from this station.
-        *polarizationID*  id of the polarization that needs to be removed from this station.
-        ================  ===================================================================
+        *id*              id of the polarization that needs to be removed from this station.
+        *key*             key name of the polarization, this is equal to the polarization direction.
+        ================  ===========================================================================
 
-        If *polarization* is not provided, *polarizationID* will be used to remove
-        it from the list of polarizations.
+        Only one of the parameters is used to identify the
+        polarization that needs to be removed.  The order of
+        evaluating the parameters to identify the polarization is
+        *polarization*, *id*, *key*
 
         Returns *True* if removing the polarization object went
         successfully, *False* otherwise.
         """
         result = False
+        pol_id = id
+        pol_key = key
 
         if polarization:
-            polarizationID = polarization.id
+            pol_id = polarization.id
+            pol_key = polarization.direction
+        elif id > 0:
+            pol_key = None
+            for p in self.polarization:
+                if p.id == pol_id:
+                    pol_key = p.direction
+        elif pol_key in self.polarization.keys():
+            id = self.polarization[pol_key].id
+        else:
+            print "WARNING: unable to determine polarization!"
 
-        if polarizationID > 0:
+
+        if pol_key:
             # Update object
-            for p in self.polarizations:
-                if p.id == polarizationID:
-                    self.polarizations.remove(p)
+            self.polarization.pop(pol_key)
 
             # Update database
             if self._db:
-                if self._id != 0:
-                    sql = "DELETE FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self._id, polarizationID)
+                if self.id != 0:
+                    sql = "DELETE FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, pol_id)
                     self._db.execute(sql)
+                    result = True
             else:
                 raise ValueError("Unable to write to database: no database was set.")
-        else:
-            print "WARNING: invalid polarizationID!"
 
         return result
 
@@ -1794,12 +1799,12 @@ class Station(object):
         print "  %-40s : %s" %("Status", self.status)
 
         # Polarizations
-        n_polarizations = len(self.polarizations)
+        n_polarizations = len(self.polarization)
         print "  %-40s : %d" %("Nr. of polarizations",n_polarizations)
-        if self.polarizations:
+        if self.polarization:
             print "Polarizations:"
-            for polarization in self.polarizations:
-                print "  %-6d - %s" %(polarization.id, polarization.resultsfile)
+            for key in self.polarization:
+                print "  %-6d - %s - %s" %(self.polarization[key].id, key, self.polarization[key].resultsfile)
             pass
 
         # Parameters
