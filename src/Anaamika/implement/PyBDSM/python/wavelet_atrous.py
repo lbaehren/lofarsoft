@@ -61,17 +61,15 @@ class Op_wavelet_atrous(Op):
           jmax=img.opts.atrous_jmax
           l = len(filter[lpf]['vec'])             # 1st 3 is arbit and 2nd 3 is whats expected for a-trous
           if jmax < 1 or jmax > 15:                   # determine jmax 
-            # If opts.atrous_orig_isl is True, check if largest island size is 
+            # Check if largest island size is 
             # smaller than 1/3 of image size. If so, use it to determine jmax.
-            if img.opts.atrous_orig_isl:
-                max_isl_shape = (0, 0)
-                for isl in img.islands:
-                    if isl.image.shape[0]*isl.image.shape[1] > max_isl_shape[0]*max_isl_shape[1]:
-                        max_isl_shape = isl.image.shape
-                if max_isl_shape != (0, 0) and min(max_isl_shape) < min(resid.shape)/3.0:
-                    min_size = min(max_isl_shape)
-                else:
-                    min_size = min(resid.shape)
+            min_size = min(resid.shape)
+            max_isl_shape = (0, 0)
+            for isl in img.islands:
+                if isl.image.shape[0]*isl.image.shape[1] > max_isl_shape[0]*max_isl_shape[1]:
+                    max_isl_shape = isl.image.shape
+            if max_isl_shape != (0, 0) and min(max_isl_shape) < min(resid.shape)/3.0:
+                min_size = min(max_isl_shape)*4.0
             else:
                 min_size = min(resid.shape)
             jmax = int(floor(log((min_size/3.0*3.0-l)/(l-1)+1)/log(2.0)+1.0))+1
@@ -88,6 +86,7 @@ class Op_wavelet_atrous(Op):
     
           im_old=resid
           total_flux = 0.0
+          ntot_wvgaus = 0
           stop_wav = False
           pix_masked = N.where(N.isnan(resid)  == True)
           for j in range(1,jmax+1):  # extra +1 is so we can do bdsm on cJ as well
@@ -115,7 +114,7 @@ class Op_wavelet_atrous(Op):
                 wopts['rms_box'] = img.opts.rms_box # doesnt matter
               else:
                 wopts['rms_box'] = (bs, bs/3)
-              if not img.opts.rms_map or img.opts.atrous_orig_isl: wopts['rms_map'] = False
+              if not img.opts.rms_map: wopts['rms_map'] = False
               if not wopts['rms_map']: wopts['mean_map'] = 'zero'
               if j <= 3: 
                 wopts['ini_gausfit'] = 'default'
@@ -139,22 +138,41 @@ class Op_wavelet_atrous(Op):
               wimg.waveletimage = True
               wimg.use_wcs = img.use_wcs
               wimg.j = j             
-              if img.opts.atrous_orig_isl:
-                wimg.rms = img.rms
-                wimg.mean = img.mean
-                wimg.rms_QUV = img.rms_QUV
-                wimg.mean_QUV = img.mean_QUV
               self.FITS_simple(wimg, img, w, '.atrous.'+suffix)
               img.atrous_opts.append(wimg.opts)
               for op in wchain:
                 op(wimg)
-                if isinstance(op,Op_islands): img.atrous_islands.append(wimg.islands)
-                if isinstance(op,Op_gausfit): img.atrous_gaussians.append(wimg.gaussians)
-                if isinstance(op,Op_gaul2srl): img.atrous_sources.append(wimg.sources)
+
+              # Restrict Gaussians to original ch0 islands
+              from gausfit import Gaussian
+              gaul = wimg.gaussians[:]
+              tot_flux = 0.0
+              nwvgaus = 0
+              gaus_id = img.gaussians[-1].gaus_num
+              wimg.gaussians = []
+              for isl in img.islands:
+                  wvgaul = []
+                  for g in gaul:
+                      gcenter = (g.centre_pix[0]-isl.origin[0],
+                                 g.centre_pix[1]-isl.origin[1])
+                      if gcenter[0] >= 0 and gcenter[0] < isl.shape[0] and gcenter[1] >= 0 and gcenter[1] < isl.shape[1]:
+                          if not isl.mask_active[gcenter]:
+                              gaus_id += 1
+                              g.gaus_num = gaus_id
+                              wvgaul.append(g)
+                  isl.gaul += wvgaul  
+                  img.gaussians += wvgaul  
+                  wimg.gaussians += wvgaul   
+                  nwvgaus += len(wvgaul)             
+                  isl.ngaus += nwvgaus
+                  for g in wvgaul:
+                      tot_flux += g.total_flux
+                      
+              mylogger.userinfo(mylog, "Number of wavelet Gaussians used", str(nwvgaus))
               if hasattr(wimg, 'gaussians'): 
                 img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
-              img.bbspatchnum = wimg.bbspatchnum
-              total_flux += wimg.total_flux_gaus
+              total_flux += tot_flux
+              ntot_wvgaus += nwvgaus
               if img.opts.interactive and len(wimg.gaussians) > 0:
                   dc = '\033[34;1m'
                   nc = '\033[0m'
@@ -173,7 +191,14 @@ class Op_wavelet_atrous(Op):
                   break
 
           pdir = img.basedir + '/misc/'
-          self.morphfilter_pyramid(img, pdir)
+          
+          # Renumber and regroup Gaussians into sources with new 
+          # wavelet Gaussians included
+          if ntot_wvgaus > 0.0:
+              img.ngaus += ntot_wvgaus
+              Op_gaul2srl()(img)
+          
+          #self.morphfilter_pyramid(img, pdir)
           img.total_flux_gaus += total_flux
           mylogger.userinfo(mylog, "Total flux in model over all scales" , '%.3f Jy' % img.total_flux_gaus)
           if img.opts.output_all:
@@ -211,14 +236,8 @@ class Op_wavelet_atrous(Op):
     def setpara_bdsm(self, img):
         from types import ClassType, TypeType
 
-        if img.opts.atrous_orig_isl:
-            # skip Op_rmsimage if original islands are to be used,
-            # as the rms maps will be biased due to masking
-            chain=[Op_preprocess, Op_threshold(), Op_islands(),
-                   Op_gausfit(), Op_gaul2srl, Op_make_residimage()]        
-        else:
-            chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
-                   Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
+        chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
+               Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
 
         opts={'thresh':'hard'}
         opts['thresh_pix'] = 3.0
@@ -242,8 +261,9 @@ class Op_wavelet_atrous(Op):
         opts['flag_maxsnr'] = 1.0
         opts['flag_maxsize_isl'] = 2.5
         opts['flag_bordersize'] = 2
-        opts['flag_maxsize_bm'] = 15.0
+        opts['flag_maxsize_bm'] = 25.0
         opts['flag_minsize_bm'] = 0.2
+        opts['flag_maxsize_fwhm'] = 2.0
         opts['bbs_patches'] = img.opts.bbs_patches
         opts['filename'] = ''
         opts['output_all'] = img.opts.output_all
@@ -273,18 +293,7 @@ class Op_wavelet_atrous(Op):
         wimg.imagename = img.imagename+name+'.pybdsm'
         wimg.pix2sky = img.pix2sky; wimg.sky2pix = img.sky2pix; wimg.pix2beam = img.pix2beam
         wimg.beam2pix = img.beam2pix; wimg.pix2coord = img.pix2coord; wimg.beam = img.beam
-        # Mask regions that are outside of islands in the original image.
-        # This prevents fitting of Gaussians to wavelet images in these 
-        # regions.
-        if img.opts.atrous_orig_isl:
-            mask = N.ones(img.ch0.shape, dtype=bool)
-            for isl in img.islands:
-                mask[isl.bbox] = isl.mask_active # This will be new mask for island finding and fitting
-            if img.mask != None:
-                mask[img.mask] = True # Make sure we pick up all masked pixels in img.mask as well
-            wimg.rms_mask = img.mask # use original img.mask only for rms/mean map calculation
-        else:
-            mask = img.mask
+        mask = img.mask
         wimg.masked = True
         wimg.mask = mask
         wimg.use_io = img.use_io

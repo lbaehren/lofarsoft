@@ -41,7 +41,7 @@ class Op_make_residimage(Op):
 
         img.resid_gaus = cp(img.ch0)
         img.model_gaus = N.zeros(shape, dtype=float)
-        for g in img.gaussians:#():
+        for g in img.gaussians:
             C1, C2 = g.centre_pix
             isl = img.islands[g.island_id]
             b = self.find_bbox(thresh*isl.rms, g)

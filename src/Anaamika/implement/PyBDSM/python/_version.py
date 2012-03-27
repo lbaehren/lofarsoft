@@ -26,6 +26,16 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/27 - Modified calculation of rms_box parameter (when 
+                 rms_box option is None) to work better with fields 
+                 composed mainly of point sources when strong 
+                 artifacts are present. Tweaked flagging on FWHM
+                 to prevent over-flagging of Gaussians in small
+                 islands. Changed wavelet module to flag Gaussians
+                 whose centers fall outside of islands found in 
+                 the original image and removed atrous_orig_isl
+                 option (as redundant).
+    
     2012/03/26 - Modified fitting of large islands to adopt an
                  iterative fitting scheme that limits the number
                  of Gaussians fit simultaneously per iteration to 10.

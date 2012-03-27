@@ -79,7 +79,8 @@ class Opts(object):
                                  "If flag_bordersize: flag + 4 (x) or 8 (y)\n"\
                                  "If flag_maxsize_isl: flag + 16 (x) or 32 (y)\n"\
                                  "If flag_maxsize_bm: flag + 64\n"\
-                                 "If flag_minsize_bm: flag + 128")
+                                 "If flag_minsize_bm: flag + 128\n"\
+                                 "If flag_maxsize_fwhm: flag + 256")
     frequency       = Option(None, Float(),
                              doc="Frequency in Hz of input image. "\
                                  "E.g., frequency = 74e6. None => get from header.\n"\
@@ -507,14 +508,15 @@ class Opts(object):
                                  "decomposed into a Pyramidal set of sources for "\
                                  "morphological transforms.",
                              group="atrous_do")
-    atrous_orig_isl  =   Bool(True,
-                             doc="Restrict wavelet Gaussians to islands found in original "\
-                                 "image\n"\
-                                 "If True, Gaussians will only be fit to the wavelet "\
-                                 "images inside islands found in the original image. "
-                                 "If False, wavelet Gaussians can be fit to any part of the "\
-                                 "wavelet image.",
-                             group="atrous_do")
+#     atrous_orig_isl  =   Bool(True,
+#                              doc="Restrict wavelet Gaussians to islands found in original "\
+#                                  "image\n"\
+#                                  "If True, Gaussians will only be fit to the wavelet "\
+#                                  "images if their centers are located inside islands "\
+#                                  "found in the original image. "
+#                                  "If False, wavelet Gaussians can be fit to any part of the "\
+#                                  "wavelet image.",
+#                              group="atrous_do")
 
     
     #--------------------------------FLAGGING OPTIONS--------------------------------
@@ -560,7 +562,7 @@ class Opts(object):
                                  "flagged. The flag value is increased by 16 (for x) "\
                                  "and 32 (for y).",
                              group="flagging_opts")
-    flag_maxsize_fwhm=  Float(0.1,
+    flag_maxsize_fwhm=  Float(0.5,
                              doc="Flag Gaussian if fwhm-contour times factor extends beyond island\n"\
                                  "Any fitted Gaussian whose contour of flag_maxsize_fwhm times the fwhm "\
                                  "falls outside the island is "\

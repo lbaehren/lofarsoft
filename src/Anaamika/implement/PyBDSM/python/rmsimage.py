@@ -58,41 +58,48 @@ class Op_rmsimage(Op):
               pol_txt = ''
               
           ## calculate rms/mean maps if needed
-          if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
-            if len(data.shape) == 2:   ## 2d case
-              self.map_2d(data, mean, rms, mask, *map_opts)
-            elif len(data.shape) == 3: ## 3d case
-              if not isinstance(mask, N.ndarray):
-                mask = N.zeros(data.shape[0], dtype=bool)
-              for i in range(data.shape[0]):
-                  ## iterate each plane
-                  self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts)
-            else:
-              mylog.critical('Image shape not handleable' + pol_txt)
-              raise RuntimeError("Can't handle array of this shape" + pol_txt)
-            mylog.info('Background rms and mean images computed' + pol_txt)
-
-          ## check if variation of rms/mean maps is significant enough
-          if pol == 'I':
-              if opts.rms_map is None:
-                  # check_rmsmap() sets img.use_rms_map
-                  self.check_rmsmap(img, rms)
+          if ((opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const'])) and img.rms_box[0] > min(img.ch0.shape)/4.0:
+            # rms box is too large - just use constant rms and mean
+            mylog.warning('Size of rms_box larger than 1/4 of image size')
+            mylogger.userinfo(mylog, 'Using constant background rms and mean')
+            img.use_rms_map = False
+            img.mean_map_type = 'const'
+          else:
+            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
+              if len(data.shape) == 2:   ## 2d case
+                self.map_2d(data, mean, rms, mask, *map_opts)
+              elif len(data.shape) == 3: ## 3d case
+                if not isinstance(mask, N.ndarray):
+                  mask = N.zeros(data.shape[0], dtype=bool)
+                for i in range(data.shape[0]):
+                    ## iterate each plane
+                    self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts)
               else:
-                  img.use_rms_map = opts.rms_map
-              if img.use_rms_map is False:
-                  mylogger.userinfo(mylog, 'Using constant background rms')
-              else:
-                  mylogger.userinfo(mylog, 'Using 2D map for background rms')
-                                  
-              if opts.mean_map == 'default':
-                  # check_meanmap() sets img.mean_map_type
-                  self.check_meanmap(img, rms)
-              else:
-                  img.mean_map_type = opts.mean_map
-              if img.mean_map_type != 'map':
-                  mylogger.userinfo(mylog, 'Using constant background mean')
-              else:
-                  mylogger.userinfo(mylog, 'Using 2D map for background mean')
+                mylog.critical('Image shape not handleable' + pol_txt)
+                raise RuntimeError("Can't handle array of this shape" + pol_txt)
+              mylog.info('Background rms and mean images computed' + pol_txt)
+  
+            ## check if variation of rms/mean maps is significant enough
+            if pol == 'I':
+                if opts.rms_map is None:
+                    # check_rmsmap() sets img.use_rms_map
+                    self.check_rmsmap(img, rms)
+                else:
+                    img.use_rms_map = opts.rms_map
+                if img.use_rms_map is False:
+                    mylogger.userinfo(mylog, 'Using constant background rms')
+                else:
+                    mylogger.userinfo(mylog, 'Using 2D map for background rms')
+                                    
+                if opts.mean_map == 'default':
+                    # check_meanmap() sets img.mean_map_type
+                    self.check_meanmap(img, rms)
+                else:
+                    img.mean_map_type = opts.mean_map
+                if img.mean_map_type != 'map':
+                    mylogger.userinfo(mylog, 'Using constant background mean')
+                else:
+                    mylogger.userinfo(mylog, 'Using 2D map for background mean')
 
           ## if rms map is insignificant, or rms_map==False use const value
           if img.use_rms_map is False:

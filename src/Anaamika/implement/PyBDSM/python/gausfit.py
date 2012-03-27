@@ -145,7 +145,6 @@ class Op_gausfit(Op):
             for g in isl.gaul:
                 n += 1; m += 1
                 g.gaus_num = n - 1
-                g.wavelet_j = j
                 tot_flux += g.total_flux
             isl.ngaus = m
         img.ngaus = n
@@ -216,6 +215,7 @@ class Op_gausfit(Op):
         dof = isl.size_active
         shape = isl.shape
         isl_image = isl.image - isl.islmean
+        size = isl.size_active/img.pixel_beamarea*2.0
         gaul = []
         iter = 0
         ng1 = 0
@@ -235,7 +235,7 @@ class Op_gausfit(Op):
             iter += 1
             fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, ini_gausfit, ngmax, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                              beam, thr0, peak, shape, isl.mask_active)
+                                              beam, thr0, peak, shape, isl.mask_active, size)
             ng1 = len(gaul)
             if fitok and len(fgaul) == 0:
                 break
@@ -250,7 +250,7 @@ class Op_gausfit(Op):
                iter += 1
                fitok = self.fit_iter(gaul, ng1, fcn, dof, beam, thr0, iter, 'simple', ngmax, verbose)
                gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                                 beam, thr0, peak, shape, isl.mask_active)
+                                                 beam, thr0, peak, shape, isl.mask_active, size)
                ng1 = len(gaul)
                if fitok and len(fgaul) == 0:
                    break
@@ -258,7 +258,7 @@ class Op_gausfit(Op):
             # If all else fails, try to fit just a single Gaussian to the island
             fitok = self.fit_iter([], 0, fcn, dof, beam, thr0, 1, 'simple', 1, verbose)
             gaul, fgaul = self.flag_gaussians(fcn.parameters, opts, 
-                                          beam, thr0, peak, shape, isl.mask_active)
+                                          beam, thr0, peak, shape, isl.mask_active, size)
 
         ### return whatever we got
         isl.mg_fcn = fcn
@@ -593,7 +593,7 @@ class Op_gausfit(Op):
         else:
             return False
 
-    def flag_gaussians(self, gaul, opts, beam, thr, peak, shape, isl_mask):
+    def flag_gaussians(self, gaul, opts, beam, thr, peak, shape, isl_mask, size):
         """Flag gaussians according to some rules.
         Splits list of gaussian parameters in 2, where the first
         one is a list of parameters for accepted gaussians, and
@@ -613,7 +613,7 @@ class Op_gausfit(Op):
         bad  = []
         for g in gaul:
             
-            flag = self._flag_gaussian(g, beam, thr, peak, shape, opts, isl_mask)
+            flag = self._flag_gaussian(g, beam, thr, peak, shape, opts, isl_mask, size)
             if flag:
                 bad.append((flag, g))
             else:
@@ -621,7 +621,7 @@ class Op_gausfit(Op):
 
         return good, bad
 
-    def _flag_gaussian(self, g, beam, thr, peak, shape, opts, mask):
+    def _flag_gaussian(self, g, beam, thr, peak, shape, opts, mask, size_bms):
         """The actual flagging routine. See above for description.
         """
         from math import sqrt, sin, cos, log, pi
@@ -631,7 +631,7 @@ class Op_gausfit(Op):
         A, x1, x2, s1, s2, th = g
         s1, s2 = map(abs, [s1, s2])
         flag = 0
-        if N.any(N.isnan(g)):
+        if N.any(N.isnan(g)) or s1 == 0.0 or s2 == 0.0:
             return -1
 
         if s1 < s2:   # s1 etc are sigma
@@ -681,15 +681,22 @@ class Op_gausfit(Op):
         if not opts.flag_smallsrc:
                 if s1*s2 == 0.: flag += 128
         
-        ellx, elly = func.drawellipse([A, x1, x2, s1*opts.flag_maxsize_fwhm,
-                                       s2*opts.flag_maxsize_fwhm, th])
-        pt1 = [N.min(ellx), elly[N.argmin(ellx)]]
-        pt2 = [ellx[N.argmax(elly)], N.max(elly)]
-        pt3 = [N.max(ellx), elly[N.argmax(ellx)]]
-        pt4 = [ellx[N.argmin(elly)], N.min(elly)]
-        extremes = [pt1, pt2, pt3, pt4]
-        for pt in extremes:
-            if abs(pt[0] - x1) > 2.0 or abs(pt[1] - x2) > 2.0:
+        if size_bms > 30.0:
+            # Only check if island is big enough, as this flagging step
+            # is unreliable for small islands. size_bms is size of island
+            # in number of beam areas
+            ellx, elly = func.drawellipse([A, x1, x2, s1*opts.flag_maxsize_fwhm,
+                                           s2*opts.flag_maxsize_fwhm, th])
+            pt1 = [N.min(ellx), elly[N.argmin(ellx)]]
+            pt2 = [ellx[N.argmax(elly)], N.max(elly)]
+            pt3 = [N.max(ellx), elly[N.argmax(ellx)]]
+            pt4 = [ellx[N.argmin(elly)], N.min(elly)]
+            extremes = [pt1, pt2, pt3, pt4]
+            for pt in extremes:
+#                 if abs(pt[0] - x1) > 2.0 or abs(pt[1] - x2) > 2.0:
+                    # Make sure extremes are at least 2 pixels from center
+                    # of Gaussian, to avoid flagging small Gaussians near
+                    # island edges
                 if pt[0] < 0 or pt[0] >= shape[0] or pt[1] < 0 or pt[1] >= shape[1]:
                     flag += 256
                     break

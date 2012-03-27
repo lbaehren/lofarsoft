@@ -149,16 +149,17 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
         else:
             # Get the unique j levels and store them. Only make subplots for
             # occupied j levels
-            j_list = []
-            for p in img.pyrsrcs:
-                for l in p.jlevels:
-                    j_list.append(l)
-            j_set = set(j_list)
-            j_with_gaus = list(j_set)
-            index_first_waveplot = len(images) 
-            for i in range(len(j_with_gaus)):
-                images.append('wavelets')
-                names.append('pyrsrc'+str(i))
+            print 'Pyramidal source plots not yet supported. Skipping wavelet images.'
+#             j_list = []
+#             for p in img.pyrsrcs:
+#                 for l in p.jlevels:
+#                     j_list.append(l)
+#             j_set = set(j_list)
+#             j_with_gaus = list(j_set)
+#             index_first_waveplot = len(images) 
+#             for i in range(len(j_with_gaus)):
+#                 images.append('wavelets')
+#                 names.append('pyrsrc'+str(i))
     if psf_major or psf_minor or psf_pa:
         if img.opts.psf_vary_do == False:
             print 'PSF variation not calculated. Skipping PSF varyiation images.'
@@ -265,29 +266,29 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             style = styles[isrc/6 % 3]
                             src = isl.sources[isrc]
                             for g in src.gaussians:
-                                gidx = g.gaus_num
-                                e = Ellipse(xy=g.centre_pix, width=g.size_pix[0], 
-                                            height=g.size_pix[1], angle=g.size_pix[2]+90.0)
-                                ax.add_artist(e)
-                                e.set_picker(3)
-                                e.set_clip_box(ax.bbox)
-                                e.set_facecolor(col)
-                                e.set_alpha(0.5)
-                                e.gaus_id = gidx
-                                e.src_id = src.source_id
-                                e.jlevel = g.jlevel
-                                e.isl_id = g.island_id
-                                e.tflux = g.total_flux
-                                e.pflux = g.peak_flux
+                                if g.jlevel == 0:
+                                    gidx = g.gaus_num
+                                    e = Ellipse(xy=g.centre_pix, width=g.size_pix[0], 
+                                                height=g.size_pix[1], angle=g.size_pix[2]+90.0)
+                                    ax.add_artist(e)
+                                    e.set_picker(3)
+                                    e.set_clip_box(ax.bbox)
+                                    e.set_facecolor(col)
+                                    e.set_alpha(0.5)
+                                    e.gaus_id = gidx
+                                    e.src_id = src.source_id
+                                    e.jlevel = g.jlevel
+                                    e.isl_id = g.island_id
+                                    e.tflux = g.total_flux
+                                    e.pflux = g.peak_flux
                 island_offsets = zip(N.array(island_offsets_x), N.array(island_offsets_y))
                 isl_borders = collections.AsteriskPolygonCollection(4, offsets=island_offsets, color=border_color, 
                                     transOffset=ax.transData, sizes=(10.0,))
                 ax.add_collection(isl_borders)
                 
-                
-                if hasattr(img, 'atrous_gaussians'):
-                    for jindx, atrgaus in enumerate(img.atrous_gaussians):
-                        for atrg in atrgaus:
+                if hasattr(img, 'gaussians'):
+                    for atrg in img.gaussians:
+                        if atrg.jlevel > 0:
                             col = 'r'
                             style = '-'
                             gidx = atrg.gaus_num
