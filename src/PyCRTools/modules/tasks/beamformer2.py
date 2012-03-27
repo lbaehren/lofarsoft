@@ -11,11 +11,10 @@ the average spectrum in each beam and for an incoherent beam.
 
 """
 
-#import pdb; pdb.set_trace()
-
 import pycrtools as cr
 from pycrtools.tasks import shortcuts as sc
 from pycrtools import tasks
+from scipy.optimize import fmin
 import time
 import pytmf
 import math
@@ -144,6 +143,9 @@ class BeamFormer2(tasks.Task):
 
         doabs = dict(default=True,
                      doc="Take the absolute of the tbeam."),
+                     
+        dosquare = dict(default=False,
+                        doc="Take the square (power) of the tbeam."),
 
         dofft = dict(default=True,
                      doc="If False do not take the fft of the timeseries data. In this case it is assumed that the user has provided the array ``fft_data``, which already contains the fft",),
@@ -413,7 +415,10 @@ class BeamFormer2(tasks.Task):
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
 
         clearfile=True
-
+              
+        # Note: when re-running task, need to redo pointingsXYZ as it is calculated only once from self.pointings.
+        self.pointingsXYZ = cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ")   
+        
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
 
         #fftplan = cr.FFTWPlanManyDftR2c(self.data.shape()[-1], 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
@@ -510,7 +515,7 @@ class BeamFormer2(tasks.Task):
         if self.tbeam_incoherent:
             self.tbeam_incoherent[...] /= self.nspectraadded[...].val()
         if self.calc_tbeams:
-            self.tcalc(NyquistZone=self.NyquistZone,doabs=self.doabs,smooth=self.smooth_width)
+            self.tcalc(NyquistZone=self.NyquistZone,doabs=self.doabs,dosquare=self.dosquare,smooth=self.smooth_width)
         self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
         if self.verbose:
             print "Finished - total time used:",time.clock()-self.t0,"s."
@@ -519,7 +524,7 @@ class BeamFormer2(tasks.Task):
         if self.doplot:
             if wasinteractive: cr.plt.ion()
 
-    def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
+    def tplot(self,beams=None,block=0,NyquistZone=1,doabs=True,dosquare=False,smooth=0,mosaic=True,plotspec=False,xlim=None,ylim=None,recalc=False):
         """
         Take the result of the BeamForm task, i.e. an array of
         dimensions [self.nblocks,self.nbeams,self.speclen], do a
@@ -547,7 +552,7 @@ class BeamFormer2(tasks.Task):
             if NyquistZone==None:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
         if not plotspec and (not hasattr(self,"tbeams") or recalc):
-            self.tcalc(beams=beams,NyquistZone=NyquistZone,doabs=doabs,smooth=smooth)
+            self.tcalc(beams=beams,NyquistZone=NyquistZone,doabs=doabs,dosquare=dosquare,smooth=smooth)
         if ylim==None and not plotspec:
             ylim=(self.tbeams.min().val(),self.tbeams.max().val())
         if mosaic:
@@ -568,7 +573,7 @@ class BeamFormer2(tasks.Task):
             else:
                 self.tbeams[...].plot(clf=True,xlim=xlim,ylim=ylim,title="Beamformed time series around main direction")
 
-    def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,smooth=0):
+    def tcalc(self,beams=None,block=0,NyquistZone=1,doabs=False,dosquare=False,smooth=0):
         """
         Calculate the time series after beamforming, i.e. take the
         result of the BeamForm task, i.e. an array of dimensions
@@ -582,6 +587,7 @@ class BeamFormer2(tasks.Task):
 
         The final time series (all blocks) is stored in Task.tbeams and returned.
         """
+                
         if beams==None:
             beams=self.beams
         hdr=beams.getHeader()
@@ -601,6 +607,8 @@ class BeamFormer2(tasks.Task):
         self.tbeams /= blocklen
         if doabs:
             self.tbeams.abs()
+        if dosquare:
+            self.tbeams.square()
         if smooth>0:
             self.tbeams[...].runningaverage(smooth,cr.hWEIGHTS.GAUSSIAN)
         if hdr.has_key("SAMPLE_INTERVAL"):
@@ -609,6 +617,53 @@ class BeamFormer2(tasks.Task):
             self.tbeams.par.xvalues.fillrange(-(blocklen/2)*dt,dt)
             self.tbeams.par.xvalues.setUnit("mu","")
         return self.tbeams
+
+    def smoothedPulsePowerMaximizer(self, direction, verbose=False): 
+        """
+        Maximizer function to be called with scipy.fmin.
+        Parameter 'direction' is a tuple (az, el) in radians.
+        (but somehow, the fmin function passes an np.array([az, el]) instead...)
+        
+        It calls self.run() again, with a new 'self.pointings' towards given direction.
+        """
+        az = direction[0]
+        el = direction[1]
+        position = (az, el, 10000)
+        
+        self.pointings = cr.rf.makeAZELRDictGrid(*(position),nx=1,ny=1) # fake distance 10000
+        
+        self.run()
+        # answer, squared and smoothed, is in self.tbeams
+        # this means the maximum in power, over a window size 'self.smooth_width', is in 
+        # the maximum of the tbeams array
+        value = - self.tbeams[0].max()[0] # note the minus sign, as we are maximizing power using a minimizer method
+        if verbose:
+            print 'Evaluated az = %f, el = %f: power = %f' % (az/deg, el/deg, - value)
+        
+        return value
+
+    def optimizeDirection(self, start_direction = None, smooth=7, verbose=False):
+        """
+        Use scipy's fmin function (downhill-simplex minimizer) to obtain a maximum pulse power.
+        """
+        
+        # not retaining these variables; should that be done?
+        self.doplot = False
+        self.store_spectrum = False
+        self.calc_tbeams = True
+        self.dosquare = True
+        self.smooth_width = smooth
+        
+        if not start_direction:
+            start_position = (self.pointings[0]["az"], self.pointings[0]["el"]) # no R yet
+        else:
+            start_position = start_direction
+        
+        optimum = fmin(self.smoothedPulsePowerMaximizer, start_position, (verbose,), xtol=1e-1, ftol=1e-1, full_output=1)
+        
+        return optimum[0] # is a tuple just like the parameters being optimized over, i.e. (az, el)
+        
+ 
 
     def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):
         """
