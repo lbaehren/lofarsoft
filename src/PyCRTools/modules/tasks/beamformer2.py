@@ -628,9 +628,9 @@ class BeamFormer2(tasks.Task):
         """
         az = direction[0]
         el = direction[1]
-        position = (az, el, 10000)
+        position = (az, el, 10000) # fake distance 10000 as used in the pipeline...
         
-        self.pointings = cr.rf.makeAZELRDictGrid(*(position),nx=1,ny=1) # fake distance 10000
+        self.pointings = cr.rf.makeAZELRDictGrid(*(position),nx=1,ny=1) 
         
         self.run()
         # answer, squared and smoothed, is in self.tbeams
@@ -647,23 +647,30 @@ class BeamFormer2(tasks.Task):
         Use scipy's fmin function (downhill-simplex minimizer) to obtain a maximum pulse power.
         """
         
-        # not retaining these variables; should that be done?
+        # retaining 3 variables in order to create the beam in the same way as an earlier beam was done.
+        temp = (self.dosquare, self.doabs, self.smooth_width)
+        
         self.doplot = False
         self.store_spectrum = False
         self.calc_tbeams = True
         self.dosquare = True
+        self.doabs = False
         self.smooth_width = smooth
         
         if not start_direction:
-            start_position = (self.pointings[0]["az"], self.pointings[0]["el"]) # no R yet
+            midpoint = (len(self.pointings) - 1) / 2 # index of middle point of pointings
+            start_position = (self.pointings[midpoint]["az"], self.pointings[midpoint]["el"]) # no R yet
         else:
             start_position = start_direction
         
         optimum = fmin(self.smoothedPulsePowerMaximizer, start_position, (verbose,), xtol=1e-1, ftol=1e-1, full_output=1)
+        optimum_direction = optimum[0]
+        # create timeseries beam self.tbeams in the same way as the variables specified
+        (self.dosquare, self.doabs, self.smooth_width) = temp
+        self.smoothedPulsePowerMaximizer(optimum_direction, verbose=False) # calculates the beam
         
-        return optimum[0] # is a tuple just like the parameters being optimized over, i.e. (az, el)
+        return optimum_direction # is a tuple just like the parameters being optimized over, i.e. (az, el)
         
- 
 
     def dynplot(self,dynspec,plot_cleanspec=None,dmin=None,dmax=None,cmin=None,cmax=None):
         """
