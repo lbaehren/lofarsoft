@@ -100,6 +100,8 @@ class CMDLine:
                            help="search for input raw data in all alive nodes instead of using the list of nodes from the parset file", default=False)
         	self.cmd.add_option('--log-append', action="store_true", dest='is_log_append',
                            help="optional parameter to append log output to already existent log files. Default is overwrite", default=False)
+        	self.cmd.add_option('--nthreads', dest='nthreads', metavar='#THREADS',
+                           help="number of threads for all dspsr calls. Default: %default", default=2, type='int')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',

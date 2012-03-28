@@ -982,8 +982,8 @@ class PipeUnit:
 						dspsr_popens=[] # list of dspsr Popen objects
 						for psr in self.psrs: # pulsar list is empty if --nofold is used
 							psr2=re.sub(r'[BJ]', '', psr)
-							cmd="dspsr -E %s/%s.par %s %s -b 256 -fft-bench -O %s_%s -K -A -L 60 %s.fits" % \
-								(self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, self.output_prefix)
+							cmd="dspsr -E %s/%s.par %s %s -b 256 -fft-bench -O %s_%s -K -A -L 60 -t %d %s.fits" % \
+								(self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, self.output_prefix)
 							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 							dspsr_popens.append(dspsr_popen)
 
@@ -1388,9 +1388,9 @@ class CVUnit(PipeUnit):
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s %s" % \
+								cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s" % \
 									(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
-									self.outdir, psr2, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
+									self.outdir, psr2, psr, self.output_prefix, input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 								dspsr_popens.append(dspsr_popen)
 
