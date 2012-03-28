@@ -9,7 +9,7 @@ adding to the changelog will naturally do this.
 """
 
 # Version number
-__version__ = '1.0'
+__version__ = '1.1'
 
 # Store svn Revision number. For this to work, one also
 # needs to do: 
@@ -25,6 +25,13 @@ def changelog():
     """
     PyBDSM Changelog.
     -----------------------------------------------------------------------
+    
+    2012/03/28 - Version 1.1
+    
+    2012/03/28 - Fixed bug that caused mask to be ignored when
+                 determining whether variations in rms and mean
+                 maps is significant. Fixed bug that caused
+                 internally derived rms_box value to be ignored.
     
     2012/03/27 - Modified calculation of rms_box parameter (when 
                  rms_box option is None) to work better with fields 
@@ -178,6 +185,8 @@ def changelog():
                  Restricted fitting of Gaussians to wavelet images to be 
                  only in islands found in the original image if 
                  opts.atrous_orig_isl is True. 
+    
+    2011/09/08 - Version 1.0
     
     2011/09/08 - Versioning system changed to use _version.py.
     

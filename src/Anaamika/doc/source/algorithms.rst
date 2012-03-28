@@ -25,10 +25,8 @@ Calculation of mean and rms maps
 --------------------------------
 The box size and step size for calculating the rms image are estimated as follows (if not set by the :term:`rms_box` parameter).
 Typical intersource seperation, :math:`s_1`, is :math:`2\sqrt{\text{bmpersrc\_th}} \times B_{\text{major}}`.
-The size of brightest source, :math:`s_{\text{max}}`, is :math:`2 B_{\text{major}} \times \sqrt{[2\ln(Max_{\text{flux}}/threshold)]}`.
-The box size is estimated as the geometric mean of the larger of the quantities :math:`s_1` and :math:`s_{\text{max}}` and
-a fourth of the smallest dimension of the image. The step size is then calculated as the minimum
-of a third of box size and a tenth of the smallest image dimension. These prescriptions yield
+The size of brightest source, :math:`s_{\text{max}}`, is :math:`2 B_{\text{major}} \times \sqrt{[2\ln(Max_{\text{flux}}/threshold)]}`. Lastly, the maximum dimension of the largest island, :math:`s_{\text{isl}}`, defined at 10--20 sigma above the clipped rms is also found.
+The box size is estimated as the larger of the quantities :math:`s_1`, :math:`s_{\text{max}}`, and :math:`s_{\text{isl}}`. The step size is then calculated as the minimum of a third of the box size and a tenth of the smallest image dimension. These prescriptions yield
 reasonable numbers for the images tested.
 
 Either the calculated rms image or a constant rms is used for subsequent analysis based on

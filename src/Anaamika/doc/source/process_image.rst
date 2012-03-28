@@ -716,8 +716,7 @@ The options concerning multichannel images are:
         the clipped rms of each channel image.
                
     frequency_sp
-        This parameter is a list of floats (default is ``None``) that sets the frequency in Hz of channels in input image when more than one channel is
-        present. E.g., ``frequency_sp = [74e6, 153e6]``.
+        This parameter is a list of floats (default is ``None``) that sets the frequency in Hz of channels in input image when more than one channel is present. E.g., ``frequency_sp = [74e6, 153e6]``.
     
         If the frequency is not given by the user, then it is looked for in the
         image header. If not found, then an error is raised. PyBDSM will not
@@ -736,7 +735,7 @@ The wavelet module performs the following steps:
 
 * For each scale (*j*), the appropriate *à trous* wavelet transformation is made (see Holschneider et al. 1989 for details). Additionally, the "remainder" image (called the *c_J* image) is also made. This image includes all emission not included in the other wavelet images.
 
-* If ``atrous_bdsm = True``, an rms map and a mean map are made for each wavelet image and Gaussians are fit in the normal way. These wavelet Gaussians can then be included in source catalogs (see :ref:`write_catalog`). The wavelet Gaussians from each scale are assigned to new sources (separate from the sources in the original image or any other wavelet image). However, PyBDSM also associates Gaussians across multiple scales to form "pyramidal" sources. These pyramidal sources are indicated in the output catalog (see :ref:`output_cols` for details).
+* If ``atrous_bdsm = True``, an rms map and a mean map are made for each wavelet image and Gaussians are fit in the normal way. These wavelet Gaussians can then be included in source catalogs (see :ref:`write_catalog`).
 
 The options for this module are as follows:
 
@@ -749,8 +748,6 @@ The options for this module are as follows:
                                    inside program                              
       :term:`atrous_lpf` ........... 'b3': Low pass filter, either 'b3' or 'tr', for B3
                                    spline or Triangle                          
-      :term:`atrous_orig_isl` ..... True : Restrict wavelet Gaussians to islands found in
-                                   original image                              
 
 .. glossary::
 
@@ -776,11 +773,6 @@ The options for this module are as follows:
         1], normalised so that the sum is unity. The lengths of the filters are
         hence 5 and 3 respectively.
         
-    atrous_orig_isl
-        This parameter is a Boolean (default is ``True``). If ``True``\, Gaussians will only be fit to the wavelet images inside islands
-        found in the original image. If ``False``\, wavelet Gaussians can be fit to
-        any part of the wavelet image.
-
 .. _psf_vary_do:
 
 PSF variation module

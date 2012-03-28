@@ -44,7 +44,7 @@ class Op_rmsimage(Op):
         else:
             mask = img.mask
         opts = img.opts
-        map_opts = (opts.kappa_clip, opts.rms_box, opts.spline_rank)
+        map_opts = (opts.kappa_clip, img.rms_box, opts.spline_rank)
         ch0_images = [img.ch0, img.ch0_Q, img.ch0_U, img.ch0_V]
         cmeans = [img.clipped_mean] + img.clipped_mean_QUV
         crmss = [img.clipped_rms] + img.clipped_rms_QUV
@@ -166,12 +166,18 @@ class Op_rmsimage(Op):
         cdelt = img.wcs_obj.acdelt[:2]
     	bm = (img.beam[0], img.beam[1])
     	fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
-    	stdsub = N.std(rms)
-
+    	if img.masked:
+    	    unmasked = N.where(~img.mask)
+            stdsub = N.std(rms[unmasked])
+            maxrms = N.max(rms[unmasked])
+        else:
+            stdsub = N.std(rms)
+            maxrms = N.max(rms)
+        
     	rms_expect = img.clipped_rms/sqrt(2)/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of rms image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
-    	if stdsub > 1.1*rms_expect:
+    	if stdsub > 1.1*rms_expect or maxrms > 3.0*rms_expect:
             img.use_rms_map = True
             mylogger.userinfo(mylog, 'Variation in rms image significant')
         else:
@@ -191,12 +197,17 @@ class Op_rmsimage(Op):
         cdelt = img.wcs_obj.acdelt[:2]
         bm = (img.beam[0], img.beam[1])
         fw_pix = sqrt(N.product(bm)/abs(N.product(cdelt)))
-        stdsub = N.std(mean)
-        
+    	if img.masked:
+            unmasked = N.where(~img.mask)
+            stdsub = N.std(mean[unmasked])
+            maxmean = N.max(mean[unmasked])
+        else:
+            stdsub = N.std(mean)
+            maxmean = N.max(mean)
         rms_expect = img.clipped_rms/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of mean image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
-        if stdsub > 1.1*rms_expect:
+        if stdsub > 1.1*rms_expect or maxmean > 3.0*rms_expect:
           img.mean_map_type = 'map'
           mylogger.userinfo(mylog, 'Variation in mean image significant')
         else:
@@ -224,8 +235,8 @@ class Op_rmsimage(Op):
         axes, mean_map, rms_map = self.rms_mean_map(arr, mask, kappa, box)
         ax = map(self.remap_axis, arr.shape, axes)
         ax = N.meshgrid(*ax[-1::-1])
-        nd.map_coordinates(mean_map, ax[-1::-1], order=interp, output=out_mean)
         nd.map_coordinates(rms_map,  ax[-1::-1], order=interp, output=out_rms)
+        nd.map_coordinates(mean_map, ax[-1::-1], order=interp, output=out_mean)
       
         # Apply mask to mean_map and rms_map by setting masked values to NaN
         if isinstance(mask, N.ndarray):

@@ -183,20 +183,9 @@ class Op_preprocess(Op):
                 max_isl_size = max(isl_size)
             mylog.info('Maximum extent of largest island (pixels) = '+str(max_isl_size))
 
-            
-            # at least 4 boxes on each side
-#             largesize = int(round(min(shape)/4.))
-#             intersrcsep = int(round(sqrt(img.bmpersrc_th)*2.* \
-#                                         img.beam[0]/cdelt[0]))
-# 
-#             bsize = int(round(sqrt(brightsize*largesize*1.)))
-#             if intersrcsep > brightsize and intersrcsep < largesize:
-#                 bsize = int(round(sqrt(intersrcsep*largesize*1.)))
             bsize = int(max(brightsize, max_isl_size*1.5))
             if bsize < 40:
                 bsize = min(40, min(shape)/4)
-#             if bsize > min(shape):
-#                 bsize = largesize
             if bsize % 10 == 0: bsize += 1
 
             bstep = int(round(min(bsize/3., min(shape)/10.)))

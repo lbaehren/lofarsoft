@@ -394,6 +394,10 @@ class Op_gausfit(Op):
                 break
             if bar.started: bar.spin()
         
+        if len(gaul) == 0:
+            # Fitting iteratively did not work -- try normal fit
+            gaul, fgaul = self.fit_island(isl, opts, img, ini_gausfit='default')
+            
         return gaul, fgaul
 
 
