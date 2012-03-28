@@ -259,6 +259,17 @@ class CMDLine:
 				else: print msg
 				self.waiting_for_user(10, log)
 
+		# checking if number of threads is good
+		if self.opts.nthreads <= 0:
+			msg="Number of threads should be positive! Given is %d. Exiting..." % (self.opts.nthreads)
+			if log != None: log.error(msg)
+			else: print msg
+			quit(1)
+		if self.opts.nthreads > 6:
+			msg="\n*** Warning *** Number of threads %d is too high! Safe is 2-6. Best is 2-3\n" % (self.opts.nthreads)
+			if log != None: log.warning(msg)
+			else: print msg
+
 		if not self.opts.is_nofold:
 			# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
 			# also reading coordinates and flux
