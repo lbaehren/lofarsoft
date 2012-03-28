@@ -70,14 +70,8 @@ class CMDLine:
                                  and only one pulsar name should be given for --par option to work", default="", type='str')
         	self.cmd.add_option('--nodecode', action="store_true", dest='is_nodecode',
                            help="optional parameter to skip decoding the data (2bf2fits/bf2puma2)", default=False)
-        	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
-                           help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
-        	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
-                           help="turn off running pdmp in the pipeline", default=False)
         	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
                            help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
-        	self.cmd.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
-                           help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
         	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
                            help="making only summaries on already processed data", default=False)
         	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
@@ -117,23 +111,33 @@ class CMDLine:
                            help="to process the data locally on current locus node for one beam only. Should only be used together \
                                  with --beams option and only the first beam will be used if there are several specified in --beams \
                                  (mostly for _internal_ use only)", default=False)
-	        self.group = opt.OptionGroup(self.cmd, "Complex voltage extra options")
-        	self.group.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
+		# adding CS/IS/FE extra options
+	        self.groupCS = opt.OptionGroup(self.cmd, "CS/IS/FE extra options")
+        	self.groupCS.add_option('--norfi', action="store_true", dest='is_norfi',
+                           help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
+        	self.groupCS.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
+                           help="turn off running pdmp in the pipeline", default=False)
+        	self.groupCS.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
+                           help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
+		self.cmd.add_option_group(self.groupCS)
+		# adding CV extra options
+	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
+        	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
                                  clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
-        	self.group.add_option('--nblocks', dest='nblocks', metavar='#BLOCKS',
+        	self.groupCV.add_option('--nblocks', dest='nblocks', metavar='#BLOCKS',
                            help="only read the first #BLOCKS blocks. Default: all blocks", default=-1, type='int')
-        	self.group.add_option('--all-for-scaling', action="store_true", dest='is_all_times',
+        	self.groupCV.add_option('--all-for-scaling', action="store_true", dest='is_all_times',
                            help="normalize the data based on entire data set. Otherwise, the scaling is updated after every data block", default=False)
-        	self.group.add_option('--write-ascii', action="store_true", dest='is_write_ascii',
+        	self.groupCV.add_option('--write-ascii', action="store_true", dest='is_write_ascii',
                            help="write out also ascii files (.rv) containing complex values", default=False)
-        	self.group.add_option('--tsubint', dest='tsubint', metavar='SECS',
+        	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
                            help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
-        	self.group.add_option('--output-chans-per-subband', dest='output_chans_per_subband', metavar='#CHANS',
+        	self.groupCV.add_option('--output-chans-per-subband', dest='output_chans_per_subband', metavar='#CHANS',
                            help="set output number of channels per subband. Default: %default (all channels in subband are collapsed)", default=1, type='int')
-        	self.group.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
+        	self.groupCV.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
                            help="skip running rmfit program", default=False)
-		self.cmd.add_option_group(self.group)
+		self.cmd.add_option_group(self.groupCV)
         
 		# reading cmd options
 		(self.opts, self.args) = self.cmd.parse_args()
