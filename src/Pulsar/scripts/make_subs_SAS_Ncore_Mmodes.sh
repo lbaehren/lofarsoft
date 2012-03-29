@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.45
+VERSION=3.46
  
 #####################################################################
 # Usage #
@@ -428,15 +428,25 @@ then
    else
       IS2=0
 
-      #unsetenv PYTHONPATH
-      export PYTHONPATH=""
-      echo "python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
-      python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
-      PARSET=${location}/${OBSID}.parset
-      #setenv PYTHONPATH $hold_pythonpath
-      export PYTHONPATH="$hold_pythonpath"
-
+      # put in work around Parset.py usage, since it seems to fail with most past datasets, so don't use if not multi TAB.
       nrTArings=`cat $PARSET | grep -i "OLAP.PencilInfo.nrRings" | head -1 | awk -F "= " '{print $2}'`
+      nrTiedArrayBeams=-1
+      nrTiedArrayBeams=`cat $PARSET | grep -i "nrTiedArrayBeams" | head -1 | awk -F "= " '{print $2}'`
+
+      if [[ $nrTArings > 0 ]] || [[ $nrTiedArrayBeams > 1 ]]
+      then
+	      #unsetenv PYTHONPATH
+	      export PYTHONPATH=""
+	      echo "python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
+	      python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
+	      PARSET=${location}/${OBSID}.parset
+	      #setenv PYTHONPATH $hold_pythonpath
+	      export PYTHONPATH="$hold_pythonpath"
+	  else
+         cp $PARSET ${location}/${OBSID}.parset
+         PARSET=${location}/${OBSID}.parset
+	  fi
+
    fi
    
    nrTiedArrayBeams=-1
@@ -3884,4 +3894,5 @@ else  # end if [[ $proc != 0 ]]
 fi
 
 exit 0
+
 
