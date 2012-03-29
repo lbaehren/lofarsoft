@@ -58,6 +58,8 @@ add_custom_target (ppgplot_bindings_build
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/ppgplot_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/presto_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/wrappers ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND cp ${CMAKE_SOURCE_DIR}/apps/presto/python/*py ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND rm ${CMAKE_BINARY_DIR}/apps/presto/python/setup.py
   COMMAND ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} build --build-base=${CMAKE_BINARY_DIR}/apps/presto/python
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMENT "Running build using ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} build --build-base=${CMAKE_BINARY_DIR}/apps/presto/python"
@@ -68,6 +70,8 @@ add_custom_target (ppgplot_bindings_install
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/ppgplot_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/presto_src ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/wrappers ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND cp ${CMAKE_SOURCE_DIR}/apps/presto/python/*py ${CMAKE_BINARY_DIR}/apps/presto/python
+  COMMAND rm ${CMAKE_BINARY_DIR}/apps/presto/python/setup.py
   COMMAND ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} install --home=${CMAKE_INSTALL_PREFIX}
 # also do the preto_fftfit install here
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/fftfit_src
