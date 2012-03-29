@@ -72,7 +72,10 @@ add_custom_target (ppgplot_bindings_install
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/wrappers ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND cp ${CMAKE_SOURCE_DIR}/apps/presto/python/*py ${CMAKE_BINARY_DIR}/apps/presto/python
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/setup.py
+  COMMAND chmod 775 ${CMAKE_BINARY_DIR}/apps/presto/python/*py
   COMMAND ${PYTHON_EXECUTABLE} ${PRESTO_SETUP_PY} install --home=${CMAKE_INSTALL_PREFIX}
+  COMMAND cp ${CMAKE_BINARY_DIR}/apps/presto/python/*.py ${CMAKE_INSTALL_PREFIX}/lib/python/
+  COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/python/setup.py
 # also do the preto_fftfit install here
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/apps/presto/python/fftfit_src
   COMMAND cp -r ${CMAKE_SOURCE_DIR}/apps/presto/python/fftfit_src ${CMAKE_BINARY_DIR}/apps/presto/python
