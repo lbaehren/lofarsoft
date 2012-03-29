@@ -134,7 +134,7 @@ class Op_gausfit(Op):
         ### put in the serial number of the gaussians for the whole image
         n = 0
         tot_flux = 0.0
-        if hasattr(img, 'j'):
+        if img.waveletimage:
             # store the wavelet scale for each Gaussian
             # (wavelet img's have a img.j attribute)
             j = img.j
@@ -152,7 +152,7 @@ class Op_gausfit(Op):
 
         mylogger.userinfo(mylog, "Total number of Gaussians fit to image",
                           str(n))
-        if not hasattr(img, '_pi'):
+        if not hasattr(img, '_pi') and not img.waveletimage:
             mylogger.userinfo(mylog, "Total flux in model", '%.3f Jy' %
                           tot_flux)
  

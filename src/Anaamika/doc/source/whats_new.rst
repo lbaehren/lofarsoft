@@ -6,7 +6,11 @@ What's New
 
 Version 1.1 (2012/03/28):
 
-    * Modified calculation of rms_box parameter (when rms_box option is None) to work better with fields composed mainly of point sources when strong artifacts are present. * Modified fitting of large islands to adopt an iterative fitting scheme that limits the number of Gaussians fit simultaneously per iteration to 10. This change speeds up fitting of large islands considerably. * Tweaked settings that affect fitting of Gaussians to improve fitting in general.
+    * Modified calculation of rms_box parameter (when rms_box option is None) to work better with fields composed mainly of point sources when strong artifacts are present. 
+    
+    * Modified fitting of large islands to adopt an iterative fitting scheme that limits the number of Gaussians fit simultaneously per iteration to 10. This change speeds up fitting of large islands considerably. 
+    
+    * Tweaked settings that affect fitting of Gaussians to improve fitting in general.
 
     * Added output of shapelet parameters to FITS tables. Fixed issue with resizing of sources in spectral index module.
 

@@ -294,22 +294,21 @@ class Op_readimage(Op):
                 iminfo = hdr['imageinfo']
                 if iminfo.has_key('restoringbeam'):
                     beaminfo = iminfo['restoringbeam']
-                    found = True
-                if beaminfo.has_key('major') and beaminfo.has_key('minor') and beaminfo.has_key('major'):
-                    bmaj = beaminfo['major']['value']
-                    bmin = beaminfo['minor']['value']
-                    bpa = beaminfo['positionangle']['value']
-                    # make sure all values are in degrees
-                    if beaminfo['major']['unit'] == 'arcsec':
-                        bmaj = bmaj / 3600.0
-                    if beaminfo['minor']['unit'] == 'arcsec':
-                        bmin = bmin / 3600.0
-                    if beaminfo['major']['unit'] == 'rad':
-                        bmaj = bmaj * 180.0 / N.pi
-                    if beaminfo['minor']['unit'] == 'rad':
-                        bmin = bmin * 180.0 / N.pi
-                    beam = (bmaj, bmin, bpa) # all degrees
-                    found = True
+                    if beaminfo.has_key('major') and beaminfo.has_key('minor') and beaminfo.has_key('major'):
+                        bmaj = beaminfo['major']['value']
+                        bmin = beaminfo['minor']['value']
+                        bpa = beaminfo['positionangle']['value']
+                        # make sure all values are in degrees
+                        if beaminfo['major']['unit'] == 'arcsec':
+                            bmaj = bmaj / 3600.0
+                        if beaminfo['minor']['unit'] == 'arcsec':
+                            bmin = bmin / 3600.0
+                        if beaminfo['major']['unit'] == 'rad':
+                            bmaj = bmaj * 180.0 / N.pi
+                        if beaminfo['minor']['unit'] == 'rad':
+                            bmin = bmin * 180.0 / N.pi
+                        beam = (bmaj, bmin, bpa) # all degrees
+                        found = True
             if img.use_io == 'fits':
                 try:
                     beam = (hdr['BMAJ'], hdr['BMIN'], hdr['BPA'])

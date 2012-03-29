@@ -26,6 +26,12 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/03/29 - Fixed bug in wavelet module that could cause 
+                 incorrect associations of Gaussians. Fixed
+                 bug in show_fit that displayed incorrect
+                 model and residual images when wavelets were
+                 used. 
+    
     2012/03/28 - Version 1.1
     
     2012/03/28 - Fixed bug that caused mask to be ignored when

@@ -21,7 +21,7 @@ from preprocess import Op_preprocess
 from rmsimage import Op_rmsimage
 from threshold import Op_threshold
 from islands import Op_islands
-from gausfit import Op_gausfit
+from gausfit import Op_gausfit, Gaussian
 from gaul2srl import Op_gaul2srl
 from make_residimage import Op_make_residimage
 from output import Op_outlist
@@ -55,6 +55,9 @@ class Op_wavelet_atrous(Op):
           if dobdsm: wchain, wopts = self.setpara_bdsm(img)
 
           n, m = img.ch0.shape
+          
+          # Calculate residual image that results from normal (non-wavelet) Gaussian fitting
+          Op_make_residimage()(img)
           resid = img.resid_gaus
           lpf=img.opts.atrous_lpf
           if lpf not in ['b3', 'tr']: lpf = 'b3'
@@ -120,8 +123,10 @@ class Op_wavelet_atrous(Op):
                 wopts['ini_gausfit'] = 'default'
               else:
                 wopts['ini_gausfit'] = 'nobeam'
-              wid = (l+(l-1)*(2**(j-1)-1))/3.0; b1, b2 = img.pixel_beam[0:2]
-              b1 = b1*fwsig; b2 = b2*fwsig
+              wid = (l+(l-1)*(2**(j-1)-1))/3.0
+              b1, b2 = img.pixel_beam[0:2]
+              b1 = b1*fwsig
+              b2 = b2*fwsig
               cdelt = img.wcs_obj.acdelt[:2]
               wopts['beam'] = (sqrt(wid*wid+b1*b1)*cdelt[0], sqrt(wid*wid+b2*b2)*cdelt[1], 0.0)
 
@@ -143,8 +148,10 @@ class Op_wavelet_atrous(Op):
               for op in wchain:
                 op(wimg)
 
+              if hasattr(wimg, 'gaussians'): 
+                img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
+
               # Restrict Gaussians to original ch0 islands
-              from gausfit import Gaussian
               gaul = wimg.gaussians[:]
               tot_flux = 0.0
               nwvgaus = 0
@@ -159,6 +166,7 @@ class Op_wavelet_atrous(Op):
                           if not isl.mask_active[gcenter]:
                               gaus_id += 1
                               g.gaus_num = gaus_id
+                              g.island_id = isl.island_id
                               wvgaul.append(g)
                   isl.gaul += wvgaul  
                   img.gaussians += wvgaul  
@@ -168,9 +176,7 @@ class Op_wavelet_atrous(Op):
                   for g in wvgaul:
                       tot_flux += g.total_flux
                       
-              mylogger.userinfo(mylog, "Number of wavelet Gaussians used", str(nwvgaus))
-              if hasattr(wimg, 'gaussians'): 
-                img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
+              mylogger.userinfo(mylog, "Number of valid wavelet Gaussians", str(nwvgaus))
               total_flux += tot_flux
               ntot_wvgaus += nwvgaus
               if img.opts.interactive and len(wimg.gaussians) > 0:
@@ -192,13 +198,8 @@ class Op_wavelet_atrous(Op):
 
           pdir = img.basedir + '/misc/'
           
-          # Renumber and regroup Gaussians into sources with new 
-          # wavelet Gaussians included
-          if ntot_wvgaus > 0.0:
-              img.ngaus += ntot_wvgaus
-              Op_gaul2srl()(img)
-          
           #self.morphfilter_pyramid(img, pdir)
+          img.ngaus += ntot_wvgaus
           img.total_flux_gaus += total_flux
           mylogger.userinfo(mylog, "Total flux in model over all scales" , '%.3f Jy' % img.total_flux_gaus)
           if img.opts.output_all:
@@ -237,7 +238,7 @@ class Op_wavelet_atrous(Op):
         from types import ClassType, TypeType
 
         chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
-               Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
+               Op_gausfit()]#, Op_gaul2srl, Op_make_residimage()]
 
         opts={'thresh':'hard'}
         opts['thresh_pix'] = 3.0

@@ -33,12 +33,8 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     gfactor = 2.0 * N.sqrt(2.0 * N.log(2.0))
     pixels_per_beam = 2.0 * N.pi * (img.beam2pix(img.beam)[0]
                                     * img.beam2pix(img.beam)[1]) / gfactor**2
-    if hasattr(img, 'atrous_gaussians'):
-        img_gaus_mod = img.ch0 - img.resid_wavelets
-        img_gaus_resid = img.resid_wavelets
-    else:
-        img_gaus_mod = img.model_gaus
-        img_gaus_resid = img.resid_gaus
+    img_gaus_mod = img.model_gaus
+    img_gaus_resid = img.resid_gaus
     img_ch0 = img.ch0
     img_rms = img.rms
     img_mean = img.mean
