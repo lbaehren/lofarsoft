@@ -799,7 +799,7 @@ class _Parameter(object):
                 if records:
                     value = self.unpickle_parameter(records[0][0])
                 else:
-                    raise ValueError("Invalid key name")
+                    raise KeyError("{0}".format(key))
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
