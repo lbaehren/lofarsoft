@@ -95,7 +95,7 @@ class TBBData(IOInterface):
             "ANTENNA_SET":lambda:self.antenna_set if hasattr(self,"antenna_set") else self.__file.antenna_set(),
             "ANTENNA_POSITION":self.__file.antenna_position,
             "ANTENNA_POSITION_ITRF":self.__file.antenna_position_itrf,
-            "NYQUIST_ZONE":self.__file.nyquist_zone,
+            "NYQUIST_ZONE":lambda:[2 for i in self["SELECTED_DIPOLES"]] if "HBA" in self["ANTENNA_SET"] else [1 for i in self["SELECTED_DIPOLES"]],
             "TIME":self.__file.time,
             "SAMPLE_NUMBER":self.__file.sample_number,
             "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
