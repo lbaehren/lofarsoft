@@ -712,6 +712,34 @@ class PipeUnit:
 			self.kill()  # killing all open processes
 			sys.exit(1)
 
+	# getting proper parfile in the processing directory
+	def get_parfile(self, cmdline, cep2):
+		for psr in self.psrs:
+			psr2=re.sub(r'[BJ]', '', psr)
+			if cmdline.opts.parfile != "":
+				if os.path.exists(cmdline.opts.parfile): 
+					self.log.info("Copying user-specified parfile '%s' to %s/%s.par" % \
+						(cmdline.opts.parfile, self.outdir, psr2))
+					cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
+					self.execute(cmd)
+					continue
+				else: 
+					self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile))
+					self.kill()
+					sys.exit(1)
+			parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
+			if os.path.exists(parfile):
+				cmd="cp -f %s %s" % (parfile, self.outdir)
+				self.execute(cmd)
+				continue
+			parfile="%s/%s.par" % (cep2.parfile_dir, psr)
+			if os.path.exists(parfile):
+				cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
+				self.execute(cmd)
+				continue
+			self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
+			cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
+			self.execute(cmd, is_os=True)
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
 	    	"""
@@ -838,7 +866,51 @@ class PipeUnit:
 				if proc != None: proc.communicate()
 				if proc != None: proc.poll()
 		self.procs = []
-				
+
+	# function that does last steps in processing, creating tarball, copyting it, changing ownership, etc...
+	def finish_off(self, obs, cep2, cmdline):
+		# copying parset file to output directory
+		self.log.info("Copying original parset file to output directory...")
+		cmd="cp -f %s %s" % (obs.parset, self.outdir)
+		self.execute(cmd, workdir=self.outdir)
+		# Make a tarball of all the plots for this beam
+		self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
+		tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
+		tar_list=[]
+		for ext in self.extensions:
+			ext_list=rglob(self.curdir, ext)
+			tar_list.extend(ext_list)
+		tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
+		tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
+		cmd="tar cvfz %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
+		self.execute(cmd, workdir=self.outdir)
+
+		# copying archive file to summary node
+		output_dir="%s_%s/%s%s" % \
+			(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
+		output_archive="%s/%s" % (output_dir, tarname)
+		self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
+		cmd="rsync -avxP %s %s:%s" % (tarname, self.summary_node, output_archive)
+		self.execute(cmd, workdir=self.outdir)
+
+		# finish
+		self.end_time=time.time()
+		self.total_time=self.end_time - self.start_time
+		self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
+		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
+
+		# flushing log file and copy it to outdir on local node and summary node
+		self.log.flush()
+		if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
+		else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
+		os.system(cmd)
+		cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
+		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
+		proc.communicate()
+
+		# changing the file permissions to be re-writable for group
+		cmd="chmod -R g+w %s" % (self.outdir)
+		os.system(cmd)
 
 	# main processing function
 	def run(self, obs, cep2, cmdline, log):
@@ -857,33 +929,8 @@ class PipeUnit:
 			self.execute(cmd)
 
 			# creating Par-file in the output directory or copying existing one
-			if not cmdline.opts.is_nofold:
-				for psr in self.psrs:
-					psr2=re.sub(r'[BJ]', '', psr)
-					if cmdline.opts.parfile != "":
-						if os.path.exists(cmdline.opts.parfile): 
-							self.log.info("Copying user-specified parfile '%s' to %s/%s.par" % \
-								(cmdline.opts.parfile, self.outdir, psr2))
-							cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
-							self.execute(cmd)
-							continue
-						else: 
-							self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile))
-							self.kill()
-							sys.exit(1)
-					parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
-					if os.path.exists(parfile):
-						cmd="cp -f %s %s" % (parfile, self.outdir)
-						self.execute(cmd)
-						continue
-					parfile="%s/%s.par" % (cep2.parfile_dir, psr)
-					if os.path.exists(parfile):
-						cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
-						self.execute(cmd)
-						continue
-					self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
-					cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
-					self.execute(cmd, is_os=True)
+			if not cmdline.opts.is_nofold: 
+				self.get_parfile(cmdline, cep2)
 
 			# Creating curdir dir
 			cmd="mkdir -m 775 -p %s" % (self.curdir)
@@ -943,34 +990,35 @@ class PipeUnit:
 
 				if not cmdline.opts.is_nofold:	
 					# running prepfold with and without mask
-					if total_chan >= 256 and total_chan <= 6000:
-						prepfold_nsubs = 256
-					elif total_chan > 6000:
-						prepfold_nsubs = 512
-					else: prepfold_nsubs = total_chan
-					self.log.info("Getting proper value of nsubs in prepfold between %d and %d..." % (prepfold_nsubs, total_chan))
-					# calculating the least common denominator of total_chan starting from prepfold_nsubs
-					prepfold_nsubs = self.lcd(prepfold_nsubs, total_chan)
-					self.log.info("Number of subbands, -nsubs, for prepfold is %d" % (prepfold_nsubs))
-					prepfold_popens=[]  # list of prepfold Popen objects
-					for psr in self.psrs:   # pulsar list is empty if --nofold is used
-						# first running prepfold with mask (if --norfi was not set)
-						if not cmdline.opts.is_norfi:
-							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
-								(psr, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+					if not cmdline.opts.is_skip_prepfold:
+						if total_chan >= 256 and total_chan <= 6000:
+							prepfold_nsubs = 256
+						elif total_chan > 6000:
+							prepfold_nsubs = 512
+						else: prepfold_nsubs = total_chan
+						self.log.info("Getting proper value of nsubs in prepfold between %d and %d..." % (prepfold_nsubs, total_chan))
+						# calculating the least common denominator of total_chan starting from prepfold_nsubs
+						prepfold_nsubs = self.lcd(prepfold_nsubs, total_chan)
+						self.log.info("Number of subbands, -nsubs, for prepfold is %d" % (prepfold_nsubs))
+						prepfold_popens=[]  # list of prepfold Popen objects
+						for psr in self.psrs:   # pulsar list is empty if --nofold is used
+							# first running prepfold with mask (if --norfi was not set)
+							if not cmdline.opts.is_norfi:
+								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
+									(psr, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
+								prepfold_popens.append(prepfold_popen)
+								time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
+                                                                              # with temporary files lile resid2.tmp otherwise it can interfere with next prepfold call
+							# running prepfold without mask
+							if not cmdline.opts.is_norfi: output_stem="_nomask"
+							else: output_stem=""
+							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
+								(psr, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
 							prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 							prepfold_popens.append(prepfold_popen)
-							time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish with temporary files lile resid2.tmp
-								      # otherwise it can interfere with next prepfold call
-						# running prepfold without mask
-						if not cmdline.opts.is_norfi: output_stem="_nomask"
-						else: output_stem=""
-						cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
-							(psr, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
-						prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
-						prepfold_popens.append(prepfold_popen)
-						time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish with temporary files like resid2.tmp
-							      # otherwise it can interfere with next prepfold call
+							time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
+                                                                      # with temporary files like resid2.tmp otherwise it can interfere with next prepfold call
 
 					# now running dspsr stuff...
 					if not cmdline.opts.is_skip_dspsr:
@@ -1050,46 +1098,47 @@ class PipeUnit:
 
 			# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
 			if not cmdline.opts.is_nofold:
-				self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
-				# also preparing montage command to create combined plot
-				montage_cmd="montage -background none -pointsize 10.2 "
-				chif=open("%s/%s_sap%03d_tab%04d_chi-squared.txt" % (self.outdir, obs.id, self.sapid, self.tabid), 'w')
 				psr_bestprofs=rglob(self.outdir, "*.pfd.bestprof")
-				thumbs=[] # list of thumbnail files
-				for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
-					psr=bp.split("/")[-1].split("_")[0]
-					thumbfile=bp.split(self.outdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
-					thumbs.append(thumbfile)
-					# getting current number for SAP and TA beam
-					cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
-					curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
-					chi_val = 0.0
-					cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
-					chiline=os.popen(cmd).readlines()
-					if np.size(chiline) > 0:
-						chi_val = float(chiline[0].rstrip())
-					else:
-						if self.sapid == cursapid and self.procdir == curprocdir:
-							self.log.warning("Warning: can't read chi-sq value from %s" % (bp))
-					chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, self.code, cursapid, curprocdir, psr, chi_val))
-					montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (self.code, cursapid, curprocdir, psr, chi_val, thumbfile)
-				chif.close()
-				cmd="mv %s_sap%03d_tab%04d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid)
-				self.execute(cmd, workdir=self.outdir)
-
-				# creating combined plots
-				# only creating combined plots when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
-				# the same node, that bestprof files do exist, but thumbnails were not created yet at the time when chi-squared.txt is
-				# getting created for another beam. And this will cause "montage" command to fail
-				# At the end combined plot will eventually be created for this node during the procesing of the last beam of this node
-				if len([ff for ff in thumbs if os.path.exists(ff)]) == len(thumbs):
-					# creating combined plots
-					self.log.info("Combining all pfd.th.png files in a single combined plot...")
-					montage_cmd += "combined.png"
-					self.execute(montage_cmd, workdir=self.outdir)
-					# making thumbnail version of the combined plot
-					cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
+				if len(psr_bestprofs) > 0:
+					self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
+					# also preparing montage command to create combined plot
+					montage_cmd="montage -background none -pointsize 10.2 "
+					chif=open("%s/%s_sap%03d_tab%04d_chi-squared.txt" % (self.outdir, obs.id, self.sapid, self.tabid), 'w')
+					thumbs=[] # list of thumbnail files
+					for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
+						psr=bp.split("/")[-1].split("_")[0]
+						thumbfile=bp.split(self.outdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+						thumbs.append(thumbfile)
+						# getting current number for SAP and TA beam
+						cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+						curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
+						chi_val = 0.0
+						cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
+						chiline=os.popen(cmd).readlines()
+						if np.size(chiline) > 0:
+							chi_val = float(chiline[0].rstrip())
+						else:
+							if self.sapid == cursapid and self.procdir == curprocdir:
+								self.log.warning("Warning: can't read chi-sq value from %s" % (bp))
+						chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, self.code, cursapid, curprocdir, psr, chi_val))
+						montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (self.code, cursapid, curprocdir, psr, chi_val, thumbfile)
+					chif.close()
+					cmd="mv %s_sap%03d_tab%04d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid)
 					self.execute(cmd, workdir=self.outdir)
+
+					# creating combined plots
+					# only creating combined plots when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
+					# the same node, that bestprof files do exist, but thumbnails were not created yet at the time when chi-squared.txt is
+					# getting created for another beam. And this will cause "montage" command to fail
+					# At the end combined plot will eventually be created for this node during the procesing of the last beam of this node
+					if len([ff for ff in thumbs if os.path.exists(ff)]) == len(thumbs):
+						# creating combined plots
+						self.log.info("Combining all pfd.th.png files in a single combined plot...")
+						montage_cmd += "combined.png"
+						self.execute(montage_cmd, workdir=self.outdir)
+						# making thumbnail version of the combined plot
+						cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
+						self.execute(cmd, workdir=self.outdir)
 
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_norfi:
 				# waiting for subdyn to finish
@@ -1111,48 +1160,8 @@ class PipeUnit:
 							cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
-			# copying parset file to output directory
-			self.log.info("Copying original parset file to output directory...")
-			cmd="cp -f %s %s" % (obs.parset, self.outdir)
-			self.execute(cmd, workdir=self.outdir)
-			# Make a tarball of all the plots for this beam
-			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
-			tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
-			tar_list=[]
-			for ext in self.extensions:
-				ext_list=rglob(self.curdir, ext)
-				tar_list.extend(ext_list)
-			tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
-			tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
-			cmd="tar cvfz %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
-			self.execute(cmd, workdir=self.outdir)
-
-			# copying archive file to summary node
-			output_dir="%s_%s/%s%s" % \
-				(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
-			output_archive="%s/%s" % (output_dir, tarname)
-			self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
-			cmd="rsync -avxP %s %s:%s" % (tarname, self.summary_node, output_archive)
-			self.execute(cmd, workdir=self.outdir)
-
-			# finish
-			self.end_time=time.time()
-			self.total_time= self.end_time- self.start_time
-			self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
-			self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
-
-			# flushing log file and copy it to outdir on local node and summary node
-			self.log.flush()
-			if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
-			else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
-			os.system(cmd)
-			cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
-			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
-			proc.communicate()
-
-			# changing the file permissions to be re-writable for group
-			cmd="chmod -R g+w %s" % (self.outdir)
-			os.system(cmd)
+			# finishing off the processing...
+			self.finish_off(obs, cep2, cmdline)
 
 		except Exception:
 			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))
@@ -1269,33 +1278,8 @@ class CVUnit(PipeUnit):
 			self.execute(cmd)
 
 			# creating Par-file in the output directory or copying existing one
-			if not cmdline.opts.is_nofold:
-				for psr in self.psrs:
-					psr2=re.sub(r'[BJ]', '', psr)
-					if cmdline.opts.parfile != "":
-						if os.path.exists(cmdline.opts.parfile): 
-							self.log.info("Copying user-specified parfile '%s' to %s/%s.par" % \
-								(cmdline.opts.parfile, self.outdir, psr2))
-							cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
-							self.execute(cmd)
-							continue
-						else: 
-							self.log.error("Can't find user-specified parfile '%s'. Exiting..." % (cmdline.opts.parfile))
-							self.kill()
-							sys.exit(1)
-					parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
-					if os.path.exists(parfile):
-						cmd="cp -f %s %s" % (parfile, self.outdir)
-						self.execute(cmd)
-						continue
-					parfile="%s/%s.par" % (cep2.parfile_dir, psr)
-					if os.path.exists(parfile):
-						cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
-						self.execute(cmd)
-						continue
-					self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
-					cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
-					self.execute(cmd, is_os=True)
+			if not cmdline.opts.is_nofold: 
+				self.get_parfile(cmdline, cep2)
 
 			# Creating curdir dir
 			cmd="mkdir -m 775 -p %s" % (self.curdir)
@@ -1467,48 +1451,8 @@ class CVUnit(PipeUnit):
 						psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 
-			# copying parset file to output directory
-			self.log.info("Copying original parset file to output directory...")
-			cmd="cp -f %s %s" % (obs.parset, self.outdir)
-			self.execute(cmd, workdir=self.outdir)
-			# Make a tarball of all the plots for this beam
-			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
-			tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
-			tar_list=[]
-			for ext in self.extensions:
-				ext_list=rglob(self.curdir, ext)
-				tar_list.extend(ext_list)
-			tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
-			tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
-			cmd="tar cvfz %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
-			self.execute(cmd, workdir=self.outdir)
-
-			# copying archive file to summary node
-			output_dir="%s_%s/%s%s" % \
-				(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
-			output_archive="%s/%s" % (output_dir, tarname)
-			self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
-			cmd="rsync -avxP %s %s:%s" % (tarname, self.summary_node, output_archive)
-			self.execute(cmd, workdir=self.outdir)
-
-			# finish
-			self.end_time=time.time()
-			self.total_time= self.end_time- self.start_time
-			self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
-			self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
-
-			# flushing log file and copy it to outdir on local node and summary node
-			self.log.flush()
-			if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
-			else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
-			os.system(cmd)
-			cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
-			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
-			proc.communicate()
-
-			# changing the file permissions to be re-writable for group
-			cmd="chmod -R g+w %s" % (self.outdir)
-			os.system(cmd)
+			# finishing off the processing...
+			self.finish_off(obs, cep2, cmdline)
 
 		except Exception:
 			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))

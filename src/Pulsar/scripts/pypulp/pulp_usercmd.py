@@ -121,6 +121,8 @@ class CMDLine:
                            help="turn off running pdmp in the pipeline", default=False)
         	self.groupCS.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
                            help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
+        	self.groupCS.add_option('--skip-prepfold', action="store_true", dest='is_skip_prepfold',
+                           help="optional parameter to turn off running prepfold part of the pipeline", default=False)
 		self.cmd.add_option_group(self.groupCS)
 		# adding CV extra options
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
@@ -456,7 +458,9 @@ class CMDLine:
 				else:
 					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
-					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or "yes"))
+					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
+					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
+						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
 					if not self.opts.is_skip_dspsr:
 						log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
 					if obs.CV: log.info("rmfit = %s" % (self.opts.is_skip_rmfit and "no" or "yes"))
