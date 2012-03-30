@@ -939,7 +939,10 @@ class Event(object):
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
-        return self.parameter[key]
+        if key in self.parameter.keys():
+            return self.parameter[key]
+        else:
+            return None
 
 
     def __setitem__(self, key, value):
@@ -1243,7 +1246,10 @@ class Datafile(object):
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
-        return self.parameter[key]
+        if key in self.parameter.keys():
+            return self.parameter[key]
+        else:
+            return None
 
 
     def __setitem__(self, key, value):
@@ -1552,7 +1558,10 @@ class Station(object):
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
-        return self.parameter[key]
+        if key in self.parameter.keys():
+            return self.parameter[key]
+        else:
+            return None
 
 
     def __setitem__(self, key, value):
@@ -1861,7 +1870,7 @@ class Polarization(object):
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
-        if key in self.parameter:
+        if key in self.parameter.keys():
             return self.parameter[key]
         else:
             return None
