@@ -1081,7 +1081,7 @@ class PipeUnit:
 							pdmp_popens.append(pdmp_popen)
 		
 				# waiting for prepfold to finish
-				if not cmdline.opts.is_nofold: self.waiting_list("prepfold", prepfold_popens)
+				if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_prepfold: self.waiting_list("prepfold", prepfold_popens)
 
 			# running convert on prepfold ps to pdf and png
 			if not cmdline.opts.is_nofold:
