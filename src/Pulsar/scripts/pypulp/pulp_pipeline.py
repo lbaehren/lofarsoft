@@ -1157,7 +1157,7 @@ class PipeUnit:
 							self.execute(cmd, is_os=True)
 							# reading new DM from the *.per file
 							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm[0], psr, self.output_prefix)
+							if np.size(newdm) > 1: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm[-1], psr, self.output_prefix)
 							else: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
