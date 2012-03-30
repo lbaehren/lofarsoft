@@ -14,7 +14,7 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy (VERSION 2.8)
 
 ##  Package information
-set (DAL1_GIT_REPOSITORY http://github.com/nextgen-astrodata/DAL1.git CACHE STRING "DAL1 git repository.")
+set (DAL1_GIT_REPOSITORY https://github.com/nextgen-astrodata/DAL1.git CACHE STRING "DAL1 git repository.")
 
 ## ==============================================================================
 ##
