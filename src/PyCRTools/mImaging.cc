@@ -199,11 +199,11 @@ void HFPP_FUNC_NAME(const IterC image, const IterC image_end,
   HInteger lenWeights = weights_end - weights;
 
   if (lenCCM <= 0) {
-    throw PyCR::ValueError("Incorrect size for ccm vector.");
+    throw PyCR::ValueError("Incorrect size for ccm vector (len <= 0).");
     return;
   }
   if (lenWeights <= 0) {
-    throw PyCR::ValueError("Incorrect size for weight vector.");
+    throw PyCR::ValueError("Incorrect size for weight vector (len <= 0).");
     return;
   }
 
@@ -276,15 +276,15 @@ void  HFPP_FUNC_NAME(const Iter vec, const Iter vec_end,
   HInteger lenDelay = delays_end - delays;
 
   if (lenVec <= 0) {
-    throw PyCR::ValueError("Incorrect size of output vector.");
+    throw PyCR::ValueError("Incorrect size of output vector (len <= 0).");
     return;
   }
   if (lenFreq <= 0) {
-    throw PyCR::ValueError("Incorrect size of frequencies vector.");
+    throw PyCR::ValueError("Incorrect size of frequencies vector (len <= 0).");
     return;
   }
   if (lenDelay <= 0) {
-    throw PyCR::ValueError("Incorrect size of delays vector.");
+    throw PyCR::ValueError("Incorrect size of delays vector (len <= 0).");
     return;
   }
 
@@ -417,13 +417,13 @@ void HFPP_FUNC_NAME (const Iter delays, const Iter delays_end,
 
   // Sanity check
   if (lenDelay <= 0) {
-    throw PyCR::ValueError("Incorrect size of delays vector.");
+    throw PyCR::ValueError("Incorrect size of delays vector (len <= 0).");
   }
   if ((lenAnt <= 0) || (lenAnt%3 != 0)) {
-    throw PyCR::ValueError("Incorrect size of antenna position vector.");
+    throw PyCR::ValueError("Incorrect size of antenna position vector (len <= 0).");
   }
   if ((lenSky <= 0) || (lenSky%3 != 0)) {
-    throw PyCR::ValueError("Incorrect size of sky position vector.");
+    throw PyCR::ValueError("Incorrect size of sky position vector (len <= 0).");
   }
 
   // Implementation
@@ -491,16 +491,16 @@ void HFPP_FUNC_NAME (const Iter phases, const Iter phases_end,
 
   // Sanity check
   if (lenPhases <= 0) {
-    throw PyCR::ValueError("Incorrect size of phase vector.");
+    throw PyCR::ValueError("Incorrect size of phase vector (len <= 0).");
   }
   if (lenFreq <= 0) {
-    throw PyCR::ValueError("Incorrect size of frequency vector.");
+    throw PyCR::ValueError("Incorrect size of frequency vector (len <= 0).");
   }
   if ((lenAnt <=0) || (lenAnt%3 != 0)) {
-    throw PyCR::ValueError("Incorrect size of antenna position vector.");
+    throw PyCR::ValueError("Incorrect size of antenna position vector (len <= 0, or no multiple of 3).");
   }
   if ((lenSky <= 0) || (lenSky%3 != 0)) {
-    throw PyCR::ValueError("Incorrect size of sky position vector.");
+    throw PyCR::ValueError("Incorrect size of sky position vector (len <= 0, or no multiple of 3).");
   }
 
   // Implementation
@@ -577,16 +577,20 @@ void HFPP_FUNC_NAME (const CIter weights, const CIter weights_end,
 
   // Sanity check
   if (lenWeight <=0) {
-    throw PyCR::ValueError("Incorrect size of weight vector.");
+    throw PyCR::ValueError("Incorrect size of weight vector (len <= 0).");
   }
   if (lenFreq <= 0) {
-    throw PyCR::ValueError("Incorrect size of frequency vector.");
+    throw PyCR::ValueError("Incorrect size of frequency vector (len <= 0).");
   }
   if ((lenAnt <=0) || (lenAnt%3 != 0)) {
-    throw PyCR::ValueError("Incorrect size of antenna position vector.");
+    char error_message[256];
+    sprintf(error_message, "Incorrect size of antenna position vector: (len[=%d] <= 0, or no multiple of 3).", int(lenAnt));
+    throw PyCR::ValueError(error_message);
   }
   if ((lenSky <= 0) || (lenSky%3 != 0)) {
-    throw PyCR::ValueError("Incorrect size of sky position vector.");
+    char error_message[256];
+    sprintf(error_message, "Incorrect size of sky position vector (len[=%d] <= 0, or no multiple of 3).", int(lenSky));
+    throw PyCR::ValueError(error_message);
   }
 
   // Implementation
@@ -867,14 +871,18 @@ void HFPP_FUNC_NAME (const Iter hc, const Iter hc_end,
   Iter ec_it=ec;
 
   // Sanity check
-  HInteger lenHC = std::distance(hc,hc_end);
-  HInteger lenEC = std::distance(ec,ec_end);
+  int lenHC = std::distance(hc,hc_end);
+  const int lenEC = std::distance(ec,ec_end);
   if ((lenHC <= 0) && (lenHC%2 != 0)) {
-    throw PyCR::ValueError("Incorrect size of horizontal coordinates vector.");
+    char error_message[256];
+    sprintf(error_message, "Incorrect size of horizontal coordinates vector (len [=%d] <= 0, or not even).", lenHC);
+    throw PyCR::ValueError(error_message);
     return;
   }
   if ((lenEC <= 0) && (lenEC%2 != 0)) {
-    throw PyCR::ValueError("Incorrect size of equatorial coordinates vector.");
+    char error_message[256];
+    sprintf(error_message, "Incorrect size of equatorial coordinates vector (len [=%d] <= 0, or not even).",lenEC);
+    throw PyCR::ValueError(error_message);
     return;
   }
   if (lenHC != lenEC) {
@@ -952,19 +960,27 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   // Sanity checks
   if (Nantpos != Nantennas * 3)
   {
-    throw PyCR::ValueError("Antenna positions array has wrong size.");
+    char error_message[256];
+    sprintf(error_message, "Antenna positions array has wrong size: Nantpos [=%d] != 3 x Nantennas [=%d].", Nantpos, Nantennas);
+    throw PyCR::ValueError(error_message);
   }
   if (Nskypos != Nskycoord * 3)
   {
-    throw PyCR::ValueError("Sky positions array has wrong size.");
+    char error_message[256];
+    sprintf(error_message, "Sky positions array has wrong size: Nskypos [=%d] != 3 x Nskycoord [=%d].", Nskypos, Nskycoord);
+    throw PyCR::ValueError(error_message);
   }
   if (Nfftdata != Nfrequencies * Nantennas)
   {
-    throw PyCR::ValueError("FFT data array has wrong size.");
+    char error_message[256];
+    sprintf(error_message, "FFT data array has wrong size: Nfftdata[=%d] != Nfrequencies[=%d] * Nantennas[=%d]", Nfftdata, Nfrequencies, Nantennas);
+    throw PyCR::ValueError(error_message);
   }
   if (Nimage != Nskycoord * Nfrequencies)
   {
-    throw PyCR::ValueError("Image array has wrong size.");
+    char error_message[256];
+    sprintf(error_message, "Image array has wrong size: Nimage[=%d] != Nskycoord[=%d] * Nfrequencies[=%d]", Nimage, Nskycoord, Nfrequencies);
+    throw PyCR::ValueError(error_message);
   }
 
   // Get iterators
@@ -1065,15 +1081,21 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   // Sanity checks
   if (Nimage != Nskycoord * Nfrequencies)
   {
-    throw PyCR::ValueError("Image array has wrong size.");
+    char error_message[256];
+    sprintf(error_message, "Image array has wrong size: Nimage[=%d] != Nskycoord[=%d] * Nfrequencies[=%d]", Nimage, Nskycoord, Nfrequencies);
+    throw PyCR::ValueError(error_message);
   }
   if (Ndelays != Nantennas * Nskycoord)
   {
-    throw PyCR::ValueError("Delays array has wrong size.");
+    char error_message[256];
+    sprintf(error_message, "Delays array has wrong size: Ndelays[=%d] != Nantennas[=%d] * Nskycoord[=%d]", Ndelays, Nantennas, Nskycoord);
+    throw PyCR::ValueError(error_message);
   }
   if (Nfftdata != Nfrequencies * Nantennas)
   {
-    throw PyCR::ValueError("FFT data array has wrong size.");
+    char error_message[256];
+    sprintf(error_message,"FFT data array has wrong size: Nfftdata[=%d] != Nfrequencies[=%d] * Nantennas[=%d]", Nfftdata, Nfrequencies, Nantennas);
+    throw PyCR::ValueError(error_message);
   }
 
   // Get iterators
