@@ -35,7 +35,7 @@ class AntennaResponse(Task):
             doc = "Antennaset." ),
         inverse_jones_matrix = dict( default = lambda self : cr.hArray(complex, dimensions = (self.frequencies.shape()[0], 2, 2)),
             doc = "Inverse Jones matrix for each frequency." ),
-        on_sky_polarizations = dict( default = lambda self : self.fft_data.new(), output = True,
+        on_sky_polarization = dict( default = lambda self : self.fft_data.new(), output = True,
             doc = "FFT data corrected for element response (contains on sky polarizations)." ),
         normalize = dict( default = True,
             doc = "Normalize to frequency response in zenith." ),
@@ -46,7 +46,7 @@ class AntennaResponse(Task):
         """
 
         # Copy FFT data over for correction
-        self.on_sky_polarizations.copy(self.fft_data)
+        self.on_sky_polarization.copy(self.fft_data)
 
         # Get inverse Jones matrix for each frequency
         if "LBA" in self.antennaset:
@@ -63,5 +63,5 @@ class AntennaResponse(Task):
             raise ValueError("Invalid antennaset " + self.antennaset)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
-        cr.hGetOnSkyPolarizations(self.on_sky_polarizations[0:self.nantennas:2,...], self.on_sky_polarizations[1:self.nantennas:2,...], self.inverse_jones_matrix)
+        cr.hGetOnSkyPolarizations(self.on_sky_polarization[0:self.nantennas:2,...], self.on_sky_polarization[1:self.nantennas:2,...], self.inverse_jones_matrix)
 

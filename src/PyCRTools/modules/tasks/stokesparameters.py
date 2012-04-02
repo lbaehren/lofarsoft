@@ -63,6 +63,6 @@ class StokesParameters(Task):
         cr.hStokesParameters(self.stokes[...], self.hilbertt[0:3*self.nantennas:3,...], self.hilbertt[1:3*self.nantennas:3,...], self.hilbertt[2:3*self.nantennas:3,...], self.hilbertt[0:3*self.nantennas:3,...], self.hilbertt[1:3*self.nantennas:3,...], self.hilbertt[2:3*self.nantennas:3,...]) 
 
         # Calculate polarization angle
-        cr.hAtan2(polarization_angle[...], self.stokes[1:self.nantennas:4, ...], self.stokes[2:self.nantennas:4, ...])
+        cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])
         self.polarization_angle /= 2
 
