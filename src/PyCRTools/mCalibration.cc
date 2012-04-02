@@ -602,7 +602,7 @@ void HFPP_FUNC_NAME (const CIter pol0, const CIter pol0_end,
   const int N = std::distance(pol0, pol0_end);
 
   // Sanity checks
-  if (N != std::distance(pol1, pol1_end) | Nj != 4*N)
+  if ((N != std::distance(pol1, pol1_end)) || (Nj != 4*N))
   {
     throw PyCR::ValueError("[hMatrixMultiply2D] input vectors have incompatible sizes.");
   }
