@@ -12,7 +12,7 @@ else:
     exit()
 
 deg2rad = 2*np.pi / 360.0
-plotlen = 2048
+plotlen = 1024
     
 f = open(fname)
 antenna_positions = f["ANTENNA_POSITIONS"]
@@ -25,18 +25,19 @@ y3 = y2[:, (65536 - plotlen/2):(65536 + plotlen/2)]
 
 data = hArray(float, dimensions=[96, plotlen])
 data[...].copy(y[..., (66048 - plotlen/2):(66048 + plotlen/2)])
-
-for i in range(8):
+# zero padding... data[..., plotlen/2:plotlen] = 0.0
+for i in range(16):
     plt.plot(y3[i])
 
 # try crosscorrelation and see how that looks 
+#data[..., 0:200] = 0.0
+#data[..., 300:-1] = 0.0
 crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",data,oversamplefactor=10)
 plt.figure()
 
 cc = crosscorr.crosscorr_data.toNumpy() / 20480
-plt.plot(cc[0])
-plt.plot(cc[1])
-plt.plot(cc[2])
+for i in range(16):
+    plt.plot(cc[i])
 
 
 # try beamforming with optimization
