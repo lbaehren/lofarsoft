@@ -150,6 +150,18 @@ for station in stations:
 # Beamform with all stations
 
 # Compute LDF
+    
+    
+signals = 0 # to be done by Pim
+#Get LORA path from database?
+loradata = loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurroundingSecond=True,silent=False)
+core = loradata["core"]
+core_uncertainties = loradata["coreuncertainties"]
+## Direction from LORA or from fit?
+direction = loradata["direction"]
+direction_uncertainties = [3.,3.,0]
+
+ldf = cr.trun("Shower",positions=antenna_positions, signals_uncertainties=signals_uncertainties, core=core,direction=direction,core_uncertainties=core_uncertainties,signals=signals,direction_uncertainties=direction_uncertainties, ldf_enable=True)
 
 # Compute footprint
 
