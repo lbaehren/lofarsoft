@@ -29,9 +29,19 @@ class Shower(Task):
         direction = dict( default = None,
             doc = "Direction of the shower [AZ, EL], AZ is in degrees eastwards from north and EL is in degrees up from horizon." ),
         direction_uncertainties = dict(default = None, 
-            doc = "Uncertainties on the direction of the shower in [eAZ,eEL]"),     
+            doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"),     
         ldf_enable = dict( default = False, 
-            doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"),            
+            doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"), 
+        ldf_logplot = dict(default = True,
+            doc = "Draw LDF with log axis"), 
+        ldf_remove_outliers = dict(default = True,
+            doc = "Do not allow values > 1000000 or < 0.001 for signal strength"),
+        ldf_color_x = dict(default='#B30424', doc = "color signals x"),
+        ldf_color_y = dict(default='#68C8F7', doc = "color signals y"),
+        ldf_color_z = dict(default='#FF8C19', doc = "color signals z"),
+        ldf_marker_x = dict(default='s', doc = "marker signals x"),
+        ldf_marker_y = dict(default='o', doc = "marker siganls y"),
+        ldf_marker_z = dict(default='v', doc = "marker siganls z"),              
     )
 
 
@@ -71,7 +81,8 @@ class Shower(Task):
         # Assuming differences in z-coordinates = 0
 
         dist = distances.vec()
-
+        positions = cr.hArray(positions)
+        
         pos1 = cr.hArray_transpose(positions)[0].vec()
         pos2 = cr.hArray_transpose(positions)[1].vec()
 
@@ -131,43 +142,67 @@ class Shower(Task):
         """Run the task.
         """
         
+        # Plot LDF
+        
         if self.ldf_enable:
         
             Dist = self.__GetDistance(self.core,self.direction,self.positions)
+        
+            if self.ldf_remove_outliers:
+                for i in xrange(len(self.signals[:,0])):
+                    if self.signals[i,0] > 100000:
+                        self.signals[i,0] = 10
+                    if self.signals[i,0] < 0.001:
+                        self.signals[i,0] = 1
+                    if self.signals[i,1] > 100000:
+                        self.signals[i,1] = 10
+                    if self.signals[i,1] < 0.001:
+                        self.signals[i,1] = 1
+                    if self.signals[i,2] > 100000:
+                        self.signals[i,2] = 10
+                    if self.signals[i,2] < 0.001:
+                        self.signals[i,2] = 1                              
             
-            cr.plt.figure()
-            cr.plt.scatter(Dist,self.signals[:,0],c='b',label="x")
-            cr.plt.scatter(Dist,self.signals[:,1],c='g',label="y")
-            cr.plt.scatter(Dist,self.signals[:,2],c='r',label="z")
-            
-            cr.plt.xlabel("Distance to Shower Axis [m]")
-            cr.plt.ylabel("Signal [a.u.]")
-            cr.plt.yscale("log")
-            cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
-            
-            cr.plt.show()
-            
-            
-            if self.core_uncertainties and self.direction_uncertainties and self.signals_uncertainties:
+            if self.core_uncertainties and self.direction_uncertainties and self.signals_uncertainties.all():
                 
-                Uncert = self.__GetTotalDistanceUncertainty()
+                Dist_uncert = self.__GetTotalDistanceUncertainty(self.core,self.core_uncertainties,self.positions,self.direction,self.direction_uncertainties,Dist)
+                
+                if self.ldf_logplot:
+                    sig_lower = np.copy(self.signals_uncertainties)   # Avoid negative errorbars
+                    sig_lower.fill(0.001)
+                    sig_lower = np.maximum(sig_lower,self.signals - self.signals_uncertainties)
+                    sig_uncer = self.signals - sig_lower
+                else:
+                    sig_lower = np.copy(self.signals_uncertainties)      
+
+                
+                cr.plt.figure()
+                cr.plt.errorbar(Dist,self.signals[:,0],yerr=[sig_uncer[:,0],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_x,marker=self.ldf_marker_x,linestyle="None",label="x")
+                cr.plt.errorbar(Dist,self.signals[:,1],yerr=[sig_uncer[:,1],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_y,marker=self.ldf_marker_y,linestyle="None",label="y")
+                cr.plt.errorbar(Dist,self.signals[:,2],yerr=[sig_uncer[:,2],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_z,marker=self.ldf_marker_z,linestyle="None",label="z")     
+                
+                cr.plt.xlabel("Distance to Shower Axis [m]")
+                cr.plt.ylabel("Signal [a.u.]")
+                
+                if self.ldf_logplot:
+                    cr.plt.yscale("log")
+                cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
+                
+                cr.plt.show()
+
             
             else:
                 print "Not all uncertainties given, do not plot uncertainties"    
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-                    
+                cr.plt.figure()
+                cr.plt.scatter(Dist,self.signals[:,0],c=self.ldf_color_x,marker=self.ldf_marker_x,label="x")
+                cr.plt.scatter(Dist,self.signals[:,1],c=self.ldf_color_y,marker=self.ldf_marker_y,label="y")
+                cr.plt.scatter(Dist,self.signals[:,2],c=self.ldf_color_z,marker=self.ldf_marker_z,label="z")
+                
+                cr.plt.xlabel("Distance to Shower Axis [m]")
+                cr.plt.ylabel("Signal [a.u.]")
+                
+                if self.ldf_logplot:
+                    cr.plt.yscale("log")
+                cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
+                
+                cr.plt.show()            
