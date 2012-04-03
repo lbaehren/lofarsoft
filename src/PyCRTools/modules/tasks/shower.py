@@ -30,6 +30,7 @@ class Shower(Task):
             doc = "Direction of the shower [AZ, EL], AZ is in degrees eastwards from north and EL is in degrees up from horizon." ),
         direction_uncertainties = dict(default = None, 
             doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"),     
+        
         ldf_enable = dict( default = False, 
             doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"), 
         ldf_logplot = dict(default = True,
@@ -41,7 +42,9 @@ class Shower(Task):
         ldf_color_z = dict(default='#FF8C19', doc = "color signals z"),
         ldf_marker_x = dict(default='s', doc = "marker signals x"),
         ldf_marker_y = dict(default='o', doc = "marker siganls y"),
-        ldf_marker_z = dict(default='v', doc = "marker siganls z"),              
+        ldf_marker_z = dict(default='v', doc = "marker siganls z"),  
+        footprint_enable = dict(default = False,
+            doc = "Draw footprint of the shower"),            
     )
 
 
@@ -163,7 +166,7 @@ class Shower(Task):
                     if self.signals[i,2] < 0.001:
                         self.signals[i,2] = 1                              
             
-            if self.core_uncertainties and self.direction_uncertainties and self.signals_uncertainties.all():
+            if self.core_uncertainties is not None and self.direction_uncertainties is not None and self.signals_uncertainties.all():
                 
                 Dist_uncert = self.__GetTotalDistanceUncertainty(self.core,self.core_uncertainties,self.positions,self.direction,self.direction_uncertainties,Dist)
                 
@@ -205,4 +208,8 @@ class Shower(Task):
                     cr.plt.yscale("log")
                 cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
                 
-                cr.plt.show()            
+                cr.plt.show()   
+                
+        if self.footprint_enable:  
+            pass       
+                            
