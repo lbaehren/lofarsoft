@@ -29,7 +29,9 @@ class Shower(Task):
         direction = dict( default = None,
             doc = "Direction of the shower [AZ, EL], AZ is in degrees eastwards from north and EL is in degrees up from horizon." ),
         direction_uncertainties = dict(default = None, 
-            doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"),     
+            doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"), 
+        timelags = dict(default=None,
+            doc = "Timelags of signals given in nanoseconds [NAntennas]"),        
         
         ldf_enable = dict( default = False, 
             doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"), 
@@ -43,8 +45,11 @@ class Shower(Task):
         ldf_marker_x = dict(default='s', doc = "marker signals x"),
         ldf_marker_y = dict(default='o', doc = "marker siganls y"),
         ldf_marker_z = dict(default='v', doc = "marker siganls z"),  
+        
         footprint_enable = dict(default = False,
-            doc = "Draw footprint of the shower"),            
+            doc = "Draw footprint of the shower"),   
+        footprint_lora_enable = dict(default = False,
+            doc = "Draw Information from LORA"),             
     )
 
 
@@ -166,7 +171,7 @@ class Shower(Task):
                     if self.signals[i,2] < 0.001:
                         self.signals[i,2] = 1                              
             
-            if self.core_uncertainties is not None and self.direction_uncertainties is not None and self.signals_uncertainties.all():
+            if self.core_uncertainties is not None and self.direction_uncertainties is not None and self.signals_uncertainties is not None:
                 
                 Dist_uncert = self.__GetTotalDistanceUncertainty(self.core,self.core_uncertainties,self.positions,self.direction,self.direction_uncertainties,Dist)
                 
