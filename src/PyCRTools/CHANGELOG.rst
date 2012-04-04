@@ -1,5 +1,12 @@
-2012-04-04 - Rev 9991
+2012-04-04
 ==========
+
+  :Author: Martin van den Akker <martinva@astro.ru.nl>
+
+ - Added LORA parameters to database.
+
+2012-04-04 - Rev 9991
+=====================
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
@@ -9,7 +16,7 @@
    mechanism) - an example script test_dedispersion.py has also been
    added to demonstrate that.
 
- - Added :func:`hPow` as a vector function. Also defined the **
+ - Added :func:`hPow` as a vector function. Also defined the ``**``
    operator for vectors.
 
 2012-03-05
@@ -31,7 +38,7 @@
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
 
- - bug fixes to beamformer.py task  
+ - bug fixes to beamformer.py task
 
 2011-11-07
 ==========

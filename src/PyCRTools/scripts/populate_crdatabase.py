@@ -10,7 +10,6 @@ from optparse import OptionParser
 import time
 
 class CRDatabasePopulator(object):
-
     def __init__(self, db_filename="", options=None):
         """Initialisation of the CRDatabasePopulator object.
 
@@ -36,7 +35,8 @@ class CRDatabasePopulator(object):
 
         self.dbManager = crdb.CRDatabase(filename=self._db_filename,
                                          datapath=options.datapath,
-                                         resultspath=options.resultspath)
+                                         resultspath=options.resultspath,
+                                         lorapath=options.lorapath)
 
         self.doWrite = False
 
@@ -108,6 +108,9 @@ class CRDatabasePopulator(object):
                 # Add datafile to event
                 event.addDatafile(datafile)
 
+                # Add LORA data to event parameters
+                self.process_lora_data(event)
+
             else:
                 continue
 
@@ -142,15 +145,13 @@ class CRDatabasePopulator(object):
                                     p[key] = parameters[key]
                                 # p.parameter.db_write(key, parameters[key])
                                 p["xml_processed"] = True
-                        # else:
-                        #     print "      File %s does not exist." %(results_filename)
+                        else:
+                            print("Results file {0} does not exist...".format(results_filename))
 
-            pass
 
 
     def update(self):
         """Update already existing database entries."""
-        # TODO: CRDatabasePopulator.update() - Add implementation
         eventIDs = self.dbManager.getEventIDs()
 
         resultspath = self.dbManager.settings.resultspath
@@ -174,8 +175,24 @@ class CRDatabasePopulator(object):
                                 for key in parameters.keys():
                                     p[key] = parameters[key]
                                 p["xml_processed"] = True
-                        # else:
-                        #     print "      File %s does not exist." %(results_filename)
+                        else:
+                            print("Results file {0} does not exist...".format(results_filename))
+
+            # Add LORA parameters
+            self.process_lora_data(e)
+
+
+    def process_lora_data(self, event):
+        if not "lora_processed" in event.parameter.keys():
+            lora_data = lora.loraInfo(event.timestamp, self.settings.lorapath)
+            if lora_data:
+                for key in lora_data.keys():
+                    lora_key = "lora_" + key
+                    event[lora_key] = lora_data[key]
+                    print("added: parameter['{0}'] = {1}".format(lora_key, event[lora_key]))
+                event["lora_processed"] = True
+            else:
+                print("Empty lora_data set...")
 
 
     def populate_nodb(self):
@@ -280,6 +297,7 @@ class CRDatabasePopulator(object):
 
         print "  %-40s : %s" %("datapath", self.settings.datapath)
         print "  %-40s : %s" %("resultspath", self.settings.resultspath)
+        print "  %-40s : %s" %("lorapath", self.settings.lorapath)
 
         print "="*linewidth
 
@@ -425,6 +443,7 @@ def parseOptions():
     parser.add_option("-d", "--datapath", type="str", dest="datapath", default="", help="directory where the datafiles can be found.")
     parser.add_option("-f", "--filefilter", type="str", dest="filefilter", default="", help="filter to select which files are processed.")
     parser.add_option("-r", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
+    parser.add_option("-l", "--lorapath", type="str", dest="lorapath", default="", help="directory where the lora files are written.")
     parser.add_option("-u", "--update", action="store_true", dest="update", default=False, help="Update instead of populating database.")
 
     (options, args) = parser.parse_args()
@@ -436,6 +455,7 @@ def parseOptions():
 
     print "datapath = %s" %(options.datapath)
     print "resultspath = %s" %(options.resultspath)
+    print "lorapath = %s" %(options.lorapath)
     print "filefilter = %s" %(options.filefilter)
 
     return (options, args)
@@ -469,6 +489,7 @@ if __name__ == '__main__':
     import pycrtools as cr
     from pycrtools import crdatabase as crdb
     from pycrtools import xmldict
+    from pycrtools import lora
 
     #test(options, args)
 

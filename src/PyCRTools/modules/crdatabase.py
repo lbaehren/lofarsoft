@@ -13,23 +13,24 @@ import time
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
-    def __init__(self, filename=":memory:", datapath="", resultspath=""):
+    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath=""):
         """Initialisation of the CRDatabase object.
 
         **Properties**
 
-        ============= =====================================
+        ============= ===============================================
         Parameter     Description
-        ============= =====================================
+        ============= ===============================================
         *filename*    filename of the database.
         *datapath*    path where the datafiles are stored.
         *resultspath* path where the results are stored.
-        ============= =====================================
+        *lorapath*    path where the LORA information is stored.
+        ============= ===============================================
 
-        If *inputpath* is an empty string the ''data'' directory of
+        If *datapath* is an empty string the ''data'' directory of
         the directory in which the database file is located is used.
 
-        If *outputpath* is an empty string the ''results'' directory of
+        If *resultspath* is an empty string the ''results'' directory of
         the directory in which the database file is located is used.
         """
 
@@ -48,18 +49,27 @@ class CRDatabase(object):
 
         # Path settings
         self.basepath = os.path.dirname(self.filename)
+        datapath_DEFAULT = os.path.join(self.basepath, "data")
+        resultspath_DEFAULT = os.path.join(self.basepath, "results")
+        lorapath_DEFAULT = os.path.join(self.basepath, "LORA/data")
 
         # Location of the datapath
         if "" != datapath:
             self.settings.datapath = os.path.realpath(datapath)
         elif "" == self.settings.datapath:
-            self.settings.datapath = os.path.join(self.basepath, "data")
+            self.settings.datapath = datapath_DEFAULT
 
         # Location of the resultspath
         if "" != resultspath:
             self.settings.resultspath = os.path.realpath(resultspath)
         elif "" == self.settings.resultspath:
-            self.settings.resultspath = os.path.join(self.basepath, "results")
+            self.settings.resultspath = resultspath_DEFAULT
+
+        # Location of the lora path
+        if "" != lorapath:
+            self.settings.lorapath = os.path.realpath(lorapath)
+        elif "" == self.settings.lorapath:
+            self.settings.lorapath =lorapath_DEFAULT
 
 
     def __createTables(self):
@@ -115,6 +125,7 @@ class CRDatabase(object):
             CREATE TABLE IF NOT EXISTS main.settings (key TEXT NOT NULL UNIQUE, value TEXT);
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');
+            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('lorapath', '');
             """
             self.db.executescript(sql)
 
@@ -595,7 +606,7 @@ class Settings(object):
 
     @property
     def datapath(self):
-        """Get the value of the datapath variable as set in the database."""
+        """Get the value of the *datapath* variable as set in the database."""
         result = None
 
         if self._db:
@@ -609,7 +620,7 @@ class Settings(object):
 
     @datapath.setter
     def datapath(self, value):
-        """Set the value of the datapath variable in the database.
+        """Set the value of the *datapath* variable in the database.
 
         **Properties**
 
@@ -628,7 +639,7 @@ class Settings(object):
 
     @property
     def resultspath(self):
-        """Get the value of the resultspath variable as set in the database."""
+        """Get the value of the *resultspath* variable as set in the database."""
         result = None
 
         if self._db:
@@ -642,7 +653,7 @@ class Settings(object):
 
     @resultspath.setter
     def resultspath(self, value):
-        """Set the value of the resultspath variable in the database.
+        """Set the value of the *resultspath* variable in the database.
 
         **Properties**
 
@@ -659,6 +670,40 @@ class Settings(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
+
+    @property
+    def lorapath(self):
+        """Get the value of the *lorapath* variable as set in the database."""
+        result = None
+
+        if self._db:
+            sql = "SELECT value FROM main.settings WHERE key='lorapath'"
+            result = str(self._db.select(sql)[0][0])
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
+    @lorapath.setter
+    def lorapath(self, value):
+        """Set the value of the *lorapath* variable in the database.
+
+        **Properties**
+
+        =========  ===========================================
+        Parameter  Description
+        =========  ===========================================
+        *value*    new value of the *lorapath* variable.
+        =========  ===========================================
+        """
+        if self._db:
+            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('lorapath',str(value))
+            self._db.execute(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
     def summary(self):
         """Summary of the Settings object."""
         linewidth = 80
@@ -669,6 +714,7 @@ class Settings(object):
 
         print "  %-40s : %s" %("datapath", self.datapath)
         print "  %-40s : %s" %("resultspath", self.resultspath)
+        print "  %-40s : %s" %("lorapath", self.lorapath)
 
 
 
