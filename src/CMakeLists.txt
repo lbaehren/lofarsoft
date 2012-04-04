@@ -321,6 +321,27 @@ add_dependencies (pulsar cfitsio wcstools swig)
 
 ## ==============================================================================
 ##
+##                                                       $LOFARSOFT/src/FRATS
+##
+## ==============================================================================
+
+##__________________________________________________________
+##                              Build & Testing instructions
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/FRATS)
+  ## Build package from present sources
+  build_package (frats src/FRATS)
+  ## Experimental build
+  lus_package_experimental (frats FRATS)
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/FRATS)
+
+##__________________________________________________________
+##                                      Package dependencies
+
+#add_dependencies (frats casacore)
+
+## ==============================================================================
+##
 ##                                                       $LOFARSOFT/src/PyCRTools
 ##
 ## ==============================================================================
