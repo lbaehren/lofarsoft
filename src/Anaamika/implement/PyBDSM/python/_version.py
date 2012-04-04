@@ -26,6 +26,17 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/04/02 - Implemented an adaptive scaling scheme for 
+                 the rms_box parameter that shrinks the box
+                 size near bright sources and expands it far
+                 from them (enabled with the adaptive_rms_box
+                 option when rms_box=None). This scheme generally 
+                 results in improved rms and mean maps when both 
+                 strong artifacts and extended sources are present.
+                 Fixed bug that prevented plotting of results 
+                 during wavelet decomposition when interactive =
+                 True.
+    
     2012/03/29 - Fixed bug in wavelet module that could cause 
                  incorrect associations of Gaussians. Fixed
                  bug in show_fit that displayed incorrect

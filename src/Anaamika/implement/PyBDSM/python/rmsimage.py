@@ -19,6 +19,7 @@ import const
 import mylogger
 import os
 import functions as func
+import scipy.ndimage as nd
 
 ### insert into Image tc-variables for mean & rms maps
 Image.mean = NArray(doc="Mean map, Stokes I")
@@ -32,7 +33,7 @@ class Op_rmsimage(Op):
     Prerequisites: Module preprocess should be run first.
     """
     def __call__(self, img):
-        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"RMSimage  ")
+        mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"RMSimage")
         mylogger.userinfo(mylog, "Calculating background rms and mean images")
         if img.opts.polarisation_do:
             pols = ['I', 'Q', 'U', 'V']
@@ -44,10 +45,144 @@ class Op_rmsimage(Op):
         else:
             mask = img.mask
         opts = img.opts
-        map_opts = (opts.kappa_clip, img.rms_box, opts.spline_rank)
         ch0_images = [img.ch0, img.ch0_Q, img.ch0_U, img.ch0_V]
         cmeans = [img.clipped_mean] + img.clipped_mean_QUV
         crmss = [img.clipped_rms] + img.clipped_rms_QUV
+        cdelt = N.array(img.wcs_obj.acdelt[:2])
+
+        # Determine box size for rms/mean map calculations.
+        # If user specifies rms_box, use it. Otherwise, use either an 
+        # adaptive binning scheme that shrinks the box near
+        # the brightest sources or estimate rms_box from bright sources. 
+        #
+        # The adaptive scheme calculates the rms/mean map
+        # at two different scales: 
+        #   1) using a large rms_box, set to max(image_size/10, 300)
+        #   2) using a small rms_box, set by size of brightest source
+        # Then, the rms and mean values at a given point are determined
+        # by a weighted average of the values in the maps at the two
+        # scales. 
+        fwsig = const.fwsig
+        brightsize = None
+        isl_pos = []
+        if opts.rms_box is None:
+            do_adapt = img.opts.adaptive_rms_box
+            # 'size' of brightest source
+            kappa1 = 3.0
+            try:
+                brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* 
+                                   sqrt(2.*log(img.max_value/(kappa1*crms)))))
+            except:
+                brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig))
+            mylog.info('Estimated size of brightest source (pixels) = '+str(brightsize))
+            
+            # Using clipped mean and rms and threshold of 100-500 sigma, 
+            # search for bright sources.
+            cmean = cmeans[0]
+            crms = crmss[0]
+            image = ch0_images[0]
+            shape = image.shape
+            isl_size_bright = []
+            max_isl_brightsize = 0.0
+            if do_adapt:
+                mylogger.userinfo(mylog, "Using adaptive scaling of rms_box")
+                threshold = 50.0
+#                 while len(isl_size_bright) < 20 and threshold > 50.0:
+                while threshold >= 50.0:
+                    isl_size_bright=[]
+                    isl_maxposn = []
+                    act_pixels = (img.ch0-cmean)/threshold >= crms
+                    threshold *= 0.8
+                    if isinstance(mask, N.ndarray):
+                        act_pixels[mask] = False
+                    rank = len(image.shape)
+                    connectivity = nd.generate_binary_structure(rank, rank)
+                    labels, count = nd.label(act_pixels, connectivity)
+                    slices = nd.find_objects(labels)
+                    for idx, s in enumerate(slices):
+                        isl_size_bright += [s[0].stop-s[0].start, s[1].stop-s[1].start]
+                        isl_maxposn.append(tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+\
+                              N.array((s[0].start, s[1].start))))
+
+            # Check islands found above at thresh_isl threshold to determine if
+            # the bright source is embedded inside a large island or not. If it is,
+            # exclude it from the bright-island list. Also find the size of the
+            # largest island at this threshold to set the large-scale rms_box
+            threshold = 10.0
+            act_pixels = (img.ch0-cmean)/threshold >= crms
+            if isinstance(mask, N.ndarray):
+                act_pixels[mask] = False
+            rank = len(image.shape)
+            connectivity = nd.generate_binary_structure(rank, rank)
+            labels, count = nd.label(act_pixels, connectivity)
+            slices = nd.find_objects(labels)
+            isl_size = []
+            isl_size_highthresh = []
+            for idx, s in enumerate(slices):
+                isl_size_lowthresh = (labels[s] == idx+1).sum()/img.pixel_beamarea*2.0
+                isl_maxposn_lowthresh = tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+
+                                              N.array((s[0].start, s[1].start)))
+                isl_size += [s[0].stop-s[0].start, s[1].stop-s[1].start]
+                if do_adapt and isl_maxposn_lowthresh in isl_maxposn and isl_size_lowthresh < 25.0:
+                    isl_pos.append(isl_maxposn_lowthresh)
+                    bright_indx = isl_maxposn.index(isl_maxposn_lowthresh)
+                    isl_size_highthresh.append(isl_size_bright[bright_indx])
+
+            if len(isl_size) == 0:
+                max_isl_size = 0.0
+            else:
+                max_isl_size = max(isl_size)
+            mylog.info('Maximum extent of largest 10-sigma island using clipped rms (pixels) = '+str(max_isl_size))
+            if len(isl_size_highthresh) == 0:
+                max_isl_size_highthresh = 0.0
+            else:
+                max_isl_size_highthresh = max(isl_size_highthresh)
+
+            
+            min_size_allowed = int(img.pixel_beam[0]*9.0) #21
+            if do_adapt:
+                bsize = int(max(brightsize, min_size_allowed, max_isl_size_highthresh*2.0))
+            else:
+                bsize = int(max(brightsize, min_size_allowed, max_isl_size*2.0))
+            bsize2 = int(max(min(img.ch0.shape)/20.0, max_isl_size*3.0))
+            if bsize < min_size_allowed:
+                bsize = min_size_allowed
+            if bsize % 10 == 0: bsize += 1
+            if bsize2 < min_size_allowed:
+                bsize2 = min_size_allowed
+            if bsize2 % 10 == 0: bsize2 += 1
+
+            bstep = int(round(min(bsize/3., min(shape)/10.)))
+            bstep2 = int(round(min(bsize2/3., min(shape)/10.)))
+            img.rms_box = (bsize, bstep)
+            img.rms_box2 = (bsize2, bstep2)
+            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
+                if do_adapt:
+                    mylogger.userinfo(mylog, 'Derived rms_box (box size, step size)',
+                                      '(' + str(img.rms_box[0]) + ', ' +
+                                      str(img.rms_box[1]) + ') pixels (small scale)')
+                    mylogger.userinfo(mylog, 'Derived rms_box (box size, step size)',
+                                      '(' + str(img.rms_box2[0]) + ', ' +
+                                      str(img.rms_box2[1]) + ') pixels (large scale)')
+                    mylogger.userinfo(mylog, 'Number of sources using small scale', str(len(isl_pos)))
+                else:
+                    mylogger.userinfo(mylog, 'Derived rms_box (box size, step size)',
+                                      '(' + str(img.rms_box[0]) + ', ' +
+                                      str(img.rms_box[1]) + ') pixels')                
+            else:
+                mylogger.userinfo(mylog, 'Using user-specified rms_box',
+                                  '(' + str(img.rms_box[0]) + ', ' +
+                                  str(img.rms_box[1]) + ') pixels')
+        else:
+            img.rms_box = opts.rms_box
+            img.rms_box2 = None
+            do_adapt = False
+            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
+                mylogger.userinfo(mylog, 'Using user-specified rms_box',
+                                  '(' + str(img.rms_box[0]) + ', ' +
+                                  str(img.rms_box[1]) + ') pixels')
+        
+        map_opts = (opts.kappa_clip, img.rms_box, opts.spline_rank)        
         for ipol, pol in enumerate(pols):
           data = ch0_images[ipol]
           mean = N.zeros(data.shape, dtype=N.float32)
@@ -67,23 +202,32 @@ class Op_rmsimage(Op):
           else:
             if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
               if len(data.shape) == 2:   ## 2d case
-                self.map_2d(data, mean, rms, mask, *map_opts)
+                self.map_2d(data, mean, rms, mask, *map_opts, do_adapt=do_adapt,
+                            bright_pt_coords=isl_pos, rms_box2=img.rms_box2)
               elif len(data.shape) == 3: ## 3d case
                 if not isinstance(mask, N.ndarray):
                   mask = N.zeros(data.shape[0], dtype=bool)
                 for i in range(data.shape[0]):
                     ## iterate each plane
-                    self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts)
+                    self.map_2d(data[i], mean[i], rms[i], mask[i], *map_opts, 
+                                do_adapt=do_adapt, bright_pt_coords=isl_pos,
+                                rms_box2=img.rms_box2)
               else:
                 mylog.critical('Image shape not handleable' + pol_txt)
                 raise RuntimeError("Can't handle array of this shape" + pol_txt)
               mylog.info('Background rms and mean images computed' + pol_txt)
   
-            ## check if variation of rms/mean maps is significant enough
+            ## check if variation of rms/mean maps is significant enough:
+            #       check_rmsmap() sets img.use_rms_map
+            #       check_meanmap() sets img.mean_map_type
             if pol == 'I':
                 if opts.rms_map is None:
-                    # check_rmsmap() sets img.use_rms_map
-                    self.check_rmsmap(img, rms)
+                    if do_adapt and len(isl_pos) > 0:
+                        # Always use 2d map if there is at least one bright
+                        # source and adaptive scaling is desired
+                        img.use_rms_map = True
+                    else:
+                        self.check_rmsmap(img, rms)
                 else:
                     img.use_rms_map = opts.rms_map
                 if img.use_rms_map is False:
@@ -92,7 +236,6 @@ class Op_rmsimage(Op):
                     mylogger.userinfo(mylog, 'Using 2D map for background rms')
                                     
                 if opts.mean_map == 'default':
-                    # check_meanmap() sets img.mean_map_type
                     self.check_meanmap(img, rms)
                 else:
                     img.mean_map_type = opts.mean_map
@@ -177,7 +320,7 @@ class Op_rmsimage(Op):
     	rms_expect = img.clipped_rms/sqrt(2)/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of rms image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
-    	if stdsub > 1.1*rms_expect or maxrms > 3.0*rms_expect:
+    	if stdsub > 1.1*rms_expect: #or maxrms > 3.0*rms_expect:
             img.use_rms_map = True
             mylogger.userinfo(mylog, 'Variation in rms image significant')
         else:
@@ -207,7 +350,10 @@ class Op_rmsimage(Op):
         rms_expect = img.clipped_rms/img.rms_box[0]*fw_pix
         mylog.debug('%s %10.6f %s' % ('Standard deviation of mean image = ', stdsub*1000.0, 'mJy'))
         mylog.debug('%s %10.6f %s' % ('Expected standard deviation = ', rms_expect*1000.0, 'mJy'))
-        if stdsub > 1.1*rms_expect or maxmean > 3.0*rms_expect:
+#         if stdsub > 1.1*rms_expect or maxmean > 3.0*rms_expect:
+        # For mean map, use a higher threshold than for the rms map, as radio images
+        # should rarely, if ever, have significant variations in the mean
+        if stdsub > 5.0*rms_expect:
           img.mean_map_type = 'map'
           mylogger.userinfo(mylog, 'Variation in mean image significant')
         else:
@@ -220,7 +366,8 @@ class Op_rmsimage(Op):
         return img
 
     def map_2d(self, arr, out_mean, out_rms, mask=False,
-               kappa=3, box=None, interp=1):
+               kappa=3, box=None, interp=1, do_adapt=False, 
+               bright_pt_coords=None, rms_box2=None):
         """Calculate mean&rms maps and store them into provided arrays
 
         Parameters:
@@ -231,13 +378,76 @@ class Op_rmsimage(Op):
         box: tuple of (box_size, box_step) for calculating map
         interp: order of interpolating spline used to interpolate 
                 calculated map
+        do_adapt: use adaptive binning
         """
-        axes, mean_map, rms_map = self.rms_mean_map(arr, mask, kappa, box)
+        # if adaptive scaling is used, mask all regions except those around
+        # bright sources to speed up small-scale map generation.
+#         if do_adapt:
+#             mask_small = N.ones(arr.shape, dtype=bool)
+#             size = int(box[0]*4.0)
+#             for pt in bright_pt_coords:
+#                 # Unmask regions around the bright point sources
+#                 bbox = self.make_bright_src_bbox(pt, [1.0, 1.0], size, arr.shape)
+#                 mask_small[bbox] = False
+#         else:
+        mask_small = mask
+        axes, mean_map1, rms_map1 = self.rms_mean_map(arr, mask_small, kappa, box)
         ax = map(self.remap_axis, arr.shape, axes)
         ax = N.meshgrid(*ax[-1::-1])
+        pt_src_scale = box[0]
+        if do_adapt:
+            out_rms2 = N.zeros(rms_map1.shape)
+            out_mean2 = N.zeros(rms_map1.shape)
+            # Generate rms/mean maps on large scale
+            box2 = rms_box2
+            axes2, mean_map2, rms_map2 = self.rms_mean_map(arr, mask, kappa, box2)
+
+            # Interpolate to get maps on small scale grid
+            axes2mod = axes2[:]
+            axes2mod[0] = axes2[0]/arr.shape[0]*mean_map1.shape[0]
+            axes2mod[1] = axes2[1]/arr.shape[1]*mean_map1.shape[1]
+            ax2 = map(self.remap_axis, out_rms2.shape, axes2mod)
+            ax2 = N.meshgrid(*ax2[-1::-1])
+            nd.map_coordinates(rms_map2,  ax2[-1::-1], order=interp, output=out_rms2)
+            nd.map_coordinates(mean_map2, ax2[-1::-1], order=interp, output=out_mean2)  
+            rms_map = out_rms2
+            mean_map = out_mean2      
+            
+            # For each bright source, find nearest points and weight them towards
+            # the small scale maps. At the moment, just use small-scale map value
+            # within a box of 15x15 grid points (= 5 box widths in each direction
+            # assuming step size is 1/3 of box size). Ideally, we should blend
+            # the scales from the two maps at the edges using the weights.
+            xscale = float(arr.shape[0])/float(out_rms2.shape[0])
+            yscale = float(arr.shape[1])/float(out_rms2.shape[1])
+            scale = [xscale, yscale]
+            size = 15
+            for bright_pt in bright_pt_coords:
+                bbox = self.make_bright_src_bbox(bright_pt, scale, size, out_rms2.shape)
+                bbox_xsize = bbox[0].stop-bbox[0].start
+                bbox_ysize = bbox[1].stop-bbox[1].start
+                weights = N.ones((bbox_xsize, bbox_ysize))
+                
+                # Taper weights to zero where small-scale value is within a factor of
+                # 2 of large-scale value. Use distance from edge of the box
+                # to determine taper value. This tapering prevents the use of the 
+                # small-scale box beyond the range of artifacts.
+                low_vals_ind = N.where(rms_map1[bbox]/out_rms2[bbox] < 3.0)
+                if len(low_vals_ind[0]) > 0:
+                    for (x,y) in zip(low_vals_ind[0],low_vals_ind[1]):
+                        dist_to_edge = N.sqrt( (min(x, bbox_xsize-1-x))**2 +
+                                           (min(y, bbox_ysize-1-y))**2 )
+                        weights[x,y] = dist_to_edge/N.mean([bbox_xsize,bbox_ysize])*2.0
+                rms_map[bbox] = rms_map1[bbox]*weights + out_rms2[bbox]*(1.0-weights)
+                mean_map[bbox] = mean_map1[bbox]*weights + out_mean2[bbox]*(1.0-weights)                
+        else:
+            rms_map = rms_map1
+            mean_map = mean_map1
+
+        # Interpolate to image coords
         nd.map_coordinates(rms_map,  ax[-1::-1], order=interp, output=out_rms)
-        nd.map_coordinates(mean_map, ax[-1::-1], order=interp, output=out_mean)
-      
+        nd.map_coordinates(mean_map, ax[-1::-1], order=interp, output=out_mean)        
+
         # Apply mask to mean_map and rms_map by setting masked values to NaN
         if isinstance(mask, N.ndarray):
             pix_masked = N.where(mask == True)
@@ -558,3 +768,22 @@ class Op_rmsimage(Op):
             res[ceil(i1):floor(i2)+1] = i + (t-i1)/(i2-i1)
 
         return res
+
+    def make_bright_src_bbox(self, coord, scale, size, shape):
+        """Returns bbox given coordinates of center and scale"""
+        xindx = int(coord[0]/scale[0])
+        yindx = int(coord[1]/scale[1])
+        xlow = xindx - int(size/2.0)
+        if xlow < 0:
+            xlow = 0
+        xhigh = xindx + int(size/2.0) + 1
+        if xhigh > shape[0]:
+            xhigh = shape[0]
+        ylow = yindx - int(size/2.0)
+        if ylow < 0:
+            ylow = 0
+        yhigh = yindx + int(size/2.0) + 1
+        if yhigh > shape[1]:
+            yhigh = shape[1]
+    
+        return [slice(xlow, xhigh, None), slice(ylow, yhigh, None)]

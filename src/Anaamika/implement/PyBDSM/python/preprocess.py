@@ -11,7 +11,6 @@ from math import pi, sqrt, log
 import const
 import functions as func
 import mylogger
-import scipy.ndimage as nd
 
 ### Insert attributes into Image class
 Image.raw_mean = Float(doc="Unclipped image mean")
@@ -143,63 +142,6 @@ class Op_preprocess(Op):
             confused = True
         img.confused = confused
         mylog.info('Parameter confused is '+str(img.confused))
-          
-
-        ### box size for rms/mean map calculations
-        fwsig = const.fwsig
-        if opts.rms_box is None:
-            # 'size' of brightest source
-            kappa1 = 3.0
-            try:
-                brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig* 
-                                   sqrt(2.*log(img.max_value/(kappa1*crms)))))
-            except:
-                brightsize = int(round(2.*img.beam[0]/cdelt[0]/fwsig))
-            mylog.info('Estimated size of brightest source (pixels) = '+str(brightsize))
-            
-            # Using clipped mean and rms and threshold of 10-20 sigma, search for largest island
-            isl_size = []
-            threshold = 20.0
-            while len(isl_size) == 0 and threshold > 10.0:
-                act_pixels = (img.ch0-cmean)/threshold >= crms
-                threshold *= 0.8
-                if isinstance(mask, N.ndarray):
-                    act_pixels[mask] = False
-        
-                                # dimension of image
-                rank = len(image.shape)
-                                # generates matrix for connectivity, in this case, 8-conn
-                connectivity = nd.generate_binary_structure(rank, rank)
-                                # labels = matrix with value = (initial) island number
-                labels, count = nd.label(act_pixels, connectivity)
-                                # slices has limits of bounding box of each such island
-                slices = nd.find_objects(labels)
-                
-                for idx, s in enumerate(slices):
-                    isl_size += [s[0].stop-s[0].start, s[1].stop-s[1].start]
-            if len(isl_size) == 0:
-                max_isl_size = 0.0
-            else:
-                max_isl_size = max(isl_size)
-            mylog.info('Maximum extent of largest island (pixels) = '+str(max_isl_size))
-
-            bsize = int(max(brightsize, max_isl_size*1.5))
-            if bsize < 40:
-                bsize = min(40, min(shape)/4)
-            if bsize % 10 == 0: bsize += 1
-
-            bstep = int(round(min(bsize/3., min(shape)/10.)))
-            img.rms_box = (bsize, bstep)
-            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
-                mylogger.userinfo(mylog, 'Derived rms_box (box size, step size)',
-                                  '(' + str(img.rms_box[0]) + ', ' +
-                                  str(img.rms_box[1]) + ') pixels')
-        else:
-            img.rms_box = opts.rms_box
-            if (opts.rms_map is not False) or (opts.mean_map not in ['zero', 'const']):
-                mylogger.userinfo(mylog, 'Using user-specified rms_box',
-                                  '(' + str(img.rms_box[0]) + ', ' +
-                                  str(img.rms_box[1]) + ') pixels')
             
         img.completed_Ops.append('preprocess')
         return img

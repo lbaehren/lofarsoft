@@ -114,7 +114,8 @@ class Op_wavelet_atrous(Op):
               y1 = (l+(l-1)*(2**(j-1)-1)); bs = max(5*y1, box)  # changed from 10 to 5
               if bs > min(n,m)/2:
                 wopts['rms_map'] = False
-                wopts['rms_box'] = img.opts.rms_box # doesnt matter
+                wopts['mean_mao'] = 'const'
+                wopts['rms_box'] = None
               else:
                 wopts['rms_box'] = (bs, bs/3)
               if not img.opts.rms_map: wopts['rms_map'] = False
@@ -156,18 +157,29 @@ class Op_wavelet_atrous(Op):
               tot_flux = 0.0
               nwvgaus = 0
               gaus_id = img.gaussians[-1].gaus_num
-              wimg.gaussians = []
+              #wimg.gaussians = []
               for isl in img.islands:
                   wvgaul = []
                   for g in gaul:
-                      gcenter = (g.centre_pix[0]-isl.origin[0],
-                                 g.centre_pix[1]-isl.origin[1])
-                      if gcenter[0] >= 0 and gcenter[0] < isl.shape[0] and gcenter[1] >= 0 and gcenter[1] < isl.shape[1]:
-                          if not isl.mask_active[gcenter]:
-                              gaus_id += 1
-                              g.gaus_num = gaus_id
-                              g.island_id = isl.island_id
-                              wvgaul.append(g)
+                      if not hasattr(g, 'valid'):
+                        g.valid = False
+                      if not g.valid:
+                          gcenter = (g.centre_pix[0]-isl.origin[0],
+                                     g.centre_pix[1]-isl.origin[1])
+                          if gcenter[0] >= 0 and gcenter[0] < isl.shape[0] and gcenter[1] >= 0 and gcenter[1] < isl.shape[1]:
+                              if not isl.mask_active[gcenter]:
+                                  gaus_id += 1
+                                  g.gaus_num = gaus_id
+                                  g.island_id = isl.island_id
+                                  g.jlevel = j
+                                  g.valid = True
+                                  wvgaul.append(g)
+                              else:
+                                  g.valid = False
+                                  g.jlevel = 0
+                          else:
+                              g.valid = False
+                              g.jlevel = 0
                   isl.gaul += wvgaul  
                   img.gaussians += wvgaul  
                   wimg.gaussians += wvgaul   
@@ -183,7 +195,7 @@ class Op_wavelet_atrous(Op):
                   dc = '\033[34;1m'
                   nc = '\033[0m'
                   print dc + 'Displaying islands and rms image...' + nc
-                  wimg.show_fit()
+                  wimg.show_fit(ch0_flagged=True)
                   prompt = dc + "Press enter to continue or 'q' stop fitting wavelet images : " + nc
                   answ = raw_input_no_history(prompt)
                   while answ != '':
@@ -238,7 +250,7 @@ class Op_wavelet_atrous(Op):
         from types import ClassType, TypeType
 
         chain=[Op_preprocess, Op_rmsimage(), Op_threshold(), Op_islands(),
-               Op_gausfit()]#, Op_gaul2srl, Op_make_residimage()]
+               Op_gausfit(), Op_gaul2srl, Op_make_residimage()]
 
         opts={'thresh':'hard'}
         opts['thresh_pix'] = 3.0
@@ -259,9 +271,9 @@ class Op_wavelet_atrous(Op):
 
         opts['flag_smallsrc'] = False
         opts['flag_minsnr'] = 0.2
-        opts['flag_maxsnr'] = 1.0
+        opts['flag_maxsnr'] = 2.0
         opts['flag_maxsize_isl'] = 2.5
-        opts['flag_bordersize'] = 2
+        opts['flag_bordersize'] = 0
         opts['flag_maxsize_bm'] = 25.0
         opts['flag_minsize_bm'] = 0.2
         opts['flag_maxsize_fwhm'] = 2.0
@@ -295,7 +307,7 @@ class Op_wavelet_atrous(Op):
         wimg.pix2sky = img.pix2sky; wimg.sky2pix = img.sky2pix; wimg.pix2beam = img.pix2beam
         wimg.beam2pix = img.beam2pix; wimg.pix2coord = img.pix2coord; wimg.beam = img.beam
         mask = img.mask
-        wimg.masked = True
+        wimg.masked = img.masked
         wimg.mask = mask
         wimg.use_io = img.use_io
 

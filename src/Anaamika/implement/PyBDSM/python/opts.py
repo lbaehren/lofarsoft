@@ -473,6 +473,17 @@ class Opts(object):
                                  "3-, or 4-D cube. The detection image and the main"\
                                  "image must have the same size and be registered.",
                              group="advanced_opts")
+    adaptive_rms_box=   Bool(False,
+                             doc="Use adaptive rms_box if rms_box=None\n"\
+                                "If True, the rms_box is reduced in size near "\
+                                "bright sources and enlarged far from them. "\
+                                "This scaling attempts to account for possible "\
+                                "strong artifacts around bright sources while "\
+                                "still acheiving accurate background rms and "\
+                                "mean values when extended sources are present.\n"\
+                                "This option is generally slower than non-"\
+                                "adaptive scaling.",
+                             group="advanced_opts")
     
     #--------------------------------A-TROUS OPTIONS--------------------------------
     atrous_jmax     =    Int(0,
@@ -998,7 +1009,7 @@ class Opts(object):
                              doc="Type of catalog to write:  'gaul' - Gaussian "\
                                  "list, 'srl' - source list (formed "\
                                  "by grouping Gaussians), 'shap' - shapelet "\
-                                 "list (not yet supported)",
+                                 "list (FITS format only)",
                              group='hidden')
     img_format      =   Enum('fits', 'casa',
                              doc="Format of output image: 'fits' or "\
