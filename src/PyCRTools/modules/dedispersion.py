@@ -37,6 +37,7 @@ def freq_to_delay(DM, freq, timeresolution=1):
 
     return offsets
 
+
 def dedisperse_array(dynspec, DM, frequencies, timeresolution):
     """Dedipserse an array. Returns an array with dedispersed values
     of the same length as the timeaxis of the array. Data will be dedispersed

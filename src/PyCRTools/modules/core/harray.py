@@ -634,8 +634,8 @@ def hArray_mprint(self):
 def hArray_transpose(self,ary=None):
     """
     Usage:
-    aryT=ary.transpose() -> return newly created transposed array from ary
-    aryT.transpose(ary) -> aryT contains transposed array data from ary (aryT will be reshaped if necessary)
+    aryT=ary.Transpose() -> return newly created transposed array from ary
+    aryT.Transpose(ary) -> aryT contains transposed array data from ary (aryT will be reshaped if necessary)
 
     Transpose the current matrix (i.e. interchange the two lowest
     dimensions). This is always a copying operation, either a new

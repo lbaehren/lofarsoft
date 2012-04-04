@@ -134,7 +134,7 @@ Whenever a new function is defined on the c-side, in the hftools library, it sho
 """
 hAllVectorMethods = ["hResize","hNew"]
 
-hAllContainerMethods = ["hFill","hSet","hElem","hFirst","hLast","hFind","hCount","hFlip","hCopy","hCopyVec","hSort","hZipper","hReadFileBinary","hWriteFileBinary","hWriteFileBinaryAppend","hRedistribute","hPPrint","hPrettyString","hReadFileText","hWriteFileText","hTranspose"]
+hAllContainerMethods = ["hFill","hSet","hElem","hFirst","hLast","hFind","hCount","hFlip","hCopy","hCopyVec","hSort","hShift","hZipper","hReadFileBinary","hWriteFileBinary","hWriteFileBinaryAppend","hRedistribute","hPPrint","hPrettyString","hReadFileText","hWriteFileText","hTranspose"]
 
 hRealContainerMethods = ["hMeanAbove","hMeanSquare","hMeanThreshold","hMeanInverse","hDownsample","hUpsample","hDownsampleSpikyData","hInterpolate2P","hInterpolate2PSubpiece","hVectorLength","hVectorSeparation","hNormalize","hAcos","hAsin","hAtan","hCeil","hFloor","hMeanGreaterThanThreshold","hMeanGreaterEqualThreshold","hMeanLessThanThreshold","hMeanLessEqualThreshold","hRunningAverage","hDelayToPhase","hInvFFTCasa","hFFTw","hInvFFTw","hSaveInvFFTw","hGetHanningFilter","hApplyHanningFilter","hGetHanningFilterHalf","hSpectralPower","hSpectralPower2","hLinearFitPolynomialX","hLinearFit","hBSplineFitXValues","hBSpline","hBSplineCalc","hBSplineFit","hErrorsToWeights","hPolynomial","hPowerLawMul","hLinearFunctionMul","hPowerLawAdd","hLinearFunctionAdd","hLogLinearFunctionAdd","hLogLinearFunctionMul"]
 

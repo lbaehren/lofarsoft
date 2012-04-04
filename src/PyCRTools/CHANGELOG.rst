@@ -1,3 +1,14 @@
+2012-04-04
+==========
+
+  :Author: Heino Falcke <H.Falcke@astro.ru.nl>
+
+ - Added function :func:`hShift` to mVector.m - this allows one to
+   shift a vector left or right (with wrapping) by a fixed
+   amount. This can be used for de-dispersion (using the looping
+   mechanism) - an example script test_dedispersion.py has also been
+   added to demonstrate that.
+
 2012-03-05
 ==========
 

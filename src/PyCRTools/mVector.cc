@@ -1331,6 +1331,71 @@ void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iterin vecin
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+
+//$DOCSTRING: Shift the contents of a vector by a fixed number of samples, copying to another vector and wrapping the content that falls off at the end to the beginning 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hShift
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED)(vecout)()("Vector containing a copy of the input vector shifted by N samples")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED)(vecin)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(N)()("Shift input vector by N samples (shift left if negative).")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vecout.shift(vecin,N) -> vecout contains vecin shifted by N samples (+ = right,  - = left)
+
+  Example:
+  vecin=hArray(float,[9],fill=range(9)) # hArray(float, [9L], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+  vecout=hArray(float,[9],fill=0)       # hArray(float, [9L], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
+
+  vecout.shift(vecin,3) 
+  vecout                                # hArray(float, [9L], fill=[6,7,8,0,1,2,3,4,5]) # len=9 slice=[0:9])
+
+  vecout.shift(vecin,-3) 
+  vecout                                # hArray(float, [9L], fill=[3,4,5,6,7,8,0,1,2]) # len=9 slice=[0:9])
+
+
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vecout, const Iter vecout_end, const Iter vecin, const Iter vecin_end, const HInteger N)
+{
+  // Declaration of variables
+  //typedef IterValueType T;
+  HInteger lenIn  = std::distance(vecin, vecin_end);
+  HInteger lenOut = std::distance(vecout, vecout_end);
+  Iter itin(vecin);
+  Iter itout,vecout_end_wrap(vecout+lenIn);
+
+  //If requested shift is larger then input size wrap
+  HInteger shift = N % lenIn;
+
+  //Check length of output vector
+  if (lenOut < lenIn) ERROR_RETURN("Size of output vector should be equal to (or larger then ) the input vector.");
+  if (lenIn < 0) ERROR_RETURN("Illegal size of input vector.");
+
+  if (shift >= 0) 
+    itout = vecout+shift;
+  else
+    itout = vecout+lenIn+shift;
+      
+  while (itin != vecin_end) {
+    //*itout=hfcast<T>(*itin);
+    *itout=*itin;
+    ++itin;
+    ++itout;
+    if (itout==vecout_end_wrap)
+      itout=vecout;
+  };
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
 //$DOCSTRING: Redistributes the values in one vector sequentially into another vector, given an offset and stride (interval) - can be used for a transpose operation
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hRedistribute
