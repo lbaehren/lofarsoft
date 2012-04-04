@@ -77,10 +77,10 @@ endif
 
 if ($?PYTHONPATH) then
    if ( $PYTHONPATH != $LOFARSOFT/release/lib ) then   
-      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python:${PYTHONPATH}
+      setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python:${PYTHONPATH}:$LOFARSOFT/build/cr/implement/GUI
    endif
 else 
-   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python
+   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python:${LOFARSOFT}/release/share/pulsar/bin:${LOFARSOFT}/release/share/pulsar/lib/python:$LOFARSOFT/build/cr/implement/GUI
 endif
 
 foreach PY_VERSION (2.6 2.5 2.4) 
@@ -90,6 +90,11 @@ foreach PY_VERSION (2.6 2.5 2.4)
 
   if ( -d ${LOFARSOFT}/release/lib/python${PY_VERSION}/site-packages ) then
     setenv PYTHONPATH ${LOFARSOFT}/release/lib/python${PY_VERSION}/site-packages:${PYTHONPATH}
+  endif
+
+  ## Location of Pulsar psrchive-installed packages
+  if ( -d ${LOFARSOFT}/release/share/pulsar/lib/python${PY_VERSION}/site-packages ) then
+    setenv PYTHONPATH ${PYTHONPATH}:${LOFARSOFT}/release/share/pulsar/lib/python${PY_VERSION}/site-packages
   endif
 
   ## Location of Fink-installed packages

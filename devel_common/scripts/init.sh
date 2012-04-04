@@ -69,6 +69,11 @@ do
     export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION/site-packages:$PYTHONPATH
   fi
 
+  # Location of Pulsar psrchive-installed packages
+  if test -d $LOFARSOFT/release/share/pulsar/lib/python${PY_VERSION}/site-packages ; then
+    export PYTHONPATH=$PYTHONPATH:$LOFARSOFT/release/share/pulsar/lib/python${PY_VERSION}/site-packages
+  fi
+
   ## Location of Fink-installed packages
 
   if test -d /sw/lib/python$PY_VERSION/site-packages ; then
