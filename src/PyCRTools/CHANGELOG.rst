@@ -1,4 +1,4 @@
-2012-04-04
+2012-04-04 - Rev 9991
 ==========
 
   :Author: Heino Falcke <H.Falcke@astro.ru.nl>
@@ -8,6 +8,9 @@
    amount. This can be used for de-dispersion (using the looping
    mechanism) - an example script test_dedispersion.py has also been
    added to demonstrate that.
+
+ - Added :func:`hPow` as a vector function. Also defined the **
+   operator for vectors.
 
 2012-03-05
 ==========

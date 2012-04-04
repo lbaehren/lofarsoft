@@ -625,6 +625,45 @@ void h{$MFUNC!CAPS}2(const IterOut vecout, const IterOut vecout_end, const IterI
 //$ENDITERATE
 
 
+//$DOCSTRING: Raises the values in the vector to a power N
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPow
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_REAL_NUMERIC_TYPES
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_1)(vec1)()("Numeric input and output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HFPP_TEMPLATED_2)(exponent)()("Value containing the power")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+
+  vec.pow(N) -> [vec_0**N, vec_1**N, ....]
+
+  Example:
+
+  a=hArray(float,5,fill=[0,1,2,3,4])
+  a.pow(3)
+  a  # -> hArray(float, [5L], fill=[0,1,8,27,64]) # len=5 slice=[0:5])
+*/
+template <class Iter, class S>
+void hPow(const Iter vec1,const Iter vec1_end, const S exponent)
+{
+      // Declaration of variables
+      Iter it=vec1;
+
+      // Vector operation
+      while (it!=vec1_end) {
+        *it = pow(*it,exponent);
+        ++it;
+      };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
 //========================================================================
 //$ITERATE MFUNC Mul,Add,Div,Sub
 //========================================================================

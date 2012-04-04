@@ -1401,6 +1401,7 @@ for v in hAllContainerTypes:
         else: print "Warning hAllContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
+    setattr(v,"__pow__",Vec_pow)
     for s in hRealContainerMethods:
         if s in locals(): setattr(v,s[1:].lower(),eval(s))
         else: print "Warning hRealContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."

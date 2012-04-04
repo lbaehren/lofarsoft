@@ -423,6 +423,17 @@ def Vec_rdiv(vec1,val):
     hMul(vecout,val)
     return vecout
 
+# Operator:  **
+def Vec_pow(vec1,val):
+    """
+    Provides the ``**`` operator for raising a vector to a power.
+    Returns a new vector.
+    """
+    vecout=vec1.new()
+    vecout.copy(vec1)
+    hPow(vecout,val)
+    return vecout
+
 # Pickling
 def hVector_getinitargs(self):
     """Get arguments for ``hVector`` constructor.
@@ -474,6 +485,7 @@ for v in hAllContainerTypes:
             print "Warning hAllContainerMethods(v): function ",s," is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
+    setattr(v,"__pow__",Vec_pow)
     for s in hRealContainerMethods:
         if s in locals():
             setattr(v,s[1:].lower(),eval(s))
