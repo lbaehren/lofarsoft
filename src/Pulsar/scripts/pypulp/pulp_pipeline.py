@@ -453,6 +453,8 @@ class Pipeline:
                        		for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
                	               		psr=bp.split("/")[-1].split("_")[0]
                 	        	thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+					# we need it for combined.pdf
+					bigfile=thumbfile.split(".th.png")[0] + ".png"
                	        		# getting current number for SAP and TA beam (or station name for FE)
                       		  	cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
                	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
@@ -465,7 +467,7 @@ class Pipeline:
 						log.warning("Warning: can't read chi-sq value from %s" % (bp))
 	                        	chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curprocdir, psr, chi_val))
         	                	montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
-        	                	montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
+        	                	montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, bigfile)
               	        chif.close()
 
 			# creating combined plots
