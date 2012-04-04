@@ -1,4 +1,4 @@
-#!/bin/ksh  
+#!/bin/ksh 
 
 USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix [ -splits number ] \n\n"\
 "      -infile obs_finished.xml  ==> Specify the finished xml file name (i.e. Obs_B1254-10_HBA.xml) \n"\
@@ -50,6 +50,7 @@ do
 done
 
 #temporary file
+prefix=$prefix$$
 outfile=$prefix"_PipeExec"
 
 if [[ $noxml == 0 ]]
@@ -83,27 +84,34 @@ fi
 if [[ $noxml == 0 ]]
 then
 
-	if [[ $survey == 0 ]] && [[ $cep2 == 0 ]]
-	then
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
-	elif [[ $survey == 1 ]] && [[ $cep2 == 0 ]]
-	then
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
-	elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
-	then
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_red -coh_only -raw /data/ -rfi\n", $1, $1)}' > $outfile
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw \"/cep2/locus???_data/\" -rfi\n", $1, $1)}' >> $outfile
-	elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
-	then
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -coh_only -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $2, $1)}' > $outfile
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_redIS -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_redIS -all -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_redIS -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $2, $1)}' >> $outfile
-	fi
+## commented out the previous pulp.sh commands to run the pipeline
+
+#	if [[ $survey == 0 ]] && [[ $cep2 == 0 ]]
+#	then
+#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+#	elif [[ $survey == 1 ]] && [[ $cep2 == 0 ]]
+#	then
+#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
+#	elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
+#	then
+#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_red -coh_only -raw /data/ -rfi\n", $1, $1)}' > $outfile
+#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw \"/cep2/locus???_data/\" -rfi\n", $1, $1)}' >> $outfile
+#	elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
+#	then
+#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -coh_only -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $2, $1)}' > $outfile
+#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_redIS -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_redIS -all -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_redIS -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $2, $1)}' >> $outfile
+
+#	fi
+
+## CEP2 only and pulp.py syntax
+	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("nohup pulp.py -id L%05d \n", $1)}' > $outfile
+
 
    cp $outfile $outfile.all
+   cp $outfile $outfile.all.sh
 fi
 
-
-if [[ $cep2 == 0 ]] && [[ $noxml == 0 ]]
+if (( $splits > 0 )) && (( $noxml == 0 ))
 then
 
 	# perform the splitting up of the all files into multiples
@@ -145,7 +153,8 @@ then
 	   cat $outfile >> $outfile.$ii
 	   rm $outfile
 	fi
-else # if [[ $cep2 == 1 ]]
+elif (( $cep2 == 1 )) && (( $noxml == 1 )) 
+then
     ii=0
     rm -rf $outfile.*.sh
     while read line 
@@ -289,14 +298,20 @@ then
 	if (( $splits > 1 ))
 	then
 	   echo "Run that file or, run the N split files:"
-	   echo "`ls $outfile.[0-9]*`"
+	   ls $outfile.[0-9]* | awk '{print "    "$1}'
 	   echo "in the processing locations."
 	fi
 elif [[ $noxml == 0 ]]
 then
    rm $outfile.all
    echo "Single script '$outfile.all.sh' contains all the processing commands in one file."
-   echo "Copy that file and all the sub-scripts ($outfile.OBSIDnumber*) to activate processing."
+#   echo "Copy that file and all the sub-scripts ($outfile.OBSIDnumber*) to activate processing."
+	if (( $splits > 1 ))
+	then
+	   echo "Run that file or, run the N split files:"
+	   ls $outfile.[0-9]* | awk '{print "    "$1}'
+	   echo "in the processing locations."
+	fi
 elif [[ $noxml == 1 ]]
 then
    #run the processing
