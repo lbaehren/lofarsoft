@@ -5,11 +5,13 @@ USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix
 "      -prefix run  ==> Output name prefix (i.e. Obs_20100730) \n"\
 "      [-splits N]  ==> Number of output split files to contain the processing commands (i.e. 4) \n"\
 "      [-cep2]      ==> Indicates that processing will be on CEP2 cluster, distributed processing separates scripts.\n"\
+"      [-parallel]  ==> All processing tasks in the script will end with '&' to be put in the background for parallel execution.\n"\
 "      [-passflags 'quoted string'] ==> Any additional flags to pass to pulp.py, in one quoted string;  used for all obs in xml.\n"\
 "\n"\
 "      Example:\n"\
 "      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -cep2 -prefix Obs_20100730 -splits 4 \n"\
 "      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -cep2 -prefix Obs_20100730 -passflags '--skip-dspsr --debug'\n"\
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -cep2 -prefix Obs_20100730 -parallel\n"\
 "\n"\
 "      The following flags are only valid for the older data and pulp.sh (NOT pulp.py)\n"\
 "      [-old]  ==> Want to use pulp.sh instead of pulp.py (older versions of data and pipeline processing). \n"\
@@ -32,6 +34,7 @@ noxml=0
 hoover_only=0
 old=0
 passflags=0
+parallel=0
 
 if [ $# -lt 4 ]                    
 then
@@ -50,6 +53,7 @@ do
 	-cep2)      cep2=1;;
 	-noxml)     noxml=1;;
 	-old)       old=1;;
+	-parallel)  parallel=1;;
 	-hoover_only)     hoover_only=1;;
 	-*)
 	    echo >&2 \
@@ -116,9 +120,19 @@ then
        ## CEP2 only and pulp.py syntax
        if [[ $passflags == 1 ]]
        then
-	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v FLAGS="$flags" '{printf("nohup pulp.py -id L%05d %s\n", $1, FLAGS)}' > $outfile
+          if [[ $parallel == 1 ]]
+          then
+	         egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v FLAGS="$flags" '{printf("nohup pulp.py -id L%05d %s &\n", $1, FLAGS)}' > $outfile
+	      else
+	         egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v FLAGS="$flags" '{printf("nohup pulp.py -id L%05d %s\n", $1, FLAGS)}' > $outfile
+	      fi
        else
-	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{printf("nohup pulp.py -id L%05d\n", $1)}' > $outfile
+          if [[ $parallel == 1 ]]
+          then
+	         egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{printf("nohup pulp.py -id L%05d &\n", $1)}' > $outfile
+	      else
+	         egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{printf("nohup pulp.py -id L%05d\n", $1)}' > $outfile
+	      fi
        fi
     fi # end if [[ $old == 1 ]]
 
