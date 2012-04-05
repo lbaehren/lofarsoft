@@ -54,9 +54,9 @@ fi
 ## Add the Python libraries to the existing search path
 
 if test -z "$PYTHONPATH" ; then
-  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$LOFARSOFT/build/cr/implement/GUI:
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python
 else
-  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$LOFARSOFT/build/cr/implement/GUI:$PYTHONPATH
+  export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$PYTHONPATH
 fi
 
 for PY_VERSION in 2.6 2.5 2.4 
@@ -84,6 +84,11 @@ do
     export PYTHONPATH=$PYTHONPATH:/sw/lib/python$PY_VERSION/site-packages/PyQt4
   fi
 done
+
+# Location of CR GUI
+if test -d $LOFARSOFT/build/cr/implement/GUI ; then
+  export PYTHONPATH=$PYTHONPATH:$LOFARSOFT/build/cr/implement/GUI
+fi
 
 ##______________________________________________________________________________
 ## Define the AIPSPATH environment variable, used to locate measures data

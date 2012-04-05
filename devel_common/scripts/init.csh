@@ -109,6 +109,12 @@ foreach PY_VERSION (2.6 2.5 2.4)
 
 end
 
+## Location of CR GUI
+if ( -d $LOFARSOFT/build/cr/implement/GUI ) then
+  setenv PYTHONPATH ${PYTHONPATH}:$LOFARSOFT/build/cr/implement/GUI
+endif
+
+
 #############################################################################
 #
 #  Define the AIPSPATH environment variable, used to locate measures data
