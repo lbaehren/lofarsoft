@@ -4,17 +4,24 @@ USAGE="\nusage : xml_pipeline_kickoff.sh -infile obs_finished.xml -prefix prefix
 "      -infile obs_finished.xml  ==> Specify the finished xml file name (i.e. Obs_B1254-10_HBA.xml) \n"\
 "      -prefix run  ==> Output name prefix (i.e. Obs_20100730) \n"\
 "      [-splits N]  ==> Number of output split files to contain the processing commands (i.e. 4) \n"\
-"      [-survey]    ==> Indicates that all the observations are in survey mode;  changes pipeline args to:\n"\
-"                       pulp.sh -id OBSID -o OBSID_red -p position -rfi   [without -all] \n"\
 "      [-cep2]      ==> Indicates that processing will be on CEP2 cluster, distributed processing separates scripts.\n"\
-"      [-noxml]     ==> Indicates that you are not starting with an xml file, but pulp_cep2.sh parameters.\n"\
-"      [-hoover_only]  ==> Usually used only with -noxml switch; runs only the hoover/collection part of 'coh_only' pulp_cep2 pipeline. \n"\
+"      [-passflags 'quoted string'] ==> Any additional flags to pass to pulp.py, in one quoted string;  used for all obs in xml.\n"\
 "\n"\
 "      Example:\n"\
-"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 \n"\
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -cep2 -prefix Obs_20100730 -splits 4 \n"\
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -cep2 -prefix Obs_20100730 -passflags '--skip-dspsr --debug'\n"\
+"\n"\
+"      The following flags are only valid for the older data and pulp.sh (NOT pulp.py)\n"\
+"      [-old]  ==> Want to use pulp.sh instead of pulp.py (older versions of data and pipeline processing). \n"\
+"      [-survey]    ==> Indicates that all the observations are in survey mode;  changes pipeline args to:\n"\
+"                       pulp.sh -id OBSID -o OBSID_red -p position -rfi   [without -all] \n"\
+"      [-hoover_only]  ==> Usually used only with -noxml switch; runs only the hoover/collection part of 'coh_only' pulp_cep2 pipeline. \n"\
+"      [-noxml]     ==> Indicates that you are not starting with an xml file, but pulp_cep2.sh parameters.\n"\
+"\n"\
+"      Example:\n"\
+"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 -old\n"\
 "      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -splits 4 -survey \n"\
-"      xml_pipeline_kickoff.sh -infile Obs_B1254-10_HBA.xml -prefix Obs_20100730 -survey \n"
-
+""
 
 infile=""
 prefix=""
@@ -23,6 +30,8 @@ survey=0
 cep2=0
 noxml=0
 hoover_only=0
+old=0
+passflags=0
 
 if [ $# -lt 4 ]                    
 then
@@ -36,9 +45,11 @@ do
     -infile)    infile=$2; shift;;
 	-prefix)    prefix=$2; shift;;
 	-splits)    splits=$2; shift;;
+	-passflags) passflags=1; flags=$2; shift;;
 	-survey)    survey=1;;
 	-cep2)      cep2=1;;
 	-noxml)     noxml=1;;
+	-old)       old=1;;
 	-hoover_only)     hoover_only=1;;
 	-*)
 	    echo >&2 \
@@ -86,26 +97,30 @@ then
 
 ## commented out the previous pulp.sh commands to run the pipeline
 
-#	if [[ $survey == 0 ]] && [[ $cep2 == 0 ]]
-#	then
-#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
-#	elif [[ $survey == 1 ]] && [[ $cep2 == 0 ]]
-#	then
-#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
-#	elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
-#	then
-#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_red -coh_only -raw /data/ -rfi\n", $1, $1)}' > $outfile
-#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L%05d -p position -o L%05d_redIS -incoh_only -all -raw \"/cep2/locus???_data/\" -rfi\n", $1, $1)}' >> $outfile
-#	elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
-#	then
-#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_red -all -raw /data/ -coh_only -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_red -raw /data/ -coh_only -rfi\n", $1, $2, $1)}' > $outfile
-#	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp.sh -id L%05d -p position -o L%05d_redIS -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L%05d -p %s -o L%05d_redIS -all -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $3, $1) ; else printf("pulp.sh -id L%05d -p %s -o L%05d_redIS -raw \"/cep2/locus???_data/\" -incoh_only -rfi -all\n", $1, $2, $1)}' >> $outfile
-
-#	fi
-
-## CEP2 only and pulp.py syntax
-	   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("nohup pulp.py -id L%05d \n", $1)}' > $outfile
-
+   if [[ $old == 1 ]]
+   then
+		if [[ $survey == 0 ]] && [[ $cep2 == 0 ]] 
+		then
+		   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp_cep2.sh -id L%05d -p position -o L%05d_red -all -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $3, $1) ; else printf("pulp.sh -id L2011_%05d -p %s -o L2011_%05d_red -all -rfi\n", $1, $2, $1)}' > $outfile
+		elif [[ $survey == 1 ]] && [[ $cep2 == 0 ]]
+		then
+		   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp.sh -id L2011_%05d -p position -o L2011_%05d_red -rfi\n", $1, $1)}' > $outfile
+		elif [[ $survey == 1 ]] && [[ $cep2 == 1 ]]
+		then
+		   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ printf("pulp_cep2.sh -id L%05d -p position -o L%05d_red -rfi\n", $1, $1)}' > $outfile
+		elif [[ $survey == 0 ]] && [[ $cep2 == 1 ]]
+		then
+		   egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{ if ( $3 == "Pos" ) printf("pulp_cep2.sh -id L%05d -p position -o L%05d_red -rfi\n", $1, $1); else if ( $2 == "Obs" ) printf("pulp_cep2.sh -id L%05d -p %s -o L%05d_red -rfi\n", $1, $3, $1) ; else printf("pulp_cep2.sh -id L%05d -p %s -o L%05d_red -rfi\n", $1, $2, $1)}' > $outfile
+		fi
+    else # if [[ $old != 1 ]]
+       ## CEP2 only and pulp.py syntax
+       if [[ $passflags == 1 ]]
+       then
+	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v FLAGS="$flags" '{ printf("nohup pulp.py -id L%05d %s\n", $1, FLAGS)}' > $outfile
+       else
+	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v '{ printf("nohup pulp.py -id L%05d\n", $1)}' > $outfile
+       fi
+    fi # end if [[ $old == 1 ]]
 
    cp $outfile $outfile.all
    cp $outfile $outfile.all.sh
