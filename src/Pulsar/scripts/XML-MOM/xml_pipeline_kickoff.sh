@@ -116,9 +116,9 @@ then
        ## CEP2 only and pulp.py syntax
        if [[ $passflags == 1 ]]
        then
-	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v FLAGS="$flags" '{ printf("nohup pulp.py -id L%05d %s\n", $1, FLAGS)}' > $outfile
+	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v FLAGS="$flags" '{printf("nohup pulp.py -id L%05d %s\n", $1, FLAGS)}' > $outfile
        else
-	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk -v '{ printf("nohup pulp.py -id L%05d\n", $1)}' > $outfile
+	      egrep "description|observationId" $infile  | sed 's/\/observationId./observationId\>\\/g' | sed -e :a -e '/\\$/N; s/\\\n//; ta' | grep observationId | sed 's/<observationId>//' | sed 's/<>//' | sed 's/</ </g' | sed 's/>/> /g' | sed 's/(.*//g' | sed 's/<.*>//g' | awk '{printf("nohup pulp.py -id L%05d\n", $1)}' > $outfile
        fi
     fi # end if [[ $old == 1 ]]
 
