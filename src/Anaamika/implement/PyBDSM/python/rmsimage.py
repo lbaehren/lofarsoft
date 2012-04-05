@@ -137,7 +137,8 @@ class Op_rmsimage(Op):
             else:
                 max_isl_size_highthresh = max(isl_size_highthresh)
 
-            
+            if len(isl_pos) == 0:
+                do_adapt = False
             min_size_allowed = int(img.pixel_beam[0]*9.0) #21
             if do_adapt:
                 bsize = int(max(brightsize, min_size_allowed, max_isl_size_highthresh*2.0))
@@ -150,7 +151,6 @@ class Op_rmsimage(Op):
             if bsize2 < min_size_allowed:
                 bsize2 = min_size_allowed
             if bsize2 % 10 == 0: bsize2 += 1
-
             bstep = int(round(min(bsize/3., min(shape)/10.)))
             bstep2 = int(round(min(bsize2/3., min(shape)/10.)))
             img.rms_box = (bsize, bstep)
@@ -379,16 +379,6 @@ class Op_rmsimage(Op):
                 calculated map
         do_adapt: use adaptive binning
         """
-        # if adaptive scaling is used, mask all regions except those around
-        # bright sources to speed up small-scale map generation.
-#         if do_adapt:
-#             mask_small = N.ones(arr.shape, dtype=bool)
-#             size = int(box[0]*4.0)
-#             for pt in bright_pt_coords:
-#                 # Unmask regions around the bright point sources
-#                 bbox = self.make_bright_src_bbox(pt, [1.0, 1.0], size, arr.shape)
-#                 mask_small[bbox] = False
-#         else:
         mask_small = mask
         axes, mean_map1, rms_map1 = self.rms_mean_map(arr, mask_small, kappa, box)
         ax = map(self.remap_axis, arr.shape, axes)
@@ -415,29 +405,36 @@ class Op_rmsimage(Op):
             # For each bright source, find nearest points and weight them towards
             # the small scale maps. At the moment, just use small-scale map value
             # within a box of 15x15 grid points (= 5 box widths in each direction
-            # assuming step size is 1/3 of box size). Ideally, we should blend
-            # the scales from the two maps at the edges using the weights.
+            # assuming step size is 1/3 of box size). me
             xscale = float(arr.shape[0])/float(out_rms2.shape[0])
             yscale = float(arr.shape[1])/float(out_rms2.shape[1])
             scale = [xscale, yscale]
             size = 15
             for bright_pt in bright_pt_coords:
-                bbox = self.make_bright_src_bbox(bright_pt, scale, size, out_rms2.shape)
+                bbox, src_center = self.make_bright_src_bbox(bright_pt, scale, size, out_rms2.shape)
                 bbox_xsize = bbox[0].stop-bbox[0].start
                 bbox_ysize = bbox[1].stop-bbox[1].start
+                src_center[0] -= bbox[0].start
+                src_center[1] -= bbox[1].start
                 weights = N.ones((bbox_xsize, bbox_ysize))
                 
                 # Taper weights to zero where small-scale value is within a factor of
                 # 2 of large-scale value. Use distance from edge of the box
                 # to determine taper value. This tapering prevents the use of the 
                 # small-scale box beyond the range of artifacts.
-                low_vals_ind = N.where(rms_map1[bbox]/out_rms2[bbox] < 3.0)
+                low_vals_ind = N.where(rms_map1[bbox]/out_rms2[bbox] < 2.0)
                 if len(low_vals_ind[0]) > 0:
-                    dist_to_edge = []
+                    dist_to_cen = []
                     for (x,y) in zip(low_vals_ind[0],low_vals_ind[1]):
-                        dist_to_edge = N.sqrt( (min(x, bbox_xsize-1-x))**2 +
-                                           (min(y, bbox_ysize-1-y))**2 )
-                        weights[x,y] = dist_to_edge/N.mean([bbox_xsize,bbox_ysize])*2.0
+                        dist_to_cen.append(N.sqrt( (x-src_center[0])**2 +
+                                           (y-src_center[1])**2 ))
+                    med_dist_to_cen = N.min(dist_to_cen)
+                    for x in range(bbox_xsize):
+                        for y in range(bbox_ysize):
+                            dist_to_cen = N.sqrt( (x-src_center[0])**2 +
+                                               (y-src_center[1])**2 )
+                            if dist_to_cen >= med_dist_to_cen:
+                                weights[x,y] = 1.0 - dist_to_cen/N.sqrt(bbox_xsize**2+bbox_ysize**2)*2.0
                 rms_map[bbox] = rms_map1[bbox]*weights + out_rms2[bbox]*(1.0-weights)
                 mean_map[bbox] = mean_map1[bbox]*weights + out_mean2[bbox]*(1.0-weights)                
         else:
@@ -786,4 +783,5 @@ class Op_rmsimage(Op):
         if yhigh > shape[1]:
             yhigh = shape[1]
     
-        return [slice(xlow, xhigh, None), slice(ylow, yhigh, None)]
+        src_center = [xindx, yindx]
+        return [slice(xlow, xhigh, None), slice(ylow, yhigh, None)], src_center
