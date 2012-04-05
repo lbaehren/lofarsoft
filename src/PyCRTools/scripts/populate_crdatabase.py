@@ -149,7 +149,6 @@ class CRDatabasePopulator(object):
                             print("Results file {0} does not exist...".format(results_filename))
 
 
-
     def update(self):
         """Update already existing database entries."""
         eventIDs = self.dbManager.getEventIDs()
@@ -164,7 +163,7 @@ class CRDatabasePopulator(object):
                 print "  Datafile: ", d.filename
                 for s in d.stations:
                     print "    Station: ", s.stationname
-                    for p in s.polarizations:
+                    for p in s.polarization.values():
                         # If results.xml file exists add results to properties.
                         results_filename = os.path.join(resultspath, p.resultsfile)
                         if os.path.isfile(results_filename):
