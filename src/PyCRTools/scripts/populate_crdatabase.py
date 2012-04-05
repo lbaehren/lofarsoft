@@ -139,11 +139,10 @@ class CRDatabasePopulator(object):
                                                         p.resultsfile)
                         if os.path.isfile(results_filename):
                             if not "xml_processed" in p.parameter.keys():
-                                print "      Processing results file %s" %(results_filename)
+                                print "      Processing results file %s..." %(results_filename)
                                 parameters = xmldict.load(results_filename)
                                 for key in parameters.keys():
                                     p[key] = parameters[key]
-                                # p.parameter.db_write(key, parameters[key])
                                 p["xml_processed"] = True
                         else:
                             print("Results file {0} does not exist...".format(results_filename))
@@ -168,7 +167,7 @@ class CRDatabasePopulator(object):
                         results_filename = os.path.join(resultspath, p.resultsfile)
                         if os.path.isfile(results_filename):
                             if not "xml_processed" in p.parameter.keys():
-                                print "      Processing results file %s" %(results_filename)
+                                print "      Processing results file %s..." %(results_filename)
                                 parameters = xmldict.load(results_filename)
                                 # - Add all parameters to info object & database
                                 for key in parameters.keys():
@@ -183,12 +182,13 @@ class CRDatabasePopulator(object):
 
     def process_lora_data(self, event):
         if not "lora_processed" in event.parameter.keys():
+            print "Adding LORA parameters..."
             lora_data = lora.loraInfo(event.timestamp, self.settings.lorapath)
             if lora_data:
                 for key in lora_data.keys():
                     lora_key = "lora_" + key
                     event[lora_key] = lora_data[key]
-                    print("added: parameter['{0}'] = {1}".format(lora_key, event[lora_key]))
+                    # print("added: parameter['{0}'] = {1}".format(lora_key, event[lora_key])) # DEBUG
                 event["lora_processed"] = True
             else:
                 print("Empty lora_data set...")
