@@ -71,6 +71,10 @@ def gatherresults(eventdir):
         pol = res["polarization"]
         thisDict[pol] = res # adds the key 0 or 1 as number
         thisDict.update(filename = os.path.join(res["filedir"], res["FILENAME"]))
+        
+        timeseriesFilename = os.path.splitext(res["FILENAME"])[0] + '-pol'+str(pol) + '-calibrated-timeseries-cut.pcr'
+        thisTimeseries = cr.hArrayRead(os.path.join(datadir, timeseriesFilename))
+        thisDict[pol].update(timeseries = thisTimeseries)
     
     return stations
         # read in antenna positions from file
@@ -120,5 +124,12 @@ def obtainvalue(par,key):
                 return None
 
 
-
 stations = gatherresults(eventdir)
+
+
+#fftplan = FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
+#hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
+
+
+
+
