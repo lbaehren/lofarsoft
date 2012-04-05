@@ -86,9 +86,8 @@ class Op_rmsimage(Op):
             max_isl_brightsize = 0.0
             if do_adapt:
                 mylogger.userinfo(mylog, "Using adaptive scaling of rms_box")
-                threshold = 50.0
-#                 while len(isl_size_bright) < 20 and threshold > 50.0:
-                while threshold >= 50.0:
+                threshold = 500.0
+                while len(isl_size_bright) < 20 and threshold > 50.0:
                     isl_size_bright=[]
                     isl_maxposn = []
                     act_pixels = (img.ch0-cmean)/threshold >= crms
@@ -144,7 +143,7 @@ class Op_rmsimage(Op):
                 bsize = int(max(brightsize, min_size_allowed, max_isl_size_highthresh*2.0))
             else:
                 bsize = int(max(brightsize, min_size_allowed, max_isl_size*2.0))
-            bsize2 = int(max(min(img.ch0.shape)/20.0, max_isl_size*3.0))
+            bsize2 = int(max(min(img.ch0.shape)/20.0, max_isl_size*5.0))
             if bsize < min_size_allowed:
                 bsize = min_size_allowed
             if bsize % 10 == 0: bsize += 1
@@ -434,6 +433,7 @@ class Op_rmsimage(Op):
                 # small-scale box beyond the range of artifacts.
                 low_vals_ind = N.where(rms_map1[bbox]/out_rms2[bbox] < 3.0)
                 if len(low_vals_ind[0]) > 0:
+                    dist_to_edge = []
                     for (x,y) in zip(low_vals_ind[0],low_vals_ind[1]):
                         dist_to_edge = N.sqrt( (min(x, bbox_xsize-1-x))**2 +
                                            (min(y, bbox_ysize-1-y))**2 )

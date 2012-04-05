@@ -292,8 +292,9 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             ax.add_artist(e)
                             e.set_picker(3)
                             e.set_clip_box(ax.bbox)
-                            e.set_facecolor(col)
-                            e.set_alpha(0.5)
+                            e.set_edgecolor(col)
+                            e.set_facecolor('none')
+                            e.set_alpha(0.8)
                             e.gaus_id = gidx
                             e.src_id = atrg.source_id
                             e.jlevel = atrg.jlevel

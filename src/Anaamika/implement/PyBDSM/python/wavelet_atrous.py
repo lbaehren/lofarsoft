@@ -162,7 +162,7 @@ class Op_wavelet_atrous(Op):
                   wvgaul = []
                   for g in gaul:
                       if not hasattr(g, 'valid'):
-                        g.valid = False
+                          g.valid = False
                       if not g.valid:
                           gcenter = (g.centre_pix[0]-isl.origin[0],
                                      g.centre_pix[1]-isl.origin[1])
@@ -182,7 +182,7 @@ class Op_wavelet_atrous(Op):
                               g.jlevel = 0
                   isl.gaul += wvgaul  
                   img.gaussians += wvgaul  
-                  wimg.gaussians += wvgaul   
+                  #wimg.gaussians += wvgaul   
                   nwvgaus += len(wvgaul)             
                   isl.ngaus += nwvgaus
                   for g in wvgaul:
@@ -195,7 +195,7 @@ class Op_wavelet_atrous(Op):
                   dc = '\033[34;1m'
                   nc = '\033[0m'
                   print dc + 'Displaying islands and rms image...' + nc
-                  wimg.show_fit(ch0_flagged=True)
+                  wimg.show_fit()
                   prompt = dc + "Press enter to continue or 'q' stop fitting wavelet images : " + nc
                   answ = raw_input_no_history(prompt)
                   while answ != '':
