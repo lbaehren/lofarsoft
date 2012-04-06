@@ -62,6 +62,10 @@ void element_response(double freq, double az, double el,
     // conversion is taken care of below.
     const double theta = (M_PI / 2) - el;
 
+    // The model calculates azimuth from the +x dipole (SW direction)
+    // LOFAR uses azimuth eastward positive from north.
+    const double phi = az - (5 * M_PI / 4);
+
     // The model is parameterized in terms of a normalized frequency in the
     // range [-1, 1]. The appropriate conversion is taken care of below.
     freq = (freq - freq_center) / freq_range;
@@ -132,15 +136,15 @@ void element_response(double freq, double az, double el,
         coeff += nPowerTheta * nPowerFreq * 2;
 
         // Compute the Jones matrix for the current harmonic, by rotating P over
-        // kappa * az, and add it to the result.
-        const double angle = sign * kappa * az;
-        const double caz = std::cos(angle);
-        const double saz = std::sin(angle);
+        // kappa * phi, and add it to the result.
+        const double angle = sign * kappa * phi;
+        const double cp = std::cos(angle);
+        const double sp = std::sin(angle);
 
-        response[0][0] += caz * P[0];
-        response[0][1] += -saz * P[1];
-        response[1][0] += saz * P[0];
-        response[1][1] += caz * P[1];
+        response[0][0] += cp * P[0];
+        response[0][1] += -sp * P[1];
+        response[1][0] += sp * P[0];
+        response[1][1] += cp * P[1];
 
         // Update sign and kappa.
         sign = -sign;

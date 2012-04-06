@@ -5762,3 +5762,41 @@ void HFPP_FUNC_NAME (const NIter out, const NIter out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Find position and value of maximum in vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hAtan2
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(out)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(y)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(x)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter out, const NIter out_end,
+                     const NIter y, const NIter y_end,
+                     const NIter x, const NIter x_end)
+{
+  int N = std::distance(out, out_end);
+
+  if (N != std::distance(y, y_end) || N != std::distance(x, x_end))
+  {
+    throw PyCR::ValueError("Vectors do not have the correct siye.");
+  }
+
+  // Get iterator
+  NIter out_it = out;
+  NIter y_it = y;
+  NIter x_it = x;
+
+  for (int i=0; i<N; i++)
+  {
+    *out_it++ = atan2(*y_it++, *x_it++);
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
