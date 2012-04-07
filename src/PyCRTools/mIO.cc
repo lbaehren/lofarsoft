@@ -108,6 +108,13 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
     outfile.close();
   } else throw PyCR::IOError("hWriteFileBinary: Unable to open file "+filename+".");
 }
+
+template <>
+void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
+  if (vec_end<=vec) return;
+  // TODO: hWriteFileText() - Add implementation
+}
+
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
@@ -142,7 +149,7 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
   Vec(float,20)=[3.0,3.0,3.0,3.0,3.0,...,2.0,2.0]
 */
 template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
   if (vec_end<=vec) return;
   char * v1 = reinterpret_cast<char*>(&(*vec));
   char * v2 = reinterpret_cast<char*>(&(*vec_end));
@@ -151,6 +158,12 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
     outfile.write(v1, (HInteger)(v2-v1));
     outfile.close();
   } else throw PyCR::IOError("hWriteFileBinaryAppend: Unable to open file "+filename+".");
+}
+
+template <>
+void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
+  if (vec_end<=vec) return;
+  // TODO: hWriteFileBinary() - Add implementation
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -215,6 +228,11 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteg
     outfile.close();
   } else throw PyCR::IOError("hWriteFileBinary: Unable to open file "+filename+".");
 }
+
+template <>
+void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename, HInteger start) {
+  // TODO: hWriteFileBinary() - Add implementation
+}
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
@@ -255,6 +273,11 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
     outfile.read(v1, (HInteger)(v2-v1));
     outfile.close();
   } else throw PyCR::IOError("hReadFileBinary: Unable to open file "+filename+".");
+}
+
+template <>
+void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
+  // TODO: hReadFileBinary() - Add implementation
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -304,6 +327,11 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
     outfile.read(v1, (HInteger)(vend-v1));
     outfile.close();
   } else throw PyCR::IOError("hReadFileBinary: Unable to open file "+filename+".");
+}
+
+template <>
+void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename, HInteger start) {
+  // TODO: hWriteFileText() - Add implementation
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

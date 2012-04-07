@@ -975,15 +975,19 @@ template <class T> HString hArray<T>::writeRaw()
   raw.resize(raw_size);
   raw_ptr = &(raw[0]);
 
-  if (typeid(T).name() == typeid(bool).name()) {
-    // Processing boolean vector
-    //    PyCR::NotImplementedError("Not implemented for booleans");
-    // vector<bool> is not an actual container type
-    //memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size/8);
-  } else {
-    // Processing non-boolean vector
-    memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size);
-  }
+  memcpy(raw_ptr, &(*storage_p->vec_p->begin()), raw_size);
+
+  return raw;
+};
+
+/*!
+  \brief Write a boolean vector content to a raw (binary) string.
+*/
+template <> HString hArray<bool>::writeRaw()
+{
+  // TODO: hArray::writeRaw() - Add implementation
+
+  HString raw = "";
 
   return raw;
 };
@@ -1008,16 +1012,17 @@ template <class T> void hArray<T>::readRaw(HString raw)
   raw_size = hfmin(vector_size*element_size, raw.size());
   raw_ptr = &(raw[0]);
 
-  if (typeid(T).name() == typeid(bool).name()) {
-    // Processing boolean vector
-    //PyCR::NotImplementedError("Not implemented for booleans");
-    // vector<bool> is not an actual container type
-  } else {
-    // Processing non-boolean vector
-    memcpy(&(*storage_p->vec_p->begin()), raw_ptr, raw_size);
-  }
+  memcpy(&(*storage_p->vec_p->begin()), raw_ptr, raw_size);
 
   return;
+};
+
+/*!
+  \brief Read a boolean vector content from a raw (binary) string.
+*/
+template <> void hArray<bool>::readRaw(HString raw)
+{
+  // TODO: hArray::readRaw() - Add implementation
 };
 
 
