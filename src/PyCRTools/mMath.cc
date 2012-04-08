@@ -5762,3 +5762,78 @@ void HFPP_FUNC_NAME (const NIter out, const NIter out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate the signal to noise ratio of the maximum.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaxSNR
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(snr)()("Signal to noise ratio of maximum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(rms)()("RMS of noise window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(max)()("Maximum of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(maxpos)()("Position of maximum with respect to signal_start.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HInteger)(signal_start)()("Start of signal part where to look for maximum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_6 (HInteger)(signal_end)()("End of signal part where to look for maximum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Calculates the signal to noise by first finding the maximum in the specified (*signal_start*, *signal_end*) region, calculating the root mean
+  square of the noise (defined to be everything outside the signal region) and dividing the two. In addition the position of the maximum is
+  calculated relative to the *signal_start*.
+*/
+template <class IIter, class NIter>
+void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
+                        const NIter rms, const NIter rms_end,
+                        const NIter max, const NIter max_end,
+                        const IIter maxpos, const IIter maxpos_end,
+                        const NIter vec, const NIter vec_end,
+                        const HInteger signal_start, const HInteger signal_end)
+{
+  // Get vector length
+  const int n = std::distance(vec, vec_end);
+  const int nm = n - (signal_end - signal_start);
+
+  // Get iterator
+  NIter it = vec;
+
+  // Sanity checks
+  if (signal_start < 0 || signal_end < signal_start || signal_end > n)
+  {
+    throw PyCR::ValueError("[hMaxSNR] signal window out of range.");
+  }
+
+  // Noise before signal window
+  for (int i=0; i<signal_start; i++)
+  {
+    *rms += (*it * *it) / nm;
+    it++;
+  }
+
+  // Pulse window to find maximum in (should be excluded from RMS)
+  *max = *it;
+  *maxpos = 0;
+  for (int i=signal_start; i<signal_end; i++)
+  {
+    if (*it > *max)
+    {
+      *max = *it;
+      *maxpos = i - signal_start;
+    }
+
+    it++;
+  }
+
+  // Noise after signal window
+  for (int i=signal_end; i<n; i++)
+  {
+    *rms += (*it * *it) / nm;
+    it++;
+  }
+
+  *rms = sqrt(*rms);
+  *snr = *max / *rms;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
