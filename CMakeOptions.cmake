@@ -17,23 +17,6 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
 set (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
   "Does the compiler support OpenMP?")
 
-## === CR-Tools =================================================================
-
-set (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL
-  "Build and use the Data Access Library?"                            )
-set (CR_WITH_GLISH ${CR_WITH_GLISH} CACHE BOOL
-  "Support for Glish applications?"                                   )
-set (CR_WITH_PYCR ${CR_WITH_PYCR} CACHE BOOL
-  "Support for Python applications?"                                  )
-set (CR_WITH_PLOTTING ${CR_WITH_PLOTTING} CACHE BOOL
-  "Support for generation of plots?"                                  )
-set (CR_WITH_GUI ${CR_WITH_GUI} CACHE BOOL
-  "Build the graphical interface?"                                    )
-set (CR_WITH_STARTOOLS ${CR_WITH_STARTOOLS} CACHE BOOL
-  "Enable using routines from LOPES-Star?"                            )
-set (CR_WITH_CASAPY ${CR_WITH_CASAPY} CACHE BOOL
-  "Build Pyline library against CASApy?"                              )
-
 ## === PyCRTools =================================================================
 
 set (PYCRTOOLS_ENABLE_TESTING ${PYCRTOOLS_ENABLE_TESTING} CACHE BOOL

@@ -1,9 +1,0 @@
-/* $Id$ */
-
-/*!
-  \defgroup ApplicationSupport CR-Tools :: ApplicationSupport module
-  \ingroup CR
-
-  \brief ApplicationSupport module for the CR-pipeline
-  
-*/

@@ -187,56 +187,6 @@ endif (EXISTS ${LUS_BINARY_DIR}/src/contrib/src/contrib-build)
 
 ## ==============================================================================
 ##
-##                                                        $LOFARSOFT/src/CR-Tools
-##
-## ==============================================================================
-
-set (CR_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CR-Tools)
-set (CR_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/cr)
-
-##__________________________________________________________
-##                              Build & Testing instructions
-
-if (IS_DIRECTORY ${CR_SOURCE_DIR})
-  ## Build package from present sources
-  lus_package_build (cr CR-Tools)
-  ## Experimental build
-  lus_package_experimental (cr CR-Tools)
-else (IS_DIRECTORY ${CR_SOURCE_DIR})
-  ExternalProject_Add (cr
-    PREFIX ${CR_BINARY_DIR}
-    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/CR-Tools
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCR_WITH_STARTOOLS=${CR_WITH_STARTOOLS} -DCR_WITH_GUI=${CR_WITH_GUI}
-    )
-endif (IS_DIRECTORY ${CR_SOURCE_DIR})
-
-##__________________________________________________________
-##                                      Package dependencies
-
-add_dependencies (cr plplot fftw3 gsl)
-
-if (CR_WITH_DAL)
-  add_dependencies (cr dal1)
-endif (CR_WITH_DAL)
-
-if (CR_WITH_GUI)
-  add_dependencies (cr mathgl)
-endif (CR_WITH_GUI)
-
-if (CR_WITH_AERA)
-  add_dependencies(cr aera)
-endif (CR_WITH_AERA)
-
-if (ROOT_FOUND AND CR_WITH_STARTOOLS)
-  add_dependencies (cr startools)
-endif (ROOT_FOUND AND CR_WITH_STARTOOLS)
-
-if (CR_WITH_GUI)
-  add_dependencies (cr pyqt)
-endif (CR_WITH_GUI)
-
-## ==============================================================================
-##
 ##                                                            $LOFARSOFT/src/LASA
 ##
 ## ==============================================================================

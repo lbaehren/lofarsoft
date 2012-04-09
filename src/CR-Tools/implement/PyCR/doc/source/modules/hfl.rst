@@ -1,9 +1,0 @@
-***
-hfl
-***
-
-.. toctree::
-    :glob:
-
-    hfl/*
-

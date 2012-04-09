@@ -1,9 +1,0 @@
-#! /bin/sh
-
-# Do a tail -f on incoming station triggers and return this on stdout
-# The requested station is passed as the first argument to this script
-# by the LOFAR Event Display program (led.py)
-
-# Uncomment this for testing
-python ./test/generate.py
-

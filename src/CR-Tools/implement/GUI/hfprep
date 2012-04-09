@@ -1,3 +1,0 @@
-#
-gawk -f hfiter.awk hffuncs_awk.cc | gawk -f hfprep.awk > hffuncs.cc
-gawk -f hfiter.awk hffuncs_awk.h | gawk -f hfprep.awk > hffuncs.h
