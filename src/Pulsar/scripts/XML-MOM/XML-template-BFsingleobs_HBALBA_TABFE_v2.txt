@@ -2,5 +2,5 @@
 								                        <angle1>ANGLE1</angle1>
 								                        <angle2>ANGLE2</angle2>
 								                        <dispersionMeasure>DM</dispersionMeasure>
-								                        <coherent>CS_TF</coherent>
+								                        <flyseye>FE_TF</flyseye>
 								                    </tiedArrayBeam>

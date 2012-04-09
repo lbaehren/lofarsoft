@@ -83,11 +83,11 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-subbandsPerFileIS subbandsPerFileIS]]  ==> Number of subbands per file BF IS (default = 512). \n"\
 "         [[-nofCollapsedChanCS nofCollapsedChannelsCS]] ==> Number of collapsed channels BF CS (default = 0). \n"\
 "         [[-nofCollapsedChanIS nofCollapsedChannelsIS]] ==> Number of collapsed channels BF IS (default = 0). \n"\
-"         [[-timeIntegFactorCS timeIntegrationFactorCS]] ==> The time integration facror (no of stokes downsampling steps) BF CS (default = 8). \n"\
-"         [[-timeIntegFactorIS timeIntegrationFactorIS]] ==> The time integration facror (no of stokes downsampling steps) BF IS (default = 8). \n"\
+"         [[-timeIntegFactorCS timeIntegrationFactorCS]] ==> The time integration facror (no of stokes downsampling steps) BF CS (default = 1). \n"\
+"         [[-timeIntegFactorIS timeIntegrationFactorIS]] ==> The time integration facror (no of stokes downsampling steps) BF IS (default = 1). \n"\
 "         [[-DM DispersionMeasure]] ==> Set the Dispersion Measure as this value for ALL the SAP & TAB beams. \n"\
 "         [[-whichStokesCS I|IQUV|XXYY]] ==> Set the BF CS stokes data type: I or IQUV or XXYY (default I). \n"\
-"         [[-whichStokesCS I|IQUV]] ==> Set the BF IS stokes data type: I or IQUV (default I). \n"
+"         [[-whichStokesIS I|IQUV]] ==> Set the BF IS stokes data type: I or IQUV (default I). \n"
 
 USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
 "For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
@@ -195,7 +195,7 @@ CAT=""
 user_cat=0
 folder=""
 TBB=false
-OCD=true
+OCD=false
 Superterp=false
 subbandsPerFileCS=512
 subbandsPerFileIS=512
@@ -774,7 +774,7 @@ if [ $IS == 1 ]
 then
    if [ $IS_LIST == "ALL" ]  || [ $IS_LIST == "all" ]
    then
-      # create the full range of row numbers for the Image data
+      # create the full range of row numbers 
       tmp=""
       ii=1
       while (( $ii <= $num_lines ))
@@ -784,7 +784,7 @@ then
       done
       IS_LIST=$tmp
    else 
-      # change the commas to spaces for the row numbers which need Image data
+      # change the commas to spaces for the row numbers 
       tmp=`echo $IS_LIST | sed 's/,/ /g'`
       IS_LIST=$tmp
    fi
@@ -812,7 +812,7 @@ fi
 
 if [[ $CS == 0 ]] && [[ $which_CS == "XXYY" ]]
 then
-   echo "ERROR: Cannot have whichStokes=$which_CS without +CS turned on"
+   echo "ERROR: Cannot have whichStokesCS=$which_CS without +CS turned on"
    exit 1
 fi
 
@@ -847,12 +847,14 @@ then
    middle=$LOFARSOFT/release/share/pulsar/data/XML-template-BFsingleobs_HBALBA_parent_v2.txt
    beam_xml=$LOFARSOFT/release/share/pulsar/data/XML-template-BFsingleobs_HBALBA_child_v2.txt
    tab_xml=$LOFARSOFT/release/share/pulsar/data/XML-template-BFsingleobs_HBALBA_TAB_v2.txt
+   fe_xml=$LOFARSOFT/release/share/pulsar/data/XML-template-BFsingleobs_HBALBA_TABFE_v2.txt
 else
    middle=$LOFARSOFT/release/share/pulsar/data/XML-template-IMsingleobs_HBALBA_parent.txt
    beam_xml=$LOFARSOFT/release/share/pulsar/data/XML-template-IMsingleobs_HBALBA_child.txt
    tab_xml=$LOFARSOFT/release/share/pulsar/data/XML-template-BFsingleobs_HBALBA_TAB_v2.txt
+   fe_xml=$LOFARSOFT/release/share/pulsar/data/XML-template-BFsingleobs_HBALBA_TABFE_v2.txt
 fi
-if [ ! -f $middle ] || [ ! -f $beam ] || [ ! -f $tab_xml ]
+if [ ! -f $middle ] || [ ! -f $beam ] || [ ! -f $tab_xml ] || [ ! -f $fe_xml ]
 then
    echo "ERROR: missing USG installation of files \$LOFARSOFT/release/share/pulsar/data/XML-template-*.txt"
    echo "       Make sure you have run 'make install' in \$LOFARSOFT/build/pulsar"
@@ -935,7 +937,35 @@ do
 			         CS_TF=true
 			      fi
 			   done			    
+		    else
+		       # CS turned off
+		       CS_TF=false
 		    fi			    
+		    IS_TF=false
+		    if (( $IS == 1 )) 
+			then
+			   for jj in $IS_LIST
+			   do 
+			      if (( $counter == $jj ))
+			      then
+			         echo "Beam-Formed Incoherentstokes (IS) turned on (TRUE) for this Observation"
+			         IS_TF=true
+			      fi
+			   done
+			fi
+						
+			FE_TF=false
+			if (( $FE == 1 )) 
+			then
+			   for jj in $FE_LIST
+			   do 
+			      if (( $counter == $jj ))
+			      then
+			         echo "Fly's Eye turned on (TRUE) for this Observation"
+			         FE_TF=true
+			      fi
+			   done
+			fi
 		fi
 
            # when Imaging, can only turn ON additional BF-related modes
@@ -1185,14 +1215,22 @@ do
 			                    echo "WARNING: user input for CS or IS beam is $DM_CSIStype and is unusable; assuming CS beam"
 			                    CS_TF="true"			                 
 			                 fi
-			                 sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGEL1/$DM_angle1/g" -e "s/ANGEL2/$DM_angle2/g" -e "s/DM/$DM_value/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+			                 sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGLE1/$DM_angle1/g" -e "s/ANGLE2/$DM_angle2/g" -e "s/DM/$DM_value/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
 			               done < $DM_INPUT 
 				        elif [[ "$DM_INPUT" == ?(+|-)+([0-9])* ]]
 				        then
 				           DM=$DM_INPUT
 				           DM_set=1
 				           echo "Found numeric DM=$DM_INPUT in last input column."
-			               sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGEL1/0/g" -e "s/ANGEL2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+			               sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+						    if [[ $IS_TF == "true" ]]
+						    then
+						       sed -e "s/CS_TF/false/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+						    fi
+						    if [[ $FE_TF == "true" ]]
+						    then
+						       sed -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/true/g" $fe_xml >> $tmp_file
+						    fi
 				        fi	
 					 elif (( $user_DM == 1 )) && (( $ncols == 9 ))
 					 then
@@ -1200,12 +1238,35 @@ do
 					    then
 					       echo "WARNING: ignoring DM column in input file, because user input DM supercedes all values"
 					    fi	
-					    sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGEL1/0/g" -e "s/ANGEL2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    if [[ $CS_TF == "true" ]]
+					    then					    
+					       sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $IS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/false/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $FE_TF == "true" ]]
+					    then
+					       sed -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/true/g" $fe_xml >> $tmp_file
+					    fi
+
+					 else # no DM column, just create a TAB
+					    if [[ $CS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $IS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/false/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $FE_TF == "true" ]]
+					    then
+					       sed -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/true/g" $fe_xml >> $tmp_file
+					    fi
+
 					 fi #end if (( $user_DM == 1 )) && (( $ncols == 9 ))
-					 
-					 ####  A2 added this for TAB temp import !!! remove !!!
-					 
-					 sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGEL1/0/g" -e "s/ANGEL2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					 					 
 					 
 				# when input table contains ra and dec values
 				else # if (( $INTYPE == 2))
@@ -1330,55 +1391,101 @@ do
 				       exit 1
 				    fi
 				    
-				    if (( $user_DM == 0 ))
+				    if (( $user_DM == 0 )) && (( $ncols == 10 ))
 				    then 
-					    if (( $ncols == 10 ))
-					    then
-					        DM_INPUT=`echo $line | awk '{print $10}'`
-					        DM_set=1
-					        # the single value can be used per beam, else @file can be used per TABs
-					        if [[ "$DM_INPUT" =~ ^@ ]]
-					        then
-					           DM_INPUT=`echo $DM_INPUT | sed 's/@//g'`
-					           # check that the file exists
-					           if [[ ! -f $DM_INPUT ]]
-					           then
-					              echo "ERROR: DM input file $DM_INPUT is missing;  cannot continue"
-					              exit 1
-					           else
-					              ll=0
-					              echo "Reading input file $DM_INPUT with TAB position offsets and DM values"
-					              while read DM_line 
-					              do 
-					                 if [[ "$DM_line" =~ ^"#" ]] || [[ "$DM_line" == "" ]] 
-					                 then
-					                     continue
-					                 else
-						                 echo "    Parsing input DM line: $DM_line"
-						                 DM_CSIStype[$ll]=`echo $DM_line | awk '{print $1}'`
-						                 DM_angle1[$ll]=`echo $DM_line | awk '{print $2}'`
-						                 DM_angle2[$ll]=`echo $DM_line | awk '{print $3}'`
-						                 DM_value[$ll]=`echo $DM_line | awk '{print $4}'`
-						                 total_TABs=$ll
-						                 DM_multi=1
-						                 ((ll += 1))
-					                 fi
-					              done < $DM_INPUT
-					           fi
-					        elif [[ "$DM_INPUT" == ?(+|-)+([0-9])* ]]
-					        then
-					           DM=$DM_INPUT
-					           DM_set=1
-					           echo "Found numeric DM=$DM_INPUT in last input column."
-					        fi	
-					    fi #end if (( $ncols == 10 ))  
-					 else 
+				        DM_INPUT=`echo $line | awk '{print $10}'`
+				        DM_set=1
+				        # the single value can be used per beam, else @file can be used per TABs
+				        if [[ "$DM_INPUT" =~ ^@ ]]
+				        then
+				           DM_INPUT=`echo $DM_INPUT | sed 's/@//g'`
+				           # check that the file exists
+				           if [[ ! -f $DM_INPUT ]]
+				           then
+				              echo "ERROR: DM input file $DM_INPUT is missing;  cannot continue"
+				              exit 1
+				           fi
+				           
+			               echo "Reading input file $DM_INPUT with TAB position offsets and DM values"
+			               ll=0
+			               while read DM_line 
+			               do 
+			                 if [[ "$DM_line" =~ ^"#" ]] || [[ "$DM_line" == "" ]] 
+			                 then
+			                     continue
+			                 else
+				                 echo "    Parsing input DM line: $DM_line"
+				                 DM_CSIStype=`echo $DM_line | awk '{print $1}'`
+				                 DM_angle1=`echo $DM_line | awk '{print $2}'`
+				                 DM_angle2=`echo $DM_line | awk '{print $3}'`
+				                 DM_value=`echo $DM_line | awk '{print $4}'`
+				                 total_TABs=$ll
+				                 DM_multi=1
+				                 ((ll+=1))
+			                 fi
+
+			                 if [[ "$DM_CSIStype" == "CS" ]]
+			                 then 
+			                    CS_TF="true"			                 
+			                 elif [[ "$DM_CSIStype" == "IS" ]]
+			                 then
+			                    CS_TF="false"
+			                 else
+			                    echo "WARNING: user input for CS or IS beam is $DM_CSIStype and is unusable; assuming CS beam"
+			                    CS_TF="true"			                 
+			                 fi
+			                 sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGLE1/$DM_angle1/g" -e "s/ANGLE2/$DM_angle2/g" -e "s/DM/$DM_value/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+			               done < $DM_INPUT 
+				        elif [[ "$DM_INPUT" == ?(+|-)+([0-9])* ]]
+				        then
+				           DM=$DM_INPUT
+				           DM_set=1
+				           echo "Found numeric DM=$DM_INPUT in last input column."
+			               sed -e "s/CS_TF/$CS_TF/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+						    if [[ $IS_TF == "true" ]]
+						    then
+						       sed -e "s/CS_TF/false/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+						    fi
+						    if [[ $FE_TF == "true" ]]
+						    then
+						       sed -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/true/g" $fe_xml >> $tmp_file
+						    fi
+				        fi	
+					 elif (( $user_DM == 1 )) && (( $ncols == 10 ))
+					 then
 					    if (( $ncols == 10 ))
 					    then
 					       echo "WARNING: ignoring DM column in input file, because user input DM supercedes all values"
-					    fi					    
-					 fi #end if (( $user_DM == 0 ))
+					    fi	
+					    if [[ $CS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/true/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $IS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/false/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $FE_TF == "true" ]]
+					    then
+					       sed -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/true/g" $fe_xml >> $tmp_file
+					    fi
 
+					 else # no DM column, just create a TAB
+					    if [[ $CS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/true/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $IS_TF == "true" ]]
+					    then
+					       sed -e "s/CS_TF/false/g" -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/false/g" $tab_xml >> $tmp_file
+					    fi
+					    if [[ $FE_TF == "true" ]]
+					    then
+					       sed -e "s/ANGLE1/0/g" -e "s/ANGLE2/0/g" -e "s/DM/$DM/g" -e "s/FE_TF/true/g" $fe_xml >> $tmp_file
+					    fi
+
+					 fi #end if (( $user_DM == 1 )) && (( $ncols == 10 ))
+					 					 
 				fi  #end if (( $INTYPE == 1))
 		
 		        ##################################################
