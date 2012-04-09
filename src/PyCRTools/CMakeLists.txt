@@ -42,7 +42,6 @@ include (FindNumPy)
 include (FindNumUtil)
 include (FindOpenMP)
 include (FindTMF)
-include (FindCRTools)
 include (FindWCSLIB)
 include (FindCFITSIO)
 
