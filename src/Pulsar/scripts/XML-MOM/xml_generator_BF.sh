@@ -1,7 +1,7 @@
-#!/bin/ksh -x
+#!/bin/ksh
 
 # Please update the version number when you edit this file:
-VERSION=2.1
+VERSION=2.2
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -828,6 +828,7 @@ fi
 
 
 cat $header | sed "s/Pulsars/$PROJECT/g" > $outfile
+echo "    <item index=\"0\">" >> $outfile
 
 
 if [[ $folder != "" ]]
