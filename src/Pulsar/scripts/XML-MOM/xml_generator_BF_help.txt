@@ -25,7 +25,6 @@ Options:
          -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
 
          [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
-         [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
          [[-stations stations_list]] ==> Comma separated list of stations (i.e. CS001,CS002,RS405) 
          [[-antenna HBA_or_LBA]] ==> The antenna name: HBA, HBAHigh, HBAMid, HBALow or LBA, LBALow, LBAHigh (default = HBALow (BF); HBAHigh (IM)) 
          [[-subsHBA subband_range]] ==> The BF HBA (Low) default subband range (default = '200..443') 
