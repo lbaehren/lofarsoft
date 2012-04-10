@@ -13,6 +13,16 @@ class Shower(Task):
     """
     Making all sorts of plots to understand the shower. 
     
+    Usage: 
+    
+    LDF = cr.trun("Shower",positions=positions, signals=signals, signals_uncertainties=signals_uncertainties, core=core,direction=direction,core_uncertainties=core_uncertainties,direction_uncertainties=direction_uncertainties, ldf_enable=True)
+    
+    Task can be run without giving uncertainties. The resulting plot will then also not contain any uncertainties. 
+    
+    FOOTPRINT = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, footprint_enable=True)
+    
+    FOOTPRINT_WITHLORA = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, footprint_enable=True, footprint_lora_enable=True, lora_positions=lora_positions,lora_signals=lora_signals,lora_timelags=lora_timelags)
+    
     """
 
     parameters = dict(
@@ -31,7 +41,9 @@ class Shower(Task):
         direction_uncertainties = dict(default = None, 
             doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"), 
         timelags = dict(default=None,
-            doc = "Timelags of signals given in nanoseconds [NAntennas]"),        
+            doc = "Timelags of signals given in nanoseconds [NAntennas]"),
+        eventid = dict(default = None,
+            doc="Give Event ID to be specified in plot title "),            
         
         ldf_enable = dict( default = False, 
             doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"), 
@@ -47,9 +59,23 @@ class Shower(Task):
         ldf_marker_z = dict(default='v', doc = "marker siganls z"),  
         
         footprint_enable = dict(default = False,
-            doc = "Draw footprint of the shower"),   
+            doc = "Draw footprint of the shower"),  
+        footprint_colormap = dict(default="autumn",doc="colormap to use for LOFAR timing"),
+        footprint_marker_lofar = dict(default='o', doc="Marker for LOFAR stations in footprint"),
+        footprint_use_background = dict(default=True, doc="Use LOFAR map as background for footprint"),
+        footprint_largest_point = dict(default=300,doc="Largest point in plot for LOFAR"),
+        footprint_use_title = dict(default=False,doc="Draw title indicating polarizations and event id (if given)"),
+             
         footprint_lora_enable = dict(default = False,
-            doc = "Draw Information from LORA"),             
+            doc = "Draw Information from LORA"), 
+        lora_positions = dict(default=None,
+            doc="LORA detector positions, given in [Nx3], [NDetectors x (X,Y,Z)], X,Y,Y kartesian" ),  
+        lora_signals = dict(default=None, 
+            doc="Signals in LORA, given in [NDetectors]"),
+        lora_timelags = dict(default=None,
+            doc = "Timelags of signals in LORA detectors, given in nanoseconds [NDetectors] "), 
+        footprint_color_lora = dict(default='#730909',doc="Color used for LORA plots. If set to 'time' uses the arrival time" ),    
+        footprint_marker_lora = dict(default='',doc="Marker for LORA stations in footprint"),
     )
 
 
@@ -215,6 +241,92 @@ class Shower(Task):
                 
                 cr.plt.show()   
                 
-        if self.footprint_enable:  
-            pass       
-                            
+        if self.footprint_enable: 
+        
+            if self.lora_signals is not None and self.lora_positions is not None:
+                
+                if self.lora_timelags is not None and self.footprint_color_lora == 'time':
+                    print "Draw LORA with timelags and color, still to be implemented"
+                else:
+                    print "Draw LORA wth signals only, still to be implemented"
+    
+            if self.footprint_use_background:
+                    from os import environ
+                    from os.path import isfile
+                    if "LOFARSOFT" in environ.keys():
+                        bgimname=environ["LOFARSOFT"]+"/src/PyCRTools/extras/LORA_layout_background.png"
+                        if isfile(bgimname):
+                            bgim=cr.plt.imread(bgimname)
+                        else:
+                            print "WARNING Cannot plot layout"
+                    else:
+                        print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
+        
+            if self.positions is not None:
+
+                self.sizes0 = self.signals[:,0]
+                self.sizes0 /= self.sizes0.max()
+                self.sizes0 *= self.footprint_largest_point
+                
+                self.scolors=self.timelags
+                
+                #POL 0
+                
+                cr.plt.figure()
+                if bgim is not None and self.footprint_use_background:
+                    cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
+                cr.plt.xlabel("LOFAR East [meters] ")
+                cr.plt.ylabel("LOFAR North [meters] ")
+                self.cbar=cr.plt.colorbar()
+                self.cbar.set_label("Time of arrival (ns)")
+                if self.footprint_use_title:
+                    if self.eventid:
+                        self.title = str(self.eventid)+" in pol X" 
+                    else:
+                        self.title = 'pol X'    
+                    cr.plt.title(self.title)
+                
+                #POL 1
+                
+                self.sizes1 = self.signals[:,1]
+                self.sizes1 /= self.sizes1.max()
+                self.sizes1 *= self.footprint_largest_point
+                                
+                cr.plt.figure()
+                if bgim is not None and self.footprint_use_background:
+                    cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
+                cr.plt.xlabel("LOFAR East [meters] ")
+                cr.plt.ylabel("LOFAR North [meters] ")
+                self.cbar=cr.plt.colorbar()
+                self.cbar.set_label("Time of arrival (ns)")
+                if self.footprint_use_title:
+                    if self.eventid:
+                        self.title = str(self.eventid)+" in pol Y" 
+                    else:
+                        self.title = 'pol Y'    
+                    cr.plt.title(self.title)                
+                
+                #POL 2
+                if self.signals[:,2] is not None:
+                
+                    self.sizes2 = self.signals[:,2]
+                    self.sizes2 /= self.sizes2.max()
+                    self.sizes2 *= self.footprint_largest_point
+                                    
+                    cr.plt.figure()
+                    if bgim is not None and self.footprint_use_background:
+                        cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                    cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes2,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
+                    cr.plt.xlabel("LOFAR East [meters] ")
+                    cr.plt.ylabel("LOFAR North [meters] ")
+                    self.cbar=cr.plt.colorbar()
+                    self.cbar.set_label("Time of arrival (ns)")
+                    if self.footprint_use_title:
+                        if self.eventid:
+                            self.title = str(self.eventid)+" in pol Z" 
+                        else:
+                            self.title = 'pol Z'    
+                        cr.plt.title(self.title)                
+                cr.plt.show()
