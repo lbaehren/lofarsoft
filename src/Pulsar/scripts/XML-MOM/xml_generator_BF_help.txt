@@ -1,0 +1,293 @@
+
+Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]] 
+       -out template_output_file -project project_name [-st stations_list]   
+       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL]  
+       [+IS|+CS|+FD|+BF list_or_ALL] [-subsHBA subband_range] [-subsLBA subband_range] 
+       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  
+       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
+       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
+       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug] 
+       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]
+       [-cat user_catalog_filename]
+       
+       REQUIRED Input Parameters:
+       -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) 
+       -inswitch BF_or_IM   ==>  Switch between 'BF' (Beam-Formed) or 'IM' (IMAGING) type of default obs
+       -intype source_or_position ==> Input file contains 'source'-based or 'position'-based input
+       -project project_name   ==> Name of the MOM project (usually 'Pulsars' or 'MSSS')
+       -out template_output_file ==> Specify the name of the output XML template file (i.e. out.xml) 
+         
+       OPTIONAL parameters (generally depend on the type of input file column format):
+       [[+multi]] ==> Turns on the multi-beam input specification;  otherwise beam separator is ignored in input file.
+       [[-LST ]]  ==> This flags the input start time (command line or file) as LST, otherwise UT is assumed.
+       [[-stations stations_list]] ==> Comma separated list of stations: (i.e. CS001,CS002,RS405) 
+       [[-antenna HBA_or_LBA]] ==> The antenna name: HBA, HBAHigh, HBAMid, HBALow or LBA, LBALow, LBAHigh (default = HBALow (BF)) 
+       [[-subsHBA subband_range]] ==> The BF HBA (Low) default subband range (default = '200..443')
+       [[-subsHBALow subband_range]] ==> The HBALow subband range (default = BF:'200..443') 
+       [[-subsHBAMid subband_range]] ==> The HBAMid subband range, valid for 160MHz clock only (default = BF:'140..383')
+       [[-subsHBAHigh subband_range]] ==> The HBAHigh subband range (default = BF:'77..320')
+       [[-subsLBA subband_range]] ==> The BF LBA (Low) default subband range (default = BF:'100..343')
+       [[-subsLBALow subband_range]] ==> The LBALow subband range (default = BF:'100..343')
+       [[-subsLBAHigh subband_range]] ==> The LBAHigh subband range (default = BF:'154..397')
+       [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16) 
+       [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 16) 
+       [[-integstepsHBA integration_steps_HBA]] ==> The integration steps for HBA (default = 16) 
+       [[-integstepsLBA integration_steps_LBA]] ==> The integration steps for LBA (default = 16) 
+       [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) 
+       [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) 
+       [[-gap duration]] ==> The time between ALL observations in minutes (default = 3) 
+       [[+IM list_or_ALL]] ==> Turn on Imaging with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[-IS list_or_ALL]] ==> Turn OFF incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+                               By default, IS (incoherentstokes) is turned on;  use flag to turn off IS for all or certain rows.
+                               If you turn IS (incoherentstokes) off then, you must turn on +CS or +FD or +BF!
+       [[+IS list_or_ALL]] ==> Turn on incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+                               By default, IS (incoherentstokes) is turned on;  use flag only to specify certain rows turned on.
+       [[+CS list_or_ALL]] ==> Turn on coherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+FD list_or_ALL]] ==> Turn on filteredData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[+BF list_or_ALL]] ==> Turn on beamformedData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)
+       [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default), Joined)
+       [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default), Inner, 'Sparse Even', 'Sparse Odd', X, Y)
+       [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM
+       [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal 
+                        (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).
+       [[-clock 200|160]] ==> Change the clock from the default value of 200 MHz to 160 MHz;  200 MHz is assumed if clock is not specified.
+       [[-nof_rings 1 | 2]] ==> Number of Tied-Array rings (generally set to 1 [7 beams] or 2 rings [19 beams]; default=0).
+       [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg).
+       [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).
+       [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog locations.
+                                          Positions must be specified in decimal degrees;  order is absolute in the format.
+                                          Can only be used with '-intype source' switch.
+       
+       For help on Imaging input format and options, use '-help IM' switch
+
+      This script is run using several different methodologies and input file options.
+      Listed first are the types of file formats allowed as input, followed by an 
+      explanation of all the input argument options.
+        
+      Input File Options (SINGLE BEAM): 
+      1) Example input file with maximum number of items specified:
+         Example Type I input file using source names:
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                 subbands
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    200..220
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              55..200
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..220
+         B1133+16   LBA        16            16       2010-07-22T15:27:30    10   CS001,CS002,CS003,CS006,CS007              77..220
+         B1133+16   LBA        64             4       2010-07-22T15:39:00    10   CS001,CS002,CS003,CS004,CS006,CS007        44..189
+         
+         Example Type I input file using ra dec positions:
+         # ra     dec     antenna chan_per_subs integ_steps    start-time       duration stations                                 subbands
+         13.98   +68.487   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    200..220
+         13.98   +68.487   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              55..200
+         13.98   +68.487   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..220
+         13.98   +68.487   LBA        16            16       2010-07-22T15:27:30    10   CS001,CS002,CS003,CS006,CS007              77..220
+         13.98   +68.487   LBA        64             4       2010-07-22T15:39:00    10   CS001,CS002,CS003,CS004,CS006,CS007        44..189
+
+      2) Example input file with maximum number of items specified without subbands:
+         Example Type II input file using source names:
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                  
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007             
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         B1133+16   LBA        64             4       2010-07-22T15:39:00    10   CS001,CS002,CS003,CS004,CS006,CS007      
+         
+         Example Type II input file using ra dec positions:
+         # ra     dec     antenna chan_per_subs integ_steps    start-time       duration stations                                 
+         13.98   +68.487   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                 
+         13.98   +68.487   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007           
+         13.98   +68.487   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007
+         13.98   +68.487   LBA        64             4       2010-07-22T15:39:00    10   CS001,CS002,CS003,CS004,CS006,CS007      
+
+      3) Example input file the pulsar name, the antenna, channels per subband, and integration steps
+         Example Type III input file using source names:
+         # pulsar  antenna chan_per_subs integ_steps                                   
+         B1133+16   HBA        16            16                         
+         B1133+16   LBA        64             4                   
+         B1133+16   LBA        64            16            
+         B1508+55   HBA        16            64                         
+
+         Example Type III input file using ra dec positions:
+         # ra     dec     antenna chan_per_subs integ_steps                                  
+         13.98   +68.487   HBA        16            16                      
+         13.98   +68.487   LBA        64             4                
+         13.98   +68.487   HBA        16            16      
+         55.76   +18.546   LBA        64             4           
+
+      4) Example input file the pulsar name, and the antenna
+         Example Type IV input file using source names:
+         # pulsar  antenna                                   
+         B1133+16   HBA                           
+         B1133+16   LBALow                     
+         B1133+16   LBAHigh               
+         B1508+55   HBAHigh                            
+
+         Example Type IV input file using ra dec positions:
+         # ra     dec     antenna                                   
+         13.98   +68.487   HBALow                          
+         13.98   +68.487   LBAHigh                    
+         13.98   +68.487   HBA          
+         55.76   +18.546   LBA               
+
+      5) Example input has just the pulsar name
+         Example Type V input file using source names:
+         # pulsar                                     
+         B1133+16                         
+         B1133+16                    
+         B1133+16               
+         B1508+55                        
+
+         Example Type V input file using ra dec in decimal degree positions:
+         # ra     dec                                        
+         13.98   +68.487                           
+         13.98   +68.487                     
+         13.98   +68.487                     
+         55.76   +18.546              
+
+         Example Type V input file using ra dec in sexagesimal positions:
+         # ra     dec                                        
+         01:57:49.9  62:12:25.9
+         03:35:16.6  +45:55:53.4
+         04:59:51.9  -02:10:06.6
+
+      6) Example input file has "NameColumn" and pulsar name (NOTE: the NameColumn must be 1st)!
+         "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
+         Example Type VI input file using source names:
+         # namecol        pulsar                                     
+         LOFAR_HBA00001   B1133+16                         
+         LOFAR_HBA00002   B1133+16                    
+         LOFAR_HBA00003   B1133+16               
+         LOFAR_HBA00004   B1508+55                        
+
+         Example Type VI input file using ra dec positions:
+         # namecol    ra     dec                                        
+         LOFAR_HBA00001   13.98   +68.487                           
+         LOFAR_HBA00002   13.98   +68.487                     
+         LOFAR_HBA00004   13.98   +68.487                     
+         LOFAR_HBA00005   55.76   +18.546              
+
+
+      Input File Options (MULTIPLE BEAMS): 
+         Multiple Beams are designated by the ";" separator on the same input line.  Any of the 
+         above 6 input file column options can be used for multiple beam designation.  You can 
+         mix single and multiple beams within one input file.
+         
+         For multiple beams, the first beam gets the primary settings for the observation, either
+         using the columns in the input file or the command line arguments.  The only items which
+         change for multiple beams are the Pulsar-Name and (optionally the subband-range).  If
+         the subband range is not specified per beam, then the total subband range is divided by
+         the number of requested beams (remainder subbands are dropped).
+         
+      1) Example input file with maximum number of items specified; lines 2 and 3 contain multiple beams:
+         Example Type I input file using source names:
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                 subbands   ;  BeamN-pulsar BeamN-subbands
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    200..220
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              155..200 ;  B1133+16   201..282
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..220 ;  B1133+16   201..251  ; B1919+55  252..279
+
+         Example Type I input file using ra dec positions:
+         # ra     dec     antenna chan_per_subs integ_steps    start-time       duration stations                                 subbands   ;  BeamN-ra BeamN-dec BeamN-subbands
+         13.98   +68.487   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    200..220
+         13.98   +68.487   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              155..200 ;  13.98   +68.487   201..282
+         13.98   +68.487   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  200..220 ;  13.98   +68.487   201..251  ; 13.98   +68.487  252..279
+         
+      2) Example input file with maximum number of items specified w/o subbands; line 2 and 3 contain multiple beams:
+         Example Type II input file using source names:
+         # pulsar  antenna chan_per_subs integ_steps    start-time       duration stations                                   ;  BeamN-pulsar 
+         B1133+16   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                    
+         B1133+16   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007              ;  B1133+25  
+         B1133+16   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007  ;  B1144+45  ; B1919+55 
+
+         Example Type II input file using ra dec positions:
+         # ra     dec     antenna chan_per_subs integ_steps    start-time       duration stations                                  ;  BeamN-ra BeamN-dec 
+         13.98   +68.487   HBA        16            16       2010-07-22T14:50:00    10   CS001,CS003,CS004,CS005                  
+         13.98   +68.487   LBA        64             4       2010-07-22T15:03:00    10   CS001,CS002,CS005,CS006,CS007             ;  13.98   +68.487   
+         13.98   +68.487   HBA        16            16       2010-07-22T15:15:30    10   CS001,CS002,CS003,CS004,CS005,CS006,CS007 ;  13.98   +68.487    ; 13.98   +68.487
+
+      3) Example input file 4 column input; lines 2 and 3 contain multiple beams:
+         Example Type III input file using source names:
+         # pulsar  antenna chan_per_subs integ_steps   ;   BeamN-pulsar                               
+         B1133+16   HBA        16            16                         
+         B1133+16   LBA        64             4        ;   B1133+25         
+         B1133+16   LBA        64            16        ;   B1144+45   ; B1919+55
+         B1508+55   HBA        16            64                         
+         
+         Example Type III input file using ra dec positions:
+         # ra     dec     antenna chan_per_subs integ_steps   ;  BeamN-ra BeamN-dec 
+         13.98   +68.487   HBA        16            16           
+         13.98   +68.487   LBA        64             4        ;  13.98   +68.487   
+         13.98   +68.487   HBA        16            16        ;  13.98   +68.487      ; 13.98   +68.487  
+
+      4) Example input file 2 column input; lines 1 and 2 contain multiple beams:
+         Example Type IV input file using source names:
+         # pulsar  antenna;   BeamN-pulsar                                 
+         B1133+16   HBA   ;   B1133+25                        
+         B1133+16   LBA   ;   B1144+45   ; B1919+55  ; B1755+19                  
+         B1133+16   LBA               
+         B1508+55   HBA                            
+
+         Example Type IV input file using ra dec positions:
+         # ra     dec   antenna    ;  BeamN-ra BeamN-dec 
+         13.98   +68.487  HBA      ;  13.98   +68.487  
+         13.98   +68.487  LBA      ;  13.98   +68.487      ; 13.98   +68.487 
+         13.98   +68.487  HBA       
+
+      5) Example input file 1 column input; lines 1 and 4 contain multiple beams:
+         Example Type V input file using source names:
+         # pulsar     ;   BeamN-pulsar                             
+         B1133+16     ;   B1144+45   ; B1919+55  ; B1755+19                     
+         B1133+16                    
+         B1133+16               
+         B1508+55     ;   B1144+45   ; B1755+19                    
+
+         Example Type V input file using ra dec positions:
+         # ra     dec      ;  BeamN-ra BeamN-dec 
+         13.98   +68.487   ;  13.98   +68.487  
+         13.98   +68.487    
+         14.68   +45.234    
+         13.98   +68.487   ;  13.98   +68.487     ; 14.68   +45.234 
+
+         Example Type V input file using ra dec in sexagesimal positions:
+         # ra     dec               ;  BeamN-ra BeamN-dec                          
+         01:57:49.9  62:12:25.9     ;  01:08:22.6  +66:08:34.0
+         03:35:16.6  +45:55:53.4
+         04:59:51.9  -02:10:06.6    ;  01:08:08.3  -14:31:50.1    ;  01:51:22.7  -06:35:02.8
+
+
+      6) Example input file has "NameColumn" and pulsar name (NOTE: the NameColumn must be 1st)!
+         "NameColumn" can be added to ANY of the above data tables, but it must always be the 1st column.
+         Example Type VI input file using source names and mutiple beams:
+         # namecol        pulsar        ;   BeamN-pulsar                             
+         LOFAR_HBA00001   B1133+16      ;   B1144+45   ; B1919+55  ; B1755+19                  
+         LOFAR_HBA00002   B1133+16                    
+         LOFAR_HBA00003   B1133+16               
+         LOFAR_HBA00004   B1508+55      ;   B1144+45   ; B1755+19                    
+
+         Example Type VI input file using ra dec in decimal degree positions:
+         # namecol    ra     dec            ;  BeamN-ra BeamN-dec                                 
+         LOFAR_HBA00001   13.98   +68.487   ;  13.98   +68.487  ; 14.68   +45.234                            
+         LOFAR_HBA00002   14.68   +45.234                      
+         LOFAR_HBA00004   13.98   +68.487                     
+         LOFAR_HBA00005   55.76   +18.546   ;  14.68   +45.234            
+
+
+         EXAMPLE runs:
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml 
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -subsLBA 10..45 +IM 6,7 +CS 6,7
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 -IS 4,5 +CS 4,5
+         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IM ALL +multi
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 +FD all
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..397  
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 +IM ALL 
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 +IM 1,2
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  +multi -namecol
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
+         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all 
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -sexages 
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4  -sexages -debug
+         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4 -cat mycatalog.txt
+
+

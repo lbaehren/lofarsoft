@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=2.2
+VERSION=2.3
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -286,7 +286,7 @@ then
    else
       echo "Printing help setting for Beam-Formed (+IM) input and switches"
       echo "For detailed help on Imaging input and switches, using '-help IM'."
-      cat $LOFARSOFT/release/share/pulsar/data/multi-template_helpBF.txt
+      cat $LOFARSOFT/release/share/pulsar/data/xml_generator_BF_help.txt
    fi
    exit 1
 fi
