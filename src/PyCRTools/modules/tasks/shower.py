@@ -20,9 +20,7 @@ class Shower(Task):
     Task can be run without giving uncertainties. The resulting plot will then also not contain any uncertainties. 
     
     FOOTPRINT = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, footprint_enable=True)
-    
-    FOOTPRINT_WITHLORA = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, footprint_enable=True, footprint_lora_enable=True, lora_positions=lora_positions,lora_signals=lora_signals,lora_timelags=lora_timelags)
-    
+        
     """
 
     parameters = dict(
@@ -262,7 +260,7 @@ class Shower(Task):
                     else:
                         print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
         
-            if self.positions is not None:
+            if self.positions is not None and self.signals is not None:
 
                 self.sizes0 = self.signals[:,0]
                 self.sizes0 /= self.sizes0.max()
@@ -312,7 +310,7 @@ class Shower(Task):
                     cr.plt.title(self.title)                
                 
                 #POL 2
-                if self.signals[:,2] is not None:
+                if self.signals.shape[1] == 3:
                 
                     self.sizes2 = self.signals[:,2]
                     self.sizes2 /= self.sizes2.max()
@@ -333,3 +331,5 @@ class Shower(Task):
                             self.title = 'pol Z'    
                         cr.plt.title(self.title)                
                 cr.plt.show()
+            else:
+                print "WARNING: Give at least positions and signals to plot a footprint"                
