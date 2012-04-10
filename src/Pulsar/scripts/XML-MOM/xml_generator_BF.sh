@@ -10,7 +10,7 @@ VERSION=2.3
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
 "       -out template_output_file -project project_name [-st stations_list]   \n"\
-"       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL]  \n"\
+"       [-start obs_start] [-time duration] [-gap duration]  \n"\
 "       [+CS|+IS|+FE list_or_ALL] [-subsHBA subband_range] [-subsLBA subband_range] \n"\
 "       [-subsHBAHigh subband_range] [-subsHBAMid subband_range] [-subsHBALow subband_range] \n"\
 "       [-subsLBAHigh subband_range] [-subsLBALow subband_range]  \n"\
@@ -47,7 +47,7 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 32 (BF), 64 (IM)) \n"\
 "         [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) \n"\
 "         [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) \n"\
-"         [[-gap duration]] ==> The time between ALL observations in minutes (default = 1) \n"\
+"         [[-gap duration]] ==> The time between ALL observations in minutes (default = 2 min) \n"\
 "         [[+IM list_or_ALL]] ==> Turn on Imaging (correlatedData) with BF observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+IS list_or_ALL]] ==> Turn on incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+CS list_or_ALL]] ==> Turn on coherentStokesData observations (default on for BF);  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
@@ -126,7 +126,7 @@ TIME=0
 user_duration=0
 STATIONS=""
 user_stations=0
-GAP=1
+GAP=2
 user_gap=0
 ANTENNA=HBAHigh
 user_antenna=0
