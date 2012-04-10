@@ -35,8 +35,8 @@ set (PYCRTOOLS_WITH_AERA ${PYCRTOOLS_WITH_AERA} CACHE BOOL
   "Compile PyCRTools with AERA data support?" )
 set (PYCRTOOLS_WITH_CASACORE ${PYCRTOOLS_WITH_CASACORE} CACHE BOOL
   "Compile PyCRTools with casacore support?")
-set (PYCRTOOLS_WITH_DAL ${PYCRTOOLS_WITH_DAL} CACHE BOOL
-  "Compile PyCRTools with DAL support?" )
+set (PYCRTOOLS_WITH_DAL1 ${PYCRTOOLS_WITH_DAL1} CACHE BOOL
+  "Compile PyCRTools with DAL1 support?" )
 set (PYCRTOOLS_WITH_FFTW ${PYCRTOOLS_WITH_FFTW} CACHE BOOL
   "Compile PyCRTools with FFTW support?")
 set (PYCRTOOLS_WITH_GSL ${PYCRTOOLS_WITH_GSL} CACHE BOOL
@@ -46,23 +46,3 @@ set (PYCRTOOLS_WITH_NUMPY ${PYCRTOOLS_WITH_NUMPY} CACHE BOOL
 set (PYCRTOOLS_WITH_OPENMP ${PYCRTOOLS_WITH_OPENMP} CACHE BOOL
   "Compile PyCRTools with OpenMP support?")
 
-## === DAL ======================================================================
-
-set (DOCUMENTATION_ONLY ${DOCUMENTATION_ONLY} CACHE BOOL
-  "Configure for building documentation only?")
-set (DAL_WITH_DOCUMENTATION ${DAL_WITH_DOCUMENTATION} CACHE BOOL
-  "Generate documentation for the DAL?")
-set (DAL_SHARED_LIBRARY ${DAL_SHARED_LIBRARY} CACHE BOOL
-  "Build DAL as shared library?")
-set (DAL_ENABLE_TESTING ${DAL_ENABLE_TESTING} CACHE BOOL
-  "Build and enable test programs?")
-set (DAL_COMPILER_WARNINGS ${DAL_COMPILER_WARNINGS} CACHE BOOL
-  "Enable standard set of compiler warnings?")
-set (DAL_PYTHON_BINDINGS ${DAL_PYTHON_BINDINGS} CACHE BOOL
-  "Create python bindings?")
-set (DAL_DEBUGGING_MESSAGES ${DAL_DEBUGGING_MESSAGES} CACHE BOOL
-  "Print debugging information?")
-set (DAL_VERBOSE_CONFIGURE ${DAL_VERBOSE_CONFIGURE} CACHE BOOL
-  "Verbose output during configuration?")
-set (DAL_WITH_MYSQL ${DAL_WITH_MYSQL} CACHE BOOL
-  "Build with support for MySQL database?")

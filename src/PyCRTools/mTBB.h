@@ -26,10 +26,10 @@
 #include "mArray.h"
 #include "mModule.h"
 
-/* DAL header files */
+/* DAL1 header files */
 #include <data_hl/TBB_Timeseries.h>
 
-class TBBData : public DAL::TBB_Timeseries {
+class TBBData : public DAL1::TBB_Timeseries {
 
 public:
 

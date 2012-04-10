@@ -69,7 +69,7 @@ using namespace std;
   \param filename -- Name of the file from which to read in the data
 */
 TBBData::TBBData (std::string const &filename)
-  : DAL::TBB_Timeseries (filename, DAL::IO_Mode::ReadOnly)
+  : DAL1::TBB_Timeseries (filename, DAL1::IO_Mode::ReadOnly)
 {
 }
 
@@ -430,157 +430,157 @@ boost::python::list TBBData::python_nyquist_zone()
 
 std::string TBBData::python_antenna_set()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.antennaSet();
 }
 
 std::string TBBData::python_filetype()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.filetype();
 }
 
 std::string TBBData::python_filedate()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.filedate();
 }
 
 std::string TBBData::python_telescope()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.telescope();
 }
 
 std::string TBBData::python_observer()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.observer();
 }
 
 double TBBData::python_clockFrequency()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.clockFrequency();
 }
 
 std::string TBBData::python_clockFrequencyUnit()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.clockFrequencyUnit();
 }
 
 std::string TBBData::python_filterSelection()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.filterSelection();
 }
 
 std::string TBBData::python_target()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.target();
 }
 
 std::string TBBData::python_systemVersion()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.systemVersion();
 }
 
 std::string TBBData::python_pipelineName()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.pipelineName();
 }
 
 std::string TBBData::python_pipelineVersion()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.pipelineVersion();
 }
 
 std::string TBBData::python_notes()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.notes();
 }
 
 std::string TBBData::python_projectID()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.projectID();
 }
 
 std::string TBBData::python_projectTitle()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.projectTitle();
 }
 
 std::string TBBData::python_projectPI()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.projectPI();
 }
 
 std::string TBBData::python_projectCoI()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.projectCoI();
 }
 
 std::string TBBData::python_projectContact()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.projectContact();
 }
 
 std::string TBBData::python_observationID()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.observationID();
 }
 
 std::string TBBData::python_startMJD()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.startMJD();
 }
 
 std::string TBBData::python_startTAI()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.startTAI();
 }
 
 std::string TBBData::python_startUTC()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.startUTC();
 }
 
 std::string TBBData::python_endMJD()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.endMJD();
 }
 
 std::string TBBData::python_endTAI()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.endTAI();
 }
 
 std::string TBBData::python_endUTC()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.endUTC();
 }
 
 int TBBData::python_nofStations()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.nofStations();
 }
 
@@ -588,7 +588,7 @@ boost::python::list TBBData::python_stationList()
 {
   boost::python::list lst;
 
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   std::vector<std::string> stations = c.stationsList();
 
   for(std::vector<std::string>::iterator it = stations.begin(); it != stations.end(); ++it)
@@ -601,25 +601,25 @@ boost::python::list TBBData::python_stationList()
 
 double TBBData::python_frequencyMin()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.frequencyMin();
 }
 
 double TBBData::python_frequencyMax()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.frequencyMax();
 }
 
 double TBBData::python_frequencyCenter()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.frequencyCenter();
 }
 
 std::string TBBData::python_frequencyUnit()
 {
-  DAL::CommonAttributes c = commonAttributes();
+  DAL1::CommonAttributes c = commonAttributes();
   return c.frequencyUnit();
 }
 

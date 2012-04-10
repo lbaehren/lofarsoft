@@ -152,7 +152,7 @@ namespace PyCR { // Namespace PyCR -- begin
   }
 
 #ifdef HAS_EXCEPTION_HANDLING
-  void translateDALIOError(DAL::IOError const& e)
+  void translateDAL1IOError(DAL1::IOError const& e)
   {
     PyErr_SetString(PyExc_IOError, e.message.c_str()); 
   }
@@ -211,7 +211,7 @@ BOOST_PYTHON_MODULE(_hftools)
   register_exception_translator<PyCR::NotImplementedError>(PyCR::translateNotImplementedError);
   register_exception_translator<PyCR::IOError>(PyCR::translateIOError);
 #ifdef HAS_EXCEPTION_HANDLING
-  register_exception_translator<DAL::IOError>(PyCR::translateDALIOError);
+  register_exception_translator<DAL1::IOError>(PyCR::translateDAL1IOError);
 #endif
 
 // ________________________________________________________________________

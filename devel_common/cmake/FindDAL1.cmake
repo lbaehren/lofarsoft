@@ -35,7 +35,7 @@
 # the following default installation layout has been defined:
 #
 # /opt
-# └── dal                          DAL1_INSTALL_PREFIX
+# └── dal1                          DAL1_INSTALL_PREFIX
 #     ├── bin                      DAL1_INSTALL_BINDIR
 #     ├── include                  DAL1_INSTALL_INCLUDEDIR
 #     │   ├── coordinates
@@ -57,29 +57,29 @@ if (NOT DAL1_FOUND)
   ##_____________________________________________________________________________
   ## Check for the header files
   
-  find_path (DAL1_INCLUDES dal_config.h
+  find_path (DAL1_INCLUDES dal1_config.h
     HINTS ${DAL1_ROOT_DIR}
-    PATHS /sw /usr /usr/local /opt/dal ${include_locations}
-    PATH_SUFFIXES include include/dal
+    PATHS /sw /usr /usr/local /opt/dal1 ${include_locations}
+    PATH_SUFFIXES include include/dal1
     )
 
-  ## core/dalDataset.h
+  ## core/dal1Dataset.h
 
-  find_path (DAL1_DALDATASET_H core/dalDataset.h
+  find_path (DAL1_DALDATASET_H core/dal1Dataset.h
     HINTS ${DAL1_ROOT_DIR}
-    PATHS /sw /usr /usr/local /opt/dal ${include_locations}
-    PATH_SUFFIXES include include/dal
+    PATHS /sw /usr /usr/local /opt/dal1 ${include_locations}
+    PATH_SUFFIXES include include/dal1
     )
   if (DAL1_DALDATASET_H)
     list (APPEND DAL1_INCLUDES ${DAL1_DALDATASET_H})
   endif (DAL1_DALDATASET_H)
   
-  ## core/dalDataset.h
+  ## core/dal1Dataset.h
 
   find_path (DAL1_COORDINATE_H coordinates/Coordinate.h
     HINTS ${DAL1_ROOT_DIR}
-    PATHS /sw /usr /usr/local /opt/dal ${include_locations}
-    PATH_SUFFIXES include include/dal
+    PATHS /sw /usr /usr/local /opt/dal1 ${include_locations}
+    PATH_SUFFIXES include include/dal1
     )
   if (DAL1_COORDINATE_H)
     list (APPEND DAL1_INCLUDES ${DAL1_COORDINATE_H})
@@ -94,10 +94,10 @@ if (NOT DAL1_FOUND)
 
   set (DAL1_LIBRARIES "")
   
-  find_library (DAL1_DAL_LIBRARY dal
+  find_library (DAL1_DAL_LIBRARY dal1
     HINTS ${DAL1_ROOT_DIR}
-    PATHS /sw /usr /usr/local /opt/dal ${lib_locations}
-    PATH_SUFFIXES lib lib/dal
+    PATHS /sw /usr /usr/local /opt/dal1 ${lib_locations}
+    PATH_SUFFIXES lib lib/dal1
     )
   if (DAL1_DAL_LIBRARY)
     list (APPEND DAL1_LIBRARIES ${DAL1_DAL_LIBRARY})
@@ -106,7 +106,7 @@ if (NOT DAL1_FOUND)
   ##_____________________________________________________________________________
   ## Check for the executable(s)
   
-  foreach (_dal_executable
+  foreach (_dal1_executable
       lopes2h5
       msread
       ms2h5
@@ -115,12 +115,12 @@ if (NOT DAL1_FOUND)
       )
 
     ## try to locate the executable
-    find_program (DAL1_${_dal_executable}_EXECUTABLE ${_dal_executable}
+    find_program (DAL1_${_dal1_executable}_EXECUTABLE ${_dal1_executable}
       HINTS ${DAL1_ROOT_DIR}
-      PATH_SUFFIXES bin bin/dal
+      PATH_SUFFIXES bin bin/dal1
       )
     
-  endforeach (_dal_executable)
+  endforeach (_dal1_executable)
   
   ##_____________________________________________________________________________
   ## Test DAL1 library for:
@@ -153,7 +153,7 @@ if (NOT DAL1_FOUND)
 
     ## __________________________________________________________________________
     ## Find library version
-    file (STRINGS "${DAL1_INCLUDES}/dal_config.h" DAL1_H REGEX "^#define DAL1_VERSION \"[^\"]*\"$")
+    file (STRINGS "${DAL1_INCLUDES}/dal1_config.h" DAL1_H REGEX "^#define DAL1_VERSION \"[^\"]*\"$")
     string (REGEX REPLACE "^.*DAL1_VERSION \"([0-9]+).*$" "\\1" DAL1_VERSION_MAJOR "${DAL1_H}")
     string (REGEX REPLACE "^.*DAL1_VERSION \"[0-9]+\\.([0-9]+).*$" "\\1" DAL1_VERSION_MINOR  "${DAL1_H}")
     string (REGEX REPLACE "^.*DAL1_VERSION \"[0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" DAL1_VERSION_PATCH "${DAL1_H}")

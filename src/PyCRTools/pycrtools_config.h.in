@@ -19,8 +19,8 @@
 /* Enable casacore support */
 #cmakedefine PYCRTOOLS_WITH_CASACORE
 
-/* Enable DAL support */
-#cmakedefine PYCRTOOLS_WITH_DAL
+/* Enable DAL1 support */
+#cmakedefine PYCRTOOLS_WITH_DAL1
 
 /* Enable GSL support */
 #cmakedefine PYCRTOOLS_WITH_GSL

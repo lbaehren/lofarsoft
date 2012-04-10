@@ -18,14 +18,6 @@ set (DAL1_GIT_REPOSITORY https://github.com/nextgen-astrodata/DAL1.git CACHE STR
 
 ## ==============================================================================
 ##
-##  Options
-##
-## ==============================================================================
-
-option (DAL1_FROM_RELEASE "Use release version instead of trunk?" NO)
-
-## ==============================================================================
-##
 ##  System inspection
 ##
 ## ==============================================================================
@@ -56,24 +48,11 @@ endif (NOT LUS_SOURCE_DIR)
 include (ExternalProject)
 
 ## Build package from source
-if (DAL1_FROM_RELEASE)
+ExternalProject_Add (dal1
+  GIT_REPOSITORY ${DAL1_GIT_REPOSITORY}
+  GIT_TAG rename
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DDAL_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+  )
 
-  ExternalProject_Add (dal1
-    GIT_REPOSITORY ${DAL1_GIT_REPOSITORY}
-    GIT_TAG release
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DDAL_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    )
-
-  add_dependencies (dal1 git)
-
-else (DAL1_FROM_RELEASE)
-
-  ExternalProject_Add (dal1
-    GIT_REPOSITORY ${DAL1_GIT_REPOSITORY}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DDAL_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    )
-
-  add_dependencies (dal1 git casacore num_util)
-
-endif (DAL1_FROM_RELEASE)
+add_dependencies (dal1 git)
 
