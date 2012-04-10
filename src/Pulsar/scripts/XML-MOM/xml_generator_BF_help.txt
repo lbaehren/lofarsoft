@@ -1,5 +1,5 @@
 
-Usage for BeamFormed: xml_generator_BF_help.sh [[-help BF]] 
+Usage for BeamFormed: xml_generator_BF.sh [[-help BF]] 
        -in observation_list_file -inswitch BF -intype source_or_position 
        -out template_output_file -project project_name [-st stations_list]   
        [-start obs_start] [-time duration] [-gap duration]   
@@ -69,8 +69,6 @@ Options:
          [[-whichStokesCS I|IQUV|XXYY]] ==> Set the BF CS stokes data type: I or IQUV or XXYY (default I). 
          [[-whichStokesIS I|IQUV]] ==> Set the BF IS stokes data type: I or IQUV (default I). 
                 
-       For help on Imaging input format and options, use '-help IM' switch
-
       This script is run using several different methodologies and input file options.
       Listed first are the types of file formats allowed as input, followed by an 
       explanation of all the input argument options.
