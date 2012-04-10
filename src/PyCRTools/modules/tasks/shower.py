@@ -268,8 +268,11 @@ class Shower(Task):
                 self.sizes0 /= self.sizes0.max()
                 self.sizes0 *= self.footprint_largest_point
                 
-                self.scolors=self.timelags
-                
+                if self.timelags is not None:
+                    self.scolors=self.timelags
+                else:
+                   self.scolors="blue"
+                   print "WARNING, footprint does not represent the time, only the signal strength"
                 #POL 0
                 
                 cr.plt.figure()
