@@ -37,6 +37,9 @@ find_package (Python)
 ## Check for executables
 
 find_program (SPHINX_EXECUTABLE sphinx)
+if (NOT SPHINX_EXECUTABLE)
+  find_program (SPHINX_EXECUTABLE sphinx-build)
+endif (NOT SPHINX_EXECUTABLE)
 
 ## -----------------------------------------------------------------------------
 ## Try to determine version

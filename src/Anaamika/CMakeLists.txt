@@ -108,6 +108,11 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC -fno-second-underscore")
 add_subdirectory (implement)
 add_subdirectory (apps)
 
+find_package(Sphinx)
+if (HAVE_SPHINX)
+  add_subdirectory (doc)
+endif (HAVE_SPHINX)
+
 ## ==============================================================================
 ##
 ##  Configuration summary
