@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/ksh 
 
 # Please update the version number when you edit this file:
 VERSION=2.2
@@ -6,19 +6,6 @@ VERSION=2.2
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
 # output is an XML file which can be uploaded into MOM (if you have ADMIN privileges)
-
-USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
-"       -in observation_list_file -inswitch IM -intype source_or_position \n"\
-"       -out template_output_file -project project_name [-stations stations_list]   \n"\
-"       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] \n"\
-"       [-subsHBAHigh subband_range] [-subsHBAMid subband_range] [-subsHBALow subband_range] \n"\
-"       [-subsLBAHigh subband_range] [-subsLBALow subband_range]  \n"\
-"       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
-"       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] \n"\
-"       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [+multi] [+CS|+IS|+FE list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug] \n"\
-"       [-cat user_catalog_filename] [-integstepsHBA BF_integration_steps_HBA] [-integstepsLBA BF_integration_steps_LBA] \n"\
-"       [-folder folder_name] [+TBB] [+OCD] [+Superterp] \n"
 
 USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       -in observation_list_file -inswitch BF -intype source_or_position \n"\
@@ -29,13 +16,14 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-subsLBAHigh subband_range] [-subsLBALow subband_range]  \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
-"       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug]"\
+"       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
+"       [+IM list_or_ALL] [-namecol] [-debug]"\
 "       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]\n"\
 "       [-cat user_catalog_filename] [-folder folder_name] [+TBB] [+OCD] [+Superterp] \n"\
 "       [-subbandsPerFileCS subbandsPerFileCS] [-subbandsPerFileIS subbandsPerFileIS] \n"\
 "       [-nofCollapsedChanCS numberCollapsedChannelsCS] [-nofCollapsedChanIS numberCollapsedChannelsIS]\n"\
-"       [-timeIntegFactorCS timeIntegrationFactorCS] [-timeIntegFactorIS timeIntegrationFactorIS]\n"\
+"       [-timeIntegFactorHBA_CS timeIntegrationFactorHBA_CS] [-timeIntegFactorHBA_IS timeIntegrationFactorHBA_IS]\n"\
+"       [-timeIntegFactorLBA_CS timeIntegrationFactorLBA_CS] [-timeIntegFactorLBA_IS timeIntegrationFactorLBA_IS]\n"\
 "       [-DM DispersionMeasure] [-whichStokesCS I|IQUV|XXYY] [-whichStokesIS I|IQUV]\n"
 
 USAGE3="Options: \n"\
@@ -57,8 +45,6 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-subsLBAHigh subband_range]] ==> The LBAHigh subband range (default = BF:'154..397'  IM:'156..399') \n"\
 "         [[-chansubsHBA channels_per_subband_HBA]] ==> The channels per subband for HBA (default = 16 (BF), 64 (IM)) \n"\
 "         [[-chansubsLBA channels_per_subband_LBA]] ==> The channels per subband for LBA (default = 32 (BF), 64 (IM)) \n"\
-"         [[-integstepsHBA integration_steps_HBA]] ==> The BF integration steps for HBA (default = 8) \n"\
-"         [[-integstepsLBA integration_steps_LBA]] ==> The BF integration steps for LBA (default = 8) \n"\
 "         [[-integHBA integration_interval_HBA]] ==> The IM-obs integration interval for HBA (default = 2) \n"\
 "         [[-integLBA integration_interval_LBA]] ==> The IM-obs integration interval for LBA (default = 3) \n"\
 "         [[-gap duration]] ==> The time between ALL observations in minutes (default = 1) \n"\
@@ -83,19 +69,21 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-subbandsPerFileIS subbandsPerFileIS]]  ==> Number of subbands per file BF IS (default = 512). \n"\
 "         [[-nofCollapsedChanCS nofCollapsedChannelsCS]] ==> Number of collapsed channels BF CS (default = 0). \n"\
 "         [[-nofCollapsedChanIS nofCollapsedChannelsIS]] ==> Number of collapsed channels BF IS (default = 0). \n"\
-"         [[-timeIntegFactorCS timeIntegrationFactorCS]] ==> The time integration facror (no of stokes downsampling steps) BF CS (default = 1). \n"\
-"         [[-timeIntegFactorIS timeIntegrationFactorIS]] ==> The time integration facror (no of stokes downsampling steps) BF IS (default = 1). \n"\
+"         [[-timeIntegFactorHBA_CS timeIntegrationFactorHBA_CS]] ==> Time integration facror (no. of stokes downsampling steps) BF HBA CS (default = 1). \n"\
+"         [[-timeIntegFactorHBA_IS timeIntegrationFactorHBA_IS]] ==> Time integration facror (no. of stokes downsampling steps) BF HBA IS (default = 1). \n"\
+"         [[-timeIntegFactorLBA_CS timeIntegrationFactorLBA_CS]] ==> Time integration facror (no. of stokes downsampling steps) BF LBA CS (default = 1). \n"\
+"         [[-timeIntegFactorLBA_IS timeIntegrationFactorLBA_IS]] ==> Time integration facror (no. of stokes downsampling steps) BF LBA IS (default = 1). \n"\
 "         [[-DM DispersionMeasure]] ==> Set the Dispersion Measure as this value for ALL the SAP & TAB beams. \n"\
 "         [[-whichStokesCS I|IQUV|XXYY]] ==> Set the BF CS stokes data type: I or IQUV or XXYY (default I). \n"\
 "         [[-whichStokesIS I|IQUV]] ==> Set the BF IS stokes data type: I or IQUV (default I). \n"
 
-USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
+USAGE5="For help on Imaging input format and options, use '-help IM' switch (depricated)\n"\
 "For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
 
 
 if [ $# -lt 2 ]                    
 then
-   print "$USAGE1" 
+#   print "$USAGE1" 
    print "$USAGE2" 
    print "$USAGE3" 
    print "$USAGE4" 
@@ -149,16 +137,11 @@ CHAN_SUBS_LBA=32
 CHAN_SUBS_LBA_IM=64
 user_chan_subs_lba=0
 CHAN_SUBS=0
-STEPS_HBA=16
-user_steps_hba=0
-STEPS_LBA=16
-user_steps_lba=0
 INTEG_HBA=2
 user_integ_hba=0
 INTEG_LBA=3
 user_integ_lba=0
 INTERVAL=1
-STEPS=0
 LST=0
 LST_DIFF=0
 PROJECT="Pulsars"
@@ -202,10 +185,20 @@ subbandsPerFileIS=512
 nofCollapsedChanCS=0
 nofCollapsedChanIS=0
 # A2 reset these to the defaults
-timeIntegFactorCS=1
-timeIntegFactorIS=1
 ##timeIntegFactorCS=0
 ##timeIntegFactorIS=0
+timeIntegFactorCS=1
+timeIntegFactorIS=1
+STEPS_HBA_CS=1
+STEPS_HBA_IS=1
+user_steps_hba_cs=0
+user_steps_hba_is=0
+STEPS_LBA_CS=1
+STEPS_LBA_IS=1
+user_steps_lba_cs=0
+user_steps_lba_is=0
+STEPS_CS=1
+STEPS_IS=1
 which_CS="I"
 which_IS="I"
 DM=0
@@ -236,8 +229,6 @@ do
      -modeLBA)           modeLBA=$2; user_modeLBA=1; shift;;
      -chansubsHBA)       CHAN_SUBS_HBA=$2; CHAN_SUBS_HBA_IM=$2; user_chan_subs_hba=1; shift;;
      -chansubsLBA)       CHAN_SUBS_LBA=$2; CHAN_SUBS_LBA_IM=$2; user_chan_subs_lba=1; shift;;
-     -integstepsHBA)     STEPS_HBA=$2; user_steps_hba=1; shift;;
-     -integstepsLBA)     STEPS_LBA=$2; user_steps_lba=1; shift;;
      -integHBA)          INTEG_HBA=$2; user_integ_hba=1; shift;;
      -integLBA)          INTEG_LBA=$2; user_integ_lba=1; shift;;
      -stations)          STATIONS=$2; user_stations=1; shift;;
@@ -262,14 +253,17 @@ do
      +Superterp)         Superterp=true;;
      -subbandsPerFileCS) subbandsPerFileCS=$2; shift;;
      -subbandsPerFileIS) subbandsPerFileIS=$2; shift;;
-     -timeIntegFactorCS) timeIntegFactorCS=$2; shift;;
-     -timeIntegFactorIS) timeIntegFactorIS=$2; shift;;
+     -timeIntegFactorHBA_CS) STEPS_HBA_CS=$2; user_steps_hba_cs=1; shift;;
+     -timeIntegFactorHBA_IS) STEPS_HBA_IS=$2; user_steps_hba_is=1; shift;;
+     -timeIntegFactorLBA_CS) STEPS_LBA_CS=$2; user_steps_lba_cs=1; shift;;
+     -timeIntegFactorLBA_IS) STEPS_LBA_IS=$2; user_steps_lba_is=1; shift;;
+     -nofCollapsedChanCS)     nofCollapsedChanCS=$2; shift;;
+     -nofCollapsedChanIS)     nofCollapsedChanIS=$2; shift;;
      -DM)                DM=$2; user_DM=1; shift;;
      -whichStokesCS)     which_CS=$2; shift;;
      -whichStokesIS)     which_IS=$2; shift;;
        -*)
             print >&2 \
-            "$USAGE1" \
             "$USAGE2" \
             "$USAGE3" \
             "$USAGE4" \
@@ -540,16 +534,18 @@ fi
 
 if (( (( $ncols >= 4 )) && (( $INTYPE == 1 )) ))
 then
-   if (( $user_steps_hba == 1 )) || (( $user_integ_hba == 1 )) 
+   if (( $user_steps_hba_cs == 1 )) || (( $user_steps_hba_is == 1 )) || (( $user_integ_hba == 1 )) 
    then
       echo "WARNING: ignoring user-specified integration steps/interval HBA setting;  input file setting will be used."
-      user_steps_hba=0
+      user_steps_hba_cs=0
+      user_steps_hba_is=0
       user_integ_hba=0
    fi
-   if (( $user_steps_lba == 1 )) || (( $user_integ_lba == 1 ))
+   if (( $user_steps_lba_cs == 1 )) ||  (( $user_steps_lba_is == 1 )) || (( $user_integ_lba == 1 ))
    then
       echo "WARNING: ignoring user-specified integration steps/interval LBA setting;  input file setting will be used."
-      user_steps_lba=0
+      user_steps_lba_cs=0
+      user_steps_lba_is=0
       user_integ_lba=0
    fi
 fi
@@ -605,13 +601,15 @@ then
 	   then
 	       ANT_SHORT=HBA
 	       CHAN_SUBS=$CHAN_SUBS_HBA
-	       STEPS=$STEPS_HBA
+	       STEPS_CS=$STEPS_HBA_CS  
+	       STEPS_IS=$STEPS_HBA_IS 
 	       INTERVAL=$INTEG_HBA
 	   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
 	   then
 	       ANT_SHORT=LBA
 	       CHAN_SUBS=$CHAN_SUBS_LBA
-	       STEPS=$STEPS_LBA
+	       STEPS_CS=$STEPS_LBA_CS  
+	       STEPS_IS=$STEPS_LBA_IS  
 	       INTERVAL=$INTEG_LBA
 	   else 
 	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBA, HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
@@ -635,13 +633,15 @@ else  # IM data
 	       ANT_SHORT=HBA
 	       CHAN_SUBS=$CHAN_SUBS_HBA_IM
 	       INTERVAL=$INTEG_HBA
-	       STEPS=$STEPS_HBA
+	       STEPS_CS=$STEPS_HBA_CS
+	       STEPS_IS=$STEPS_HBA_IS
 	   elif [[ $ANTENNA == "LBA" ]] || [[ $ANTENNA == "LBALow" ]] || [[ $ANTENNA == "LBAHigh" ]]
 	   then
 	       ANT_SHORT=LBA
 	       CHAN_SUBS=$CHAN_SUBS_LBA_IM
 	       INTERVAL=$INTEG_LBA
-	       STEPS=$STEPS_LBA
+	       STEPS_CS=$STEPS_LBA_CS
+	       STEPS_IS=$STEPS_LBA_IS
 	   else
 	      echo "ERROR: Input antenna setting is not understood ($ANTENNA); must be: HBALow, HBAMid, HBAHigh or LBA, LBALow, LBAHigh"
 	      exit 1
@@ -745,6 +745,13 @@ then
    then
       echo "WARNING: One of these BF specifications must be turned on: +CS|+IS|+FE."
       echo "         Therefore, assuming Coherentstokes for all beams (+CS)."
+      CS=1
+      CS_LIST=ALL
+   fi
+   # if only FE is turned on, must also turn on CS mode
+   if [ $CS == 0 ] && [ $FE == 1 ]
+   then
+      echo "NOTE: Turning on CS when FE is requested."
       CS=1
       CS_LIST=ALL
    fi
@@ -1097,23 +1104,51 @@ do
 							if [[ $ANT_SHORT == "HBA" ]] 
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA
-						        STEPS=$STEPS_HBA
 						        INTERVAL=$INTEG_HBA
+							    if [[ $IS_TF == "true" ]]
+							    then
+						           STEPS_IS=$STEPS_HBA_IS
+							    fi
+							    if [[ $FE_TF == "true" ]] ||  [[ $CS_TF == "true" ]]
+							    then
+						           STEPS_CS=$STEPS_HBA_CS
+							    fi
 							else
 						        CHAN_SUBS=$CHAN_SUBS_LBA
-						        STEPS=$STEPS_LBA
 						        INTERVAL=$INTEG_LBA
+							    if [[ $IS_TF == "true" ]]
+							    then
+						           STEPS_IS=$STEPS_LBA_IS
+							    fi
+							    if [[ $FE_TF == "true" ]] ||  [[ $CS_TF == "true" ]]
+							    then
+						           STEPS_CS=$STEPS_LBA_CS
+							    fi
 							fi
 						else
 							if [[ $ANT_SHORT == "HBA" ]]
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
-						        STEPS=$STEPS_HBA
+							    if [[ $IS_TF == "true" ]]
+							    then
+						           STEPS_IS=$STEPS_HBA_IS
+							    fi
+							    if [[ $FE_TF == "true" ]] ||  [[ $CS_TF == "true" ]]
+							    then
+						           STEPS_CS=$STEPS_HBA_CS
+							    fi
 							else
 						        CHAN_SUBS=$CHAN_SUBS_LBA_IM
 						        INTERVAL=$INTEG_LBA
-						        STEPS=$STEPS_LBA
+							    if [[ $IS_TF == "true" ]]
+							    then
+						           STEPS_IS=$STEPS_LBA_IS
+							    fi
+							    if [[ $FE_TF == "true" ]] ||  [[ $CS_TF == "true" ]]
+							    then
+						           STEPS_CS=$STEPS_LBA_CS
+							    fi
 							fi
 						fi # end if [ $INSWITCH == 1 ]
 				    fi # end (( $ncols == 2 ))
@@ -1124,6 +1159,16 @@ do
 				        if [ $INSWITCH == 1 ] # BF
 				        then
 				            STEPS=`echo $line | awk '{print $4}'`
+				            two_values=`echo $STEPS | grep "/"`
+				            STEPS_CS=`echo $STEPS | awk -F"/" '{print $1}'`
+				            if [[ $two_values != "" ]]
+				            then
+				               # two values, first is CS and second is IS
+				               STEPS_IS=`echo $STEPS | awk -F"/" '{print $2}'`
+                            else
+                               STEPS_IS=$STEPS_CS
+				            fi
+
 				            if [[ $ANT_SHORT == "HBA" ]]
 				            then 
 				                INTERVAL=$INTEG_HBA
@@ -1310,11 +1355,13 @@ do
 							if [[ $ANT_SHORT == "HBA" ]] 
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA
-						        STEPS=$STEPS_HBA
+						        STEPS_CS=$STEPS_HBA_CS
+						        STEPS_IS=$STEPS_HBA_IS
 						        INTERVAL=$INTEG_HBA
 							else
 						        CHAN_SUBS=$CHAN_SUBS_LBA
-						        STEPS=$STEPS_LBA
+						        STEPS_CS=$STEPS_LBA_CS
+						        STEPS_IS=$STEPS_LBA_IS
 						        INTERVAL=$INTEG_LBA
 							fi
 						else
@@ -1322,11 +1369,13 @@ do
 							then 
 						        CHAN_SUBS=$CHAN_SUBS_HBA_IM
 						        INTERVAL=$INTEG_HBA
-						        STEPS=$STEPS_HBA
+						        STEPS_CS=$STEPS_HBA_CS
+						        STEPS_IS=$STEPS_HBA_IS
 							else
 						        CHAN_SUBS=$CHAN_SUBS_LBA_IM
 						        INTERVAL=$INTEG_LBA
-						        STEPS=$STEPS_LBA
+						        STEPS_CS=$STEPS_LBA_CS
+						        STEPS_IS=$STEPS_LBA_IS
 							fi
 						fi # end if [ $INSWITCH == 1 ]
 				    fi # end if (( $ncols == 3 ))
@@ -1337,6 +1386,16 @@ do
 				        if [ $INSWITCH == 1 ] # BF
 				        then
 				            STEPS=`echo $line | awk '{print $5}'`
+				            two_values=`echo $STEPS | grep "/"`
+				            STEPS_CS=`echo $STEPS | awk -F"/" '{print $1}'`
+				            if [[ $two_values != "" ]]
+				            then
+				               # two values, first is CS and second is IS
+				               STEPS_IS=`echo $STEPS | awk -F"/" '{print $2}'`
+                            else
+                               STEPS_IS=$STEPS_CS
+				            fi
+
 				            if [[ $ANT_SHORT == "HBA" ]]
 				            then
 				                INTERVAL=$INTEG_HBA
@@ -1347,9 +1406,11 @@ do
 				            INTERVAL=`echo $line | awk '{print $5}'`
 							if [[ $ANT_SHORT == "HBA" ]]  
 							then 
-						        STEPS=$STEPS_HBA
+						        STEPS_CS=$STEPS_HBA_CS
+						        STEPS_IS=$STEPS_HBA_IS
 							else
-						        STEPS=$STEPS_LBA
+						        STEPS_CS=$STEPS_LBA_CS
+						        STEPS_IS=$STEPS_LBA_IS
 							fi
 				        fi
 				    fi
@@ -2139,7 +2200,8 @@ do
 			if [ $INSWITCH = 1 ]
 			then
 			   echo "Channels per Subband = $CHAN_SUBS"
-			   echo "Integration Steps = $STEPS"
+			   echo "Integration Steps CS = $STEPS_CS"
+			   echo "Integration Steps IS = $STEPS_IS"
 	        else
 			   echo "Channels per Subband = $CHAN_SUBS"
 	        fi
@@ -2164,21 +2226,21 @@ do
 	           if (( $beam_counter == 0 ))
 	           then
 #	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FE_TF/$CV_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" $middle >> $outfile
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/BYPASS 2PPF/$bypass2PPF/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FE_TF/$FE_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/CLOCK/$clock/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" -e "s/TBB PIGGYBACK/$TBB/g" -e "s/OCD_TF/$OCD/g" -e "s/ENABLE SUPERTERP/$Superterp/g" -e "s/SUBS PER FILE CS/$subbandsPerFileCS/g" -e "s/SUBS PER FILE IS/$subbandsPerFileIS/g" -e "s/COLLAPSED CHAN CS/$nofCollapsedChanCS/g" -e "s/COLLAPSED CHAN IS/$nofCollapsedChanIS/g" -e "s/DOWNSAMPLING STEPS CS/$timeIntegFactorCS/g" -e "s/DOWNSAMPLING STEPS IS/$timeIntegFactorIS/g" -e "s/WHICH_CS/$which_CS/g" -e "s/WHICH_IS/$which_IS/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/BYPASS 2PPF/$bypass2PPF/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FE_TF/$FE_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/CLOCK/$clock/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" -e "s/TBB PIGGYBACK/$TBB/g" -e "s/OCD_TF/$OCD/g" -e "s/ENABLE SUPERTERP/$Superterp/g" -e "s/SUBS PER FILE CS/$subbandsPerFileCS/g" -e "s/SUBS PER FILE IS/$subbandsPerFileIS/g" -e "s/COLLAPSED CHAN CS/$nofCollapsedChanCS/g" -e "s/COLLAPSED CHAN IS/$nofCollapsedChanIS/g" -e "s/DOWNSAMPLING STEPS CS/$STEPS_CS/g" -e "s/DOWNSAMPLING STEPS IS/$STEPS_IS/g" -e "s/WHICH_CS/$which_CS/g" -e "s/WHICH_IS/$which_IS/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" $middle >> $outfile
 	              echo "                                  <children>" >> $outfile
 	           fi
 	        elif [ $INSWITCH == 2 ]  && [ $skip == 0 ]
 	        then
 	           if (( $beam_counter == 0 ))
 	           then
-	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FE_TF/$FE_TF/g" -e "s/BYPASS 2PPF/$bypass2PPF/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/CLOCK/$clock/g " -e "s/TBB PIGGYBACK/$TBB/g" -e "s/OCD_TF/$OCD/g" -e "s/ENABLE SUPERTERP/$Superterp/g" -e "s/SUBS PER FILE CS/$subbandsPerFileCS/g" -e "s/SUBS PER FILE IS/$subbandsPerFileIS/g" -e "s/COLLAPSED CHAN CS/$nofCollapsedChanCS/g" -e "s/COLLAPSED CHAN IS/$nofCollapsedChanIS/g" -e "s/DOWNSAMPLING STEPS CS/$timeIntegFactorCS/g" -e "s/DOWNSAMPLING STEPS IS/$timeIntegFactorIS/g" -e "s/WHICH_CS/$WHICH_CS/g" -e "s/WHICH_IS/$WHICH_IS/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" $middle >> $outfile
+	              sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/IS_TF/$IS_TF/g" -e "s/CS_TF/$CS_TF/g" -e "s/FE_TF/$FE_TF/g" -e "s/BYPASS 2PPF/$bypass2PPF/g" -e "s/CLOCK/$clock/g " -e "s/TBB PIGGYBACK/$TBB/g" -e "s/OCD_TF/$OCD/g" -e "s/ENABLE SUPERTERP/$Superterp/g" -e "s/SUBS PER FILE CS/$subbandsPerFileCS/g" -e "s/SUBS PER FILE IS/$subbandsPerFileIS/g" -e "s/COLLAPSED CHAN CS/$nofCollapsedChanCS/g" -e "s/COLLAPSED CHAN IS/$nofCollapsedChanIS/g" -e "s/DOWNSAMPLING STEPS CS/$STEPS_CS/g" -e "s/DOWNSAMPLING STEPS IS/$STEPS_IS/g" -e "s/WHICH_CS/$WHICH_CS/g" -e "s/WHICH_IS/$WHICH_IS/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" $middle >> $outfile
 	           fi
 	        fi 
 
 	        if [ $INSWITCH == 1 ] && [ $skip == 0 ]
 	        then 
 #	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME ($ANTENNA)/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" $beam_xml >> $outfile
-	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/OCD_TF/$OCD/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" -e "s/FE_TF/$FE_TF/g" $beam_xml >> $outfile
+	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/Obs $OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/PULSAR/$PULSAR/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/IMAGING/$IM_TF/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/OCD_TF/$OCD/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" -e "s/FE_TF/$FE_TF/g" $beam_xml >> $outfile
 	           
 
 	           # Note, this is how to replace a string in a file with the contents of a file
@@ -2187,14 +2249,13 @@ do
 	           #	       str=INSERT_TAB_FILE_CONTENTS
 	           #           sed -e "/$str/r FileB" -e "/$str/d" FileA
 	            mv $outfile $$"_"$outfile
-	            cat $tmp_file
 	            str=INSERT_TAB_FILE_CONTENTS
 	            sed -e "/$str/r $tmp_file" -e "/$str/d" $$"_"$outfile > $outfile
 #           		rm $$"_"$outfile
 
 	        elif [ $INSWITCH == 2 ] && [ $skip == 0 ]
 	        then
-	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/INTEG STEPS/$STEPS/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/OCD_TF/$OCD/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" -e "s/FE_TF/$FE_TF/g" $beam_xml >> $outfile
+	           sed -e "s/FILL IN OBSERVATION NAME/$OBSNAME/g" -e "s/RA/$RA/g" -e "s/DEC/$DEC/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/FILL IN DESCRIPTION/$OBJECT_LONG_BEAM at $START for $TIME min/g" -e "s/RDEG/$RA_DEG/g" -e "s/DDEG/$DEC_DEG/g" -e "s/STARTTIME/$START/g" -e "s/ENDTIME/$END/g" -e "s/LENGTH/$DURATION/g" -e "s/FILL IN TIMESTAMP/$date/g" -e "s/SUBBANDS/$SUBBANDS/g" -e "s/STATION_LIST/$STATION_LIST/g" -e "s/OBJECT/$OBJECT/g" -e "s/PROJECT NAME/$PROJECT/g" -e "s/ANTENNA SETTING/$ANTENNA_SETTING/g" -e "s/INSTRUMENT FILTER/$INSTRUMENT_FILTER/g" -e "s/INTEG INTERVAL/$INTERVAL/g" -e "s/TARGET NAME/$OBJECT/g" -e "s/BEAM NUMBER/$beam_counter/g" -e "s/CHANNELS PER SUBBAND/$CHAN_SUBS/g" -e "s/OCD_TF/$OCD/g" -e "s/NOF TA RINGS/$NOF_RINGS/g" -e "s/TA RING SIZE/$RING_SIZE/g" -e "s/FE_TF/$FE_TF/g" $beam_xml >> $outfile
 	        fi
 	        
 	        if (( $MULTI == 1 ))  && (( $nbeams > 1 ))
