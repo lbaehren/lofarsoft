@@ -19,7 +19,7 @@ class Shower(Task):
     
     Task can be run without giving uncertainties. The resulting plot will then also not contain any uncertainties. 
     
-    FOOTPRINT = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, footprint_enable=True)
+    FOOTPRINT = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, direction=direction, core = core, footprint_enable=True)
         
     """
 
@@ -289,8 +289,9 @@ class Shower(Task):
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
-                self.cbar=cr.plt.colorbar()
-                self.cbar.set_label("Time of arrival (ns)")
+                if self.timelags is not None:
+                    self.cbar=cr.plt.colorbar()
+                    self.cbar.set_label("Time of arrival (ns)")
                 if self.footprint_use_title:
                     if self.eventid:
                         self.title = str(self.eventid)+" in pol X" 
@@ -314,8 +315,9 @@ class Shower(Task):
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
-                self.cbar=cr.plt.colorbar()
-                self.cbar.set_label("Time of arrival (ns)")
+                if self.timelags is not None:
+                    self.cbar=cr.plt.colorbar()
+                    self.cbar.set_label("Time of arrival (ns)")
                 if self.footprint_use_title:
                     if self.eventid:
                         self.title = str(self.eventid)+" in pol Y" 
@@ -340,8 +342,10 @@ class Shower(Task):
                     cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes2,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                     cr.plt.xlabel("LOFAR East [meters] ")
                     cr.plt.ylabel("LOFAR North [meters] ")
-                    self.cbar=cr.plt.colorbar()
-                    self.cbar.set_label("Time of arrival (ns)")
+                    
+                    if self.timelags is not None:
+                        self.cbar=cr.plt.colorbar()
+                        self.cbar.set_label("Time of arrival (ns)")
                     if self.footprint_use_title:
                         if self.eventid:
                             self.title = str(self.eventid)+" in pol Z" 
