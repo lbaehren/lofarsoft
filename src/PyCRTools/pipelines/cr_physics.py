@@ -154,7 +154,7 @@ for station in stations:
     stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
     # Get pulse strength
-    pulse_envelope2 = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+    pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
     # Create instance
     p = crdb.Polarization(db)
@@ -168,21 +168,25 @@ for station in stations:
 
     # Add parameters
     p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
-    p["crp_pulse_strength"] = cr.hArray(pulse_envelope2.maxima).toNumpy().reshape((nantennas, 3))
-    p["crp_rms"] = cr.hArray(pulse_envelope2.rms).toNumpy().reshape((nantennas, 3))
+    p["crp_pulse_delays"] = pulse_envelope_xyz.delays.toNumpy().reshape((nantennas,3)) + f["CLOCK_OFFSET"][0]
+    p["crp_pulse_strength"] = cr.hArray(pulse_envelope_xyz.maxima).toNumpy().reshape((nantennas, 3))
+    p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
 
 # Get combined parameters from (cached) database
 all_station_antenna_positions = []
+all_station_pulse_delays = []
 all_station_pulse_strength = []
 all_station_rms = []
 
 for station in stations:
     p = station.polarization["xyz"]
     all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
+    all_station_pulse_delays.append(p["crp_pulse_delays"])
     all_station_pulse_strength.append(p["crp_pulse_strength"])
     all_station_rms.append(p["crp_rms"])
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)
+all_station_pulse_delays = np.vstack(all_station_pulse_delays)
 all_station_pulse_strength = np.vstack(all_station_pulse_strength)
 all_station_rms = np.vstack(all_station_rms)
 
@@ -204,10 +208,5 @@ ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncer
 
 # Compute footprint
 
-timelags = None
-
-footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = direction, timelags = timelags, footprint_enable=True )
-
-
-
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = direction, timelags = all_station_pulse_delays * 1.e9, footprint_enable=True )
 
