@@ -34,8 +34,11 @@ for f in event.datafiles:
 
 combined_antenna_positions = []
 combined_pulse_strength = []
+combined_rms = []
 
 for station in stations:
+
+    print station
 
     # Open file
     f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
@@ -153,29 +156,51 @@ for station in stations:
     # Get pulse strength
     pulse_envelope2 = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
-    combined_antenna_positions.append(md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy())
-    combined_pulse_strength.append(cr.hArray(pulse_envelope2.maxima).toNumpy().reshape((nantennas, 3)))
+    # Create instance
+    p = crdb.Polarization(db)
 
-    print station
+    # Set direction
+    p.direction = "xyz"
+
+    # Add to station object (and to database)
+    p.write()
+    station.addPolarization(p)
+
+    # Add parameters
+    p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
+    p["crp_pulse_strength"] = cr.hArray(pulse_envelope2.maxima).toNumpy().reshape((nantennas, 3))
+    p["crp_rms"] = cr.hArray(pulse_envelope2.rms).toNumpy().reshape((nantennas, 3))
+
+# Get combined parameters from (cached) database
+all_station_antenna_positions = []
+all_station_pulse_strength = []
+all_station_rms = []
+
+for station in stations:
+    p = station.polarization["xyz"]
+    all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
+    all_station_pulse_strength.append(p["crp_pulse_strength"])
+    all_station_rms.append(p["crp_rms"])
+
+all_station_antenna_positions = np.vstack(all_station_antenna_positions)
+all_station_pulse_strength = np.vstack(all_station_pulse_strength)
+all_station_rms = np.vstack(all_station_rms)
+
+# Convert to contiguous array of correct shape
+shape = all_station_antenna_positions.shape
+all_station_antenna_positions = all_station_antenna_positions.reshape((shape[0] / 2, 2, shape[1]))[:,0]
+all_station_antenna_positions = all_station_antenna_positions.copy()
 
 # Beamform with all stations
 
 # Compute LDF
 
-combined_antenna_positions = np.vstack(combined_antenna_positions)
-combined_pulse_strength = np.vstack(combined_pulse_strength)
-core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
-core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"]
-direction = stations[0].polarization['0']["pulse_direction_lora"]
-direction_uncertainties = [3.,3.,0]
-signals_uncertainties = None
+ldf_core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
+ldf_core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
+ldf_direction = stations[0].polarization['0']["pulse_direction_lora"]
+ldf_direction_uncertainties = [3.,3.,0]
 
-shape = combined_antenna_positions.shape
-combined_antenna_positions = combined_antenna_positions.reshape((shape[0] / 2, 2, shape[1]))[:,0]
-combined_antenna_positions = combined_antenna_positions.copy()
-print combined_antenna_positions
-
-ldf = cr.trun("Shower", positions = combined_antenna_positions, signals_uncertainties = signals_uncertainties, core = core, direction = direction, core_uncertainties = core_uncertainties.toNumpy(), signals = combined_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True)
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = ldf_core, direction = ldf_direction, core_uncertainties = ldf_core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = ldf_direction_uncertainties, ldf_enable = True)
 
 # Compute footprint
 
