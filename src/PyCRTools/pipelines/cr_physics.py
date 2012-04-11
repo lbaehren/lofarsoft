@@ -195,12 +195,19 @@ all_station_antenna_positions = all_station_antenna_positions.copy()
 
 # Compute LDF
 
-ldf_core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
-ldf_core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
-ldf_direction = stations[0].polarization['0']["pulse_direction_lora"]
-ldf_direction_uncertainties = [3.,3.,0]
+core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
+core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
+direction = stations[0].polarization['0']["pulse_direction_lora"]
+direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = ldf_core, direction = ldf_direction, core_uncertainties = ldf_core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = ldf_direction_uncertainties, ldf_enable = True)
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True)
 
 # Compute footprint
+
+timelags = None
+
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = direction, timelags = timelags, footprint_enable=True )
+
+
+
 
