@@ -74,7 +74,7 @@ class PulseEnvelope(Task):
         """
 
         # Resample singal
-        cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.pulse_start:self.pulse_end])
+        cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.window_start:self.window_end])
 
         # Compute FFT
         cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
@@ -93,7 +93,7 @@ class PulseEnvelope(Task):
         cr.hSqrt(self.envelope)
 
         # Find signal to noise ratio, maximum, position of maximum and rms
-        cr.hMaxSNR(self.snr[...], self.rms[...], self.maxima[...], self.maxpos[...], self.envelope[...], self.pulse_start - self.window_start, self.pulse_end - self.window_start)
+        cr.hMaxSNR(self.snr[...], self.rms[...], self.maxima[...], self.maxpos[...], self.envelope[...], (self.pulse_start - self.window_start) * int(self.resample_factor), (self.pulse_end - self.window_start) * int(self.resample_factor))
 
         # Convert to delay
         self.delays[:] = self.maxpos[:]
