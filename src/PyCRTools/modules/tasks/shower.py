@@ -63,6 +63,9 @@ class Shower(Task):
         footprint_use_background = dict(default=True, doc="Use LOFAR map as background for footprint"),
         footprint_largest_point = dict(default=300,doc="Largest point in plot for LOFAR"),
         footprint_use_title = dict(default=False,doc="Draw title indicating polarizations and event id (if given)"),
+         
+        footprint_shower_enable = dict(default=True, doc='Draw shower geometry in footprint'), 
+        footprint_shower_color = dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),            
              
         footprint_lora_enable = dict(default = False,
             doc = "Draw Information from LORA"), 
@@ -260,6 +263,13 @@ class Shower(Task):
                     else:
                         print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
         
+            if self.footprint_shower_enable and self.direction is not None and self.core is not None:
+                    
+                    dcos=cr.cos(cr.radians(self.direction[0]))
+                    dsin=cr.sin(cr.radians(self.direction[0]))
+                    elev=self.direction[1]
+                    
+
             if self.positions is not None and self.signals is not None:
 
                 self.sizes0 = self.signals[:,0]
@@ -288,6 +298,10 @@ class Shower(Task):
                         self.title = 'pol X'    
                     cr.plt.title(self.title)
                 
+                #Plotting the shower
+                if self.footprint_shower_enable:
+                    cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
+                    cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
                 #POL 1
                 
                 self.sizes1 = self.signals[:,1]
@@ -309,6 +323,10 @@ class Shower(Task):
                         self.title = 'pol Y'    
                     cr.plt.title(self.title)                
                 
+                #Plotting the shower
+                if self.footprint_shower_enable:
+                    cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
+                    cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
                 #POL 2
                 if self.signals.shape[1] == 3:
                 
@@ -330,6 +348,15 @@ class Shower(Task):
                         else:
                             self.title = 'pol Z'    
                         cr.plt.title(self.title)                
+                    #Plotting the shower
+                    if self.footprint_shower_enable:
+                        cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
+                        cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
+
+
+                
+                
                 cr.plt.show()
+            
             else:
                 print "WARNING: Give at least positions and signals to plot a footprint"                
