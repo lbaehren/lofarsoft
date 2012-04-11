@@ -2,6 +2,7 @@
 """
 
 import pytmf
+import numpy as np
 import pycrtools as cr
 from pycrtools import crdatabase as crdb
 from pycrtools import metadata as md
@@ -30,6 +31,9 @@ event = crdb.Event(db = db, id = options.id)
 stations = []
 for f in event.datafiles:
     stations.extend(f.stations)
+
+combined_antenna_positions = []
+combined_pulse_strength = []
 
 for station in stations:
 
@@ -112,7 +116,6 @@ for station in stations:
 
     # Get first estimate of pulse direction
     pulse_direction = station.polarization[rp]["pulse_direction"]
-    print "database results for direction", pulse_direction
 
     fft = fft_data.toNumpy()
 
@@ -122,7 +125,7 @@ for station in stations:
     while True:
 
         # Unfold antenna pattern
-        antenna_response = cr.trun("AntennaResponse", normalize = False, fft_data = fft_data, frequencies = frequencies, direction = (0., 45.9999999999999))
+        antenna_response = cr.trun("AntennaResponse", normalize = False, fft_data = fft_data, frequencies = frequencies, direction = pulse_direction)
 
         # Get timeseries data
         cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
@@ -136,7 +139,7 @@ for station in stations:
 
         pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
-        n += 100
+        n += 1
         if converged or n > options.maximum_nof_iterations or direction_fit_plane_wave.fit_failed:
             break # Exit fitting loop
 
@@ -147,21 +150,32 @@ for station in stations:
     # Get Stokes parameters
     stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
+    # Get pulse strength
+    pulse_envelope2 = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+
+    combined_antenna_positions.append(md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy())
+    combined_pulse_strength.append(cr.hArray(pulse_envelope2.maxima).toNumpy().reshape((nantennas, 3)))
+
+    print station
+
 # Beamform with all stations
 
 # Compute LDF
-    
-    
-signals = 0 # to be done by Pim
-#Get LORA path from database?
-loradata = loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurroundingSecond=True,silent=False)
-core = loradata["core"]
-core_uncertainties = loradata["coreuncertainties"]
-## Direction from LORA or from fit?
-direction = loradata["direction"]
-direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower",positions=antenna_positions, signals_uncertainties=signals_uncertainties, core=core,direction=direction,core_uncertainties=core_uncertainties,signals=signals,direction_uncertainties=direction_uncertainties, ldf_enable=True)
+combined_antenna_positions = np.vstack(combined_antenna_positions)
+combined_pulse_strength = np.vstack(combined_pulse_strength)
+core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
+core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"]
+direction = stations[0].polarization['0']["pulse_direction_lora"]
+direction_uncertainties = [3.,3.,0]
+signals_uncertainties = None
+
+shape = combined_antenna_positions.shape
+combined_antenna_positions = combined_antenna_positions.reshape((shape[0] / 2, 2, shape[1]))[:,0]
+combined_antenna_positions = combined_antenna_positions.copy()
+print combined_antenna_positions
+
+ldf = cr.trun("Shower", positions = combined_antenna_positions, signals_uncertainties = signals_uncertainties, core = core, direction = direction, core_uncertainties = core_uncertainties.toNumpy(), signals = combined_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True)
 
 # Compute footprint
 
