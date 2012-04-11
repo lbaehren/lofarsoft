@@ -39,9 +39,12 @@ class Shower(Task):
         direction_uncertainties = dict(default = None, 
             doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"), 
         timelags = dict(default=None,
-            doc = "Timelags of signals given in nanoseconds [NAntennas]"),
+            doc = "Timelags of signals given in nanoseconds [NAntennas x (X,Y,Z)]"),
         eventid = dict(default = None,
-            doc="Give Event ID to be specified in plot title "),            
+            doc="Give Event ID to be specified in plot title "), 
+            
+        save_plots = dict(default=False,
+            doc="Saving plost instead of showing them.") ,              
         
         ldf_enable = dict( default = False, 
             doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"), 
@@ -62,7 +65,7 @@ class Shower(Task):
         footprint_marker_lofar = dict(default='o', doc="Marker for LOFAR stations in footprint"),
         footprint_use_background = dict(default=True, doc="Use LOFAR map as background for footprint"),
         footprint_largest_point = dict(default=300,doc="Largest point in plot for LOFAR"),
-        footprint_use_title = dict(default=False,doc="Draw title indicating polarizations and event id (if given)"),
+        footprint_use_title = dict(default=True,doc="Draw title indicating polarizations and event id (if given)"),
          
         footprint_shower_enable = dict(default=True, doc='Draw shower geometry in footprint'), 
         footprint_shower_color = dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),            
@@ -177,7 +180,7 @@ class Shower(Task):
         """Run the task.
         """
         
-        # Plot LDF
+        # ---------------------  LDF  ------------------------------ #
         
         if self.ldf_enable:
         
@@ -222,8 +225,6 @@ class Shower(Task):
                 if self.ldf_logplot:
                     cr.plt.yscale("log")
                 cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
-                
-                cr.plt.show()
 
             
             else:
@@ -240,7 +241,13 @@ class Shower(Task):
                     cr.plt.yscale("log")
                 cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
                 
-                cr.plt.show()   
+            if self.save_plots:
+                print "Not implemented yet"
+            else:    
+                 cr.plt.show()   
+        
+       #---------------------- FOOTPRINT --------------------# 
+        
                 
         if self.footprint_enable: 
         
@@ -276,16 +283,17 @@ class Shower(Task):
                 self.sizes0 /= self.sizes0.max()
                 self.sizes0 *= self.footprint_largest_point
                 
-                if self.timelags is not None:
-                    self.scolors=self.timelags
-                else:
+                if self.timelags is None:
                    self.scolors="blue"
                    print "WARNING, footprint does not represent the time, only the signal strength"
-                #POL 0
+                
+                # POL 0
                 
                 cr.plt.figure()
                 if bgim is not None and self.footprint_use_background:
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                if self.timelags is not None:
+                    self.scolors=self.timelags[:,0]                
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -303,6 +311,7 @@ class Shower(Task):
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
+                
                 #POL 1
                 
                 self.sizes1 = self.signals[:,1]
@@ -312,6 +321,8 @@ class Shower(Task):
                 cr.plt.figure()
                 if bgim is not None and self.footprint_use_background:
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                if self.timelags is not None:
+                    self.scolors=self.timelags[:,1]
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -329,6 +340,7 @@ class Shower(Task):
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
+                
                 #POL 2
                 if self.signals.shape[1] == 3:
                 
@@ -339,6 +351,8 @@ class Shower(Task):
                     cr.plt.figure()
                     if bgim is not None and self.footprint_use_background:
                         cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                    if self.timelags is not None:
+                        self.scolors=self.timelags[:,2]
                     cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes2,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                     cr.plt.xlabel("LOFAR East [meters] ")
                     cr.plt.ylabel("LOFAR North [meters] ")
@@ -352,15 +366,17 @@ class Shower(Task):
                         else:
                             self.title = 'pol Z'    
                         cr.plt.title(self.title)                
+                    
                     #Plotting the shower
                     if self.footprint_shower_enable:
                         cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
 
 
-                
-                
-                cr.plt.show()
+                if self.save_plots:
+                    print "Not implemented yet"
+                else:    
+                    cr.plt.show()
             
             else:
                 print "WARNING: Give at least positions and signals to plot a footprint"                
