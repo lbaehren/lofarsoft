@@ -113,6 +113,7 @@ class TBBData(IOInterface):
             "FILEDATE":self.__file.filedate,
             "TELESCOPE":self.__file.telescope,
             "OBSERVER":self.__file.observer,
+            "CLOCK_OFFSET":self.getClockOffset,
             "CLOCK_FREQUENCY":self.__file.clockFrequency,
             "CLOCK_FREQUENCY_UNIT":self.__file.clockFrequencyUnit,
             "FILTER_SELECTION":self.__file.filterSelection,
@@ -632,6 +633,12 @@ class TBBData(IOInterface):
         cr.hFFTFrequencies(frequencies, self["SAMPLE_FREQUENCY"][0], self.__nyquist_zone[0])
     
         return frequencies
+
+    def getClockOffset(self):
+        """Return clock offset.
+        """
+
+        return [md.getClockCorrection(s) for s in self["STATION_NAME"]]
 
     def empty(self, key):
         """Return empty array for keyword data.
