@@ -937,11 +937,14 @@ class obsinfo:
 				if self.subbandList != "?" and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
 					try:
 						subband_first = int(self.subbandList.split("..")[0].split(",")[0])
-						# CS has a priority
-						if self.nrChanPerSubCS != 0:
-							nchanpersub = self.nrChanPerSubCS
-						else:
-							nchanpersub = self.nrChanPerSubIS
+						if self.nrChanPerSubIS == self.nrChanPerSubCS or self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
+			                                nchanspersub = (self.nrChanPerSubIS != 0 and self.nrChanPerSubIS or self.nrChanPerSubCS)
+			                        elif self.IS == '+' and self.CS != '+' and self.BF != '+':
+			                                nchanspersub = self.nrChanPerSubIS
+			                        elif self.IS != '+' and (self.CS == '+' or self.BF == '+'):
+			                                nchanspersub = self.nrChanPerSubCS
+						else:   # CS has a priority
+							nchanspersub = self.nrChanPerSubCS
 						if nchanpersub > 1:
 							lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
 						else:
@@ -1136,12 +1139,24 @@ class outputInfo:
 		if self.oi.nrChanPerSubIS == self.oi.nrChanPerSubCS or self.oi.nrChanPerSubIS == 0 or self.oi.nrChanPerSubCS == 0:
 			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS)
 			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS)
+		elif self.oi.IS == '+' and self.oi.CS != '+' and self.oi.BF != '+':
+			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubIS)
+			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubIS)
+		elif self.oi.IS != '+' and (self.oi.CS == '+' or self.oi.BF == '+'):
+			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubCS)
+			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubCS)
 		else:
 			sampling_setup="Channels/Sub:%d(IS),%d(CS)|" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS)
 			sampling_setup_html="Channels/Sub: %d (IS), %d (CS)<br>" % (self.oi.nrChanPerSubIS, self.oi.nrChanPerSubCS)
 		if self.oi.timeresIS == self.oi.timeresCS or self.oi.timeresIS == 0 or self.oi.timeresCS == 0:
 			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
 			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
+		elif self.oi.IS == '+' and self.oi.CS != '+' and self.oi.BF != '+':
+			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresIS)
+			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresIS)
+		elif self.oi.IS != '+' and (self.oi.CS == '+' or self.oi.BF == '+'):
+			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresCS)
+			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresCS)
 		else:
 			sampling_setup+="Sampling:%g_ms(IS),%g_ms(CS)" % (self.oi.timeresIS, self.oi.timeresCS)
 			sampling_setup_html+="Sampling: %g ms (IS), %g ms (CS)" % (self.oi.timeresIS, self.oi.timeresCS)
