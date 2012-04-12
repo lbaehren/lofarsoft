@@ -8,6 +8,8 @@ from pytmf import *
 from pycrtools import metadata
 import math
 import numpy as np
+import pdb;# pdb.set_trace()
+
 
 def strdate2jd(strdate):
     '''
@@ -19,11 +21,10 @@ def strdate2jd(strdate):
     date_all = [int(a) for a in re.findall(r'\w+',strdate)]
     date = [date_all[0],date_all[1], float(date_all[2])+date_all[3]/24.+date_all[4]/(24*60.)+date_all[5]/(24.*60*60)]
     utc = date2jd(date[0],date[1],date[2])
-
     return utc
 
 pulsar = 1
-altair = 1 # if you are running this program in altair.
+altair = 1 #If you are running this program in altair.
 
 if pulsar:
     cr.tload('BeamFormer')  #Using this since it seems the program runs faster when the task is preloaded (if other task is "loaded" then it runs slower).
@@ -32,9 +33,18 @@ if pulsar:
     if altair:
         f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
         filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5'
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5'
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'        
+        output_dir= '/Users/eenriquez/RESEARCH/Pulsars/Results/'
+
     else:    
         f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
         filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+        output_dir= '~/RESEARCH/Pulsars/Results/'
 
 #PSR B0329+54 -- Pulsar    
 #Wikipidea Values
@@ -44,8 +54,8 @@ if pulsar:
     alpha = hms2rad(03,32,59.37 ); # Right assention 
     delta = dms2rad(54,34,44.9); # Declination    
     
-    phi = deg2rad(52.92)  #(LOFAR Superterp)
-    L = deg2rad(6.87)
+    phi = deg2rad(52.915122495)  #(LOFAR Superterp) 
+    L = deg2rad(6.869837540) 
     
     utc = strdate2jd(f1['TIME_HR'][0])
     
@@ -56,25 +66,30 @@ if pulsar:
     # Convert all coordinates in the input array
     # assumes difference between UTC and UT is 0 (hence ut1_utc=0.)
     cr.hEquatorial2Horizontal(horizontal, equatorial, utc, 0., L, phi)
+    #horizontal2 = radec2azel(alpha,delta,utc,0.,L,phi)
     
     if horizontal[0] < 0:  horizontal[0] += 2.*math.pi  #Need to check the definitions used for positive azimut angles.
     
     azel = [horizontal[0],horizontal[1]]
+    
     NyquistZone = 2
-    pointings=[{'el': azel[1], 'az': azel[0]}]
+    pointings=[{'az': azel[0], 'el': azel[1]}]
     maxchunklen = 2**20
     blocklen = 2**14
-    dohanning =False
-
-
+    dohanning =True
+    
 else:
-    f1=cr.open('~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5')
-    filefilter = '~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5'
-    azel_CR =[-46.9,45.4]
+    f1=cr.open('~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5')
+    filefilter = '~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5'   
+    output_dir= '~/RESEARCH/VHECR/Results/'
+
+#    azel_CR =[-46.9,45.4]
+    azel_CR =[231.9,63.1]
+    
     azel = [a*cr.deg for a in azel_CR]
     NyquistZone = 1
-    pointings=[{'el': azel[1], 'az': azel[0]}]#,{'el': azel[1]-5*cr.deg, 'az': azel[0]},{'el': azel[1], 'az': azel[0]-5*cr.deg}]
-#    FarField = True ## what does this do?? ...since it changes the output peak alot (False=nopeak)
+    pointings=[{'el': azel[1]+0*cr.deg, 'az': azel[0]}]#,{'el': azel[1]-5*cr.deg, 'az': azel[0]},{'el': azel[1], 'az': azel[0]-5*cr.deg}]
+#    FarField = True ##This changes the output peak alot (False=nopeak)
     maxchunklen = 2**16*5
     blocklen = 2**10
     dohanning =False
@@ -91,39 +106,63 @@ phase_center = phase_center
 antenna_positions= dict(zip(f1["DIPOLE_NAMES"],antenna_positions))
 cal_delays=dict(zip(f1["DIPOLE_NAMES"],f1["DIPOLE_CALIBRATION_DELAY"]))
 
-
 #------------------------------
 randomize_peaks = False
 FarField = True
 qualitycheck = False
 plotspec = True
-doplot = True
+doplot = False
 filenames = [filefilter]
 nantennas_start = 1
 nantennas_stride = 2
 maxnantennas = f1['NOF_DIPOLE_DATASETS']
-detail_name = '.test'
+detail_name = '.pol1.fixed_Nyquist'
 #----------------------------------
 
-bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,antenna_positions=antenna_positions,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name)
+bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,antenna_positions=antenna_positions,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name)
 
 #-------------------------------------------------------------------------------------
-#from pycrtools import *
 
-#tpar filenames=['~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5']
-#tpar NyquistZone=2
-#bm=hArrayRead('L43784_D20120125T211154.887Z_CS002_R000_tbb.h5.beams.pcr')
-#tpar maxchunklen=2**20
-#tpar blocklen=2**14
-#dmin=10e2;dmax=10e4
+#Run for Beamformer Pulsar case
+'''
+from pycrtools import *
+tpar filenames=['~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5']
+tpar maxchunklen=2**20
+tpar blocklen=2**14
+tpar detail_name='.pol0.fixed_Nyquist'
+dynspec,cleandynspec=Task.dyncalc(tbin=16,clean=True,save_file=True)
 
+tpar NyquistZone=2
+bm=hArrayRead('L43784_D20120125T211154.887Z_CS002_R000_tbb.h5.beams.pcr')
+dmin=10e2;dmax=10e4
+dynspec=Task.dyncalc(tbin=16*4)
+cr.plt.clf(); cr.plt.imshow(np.transpose(np.log(cleandynspec)),origin='lower',aspect='auto',vmin=-8,vmax=-2,extent=[0,1.024,100,200])
+'''
 
-'''tpar filenames=['~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
-tpar NyquistZone=1
+#Run for Beamformer CR case
+'''
+from pycrtools import *
+tpar filenames=['~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5']
 tpar maxchunklen=2**16*5
 tpar blocklen=2**10
+tpar detail_name='.pol0'
+tpar NyquistZone=1
 #dmin=-10e1;dmax=10e1
 bm=hArrayRead('L35018_D20111120T014205.590Z_CS004_R000_tbb.h5.beams.pcr')'''
+
+
+#Run for StationBeamformer
+'''
+from pycrtools import *
+tload 'StationBeamformer'
+tpar filename='L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+tpar blocksize=2**14
+tpar antennas='even'
+tpar coordinates=(pytmf.hms2deg(3, 32, 59.37),pytmf.dms2deg(54,34 , 44.9))
+Task.init()
+Task.run()
+'''
+
 
 #-------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------
