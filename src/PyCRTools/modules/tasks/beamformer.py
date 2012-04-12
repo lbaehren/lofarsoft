@@ -61,14 +61,14 @@ import pdb;# pdb.set_trace()
 deg=math.pi/180.
 pi2=math.pi/2.
 
-def makeGrid(AZ,EL,Distance,offset=5*deg):
-    return [dict(az=AZ-offset, el=EL+offset,r=Distance),dict(az=AZ, el=EL+offset,r=Distance),dict(az=AZ+offset, el=EL+offset,r=Distance),
-            dict(az=AZ-offset, el=EL,r=Distance),dict(az=AZ, el=EL,r=Distance),dict(az=AZ+offset, el=EL,r=Distance),
-            dict(az=AZ-offset, el=EL-offset,r=Distance),dict(az=AZ, el=EL-offset,r=Distance),dict(az=AZ+offset, el=EL-offset,r=Distance)]
+#def makeGrid(AZ,EL,Distance,offset=5*deg):
+#    return [dict(az=AZ-offset, el=EL+offset,r=Distance),dict(az=AZ, el=EL+offset,r=Distance),dict(az=AZ+offset, el=EL+offset,r=Distance),
+#            dict(az=AZ-offset, el=EL,r=Distance),dict(az=AZ, el=EL,r=Distance),dict(az=AZ+offset, el=EL,r=Distance),
+#            dict(az=AZ-offset, el=EL-offset,r=Distance),dict(az=AZ, el=EL-offset,r=Distance),dict(az=AZ+offset, el=EL-offset,r=Distance)]
 
 def getfile(ws):
     """
-    To produce an error message in case the file does not exist
+    To produce an error message in case the file does not exist.
     """
     if ws.file_start_number < len(ws.filenames):
         f=cr.open(ws.filenames[ws.file_start_number])
@@ -173,7 +173,7 @@ class BeamFormer(tasks.Task):
 
         >>> Task.qplot(186,all=False).
         
-    .. CurrentModuleDeveloper:: Emilio Enriquez <e.enriquez@astro.ru.nl>
+    .. CurrentModuleDeveloper:: Emilio Enriquez <e.enriquez 'at' astro.ru.nl>
 
     """
 
@@ -181,7 +181,7 @@ class BeamFormer(tasks.Task):
 #Beamformer parameters:
 #------------------------------------------------------------------------
         pointings = dict(default=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)],
-                         doc="List of coordinate dicts (``{'az':az1,'el':elevation value}``) containing pointing directions for each beam on the sky."),
+                         doc="List of coordinate dicts (``{'az':azimuth,'el':elevation value}``) containing pointing directions for each beam on the sky."),
 
         cal_delays = dict(default={},
                           doc="A dict containing 'cable' delays for each antenna in seconds as values. Key is the antenna ID. Delays will be added to geometrical delays.",
@@ -248,7 +248,7 @@ class BeamFormer(tasks.Task):
         maxnantennas = dict(default=96,
                             doc="Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."),
 
-        maxchunklen = dict(default=2**18,
+        maxchunklen = dict(default=2**20,
                            doc="Maximum length of one chunk of data that is kept in memory.",
                            unit="Samples"),
                            
@@ -403,11 +403,10 @@ class BeamFormer(tasks.Task):
                         unit="Sample"),
         
         test_beam_per_antenna = dict(default=False,
-                               doc="Save the all de antennas separatelly. Temporal parameter while task is under developement. Some values are hardcoded."),
+                               doc="Save the all de antennas separatelly. Temporal parameter while task is under developement. NOTE: Some values are hardcoded!"),
 
 #------------------------------------------------------------------------
 # Derived parameters
-
 
         nbeams = dict(default=lambda self:len(self.pointings),
                       doc="Number of beams to calculate."),
@@ -483,6 +482,9 @@ class BeamFormer(tasks.Task):
         delta_frequency = sc.p_(lambda self:(self.end_frequency-self.start_frequency)/(self.speclen-1.0),
                              "Separation of two subsequent channels in final spectrum."),
 
+        pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
+                             doc="Array of shape ``[nbeams,3]`` with *x*, *y*, *z* positions for each beam on the sky."),
+
 #------------------------------------------------------------------------
 
 #Now define all the work arrays used internally
@@ -510,9 +512,6 @@ class BeamFormer(tasks.Task):
                      doc="Output array containing the FFTed data for each beam.",
                      default=lambda self:cr.hArray(complex,[self.nblocks,self.nbeams,self.speclen],name="Beamed FFT",header=self.header,par=dict(logplot="y"),xvalues=self.frequencies)),
 
-        pointingsXYZ = dict(default=lambda self:cr.hArray(float,[self.nbeams,3],fill=[item for sublist in [cr.convert(coords,"CARTESIAN") for coords in self.pointings] for item in sublist],name="Beam Direction XYZ"),
-                            doc="Array of shape ``[nbeams,3]`` with *x*, *y*, *z* positions for each beam on the sky."),
-
         phases = dict(workarray=True,
                       doc="Complex phases for each beam and each freqeuncy channel used to calculate complex weights for beamforming.",
                       default=lambda self:cr.hArray(float,[self.nbeams,self.speclen],name="Phases",header=self.header)),
@@ -532,7 +531,11 @@ class BeamFormer(tasks.Task):
 
         frequencies = dict(workarray=True,
                            doc="Frequency axis for the final power spectrum.",
-                           default=lambda self:cr.hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header))
+                           default=lambda self:cr.hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header)),
+
+        times = dict(workarray=True,
+                     doc="Time axis for the final dynamic spectrum.",
+                     default=lambda self:cr.hArray(float,[self.sectduration*self.nchunks/self.block_duration],name="Time",units=("","s"),header=self.header))
     )
 
 
@@ -651,7 +654,7 @@ class BeamFormer(tasks.Task):
                         self.beams.write(self.spectrum_file,nblocks=self.nchunks,block=nchunk,clearfile=clearfile)
                         clearfile=False
                         if self.test_beam_per_antenna:
-                            test_beam[count]= self.beams[7]
+                            test_beam[count]= self.beams[7] # 7 since was checking in CR file.
                             count+=1
                         #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
 #                        if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
@@ -659,7 +662,6 @@ class BeamFormer(tasks.Task):
 #                            print "RMS of plotted spectra=",self.avspec[...,self.plot_start:self.plot_end].stddev()
 #                        if self.doplot>1:
 #                            self.avspec[...,0,:].plot();self.plotpause()
-#                        pdb.set_trace()
                      #End for nchunk
                 print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
                 if self.qualitycheck:
@@ -682,7 +684,7 @@ class BeamFormer(tasks.Task):
 #            self.avspec /= self.nspectraadded                      
 #            self.avspec_incoherent /= self.nspectraadded
 #            self.tbeam_incoherent /= self.nspectraadded
-        self.file_start_number=original_file_start_number # reset to original value, so that the parameter file is correctly written.
+        self.file_start_number=original_file_start_number  # Resets to original value, so that the parameter file is correctly written.
         if self.qualitycheck:
             self.mean=cr.asvec(self.mean_antenna[:self.nantennas_total]).mean()
             self.mean_rms=cr.asvec(self.mean_antenna[:self.nantennas_total]).stddev(self.mean)
@@ -739,7 +741,7 @@ class BeamFormer(tasks.Task):
         if chunk > self.maxnchunks-1 or chunk < 0:
             raise ValueError('Chunk value out of range.')
         self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
-        if beams==None:
+        if not beams:
             self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)
         else:
             self.beams = beams
@@ -748,12 +750,12 @@ class BeamFormer(tasks.Task):
             spec = cr.hArray(float,[self.nbeams,self.speclen],name="Frequency Spectrum",header=hdr,par=dict(logplot="y"),xvalues=self.frequencies)
             spec.spectralpower2(self.beams[block,...])
         if hdr.has_key("BeamFormer"):
-            if NyquistZone==None:
+            if not NyquistZone:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
         if not plotspec and (not hasattr(self,"tbeams") or recalc):
             self.tcalc(beams=self.beams,NyquistZone=NyquistZone,doabs=doabs,smooth=smooth)
 
-        if ylim==None and not plotspec:
+        if not ylim and not plotspec:
             ylim=(self.tbeams[block,...].min().val(),self.tbeams[block,...].max().val())
         if mosaic and self.nbeams > 1:
             npanels=self.beams.shape()[-2]
@@ -772,7 +774,6 @@ class BeamFormer(tasks.Task):
             else:
                 self.tbeams[block,...].plot(clf=True,xlim=xlim,ylim=ylim)
 
-
     def tcalc(self,beams=None,block=0,chunk=0,NyquistZone=1,doabs=False,smooth=0):
         """
         Calculate the time series after beamforming, i.e. take the
@@ -782,24 +783,24 @@ class BeamFormer(tasks.Task):
 
         ============= ===== ===================================================================
         *beams*       None  Input array. Take self.beams from task, if None.
-        *NyquistZone*  1    NyquistZone=2,4,... means flip the data left to right before FFT.
-        *doabs*      False  Take the absolute of the timeseries, if True.
-        *smooth*        0   If > 0 smooth datat with a Gaussian kernel of that size.
+        *NyquistZone* 1     NyquistZone=2,4,... means flip the data left to right before FFT.
+        *doabs*       False Take the absolute of the timeseries, if True.
+        *smooth*      0     If > 0 smooth data with a Gaussian kernel of that size.
         ============= ===== ===================================================================
 
-        The final time series (all blocks) is stored in Task.tbeams and returned.
+        The final time series (all blocks) is stored in ``Task.tbeams`` and returned.
         """
         
         if block > self.nblocks-1 or block < 0:
             raise ValueError('Block value out of range.')
         if chunk > self.maxnchunks-1 or chunk < 0:
             raise ValueError('Chunk value out of range.')        
-        if beams==None:
+        if not beams:
             self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)
             beams = self.beams
         hdr=beams.getHeader()
         if hdr.has_key("BeamFormer"):
-            if NyquistZone==None:
+            if not NyquistZone:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
         dim=beams.getDim();blocklen=(dim[-1]-1)*2
         self.beamscopy=cr.hArray(dimensions=[dim[-3]*dim[-2],dim[-1]],copy=beams)
@@ -819,135 +820,184 @@ class BeamFormer(tasks.Task):
             self.tbeams.par.xvalues.setUnit("mu","")
         return self.tbeams
 
-
-    def dynplot(self,dynspec=None,nbeam=0,plot_cleanspec=False,dmin=None,dmax=None,cmin=None,cmax=None,save_file=False):
+    def dynplot(self,dynspec=None,cleandynspec=None,plot_cleanspec=False,dmin=None,dmax=None,cmin=None,cmax=None,from_file=False):
         """
         Plot the dynamic beamformed spectrum. Provide the dynamic spectrum of the beamformed.
 
-        ================ ==== ===================================================================
-        *dynspec*        None Array with dynamic spectrum.
-        *plot_cleanspec* False If False, don't plot the cleaned spectrum
-        *dmin*                Minimum z-value (intensity) in dynamic spectrum to plot
-        *dmax*                Maximum z-value (intensity) in dynamic spectrum to plot
-        *cmin*                Minimum z-value (intensity) in clean dynamic spectrum to plot
-        *cmax*                Maximum z-value (intensity) in clean dynamic spectrum to plot
-        *save_file*     False To save a file.
-        ================ ==== ===================================================================
+        ================ ===== ===================================================================
+        *dynspec*        None  Array with dynamic spectrum.
+        *cleandynspec*   None  Array with cleaned dynamic spectrum.        
+        *plot_cleanspec* False If True it plots the cleaned spectrum in linear.
+        *dmin*                 Minimum z-value (intensity) in dynamic spectrum to plot
+        *dmax*                 Maximum z-value (intensity) in dynamic spectrum to plot
+        *cmin*                 Minimum z-value (intensity) in clean dynamic spectrum to plot
+        *cmax*                 Maximum z-value (intensity) in clean dynamic spectrum to plot
+        *from_file*      False Read from file (within the .pcr directory of the beam).
+        ================ ===== ===================================================================
 
-         Example::
-                tpar filenames=['L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
-                tpar blocklen=2**10
-                tpar maxchunklen=2**16*5
-                Task.dynplot(dmin=-10e1,dmax=10e2)
-                   
-                   or
+        Example::
          
-                tpar filenames=['L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
-                tpar blocklen=2**10
-                tpar maxchunklen=2**16*5
-                dynspec=Task.dyncalc()
-                Task.dynplot(beams=dyspec,dmin=-10e1,dmax=10e2)
-        Known Bugs::
-        1) Axis values and labels may not be shown when when using 'fraction' in dyncalc.
-
+            tpar filenames=['File_path/File_name_tbb.h5']
+            tpar blocklen=2**10
+            tpar maxchunklen=2**16*5
+            Task.dynplot(dmin=-10e1,dmax=10e2)
+               
+        or::
+     
+            tpar filenames=['File_path/File_name_tbb.h5']
+            tpar blocklen=2**10
+            tpar maxchunklen=2**16*5
+            dynspec=Task.dyncalc()
+            Task.dynplot(beams=dyspec,dmin=-10e1,dmax=10e2)
+            
         """
 
-        if dynspec==None:
-            dynspec=self.dyncalc()
-            
-        if cr.ishArray(dynspec):
-            dynspec = cr.hArray_toNumpy(dynspec)
-            
-        hdr=self.beams.getHeader()
+        if not dynspec:
+            if from_file:
+                self.spectrum_file_bin=os.path.join(self.spectrum_file,"dynspec")
+                self.dynspec = cr.hArrayRead(self.spectrum_file_bin)
+                if plot_cleanspec:  
+                    self.spectrum_file_bin=os.path.join(self.spectrum_file,"clean_dynspec")
+                    self.cleandynspec = cr.hArrayRead(self.spectrum_file_bin)
+            else:            
+                print 'CAUTION: Using the default options in self.dyncalc()' 
+                if plot_cleanspec:
+                    self.dyncalc(clean=True)
+                else:
+                    self.dyncalc()
+
+            dynspec=self.dynspec
+            if plot_cleanspec:  
+                cleandynspec=self.cleandynspec
+        else:                    
+            self.dynspec=dynspec
+            if plot_cleanspec:
+                if not cleandynspec:
+                    raise ValueError('Need to provide cleandynspec if plot_clenspec=True.')
+                self.cleandynspec=cleandynspec
         
+        cr.plt.clf()
         if plot_cleanspec:
             cr.plt.subplot(1,2,1)
-        cr.plt.title("Dynamic Spectrum")
-        cr.plt.imshow(dynspec,aspect='auto',vmin=dmin,vmax=dmax,cmap=cr.plt.cm.hot,extent=(self.start_frequency/10**6,self.end_frequency/10**6,self.start_time*1000,self.end_time*1000))
-        cr.plt.xlabel("Frequency [MHz]")
-        cr.plt.ylabel("+/- Time [ms]")
+        extra='[log10]'
+        cr.plt.title("Dynamic Spectrum %s " %extra)
+        cr.plt.imshow(np.log10(cr.hArray_toNumpy(dynspec)),aspect='auto',origin='lower',vmin=dmin,vmax=dmax,cmap=cr.plt.cm.hot,extent=(self.start_time,self.end_time,self.start_frequency/10**6,self.end_frequency/10**6))
+        cr.plt.ylabel("Frequency [MHz]")
+        cr.plt.xlabel("+/- Time [s]")
 
         if plot_cleanspec:
             cr.plt.subplot(1,2,2)
-            avspec=cr.hArray(float,self.speclen,fill=0.0)
-            dynspec[...].addto(avspec)
-            cleandynspec= dynspec/avspec
-            cleandynspec = cr.hArray_toNumpy(cleandynspec)
+            cr.plt.imshow(cr.hArray_toNumpy(cleandynspec),aspect='auto',origin='lower',vmin=cmin,vmax=cmax,cmap=cr.plt.cm.hot,extent=(self.start_time,self.end_time,self.start_frequency/10**6,self.end_frequency/10**6))  
+            extra='[linear]'
+            cr.plt.title("Cleaned Dynamic Spectrum %s " %extra)
+            cr.plt.ylabel("Frequency [MHz]")
+            cr.plt.xlabel("+/- Time [s]")
+            print "cleandynspec: min=",self.cleandynspec.min().val(),"max=",self.cleandynspec.max().val(),"rms=",self.cleandynspec.stddev().val()
 
-            cr.plt.title("Cleaned Dynamic Spectrum")
-            cr.plt.imshow(cleandynspec,aspect='auto',vmin=cmin,vmax=cmax,cmap=cr.plt.cm.hot,extent=(self.start_frequency/10**6,self.end_frequency/10**6,self.start_time*1000,self.end_time*1000))
-            cr.plt.xlabel("Frequency [MHz]")
-            cr.plt.ylabel("+/- Time [ms]")
-
-        if save_file:
-            print 'WARNING: Not Saving file. Need to code this.'
-        
-    def dyncalc(self,beams=None,nbeam=0,section=0,save_file=False,fraction=False,toNumpy=True,tbin=1):
+    def dyncalc(self,beams=None,nbeam=0,save_file=False,fraction=None,tbin=1,clean=False):
         '''
         Calculates the dynamic spectrum.
                 
-        ================ ==== ===================================================================
-        *save_file*     False Saves a file...(not implemented yet)
-        *fraction*      False If not False, then a list of the form [x,y] such that extracting the fraction x/y of the data.
-        *tbin*            1   Bins blocks toguether. 
-        *toNumpy*       True  Returns a Numpy array instead of an hArray.
-        ================ ==== ===================================================================
+        =============== ===== ===================================================================
+        *beams*         None  Input array. Take self.beams from task, if None.
+        *nbeam*         0     Beam to work with, if (self.)beams has stored multiple ones.
+        *save_file*     False Saves a file in hArray format with additional information besides the array values...(not implemented yet)
+        *fraction*      None  If not None, then a list of the form [x,y] such that extracting the fraction x/y of the data. with x>-1, and y>=x. 
+        *tbin*          1     If >1 integrates over this number of blocks. Or time binning.
+        *clean*         False If True it calculates the cleaned spectrum.
+        =============== ===== ===================================================================
 
          Example::
-                tpar filenames=['L35018_D20111120T014205.590Z_CS004_R000_tbb.h5']
-                tpar blocklen=2**10
-                tpar maxchunklen=2**16*5
-                dynspec=Task.dyncalc()
-
-        Known Bugs::
-        1) Fraction only works for the first fraction (ie. 1/N ), other fractions return zeros. (ie. a/N)
+         
+            tpar filenames = ['File_path/File_name_tbb.h5']
+            tpar blocklen = 2**10
+            tpar maxchunklen = 2**16*5
+            dynspec = Task.dyncalc()
         
-        '''
+        or::
+        
+            dynspec,cleandynspec = Task.dyncalc(tbin=16,clean=True,save_file=True)
 
-        if beams==None:                
-            pass
-        else:
-            print 'Need to code this.'
-            stop
+        The regular and clean dynamic spectra (all blocks) are returned and stored in ``Task.dynspec`` and ``Task.cleandynspec`` respectively.
+        '''
+        t0=time.clock()
+        if beams!=None:
+            self.beams = beams 
 
         self.spectrum_file_bin=os.path.join(self.spectrum_file,"data.bin")
  
-        if fraction==False:
+        if not fraction:
             fraction=[1]
             chunk_fraction=self.nchunks
         else:
-            if type(fraction) != type([]) or len(fraction)!=2 or fraction[0] > fraction[1]:
-                raise TypeError('Need a list of lenght 2, with first element "<" or "=" second element.')
+            if type(fraction) != type([]) or len(fraction)!=2 or fraction[0] > fraction[1] or fraction[0]<0 or fraction[1]<0:
+                raise ValueError('Need a list of lenght 2, with first element "<" or "=" second element. Both elements positive.')
             if fraction[0]==0: fraction[0]=1
             chunk_fraction=int(self.nchunks/fraction[1])
-            self.start_time=(fraction[0]-1)*self.end_time/fraction[1]
-            self.end_time=fraction[0]*self.end_time/fraction[1]
+            self.start_time=(fraction[0]-1)*(self.sectduration*self.nchunks)/fraction[1]
+            self.end_time=fraction[0]*(self.sectduration*self.nchunks)/fraction[1]
 
         dynspec = cr.hArray(float,[self.nblocks*chunk_fraction,self.speclen])
         chunk_range=range((fraction[0]-1)*chunk_fraction,(fraction[0])*chunk_fraction) 
+        
+        #Reading beams.
+        if not beams:
+            for chunk in chunk_range:
+                self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)
+                for block in range(self.nblocks):
+                    dynspec[(chunk-chunk_range[0])*self.nblocks+block].spectralpower2(self.beams[block,nbeam])
 
-        for chunk in chunk_range:
-            self.beams.readfilebinary(self.spectrum_file_bin,chunk*self.speclen*self.nbeams*self.nblocks)   
-            for block in range(self.nblocks):
-                dynspec[(chunk-chunk_range[0])*self.nblocks+block].spectralpower(self.beams[block,nbeam])
-
+        #Time integration.
         if tbin>1:
             dynspec = cr.hArray_toNumpy(dynspec)
             dynspec = dynspec.reshape((dynspec.shape[0]/tbin,tbin,dynspec.shape[1]))
             dynspec = np.sum(dynspec,axis=1)
-            toNumpy = False
-        if toNumpy:
-            dynspec = cr.hArray_toNumpy(dynspec)
+            dynspec = cr.hArray(dynspec)
+            dynspec.par.tbin = tbin
 
+        #Cleaning dynamic spectrum.
+        if clean:  
+            avspec=cr.hArray(float,self.speclen,fill=0.0)
+            dynspec[...].addto(avspec)
+            cleandynspec = dynspec/avspec
+
+        #Create a frequency vector
+        self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
+        dynspec.par.yvalues= self.frequencies
+        
+        #Create a time vector
+        self.times = cr.hArray(float,int(round((self.end_time-self.start_time)/(self.block_duration*tbin))),name="Time",units=("","s"))
+        self.times.fillrange(self.start_time,self.block_duration*tbin)
+        dynspec.par.xvalues= self.times
+
+        #Transposing arrays.
+        dyntrans = cr.hArray(float,[dynspec.shape()[1],dynspec.shape()[0]])
+        cr.hTranspose(dyntrans,dynspec,dyntrans.shape()[0])
+        dynspec = cr.hArray(float,dyntrans,dyntrans)   # making hArray since ".copy" doesn't work.
+        if clean:  
+            cr.hTranspose(dyntrans,cleandynspec,dyntrans.shape()[0])
+            cleandynspec =  cr.hArray(float,dyntrans,dyntrans)   # making hArray since ".copy" doesn't work.
+            cleandynspec.par.tbin = tbin
+            cleandynspec.par.yvalues= self.frequencies
+            cleandynspec.par.xvalues= self.times            
+        dyntrans = 0
+        
+        #Saving file(s).
         if save_file:
-            print 'WARNING: Not Saving file. Need to code this.'
-#debug# need to check this, maybe saving the dynspec and plot in a different folder...it could be still be saved in same folder, but not as paramenter maybe?
-#            self.beams.par.dynspec=dynspec
-#            self.beams.par.dynspec.write(self.spectrum_file,clearfile=None)
-#            self.dynspec.write(self.spectrum_file)
+            dynspec.write(os.path.join(self.spectrum_file,"dynspec"),nblocks=1,block=0,clearfile=True)
+            print 'Saving binary in %s' %os.path.join(self.spectrum_file,"dynspec")
+            if clean:  
+                cleandynspec.write(os.path.join(self.spectrum_file,"clean_dynspec"),nblocks=1,block=0,clearfile=True)
+                print 'Saving binary in %s' %os.path.join(self.spectrum_file,"clean_dynspec")
 
-        return dynspec
+        print "Finished - total time used:",time.clock()-t0,"s."
 
+        self.dynspec = dynspec
+        if clean:  
+            self.cleandynspec = cleandynspec
+            return self.dynspec, self.cleandynspec
+        else:
+            return self.dynspec
 
     def qplot(self,entry=0,flaggedblock=0,block=-1,all=True):
         """
@@ -1006,8 +1056,6 @@ class BeamFormer(tasks.Task):
         y.par.xvalues=datafile["Time"]
         y.par.xvalues.setUnit("mu","")
         y.plot(clf=not all)
-
-
 
 
 """
