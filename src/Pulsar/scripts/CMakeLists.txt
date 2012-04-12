@@ -26,5 +26,7 @@ add_custom_target (scripts_install
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/data/parfile
   WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/scripts
   COMMENT "Install extra processing scripts and LOFAR inf file into ${CMAKE_INSTALL_PREFIX}/bin and ${CMAKE_INSTALL_PREFIX}/data..."
+  COMMENT "Copying parfiles to ${CMAKE_INSTALL_PREFIX}/data/parfile..."
+  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/parfiles/*.par ${CMAKE_INSTALL_PREFIX}/data/parfile/
   )
 
