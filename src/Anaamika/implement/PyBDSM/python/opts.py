@@ -484,7 +484,13 @@ class Opts(object):
                                 "This option is generally slower than non-"\
                                 "adaptive scaling.",
                              group="advanced_opts")
-    
+    adaptive_thresh =   Float(50.0,
+                             doc="If adaptive_rms_box is True, sources with pixels "\
+                                 "above adaptive_thresh*clipped_rms will be considered as "\
+                                 "bright sources (i.e., with potential artifacts), "\
+                                 "if their sizes at a threshold of 10.0 is less "\
+                                 "than 25 beam areas.",
+                             group="advanced_opts")
     #--------------------------------A-TROUS OPTIONS--------------------------------
     atrous_jmax     =    Int(0,
                              doc='Max allowed wavelength order, 0 => calculate '\

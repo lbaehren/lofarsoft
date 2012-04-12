@@ -63,6 +63,7 @@ class Op_rmsimage(Op):
         # by a weighted average of the values in the maps at the two
         # scales. 
         fwsig = const.fwsig
+        adapt_thresh = opts.adaptive_thresh
         brightsize = None
         isl_pos = []
         if opts.rms_box is None:
@@ -83,11 +84,12 @@ class Op_rmsimage(Op):
             image = ch0_images[0]
             shape = image.shape
             isl_size_bright = []
+            isl_area_highthresh = []
             max_isl_brightsize = 0.0
             if do_adapt:
                 mylogger.userinfo(mylog, "Using adaptive scaling of rms_box")
                 threshold = 500.0
-                while len(isl_size_bright) < 20 and threshold > 50.0:
+                while len(isl_size_bright) < 20 and threshold > adapt_thresh:
                     isl_size_bright=[]
                     isl_maxposn = []
                     act_pixels = (img.ch0-cmean)/threshold >= crms
@@ -99,7 +101,9 @@ class Op_rmsimage(Op):
                     labels, count = nd.label(act_pixels, connectivity)
                     slices = nd.find_objects(labels)
                     for idx, s in enumerate(slices):
-                        isl_size_bright += [s[0].stop-s[0].start, s[1].stop-s[1].start]
+                        isl_size_bright.append(max([s[0].stop-s[0].start, s[1].stop-s[1].start]))
+                        size_area = (labels[s] == idx+1).sum()/img.pixel_beamarea*2.0
+                        isl_area_highthresh.append(size_area)
                         isl_maxposn.append(tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+\
                               N.array((s[0].start, s[1].start))))
 
@@ -117,15 +121,18 @@ class Op_rmsimage(Op):
             slices = nd.find_objects(labels)
             isl_size = []
             isl_size_highthresh = []
+            isl_size_lowthresh = []
             for idx, s in enumerate(slices):
-                isl_size_lowthresh = (labels[s] == idx+1).sum()/img.pixel_beamarea*2.0
+                isl_area_lowthresh = (labels[s] == idx+1).sum()/img.pixel_beamarea*2.0
                 isl_maxposn_lowthresh = tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+
                                               N.array((s[0].start, s[1].start)))
                 isl_size += [s[0].stop-s[0].start, s[1].stop-s[1].start]
-                if do_adapt and isl_maxposn_lowthresh in isl_maxposn and isl_size_lowthresh < 25.0:
-                    isl_pos.append(isl_maxposn_lowthresh)
+                if do_adapt and isl_maxposn_lowthresh in isl_maxposn:
                     bright_indx = isl_maxposn.index(isl_maxposn_lowthresh)
-                    isl_size_highthresh.append(isl_size_bright[bright_indx])
+                    if isl_area_lowthresh < 25.0 or isl_area_lowthresh/isl_area_highthresh[bright_indx] < 8.0:
+                        isl_pos.append(isl_maxposn_lowthresh)
+                        isl_size_lowthresh.append(max([s[0].stop-s[0].start, s[1].stop-s[1].start]))
+                        isl_size_highthresh.append(isl_size_bright[bright_indx])
 
             if len(isl_size) == 0:
                 max_isl_size = 0.0

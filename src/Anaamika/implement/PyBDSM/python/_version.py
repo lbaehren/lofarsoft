@@ -26,6 +26,12 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/04/12 - Fixed bug in adaptive scaling code that could 
+                 cause incorrect small-scale rms_box size. Added
+                 a parameter (adaptive_thresh) that controls the
+                 minimum threshold for sources used to set the
+                 small-scale rms_box size.
+    
     2012/04/02 - Implemented an adaptive scaling scheme for 
                  the rms_box parameter that shrinks the box
                  size near bright sources and expands it far
