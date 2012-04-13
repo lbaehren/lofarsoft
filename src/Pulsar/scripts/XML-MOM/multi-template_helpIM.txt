@@ -1,4 +1,17 @@
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+April 2012
+
+WARNING: DO NOT USE THIS VERSION OF THE XML-GENETATOR FOR BEAM-FORMED OBSERVATIONS.
+PLEASE USE THE NEW GENERATOR FOR BF-ONLY OBSERVATIONS, CALLED: xml_generator_BF.sh
+
+This version of the xml-generator should only be used for Imaging observations!!!
+The beam-formed xml has been depricated and is no longer valid when produced with
+this script!
+
+For IM+BF observations, please xml_generator_BF.sh and turn on +IM
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]] 
        -in observation_list_file -inswitch IM -intype source_or_position 
        -out template_output_file -project project_name [-stations stations_list]   
@@ -49,7 +62,7 @@ Usage for Imaging: ./multi-templatesNbeams.sh [[-help IM]]
                                           Positions must be specified in decimal degrees;  order is absolute in the format.
                                           Can only be used with '-intype source' switch.
                 
-       For help on Beam_formed input format and options, use '-help BF' switch
+       For help on Beam_formed input format and options, use 'xml_generator_BF.sh -help BF' switch
 
       This script is run using several different methodologies and input file options.
       Listed first are the types of file formats allowed as input, followed by an 

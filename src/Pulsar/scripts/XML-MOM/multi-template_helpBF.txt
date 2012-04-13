@@ -8,6 +8,8 @@ PLEASE USE THE NEW GENERATOR FOR BF-ONLY OBSERVATIONS, CALLED: xml_generator_BF.
 This version of the xml-generator should only be used for Imaging observations!!!
 The beam-formed xml has been depricated and is no longer valid when produced with
 this script!
+
+For IM+BF observations, please xml_generator_BF.sh and turn on +IM
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]] 

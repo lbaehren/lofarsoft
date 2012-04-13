@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=2.1
+VERSION=2.2
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -18,20 +18,6 @@ USAGE1="\nUsage for Imaging: $0 [[-help IM]] \n"\
 "       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
 "       [+multi] [+IS|+CS|+FD|+BF list_or_ALL] [-namecol] [-sexages] [-clock 200|160] [-debug] \n"\
 "       [-cat user_catalog_filename] [-integstepsHBA BF_integration_steps_HBA] [-integstepsLBA BF_integration_steps_LBA] \n"
-
-USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
-"       -in observation_list_file -inswitch BF -intype source_or_position \n"\
-"       -out template_output_file -project project_name [-st stations_list]   \n"\
-"       [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL]  \n"\
-"       [+IS|+CS|+FD|+BF list_or_ALL] [-subsHBA subband_range] [-subsLBA subband_range] \n"\
-"       [-subsHBAHigh subband_range] [-subsHBAMid subband_range] [-subsHBALow subband_range] \n"\
-"       [-subsLBAHigh subband_range] [-subsLBALow subband_range]  \n"\
-"       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
-"       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
-"       [+IM list_or_ALL] [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [-integstepsHBA integration_steps_HBA] [-integstepsLBA integration_steps_LBA] [-namecol] [-debug]"\
-"       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]\n"\
-"       [-cat user_catalog_filename] \n"
 
 USAGE3="Options: \n"\
 "         -in observation_list_file ==> Specify the ascii file with observation listing (i.e. in.txt) \n"\
@@ -74,8 +60,18 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog positions. \n"
 
 USAGE5="For help on Imaging input format and options, use '-help IM' switch\n"\
-"For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
-
+"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"\
+"April 2012\n"\
+"\n"\
+"WARNING: DO NOT USE THIS VERSION OF THE XML-GENETATOR FOR BEAM-FORMED OBSERVATIONS.\n"\
+"PLEASE USE THE NEW GENERATOR FOR BF-ONLY OBSERVATIONS, CALLED: xml_generator_BF.sh\n"\
+"\n"\
+"This version of the xml-generator should only be used for Imaging observations!!!\n"\
+"The beam-formed xml has been depricated and is no longer valid when produced with\n"\
+"this script!\n"\
+"\n"\
+"For IM+BF observations, please xml_generator_BF.sh and turn on +IM\n"\
+"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
 
 if [ $# -lt 2 ]                    
 then

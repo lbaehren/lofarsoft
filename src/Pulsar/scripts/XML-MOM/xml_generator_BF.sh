@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=2.4
+VERSION=2.5
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -77,7 +77,7 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-whichStokesCS I|IQUV|XXYY]] ==> Set the BF CS stokes data type: I or IQUV or XXYY (default I). \n"\
 "         [[-whichStokesIS I|IQUV]] ==> Set the BF IS stokes data type: I or IQUV (default I). \n"
 
-USAGE5="For help on Imaging input format and options, use '-help IM' switch (depricated)\n"\
+USAGE5="For help on Imaging input format and options, use 'multi-templatesNbeams.sh -help IM' (different script)\n"\
 "For help on BF (BF+IM) input format and options, use '-help BF' switch\n"
 
 
