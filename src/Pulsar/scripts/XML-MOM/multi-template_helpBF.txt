@@ -1,4 +1,15 @@
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+April 2012
+
+WARNING: DO NOT USE THIS VERSION OF THE XML-GENETATOR FOR BEAM-FORMED OBSERVATIONS.
+PLEASE USE THE NEW GENERATOR FOR BF-ONLY OBSERVATIONS, CALLED: xml_generator_BF.sh
+
+This version of the xml-generator should only be used for Imaging observations!!!
+The beam-formed xml has been depricated and is no longer valid when produced with
+this script!
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 Usage for BeamFormed: ./multi-templatesNbeams.sh [[-help BF]] 
        -out template_output_file -project project_name [-st stations_list]   
        [-start obs_start] [-time duration] [-gap duration] [-lst|-LST] [-IS list_or_ALL]  

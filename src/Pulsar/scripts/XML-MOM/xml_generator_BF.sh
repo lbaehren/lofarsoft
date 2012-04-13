@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=2.3
+VERSION=2.4
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -52,7 +52,7 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[+IS list_or_ALL]] ==> Turn on incoherentStokesData observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+CS list_or_ALL]] ==> Turn on coherentStokesData observations (default on for BF);  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
 "         [[+FE list_or_ALL]] ==> Turn on Fly's Eye observations;  'ALL' or row-number-list '2,4,5' (rows start at #1)\n"\
-"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default BF & IM), Joined)\n"\
+"         [[-modeHBA antenna_submode]] ==> The HBA antenna sub-mode (Zero, One, Dual (default BF & IM), Joined, Dual_Inner)\n"\
 "         [[-modeLBA antenna_submode]] ==> The LBA antenna sub-mode (Outer (default BF & IM), Inner, Sparse Even, Sparse Odd, X, Y)\n"\
 "         [[-namecol]] ==> The first column in the input file contains an additional column which will be used as the Obs Name in MOM\n"\
 "         [[-sexages]] ==> Indicator that input file contains RA & DEC columns in Sexagesimal (HH:MM:SS.SSSS [+/-]DD:MM:SS.SSSSS) format (decimal degrees assumed otherwise).\n"\
@@ -2093,7 +2093,7 @@ do
 	          else
 	             modeHBA=$modeHBA_IM
 	          fi
-	          if [ $modeHBA == "Zero" ] || [ $modeHBA == "One" ] || [ $modeHBA == "Dual" ] || [ $modeHBA == "Joined" ]
+	          if [ $modeHBA == "Zero" ] || [ $modeHBA == "One" ] || [ $modeHBA == "Dual" ] || [ $modeHBA == "Joined" ] || [ $modeHBA == "Dual_Inner" ]
 	          then
 	             ANTENNA_SETTING="HBA $modeHBA"
 	          else 
