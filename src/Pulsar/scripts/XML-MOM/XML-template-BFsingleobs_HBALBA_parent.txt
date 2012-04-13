@@ -10,6 +10,7 @@
         <name>FILL IN OBSERVATION NAME</name>
         <projectName>PROJECT NAME</projectName>
         <instrument>Beam Observation</instrument>
+		<tbbPiggybackAllowed>true</tbbPiggybackAllowed>
         <userSpecification>
             <correlatedData>IMAGING</correlatedData>
             <filteredData>FD_TF</filteredData>
