@@ -45,6 +45,15 @@ if os.path.isfile(processed_files):
 # Check wich files in the data directory have not been processed yet
 files = [f for f in glob.glob(input_dir +"/*.h5") if f not in done]
 
+# Insert missing metadata
+print "Adding metadata"
+for f in files:
+
+    try:
+        subprocess.call([os.environ["LOFARSOFT"]+"/release/bin/tbbmd", "--dipoleCalibrationDelayDir="+os.environ["LOFARSOFT"]+"/data/lofar/dipole_calibration_delay/", f])
+    except:
+        pass
+
 # Check how many CPU's we have
 count = multiprocessing.cpu_count()
 
