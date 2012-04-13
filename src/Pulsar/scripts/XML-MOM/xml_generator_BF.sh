@@ -2095,7 +2095,12 @@ do
 	          fi
 	          if [ $modeHBA == "Zero" ] || [ $modeHBA == "One" ] || [ $modeHBA == "Dual" ] || [ $modeHBA == "Joined" ] || [ $modeHBA == "Dual_Inner" ]
 	          then
-	             ANTENNA_SETTING="HBA $modeHBA"
+	             if [ $modeHBA == "Dual_Inner" ]
+	             then 
+	                ANTENNA_SETTING="HBA Dual Inner"
+	             else
+	                ANTENNA_SETTING="HBA $modeHBA"
+	             fi
 	          else 
 	              echo "WARNING: user antenna mode HBA $modeHBA is not recognized, using default"
 		          if [ $INSWITCH == 1 ] #BF
