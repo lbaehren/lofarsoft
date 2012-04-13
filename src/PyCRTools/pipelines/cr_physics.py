@@ -156,6 +156,10 @@ for station in stations:
     # Get pulse strength
     pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
+    # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
+    time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
+    time_delays += float(block * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
+
     # Create instance
     p = crdb.Polarization(db)
 
@@ -168,7 +172,7 @@ for station in stations:
 
     # Add parameters
     p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
-    p["crp_pulse_delays"] = pulse_envelope_xyz.delays.toNumpy().reshape((nantennas,3)) + f["CLOCK_OFFSET"][0]
+    p["crp_pulse_delays"] = time_delays
     p["crp_pulse_strength"] = cr.hArray(pulse_envelope_xyz.maxima).toNumpy().reshape((nantennas, 3))
     p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
 
@@ -208,5 +212,5 @@ ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncer
 
 # Compute footprint
 
-footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = direction, timelags = all_station_pulse_delays * 1.e9, footprint_enable=True )
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = direction, timelags = all_station_pulse_delays, footprint_enable=True )
 

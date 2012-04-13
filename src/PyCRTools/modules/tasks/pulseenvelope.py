@@ -59,6 +59,8 @@ class PulseEnvelope(Task):
             doc = "Pulse maximum." ),
         maxpos = dict( default = lambda self : cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*." ),
+        pulse_maximum_time = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
+            doc = "Position of pulse maximum relative to data start in seconds." ),
         refant = dict( default = lambda self : self.snr.maxpos().val(),
             doc = "Reference antenna for delays, taken as antenna with highest signal to noise." ),
         delays = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
@@ -98,5 +100,12 @@ class PulseEnvelope(Task):
         # Convert to delay
         self.delays[:] = self.maxpos[:]
         self.delays /= (self.sampling_frequency * self.resample_factor)
+
+        # Calculate pulse maximum in seconds since start of datafile
+        self.pulse_maximum_time[:] = self.window_start # Number of samples before start of upsampled block
+        self.pulse_maximum_time /= self.sampling_frequency # Converted to seconds
+        self.pulse_maximum_time += self.delays # Add the number of seconds of the pulse in the upsampled block
+
+        # Shift delays to be relative to reference antenna
         self.delays -= self.delays[self.refant]
 

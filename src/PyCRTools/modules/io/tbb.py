@@ -69,6 +69,7 @@ class TBBData(IOInterface):
 
         self.__keyworddict={
             # NON-ICD KEYWORDS
+            "ALIGNMENT_REFERENCE_ANTENNA":self.__file.alignment_reference_antenna,
             "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
             "ITRFANTENNA_POSITIONS":self.getITRFAntennaPositions,
             "ANTENNA_POSITIONS":self.getRelativeAntennaPositions,
