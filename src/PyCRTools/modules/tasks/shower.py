@@ -39,7 +39,7 @@ class Shower(Task):
         direction_uncertainties = dict(default = None, 
             doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"), 
         timelags = dict(default=None,
-            doc = "Timelags of signals given in nanoseconds [NAntennas x (X,Y,Z)]"),
+            doc = "Timelags of signals given in seconds [NAntennas x (X,Y,Z)]"),
         eventid = dict(default = None,
             doc="Give Event ID to be specified in plot title "), 
             
@@ -293,7 +293,9 @@ class Shower(Task):
                 if bgim is not None and self.footprint_use_background:
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
                 if self.timelags is not None:
-                    self.scolors=self.timelags[:,0]                
+                    self.scolors=self.timelags[:,0]-self.timelags[:,0].min()
+                    self.scolors *=1e9   
+                                 
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -322,7 +324,8 @@ class Shower(Task):
                 if bgim is not None and self.footprint_use_background:
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
                 if self.timelags is not None:
-                    self.scolors=self.timelags[:,1]
+                    self.scolors=self.timelags[:,1]-self.timelags[:,1].min()
+                    self.scolors *=1e9
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -352,7 +355,8 @@ class Shower(Task):
                     if bgim is not None and self.footprint_use_background:
                         cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
                     if self.timelags is not None:
-                        self.scolors=self.timelags[:,2]
+                        self.scolors=self.timelags[:,2]-self.timelags[:,2].min()
+                    self.scolors *=1e9
                     cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes2,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                     cr.plt.xlabel("LOFAR East [meters] ")
                     cr.plt.ylabel("LOFAR North [meters] ")
