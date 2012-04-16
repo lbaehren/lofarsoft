@@ -280,7 +280,7 @@ class Shower(Task):
             if self.positions is not None and self.signals is not None:
 
                 self.sizes0 = self.signals[:,0]
-                self.sizes0 /= self.sizes0.max()
+                self.sizes0 /= self.signals.max()
                 self.sizes0 *= self.footprint_largest_point
                 
                 if self.timelags is None:
@@ -317,7 +317,7 @@ class Shower(Task):
                 #POL 1
                 
                 self.sizes1 = self.signals[:,1]
-                self.sizes1 /= self.sizes1.max()
+                self.sizes1 /= self.signals.max()
                 self.sizes1 *= self.footprint_largest_point
                                 
                 cr.plt.figure()
@@ -348,7 +348,7 @@ class Shower(Task):
                 if self.signals.shape[1] == 3:
                 
                     self.sizes2 = self.signals[:,2]
-                    self.sizes2 /= self.sizes2.max()
+                    self.sizes2 /= self.signals.max()
                     self.sizes2 *= self.footprint_largest_point
                                     
                     cr.plt.figure()
