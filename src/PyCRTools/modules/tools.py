@@ -21,7 +21,7 @@ def toAngles(array,deg=True):
     if deg == True:
         theta = np.rad2deg(theta)
         phi = np.rad2deg(phi)
-    return theta, phi, r
+    return [theta, phi]
     
 
 def averageCartesian(thetalist, philist, deg = True): # in degrees
@@ -32,4 +32,20 @@ def averageCartesian(thetalist, philist, deg = True): # in degrees
         vec += toVector(theta,phi, deg)
     vec = vec/np.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
     av = toAngles(vec)    
+    return av
+
+def averageLOFARdirections(thetalist, philist, deg = True): # in degrees    
+vec = np.array([0.,0.,0.])
+    for i in xrange(len(thetalist)):
+        if deg == True:
+            theta = 90 - thetalist[i]
+            phi = 90 - philist[i]
+        else:
+            theta = np.pi/2. - thetalist[i]
+            phi = np.pi/2. - philist[i]                
+        vec += toVector(theta,phi, deg)
+    vec = vec/np.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
+    av = toAngles(vec)
+    av[0] = 90 - av[0]
+    av[1] = 90 - av[1]  
     return av
