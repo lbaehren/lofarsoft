@@ -6,6 +6,7 @@ import numpy as np
 import pycrtools as cr
 from pycrtools import crdatabase as crdb
 from pycrtools import metadata as md
+from pycrtools import tools
 
 from optparse import OptionParser
 
@@ -124,7 +125,7 @@ for station in stations:
 
     # Start direction fitting loop
     n = 0
-    converged = False
+    direction_fit_converged = False
     while True:
 
         # Unfold antenna pattern
@@ -143,8 +144,19 @@ for station in stations:
         pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
         n += 1
-        if converged or n > options.maximum_nof_iterations or direction_fit_plane_wave.fit_failed:
-            break # Exit fitting loop
+        if direction_fit_converged:
+            print "fit converged"
+            station["crp_pulse_direction"] = pulse_direction
+            break
+
+        if n > options.maximum_nof_iterations:
+            print "maximum number of iterations reached"
+            station["crp_pulse_direction"] = pulse_direction
+            break
+
+        if direction_fit_plane_wave.fit_failed:
+            print "direction fit failed"
+            break
 
     # Project polarization onto x,y,z frame
     xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, blocksize))
@@ -181,8 +193,14 @@ all_station_antenna_positions = []
 all_station_pulse_delays = []
 all_station_pulse_strength = []
 all_station_rms = []
+all_station_direction = []
 
 for station in stations:
+    try:
+        all_station_direction.append(station["crp_pulse_direction"])
+    except:
+        print station.stationname, "does not have a pulse direction"
+
     p = station.polarization["xyz"]
     all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
     all_station_pulse_delays.append(p["crp_pulse_delays"])
@@ -193,11 +211,16 @@ all_station_antenna_positions = np.vstack(all_station_antenna_positions)
 all_station_pulse_delays = np.vstack(all_station_pulse_delays)
 all_station_pulse_strength = np.vstack(all_station_pulse_strength)
 all_station_rms = np.vstack(all_station_rms)
+all_station_direction = np.asarray(all_station_direction)
 
 # Convert to contiguous array of correct shape
 shape = all_station_antenna_positions.shape
 all_station_antenna_positions = all_station_antenna_positions.reshape((shape[0] / 2, 2, shape[1]))[:,0]
 all_station_antenna_positions = all_station_antenna_positions.copy()
+
+# Calculate average direction and store it
+average_direction = tools.averageDirectionLOFAR(all_station_direction[:,0], all_station_direction[:,1])
+event["crp_average_direction"] = average_direction
 
 # Beamform with all stations
 
@@ -205,12 +228,11 @@ all_station_antenna_positions = all_station_antenna_positions.copy()
 
 core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
 core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
-direction = stations[0].polarization['0']["pulse_direction_lora"]
 direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True)
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True)
 
 # Compute footprint
 
-footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = direction, timelags = all_station_pulse_delays, footprint_enable=True )
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True )
 
