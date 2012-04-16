@@ -54,5 +54,5 @@ ExternalProject_Add (dal1
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DDAL_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
   )
 
-add_dependencies (dal1 git)
+add_dependencies (dal1 git casacore num_util)
 
