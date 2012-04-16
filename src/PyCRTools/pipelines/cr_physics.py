@@ -28,6 +28,9 @@ db = dbManager.db
 # Get event from database
 event = crdb.Event(db = db, id = options.id)
 
+# Set the event status
+event["status"] = "CR_NOT_ANALYZED"
+
 # Loop over all stations in event
 stations = []
 for f in event.datafiles:
@@ -230,9 +233,12 @@ core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
 core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
 direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True)
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True, save_plots = True)
 
 # Compute footprint
 
-footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True )
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True, save_plots = True)
+
+# Update event status
+event["status"] = "CR_ANALYZED"
 
