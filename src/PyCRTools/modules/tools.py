@@ -4,7 +4,7 @@ Various function that are handy for cr physics analysis.
 
 import numpy as np
 
-def ToVector(theta,phi,deg=True):# in degrees
+def toVector(theta,phi,deg=True):# in degrees
     if deg == True:
         p = np.deg2rad(phi)
         t = np.deg2rad(theta)
@@ -14,7 +14,7 @@ def ToVector(theta,phi,deg=True):# in degrees
     a = np.array([np.cos(p)*np.sin(t),np.sin(p)*np.sin(t),np.cos(t)])
     return a
     
-def ToAngles(array,deg=True):
+def toAngles(array,deg=True):
     r = np.sqrt(array[0]**2+array[1]**2+array[2]**2)
     theta = np.arccos(array[2]/r)
     phi = np.arctan(array[1]/array[0])
@@ -24,12 +24,12 @@ def ToAngles(array,deg=True):
     return theta, phi, r
     
 
-def AverageKartesian(thetalist, philist, deg = True): # in degrees
+def averageCartesian(thetalist, philist, deg = True): # in degrees
     vec = np.array([0.,0.,0.])
     for i in xrange(len(thetalist)):
         theta = thetalist[i]
         phi = philist[i]
-        vec += ToVector(theta,phi, deg)
+        vec += toVector(theta,phi, deg)
     vec = vec/np.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
-    av = ToAngles(vec)    
+    av = toAngles(vec)    
     return av
