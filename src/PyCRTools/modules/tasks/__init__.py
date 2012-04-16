@@ -791,8 +791,15 @@ class Task(object):
         self.callinit(forceinit=init) #Call initialization if not yet done
 
         self.saveOutputFile()
+
+        print "["+self.__taskname__+"] started"
+
         retval=self.run()
+
         self["tduration"]=time.clock()-self["t0"] # Execution time of task
+
+        print "["+self.__taskname__+"] completed in", self["tduration"], "s"
+
         self.saveOutputFile() # to store final values
 
         #Add logging information
