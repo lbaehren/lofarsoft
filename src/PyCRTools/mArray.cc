@@ -985,9 +985,19 @@ template <class T> HString hArray<T>::writeRaw()
 */
 template <> HString hArray<bool>::writeRaw()
 {
-  // TODO: hArray::writeRaw() - Add implementation
-
   HString raw = "";
+
+  if (storage_p == NULL) return raw;
+  if (storage_p->vec_p == NULL) return raw;
+
+  std::vector<bool>::iterator it = storage_p->vec_p->begin();
+  while (it != storage_p->vec_p->end()) {
+    if (*it)
+      raw += "1";
+    else
+      raw += "0";
+    ++it;
+  }
 
   return raw;
 };
@@ -1022,7 +1032,28 @@ template <class T> void hArray<T>::readRaw(HString raw)
 */
 template <> void hArray<bool>::readRaw(HString raw)
 {
-  // TODO: hArray::readRaw() - Add implementation
+  // Sanity check
+  if (storage_p == NULL) return;
+  if (storage_p->vec_p == NULL) return;
+
+  int vec_len = storage_p->vec_p->size();
+  int str_len = raw.size();
+  if (vec_len != str_len) {
+    return;
+  }
+
+  // Reading out the string
+  int str_i = 0;
+  std::vector<bool>::iterator it = storage_p->vec_p->begin();
+  while ((it != storage_p->vec_p->end()) && (str_i < str_len)) {
+    if (0 == raw.compare(str_i, 1, "1")) {
+      *it = true;
+    } else {
+      *it = false;
+    }
+    ++str_i;
+    ++it;
+  }
 };
 
 
