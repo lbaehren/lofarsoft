@@ -798,7 +798,7 @@ class Task(object):
 
         self["tduration"]=time.clock()-self["t0"] # Execution time of task
 
-        print "["+self.__taskname__+"] completed in", self["tduration"], "s"
+        print "["+self.__taskname__+"] completed in {0:.3f} s".format(self["tduration"])
 
         self.saveOutputFile() # to store final values
 
