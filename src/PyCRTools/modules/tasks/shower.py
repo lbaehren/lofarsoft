@@ -252,12 +252,28 @@ class Shower(Task):
         if self.footprint_enable: 
         
             if self.lora_signals is not None and self.lora_positions is not None:
-                
+  
+                self.lsizes = self.lora_signals
+                if self.lszises.max() > 0:
+                    self.lszises /= self.lszises.max() 
+                    self.lszises *= self.footprint_largest_point
+
                 if self.lora_timelags is not None and self.footprint_color_lora == 'time':
-                    print "Draw LORA with timelags and color, still to be implemented"
+                    #print "Draw LORA with timelags and color, still to be implemented"
+
+                    self.loracolor=self.loraarrivaltimes
+                    for i in xrange(len(self.loracolor)):
+                        if self.loracolor[i] == 0:
+                            self.loracolor[i] += max(self.loracolor)
+
+                    cr.plt.scatter(self.lorapositions[:,0],self.lorapositions[:,],s=self.lsizes,c=self.loracolor,marker=self.lorashape,cmap="winter")
+
                 else:
-                    print "Draw LORA wth signals only, still to be implemented"
+                    #print "Draw LORA wth signals only, still to be implemented"
+
+                    cr.plt.scatter(self.lorapositions[:,0],self.lorapositions[:,],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
     
+
             if self.footprint_use_background:
                     from os import environ
                     from os.path import isfile
@@ -377,10 +393,11 @@ class Shower(Task):
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
 
 
-                if self.save_plots:
-                    print "Not implemented yet"
-                else:    
-                    cr.plt.show()
             
             else:
-                print "WARNING: Give at least positions and signals to plot a footprint"                
+                print "WARNING: Give at least positions and signals to plot a footprint"  
+                
+            if self.save_plots:
+                print "Not implemented yet"
+            else:    
+                cr.plt.show()                  
