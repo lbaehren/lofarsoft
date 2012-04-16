@@ -111,8 +111,26 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
 
 template <>
 void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
+  // Sanity check
   if (vec_end<=vec) return;
-  // TODO: hWriteFileText() - Add implementation
+
+  // Implementation
+  fstream outfile(filename.c_str(), ios::out | ios::binary | ios::trunc);
+  if (outfile) {
+    std::_Bit_iterator it = vec;
+    std::string raw = "";
+    while (it != vec_end) {
+      if (*it)
+        raw += "1";
+      else
+        raw += "0";
+      ++it;
+    }
+    outfile << raw;
+    outfile.close();
+  } else {
+    throw PyCR::IOError("hWriteFileBinary: Unable to open file " + filename + ".");
+  }
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -162,8 +180,26 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename) {
 
 template <>
 void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
+  // Sanity check
   if (vec_end<=vec) return;
-  // TODO: hWriteFileBinary() - Add implementation
+
+  // Implementation
+  fstream outfile(filename.c_str(), ios::out | ios::binary | ios::app);
+  if (outfile) {
+    std::_Bit_iterator it = vec;
+    std::string raw = "";
+    while (it != vec_end) {
+      if (*it)
+        raw += "1";
+      else
+        raw += "0";
+      ++it;
+    }
+    outfile << raw;
+    outfile.close();
+  } else {
+    throw PyCR::IOError("hWriteFileBinaryAppend: Unable to open file " + filename + ".");
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -231,55 +267,42 @@ void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, HInteg
 
 template <>
 void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename, HInteger start) {
-  // TODO: hWriteFileBinary() - Add implementation
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+  // Sanity check
+  if (vec_end <= vec) return;
 
+  // Generating raw string
+  std::_Bit_iterator it = vec;
+  std::string raw = "";
+  while (it != vec_end) {
+    if (*it)
+      raw += "1";
+    else
+      raw += "0";
+    ++it;
+  }
 
-//-----------------------------------------------------------------------
-//$DOCSTRING: Read a single vector from a file which was dumped in (machine-dependent) binary format
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadFileBinary
-//-----------------------------------------------------------------------
-#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
-#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-//$COPY_TO END ----------------------------------------------------------
-/*!
-  \brief $DOCSTRING
-  $PARDOCSTRING
-
-  Usage:
-  vec.readdump(filename) -> reads dumped vector from file
-
-  See also:
-  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend, hWriteFileText, hReadFileText
-
-  Example:
-  >>> v=Vector(float,10,fill=3.0)
-  >>> hWriteFileBinary(v,\"test.dat\")
-  >>> x=Vector(float,10,fill=1.0)
-  >>> hReadFileBinary(x,\"test.dat\")
-  >>> x
-  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
-*/
-template <class Iter>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
-  char * v1 = reinterpret_cast<char*>(&(*vec));
-  char * v2 = reinterpret_cast<char*>(&(*vec_end));
-  fstream outfile(filename.c_str(), ios::in | ios::binary);
-  if (outfile){
-    outfile.read(v1, (HInteger)(v2-v1));
+  // Writing to file
+  fstream outfile;
+  ifstream infile(filename.c_str(), ios::binary | ios::in);
+  int vec_len = std::distance(vec, vec_end);
+  int str_len = vec_len;
+  if (infile) {
+    infile.close();
+    outfile.open(filename.c_str(), ios::binary | ios::out | ios::in);
+  } else {
+    infile.close();
+    outfile.open(filename.c_str(), ios::binary | ios::out);
+  }
+  if (outfile) {
+    if (start > 0) outfile.seekg(start * vec_len);
+    outfile.write(raw.c_str(), str_len);
     outfile.close();
-  } else throw PyCR::IOError("hReadFileBinary: Unable to open file "+filename+".");
-}
-
-template <>
-void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
-  // TODO: hReadFileBinary() - Add implementation
+  } else {
+    throw PyCR::IOError("hWriteFileBinary: Unable to open file " + filename + ".");
+  }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 
 //-----------------------------------------------------------------------
@@ -331,7 +354,79 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, HInt
 
 template <>
 void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename, HInteger start) {
-  // TODO: hWriteFileText() - Add implementation
+  int vec_len = std::distance(vec, vec_end);
+  int str_len = vec_len;
+  char raw[str_len];
+
+  fstream outfile(filename.c_str(), ios::in | ios::binary);
+  if (outfile) {
+    if (start > 0) {
+      outfile.seekg(vec_len * start);
+    }
+    outfile.read(raw, vec_len);
+    outfile.close();
+
+    std::_Bit_iterator it = vec;
+    int i = 0;
+    while ((it != vec_end) && (i < str_len)) {
+      if (raw[i] == '1') {
+        *it = true;
+      } else {
+        *it = false;
+      }
+      ++i;
+      ++it;
+    }
+  } else {
+    throw PyCR::IOError("hWriteFileBinary: Unable to open file " + filename + ".");
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Read a single vector from a file which was dumped in (machine-dependent) binary format
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hReadFileBinary
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vec.readdump(filename) -> reads dumped vector from file
+
+  See also:
+  hReadFileBinary, hWriteFileBinary, hWriteFileBinaryAppend, hWriteFileText, hReadFileText
+
+  Example:
+  >>> v=Vector(float,10,fill=3.0)
+  >>> hWriteFileBinary(v,\"test.dat\")
+  >>> x=Vector(float,10,fill=1.0)
+  >>> hReadFileBinary(x,\"test.dat\")
+  >>> x
+  Vec(float,10)=[3.0,3.0,3.0,3.0,3.0,...]
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename) {
+  char * v1 = reinterpret_cast<char*>(&(*vec));
+  char * v2 = reinterpret_cast<char*>(&(*vec_end));
+  fstream outfile(filename.c_str(), ios::in | ios::binary);
+  if (outfile){
+    outfile.read(v1, (HInteger)(v2-v1));
+    outfile.close();
+  } else throw PyCR::IOError("hReadFileBinary: Unable to open file "+filename+".");
+}
+
+template <>
+void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_end, HString filename) {
+  hReadFileBinary(vec, vec_end, filename, 0);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -688,7 +783,7 @@ HBool HFPP_FUNC_NAME (AERA::Datareader& dr)
 HPyObject HFPP_FUNC_NAME (AERA::Datareader& dr, const std::string keyValue)
 {
   std::string keyName = keyValue;
-  HPyObject pyObj = HPyObject(NULL);
+  HPyObject pyObj = HPyObject();
   AERA::Data::Header* header_ptr = dr.header();
   stringToLower(keyName);
 
