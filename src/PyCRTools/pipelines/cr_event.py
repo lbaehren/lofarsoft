@@ -93,12 +93,12 @@ from optparse import OptionParser
 usage = "usage: %prog [options] datafile.h5 "
 parser = OptionParser(usage=usage)
 
-parser.add_option("-o","--outputdir", type="str", default="",help="directory where to store the final results (will be stored in a subdirectory filename.dir/ within that directory)")
+parser.add_option("-o","--outputdir", type="str", default="/data/VHECR/LORAtriggered/results",help="directory where to store the final results (will be stored in a subdirectory filename.dir/ within that directory)")
 parser.add_option("-L","--lora_logfile", type="str", default="LORAtime4",help="LORA logfile (LORAtime4)")
 parser.add_option("--loradir", type="str", default="/data/VHECR/LORAtriggered/LORA/",help="Directory to find LORA information")
-parser.add_option("-d","--datadir", type="str", default="",help="Will be added to each of the filename arguments (hence, use quotations for the main arguments if you use this option and have asterisks in the argument!)")
+parser.add_option("-d","--datadir", type="str", default="/data/VHECR/LORAtriggered/data",help="Will be added to each of the filename arguments (hence, use quotations for the main arguments if you use this option and have asterisks in the argument!)")
 parser.add_option("-p","--polarization", type="int", default=-1,help="either 0 or 1 for selecting even or odd antennas, or -1 for both")
-parser.add_option("-t","--nsigma", type="float", default=4.0,help="Threshold for identifying peaks")
+parser.add_option("-t","--nsigma", type="float", default=3.0,help="Threshold for identifying peaks")
 parser.add_option("-b","--block", type="int", default=-1,help="in which block do you expect the peak  (use LORA guess if -1 or central block if no guess is present)")
 parser.add_option("-w","--search_window_width", type="int", default=-1,help="Width of search window for peak around sample_number (in samples) - full block if not given")
 parser.add_option("-n","--sample_number", type="int", default=-1,help="Sample number within block where peak is expected (use LORA guess if -1 or center if no guess is present)")
