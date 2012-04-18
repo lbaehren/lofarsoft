@@ -70,7 +70,7 @@ class Shower(Task):
         footprint_shower_enable = dict(default=True, doc='Draw shower geometry in footprint'), 
         footprint_shower_color = dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),            
              
-        footprint_lora_enable = dict(default = False,
+        footprint_lora_enable = dict(default = True,
             doc = "Draw Information from LORA"), 
         lora_positions = dict(default=None,
             doc="LORA detector positions, given in [Nx3], [NDetectors x (X,Y,Z)], X,Y,Y kartesian" ),  
@@ -80,6 +80,9 @@ class Shower(Task):
             doc = "Timelags of signals in LORA detectors, given in nanoseconds [NDetectors] "), 
         footprint_color_lora = dict(default='#730909',doc="Color used for LORA plots. If set to 'time' uses the arrival time" ),    
         footprint_marker_lora = dict(default='',doc="Marker for LORA stations in footprint"),
+        
+        azimuth_in_distance_bins_enable = dict(default = False,
+            doc = "Making plots for different distance bins"),
     )
 
 
@@ -251,7 +254,7 @@ class Shower(Task):
                 
         if self.footprint_enable: 
         
-            if self.lora_signals is not None and self.lora_positions is not None:
+            if self.lora_signals is not None and self.lora_positions is not None and self.footprint_lora_enable:
   
                 self.lsizes = self.lora_signals
                 if self.lszises.max() > 0:
@@ -391,13 +394,63 @@ class Shower(Task):
                     if self.footprint_shower_enable:
                         cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
-
+                
+                if self.save_plots:
+                    print "Not implemented yet"
+                else:    
+                    cr.plt.show()
 
             
             else:
                 print "WARNING: Give at least positions and signals to plot a footprint"  
                 
-            if self.save_plots:
-                print "Not implemented yet"
-            else:    
-                cr.plt.show()                  
+  
+                
+                
+        if self.azimuth_in_distance_bins_enable:    
+                
+                Dist = self.__GetDistance(self.core,self.direction,self.positions)
+                Dist = np.array(Dist)
+                DistPlane = self.positions[:,0]* self.positions[:,0] + self.positions[:,1]* self.positions[:,1]
+                
+                DistPlane = np.sqrt(DistPlane)
+                
+                Angle = self.positions[:,0]/DistPlane
+                Angle = np.arcsin(Angle)
+                Angle = np.rad2deg(Angle)
+
+                # Slicing 
+                
+                asc = (Dist < 100)
+                bsc = (Dist > 100) & (Dist < 200)
+                csc = (Dist > 200) & (Dist < 300)
+                dsc = (Dist > 300) & (Dist < 400)
+                esc = (Dist > 400)
+
+                
+                cr.plt.figure()
+                
+                cr.plt.plot(Angle[asc],self.signals[:,0][asc],linestyle="None",marker = 'o',color = "green",label="d < 100m")     
+                cr.plt.plot(Angle[bsc],self.signals[:,0][bsc],linestyle="None",marker = 's',color = "red",label="100m < d < 200m")
+                cr.plt.plot(Angle[csc],self.signals[:,0][csc],linestyle="None",marker = '<',color = "blue",label="200m < d < 300m")
+                cr.plt.plot(Angle[dsc],self.signals[:,0][dsc],linestyle="None",marker = '>',color = "magenta",label="300m < d < 400m")
+                cr.plt.plot(Angle[esc],self.signals[:,0][esc],linestyle="None",marker = 'v',color = "black",label="d > 400m")
+                cr.plt.ylabel("Signal [a.u.]")
+                cr.plt.xlabel("Angle to shower core")
+                cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
+                
+                cr.plt.figure()
+                
+                cr.plt.plot(Angle[asc],self.signals[:,1][asc],linestyle="None",marker = 'o',color = "green",label="d < 100m")     
+                cr.plt.plot(Angle[bsc],self.signals[:,1][bsc],linestyle="None",marker = 's',color = "red",label="100m < d < 200m")
+                cr.plt.plot(Angle[csc],self.signals[:,1][csc],linestyle="None",marker = '<',color = "blue",label="200m < d < 300m")
+                cr.plt.plot(Angle[dsc],self.signals[:,1][dsc],linestyle="None",marker = '>',color = "magenta",label="300m < d < 400m")                
+                cr.plt.plot(Angle[esc],self.signals[:,1][esc],linestyle="None",marker = 'v',color = "black",label="d > 400m")
+                cr.plt.ylabel("Signal [a.u.]")
+                cr.plt.xlabel("Angle to shower core")                
+                cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
+                
+                if self.save_plots:
+                    print "Not implemented yet"
+                else:    
+                    cr.plt.show()                         
