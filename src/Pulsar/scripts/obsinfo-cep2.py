@@ -1335,7 +1335,7 @@ class writeHtmlList:
 	def legend (self):
 		# getting date & time of last update
 		if self.lupd == "":
-			cmd="date +'%b %d, %Y %H:%M:%S'"
+			cmd="date +'%b %d, %Y %H:%M:%S %Z'"
 			self.lupd=os.popen(cmd).readlines()[0][:-1]
 		self.htmlptr.write ("\n</table>\n\n<hr width=100%%>\n<address>\nLast Updated: %s\n</address>\n" % (self.lupd, ))
 		self.htmlptr.write ("\n</body>\n</html>")
@@ -1813,7 +1813,7 @@ class obsstat:
 		self.htmlptr.write ("\n</table>")
                 # getting date & time of last update
                 if self.lupd == "":
-                        cmd="date +'%b %d, %Y %H:%M:%S'"
+                        cmd="date +'%b %d, %Y %H:%M:%S %Z'"
                         self.lupd=os.popen(cmd).readlines()[0][:-1]
                 self.htmlptr.write ("\n\n<hr width=100%%>\n<address>\nLast Updated: %s\n</address>\n" % (self.lupd, ))
 		self.htmlptr.write ("\n</body>\n</html>")
