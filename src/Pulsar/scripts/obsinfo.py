@@ -68,7 +68,7 @@ hostdir="Lofar"  # dir that contains plots, grid links, db file
 plotsdir="/home/%s/%s/plots" % (username, hostdir)
 griddir="/home/%s/%s/grid" % (username, hostdir)
 # where to copy profile plots (ag004)
-webserver="%s@ag004.nfra.nl" % (username, ) # ag004 - former dop95
+webserver="%s@10.87.15.4" % (username, ) # ag004 - former dop95
 htmltitle="LOFAR pulsar observations "
 basehref="http://www.astron.nl/~kondratiev"
 basehref_dir="lofar"
