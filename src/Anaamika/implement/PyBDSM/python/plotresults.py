@@ -6,6 +6,7 @@ from math import log10
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import functions as func
+from const import fwsig
 import os
 from matplotlib.widgets import Button
 from matplotlib.patches import Ellipse
@@ -50,8 +51,8 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
     if hasattr(img, 'ch0_pi'):
         img_pi = img.ch0_pi
     if hasattr(img, 'psf_vary_maj'):
-        img_psf_maj = img.psf_vary_maj
-        img_psf_min = img.psf_vary_min
+        img_psf_maj = img.psf_vary_maj*fwsig
+        img_psf_min = img.psf_vary_min*fwsig
         img_psf_pa = img.psf_vary_pa
     
     # Construct lists of images, titles, etc.

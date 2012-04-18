@@ -564,6 +564,7 @@ def export_image(img, outfile=None, img_format='fits',
     """
     import os
     import functions as func
+    from const import fwsig
     
     # First some checking:
     if not 'gausfit' in img.completed_Ops and 'gaus' in img_type:
@@ -624,15 +625,15 @@ def export_image(img, outfile=None, img_format='fits',
                                      clobber=clobber)
         elif img_type == 'psf_major':
             func.write_image_to_file(use_io, filename,
-                                     img.psf_var_maj, img, bdir,
+                                     img.psf_vary_maj*fwsig, img, bdir,
                                      clobber=clobber)
         elif img_type == 'psf_minor':
             func.write_image_to_file(use_io, filename,
-                                     img.psf_var_min, img, bdir,
+                                     img.psf_vary_min*fwsig, img, bdir,
                                      clobber=clobber)
         elif img_type == 'psf_pa':
             func.write_image_to_file(use_io, filename,
-                                     img.psf_var_pa, img, bdir,
+                                     img.psf_vary_pa, img, bdir,
                                      clobber=clobber)
         elif img_type == 'gaus_resid':
             if incl_wavelet and hasattr(img, 'atrous_gaussians'):

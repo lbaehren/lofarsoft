@@ -26,6 +26,13 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/04/17 - Fixed bug in psf_vary module that resulted in
+                 PSF major and minor axis maps in terms of 
+                 sigma instead of FWHM. Added psf_vary option
+                 (psf_stype_only) to allow PSF fitting to non-
+                 S-type sources (useful if sources are very 
+                 distorted).
+    
     2012/04/12 - Fixed bug in adaptive scaling code that could 
                  cause incorrect small-scale rms_box size. Added
                  a parameter (adaptive_thresh) that controls the

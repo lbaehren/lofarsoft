@@ -35,7 +35,7 @@ class Op_islands(Op):
     
     The option to detect islands on a different "detection" 
     image is also available. This option is useful for example
-    when a beam correction is used in AWImager -- it is generally
+    when a primary beam correction is used -- it is generally
     better to detect sources on the uncorrected image, but 
     to measure them on the corrected image.
 
@@ -51,7 +51,10 @@ class Op_islands(Op):
         opts = img.opts
 
         if opts.detection_image != '':
-            # Use a different image for island detection
+            # Use a different image for island detection. The detection
+            # image and the measurement image must have the same shape
+            # and be registered. Otherwise, one could reproject the
+            # detection image using, e.g., the Kapteyn package.
             #
             # First, set up up an Image object and run a limited
             # op_chain.
@@ -246,7 +249,8 @@ class Island(object):
         ### create (inverted) masks
         # Note that mask_active is the island mask; mask_noisy is just
         # the noisy pixels in the island image. If you want to mask the
-        # noisy pixels as well, set the mask to mask = mask_active + mask_noisy
+        # noisy pixels as well, set the mask to:
+        #     mask = mask_active + mask_noisy
         isl_mask = (labels[bbox] == idx)
         noise_mask = (labels[bbox] == 0)
         N.logical_or(noise_mask, isl_mask, noise_mask)

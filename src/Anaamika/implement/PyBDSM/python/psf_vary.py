@@ -37,6 +37,7 @@ class Op_psf_vary(Op):
         gencode = opts.psf_gencode; primarygen = opts.psf_primarygen; itess_method = opts.psf_itess_method
         tess_sc = opts.psf_tess_sc; tess_fuzzy= opts.psf_tess_fuzzy
         bright_snr_cut = opts.psf_high_snr
+        s_only = opts.psf_stype_only
         if opts.psf_snrcut < 5.0: 
             mylogger.userinfo(mylog, "Value of psf_snrcut too low; increasing to 5")
             snrcut = 5.0
@@ -44,9 +45,9 @@ class Op_psf_vary(Op):
             snrcut = opts.psf_snrcut
         img.psf_snrcut = snrcut
         if opts.psf_high_snr != None:
-            if opts.psf_high_snr < 20.0: 
-                mylogger.userinfo(mylog, "Value of psf_high_snr too low; increasing to 20")
-                high_snrcut = 20.0
+            if opts.psf_high_snr < 10.0: 
+                mylogger.userinfo(mylog, "Value of psf_high_snr too low; increasing to 10")
+                high_snrcut = 10.0
             else:
                 high_snrcut = opts.psf_high_snr
         else:
@@ -59,18 +60,41 @@ class Op_psf_vary(Op):
 
         ### now put all relevant gaussian parameters into a list 
         ngaus = img.ngaus
-        num = N.zeros(ngaus, int); peak = N.zeros(ngaus); xc = N.zeros(ngaus); yc = N.zeros(ngaus) 
-        bmaj = N.zeros(ngaus); bmin = N.zeros(ngaus); bpa = N.zeros(ngaus); code = N.array(['']*ngaus); 
-        rms = N.zeros(ngaus)
-        for i, g in enumerate(img.gaussians):
-          num[i] = i; peak[i] = g.peak_flux; xc[i] = g.centre_pix[0]; yc[i] = g.centre_pix[1]
-          bmaj[i] = g.size_pix[0]; bmin[i] = g.size_pix[1]; bpa[i] = g.size_pix[2]
-          code[i] = img.sources[g.source_id].code; rms[i] = img.islands[g.island_id].rms
+        nsrc = img.nsrc
+        num = N.zeros(nsrc, int)
+        peak = N.zeros(nsrc)
+        xc = N.zeros(nsrc)
+        yc = N.zeros(nsrc) 
+        bmaj = N.zeros(nsrc)
+        bmin = N.zeros(nsrc)
+        bpa = N.zeros(nsrc)
+        code = N.array(['']*nsrc); 
+        rms = N.zeros(nsrc)
+        src_id_list = []
+        for i, src in enumerate(img.sources):
+            src_max = 0.0
+            for gmax in src.gaussians:
+                # Take only brightest Gaussian per source
+                if gmax.peak_flux > src_max:
+                    src_max = gmax.peak_flux
+                    g = gmax
+            num[i] = i
+            peak[i] = g.peak_flux
+            xc[i] = g.centre_pix[0]
+            yc[i] = g.centre_pix[1]
+            bmaj[i] = g.size_pix[0]
+            bmin[i] = g.size_pix[1]
+            bpa[i] = g.size_pix[2]
+            code[i] = img.sources[g.source_id].code
+            rms[i] = img.islands[g.island_id].rms
         gauls = (num, peak, xc, yc, bmaj, bmin, bpa, code, rms)
         tr_gauls = self.trans_gaul(gauls)
 
         # takes gaussians with code=S and snr > snrcut.
-        tr = [n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
+        if s_only:
+            tr = [n for n in tr_gauls if n[1]/n[8]>snrcut and n[7] == 'S']
+        else:
+            tr = [n for n in tr_gauls if n[1]/n[8]>snrcut]
         g_gauls = self.trans_gaul(tr)
 
         # computes statistics of fitted sizes. Same as psfvary_fullstat.f in fBDSM.
@@ -116,8 +140,8 @@ class Op_psf_vary(Op):
         # For each tile, calculate the weighted averaged psf image. Also for all the sources in the image.
         cdelt = list(img.wcs_obj.acdelt[0:2])
         factor=3.
-        psfimages, psfcoords, totpsfimage = self.psf_in_tile(image, img.beam, g_gauls, \
-                   cdelt, factor, snrcutstack, volrank, tile_prop, plot)
+        psfimages, psfcoords, totpsfimage, psfratio = self.psf_in_tile(image, img.beam, g_gauls, \
+                   cdelt, factor, snrcutstack, volrank, tile_prop, plot, img)
         npsf = len(psfimages)
 
         if opts.psf_use_shap:
@@ -226,6 +250,7 @@ class Op_psf_vary(Op):
                 maj_interp = N.transpose(griddata(x, y, maj_values, xi, yi))
                 min_interp = N.transpose(griddata(x, y, min_values, xi, yi))
                 pa_interp = N.transpose(griddata(x, y, pa_values, xi, yi))
+                ratio_interp = N.transpose(griddata(x, y, psfratio, xi, yi))
                 
                 # Now fill in regions outside the grid.
                 # First check if they are masked arrays and, if so, convert to 
@@ -237,33 +262,39 @@ class Op_psf_vary(Op):
                     maj_interp = N.array(maj_interp)
                     min_interp = N.array(min_interp)
                     pa_interp = N.array(pa_interp)
+                    ratio_interp = N.array(ratio_interp)
                 nodata = N.where(N.isnan(maj_interp))
                 # Now fill NaNs with values in tiles
                 if len(nodata[0]) > 0:
                     maj_interp_nearest = N.zeros(image.shape)
                     min_interp_nearest = N.zeros(image.shape)
                     pa_interp_nearest = N.zeros(image.shape)
+                    ratio_interp_nearest = N.zeros(image.shape)
                     for i, coord in enumerate(psfcoords):
                         intile = N.where(volrank == volrank[tuple(coord)])
                         maj_interp_nearest[intile] = maj_values[i]
                         min_interp_nearest[intile] = min_values[i]
                         pa_interp_nearest[intile] = pa_values[i]
+                        ratio_interp_nearest[intile] = psfratio[i]
                     blanktiles = N.where(maj_interp_nearest == 0)
                     maj_interp_nearest[blanktiles] = N.mean(maj_values)
                     min_interp_nearest[blanktiles] = N.mean(min_values)
-                    pa_interp_nearest[blanktiles] = N.mean(pa_values)         
+                    pa_interp_nearest[blanktiles] = N.mean(pa_values)    
+                    ratio_interp_nearest[blanktiles] = N.mean(psfratio)                                  
                     maj_interp[nodata] = maj_interp_nearest[nodata]
                     min_interp[nodata] = min_interp_nearest[nodata]
                     pa_interp[nodata] = pa_interp_nearest[nodata]
+                    ratio_interp[nodata] = ratio_interp_nearest[nodata]
                             
                 # Store interpolated images
                 img.psf_vary_maj = maj_interp
                 img.psf_vary_min = min_interp
                 img.psf_vary_pa = pa_interp
                 if opts.output_all:
-                    func.write_image_to_file(img.use_io, img.imagename + '.maj_interp.fits', N.transpose(maj_interp), img, dir)
-                    func.write_image_to_file(img.use_io, img.imagename + '.min_interp.fits', N.transpose(min_interp), img, dir)
+                    func.write_image_to_file(img.use_io, img.imagename + '.maj_interp.fits', N.transpose(maj_interp)*fwsig, img, dir)
+                    func.write_image_to_file(img.use_io, img.imagename + '.min_interp.fits', N.transpose(min_interp)*fwsig, img, dir)
                     func.write_image_to_file(img.use_io, img.imagename + '.pa_interp.fits', N.transpose(pa_interp), img, dir)
+                    func.write_image_to_file(img.use_io, img.imagename + '.ratio_interp.fits', N.transpose(ratio_interp), img, dir)
                 
                 # Loop through source and Gaussian lists and deconvolve the sizes using appropriate beam
                 bar2 = statusbar.StatusBar('Correcting deconvolved source sizes ..... : ', 0, img.nsrc)
@@ -504,6 +535,7 @@ class Op_psf_vary(Op):
 
         index=snr.argsort()
         snr = snr[index]
+#        snr = snr[::-1]
         x = N.asarray(g_gauls[2])[index]
         y = N.asarray(g_gauls[3])[index]
         
@@ -512,6 +544,8 @@ class Op_psf_vary(Op):
             if gencode != 'file': gencode = 'list'
             if gencode == 'list':
                 cutoff = int(round(num*(snrtop)))
+                if cutoff == len(snr):
+                    cutoff -= 1
                 # Make sure we don't fall below snrcutstack (SNR cut for stacking of PSFs), since
                 # it makes no sense to make tiles with generators that fall below this cut.
                 if snr[cutoff] < snrcutstack: cutoff = snr.searchsorted(snrcutstack)
@@ -780,7 +814,7 @@ class Op_psf_vary(Op):
     
 ##################################################################################################
     def psf_in_tile(self, image, beam, g_gauls, cdelt, factor, snrcutstack, volrank, \
-                    tile_prop, plot):
+                    tile_prop, plot, img):
         """ For each tile given by tile_prop, make a list of all gaussians in the constituent tesselations
         and pass it to stackpsf with a weight for each gaussian, to calculate the average psf per tile.
     
@@ -792,6 +826,7 @@ class Op_psf_vary(Op):
         ntile = len(tile_list)
         psfimages = []
         psfcoords = []
+        psfratio = [] # ratio of peak flux to total flux
         srcpertile = N.zeros(ntile)
         snrpertile = N.zeros(ntile)
     
@@ -822,6 +857,16 @@ class Op_psf_vary(Op):
             a = self.stackpsf(image, beam, t_gauls, wts, cdelt, factor)
             psfimages.append(a)
             psfcoords.append([sum(N.asarray(t_gauls[2])*wts)/sum(wts), sum(N.asarray(t_gauls[3])*wts)/sum(wts)])
+            
+            # Find peak/total flux ratio for sources in tile. t_gauls[0] is source_id
+            src_ratio = []
+            src_wts = []
+            for gt in tile_gauls:
+                src = img.sources[gt[0]]
+                src_ratio.append(src.peak_flux_max / src.total_flux)
+                src_wts.append(src.total_flux / src.total_fluxE)
+            psfratio.append(sum(N.asarray(src_ratio)*src_wts)/sum(src_wts))
+
         totpsfimage = psfimages[0]*snrpertile[0]
         for itile in range(1,ntile):
             totpsfimage += psfimages[itile]*snrpertile[itile]
@@ -852,7 +897,7 @@ class Op_psf_vary(Op):
            pl.setp(a, xticks=[], yticks=[])
          pl.show()
          
-        return psfimages, psfcoords, totpsfimage
+        return psfimages, psfcoords, totpsfimage, psfratio
     
     
 ##################################################################################################

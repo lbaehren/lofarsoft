@@ -85,11 +85,12 @@ class Op_rmsimage(Op):
             shape = image.shape
             isl_size_bright = []
             isl_area_highthresh = []
+            isl_peak = []
             max_isl_brightsize = 0.0
             if do_adapt:
                 mylogger.userinfo(mylog, "Using adaptive scaling of rms_box")
                 threshold = 500.0
-                while len(isl_size_bright) < 20 and threshold > adapt_thresh:
+                while len(isl_size_bright) < 5 and threshold > adapt_thresh:
                     isl_size_bright=[]
                     isl_maxposn = []
                     act_pixels = (img.ch0-cmean)/threshold >= crms
@@ -106,6 +107,7 @@ class Op_rmsimage(Op):
                         isl_area_highthresh.append(size_area)
                         isl_maxposn.append(tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+\
                               N.array((s[0].start, s[1].start))))
+                        isl_peak.append(nd.maximum(image[s], labels[s], idx+1))
 
             # Check islands found above at thresh_isl threshold to determine if
             # the bright source is embedded inside a large island or not. If it is,
@@ -122,6 +124,7 @@ class Op_rmsimage(Op):
             isl_size = []
             isl_size_highthresh = []
             isl_size_lowthresh = []
+            isl_snr = []
             for idx, s in enumerate(slices):
                 isl_area_lowthresh = (labels[s] == idx+1).sum()/img.pixel_beamarea*2.0
                 isl_maxposn_lowthresh = tuple(N.array(N.unravel_index(N.argmax(image[s]), image[s].shape))+
@@ -133,6 +136,7 @@ class Op_rmsimage(Op):
                         isl_pos.append(isl_maxposn_lowthresh)
                         isl_size_lowthresh.append(max([s[0].stop-s[0].start, s[1].stop-s[1].start]))
                         isl_size_highthresh.append(isl_size_bright[bright_indx])
+                        isl_snr.append(isl_peak[bright_indx]/crms)
 
             if len(isl_size) == 0:
                 max_isl_size = 0.0
@@ -141,12 +145,15 @@ class Op_rmsimage(Op):
             mylog.info('Maximum extent of largest 10-sigma island using clipped rms (pixels) = '+str(max_isl_size))
             if len(isl_size_highthresh) == 0:
                 max_isl_size_highthresh = 0.0
+                max_isl_size_lowthresh = 0.0
             else:
                 max_isl_size_highthresh = max(isl_size_highthresh)
+                max_isl_size_lowthresh = max(isl_size_lowthresh)
+                avg_max_isl_size = max_isl_size_highthresh#(max_isl_size_highthresh + max_isl_size_lowthresh) / 2.0
 
             if len(isl_pos) == 0:
                 do_adapt = False
-            min_size_allowed = int(img.pixel_beam[0]*9.0) #21
+            min_size_allowed = int(img.pixel_beam[0]*9.0)
             if do_adapt:
                 bsize = int(max(brightsize, min_size_allowed, max_isl_size_highthresh*2.0))
             else:

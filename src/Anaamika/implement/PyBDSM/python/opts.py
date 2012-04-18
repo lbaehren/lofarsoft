@@ -910,13 +910,17 @@ class Opts(object):
                              doc="Use shapelets for PSF variation",
                              group="hidden")
                              
-    psf_high_snr    =  Option(None, Float(),
+    psf_high_snr    = Option(None, Float(),
                              doc = "SNR above which all sources are taken to be unresolved. "\
                                  "E.g., psf_high_snr = 20.0. None => no such selection is made\n"\
                                  "Gaussians with SNR greater than this are "\
                                  "used to determine the PSF variation, even if they are deemed "\
                                  "to be resolved. This corrects for the unreliability at high SNRs in the "\
                                  "algorithm used to find unresolved sources. The minimum value is 20.0",
+                             group="psf_vary_do")
+    psf_stype_only =    Bool(True,
+                             doc = "Restrict sources used in PSF variation estimating to "\
+                                 "be only of type 'S'",
                              group="psf_vary_do")
     
     #-----------------------------SHAPELET OPTIONS--------------------------------
@@ -1040,7 +1044,7 @@ class Opts(object):
                                  "'shap_model' - Shapelet model image\n"\
                                  "'psf_major' - PSF major axis FWHM (in pixels) image\n"\
                                  "'psf_minor' - PSF minor axis FWHM (in pixels) image\n"\
-                                 "'psf_pa' - PSF position angle (in degrees) image\n",
+                                 "'psf_pa' - PSF position angle (E from N in degrees) image\n",
                              group='hidden')
     ch0_image       =   Bool(True,
                              doc="Show the ch0 image. This is the image used for "\
@@ -1087,13 +1091,16 @@ class Opts(object):
                                  "the mouse",
                              group="hidden")
     psf_major       =   Bool(False,
-                             doc="Show the PSF major axis variation",
+                             doc="Show the PSF major axis variation (values are "\
+                                 "FWHM in pixels)",
                              group="hidden")
     psf_minor       =   Bool(False,
-                             doc="Show the PSF minor axis variation",
+                             doc="Show the FWHM of PSF minor axis variation (values are "\
+                                 "FWHM in pixels)",
                              group="hidden")
     psf_pa          =   Bool(False,
-                             doc="Show the PSF position angle variation",
+                             doc="Show the PSF position angle variation (values are "\
+                                 "angle E from N in degrees)",
                              group="hidden")
 
     
