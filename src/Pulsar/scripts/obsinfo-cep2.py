@@ -936,13 +936,15 @@ class obsinfo:
 				if self.subbandList != "?" and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
 					try:
 						subband_first = int(self.subbandList.split("..")[0].split(",")[0])
+						# CS has a priority but we still have chance to modify it below
+						nchanpersub = self.nrChanPerSubCS
 						if self.nrChanPerSubIS == self.nrChanPerSubCS or self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
 			                                nchanspersub = (self.nrChanPerSubIS != 0 and self.nrChanPerSubIS or self.nrChanPerSubCS)
 			                        elif self.IS == '+' and self.CS != '+' and self.BF != '+':
 			                                nchanspersub = self.nrChanPerSubIS
 			                        elif self.IS != '+' and (self.CS == '+' or self.BF == '+'):
 			                                nchanspersub = self.nrChanPerSubCS
-						else:   # CS has a priority
+						else:   # still CS has a priority
 							nchanspersub = self.nrChanPerSubCS
 						if nchanpersub > 1:
 							lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
