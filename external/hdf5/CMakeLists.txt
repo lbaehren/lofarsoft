@@ -15,7 +15,7 @@ cmake_minimum_required (VERSION 2.8)
 ## Package information
 set (HDF5_REQUIRED_VERSION_MAJ "1")
 set (HDF5_REQUIRED_VERSION_MIN "8")
-set (HDF5_REQUIRED_VERSION_REL "8")
+set (HDF5_REQUIRED_VERSION_REL "4")
 set (HDF5_VERSION        "1.${HDF5_REQUIRED_VERSION_MIN}.${HDF5_REQUIRED_VERSION_REL}" )
 set (HDF5_SOURCE_ARCHIVE "hdf5-${HDF5_VERSION}.tar.gz" )
 set (HDF5_URL            "http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-${HDF5_VERSION}/src/${HDF5_SOURCE_ARCHIVE}" )
@@ -120,7 +120,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
       DOWNLOAD_DIR download
       SOURCE_DIR source
       URL ${HAVE_HDF5_SOURCE}
-      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} --bindir=${CMAKE_INSTALL_PREFIX}/bin --includedir=${LUS_INCLUDE_DIR}/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static}
+      CONFIGURE_COMMAND ${HDF5_BINARY_DIR}/source/configure --prefix=${CMAKE_INSTALL_PREFIX} --bindir=${CMAKE_INSTALL_PREFIX}/bin --includedir=${LUS_INCLUDE_DIR}/hdf5 ${HDF5_enable_cxx} ${HDF5_enable_fortran} ${HDF5_enable_hl} ${HDF5_enable_shared} ${HDF5_enable_static} --with-zlib=no --with-szlib=no
       INSTALL_COMMAND make install
       )
   
