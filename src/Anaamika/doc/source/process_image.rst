@@ -22,8 +22,9 @@ order:
    should be applied, one or the other is chosen internally based on the
    ratio of expected false pixels to true pixels.
 
-#. Calculates the rms image. The 3-sigma clipped rms and mean are calculated
-   inside boxes of defined by the :term:`rms_box` parameter. Intermediate values
+#. Calculates the rms and mean images. The 3-sigma clipped rms and mean are calculated
+   inside boxes of defined by the :term:`rms_box` parameter. Optionally, these images can be calculated using 
+   adaptive scaling of this box, so that a smaller box (defined the the :term:`rms_box_bright` parameter) is used near bright sources (where strong artifacts are more likely). Intermediate values
    are calculated using bicubic spline interpolation by default (the order of the spline interpolation can be set with the :term:`spline_rank` parameter). Depending on the resulting statistics (see :ref:`algorithms` for details), we either adopt the rms image or a constant rms
    in the following analysis.
 
@@ -71,7 +72,9 @@ Type ``inp process_image`` to list the main reduction parameters:
 
     PROCESS_IMAGE: Find and measure sources in an image.
     ================================================================================
-    :term:`filename` ................. '': Input image file name                       
+    :term:`filename` ................. '': Input image file name   
+    :term:`adaptive_rms_box` ..... False : Use adaptive rms_box when determining rms and
+                                   mean maps                    
     :term:`advanced_opts` ........ False : Show advanced options                       
     :term:`atrous_do` ............ False : Decompose Gaussian residual image into multiple
                                    scales                                      
@@ -117,7 +120,10 @@ Each of the parameters is described in detail below.
 .. glossary::
     filename
         This parameter is a string (no default) that sets the input image file name. The input image can be a FITS or CASA 2-, 3-, or 4-D cube.
-        
+
+    adaptive_rms_box
+        This parameter is a Boolean (default is ``False``). If ``True``, an adaptive box is used when calculating the rms and mean maps. See :ref:`adaptive_rms_box` for details of the options.
+
     advanced_opts
         This parameter is a Boolean (default is ``False``). If ``True``, the advanced options are shown. See :ref:`advanced_opts` for details of the advanced options.
         
@@ -257,6 +263,35 @@ Each of the parameters is described in detail below.
         Use the ``mean_map`` and ``rms_map`` parameters to control the way the mean and
         rms are determined.
 
+
+.. _adaptive_rms_box:
+
+Adaptive box options
+====================
+If ``adaptive_rms_box = True``, the rms_box is reduced in size near bright sources and enlarged far from them. This scaling attempts to account for possible strong artifacts around bright sources while still acheiving accurate background rms and mean values when extended sources are present. This option is generally slower than non-adaptive scaling.
+
+Use the ``rms_box`` parameter to set the large-scale box and the ``rms_box_bright`` parameter to set the small-scale box. The threshold for bright sources can be set with the ``adaptive_thresh`` parameter:
+
+.. parsed-literal::
+
+    adaptive_rms_box ...... True : Use adaptive rms_box when determining rms and mean maps
+      :term:`adaptive_thresh` ..... None : Sources with pixels above adaptive_thresh*
+                                   clipped_rms will be considered as bright sources (i.e., 
+                                   with potential artifacts). None => calculate inside 
+                                   program            
+      :term:`rms_box_bright` ...... None : Box size, step size for rms/mean map 
+                                   calculation near bright sources. Specify as (box, step) 
+                                   in pixels. None => calculate inside program                              
+
+.. glossary::
+
+    adaptive_thresh
+        This parameter is a float (default is ``None``) that sets the SNR above which sources may be affected by strong artifacts Sources that meet the SNR threshold will use the small-scale box (set by the ``rms_box_bright`` parameter) if their sizes at a threshold of 10.0 is less than 25 beam areas.
+
+        If None, the threshold is varied from 500 to 50 to attempt to obtain at least 5 candidate bright sources.
+
+    rms_box_bright
+        This parameter is a tuple (default is ``None``) of two integers that sets the box and step sizes to use near bright sources (determined by the ``adaptive_thresh`` parameter). The large-scale box size is set with the ``rms_box`` parameter.
 
 .. _advanced_opts:
 
@@ -779,7 +814,7 @@ PSF variation module
 --------------------
 If ``psf_vary_do = True``, then the spatial variations in the PSF are estimated and their effects corrected for. To this end, PyBDSM performs the following steps:
 
-* A list of sources that are likely to be unresolved is constructed. This is done by first selecting only type 'S' sources (see :ref:`output_cols` for details of source types) and sources with SNRs that exceed ``psf_snrcut``. Next, a function is fit to determine how the size of sources (normalized by the median size) varies with the SNR. The function used is defined as :math:`\sigma / median = \sqrt(c_1^2 + c_2^2/SNR^2)`, where :math:`\sigma` is the size of the Gaussian and :math:`c_1` and :math:`c_2` are free parameters. Clipping of outliers is done during this fitting, controlled by the ``psf_nsig`` parameter. Lastly, unresolved sources are selected by choosing sources that lie within ``psf_kappa2`` times the rms of this best-fit sigma-SNR relation. As this last step can be unreliable for high-SNR sources, an additional selection can be made for the highest SNR sources using the ``psf_high_snr`` parameter. All sources with SNRs above ``psf_high_snr`` will be taken as unresolved.
+* A list of sources that are likely to be unresolved is constructed. This is done by first selecting only type 'S' sources by default (see :ref:`output_cols` for details of source types), but this restriction can be overridden using the ``psf_stype_only`` option) and sources with SNRs that exceed ``psf_snrcut``. Next, a function is fit to determine how the size of sources (normalized by the median size) varies with the SNR. The function used is defined as :math:`\sigma / median = \sqrt(c_1^2 + c_2^2/SNR^2)`, where :math:`\sigma` is the size of the Gaussian and :math:`c_1` and :math:`c_2` are free parameters. Clipping of outliers is done during this fitting, controlled by the ``psf_nsig`` parameter. Lastly, unresolved sources are selected by choosing sources that lie within ``psf_kappa2`` times the rms of this best-fit sigma-SNR relation. As this last step can be unreliable for high-SNR sources, an additional selection can be made for the highest SNR sources using the ``psf_high_snr`` parameter. All sources with SNRs above ``psf_high_snr`` will be taken as unresolved.
 
 * Next the image is tessellated using Voronoi tessellation to produce tiles within which the PSF shape is calculated (and assumed to be constant). The list of probable unresolved sources is filtered to select "calibrator" sources to use to determine the tessellation tiles. These sources are the brightest sources (known as the primary generators), defined as those sources that have SNRs in the top fraction of sources defined by ``psf_snrtop`` and that also have SNRs greater than ``psf_snrcutstack``. These sources are then grouped by their proximity, if they are within 50% of the distance to third closest source.
 
@@ -807,6 +842,8 @@ The options for this module are as follows:
       :term:`psf_snrcutstack` ..... 15.0 : Unresolved sources with higher SNR taken for
                                    stacked psfs                                
       :term:`psf_snrtop` .......... 0.15 : Fraction of SNR > snrcut as primary generators
+      :term:`psf_stype_only` ...... True : Restrict sources used in PSF variation 
+                                   estimating to be only of type 'S'                                    
 
 .. glossary::
 
@@ -852,6 +889,8 @@ The options for this module are as follows:
         which are the ``psf_snrtop`` fraction of the SNR distribution are taken as Voronoi
         generators. 
 
+    psf_stype_only
+        This parameter is a Boolean (default is ``False``). If ``True``\, sources are restricted to be only of type 'S'.
 
 .. _spectralindex_do:
 

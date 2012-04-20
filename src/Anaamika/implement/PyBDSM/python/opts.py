@@ -948,7 +948,7 @@ class Opts(object):
                                  "algorithm used to find unresolved sources. The minimum value is 20.0",
                              group="psf_vary_do")
     psf_stype_only =    Bool(True,
-                             doc = "Restrict sources used in PSF variation estimating to "\
+                             doc = "Restrict sources to "\
                                  "be only of type 'S'",
                              group="psf_vary_do")
     
