@@ -139,18 +139,19 @@ class CRDatabasePopulator(object):
 
                         p.write()
                         station.addPolarization(p)
-                        # If results.xml file exists add results to properties.
-                        # results_filename = os.path.join(self.dbManager.settings.resultspath,
-                        #                                 p.resultsfile)
-                        # if os.path.isfile(results_filename):
-                        #     if not "xml_processed" in p.parameter.keys():
-                        #         print "      Processing results file %s..." %(results_filename)
-                        #         parameters = xmldict.load(results_filename)
-                        #         for key in parameters.keys():
-                        #             p[key] = parameters[key]
-                        #         p["xml_processed"] = True
-                        # else:
-                        #     print("Results file {0} does not exist...".format(results_filename))
+                        if options.parameters:
+                            # If results.xml file exists add results to properties.
+                            results_filename = os.path.join(self.dbManager.settings.resultspath,
+                                                            p.resultsfile)
+                            if os.path.isfile(results_filename):
+                                if not "xml_processed" in p.parameter.keys():
+                                    print "      Processing results file %s..." %(results_filename)
+                                    parameters = xmldict.load(results_filename)
+                                    for key in parameters.keys():
+                                        p[key] = parameters[key]
+                                    p["xml_processed"] = True
+                            else:
+                                print("Results file {0} does not exist...".format(results_filename))
 
 
     def update(self):
@@ -170,7 +171,7 @@ class CRDatabasePopulator(object):
                     for p in s.polarization.values():
                         # If results.xml file exists add results to properties.
                         results_filename = os.path.join(resultspath, p.resultsfile)
-                        if os.path.isfile(results_filename):
+                        if os.path.isfile(results_filename) and options.parameters:
                             if not "xml_processed" in p.parameter.keys():
                                 print "      Processing results file %s..." %(results_filename)
                                 parameters = xmldict.load(results_filename)
@@ -450,6 +451,7 @@ def parseOptions():
     parser.add_option("-l", "--lorapath", type="str", dest="lorapath", default="", help="directory where the lora files are written.")
     parser.add_option("-u", "--update", action="store_true", dest="update", default=False, help="Update instead of populating database.")
     parser.add_option("-s", "--hdf5", type="str", dest="datafile", default="", help="name of a single hdf5 file that needs to be registered in the database.")
+    parser.add_option("-p", "--parameters", action="store_true", dest="parameters", default=False, help="Enable storing polarization parameter information if available [default=False].")
 
     (options, args) = parser.parse_args()
 
