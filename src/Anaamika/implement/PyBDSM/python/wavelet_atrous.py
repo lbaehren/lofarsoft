@@ -148,46 +148,47 @@ class Op_wavelet_atrous(Op):
               img.atrous_opts.append(wimg.opts)
               for op in wchain:
                 op(wimg)
-
-              if hasattr(wimg, 'gaussians'): 
-                img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
-
-              # Restrict Gaussians to original ch0 islands
-              gaul = wimg.gaussians[:]
-              tot_flux = 0.0
-              nwvgaus = 0
-              gaus_id = img.gaussians[-1].gaus_num
-              #wimg.gaussians = []
-              for isl in img.islands:
-                  wvgaul = []
-                  for g in gaul:
-                      if not hasattr(g, 'valid'):
-                          g.valid = False
-                      if not g.valid:
-                          gcenter = (g.centre_pix[0]-isl.origin[0],
-                                     g.centre_pix[1]-isl.origin[1])
-                          if gcenter[0] >= 0 and gcenter[0] < isl.shape[0] and gcenter[1] >= 0 and gcenter[1] < isl.shape[1]:
-                              if not isl.mask_active[gcenter]:
-                                  gaus_id += 1
-                                  g.gaus_num = gaus_id
-                                  g.island_id = isl.island_id
-                                  g.jlevel = j
-                                  g.valid = True
-                                  wvgaul.append(g)
+                if isinstance(op, Op_gaul2srl):
+                  # Restrict Gaussians to original ch0 islands
+                  gaul = wimg.gaussians
+                  tot_flux = 0.0
+                  nwvgaus = 0
+                  gaus_id = img.gaussians[-1].gaus_num
+                  for isl in img.islands:
+                      wvgaul = []
+                      for g in gaul:
+                          if not hasattr(g, 'valid'):
+                              g.valid = False
+                          if not g.valid:
+                              gcenter = (g.centre_pix[0]-isl.origin[0],
+                                         g.centre_pix[1]-isl.origin[1])
+                              if gcenter[0] >= 0 and gcenter[0] < isl.shape[0] and gcenter[1] >= 0 and gcenter[1] < isl.shape[1]:
+                                  if not isl.mask_active[gcenter]:
+                                      gaus_id += 1
+                                      g.gaus_num = gaus_id
+                                      g.wisland_id = g.island_id
+                                      g.island_id = isl.island_id
+                                      g.jlevel = j
+                                      g.valid = True
+                                      wvgaul.append(g)
+                                  else:
+                                      g.valid = False
+                                      g.jlevel = 0
                               else:
                                   g.valid = False
                                   g.jlevel = 0
-                          else:
-                              g.valid = False
-                              g.jlevel = 0
-                  isl.gaul += wvgaul  
-                  img.gaussians += wvgaul  
-                  #wimg.gaussians += wvgaul   
-                  nwvgaus += len(wvgaul)             
-                  isl.ngaus += nwvgaus
-                  for g in wvgaul:
-                      tot_flux += g.total_flux
-                      
+                      isl.gaul += wvgaul  
+                      img.gaussians += wvgaul  
+                      nwvgaus += len(wvgaul)             
+                      isl.ngaus += nwvgaus
+                      for g in wvgaul:
+                          tot_flux += g.total_flux
+                          
+                  vg = []
+                  for g in wimg.gaussians:
+                      if g.valid:
+                          vg.append(g)
+                  wimg.gaussians = vg
               mylogger.userinfo(mylog, "Number of valid wavelet Gaussians", str(nwvgaus))
               total_flux += tot_flux
               ntot_wvgaus += nwvgaus
@@ -204,6 +205,8 @@ class Op_wavelet_atrous(Op):
                           stop_wav = True
                           break
                       answ = raw_input_no_history(prompt)
+              if len(wimg.gaussians) > 0: 
+                img.resid_wavelets = self.subtract_wvgaus(img.opts, img.resid_wavelets, wimg.gaussians, wimg.islands)
               del wimg
               if stop_wav == True:
                   break
@@ -321,14 +324,18 @@ class Op_wavelet_atrous(Op):
         thresh= opts.fittedimage_clip
 
         for g in gaussians:
-          C1, C2 = g.centre_pix
-          isl = islands[g.island_id]
-          b = opp.find_bbox(dummy, thresh*isl.rms, g)
-          bbox = N.s_[max(0, int(C1-b)):min(shape[0], int(C1+b+1)),
-                      max(0, int(C2-b)):min(shape[1], int(C2+b+1))]
-          x_ax, y_ax = N.mgrid[bbox]
-          ffimg = func.gaussian_fcn(g, x_ax, y_ax)
-          residim[bbox] = residim[bbox] - ffimg
+          if g.valid:
+              C1, C2 = g.centre_pix
+              if hasattr(g, 'wisland_id'):
+                  isl = islands[g.wisland_id]
+              else:
+                  isl = islands[g.island_id]
+              b = opp.find_bbox(dummy, thresh*isl.rms, g)
+              bbox = N.s_[max(0, int(C1-b)):min(shape[0], int(C1+b+1)),
+                          max(0, int(C2-b)):min(shape[1], int(C2+b+1))]
+              x_ax, y_ax = N.mgrid[bbox]
+              ffimg = func.gaussian_fcn(g, x_ax, y_ax)
+              residim[bbox] = residim[bbox] - ffimg
 
         return residim
 

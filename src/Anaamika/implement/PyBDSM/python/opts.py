@@ -194,7 +194,10 @@ class Opts(object):
                                  "source may not be fit at all; too large a box size "\
                                  "can result in underestimates of the rms due to "\
                                  "oversmoothing. A step size of 1/3 "\
-                                 "to 1/4 of the box size usually works well.")
+                                 "to 1/4 of the box size usually works well.\n"\
+                                 "If adaptive_rms_box is True, the rms_box parameter "\
+                                 "sets the large-scale box size that is used far "\
+                                 "from bright sources.")
     rms_map         =   Enum(None, True, False,
                              doc="Background rms map: True => "\
                                  "use 2-D rms map; False => use constant rms; " \
@@ -271,6 +274,22 @@ class Opts(object):
                                  "mean + thresh_pix * rms. Use the mean_map "\
                                  "and rms_map parameters to control the way "\
                                  "the mean and rms are determined.")
+    adaptive_rms_box=   Bool(False,
+                             doc="Use adaptive rms_box when determining rms and "\
+                                "mean maps\n"\
+                                "If True, the rms_box is reduced in size near "\
+                                "bright sources and enlarged far from them. "\
+                                "This scaling attempts to account for possible "\
+                                "strong artifacts around bright sources while "\
+                                "still acheiving accurate background rms and "\
+                                "mean values when extended sources are present.\n"\
+                                "This option is generally slower than non-"\
+                                "adaptive scaling.\n"\
+                                "Use the rms_box parameter to set the large-"\
+                                "scale rms_box and the rms_box_bright parameter "\
+                                "to set the small-scale rms_box. The threshold "\
+                                "for bright sources can be set with the "\
+                                "adaptive_thresh parameter.")
 
 
     #--------------------------------ADVANCED OPTIONS--------------------------------
@@ -473,24 +492,34 @@ class Opts(object):
                                  "3-, or 4-D cube. The detection image and the main"\
                                  "image must have the same size and be registered.",
                              group="advanced_opts")
-    adaptive_rms_box=   Bool(False,
-                             doc="Use adaptive rms_box if rms_box=None\n"\
-                                "If True, the rms_box is reduced in size near "\
-                                "bright sources and enlarged far from them. "\
-                                "This scaling attempts to account for possible "\
-                                "strong artifacts around bright sources while "\
-                                "still acheiving accurate background rms and "\
-                                "mean values when extended sources are present.\n"\
-                                "This option is generally slower than non-"\
-                                "adaptive scaling.",
-                             group="advanced_opts")
-    adaptive_thresh =   Float(50.0,
-                             doc="If adaptive_rms_box is True, sources with pixels "\
+
+    #--------------------------------ADAPTIVE RMS_BOX OPTIONS--------------------------------
+
+    rms_box_bright  = Option(None, Tuple(Int(), Int()),
+                             doc="Box size, step size for rms/mean map "\
+                                 "calculation near bright sources. Specify as (box, step) in "\
+                                 "pixels. None => calculate inside program\n"\
+                                 "This parameter sets the box and step sizes "\
+                                 "to use near bright sources (determined by the "\
+                                 "adaptive_thresh parameter). The large-scale "\
+                                 "box size is set with the rms_box parameter.",
+                             group="adaptive_rms_box")
+    adaptive_thresh = Option(None, Float(),
+                             doc="Sources with pixels "\
                                  "above adaptive_thresh*clipped_rms will be considered as "\
-                                 "bright sources (i.e., with potential artifacts), "\
+                                 "bright sources (i.e., with potential artifacts). "\
+                                 "None => calculate inside program\n"\
+                                 "This parameter sets the SNR above which "\
+                                 "sources may be affected by strong artifacts "\
+                                 "Sources that meet the SNR threshold will use the "\
+                                 "small-scale rms_box (which helps to exclude artifacts) "\
                                  "if their sizes at a threshold of 10.0 is less "\
-                                 "than 25 beam areas.",
-                             group="advanced_opts")
+                                 "than 25 beam areas.\n"
+                                 "If None, the threshold is varied from 500 "\
+                                 "to 50 to attempt to obtain at least 5 candidate "\
+                                 "bright sources.",
+                             group="adaptive_rms_box")
+
     #--------------------------------A-TROUS OPTIONS--------------------------------
     atrous_jmax     =    Int(0,
                              doc='Max allowed wavelength order, 0 => calculate '\

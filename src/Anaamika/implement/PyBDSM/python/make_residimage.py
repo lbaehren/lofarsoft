@@ -43,7 +43,10 @@ class Op_make_residimage(Op):
         img.model_gaus = N.zeros(shape, dtype=float)
         for g in img.gaussians:
             C1, C2 = g.centre_pix
-            isl = img.islands[g.island_id]
+            if hasattr(g, 'wisland_id') and img.waveletimage:
+              isl = img.islands[g.wisland_id]
+            else:
+              isl = img.islands[g.island_id]
             b = self.find_bbox(thresh*isl.rms, g)
 
             bbox = N.s_[max(0, int(C1-b)):min(shape[0], int(C1+b+1)),

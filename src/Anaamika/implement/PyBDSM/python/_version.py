@@ -26,6 +26,15 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/04/20 - Promoted the adaptive_rms_box parameter to
+                 the main options listing and added the 
+                 rms_box_bright option so that the user can
+                 specify either (or both) of the rms_boxes.
+                 Fixed bug in wavelet module so that invalid
+                 Gaussians (i.e., those that lie outside of
+                 islands in the ch0 image) are not used when
+                 making the residual images at each scale.
+    
     2012/04/17 - Fixed bug in psf_vary module that resulted in
                  PSF major and minor axis maps in terms of 
                  sigma instead of FWHM. Added psf_vary option

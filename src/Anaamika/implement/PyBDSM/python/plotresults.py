@@ -263,7 +263,11 @@ def plotresults(img, ch0_image=True, rms_image=True, mean_image=True,
                             style = styles[isrc/6 % 3]
                             src = isl.sources[isrc]
                             for g in src.gaussians:
-                                if g.jlevel == 0:
+                                if hasattr(g, 'valid'):
+                                    valid = g.valid
+                                else:
+                                    valid = True
+                                if g.jlevel == 0 and valid:
                                     gidx = g.gaus_num
                                     e = Ellipse(xy=g.centre_pix, width=g.size_pix[0], 
                                                 height=g.size_pix[1], angle=g.size_pix[2]+90.0)
