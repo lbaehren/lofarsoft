@@ -40,6 +40,8 @@ class Shower(Task):
             doc = "Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"), 
         timelags = dict(default=None,
             doc = "Timelags of signals given in seconds [NAntennas x (X,Y,Z)]"),
+        polarization_angle = dict(default = None,
+            doc= "Polarization angle per station [NAntannas x angle] in radians"),
         eventid = dict(default = None,
             doc="Give Event ID to be specified in plot title "), 
             
@@ -81,8 +83,13 @@ class Shower(Task):
         footprint_color_lora = dict(default='#730909',doc="Color used for LORA plots. If set to 'time' uses the arrival time" ),    
         footprint_marker_lora = dict(default='',doc="Marker for LORA stations in footprint"),
         
+        footprint_polarization_enable = dict(default = False,
+            doc= "Draw footprint with polarization arrows"),
+            
         azimuth_in_distance_bins_enable = dict(default = False,
             doc = "Making plots for different distance bins"),
+        slicing = dict(default = None,
+            doc = "Give boundaries for azimuth bins in [a,b,c,d]"),
     )
 
 
@@ -405,7 +412,33 @@ class Shower(Task):
                 print "WARNING: Give at least positions and signals to plot a footprint"  
                 
   
+        if self.footprint_polarization_enable:
+        
+            if self.positions is not None and self.polarization_angle is not None:
+
+               cr.plt.scatter(self.positions[:,0],self.positions[:,1])
+               
+               x_pol = np.cos(self.polarization_angle)*20
+               y_pol = np.sin(self.polarization_angle)*20
+               
+              
+               for i in xrange(self.positions.shape[0]):
+                     cr.plt.arrow(self.positions[i,0]-x_pol[i]/2.,self.positions[i,1]-y_pol[i]/2.,x_pol[i],y_pol[i],color='red',lw = 2, head_length=1,head_width=1)
+
+               if self.core is not None and self.direction is not None:
+                    elev=self.direction[1]
+                    dcos=cr.cos(cr.radians(self.direction[0]))
+                    dsin=cr.sin(cr.radians(self.direction[0]))
+                    cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
+                    cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4) 
+
+            else:
+                print "Give positions and polarization angles to draw footprint in polarization"
                 
+            if self.save_plots:
+                print "to do"
+            else:
+                cr.plt.show()    
                 
         if self.azimuth_in_distance_bins_enable:    
                 
@@ -420,12 +453,14 @@ class Shower(Task):
                 Angle = np.rad2deg(Angle)
 
                 # Slicing 
+                if self.slicing is None:    
+                    self.slicing = [100,200,300,400]
                 
-                asc = (Dist < 100)
-                bsc = (Dist > 100) & (Dist < 200)
-                csc = (Dist > 200) & (Dist < 300)
-                dsc = (Dist > 300) & (Dist < 400)
-                esc = (Dist > 400)
+                asc = (Dist < self.slicing[0])
+                bsc = (Dist > self.slicing[0]) & (Dist < self.slicing[1])
+                csc = (Dist > self.slicing[1]) & (Dist < self.slicing[2])
+                dsc = (Dist > self.slicing[2]) & (Dist < self.slicing[3])
+                esc = (Dist > self.slicing[3])
 
                 
                 cr.plt.figure()
