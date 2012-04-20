@@ -21,6 +21,7 @@ char OUTNAME[248] = "PULSAR_OBS";
 int BEAMS = 1;
 int SUBBANDS = 1;
 int CHANNELS = 1;
+int CHANNELS_TRES = -1;
 int STOKES = 1;	
 int STOKES_SWITCH = 0;			
 int collapse = 0;
@@ -1895,7 +1896,7 @@ int main( int argc, char **argv )
       IS2 = 0;
     }
 
-    if(IS2 == 0) {
+    if(IS2 == 0) {   
 //      s_ptr = get_ptr_entry("OLAP.Storage.subbandsPerPart", header_txt, nrlines, "=");
 //      if(s_ptr != NULL) {
 //        sscanf(s_ptr, "%d", &(SUBBANDS));
@@ -1911,6 +1912,7 @@ int main( int argc, char **argv )
         return 0;     
       }
       s_ptr = get_ptr_entry("Observation.channelsPerSubband", header_txt, nrlines, "=");
+      if(application.verbose) printf("Got %s channels from Observation.channelsPerSubband\n", s_ptr);
       if(s_ptr != NULL) {
         sscanf(s_ptr, "%d", &(CHANNELS));
       }else {
@@ -1924,7 +1926,7 @@ int main( int argc, char **argv )
         fprintf(stderr, "2bf2fits: Observation.ObservationControl.OnlineControl.OLAP.Stokes.integrationSteps not set\n");
         return 0;     
       }
-    }else{
+    }else{  /* so IS2 != 0 */
 //      if (CSIS_MODE == 0) { // was called OLAP.Storage.subbandsPerPart
 //         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.subbandsPerFile", header_txt, nrlines, "=");
 //      }else {
@@ -1948,9 +1950,19 @@ int main( int argc, char **argv )
         return 0;      
       }
       if (CSIS_MODE == 0) { // was called Observation.channelsPerSubband
-         s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.channelsPerSubband", header_txt, nrlines, "=");
+	s_ptr = get_ptr_entry("Observation.channelsPerSubband", header_txt, nrlines, "=");
+	if(application.verbose) printf("Got %s channels from Observation.channelsPerSubband for time resolution calculation\n", s_ptr);
+	if(s_ptr != NULL) {
+	  sscanf(s_ptr, "%d", &(CHANNELS_TRES));
+	}else {
+	  fprintf(stderr, "2bf2fits: Observation.channelsPerSubband not set\n");
+	  return 0;     
+	}
+	s_ptr = get_ptr_entry("OLAP.CNProc_CoherentStokes.channelsPerSubband", header_txt, nrlines, "=");
+	 if(application.verbose) printf("Got %s channels from OLAP.CNProc_CoherentStokes.channelsPerSubband\n", s_ptr);
       }else {
          s_ptr = get_ptr_entry("OLAP.CNProc_IncoherentStokes.channelsPerSubband", header_txt, nrlines, "=");
+	 if(application.verbose) printf("Got %s channels from OLAP.CNProc_IncoherentStokes.channelsPerSubband\n", s_ptr);
       }
       if(s_ptr != NULL) {
         sscanf(s_ptr, "%d", &(CHANNELS));
@@ -2136,7 +2148,12 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     subintdata.nrFreqChan = CHANNELS * SUBBANDS;
   subintdata.NrPols = 1;
   subintdata.NrBits = nrbits;
-  subintdata.SampTime = (SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*clockparam*1000*1000/FFTLENGTH/CHANNELS));
+  /* Actual number of channels is not always the parameter to use for time resolution calculation. */
+  if(CHANNELS_TRES >= 0) {
+    subintdata.SampTime = (SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*clockparam*1000*1000/FFTLENGTH/CHANNELS_TRES));
+  }else {
+    subintdata.SampTime = (SAMPLESPERSTOKESINTEGRATION*1.0/(1.0*clockparam*1000*1000/FFTLENGTH/CHANNELS));
+  }
   subintdata.NrPulses = 1;   
   subintdata.format = MEMORY_format;
   subintdata.Period = -1;   
