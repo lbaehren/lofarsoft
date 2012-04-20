@@ -37,7 +37,7 @@ class StokesParameters(Task):
         stokes = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, 4)),
             doc = "Stokes parameters I, Q, U and V for each antenna."),
         polarization_angle = dict( default = lambda self : cr.hArray(float, self.nantennas),
-            doc = "Polarization angle ..math::`\phi=\atan(U/Q)` for each antenna."),
+            doc = "Polarization angle ..math::`\phi=0.5 \atan(U/Q)` for each antenna."),
         fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE) ),
         ifftwplan = dict( default = lambda self : cr.FFTWPlanManyDftC2r(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE) ),
     )
