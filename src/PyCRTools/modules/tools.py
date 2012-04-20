@@ -50,3 +50,13 @@ def averageDirectionLOFAR(thetalist, philist, degrees = True): # in degrees
     av[1] = 90 - av[1]  
     return av
 
+# Using cuts on LORA reconstruction, will yield true when LORA reconstruction is considered reliable
+def applyLORAcuts(core,moliere,elevation):   
+    quality = False 
+    
+    if math.sqrt(core[0]**2 + core[1]**2) < 150:
+        if moliere < 100 and moliere > 20:
+            if elevation > 55:
+                quality = True
+                
+    return quality 
