@@ -10,6 +10,7 @@ from optparse import OptionParser
 import time
 
 class CRDatabasePopulator(object):
+
     def __init__(self, db_filename="", options=None):
         """Initialisation of the CRDatabasePopulator object.
 
@@ -52,27 +53,31 @@ class CRDatabasePopulator(object):
 
         # Build list of filenames
         datapath = self.settings.datapath
-        filename_list = os.listdir(datapath)
 
-        # - Filter filename_list for appropriate files
-        #   - includefilter (.h5 files)
-        includefilter = crdb.Filter(self._db, "INCLUDE")
-        includefilter.add("h5")
-        filename_list = filter(lambda f: includefilter.execute(f), filename_list)
+        if "" != options.datafile:
+            filename_list = [options.datafile]
+        else:
+            filename_list = os.listdir(datapath)
 
-        #   - excludefilter (no 'test' or 'bkp' files)
-        excludefilter = crdb.Filter(self._db, "EXCLUDE")
-        excludefilter.add("test")
-        excludefilter.add("bkp")
-        filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
+            # - Filter filename_list for appropriate files
+            #   - includefilter (.h5 files)
+            includefilter = crdb.Filter(self._db, "INCLUDE")
+            includefilter.add("h5")
+            filename_list = filter(lambda f: includefilter.execute(f), filename_list)
 
-        # - File filter
-        if "" != options.filefilter:
-            filefilter = crdb.Filter(self._db, "FILE")
-            print "options.filefilter = %s" %(options.filefilter)
-            filefilter.add(options.filefilter)
-            filename_list = filter(lambda f: filefilter.execute(f), filename_list)
-            filefilter.delete(options.filefilter)
+            #   - excludefilter (no 'test' or 'bkp' files)
+            excludefilter = crdb.Filter(self._db, "EXCLUDE")
+            excludefilter.add("test")
+            excludefilter.add("bkp")
+            filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
+
+            # - File filter
+            if "" != options.filefilter:
+                filefilter = crdb.Filter(self._db, "FILE")
+                print "options.filefilter = %s" %(options.filefilter)
+                filefilter.add(options.filefilter)
+                filename_list = filter(lambda f: filefilter.execute(f), filename_list)
+                filefilter.delete(options.filefilter)
 
         # Loop over all filenames in the filelist
         for filename in filename_list:
@@ -135,17 +140,17 @@ class CRDatabasePopulator(object):
                         p.write()
                         station.addPolarization(p)
                         # If results.xml file exists add results to properties.
-                        results_filename = os.path.join(self.dbManager.settings.resultspath,
-                                                        p.resultsfile)
-                        if os.path.isfile(results_filename):
-                            if not "xml_processed" in p.parameter.keys():
-                                print "      Processing results file %s..." %(results_filename)
-                                parameters = xmldict.load(results_filename)
-                                for key in parameters.keys():
-                                    p[key] = parameters[key]
-                                p["xml_processed"] = True
-                        else:
-                            print("Results file {0} does not exist...".format(results_filename))
+                        # results_filename = os.path.join(self.dbManager.settings.resultspath,
+                        #                                 p.resultsfile)
+                        # if os.path.isfile(results_filename):
+                        #     if not "xml_processed" in p.parameter.keys():
+                        #         print "      Processing results file %s..." %(results_filename)
+                        #         parameters = xmldict.load(results_filename)
+                        #         for key in parameters.keys():
+                        #             p[key] = parameters[key]
+                        #         p["xml_processed"] = True
+                        # else:
+                        #     print("Results file {0} does not exist...".format(results_filename))
 
 
     def update(self):
@@ -351,7 +356,7 @@ class DataExtractor(object):
         if self.isOpen():
             seconds = self._datafile["TIME"][0]
             subsec  = self._datafile["SAMPLE_NUMBER"][0] * self._datafile["SAMPLE_INTERVAL"][0]
-            result = int(seconds + round(subsec + 0.5))
+            result = int(seconds) # + round(subsec + 0.5))
         else:
             raise ValueError("No open datafile")
 
@@ -444,6 +449,7 @@ def parseOptions():
     parser.add_option("-r", "--resultspath", type="str", dest="resultspath", default="", help="directory where the results files are written.")
     parser.add_option("-l", "--lorapath", type="str", dest="lorapath", default="", help="directory where the lora files are written.")
     parser.add_option("-u", "--update", action="store_true", dest="update", default=False, help="Update instead of populating database.")
+    parser.add_option("-s", "--hdf5", type="str", dest="datafile", default="", help="name of a single hdf5 file that needs to be registered in the database.")
 
     (options, args) = parser.parse_args()
 
@@ -456,6 +462,7 @@ def parseOptions():
     print "resultspath = %s" %(options.resultspath)
     print "lorapath = %s" %(options.lorapath)
     print "filefilter = %s" %(options.filefilter)
+    print "datafile = %s" %(options.datafile)
 
     return (options, args)
 
