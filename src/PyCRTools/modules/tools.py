@@ -4,6 +4,7 @@ Various function that are handy for cr physics analysis.
 
 import numpy as np
 
+# Converts spherical theta, phi to kartesian (x,y,z) vector
 def toVector(theta, phi, degrees = True):# in degrees
     if degrees:
         p = np.deg2rad(phi)
@@ -13,7 +14,8 @@ def toVector(theta, phi, degrees = True):# in degrees
         t = theta    
     a = np.array([np.cos(p)*np.sin(t),np.sin(p)*np.sin(t),np.cos(t)])
     return a
-    
+  
+# Converts kartesian (x,y,z) tp spherical theta, phi    
 def toAngles(array, degrees = True):
     r = np.sqrt(array[0]**2+array[1]**2+array[2]**2)
     theta = np.arccos(array[2]/r)
@@ -24,6 +26,7 @@ def toAngles(array, degrees = True):
     return [theta, phi]
     
 
+# Averages over list of thetas and phis (standard convention), via transformation in to kartesian vectors 
 def averageDirection(thetalist, philist, degrees = True): # in degrees
     vec = np.array([0.,0.,0.])
     for i in xrange(len(thetalist)):
@@ -34,6 +37,7 @@ def averageDirection(thetalist, philist, degrees = True): # in degrees
     av = toAngles(vec)    
     return av
 
+# Averages over list of thetas and phis (LOFAR convention, el, az), via transformation in to kartesian vectors
 def averageDirectionLOFAR(thetalist, philist, degrees = True): # in degrees    
     vec = np.array([0.,0.,0.])
     for i in xrange(len(thetalist)):
@@ -60,3 +64,8 @@ def applyLORAcuts(core,moliere,elevation):
                 quality = True
                 
     return quality 
+
+# Calculates space angle between two sets of angles (convetion kartesian)
+def spaceAngle(zen1, az1, zen2, az2):
+  return np.arccos(np.sin(zen1)*np.sin(zen2)*np.cos(az1-az2) 
+              + np.cos(zen1)*np.cos(zen2))
