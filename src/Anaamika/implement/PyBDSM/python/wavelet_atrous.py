@@ -148,11 +148,37 @@ class Op_wavelet_atrous(Op):
               img.atrous_opts.append(wimg.opts)
               for op in wchain:
                 op(wimg)
+                if isinstance(op, Op_islands):
+                    # Delete islands that do not share any pixels with
+                    # islands in original ch0 image.
+                    good_isl = []
+                    # Make original rank image boolean; rank counts from 0, with -1 being
+                    # outside any island
+                    orig_rankim_bool = N.array(img.pyrank+1, dtype=bool)                    
+                    # Multiply rank images
+                    valid_islands = orig_rankim_bool * (wimg.pyrank + 1)
+                    for wvisl in wimg.islands:
+                        if wvisl.island_id in valid_islands-1:
+                            wvisl.valid = True
+                            good_isl.append(wvisl)
+                        else:
+                            wvisl.valid = False
+                            
+                    wimg.islands = good_isl
+                    wimg.nisl = len(good_isl)
+                    mylogger.userinfo(mylog, "Number of vaild islands found", '%i' %
+                              wimg.nisl)
+                    # Renumber islands:
+                    for wvindx, wvisl in enumerate(wimg.islands):
+                        wvisl.island_id = wvindx
+                    
                 if isinstance(op, Op_gaul2srl):
-                  # Restrict Gaussians to original ch0 islands
+                  # Restrict Gaussians to original ch0 islands.
                   gaul = wimg.gaussians
                   tot_flux = 0.0
                   nwvgaus = 0
+                  
+                  # TODO fix following when img.ngaus == 0!
                   gaus_id = img.gaussians[-1].gaus_num
                   for isl in img.islands:
                       wvgaul = []

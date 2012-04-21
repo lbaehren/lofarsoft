@@ -328,8 +328,13 @@ class Op_gaul2srl(Op):
             # pl.imshow(N.transpose(subim_src), origin='lower', interpolation='nearest')
             # pl.suptitle('Image of bad M source '+str(isl.island_id))
                                         # convert pixels to coords
-        sra, sdec = img.pix2sky([mompara[1]+delc[0], mompara[2]+delc[1]])
-        mra, mdec = img.pix2sky(posn)
+        try:
+            sra, sdec = img.pix2sky([mompara[1]+delc[0], mompara[2]+delc[1]])
+            mra, mdec = img.pix2sky(posn)
+        except RuntimeError, err:
+            # Invalid pixel wcs coordinate
+            sra, sdec = 0.0, 0.0
+            mra, mdec = 0.0, 0.0
                                         # "deconvolve" the sizes
         gaus_c = [mompara[3], mompara[4], mompara[5]]
         gaus_bm = [bm_pix[0], bm_pix[1], bm_pix[2]]

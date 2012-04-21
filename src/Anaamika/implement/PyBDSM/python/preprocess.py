@@ -84,7 +84,19 @@ class Op_preprocess(Op):
           mylogger.userinfo(mylog, "Determining the pixels outside the universe")
           noutside_univ = self.outside_univ(img)
           img.noutside_univ = noutside_univ
-          mylogger.userinfo(mylog, "Number of additional pixels blanked", str(noutside_univ))
+          
+          # If any are found, (re)mask the image
+          if noutside_univ > 0:
+              mask = N.isnan(img.ch0)
+              masked = mask.any()
+              img.masked = masked
+              if masked:
+                  img.mask = mask
+              img.blankpix = N.sum(mask)
+              frac_blank = round(float(noutside_univ)/float(image.shape[0]*image.shape[1]),3)
+          mylogger.userinfo(mylog, "Number of additional pixels blanked", str(noutside_univ)
+                            +' ('+str(frac_blank*100.0)+'%)')
+
         else:
           mylog.info("Not checking to see if there are pixels outside the universe")
 

@@ -33,7 +33,12 @@ def changelog():
                  Fixed bug in wavelet module so that invalid
                  Gaussians (i.e., those that lie outside of
                  islands in the ch0 image) are not used when
-                 making the residual images at each scale.
+                 making the residual images at each scale. 
+                 Improved speed of Gaussian fitting to wavelet
+                 images. Fixed bug that resulted in pixels found 
+                 to be outside the universe (check is enabled 
+                 with the check_outsideuniv option) not being 
+                 masked properly. 
     
     2012/04/17 - Fixed bug in psf_vary module that resulted in
                  PSF major and minor axis maps in terms of 
