@@ -190,6 +190,8 @@ for station in stations:
     p["crp_pulse_delays"] = time_delays
     p["crp_pulse_strength"] = cr.hArray(pulse_envelope_xyz.maxima).toNumpy().reshape((nantennas, 3))
     p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
+    p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
+    p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
 
 # Get combined parameters from (cached) database
 all_station_antenna_positions = []
