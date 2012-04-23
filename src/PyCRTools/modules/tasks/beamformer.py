@@ -953,7 +953,6 @@ class BeamFormer(tasks.Task):
             dynspec = dynspec.reshape((dynspec.shape[0]/tbin,tbin,dynspec.shape[1]))
             dynspec = np.sum(dynspec,axis=1)
             dynspec = cr.hArray(dynspec)
-            dynspec.par.tbin = tbin
 
         #Cleaning dynamic spectrum.
         if clean:  
@@ -961,26 +960,28 @@ class BeamFormer(tasks.Task):
             dynspec[...].addto(avspec)
             cleandynspec = dynspec/avspec
 
+        #Transposing arrays.
+        dynspec = dynspec.Transpose()
+        if clean:  
+            cleandynspec = cleandynspec.Transpose()
+        
         #Create a frequency vector
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
-        dynspec.par.yvalues= self.frequencies
         
         #Create a time vector
         self.times = cr.hArray(float,int(round((self.end_time-self.start_time)/(self.block_duration*tbin))),name="Time",units=("","s"))
         self.times.fillrange(self.start_time,self.block_duration*tbin)
-        dynspec.par.xvalues= self.times
 
-        #Transposing arrays.
-        dyntrans = cr.hArray(float,[dynspec.shape()[1],dynspec.shape()[0]])
-        cr.hTranspose(dyntrans,dynspec,dyntrans.shape()[0])
-        dynspec = cr.hArray(float,dyntrans,dyntrans)   # making hArray since ".copy" doesn't work.
+        #Adding parameters
+        dynspec.par.yvalues= self.frequencies
+        dynspec.par.xvalues= self.times
+        if tbin>1:
+            dynspec.par.tbin = tbin
         if clean:  
-            cr.hTranspose(dyntrans,cleandynspec,dyntrans.shape()[0])
-            cleandynspec =  cr.hArray(float,dyntrans,dyntrans)   # making hArray since ".copy" doesn't work.
-            cleandynspec.par.tbin = tbin
             cleandynspec.par.yvalues= self.frequencies
             cleandynspec.par.xvalues= self.times            
-        dyntrans = 0
+            if tbin>1:
+                cleandynspec.par.tbin = tbin
         
         #Saving file(s).
         if save_file:
