@@ -1,6 +1,9 @@
 """CR pipeline.
 """
 
+import matplotlib
+matplotlib.use("Agg")
+
 import pytmf
 import numpy as np
 import pycrtools as cr
