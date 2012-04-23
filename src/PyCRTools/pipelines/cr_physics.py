@@ -29,7 +29,7 @@ db = dbManager.db
 event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
-event["status"] = "CR_NOT_ANALYZED"
+event.status = "CR_NOT_ANALYZED"
 
 # Loop over all stations in event
 stations = []
@@ -242,5 +242,6 @@ ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncer
 footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True, save_plots = True)
 
 # Update event status
-event["status"] = "CR_ANALYZED"
+event.status = "CR_ANALYZED"
+event.write()
 
