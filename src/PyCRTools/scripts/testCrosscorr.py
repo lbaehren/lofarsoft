@@ -77,24 +77,11 @@ def gatherresults(eventdir):
         thisDict[pol].update(timeseries = thisTimeseries)
     
     return stations
-        # read in antenna positions from file
-        
-        
-        
+
 #        positions.extend(res["antenna_positions_array_XYZ_m"]) # in flat list NB! All antennas? Same order as for timeseries data?
         
         # timeseries inlezen, orig of calibrated? Zie evt cr_physics.py.
-        # ....
-
-
-#        theseAntIDs = [str(int(v)) for v in res["antennas"].values()]
-#        antid.extend(theseAntIDs) # res["antennas"] is a dict!
-        # check: same ordering for ant-id's and cable delays in 'res'??? Relying on that.
-#        cabledelays.extend(res["antennas_residual_cable_delays_planewave"])  #antennas_final_cable_delays
-#        residualdelays.extend(res["antennas_residual_cable_delays_planewave"])
-        # test for spread and outliers
-#        theseDelays = np.array(res["antennas_residual_cable_delays_planewave"])
-    
+        # ....    
 
 def obtainvalue(par,key):
     """This function returns the value from a parameter dict or a default value if the key does not exist"""
@@ -125,6 +112,56 @@ def obtainvalue(par,key):
 
 
 stations = gatherresults(eventdir)
+# now accumulate arrays with:
+# - all timeseries data for all stations
+# - all corresponding antenna ids and positions
+# - all calibration delays, and (station) clock offsets for those ids
+# - array of all reference offsets per antenna id. (starting point of timeseries array)
+
+pol = 0 # later do both together
+
+startTimes = []
+nofantennas = 0
+sample_interval = 0.0
+for dataset in stations:
+    thisDataset = dataset[pol]
+    
+    block = thisDataset["BLOCK"]
+    blocksize = thisDataset["BLOCKSIZE"]
+    tbb_samplenr = thisDataset["SAMPLE_NUMBER"]
+    pulse_samplenr = thisDataset["pulse_start_sample"]
+    sample_interval = thisDataset["SAMPLE_INTERVAL"]
+    clock_correction = md.getClockCorrection(thisDataset["stationName"])
+    nofantennas += len(thisDataset["antennas"])
+#    pulse_end = thisDataset["pulse_end_sample"]
+    timeOffset = sample_interval * (tbb_samplenr + block * blocksize + pulse_samplenr) + clock_correction
+    
+    startTimes.extend(timeOffset)
+
+# accumulate ant-ids, ant-positions and timeseries data
+antids = []
+antpos = []
+datalen = stations[0][0]["timeseries"].shape()[1] # and assume the same length for cut-timeseries for all others...
+full_timeseries = hArray(float, dimensions = [len(antids), datalen])
+row = 0
+for dataset in stations: 
+    antids.append(dataset[pol]["antennas"].values())
+    antpos.append(dataset[pol]["antenna_positions_array_XYZ_m"])
+    thisTimeseries = dataset[pol]["timeseries"]
+    nofchannels = thisTimeseries.shape()[0]
+    full_timeseries[row:row+nofchannels].copy(thisTimeseries) # check...
+    row += nofchannels
+
+# get a reference antenna with a strong pulse...
+# for now, just station[0]'s reference antenna... May want to use overall-best pulse (highest SNR)
+refant = station[0][pol]["pulses_refant"]
+# is the index of the ref antenna also in the full list of antids / antpos
+
+# now cross correlate all channels in full_timeseries, get relative times
+crosscorr = trerun('CrossCorrelateAntennas', "crosscorr", full_timeseries,oversamplefactor=128)
+
+#And determine the relative offsets between them
+maxima_cc = trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = refant)
 
 
 #fftplan = FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
