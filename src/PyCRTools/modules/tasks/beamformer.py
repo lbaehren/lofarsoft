@@ -894,6 +894,181 @@ class BeamFormer(tasks.Task):
             cr.plt.xlabel("+/- Time [s]")
             print "cleandynspec: min=",self.cleandynspec.min().val(),"max=",self.cleandynspec.max().val(),"rms=",self.cleandynspec.stddev().val()
 
+    def dynDM(self,cleandynspec=None,DM=None,Ref_Freqs=None,from_file=False,verbose=False,save_file=False):
+        """
+        Do dedispersion by integer shifting.
+        Calculate dedispersed time series.
+    
+        ============== ===== ===================================================================
+        *cleandynspec* None  Array with cleaned dynamic spectrum.
+        *DM*           None  Dispersion Measure.
+        *Ref_Freqs*    None  List with the begin and end of reference frequencies. [f1,f2] in Hz
+        *from_file*    False Read cleandynspec from file (within the .pcr directory of the beam).
+        *verbose*      False If true then prints extra information, plot the dedispersed dynspec, and calculates/plots the time series.
+        *save_file*    False Saves a file in hArray format with additional information besides the array values.
+        ============== ===== ===================================================================
+    
+        Example::
+    
+            dedispersed_dynspec = Task.dynDM(cleandynspec=cleandynspec,DM=26.83,Ref_Freqs=[151e6,170e6])
+        
+        or::
+
+            Task.dynDM(DM=26.83,Ref_Freqs=[151e6,170e6],from_file=True,verbose=True)
+
+        Needs a cleaned dynamic spectrum as input file.        
+        """
+        #------------------------
+        #Checking imput is corret.
+        if not cleandynspec:
+            if from_file:
+                self.spectrum_file_bin=os.path.join(self.spectrum_file,"clean_dynspec")
+                self.cleandynspec = cr.hArrayRead(self.spectrum_file_bin)
+                self.times = self.cleandynspec.par.xvalues
+                self.frequencies =  self.cleandynspec.par.yvalues
+            else:            
+                print 'CAUTION: Using the default options in self.dyncalc()' 
+                self.dyncalc(clean=True)
+            cleandynspec=self.cleandynspec
+        else:                    
+            self.cleandynspec=cleandynspec
+                       
+        if not Ref_Freqs:        
+            Ref_Freqs = [self.frequencies[int(len(self.frequencies)/4)],self.frequencies[int(3*len(self.frequencies)/4)]] # Taking the middle half.
+        else:
+            if type(Ref_Freqs) != type([]) or len(Ref_Freqs)!=2 or Ref_Freqs[0] > Ref_Freqs[1] or Ref_Freqs[0]<0 or Ref_Freqs[1]<0:
+                raise ValueError('Need a list of lenght 2, with first element "<" or "=" second element. Both elements positive.')        
+
+        #------------------------        
+        #Some more parameters and variables.
+        dedispersed_dynspec = cr.hArray(float,cleandynspec,fill=0)
+        dt=self.block_duration*self.cleandynspec.par.tbin
+    
+        #Channel of reference frequency
+        nref = self.frequencies.Find(">",Ref_Freqs[0])[0]
+        nref2 = self.frequencies.Find(">",Ref_Freqs[1])[0]
+        if verbose:
+            print "Reference channels=",nref,nref2
+        
+        #Calculate the relative shifts in samples per frequency channels
+        #Constant value comes from "Handbook of Pulsar Astronomy - by Duncan Ross Lorimer , Section 4.1.1, pagina 86 (in google books)"
+        shifts = ( 4.148808e-3*DM/dt) * 1e9**2 * (Ref_Freqs[0]**-2 - self.frequencies**-2)
+                
+        #Integer offsets to reference frequency (shift to center)
+        offsets = cr.Vector(int,self.frequencies,fill=shifts)
+        offsets += self.times.shape()[0]/2
+        
+        #Print roughly the shift at the end of the pulse around Ref_Freqs[1]
+        if verbose:
+            print "Sample shift at reference frequency (",Ref_Freqs[0],"):",shifts[nref]
+            print "Sample shift at 2nd reference frequency (",Ref_Freqs[1],"):",shifts[nref2]
+        
+        #Now do the actual dedispersion by integer shifting ... that's all
+        dedispersed_dynspec[...].shift(cleandynspec[...],offsets.vec())
+            
+        if verbose:
+            #Plotting of dedispersed dynamic spectrum
+            cr.plt.clf()
+            cr.plt.title("Dedispersed Dynamic Spectrum")
+            cr.plt.imshow(cr.hArray_toNumpy(dedispersed_dynspec),aspect='auto',cmap=cr.plt.cm.hot,origin='lower',vmin=1e-5,vmax=0.003,extent=(self.start_time,self.end_time,self.start_frequency/10**6,self.end_frequency/10**6))
+            cr.plt.ylabel("Frequency [MHz]")
+            cr.plt.xlabel("Time [s]")
+            k=raw_input("Press return to continue ...")
+    
+            #Calculate dedispersed time series by collapsing all frequencies onto time axis
+            dedispersed_timeseries = cr.hArray(float,self.times,fill=0,name="Power",xvalues=self.times)
+            dedispersed_dynspec[...].addto(dedispersed_timeseries)
+            
+            #plotting of time series
+            dedispersed_timeseries.plot(clf=True)
+
+        #Adding parameters
+        dedispersed_dynspec.par.yvalues= self.frequencies
+        dedispersed_dynspec.par.xvalues= self.times
+        if save_file:
+            dedispersed_dynspec.write(os.path.join(self.spectrum_file,"dedispersed_dynspec"),nblocks=1,block=0,clearfile=True)
+            print 'Saving binary in %s' %os.path.join(self.spectrum_file,"dedispersed_dynspec")
+        
+        self.cleandynspec = cleandynspec
+        return dedispersed_dynspec
+
+    def dyn_DM_SNR(self,dedispersed_dynspec,pulse_time=None,pulse_period=None,Ref_Freqs=None,verbose=False):
+        """
+        Calculates SNR for each pulse in a dedispersed time series.
+    
+        ===================== ===== ===================================================================
+        *dedispersed_dynspec*       Array with cleaned dynamic spectrum.
+        *pulse_time*          None  Time for each pulse. [t1,t2,t3,...]
+        *Ref_Freqs*           None  List with the begin and end of reference frequencies. [f1a,f1b,f2a,f2b,f3a,f3b,....] in Hz.
+        *verbose*             False If true then prints the SNR information, and plots a time series, for each pulse. 
+                                    Otherwise just returns the pulse_timeseries as an hArray.
+        *pulse_period=None*   None  The actual pulse period of the pulsar. [s]
+        ===================== ===== ===================================================================
+  
+        Example::
+         
+            pulse_timeseries = Task.dyn_DM_SNR(dedispersed_dynspec,pulse_time=[.1,.5,.8],Ref_Freqs=[120e6,145e6,150e6,170e6,140e6,160e6])
+
+        or::
+        
+            Task.dyn_DM_SNR(dedispersed_dynspec,pulse_time=[.1,.5,.8],pulse_period=0.71452,Ref_Freqs=[120e6,145e6,150e6,170e6,140e6,160e6],verbose=True)
+
+        """
+        #------------------------
+        #Checking imput is corret.
+            
+        if type(Ref_Freqs) != type([]) or np.remainder(len(Ref_Freqs),2):
+            raise ValueError('Need a list of lenght 2n.')        
+
+        if type(pulse_time) != type([]) or len(pulse_time)!=len(Ref_Freqs)/2 :
+            raise ValueError('Need a list of lenght n.')        
+         
+        #------------------------
+
+        npulses= len(pulse_time)
+        dedispersed_dynspec = cr.hArray_toNumpy(dedispersed_dynspec)
+        pulse_timeseries = np.array(np.zeros([npulses,len(self.times)]))
+        
+        if verbose:
+            print 'Calculating time series for %i pulses.' %npulses
+        
+        for npulse in range(npulses):
+            #Channel of reference frequency
+            nfreq1 = self.frequencies.Find(">",Ref_Freqs[2*npulse])[0]
+            nfreq2 = self.frequencies.Find(">",Ref_Freqs[2*npulse+1])[0]
+            if verbose:
+                print "Reference channels=",nfreq1,nfreq2
+                print "Reference frequencies=",self.frequencies[nfreq1],self.frequencies[nfreq2]
+
+           #Channel of reference time
+            ntime = self.times.Find(">",pulse_time[npulse])[0]
+            if verbose:
+                print "Reference time = ", self.times[ntime]            
+                dtime = int(min(self.times.Find(">",pulse_period)[0]/4,ntime)/2)     #Region around the pulse to calculate the max from (useful if several pulses in time series).
+            
+            dedispersed_pulse = dedispersed_dynspec[nfreq1:nfreq2]            
+            pulse_timeseries[npulse] = np.sum(dedispersed_pulse,axis=0)
+            
+            pulse_timeseries[npulse]= (pulse_timeseries[npulse]/pulse_timeseries[npulse].mean())-1.
+            
+            if verbose:
+                print '--------'
+                print 'Pulse ', npulse+1, ':'
+                print '     Mean  = %2.2f , Stddev  = %2.2f '  %(pulse_timeseries[npulse].mean(), pulse_timeseries[npulse].std())
+                print '     Max  = %2.2f, SNR = %2.2f' %(pulse_timeseries[npulse,ntime-dtime:ntime+dtime].max(), pulse_timeseries[npulse,ntime-dtime:ntime+dtime].max()/pulse_timeseries[npulse].std())
+                print '--------'
+
+        if verbose:
+            cr.plt.clf()
+            cr.plt.plot(cr.hArray_toNumpy(self.times),np.transpose(pulse_timeseries))
+            cr.plt.xlabel("+/- Time [s]")
+            cr.plt.ylabel("Normalized Time_Series")
+
+        pulse_timeseries = cr.hArray(pulse_timeseries)
+        pulse_timeseries.par.xvalues= self.times
+        return pulse_timeseries
+
+
     def dyncalc(self,beams=None,nbeam=0,save_file=False,fraction=None,tbin=1,clean=False):
         '''
         Calculates the dynamic spectrum.
@@ -901,13 +1076,13 @@ class BeamFormer(tasks.Task):
         =============== ===== ===================================================================
         *beams*         None  Input array. Take self.beams from task, if None.
         *nbeam*         0     Beam to work with, if (self.)beams has stored multiple ones.
-        *save_file*     False Saves a file in hArray format with additional information besides the array values...(not implemented yet)
+        *save_file*     False Saves a file in hArray format with additional information besides the array values.
         *fraction*      None  If not None, then a list of the form [x,y] such that extracting the fraction x/y of the data. with x>-1, and y>=x. 
         *tbin*          1     If >1 integrates over this number of blocks. Or time binning.
         *clean*         False If True it calculates the cleaned spectrum.
         =============== ===== ===================================================================
 
-         Example::
+        Example::
          
             tpar filenames = ['File_path/File_name_tbb.h5']
             tpar blocklen = 2**10
@@ -975,13 +1150,11 @@ class BeamFormer(tasks.Task):
         #Adding parameters
         dynspec.par.yvalues= self.frequencies
         dynspec.par.xvalues= self.times
-        if tbin>1:
-            dynspec.par.tbin = tbin
+        dynspec.par.tbin = tbin
         if clean:  
             cleandynspec.par.yvalues= self.frequencies
             cleandynspec.par.xvalues= self.times            
-            if tbin>1:
-                cleandynspec.par.tbin = tbin
+            cleandynspec.par.tbin = tbin
         
         #Saving file(s).
         if save_file:
