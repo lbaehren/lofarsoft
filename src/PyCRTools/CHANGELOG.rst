@@ -1,3 +1,10 @@
+2012-04-23
+==========
+
+  :Author: Martin van den Akker <martinva@astro.ru.nl>
+
+ - Added CRDatabase support to cr_event.py pipeline script.
+
 2012-04-04
 ==========
 

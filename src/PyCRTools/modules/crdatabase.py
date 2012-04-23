@@ -176,7 +176,7 @@ class CRDatabase(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, order="e.timestamp"):
+    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
         """Return a list of eventIDs satifying the values of this
         functions arguments.
 
@@ -189,6 +189,7 @@ class CRDatabase(object):
         *timestamp_start*  timestamp of the event is larger than this value.
         *timestamp_end*    timestamp of the event is smaller than this value.
         *status*           status of the event.
+        *datafile_name*    name of a datafile associated to an event.
         *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
 
@@ -206,7 +207,10 @@ class CRDatabase(object):
         if self.db:
             # Construct SQL table
             sql_fields = "e.eventID"
-            sql_table = "events AS e"
+            sql_table_e  = "events AS e"
+            sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_e + " ON (ed.eventID=e.eventID)"
+            sql_table_d  = "datafiles AS d INNER JOIN " + sql_table_ed + "AND (d.datafileID=ed.datafileID)"
+            sql_table = sql_table_e
             sql_order = order
             sql_selection_list = []
 
@@ -220,6 +224,9 @@ class CRDatabase(object):
                     sql_selection_list.append("e.timestamp<{0}".format(int(timestamp_end)))
             if status:
                 sql_selection_list.append("e.status='{0}'".format(str(status).upper()))
+            if datafile_name:
+                sql_table = sql_table_d
+                sql_selection_list.append("d.filename='{0}'".format(str(datafile_name)))
 
             sql_selection = ""
             if sql_selection_list:
@@ -802,11 +809,12 @@ class _Parameter(object):
             for key in py_keys:
                 self.db_write(key, self._parameter[key])
 
-            # - Delete unused parameters
-            for key in db_keys:
-                if not key in py_keys:
-                    sql = "DELETE FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, str(key))
-                    self._db.execute(sql)
+            # TEST: _Parameter.write() - Removal of unused deletion part
+            # # - Delete unused parameters
+            # for key in db_keys:
+            #     if not key in py_keys:
+            #         sql = "DELETE FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, str(key))
+            #         self._db.execute(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -850,6 +858,8 @@ class _Parameter(object):
 
         return value
 
+
+    # TODO: _Parameter{} - Add a db_read_all(self) method to speedup reading.
 
     def db_write(self, key, value):
         """Write value for parameter *key* to the database.
@@ -965,7 +975,7 @@ class Event(object):
 
         # Set default values
         self.timestamp = 0
-        self.status = "NEW"
+        self.status = "NEW" # Allowed values: NEW, CR_FOUND, CR_NOT_FOUND, CR_ANALYZED, CR_NOT_ANALYZED
         self.datafiles = []
         self.parameter = _Parameter(parent=self)
 
@@ -1947,7 +1957,7 @@ class Polarization(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self):
+    def write(self, recursive=False):
         """Write polarization information to the database."""
         if self._db:
             # Write attributes
