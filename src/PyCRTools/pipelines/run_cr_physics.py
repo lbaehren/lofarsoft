@@ -13,7 +13,7 @@ from optparse import OptionParser
 # Parse commandline options
 parser = OptionParser()
 parser.add_option("-d", "--database", default="cr.db", help="Filename of database")
-parser.add_option("--max-threads", default = 12, help="Maximum number of threads to use.")
+parser.add_option("--max-threads", default = 12, type = int, help="Maximum number of threads to use.")
 parser.add_option("--log-dir", default = "./", help="Directory to store logs.")
 
 (options, args) = parser.parse_args()
