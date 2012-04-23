@@ -30,7 +30,7 @@ def call_pipeline(event_id):
 
     with open(options.log_dir+"/"+"event-"+str(event_id)+".log", "w") as f:
 
-        status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_physics.py --id="+str(event_id), stdout=f, stderr=subprocess.STDOUT, shell=True)
+        status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_physics.py --id="+str(event_id)+" --database="+options.database, stdout=f, stderr=subprocess.STDOUT, shell=True)
 
 # Check how many CPU's we have
 count = multiprocessing.cpu_count()
