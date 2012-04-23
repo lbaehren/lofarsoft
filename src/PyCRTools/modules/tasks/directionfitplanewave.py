@@ -107,6 +107,12 @@ class DirectionFitPlaneWave(tasks.Task):
             goodSubset = np.arange(len(times)) # start with all 'good'
         
         goodcount = len(goodSubset)
+        if goodcount < 3:
+            print "ERROR: too few good antennas for direction fit."
+            self.meandirection = (0, 0, 1)
+            self.fit_failed = True
+            return
+
         niter = 0
         while True:
             niter += 1
