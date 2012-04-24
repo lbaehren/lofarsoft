@@ -14,7 +14,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
 parser.add_option("--max-threads", default = 12, type = int, help = "maximum number of threads to use")
-parser.add_option("--max_attempts", default = 2, type = int, help = "maximum number of times to attempt processing a file before adding to failed")
+parser.add_option("--max-attempts", default = 2, type = int, help = "maximum number of times to attempt processing a file before adding to failed")
 parser.add_option("--log-dir", default = "./", help = "directory to store logs")
 
 (options, args) = parser.parse_args()
