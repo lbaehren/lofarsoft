@@ -187,7 +187,7 @@ maxima = crosscorr.crosscorr_data[...].max() # need to look at positive maximum 
 ksigma = hArray(maxima / sdev)
 k = ksigma.toNumpy()
 
-x = np.where(k < 5.0)
+x = np.where(k < 5.0) # bad indices
 
 y = hArray(maxima_cc.lags).toNumpy()
 yy = y[x]
@@ -202,9 +202,29 @@ arrivaltime = startTimes + hArray(maxima_cc.lags)
 # BUG! startTimes + maxima_cc.lags gives all values equal to startTimes[0] + maxima_cc.lags[0]
 # happens when adding hArray and Vector... why?
 
+for badchannel in x[0]: 
+    arrivaltime[int(badchannel)] = arrivaltime[int(badchannel)-1] # HACK !!
+
 plt.figure()
 arrivaltime.plot()
 plt.title('Arrival times, matched with offsets per station (check!)')
+
+# now make footprint plot of all arrival times
+loradir = '/Users/acorstanje/triggering/CR/LORA'
+# first show originally derived arrival times
+fptask_orig = cr.trerun("plotfootprint", "0", colormap = 'jet', filefilter = eventdir, loradir = loradir, pol=pol) # no parameters set...
+plt.figure()
+# now our arrival times
+fptask = cr.trerun("plotfootprint", "1", colormap = 'jet', filefilter = eventdir, arrivaltime=arrivaltime, loradir = loradir, pol=pol) # no parameters set...
+
+delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
+delta -= delta.mean()
+plt.figure()
+fptask_delta = cr.trerun("plotfootprint", "2", colormap = 'jet', filefilter = eventdir, arrivaltime=delta, loradir = loradir, pol=pol) # no parameters set...
+
+plt.figure()
+delta.plot()
+plt.title('Difference between plotfootprint / cr_event arrival times\nand full crosscorrelation times')
 
 #fftplan = FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
 #hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
