@@ -20,7 +20,7 @@ class Database:
         and read from memory.
         """
         self._filename = filename
-        self._db = sqlite3.connect(self._filename)
+        self._db = sqlite3.connect(self._filename, timeout = 60)
 
 
     def open(self, filename=""):
@@ -40,7 +40,7 @@ class Database:
         if filename != "":
             self._filename = filename
 
-        self._db = sqlite3.connect(self._filename)
+        self._db = sqlite3.connect(self._filename, timeout = 60)
 
 
     def close(self):
