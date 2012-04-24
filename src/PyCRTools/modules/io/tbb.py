@@ -631,7 +631,7 @@ class TBBData(IOInterface):
         frequencies = self.empty("FREQUENCY_DATA")
 
         # Calculate sample frequency in Hz
-        cr.hFFTFrequencies(frequencies, self["SAMPLE_FREQUENCY"][0], self.__nyquist_zone[0])
+        cr.hFFTFrequencies(frequencies, self["SAMPLE_FREQUENCY"][0], self["NYQUIST_ZONE"][0])
     
         return frequencies
 
