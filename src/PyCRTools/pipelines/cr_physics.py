@@ -54,7 +54,19 @@ for station in stations:
     f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
 
     # Set reference polarization to the one that had the best pulse
-    if station.polarization['0']["pulse_height_incoherent"] > station.polarization['1']["pulse_height_incoherent"]:
+    h0 = 0
+    h1 = 0
+    try:
+        h0 = station.polarization['0']["pulse_height_incoherent"]
+    except:
+        pass
+
+    try:
+        h1 = station.polarization['1']["pulse_height_incoherent"]
+    except:
+        pass
+
+    if h0 > h1:
         rp = '0'
     else:
         rp = '1'
