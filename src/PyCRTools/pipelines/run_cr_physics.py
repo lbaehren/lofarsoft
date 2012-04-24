@@ -22,7 +22,7 @@ db_filename = options.database
 dbManager = crdb.CRDatabase(db_filename)
 db = dbManager.db
 
-event_ids = dbManager.getEventIDs() #status = "CR_FOUND")
+event_ids = dbManager.getEventIDs("CR_FOUND")
 
 def call_pipeline(event_id):
     """Function that actually calls the subprocess for each event.
