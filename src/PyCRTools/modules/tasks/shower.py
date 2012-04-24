@@ -44,10 +44,12 @@ class Shower(Task):
             doc= "Polarization angle per station [NAntannas x angle] in radians"),
         eventid = dict(default = None,
             doc="Give Event ID to be specified in plot title "), 
-            
+
         save_plots = dict(default=False,
-            doc="Saving plost instead of showing them.") ,              
-        
+            doc="Saving plost instead of showing them."),
+        plot_prefix = dict(default="",
+            doc="Prefix for stored plots"),
+
         ldf_enable = dict( default = False, 
             doc = "Draw Lateral Distribution Function, signal vs. distance from shower axis"), 
         ldf_logplot = dict(default = True,
@@ -252,7 +254,7 @@ class Shower(Task):
                 cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
                 
             if self.save_plots:
-                print "Not implemented yet"
+                cr.plt.savefig(plot_prefix+"shower_ldf.png")
             else:    
                  cr.plt.show()   
         
@@ -403,7 +405,7 @@ class Shower(Task):
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
                 
                 if self.save_plots:
-                    print "Not implemented yet"
+                    cr.plt.savefig(plot_prefix+"shower_footprint.png")
                 else:    
                     cr.plt.show()
 
@@ -486,6 +488,7 @@ class Shower(Task):
                 cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
                 
                 if self.save_plots:
-                    print "Not implemented yet"
+                    cr.plt.savefig(plot_prefix+"shower_azimuthal_signal.png")
                 else:    
-                    cr.plt.show()                         
+                    cr.plt.show()
+

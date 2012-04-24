@@ -238,11 +238,11 @@ core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
 core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
 direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True, save_plots = True)
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True, save_plots = True, plot_prefix = str(options.id)+"-")
 
 # Compute footprint
 
-footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True, save_plots = True)
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True, save_plots = True, plot_prefix = str(options.id)+"-")
 
 # Update event status
 event.status = "CR_ANALYZED"
