@@ -12,9 +12,9 @@ from optparse import OptionParser
 
 # Parse commandline options
 parser = OptionParser()
-parser.add_option("-d", "--database", default="cr.db", help="Filename of database")
-parser.add_option("--max-threads", default = 12, type = int, help="Maximum number of threads to use.")
-parser.add_option("--log-dir", default = "./", help="Directory to store logs.")
+parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
+parser.add_option("--max-threads", default = 12, type = int, help = "maximum number of threads to use.")
+parser.add_option("--log-dir", default = "./", help = "directory to store logs.")
 
 (options, args) = parser.parse_args()
 
@@ -28,7 +28,7 @@ def call_pipeline(event_id):
     """Function that actually calls the subprocess for each event.
     """
 
-    with open(options.log_dir+"/"+"event-"+str(event_id)+".log", "w") as f:
+    with open(options.log_dir+"/"+"cr_physics-"+str(event_id)+".log", "w") as f:
 
         status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_physics.py --id="+str(event_id)+" --database="+options.database, stdout=f, stderr=subprocess.STDOUT, shell=True)
 

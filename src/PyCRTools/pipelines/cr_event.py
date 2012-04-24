@@ -91,12 +91,12 @@ from optparse import OptionParser
 #Command line options
 #------------------------------------------------------------------------
 usage = """
-usage: %prog --db <databasename> [options] datafile.h5
-       %prog --db <databasename> -i <eventID> [options]
+usage: %prog --database <databasename> [options] datafile.h5
+       %prog --database <databasename> -i <eventID> [options]
         """
 parser = OptionParser(usage=usage)
 
-parser.add_option("--db", type="str", dest="db_name", default="", help="Location of the database file")
+parser.add_option("--database", type="str", default="", help="Location of the database file")
 parser.add_option("--loradir", type="str", default="/data/VHECR/LORAtriggered/LORA/",help="Directory to find LORA information")
 parser.add_option("--max_data_length", type="int", default=-1,help="Maximum length the file is allowed to have (avoid hangups for corrupted files)")
 parser.add_option("--min_data_length", type="int", default=-1,help="Minimum length the file should have (sanity check)")
@@ -167,7 +167,6 @@ if not parser.get_prog_name()=="cr_event.py":
     search_window_width=-1
     sample_number=-1
     event_id = 0
-    db_name = ""
     db = None
 
     maximum_allowed_delay=1e-8 # maximum differential mean cable delay
@@ -205,10 +204,9 @@ else:
     polarizations=[0,1] if polarization<0 else [polarization]
 
     # Database
-    db_name = options.db_name
     db = None
-    if (db_name != ""):
-        db_manager = crdb.CRDatabase(db_name)
+    if (options.database != ""):
+        db_manager = crdb.CRDatabase(options.database)
         db = db_manager.db
 
     if db:
