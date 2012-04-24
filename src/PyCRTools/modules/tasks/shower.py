@@ -254,7 +254,7 @@ class Shower(Task):
                 cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
                 
             if self.save_plots:
-                cr.plt.savefig(plot_prefix+"shower_ldf.png")
+                cr.plt.savefig(self.plot_prefix+"shower_ldf.png")
             else:    
                  cr.plt.show()   
         
@@ -405,7 +405,7 @@ class Shower(Task):
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
                 
                 if self.save_plots:
-                    cr.plt.savefig(plot_prefix+"shower_footprint.png")
+                    cr.plt.savefig(self.plot_prefix+"shower_footprint.png")
                 else:    
                     cr.plt.show()
 
@@ -488,7 +488,7 @@ class Shower(Task):
                 cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
                 
                 if self.save_plots:
-                    cr.plt.savefig(plot_prefix+"shower_azimuthal_signal.png")
+                    cr.plt.savefig(self.plot_prefix+"shower_azimuthal_signal.png")
                 else:    
                     cr.plt.show()
 
