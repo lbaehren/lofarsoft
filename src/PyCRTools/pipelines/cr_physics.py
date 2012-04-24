@@ -4,6 +4,7 @@
 import matplotlib
 matplotlib.use("Agg")
 
+import time
 import pytmf
 import numpy as np
 import pycrtools as cr
@@ -27,6 +28,8 @@ parser.add_option("--maximum_nof_iterations", default = 5, help="Maximum number 
 db_filename = options.database
 dbManager = crdb.CRDatabase(db_filename)
 db = dbManager.db
+
+start = time.clock()
 
 # Get event from database
 event = crdb.Event(db = db, id = options.id)
@@ -247,4 +250,6 @@ footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals =
 # Update event status
 event.status = "CR_ANALYZED"
 event.write()
+
+print "[cr_physics] completed in {0:.3f} s".format(time.clock() - start)
 
