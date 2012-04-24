@@ -7,7 +7,9 @@ Reprocess cross correlation over 0/1 polarisation inside each station.
 Created by Arthur Corstanje, Apr. 2012
 """
 
+from pycrtools import hArray
 import pycrtools as cr
+
 import pycrtools.tasks as tasks
 import os
 from pycrtools.tasks.shortcuts import *
@@ -125,44 +127,84 @@ nofantennas = 0
 sample_interval = 0.0
 for dataset in stations:
     thisDataset = dataset[pol]
+    stationName = dataset["stationName"]
     
     block = thisDataset["BLOCK"]
     blocksize = thisDataset["BLOCKSIZE"]
     tbb_samplenr = thisDataset["SAMPLE_NUMBER"]
     pulse_samplenr = thisDataset["pulse_start_sample"]
     sample_interval = thisDataset["SAMPLE_INTERVAL"]
-    clock_correction = md.getClockCorrection(thisDataset["stationName"])
-    nofantennas += len(thisDataset["antennas"])
+    clock_correction = md.getClockCorrection(stationName)
+    nofchannels = len(thisDataset["antennas"])
+    nofantennas += nofchannels
 #    pulse_end = thisDataset["pulse_end_sample"]
     timeOffset = sample_interval * (tbb_samplenr + block * blocksize + pulse_samplenr) + clock_correction
     
-    startTimes.extend(timeOffset)
+    startTimes.extend([timeOffset] * nofchannels) # this offset for every antenna in this dataset
+
+startTimes = hArray(startTimes)
 
 # accumulate ant-ids, ant-positions and timeseries data
 antids = []
 antpos = []
 datalen = stations[0][0]["timeseries"].shape()[1] # and assume the same length for cut-timeseries for all others...
-full_timeseries = hArray(float, dimensions = [len(antids), datalen])
+full_timeseries = hArray(float, dimensions = [nofantennas, datalen])
+print full_timeseries.shape()
 row = 0
 for dataset in stations: 
     antids.append(dataset[pol]["antennas"].values())
     antpos.append(dataset[pol]["antenna_positions_array_XYZ_m"])
     thisTimeseries = dataset[pol]["timeseries"]
     nofchannels = thisTimeseries.shape()[0]
+    print row
+    print row+nofchannels
+    print thisTimeseries.shape()
     full_timeseries[row:row+nofchannels].copy(thisTimeseries) # check...
     row += nofchannels
 
 # get a reference antenna with a strong pulse...
 # for now, just station[0]'s reference antenna... May want to use overall-best pulse (highest SNR)
-refant = station[0][pol]["pulses_refant"]
+refant = stations[0][pol]["pulses_refant"]
 # is the index of the ref antenna also in the full list of antids / antpos
 
 # now cross correlate all channels in full_timeseries, get relative times
-crosscorr = trerun('CrossCorrelateAntennas', "crosscorr", full_timeseries,oversamplefactor=128)
+crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", full_timeseries, oversamplefactor=128)
 
 #And determine the relative offsets between them
-maxima_cc = trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = refant)
+maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = refant)
 
+#print startTimes
+#print maxima_cc.lags
+
+# plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
+
+plt.figure()
+hArray(maxima_cc.lags).plot()
+
+sdev = crosscorr.crosscorr_data[...].stddev()
+maxima = crosscorr.crosscorr_data[...].max() # need to look at positive maximum only!
+
+ksigma = hArray(maxima / sdev)
+k = ksigma.toNumpy()
+
+x = np.where(k < 5.0)
+
+y = hArray(maxima_cc.lags).toNumpy()
+yy = y[x]
+plt.scatter(x, yy)
+plt.title('Delays from cross correlations\nBlue dots represent flagged delays (no clear maximum)')
+
+plt.figure()
+hArray(ksigma).plot()
+plt.title('Strength (in sigmas) of the crosscorrelation maximum')
+
+arrivaltime = startTimes + hArray(maxima_cc.lags) 
+# BUG! startTimes + maxima_cc.lags gives all values equal to startTimes[0] + maxima_cc.lags[0]
+# happens when adding hArray and Vector... why?
+
+plt.figure()
+arrivaltime.plot()
+plt.title('Arrival times, matched with offsets per station (check!)')
 
 #fftplan = FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
 #hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
