@@ -173,7 +173,7 @@ class BeamFormer(tasks.Task):
 
         >>> Task.qplot(186,all=False).
         
-    .. CurrentModuleDeveloper:: Emilio Enriquez <e.enriquez 'at' astro.ru.nl>
+    CurrentModuleDeveloper:: Emilio Enriquez <e.enriquez 'at' astro.ru.nl>
 
     """
 
@@ -1002,7 +1002,7 @@ class BeamFormer(tasks.Task):
         *Ref_Freqs*           None  List with the begin and end of reference frequencies. [f1a,f1b,f2a,f2b,f3a,f3b,....] in Hz.
         *verbose*             False If true then prints the SNR information, and plots a time series, for each pulse. 
                                     Otherwise just returns the pulse_timeseries as an hArray.
-        *pulse_period=None*   None  The actual pulse period of the pulsar. [s]
+        *pulse_period*        None  The actual pulse period of the pulsar. [s]
         ===================== ===== ===================================================================
   
         Example::
@@ -1014,6 +1014,9 @@ class BeamFormer(tasks.Task):
             Task.dyn_DM_SNR(dedispersed_dynspec,pulse_time=[.1,.5,.8],pulse_period=0.71452,Ref_Freqs=[120e6,145e6,150e6,170e6,140e6,160e6],verbose=True)
 
         """
+        
+        min_pulse_period = self.times[10]
+
         #------------------------
         #Checking imput is corret.
             
@@ -1023,15 +1026,34 @@ class BeamFormer(tasks.Task):
         if type(pulse_time) != type([]) or len(pulse_time)!=len(Ref_Freqs)/2 :
             raise ValueError('Need a list of lenght n.')        
          
+        if pulse_period < min_pulse_period:
+            raise ValueError('Pulse period < %2.3f [s], code upgraded needed if the period is correct.')        
+         
         #------------------------
-
+        #Inicialating some variables.
         npulses= len(pulse_time)
         dedispersed_dynspec = cr.hArray_toNumpy(dedispersed_dynspec)
-        pulse_timeseries = np.array(np.zeros([npulses,len(self.times)]))
+        pulse_timeseries = np.zeros([npulses,len(self.times)])
+        Stats = np.zeros([4,npulses])  # The order is [Mean,Stddev,Max,SNR]  by npulses.        
+        mask = np.ones(len(pulse_timeseries[0]),dtype=bool)
+        anti_mask = np.zeros(pulse_timeseries.shape,dtype=bool)
         
         if verbose:
             print 'Calculating time series for %i pulses.' %npulses
+            
+        #Region around the pulse to calculate the max from (useful if several pulses in time series).
+        dtime = self.times.Find(">",max(pulse_period/16,min_pulse_period))[0]  
         
+        
+        #Creating mask on top of all pulses.
+        for npulse in range(npulses):
+            #Channel of reference time
+            ntime = self.times.Find(">",pulse_time[npulse])[0]
+            if verbose:
+                print "Pulse time = ", self.times[ntime]                        
+            mask[ntime-dtime:ntime+dtime] = False
+            anti_mask[npulse,ntime-dtime:ntime+dtime] = True
+
         for npulse in range(npulses):
             #Channel of reference frequency
             nfreq1 = self.frequencies.Find(">",Ref_Freqs[2*npulse])[0]
@@ -1039,23 +1061,23 @@ class BeamFormer(tasks.Task):
             if verbose:
                 print "Reference channels=",nfreq1,nfreq2
                 print "Reference frequencies=",self.frequencies[nfreq1],self.frequencies[nfreq2]
-
-           #Channel of reference time
-            ntime = self.times.Find(">",pulse_time[npulse])[0]
-            if verbose:
-                print "Reference time = ", self.times[ntime]            
-                dtime = int(min(self.times.Find(">",pulse_period)[0]/4,ntime)/2)     #Region around the pulse to calculate the max from (useful if several pulses in time series).
             
             dedispersed_pulse = dedispersed_dynspec[nfreq1:nfreq2]            
             pulse_timeseries[npulse] = np.sum(dedispersed_pulse,axis=0)
             
-            pulse_timeseries[npulse]= (pulse_timeseries[npulse]/pulse_timeseries[npulse].mean())-1.
+            Stats[0,npulse] = pulse_timeseries[npulse,mask].mean()           # Mean0
+            
+            pulse_timeseries[npulse]= pulse_timeseries[npulse] - Stats[0,npulse]
+            
+            Stats[1,npulse]  = pulse_timeseries[npulse,mask].std()           # Stddev
+            Stats[2,npulse]  = pulse_timeseries[npulse,anti_mask[npulse]].max()           # Max
+            Stats[3,npulse]  = Stats[2,npulse]/Stats[1,npulse]           #SNR
             
             if verbose:
                 print '--------'
                 print 'Pulse ', npulse+1, ':'
-                print '     Mean  = %2.2f , Stddev  = %2.2f '  %(pulse_timeseries[npulse].mean(), pulse_timeseries[npulse].std())
-                print '     Max  = %2.2f, SNR = %2.2f' %(pulse_timeseries[npulse,ntime-dtime:ntime+dtime].max(), pulse_timeseries[npulse,ntime-dtime:ntime+dtime].max()/pulse_timeseries[npulse].std())
+                print '     Mean  = %2.3f , Stddev  = %2.3f '  %(Stats[0,npulse],Stats[1,npulse])
+                print '     Max  = %2.3f, SNR = %2.3f' %(Stats[2,npulse],Stats[3,npulse])
                 print '--------'
 
         if verbose:
@@ -1066,7 +1088,8 @@ class BeamFormer(tasks.Task):
 
         pulse_timeseries = cr.hArray(pulse_timeseries)
         pulse_timeseries.par.xvalues= self.times
-        return pulse_timeseries
+        
+        return pulse_timeseries,Stats
 
 
     def dyncalc(self,beams=None,nbeam=0,save_file=False,fraction=None,tbin=1,clean=False):
