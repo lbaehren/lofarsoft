@@ -1,6 +1,7 @@
 """LORA
 """
 import pycrtools as cr
+import re
 
 def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, samplenumber, clockoffset = 1e4, blocksize = 2**16):
     """Calculates block number corresponding to LORA timestamp and the
@@ -115,11 +116,11 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
             #print a,b
             loradata[a].append(float(b))
         loradata[detectorkeys[-1]].append(float(info[-1]))
-        
+
     loradata["core"]=cr.hArray([loradata["Core(X)"],loradata["Core(Y)"],0.],name="shower core parameters from lora",unit="m")
     loradata["energy"]=loradata["Energy(eV)"]
     loradata["direction"]=cr.hArray([loradata["Azimuth"],loradata["Elevation"]],name="shower direction from lora",unit="degrees")
-    
+
     #Paramaters added in later versions, keeping compatibility with old versions
     if len_firstline >= 9:
         loradata["coreuncertainties"]=cr.hArray([loradata["CoreE(X)"],loradata["CoreE(Y)"],0],name="shower core uncertainties from lora",unit="m")
@@ -128,9 +129,15 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     if len_firstline == 10:
         loradata["moliere"]=loradata['Moliere_rad(m)']
     else:
-        loradata["moliere"]=-1  
+        loradata["moliere"]=-1
 
-    return loradata
+    loradata_cleankeys = {}
+    for key in loradata.keys():
+        cleankey = re.sub('\W', '_', key)
+        cleankey = re.sub('_+$', '', cleankey)
+        loradata_cleankeys[cleankey] = loradata[key]
+
+    return loradata_cleankeys
 
 
 def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
@@ -165,10 +172,10 @@ def nsecFromSec(lora_second,logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4"):
 
 def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_average=1,cumulative=True,plotAllowed=True,plotNotAllowed=True,plotNoObservation=True,stacked=True):
     """
-    Plot the triggers that were received from LORA at LOFAR. The trigger can be 
-    handled in three ways. Either there is no observation, so nothing is done. 
-    If there is an observation, it can do two things. Either triggering was 
-    allowed and TBB data should have been obtained, or triggering was not 
+    Plot the triggers that were received from LORA at LOFAR. The trigger can be
+    handled in three ways. Either there is no observation, so nothing is done.
+    If there is an observation, it can do two things. Either triggering was
+    allowed and TBB data should have been obtained, or triggering was not
     allowed and no TBB data was obtained.
 
     Input parameters:
@@ -195,14 +202,14 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
     notallowed=[int(l.split()[0]) for l in lines if 'allowed' in l and 'not' in l]
     noobservation=[int(l.split()[0]) for l in lines if 'no observation' in l]
     # Filter out false timestamps that occasionally occor
-    allowed=[a for a in allowed if a > 1000000000] 
-    notallowed=[a for a in notallowed if a > 1000000000] 
-    noobservation=[a for a in noobservation if a > 1000000000] 
+    allowed=[a for a in allowed if a > 1000000000]
+    notallowed=[a for a in notallowed if a > 1000000000]
+    noobservation=[a for a in noobservation if a > 1000000000]
     # Convert to MJD
     allowed=[a/86400.+40587 for a in allowed]
     notallowed=[a/86400.+40587 for a in notallowed]
     noobservation=[a/86400.+40587 for a in noobservation]
-    
+
     plotdata=[]
     plotlength=0
     mylegend=[]
@@ -223,7 +230,7 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
         histtype='barstacked'
     else:
         histtype='bar'
-    
+
     if plotlength==1:
         plotdata=plotdata[0]
 
@@ -235,6 +242,6 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
     plot=plt.hist(plotdata,bins=bins,histtype=histtype, cumulative=cumulative,label=mylegend)
 
     plt.legend()
-    plt.title('Triggers send by LORA and received by LOFAR \n current date '+str(time.time()/86400+40588)[0:8]) 
-    
-    return plot 
+    plt.title('Triggers send by LORA and received by LOFAR \n current date '+str(time.time()/86400+40588)[0:8])
+
+    return plot
