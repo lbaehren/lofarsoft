@@ -9,7 +9,6 @@ Created by Arthur Corstanje, Apr. 2012
 
 from pycrtools import hArray
 import pycrtools as cr
-
 import pycrtools.tasks as tasks
 import os
 from pycrtools.tasks.shortcuts import *
@@ -19,12 +18,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from pycrtools import xmldict
 
-def timeStringNow():
-    now = datetime.now()
-    return now.strftime("%Y-%m-%d_%H%M%S")
-
-eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20111228T200122.223Z'
-
+eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20120204T002716.905Z'
+#eventdir = '/data/VHECR/LORAtriggered/results/VHECR_LORA-20120204T002716.906Z'
 def gatherresults(eventdir):
     """
     Gather results from 1st pipeline analysis if status is 'good', group into a list of dicts containing
@@ -85,34 +80,6 @@ def gatherresults(eventdir):
         # timeseries inlezen, orig of calibrated? Zie evt cr_physics.py.
         # ....    
 
-def obtainvalue(par,key):
-    """This function returns the value from a parameter dict or a default value if the key does not exist"""
-    defaultvalues=dict(
-        title=False,
-        loracore=None,
-        positions=None,
-        antid=None,
-        loradirection=None,
-        names=False
-    )
-
-    if not par:
-        if key in defaultvalues.keys():
-            return defaultvalues[key]
-        else: 
-            print "please add ",key,"to defaults in cabledelays.py / obtainvalue "
-            return None
-    else:
-        if key in par.keys():
-            return par[key]
-        else:
-            if key in defaultvalues.keys():
-                return defaultvalues[key]
-            else: 
-                print "please add ",key,"to defaults in cabledelays.py / obtainvalue "
-                return None
-
-
 stations = gatherresults(eventdir)
 # now accumulate arrays with:
 # - all timeseries data for all stations
@@ -152,8 +119,8 @@ full_timeseries = hArray(float, dimensions = [nofantennas, datalen])
 print full_timeseries.shape()
 row = 0
 for dataset in stations: 
-    antids.append(dataset[pol]["antennas"].values())
-    antpos.append(dataset[pol]["antenna_positions_array_XYZ_m"])
+    antids.extend(dataset[pol]["antennas"].values())
+    antpos.extend(dataset[pol]["antenna_positions_array_XYZ_m"])
     thisTimeseries = dataset[pol]["timeseries"]
     nofchannels = thisTimeseries.shape()[0]
     print row
@@ -162,6 +129,8 @@ for dataset in stations:
     full_timeseries[row:row+nofchannels].copy(thisTimeseries) # check...
     row += nofchannels
 
+antpos = hArray(antpos)
+antids = hArray(antids)
 # get a reference antenna with a strong pulse...
 # for now, just station[0]'s reference antenna... May want to use overall-best pulse (highest SNR)
 refant = stations[0][pol]["pulses_refant"]
@@ -187,8 +156,8 @@ maxima = crosscorr.crosscorr_data[...].max() # need to look at positive maximum 
 ksigma = hArray(maxima / sdev)
 k = ksigma.toNumpy()
 
-x = np.where(k < 5.0) # bad indices
-
+x = np.where(k < 3.0) # bad indices
+print 'Number of BAD channels: ', len(x[0])
 y = hArray(maxima_cc.lags).toNumpy()
 yy = y[x]
 plt.scatter(x, yy)
@@ -202,8 +171,8 @@ arrivaltime = startTimes + hArray(maxima_cc.lags)
 # BUG! startTimes + maxima_cc.lags gives all values equal to startTimes[0] + maxima_cc.lags[0]
 # happens when adding hArray and Vector... why?
 
-for badchannel in x[0]: 
-    arrivaltime[int(badchannel)] = arrivaltime[int(badchannel)-1] # HACK !!
+#for badchannel in x[0]: 
+#    arrivaltime[int(badchannel)] = arrivaltime[int(badchannel)-1] # HACK !!
 
 plt.figure()
 arrivaltime.plot()
@@ -213,18 +182,43 @@ plt.title('Arrival times, matched with offsets per station (check!)')
 loradir = '/Users/acorstanje/triggering/CR/LORA'
 # first show originally derived arrival times
 fptask_orig = cr.trerun("plotfootprint", "0", colormap = 'jet', filefilter = eventdir, loradir = loradir, pol=pol) # no parameters set...
+plt.title('Footprint using original cr_event arrival times')
 plt.figure()
 # now our arrival times
 fptask = cr.trerun("plotfootprint", "1", colormap = 'jet', filefilter = eventdir, arrivaltime=arrivaltime, loradir = loradir, pol=pol) # no parameters set...
-
+plt.title('Footprint using crosscorrelated arrival times')
 delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
 delta -= delta.mean()
 plt.figure()
 fptask_delta = cr.trerun("plotfootprint", "2", colormap = 'jet', filefilter = eventdir, arrivaltime=delta, loradir = loradir, pol=pol) # no parameters set...
-
+plt.title('Footprint of difference between cr_event and full-cc method')
 plt.figure()
 delta.plot()
 plt.title('Difference between plotfootprint / cr_event arrival times\nand full crosscorrelation times')
+
+# Do plane-wave direction fit on full arrivaltimes
+# Fit pulse direction
+print 'Do plane wave fit on full arrival times (cross correlations here)...'
+direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antpos, timelags = arrivaltime, verbose=True)
+
+plt.figure()
+direction_fit_plane_wave.residual_delays.plot()
+plt.title('Residual delays after plane wave fit')
+
+print 'Do plane wave fit on stored arrival times, from plotfootprint...'
+direction_fit_plane_wave_orig = cr.trun("DirectionFitPlaneWave", positions = antpos, timelags = 1.0e-9 * fptask_orig.arrivaltime, verbose=True)
+
+plt.figure()
+direction_fit_plane_wave_orig.residual_delays.plot()
+plt.title('Residual delays after plane wave fit\n to plotfootprint timelags')
+
+residu = direction_fit_plane_wave.residual_delays.toNumpy()
+residu -= residu.mean()
+residu[np.where(abs(residu) > 15e-9)] = np.float('nan') # hack
+
+plt.figure()
+fptask_delta = cr.trerun("plotfootprint", "3", colormap = 'jet', filefilter = eventdir, arrivaltime=hArray(1.0e9*residu), loradir = loradir, pol=pol) # no parameters set...
+plt.title('Footprint of residual delays w.r.t. planewave fit')
 
 #fftplan = FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, fftw_flags.ESTIMATE)
 #hFFTWExecutePlan(fft_data[...], timeseries_data[...], fftplan)
