@@ -189,6 +189,14 @@ class CMDLine:
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
+	
+		# when do only summaries then ignore --del optioni if given, otherwise 
+		# everything will be deleted and if raw data are already erased then we are screwed
+		if self.opts.is_summary and self.opts.is_delete:
+			msg="***\n*** Warning: You give --del with --summary, deleting of previous results will be ignored and\n\
+*** and new summary results will be overwritten.\n***"
+			if log != None: log.warning(msg)
+			else: print msg
 
 		# checking that if --beams used then beams are specified correctly
 		# we have this complicated "if" because we used --beams to pass summary locus node when --summary and --local

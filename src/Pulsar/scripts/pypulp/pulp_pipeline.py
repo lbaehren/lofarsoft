@@ -73,9 +73,11 @@ class Pipeline:
 			# adding unit to the list
 			self.units.append(unit)
 
-		if len(self.units) == 0:
-			log.info("None beams to process!")
-			quit(0)
+		# only quitting when not making summaries only
+		if not cmdline.opts.is_summary:		
+			if len(self.units) == 0:
+				log.info("None beams to process!")
+				quit(0)
 
 		# creating main output directory on locus092 for CS data and on locus094 for IS data
 		# before that we also remove this directory if user flag is_del was set
