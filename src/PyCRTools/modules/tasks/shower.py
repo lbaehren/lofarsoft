@@ -68,7 +68,7 @@ class Shower(Task):
         footprint_colormap = dict(default="autumn",doc="colormap to use for LOFAR timing"),
         footprint_marker_lofar = dict(default='o', doc="Marker for LOFAR stations in footprint"),
         footprint_use_background = dict(default=True, doc="Use LOFAR map as background for footprint"),
-        footprint_largest_point = dict(default=300,doc="Largest point in plot for LOFAR"),
+        footprint_point_scaling = dict(default=2,doc="Scaling factor for point size in LOFAR plot"),
         footprint_use_title = dict(default=True,doc="Draw title indicating polarizations and event id (if given)"),
          
         footprint_shower_enable = dict(default=True, doc='Draw shower geometry in footprint'), 
@@ -83,7 +83,8 @@ class Shower(Task):
         lora_timelags = dict(default=None,
             doc = "Timelags of signals in LORA detectors, given in nanoseconds [NDetectors] "), 
         footprint_color_lora = dict(default='#730909',doc="Color used for LORA plots. If set to 'time' uses the arrival time" ),    
-        footprint_marker_lora = dict(default='',doc="Marker for LORA stations in footprint"),
+        footprint_marker_lora = dict(default='p',doc="Marker for LORA stations in footprint"),
+        footprint_lora_point_scaling = dict(default=200, doc="Scaling factor for point size in LORA shower"),
         
         footprint_polarization_enable = dict(default = False,
             doc= "Draw footprint with polarization arrows"),
@@ -262,30 +263,27 @@ class Shower(Task):
         
                 
         if self.footprint_enable: 
-        
+            
+            # LORA
             if self.lora_signals is not None and self.lora_positions is not None and self.footprint_lora_enable:
   
-                self.lsizes = self.lora_signals
-                if self.lszises.max() > 0:
-                    self.lszises /= self.lszises.max() 
-                    self.lszises *= self.footprint_largest_point
-
+                self.lsizes = np.copy(self.lora_signals)
+                self.lsizes = np.log10(self.lsizes)
+                self.lsizes *= self.footprint_lora_point_scaling
+                LORA_regular = False
+                LORA_time = False
+                                
                 if self.lora_timelags is not None and self.footprint_color_lora == 'time':
-                    #print "Draw LORA with timelags and color, still to be implemented"
+                    LORA_time = True
 
-                    self.loracolor=self.loraarrivaltimes
+                    self.loracolor=np.copy(self.lora_timelags)
                     for i in xrange(len(self.loracolor)):
                         if self.loracolor[i] == 0:
                             self.loracolor[i] += max(self.loracolor)
-
-                    cr.plt.scatter(self.lorapositions[:,0],self.lorapositions[:,],s=self.lsizes,c=self.loracolor,marker=self.lorashape,cmap="winter")
-
                 else:
-                    #print "Draw LORA wth signals only, still to be implemented"
-
-                    cr.plt.scatter(self.lorapositions[:,0],self.lorapositions[:,],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
-    
-
+                    LORA_regular = True
+            
+            # Background    
             if self.footprint_use_background:
                     from os import environ
                     from os.path import isfile
@@ -297,7 +295,8 @@ class Shower(Task):
                             print "WARNING Cannot plot layout"
                     else:
                         print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
-        
+            
+            # Shower
             if self.footprint_shower_enable and self.direction is not None and self.core is not None:
                     
                     dcos=cr.cos(cr.radians(self.direction[0]))
@@ -306,24 +305,31 @@ class Shower(Task):
                     
 
             if self.positions is not None and self.signals is not None:
-
-                self.sizes0 = self.signals[:,0]
-                self.sizes0 /= self.signals.max()
-                self.sizes0 *= self.footprint_largest_point
                 
                 if self.timelags is None:
                    self.scolors="blue"
                    print "WARNING, footprint does not represent the time, only the signal strength"
                 
-                # POL 0
+                
+                # ------------- POL 0
+                 
+                self.sizes0 = np.copy(self.signals[:,0])
+                self.sizes0 *= self.footprint_point_scaling
                 
                 cr.plt.figure()
+                
+                # Adding LORA
+                if LORA_time:
+                    cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.loracolor,marker=self.footprint_marker_lora,cmap="winter")
+                if LORA_regular:
+                    cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
+                
                 if bgim is not None and self.footprint_use_background:
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                
                 if self.timelags is not None:
                     self.scolors=self.timelags[:,0]-self.timelags[:,0].min()
-                    self.scolors *=1e9   
-                                 
+                    self.scolors *=1e9                    
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -345,18 +351,28 @@ class Shower(Task):
                 if self.save_plots:
                     cr.plt.savefig(self.plot_prefix+"shower_footprint_polX.png")
 
-                #POL 1
+                # ----------- POL 1
                 
-                self.sizes1 = self.signals[:,1]
-                self.sizes1 /= self.signals.max()
-                self.sizes1 *= self.footprint_largest_point
+                self.sizes1 = np.copy(self.signals[:,1])
+                self.sizes1 *= self.footprint_point_scaling
+
                                 
                 cr.plt.figure()
+                
+                # Adding LORA
+                if LORA_time:
+                    cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.loracolor,marker=self.footprint_marker_lora,cmap="winter")
+                if LORA_regular:
+                    cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
+                
+                # Background
                 if bgim is not None and self.footprint_use_background:
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                
+                # Signals    
                 if self.timelags is not None:
                     self.scolors=self.timelags[:,1]-self.timelags[:,1].min()
-                    self.scolors *=1e9
+                    self.scolors *=1e9   
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -378,19 +394,25 @@ class Shower(Task):
                 if self.save_plots:
                     cr.plt.savefig(self.plot_prefix+"shower_footprint_polY.png")
                
-                #POL 2
+                # -------- POL 2
                 if self.signals.shape[1] == 3:
                 
-                    self.sizes2 = self.signals[:,2]
-                    self.sizes2 /= self.signals.max()
-                    self.sizes2 *= self.footprint_largest_point
+                    self.sizes2 = np.copy(self.signals[:,2])
+                    self.sizes2 *= self.footprint_point_scaling
                                     
                     cr.plt.figure()
+                    
+                    # Adding LORA
+                    if LORA_time:
+                        cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.loracolor,marker=self.footprint_marker_lora,cmap="winter")
+                    if LORA_regular:
+                        cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
+                    
                     if bgim is not None and self.footprint_use_background:
                         cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
                     if self.timelags is not None:
                         self.scolors=self.timelags[:,2]-self.timelags[:,2].min()
-                    self.scolors *=1e9
+                        self.scolors *=1e9
                     cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes2,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
                     cr.plt.xlabel("LOFAR East [meters] ")
                     cr.plt.ylabel("LOFAR North [meters] ")
@@ -413,14 +435,16 @@ class Shower(Task):
                     if self.save_plots:
                         cr.plt.savefig(self.plot_prefix+"shower_footprint_polZ.png")
                 
-                if not self.save_plots:    
+                if not self.save_plots:   
                     cr.plt.show()
 
             
             else:
                 print "WARNING: Give at least positions and signals to plot a footprint"  
                 
-  
+        
+        # --------------------- Polarization Footprint  ------------------------------ #
+        
         if self.footprint_polarization_enable:
         
             if self.positions is not None and self.polarization_angle is not None:
@@ -448,7 +472,9 @@ class Shower(Task):
                 cr.plt.savefig(self.plot_prefix+"polarization_footprint.png")
             else:
                 cr.plt.show()    
-                
+        
+        # ---------------------  Azimuth binned distance  ------------------------------ #
+               
         if self.azimuth_in_distance_bins_enable:    
                 
                 Dist = self.__GetDistance(self.core,self.direction,self.positions)
@@ -470,10 +496,9 @@ class Shower(Task):
                 csc = (Dist > self.slicing[1]) & (Dist < self.slicing[2])
                 dsc = (Dist > self.slicing[2]) & (Dist < self.slicing[3])
                 esc = (Dist > self.slicing[3])
-
-                
+ 
                 cr.plt.figure()
-                
+
                 cr.plt.plot(Angle[asc],self.signals[:,0][asc],linestyle="None",marker = 'o',color = "green",label="d < 100m")     
                 cr.plt.plot(Angle[bsc],self.signals[:,0][bsc],linestyle="None",marker = 's',color = "red",label="100m < d < 200m")
                 cr.plt.plot(Angle[csc],self.signals[:,0][csc],linestyle="None",marker = '<',color = "blue",label="200m < d < 300m")
