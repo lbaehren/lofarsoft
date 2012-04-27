@@ -378,7 +378,7 @@ class CMDLine:
         	        for ii in range(len(self.beams)):
                 	        sapid=int(self.beams[ii].split(":")[0])
                         	tabid=int(self.beams[ii].split(":")[1])
-    	                    tab = obs.saps[sapid].tabs[tabid]
+    	                    	tab = obs.saps[sapid].tabs[tabid]
         	                if len(tab.location) > 0:
                 	                # if here, it means node is available for this beam
                         	        if len(tab.location) > 1 and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
@@ -399,7 +399,7 @@ class CMDLine:
         	        if len(excluded_beams_id) > 0:
                 	        msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([self.beams[id] for id in excluded_beams_id]))
                         	if log != None: log.info(msg)
-   	                     else: print msg
+				else: print msg
         	                # deleting these excluded beams from the cmdline.beams list
                 	        for id in reversed(excluded_beams_id):
                         	        del(self.beams[id])
