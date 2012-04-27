@@ -193,6 +193,7 @@ class CMDLine:
 		# when do only summaries then ignore --del optioni if given, otherwise 
 		# everything will be deleted and if raw data are already erased then we are screwed
 		if self.opts.is_summary and self.opts.is_delete:
+			self.opts.is_delete = False
 			msg="***\n*** Warning: You give --del with --summary, deleting of previous results will be ignored and\n\
 *** and new summary results will be overwritten.\n***"
 			if log != None: log.warning(msg)
