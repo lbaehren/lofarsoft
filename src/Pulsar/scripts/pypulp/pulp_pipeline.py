@@ -446,7 +446,7 @@ class Pipeline:
 			log.info("Reading chi-squared values and adding to chi-squared.txt...")
                         # also preparing montage command to create combined plot
 	       	        montage_cmd="montage -background none -pointsize 10.2 "
-	       	        montage_cmd_pdf="montage -geometry 100% -rotate 90 -adjoin -tile 1x1 -pointsize 12 "
+	       	        montage_cmd_pdf="montage -geometry 100% -adjoin -tile 1x1 -pointsize 12 "
                 	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
      	       	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
 			if len(psr_bestprofs) > 0:
