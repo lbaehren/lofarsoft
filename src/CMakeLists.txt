@@ -132,7 +132,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
 ##__________________________________________________________
 ##                                      Package dependencies
 
-add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
+add_dependencies (pybdsm wcslib cfitsio boost num_util pyfits)
 
 ## ==============================================================================
 ##
