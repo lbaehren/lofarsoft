@@ -254,7 +254,7 @@ class Shower(Task):
                 cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
                 
             if self.save_plots:
-                cr.plt.savefig(self.plot_prefix+"shower_ldf.png")
+                 cr.plt.savefig(self.plot_prefix+"shower_ldf.png")
             else:    
                  cr.plt.show()   
         
@@ -341,7 +341,10 @@ class Shower(Task):
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
-                
+
+                if self.save_plots:
+                    cr.plt.savefig(self.plot_prefix+"shower_footprint_polX.png")
+
                 #POL 1
                 
                 self.sizes1 = self.signals[:,1]
@@ -370,8 +373,11 @@ class Shower(Task):
                 #Plotting the shower
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
-                    cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
-                
+                    cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)
+                                    
+                if self.save_plots:
+                    cr.plt.savefig(self.plot_prefix+"shower_footprint_polY.png")
+               
                 #POL 2
                 if self.signals.shape[1] == 3:
                 
@@ -404,9 +410,10 @@ class Shower(Task):
                         cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
                 
-                if self.save_plots:
-                    cr.plt.savefig(self.plot_prefix+"shower_footprint.png")
-                else:    
+                    if self.save_plots:
+                        cr.plt.savefig(self.plot_prefix+"shower_footprint_polZ.png")
+                
+                if not self.save_plots:    
                     cr.plt.show()
 
             
@@ -438,7 +445,7 @@ class Shower(Task):
                 print "Give positions and polarization angles to draw footprint in polarization"
                 
             if self.save_plots:
-                print "to do"
+                cr.plt.savefig(self.plot_prefix+"polarization_footprint.png")
             else:
                 cr.plt.show()    
                 
