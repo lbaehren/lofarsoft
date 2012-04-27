@@ -111,7 +111,9 @@ if __name__ == "__main__":
 			obs = Observation(cmdline.opts.obsid, cep2, cmdline, log)
 
 			# checking if rawdata available on the cluster for user-specified beams
-			cmdline.is_rawdata_available(cep2, obs, log)
+			# do it only if data needs to be processed, not when we do only summaries
+			if not cmdline.opts.is_summary:
+				cmdline.is_rawdata_available(cep2, obs, log)
 
 			# saving obs configuration to file
                 	obsfd = open (obsconf_file, "wb")
