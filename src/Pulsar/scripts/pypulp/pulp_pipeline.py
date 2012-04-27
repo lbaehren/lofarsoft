@@ -645,7 +645,7 @@ class PipeUnit:
 
 	# function to set outdir and curdir directories
 	def set_outdir(self, obs, cep2, cmdline):
-		if len(self.tab.location) > 1:
+		if len(self.tab.location) > 1 or len(self.tab.location) == 0:  # the last condition is when raw data are erased but still want to run only summaries
 			if self.tab.is_coherent: locus=cep2.hoover_nodes[0] # we choose one hoover node for CS data
 			else: locus=cep2.hoover_nodes[1]                    # and another for IS data
 		else:
