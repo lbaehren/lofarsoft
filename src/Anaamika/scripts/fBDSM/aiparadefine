@@ -1,9 +1,0 @@
-fitsdir = '/data/anaamika/fits/' fits directory
-scratch = '/data/anaamika/image/' scratch directory
-srldir = '/data/anaamika/image/' source list directory
-plotdir = '/data/anaamika/plots/' plots directory
-fitsname = 'WN65341H.fits' name of fits file
-solnname = 'vliet' id name for sourcelist
-airuncode = 'mq' (a)uto/(m)anual and (q)uiet/(v)erbose
-gausshap = '11' analyse gaussian, shapelets (1=y; 0=n); default=11=both
-saveplots = 'y' (y)es/(n) - save plots or not; else (n)o. 

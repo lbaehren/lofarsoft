@@ -1,5 +1,0 @@
-
-clean: 
-	rm -fr lib*
-
-

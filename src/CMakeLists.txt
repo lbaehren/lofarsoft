@@ -108,41 +108,31 @@ endmacro (lus_package_experimental)
 
 ## ==============================================================================
 ##
-##                                                        $LOFARSOFT/src/Anaamika
+##                                                        $LOFARSOFT/src/PyBDSM
 ##
 ## ==============================================================================
 
-##__________________________________________________________
-##                                                   Options
-
-option (ANAAMIKA_ENABLE_SCIPY   "Build SciPy as interactive environment?"  NO  )
-option (ANAAMIKA_ENABLE_FBDSM   "Build Fortran-based version of BDSM?"     NO  )
-option (ANAAMIKA_ENABLE_PYBDSM  "Build Python-enabled version of BDSM?"    YES )
 
 ##__________________________________________________________
 ##                              Build & Testing instructions
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
   ## Build package from present sources
-  lus_package_build (anaamika Anaamika)
+  lus_package_build (pybdsm PyBDSM)
   ## Experimental build
-  lus_package_experimental (anaamika Anaamika)
-else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
-  ExternalProject_Add (anaamika
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Anaamika
-    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/Anaamika
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DANAAMIKA_ENABLE_SCIPY=${ANAAMIKA_ENABLE_SCIPY}
+  lus_package_experimental (pybdsm PyBDSM)
+else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
+  ExternalProject_Add (pybdsm
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/PyBDSM
+    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/PyBDSM
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
     )
-endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Anaamika)
+endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
 
 ##__________________________________________________________
 ##                                      Package dependencies
 
 add_dependencies (anaamika wcslib cfitsio boost num_util pyfits)
-
-if (ANAAMIKA_ENABLE_SCIPY)
-  add_dependencies (anaamika scipy)
-endif (ANAAMIKA_ENABLE_SCIPY)
 
 ## ==============================================================================
 ##

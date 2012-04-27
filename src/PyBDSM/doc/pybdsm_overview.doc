@@ -1,0 +1,37 @@
+
+//_______________________________________________________________________________
+// Description of source code tree
+
+/*!
+  \page PyBDSM PyBDSM
+  \defgroup PyBDSM PyBDSM - Blob Detection and Source Measurement
+
+  The current version of BDSM is the Python version PyBDSM. It is currently maintained and developed at Sterrewacht Leiden.
+
+  \section PyBDSM_code_tree Organiation of the source code
+
+  The diagram below show the basic organisation of the source code directories.
+  This has been updated to match the structure of the LOFAR repository, where PyBDSM will now reside:  
+
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  `-- src
+      |-- contrib
+      |-- CR-Tools
+      |-- DAL
+      `-- PyBDSM                 <-- Project top-level directory
+          |-- src
+          |   |-- apps
+	      |-- test
+          `-- doc
+  \endverbatim
+
+
+*/
+
