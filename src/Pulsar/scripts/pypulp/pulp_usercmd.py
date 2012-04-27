@@ -344,14 +344,6 @@ class CMDLine:
 
         # checking if raw data for specified beams are located on one of the down nodes
         def is_rawdata_available(self, cep2, obs, log=None):
-                msg="Checking if all data/nodes are available for user-specified beams..."
-                if log != None: log.info(msg)
-                else: print msg
-
-                # if some TABs have raw data in several locations
-                # we also need to check if hoover nodes are up
-                avail_hoover_nodes=list(set(cep2.hoover_nodes).intersection(set(cep2.alive_nodes)))
-
                 # first forming the actual list of beams to process taking also into account
                 # cmdline flags, like --noIS, --noCS, --noCV, --noFE
                 if len(self.user_beams) > 0: self.beams = self.user_beams
@@ -374,6 +366,14 @@ class CMDLine:
 
                 # now we are checking if raw data are available for beams we want to process
 		if not self.opts.is_summary:
+                	msg="Checking if all data/nodes are available for user-specified beams..."
+	                if log != None: log.info(msg)
+        	        else: print msg
+
+                	# if some TABs have raw data in several locations
+                	# we also need to check if hoover nodes are up
+                	avail_hoover_nodes=list(set(cep2.hoover_nodes).intersection(set(cep2.alive_nodes)))
+
 	                excluded_beams_id=[]
         	        for ii in range(len(self.beams)):
                 	        sapid=int(self.beams[ii].split(":")[0])
