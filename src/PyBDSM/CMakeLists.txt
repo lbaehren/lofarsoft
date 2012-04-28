@@ -92,6 +92,19 @@ endif (PYBDSM_ENABLE_TESTING)
 # Set Fortran include directories and compile flags.
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC -fno-second-underscore")
 
+include_directories (
+  ${BOOST_INCLUDES}
+  ${PYTHON_INCLUDES}
+  ${NUMPY_INCLUDES}
+  )
+
+if (NUM_UTIL_INCLUDES)
+  include_directories (
+    ${NUM_UTIL_INCLUDES}
+    ${NUM_UTIL_INCLUDES}/..
+    )
+endif (NUM_UTIL_INCLUDES)
+
 ## ==============================================================================
 ##
 ##  Project subdirectories
