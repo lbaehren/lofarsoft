@@ -67,12 +67,12 @@ if (NOT FIND_GIT_CMAKE)
 
     ## Extract minor version
 
-    string (REGEX REPLACE "${GIT_VERSION_MAJOR}." "" _version ${_version} )
+    string (REGEX REPLACE "^${GIT_VERSION_MAJOR}." "" _version ${_version} )
     string (REGEX MATCH "[0-9]" GIT_VERSION_MINOR ${_version})
 
     ## Extract patch version
 
-    string (REGEX REPLACE "${GIT_VERSION_MINOR}." "" _version ${_version} )
+    string (REGEX REPLACE "^${GIT_VERSION_MINOR}." "" _version ${_version} )
     string (REGEX MATCH "[0-9]" GIT_VERSION_PATCH ${_version})
 
   endif (_version)
