@@ -74,6 +74,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </tr>
     </xsl:for-each>
   </table>
+  <table>
+    <caption>Figures</caption>
+    <xsl:for-each select="/elements/figures/figure">
+      <tr>
+        <td><xsl:value-of select="path"/></td>
+      </tr>
+    </xsl:for-each>
+  </table>
   </body>
   </html>
 </xsl:template>

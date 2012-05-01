@@ -259,12 +259,18 @@ def polarization_handler(eventID, station_name, polarization_direction):
     """, (eventID, station_name, polarization_direction))
 
     parameters = SubElement(elements, "parameters")
+    figures = SubElement(elements, "figures")
     for e in c.fetchall():
 
         parameter = SubElement(parameters, "parameter")
 
-        SubElement(parameter, "key").text = str(e[0])
-        SubElement(parameter, "value").text = str(unpickle_parameter(e[1]))
+        if str(e[0]) == "plotfiles":
+            for p in unpickle_parameter(e[1]):
+                figure = SubElement(figures, "figure")
+                SubElement(figure, "path").text = str(p)
+        else:
+            SubElement(parameter, "key").text = str(e[0])
+            SubElement(parameter, "value").text = str(unpickle_parameter(e[1]))
 
     # Open string file descriptor for output
     f = StringIO()
