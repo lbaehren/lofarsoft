@@ -554,8 +554,8 @@ def run_pipeline_datafile(full_filename):
 
         if lora_event_info:
                 lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
-                lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
-                lora_energy=lora_event_info["Energy(eV)"]
+                lora_core=(lora_event_info["Core_X"],lora_event_info["Core(Y)"])
+                lora_energy=lora_event_info["Energy_eV"]
                 lora_coreuncertainties=lora_event_info["coreuncertainties"]
                 lora_moliere=lora_event_info["moliere"]
 
@@ -1646,8 +1646,8 @@ def run_pipeline_event(event_info, dump_html=False):
 
             if lora_event_info:
                     lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
-                    lora_core=(lora_event_info["Core(X)"],lora_event_info["Core(Y)"])
-                    lora_energy=lora_event_info["Energy(eV)"]
+                    lora_core=(lora_event_info["Core_X"],lora_event_info["Core_Y"])
+                    lora_energy=lora_event_info["Energy_eV"]
                     lora_coreuncertainties=lora_event_info["coreuncertainties"]
                     lora_moliere=lora_event_info["moliere"]
 
