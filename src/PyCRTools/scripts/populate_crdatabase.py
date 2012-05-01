@@ -69,6 +69,8 @@ class CRDatabasePopulator(object):
             excludefilter = crdb.Filter(self._db, "EXCLUDE")
             excludefilter.add("test")
             excludefilter.add("bkp")
+            for i in range(1,99):
+                excludefilter.add("R%03d" %(i))
             filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
 
             # - File filter
