@@ -136,7 +136,7 @@ class SAPBeam:
 
 		# Getting the size of the TA ring (in deg)
 		if self.nrRings != 0:
-			cmd="grep 'Observation.Beam\[%d\].nrTabRingSize' %s" % (self.sapid, parset)
+			cmd="grep 'Observation.Beam\[%d\].tabRingSize' %s" % (self.sapid, parset)
 			status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				# getting size of the TA ring
