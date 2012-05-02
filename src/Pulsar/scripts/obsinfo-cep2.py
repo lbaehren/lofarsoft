@@ -1008,6 +1008,15 @@ class obsinfo:
 						self.ringSize=float(status[0][:-1].split(" = ")[-1])
 						self.ringSize = self.ringSize * (180./3.1415926)
 					except: self.ringSize = 0
+				else: # if all previous keywords for ringsize are missing (recent change since Jan27, 2012?)
+					cmd="grep 'Observation.Beam\[0\].tabRingSize' %s" % (self.parset,)
+					status=os.popen(cmd).readlines()
+					if np.size(status)>0:
+						# getting size of the TA ring
+						try:
+							self.ringSize=float(status[0][:-1].split(" = ")[-1])
+							self.ringSize = self.ringSize * (180./3.1415926)
+						except: self.ringSize = 0
 
 		# in case keyword 'Output_IncoherentStokes.enabled' does not exist, but format is new (after Jan 27, 2012)
 		# also we need then decrease the number of TA beams as one of them is IS beam now
