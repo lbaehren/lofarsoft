@@ -74,12 +74,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:for-each select="/elements/header/stations/station">
     <xsl:sort select="name"/>
       <tr>
-        <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:value-of select="name"/></xsl:attribute><xsl:value-of select="name"/></a></td>
+        <xsl:variable name="station"><xsl:value-of select="name"/></xsl:variable>
+        <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:copy-of select="$station" /></xsl:attribute><xsl:copy-of select="$station" /></a></td>
         <td><xsl:value-of select="status"/></td>
         <td>
           <xsl:for-each select="polarizations/polarization">
             <tr>
-              <td><xsl:value-of select="name"/></td>
+              <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:copy-of select="$station" />/<xsl:value-of select="name"/></xsl:attribute><xsl:value-of select="name"/></a></td>
             </tr>
           </xsl:for-each>
         </td>
