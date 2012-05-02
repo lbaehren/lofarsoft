@@ -51,7 +51,7 @@ obsid=str(line.split(".")[0])
 #CS_SAP0_BEAM0_
 file = open(options.chisq,"r")
 for line in file.readlines():
-    beam = int(line.split("CS_SAP%s_BEAM")[1].split("_")[0])
+    beam = int(line.split("CS_SAP%s_BEAM" % (options.sap))[1].split("_")[0])
     chisq = float(line.split("chi-sq=")[1])
     Chisqs.append([beam,chisq])    
 file.close()
