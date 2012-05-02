@@ -13,7 +13,7 @@ table
     border: 1px solid #d8d8d8;
 }
 
-caption
+table caption
 {
     margin: 0;
     padding: 6px 0 8px 0;
@@ -23,7 +23,12 @@ caption
     font-family: sans-serif;
 }
 
-tr:nth-child(odd)
+table img
+{
+    width: 50%;
+}
+
+table.parameters tr:nth-child(odd)
 {
     background: #f4f4f4;
 }

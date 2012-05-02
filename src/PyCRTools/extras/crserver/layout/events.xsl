@@ -11,14 +11,47 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   </head>
   <body>
   <h1>LOFAR Cosmic Ray Events</h1>
+  <nav>
+      <ul class="cf">
+          <li><a class="dropdown" href="#">Section</a>
+              <ul>
+                  <li><a href="#good">Good events</a></li>
+                  <li><a href="#all">All events</a></li>
+              </ul>
+          </li>
+          <li><a href="/events">All events</a></li>
+      </ul>
+  </nav>
   <table>
+    <caption id="good">Good events</caption>
     <tr>
-      <th>id</th>
-      <th>timestamp</th>
-      <th>status</th>
+      <th>Id</th>
+      <th>Timestamp</th>
+      <th>Event status</th>
     </tr>
     <xsl:for-each select="/elements/event">
-      <xsl:sort select="key"/>
+      <xsl:if test="status='CR_FOUND' or status='CR_ANALYSED'">
+      <tr>
+        <td>
+          <a><xsl:attribute name="href">
+          events/<xsl:value-of select="id"/></xsl:attribute> 
+          <xsl:value-of select="id"/> 
+          </a>
+        </td>
+        <td><xsl:value-of select="timestamp"/></td>
+        <td><xsl:value-of select="status"/></td>
+      </tr>
+      </xsl:if>
+    </xsl:for-each>
+  </table>
+  <table>
+    <caption id="all">All events</caption>
+    <tr>
+      <th>Id</th>
+      <th>Timestamp</th>
+      <th>Event status</th>
+    </tr>
+    <xsl:for-each select="/elements/event">
       <tr>
         <td>
           <a><xsl:attribute name="href">
