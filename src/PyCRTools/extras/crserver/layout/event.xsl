@@ -110,7 +110,11 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <caption id="figures">Figures</caption>
     <xsl:for-each select="/elements/figures/figure">
       <tr>
-        <td><img><xsl:attribute name="src"><xsl:value-of select="path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="path"/></xsl:attribute></img></td>
+        <td>
+          <a><xsl:attribute name="href"><xsl:value-of select="path"/></xsl:attribute>
+            <img><xsl:attribute name="src"><xsl:value-of select="path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="path"/></xsl:attribute></img>
+          </a>
+        </td>
       </tr>
     </xsl:for-each>
   </table>
