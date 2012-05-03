@@ -449,7 +449,7 @@ def write_catalog(**kwargs):
         print "\n\033[31;1mAborted\033[0m"
 
 write_catalog.arg_list = ['bbs_patches', 'format', 'outfile', 'srcroot',
-                          'incl_wavelet', 'clobber', 'catalog_type']
+                          'incl_chan', 'clobber', 'catalog_type']
 write_catalog.use_groups = False
 
 
@@ -485,7 +485,7 @@ def export_image(**kwargs):
         print "\n\033[31;1mAborted\033[0m"
         
 export_image.arg_list = ['outfile', 'img_type', 'img_format',
-                         'incl_wavelet', 'clobber']
+                         'clobber']
 export_image.use_groups = False
 
 

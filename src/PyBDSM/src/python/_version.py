@@ -26,6 +26,15 @@ def changelog():
     PyBDSM Changelog.
     -----------------------------------------------------------------------
     
+    2012/05/02 - Added option to output fluxes for every
+                 channel found by the spectral index module.
+                 Added option to spectral index module to
+                 allow use of fluxes that do not meet the
+                 desired SNR. Changed flag_maxsnr criterion
+                 to also flag if the peak flux of the 
+                 Gaussian exceeds the value at its center.
+                 Removed incl_wavelet option.
+                 
     2012/04/20 - Promoted the adaptive_rms_box parameter to
                  the main options listing and added the 
                  rms_box_bright option so that the user can

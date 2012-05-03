@@ -508,7 +508,6 @@ class Source(object):
                                 colname='Resid_Isl_rms', units='Jy/beam')
     sresid_mean         = Float(doc="Island mean in Shapelet residual image Jy/beam", 
                                 colname='Resid_Isl_mean', units='Jy/beam')
-    wavelet_j           = Int(doc="Wavelet number to which Gaussian belongs", colname='Wave_id')
     ngaus               = Int(doc='Number of gaussians in the source', colname='N_gaus')
     island_id           = Int(doc="Serial number of the island", colname='Isl_id')
     gaussians           = List(tInstance(Gaussian), doc="")

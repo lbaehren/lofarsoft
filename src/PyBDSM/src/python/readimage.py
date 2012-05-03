@@ -68,6 +68,8 @@ class Op_readimage(Op):
             data, hdr = result
 
         # Store data and header in img. If polarisation_do = False, only store pol == 'I'
+        img.nchan = data.shape[1]
+        img.nstokes = data.shape[0]
         mylogger.userinfo(mylog, 'Image size',
                           str(data.shape[-2:])+' pixels')
         mylogger.userinfo(mylog, 'Number of channels',
@@ -163,11 +165,11 @@ class Op_readimage(Op):
           cdelt = [hdr['cdelt1'], hdr['cdelt2']]
           acdelt = [abs(hdr['cdelt1']), abs(hdr['cdelt2'])]
           ctype = [hdr['ctype1'], hdr['ctype2']]
-          if hdr.has_key('crota1'): 
+          if 'crota1' in hdr: 
             crota = [hdr['crota1'], hdr['crota2']]
           else:
             crota = []
-          if hdr.has_key('cunit1'): 
+          if 'cunit1' in hdr: 
             cunit = [hdr['cunit1'], hdr['cunit2']]
           else:
             cunit = []
@@ -420,7 +422,7 @@ class Op_readimage(Op):
                     code = 0
         if img.use_io == 'fits':
             hdr = img.header
-            if hdr.has_key('EQUINOX'):
+            if 'EQUINOX' in hdr:
                 year = hdr['EQUINOX']
                 if isinstance(year, str):     # Check for 'J2000' or 'B1950' values
                     tst = year[:1]
@@ -431,11 +433,11 @@ class Op_readimage(Op):
                 else:
                     code = 0
             else:
-                if hdr.has_key('EPOCH'): # Check EPOCH if EQUINOX not found
+                if 'EPOCH' in hdr: # Check EPOCH if EQUINOX not found
                     year = hdr['EPOCH']
                     code = 1
                 else:
-                    if hdr.has_key('RADECSYS'):
+                    if 'RADECSYS' in hdr:
                         sys = hdr['RADECSYS']
                         code = 4 
                         if sys[:3] == 'ICR': year = 2000.0

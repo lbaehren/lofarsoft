@@ -48,68 +48,60 @@ class Op_outlist(Op):
             name = img.extraparams['bbsname']
         else:
             name = img.imagename
-        fnames = [dir + name + '.sky_in']
-        if img.extraparams.has_key('bbsprefix'): 
-            fnames.append(dir + img.parentname + '.pybdsm' + '.total.sky_in')
-        else:
-            fnames.append(dir + name + '.total.sky_in')
+        fname = dir + name + '.sky_in'
 
-        # Write Gaussian list without wavelet Gaussians
-        write_bbs_gaul(img, filename=fnames[0], srcroot=img.opts.srcroot, 
-                       patch=img.opts.bbs_patches, incl_primary=True, incl_wavelet=False, 
-                       sort_by='flux', clobber=True)
-        # Write Gaussian list with wavelet Gaussians (if any)
-        write_bbs_gaul(img, filename=fnames[1], srcroot=img.opts.srcroot, 
-                       patch=img.opts.bbs_patches, incl_primary=True, incl_wavelet=True, 
+        # Write Gaussian list
+        write_bbs_gaul(img, filename=fname, srcroot=img.opts.srcroot, 
+                       patch=img.opts.bbs_patches,
                        sort_by='flux', clobber=True)
   
 
     def write_gaul(self, img, dir):
         """ Writes the gaussian list as an ASCII file"""            
         fname = dir + img.imagename + '.gaul'
-        write_ascii_list(img, filename=fname, incl_wavelet=True, sort_by='indx',
+        write_ascii_list(img, filename=fname, sort_by='indx',
                          clobber=True, objtype='gaul')
 
     def write_srl(self, img, dir):
         """ Writes the source list as an ASCII file"""            
         fname = dir + img.imagename + '.srl'
-        write_ascii_list(img, filename=fname, incl_wavelet=True, sort_by='indx',
+        write_ascii_list(img, filename=fname, sort_by='indx',
                          clobber=True, objtype='srl')
 
     def write_aips(self, img, dir):
         """ Writes the gaussian list an AIPS STAR file"""            
         fname = dir + img.imagename + '.star'
-        write_star(img, filename=fname, sort_by='indx', incl_wavelet=True,
+        write_star(img, filename=fname, sort_by='indx',
                    clobber=True)
 
     def write_kvis(self, img, dir):
         """ Writes the gaussian list as a kvis file"""            
         fname = dir + img.imagename + '.kvis.ann'
-        write_kvis_ann(img, filename=fname, sort_by='indx', incl_wavelet=True,
+        write_kvis_ann(img, filename=fname, sort_by='indx',
                        clobber=True)
   
     def write_ds9(self, img, dir):
         """ Writes the gaussian list as a ds9 region file"""            
         fname = dir + img.imagename + '.ds9.reg'
-        write_ds9_list(img, filename=fname, srcroot=img.opts.srcroot, incl_wavelet=True,
+        write_ds9_list(img, filename=fname, srcroot=img.opts.srcroot,
                        clobber=True, deconvolve=False)
   
-    def write_gaul_FITS(self, img, dir, incl_wavelet=True):
+    def write_gaul_FITS(self, img, dir):
         """ Writes the gaussian list as FITS binary table"""
         fname = dir + img.imagename+'.gaul.FITS'
-        write_fits_list(img, filename=fname, sort_by='indx', incl_wavelet=True,
+        write_fits_list(img, filename=fname, sort_by='indx',
                         clobber=True, objtype='gaul')
                     
-    def write_srl_FITS(self, img, dir, incl_wavelet=True):
+    def write_srl_FITS(self, img, dir):
         """ Writes the source list as FITS binary table"""
         fname = dir + img.imagename+'.srl.FITS'
-        write_fits_list(img, filename=fname, sort_by='indx', incl_wavelet=True,
+        write_fits_list(img, filename=fname, sort_by='indx',
                         clobber=True, objtype='srl')
                     
     def write_shap_FITS(self, img, dir):
         """ Writes the shapelet list as a FITS file"""            
         fname = dir + img.imagename + '.shap.FITS'
-        write_fits_list(img, filename=fname, sort_by='indx', incl_wavelet=False,
+        write_fits_list(img, filename=fname, sort_by='indx',
                         clobber=True, objtype='shap')
 
     def write_opts(self, img, dir):
@@ -174,71 +166,8 @@ def dec2ddmmss(deg):
 
     return (int(dd), int(ma), sa, sign)
 
-def pybdsm2fbdsm(img, incl_wavelet=True):
-    import functions as func
-
-    fbdsm = []
-    g_list = img.gaussians
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        for ag in img.atrous_gaussians:
-            g_list += ag
-    for g in g_list:
-        gidx = g.gaus_num
-        iidx = g.island_id
-        widx = g.wavelet_j
-        A = g.peak_flux
-        T = g.total_flux
-        ra, dec = g.centre_sky
-        x, y = g.centre_pix
-        shape = g.size_sky
-        deconv_shape = g.deconv_size_sky
-        eA = g.peak_fluxE
-        eT = g.total_fluxE
-        era, edec = g.centre_skyE
-        ex, ey = g.centre_pixE
-        eshape = g.size_skyE
-        deconv_eshape = g.deconv_size_skyE
-        isl_idx = g.island_id
-        isl = img.islands[isl_idx]
-        isl_rms = isl.rms
-        isl_av = isl.mean
-        src_idx = g.source_id
-        src = img.sources[src_idx]
-        src_rms = src.rms_isl
-        src_av = isl.mean
-        flag = g.flag
-        grms = g.rms
-        x, y = g.centre_pix
-        xsize, ysize, ang = g.size_pix # FWHM
-        ellx, elly = func.drawellipse(g)
-        blc = [int(min(ellx)), int(min(elly))]
-        trc = [int(max(ellx)), int(max(elly))]
-    
-        specin = 0.0
-        especin = 0.0
-        if img.opts.spectralindex_do:
-            spin1 = g.spin1
-            espin1 = g.espin1
-            if spin1 == None:
-                specin = 0.0
-                especin = 0.0
-            else:                       
-                specin = spin1[1]
-                especin = espin1[1]
-
-        list1 = [gidx, iidx, widx, flag, T, eT, A, eA, ra, era, dec, edec, x, ex, y,
-                 ey, shape[0], eshape[0], shape[1], eshape[1], shape[2],
-                 eshape[2], deconv_shape[0], deconv_eshape[0],
-                 deconv_shape[1], deconv_eshape[1], deconv_shape[2],
-                 deconv_eshape[2], src_rms, src_av, isl_rms, isl_av,
-                 specin, especin, src_idx, blc[0], blc[1], trc[0], trc[1], grms]
-        fbdsm.append(list1)
-    fbdsm = func.trans_gaul(fbdsm)
-    return fbdsm
-
-
 def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
-                   incl_primary=True, incl_wavelet=True, sort_by='flux',
+                   incl_primary=True, sort_by='flux',
                    clobber=False):
     """Writes Gaussian list to a BBS sky model"""
     import numpy as N
@@ -256,26 +185,8 @@ def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
 
     outl, outn, patl = list_and_sort_gaussians(img, patch=patch,
                                                root=srcroot, sort_by=sort_by)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=patch,
-                                                            root=srcroot,
-                                                            wavelet=True,
-                                                            sort_by=sort_by)
-    else:
-        wavoutl = []
-    if not incl_primary and not incl_wavelet:
-        print '\033[31;1mERROR\033[0m: incl_primary and incl_wavelet cannot both be False.'
-        return
-    if incl_primary:
-        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-            outstr_list = make_bbs_str(img, outl+wavoutl, outn+wavoutn, patl+wavpatl)
-        else:
-            outstr_list = make_bbs_str(img, outl, outn, patl)
-    else:
-        if len(wavoutl) > 0:
-            outstr_list = make_bbs_str(img, wavoutl, wavoutn, wavpatl)
-        else:
-            return
+    outstr_list = make_bbs_str(img, outl, outn, patl)
+
     if filename == None:    
         filename = img.imagename + '.sky_in'
     if os.path.exists(filename) and clobber == False:
@@ -289,7 +200,7 @@ def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
     
 
 def write_ds9_list(img, filename=None, srcroot=None, deconvolve=False,
-                   incl_wavelet=True, clobber=False, objtype='gaul'):
+                   clobber=False, objtype='gaul'):
     """Writes Gaussian list to a ds9 region file"""
     import numpy as N
     from const import fwsig
@@ -299,11 +210,6 @@ def write_ds9_list(img, filename=None, srcroot=None, deconvolve=False,
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
     if objtype == 'gaul':
         outl, outn, patl = list_and_sort_gaussians(img, patch=None)
-        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-            wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                                wavelet=True)
-            outl += wavoutl
-            outn += wavoutn
     elif objtype == 'srl': 
         root = img.parentname       
         outl = [img.sources]
@@ -325,8 +231,8 @@ def write_ds9_list(img, filename=None, srcroot=None, deconvolve=False,
     return filename
 
         
-def write_ascii_list(img, filename=None, incl_wavelet=True, sort_by='indx',
-                     clobber=False, objtype='gaul'):
+def write_ascii_list(img, filename=None, sort_by='indx',
+                     incl_chan=False, clobber=False, objtype='gaul'):
     """Writes Gaussian list to an ASCII file"""
     import mylogger
     import os
@@ -334,11 +240,6 @@ def write_ascii_list(img, filename=None, incl_wavelet=True, sort_by='indx',
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
     if objtype == 'gaul':
         outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
-        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-            wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                                wavelet=True,
-                                                                sort_by=sort_by)
-            outl += wavoutl
     elif objtype == 'srl':
         outl = [img.sources]
     outstr_list = make_ascii_str(img, outl, objtype=objtype)
@@ -357,17 +258,13 @@ def write_ascii_list(img, filename=None, incl_wavelet=True, sort_by='indx',
     return filename
 
   
-def write_casa_gaul(img, filename=None, incl_wavelet=True, clobber=False):
+def write_casa_gaul(img, filename=None, clobber=False):
     """Writes a clean box file for use in casapy"""
     import mylogger
     import os
   
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
     outl, outn, patl = list_and_sort_gaussians(img, patch=None)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                            wavelet=True)
-        outl += wavoutl
     outstr_list = make_casa_str(img, outl)
     if filename == None:
         filename = img.imagename + '.box'
@@ -382,7 +279,7 @@ def write_casa_gaul(img, filename=None, incl_wavelet=True, clobber=False):
 
 
 def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
-                    incl_wavelet=True, clobber=False):
+                    incl_chan=False, clobber=False):
     """ Write as FITS binary table.
     """
     import mylogger
@@ -394,11 +291,6 @@ def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
     mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Output")
     if objtype == 'gaul':
         outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
-        if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-            wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                                wavelet=True,
-                                                                sort_by=sort_by)
-            outl += wavoutl
     elif objtype == 'srl':
         outl = [img.sources]
     elif objtype == 'shap':
@@ -415,8 +307,9 @@ def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
     cvals, cnames, cformats, cunits = make_output_columns(outl[0][0], fits=True,
                                                           objtype=objtype, 
                                                           incl_spin=img.opts.spectralindex_do,
+                                                          incl_chan=img.opts.incl_chan,
                                                           incl_pol=img.opts.polarisation_do,
-                                                          nmax=nmax)
+                                                          nmax=nmax, nchan=img.nchan)
     out_list = make_fits_list(img, outl, objtype=objtype, nmax=nmax)
     col_list = []
     for ind, col in enumerate(out_list):
@@ -447,7 +340,7 @@ def write_fits_list(img, filename=None, sort_by='indx', objtype='gaul',
     return filename
     
 
-def write_kvis_ann(img, filename=None, sort_by='indx', incl_wavelet=True,
+def write_kvis_ann(img, filename=None, sort_by='indx',
                    clobber=False):
     import mylogger
     import os
@@ -463,12 +356,6 @@ def write_kvis_ann(img, filename=None, sort_by='indx', incl_wavelet=True,
     f.write("color green\n\n")
 
     outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                            wavelet=True,
-                                                            sort_by=sort_by)
-        outl += wavoutl
-
     for g in outl[0]:
         iidx = g.island_id
         ra, dec = g.centre_sky
@@ -484,7 +371,7 @@ def write_kvis_ann(img, filename=None, sort_by='indx', incl_wavelet=True,
     return filename
     
 
-def write_star(img, filename=None, sort_by='indx', incl_wavelet=False,
+def write_star(img, filename=None, sort_by='indx',
                clobber=False):
     from output import ra2hhmmss, dec2ddmmss
     import mylogger
@@ -499,11 +386,6 @@ def write_star(img, filename=None, sort_by='indx', incl_wavelet=False,
     mylog.info('Writing '+filename)
 
     outl, outn, patl = list_and_sort_gaussians(img, patch=None, sort_by=sort_by)
-    if incl_wavelet and hasattr(img, 'atrous_gaussians'):
-        wavoutl, wavoutn, wavpatl = list_and_sort_gaussians(img, patch=None,
-                                                            wavelet=True,
-                                                            sort_by=sort_by)
-        outl += wavoutl
 
     for g in outl[0]:
         A = g.peak_flux
@@ -669,7 +551,9 @@ def make_ascii_str(img, glist, objtype='gaul'):
         cvals, cnames, cformats, cunits = make_output_columns(g, fits=False, 
                                                               objtype=objtype, 
                                                               incl_spin=img.opts.spectralindex_do,
-                                                              incl_pol=img.opts.polarisation_do)
+                                                              incl_chan=img.opts.incl_chan,
+                                                              incl_pol=img.opts.polarisation_do,
+                                                              nchan=img.nchan)
         cformats[-1] += "\n"
         if i == 0:
             outstr_list.append("# " + " ".join(cnames) + "\n")
@@ -684,8 +568,9 @@ def make_fits_list(img, glist, objtype='gaul', nmax=30):
     for g in glist[0]:
         cvals, ext1, ext2, ext3 = make_output_columns(g, fits=True, objtype=objtype, 
                                                       incl_spin=img.opts.spectralindex_do,
+                                                      incl_chan=img.opts.incl_chan,
                                                       incl_pol=img.opts.polarisation_do,
-                                                      nmax=nmax)
+                                                      nmax=nmax, nchan=img.nchan)
         out_list.append(cvals)
     out_list = func.trans_gaul(out_list)
     return out_list
@@ -750,12 +635,10 @@ def get_src(src_list, srcid):
             return src
     return None
 
-def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
+def list_and_sort_gaussians(img, patch=None, root=None,
                             sort_by='index'):
     """Returns sorted lists of Gaussians and their names and patch names.
 
-    wavelet - if True, use only wavelet Gaussians; if False, use only
-              primary Gaussians
     patch - can be "single", "gaussian", "source", or None
     
     Returns (outlist, outnames, patchnames)
@@ -796,26 +679,22 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
     src_list = img.sources
     for src in src_list:
         for g in src.gaussians:
-            if not wavelet or g.jlevel > 0:
-                gauslist.append(g)
-                gausflux.append(g.total_flux)
-                gausindx.append(g.gaus_num)
-                if wavelet:
-                    jstr = '_w' + str(g.jlevel)
-                else:
-                    jstr = ''
-                gausname.append(root + jstr + '_i' + str(src.island_id) + '_s' +
-                                str(src.source_id) + '_g' + str(g.gaus_num))
-                if patch == 'gaussian':
-                    outlist.append(gauslist)
-                    outnames.append(gausname)
-                    patchnames.append(root + '_patch' + jstr + '_g' + str(g.gaus_num))
-                    patchflux.append(N.sum(gausflux))
-                    patchindx.append(g.gaus_num)
-                    gauslist = [] # reset for next Gaussian
-                    gausname = []
-                    gausflux = []
-                    gausindx = []
+            gauslist.append(g)
+            gausflux.append(g.total_flux)
+            gausindx.append(g.gaus_num)
+            jstr = '_w' + str(g.jlevel)
+            gausname.append(root + jstr + '_i' + str(src.island_id) + '_s' +
+                            str(src.source_id) + '_g' + str(g.gaus_num))
+            if patch == 'gaussian':
+                outlist.append(gauslist)
+                outnames.append(gausname)
+                patchnames.append(root + '_patch' + jstr + '_g' + str(g.gaus_num))
+                patchflux.append(N.sum(gausflux))
+                patchindx.append(g.gaus_num)
+                gauslist = [] # reset for next Gaussian
+                gausname = []
+                gausflux = []
+                gausindx = []
 #                 if patch == 'mask':
 #                     patchnum = mask_labels[g.centre_pix]
                     
@@ -839,7 +718,7 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
                 
             outlist.append(sorted_gauslist)
             outnames.append(sorted_gausname)
-            patchnames.append(root + '_patch' + jstr + '_s' + str(src.source_id))
+            patchnames.append(root + '_patch' + '_s' + str(src.source_id))
             patchflux.append(N.sum(gausflux))
             patchindx.append(src.source_id)
             gauslist = [] # reset for next source
@@ -895,14 +774,14 @@ def list_and_sort_gaussians(img, patch=None, root=None, wavelet=False,
     return (outlist_sorted, outnames_sorted, patchnames_sorted)
 
 def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
-                        incl_pol=False, nmax=30):
+                        incl_chan=False, incl_pol=False, nmax=30, nchan=1):
     """Returns a list of column names, formats, and units for Gaussian, Source, or Shapelet"""
     import numpy as N
     
     # First, define a list of columns in order desired, using the names of
     # the attributes of the object
     if objtype == 'gaul':
-        names = ['gaus_num', 'island_id', 'source_id', 'wavelet_j', 
+        names = ['gaus_num', 'island_id', 'source_id', 'jlevel', 
                  'centre_sky', 'centre_skyE', 'total_flux', 
                  'total_fluxE', 'peak_flux', 'peak_fluxE',
                  'centre_pix', 'centre_pixE', 'size_sky', 'size_skyE', 
@@ -910,7 +789,7 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
                  'deconv_size_skyE', 'rms', 'mean', 'gresid_rms', 'gresid_mean',
                  'code']
     elif objtype == 'srl':
-        names = ['source_id', 'island_id', 'wavelet_j', 'posn_sky_centroid', 
+        names = ['source_id', 'island_id', 'posn_sky_centroid', 
                  'posn_sky_centroidE', 'total_flux', 
                  'total_fluxE', 
                  'peak_flux_max', 'peak_flux_maxE', 'posn_sky_max', 'posn_sky_maxE', 
@@ -932,6 +811,8 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
         return None
     if incl_spin:
         names += ['spec_indx', 'e_spec_indx']
+    if incl_chan:
+        names += ['specin_flux', 'specin_fluxE', 'specin_freq']
     if incl_pol:    
         names += ['total_flux_Q', 'total_fluxE_Q', 'total_flux_U', 'total_fluxE_U',
                   'total_flux_V', 'total_fluxE_V', 'lpol_fraction', 'lpol_fraction_loerr',
@@ -945,44 +826,60 @@ def make_output_columns(obj, fits=False, objtype='gaul', incl_spin=False,
     skip_next = False
     for n, name in enumerate(names):
         if hasattr(obj, name):
-            if not skip_next:
-                val = obj.__getattribute__(name)
-                colname = obj.__class__.__dict__[name]._colname
-                units = obj.__class__.__dict__[name]._units
-                if units == None:
-                    units = ' '
-                if isinstance(val, list):
-                    # This is a list, so handle it differently. We assume the next
-                    # entry will have the errors, and they are interleaved to be
-                    # in the order (val, error).
-                    next_name = names[n+1]
-                    val_next = obj.__getattribute__(next_name)
-                    colname_next = obj.__class__.__dict__[next_name]._colname
-                    units_next = obj.__class__.__dict__[next_name]._units
-                    if units_next == None:
-                        units_next = ' '                 
-                    for i in range(len(val)):
-                        cvals.append(val[i])
-                        cvals.append(val_next[i])
-                        cnames.append(colname[i])
-                        cnames.append(colname_next[i])
-                        cunits.append(units[i])
-                        cunits.append(units_next[i])
-                    skip_next = True
-                elif isinstance(val, N.ndarray):
-                    # This is a numpy array, so flatten it 
-                    tarr = val.flatten()
-                    tarr2 = N.resize(tarr, nmax**2)
-                    tarr2[tarr.shape[0]:] = N.NaN
-                    cvals.append(tarr2)
-                    cnames.append(colname)
-                    cunits.append(units)
-                else:
-                    cvals.append(val)
-                    cnames.append(colname)
-                    cunits.append(units)
+            if name in ['specin_flux', 'specin_fluxE', 'specin_freq']:
+                # As these are variable length lists, they must 
+                # (unfortunately) be treated differently.
+                    val = obj.__getattribute__(name)
+                    colname = obj.__class__.__dict__[name]._colname
+                    units = obj.__class__.__dict__[name]._units
+                    for i in range(nchan):
+                        if i < len(val):
+                            cvals.append(val[i])
+                            cnames.append(colname[0]+'_ch'+str(i+1))
+                            cunits.append(units[0])
+                        else:
+                            cvals.append(N.NaN)
+                            cnames.append(colname[0]+'_ch'+str(i+1))
+                            cunits.append(units[0])
             else:
-                skip_next = False
+                if not skip_next:
+                    val = obj.__getattribute__(name)
+                    colname = obj.__class__.__dict__[name]._colname
+                    units = obj.__class__.__dict__[name]._units
+                    if units == None:
+                        units = ' '
+                    if isinstance(val, list):
+                        # This is a list, so handle it differently. We assume the next
+                        # entry will have the errors, and they are interleaved to be
+                        # in the order (val, error).
+                        next_name = names[n+1]
+                        val_next = obj.__getattribute__(next_name)
+                        colname_next = obj.__class__.__dict__[next_name]._colname
+                        units_next = obj.__class__.__dict__[next_name]._units
+                        if units_next == None:
+                            units_next = ' '                 
+                        for i in range(len(val)):
+                            cvals.append(val[i])
+                            cvals.append(val_next[i])
+                            cnames.append(colname[i])
+                            cnames.append(colname_next[i])
+                            cunits.append(units[i])
+                            cunits.append(units_next[i])
+                        skip_next = True
+                    elif isinstance(val, N.ndarray):
+                        # This is a numpy array, so flatten it 
+                        tarr = val.flatten()
+                        tarr2 = N.resize(tarr, nmax**2)
+                        tarr2[tarr.shape[0]:] = N.NaN
+                        cvals.append(tarr2)
+                        cnames.append(colname)
+                        cunits.append(units)
+                    else:
+                        cvals.append(val)
+                        cnames.append(colname)
+                        cunits.append(units)
+                else:
+                    skip_next = False
             
     for i, v in enumerate(cvals):
         if fits:

@@ -995,6 +995,12 @@ class Opts(object):
                                  "total number of these bad channels does not exceed "\
                                  "10% of the total number of channels themselves.",
                              group="spectralindex_do")
+    flagchan_snr    =   Bool(True,
+                             doc = "Flag channels that do not meet SNR criterion "\
+                                 "set by specind_snr\n"\
+                                 "If True, then channels (after averaging if needed) "\
+                                 "will be flagged and will not be used during fitting.",
+                             group="spectralindex_do")
     specind_maxchan =    Int(0,
                              doc = "Maximum number of channels to average for "\
                                  "a given source when when attempting to meet target SNR. "\
@@ -1005,10 +1011,11 @@ class Opts(object):
                                  "average.",
                              group="spectralindex_do")
     specind_snr     =  Float(3.0,
-                             doc = "Target SNR to use when fitting power law; "\
-                                 "channels with SNRs below this will be ignored. If "\
+                             doc = "Target SNR to use when fitting power law. If "\
                                  "there is insufficient SNR, neighboring channels "\
-                                 "are averaged to attempt to obtain the target SNR\n"\
+                                 "are averaged to attempt to obtain the target SNR. "\
+                                 "Channels with SNRs below this will be flagged if "\
+                                 "flagchan_snr=True.\n"\
                                  "The maximum allowable number of channels to average "\
                                  "is determined by the specind_maxchan parameter.",
                              group="spectralindex_do")
@@ -1046,8 +1053,8 @@ class Opts(object):
                              doc="Root name for entries in the output catalog. "\
                                  "None => use image file name",
                              group='hidden')
-    incl_wavelet    =   Bool(True,
-                             doc="Include Gaussians from wavelet decomposition "\
+    incl_chan       =   Bool(False,
+                             doc="Include fluxes from each channel "\
                                  "(if any)?",
                              group='hidden')
     catalog_type    =   Enum('gaul', 'shap', 'srl',
