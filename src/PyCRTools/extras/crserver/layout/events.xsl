@@ -30,7 +30,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <th>Event status</th>
     </tr>
     <xsl:for-each select="/elements/event">
-      <xsl:if test="status='CR_FOUND' or status='CR_ANALYSED'">
+      <xsl:if test="status='CR_FOUND' or status='CR_ANALYZED'">
       <tr>
         <td>
           <a><xsl:attribute name="href">
