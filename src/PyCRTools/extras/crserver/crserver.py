@@ -340,43 +340,48 @@ class CustomHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
 
         try:
+
             if self.path == '/events':
+
+                s = events_handler()
 
                 self.send_response(200)
                 self.send_header('Content-type','text/xml')
                 self.end_headers()
-                self.wfile.write(events_handler())
-                return
+                self.wfile.write(s)
 
             elif re.match(r'/events/[0-9]+$', self.path):
 
                 m = re.match(r'/events/([0-9]+)$', self.path)
 
+                s = event_handler(int(m.group(1)))
+
                 self.send_response(200)
                 self.send_header('Content-type','text/xml')
                 self.end_headers()
-                self.wfile.write(event_handler(int(m.group(1))))
-                return
+                self.wfile.write(s)
 
             elif re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])$', self.path):
 
                 m = re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])$', self.path)
 
+                s = station_handler(int(m.group(1)), m.group(2))
+
                 self.send_response(200)
                 self.send_header('Content-type','text/xml')
                 self.end_headers()
-                self.wfile.write(station_handler(int(m.group(1)), m.group(2)))
-                return
+                self.wfile.write(s)
 
             elif re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])/(\w+)$', self.path):
 
                 m = re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])/(\w+)$', self.path)
 
+                s = polarization_handler(int(m.group(1)), m.group(2), m.group(3))
+
                 self.send_response(200)
                 self.send_header('Content-type','text/xml')
                 self.end_headers()
-                self.wfile.write(polarization_handler(int(m.group(1)), m.group(2), m.group(3)))
-                return
+                self.wfile.write(s)
 
             else:
                 # serve files, and directory listings by following self.path from
@@ -385,10 +390,12 @@ class CustomHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         except Exception as e:
 
+            s = "<html><head><title>Error</title></head><body><h1>Error</h1>"+str(e)+"</body></html>"
+
             self.send_response(200)
             self.send_header('Content-type','text/html')
             self.end_headers()
-            self.wfile.write(str(e))
+            self.wfile.write(s)
 
 httpd = SocketServer.ThreadingTCPServer((options.hostname, options.port),CustomHandler)
 
