@@ -15,6 +15,7 @@ parser = OptionParser()
 parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
 parser.add_option("--max-threads", default = 12, type = int, help = "maximum number of threads to use.")
 parser.add_option("--log-dir", default = "./", help = "directory to store logs.")
+parser.add_option("--output-dir", default = "./", help = "directory to store pipeline output.")
 
 (options, args) = parser.parse_args()
 
@@ -30,7 +31,7 @@ def call_pipeline(event_id):
 
     with open(options.log_dir+"/"+"cr_physics-"+str(event_id)+".log", "w", buffering = 1) as f:
 
-        status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_physics.py --id="+str(event_id)+" --database="+options.database, stdout=f, stderr=subprocess.STDOUT, shell=True)
+        status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_physics.py --id="+str(event_id)+" --database="+options.database + " --output-dir="+options.output_dir, stdout=f, stderr=subprocess.STDOUT, shell=True)
 
 # Check how many CPU's we have
 count = multiprocessing.cpu_count()

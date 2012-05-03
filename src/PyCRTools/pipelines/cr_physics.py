@@ -21,6 +21,7 @@ cr.tasks.task_write_parfiles = False
 parser = OptionParser()
 parser.add_option("-i", "--id", type="int", help="Event ID", default=1)
 parser.add_option("-d", "--database", default="cr.db", help="Filename of database")
+parser.add_option("-o", "--output-dir", default="./", help="Output directory")
 parser.add_option("--maximum_nof_iterations", default = 5, help="Maximum number of iterations in antenna pattern unfolding loop.")
 
 (options, args) = parser.parse_args()
@@ -211,6 +212,9 @@ for station in stations:
     p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
     p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
 
+# Create list of event level plots
+plotlist = []
+
 # Get combined parameters from (cached) database
 all_station_antenna_positions = []
 all_station_pulse_delays = []
@@ -253,11 +257,20 @@ core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
 core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
 direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True, save_plots = True, plot_prefix = str(options.id)+"-")
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
+
+# Add LDF plots to list of event level plots
+plotlist.extend(ldf.plotlist)
 
 # Compute footprint
 
-footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True, save_plots = True, plot_prefix = str(options.id)+"-")
+footprint = cr.trun("Shower",positions= all_station_antenna_positions, signals = all_station_pulse_strength,core = core,direction = average_direction, timelags = all_station_pulse_delays, footprint_enable=True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
+
+# Add footprint plots to list of event level plots
+plotlist.extend(footprint.plotlist)
+
+# Add list of event level plots to event
+event["plotfiles"] = ["/"+p.lstrip("./") for p in plotlist]
 
 # Update event status
 event.status = "CR_ANALYZED"
