@@ -200,6 +200,7 @@ else:
     min_data_length=options.min_data_length
     maxnchunks=max_data_length/blocksize
     do_checksums = options.checksum
+    statuslist = []
 
     polarizations=[0,1] if polarization<0 else [polarization]
 
@@ -229,113 +230,113 @@ plt.ioff()
 #------------------------------------------------------------------------
 
 good_old_time_stamp = "None"
-
-def finish_file(laststatus=""):
-    ########################################################################
-    #Writing summary output to html file
-    ########################################################################
-
-    if laststatus: statuslist.append(laststatus)
-    status="/".join(statuslist)
-
-    results["status"]=status
-
-    if not os.path.exists(summaryfilename):
-        summaryfile=open(summaryfilename,"w")
-        summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
-        summaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format(topdir_name))
-        summaryfile.write("<i>File created on {0:s} by user {1:s}.</i><br>\n".format(file_time,os.getlogin()))
-        summaryfile.write("Directories: <a href=pol0>pol0</a>, <a href=pol1>pol1</a><p>\n")
+def run_pipeline_datafile(full_filename):
+    def finish_file(laststatus=""):
+        ########################################################################
+        #Writing summary output to html file
+        ########################################################################
+    
+        if laststatus: statuslist.append(laststatus)
+        status="/".join(statuslist)
+    
+        results["status"]=status
+    
+        if not os.path.exists(summaryfilename):
+            summaryfile=open(summaryfilename,"w")
+            summaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format(topdir_name))
+            summaryfile.write("<h1>CR Pipeline Summary for {0:s}</h1>\n".format(topdir_name))
+            summaryfile.write("<i>File created on {0:s} by user {1:s}.</i><br>\n".format(file_time,os.getlogin()))
+            summaryfile.write("Directories: <a href=pol0>pol0</a>, <a href=pol1>pol1</a><p>\n")
+            summaryfile.close()
+    
+        if not os.path.exists(goodsummaryfilename):
+            topsummaryfile=open(goodsummaryfilename,"w")
+            topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of good events"))
+            topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary File of Good Events"))
+            topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
+            topsummaryfile.close()
+    
+        if not os.path.exists(allsummaryfilename):
+            topsummaryfile=open(allsummaryfilename,"w")
+            topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of all events"))
+            topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary File of All Events"))
+            topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
+            topsummaryfile.close()
+    
+        summaryfile=open(summaryfilename,"a")
+        if not old_time_stamp == time_stamp: summaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
+        summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         summaryfile.close()
-
-    if not os.path.exists(goodsummaryfilename):
-        topsummaryfile=open(goodsummaryfilename,"w")
-        topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of good events"))
-        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary File of Good Events"))
-        topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
-        topsummaryfile.close()
-
-    if not os.path.exists(allsummaryfilename):
-        topsummaryfile=open(allsummaryfilename,"w")
-        topsummaryfile.write("<html><head><title>{0:s}</title></head><body>\n".format("CR Pipeline Summary FILE of all events"))
-        topsummaryfile.write("<h1>{0:s}</h1>\n".format("CR Pipeline Summary File of All Events"))
-        topsummaryfile.write("<i>File created on {0:s} by user {1:s}.</i><p>\n".format(file_time,os.getlogin()))
-        topsummaryfile.close()
-
-    summaryfile=open(summaryfilename,"a")
-    if not old_time_stamp == time_stamp: summaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
-    summaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:.1f},{el:.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_event,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
-    summaryfile.close()
-
-    global good_old_time_stamp
-    if delay_quality_error<1:
-        topsummaryfile=open(goodsummaryfilename,"a")
-        if not good_old_time_stamp == time_stamp:
-            topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
-            good_old_time_stamp = time_stamp
+    
+        global good_old_time_stamp
+        if delay_quality_error<1:
+            topsummaryfile=open(goodsummaryfilename,"a")
+            if not good_old_time_stamp == time_stamp:
+                topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
+                good_old_time_stamp = time_stamp
+            topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+            topsummaryfile.close()
+    
+        topsummaryfile=open(allsummaryfilename,"a")
+        if not old_time_stamp == time_stamp: topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
         topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
         topsummaryfile.close()
-
-    topsummaryfile=open(allsummaryfilename,"a")
-    if not old_time_stamp == time_stamp: topsummaryfile.write("<h3>"+pretty_time_stamp+"</h3>\n")
-    topsummaryfile.write('<a name={0:s} href="{1:s}">{0:s}</a> ({2:s} - {3:s}): <b>Error={4:6.2}</b>, npeaks={8:d}, azel=[{az:5.1f}, {el:4.1f}], height={7:6.2f}, Energy={5:10.2g} eV, norm. pulse={6:6.2f}, <b>{status:s}</b><br>\n'.format(outfilename,os.path.join(reldir_from_top,"index.html"),file_time_short,os.getlogin(),delay_quality_error,lora_energy,pulse_normalized_height,pulse_height,pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
-    topsummaryfile.close()
-
-    htmlfile=open(htmlfilename,"w")
-    htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
-    htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
-    htmlfile.write("<b><i>"+pretty_time_stamp+": </i></b>")
-    htmlfile.write("<i>processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
-    htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2g} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
-
-    htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
-    htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
-    htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parfiles"))
-    htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Logger"))
-    htmlfile.write("<a href=#{0:s}>{0:s}</a><p>\n".format("Plotfiles"))
-    htmlfile.write(", ".join(['<a href=#{0:s}>{1:s}</a>'.format(os.path.split(f)[-1],os.path.split(f)[-1].split("pol"+str(current_polarization)+"-")[-1][:-4]) for f in results["plotfiles"]]))
-
-
-    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parameters"))
-
-    l=results.items(); l.sort()
-    htmlfile.write(", ".join(["<a href=#{0:s}>{0:s}</a>".format(k) for k,v in l])+"<p>\n")
-    htmlfile.write('<table border="1">\n'.format())
-    for k,v in l:
-        htmlfile.write("<tr><td><b><a name={0:s}>{0:s}</a></b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
-    htmlfile.write("</table>\n".format())
-
-    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parfiles"))
-    for i in range(nparfiles,len(tasks.task_parfiles)):
-        if os.path.exists(tasks.task_parfiles[i]):
-            os.rename(tasks.task_parfiles[i],tasks.task_parfiles[i]+".txt")
-            htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
-
-    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Logger"))
-    logstring=tlog(doprint=False)
-    if logstring: htmlfile.write("<PRE>\n"+logstring+"</PRE>\n")
-
-    htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
-    for f in results["plotfiles"]:
-        htmlfile.write('<a name="{0:s}" href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><a href=#top>(back to top)</a><p>\n'.format(os.path.split(f)[-1]))
-
-    htmlfile.write("</body></html>\n")
-    htmlfile.close()
-
-    #print logfile
-    tlog()
-
-    print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
-    print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
-    print "which can be found in `results.xml`(use, e.g., xmldict)."
-    print "Shifted time series data of all antennas is in event.par.time_series."
-    print "Open",htmlfilename,"in your browser to get a summary."
-    print "-----------------------------------------------------------------------------------------------------------"
-    print "Finished cr_event after",time.clock()-t0,"seconds at",time.strftime("%A, %Y-%m-%d at %H:%M:%S")
-    print "-----------------------------------------------------------------------------------------------------------\n"
+    
+        htmlfile=open(htmlfilename,"w")
+        htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(outfilename))
+        htmlfile.write("<h1>{0:s}</h1>\n".format(outfilename))
+        htmlfile.write("<b><i>"+pretty_time_stamp+": </i></b>")
+        htmlfile.write("<i>processed on {0:s} by user {1:s}: processing time={2:5.2f}s.<br>Directories: <a href=../../..>Project</a>, <a href=../..>{3:s}</a>, <a href=..>Stations</a></i>.<p>\n".format(file_time,os.getlogin(),time.clock()-t0,topdir_name))
+        htmlfile.write('<b>Error={error:6.2}</b>, npeaks={npeaks:d}, azel=[{az:5.1f}, {el:4.1f}], height={height:6.2f}, Energy={energy:10.2g} eV, norm. pulse={norm:6.2f}, <b>{status:s}</b><p>'.format(error=delay_quality_error,energy=lora_energy,norm=pulse_normalized_height,height=pulse_height,npeaks=pulse_npeaks,az=pulse_direction[0],el=pulse_direction[1],status=status))
+    
+        htmlfile.write('<h2><a name="{1:s}">{0:s}</a></h2>\n'.format("Table of Contents","top"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parameters"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Parfiles"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><br>\n".format("Logger"))
+        htmlfile.write("<a href=#{0:s}>{0:s}</a><p>\n".format("Plotfiles"))
+        htmlfile.write(", ".join(['<a href=#{0:s}>{1:s}</a>'.format(os.path.split(f)[-1],os.path.split(f)[-1].split("pol"+str(current_polarization)+"-")[-1][:-4]) for f in results["plotfiles"]]))
+    
+    
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parameters"))
+    
+        l=results.items(); l.sort()
+        htmlfile.write(", ".join(["<a href=#{0:s}>{0:s}</a>".format(k) for k,v in l])+"<p>\n")
+        htmlfile.write('<table border="1">\n'.format())
+        for k,v in l:
+            htmlfile.write("<tr><td><b><a name={0:s}>{0:s}</a></b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
+        htmlfile.write("</table>\n".format())
+    
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Parfiles"))
+        for i in range(nparfiles,len(tasks.task_parfiles)):
+            if os.path.exists(tasks.task_parfiles[i]):
+                os.rename(tasks.task_parfiles[i],tasks.task_parfiles[i]+".txt")
+                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(tasks.task_parfiles[i],os.path.split(tasks.task_parfiles[i])[-1]))
+    
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Logger"))
+        logstring=tlog(doprint=False)
+        if logstring: htmlfile.write("<PRE>\n"+logstring+"</PRE>\n")
+    
+        htmlfile.write("<h2><a name={0:s}>{0:s}</a></h2>\n".format("Plotfiles"))
+        for f in results["plotfiles"]:
+            htmlfile.write('<a name="{0:s}" href="{0:s}">{0:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=500></a><a href=#top>(back to top)</a><p>\n'.format(os.path.split(f)[-1]))
+    
+        htmlfile.write("</body></html>\n")
+        htmlfile.close()
+    
+        #print logfile
+        tlog()
+    
+        print "Data and results written to file. Read back with event=hArrayRead('"+result_file+"')"
+        print "Basic parameters and results are in the dicts ``results`` or ``event.par.results``,"
+        print "which can be found in `results.xml`(use, e.g., xmldict)."
+        print "Shifted time series data of all antennas is in event.par.time_series."
+        print "Open",htmlfilename,"in your browser to get a summary."
+        print "-----------------------------------------------------------------------------------------------------------"
+        print "Finished cr_event after",time.clock()-t0,"seconds at",time.strftime("%A, %Y-%m-%d at %H:%M:%S")
+        print "-----------------------------------------------------------------------------------------------------------\n"
 
 
-def run_pipeline_datafile(full_filename):
+
     for current_polarization in polarizations:
         results={}
         results["pulse_height_incoherent"]=0.0
@@ -554,7 +555,7 @@ def run_pipeline_datafile(full_filename):
 
         if lora_event_info:
                 lora_direction=(lora_event_info["Azimuth"],lora_event_info["Elevation"])
-                lora_core=(lora_event_info["Core_X"],lora_event_info["Core(Y)"])
+                lora_core=(lora_event_info["Core_X"],lora_event_info["Core_Y"])
                 lora_energy=lora_event_info["Energy_eV"]
                 lora_coreuncertainties=lora_event_info["coreuncertainties"]
                 lora_moliere=lora_event_info["moliere"]
