@@ -124,7 +124,7 @@ def events_handler():
     """
 
     # Connect to database
-    conn = sqlite3.connect(options.database)
+    conn = sqlite3.connect(options.database, timeout=60.0)
 
     # Create cursor
     c = conn.cursor()
