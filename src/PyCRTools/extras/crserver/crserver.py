@@ -339,48 +339,56 @@ class CustomHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def do_GET(self):
 
-        if self.path == '/events':
+        try:
+            if self.path == '/events':
+
+                self.send_response(200)
+                self.send_header('Content-type','text/xml')
+                self.end_headers()
+                self.wfile.write(events_handler())
+                return
+
+            elif re.match(r'/events/[0-9]+$', self.path):
+
+                m = re.match(r'/events/([0-9]+)$', self.path)
+
+                self.send_response(200)
+                self.send_header('Content-type','text/xml')
+                self.end_headers()
+                self.wfile.write(event_handler(int(m.group(1))))
+                return
+
+            elif re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])$', self.path):
+
+                m = re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])$', self.path)
+
+                self.send_response(200)
+                self.send_header('Content-type','text/xml')
+                self.end_headers()
+                self.wfile.write(station_handler(int(m.group(1)), m.group(2)))
+                return
+
+            elif re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])/(\w+)$', self.path):
+
+                m = re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])/(\w+)$', self.path)
+
+                self.send_response(200)
+                self.send_header('Content-type','text/xml')
+                self.end_headers()
+                self.wfile.write(polarization_handler(int(m.group(1)), m.group(2), m.group(3)))
+                return
+
+            else:
+                # serve files, and directory listings by following self.path from
+                # current working directory
+                SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+
+        except Exception as e:
 
             self.send_response(200)
-            self.send_header('Content-type','text/xml')
+            self.send_header('Content-type','text/html')
             self.end_headers()
-            self.wfile.write(events_handler())
-            return
-
-        elif re.match(r'/events/[0-9]+$', self.path):
-
-            m = re.match(r'/events/([0-9]+)$', self.path)
-
-            self.send_response(200)
-            self.send_header('Content-type','text/xml')
-            self.end_headers()
-            self.wfile.write(event_handler(int(m.group(1))))
-            return
-
-        elif re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])$', self.path):
-
-            m = re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])$', self.path)
-
-            self.send_response(200)
-            self.send_header('Content-type','text/xml')
-            self.end_headers()
-            self.wfile.write(station_handler(int(m.group(1)), m.group(2)))
-            return
-
-        elif re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])/(\w+)$', self.path):
-
-            m = re.match(r'/events/([0-9]+)/([A-Z][A-Z][0-9][0-9][0-9])/(\w+)$', self.path)
-
-            self.send_response(200)
-            self.send_header('Content-type','text/xml')
-            self.end_headers()
-            self.wfile.write(polarization_handler(int(m.group(1)), m.group(2), m.group(3)))
-            return
-
-        else:
-            # serve files, and directory listings by following self.path from
-            # current working directory
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+            self.wfile.write(str(e))
 
 httpd = SocketServer.ThreadingTCPServer((options.hostname, options.port),CustomHandler)
 
