@@ -16,6 +16,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <li><a class="dropdown" href="#">Section</a>
               <ul>
                   <li><a href="#header">Header</a></li>
+                  <li><a href="#logs">Logs</a></li>
                   <li><a href="#stations">Stations</a></li>
                   <li><a href="#datafiles">Datafiles</a></li>
                   <li><a href="#figures">Figures</a></li>
@@ -62,6 +63,26 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <td><xsl:value-of select="/elements/header/status"/></td>
       </td>
     </tr>
+  </table>
+  <table>
+  <caption id="logs">Logs</caption>
+  <tr><th>Name</th><th>Description</th></tr>
+      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND'">
+        <tr>
+          <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_event</a></td>
+          <td>First stage pipeline</td>
+        </tr>
+      </xsl:if>
+      <xsl:if test="/elements/header/status='CR_ANALYZED' or /elements/header/status='CR_NOT_ANALYZED'">
+        <tr>
+          <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_event</a></td>
+          <td>First stage pipeline</td>
+        </tr>
+        <tr>
+          <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_physics</a></td>
+          <td>Second stage pipeline</td>
+        </tr>
+      </xsl:if>
   </table>
   <table>
   <caption id="stations">Stations</caption>
