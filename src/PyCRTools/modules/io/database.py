@@ -20,7 +20,7 @@ class Database:
         and read from memory.
         """
         self._filename = filename
-        self._db = sqlite3.connect(self._filename, timeout = 60)
+        self._db = sqlite3.connect(self._filename, timeout = 60, isolation_level = "DEFERRED")
 
 
     def open(self, filename=""):
@@ -40,7 +40,7 @@ class Database:
         if filename != "":
             self._filename = filename
 
-        self._db = sqlite3.connect(self._filename, timeout = 60)
+        self._db = sqlite3.connect(self._filename, timeout = 60, isolation_level = "DEFERRED")
 
 
     def close(self):
@@ -64,9 +64,10 @@ class Database:
         newID = 0
         cursor = self._db.cursor()
 
-        cursor.execute(sql)
-        newID = cursor.lastrowid
-        self._db.commit()
+        with self._db:
+            cursor.execute(sql)
+            newID = cursor.lastrowid
+
         cursor.close()
 
         return newID
@@ -107,8 +108,9 @@ class Database:
 
         cursor = self._db.cursor()
 
-        cursor.execute(sql)
-        self._db.commit()
+        with self._db:
+            cursor.execute(sql)
+
         cursor.close()
 
 
@@ -126,7 +128,8 @@ class Database:
 
         cursor = self._db.cursor()
 
-        cursor.executescript(sql)
-        self._db.commit()
+        with self._db:
+            cursor.executescript(sql)
+
         cursor.close()
 
