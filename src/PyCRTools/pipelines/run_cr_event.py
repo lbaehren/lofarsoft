@@ -29,6 +29,8 @@ def call_pipeline(event_id):
     """Function that actually calls the subprocess for each event.
     """
 
+    print "processing event", event_id
+
     with open(options.log_dir+"/"+"cr_event-"+str(event_id)+".log", "w", buffering = 1) as f:
 
         status = 1
