@@ -886,6 +886,31 @@ class _Parameter(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
+    def db_write_all(self):
+        """Write all parameters to the database."""
+        # TODO: _Parameter.db_write_all() - Add implementation
+
+        if self._db:
+            sql = "SELECT key FROM {0} WHERE {1}={2}".format(self._tablename, self._idlabel, self._id)
+            db_keys = [str(record[0]) for record in self._db.select(sql)]
+            py_keys = [key for key in self._parameter]
+
+            sql = """"""
+            for key in py_keys:
+                if not key in db_keys:
+                    # Insert new items
+                    sql += "INSERT INTO {0} ({1}, key, value) VALUES ({2}, '{3}', '{4}');\n".format(self._tablename, self._idlabel, self._id, key, self.pickle_parameter(value))
+                else:
+                    # Update existing items
+                    sql += "UPDATE {0} SET value='{4}' WHERE {1}={2} AND key='{3}';\n".format(self._tablename, self._idlabel, self._id, key, self.pickle_parameter(value))
+            print "SQL : ",sql          # DEBUG
+            self._db.executescript(sql)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        raise NotImplementedError("Function needs to be implemented.")
+
+
     def db_delete(self, key):
         """Delete a parameter entry from the database.
 
@@ -1054,7 +1079,7 @@ class Event(object):
         """
         if self._db:
             # Writing attributes
-            if self._inDatabase:       # Update values
+            if self._inDatabase:        # Update values
                 sql = "UPDATE main.events SET timestamp={1}, status='{2}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()))
                 self._db.execute(sql)
             else:                       # Create new record
@@ -1069,13 +1094,6 @@ class Event(object):
             if recursive:
                 for datafile in self.datafiles:
                     datafile.write(recursive=True)
-
-            # Handled by addDatafile()
-            #     sql = "SELECT COUNT(eventID) FROM main.event_datafile WHERE datafileID={0}".format(datafileID)
-            #     result = self._db.select(sql)[0][0]
-            #     if 0 == result:
-            #         sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafileID)
-            #         self._db.insert(sql)
 
             # Writing parameters
             self.parameter.write()
@@ -1379,12 +1397,6 @@ class Datafile(object):
             if recursive:
                 for station in self.stations:
                     station.write(recursive=True)
-
-                # sql = "SELECT COUNT(datafileID) FROM main.datafile_station WHERE stationID={0}".format(stationID)
-                # result = self._db.select(sql)[0][0]
-                # if 0 == result:
-                #     sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, stationID)
-                #     self._db.insert(sql)
 
             # Write parameter information
             self.parameter.write()
