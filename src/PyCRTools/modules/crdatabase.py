@@ -888,8 +888,6 @@ class _Parameter(object):
 
     def db_write_all(self):
         """Write all parameters to the database."""
-        # TODO: _Parameter.db_write_all() - Add implementation
-
         if self._db:
             sql = "SELECT key FROM {0} WHERE {1}={2}".format(self._tablename, self._idlabel, self._id)
             db_keys = [str(record[0]) for record in self._db.select(sql)]
@@ -907,8 +905,6 @@ class _Parameter(object):
             self._db.executescript(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
-        raise NotImplementedError("Function needs to be implemented.")
 
 
     def db_delete(self, key):
@@ -1279,6 +1275,7 @@ class Datafile(object):
     * *status*: the status of the datafile.
     * *stations*: a list of station information objects (:class:`Station`) that are stored in the datafile.
     * *parameter*: a dictionary of optional parameters with additional information for this specific datafile.
+
     """
 
     def __init__(self, db=None, id=0):
@@ -1890,6 +1887,7 @@ class Polarization(object):
     * *status*: the status of the polarization.
     * *resultsfile*: the name of the resultsfile, where all the results from the pipeline are stored.
     * *parameter*: a dictionary of optional parameters. This contains also resulting information from the pipeline.
+
     """
 
     def __init__(self, db=None, id=0):
