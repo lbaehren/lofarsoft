@@ -1278,7 +1278,7 @@ class Datafile(object):
     * *filename*: the filename of the datafile.
     * *status*: the status of the datafile.
     * *stations*: a list of station information objects (:class:`Station`) that are stored in the datafile.
-
+    * *parameter*: a dictionary of optional parameters with additional information for this specific datafile.
     """
 
     def __init__(self, db=None, id=0):
@@ -1582,7 +1582,7 @@ class Station(object):
     * *stationname*: the name of the station, e.g. CS001, RS203.
     * *status*: the status of the station.
     * *polarizations*: a list of polarization information objects (:class:`Polarization`) stored in this station.
-
+    * *parameter*: a dictionary of optional parameters with additional information for this specific station.
     """
 
     def __init__(self, db=None, id=0):
@@ -1890,7 +1890,6 @@ class Polarization(object):
     * *status*: the status of the polarization.
     * *resultsfile*: the name of the resultsfile, where all the results from the pipeline are stored.
     * *parameter*: a dictionary of optional parameters. This contains also resulting information from the pipeline.
-
     """
 
     def __init__(self, db=None, id=0):
