@@ -818,7 +818,6 @@ def getClockCorrection(station,antennaset="HBA",time=1278480000):
     if station in clockcorrection.keys():
         return clockcorrection[station]
     else:
-        print "NO CLOCK CORRECTION VALUE AVAILABLE IN THE DATABASE"
         return 0
 
 def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesystem="WGS84",):
