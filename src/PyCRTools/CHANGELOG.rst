@@ -1,3 +1,11 @@
+2012-05-08
+==========
+
+  :Author: Martin van den Akker <martinva@astro.ru.nl>
+
+ - Use column based parameter tables instead of row based (for performance improvement)
+
+
 2012-04-23
 ==========
 

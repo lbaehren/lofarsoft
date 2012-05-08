@@ -10,6 +10,8 @@ import re
 import pickle
 import time
 
+debug_mode = True
+
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
@@ -42,10 +44,14 @@ class CRDatabase(object):
 
         # Initialize database structure
         self.db.open()
-        self.__createTables()
+        self.__createDatabase()
 
         # Settings
         self.settings = Settings(self.db)
+
+        # Database version applied in this module
+        self.db_required_version = 1
+        self.__updateDatabase()
 
         # Path settings
         self.basepath = os.path.dirname(self.filename)
@@ -72,8 +78,15 @@ class CRDatabase(object):
             self.settings.lorapath =lorapath_DEFAULT
 
 
-    def __createTables(self):
-        """Create the pipeline database tables if they not already exist."""
+
+    def __createDatabase(self):
+        """***DO NOT UPDATE TABLE DEFINITIONS IN THIS METHOD***.
+
+        Create the pipeline database tables if they not already
+        exist. Extensions of or changes to the database tables must not be
+        applied in this method, these need to be done in a special
+        __updateTables method.
+        """
 
         if self.db:
             # Event table
@@ -126,15 +139,7 @@ class CRDatabase(object):
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');
             INSERT OR IGNORE INTO main.settings (key, value) VALUES ('lorapath', '');
-            """
-            self.db.executescript(sql)
-
-            # Status table
-            sql = """
-            CREATE TABLE IF NOT EXISTS main.status (statusID INTEGER UNIQUE, status TEXT NOT NULL);
-            INSERT OR IGNORE INTO main.status (statusID, status) VALUES (-1, 'NEW');
-            INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 0, 'UNKNOWN');
-            INSERT OR IGNORE INTO main.status (statusID, status) VALUES ( 1, 'PROCESSED');
+            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('db_version', '0');
             """
             self.db.executescript(sql)
 
@@ -146,34 +151,207 @@ class CRDatabase(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def __resetTables(self):
-        """Reset all tables and create a clean table structure."""
+    def __updateDatabase(self):
+        self.__updateDatabase_v0_to_v1()
 
-        if self.db:
-            # Remove all tables.
-            self.db.execute("DROP TABLE IF EXISTS main.settings")
-            self.db.execute("DROP TABLE IF EXISTS main.events")
-            self.db.execute("DROP TABLE IF EXISTS main.eventparameters")
-            self.db.execute("DROP TABLE IF EXISTS main.datafiles")
-            self.db.execute("DROP TABLE IF EXISTS main.datafileparameters")
-            self.db.execute("DROP TABLE IF EXISTS main.stations")
-            self.db.execute("DROP TABLE IF EXISTS main.stationparameters")
-            self.db.execute("DROP TABLE IF EXISTS main.polarizations")
-            self.db.execute("DROP TABLE IF EXISTS main.polarizationparameters")
-            self.db.execute("DROP TABLE IF EXISTS main.event_datafile")
-            self.db.execute("DROP TABLE IF EXISTS main.datafile_station")
-            self.db.execute("DROP TABLE IF EXISTS main.station_polarization")
-            self.db.execute("DROP TABLE IF EXISTS main.filters")
-            self.db.execute("DROP TABLE IF EXISTS main.status")
 
-            # Database needs to be closed to properly drop the tables before creating them again.
-            self.db.close()
-            self.db.open()
+    def __convertParameterTable_v0_to_v1(self, tablename="", parameter_keys=[]):
 
-            # Create all tables.
-            self.__createTables()
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
+        if not tablename in ["event", "datafile", "station", "polarization"]:
+            raise ValueError("Invalid tablename, should be 'event', 'datafile', 'station' or 'polarization'")
+
+        # Create new parameters table
+        if debug_mode: print "    Creating new table..." # DEBUG
+
+        columns_string = ""
+        for key in parameter_keys:
+            columns_string += ", {0} TEXT".format(key)
+
+        sql_list = []
+        sql_list.append("CREATE TABLE IF NOT EXISTS main.{0}parameters_new ({0}ID INTEGER PRIMARY KEY {1});".format(tablename, columns_string))
+        self.db.executelist(sql_list)
+
+        # Transfer information from old to new parameter table
+        if debug_mode: print "    Transfering data to new table..." # DEBUG
+        if debug_mode: print "      . retrieving data from db..."   # DEBUG
+        id_list = [r[0] for r in self.db.select("SELECT DISTINCT {0}ID FROM main.{0}parameters;".format(tablename))]
+        records = self.db.select("SELECT {0}ID, lower(key), value FROM {0}parameters ORDER BY {0}ID;".format(tablename))
+
+        if debug_mode: print "      . extracting parameter keys and values..." # DEBUG
+        transfer_key_strings = {}
+        transfer_val_strings = {}
+        for _id in id_list:
+            transfer_key_strings[_id] = "{0}ID".format(tablename)
+            transfer_val_strings[_id] = "{0}".format(_id)
+        for r in records:
+            k = r[1]
+            v = r[2]
+            if (k in parameter_keys) and (v):
+                transfer_key_strings[r[0]] += ", " + k
+                transfer_val_strings[r[0]] += ", '" + v + "'"
+
+        if debug_mode: print "      . building sql statements..." # DEBUG
+        sql_list = []
+        for _id in id_list:
+            sql_list.append("INSERT INTO {0}parameters_new ({1}) VALUES ({2});".format(tablename, transfer_key_strings[_id], transfer_val_strings[_id]))
+        if debug_mode: print "      . executing sql statements..." # DEBUG
+        self.db.executelist(sql_list)
+
+        # Rename new polarizationparameters table
+        if debug_mode: print "    Renaming new table (replacing old table)..." # DEBUG
+        sql_list = []
+        sql_list.append("DROP TABLE main.{0}parameters;".format(tablename))
+        sql_list.append("ALTER TABLE main.{0}parameters_new RENAME TO {0}parameters;".format(tablename))
+        self.db.executelist(sql_list)
+
+
+    def __updateDatabase_v0_to_v1(self):
+        """Update database from version 0 to version 1.
+
+        The database is only updated if the version of the database is
+        0 and the required version is larger than 0.
+
+        List of changes:
+        - Change PolarizationParameters table from row based to column based.
+        - Change StationParameters table from row based to column based.
+        - Change DatafileParameters table from row based to column based.
+        - Change EventParameters table from row based to column based.
+        """
+        db_version_pre = 0
+        db_version_post = 1
+
+        if ((self.settings.db_version == db_version_pre) and
+            (self.db_required_version >= db_version_post)):
+
+            print "Upgrading database to version {0}...".format(db_version_post)
+
+            # ______________________________________________________________________________
+            #                                                 Update polarization parameters
+            print "  Updating polarization parameters..." # DEBUG
+            new_parameter_keys = ["antenna_positions_array_xyz_m",
+                                  "antenna_positions_itrf_m",
+                                  "antenna_positions_station_xyz_m",
+                                  "antenna_set",
+                                  "antennas",
+                                  "antennas_final_cable_delays",
+                                  "antennas_flagged_delays",
+                                  "antennas_residual_cable_delays",
+                                  "antennas_spectral_power",
+                                  "antennas_timeseries_npeaks",
+                                  "antennas_timeseries_rms",
+                                  "antennas_with_peaks",
+                                  "antennas_with_strong_pulses",
+                                  "bad_antennas",
+                                  "block",
+                                  "blocksize",
+                                  "data_length",
+                                  "data_length_ms",
+                                  "delay_quality_error",
+                                  "dipole_calibration_delay_applied",
+                                  "dirty_channels",
+                                  "filedir",
+                                  "filename",
+                                  "frequency_range",
+                                  "nantennas_with_strong_pulses",
+                                  "ndipoles",
+                                  "nof_dipole_datasets",
+                                  "npeaks_found",
+                                  "nyquist_zone",
+                                  "pipeline_version",
+                                  "plotfiles",
+                                  "polarization",
+                                  "pulse_core_lora",
+                                  "pulse_coreuncertainties_lora",
+                                  "pulse_direction",
+                                  "pulse_direction_delta_delays_final",
+                                  "pulse_direction_delta_delays_start",
+                                  "pulse_direction_lora",
+                                  "pulse_direction_planewave",
+                                  "pulse_end_sample",
+                                  "pulse_energy_lora",
+                                  "pulse_height",
+                                  "pulse_height_incoherent",
+                                  "pulse_height_rms",
+                                  "pulse_location",
+                                  "pulse_moliere_lora",
+                                  "pulse_normalized_height",
+                                  "pulse_start_sample",
+                                  "pulse_time_ms",
+                                  "pulses_absolute_arrivaltime",
+                                  "pulses_maxima_x",
+                                  "pulses_maxima_y",
+                                  "pulses_power_snr",
+                                  "pulses_refant",
+                                  "pulses_sigma",
+                                  "pulses_strength",
+                                  "pulses_timelags_ns",
+                                  "sample_frequency",
+                                  "sample_interval",
+                                  "sample_number",
+                                  "station_antennas_homogeneity_factor",
+                                  "station_spectral_power",
+                                  "station_timeseries_npeaks",
+                                  "station_timeseries_rms",
+                                  "status",
+                                  "svn_revision",
+                                  "telescope",
+                                  "time",
+                                  "timeseries_power_mean",
+                                  "timeseries_power_rms",
+                                  "timeseries_raw_rms",
+                                  "timeseries_rms"]
+
+
+            # Create new polarizationparameters table
+            self.__convertParameterTable_v0_to_v1("polarization", new_parameter_keys)
+
+            # ______________________________________________________________________________
+            #                                                      Update station parameters
+            print "  Updating station parameters..."
+            new_parameter_keys = []
+
+            self.__convertParameterTable_v0_to_v1("station", new_parameter_keys)
+
+            # ______________________________________________________________________________
+            #                                                     Update datafile parameters
+            print "  Updating datafile parameters..."
+            new_parameter_keys = []
+
+            self.__convertParameterTable_v0_to_v1("datafile", new_parameter_keys)
+
+            # ______________________________________________________________________________
+            #                                                        Update event parameters
+            print "  Updating event parameters..."
+            new_parameter_keys = ["lora_energy_ev",
+                                  "lora_energy",
+                                  "lora_core_x",
+                                  "lora_core_y",
+                                  "lora_coreuncertainties",
+                                  "lora_elevation",
+                                  "lora_utc_time_secs",
+                                  "lora_coree_x",
+                                  "lora_coree_y",
+                                  "lora_core",
+                                  "lora_direction",
+                                  "lora_10_nsec",
+                                  "lora_moliere_rad_m",
+                                  "lora_time",
+                                  "lora_detectorid",
+                                  "lora_moliere",
+                                  "lora_azimuth",
+                                  "lora_particle_density__m2",
+                                  "lora_nsecs",
+                                  "lora_posz",
+                                  "lora_posx",
+                                  "lora_posy"]
+
+            self.__convertParameterTable_v0_to_v1("event", new_parameter_keys)
+
+            # ______________________________________________________________________________
+            #                                                 Update database version number
+            print "  Updating database version number..." # DEBUG
+
+            self.db.executescript("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
 
 
     def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
@@ -677,7 +855,6 @@ class Settings(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-
     @property
     def lorapath(self):
         """Get the value of the *lorapath* variable as set in the database."""
@@ -711,6 +888,20 @@ class Settings(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
+    @property
+    def db_version(self):
+        """Get the value of the *db_version* variable as set in the database."""
+        result = 0
+
+        if self._db:
+            sql = "SELECT value FROM settings WHERE key='db_version'"
+            result = int(self._db.select(sql)[0][0])
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return result
+
+
     def summary(self):
         """Summary of the Settings object."""
         linewidth = 80
@@ -722,6 +913,7 @@ class Settings(object):
         print "  %-40s : %s" %("datapath", self.datapath)
         print "  %-40s : %s" %("resultspath", self.resultspath)
         print "  %-40s : %s" %("lorapath", self.lorapath)
+        print "  %-40s : %d" %("db version", self.db_version)
 
 
 
@@ -808,13 +1000,6 @@ class _Parameter(object):
             # - Insert/update parameters
             for key in py_keys:
                 self.db_write(key, self._parameter[key])
-
-            # TEST: _Parameter.write() - Removal of unused deletion part
-            # # - Delete unused parameters
-            # for key in db_keys:
-            #     if not key in py_keys:
-            #         sql = "DELETE FROM {0} WHERE {1}={2} AND key='{3}'".format(self._tablename, self._idlabel, self._id, str(key))
-            #         self._db.execute(sql)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -858,8 +1043,6 @@ class _Parameter(object):
 
         return value
 
-
-    # TODO: _Parameter{} - Add a db_read_all(self) method to speedup reading.
 
     def db_write(self, key, value):
         """Write value for parameter *key* to the database.
@@ -968,6 +1151,129 @@ class _Parameter(object):
 
 
 
+class BaseParameter(object):
+
+    def __init__(self, parent):
+        """"""
+        self._parent = parent
+        self._parent_type = parent.__class__.__name__.lower()
+        self._parameter = {}
+
+        # Check if the parent is of the correct type ()
+        if self._parent_type in ['event','datafile','station','polarization']:
+            self._tablename = self._parent_type + "parameters"
+            self._idlabel = self._parent_type + "ID"
+        else:
+            raise TypeError("Parent type does not match any parameter table in the database.")
+
+
+    @property
+    def _id(self):
+        """Return the ID of the parent object."""
+        return self._parent._id
+
+
+    @property
+    def _db(self):
+        """Return the db reference of the parent object."""
+        return self._parent._db
+
+
+    def __repr__(self):
+        """Representation of the parameter object."""
+        return self._parameter.__repr__()
+
+
+    def __getitem__(self, key):
+        """Get the value of the parameter *key*."""
+        return self._parameter[key]
+
+
+    def __setitem__(self, key, value):
+        """Set the value of the parameter *key*."""
+        self._parameter[key] = value
+
+
+    def __delitem__(self, key):
+        """Empty the entry *key* from the list of parameters."""
+        self._parameter[key] = None
+
+
+    def keys(self):
+        """Return a list of valid parameter keys."""
+        self.keys = self._parameter.keys()
+
+        if not self.keys:
+            sql = "pragma table_info({0});".format(self._tablename)
+            if debug_mode: print sql
+            records = self._db.select(sql)
+            self.keys = [str(r[1]) for r in records]
+            self.keys.remove("{0}".format(self._idlabel)) # Remove the id field as a key
+
+        return self.keys
+
+
+    def read(self):
+        """Read parameters from the database."""
+        sql = "SELECT * FROM {0} WHERE {1}={2}".format(self._tablename, self._idlabel, self._id)
+        records = self._db.select(sql)
+        if records:
+            for i in range(1, len(records[0])-1):
+                key = self.keys[i-1]
+                value = records[0][i]
+                if value:
+                    self._parameter[key] = self.unpickle_parameter(str(value))
+
+
+    def write(self):
+        """Write parameters to the database."""
+        sql_keys = "{0}".format(self._idlabel)
+        sql_values = "{0}".format(self._id)
+        for key in self._parameter.keys():
+            sql_keys += ", {0}".format(key)
+            sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
+        sql = "INSERT OR REPLACE INTO {0} ({1}) VALUES ({2});".format(self._tablename, sql_keys, sql_values)
+        self._db.execute(sql)
+
+
+    def pickle_parameter(self, value):
+        """Return the parameter as a database friendly pickle
+        representation.
+
+        **Properties**
+
+        ==============  ======================================================
+        Parameter       Description
+        ==============  ======================================================
+        *value*         Python representation of the value of the parameter.
+        ==============  ======================================================
+        """
+        return re.sub("'", '"', pickle.dumps(value))
+
+
+    def unpickle_parameter(self, value):
+        """Return the parameter value from parsing a database friendly
+        representation of the parameter.
+
+        **Properties**
+
+        ==============  ================================================
+        Parameter       Description
+        ==============  ================================================
+        *value*         Database representation of the parameter value.
+        ==============  ================================================
+        """
+        return pickle.loads(re.sub('"', "'", str(value)))
+
+
+    def summary(self):
+        """Summary of the parameters."""
+        for key in self.keys:
+            if key in self._parameter.keys():
+                print "  %-40s : %s" %(key, self._parameter[key])
+
+
+
 class Event(object):
     """CR event information.
 
@@ -998,7 +1304,7 @@ class Event(object):
         self.timestamp = 0
         self.status = "NEW" # Allowed values: NEW, CR_FOUND, CR_NOT_FOUND, CR_ANALYZED, CR_NOT_ANALYZED
         self.datafiles = []
-        self.parameter = _Parameter(parent=self)
+        self.parameter = EventParameter(parent=self)
 
         self.settings = Settings(db)
 
@@ -1054,24 +1360,25 @@ class Event(object):
                     datafile.event = self
                     self.datafiles.append(datafile)
 
-                # Reading parameters - Done by _Parameter class
-                # self.parameter.read()
+                # Reading parameters
+                self.parameter.read()
             else:
                 print "WARNING: This event (id={0}) is not available in the database.".format(self._id)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self, recursive=True):
+    def write(self, recursive=True, parameters=True):
         """Write event information to the database.
 
         **Properties**
 
-        ===========  =================================================================
-        Parameter    Description
-        ===========  =================================================================
-        *recursive*  if *True* write all underlying datastructures (datafiles, etc.)
-        ===========  =================================================================
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (datafiles, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
         """
         if self._db:
             # Writing attributes
@@ -1092,7 +1399,8 @@ class Event(object):
                     datafile.write(recursive=True)
 
             # Writing parameters
-            self.parameter.write()
+            if parameters:
+                self.parameter.write()
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1266,6 +1574,21 @@ class Event(object):
 
 
 
+class EventParameter(BaseParameter):
+
+    # Class variables
+    key_list = []
+    table_name = "eventparameters"
+    id_name = "eventID"
+
+    def __init__(self, parent=None):
+        """Initialization of the EventParameter object."""
+        BaseParameter.__init__(self, parent)
+
+        EventParameter.key_list = self.keys()
+
+
+
 class Datafile(object):
     """CR datafile information.
 
@@ -1275,7 +1598,6 @@ class Datafile(object):
     * *status*: the status of the datafile.
     * *stations*: a list of station information objects (:class:`Station`) that are stored in the datafile.
     * *parameter*: a dictionary of optional parameters with additional information for this specific datafile.
-
     """
 
     def __init__(self, db=None, id=0):
@@ -1296,7 +1618,7 @@ class Datafile(object):
         self.filename = ""
         self.status = "NEW"
         self.stations = []
-        self.parameter = _Parameter(parent=self)
+        self.parameter = DatafileParameter(parent=self)
 
         self.settings = Settings(db)
 
@@ -1352,24 +1674,25 @@ class Datafile(object):
                     station.datafile = self
                     self.stations.append(station)
 
-                # Read parameters - Done by _Parameter class
-                # self.parameter.read()
+                # Read parameters
+                self.parameter.read()
             else:
                 print "WARNING: This datafile (id={0}) is not available in the database.".format(self._id)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self, recursive=True):
+    def write(self, recursive=True, parameters=True):
         """Write datafile information to the database.
 
         **Properties**
 
-        ===========  =================================================================
-        Parameter    Description
-        ===========  =================================================================
-        *recursive*  if *True* write all underlying datastructures (stations, etc.)
-        ===========  =================================================================
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (stations, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
         """
         if self._db:
             # Write attributes
@@ -1396,7 +1719,8 @@ class Datafile(object):
                     station.write(recursive=True)
 
             # Write parameter information
-            self.parameter.write()
+            if parameters:
+                self.parameter.write()
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1571,6 +1895,21 @@ class Datafile(object):
 
 
 
+class DatafileParameter(BaseParameter):
+
+    # Class variables
+    key_list = []
+    table_name = "datafileparameters"
+    id_name = "datafileID"
+
+    def __init__(self, parent=None):
+        """Initialization of the DatafileParameter object."""
+        BaseParameter.__init__(self, parent)
+
+        DatafileParameter.key_list = self.keys()
+
+
+
 class Station(object):
     """CR station information.
 
@@ -1600,7 +1939,7 @@ class Station(object):
         self.stationname = ""
         self.status = "NEW"
         self.polarization = {}
-        self.parameter = _Parameter(parent=self)
+        self.parameter = StationParameter(parent=self)
 
         self.settings = Settings(db)
 
@@ -1656,24 +1995,25 @@ class Station(object):
                     key = str(polarization.direction)
                     self.polarization[key] = polarization
 
-                # Read parameter information - Done by _Parameter class
-                # self.parameter.read()
+                # Read parameter information
+                self.parameter.read()
             else:
                 print "WARNING: This station (id={0}) is not available in the database.".format(self._id)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self, recursive=True):
+    def write(self, recursive=True, parameters=True):
         """Write station information to the database.
 
         **Properties**
 
-        ===========  =================================================================
-        Parameter    Description
-        ===========  =================================================================
-        *recursive*  if *True* write all underlying datastructures (polarizations)
-        ===========  =================================================================
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (polarizations)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
         """
         if self._db:
             # Write attributes
@@ -1694,7 +2034,8 @@ class Station(object):
                     self.polarization[key].write()
 
             # Write parameter information
-            self.parameter.write()
+            if parameters:
+                self.parameter.write()
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -1877,6 +2218,21 @@ class Station(object):
 
 
 
+class StationParameter(BaseParameter):
+
+    # Class variables
+    key_list = []
+    table_name = "stationparameters"
+    id_name = "stationID"
+
+    def __init__(self, parent=None):
+        """Initialization of the StationParameter object."""
+        BaseParameter.__init__(self, parent)
+
+        StationParameter.key_list = self.keys()
+
+
+
 class Polarization(object):
     """CR polarization information.
 
@@ -1909,7 +2265,7 @@ class Polarization(object):
         self.direction = ""
         self.status = "NEW"
         self.resultsfile = ""
-        self.parameter = _Parameter(parent=self)
+        self.parameter = PolarizationParameter(parent=self)
 
         self.settings = Settings(db)
 
@@ -1956,8 +2312,8 @@ class Polarization(object):
                 else:
                     raise ValueError("Multiple records found for eventID={0}".format(self._id))
 
-                # Read parameters - Done by _Parameter class
-                # self.parameter.read()
+                # Read parameters
+                self.parameter.read()
 
             else:
                 print "WARNING: This polarization (id={0}) is not available in the database.".format(self._id)
@@ -1966,8 +2322,17 @@ class Polarization(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self, recursive=False):
-        """Write polarization information to the database."""
+    def write(self, parameters=True):
+        """Write polarization information to the database.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
         if self._db:
             # Write attributes
             if self._inDatabase:
@@ -1982,7 +2347,8 @@ class Polarization(object):
                 self._inDatabase = True
 
             # Write parameters
-            self.parameter.write()
+            if parameters:
+                self.parameter.write()
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
@@ -2048,14 +2414,29 @@ class Polarization(object):
         if showParameters:
             self.parameter.summary()
         else:
-            print "  %-40s : %d" %("# Parameters", len(self.parameter.keys()))
+            print "  %-40s : %d" %("# Parameters", len(self.parameter.keys))
 
         print "="*linewidth
 
 
 
+class PolarizationParameter(BaseParameter):
+
+    # Class variables
+    key_list = []
+    table_name = "polarizationparameters"
+    id_name = "polarizationID"
+
+    def __init__(self, parent=None):
+        """Initialization of the PolarizationParameter object."""
+        BaseParameter.__init__(self, parent)
+
+        PolarizationParameter.key_list = self.keys()
+
+
+
 class Filter(object):
-    """Filter"""
+    #    """Filter"""
 
     def __init__(self, db=None, name="DEFAULT"):
         """Initialisation of Filter object.
