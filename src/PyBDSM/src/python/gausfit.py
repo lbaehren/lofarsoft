@@ -18,9 +18,12 @@ import mylogger
 import sys
 import time
 import statusbar
-import misc
 import _cbdsm
-import matplotlib.pyplot as pl
+try:
+    import matplotlib.pyplot as pl
+    has_pl = True
+except ImportError:
+    has_pl = False
 import scipy.ndimage as nd
 
 
@@ -75,7 +78,7 @@ class Op_gausfit(Op):
             print "Fitting isl #", idx, '; # pix = ',N.sum(~isl.mask_active),'; size = ',size
             
           if size > maxsize:
-            tosplit = misc.isl_tosplit(isl, img)
+            tosplit = func.isl_tosplit(isl, img)
             if opts.split_isl and tosplit[0] > 0:
                 n_subisl, sub_labels = tosplit[1], tosplit[2]
                 gaul = []; fgaul = []
@@ -108,7 +111,7 @@ class Op_gausfit(Op):
               gaul, fgaul = self.fit_island(isl, opts, img)
             if bar.started: bar.increment()
 
-          if opts.plot_islands:
+          if opts.plot_islands and has_pl:
               pl.figure()
               pl.suptitle('Island : '+str(isl.island_id))
               pl.subplot(1,2,1)
@@ -153,14 +156,14 @@ class Op_gausfit(Op):
         mylogger.userinfo(mylog, "Total number of Gaussians fit to image",
                           str(n))
         if not hasattr(img, '_pi') and not img.waveletimage:
-            mylogger.userinfo(mylog, "Total flux in model", '%.3f Jy' %
+            mylogger.userinfo(mylog, "Total flux density in model", '%.3f Jy' %
                           tot_flux)
  
         # Check if model flux is very different from sum of flux in image
         if img.ch0_sum_jy > 0 and not hasattr(img, '_pi'):
             if img.total_flux_gaus/img.ch0_sum_jy < 0.5 or \
                     img.total_flux_gaus/img.ch0_sum_jy > 2.0:
-                mylog.warn('Total flux in model is %0.2f times sum of pixels '\
+                mylog.warn('Total flux density in model is %0.2f times sum of pixels '\
                                'in input image. Large residuals may remain.' %
                            (img.total_flux_gaus/img.ch0_sum_jy,))
             

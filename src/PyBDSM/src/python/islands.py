@@ -42,11 +42,6 @@ class Op_islands(Op):
     Prerequisites: module rmsimage should be run first.
     """
     def __call__(self, img):
-        try:
-            import output_fbdsm_files as opf
-            has_fbdsm = True
-        except ImportError:
-            has_fbdsm = False
         mylog = mylogger.logging.getLogger("PyBDSM."+img.log+"Islands")
         opts = img.opts
 
@@ -99,8 +94,6 @@ class Op_islands(Op):
                     pyrank[isl.bbox] = N.invert(isl.mask_active)*i
                 
             if opts.output_all: write_islands(img)
-            if opts.output_fbdsm and has_fbdsm:
-                opf.write_fbdsm_islands(img)
             if opts.savefits_rankim:
                 func.write_image_to_file(img.use_io, img.imagename + '_pyrank.fits', pyrank, img)
 

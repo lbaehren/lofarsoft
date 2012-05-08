@@ -10,8 +10,8 @@ class Op_outlist(Op):
     """Write out list of Gaussians
 
     Currently 6 output formats are supported:
+    - FIST list
     - BBS list
-    - fbdsm gaussian list
     - star list
     - kvis annotations
     - ascii list
@@ -165,6 +165,38 @@ def dec2ddmmss(deg):
     sa = x*60
 
     return (int(dd), int(ma), sa, sign)
+    
+def B1950toJ2000(Bcoord):
+    """ Precess using Aoki et al. 1983. Same results as NED to ~0.2asec """
+    from math import sin, cos, pi, sqrt, asin, acos
+    import numpy as N
+
+    rad = 180.0/pi
+    ra, dec = Bcoord
+
+    A = N.array([-1.62557e-6, -0.31919e-6, -0.13843e-6])
+    M = N.array([[0.9999256782, 0.0111820609, 0.00485794], [-0.0111820610, 0.9999374784, -0.0000271474], \
+                 [-0.0048579477, -0.0000271765, 0.9999881997]])
+
+    r0=N.zeros(3)
+    r0[0]=cos(dec/rad)*cos(ra/rad)
+    r0[1]=cos(dec/rad)*sin(ra/rad)
+    r0[2]=sin(dec/rad)
+
+    r0A=N.sum(r0*A)
+    r1=r0-A+r0A*r0
+    r = N.sum(M.transpose()*r1, axis = 1)
+
+    rscal = sqrt(N.sum(r*r))
+    decj=asin(r[2]/rscal)*rad 
+
+    d1=r[0]/rscal/cos(decj/rad)
+    d2=r[1]/rscal/cos(decj/rad)
+    raj=acos(d1)*rad 
+    if d2 < 0.0: raj = 360.0 - raj
+
+    Jcoord = [raj, decj]
+    return Jcoord
 
 def write_bbs_gaul(img, filename=None, srcroot=None, patch=None,
                    incl_primary=True, sort_by='flux',
@@ -414,7 +446,6 @@ def make_bbs_str(img, glist, gnames, patchnames):
     """Makes a list of string entries for a BBS sky model."""
     from output import ra2hhmmss
     from output import dec2ddmmss
-    from libs import B1950toJ2000
     import numpy as N
 
     outstr_list = []

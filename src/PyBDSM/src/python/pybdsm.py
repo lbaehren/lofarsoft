@@ -373,8 +373,8 @@ def show_fit(**kwargs):
     the controls at the bottom of the plot window.
 
     In addition, the following commands are available:
-      Press "i" ........ : Get integrated fluxes and mean rms values
-                           for the visible portion of the image
+      Press "i" ........ : Get integrated flux densities and mean rms
+                           values for the visible portion of the image
       Press "m" ........ : Change min and max scaling values
       Press "n" ........ : Show / hide island IDs
       Press "0" ........ : Reset scaling to default

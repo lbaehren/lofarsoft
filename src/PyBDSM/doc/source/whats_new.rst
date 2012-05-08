@@ -30,4 +30,4 @@ Version 1.1 (2012/03/28):
     
     * Fixed many minor bugs.
 
-See the changelog (accessible from the interactive shell using ``help changelog``) for details of all changes since the last version.
+See the changelog (accessible from the interactive shell using ``help changelog``) for details of all changes.

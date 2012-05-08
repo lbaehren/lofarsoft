@@ -147,13 +147,10 @@ Lastly, the plot window is closed, and the source catalog is written out to an A
                                    source are grouped into one patch           
     catalog_type ......... 'gaul': Type of catalog to write:  'gaul' - Gaussian
                                    list, 'srl' - source list (formed by grouping
-                                   Gaussians), 'shap' - shapelet list (not yet 
-                                   supported)                                  
+                                   Gaussians), 'shap' - shapelet list          
     clobber .............. False : Overwrite existing file?                    
     format ................ 'bbs': Format of output catalog: 'bbs', 'ds9', 'fits',
                                    'star', 'kvis', or 'ascii'                  
-    incl_wavelet .......... True : Include Gaussians from wavelet decomposition (if
-                                   any)?                                       
     srcroot ............... None : Root name for entries in the output catalog. None
                                    => use image file name                      
     

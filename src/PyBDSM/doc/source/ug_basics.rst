@@ -176,7 +176,9 @@ Below is an example of using PyBDSM to find and measure sources in an image::
     PROCESS_IMAGE: Find and measure sources in an image.
     =================================================================================
     filename ................. '': Input image file name                       
-    advanced_opts ........ False : Show advanced options                       
+    advanced_opts ........ False : Show advanced options
+    adaptive_rms_box ..... False : Use adaptive rms_box when determining rms and 
+                                   mean maps                   
     atrous_do ............ False : Decompose Gaussian residual image into multiple
                                    scales                                      
     beam .................. None : FWHM of restoring beam. Specify as (maj, min, pos

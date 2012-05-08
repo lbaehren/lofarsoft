@@ -153,8 +153,8 @@ class Opts(object):
                                  "pi_thresh_pix parameters.\n"\
                                  "Next, for any such PI-only sources, "\
                                  "plus all sources detected in the Stokes I image, "\
-                                 "the fluxes in each of the other Stokes images are found. "\
-                                 "Fluxes are calculated by fitting for the normalization of the Gaussians "\
+                                 "the flux densities in each of the other Stokes images are found. "\
+                                 "Flux densities are calculated by fitting for the normalization of the Gaussians "\
                                  "found from the Stokes I or PI images."\
                                  "Lastly, the polarisation fraction and angle for each source "\
                                  "are calculated.\n"\
@@ -166,7 +166,7 @@ class Opts(object):
                                  "NVSS catalog (see ftp://ftp.cv.nrao.edu/pub/nvss/catalog.ps). "\
                                  "Errors on the linear and total polarisation fractions "\
                                  "and polarisation angle are estimated using the debiased "\
-                                 "polarised flux and standard error propagation. See "\
+                                 "polarised flux density and standard error propagation. See "\
                                  "Sparks & Axon (1999) for a more detailed treatment.")
     psf_vary_do     =   Bool(False,
                              doc="Calculate PSF variation across image")
@@ -264,7 +264,7 @@ class Opts(object):
                                  "calculated inside the program\n"\
                                  "This parameter sets the overall detection threshold "\
                                  "for islands (i.e. thresh_pix = 5 will find all sources "\
-                                 "with peak fluxes of 5-sigma or greater). Use the "\
+                                 "with peak flux densities per beam of 5-sigma or greater). Use the "\
                                  "thresh_isl parameter to control how much of each island "\
                                  "is used in fitting. Generally, thresh_pix should be larger "\
                                  "than thresh_isl.\n"
@@ -314,14 +314,14 @@ class Opts(object):
                                      "sub island is less than 75% the size of the "\
                                      "largest when opened with a 3x3 footprint, a "\
                                      "5x5 opening is taken.",
-                             group='advanced_opts')
+                             group='hidden')
     splitisl_frac_bigisl3 = Float(0.8,
                                   doc="Fraction of island area for 3x3 opening to "\
                                       "be used.\nWhen deciding to split an island, "\
                                       "if the largest sub island when opened with a "\
                                       "3x3 footprint is less than this fraction of the "\
                                       "island area, then a 3x3 opening is considered.",
-                             group='advanced_opts')
+                             group='hidden')
     peak_fit        =   Bool(True,
                              doc="Find and fit peaks of large islands iteratively\n"\
                                  "When enabled, PyBDSM will identify and "\
@@ -494,7 +494,6 @@ class Opts(object):
                              group="advanced_opts")
 
     #--------------------------------ADAPTIVE RMS_BOX OPTIONS--------------------------------
-
     rms_box_bright  = Option(None, Tuple(Int(), Int()),
                              doc="Box size, step size for rms/mean map "\
                                  "calculation near bright sources. Specify as (box, step) in "\
@@ -555,16 +554,6 @@ class Opts(object):
                                  "decomposed into a Pyramidal set of sources for "\
                                  "morphological transforms.",
                              group="atrous_do")
-#     atrous_orig_isl  =   Bool(True,
-#                              doc="Restrict wavelet Gaussians to islands found in original "\
-#                                  "image\n"\
-#                                  "If True, Gaussians will only be fit to the wavelet "\
-#                                  "images if their centers are located inside islands "\
-#                                  "found in the original image. "
-#                                  "If False, wavelet Gaussians can be fit to any part of the "\
-#                                  "wavelet image.",
-#                              group="atrous_do")
-
     
     #--------------------------------FLAGGING OPTIONS--------------------------------
     flag_smallsrc   =   Bool(False,
@@ -593,11 +582,11 @@ class Opts(object):
                                  "flag_minsnr times thresh_pix times the local rms "\
                                  "is flagged. The flag value is increased by 1.",
                              group="flagging_opts")
-    flag_maxsnr     =  Float(2.0,
+    flag_maxsnr     =  Float(1.5,
                              doc="Flag Gaussian if peak is greater than "\
-                                 "flag_maxsnr times max value in island\n"\
+                                 "flag_maxsnr times image value at the peak\n"\
                                  "Any fitted Gaussian whose peak is greater than "\
-                                 "flag_maxsnr times thresh_pix times the local rms "\
+                                 "flag_maxsnr times the image value at the peak "\
                                  "is flagged. The flag value is increased by 2.",
                              group="flagging_opts")
     flag_maxsize_isl=  Float(1.0,
@@ -764,10 +753,6 @@ class Opts(object):
                              doc="Directory of input FITS files. None => get "\
                                  "from filename",
                              group="output_opts")
-    output_fbdsm    =   Bool(False,
-                             doc="Write out fBDSM format output files "\
-                                 "for use in Anaamika",
-                             group="output_opts")
     savefits_residim=   Bool(False,
                              doc="Save residual image as fits file",
                              group="output_opts")
@@ -826,7 +811,7 @@ class Opts(object):
                                  "This parameter sets the overall detection threshold "\
                                  "for islands in the polarized intensity (PI) image "\
                                  "(i.e. pi_thresh_pix = 5 will find all sources "\
-                                 "with peak fluxes of 5-sigma or greater). Use the "\
+                                 "with peak flux densities per beam of 5-sigma or greater). Use the "\
                                  "pi_thresh_isl parameter to control how much of each island "\
                                  "is used in fitting. Generally, pi_thresh_pix should be larger "\
                                  "than pi_thresh_isl.",
@@ -1006,7 +991,7 @@ class Opts(object):
                                  "a given source when when attempting to meet target SNR. "\
                                  "1 => no averaging; 0 => no maximum\n"\
                                  "If spectralindex_do is True, then for a given source, "\
-                                 "if the fluxes in each channel are below a threshold, "\
+                                 "if the flux densities in each channel are below a threshold, "\
                                  "then this determines the maximum number of channels to "\
                                  "average.",
                              group="spectralindex_do")
@@ -1054,7 +1039,7 @@ class Opts(object):
                                  "None => use image file name",
                              group='hidden')
     incl_chan       =   Bool(False,
-                             doc="Include fluxes from each channel "\
+                             doc="Include flux densities from each channel "\
                                  "(if any)?",
                              group='hidden')
     catalog_type    =   Enum('gaul', 'shap', 'srl',

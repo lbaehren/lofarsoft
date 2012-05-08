@@ -55,6 +55,14 @@ Inside each island, groups of Gaussians are deemed to be a part of the same sour
     1. no pixel on the line joining the centers of any pair of Gaussians has a (Gaussian reconstructed) value less than the island threshold, and 
     2. the centers are separated by a distance less than half the sum of their FWHMs along the line joining them. 
 
+Once Gaussians have been grouped into sources, the source properties are calculated as follows:
+
+    1. The total source flux density is the sum of the total flux densities of all Gaussians assigned to that source.
+    2. The source position (RA, DEC) and shape (Maj, Min, PA) are calculated using moment analysis (for details, see http://en.wikipedia.org/wiki/Image_moment).
+    3. The errors on the position and size are estimated using a Monte Carlo technique.
+    4. The position of the peak flux density per beam of the source (RA_max, DEC_max) is also stored.
+    
+    
 .. _colorcorrections:
 
 Effect of neglecting color corrections

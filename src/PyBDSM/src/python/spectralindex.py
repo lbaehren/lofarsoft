@@ -10,7 +10,6 @@ import mylogger
 from gaul2srl import Source
 from copy import deepcopy as cp
 import _cbdsm
-import matplotlib.pyplot as pl
 import collapse 
 import sys
 import functions as func
