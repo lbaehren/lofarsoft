@@ -10,11 +10,13 @@ class Database:
     def __init__(self, filename=":memory:"):
         """Initialisation of the Database class.
 
-        **Parameters**
+        **Properties**
 
-        ============ =====
+        ============ =======================================================
+        Parameter    Description
+        ============ =======================================================
         *filename*   Filename of the database.
-        ============ =====
+        ============ =======================================================
 
         When the filename is ``:memory:`` the database is written to
         and read from memory.
@@ -26,11 +28,13 @@ class Database:
     def open(self, filename=""):
         """Open an SQLite database.
 
-        **Parameters**
+        **Properties**
 
-        ============ =====
+        ============ =======================================================
+        Parameter    Description
+        ============ =======================================================
         *filename*   Filename of the database.
-        ============ =====
+        ============ =======================================================
 
         When the filename is ``:memory:`` the database is written to
         and read from memory.
@@ -52,11 +56,13 @@ class Database:
     def insert(self, sql=""):
         """Insert a new record into the database and return the new primary key.
 
-        **Parameters**
+        **Properties**
 
-        ======== =====
-        *sql*    SQL statement to execute.
-        ======== =====
+        ==========  =======================================================
+        Parameter   Description
+        ==========  =======================================================
+        *sql*       SQL statement to execute.
+        ==========  =======================================================
         """
         if not self._db:
             self.open()
@@ -76,11 +82,13 @@ class Database:
     def select(self, sql=""):
         """Select records from the database.
 
-        **Parameters**
+        **Properties**
 
-        ======== =====
-        *sql*    SQL statement to execute.
-        ======== =====
+        =========  =======================================================
+        Parameter  Description
+        =========  =======================================================
+        *sql*      SQL statement to execute.
+        =========  =======================================================
         """
         if not self._db:
             self.open()
@@ -97,11 +105,13 @@ class Database:
     def execute(self, sql=""):
         """Execute an sql statement
 
-        **Parameters**
+        **Properties**
 
-        ======== =====
-        *sql*    SQL statement to execute.
-        ======== =====
+        =========  =======================================================
+        Parameter  Description
+        =========  =======================================================
+        *sql*      SQL statement to execute.
+        =========  =======================================================
         """
         if not self._db:
             self.open()
@@ -117,19 +127,73 @@ class Database:
     def executescript(self, sql=""):
         """Execute a series of SQL statements.
 
-        **Parameters**
+        **Properties**
 
-        ======== =====
-        *sql*    SQL statement to execute.
-        ======== =====
+        ==========  =======================================================
+        Parameter   Description
+        ==========  =======================================================
+        *sql*       SQL statement to execute.
+        ==========  =======================================================
         """
         if not self._db:
             self.open()
 
         cursor = self._db.cursor()
 
-        with self._db:
-            cursor.executescript(sql)
+        cursor.executescript(sql)
+        self._db.commit()
 
         cursor.close()
+
+
+    def executelist(self, sql_list=[], blocksize=128, verbose=False):
+        i_block = 1
+        n_block = 1
+
+        if not self._db:
+            self.open()
+
+        cursor = self._db.cursor()
+
+        if sql_list:
+            sql_block = "BEGIN TRANSACTION;\n"
+            for sql_statement in sql_list:
+                sql_block += sql_statement + "\n"
+                i_block += 1
+                if i_block > blocksize:
+                    sql_block += "COMMIT;"
+                    if verbose:
+                        print "commiting sql_block ", n_block, "(",n_block*blocksize,")"
+                        print sql_block
+                    cursor.executescript(sql_block)
+                    self._db.commit()
+                    sql_block = "BEGIN TRANSACTION;\n"
+                    i_block = 1
+                    n_block += 1
+
+            sql_block += "COMMIT;"
+            cursor.executescript(sql_block)
+            self._db.commit()
+
+        cursor.close()
+
+
+    def writescript(self, filename, sql_script):
+        """Write SQL script to a file.
+
+        **Properties**
+
+        ============  =======================================================
+        Parameter     Description
+        ============  =======================================================
+        *filename*    Name of the file to which to write the sql_script.
+        *sql_script*  Script with SQL statements.
+        ============  =======================================================
+
+        """
+        sql_file = open(filename, 'w')
+
+        sql_file.write(sql_script)
+
+        sql_file.close()
 
