@@ -33,7 +33,11 @@ def unpickle_parameter(db_parameter):
     *db_parameter*  Database representation of the parameter value.
     ==============  ================================================
     """
-    return pickle.loads(re.sub('"', "'", str(db_parameter)))
+
+    if db_parameter is None:
+        return ""
+    else:
+        return pickle.loads(re.sub('"', "'", str(db_parameter)))
 
 def event_header(cursor, eventID, station=None, polarization=None, datafile=None):
     """
@@ -171,22 +175,29 @@ def event_handler(eventID):
     # Add event header
     elements.append(event_header(c, eventID))
 
-    # Fetch event parameters
-    c.execute("SELECT key, value FROM eventparameters WHERE eventID=?", (eventID, ))
+    # Fetch event parameter keys 
+    c.execute("PRAGMA table_info(eventparameters)")
+
+    keys = [str(e[1]) for e in c.fetchall()[1:]]
+
+    # Fetch event parameter values
+    c.execute("SELECT * FROM eventparameters WHERE eventID=?", (eventID, ))
+
+    values = [unpickle_parameter(e) for e in c.fetchone()[1:]]
 
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
-    for e in c.fetchall():
+    for e in zip(keys, values):
 
         parameter = SubElement(parameters, "parameter")
 
-        if str(e[0]) == "plotfiles":
-            for p in unpickle_parameter(e[1]):
+        if e[0] == "plotfiles":
+            for p in e[1]:
                 figure = SubElement(figures, "figure")
                 SubElement(figure, "path").text = str(p)
         else:
-            SubElement(parameter, "key").text = str(e[0])
-            SubElement(parameter, "value").text = str(unpickle_parameter(e[1]))
+            SubElement(parameter, "key").text = e[0]
+            SubElement(parameter, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
@@ -232,27 +243,34 @@ def station_handler(eventID, station_name):
         SubElement(s, "status").text = e[1]
 
     # Fetch all station parameters
+    c.execute("PRAGMA table_info(stationparameters)")
+
+    keys = [str(e[1]) for e in c.fetchall()[1:]]
+
+    # Fetch all station parameter values
     c.execute("""
-    SELECT sp.key, sp.value FROM 
+    SELECT sp.* FROM 
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN stationparameters AS sp ON (s.stationID=sp.stationID)
     WHERE (ed.eventID=? AND s.stationname=?)
     """, (eventID, station_name))
 
+    values = [unpickle_parameter(e) for e in c.fetchone()[1:]]
+
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
-    for e in c.fetchall():
+    for e in zip(keys, values):
 
         parameter = SubElement(parameters, "parameter")
 
-        if str(e[0]) == "plotfiles":
-            for p in unpickle_parameter(e[1]):
+        if e[0] == "plotfiles":
+            for p in e[1]:
                 figure = SubElement(figures, "figure")
                 SubElement(figure, "path").text = str(p)
         else:
-            SubElement(parameter, "key").text = str(e[0])
-            SubElement(parameter, "value").text = str(unpickle_parameter(e[1]))
+            SubElement(parameter, "key").text = e[0]
+            SubElement(parameter, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
@@ -298,9 +316,14 @@ def polarization_handler(eventID, station_name, polarization_direction):
         if e[0] == polarization_direction:
             s.set("current", "true")
 
-    # Fetch all polarization parameters
+    # Fetch polarization parameter keys 
+    c.execute("PRAGMA table_info(polarizationparameters)")
+
+    keys = [str(e[1]) for e in c.fetchall()[1:]]
+
+    # Fetch polarization parameter values
     c.execute("""
-    SELECT pp.key, pp.value FROM 
+    SELECT pp.* FROM 
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -309,19 +332,22 @@ def polarization_handler(eventID, station_name, polarization_direction):
     WHERE (ed.eventID=? AND s.stationname=? AND p.direction=?)
     """, (eventID, station_name, polarization_direction))
 
+    values = [unpickle_parameter(e) for e in c.fetchone()[1:]]
+
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
-    for e in c.fetchall():
+    print keys, values
+    for e in zip(keys, values):
 
         parameter = SubElement(parameters, "parameter")
 
-        if str(e[0]) == "plotfiles":
-            for p in unpickle_parameter(e[1]):
+        if e[0] == "plotfiles":
+            for p in e[1]:
                 figure = SubElement(figures, "figure")
                 SubElement(figure, "path").text = str(p)
         else:
-            SubElement(parameter, "key").text = str(e[0])
-            SubElement(parameter, "value").text = str(unpickle_parameter(e[1]))
+            SubElement(parameter, "key").text = e[0]
+            SubElement(parameter, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
