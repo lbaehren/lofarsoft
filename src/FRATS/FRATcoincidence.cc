@@ -459,7 +459,7 @@ namespace FRAT {
                     blocksum+=DeDispersedBuffer[rest];
                     SumDeDispersed[rest]=DeDispersedBuffer[rest];
                     float subsum=0;
-                    for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                    for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it%itsBufferLength];}
                     SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
                     SBsumsamples++;
                     SBaverage+=subsum;
@@ -651,7 +651,19 @@ namespace FRAT {
                     blocksum+=DeDispersedBuffer[rest];
                     SumDeDispersed[rest]=DeDispersedBuffer[rest];
                     float subsum=0;
-                    for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                    if(rest >= itsIntegrationLength){
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                    } else {
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){
+                            if(it>=0){
+                                subsum+=SumDeDispersed[it];
+                            }
+                            else {
+                                subsum+=SumDeDispersed[it+itsBufferLength];
+                            }
+                        }
+                        
+                    }
                     SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
                     SBsumsamples++;
                     SBaverage+=subsum;
@@ -853,7 +865,36 @@ namespace FRAT {
 		
 		
 		}
+        
+bool SubbandTrigger::makeplotDedispBlock(std::string pulselogfilename){
+            std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out | std::ios::app | std::ios::binary);
+            if(itsBlockNumber<1){
+                std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out |  std::ios::binary);
+            }
+			int totaltime=(itsSequenceNumber+1)*itsNrSamples;
+			int intstart=(itsSequenceNumber+1)*itsNrSamples%itsBufferLength;
+
+			//pulselogfile.open;
+			int buflen=SumDeDispersed.size();
+			//pulselogfile.width(11);
+            //printf("SeqNr, NrSam, BufLen, SumDeDispSize %i %i %i %i ",itsSequenceNumber, itsNrSamples, itsBufferLength, buflen);
+            //pulselogfile.precision(10);
+            if(intstart>itsNrSamples){
+                pulselogfile.write((char*) &SumDeDispersed[intstart-itsNrSamples], itsNrSamples*sizeof(float));
+            } else {
+                int offset=itsNrSamples-intstart;
+                pulselogfile.write((char*) &SumDeDispersed[buflen-offset], offset*sizeof(float));
+                pulselogfile.write((char*) &SumDeDispersed[0], intstart*sizeof(float));
+            }
+			pulselogfile.close();
+			
+			return true;
 		
+		
+		
+		}
+
+        	
 		std::string SubbandTrigger::blockAnalysisSummary(){
 			char output[200];
 			//std::string output;

@@ -251,9 +251,11 @@ namespace FRAT {
               void InitDedispersionOffset(std::vector<float> FREQvalues);
 			  void summary();
 			  bool makeplotBuffer(std::string pulselogfilename);
+			  bool makeplotDedispBlock(std::string pulselogfilename);
 			  std::string blockAnalysisSummary();
 			  std::string FoundTriggers();
 			  bool SendTriggerMessage(struct triggerEvent trigger);
+              float itsDM;
 			  
 		  private:
 
@@ -268,7 +270,7 @@ namespace FRAT {
               int itsStartChannel;
               unsigned long int itsStarttime_utc_sec;
               unsigned long int itsStarttime_utc_ns;
-			  float itsDM;
+			  
 			  int itsIntegrationLength;
 			  float itsTriggerLevel; // number of stdev above noise
 			  float itsStartFreq; // in GHz

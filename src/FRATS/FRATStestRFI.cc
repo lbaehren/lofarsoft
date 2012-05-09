@@ -990,13 +990,19 @@ if(doFlagging){
 						pulselogfn << pulsedir << "/pulse" << pulsenr << "_" << fc2 << ".log";
 						string pulselogfilename;
 						pulselogfn >> pulselogfilename;
-                        cout << "writing to " << pulselogfilename << endl;
 						
 						SBTs[fc2][DMcounter]->makeplotBuffer(pulselogfilename);
 
 					}
 					pulsenr++;
 				}
+                if(nDMs <3){
+						stringstream pulselogfn;
+						pulselogfn << pulsedir << "/dedisptimeseries_" << SBTs[sc][DMcounter]->itsDM << "_" << sc << ".log";
+						string pulselogfilename;
+						pulselogfn >> pulselogfilename;
+						SBTs[sc][DMcounter]->makeplotDedispBlock(pulselogfilename);
+                }
 			}
 			
 
