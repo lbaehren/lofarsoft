@@ -57,18 +57,21 @@ class CRDatabasePopulator(object):
         if "" != options.datafile:
             filename_list = [options.datafile]
         else:
+            print "  . Building list of files to process..."
             filename_list = os.listdir(datapath)
 
             # - Filter filename_list for appropriate files
             #   - includefilter (.h5 files)
             includefilter = crdb.Filter(self._db, "INCLUDE")
             includefilter.add("h5")
+            print "    - Running include filter..."
             filename_list = filter(lambda f: includefilter.execute(f), filename_list)
 
             #   - excludefilter (no 'test' or 'bkp' files)
             excludefilter = crdb.Filter(self._db, "EXCLUDE")
             excludefilter.add("test")
             excludefilter.add("bkp")
+            print "    - Running excludefilter..."
             for i in range(1,99):
                 excludefilter.add("R%03d" %(i))
             filename_list = filter(lambda f: not excludefilter.execute(f), filename_list)
@@ -82,6 +85,7 @@ class CRDatabasePopulator(object):
                 filefilter.delete(options.filefilter)
 
         # Loop over all filenames in the filelist
+        print "  . Looping over all files"
         for filename in filename_list:
             dx = None
             filename_full = datapath + "/" + filename
@@ -98,25 +102,25 @@ class CRDatabasePopulator(object):
 
                 timestamp = dx.timestamp
 
-                datafile = crdb.Datafile(self._db)
-                datafile.filename = filename
-                datafile.write(recursive=False)
+                d = crdb.Datafile(self._db)
+                d.filename = filename
+                d.write(recursive=False, parameters=False)
 
                 # Find event information
                 eventIDs = self.dbManager.getEventIDs(timestamp=timestamp)
                 if not eventIDs:
-                    event = crdb.Event(self._db)
-                    event.timestamp = timestamp
-                    event.write(recursive=False)
+                    e = crdb.Event(self._db)
+                    e.timestamp = timestamp
+                    e.write(recursive=False, parameters=False)
                 else:
                     eventID = eventIDs[0]
-                    event = crdb.Event(self._db, id=eventID)
+                    e = crdb.Event(self._db, id=eventID)
 
                 # Add datafile to event
-                event.addDatafile(datafile)
+                e.addDatafile(d)
 
                 # Add LORA data to event parameters
-                self.process_lora_data(event)
+                self.process_lora_data(e)
 
             else:
                 continue
@@ -124,13 +128,13 @@ class CRDatabasePopulator(object):
             # Find station information
             # - Station names
             for stationname in dx.stationnames:
-                stationIDs = self.dbManager.getStationIDs(datafileID=datafile.id, stationname=stationname)
+                stationIDs = self.dbManager.getStationIDs(datafileID=d.id, stationname=stationname)
                 if not stationIDs:
                     # Create stations
-                    station = crdb.Station(self._db)
-                    station.stationname = stationname
-                    station.write(recursive=False)
-                    datafile.addStation(station)
+                    s = crdb.Station(self._db)
+                    s.stationname = stationname
+                    s.write(recursive=False, parameters=False)
+                    d.addStation(s)
 
                     # Create polarizations
                     for pol_direction in [0,1]:
@@ -140,18 +144,17 @@ class CRDatabasePopulator(object):
                         p.resultsfile = dx.resultsfile(pol_direction)
 
                         p.write()
-                        station.addPolarization(p)
+                        s.addPolarization(p)
                         if options.parameters:
                             # If results.xml file exists add results to properties.
                             results_filename = os.path.join(self.dbManager.settings.resultspath,
                                                             p.resultsfile)
                             if os.path.isfile(results_filename):
-                                if not "xml_processed" in p.parameter.keys:
-                                    print "      Processing results file %s..." %(results_filename)
-                                    parameters = xmldict.load(results_filename)
-                                    for key in parameters.keys:
-                                        p[key] = parameters[key]
-                                    p["xml_processed"] = True
+                                print "      Processing results file %s..." %(results_filename)
+                                parameters = xmldict.load(results_filename)
+                                for key in parameters.keys():
+                                    p[key] = parameters[key]
+                                p.write(recursive=False, parameters=True)
                             else:
                                 print("Results file {0} does not exist...".format(results_filename))
 
@@ -174,13 +177,11 @@ class CRDatabasePopulator(object):
                         # If results.xml file exists add results to properties.
                         results_filename = os.path.join(resultspath, p.resultsfile)
                         if os.path.isfile(results_filename) and options.parameters:
-                            if not "xml_processed" in p.parameter.keys:
-                                print "      Processing results file %s..." %(results_filename)
-                                parameters = xmldict.load(results_filename)
-                                # - Add all parameters to info object & database
-                                for key in parameters.keys:
-                                    p[key] = parameters[key]
-                                p["xml_processed"] = True
+                            print "      Processing results file %s..." %(results_filename)
+                            parameters = xmldict.load(results_filename)
+                            for key in parameters.keys:
+                                p[key] = parameters[key]
+                            p.write(recursive=False, parameters=True)
                         else:
                             print("Results file {0} does not exist...".format(results_filename))
 
@@ -189,17 +190,15 @@ class CRDatabasePopulator(object):
 
 
     def process_lora_data(self, event):
-        if not "lora_processed" in event.parameter.keys:
-            print "Adding LORA parameters..."
-            lora_data = lora.loraInfo(event.timestamp, self.settings.lorapath)
-            if lora_data:
-                for key in lora_data.keys():
-                    lora_key = "lora_" + key
-                    event[lora_key] = lora_data[key]
-                    # print("added: parameter['{0}'] = {1}".format(lora_key, event[lora_key])) # DEBUG
-                event["lora_processed"] = True
-            else:
-                print("Empty lora_data set...")
+        print "Adding LORA parameters..."
+        lora_data = lora.loraInfo(event.timestamp, self.settings.lorapath)
+        if lora_data:
+            for key in lora_data.keys():
+                lora_key = "lora_" + key
+                event[lora_key] = lora_data[key]
+            event.write(recursive=False, parameters=True)
+        else:
+            print("Empty lora_data set...")
 
 
     def populate_nodb(self):

@@ -78,7 +78,6 @@ class CRDatabase(object):
             self.settings.lorapath =lorapath_DEFAULT
 
 
-
     def __createDatabase(self):
         """***DO NOT UPDATE TABLE DEFINITIONS IN THIS METHOD***.
 
@@ -1169,6 +1168,8 @@ class BaseParameter(object):
         else:
             raise TypeError("Parent type does not match any parameter table in the database.")
 
+        self._keys = self.keys()
+
 
     @property
     def _id(self):
@@ -1202,7 +1203,6 @@ class BaseParameter(object):
         self._parameter[key] = None
 
 
-    @property
     def keys(self):
         """Return a list of valid parameter keys."""
         self._keys = self._parameter.keys()
@@ -1211,8 +1211,8 @@ class BaseParameter(object):
             sql = "pragma table_info({0});".format(self._tablename)
             if debug_mode: print sql
             records = self._db.select(sql)
-            self._keys = [str(r[1]) for r in records]
-            self._keys.remove("{0}".format(self._idlabel)) # Remove the id field as a key
+            if records:
+                self._keys = [str(r[1]) for r in records[1:]]
 
         return self._keys
 
@@ -1220,11 +1220,13 @@ class BaseParameter(object):
     def read(self):
         """Read parameters from the database."""
         sql = "SELECT * FROM {0} WHERE {1}={2}".format(self._tablename, self._idlabel, self._id)
+        if debug_mode: print sql
         records = self._db.select(sql)
         if records:
-            for i in range(1, len(records[0])-1):
-                key = self.keys[i-1]
-                value = records[0][i]
+            values = [v for v in records[0][1:]]
+            for i in range(len(values)):
+                key = self._keys[i]
+                value = values[i]
                 if value:
                     self._parameter[key] = self.unpickle_parameter(str(value))
 
@@ -1237,7 +1239,7 @@ class BaseParameter(object):
             sql_keys += ", {0}".format(key)
             sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
         sql = "INSERT OR REPLACE INTO {0} ({1}) VALUES ({2});".format(self._tablename, sql_keys, sql_values)
-        self._db.execute(sql)
+        self._db.insert(sql)
 
 
     def pickle_parameter(self, value):
@@ -1463,7 +1465,7 @@ class Event(object):
         if datafile:
             # Update object
             if 0 == datafile.id:
-                datafile.write(recursive=False)
+                datafile.write(recursive=False, parameters=False)
             datafile.event = self       # Reference to parent (event)
 
             # Check for duplicate
@@ -1478,7 +1480,7 @@ class Event(object):
             # Update database
             if self._db:
                 if not self._inDatabase:
-                    self.write(recursive=False)
+                    self.write(recursive=False, parameters=False)
 
                 # Update the linking table.
                 sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafile.id)
@@ -1535,6 +1537,31 @@ class Event(object):
                 raise ValueError("Unable to write to database: no database was set.")
         else:
             print "WARNING: invalid datafileID!"
+
+        return result
+
+
+    def is_cr_found(self):
+        """Check if a polarization with a CR detection is found within
+        this event.
+
+        Returns *True* if a polarization with a CR detection is found,
+        *False* otherwise.
+        """
+        result = False
+
+        # TODO: Event.is_cr_found() - Add SQL statement
+        if self._db:
+            sql = """
+            SELECT p.status FROM
+            event_datafile AS ed
+            INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
+            INNER JOIN station_polarization as sp ON (ds.stationID=sp.stationID)
+            WHERE (p.status='OK' AND ed.eventID={0});""".format(self._id)
+            records = self.db.select(sql)
+
+            if records:
+                result = True
 
         return result
 
@@ -1783,7 +1810,7 @@ class Datafile(object):
         if station:
             # Update object
             if 0 == station.id:
-                station.write(recursive=False)
+                station.write(recursive=False, parameters=False)
             station.datafile = self     #  Reference to parent (datafile)
 
             # Check for duplicate
@@ -1798,7 +1825,7 @@ class Datafile(object):
             # Update database
             if self._db:
                 if not self._inDatabase:
-                    self.write(recursive=False)
+                    self.write(recursive=False, parameters=False)
 
                 # Update linking table
                 if self._id != 0:
@@ -2097,7 +2124,7 @@ class Station(object):
         if polarization:
             # Update object
             if 0 == polarization.id:
-                polarization.write()
+                polarization.write(recursive=False, parameters=False)
             polarization.station = self # Reference to parent (station)
             key = polarization.direction
             if 0 == len(key):
@@ -2107,7 +2134,7 @@ class Station(object):
             # Update database
             if self._db:
                 if not self._inDatabase:
-                    self.write(recursive=False)
+                    self.write(recursive=False, parameters=False)
 
                 # Update linking table
                 sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, polarization.id)
