@@ -176,28 +176,32 @@ def event_handler(eventID):
     elements.append(event_header(c, eventID))
 
     # Fetch event parameter keys 
+    parameters = SubElement(elements, "parameters")
+    figures = SubElement(elements, "figures")
+
     c.execute("PRAGMA table_info(eventparameters)")
 
     keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch event parameter values
     c.execute("SELECT * FROM eventparameters WHERE eventID=?", (eventID, ))
+    
+    v = c.fetchone()
+    if v is not None and len(v) > 1:
 
-    values = [unpickle_parameter(e) for e in c.fetchone()[1:]]
-
-    parameters = SubElement(elements, "parameters")
-    figures = SubElement(elements, "figures")
-    for e in zip(keys, values):
-
-        parameter = SubElement(parameters, "parameter")
-
-        if e[0] == "plotfiles":
-            for p in e[1]:
-                figure = SubElement(figures, "figure")
-                SubElement(figure, "path").text = str(p)
-        else:
-            SubElement(parameter, "key").text = e[0]
-            SubElement(parameter, "value").text = str(e[1])
+        values = [unpickle_parameter(e) for e in v[1:]]
+    
+        for e in zip(keys, values):
+    
+            parameter = SubElement(parameters, "parameter")
+    
+            if e[0] == "plotfiles":
+                for p in e[1]:
+                    figure = SubElement(figures, "figure")
+                    SubElement(figure, "path").text = str(p)
+            else:
+                SubElement(parameter, "key").text = e[0]
+                SubElement(parameter, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
@@ -243,6 +247,9 @@ def station_handler(eventID, station_name):
         SubElement(s, "status").text = e[1]
 
     # Fetch all station parameters
+    parameters = SubElement(elements, "parameters")
+    figures = SubElement(elements, "figures")
+
     c.execute("PRAGMA table_info(stationparameters)")
 
     keys = [str(e[1]) for e in c.fetchall()[1:]]
@@ -256,21 +263,22 @@ def station_handler(eventID, station_name):
     WHERE (ed.eventID=? AND s.stationname=?)
     """, (eventID, station_name))
 
-    values = [unpickle_parameter(e) for e in c.fetchone()[1:]]
+    v = c.fetchone()
+    if v is not None and len(v) > 1:
 
-    parameters = SubElement(elements, "parameters")
-    figures = SubElement(elements, "figures")
-    for e in zip(keys, values):
+        values = [unpickle_parameter(e) for e in v[1:]]
 
-        parameter = SubElement(parameters, "parameter")
+        for e in zip(keys, values):
 
-        if e[0] == "plotfiles":
-            for p in e[1]:
-                figure = SubElement(figures, "figure")
-                SubElement(figure, "path").text = str(p)
-        else:
-            SubElement(parameter, "key").text = e[0]
-            SubElement(parameter, "value").text = str(e[1])
+            parameter = SubElement(parameters, "parameter")
+
+            if e[0] == "plotfiles":
+                for p in e[1]:
+                    figure = SubElement(figures, "figure")
+                    SubElement(figure, "path").text = str(p)
+            else:
+                SubElement(parameter, "key").text = e[0]
+                SubElement(parameter, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
@@ -317,6 +325,9 @@ def polarization_handler(eventID, station_name, polarization_direction):
             s.set("current", "true")
 
     # Fetch polarization parameter keys 
+    parameters = SubElement(elements, "parameters")
+    figures = SubElement(elements, "figures")
+
     c.execute("PRAGMA table_info(polarizationparameters)")
 
     keys = [str(e[1]) for e in c.fetchall()[1:]]
@@ -332,22 +343,22 @@ def polarization_handler(eventID, station_name, polarization_direction):
     WHERE (ed.eventID=? AND s.stationname=? AND p.direction=?)
     """, (eventID, station_name, polarization_direction))
 
-    values = [unpickle_parameter(e) for e in c.fetchone()[1:]]
-
-    parameters = SubElement(elements, "parameters")
-    figures = SubElement(elements, "figures")
-    print keys, values
-    for e in zip(keys, values):
-
-        parameter = SubElement(parameters, "parameter")
-
-        if e[0] == "plotfiles":
-            for p in e[1]:
-                figure = SubElement(figures, "figure")
-                SubElement(figure, "path").text = str(p)
-        else:
-            SubElement(parameter, "key").text = e[0]
-            SubElement(parameter, "value").text = str(e[1])
+    v = c.fetchone()
+    if v is not None and len(v) > 1:
+    
+        values = [unpickle_parameter(e) for e in v[1:]]
+    
+        for e in zip(keys, values):
+    
+            parameter = SubElement(parameters, "parameter")
+    
+            if e[0] == "plotfiles":
+                for p in e[1]:
+                    figure = SubElement(figures, "figure")
+                    SubElement(figure, "path").text = str(p)
+            else:
+                SubElement(parameter, "key").text = e[0]
+                SubElement(parameter, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
