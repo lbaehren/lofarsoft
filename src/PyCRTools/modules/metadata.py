@@ -797,7 +797,7 @@ def getAntennaPositions(station,antennaset,return_as_hArray=False):
     return returnpos
 
 
-def getClockCorrection(station,antennaset="HBA",time=1278480000):
+def getClockCorrection(station,antennaset="LBA",time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
 
     *station* Station name or number for which to get the correction.
@@ -808,16 +808,36 @@ def getClockCorrection(station,antennaset="HBA",time=1278480000):
         station=idToStationName(station)
 
     clockcorrection={}
-    clockcorrection["CS002"]=8.2724449975934222e-06
-    clockcorrection["CS003"]=6.8756447631247787e-06
-    clockcorrection["CS004"]=7.8462185662334179e-06
-    clockcorrection["CS005"]=8.4978152695672203e-06
-    clockcorrection["CS006"]=7.8374740231534724e-06
-    clockcorrection["CS007"]=7.8673363857885218e-06
+    # Entering values as of April 26, 2012; for HBA and for LBA. HBA0 and HBA1 are available separately in LOFAR parsets.
+    if "LBA" in antennaset:
+        clockcorrection["CS002"] = 8.291395e-06
+        clockcorrection["CS003"] = 6.890990e-06
+        clockcorrection["CS004"] = 7.855759e-06
+        clockcorrection["CS005"] = 8.507690e-06
+        clockcorrection["CS006"] = 7.850904e-06
+        clockcorrection["CS007"] = 7.885136e-06
+    elif "HBA" in antennaset:
+        clockcorrection["CS002"] = 8.291395e-06 # is the same as LBA for CS002 and CS007
+        clockcorrection["CS003"] = 6.889990e-06
+        clockcorrection["CS004"] = 7.861759e-06
+        clockcorrection["CS005"] = 8.513690e-06
+        clockcorrection["CS006"] = 7.854904e-06
+        clockcorrection["CS007"] = 7.885136e-06
+    else:
+        print "ERROR: no clock offsets available for this antennaset: ", antennaset
+        return 0
+
+#    clockcorrection["CS002"]=8.2724449975934222e-06
+#    clockcorrection["CS003"]=6.8756447631247787e-06
+#    clockcorrection["CS004"]=7.8462185662334179e-06
+#    clockcorrection["CS005"]=8.4978152695672203e-06
+#    clockcorrection["CS006"]=7.8374740231534724e-06
+#    clockcorrection["CS007"]=7.8673363857885218e-06
 
     if station in clockcorrection.keys():
         return clockcorrection[station]
     else:
+        print "ERROR: no clock offsets available for this station: ", station
         return 0
 
 def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesystem="WGS84",):
