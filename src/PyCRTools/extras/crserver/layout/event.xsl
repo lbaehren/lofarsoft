@@ -79,7 +79,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <td>First stage pipeline</td>
         </tr>
         <tr>
-          <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_physics</a></td>
+          <td><a><xsl:attribute name="href">/log/cr_physics-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_physics</a></td>
           <td>Second stage pipeline</td>
         </tr>
       </xsl:if>
