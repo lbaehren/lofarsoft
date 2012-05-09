@@ -2322,7 +2322,7 @@ class Polarization(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def write(self, parameters=True):
+    def write(self, recursive=True, parameters=True):
         """Write polarization information to the database.
 
         **Properties**
@@ -2330,7 +2330,8 @@ class Polarization(object):
         ============  =================================================================
         Parameter     Description
         ============  =================================================================
-        *parameters*  if *True* write all parameters
+        *recursive*   if *True* write all underlying data structures.
+        *parameters*  if *True* write all parameters.
         ============  =================================================================
         """
         if self._db:
