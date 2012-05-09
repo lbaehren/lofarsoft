@@ -146,10 +146,10 @@ class CRDatabasePopulator(object):
                             results_filename = os.path.join(self.dbManager.settings.resultspath,
                                                             p.resultsfile)
                             if os.path.isfile(results_filename):
-                                if not "xml_processed" in p.parameter.keys():
+                                if not "xml_processed" in p.parameter.keys:
                                     print "      Processing results file %s..." %(results_filename)
                                     parameters = xmldict.load(results_filename)
-                                    for key in parameters.keys():
+                                    for key in parameters.keys:
                                         p[key] = parameters[key]
                                     p["xml_processed"] = True
                             else:
@@ -174,11 +174,11 @@ class CRDatabasePopulator(object):
                         # If results.xml file exists add results to properties.
                         results_filename = os.path.join(resultspath, p.resultsfile)
                         if os.path.isfile(results_filename) and options.parameters:
-                            if not "xml_processed" in p.parameter.keys():
+                            if not "xml_processed" in p.parameter.keys:
                                 print "      Processing results file %s..." %(results_filename)
                                 parameters = xmldict.load(results_filename)
                                 # - Add all parameters to info object & database
-                                for key in parameters.keys():
+                                for key in parameters.keys:
                                     p[key] = parameters[key]
                                 p["xml_processed"] = True
                         else:
@@ -189,7 +189,7 @@ class CRDatabasePopulator(object):
 
 
     def process_lora_data(self, event):
-        if not "lora_processed" in event.parameter.keys():
+        if not "lora_processed" in event.parameter.keys:
             print "Adding LORA parameters..."
             lora_data = lora.loraInfo(event.timestamp, self.settings.lorapath)
             if lora_data:

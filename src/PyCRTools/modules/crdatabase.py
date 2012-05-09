@@ -10,7 +10,7 @@ import re
 import pickle
 import time
 
-debug_mode = True
+debug_mode = False
 
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
@@ -918,7 +918,10 @@ class Settings(object):
 
 
 class _Parameter(object):
-    """General functionality for optional information of an information object."""
+    """General functionality for optional information of an information object.
+
+    *Legacy code*
+    """
 
     def __init__(self, parent=None):
         """Initialisation of the _Parameter object.
@@ -1199,18 +1202,19 @@ class BaseParameter(object):
         self._parameter[key] = None
 
 
+    @property
     def keys(self):
         """Return a list of valid parameter keys."""
-        self.keys = self._parameter.keys()
+        self._keys = self._parameter.keys()
 
-        if not self.keys:
+        if not self._keys:
             sql = "pragma table_info({0});".format(self._tablename)
             if debug_mode: print sql
             records = self._db.select(sql)
-            self.keys = [str(r[1]) for r in records]
-            self.keys.remove("{0}".format(self._idlabel)) # Remove the id field as a key
+            self._keys = [str(r[1]) for r in records]
+            self._keys.remove("{0}".format(self._idlabel)) # Remove the id field as a key
 
-        return self.keys
+        return self._keys
 
 
     def read(self):
@@ -1585,7 +1589,7 @@ class EventParameter(BaseParameter):
         """Initialization of the EventParameter object."""
         BaseParameter.__init__(self, parent)
 
-        EventParameter.key_list = self.keys()
+        EventParameter.key_list = self.keys
 
 
 
@@ -1906,7 +1910,7 @@ class DatafileParameter(BaseParameter):
         """Initialization of the DatafileParameter object."""
         BaseParameter.__init__(self, parent)
 
-        DatafileParameter.key_list = self.keys()
+        DatafileParameter.key_list = self.keys
 
 
 
@@ -2229,7 +2233,7 @@ class StationParameter(BaseParameter):
         """Initialization of the StationParameter object."""
         BaseParameter.__init__(self, parent)
 
-        StationParameter.key_list = self.keys()
+        StationParameter.key_list = self.keys
 
 
 
@@ -2432,7 +2436,7 @@ class PolarizationParameter(BaseParameter):
         """Initialization of the PolarizationParameter object."""
         BaseParameter.__init__(self, parent)
 
-        PolarizationParameter.key_list = self.keys()
+        PolarizationParameter.key_list = self.keys
 
 
 
