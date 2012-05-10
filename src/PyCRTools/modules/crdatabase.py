@@ -1085,6 +1085,7 @@ class Event(object):
         self.timestamp = 0
         self.status = "NEW" # Allowed values: NEW, CR_FOUND, CR_NOT_FOUND, CR_ANALYZED, CR_NOT_ANALYZED
         self.datafiles = []
+        self.stations = []
         self.parameter = EventParameter(parent=self)
 
         self.settings = Settings(db)
@@ -1140,6 +1141,13 @@ class Event(object):
                     datafile = Datafile(self._db, id=datafileID)
                     datafile.event = self
                     self.datafiles.append(datafile)
+
+                # Read stations
+                for d in self.datafiles:
+                    # Station objects are already created by creating Datafile objects (see above)
+                    self.stations.extend(d.stations)
+                    for s in d.stations:
+                        s.event = self
 
                 # Reading parameters
                 self.parameter.read()
