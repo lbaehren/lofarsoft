@@ -265,6 +265,22 @@ def mse(az, el, pos, times):
 
     return mse * c * c
 
+def phaseError(az, el, pos, phases, freq):
+
+    N = len(phases) # phases assumed 0 for phases[0]?
+    calcTimes = timeDelaysFromDirection(pos, (az, el))
+    calcTimes -= calcTimes[0] # same phase ref imposed
+    calcPhases = (twopi * freq) * calcTimes
+        
+    # wrap around into [-pi, pi]? Not strictly needed as the sin^2 function will do that...
+    deltaPhi = (phases - phases[0]) - calcPhases # measured 'phases' and expected 'calcPhases' at the same reference phase
+    
+    mu = (1.0/N) * np.sum( 1.0/(freq * twopi) * sin(deltaPhi) ) # check; uses same procedure as for 'mse' above.
+    msePerAntenna = ( 1.0/(freq * twopi) * sin(deltaPhi) ) ** 2 - mu*mu
+    mse = np.average(msePerAntenna) 
+
+    return mse * c * c
+
 def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount=0):
     """
     Mean-squared error in the times for a given direction and distance, as used in brute force or similar searches.
