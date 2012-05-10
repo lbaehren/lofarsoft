@@ -34,14 +34,20 @@ azimuths = np.arange(azsteps) * (360.0 / azsteps)
 
 imarray = np.zeros((elsteps, azsteps))
 elstep = 0
+minimum = 1.0e9
 for el in elevations:
     print elstep
     azstep = 0
     for az in azimuths:
         badness = sf.phaseError(az*deg2rad, el*deg2rad, pos, phases, freq)
+        if badness < minimum:
+            minimum = badness
+            minpos = (az, el)
         imarray[elsteps - 1 - elstep, azstep] = badness # hack to get elevations shown bottom to top as 0.0 - 90.0
         azstep += 1
     elstep += 1
 
+print 'Best fit: (az, el) = ', minpos
+print 'Phase error = ', minimum
 plt.imshow(imarray, cmap=plt.cm.hot,extent=(0, 360.0, 0.0, 90.0))
 plt.colorbar()
