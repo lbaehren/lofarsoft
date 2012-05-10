@@ -22,34 +22,74 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <li><a href="/events">All events</a></li>
       </ul>
   </nav>
-  <table>
+  <table class="parameters">
     <caption id="good">Good events</caption>
     <tr>
       <th>Id</th>
       <th>Timestamp</th>
       <th>Event status</th>
+      <th>Energy (eV)</th>
+      <th>Core x (m)</th>
+      <th>Core y (m)</th>
+      <th>Azimuth (deg)</th>
+      <th>Elevation (deg)</th>
+      <th>Moliere radius (m)</th>
     </tr>
     <xsl:for-each select="/elements/event">
       <xsl:if test="status='CR_FOUND' or status='CR_ANALYZED'">
-      <tr>
-        <td>
-          <a><xsl:attribute name="href">
-          events/<xsl:value-of select="id"/></xsl:attribute> 
-          <xsl:value-of select="id"/> 
-          </a>
-        </td>
-        <td><xsl:value-of select="timestamp"/></td>
-        <td><xsl:value-of select="status"/></td>
-      </tr>
+      <xsl:choose>
+         <xsl:when test="lora/@good_reconstruction">
+           <tr class="highlight">
+             <td>
+               <a><xsl:attribute name="href">
+               events/<xsl:value-of select="id"/></xsl:attribute> 
+               <xsl:value-of select="id"/> 
+               </a>
+             </td>
+             <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="status"/></td>
+             <td><xsl:value-of select="lora/energy"/></td>
+             <td><xsl:value-of select="lora/core_x"/></td>
+             <td><xsl:value-of select="lora/core_y"/></td>
+             <td><xsl:value-of select="lora/azimuth"/></td>
+             <td><xsl:value-of select="lora/elevation"/></td>
+             <td><xsl:value-of select="lora/moliere"/></td>
+           </tr>
+         </xsl:when>
+         <xsl:otherwise>
+           <tr>
+             <td>
+               <a><xsl:attribute name="href">
+               events/<xsl:value-of select="id"/></xsl:attribute> 
+               <xsl:value-of select="id"/> 
+               </a>
+             </td>
+             <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="status"/></td>
+             <td><xsl:value-of select="lora/energy"/></td>
+             <td><xsl:value-of select="lora/core_x"/></td>
+             <td><xsl:value-of select="lora/core_y"/></td>
+             <td><xsl:value-of select="lora/azimuth"/></td>
+             <td><xsl:value-of select="lora/elevation"/></td>
+             <td><xsl:value-of select="lora/moliere"/></td>
+           </tr>
+         </xsl:otherwise>
+      </xsl:choose>
       </xsl:if>
     </xsl:for-each>
   </table>
   <table>
-    <caption id="all">All events</caption>
+    <caption id="all" class="parameters">All events</caption>
     <tr>
       <th>Id</th>
       <th>Timestamp</th>
       <th>Event status</th>
+      <th>Energy (eV)</th>
+      <th>Core x (m)</th>
+      <th>Core y (m)</th>
+      <th>Azimuth (deg)</th>
+      <th>Elevation (deg)</th>
+      <th>Moliere radius (m)</th>
     </tr>
     <xsl:for-each select="/elements/event">
       <tr>
@@ -61,6 +101,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         </td>
         <td><xsl:value-of select="timestamp"/></td>
         <td><xsl:value-of select="status"/></td>
+        <td><xsl:value-of select="lora/energy"/></td>
+        <td><xsl:value-of select="lora/core_x"/></td>
+        <td><xsl:value-of select="lora/core_y"/></td>
+        <td><xsl:value-of select="lora/azimuth"/></td>
+        <td><xsl:value-of select="lora/elevation"/></td>
+        <td><xsl:value-of select="lora/moliere"/></td>
       </tr>
     </xsl:for-each>
   </table>

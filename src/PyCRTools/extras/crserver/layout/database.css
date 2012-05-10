@@ -50,6 +50,11 @@ td
     color: #303030;
 }
 
+table tr.highlight td
+{
+    color: green;
+}
+
 /* Navigation */
 nav ul
 {

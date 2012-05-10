@@ -3,6 +3,7 @@ Serve CR events dynamically from database.
 """
 
 import re
+import math
 import cPickle as pickle
 import sqlite3
 import SocketServer
@@ -20,6 +21,22 @@ parser.add_option("-n", "--hostname", default = "localhost", help = "hostname or
 parser.add_option("-d", "--database", default = "cr.db", help = "filename of database")
 
 (options, args) = parser.parse_args()
+
+def good_lora_reconstruction(core_x, core_y, moliere, elevation):
+    """
+    """
+
+    quality = False
+
+    try:
+        if math.sqrt(core_x**2 + core_y**2) < 150:
+            if moliere < 100 and moliere > 20:
+                if elevation > 55:
+                    quality = True
+    except:
+        pass
+
+    return quality
 
 def unpickle_parameter(db_parameter):
     """Return the parameter value from parsing a database friendly
@@ -134,7 +151,8 @@ def events_handler():
     c = conn.cursor()
 
     # Fetch all event IDs
-    c.execute("SELECT eventID, timestamp, status FROM events")
+    c.execute("""SELECT e.eventID, e.timestamp, e.status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
+    events AS e INNER JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
 
     # Generate empty XML
     elements = Element("elements")
@@ -146,6 +164,25 @@ def events_handler():
         SubElement(event, "id").text = str(e[0])
         SubElement(event, "timestamp").text = str(datetime.utcfromtimestamp(e[1]))
         SubElement(event, "status").text = str(e[2])
+
+        lora = SubElement(event, "lora")
+
+        energy = unpickle_parameter(e[3])
+        core_x = unpickle_parameter(e[4])
+        core_y = unpickle_parameter(e[5])
+        azimuth = unpickle_parameter(e[6])
+        elevation = unpickle_parameter(e[7])
+        moliere = unpickle_parameter(e[8])
+
+        if good_lora_reconstruction(core_x, core_y, moliere, elevation):
+            lora.attrib['good_reconstruction'] = "true"
+
+        SubElement(lora, "energy").text = str(energy)
+        SubElement(lora, "core_x").text = str(core_x)
+        SubElement(lora, "core_y").text = str(core_y)
+        SubElement(lora, "azimuth").text = str(azimuth)
+        SubElement(lora, "elevation").text = str(elevation)
+        SubElement(lora, "moliere").text = str(moliere)
 
     # Open string file descriptor for output
     f = StringIO()
