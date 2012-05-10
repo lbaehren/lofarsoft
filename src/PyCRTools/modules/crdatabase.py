@@ -177,22 +177,23 @@ class CRDatabase(object):
         records = self.db.select("SELECT {0}ID, lower(key), value FROM {0}parameters ORDER BY {0}ID;".format(tablename))
 
         if debug_mode: print "      . extracting parameter keys and values..." # DEBUG
-        transfer_key_strings = {}
-        transfer_val_strings = {}
+        transfer_keys = {}
+        transfer_values = {}
         for _id in id_list:
-            transfer_key_strings[_id] = "{0}ID".format(tablename)
-            transfer_val_strings[_id] = "{0}".format(_id)
+            transfer_keys[_id] = "{0}ID".format(tablename)
+            transfer_values[_id] = "{0}".format(_id)
         for r in records:
+            par_id = r[0]
             k = r[1]
             v = r[2]
             if (k in parameter_keys) and (v):
-                transfer_key_strings[r[0]] += ", " + k
-                transfer_val_strings[r[0]] += ", '" + v + "'"
+                transfer_keys[par_id] += ", " + k
+                transfer_values[par_id] += ", '" + v + "'"
 
         if debug_mode: print "      . building sql statements..." # DEBUG
         sql_list = []
         for _id in id_list:
-            sql_list.append("INSERT INTO {0}parameters_new ({1}) VALUES ({2});".format(tablename, transfer_key_strings[_id], transfer_val_strings[_id]))
+            sql_list.append("INSERT INTO {0}parameters_new ({1}) VALUES ({2});".format(tablename, transfer_keys[_id], transfer_values[_id]))
         if debug_mode: print "      . executing sql statements..." # DEBUG
         self.db.executelist(sql_list)
 
@@ -1272,11 +1273,22 @@ class BaseParameter(object):
         return pickle.loads(re.sub('"', "'", str(value)))
 
 
-    def summary(self):
-        """Summary of the parameters."""
-        for key in self.keys:
-            if key in self._parameter.keys():
-                print "  %-40s : %s" %(key, self._parameter[key])
+    def summary(self, parent_class_name="BaseParameter"):
+        """Summary of the parameter object."""
+        linewidth = 80
+
+        print "=" * linewidth
+        print "  Summary of the {0} object.".format(parent_class_name)
+        print "=" * linewidth
+
+        print "  %-40s : %d" %("Number of parameters", len(self._parameter))
+
+        print "="*linewidth
+
+        for key in self._parameter.keys():
+            print "    %-38s : %s" %(key, self._parameter[key])
+
+        print "="*linewidth
 
 
 
@@ -1545,12 +1557,11 @@ class Event(object):
         """Check if a polarization with a CR detection is found within
         this event.
 
-        Returns *True* if a polarization with a CR detection is found,
-        *False* otherwise.
+        Returns *True* if a polarization with a CR detection
+        (polarization.status=='OK') is found, *False* otherwise.
         """
         result = False
 
-        # TODO: Event.is_cr_found() - Add SQL statement
         if self._db:
             sql = """
             SELECT p.status FROM
@@ -1617,6 +1628,11 @@ class EventParameter(BaseParameter):
         BaseParameter.__init__(self, parent)
 
         EventParameter.key_list = self.keys
+
+
+    def summary(self):
+        """Summary of the EventParameter object."""
+        BaseParameter.Summary(self, "EventParameter")
 
 
 
@@ -1938,6 +1954,11 @@ class DatafileParameter(BaseParameter):
         BaseParameter.__init__(self, parent)
 
         DatafileParameter.key_list = self.keys
+
+
+    def summary(self):
+        """Summary of the DatafileParameter object."""
+        BaseParameter.Summary(self, "DatafileParameter")
 
 
 
@@ -2263,6 +2284,11 @@ class StationParameter(BaseParameter):
         StationParameter.key_list = self.keys
 
 
+    def summary(self):
+        """Summary of the StationParameter object."""
+        BaseParameter.Summary(self, "StationParameter")
+
+
 
 class Polarization(object):
     """CR polarization information.
@@ -2464,6 +2490,11 @@ class PolarizationParameter(BaseParameter):
         BaseParameter.__init__(self, parent)
 
         PolarizationParameter.key_list = self.keys
+
+
+    def summary(self):
+        """Summary of the PolarizationParameter object."""
+        BaseParameter.Summary(self, "PolarizationParameter")
 
 
 
