@@ -79,9 +79,15 @@ class CEP2Info:
 	        cmd="%s %s 'date' | grep -v xauth | grep -v connect | grep -v Permission | grep -v @ | egrep -v \'\\*\\*\\*\\*\\*\'" % (self.cexeccmd, cexeclocus)
         	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 	        # finding all locus nodes that have the dir with raw data
-        	for l in range(len(cexec_output)):
-                	if re.match("^-----", cexec_output[l]) is None:
-                        	self.alive_nodes.append(cexec_output[l-1].split(" ")[1])
+		try:
+			for l in range(len(cexec_output)):
+                		if re.match("^-----", cexec_output[l]) is None:
+                        		self.alive_nodes.append(cexec_output[l-1].split(" ")[1])
+		except Exception:
+			msg="Problem with connection to locus nodes...\nTry removing locus entries from your ~/.ssh/know_hosts file or try again later"
+			if log != None: log.error(msg)
+			else: print msg
+			quit(1)
                 if len(self.alive_nodes) == 0:
 			msg="The connection to all locus nodes is down. Try again later"
 			if log != None: log.error(msg)
