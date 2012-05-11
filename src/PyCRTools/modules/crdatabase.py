@@ -1339,6 +1339,7 @@ class Event(object):
             event_datafile AS ed
             INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
             INNER JOIN station_polarization as sp ON (ds.stationID=sp.stationID)
+            INNER JOIN polarization as p ON (sp.polarizationID=p.polarizationID)
             WHERE (p.status='OK' AND ed.eventID={0});""".format(self._id)
             records = self._db.select(sql)
 
