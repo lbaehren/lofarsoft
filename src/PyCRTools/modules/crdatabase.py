@@ -2243,7 +2243,7 @@ class Polarization(object):
         if showParameters:
             self.parameter.summary()
         else:
-            print "  %-40s : %d" %("# Parameters", len(self.parameter.keys))
+            print "  %-40s : %d" %("# Parameters", len(self.parameter.keys()))
 
         print "="*linewidth
 
