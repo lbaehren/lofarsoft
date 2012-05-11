@@ -390,7 +390,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "ERROR opening file - skipping this file!"
             statuslist.append("OPEN FAILED "+str(e))
             # xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
 
             if dump_html:
                 finish_file()
@@ -481,7 +481,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             if skip_existing_files and os.path.exists(htmlfilename):
                 print "# Resultfile ("+htmlfilename+") already exists - skipping file:",outputdir_with_subdirectories
                 # Write parameters to database
-                write_results_to_database(results, polarization_info)
+                write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 continue
             else:
                 print "# Using existing output directory",outputdir_with_subdirectories
@@ -522,7 +522,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         if "HBA" in datafile["ANTENNA_SET"]:
             statuslist.append("HBA SKIPPED")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -535,7 +535,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "ERROR: Data file size is too small (",max(datafile["DATA_LENGTH"]),") - skipping this file!"
             statuslist.append("FILE TOO SMALL")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -561,7 +561,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                     print "#ERROR - LORA trigger information not found"
                     statuslist.append("TRIGGER TOO LATE")
                     # Write parameters to database
-                    write_results_to_database(results, polarization_info)
+                    write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                     if dump_html:
                         finish_file()
                     continue
@@ -575,7 +575,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             else:
                 statuslist.append("TIMESTAMP NOT IN LORA LOGFILE")
                 # Write parameters to database
-                write_results_to_database(results, polarization_info)
+                write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 if dump_html:
                     finish_file()
                 continue
@@ -711,7 +711,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "#ERROR: To few good antennas ("+str(ndipoles)+")"
             statuslist.append("TOO FEW ANTENNAS")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -757,7 +757,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 print "#ERROR: To few good antennas ("+str(ndipoles)+")"
                 statuslist.append("TOO FEW ANTENNAS")
                 # Write parameters to database
-                write_results_to_database(results, polarization_info)
+                write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 if dump_html:
                     finish_file()
                 continue
@@ -868,7 +868,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "Error reading file - skipping this file"
             statuslist.append("READ ERROR")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -1029,7 +1029,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "ERROR: LocatePulseTrain: No pulses found!"
             statuslist.append("NO PULSE")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -1122,7 +1122,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "ERROR: LocatePulseTrain: Not enough pulses found for beam forming!"
             statuslist.append("TOO FEW PULSES")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -1190,7 +1190,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         if direction.ngood == 0:
             statuslist.append("NO GOOD TRIANGLES FOUND")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -1336,7 +1336,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             print "FITTED MAXIMUM OUTSIDE RANGE"
             statuslist.append("FITTED MAXIMUM OUTSIDE RANGE")
             # Write parameters to database
-            write_results_to_database(results, polarization_info)
+            write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if dump_html:
                 finish_file()
             continue
@@ -1423,7 +1423,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             event.write(result_file)
 
         # Writing results
-        write_results_to_database(results, polarization_info)
+        write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
         if dump_html:
             finish_file()
 
@@ -1457,7 +1457,7 @@ def process_event(event_id=-1):
         raise ValueError("No event_info object provided.")
 
 
-def write_results_to_database(results, polarization_info=None):
+def write_results_to_database(results, polarization_info=None, xml_file=None):
     """Write results to the database.
 
     **Properties**
@@ -1469,10 +1469,13 @@ def write_results_to_database(results, polarization_info=None):
     *polarization_info*  Object containing polarization information.
     ===================  ================================================
     """
-    if polarization_info and results:
-        for key in results.keys():
-            polarization_info[key] = results[key]
-        polarization_info.write(recursive=False, parameters=True)
+    if results:
+        if xml_file:
+            xmldict.dump(xml_file, results)
+        if polarization_info:
+            for key in results.keys():
+                polarization_info[key] = results[key]
+            polarization_info.write(recursive=False, parameters=True)
 
 
 ########################################################################
