@@ -394,6 +394,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             if datafile_info:
                 datafile_info.status = "OPEN FAILED"
                 datafile_info.write(recursive=False, parameters=False)
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -484,6 +487,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 print "# Resultfile ("+htmlfilename+") already exists - skipping file:",outputdir_with_subdirectories
                 # Write parameters to database
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+                if polarization_info:
+                    polarization_info.status = "BAD"
+                    polarization_info.write(recursive=False, parameters=False)
                 continue
             else:
                 print "# Using existing output directory",outputdir_with_subdirectories
@@ -525,6 +531,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("HBA SKIPPED")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -538,6 +547,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("FILE TOO SMALL")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -564,6 +576,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                     statuslist.append("TRIGGER TOO LATE")
                     # Write parameters to database
                     write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+                    if polarization_info:
+                        polarization_info.status = "BAD"
+                        polarization_info.write(recursive=False, parameters=False)
                     if dump_html:
                         finish_file()
                     continue
@@ -578,6 +593,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 statuslist.append("TIMESTAMP NOT IN LORA LOGFILE")
                 # Write parameters to database
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+                if polarization_info:
+                    polarization_info.status = "BAD"
+                    polarization_info.write(recursive=False, parameters=False)
                 if dump_html:
                     finish_file()
                 continue
@@ -714,6 +732,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("TOO FEW ANTENNAS")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -760,6 +781,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 statuslist.append("TOO FEW ANTENNAS")
                 # Write parameters to database
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+                if polarization_info:
+                    polarization_info.status = "BAD"
+                    polarization_info.write(recursive=False, parameters=False)
                 if dump_html:
                     finish_file()
                 continue
@@ -871,6 +895,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("READ ERROR")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -1032,6 +1059,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("NO PULSE")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -1125,6 +1155,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("TOO FEW PULSES")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -1193,6 +1226,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("NO GOOD TRIANGLES FOUND")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -1339,6 +1375,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("FITTED MAXIMUM OUTSIDE RANGE")
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
+            if polarization_info:
+                polarization_info.status = "BAD"
+                polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
