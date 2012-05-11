@@ -1403,7 +1403,7 @@ class EventParameter(BaseParameter):
 
     def summary(self):
         """Summary of the EventParameter object."""
-        BaseParameter.Summary(self, "EventParameter")
+        BaseParameter.summary(self, "EventParameter")
 
 
 
@@ -1729,7 +1729,7 @@ class DatafileParameter(BaseParameter):
 
     def summary(self):
         """Summary of the DatafileParameter object."""
-        BaseParameter.Summary(self, "DatafileParameter")
+        BaseParameter.summary(self, "DatafileParameter")
 
 
 
@@ -2057,7 +2057,7 @@ class StationParameter(BaseParameter):
 
     def summary(self):
         """Summary of the StationParameter object."""
-        BaseParameter.Summary(self, "StationParameter")
+        BaseParameter.summary(self, "StationParameter")
 
 
 
@@ -2265,7 +2265,7 @@ class PolarizationParameter(BaseParameter):
 
     def summary(self):
         """Summary of the PolarizationParameter object."""
-        BaseParameter.Summary(self, "PolarizationParameter")
+        BaseParameter.summary(self, "PolarizationParameter")
 
 
 
