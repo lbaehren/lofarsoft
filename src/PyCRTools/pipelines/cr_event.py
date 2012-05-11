@@ -391,8 +391,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             statuslist.append("OPEN FAILED "+str(e))
             # xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
-            datafile_info.status = "OPEN FAILED"
-            datafile_info.write(recursive=False, parameters=False)
+            if datafile_info:
+                datafile_info.status = "OPEN FAILED"
+                datafile_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
             continue
@@ -1425,8 +1426,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
 
         # Writing results
         write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
-        polarization_info.status = final_status
-        polarization_info.write(recursive=False, parameters=False)
+        if polarization_info:
+            polarization_info.status = final_status
+            polarization_info.write(recursive=False, parameters=False)
 
         if dump_html:
             finish_file()
@@ -1458,7 +1460,7 @@ def process_event(event_id=-1):
 
         event_info.summary()
     else:
-        raise ValueError("No event_info object provided.")
+        raise ValueError("Invalid event_id provided")
 
 
 def write_results_to_database(results=None, polarization_info=None, xml_file=None):
