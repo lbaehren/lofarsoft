@@ -75,8 +75,7 @@
       |   |-- testing
       |   `-- utilities
       |-- CR-Tools
-      |-- DAL
-      `-- BDSM
+      `-- DAL
   \endverbatim
 */
 
@@ -103,8 +102,7 @@
       |   |-- pipeline
       |   `-- recipes
       |-- CR-Tools
-      |-- DAL
-      `-- BDSM
+      `-- DAL
   \endverbatim	
   
   The framework aims to make it possible to manage a variety of different

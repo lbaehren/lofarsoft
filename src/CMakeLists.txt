@@ -108,34 +108,6 @@ endmacro (lus_package_experimental)
 
 ## ==============================================================================
 ##
-##                                                        $LOFARSOFT/src/PyBDSM
-##
-## ==============================================================================
-
-
-##__________________________________________________________
-##                              Build & Testing instructions
-
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
-  ## Build package from present sources
-  lus_package_build (pybdsm PyBDSM)
-  ## Experimental build
-  lus_package_experimental (pybdsm PyBDSM)
-else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
-  ExternalProject_Add (pybdsm
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/PyBDSM
-    SVN_REPOSITORY http://usg.lofar.org/svn/code/trunk/src/PyBDSM
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
-    )
-endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyBDSM)
-
-##__________________________________________________________
-##                                      Package dependencies
-
-add_dependencies (pybdsm wcslib cfitsio boost num_util pyfits)
-
-## ==============================================================================
-##
 ##                                                         $LOFARSOFT/src/contrib
 ##
 ## ==============================================================================
