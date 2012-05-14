@@ -50,7 +50,7 @@ class CRDatabase(object):
         self.settings = Settings(self.db)
 
         # Database version applied in this module
-        self.db_required_version = 1
+        self.db_required_version = 2
         self.__updateDatabase()
 
         # Path settings
@@ -152,12 +152,55 @@ class CRDatabase(object):
 
     def __updateDatabase(self):
         self.__updateDatabase_v0_to_v1()
+        self.__updateDatabase_v1_to_v2()
+
+
+    def addParameterName(self, grouptype, parametername):
+        """Add a parameter with name *parametername* to the table
+        *grouptype*.
+
+        **Properties**
+
+        ===============  =======================================================
+        Parameter        Description
+        ===============  =======================================================
+        *grouptype*      Type of the group to whcih to add the parameter:
+                         'Event', 'Datafile', 'Station', or 'Polarization'.
+        *parametername*  Name of the parameter.
+        ===============  =======================================================
+
+        If a column with the name *parametername* already exists it
+        will be skipped, otherwise it will be created.
+        """
+        if not grouptype in ["event", "datafile", "station", "polarization"]:
+            raise ValueError("Invalid grouptype, should be 'event', 'datafile', 'station' or 'polarization'")
+
+        tablename = grouptype.lower()+"parameters"
+        columnname = parametername.lower()
+
+        if not self.isLocked():
+            # Find list of parameter names
+            parameternames = []
+            sql = "pragma table_info({0});".format(tablename)
+            if debug_mode: print "SQL: table info: ",sql
+            records = self.db.select(sql)
+            if records:
+                parameternames = [str(r[1]) for r in records[1:]]
+
+            if parameternames:
+                if not columnname in parameternames:
+                    # Add parametername to table
+                    sql = "ALTER TABLE {0} ADD COLUMN {1} TEXT;".format(tablename, columnname)
+                    if debug_mode: print "SQL: Adding column: ",sql
+                    self.db.execute(sql)
+        else:
+            raise ValueError("DATABASE IS LOCKED: Unable to add a parametername {0} to the database".format(columnname))
 
 
     def __convertParameterTable_v0_to_v1(self, tablename="", parameter_keys=[]):
 
         if not tablename in ["event", "datafile", "station", "polarization"]:
-            raise ValueError("Invalid tablename, should be 'event', 'datafile', 'station' or 'polarization'")
+            raise ValueError("Invalid tablename: should be 'event', 'datafile', 'station' or 'polarization'")
 
         # Create new parameters table
         if debug_mode: print "    Creating new table..." # DEBUG
@@ -219,6 +262,7 @@ class CRDatabase(object):
         """
         db_version_pre = 0
         db_version_post = 1
+
 
         if ((self.settings.db_version == db_version_pre) and
             (self.db_required_version >= db_version_post)):
@@ -352,6 +396,32 @@ class CRDatabase(object):
             print "  Updating database version number..." # DEBUG
 
             self.db.executescript("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+
+
+    def __updateDatabase_v1_to_v2(self):
+        """Update database from version 1 to version 2.
+
+        The database is only updated if the version of the database is
+        1 and the required version is larger than the database version.
+
+        List of changes:
+        - Added locking of database.
+        """
+        db_version_pre = 1
+        db_version_post = 2
+
+        if ((self.settings.db_version == db_version_pre) and
+            (self.db_required_version >= db_version_post)):
+
+            print "Upgrading database to version {0}...".format(db_version_post)
+
+            # Add lock setting.
+            print "  Updating database locking..."
+            self.db.executescript("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('locked', '1');")
+
+            # Upgrade the database version number.
+            print "  Updating database version number..." # DEBUG
+            self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
 
 
     def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
@@ -697,6 +767,30 @@ class CRDatabase(object):
             return none
 
 
+    def isLocked(self):
+        """Check if the database is locked."""
+        result = True
+
+        if self.db:
+            sql = "SELECT value FROM main.settings WHERE key='locked'"
+            if (int(self.db.select(sql)[0][0]) == 0):
+                result = False
+
+        if debug_mode: print "isLocked(): ",result # DEBUG
+
+        return result
+
+
+    def unlock(self):
+        """Unlock the database to be able to modify it. An unlocked database cannot be locked again!
+        """
+        print "UNLOCKING THE DATABASE"
+        print "WARNING: An unlocked database cannot be locked again!"
+
+        sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('locked', str(0))
+        self.db.execute(sql)
+
+
     def summary(self):
         """Summary of the CRDatabase object."""
         linewidth = 80
@@ -715,6 +809,13 @@ class CRDatabase(object):
         print "  %-40s : '%s'" %("Base path", self.basepath)
         print "  %-40s : '%s'" %("Data path", self.settings.datapath)
         print "  %-40s : '%s'" %("Results path", self.settings.resultspath)
+        print "  %-40s : %d" %("Version", self.settings.db_version)
+
+        if self.isLocked():
+            db_locked_status = "locked"
+        else:
+            db_locked_status = "unlocked"
+        print "  %-40s : %s" %("Is database locked", db_locked_status)
 
         print "-"*linewidth
 
@@ -973,7 +1074,7 @@ class BaseParameter(object):
 
         if not self._keys:
             sql = "pragma table_info({0});".format(self._tablename)
-            if debug_mode: print sql
+            if debug_mode: print sql    # DEBUG
             records = self._db.select(sql)
             if records:
                 self._keys = [str(r[1]) for r in records[1:]]
@@ -984,7 +1085,7 @@ class BaseParameter(object):
     def read(self):
         """Read parameters from the database."""
         sql = "SELECT * FROM {0} WHERE {1}={2}".format(self._tablename, self._idlabel, self._id)
-        if debug_mode: print sql
+        if debug_mode: print sql        # DEBUG
         records = self._db.select(sql)
         if records:
             values = [v for v in records[0][1:]]
