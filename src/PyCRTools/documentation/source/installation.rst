@@ -9,6 +9,8 @@ This chapter describes how to install the PyCRTools on the following operating s
 * :ref:`installation_mac`
 * :ref:`installation_ubuntu`
 
+  * :ref:`installation_ubuntu_12`
+  * :ref:`installation_ubuntu_10`
 
 .. _installation_mac:
 
@@ -348,11 +350,126 @@ Test by running::
 Installation on Ubuntu
 ======================
 
+.. _installation_ubuntu_12:
+
+Installation on Ubuntu 12.04
+----------------------------
+
+The following shows you how to install PyCRTools on Ubuntu 12.04
+(Precise Pangolin) for 64 bit systems.
+
+Prerequisites
+^^^^^^^^^^^^^
+
+The following Ubuntu packages need to be installed:
+
+* g++
+* gfortran
+* subversion
+* python-dev
+* zlib1g-dev
+* flex
+* libatlas-base-dev
+* liblapack-dev
+* swig
+* bison
+* libncurses5-dev
+* libfreetype6-dev
+* libpng12-dev
+* python-tk
+* python-pyfits
+* tk8.5-dev
+* fftw3-dev
+* git
+* valgrind
+
+This can be done by using following commands::
+
+  sudo apt-get install g++ gfortran flex swig bison subversion
+  sudo apt-get install zlib1g-dev libatlas-base-dev liblapack-dev
+  sudo apt-get install libncurses5-dev libfreetype6-dev libpng12-dev
+  sudo apt-get install python-dev python-tk python-pyfits tk8.5-dev fftw3-dev
+  sudo apt-get install libbz2-dev libghc-readline-dev
+  sudo apt-get install git git git-core git-doc git-man git-svn
+  sudo apt-get install valgrind
+
+
+Additionally you can install the following packages directly from the
+Ubuntu repository to reduce the amount of packages that need to be
+build during the build process of the PyCRTools::
+
+  sudo apt-get install libboost1.48-all-dev
+  sudo apt-get install wcslib-dev
+  sudo apt-get install cmake cmake-doc cmake-curses-gui
+  sudo apt-get install libgsl0-dev
+  sudo apt-get install python-matplotlib
+  sudo apt-get install python-sphinx
+  sudo apt-get install libcfitsio3-dev
+  sudo apt-get install python-numpy
+  sudo apt-get install num-utils
+  sudo apt-get install python-scipy
+  sudo apt-get install libblas-dev
+  sudo apt-get install python-sip-dev
+  sudo apt-get install openmpi-bin openmpi-common
+  sudo apt-get install ipython
+
+
+
+Building the Pycrtools
+^^^^^^^^^^^^^^^^^^^^^^
+
+Now we are ready to install PyCRTools itself. First get the latest
+source code from the LOFAR USG Subversion repository::
+
+  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
+
+Then add the following line to your ``.bashrc`` or ``.bash_profile``::
+
+  export LOFARSOFT=/path/to/lofarsoft
+  . $LOFARSOFT/devel_common/scripts/init.sh
+
+Don't forget to restart your shell or problems will arise along the way.
+
+Now bootstrap the build system::
+
+  cd $LOFARSOFT
+  ./bootstrap
+
+Then go to the build directory::
+
+  cd build
+
+The CasaCore package needs to build from the latest SVN
+revision. Therefor this needs some extra tweaking of the CMake
+settings. To do this run::
+
+  ccmake .
+
+and apply the following setting::
+
+  CASACORE_FROM_LATEST_SVN_REVISION ON
+
+Complete the CMake configuration by pressing ``c``, ``c``, and ``g``
+consecutively.
+
+Compile the PyCRTools::
+
+  make pycrtools
+
+Grab a cup of coffee and if all is well, in about 15 minutes you
+should have your very own working installation of the PyCRTools.
+
+
+.. _installation_ubuntu_10:
+
+Installation on Ubuntu 10.04 and 10.10
+--------------------------------------
+
 The following shows you how to install PyCRTools on Ubuntu 10.04 (Lucid
 Lynx) and Ubuntu 10.10 (Maverick Meerkat) in either 32 or 64 bit.
 
 Prerequisites
--------------
+^^^^^^^^^^^^^
 
 The following Ubuntu packages need to be installed:
 
@@ -383,7 +500,7 @@ For this you can just use the package manager::
 
 
 Building the PyCRTools
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
 
