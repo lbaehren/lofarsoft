@@ -188,11 +188,13 @@ class CRDatabase(object):
                 parameternames = [str(r[1]) for r in records[1:]]
 
             if parameternames:
-                if not columnname in parameternames:
-                    # Add parametername to table
-                    sql = "ALTER TABLE {0} ADD COLUMN {1} TEXT;".format(tablename, columnname)
-                    if debug_mode: print "SQL: Adding column: ",sql
-                    self.db.execute(sql)
+                if columnname in parameternames:
+                    return
+
+            # Add parametername to table
+            sql = "ALTER TABLE {0} ADD COLUMN {1} TEXT;".format(tablename, columnname)
+            if debug_mode: print "SQL: Adding column: ",sql
+            self.db.execute(sql)
         else:
             raise ValueError("DATABASE IS LOCKED: Unable to add a parametername {0} to the database".format(columnname))
 
