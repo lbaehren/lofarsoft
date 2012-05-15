@@ -50,7 +50,7 @@ class CRDatabase(object):
         self.settings = Settings(self.db)
 
         # Database version applied in this module
-        self.db_required_version = 2
+        self.db_required_version = 3
         self.__updateDatabase()
 
         # Path settings
@@ -157,6 +157,7 @@ class CRDatabase(object):
     def __updateDatabase(self):
         self.__updateDatabase_v0_to_v1()
         self.__updateDatabase_v1_to_v2()
+        self.__updateDatabase_v2_to_v3()
 
 
     def addParameterName(self, grouptype, parametername):
@@ -424,6 +425,42 @@ class CRDatabase(object):
             # Add lock setting.
             print "  Updating database locking..."
             self.db.executescript("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('locked', '1');")
+
+            # Upgrade the database version number.
+            print "  Updating database version number..." # DEBUG
+            self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+
+
+    def __updateDatabase_v2_to_v3(self):
+        """Update database from version 1 to version 2.
+
+        The database is only updated if the version of the database is
+        1 and the required version is larger than the database version.
+
+        List of changes:
+        - Added locking of database.
+        """
+        db_version_pre = 2
+        db_version_post = 3
+
+        print "Upgrading database to version {0}...".format(db_version_post)
+
+        if ((self.settings.db_version == db_version_pre) and
+            (self.db_required_version >= db_version_post)):
+
+            # Add parameters for cr_physics pipeline
+            print "  Adding additional parameters for cr_physics pipeline..." # DEBUG
+            sql = ""
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "plotfiles")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "crp_average_direction")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("station", "crp_pulse_direction")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_itrf_antenna_positions")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_delays")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_strength")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_rms")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_stokes")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_polarization_angle")
+            self.db.executescript(sql)
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
