@@ -77,6 +77,10 @@ class CRDatabase(object):
         elif "" == self.settings.lorapath:
             self.settings.lorapath =lorapath_DEFAULT
 
+        # Name of the file that locks the database file
+        self.lockfilename = os.path.join(os.path.dirname(filename), "." + os.path.basename(filename) + ".lock")
+
+
 
     def __createDatabase(self):
         """***DO NOT UPDATE TABLE DEFINITIONS IN THIS METHOD***.
@@ -776,7 +780,12 @@ class CRDatabase(object):
         if self.db:
             sql = "SELECT value FROM main.settings WHERE key='locked'"
             if (int(self.db.select(sql)[0][0]) == 0):
-                result = False
+                if os.path.exists(self.lockfilename):
+                    sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('locked', str(1))
+                    self.db.execute(sql)
+                    result = True
+                else:
+                    result = False
 
         if debug_mode: print "isLocked(): ",result # DEBUG
 
@@ -786,11 +795,17 @@ class CRDatabase(object):
     def unlock(self):
         """Unlock the database to be able to modify it. An unlocked database cannot be locked again!
         """
-        print "UNLOCKING THE DATABASE"
-        print "WARNING: An unlocked database cannot be locked again!"
+        if self.isLocked():
+            if not os.path.exists(self.lockfilename):
+                print "UNLOCKING THE DATABASE..."
+                print "WARNING: An unlocked database cannot be locked again!"
 
-        sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('locked', str(0))
-        self.db.execute(sql)
+                sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('locked', str(0))
+                self.db.execute(sql)
+            else:
+                print "Unable to unlock the database."
+        else:
+           print "Database is already unlocked."
 
 
     def summary(self):
