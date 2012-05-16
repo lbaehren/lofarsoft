@@ -1997,9 +1997,9 @@ def parsecmd(prg, argv):
 				is_no_check_rawdata = True
 			if opt in ("--basehrefdir"):
 				global webplotsdir
-				webplotsdir = re.sub(plots, arg + "/" + plots, webplotsdir)
+				webplotsdir = re.sub("plots", arg + "/plots", webplotsdir)
 				global webgriddir
-				webgriddir = re.sub(grid, arg + "/" + grid, webgriddir)
+				webgriddir = re.sub("grid", arg + "/grid", webgriddir)
 				global basehref_dir
 				basehref_dir = arg
 			if opt in ("--htmltitle"):
