@@ -13,9 +13,9 @@ from optparse import OptionParser
 # Parse commandline options
 parser = OptionParser()
 parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
-parser.add_option("--max-threads", default = 12, type = int, help = "maximum number of threads to use")
-parser.add_option("--max-attempts", default = 2, type = int, help = "maximum number of times to attempt processing a file before adding to failed")
-parser.add_option("--log-dir", default = "./", help = "directory to store logs")
+parser.add_option("--max-threads", default = 1, type = int, help = "maximum number of threads to use")
+parser.add_option("--max-attempts", default = 1, type = int, help = "maximum number of times to attempt processing a file before adding to failed")
+parser.add_option("--log-dir", default = "./log", help = "directory to store logs")
 
 (options, args) = parser.parse_args()
 
@@ -37,6 +37,7 @@ def call_pipeline(event_id):
         attempt = 1
 
         while (attempt <= options.max_attempts and status != 0):
+            print "python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_event.py "+"--database="+options.database+" --id="+str(event_id)+" --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R"
             status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_event.py "+"--database="+options.database+" --id="+str(event_id)+" --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R", stdout=f, stderr=subprocess.STDOUT, shell=True)
             attempt += 1
 

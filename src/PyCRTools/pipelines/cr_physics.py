@@ -36,7 +36,8 @@ start = time.clock()
 event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
-event.status = "CR_NOT_ANALYZED"
+event.status = "CR_PHYSICS_PROCESSING"
+event.write(recursive=False, parameters=False)
 
 # Loop over all stations in event
 stations = []
@@ -73,8 +74,8 @@ for station in stations:
         rp = '1'
 
     # Select block containing pulse
-    blocksize = station.polarization[rp]["BLOCKSIZE"]
-    block = station.polarization[rp]["BLOCK"]
+    blocksize = station.polarization[rp]["blocksize"]
+    block = station.polarization[rp]["block"]
     f["BLOCKSIZE"] = blocksize
     f["BLOCK"] = block
 

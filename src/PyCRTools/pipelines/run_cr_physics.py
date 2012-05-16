@@ -13,9 +13,9 @@ from optparse import OptionParser
 # Parse commandline options
 parser = OptionParser()
 parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
-parser.add_option("--max-threads", default = 12, type = int, help = "maximum number of threads to use.")
-parser.add_option("--log-dir", default = "./", help = "directory to store logs.")
-parser.add_option("--output-dir", default = "./", help = "directory to store pipeline output.")
+parser.add_option("--max-threads", default = 1, type = int, help = "maximum number of threads to use.")
+parser.add_option("--log-dir", default = "./log", help = "directory to store logs.")
+parser.add_option("--output-dir", default = "./results", help = "directory to store pipeline output.")
 
 (options, args) = parser.parse_args()
 

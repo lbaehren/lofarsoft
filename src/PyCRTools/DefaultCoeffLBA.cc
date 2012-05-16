@@ -72,3 +72,9 @@ const std::complex<double> default_lba_coeff[100] = {
     std::complex<double>(-0.0389912915621699, -0.0301364165752433), std::complex<double>(-0.0462331759359031, 0.0405864871628086),
     std::complex<double>(-0.0251598701859194, 0.0115712688652445), std::complex<double>(-0.0563476280247398, 0.0079787883434624)
 };
+
+// Fitted LBA bandpass function = N/D with
+// 
+//      N = Freq^2; D = sum C(k) Fnorm^k where the bandpass coefficients C are
+const double lba_bandpass_coeff[10] = { 0.0130, -0.0316, 0.3380, 0.1231, -0.7401, -0.3435, 1.0000, 0.3891, -0.4324, -0.1741 };
+
