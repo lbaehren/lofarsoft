@@ -4,7 +4,7 @@
 # N core defaul is = 8 (cores)
 
 #PLEASE increment the version number when you edit this file!!!
-VERSION=3.46
+VERSION=3.47
  
 #####################################################################
 # Usage #
@@ -2663,9 +2663,9 @@ do
 						      fi
 						      if (( $CHAN > 1 ))
 						      then
-						         echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						         echo dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 						      else
-						         echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						         echo dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 						      fi
 
 						   fi
@@ -2694,11 +2694,11 @@ do
  						          fi
  						          if (( $CHAN > 1 ))
  						          then
-	 						          echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-	 						          dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+	 						          echo "Running: " dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+	 						          dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
 	 						      else
-	 						          echo "Running: " dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-	 						          dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+	 						          echo "Running: " dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+	 						          dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
 	 						      fi
 	 						      pid=$!
  						          wait $pid
@@ -2815,9 +2815,9 @@ do
 							       fi
 							       if (( $CHAN > 1 ))
 							       then
-						              echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						              echo dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 						           else
-						              echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+						              echo dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 						           fi
 							   fi
 						       if [ $test == 0 ]
@@ -2844,11 +2844,11 @@ do
 							           fi
 							           if (( $CHAN > 1 ))
 							           then
-							              echo "Running: " echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-							              dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+							              echo "Running: " echo dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							              dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 							           else
-							              echo "Running: " echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-							              dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+							              echo "Running: " echo dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+							              dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
 							           fi
  						               pid=$!
  						               wait $pid
@@ -3033,9 +3033,9 @@ do
 						    fi	
 						    if (( $CHAN > 1 ))
 						    then			
-                               echo dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+                               echo dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
                             else
-                               echo dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
+                               echo dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout
                             fi
 						fi
 
@@ -3063,11 +3063,11 @@ do
 						        fi
 						        if (( $CHAN > 1 ))
 						        then
-						           echo "Running: " dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-						           dspsr -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+						           echo "Running: " dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						           dspsr -t 2 -E $fold_pulsar_cut.par -j "zap chan `seq -s, 0 $CHAN $max`" -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
 						        else
-						           echo "Running: " dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
-						           dspsr -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
+						           echo "Running: " dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> $log
+						           dspsr -t 2 -E $fold_pulsar_cut.par -q -b 256 -fft-bench -O ${fold_pulsar}_${OBSID}_RSP${ii} -K -A -L $dspsr_Lflag ${PULSAR_ARRAY_PRIMARY[0]}_${OBSID}_RSP${ii}.fits >> ${fold_pulsar}_${OBSID}_RSP${ii}.dspsrout 2>&1 &
 						        fi
 						        pid=$!
 				                wait $pid
