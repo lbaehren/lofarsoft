@@ -100,8 +100,8 @@ griddir="/home/%s/%s/grid" % (username, hostdir)
 # where to copy profile plots (ag004)
 webserver="%s@10.87.15.4" % (username, )  # ag004 - former dop95
 htmltitle="LOFAR pulsar observations "
-basehref="http://www.astron.nl/lofarpwg"
-basehref_dir=""
+basehref="http://www.astron.nl"
+basehref_dir="lofarpwg"
 webplotsdir="/var/www/pulsars/plots"
 webgriddir="/var/www/pulsars/grid"
 # if False, then do not rsync plots to external webserver
@@ -1276,7 +1276,7 @@ class writeHtmlList:
                                   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
                           	  <meta name=\"Classification\" content=\"public HTML\">\n\
                                   <meta name=\"robots\" content=\"noindex, nofollow\">\n\
-				  <base href=\"%s/%s\" />\n" % (basehref, basehref_dir == "" and "" or basehref_dir + "/"))
+				  <base href=\"%s/%s/\" />\n" % (basehref, basehref_dir))
 		self.htmlptr.write ("\
                           	  <title>%s</title>\n" % (htmltitle,))
 		self.htmlptr.write ("\
@@ -1678,7 +1678,7 @@ class obsstat:
                                   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
                           	  <meta name=\"Classification\" content=\"public HTML\">\n\
                                   <meta name=\"robots\" content=\"noindex, nofollow\">\n\
-                                  <base href=\"%s/%s\" />\n" % (basehref, basehref_dir == "" and "" or basehref_dir + "/"))
+                                  <base href=\"%s/%s/\" />\n" % (basehref, basehref_dir))
 		self.htmlptr.write ("\
                           	  <title>%s%s</title>\n" % (htmltitle, "statistics"))
 		self.htmlptr.write ("\
