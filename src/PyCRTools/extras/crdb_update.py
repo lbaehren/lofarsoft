@@ -10,6 +10,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-a", "--all-events", action="store_true", default=False, help = "apply action to all events in database")
 parser.add_option("-s", "--event-status", default = "NEW", help = "update event status to given value")
+parser.add_option("-o", "--old-event-status", default = "NEW", help = "update all events with this status to new status")
 parser.add_option("-d", "--database", default = "cr.db", help = "filename of database")
 
 (options, args) = parser.parse_args()
@@ -28,6 +29,10 @@ with con:
     
     if options.all_events:
         cur.execute("SELECT eventID FROM events")
+
+        events = [e[0] for e in cur.fetchall()]
+    elif options.old_event_status != "NEW":
+        cur.execute("SELECT eventID FROM events WHERE status=?", (options.old_event_status, ))
 
         events = [e[0] for e in cur.fetchall()]
     else:
