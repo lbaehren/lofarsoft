@@ -102,8 +102,8 @@ webserver="%s@10.87.15.4" % (username, )  # ag004 - former dop95
 htmltitle="LOFAR pulsar observations "
 basehref="http://www.astron.nl"
 basehref_dir="lofarpwg"
-webplotsdir="/var/www/pulsars/plots"
-webgriddir="/var/www/pulsars/grid"
+webplotsdir="/var/www/%s/plots" % (basehref_dir, )
+webgriddir="/var/www/%s/grid" % (basehref_dir, )
 # if False, then do not rsync plots to external webserver
 is_torsync = True
 # if True, then add links of number of obs vs. time, and disk volume vs. time
@@ -1678,7 +1678,7 @@ class obsstat:
                                   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n\
                           	  <meta name=\"Classification\" content=\"public HTML\">\n\
                                   <meta name=\"robots\" content=\"noindex, nofollow\">\n\
-                                  <base href=\"%s/%s/\" />\n" % (basehref, basehref_dir))
+				  <base href=\"%s/%s/\" />\n" % (basehref, basehref_dir))
 		self.htmlptr.write ("\
                           	  <title>%s%s</title>\n" % (htmltitle, "statistics"))
 		self.htmlptr.write ("\
@@ -1884,8 +1884,8 @@ def usage (prg):
                                        If you use both --hostdir and --dbfile, make sure that --dbfile stands later in the command line\n\
           --dbfile <dbfile>          - database file with stored info about the observations\n\
           --basehrefdir <dir>        - the base directory on remote webserver where html files, all plots and grid ascii files will be copied\n\
-                                       to corresponding plots/ and grid/ directories. This directory is relative to <project_root> directory on the webserver.\n\
-                                       Default is 'lofarpwg'\n\
+                                       to corresponding plots/ and grid/ directories. This directory is relative to project root directory\n\
+                                       on the webserver. Default is 'lofarpwg'\n\
           --htmltitle <str>          - the title for the html page. Default is 'LOFAR pulsar observations '\n\
           --statevol-links           - on the statistics' page adds links to plots of evolution of number of observations\n\
                                        and disk volume with time\n\
@@ -1996,11 +1996,11 @@ def parsecmd(prg, argv):
 				global is_no_check_rawdata
 				is_no_check_rawdata = True
 			if opt in ("--basehrefdir"):
-				global webplotsdir
-				webplotsdir = re.sub("plots", arg + "/plots", webplotsdir)
-				global webgriddir
-				webgriddir = re.sub("grid", arg + "/grid", webgriddir)
 				global basehref_dir
+				global webplotsdir
+				webplotsdir = re.sub("/" + basehref_dir + "/", "/" + arg + "/", webplotsdir)
+				global webgriddir
+				webgriddir = re.sub("/" + basehref_dir + "/", "/" + arg + "/", webgriddir)
 				basehref_dir = arg
 			if opt in ("--htmltitle"):
 				global htmltitle
