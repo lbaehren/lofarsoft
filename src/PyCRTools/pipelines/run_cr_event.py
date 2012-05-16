@@ -37,8 +37,13 @@ def call_pipeline(event_id):
         attempt = 1
 
         while (attempt <= options.max_attempts and status != 0):
-            print "python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_event.py "+"--database="+options.database+" --id="+str(event_id)+" --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R"
-            status = subprocess.call("python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_event.py "+"--database="+options.database+" --id="+str(event_id)+" --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R", stdout=f, stderr=subprocess.STDOUT, shell=True)
+
+            command = "python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/pipelines/cr_event.py "+"--database="+options.database+" --id="+str(event_id)+" --max_data_length=12289024 --min_data_length=1 --search_window_width=5000 --nsigma=3 -R"
+
+            print command
+
+            status = subprocess.call(command, stdout=f, stderr=subprocess.STDOUT, shell=True)
+
             attempt += 1
 
 # Check how many CPU's we have
