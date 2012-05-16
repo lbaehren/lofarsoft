@@ -1885,7 +1885,7 @@ def usage (prg):
           --dbfile <dbfile>          - database file with stored info about the observations\n\
           --basehrefdir <dir>        - the base directory on remote webserver where html files, all plots and grid ascii files will be copied\n\
                                        to corresponding plots/ and grid/ directories. This directory is relative to <project_root> directory on the webserver.\n\
-                                       Default is ''\n\
+                                       Default is 'lofarpwg'\n\
           --htmltitle <str>          - the title for the html page. Default is 'LOFAR pulsar observations '\n\
           --statevol-links           - on the statistics' page adds links to plots of evolution of number of observations\n\
                                        and disk volume with time\n\
