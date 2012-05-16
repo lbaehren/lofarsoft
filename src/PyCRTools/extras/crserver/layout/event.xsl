@@ -67,13 +67,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <table>
   <caption id="logs">Logs</caption>
   <tr><th>Name</th><th>Description</th></tr>
-      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND'">
+      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND' or /elements/header/status='CR_EVENT_PROCESSING'">
         <tr>
           <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_event</a></td>
           <td>First stage pipeline</td>
         </tr>
       </xsl:if>
-      <xsl:if test="/elements/header/status='CR_ANALYZED' or /elements/header/status='CR_NOT_ANALYZED'">
+      <xsl:if test="/elements/header/status='CR_ANALYZED' or /elements/header/status='CR_NOT_ANALYZED' or /elements/header/status='CR_PHYSICS_PROCESSING'">
         <tr>
           <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.log</xsl:attribute>cr_event</a></td>
           <td>First stage pipeline</td>
