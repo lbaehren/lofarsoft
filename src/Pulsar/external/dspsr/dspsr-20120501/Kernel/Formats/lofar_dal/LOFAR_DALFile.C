@@ -53,8 +53,10 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 
   Attribute<std::string> telescope = bf_file->telescope();
 
-  if (telescope.exists())
+  if (telescope.exists()) {
     cerr << "LOFAR_DALFile::open_file telescope=" << telescope.get() << endl;
+    info.set_telescope(telescope.get());
+  }
 
   Attribute<std::string> observer = bf_file->observer();
 
@@ -115,6 +117,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   if (freq2.exists())
     cerr << "LOFAR_DALFile::open_file beam frequency=" << freq2.get() << endl;
 
+/* VLAD: DAL does not seem to have target() method added yet... (it is present in ICD#003)
   Attribute< std::vector<std::string> > targets = beam.target();
   if (targets.exists())
     {
@@ -123,6 +126,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
     }
   else
     cerr << "beam target does not exist" << endl;
+*/
 
   cerr << endl << "*****************" << endl << endl;
 
@@ -288,8 +292,9 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 
 
   Attribute<double> rate = sap.channelWidth();
-  if (rate.exists())
+  if (rate.exists()) {
     info.set_rate (rate.get());
+  }
 
   
   if (coord.exists())
