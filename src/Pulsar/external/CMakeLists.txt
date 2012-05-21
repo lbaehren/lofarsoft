@@ -326,7 +326,8 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 
 #if (NOT TARGET dspsr)
 
-  set (dspsr_version   "20120327")  
+  set (dspsr_version   "20120501")  
+#  set (dspsr_version   "20120327")  
 #  set (dspsr_version   "20120322")  
 #  set (dspsr_version   "20120316")
 #  set (dspsr_version   "1.0")
@@ -342,6 +343,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
   )
 #add_dependencies (dspsr_unpack tempo2_install psrchive_install psrdada_install)
 add_dependencies (dspsr_unpack tempo2_install psrdada_install)
+#add_dependencies (dspsr_unpack)
 
 add_custom_target (dspsr_bootstrap
   COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada  1> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
@@ -355,7 +357,7 @@ add_dependencies (dspsr_bootstrap  tempo2_install psrdada_install dspsr_unpack)
 if (UNIX)
  if (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl LIBS=-ldal LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CXXFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include/dal 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (darwin) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
@@ -364,7 +366,7 @@ add_dependencies (dspsr_configure  tempo2_install psrdada_install dspsr_bootstra
 #add_dependencies (dspsr_configure  dspsr_bootstrap dspsr_unpack)
  else (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
+  COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS=-ldl LIBS=-ldal LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CXXFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include/dal 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (linux) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
