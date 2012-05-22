@@ -392,34 +392,281 @@ def idToStationName(station_id):
     The station name is more commonly used to identify the station
     for example for the files with metadata"""
 
-    if ( station_id > 255 ):
-        print "Unvalid station id"
-        return "Unvalid station id"
-    digit1=station_id/100
-    digit2=np.mod(station_id,100)/10
-    digit3=np.mod(station_id,10)
+    if station_id == 1:
+        return "CS001"
+      
+    elif station_id == 2:
+        return "CS002"
+      
+    elif station_id == 3:
+        return "CS003"
+      
+    elif station_id == 4:
+        return "CS004"
+      
+    elif station_id == 5:
+        return "CS005"
+      
+    elif station_id == 6:
+        return "CS006"
+      
+    elif station_id == 7:
+        return "CS007"
+      
+    elif station_id == 8:
+        return "CS008"
+      
+    elif station_id == 9:
+        return "CS009"
+      
+    elif station_id == 10:
+        return "CS010"
+      
+    elif station_id == 11:
+        return "CS011"
+      
+    elif station_id == 12:
+        return "CS012"
+      
+    elif station_id == 13:
+        return "CS013"
+      
+    elif station_id == 14:
+        return "CS014"
+      
+    elif station_id == 15:
+        return "CS015"
+      
+    elif station_id == 16:
+        return "CS016"
+      
+    elif station_id == 17:
+        return "CS017"
+      
+    elif station_id == 18:
+        return "CS018"
+      
+    elif station_id == 19:
+        return "CS019"
+      
+    elif station_id == 20:
+        return "CS020"
+      
+    elif station_id == 21:
+        return "CS021"
+      
+    elif station_id == 22:
+        return "CS022"
+      
+    elif station_id == 23:
+        return "CS023"
+      
+    elif station_id == 24:
+        return "CS024"
+      
+    elif station_id == 25:
+        return "CS025"
+      
+    elif station_id == 26:
+        return "CS026"
+      
+    elif station_id == 27:
+        return "CS027"
+      
+    elif station_id == 28:
+        return "CS028"
+      
+    elif station_id == 29:
+        return "CS029"
+      
+    elif station_id == 30:
+        return "CS030"
+      
+    elif station_id == 31:
+        return "CS031"
+      
+    elif station_id == 32:
+        return "CS032"
+      
+    elif station_id == 101:
+        return "CS101"
+      
+    elif station_id == 102:
+        return "CS102"
+      
+    elif station_id == 103:
+        return "CS103"
+      
+    elif station_id == 121:
+        return "CS201"
+      
+    elif station_id == 141:
+        return "CS301"
+      
+    elif station_id == 142:
+        return "CS302"
+      
+    elif station_id == 161:
+        return "CS401"
+      
+    elif station_id == 181:
+        return "CS501"
+      
+    elif station_id == 104:
+        return "RS104"
+      
+    elif station_id == 105:
+        return "RS105"
+      
+    elif station_id == 106:
+        return "RS106"
+      
+    elif station_id == 107:
+        return "RS107"
+      
+    elif station_id == 108:
+        return "RS108"
+      
+    elif station_id == 109:
+        return "RS109"
+      
+    elif station_id == 122:
+        return "RS202"
+      
+    elif station_id == 123:
+        return "RS203"
+      
+    elif station_id == 124:
+        return "RS204"
+      
+    elif station_id == 125:
+        return "RS205"
+      
+    elif station_id == 126:
+        return "RS206"
+      
+    elif station_id == 127:
+        return "RS207"
+      
+    elif station_id == 128:
+        return "RS208"
+      
+    elif station_id == 129:
+        return "RS209"
+      
+    elif station_id == 130:
+        return "RS210"
+      
+    elif station_id == 143:
+        return "RS303"
+      
+    elif station_id == 144:
+        return "RS304"
+      
+    elif station_id == 145:
+        return "RS305"
+      
+    elif station_id == 146:
+        return "RS306"
+      
+    elif station_id == 147:
+        return "RS307"
+      
+    elif station_id == 148:
+        return "RS308"
+      
+    elif station_id == 149:
+        return "RS309"
+      
+    elif station_id == 150:
+        return "RS310"
+      
+    elif station_id == 162:
+        return "RS402"
+      
+    elif station_id == 163:
+        return "RS403"
+      
+    elif station_id == 164:
+        return "RS404"
+      
+    elif station_id == 165:
+        return "RS405"
+      
+    elif station_id == 166:
+        return "RS406"
+      
+    elif station_id == 167:
+        return "RS407"
+      
+    elif station_id == 168:
+        return "RS408"
+      
+    elif station_id == 169:
+        return "RS409"
+      
+    elif station_id == 170:
+        return "RS410"
+      
+    elif station_id == 171:
+        return "RS411"
+      
+    elif station_id == 172:
+        return "RS412"
+      
+    elif station_id == 173:
+        return "RS413"
+      
+    elif station_id == 182:
+        return "RS502"
+      
+    elif station_id == 183:
+        return "RS503"
+      
+    elif station_id == 184:
+        return "RS504"
+      
+    elif station_id == 185:
+        return "RS505"
+      
+    elif station_id == 186:
+        return "RS506"
+      
+    elif station_id == 187:
+        return "RS507"
+      
+    elif station_id == 188:
+        return "RS508"
+      
+    elif station_id == 189:
+        return "RS509"
+      
+    elif station_id == 201:
+        return "DE601"
+      
+    elif station_id == 202:
+        return "DE602"
+      
+    elif station_id == 203:
+        return "DE603"
+      
+    elif station_id == 204:
+        return "DE604"
+      
+    elif station_id == 205:
+        return "DE605"
+      
+    elif station_id == 206:
+        return "FR606"
+      
+    elif station_id == 207:
+        return "SE607"
+      
+    elif station_id == 208:
+        return "UK608"
 
-    if digit1 == 0:
-        station_name="CS"+str(digit1)+str(digit2)+str(digit3)
-    elif digit1 == 2:
-        digit1=6
-        if digit2 != 0:
-            print "Unkown international station please add it to the list"
-            return "Unknown international station"
-        if digit3 > 4:
-            print "Unkown international station please add it to the list"
-            return "Unknown international station"
-        if digit3 <= 4:
-            station_nr=digit1*100+digit2*10+digit3;
-            station_name="DE"+str(station_nr)
-    elif digit1==1:
-        station_nr=digit1*100+(digit2/2)*100+np.mod(digit2,2)*10+digit3
-        if digit3<=2 or digit3==3 and digit2==0:
-            station_name="CS"+str(station_nr)
-        else:
-            station_name="RS"+str(station_nr)
-
-    return station_name
+    else:
+        return "ST{0:03d}".format(station_id)
 
 def stationNameToID(station_name):
     """Returns the station id from a station name
