@@ -982,10 +982,11 @@ class PipeUnit:
 					self.log.info("Creating RFI mask...")
 					cmd="rfifind -o %s -psrfits -noclip -blocks 16 %s %s.fits" % (self.output_prefix, zapstr, self.output_prefix)
 					rfifind_popen = self.start_and_go(cmd, workdir=self.curdir)
-					self.log.info("Producing RFI report...")
-					samples_to_average=int(10000. / self.sampling) # 10 s worth of data
-					cmd="python %s/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n %d %s.fits" % (cep2.lofarsoft, samples_to_average, self.output_prefix)
-					subdyn_popen = self.start_and_go(cmd, workdir=self.curdir)
+					if not cmdline.opts.is_skip_subdyn:
+						self.log.info("Producing RFI report...")
+						samples_to_average=int(10000. / self.sampling) # 10 s worth of data
+						cmd="python %s/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n %d %s.fits" % (cep2.lofarsoft, samples_to_average, self.output_prefix)
+						subdyn_popen = self.start_and_go(cmd, workdir=self.curdir)
 
 					# waiting for rfifind to finish
 					self.waiting("rfifind", rfifind_popen)
@@ -1142,7 +1143,7 @@ class PipeUnit:
 						cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
 						self.execute(cmd, workdir=self.outdir)
 
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_norfi:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_norfi and not cmdline.opts.is_skip_subdyn:
 				# waiting for subdyn to finish
 				self.waiting("subdyn.py", subdyn_popen)
 
@@ -1266,6 +1267,14 @@ class CVUnit(PipeUnit):
 
 	# main CV processing function
 	def run(self, obs, cep2, cmdline, log):
+		# if we are not using dspsr directly to read *.h5 files
+		if cmdline.opts.is_nodal:
+			self.run_nodal(obs, cep2, cmdline, log)
+		else:
+			self.run_dal(obs, cep2, cmdline, log)
+
+	# main run function using dspsr to read directly *.h5 files
+	def run_dal(self, obs, cep2, cmdline, log):
 		try:
 			self.log = log
 			self.logfile = cep2.get_logfile().split("/")[-1]		
@@ -1288,7 +1297,177 @@ class CVUnit(PipeUnit):
 			cmd="mkdir -m 775 -p %s" % (self.curdir)
 			self.execute(cmd)
 
-			# if not justting making plots...
+			# if not just making plots...
+			if not cmdline.opts.is_plots_only:
+				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
+        	        	                          # also we need to moint locus nodes that we need
+					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
+					input_files=[]
+					for loc in self.tab.location:
+						# first "mounting" corresponding locus node
+						input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, obs.id)
+						process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+						process.communicate()
+						# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
+						# so we have to make soft links to input files
+						self.log.info("Making links to input files in the current directory...")
+						for f in self.tab.rawfiles[loc]:
+							# links to the *.raw files
+							cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
+							self.execute(cmd, workdir=self.curdir)
+							# links to the *.h5 files
+							cmd="ln -sf %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+							self.execute(cmd, workdir=self.curdir)
+						input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
+						input_files.extend(input_file)
+				else:
+					self.log.error("Complex voltage data should be on more than 1 locus nodes. Exiting...")
+					self.kill()
+					sys.exit(1)
+
+				self.log.info("Input data: %s" % ("\n".join(input_files)))
+
+			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
+			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
+
+			if not cmdline.opts.is_plots_only:
+				# getting the list of "_S0_" files, the number of which is how many freq splits we have
+				s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
+				if not cmdline.opts.is_nofold and not cmdline.opts.is_nodecode:
+					verbose="-q"
+					if cmdline.opts.is_debug: verbose="-v"
+
+					# running dspsr for every pulsar for all frequency splits
+					self.log.info("Running dspsr for all frequency splits...")
+					# loop on pulsars
+					for psr in self.psrs:
+						self.log.info("Running dspsr for pulsar %s..." % (psr))
+						psr2=re.sub(r'[BJ]', '', psr)
+						# loop on frequency splits
+						for ii in range(len(s0_files)):
+							cmd="dspsr -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d %s" % \
+								(cmdline.opts.tsubint, verbose, self.outdir, psr2, \
+								psr, self.output_prefix, ii, cmdline.opts.nthreads, s0_files[ii])
+							self.execute(cmd, workdir=self.curdir)
+
+						# running psradd to add all freq channels together
+						self.log.info("Adding frequency channels together...")
+						ar_files=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
+						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+						self.execute(cmd, workdir=self.curdir)
+						# removing corrupted freq channels
+						total_chan = obs.nrSubbands * self.nrChanPerSub
+						if self.nrChanPerSub > 1:
+							self.log.info("Zapping every %d channel and using median smoothed difference algorithm..." % (self.nrChanPerSub))
+							cmd="paz -z \"%s\" -r -m %s_%s.ar" % \
+								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+						else:
+							self.log.info("Zapping channels using median smoothed difference algorithm...")
+							cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+
+						# removing ar-files from dspsr for every frequency split
+						remove_list=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
+						cmd="rm -f %s" % (" ".join(remove_list))
+						self.execute(cmd, workdir=self.curdir)
+
+					# removing links for input h5 files
+					cmd="rm -f %s" % (" ".join(input_files))
+					self.execute(cmd, workdir=self.curdir)
+					# removing links for input .raw files
+					cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
+					self.execute(cmd, workdir=self.curdir)
+
+					# scrunching in freq
+					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (obs.nrSubbands))
+					for psr in self.psrs:
+						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+
+			# first, calculating the proper min divisir for the number of subbands
+#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
+			# calculating the greatest common denominator of obs.nrSubbands starting from self.nrChanPerSub
+			pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
+			self.log.info("Creating diagnostic plots...")
+			for psr in self.psrs:
+				# creating DSPSR diagnostic plots
+				cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+				self.execute(cmd, workdir=self.curdir)
+				if not cmdline.opts.is_skip_rmfit:
+					try:
+						# running rmfit for negative and positive RMs
+						cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+						cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
+                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
+							psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+					except Exception:
+						self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
+						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
+                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+							psr, self.output_prefix, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+				else:
+					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
+                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+						(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+						psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+
+			# finishing off the processing...
+			self.finish_off(obs, cep2, cmdline)
+
+		except Exception:
+			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))
+			self.kill()
+			sys.exit(1)
+
+		# kill all open processes
+		self.kill()
+		self.procs = []
+		# remove reference to PulpLogger class from processing unit
+		self.log = None
+		# remove references to Popen processes
+		self.parent = None
+
+	# main run function using bf2puma2 for conversion
+	def run_nodal(self, obs, cep2, cmdline, log):
+		try:
+			self.log = log
+			self.logfile = cep2.get_logfile().split("/")[-1]		
+			self.start_time=time.time()	
+
+			# start logging
+			self.log.info("%s SAP=%d TAB=%d %s(%s%s Stokes: %s)    UTC start time is: %s  @node: %s" % \
+				(obs.id, self.sapid, self.tabid, obs.FE and ", ".join(self.tab.stationList) + " " or "", obs.FE and "FE/" or "", self.code, \
+				self.stokes, time.asctime(time.gmtime()), cep2.current_node))
+
+			# Re-creating root output directory
+			cmd="mkdir -m 775 -p %s" % (self.outdir)
+			self.execute(cmd)
+
+			# creating Par-file in the output directory or copying existing one
+			if not cmdline.opts.is_nofold: 
+				self.get_parfile(cmdline, cep2)
+
+			# Creating curdir dir
+			cmd="mkdir -m 775 -p %s" % (self.curdir)
+			self.execute(cmd)
+
+			# if not just making plots...
 			if not cmdline.opts.is_plots_only:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         	        	                          # also we need to moint locus nodes that we need
@@ -1333,7 +1512,7 @@ class CVUnit(PipeUnit):
 					if cmdline.opts.is_debug: verbose="-v"
 
 					# running bf2puma2 command for all frequency splits...
-					self.log.info("Running bf2puma2 for all frequency splits simultaneously...")
+					self.log.info("Running bf2puma2 for all frequency splits...")
 					# loop on frequency splits
 					for ii in range(len(s0_files)):
 						cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
@@ -1396,12 +1575,12 @@ class CVUnit(PipeUnit):
 								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
-						# removing files created by bf2puma2 and dspsr for each freq channel
+						# removing files created by dspsr for each freq channel
 						remove_list=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
 						cmd="rm -f %s" % (" ".join(remove_list))
 						self.execute(cmd, workdir=self.curdir)
 
-					# removing files created by bf2puma2 and dspsr for each freq channel
+					# removing files created by bf2puma2 for each freq channel
 					remove_list=glob.glob("%s/%s_SB*_CH*" % (self.curdir, input_prefix))
 					cmd="rm -f %s" % (" ".join(remove_list))
 					self.execute(cmd, workdir=self.curdir)

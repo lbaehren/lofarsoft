@@ -119,6 +119,8 @@ class CMDLine:
                            help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
         	self.groupCS.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
                            help="turn off running pdmp in the pipeline", default=False)
+        	self.groupCS.add_option('--skip-subdyn', action="store_true", dest='is_skip_subdyn',
+                           help="optional parameter to skip subdyn.py only", default=False)
         	self.groupCS.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
                            help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
         	self.groupCS.add_option('--skip-prepfold', action="store_true", dest='is_skip_prepfold',
@@ -126,6 +128,8 @@ class CMDLine:
 		self.cmd.add_option_group(self.groupCS)
 		# adding CV extra options
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
+        	self.groupCV.add_option('--nodal', action="store_true", dest='is_nodal',
+                           help="use bf2puma2 to read raw data instead of using dspsr to read *.h5 files directly", default=False)
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
                                  clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
@@ -459,15 +463,18 @@ class CMDLine:
 				if obs.IS and self.opts.is_noIS: skipped += " IS"
 				if obs.CV and self.opts.is_noCV: skipped += " CV"
 				if obs.FE and self.opts.is_noFE: skipped += " FE"
-				if obs.CV and self.opts.is_skip_rmfit: log.info("rmfit = ")
+				if skipped != "":
+					log.info("Skipped processing of: %s" % (skipped))
 				if len(self.user_beams) != 0:
 					log.info("User-specified BEAMS to process: %s" % (", ".join(self.user_beams)))
 				if len(self.user_excluded_beams) != 0:
 					log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
 				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
 				else:
+					if obs.CV: log.info("DSPSR with LOFAR DAL = %s" % (self.opts.is_nodal and "no" or "yes"))
 					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
+					log.info("Subdyn.py = %s" % (self.opts.is_skip_subdyn and "no" or "yes"))
 					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
