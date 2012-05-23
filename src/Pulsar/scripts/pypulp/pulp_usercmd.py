@@ -130,6 +130,10 @@ class CMDLine:
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
         	self.groupCV.add_option('--nodal', action="store_true", dest='is_nodal',
                            help="use bf2puma2 to read raw data instead of using dspsr to read *.h5 files directly", default=False)
+        	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
+                           help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
+        	self.groupCV.add_option('--maxram', dest='maxram', metavar='MBYTES',
+                           help="set the upper limit on RAM usage for dspsr. Default is %default MB", default=512, type='float')
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
                                  clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
@@ -139,8 +143,6 @@ class CMDLine:
                            help="normalize the data based on entire data set. Otherwise, the scaling is updated after every data block", default=False)
         	self.groupCV.add_option('--write-ascii', action="store_true", dest='is_write_ascii',
                            help="write out also ascii files (.rv) containing complex values", default=False)
-        	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
-                           help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
         	self.groupCV.add_option('--output-chans-per-subband', dest='output_chans_per_subband', metavar='#CHANS',
                            help="set output number of channels per subband. Default: %default (all channels in subband are collapsed)", default=1, type='int')
         	self.groupCV.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
@@ -471,7 +473,7 @@ class CMDLine:
 					log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
 				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
 				else:
-					if obs.CV: log.info("DSPSR with LOFAR DAL = %s" % (self.opts.is_nodal and "no" or "yes"))
+					if obs.CV: log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = %g MB)" % (self.opts.maxram)))
 					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
 					log.info("Subdyn.py = %s" % (self.opts.is_skip_subdyn and "no" or "yes"))
