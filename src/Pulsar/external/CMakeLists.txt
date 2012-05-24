@@ -339,13 +339,14 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
     COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
     COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
     COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/../../lib/lidal.so ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/
+    COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/../../lib/lidal.so ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/config/
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
   )
 #add_dependencies (dspsr_unpack tempo2_install psrchive_install psrdada_install)
 #add_dependencies (dspsr_unpack tempo2_install psrdada_install)
 
-set( ENV{LD_LIBRARY_PATH} ${PULSAR_LD_LIBRARY_PATH} )
+set( ENV{LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/../../lib:. )
 
 add_custom_target (dspsr_bootstrap
   COMMAND export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/../../lib 
