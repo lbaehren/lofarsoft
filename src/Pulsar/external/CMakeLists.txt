@@ -342,10 +342,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
     COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
   )
 #add_dependencies (dspsr_unpack tempo2_install psrchive_install psrdada_install)
-#add_dependencies (dspsr_unpack tempo2_install psrdada_install)
-
-set( ENV{LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/../../lib:. )
-set( ENV{PATH} $ENV{PATH}:${CMAKE_INSTALL_PREFIX}/bin:. )
+add_dependencies (dspsr_unpack tempo2_install psrdada_install)
 
 add_custom_target (dspsr_bootstrap
   COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada  1> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
@@ -353,8 +350,8 @@ add_custom_target (dspsr_bootstrap
   COMMENT "Running bootstrap for project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
 #add_dependencies (dspsr_bootstrap  tempo2_install psrchive_install psrdada_install dspsr_unpack)
-#add_dependencies (dspsr_bootstrap  tempo2_install psrdada_install dspsr_unpack)
-add_dependencies (dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_bootstrap  tempo2_install psrdada_install dspsr_unpack)
+#add_dependencies (dspsr_bootstrap dspsr_unpack)
 
 if (UNIX)
  if (APPLE)
@@ -364,8 +361,8 @@ add_custom_target (dspsr_configure
   COMMENT "Configuring project dspsr (darwin) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
 #add_dependencies (dspsr_configure  tempo2_install psrchive_install psrdada_install dspsr_bootstrap dspsr_unpack)
-#add_dependencies (dspsr_configure  tempo2_install psrdada_install dspsr_bootstrap dspsr_unpack)
-add_dependencies (dspsr_configure  dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_configure  tempo2_install psrdada_install dspsr_bootstrap dspsr_unpack)
+#add_dependencies (dspsr_configure  dspsr_bootstrap dspsr_unpack)
  else (APPLE)
 add_custom_target (dspsr_configure
   COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS='-ldl -ldal' LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CXXFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include/dal LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
@@ -373,8 +370,7 @@ add_custom_target (dspsr_configure
   COMMENT "Configuring project dspsr (linux) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
   )
 #add_dependencies (dspsr_configure  tempo2_install psrchive_install psrdada_install dspsr_bootstrap dspsr_unpack)
-#add_dependencies (dspsr_configure  tempo2_install psrdada_install dspsr_bootstrap dspsr_unpack)
-add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_configure  tempo2_install psrdada_install dspsr_bootstrap dspsr_unpack)#add_dependencies (dspsr_configure dspsr_bootstrap dspsr_unpack)
  endif (APPLE)
 endif (UNIX)
 
@@ -384,8 +380,8 @@ add_custom_target (dspsr_build
   COMMENT "Building project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name}..."
   )
 #add_dependencies (dspsr_build  tempo2_install psrchive_install psrdada_install dspsr_configure dspsr_bootstrap dspsr_unpack)
-#add_dependencies (dspsr_build  tempo2_install psrdada_install dspsr_configure dspsr_bootstrap dspsr_unpack)
-add_dependencies (dspsr_build  dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_build  tempo2_install psrdada_install dspsr_configure dspsr_bootstrap dspsr_unpack)
+#add_dependencies (dspsr_build  dspsr_configure dspsr_bootstrap dspsr_unpack)
 
 add_custom_target (dspsr_preinstall
   COMMAND make install prefix=${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build -I${CMAKE_INSTALL_PREFIX}/psrdada/include 
@@ -394,8 +390,8 @@ add_custom_target (dspsr_preinstall
   COMMENT "Install project dspsr first into ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build..."
   )
 #add_dependencies (dspsr_preinstall  tempo2_install psrchive_install psrdada_install dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
-#add_dependencies (dspsr_preinstall  tempo2_install psrdada_install dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
-add_dependencies (dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_preinstall  tempo2_install psrdada_install dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+#add_dependencies (dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
 add_custom_target (dspsr_install
   COMMAND cp -r bin/* ${CMAKE_INSTALL_PREFIX}/bin/
@@ -405,8 +401,8 @@ add_custom_target (dspsr_install
   COMMENT "Install project dspsr into ${CMAKE_INSTALL_PREFIX}..."
   )
 #add_dependencies (dspsr_install tempo2_install psrchive_install psrdada_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
-#add_dependencies (dspsr_install tempo2_install psrdada_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
-add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+add_dependencies (dspsr_install tempo2_install psrdada_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
+#add_dependencies (dspsr_install dspsr_preinstall dspsr_build dspsr_configure dspsr_bootstrap dspsr_unpack)
 
   ## Register last step in the chain with the actual target
 #  add_custom_target (dspsr ALL)
