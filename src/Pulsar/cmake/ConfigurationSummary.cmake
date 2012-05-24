@@ -30,6 +30,7 @@ message (STATUS " .. Enable verbose configure     = ${PULSAR_VERBOSE_CONFIGURE}"
 message (STATUS " .. Enable Python bindings       = ${PULSAR_PYTHON_BINDINGS}"      )
 message (STATUS "    .. PYTHONPATH                = ${PULSAR_PYTHONPATH}"           )
 message (STATUS "    .. LD_LIBRARY_PATH           = ${PULSAR_LD_LIBRARY_PATH}"      )
+message (STATUS "    .. ENV:LD_LIBRARY_PATH       = $ENV{LD_LIBRARY_PATH}"          )
 message (STATUS " External dependencies:"                                           )
 message (STATUS " .. Have CFITSIO                 = ${CFITSIO_FOUND}"               )
 message (STATUS "    .. CFITSIO version           = ${CFITSIO_VERSION}"             )
