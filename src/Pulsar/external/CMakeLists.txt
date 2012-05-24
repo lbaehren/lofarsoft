@@ -346,7 +346,8 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 
 add_custom_target (dspsr_bootstrap
   COMMAND export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/../../lib 
-  COMMAND echo ${LD_LIBRARY_PATH}
+  COMMAND echo This is the LD_LIBRARY_PATH:  ${LD_LIBRARY_PATH}
+  COMMAND echo This is the CMAKE_LIBRARY_PATH: ${CMAKE_LIBRARY_PATH}
   COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada  1> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name} 
   COMMENT "Running bootstrap for project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
