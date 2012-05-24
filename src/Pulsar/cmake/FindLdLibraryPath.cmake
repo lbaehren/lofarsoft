@@ -10,8 +10,8 @@ set (PULSAR_LD_LIBRARY_PATH "")
 ##____________________________________________________________________
 ## Step 3: Add Pulsar-Tools specific extensions to LD_LIBRARY_PATH
 
-list (APPEND PULSAR_LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib)
-#list (APPEND PULSAR_LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/../../lib)
+#list (APPEND PULSAR_LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+list (APPEND PULSAR_LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/../../lib)
 
 ##____________________________________________________________________
 ## Clean up the list: remove duplicate entries and export back to
