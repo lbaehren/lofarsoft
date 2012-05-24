@@ -338,6 +338,7 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
     COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
     COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
     COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
+    COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/../../lib/lidal.so ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
   )
