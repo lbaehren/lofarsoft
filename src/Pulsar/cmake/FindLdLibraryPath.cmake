@@ -22,7 +22,8 @@ list (REMOVE_DUPLICATES PULSAR_LD_LIBRARY_PATH)
 message (STATUS "A2    .. LD_LIBRARY_PATH           = ${PULSAR_LD_LIBRARY_PATH}"      )
 message (STATUS "A2    .. ENV:LD_LIBRARY_PATH       = $ENV{LD_LIBRARY_PATH}"          )
 
-set( ENV{LD_LIBRARY_PATH} ${PULSAR_LD_LIBRARY_PATH} )
+#set( ENV{LD_LIBRARY_PATH} ${PULSAR_LD_LIBRARY_PATH} )
+set( ENV{LD_LIBRARY_PATH} "randomstring" )
 
 message (STATUS "A2    .. LD_LIBRARY_PATH           = ${PULSAR_LD_LIBRARY_PATH}"      )
 message (STATUS "A2    .. ENV:LD_LIBRARY_PATH       = $ENV{LD_LIBRARY_PATH}"          )
