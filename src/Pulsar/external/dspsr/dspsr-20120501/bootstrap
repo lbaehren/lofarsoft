@@ -2,6 +2,7 @@
 
 hash -r
 echo dspsr bootstrap with the following PATH: $PATH
+echo dspsr bootstrap with the following LD_LIBRARY_PATH: $LD_LIBRARY_PATH
 echo `which psrchive`
 ls -ltr $LOFARSOFT/release/share/pulsar/bin/
 
