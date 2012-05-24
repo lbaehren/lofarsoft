@@ -48,6 +48,14 @@ if autoreconf --install --force; then
   echo
   echo "Bootstrap complete.  You can now run the configure script."
   echo
+
+  # This is additional scripting in order to add the LD_LIBRARY_PATH into the configure script
+  mv configure configure.save
+  echo "#! /bin/sh" > configure
+  echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:." >> configure
+  cat configure.save >> configure
+  chmod 775 configure
+
   exit 0
 
 else
@@ -60,10 +68,5 @@ else
 
 fi
 
-# This is additional scripting in order to add the LD_LIBRARY_PATH into the configure script
-mv configure configure.save
-echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:." > configure
-cat configure.save >> configure
-chmod 775 configure
 
 
