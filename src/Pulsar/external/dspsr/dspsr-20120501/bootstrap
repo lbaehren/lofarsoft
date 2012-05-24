@@ -43,7 +43,7 @@ sh config/formats.sh
 
 echo "Running the GNU autotools.  Please be patient ..."
 
-if autoreconf --install --force -B $LOFARSOFT/release/lib -I $LOFARSOFT/release/lib; then
+if autoreconf --install --force; then
 
   echo
   echo "Bootstrap complete.  You can now run the configure script."
@@ -59,4 +59,11 @@ else
   exit -1
 
 fi
+
+# This is additional scripting in order to add the LD_LIBRARY_PATH into the configure script
+mv configure configure.save
+echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:." > configure
+cat configure.save >> configure
+chmod 775 configure
+
 
