@@ -5,11 +5,11 @@ echo dspsr bootstrap with the following PATH: $PATH
 echo dspsr bootstrap with the following LD_LIBRARY_PATH: $LD_LIBRARY_PATH
 echo changing paths:
 export PATH=${PATH}:$LOFARSOFT/release/share/pulsar/bin:.
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$LOFARSOFT/release/share/pulsar/lib:.
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:.
 echo dspsr bootstrap with the new following PATH: $PATH
 echo dspsr bootstrap with the new following LD_LIBRARY_PATH: $LD_LIBRARY_PATH
 
-echo `which psrchive`
+echo Location of psrchive using which: `which psrchive`
 ls -ltr $LOFARSOFT/release/share/pulsar/bin/
 
 psrchive=$LOFARSOFT/release/share/pulsar/bin/psrchive
@@ -43,7 +43,7 @@ sh config/formats.sh
 
 echo "Running the GNU autotools.  Please be patient ..."
 
-if autoreconf --install --force; then
+if autoreconf --install --force -B $LOFARSOFT/release/lib -I $LOFARSOFT/release/lib; then
 
   echo
   echo "Bootstrap complete.  You can now run the configure script."
