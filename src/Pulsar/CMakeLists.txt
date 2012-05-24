@@ -106,7 +106,8 @@ include (${PULSAR_SOURCE_DIR}/cmake/InstallationSetup.cmake)
 
 list (INSERT CMAKE_INCLUDE_PATH 0 ${CMAKE_INSTALL_PREFIX}/include )
 list (INSERT CMAKE_LIBRARY_PATH 0 ${CMAKE_INSTALL_PREFIX}/lib )
- 
+list (INSERT CMAKE_LIBRARY_PATH 0 ${CMAKE_INSTALL_PREFIX}/../../lib )
+
 ## ==============================================================================
 ##
 ##  External dependencies
