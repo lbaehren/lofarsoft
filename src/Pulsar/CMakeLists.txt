@@ -163,6 +163,7 @@ find_library (libz       z       )
 
 set (FIND_CFITSIO_CMAKE FALSE)
 include (${PULSAR_SOURCE_DIR}/cmake/FindPythonPath.cmake)
+include (${PULSAR_SOURCE_DIR}/cmake/FindLdLibraryPath.cmake)
 
 foreach (pulsarExternalPackages
     CFITSIO
