@@ -338,8 +338,6 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
     COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
     COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/${dspsr_directory} ${PULSAR_BINARY_DIR}/apps/
     COMMAND mkdir ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/build
-    COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/../../lib/lidal.so ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/
-    COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/../../lib/lidal.so ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/config/
     WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
     COMMENT "Copying DSPSR from ${PULSAR_SOURCE_DIR}/external/${dspsr_directory} to ${PULSAR_BINARY_DIR}/apps/${dspsr_name}"
   )
@@ -350,10 +348,6 @@ set( ENV{LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/../../lib:. )
 set( ENV{PATH} $ENV{PATH}:${CMAKE_INSTALL_PREFIX}/bin:. )
 
 add_custom_target (dspsr_bootstrap
-  COMMAND export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/../../lib 
-  COMMAND echo This is the LD_LIBRARY_PATH:  $ENV{LD_LIBRARY_PATH}
-  COMMAND echo This is the PULSAR_LD_LIBRARY_PATH: ${PULSAR_LD_LIBRARY_PATH}
-  COMMAND echo This is the PATH: $ENV{PATH}
   COMMAND ./bootstrap PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada  1> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name} 
   COMMENT "Running bootstrap for project dspsr in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
@@ -365,9 +359,6 @@ add_dependencies (dspsr_bootstrap dspsr_unpack)
 if (UNIX)
  if (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/../../lib 
-  COMMAND echo This is the LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}
-  COMMAND echo This is the PATH: $ENV{PATH}
   COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=darwin --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS='-ldl -ldal' LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CXXFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include/dal LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (darwin) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
@@ -377,9 +368,6 @@ add_custom_target (dspsr_configure
 add_dependencies (dspsr_configure  dspsr_bootstrap dspsr_unpack)
  else (APPLE)
 add_custom_target (dspsr_configure
-  COMMAND export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/../../lib 
-  COMMAND echo This is the LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}
-  COMMAND echo This is the PATH: $ENV{PATH}
   COMMAND ./configure PSRHOME=${PULSAR_BINARY_DIR}/apps/${dspsr_name} LOGIN_ARCH=linux --with-psrchive-dir=${CMAKE_INSTALL_PREFIX} --with-psrdada-dir=${CMAKE_INSTALL_PREFIX}/psrdada LIBS='-ldl -ldal' LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/../../lib CXXFLAGS=-I${CMAKE_INSTALL_PREFIX}/../../include/dal LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH} 1>> ${PULSAR_BINARY_DIR}/apps/${dspsr_name}/cmake_configure.log 2>&1
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/${dspsr_name}
   COMMENT "Configuring project dspsr (linux) in ${PULSAR_BINARY_DIR}/apps/${dspsr_name} ..."
