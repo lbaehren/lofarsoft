@@ -14,7 +14,7 @@ add_custom_target (scripts_install
   COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/bin/make_subs_SAS_Ncore_Mmodes.sh ${CMAKE_INSTALL_PREFIX}/bin/pulp.sh
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/lofar_default.inf ${PULSAR_SOURCE_DIR}/scripts/psr_cats.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/*.sh ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/*.py ${CMAKE_INSTALL_PREFIX}/bin/
-  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/XML-template-*txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-template_help*txt ${CMAKE_INSTALL_PREFIX}/data/
+  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/XML-template-*txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/multi-template_help*txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/xml_generator_BF_help.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/PSR_catalog_NA.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_RADEC.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_psrHBA.txt ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/3cCatalog_psrLBA.txt ${CMAKE_INSTALL_PREFIX}/data/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/XML-MOM/Combined_3C_PSR_catalog.txt ${CMAKE_INSTALL_PREFIX}/data/
