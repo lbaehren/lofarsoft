@@ -311,24 +311,23 @@ Options:
 
 
          EXAMPLE runs:
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml 
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -subsLBA 10..45 +IM 6,7 +CS 6,7
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 -IS 4,5 +CS 4,5
-         > multi-templatesNbeams.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IM ALL +multi
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 +FD all
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..397  
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 +IM ALL 
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 +IM 1,2
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  +multi -namecol
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
-         > multi-templatesNbeams.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all 
-         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -sexages 
-         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4  -sexages -debug
-         > multi-templatesNbeams.sh -in obs_2col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4 -cat mycatalog.txt
+         > xml_generator_BF.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml 
+         > xml_generator_BF.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -subsLBA 10..45 +IM 6,7 +CS 6,7
+         > xml_generator_BF.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001
+         > xml_generator_BF.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 10 -stations CS001,CS002 -subsLBA 10..45 -IS 4,5 +CS 4,5
+         > xml_generator_BF.sh -in obs.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 30 -stations CS001 -gap 6 -subsHBA 200..245 +IM 2,4,6
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004 +multi
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 +IM ALL +multi
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -subsLBA 10..45 -subsHBA 200..397  
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -project LEA032 +IM ALL 
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:00:00 -time 33 -stations CS001,CS002,CS003,CS004
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T14:50:00 -time 10 -stations CS001,CS002 -gap 6 -project LEA032 +IM 1,2
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -subsLBA 10..45 
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -chansubsHBA 64 -integstepsHBA 4  +multi -namecol
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  
+         > xml_generator_BF.sh -in obs_1col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -integLBA 5 +IM all 
+         > xml_generator_BF.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBA -chansubsLBA 64 -integstepsLBA 4  -sexages 
+         > xml_generator_BF.sh -in obs_2col.txt -inswitch BF -intype position -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4  -sexages -debug
+         > xml_generator_BF.sh -in obs_2col.txt -inswitch BF -intype source -project Pulsars -out output.xml -start 2010-07-22T09:40:00 -time 25 -stations CS001 -antenna LBAHigh -chansubsLBA 64 -integstepsLBA 4 -cat mycatalog.txt
 
 
