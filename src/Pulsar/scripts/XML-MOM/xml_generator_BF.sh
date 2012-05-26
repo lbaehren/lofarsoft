@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=2.5
+VERSION=2.7
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -433,7 +433,8 @@ then
    nbeams=1
 else 
    is_multi=`grep -v "#" $infile | grep -v '^$' | grep ";"`
-   if [[ $is_multi == "" ]]
+#   if [[ $is_multi == "" ]]
+   if [[ ! -n "$is_multi" ]]
    then
       echo "WARNING: unable to find field separtor ';' in input file therefore turning off multi-beam request"
       nbeams=1
@@ -838,7 +839,8 @@ cat $header | sed "s/Pulsars/$PROJECT/g" > $outfile
 echo "    <item index=\"0\">" >> $outfile
 
 
-if [[ $folder != "" ]]
+#if [[ $folder != "" ]]
+if [[ -n "$folder" ]]
 then
 	echo "          <lofar:folder>" >> $outfile
 	echo "            <name>$folder</name>" >> $outfile
@@ -1199,7 +1201,7 @@ do
 					    fi
 				    fi
 		
-				    if (( $ncols == 8 ))
+				    if (( $ncols >= 8 ))
 				    then
 				        SUBBANDS=`echo $line | awk '{print $8}'`
 				        SUBBANDS_SET=1
@@ -1434,7 +1436,7 @@ do
 					    fi
 				    fi
 		
-				    if (( $ncols == 9 ))
+				    if (( $ncols >= 9 ))
 				    then
 				        SUBBANDS=`echo $line | awk '{print $9}'`
 				        SUBBANDS_SET=1
@@ -1567,7 +1569,8 @@ do
 		                elif [ $user_subbands_hba == 1 ] && [ $ANTENNA == "HBA" ]
 		                then
                             needs_expand=`echo $SUBBANDS_HBA | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_HBA" | expand_sblist.py`
 				            else
@@ -1584,7 +1587,8 @@ do
 		                elif [ $user_subbands_hbahigh == 1 ] && [ $ANTENNA == "HBAHigh" ]
 		                then
                             needs_expand=`echo $SUBBANDS_HBAHigh | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_HBAHigh" | expand_sblist.py`
 				            else
@@ -1607,7 +1611,8 @@ do
 		                        exit 1
 		                    else
 	                            needs_expand=`echo $SUBBANDS_HBAMid | grep "," | grep ".."`
-					            if [ $needs_expand != "" ]
+					            #if [ $needs_expand != "" ]
+                                if [[ -n "$needs_expand" ]]
 					            then
 					               SUBBANDS=`echo "$SUBBANDS_HBAMid" | expand_sblist.py`
 					            else
@@ -1625,7 +1630,8 @@ do
 		                elif [ $user_subbands_hbalow == 1 ] && [ $ANTENNA == "HBALow" ]
 		                then
                             needs_expand=`echo $SUBBANDS_HBALow | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_HBALow" | expand_sblist.py`
 				            else
@@ -1642,7 +1648,8 @@ do
 		                elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ]
 		                then
                             needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
 				            else
@@ -1659,7 +1666,8 @@ do
 		                elif [ $user_subbands_lbahigh == 1 ] && [ $ANTENNA == "LBAHigh" ]
 		                then
                             needs_expand=`echo $SUBBANDS_LBAHigh | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+#				            if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBAHigh" | expand_sblist.py`
 				            else
@@ -1677,8 +1685,8 @@ do
 		                then
 		                    needs_expand=""
                             needs_expand=`echo $SUBBANDS_LBALow | grep "," | grep ".."`
-                            echo "A2, 1 - $needs_expand"
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBALow" | expand_sblist.py`
 				            else
@@ -1700,7 +1708,8 @@ do
 		                elif [ $user_subbands_hbahigh == 1 ] && [ $ANTENNA == "HBAHigh" ]
 		                then
                             needs_expand=`echo $SUBBANDS_HBAHigh | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_HBAHigh" | expand_sblist.py`
 				            else
@@ -1723,7 +1732,8 @@ do
 		                        exit 1
 		                    else
 	                            needs_expand=`echo $SUBBANDS_HBAMid | grep "," | grep ".."`
-					            if [ $needs_expand != "" ]
+					            #if [ $needs_expand != "" ]
+                                if [[ -n "$needs_expand" ]]
 					            then
 					               SUBBANDS=`echo "$SUBBANDS_HBAMid" | expand_sblist.py`
 					            else
@@ -1741,7 +1751,8 @@ do
 		                elif [ $user_subbands_hbalow == 1 ] && [ $ANTENNA == "HBALow" ]
 		                then
                             needs_expand=`echo $SUBBANDS_HBALow | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_HBALow" | expand_sblist.py`
 				            else
@@ -1758,7 +1769,8 @@ do
 		                elif [ $user_subbands_lbahigh == 1 ] && [ $ANTENNA == "LBAHigh" ]
 		                then
                             needs_expand=`echo $SUBBANDS_LBAHigh | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBAHigh" | expand_sblist.py`
 				            else
@@ -1775,7 +1787,8 @@ do
 		                elif [ $user_subbands_lba == 1 ] && [ $ANTENNA == "LBA" ]
 		                then
                             needs_expand=`echo $SUBBANDS_LBA | grep "," | grep ".."`
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBA" | expand_sblist.py`
 				            else
@@ -1793,8 +1806,8 @@ do
 		                then
 		                	needs_expand=""
                             needs_expand=`echo $SUBBANDS_LBALow | grep "," | grep ".."`
-                            echo "A2, 2 - $needs_expand"
-				            if [ $needs_expand != "" ]
+				            #if [ $needs_expand != "" ]
+                            if [[ -n "$needs_expand" ]]
 				            then
 				               SUBBANDS=`echo "$SUBBANDS_LBALow" | expand_sblist.py`
 				            else
@@ -2302,10 +2315,15 @@ then
    rm /tmp/$$xmltmp_namecol /tmp/$$xmltmp_datacol
 fi
 
-#if [[ -f /tmp/$$_TAB ]]
-#then
-#   rm /tmp/$$_TAB
-#fi
+if [[ -f /tmp/$$_TAB ]]
+then
+   rm /tmp/$$_TAB
+fi
+
+if [[ -f $$"_"$outfile ]]
+then
+   rm $$"_"$outfile
+fi
 
 if (( $user_cat == 1 ))
 then
