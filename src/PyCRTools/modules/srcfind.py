@@ -6,12 +6,15 @@
 #import pycrtools
 import numpy as np
 from numpy import sin, cos, pi
+import matplotlib.pyplot as plt # want to have plotting in here?
 from scipy.optimize import brute, fmin
+import sys 
 
 c = 299792458.0 # speed of ligth in m/s
 twopi = 2 * pi
 halfpi = 0.5 * pi
 rad2deg = 360.0 / twopi
+deg2rad = twopi / 360.0
 nan = float('nan')
 
 def directionFromThreeAntennas(positions, times):
@@ -276,7 +279,7 @@ def phaseError(az, el, pos, phases, freq):
     deltaPhi = (phases - phases[0]) - calcPhases # measured 'phases' and expected 'calcPhases' at the same reference phase
     
     mu = (1.0/N) * np.sum( 1.0/(freq * twopi) * sin(deltaPhi) ) # check; uses same procedure as for 'mse' above.
-    msePerAntenna = ( 1.0/(freq * twopi) * sin(deltaPhi) ) ** 2 - mu*mu
+    msePerAntenna = ( 2.0/(freq * twopi) * sin(deltaPhi/2) ) ** 2 - mu*mu # periodicity 2-pi in deltaPhi needed!
     mse = np.average(msePerAntenna) 
 
     return mse * c * c
@@ -317,7 +320,7 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
     return mse * c * c
 
 
-def directionBruteForceSearch(positions, times):
+def directionBruteForceSearch(positions, times, azSteps = 120, elSteps = 30):
     """
     Given N antenna positions, and (pulse) arrival times for each antenna,
     get a direction of arrival (az, el) assuming a source at infinity (plane wave).
@@ -346,8 +349,6 @@ def directionBruteForceSearch(positions, times):
 
     # this can probably be done better by Scipy. But for now this is easy and it works...
 
-    elSteps = 30
-    azSteps = 120 # where do we put the 'constant' parameters? Well, not here...
     N = len(times)
 
     bestFit = (-1, -1)
@@ -369,6 +370,39 @@ def directionBruteForceSearch(positions, times):
                 bestFit = (az, el)
 
     return bestFit + (minMSE,)
+
+def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 90, showImage = False, verbose=False):
+    # this can probably be done better by Scipy. But for now this is easy and it works...
+    elevations = np.arange(elSteps) * (90.0 / elSteps)
+    azimuths = np.arange(azSteps) * (360.0 / azSteps)
+    
+    if showImage:
+        imarray = np.zeros((elSteps, azSteps))
+    elstep = 0
+    minPhaseError = 1.0e9
+    for el in elevations:
+        if verbose:
+            print ' %d,' % elstep,
+            sys.stdout.flush()
+        azstep = 0
+        for az in azimuths:
+            badness = phaseError(az*deg2rad, el*deg2rad, positions, phases, freq)
+            if badness < minPhaseError:
+                minPhaseError = badness
+                minpos = (az * deg2rad, el * deg2rad)
+            if showImage:
+                imarray[elSteps - 1 - elstep, azstep] = badness # hack to get elevations shown bottom to top as 0.0 - 90.0
+            azstep += 1
+        elstep += 1
+    
+    if showImage:
+        plt.imshow(imarray, cmap=plt.cm.hot,extent=(0, 360.0, 0.0, 90.0))
+        plt.colorbar()
+    if verbose:
+        print ' '
+
+    return minpos + (minPhaseError,)
+
 
 def directionForHorizontalArray(positions, times):
     """
