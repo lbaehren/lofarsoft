@@ -84,7 +84,7 @@ class CEP2Info:
                 		if re.match("^-----", cexec_output[l]) is None:
                         		self.alive_nodes.append(cexec_output[l-1].split(" ")[1])
 		except Exception:
-			msg="Problem with connection to locus nodes...\nTry removing locus entries from your ~/.ssh/know_hosts file or try again later"
+			msg="Problem with connection to locus nodes...\nTry removing locus entries from your ~/.ssh/known_hosts file or try again later"
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
