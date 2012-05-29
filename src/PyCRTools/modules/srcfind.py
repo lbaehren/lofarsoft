@@ -396,7 +396,8 @@ def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 
         elstep += 1
     
     if showImage:
-        plt.imshow(imarray, cmap=plt.cm.hot,extent=(0, 360.0, 0.0, 90.0))
+        plt.imshow(imarray, cmap=plt.cm.hot_r,extent=(0, 360.0, 0.0, 90.0)) 
+        # show 'good' positions bright by reverse colormap hot_r
         plt.colorbar()
     if verbose:
         print ' '
