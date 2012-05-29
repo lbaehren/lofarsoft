@@ -162,6 +162,20 @@ def timeDelaysFromDirection(positions, direction):
 
     return timeDelays
 
+def phaseWrap(phases):
+    wrapped = np.zeros(len(phases))
+    for i in range(len(phases)): # improve!
+        wrapped[i] = phases[i] - twopi * round(phases[i] / twopi)
+    return wrapped
+
+def phasesFromDirection(positions, direction, freq, nowrap = False):
+    # return phases instead of time differences
+    phases = (twopi * freq) * timeDelaysFromDirection(positions, direction)
+    if nowrap:
+        return phases
+    else:
+        return phaseWrap(phases)
+
 def timeDelaysFromDirectionAndDistance(positions, direction):
     """
     Get time delays for antennas at given position for a given direction and distance.
