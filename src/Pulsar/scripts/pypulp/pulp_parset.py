@@ -305,12 +305,16 @@ class Observation:
 
 	# return True if parset file was found, and False otherwise
 	def is_parset (self):
-		if self.parset == "": 
+		if self.parset != "": 
+			if os.path.exists(self.parset):	return True
+			else: return False
+		else:   # checking old parset location
 			self.parset = "%s/%s/%s.parset" % (self.parset_dir, self.id, self.id)
-		if os.path.exists(self.parset):
-			return True
-		else:
-			return False
+			if os.path.exists(self.parset):	return True
+			else:
+				self.parset = "%s/%s.parset" % (self.parset_dir, self.id)
+				if os.path.exists(self.parset):	return True
+				else: return False
 
 	# parsing the string with ranges of subbands recorded to get list of subbands
 	def getSubbands(self, sblist):
