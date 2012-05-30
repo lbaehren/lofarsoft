@@ -69,7 +69,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     SubElement(header, "id").text = str(eventID)
     SubElement(header, "timestamp").text = str(datetime.utcfromtimestamp(e[0]))
     SubElement(header, "status").text = str(e[1])
-    
+
     if station:
         s = SubElement(header, "station")
         SubElement(s, "name").text = str(station)
@@ -88,7 +88,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         p = SubElement(header, "polarization")
         SubElement(p, "name").text = str(polarization)
 
-        cursor.execute("""SELECT p.status FROM 
+        cursor.execute("""SELECT p.status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -115,7 +115,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         SubElement(s, "status").text = e[1]
 
         # Get all polarizations for this station
-        cursor.execute("""SELECT p.direction, p.status FROM 
+        cursor.execute("""SELECT p.direction, p.status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -152,7 +152,7 @@ def events_handler():
 
     # Fetch all event IDs
     c.execute("""SELECT e.eventID, e.timestamp, e.status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
-    events AS e INNER JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
+    events AS e LEFT JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
 
     # Generate empty XML
     elements = Element("elements")
@@ -212,7 +212,7 @@ def event_handler(eventID):
     # Add event header
     elements.append(event_header(c, eventID))
 
-    # Fetch event parameter keys 
+    # Fetch event parameter keys
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
 
@@ -222,16 +222,16 @@ def event_handler(eventID):
 
     # Fetch event parameter values
     c.execute("SELECT * FROM eventparameters WHERE eventID=?", (eventID, ))
-    
+
     v = c.fetchone()
     if v is not None and len(v) > 1:
 
         values = [unpickle_parameter(e) for e in v[1:]]
-    
+
         for e in zip(keys, values):
-    
+
             parameter = SubElement(parameters, "parameter")
-    
+
             if e[0] == "plotfiles":
                 for p in e[1]:
                     figure = SubElement(figures, "figure")
@@ -270,7 +270,7 @@ def station_handler(eventID, station_name):
     elements.append(header)
 
     # Get all polarizations for this station
-    c.execute("""SELECT p.direction, p.status FROM 
+    c.execute("""SELECT p.direction, p.status FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -293,7 +293,7 @@ def station_handler(eventID, station_name):
 
     # Fetch all station parameter values
     c.execute("""
-    SELECT sp.* FROM 
+    SELECT sp.* FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN stationparameters AS sp ON (s.stationID=sp.stationID)
@@ -347,7 +347,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
     elements.append(header)
 
     # Get all polarizations for this station
-    c.execute("""SELECT direction FROM 
+    c.execute("""SELECT direction FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -361,7 +361,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
         if e[0] == polarization_direction:
             s.set("current", "true")
 
-    # Fetch polarization parameter keys 
+    # Fetch polarization parameter keys
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
 
@@ -371,7 +371,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
 
     # Fetch polarization parameter values
     c.execute("""
-    SELECT pp.* FROM 
+    SELECT pp.* FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -382,13 +382,13 @@ def polarization_handler(eventID, station_name, polarization_direction):
 
     v = c.fetchone()
     if v is not None and len(v) > 1:
-    
+
         values = [unpickle_parameter(e) for e in v[1:]]
-    
+
         for e in zip(keys, values):
-    
+
             parameter = SubElement(parameters, "parameter")
-    
+
             if e[0] == "plotfiles":
                 for p in e[1]:
                     figure = SubElement(figures, "figure")
