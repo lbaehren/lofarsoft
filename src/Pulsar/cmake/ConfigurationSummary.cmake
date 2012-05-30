@@ -19,6 +19,7 @@ message (STATUS " System configuration:"                                        
 message (STATUS " .. CMAKE_COMMAND                = ${CMAKE_COMMAND}"               )
 message (STATUS " .. CMAKE_SYSTEM                 = ${CMAKE_SYSTEM}"                )
 message (STATUS " .. CMAKE_SYSTEM_PROCESSOR       = ${CMAKE_SYSTEM_PROCESSOR}"      )
+message (STATUS " .. SYSTEM_UNAME_TEST            = ${SYSTEM_UNAME_TEST}"           )
 message (STATUS " Package configuration:"                                           )
 message (STATUS " .. PULSAR_SOURCE_DIR            = ${PULSAR_SOURCE_DIR}"           )
 message (STATUS " .. PULSAR_BINARY_DIR            = ${PULSAR_BINARY_DIR}"           )
@@ -56,3 +57,6 @@ message (STATUS "    .. Include directory         = ${PYTHON_INCLUDES}"         
 message (STATUS "    .. Python library            = ${PYTHON_LIBRARIES}"            )
 message (STATUS "    .. NumPy include directory   = ${NUMPY_INCLUDES}"              )
 message (STATUS "+------------------------------------------------------------+"    )
+
+
+

@@ -106,11 +106,26 @@ else (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc")
   EXECUTE_PROCESS( COMMAND mkdir -p ${PULSAR_BINARY_DIR}/apps/sigproc)
 endif (IS_DIRECTORY "${PULSAR_BINARY_DIR}/apps/sigproc")
 
+IF(NOT SYSTEM_UNAME_TEST)
+   EXEC_PROGRAM("uname -n"
+                OUTPUT_VARIABLE SYSTEM_UNAME_TEST)
+   SET(SYSTEM_UNAME_TEST "${SYSTEM_UNAME_TEST}" CACHE STRING "Name of build machine for Wisdom Flags")
+ENDIF(NOT SYSTEM_UNAME_TEST)
+SET(SYSTEM_UNAME_TEST "${SYSTEM_UNAME_TEST}")
+
+if (SYSTEM_UNAME_TEST STREQUAL "lhn001")
+   message (STATUS "[PULSAR] Working/building on lhn001 - fftw_wisdom.txt will be copied")
+   EXECUTE_PROCESS( COMMAND cp ${PULSAR_SOURCE_DIR}/apps/presto/LUS/LUS_lhn001_fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt)
+   message (STATUS "[PULSAR] cp ${PULSAR_SOURCE_DIR}/apps/presto/LUS/LUS_lhn001_fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+else (SYSTEM_UNAME_TEST STREQUAL lhn001)
+   message (STATUS "[PULSAR] Not working/build on lhn001 - fftw_widom.txt will be created if it does not exist")
+endif (SYSTEM_UNAME_TEST STREQUAL "lhn001")
+
 if (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-  message (STATUS "[PULSAR] Makewisdom has already been run; skipping!")
+  message (STATUS "[PULSAR] Makewisdom file is present; skipping build target!")
   set (PRESTO_MAKEWISDOM FALSE)
 else (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-  message (STATUS "[PULSAR] Makewisdom not been run;  adding to make queue")
+  message (STATUS "[PULSAR] Makewisdom not been run;  adding to build make queue")
   set (PRESTO_MAKEWISDOM TRUE)
 endif (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
 
