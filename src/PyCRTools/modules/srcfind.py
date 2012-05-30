@@ -280,7 +280,7 @@ def mse(az, el, pos, times):
     mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
     mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
 
-    return mse * c * c
+    return mse * 1.0e18 # output in nanoseconds-squared
 
 def phaseError(az, el, pos, phases, freq):
 
@@ -296,7 +296,7 @@ def phaseError(az, el, pos, phases, freq):
     msePerAntenna = ( 2.0/(freq * twopi) * sin(deltaPhi/2) ) ** 2 - mu*mu # periodicity 2-pi in deltaPhi needed!
     mse = np.average(msePerAntenna) 
 
-    return mse * c * c
+    return mse * 1.0e18 # output in nanoseconds-squared; may want to switch to radians-squared?
 
 def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount=0):
     """
