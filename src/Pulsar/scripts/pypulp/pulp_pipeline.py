@@ -1345,9 +1345,10 @@ class CVUnit(PipeUnit):
 						psr2=re.sub(r'[BJ]', '', psr)
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
+							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
 							cmd="dspsr -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d -U %f %s" % \
 								(cmdline.opts.tsubint, verbose, self.outdir, psr2, \
-								psr, self.output_prefix, ii, cmdline.opts.nthreads, cmdline.opts.maxram, s0_files[ii])
+								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.maxram, s0_files[ii])
 							self.execute(cmd, workdir=self.curdir)
 
 						# running psradd to add all freq channels together
