@@ -121,13 +121,15 @@ else (SYSTEM_UNAME_TEST STREQUAL lhn001)
    message (STATUS "[PULSAR] Not working/building on lhn001 - fftw_widom.txt will be created if it does not exist")
 endif (SYSTEM_UNAME_TEST STREQUAL "lhn001")
 
-if (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-  message (STATUS "[PULSAR] Makewisdom file is present; skipping build target!")
-  set (PRESTO_MAKEWISDOM FALSE)
-else (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
-  message (STATUS "[PULSAR] Makewisdom has not been run;  adding to the build make queue")
-  set (PRESTO_MAKEWISDOM TRUE)
-endif (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+set (PRESTO_MAKEWISDOM TRUE)
+
+#if (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+#  message (STATUS "[PULSAR] Makewisdom file is present; skipping build target!")
+#  set (PRESTO_MAKEWISDOM FALSE)
+#else (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
+#  message (STATUS "[PULSAR] Makewisdom has not been run;  adding to the build make queue")
+#  set (PRESTO_MAKEWISDOM TRUE)
+#endif (EXISTS "${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt")
 
 # skip the full RPATH for the build tree
 set (CMAKE_SKIP_BUILD_RPATH YES)
