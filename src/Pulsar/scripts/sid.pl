@@ -97,7 +97,7 @@ if ($time >= 24.*$sol_in_sid) { $time -= 24.*$sol_in_sid; }
 
 # converting UTC to readable format
 $time = &hours2str($time);
-$UTC = "$utc $time";
+$UTC = "$utc$time";
 } # 
 
 
