@@ -522,13 +522,26 @@ foreach (src ${presto_makewisdom_binaries})
 endforeach (src)
 
 if (PRESTO_MAKEWISDOM)
-add_custom_target (presto_makewisdom
-  COMMAND ./makewisdom
-  COMMAND cp fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/
-  WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/src
-  COMMENT "Executing '${PULSAR_BINARY_DIR}//apps/presto/src/makewisdom' followed by 'cp ${PULSAR_BINARY_DIR}/apps/presto/src/fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/'"
-  )
-add_dependencies (presto_makewisdom makewisdom)
+   if (SYSTEM_UNAME_TEST STREQUAL "lhn001")
+
+   add_custom_target (presto_makewisdom
+      COMMAND cp LUS_lhn001_fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt
+      WORKING_DIRECTORY ${PULSAR_SOURCE_DIR}/apps/presto/LUS
+      COMMENT "Executing 'cp LUS_lhn001_fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/fftw_wisdom.txt'"
+   )
+
+   else (SYSTEM_UNAME_TEST STREQUAL lhn001)
+
+   add_custom_target (presto_makewisdom
+      COMMAND ./makewisdom
+      COMMAND cp fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/
+      WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps/presto/src
+      COMMENT "Executing '${PULSAR_BINARY_DIR}//apps/presto/src/makewisdom' followed by 'cp ${PULSAR_BINARY_DIR}/apps/presto/src/fftw_wisdom.txt ${CMAKE_INSTALL_PREFIX}/lib/'"
+
+   )
+     add_dependencies (presto_makewisdom makewisdom)
+  endif (SYSTEM_UNAME_TEST STREQUAL "lhn001")
+
 endif (PRESTO_MAKEWISDOM)
 
 add_custom_target (presto_cat_install
