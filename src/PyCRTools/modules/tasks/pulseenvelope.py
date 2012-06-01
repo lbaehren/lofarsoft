@@ -65,7 +65,7 @@ class PulseEnvelope(Task):
             doc = "Reference antenna for delays, taken as antenna with highest signal to noise." ),
         delays = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
             doc = "Delays corresponding to the position of the maximum of the envelope relative to the first antenna." ),
-        nsigma = dict( default = 7,
+        nsigma = dict( default = 3,
             doc = "Number of standard deviations that pulse needs to be above noise level." ),
         antennas_with_significant_pulses = dict( default = lambda self : [i for i in range(self.nantennas) if self.snr[i] > self.nsigma],
             doc = "Indices of antennas with pulses more than nsigma above the noise limit." ),

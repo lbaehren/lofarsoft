@@ -164,6 +164,11 @@ for station in stations:
 
         # Calculate delays
         pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+
+        # Use current direction if not enough significant pulses are found for direction fitting
+        if len(pulse_envelope.antennas_with_significant_pulses) < 3:
+            print "not enough antennas with significant pulses, using previous direction"
+            break
         
         # Fit pulse direction
         direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses,reference_antenna = pulse_envelope.refant, verbose=True)
