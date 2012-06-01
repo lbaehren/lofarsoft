@@ -352,13 +352,12 @@ class Pipeline:
 		bpnf.close()
 
 		# creating combined DSPSR plots
-		if not cmdline.opts.is_skip_dspsr:
-			dspsr_diags=rglob(sumdir, "*_diag.png")
-			if len(dspsr_diags) > 0:
-				log.info("Creating DSPSR summary diagnostic plots...")
-				if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
-				else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
-				self.execute(cmd, log, workdir=sumdir)
+		dspsr_diags=rglob(sumdir, "*_diag.png")
+		if len(dspsr_diags) > 0:
+			log.info("Creating DSPSR summary diagnostic plots...")
+			if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
+			else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
+			self.execute(cmd, log, workdir=sumdir)
 
 		if os.path.exists("%s/dspsr_status.png" % (sumdir)):
 			log.info("Renaming dspsr status file to status.png ...")
@@ -1050,26 +1049,27 @@ class PipeUnit:
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
 			# these programs should be run quick, so run them one by one
 
-			# first, calculating the proper max divisor for the number of subbands
-#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
-			# calculating the greatest common denominator of obs.nrSubbands starting from 63 down
-			pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
-			for psr in self.psrs:  # pulsar list is empty if --nofold is used
-				# creating DSPSR diagnostic plots
-				cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -J -g %s_%s_J.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
-                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-                                     (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
-                                      psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
+			if not cmdline.opts.is_skip_dspsr:
+				# first, calculating the proper max divisor for the number of subbands
+#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
+				# calculating the greatest common denominator of obs.nrSubbands starting from 63 down
+				pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
+				for psr in self.psrs:  # pulsar list is empty if --nofold is used
+					# creating DSPSR diagnostic plots
+					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
+                	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+                        	             (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+                                	      psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
 
 			if not cmdline.opts.is_plots_only:
 				if not cmdline.opts.is_skip_dspsr:
