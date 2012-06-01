@@ -54,13 +54,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     </tr>
     <tr>
       <td>
-        <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/></xsl:attribute><xsl:value-of select="/elements/header/id"/></a></td>
+        <a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/></xsl:attribute><xsl:value-of select="/elements/header/id"/></a>
       </td>
       <td>
-        <td><xsl:value-of select="/elements/header/timestamp"/></td>
+        <xsl:value-of select="/elements/header/timestamp"/>
       </td>
       <td>
-        <td><xsl:value-of select="/elements/header/status"/></td>
+        <xsl:value-of select="/elements/header/status"/>
       </td>
     </tr>
   </table>
@@ -99,18 +99,22 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:copy-of select="$station" /></xsl:attribute><xsl:copy-of select="$station" /></a></td>
         <td><xsl:value-of select="status"/></td>
         <td>
+          <table>
           <xsl:for-each select="polarizations/polarization">
             <tr>
               <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:copy-of select="$station" />/<xsl:value-of select="name"/></xsl:attribute><xsl:value-of select="name"/></a></td>
             </tr>
           </xsl:for-each>
+          </table>
         </td>
         <td>
+          <table>
           <xsl:for-each select="polarizations/polarization">
             <tr>
               <td><xsl:value-of select="status"/></td>
             </tr>
           </xsl:for-each>
+          </table>
         </td>
       </tr>
     </xsl:for-each>

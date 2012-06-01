@@ -8,6 +8,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <head>
     <link rel="stylesheet" type="text/css" href="layout/database.css" />
     <title>LOFAR Cosmic Ray Events</title>
+    <script src="layout/sorttable.js"></script>
   </head>
   <body>
   <h1>LOFAR Cosmic Ray Events</h1>
@@ -22,7 +23,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <li><a href="/events">All events</a></li>
       </ul>
   </nav>
-  <table class="parameters">
+  <table class="sortable">
     <caption id="good">Good events</caption>
     <tr>
       <th>Id</th>

@@ -60,16 +60,16 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     </tr>
     <tr>
       <td>
-        <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/></xsl:attribute><xsl:value-of select="/elements/header/id"/></a></td>
+        <a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/></xsl:attribute><xsl:value-of select="/elements/header/id"/></a>
       </td>
       <td>
-        <td><xsl:value-of select="/elements/header/timestamp"/></td>
+        <xsl:value-of select="/elements/header/timestamp"/>
       </td>
       <td>
-        <td><xsl:value-of select="/elements/header/status"/></td>
+        <xsl:value-of select="/elements/header/status"/>
       </td>
       <td>
-        <td><xsl:value-of select="/elements/header/station/status"/></td>
+        <xsl:value-of select="/elements/header/station/status"/>
       </td>
     </tr>
   </table>
