@@ -50,177 +50,187 @@ combined_rms = []
 
 for station in stations:
 
-    print station
-
-    # Open file
-    f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
-
-    # Set reference polarization to the one that had the best pulse
-    h0 = 0
-    h1 = 0
     try:
-        h0 = station.polarization['0']["pulse_height_incoherent"]
-    except:
-        pass
+        print 80 * "-"
+        print station
+        print 80 * "-"
 
-    try:
-        h1 = station.polarization['1']["pulse_height_incoherent"]
-    except:
-        pass
+        # Open file
+        f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
 
-    if h0 > h1:
-        rp = '0'
-    else:
-        rp = '1'
+        # Set reference polarization to the one that had the best pulse
+        h0 = 0
+        h1 = 0
+        try:
+            h0 = station.polarization['0']["pulse_height_incoherent"]
+        except:
+            pass
 
-    # Select block containing pulse
-    blocksize = station.polarization[rp]["blocksize"]
-    block = station.polarization[rp]["block"]
-    f["BLOCKSIZE"] = blocksize
-    f["BLOCK"] = block
+        try:
+            h1 = station.polarization['1']["pulse_height_incoherent"]
+        except:
+            pass
 
-    # Create FFTW plans
-    fftplan = cr.FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-    invfftplan = cr.FFTWPlanManyDftC2r(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+        if h0 > h1:
+            rp = '0'
+        else:
+            rp = '1'
 
-    # Select antennas which are marked good for both polarization
-    names = f["DIPOLE_NAMES"]
-    names_good = station.polarization['0']["antennas"].values() + station.polarization['1']["antennas"].values()
+        # Select block containing pulse
+        blocksize = station.polarization[rp]["blocksize"]
+        block = station.polarization[rp]["block"]
+        f["BLOCKSIZE"] = blocksize
+        f["BLOCK"] = block
 
-    selected_dipoles = []
-    for i in range(len(names)/2):
-        if names[2*i] in names_good and names[2*i+1] in names_good:
-            selected_dipoles.extend([names[2*i], names[2*i+1]])
+        # Create FFTW plans
+        fftplan = cr.FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+        invfftplan = cr.FFTWPlanManyDftC2r(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
-    f["SELECTED_DIPOLES"] = selected_dipoles
+        # Select antennas which are marked good for both polarization
+        names = f["DIPOLE_NAMES"]
+        names_good = station.polarization['0']["antennas"].values() + station.polarization['1']["antennas"].values()
 
-    # Read FFT data
-    fft_data = f.empty("FFT_DATA")
-    f.getFFTData(fft_data, block, False)
-    frequencies = cr.hArray(f["FREQUENCY_DATA"])
+        selected_dipoles = []
+        for i in range(len(names)/2):
+            if names[2*i] in names_good and names[2*i+1] in names_good:
+                selected_dipoles.extend([names[2*i], names[2*i+1]])
 
-    # Flag dirty channels (from RFI excission)
-    dirty_channels = list(set(station.polarization['0']["dirty_channels"] + station.polarization['1']["dirty_channels"]))
+        f["SELECTED_DIPOLES"] = selected_dipoles
 
-    fft_data[..., dirty_channels] = 0
+        # Read FFT data
+        fft_data = f.empty("FFT_DATA")
+        f.getFFTData(fft_data, block, False)
+        frequencies = cr.hArray(f["FREQUENCY_DATA"])
 
-    # Apply calibration delays
-    try:
-        cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
-    except:
-        print "Error when obtaining DIPOLE_CALIBRATION_DELAY skipping station", f["STATION_NAME"]
+        # Flag dirty channels (from RFI excission)
+        dirty_channels = list(set(station.polarization['0']["dirty_channels"] + station.polarization['1']["dirty_channels"]))
 
-    weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
-    phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
+        fft_data[..., dirty_channels] = 0
 
-    cr.hDelayToPhase(phases, frequencies, cabledelays)
-    cr.hPhaseToComplex(weights, phases)
+        # Apply calibration delays
+        try:
+            cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
+        except:
+            print "Error when obtaining DIPOLE_CALIBRATION_DELAY skipping station", f["STATION_NAME"]
 
-    fft_data.mul(weights)
+        weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
+        phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
 
-    # Get expected galactic noise strength
-    galactic_noise = cr.trun("GalacticNoise", timestamp = f["TIME"][0])
+        cr.hDelayToPhase(phases, frequencies, cabledelays)
+        cr.hPhaseToComplex(weights, phases)
 
-    # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
-    antennas_spectral_power = dict(zip(
-        station.polarization['0']["antennas"].values()+station.polarization['1']["antennas"].values(),
-        station.polarization['0']["antennas_spectral_power"]+station.polarization['1']["antennas_spectral_power"]
-        ))
+        fft_data.mul(weights)
 
-    antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
+        # Get expected galactic noise strength
+        galactic_noise = cr.trun("GalacticNoise", timestamp = f["TIME"][0])
 
-    # Correct to expected level
-    cr.hInverse(antennas_spectral_power_correction)
-    cr.hMul(antennas_spectral_power_correction, galactic_noise.galactic_noise)
-    cr.hMul(fft_data[...], antennas_spectral_power_correction[...])
+        # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
+        antennas_spectral_power = dict(zip(
+            station.polarization['0']["antennas"].values()+station.polarization['1']["antennas"].values(),
+            station.polarization['0']["antennas_spectral_power"]+station.polarization['1']["antennas_spectral_power"]
+            ))
 
-    # Get timeseries data
-    timeseries_data = f.empty("TIMESERIES_DATA")
-    nantennas = timeseries_data.shape()[0] / 2
+        antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
 
-    # Get antennas positions
-    antenna_positions = f["ANTENNA_POSITIONS"]
-
-    # Get pulse window
-    pulse_start = station.polarization[rp]["pulse_start_sample"]
-    pulse_end = station.polarization[rp]["pulse_end_sample"]
-
-    # Get first estimate of pulse direction
-    pulse_direction = station.polarization[rp]["pulse_direction"]
-
-    fft = fft_data.toNumpy()
-
-    # Start direction fitting loop
-    n = 0
-    direction_fit_converged = False
-    while True:
-
-        # Unfold antenna pattern
-        antenna_response = cr.trun("AntennaResponse", normalize = False, fft_data = fft_data, frequencies = frequencies, direction = pulse_direction)
+        # Correct to expected level
+        cr.hInverse(antennas_spectral_power_correction)
+        cr.hMul(antennas_spectral_power_correction, galactic_noise.galactic_noise)
+        cr.hMul(fft_data[...], antennas_spectral_power_correction[...])
 
         # Get timeseries data
-        cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
-        timeseries_data /= blocksize
+        timeseries_data = f.empty("TIMESERIES_DATA")
+        nantennas = timeseries_data.shape()[0] / 2
 
-        # Calculate delays
-        pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+        # Get antennas positions
+        antenna_positions = f["ANTENNA_POSITIONS"]
 
-        # Use current direction if not enough significant pulses are found for direction fitting
-        if len(pulse_envelope.antennas_with_significant_pulses) < 3:
-            print "not enough antennas with significant pulses, using previous direction"
-            break
-        
-        # Fit pulse direction
-        direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses,reference_antenna = pulse_envelope.refant, verbose=True)
+        # Get pulse window
+        pulse_start = station.polarization[rp]["pulse_start_sample"]
+        pulse_end = station.polarization[rp]["pulse_end_sample"]
 
-        pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
+        # Get first estimate of pulse direction
+        pulse_direction = station.polarization[rp]["pulse_direction"]
 
-        n += 1
-        if direction_fit_converged:
-            print "fit converged"
-            station["crp_pulse_direction"] = pulse_direction
-            break
+        fft = fft_data.toNumpy()
 
-        if n > options.maximum_nof_iterations:
-            print "maximum number of iterations reached"
-            station["crp_pulse_direction"] = pulse_direction
-            break
+        # Start direction fitting loop
+        n = 0
+        direction_fit_converged = False
+        while True:
 
-        if direction_fit_plane_wave.fit_failed:
-            print "direction fit failed"
-            break
+            # Unfold antenna pattern
+            antenna_response = cr.trun("AntennaResponse", normalize = False, fft_data = fft_data, frequencies = frequencies, direction = pulse_direction)
 
-    # Project polarization onto x,y,z frame
-    xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, blocksize))
-    cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
+            # Get timeseries data
+            cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
+            timeseries_data /= blocksize
 
-    # Get Stokes parameters
-    stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+            # Calculate delays
+            pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
-    # Get pulse strength
-    pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+            # Use current direction if not enough significant pulses are found for direction fitting
+            if len(pulse_envelope.antennas_with_significant_pulses) < 3:
+                print "not enough antennas with significant pulses, using previous direction"
+                break
+            
+            # Fit pulse direction
+            direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses,reference_antenna = pulse_envelope.refant, verbose=True)
 
-    # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
-    time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
-    time_delays += float(block * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
+            pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
-    # Create instance
-    p = crdb.Polarization(db)
+            n += 1
+            if direction_fit_converged:
+                print "fit converged"
+                station["crp_pulse_direction"] = pulse_direction
+                break
 
-    # Set direction
-    p.direction = "xyz"
+            if n > options.maximum_nof_iterations:
+                print "maximum number of iterations reached"
+                station["crp_pulse_direction"] = pulse_direction
+                break
 
-    # Add to station object (and to database)
-    p.write()
-    station.addPolarization(p)
+            if direction_fit_plane_wave.fit_failed:
+                print "direction fit failed"
+                break
 
-    # Add parameters
-    p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
-    p["crp_pulse_delays"] = time_delays
-    p["crp_pulse_strength"] = cr.hArray(pulse_envelope_xyz.maxima).toNumpy().reshape((nantennas, 3))
-    p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
-    p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
-    p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
+        # Project polarization onto x,y,z frame
+        xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, blocksize))
+        cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
+
+        # Get Stokes parameters
+        stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+
+        # Get pulse strength
+        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+
+        # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
+        time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
+        time_delays += float(block * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
+
+        # Create instance
+        p = crdb.Polarization(db)
+
+        # Set direction
+        p.direction = "xyz"
+
+        # Add to station object (and to database)
+        p.write()
+        station.addPolarization(p)
+
+        # Add parameters
+        p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
+        p["crp_pulse_delays"] = time_delays
+        p["crp_pulse_strength"] = cr.hArray(pulse_envelope_xyz.maxima).toNumpy().reshape((nantennas, 3))
+        p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
+        p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
+        p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
+
+    except Exception as e:
+        print 80 * "-"
+        print "Error occured when processing station", station.stationname
+        print 80 * "-"
+        print e
+        print 80 * "-"
 
 # Create list of event level plots
 plotlist = []
