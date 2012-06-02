@@ -245,14 +245,13 @@ all_station_direction = []
 for station in stations:
     try:
         all_station_direction.append(station["crp_pulse_direction"])
+        p = station.polarization["xyz"]
+        all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
+        all_station_pulse_delays.append(p["crp_pulse_delays"])
+        all_station_pulse_strength.append(p["crp_pulse_strength"])
+        all_station_rms.append(p["crp_rms"])
     except:
-        print station.stationname, "does not have a pulse direction"
-
-    p = station.polarization["xyz"]
-    all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
-    all_station_pulse_delays.append(p["crp_pulse_delays"])
-    all_station_pulse_strength.append(p["crp_pulse_strength"])
-    all_station_rms.append(p["crp_rms"])
+        print "Do not have all pulse parameters for station", station.stationname
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)
 all_station_pulse_delays = np.vstack(all_station_pulse_delays)
