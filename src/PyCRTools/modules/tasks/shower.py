@@ -57,12 +57,14 @@ class Shower(Task):
             doc = "Draw LDF with log axis"), 
         ldf_remove_outliers = dict(default = True,
             doc = "Do not allow values > 1000000 or < 0.001 for signal strength"),
+        ldf_scale = dict(default= True, doc = "Scale LDF to region around core only"),
         ldf_color_x = dict(default='#B30424', doc = "color signals x"),
         ldf_color_y = dict(default='#68C8F7', doc = "color signals y"),
         ldf_color_z = dict(default='#FF8C19', doc = "color signals z"),
         ldf_marker_x = dict(default='s', doc = "marker signals x"),
         ldf_marker_y = dict(default='o', doc = "marker siganls y"),
-        ldf_marker_z = dict(default='v', doc = "marker siganls z"),  
+        ldf_marker_z = dict(default='v', doc = "marker siganls z"), 
+         
         
         footprint_enable = dict(default = False,
             doc = "Draw footprint of the shower"),  
@@ -73,7 +75,8 @@ class Shower(Task):
         footprint_use_title = dict(default=True,doc="Draw title indicating polarizations and event id (if given)"),
          
         footprint_shower_enable = dict(default=True, doc='Draw shower geometry in footprint'), 
-        footprint_shower_color = dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),            
+        footprint_shower_color = dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),    
+        footprint_scale = dict(default = True, doc = "Scale footprint to display superterp only."),     
              
         footprint_lora_enable = dict(default = True,
             doc = "Draw Information from LORA"), 
@@ -254,6 +257,9 @@ class Shower(Task):
                 if self.ldf_logplot:
                     cr.plt.yscale("log")
                 cr.plt.legend(loc='upper right', shadow=False, scatterpoints=1)
+            
+            if self.ldf_scale:
+                cr.plt.xlim(0,500)
                 
             if self.save_plots:
                 plotname = self.plot_prefix+"shower_ldf.png"
@@ -354,7 +360,11 @@ class Shower(Task):
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
-
+                
+                if self.footprint_scale:
+                    cr.plt.xlim(-190,190)
+                    cr.plt.ylim(-190,190)
+                    
                 if self.save_plots:
                     plotname = self.plot_prefix+"shower_footprint_polX.png"
                     cr.plt.savefig(plotname)
@@ -402,7 +412,11 @@ class Shower(Task):
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)
-                                    
+
+                if self.footprint_scale:
+                    cr.plt.xlim(-190,190)
+                    cr.plt.ylim(-190,190)
+                                                         
                 if self.save_plots:
                     plotname = self.plot_prefix+"shower_footprint_polY.png"
                     cr.plt.savefig(plotname)
@@ -448,6 +462,10 @@ class Shower(Task):
                     if self.footprint_shower_enable:
                         cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
+
+                    if self.footprint_scale:
+                        cr.plt.xlim(-190,190)
+                        cr.plt.ylim(-190,190)
                 
                     if self.save_plots:
                         plotname = self.plot_prefix+"shower_footprint_polZ.png"
