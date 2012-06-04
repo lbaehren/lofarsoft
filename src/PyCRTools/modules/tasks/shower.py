@@ -76,7 +76,8 @@ class Shower(Task):
          
         footprint_shower_enable = dict(default=True, doc='Draw shower geometry in footprint'), 
         footprint_shower_color = dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),    
-        footprint_scale = dict(default = True, doc = "Scale footprint to display superterp only."),     
+        footprint_scale = dict(default = True, doc = "Scale footprint to display superterp only."),    
+        footprint_scale_box = dict(default = 200, doc = "Box around coordinate center which will be plotted"),
              
         footprint_lora_enable = dict(default = True,
             doc = "Draw Information from LORA"), 
@@ -275,7 +276,9 @@ class Shower(Task):
             
             # LORA
             LORA_regular = False
-            LORA_time = False            
+            LORA_time = False   
+            
+                     
             
             if self.lora_signals is not None and self.lora_positions is not None and self.footprint_lora_enable:
   
@@ -315,7 +318,22 @@ class Shower(Task):
                     
 
             if self.positions is not None and self.signals is not None:
+            
+                if self.footprint_scale:
+                    scaling_check = (self.positions[:,0]>-self.footprint_scale_box)&(self.positions[:,1]<self.footprint_scale_box)&(self.positions[:,1]>-self.footprint_scale_box)&(self.positions[:,0]<self.footprint_scale_box)
+                    scaling_check = scaling_check.transpose()
+                    
+                    print self.timelags
+                    self.signals = self.signals[scaling_check]
+                    self.positions = self.positions[scaling_check]
+                    self.timelags = self.timelags[scaling_check]
+                    print self.timelags
                 
+                    print self.signals.shape
+                    print self.positions.shape
+                    print self.timelags.shape
+                    
+                    
                 if self.timelags is None:
                    self.scolors="blue"
                    print "WARNING, footprint does not represent the time, only the signal strength"
@@ -342,7 +360,8 @@ class Shower(Task):
                 
                 if self.timelags is not None:
                     self.scolors=self.timelags[:,0]-self.timelags[:,0].min()
-                    self.scolors *=1e9                    
+                    self.scolors *=1e9  
+                                      
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
                 cr.plt.xlabel("LOFAR East [meters] ")
                 cr.plt.ylabel("LOFAR North [meters] ")
@@ -361,9 +380,6 @@ class Shower(Task):
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
                 
-                if self.footprint_scale:
-                    cr.plt.xlim(-190,190)
-                    cr.plt.ylim(-190,190)
                     
                 if self.save_plots:
                     plotname = self.plot_prefix+"shower_footprint_polX.png"
@@ -413,9 +429,6 @@ class Shower(Task):
                     cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)
 
-                if self.footprint_scale:
-                    cr.plt.xlim(-190,190)
-                    cr.plt.ylim(-190,190)
                                                          
                 if self.save_plots:
                     plotname = self.plot_prefix+"shower_footprint_polY.png"
@@ -463,9 +476,6 @@ class Shower(Task):
                         cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
                         cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)                
 
-                    if self.footprint_scale:
-                        cr.plt.xlim(-190,190)
-                        cr.plt.ylim(-190,190)
                 
                     if self.save_plots:
                         plotname = self.plot_prefix+"shower_footprint_polZ.png"
