@@ -1,7 +1,7 @@
 #!/bin/ksh 
 
 # Please update the version number when you edit this file:
-VERSION=2.7
+VERSION=2.8
 
 # take a list of observations, and create multiple templates for MOM upload (Imaging ONLY)
 # required input: list of object names or ra/dec positions
@@ -17,9 +17,9 @@ USAGE2="\nUsage for BeamFormed: $0 [[-help BF]] \n"\
 "       [-integHBA integration_interval_HBA] [-integLBA integration_interval_LBA]  \n"\
 "       [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] \n"\
 "       [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] \n"\
-"       [+IM list_or_ALL] [-namecol] [-debug]"\
+"       [+IM list_or_ALL] [-namecol] [-debug] [-folder folder_name] [-momid mom2Id]"\
 "       [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]\n"\
-"       [-cat user_catalog_filename] [-folder folder_name] [+TBB] [+OCD] [+Superterp] \n"\
+"       [-cat user_catalog_filename] [+TBB] [+OCD] [+Superterp] \n"\
 "       [-subbandsPerFileCS subbandsPerFileCS] [-subbandsPerFileIS subbandsPerFileIS] \n"\
 "       [-nofCollapsedChanCS numberCollapsedChannelsCS] [-nofCollapsedChanIS numberCollapsedChannelsIS]\n"\
 "       [-timeIntegFactorHBA_CS timeIntegrationFactorHBA_CS] [-timeIntegFactorHBA_IS timeIntegrationFactorHBA_IS]\n"\
@@ -61,7 +61,8 @@ USAGE4="         [[+multi]] ==> Turns on the multi-beam input specification;  ot
 "         [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg)\n"\
 "         [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).\n"\
 "         [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog positions. \n"\
-"         [[-folder folder_name]]  ==> Import XML directly into this MoM folder name; default is no folder. \n"\
+"         [[-folder folder_name]]  ==> Import XML directly into this MoM folder name; default is no folder; use -momid to append to existing folder. \n"\
+"         [[-momid mom2Id]]  ==> If appending to existing MoM folder (-folder flag), must use the mom2Id as well. \n"\
 "         [[+TBB]]  ==> Turn on TBB piggybacking during the observation;  turned off by default. \n"\
 "         [[+OCD]]  ==> Turn on BF Online Coherent Dedispersion (OCD);  turned off by default. \n"\
 "         [[+Superterp]]  ==> Turn on BF Enable Superterp option;  turned off by default. \n"\
@@ -177,6 +178,7 @@ RING_SIZE=0.0
 CAT=""
 user_cat=0
 folder=""
+momid=""
 TBB=false
 OCD=false
 Superterp=false
@@ -248,6 +250,7 @@ do
      -ring_size)         RING_SIZE=$2; shift;;
      -cat)               user_catfile=$2; user_cat=1; shift;;
      -folder)            folder=$2; shift;;
+     -momid)             momid=$2; shift;;
      +TBB)               TBB=true;;
      +OCD)               OCD=true;;
      +Superterp)         Superterp=true;;
@@ -842,9 +845,14 @@ echo "    <item index=\"0\">" >> $outfile
 #if [[ $folder != "" ]]
 if [[ -n "$folder" ]]
 then
-	echo "          <lofar:folder>" >> $outfile
+    if [[ -n "$momid" ]]
+    then
+	    echo "          <lofar:folder mom2Id=\"$momid\">" >> $outfile
+    else
+	    echo "          <lofar:folder>" >> $outfile
+    fi
 	echo "            <name>$folder</name>" >> $outfile
-	echo "            <description>Folder: $folder xml-uploaded (`date`)</description>" >> $outfile
+	echo "            <description>Folder: $folder xml-uploaded on `date`</description>" >> $outfile
 	echo "            <children>" >> $outfile
 	echo ""
 	echo "            <item index=\"0\">" >> $outfile

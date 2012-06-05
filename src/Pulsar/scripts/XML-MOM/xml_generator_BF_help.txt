@@ -10,7 +10,7 @@ Usage for BeamFormed: xml_generator_BF.sh [[-help BF]]
        [-antenna antenna_setup]  [-modeHBA antenna_submode] [-modeLBA antenna_submode] [+multi] 
        [-chansubsHBA channels_per_subband_HBA] [-chansubsLBA channels_per_subband_LBA] 
        [+IM list_or_ALL] [-namecol] [-debug] [-sexages] [-clock 200|160] [-nof_rings num_of_TA_rings] [-ring_size TA_ring_size]
-       [-cat user_catalog_filename] [-folder folder_name] [+TBB] [+OCD] [+Superterp] 
+       [-cat user_catalog_filename] [+TBB] [+OCD] [+Superterp] [-folder folder_name] [-momid mom2Id]
        [-subbandsPerFileCS subbandsPerFileCS] [-subbandsPerFileIS subbandsPerFileIS] 
        [-nofCollapsedChanCS numberCollapsedChannelsCS] [-nofCollapsedChanIS numberCollapsedChannelsIS]
        [-timeIntegFactorHBA_CS timeIntegrationFactorHBA_CS] [-timeIntegFactorHBA_IS timeIntegrationFactorHBA_IS]
@@ -52,7 +52,8 @@ Options:
          [[-ring_size TA_ring_size]] ==> Size of Tied-Array rings in radians (default=0.00872663, which is ~0.5 deg)
          [[-debug]] ==> Turn on KSH DEBUGGING information while running the script (tons of STDOUT messages, for testing).
          [[-cat user_catalog_filename]] ==> User specified catalog file (format: ra dec name), overrules regular catalog positions. 
-         [[-folder folder_name]]  ==> Import XML directly into this MoM folder name; default is no folder. 
+         [[-folder folder_name]]  ==> Import XML directly into this MoM folder name; default is no folder; use -momid to append to existing folder. 
+         [[-momid mom2Id]]  ==> If appending to existing MoM folder (-folder flag), must use the mom2Id as well.
          [[+TBB]]  ==> Turn on TBB piggybacking during the observation;  turned off by default. 
          [[+OCD]]  ==> Turn on BF Online Coherent Dedispersion (OCD);  turned off by default. 
          [[+Superterp]]  ==> Turn on BF Enable Superterp option;  turned off by default. 
