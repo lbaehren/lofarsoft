@@ -311,7 +311,7 @@ class Observation:
 		else:   # checking old parset location
 			self.parset = "%s/%s/%s.parset" % (self.parset_dir, self.id, self.id)
 			if os.path.exists(self.parset):	return True
-			else:
+			else: 
 				self.parset = "%s/%s.parset" % (self.parset_dir, self.id)
 				if os.path.exists(self.parset):	return True
 				else: return False
