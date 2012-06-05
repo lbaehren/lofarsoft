@@ -411,6 +411,9 @@ def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 
     
     if showImage:
         plt.imshow(imarray, cmap=plt.cm.hot_r,extent=(0, 360.0, 0.0, 90.0)) 
+        plt.ylabel("Elevation [deg]")
+        plt.xlabel("Azimuth [deg]")
+        plt.title("Phase error [ns^2] as function of incoming direction")
         # show 'good' positions bright by reverse colormap hot_r
         plt.colorbar()
     if verbose:
