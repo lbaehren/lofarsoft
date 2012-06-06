@@ -333,7 +333,7 @@ namespace CR {
       status = false;
     }
     
-    return true;
+    return status;
   }
   
   // ------------------------------------------------------- AzElHeight2Cartesian
