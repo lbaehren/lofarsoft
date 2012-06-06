@@ -5,7 +5,7 @@ Various function that are handy for cr physics analysis.
 import numpy as np
 
 # Converts spherical theta, phi to kartesian (x,y,z) vector
-def toVector(theta, phi, degrees = True):# in degrees
+def toVector(phi, theta, degrees = True):# in degrees
     if degrees:
         p = np.deg2rad(phi)
         t = np.deg2rad(theta)
@@ -23,7 +23,7 @@ def toAngles(array, degrees = True):
     if degrees:
         theta = np.rad2deg(theta)
         phi = np.rad2deg(phi)
-    return [theta, phi]
+    return [phi, theta]
     
 
 # Averages over list of thetas and phis (standard convention), via transformation in to kartesian vectors 
