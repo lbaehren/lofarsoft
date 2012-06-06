@@ -327,11 +327,6 @@ class Shower(Task):
                     self.signals = self.signals[scaling_check]
                     self.positions = self.positions[scaling_check]
                     self.timelags = self.timelags[scaling_check]
-                    print self.timelags
-                
-                    print self.signals.shape
-                    print self.positions.shape
-                    print self.timelags.shape
                     
                     
                 if self.timelags is None:
