@@ -52,6 +52,7 @@ class AntennaResponse(Task):
 
         # Get inverse Jones matrix for each frequency
         if self.test_with_unity_matrix:
+            print "[AntennaResponse] using unity inverse Jones matrix for unfolding"
             cr.hGetUnityInverseJonesMatrix(self.inverse_jones_matrix)
         elif "LBA" in self.antennaset:
             if self.normalize:
