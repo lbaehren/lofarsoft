@@ -19,7 +19,7 @@ def toVector(theta, phi, degrees = True):# in degrees
 def toAngles(array, degrees = True):
     r = np.sqrt(array[0]**2+array[1]**2+array[2]**2)
     theta = np.arccos(array[2]/r)
-    phi = np.arctan(array[1]/array[0])
+    phi = np.arctan2(array[1],array[0])
     if degrees:
         theta = np.rad2deg(theta)
         phi = np.rad2deg(phi)
