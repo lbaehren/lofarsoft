@@ -574,6 +574,41 @@ void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Get unity inverse Jones matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetUnityInverseJonesMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(Jinv)()("Inverse Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Returns a unity inverse Jones matrix for testing.
+*/
+
+template <class CIter, class NIter>
+void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end)
+{
+  // Get lengths
+  const int Nj = std::distance(Jinv, Jinv_end);
+  const int Nf = Nj / 4;
+
+  // Get iterators
+  CIter Jinv_it = Jinv;
+
+  // Loop over frequencies
+  for (int i=0; i<Nf; i++)
+  {
+    *Jinv_it++ = 1.0;
+    *Jinv_it++ = 0.0;
+    *Jinv_it++ = 0.0;
+    *Jinv_it++ = 1.0;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Apply inverse Jones matrix to get on sky polarizations
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hGetOnSkyPolarizations
