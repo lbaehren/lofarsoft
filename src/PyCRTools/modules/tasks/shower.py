@@ -57,6 +57,8 @@ class Shower(Task):
             doc = "Draw LDF with log axis"), 
         ldf_remove_outliers = dict(default = True,
             doc = "Do not allow values > 1000000 or < 0.001 for signal strength"),
+        ldf_total_signal = dict(default = False, doc="draw only one signalstrength"),
+            
         ldf_scale = dict(default= True, doc = "Scale LDF to region around core only"),
         ldf_color_x = dict(default='#B30424', doc = "color signals x"),
         ldf_color_y = dict(default='#68C8F7', doc = "color signals y"),
@@ -204,20 +206,22 @@ class Shower(Task):
         
             Dist = self.__GetDistance(self.core,self.direction,self.positions)
         
-            if self.ldf_remove_outliers:
-                for i in xrange(len(self.signals[:,0])):
-                    if self.signals[i,0] > 100000:
-                        self.signals[i,0] = 10
-                    if self.signals[i,0] < 0.001:
-                        self.signals[i,0] = 1
-                    if self.signals[i,1] > 100000:
-                        self.signals[i,1] = 10
-                    if self.signals[i,1] < 0.001:
-                        self.signals[i,1] = 1
-                    if self.signals[i,2] > 100000:
-                        self.signals[i,2] = 10
-                    if self.signals[i,2] < 0.001:
-                        self.signals[i,2] = 1                              
+                        
+            if not self.ldf_total_signal: 
+               if self.ldf_remove_outliers:
+                   for i in xrange(len(self.signals[:,0])):
+                       if self.signals[i,0] > 100000:
+                           self.signals[i,0] = 10
+                       if self.signals[i,0] < 0.001:
+                           self.signals[i,0] = 1  
+                           if self.signals[i,1] > 100000:
+                               self.signals[i,1] = 10
+                           if self.signals[i,1] < 0.001:
+                               self.signals[i,1] = 1
+                           if self.signals[i,2] > 100000:
+                               self.signals[i,2] = 10
+                           if self.signals[i,2] < 0.001:
+                               self.signals[i,2] = 1                              
             
             if self.core_uncertainties is not None and self.direction_uncertainties is not None and self.signals_uncertainties is not None:
                 
@@ -233,10 +237,15 @@ class Shower(Task):
 
                 
                 cr.plt.figure()
-                cr.plt.errorbar(Dist,self.signals[:,0],yerr=[sig_uncer[:,0],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_x,marker=self.ldf_marker_x,linestyle="None",label="x")
-                cr.plt.errorbar(Dist,self.signals[:,1],yerr=[sig_uncer[:,1],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_y,marker=self.ldf_marker_y,linestyle="None",label="y")
-                cr.plt.errorbar(Dist,self.signals[:,2],yerr=[sig_uncer[:,2],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_z,marker=self.ldf_marker_z,linestyle="None",label="z")     
-                
+                if self.ldf_total_signal:
+                    cr.plt.errorbar(Dist,self.signals,yerr=[sig_uncer,self.signals_uncertainties],xerr=Dist_uncert,c=self.ldf_color_x,marker=self.ldf_marker_x,linestyle="None",label="total")
+                    
+                else:
+                    
+                    cr.plt.errorbar(Dist,self.signals[:,0],yerr=[sig_uncer[:,0],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_x,marker=self.ldf_marker_x,linestyle="None",label="x")
+                    cr.plt.errorbar(Dist,self.signals[:,1],yerr=[sig_uncer[:,1],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_y,marker=self.ldf_marker_y,linestyle="None",label="y")
+                    cr.plt.errorbar(Dist,self.signals[:,2],yerr=[sig_uncer[:,2],self.signals_uncertainties[:,0]],xerr=Dist_uncert,c=self.ldf_color_z,marker=self.ldf_marker_z,linestyle="None",label="z")     
+                    
                 cr.plt.xlabel("Distance to Shower Axis [m]")
                 cr.plt.ylabel("Signal [a.u.]")
                 
@@ -248,9 +257,12 @@ class Shower(Task):
             else:
                 print "Not all uncertainties given, do not plot uncertainties"    
                 cr.plt.figure()
-                cr.plt.scatter(Dist,self.signals[:,0],c=self.ldf_color_x,marker=self.ldf_marker_x,label="x")
-                cr.plt.scatter(Dist,self.signals[:,1],c=self.ldf_color_y,marker=self.ldf_marker_y,label="y")
-                cr.plt.scatter(Dist,self.signals[:,2],c=self.ldf_color_z,marker=self.ldf_marker_z,label="z")
+                if self.ldf_total_signal:
+                    cr.plt.scatter(Dist,self.signals,c=self.ldf_color_x,marker=self.ldf_marker_x,label="total")
+                else:
+                    cr.plt.scatter(Dist,self.signals[:,0],c=self.ldf_color_x,marker=self.ldf_marker_x,label="x")
+                    cr.plt.scatter(Dist,self.signals[:,1],c=self.ldf_color_y,marker=self.ldf_marker_y,label="y")
+                    cr.plt.scatter(Dist,self.signals[:,2],c=self.ldf_color_z,marker=self.ldf_marker_z,label="z")
                 
                 cr.plt.xlabel("Distance to Shower Axis [m]")
                 cr.plt.ylabel("Signal [a.u.]")
@@ -323,7 +335,6 @@ class Shower(Task):
                     scaling_check = (self.positions[:,0]>-self.footprint_scale_box)&(self.positions[:,1]<self.footprint_scale_box)&(self.positions[:,1]>-self.footprint_scale_box)&(self.positions[:,0]<self.footprint_scale_box)
                     scaling_check = scaling_check.transpose()
                     
-                    print self.timelags
                     self.signals = self.signals[scaling_check]
                     self.positions = self.positions[scaling_check]
                     self.timelags = self.timelags[scaling_check]
