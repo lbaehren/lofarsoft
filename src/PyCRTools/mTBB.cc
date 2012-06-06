@@ -334,23 +334,36 @@ boost::python::list TBBData::python_antenna_position_itrf()
   return lst;
 }
 
-// WARNING Non trivial method needs to be migrated to parrent class
+// WARNING Non trivial method needs to be migrated to parent class
 uint TBBData::python_maximum_read_length(int refAntenna)
 {
   std::vector<uint> length = data_length();
   std::vector<int> offset = sample_offset(refAntenna);
 
-  uint currentLength = 0;
   uint maxLength = 0;
 
-  for (uint i=0; i<length.size(); ++i)
-  {
-    currentLength = length[i] - offset[i];
+  cout << "max_readout length for refAntenna "<< refAntenna << endl;
 
-    if (currentLength > maxLength)
-    {
-      maxLength = currentLength;
+  // Find inner leftmost samples
+  int sample_left = 0;
+  for ( uint i = 0; i < length.size(); ++i ) {
+    if ( offset[i] > sample_left ) {
+      sample_left = offset[i];
     }
+  }
+
+  // Find inner rightmost samples
+  int sample_right = length[0] - sample_left;
+  for ( uint i = 0; i < length.size(); ++i ) {
+    if ( (int)(length[i] - offset[i]) < sample_right ) {
+      sample_right = (int)(length[i] - offset[i]);
+    }
+  }
+
+  if ( sample_right > sample_left ) {
+    maxLength = sample_right - sample_left;
+  } else {
+    maxLength = 0;
   }
 
   return maxLength;
@@ -478,6 +491,7 @@ std::string TBBData::python_filterSelection()
 
 std::string TBBData::python_target()
 {
+
   DAL1::CommonAttributes c = commonAttributes();
   return c.target();
 }
