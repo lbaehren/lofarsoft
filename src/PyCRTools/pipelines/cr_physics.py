@@ -22,7 +22,7 @@ parser = OptionParser()
 parser.add_option("-i", "--id", type="int", help="Event ID", default=1)
 parser.add_option("-d", "--database", default="cr.db", help="Filename of database")
 parser.add_option("-o", "--output-dir", default="./", help="Output directory")
-parser.add_option("--use-unity-ijm", default=False, help="Use unity inverse Jones matrix for unfolding the antenna pattern for testing purposes.")
+parser.add_option("--use-unity-ijm", action="store_true", default=False, help="Use unity inverse Jones matrix for unfolding the antenna pattern for testing purposes.")
 parser.add_option("--maximum_nof_iterations", default = 5, help="Maximum number of iterations in antenna pattern unfolding loop.")
 
 (options, args) = parser.parse_args()
