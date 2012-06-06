@@ -27,7 +27,7 @@ def toAngles(array, degrees = True):
     
 
 # Averages over list of thetas and phis (standard convention), via transformation in to kartesian vectors 
-def averageDirection(thetalist, philist, degrees = True): # in degrees
+def averageDirection(philist, thetalist,  degrees = True): # in degrees
     vec = np.array([0.,0.,0.])
     for i in xrange(len(thetalist)):
         theta = thetalist[i]
@@ -38,7 +38,7 @@ def averageDirection(thetalist, philist, degrees = True): # in degrees
     return av
 
 # Averages over list of thetas and phis (LOFAR convention, el, az), via transformation in to kartesian vectors
-def averageDirectionLOFAR(thetalist, philist, degrees = True): # in degrees    
+def averageDirectionLOFAR(philist,thetalist, degrees = True): # in degrees    
     vec = np.array([0.,0.,0.])
     for i in xrange(len(thetalist)):
         if degrees:
