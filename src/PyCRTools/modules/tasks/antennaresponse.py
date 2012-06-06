@@ -51,7 +51,7 @@ class AntennaResponse(Task):
         self.on_sky_polarization.copy(self.fft_data)
 
         # Get inverse Jones matrix for each frequency
-        if test_with_unity_matrix:
+        if self.test_with_unity_matrix:
             cr.hGetUnityInverseJonesMatrix(self.inverse_jones_matrix)
         elif "LBA" in self.antennaset:
             if self.normalize:
