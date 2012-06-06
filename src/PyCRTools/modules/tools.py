@@ -26,7 +26,7 @@ def toAngles(array, degrees = True):
     return [phi, theta]
     
 
-# Averages over list of thetas and phis (standard convention), via transformation in to kartesian vectors 
+# Averages over list of thetas and phis (standard convention), via transformation in to Cartesian vectors 
 def averageDirection(philist, thetalist,  degrees = True): # in degrees
     vec = np.array([0.,0.,0.])
     for i in xrange(len(thetalist)):
@@ -37,21 +37,21 @@ def averageDirection(philist, thetalist,  degrees = True): # in degrees
     av = toAngles(vec)    
     return av
 
-# Averages over list of thetas and phis (LOFAR convention, el, az), via transformation in to kartesian vectors
-def averageDirectionLOFAR(philist,thetalist, degrees = True): # in degrees    
-    vec = np.array([0.,0.,0.])
-    for i in xrange(len(thetalist)):
-        if degrees:
-            theta = 90 - thetalist[i]
-            phi = 90 - philist[i]
-        else:
-            theta = np.pi/2. - thetalist[i]
-            phi = np.pi/2. - philist[i]                
-        vec += toVector(theta, phi, degrees)
-    vec = vec/np.sqrt(vec[0]**2+vec[1]**2+vec[2]**2)
-    av = toAngles(vec)
+# Averages over list of azimuth and elevations (LOFAR convention) via transformation in to Cartesian vectors
+def averageDirectionLOFAR(azlist, ellist, degrees = True): # in degrees    
+
+    if degrees:
+        philist = 90 - np.asarray(ellist)
+        thetalist = 90 - np.asarray(azlist)
+    else:
+        philist = np.pi/2. - np.asarray(ellist)
+        thetalist = np.pi/2. - np.asarray(azlist)
+
+    av = averageDirection(philist, thetalist, degrees)
+
     av[0] = 90 - av[0]
     av[1] = 90 - av[1]  
+
     return av
 
 # Using cuts on LORA reconstruction, will yield true when LORA reconstruction is considered reliable
