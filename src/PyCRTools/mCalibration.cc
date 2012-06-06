@@ -588,7 +588,7 @@ void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end,
   Returns a unity inverse Jones matrix for testing.
 */
 
-template <class CIter, class NIter>
+template <class CIter>
 void HFPP_FUNC_NAME (const CIter Jinv, const CIter Jinv_end)
 {
   // Get lengths
