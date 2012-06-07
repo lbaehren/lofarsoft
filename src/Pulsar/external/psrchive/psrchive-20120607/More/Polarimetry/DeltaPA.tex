@@ -1,0 +1,85 @@
+
+%
+% Tim and Vanessa: 044 8075 488
+%
+
+\documentclass[12pt]{article}
+\usepackage{amsfonts}
+
+\newcommand{\real}{{\rm Re}}
+\newcommand{\imag}{{\rm Im}}
+
+\begin{document}
+
+\section{Mean value of position angle change \\ Mark II}
+
+This memo documents an updated model for estimating the change in
+position angle, $\Delta\Psi$, and its uncertainty. Let
+\begin{equation}
+P_k = Q_k + i U_k = L_k \exp i2\Psi_k
+\end{equation}
+represent the linear polarization of the $k$th phase bin in one profile and
+\begin{equation}
+P^\prime_k = Q^\prime_k + i U^\prime_k = L^\prime_k \exp i2\Psi^\prime_k
+\end{equation}
+the same in the other profile.  
+
+Consider the {\bf weighted} cross-correlation,
+$\bar{Z}=\bar{C}+i\bar{S}$, where $\bar C$ and $\bar S$ are the
+weighted mean values of the real and imaginary components of
+\begin{equation}
+z_k = c_k + i s_k 
+    = P^*_k P^\prime_k = L_k L^\prime_k \exp i2(\Psi^\prime_k - \Psi_k).
+\end{equation}
+That is, where
+\begin{equation}
+c_k = Q_kQ^\prime_k + U_kU^\prime_k,
+\hspace{1cm}
+s_k = Q_kU^\prime_k - U_kQ^\prime_k,
+\end{equation}
+and
+\begin{eqnarray}
+\sigma_{c_k}^2 & = &
+ Q^{\prime2}_k\sigma_{Q_k}^2 + U^{\prime2}_k\sigma_{U_k}^2 +
+ Q^2_k\sigma_{Q^\prime_k}^2 + U^2_k\sigma_{U^\prime_k}^2 \\
+\sigma_{s_k}^2 & = &
+ U^{\prime2}_k\sigma_{Q_k}^2 + Q^{\prime2}_k\sigma_{U_k}^2 +
+ U^2_k\sigma_{Q^\prime_k}^2 + Q^2_k\sigma_{U^\prime_k}^2 \\
+\sigma_{s_k c_k} & = &
+ Q^\prime_k U^\prime_k (\sigma_{Q_k}^2 - \sigma_{U_k}^2) +
+ Q_kU_k (\sigma_{U^\prime_k}^2 -\sigma_{Q^\prime_k}^2)
+\end{eqnarray}
+the weighted means and their variances and covariance are given by
+\begin{equation}
+\bar C = \sigma_{\bar C}^2 \sum_{k=1}^N { c_k \over \sigma_{c_k}^2 }
+\hspace{1cm}
+\bar S = \sigma_{\bar S}^2 \sum_{k=1}^N { s_k \over \sigma_{s_k}^2 }
+\end{equation}
+and
+\begin{equation}
+\sigma_{\bar C}^2 = \left[ \sum_{k=1}^N{1\over\sigma_{c_k}^2} \right]^{-1}
+\hspace{5mm}
+\sigma_{\bar S}^2 = \left[ \sum_{k=1}^N{1\over\sigma_{s_k}^2} \right]^{-1}
+\hspace{5mm}
+\sigma_{\bar S \bar C} = \sum_{k=1}^N
+\left[\sigma_{\bar S}\sigma_{\bar C}\over\sigma_{s_k}\sigma_{c_k}\right]^2
+                         \sigma_{s_k c_k}
+\end{equation}
+
+\newpage
+
+\noindent
+The expectation value of $\Delta\Psi=\Psi^\prime_k - \Psi_k$ is given by
+\begin{equation}
+\langle\Delta\Psi\rangle
+={1\over2}\tan^{-1}\left({\bar S\over\bar C}\right).
+\end{equation}
+and the variance of the expectation value
+\begin{equation}
+{\mathrm{var}}(\langle\Delta\Psi\rangle) = 
+{ \bar C^2\sigma_{\bar S}^2 + \bar S^2\sigma_{\bar C}^2
+  + 2 \bar S\bar C \sigma_{\bar S \bar C} \over 
+  \left(\bar C^2 + \bar S^2\right)^2 }
+\end{equation}
+
+\end{document}
