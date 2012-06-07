@@ -413,7 +413,7 @@ class DataExtractor(object):
             time_ms_str = str(time_ms).zfill(3)
             time_stamp  = time_s_str+"."+time_ms_str+"Z"
 
-            polname = "pol%d" %(pol)
+            polname = "pol%s" %(pol)
 
             stationname = self.stationnames[0]
 
