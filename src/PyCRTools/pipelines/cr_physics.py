@@ -208,15 +208,8 @@ for station in stations:
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
         time_delays += float(block * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
 
-        # Create instance
-        p = crdb.Polarization(db)
-
-        # Set direction
-        p.direction = "xyz"
-
-        # Add to station object (and to database)
-        p.write()
-        station.addPolarization(p)
+        # Get xyz-polarization instance
+        p = station.polarization['xyz']
 
         # Add parameters
         p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
@@ -226,12 +219,18 @@ for station in stations:
         p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
 
+        p.status = "OK"
+
     except Exception as e:
         print 80 * "-"
         print "Error occured when processing station", station.stationname
         print 80 * "-"
         print e
         print 80 * "-"
+
+        p = station.polarization['xyz']
+
+        p.status = "BAD"
 
 # Create list of event level plots
 plotlist = []
