@@ -97,10 +97,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     </tr>
     <xsl:for-each select="/elements/parameters/parameter">
       <xsl:sort select="key"/>
+      <xsl:if test="value != ''">
       <tr>
         <td><xsl:value-of select="key"/></td>
         <td><xsl:value-of select="value"/></td>
       </tr>
+      </xsl:if>
     </xsl:for-each>
   </table>
   </body>
