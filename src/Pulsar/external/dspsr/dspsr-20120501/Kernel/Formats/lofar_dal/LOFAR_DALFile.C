@@ -9,7 +9,7 @@ using namespace std;
 
 #include "dsp/LOFAR_DALFile.h"
 
-#include "lofar/BF_File.h"
+#include "dal/lofar/BF_File.h"
 using namespace DAL;
 
 class dsp::LOFAR_DALFile::Handle
