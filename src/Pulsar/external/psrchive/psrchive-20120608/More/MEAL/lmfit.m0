@@ -1,9 +1,0 @@
-SumRule<Scalar>
- Gaussian
-  centre .134e7 1
-  height -6e-3 1
-  width 2e4 1
- Gaussian
-  centre 0.147e7 1
-  height -4e-3 1
-  width 2e4 1
