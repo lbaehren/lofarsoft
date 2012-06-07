@@ -137,10 +137,10 @@ class CRDatabasePopulator(object):
                     d.addStation(s)
 
                     # Create polarizations
-                    for pol_direction in [0,1]:
+                    for pol_direction in ["0","1","xyz"]:
                         p = crdb.Polarization(self._db)
                         p.antennaset = dx.antennaset
-                        p.direction = "%d" %(pol_direction)
+                        p.direction = "%s" %(pol_direction)
                         p.resultsfile = dx.resultsfile(pol_direction)
 
                         p.write()
@@ -282,10 +282,10 @@ class CRDatabasePopulator(object):
                         datafile.addStation(station)
 
                     # Create polarizations
-                    for pol_direction in [0,1]:
+                    for pol_direction in ["0","1","xyz"]:
                         p = crdb.Polarization(self._db)
                         p.antennaset = dx.antennaset
-                        p.direction = "%d" %(pol_direction)
+                        p.direction = "%s" %(pol_direction)
                         p.resultsfile = dx.resultsfile(pol_direction)
 
                         if self.doWrite:
