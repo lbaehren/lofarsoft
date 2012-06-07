@@ -184,7 +184,7 @@ add_dependencies (ppgplot_install ppgplot_build ppgplot_unpack)
 
 #  set (psrchive_version   "13.3")
 #  set (psrchive_version   "20120316")
-  set (psrchive_version   "20120608")
+  set (psrchive_version   "20120607")
   set (psrchive_name      "psrchive-${psrchive_version}")
   set (psrchive_directory "psrchive/psrchive-${psrchive_version}")
   
