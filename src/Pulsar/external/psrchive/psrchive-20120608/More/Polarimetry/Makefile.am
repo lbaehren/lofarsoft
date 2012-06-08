@@ -19,6 +19,7 @@ nobase_include_HEADERS = \
         Pulsar/Database.h \
         Pulsar/DeltaPA.h \
         Pulsar/DeltaRM.h \
+	Pulsar/Distortion.h \
         Pulsar/DoPCalibrator.h \
         Pulsar/Faraday.h \
         Pulsar/FaradayRotation.h \
@@ -105,6 +106,7 @@ libPolarimetry_la_SOURCES = \
         Database.C \
         DeltaPA.C \
         DeltaRM.C \
+	Distortion.C \
         DoPCalibrator.C \
         Faraday.C \
         FaradayRotation.C \
