@@ -1,0 +1,93 @@
+#! /bin/sh
+
+# @configure_input@
+
+usage()
+{
+cat <<EOF
+
+Usage: psrchive [OPTION]
+
+Known values for OPTION are:
+
+  --prefix              installation directory
+  --libs                library linking information
+  --cflags              pre-processor and compiler flags
+  --html                web page layout directory
+  --aclocal             autoconf macro directory
+  --help                this help message
+  --version             version information
+  --pgplot-libs         PGPLOT linking information
+  --qt-libs             Qt linking information
+
+EOF
+
+exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
+
+while test $# -gt 0; do
+
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+
+    --prefix)
+        echo @PSRCHIVE_INSTALL@
+        ;;
+
+    --version)
+        echo @PACKAGE_STRING@
+        exit 0
+        ;;
+
+    --help)
+        usage 0
+        ;;
+
+    --cflags)
+        echo -I@includedir@ @PTHREAD_CFLAGS@
+        ;;
+
+    --ldflags | --libs)
+        echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil \
+             @LDFLAGS@ @FFT_LIBS@ @CFITSIO_LIBS@ @PUMA_LIBS@ @TEMPO2_LIBS@ \
+             @GSL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @FLIBS@
+        ;;
+
+    --pgplot-libs)
+        echo @PGPLOT_CFLAGS@ @PGPLOT_LIBS@
+        ;;
+
+    --qt-libs)
+        echo @QT_LIBS@
+        ;;
+
+    --aclocal)
+        echo @datadir@/aclocal
+        ;;
+
+    --html)
+        echo @datadir@/html
+        ;;
+
+    *)
+        usage
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+exit 0
+
