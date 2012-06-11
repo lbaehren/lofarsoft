@@ -163,9 +163,10 @@ def timeDelaysFromDirection(positions, direction):
     return timeDelays
 
 def phaseWrap(phases):
-    wrapped = np.zeros(len(phases))
-    for i in range(len(phases)): # improve!
-        wrapped[i] = phases[i] - twopi * round(phases[i] / twopi)
+    wrapped = phases - twopi * (phases / twopi).round()
+#    wrapped = np.zeros(len(phases))
+#    for i in range(len(phases)): # improve!
+#        wrapped[i] = phases[i] - twopi * round(phases[i] / twopi)
     return wrapped
 
 def phasesFromDirection(positions, direction, freq, nowrap = False):
@@ -292,7 +293,7 @@ def phaseError(az, el, pos, phases, freq):
     # wrap around into [-pi, pi]? Not strictly needed as the sin^2 function will do that...
     deltaPhi = (phases - phases[0]) - calcPhases # measured 'phases' and expected 'calcPhases' at the same reference phase
     
-    mu = (1.0/N) * np.sum( 1.0/(freq * twopi) * sin(deltaPhi) ) # check; uses same procedure as for 'mse' above.
+    mu = (1.0/N) * np.sum( 2.0/(freq * twopi) * sin(deltaPhi/2) ) # check; uses same procedure as for 'mse' above.
     msePerAntenna = ( 2.0/(freq * twopi) * sin(deltaPhi/2) ) ** 2 - mu*mu # periodicity 2-pi in deltaPhi needed!
     mse = np.average(msePerAntenna) 
 
@@ -386,7 +387,7 @@ def directionBruteForceSearch(positions, times, azSteps = 120, elSteps = 30):
     return bestFit + (minMSE,)
 
 def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 90, showImage = False, verbose=False):
-    # this can probably be done better by Scipy. But for now this is easy and it works...
+    # this can probably be done better by Scipy (brute). But for now this is easy and it works...
     elevations = np.arange(elSteps) * (90.0 / elSteps)
     azimuths = np.arange(azSteps) * (360.0 / azSteps)
     
