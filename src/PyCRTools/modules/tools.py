@@ -98,9 +98,9 @@ def select_quadrant(antenna_coordinates, core_position, rotation = 45.0):
 
         if temp[0] >= 0 and temp[1] >= 0:
             q[i] = 0
-        elif temp[0] >= 0 and temp[1] <= 0:
-            q[i] = 1
         elif temp[0] < 0 and temp[1] > 0:
+            q[i] = 1
+        elif temp[0] >= 0 and temp[1] <= 0:
             q[i] = 2
         elif temp[0] < 0 and temp[1] < 0:
             q[i] = 3
