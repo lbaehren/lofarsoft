@@ -3,6 +3,7 @@ Various function that are handy for cr physics analysis.
 """
 
 import numpy as np
+from pytmf import deg2rad
 
 # Converts spherical theta, phi to kartesian (x,y,z) vector
 def toVector(phi, theta, degrees = True):# in degrees
@@ -69,3 +70,42 @@ def applyLORAcuts(core,moliere,elevation):
 def spaceAngle(zen1, az1, zen2, az2):
   return np.arccos(np.sin(zen1)*np.sin(zen2)*np.cos(az1-az2) 
               + np.cos(zen1)*np.cos(zen2))
+
+def select_quadrant(antenna_coordinates, core_position, rotation = 45.0):
+    """
+    *antenna_coordinates* as numpy array of shape (nantennas, 3)
+    *core_position* as numpy array of shape (3, )
+    *rotation* rotation of antennas with respect to North in degrees.
+    """
+
+    # Get only first two antennas
+    ac = antenna_coordinates[:, 0:2]
+
+    # Convert angle to radians
+    theta = deg2rad(rotation)
+
+    # Setup rotation matrix
+    R = np.array([[np.cos(theta), -1.0 * np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+
+    # Calculate difference in coordinates
+    diff_c = ac - np.repeat(core_position[0:2], ac.shape[0]).reshape(2, ac.shape[0]).transpose()
+
+    # Rotate and return quadrant for each antenna
+    q = np.zeros(ac.shape[0])
+    for i in range(ac.shape[0]):
+
+        temp = np.dot(R, diff_c[i])
+
+        if temp[0] >= 0 and temp[1] >= 0:
+            q[i] = 0
+        elif temp[0] >= 0 and temp[1] <= 0:
+            q[i] = 1
+        elif temp[0] < 0 and temp[1] > 0:
+            q[i] = 2
+        elif temp[0] < 0 and temp[1] < 0:
+            q[i] = 3
+        else:
+            raise ValueError("Something went wrong here.")
+
+    return q
+
