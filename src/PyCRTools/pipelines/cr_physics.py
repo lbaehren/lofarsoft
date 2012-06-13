@@ -202,7 +202,7 @@ for station in stations:
         stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
         # Get pulse strength
-        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
+        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [], plot_antennas = [0, 1, 2])
 
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
@@ -218,6 +218,7 @@ for station in stations:
         p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
         p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
+        p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist]
 
         p.status = "OK"
 

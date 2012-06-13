@@ -6,7 +6,9 @@ Module documentation
 
 from pycrtools.tasks import Task
 from pycrtools.grid import CoordinateGrid
+import numpy as np
 import pycrtools as cr
+import matplotlib.pyplot as plt
 
 class PulseEnvelope(Task):
     """Calculate pulse envelope using Hilbert transform.
@@ -69,6 +71,14 @@ class PulseEnvelope(Task):
             doc = "Number of standard deviations that pulse needs to be above noise level." ),
         antennas_with_significant_pulses = dict( default = lambda self : [i for i in range(self.nantennas) if self.snr[i] > self.nsigma],
             doc = "Indices of antennas with pulses more than nsigma above the noise limit." ),
+        save_plots = dict( default = False,
+            doc = "Store plots" ),
+        plot_prefix = dict( default = "",
+            doc = "Prefix for plots" ),
+        plotlist = dict( default = [],
+            doc = "List of plots" ),
+        plot_antennas = dict( default = lambda self : range(self.nantennas),
+            doc = "Antennas to create plots for." ),
     )
 
     def run(self):
@@ -109,3 +119,48 @@ class PulseEnvelope(Task):
         # Shift delays to be relative to reference antenna
         self.delays -= self.delays[self.refant]
 
+        if self.save_plots:
+
+            # Single pulse envelope of first antenna
+            for i in self.plot_antennas:
+                plt.clf()
+
+                s = self.timeseries_data_resampled.toNumpy()
+                y = self.envelope.toNumpy()
+                x = 5.e-6 * self.resample_factor * np.arange(y.shape[1])
+
+                plt.plot(x, s[i], label = "Signal")
+                plt.plot(x, y[i], label = "Envelope")
+                plt.plot(x, np.zeros(y.shape[1]) + self.rms[0], 'r--', label = "RMS")
+                plt.plot(x, np.zeros(y.shape[1]) - self.rms[0], 'r--')
+                plt.annotate("pulse maximum", xy = (x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.maxima[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
+
+                p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.png".format(i)
+
+                plt.xlabel(r"Time ($\mu s$)")
+                plt.ylabel("Power (ADU)")
+                plt.legend()
+                plt.title("Pulse envelope for antenna {0:d}".format(i))
+                plt.savefig(p)
+
+                self.plotlist.append(p)
+
+            # All pulse envelopes as stacked plot
+            plt.clf()
+
+            offset = 0
+            for i in range(y.shape[0]):
+
+                plt.plot(x, y[i] + offset)
+
+                offset += self.maxima[i]
+
+            p = self.plot_prefix + "pulse_envelope_envelope.png"
+
+            plt.xlabel(r"Time ($\mu s$)")
+            plt.ylabel("Power (ADU)")
+            plt.title("All pulse envelopes")
+            plt.savefig(p)
+
+            self.plotlist.append(p)
+            
