@@ -311,7 +311,7 @@ class Observation:
 		else:   # checking old parset location
 			self.parset = "%s/%s/%s.parset" % (self.parset_dir, self.id, self.id)
 			if os.path.exists(self.parset):	return True
-			else: 
+			else:
 				self.parset = "%s/%s.parset" % (self.parset_dir, self.id)
 				if os.path.exists(self.parset):	return True
 				else: return False
@@ -322,7 +322,7 @@ class Observation:
 		sbparts=sblist.split(",")
 		for ss in sbparts:
 			sedges=ss.split("..")
-			if len(sedges) == 1: subs.append(int(sedges))
+			if len(sedges) == 1: subs.append(int(sedges[0]))
 			else: subs.extend(np.arange(int(sedges[0]), int(sedges[1])+1))
 		subs=np.unique(subs)
 		subs.sort() # sorting with smallest being the first
