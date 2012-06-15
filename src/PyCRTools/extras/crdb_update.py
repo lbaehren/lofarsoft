@@ -23,10 +23,6 @@ with con:
     # Get cursor on database
     cur = con.cursor()
 
-    if options.event_status and options.event_status not in ["NEW", "CR_FOUND", "CR_NOT_FOUND", "CR_ANALYZED", "CR_NOT_ANALYZED"]:
-        print parser.print_help()
-        sys.exit(1)
-    
     if options.all_events:
         cur.execute("SELECT eventID FROM events")
 
