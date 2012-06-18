@@ -324,7 +324,7 @@ class Observation:
 			sedges=ss.split("..")
 			if len(sedges) == 1: subs.append(int(sedges[0]))
 			else: subs.extend(np.arange(int(sedges[0]), int(sedges[1])+1))
-		subs=np.unique(subs)
+#		subs=np.unique(subs)
 		subs.sort() # sorting with smallest being the first
 		return subs
 

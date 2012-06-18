@@ -972,7 +972,7 @@ class PipeUnit:
 					self.execute(cmd, workdir=self.curdir)
 
 				# running RFI excision, checking
-				total_chan = obs.nrSubbands*self.nrChanPerSub
+				total_chan = self.tab.nrSubbands*self.nrChanPerSub
 				if not cmdline.opts.is_norfi:
 					zapstr=""
 					# we should zap 1st chan as after 2nd polyphase it has junk
@@ -1041,9 +1041,9 @@ class PipeUnit:
 						self.waiting_list("dspsr", dspsr_popens)
 
 						# scrunching in frequency
-						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (obs.nrSubbands))
+						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
 						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-							cmd="pam --setnchn %d -m %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
+							cmd="pam --setnchn %d -m %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
@@ -1051,10 +1051,10 @@ class PipeUnit:
 
 			if not cmdline.opts.is_skip_dspsr:
 				# first, calculating the proper max divisor for the number of subbands
-#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
-				# calculating the greatest common denominator of obs.nrSubbands starting from 63 down
-				pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
+#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(self.tab.nrSubbands, 63)))
+				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
+				pav_nchans = self.hcd(1, np.min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
 				for psr in self.psrs:  # pulsar list is empty if --nofold is used
 					# creating DSPSR diagnostic plots
 					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
@@ -1079,7 +1079,7 @@ class PipeUnit:
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
 							cmd="pdmp -mc %d -mb 128 -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
-								(obs.nrSubbands, psr, self.output_prefix, psr, self.output_prefix)
+								(self.tab.nrSubbands, psr, self.output_prefix, psr, self.output_prefix)
 							pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 							pdmp_popens.append(pdmp_popen)
 		
@@ -1357,7 +1357,7 @@ class CVUnit(PipeUnit):
 						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 						self.execute(cmd, workdir=self.curdir)
 						# removing corrupted freq channels
-						total_chan = obs.nrSubbands * self.nrChanPerSub
+						total_chan = self.tab.nrSubbands * self.nrChanPerSub
 						if self.nrChanPerSub > 1:
 							self.log.info("Zapping every %d channel and using median smoothed difference algorithm..." % (self.nrChanPerSub))
 							cmd="paz -z \"%s\" -r -m %s_%s.ar" % \
@@ -1381,16 +1381,16 @@ class CVUnit(PipeUnit):
 					self.execute(cmd, workdir=self.curdir)
 
 					# scrunching in freq
-					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (obs.nrSubbands))
+					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (self.tab.nrSubbands))
 					for psr in self.psrs:
-						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
+						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
 
 			# first, calculating the proper min divisir for the number of subbands
-#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
-			# calculating the greatest common denominator of obs.nrSubbands starting from self.nrChanPerSub
-			pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
+#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(self.tab.nrSubbands, 63)))
+			# calculating the greatest common denominator of self.tab.nrSubbands starting from self.nrChanPerSub
+			pav_nchans = self.hcd(1, np.min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
 			self.log.info("Creating diagnostic plots...")
 			for psr in self.psrs:
 				# creating DSPSR diagnostic plots
@@ -1541,7 +1541,7 @@ class CVUnit(PipeUnit):
 
 					verbose="-q"
 					if cmdline.opts.is_debug: verbose="-v"
-					total_chan = obs.nrSubbands * self.nrChanPerSub
+					total_chan = self.tab.nrSubbands * self.nrChanPerSub
 
 					# running dspsr for every frequency channel. We run it in bunches of number of channels in subband
 					# usually it is 16 which is less than number of cores in locus nodes. But even if it is 32, then it should be OK (I think...)
@@ -1587,16 +1587,16 @@ class CVUnit(PipeUnit):
 					self.execute(cmd, workdir=self.curdir)
 
 					# scrunching in freq
-					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (obs.nrSubbands))
+					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (self.tab.nrSubbands))
 					for psr in self.psrs:
-						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (obs.nrSubbands, psr, self.output_prefix)
+						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
 
 			# first, calculating the proper min divisir for the number of subbands
-#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, obs.nrSubbands))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(obs.nrSubbands, 63)))
-			# calculating the greatest common denominator of obs.nrSubbands starting from self.nrChanPerSub
-			pav_nchans = self.hcd(1, np.min(obs.nrSubbands, 63), obs.nrSubbands)
+#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
+			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, np.min(self.tab.nrSubbands, 63)))
+			# calculating the greatest common denominator of self.tab.nrSubbands starting from self.nrChanPerSub
+			pav_nchans = self.hcd(1, np.min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
 			self.log.info("Creating diagnostic plots...")
 			for psr in self.psrs:
 				# creating DSPSR diagnostic plots
