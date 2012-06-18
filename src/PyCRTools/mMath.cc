@@ -1593,7 +1593,7 @@ HComplex HFPP_FUNC_NAME(const HNumber phase)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
-//$DOCSTRING: Coverts a vector of real phase to a vector of corresponding complex numbers (with amplitude of unity).
+//$DOCSTRING: Converts a vector of real phase to a vector of corresponding complex numbers (with amplitude of unity).
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hPhaseToComplex
 //-----------------------------------------------------------------------
@@ -1615,7 +1615,7 @@ HComplex HFPP_FUNC_NAME(const HNumber phase)
 template <class Iter1,class Iter2>
 void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec, const Iter2 phasevec_end)
 {
-  // Declaraion of variables
+  // Declaration of variables
   Iter1 it1=vec;
   Iter2 it2=phasevec;
   HInteger lenOut = vec_end - vec;
@@ -1632,6 +1632,130 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
     ++it1;
     ++it2; if (it2==phasevec_end) it2=phasevec; // loop over input vector if necessary ...
   };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Extract the phase of a complex number (i.e. get phi from z = r exp(i phi) )
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hComplexToPhase
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(z)()("Complex number to extract phase from")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+ */
+HNumber HFPP_FUNC_NAME(const HComplex z)
+{
+    return arg(z); 
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Converts a vector of real phase to a vector of corresponding complex numbers (with amplitude of unity).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hComplexToPhase
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(phasevec)()("Output vector returning (real) phases")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vec)()("Input vector with complex numbers")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+ 
+ Description:
+ If input vector is shorter it will be repeated until the output vector is filled.
+ 
+ Usage:
+ hComplexToPhase(outvec, complex_in) -> outvec = [arg(z_0), arg(z_1),..., arg(z_{n-1}]
+ outvec.complextophase(complex_in) -> outvec = [arg(z_0), arg(z_1),..., arg(z_{n-1})]
+ */
+template <class Iter1,class Iter2>
+void  HFPP_FUNC_NAME(const Iter1 phasevec, const Iter1 phasevec_end, const Iter2 vec, const Iter2 vec_end)
+{
+    // Declaration of variables
+    Iter1 it1 = phasevec;
+    Iter2 it2 = vec;
+    HInteger lenOut = phasevec_end - phasevec;
+    HInteger lenPhase = vec_end - vec;
+    
+    // Sanity check
+    if ((lenPhase <= 0) || (lenOut <= 0)) {
+        throw PyCR::ValueError("Illegal size of phase vector");
+    }
+    
+    // Vector operation
+    while (it1 != phasevec_end) {
+        *it1=hComplexToPhase(*it2);
+        ++it1;
+        ++it2; if (it2==vec_end) it2=vec; // loop over input vector if necessary ...
+    };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Extract the phase of a complex number (i.e. get phi from z = r exp(i phi) )
+//$COPY_TO HFILE START ---------------------------------------------------
+#define HFPP_FUNC_NAME hPhaseWrap
+//------------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(phase)()("Phase to wrap into (-pi, pi]")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+ */
+HNumber HFPP_FUNC_NAME(const HNumber phase)
+{ // Wrap positive or negative phase into interval (-pi, pi] by subtracting multiples of 2*pi
+    return phase - 2*M_PI * floor( (phase + M_PI) / (2*M_PI) );
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+
+//$DOCSTRING: Converts a vector of real phase to a vector of corresponding complex numbers (with amplitude of unity).
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hPhaseWrap
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(wrappedvec)()("Output vector returning wrapped phases")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(vec)()("Input vector with phases")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+ \brief $DOCSTRING
+ $PARDOCSTRING
+ 
+ Description:
+ If input vector is shorter it will be repeated until the output vector is filled.
+ 
+ Usage:
+ hPhaseWrap(outvec, phase_in) -> outvec = [wrap(phi_0), wrap(phi_1),..., wrap(phi_{n-1}]
+ outvec.phasewrap(phase_in) -> outvec = [wrap(phi_0), wrap(phi_1),..., wrap(phi_{n-1})]
+ */
+template <class Iter1,class Iter2>
+void  HFPP_FUNC_NAME(const Iter1 wrappedvec, const Iter1 wrappedvec_end, const Iter2 vec, const Iter2 vec_end)
+{
+    // Declaration of variables
+    Iter1 it1 = wrappedvec;
+    Iter2 it2 = vec;
+    HInteger lenOut = wrappedvec_end - wrappedvec;
+    HInteger lenPhase = vec_end - vec;
+    
+    // Sanity check
+    if ((lenPhase <= 0) || (lenOut <= 0)) {
+        throw PyCR::ValueError("Illegal size of phase vector");
+    }
+    
+    // Vector operation
+    while (it1 != wrappedvec_end) {
+        *it1 = hPhaseWrap(*it2);
+        ++it1;
+        ++it2; if (it2==vec_end) it2=vec; // loop over input vector if necessary ...
+    };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
