@@ -28,12 +28,20 @@ def open(filename, *args, **kwargs):
     ================== ==================================================
 
     """
-
-    filename=os.path.expandvars(os.path.expanduser(filename))
-
-    # Get file extension to determine type
-    ext = filename.split(".")[-1].strip().lower()
-
+    if isinstance(filename, list):
+       filename = [os.path.expandvars(os.path.expanduser(f)) for f in filename]
+       ext = set()
+       for f in filename:
+           ext.add(f.split(".")[-1].strip().lower())
+       if len(ext) != 1:
+           raise ValueError("Multiple extensions")
+       else:
+           ext = list(ext)[0]
+    else:
+       filename=os.path.expandvars(os.path.expanduser(filename))
+       # Get file extension to determine type
+       ext = filename.split(".")[-1].strip().lower()
+    
     if ext == "h5":
         # Open file with LOFAR TBB data
         return tbb.open(filename, *args, **kwargs)
