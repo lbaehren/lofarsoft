@@ -403,6 +403,9 @@ class BeamFormer(tasks.Task):
         test_beam_per_antenna = dict(default=False,
                                doc="Save the all de antennas separatelly. Temporal parameter while task is under developement. NOTE: Some values are hardcoded!"),
 
+        sample_offset = dict(default = 0,
+                        doc="Sample offset applied to time series. (ie. to set different stations to a common time.)",
+                        unit="Sample"),
 #------------------------------------------------------------------------
 # Derived parameters
 
@@ -564,6 +567,8 @@ class BeamFormer(tasks.Task):
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
         self.updateHeader(self.beams,BEAM_NSPECTRAADDED="nspectraadded",BEAM_FILENAMES="filenames",BEAM_ANTENNAS_USED="antennas_used",BEAM_NCHUNKS="nchunks",BEAM_FREQUENCIES="frequencies",FREQUENCY_INTERVAL="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",BEAM_FILENAME="spectrum_file")
 
+        if sample_offset: self.datafile.shiftTimeseriesData(sample_offset=sample_offset)
+        
         dataok=True
         clearfile=True
         self.t0=time.clock() #; print "Reading in data and doing a double FFT."
