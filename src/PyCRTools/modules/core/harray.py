@@ -880,7 +880,7 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
 
     *ext* - name extension used on the folder that contains the binary and header.
      If present, it overwrite any other extension in filename. If not present, it overwrites with ``.pcr``
-     It works with or without the dot.
+     It works with or without the dot. NOTE: An extension is defined here as any string after the last dot in the filename.
     
     Example::
 
@@ -970,7 +970,7 @@ def hArrayReadDictArray(dictionary,path,block=-1,blockedIOnames=default_blockedI
             newdictionary[k]=hArrayReadDictArray(v,path)
     return newdictionary
 
-def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=None,clearfile=None,blockedIOnames=default_blockedIOnames):
+def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=None,clearfile=None,blockedIOnames=default_blockedIOnames,ext='.pcr'):
     """
     Recursively goes through a dict (of dicts) and replaces all values which are hArray with a placeholder and writes the array to disk.
     """
@@ -980,7 +980,7 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
             newdictionary[k]=list(v)
         elif type(v) in hAllVectorTypes:
             parname=prefix+"."+str(k)
-            filename=parname+".pcr"
+            filename=parname+ext
             if parname in blockedIOnames:
                 hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             else:
@@ -988,8 +988,8 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
             newdictionary[k]=hFileContainer(path,filename,vector=True)
         elif type(v) in hAllArrayTypes:
             parname=prefix+"."+str(k)
-            filename=parname+".pcr"
-            filename=prefix+"."+str(k)+".pcr"
+            filename=parname+ext
+            filename=prefix+"."+str(k)+ext
             if parname in blockedIOnames:
                 hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
             else:
@@ -1029,7 +1029,8 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
 
     *ext* - name extension used on the folder that contains the binary and header.
      If present, it overwrite any other extension in filename. If not present, it overwrites with ``.pcr``
-     It works with or without the dot.
+     It works with or without the dot. NOTE: An extension is defined here as any string after the last dot in the filename. 
+
 
     Example::
 
@@ -1075,7 +1076,7 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
         f.write("ha_slice = None\n")
     f.write("ha_varname = '" + varname+"'\n")
     if hasattr(self,"par"):
-        par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile)
+        par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile,ext=ext)
         f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
     else:
         f.write('ha_parameters=None\n')
@@ -1115,10 +1116,12 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
                              then an array with dimensions
                              ``[nblocks,original dimensions ...]`` will be
                              returned.
-    ext             .pcr     Extension used on the folder name (filename). 
+    ext             .pcr     Extension used on the folder name (filename).
                              If present, it overwrite any other extension
                              in filename. If not present, it overwrites 
                              with ``.pcr`` It works with or without the dot.
+                             NOTE: An extension is defined here as any string 
+                             after the last dot in the filename. 
     =============== ======== ===============================================
 
     Example::
@@ -1193,16 +1196,12 @@ def get_filename(filename,ext):
 
     '''
     
-    fn=os.path.expandvars(os.path.expanduser(filename))    
+    fn = os.path.expandvars(os.path.expanduser(filename))    
     ext=str(ext)
     if '.' not in ext:
-        ext= '.' + ext 
-    ii=len(ext)*-1
-    if not fn[ii:].upper() == ext.upper(): 
-        if '.' in fn:           #Remove any other extension different than "ext".
-            fn = fn[:(fn[::-1].index('.')+1)*-1] + ext    
-        else:
-            fn+=ext    
+        ext = '.' + ext 
+
+    fn = os.path.splitext(fn)[0] + ext
     
     return fn,ext
 
