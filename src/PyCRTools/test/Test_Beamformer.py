@@ -24,7 +24,7 @@ def strdate2jd(strdate):
     return utc
 
 pulsar = 1
-altair = 1 #If you are running this program in altair.
+altair = 0 #If you are running this program in altair.
 
 if pulsar:
     cr.tload('BeamFormer')  #Using this since it seems the program runs faster when the task is preloaded (if other task is "loaded" then it runs slower).
@@ -40,11 +40,13 @@ if pulsar:
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'        
         output_dir= '/Users/eenriquez/RESEARCH/Pulsars/Results/'
+        f2=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
 
     else:    
         f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
         filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
         output_dir= '~/RESEARCH/Pulsars/Results/'
+        f2=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
 
 #PSR B0329+54 -- Pulsar    
 #Wikipidea Values
@@ -94,19 +96,10 @@ else:
     blocklen = 2**10
     dohanning =False
 
-#------------------------------
-antenna_positions=f1['ANTENNA_POSITIONS']
-antenna_set = f1['ANTENNA_SET']
-channel = f1["CHANNEL_ID"]
-sample_interval = f1["SAMPLE_INTERVAL"][0]
-phase_center = cr.hArray(antenna_positions[0].vec())
-phase_center = phase_center
 
-#tpar antenna_positions= dict(zip(f1["CHANNEL_ID"],f1.getITRFAntennaPositions()))
-antenna_positions= dict(zip(f1["DIPOLE_NAMES"],antenna_positions))
-cal_delays=dict(zip(f1["DIPOLE_NAMES"],f1["DIPOLE_CALIBRATION_DELAY"]))
 
 #------------------------------
+#Set basic beamformer parameters.
 randomize_peaks = False
 FarField = True
 qualitycheck = False
@@ -116,10 +109,34 @@ filenames = [filefilter]
 nantennas_start = 1
 nantennas_stride = 2
 maxnantennas = f1['NOF_DIPOLE_DATASETS']
-detail_name = '.pol1.fixed_Nyquist'
-#----------------------------------
+detail_name = '.pol1.TAB'
 
-bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,antenna_positions=antenna_positions,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name)
+#------------------------------
+#Additional calibration values.
+
+cal_delays=dict(zip(f1["DIPOLE_NAMES"],f1["DIPOLE_CALIBRATION_DELAY"]))
+
+antenna_positions= cr.hArray(float,[96,3],f2['ANTENNA_POSITION_ITRF'])
+antenna_set = f1['ANTENNA_SET']
+channel = f1["CHANNEL_ID"]
+sample_interval = f1["SAMPLE_INTERVAL"][0]
+
+phase_center = cr.hArray(antenna_positions[nantennas_start].vec())
+
+#tpar antenna_positions= dict(zip(f1["CHANNEL_ID"],f1.getITRFAntennaPositions()))
+antenna_positions= dict(zip(f1["DIPOLE_NAMES"],antenna_positions))
+#clock_delay = metadata.getClockCorrection(f2['STATION_NAME'][0],f2['ANTENNA_SET']
+
+#Multi station starting times.
+t0 = max(f2['SAMPLE_NUMBER'])*f2['SAMPLE_INTERVAL'][0]+f2['CLOCK_OFFSET'][0]
+t1 = max(f1['SAMPLE_NUMBER'])*f1['SAMPLE_INTERVAL'][0]+f1['CLOCK_OFFSET'][0]
+
+#calculate delta samples, t0-f1[0][0]
+sample_offset = int((t0-t1)/f1['SAMPLE_INTERVAL'][0])
+
+
+#----------------------------------
+bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,antenna_positions=antenna_positions,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,sample_offset=sample_offset)
 
 #-------------------------------------------------------------------------------------
 
