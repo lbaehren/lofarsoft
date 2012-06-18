@@ -545,6 +545,23 @@ class TBBData(IOInterface):
 
         cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize, self.__blocksize, self.__file)
 
+
+    def shiftTimeseriesData(self, sample_offset=0):
+        """Shifts timeseries data for selected antennas.
+
+        Required Arguments:
+
+        =============== =================================================
+        Parameter       Description
+        =============== =================================================
+        *sample_offset* Number of samples to offset timeseries data.
+        =============== =================================================
+
+        """    
+
+        self._TBBData__alignment_offset[...] += sample_offset
+        self.__keyworddict["MAXIMUM_READ_LENGTH"] = self.__file.maximum_read_length(self.__refAntenna) - sample_offset
+
     def getFFTData(self, data, block=-1, hanning=True):
         """Writes FFT data for selected antennas to data array.
 
