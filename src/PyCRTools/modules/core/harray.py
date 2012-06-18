@@ -828,11 +828,11 @@ def hArray_getHeader(self,parameter_name=None):
 #------------------------------------------------------------------------
 default_blockedIOnames=set(["par.xvalues"])
 
-def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varname='',clearfile=None,blockedIOnames=default_blockedIOnames):
+def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varname='',clearfile=None,blockedIOnames=default_blockedIOnames,ext='.pcr'):
     """
     Usage:
 
-    array.write(filename,nblocks=1,block=0,dim=None,writeheader=None,clearfile=None)
+    array.write(filename,nblocks=1,block=0,dim=None,writeheader=None,clearfile=None,ext='.pcr')
 
     Write an hArray to disk including a header file to read it back
     again. This is a simple interface to hArray_writeheader and then
@@ -878,39 +878,41 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
      e.g. 'par.xvalues' (default). An array in the header would be
      specified as 'par.hdr.arrayname.'
 
-    Example:
+    *ext* - name extension used on the folder that contains the binary and header.
+     If present, it overwrite any other extension in filename. If not present, it overwrites with ``.pcr``
+     It works with or without the dot.
+    
+    Example::
 
-xvals=hArray(range(10))
-x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
-x.write("test.pcr")
-y=hArrayRead("test")
-y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
-y.par.xvalues -> hArray(int, [10], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
+      xvals=hArray(range(10))
+      x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
+      x.write("test.")
+      y=hArrayRead("test")
+      y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+      y.par.xvalues -> hArray(int, [10], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
+        
+    The data files are stored in a directory with name test.pcr:
+    
+    ls test.pcr/ ->  data.bin               header.hdr              par.xvalues.pcr/
+    
+    Example using blocks::
+  
+       xvals=hArray(range(10))
+       x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
+       x.write("test.pcr",block=0,nblocks=2)
+       x.write("test.pcr",block=1,nblocks=2)
+       y=hArrayRead("test")
+       y -> hArray(float, [20], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], name="test") # len=20 slice=[0:20])
+       y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=20 slice=[0:20])
 
-The data files are stored in a directory with name test.pcr:
-
-ls test.pcr/ ->  data.bin               header.hdr              par.xvalues.pcr/
-
-Example using blocks:
-
-xvals=hArray(range(10))
-x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
-x.write("test.pcr",block=0,nblocks=2)
-x.write("test.pcr",block=1,nblocks=2)
-y=hArrayRead("test")
-y -> hArray(float, [20], fill=[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], name="test") # len=20 slice=[0:20])
-y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=20 slice=[0:20])
     """
 
     if type(self)==StringArray:
         print "Attention: StringArrays cannot be dumped to disk!"
         return
 
-
-    fn=os.path.expandvars(os.path.expanduser(filename))
-
     #Add proper ending if missing
-    if not fn[-4:].upper() == ".PCR": fn+=".pcr"
+    fn,ext = get_filename(filename,ext)
     binfile=os.path.join(fn,"data.bin")
 
     #Check if data and header directory is available
@@ -922,7 +924,7 @@ y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 
 
     #Write header file if requested
     if not (writeheader==False):
-        hArray_writeheader(self,fn,nblocks=nblocks,block=block,dim=dim,varname=varname,blockedIOnames=blockedIOnames,writeheader=writeheader,clearfile=clearfile)
+        hArray_writeheader(self,fn,nblocks=nblocks,block=block,dim=dim,varname=varname,blockedIOnames=blockedIOnames,writeheader=writeheader,clearfile=clearfile,ext=ext)
         if (block==0) and not (clearfile==False):
             if os.path.exists(binfile):
                 os.remove(binfile)
@@ -931,7 +933,7 @@ y.par.xvalues -> hArray(int, [20], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 
         if os.path.exists(binfile):
             os.remove(binfile)
     self.writefilebinary(binfile,block*self.getSize())
-
+    
 class hFileContainer():
     """
     Dummy class to hold a filename where an hArray is stored.
@@ -949,7 +951,7 @@ class hFileContainer():
 
 def hArrayReadDictArray(dictionary,path,block=-1,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
     """
-    Recursively goes through a dict (of dicts) and replaces all placeholder (hFileCOntainer) with hArrays or Vectors read from disk.
+    Recursively goes through a dict (of dicts) and replaces all placeholder (hFileContainer) with hArrays or Vectors read from disk.
     """
     newdictionary=dictionary.copy()
     for k,v in newdictionary.items():
@@ -997,7 +999,7 @@ def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=No
             newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+str(k))
     return newdictionary
 
-def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None):
+def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None,ext='.pcr'):
     """
     Usage:
 
@@ -1006,7 +1008,7 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
     Write a header for an hArray binary data file, which was written with hWriteFileBinary.
 
     *filename* - the filename where the data was dumped. The header
-    filename will have the ending".hdr", replacing a ".dat" ending if present.
+    filename will have the ending".hdr", replacing any other ending if present.
 
     *nblocks* - Allows one to specify that one has written the same
     vector multiple times to the same file, so that the data file
@@ -1025,18 +1027,22 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
     *varname* - you can store the original variable name in which the
     hArray was stored.
 
-Example:
-x=hArray([1.0,2.0,3,4],name="test")
-x.writeheader("test.pcr")
-x.writefilebinary("test.pcr")
-y=hArrayRead("test")
-y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+    *ext* - name extension used on the folder that contains the binary and header.
+     If present, it overwrite any other extension in filename. If not present, it overwrites with ``.pcr``
+     It works with or without the dot.
+
+    Example::
+
+      x=hArray([1.0,2.0,3,4],name="test")
+      x.writeheader("test.pcr")
+      x.writefilebinary("test.pcr")
+      y=hArrayRead("test")
+      y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
+
     """
-    fn=os.path.expandvars(os.path.expanduser(filename))
-    if fn[-4:].upper() in [".PCR",".DAT",".HDR"]:
-        fn=fn[:-4]+'.pcr'
-    else:
-        fn=fn+'.pcr'
+
+    fn,ext = get_filename(filename,ext)
+   
     if not os.path.exists(fn):
         os.mkdir(fn)
     elif not os.path.isdir(fn):
@@ -1075,7 +1081,7 @@ y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0,
         f.write('ha_parameters=None\n')
     f.close()
 
-def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
+def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True,ext='.pcr'):
     """
     Usage::
 
@@ -1089,10 +1095,9 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
     =============== ======== ===============================================
     Parameter       Default  Description
     =============== ======== ===============================================
-    filename                 the filename of either the ``.dat`` file
-                             or the ``.hdr`` file (but both files need
-                             to be present). You can only give the
-                             filename without the extension.
+    filename                 The folder name where ``data.bin``
+                             and ``header.hdr`` files are stored. 
+                             (both files need to be present).
     block           -1       Allows one to specify that one has written
                              the same vector multiple times to the same
                              file, so that the data file size is actually
@@ -1110,6 +1115,10 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
                              then an array with dimensions
                              ``[nblocks,original dimensions ...]`` will be
                              returned.
+    ext             .pcr     Extension used on the folder name (filename). 
+                             If present, it overwrite any other extension
+                             in filename. If not present, it overwrites 
+                             with ``.pcr`` It works with or without the dot.
     =============== ======== ===============================================
 
     Example::
@@ -1126,9 +1135,8 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
 
     """
     ha_slice=None # Put there to assure backward compatibility
-    fn=os.path.expandvars(os.path.expanduser(filename))
-    if fn[-4:].upper() == ".PCR": fn=fn[:-4]+".pcr"
-    else: fn+=".pcr"
+
+    fn,ext = get_filename(filename,ext)
     binfile=os.path.join(fn,"data.bin")
     hdrfile=os.path.join(fn,"header.hdr")
     if not os.path.exists(fn):
@@ -1170,6 +1178,33 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
 #        print "Creating new object",l["ha_varname"]
 #        exec ("global "+l["ha_varname"]+"\n"+l["ha_varname"]+" = ary")
     return ary
+
+def get_filename(filename,ext):
+    '''
+    Returns the folder name and its proper extention.
+    
+    =============== ======== ===============================================
+    Parameter       Default  Description
+    =============== ======== ===============================================
+    filename                 The folder name where ``data.bin``
+                             and ``header.hdr`` files are stored. 
+    ext             .pcr     Extension used on the folder name (filename). 
+    =============== ======== ===============================================
+
+    '''
+    
+    fn=os.path.expandvars(os.path.expanduser(filename))    
+    ext=str(ext)
+    if '.' not in ext:
+        ext= '.' + ext 
+    ii=len(ext)*-1
+    if not fn[ii:].upper() == ext.upper(): 
+        if '.' in fn:           #Remove any other extension different than "ext".
+            fn = fn[:(fn[::-1].index('.')+1)*-1] + ext    
+        else:
+            fn+=ext    
+    
+    return fn,ext
 
 def ashArray(val):
     """Usage::
