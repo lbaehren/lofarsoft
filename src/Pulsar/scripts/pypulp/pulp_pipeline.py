@@ -1026,7 +1026,7 @@ class PipeUnit:
 					if not cmdline.opts.is_skip_dspsr:
 						zapstr=""
 						if self.nrChanPerSub > 1:
-							zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
+							zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan-self.nrChanPerSub, self.nrChanPerSub)]))
 						verbose="-q"
 						if cmdline.opts.is_debug: verbose="-v"
 						dspsr_popens=[] # list of dspsr Popen objects
@@ -1361,7 +1361,7 @@ class CVUnit(PipeUnit):
 						if self.nrChanPerSub > 1:
 							self.log.info("Zapping every %d channel and using median smoothed difference algorithm..." % (self.nrChanPerSub))
 							cmd="paz -z \"%s\" -r -m %s_%s.ar" % \
-								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
+								(" ".join([str(jj) for jj in range(0, total_chan-self.nrChanPerSub, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 						else:
 							self.log.info("Zapping channels using median smoothed difference algorithm...")
@@ -1573,7 +1573,7 @@ class CVUnit(PipeUnit):
 						if self.nrChanPerSub > 1:
 							self.log.info("Zapping every %d channel..." % (self.nrChanPerSub))
 							cmd="paz -z \"%s\" -m %s_%s.ar" % \
-								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
+								(" ".join([str(jj) for jj in range(0, total_chan-self.nrChanPerSub, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
 						# removing files created by dspsr for each freq channel
