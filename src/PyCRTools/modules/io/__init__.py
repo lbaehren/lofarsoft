@@ -5,11 +5,11 @@ types.
 
 """
 
-__all__ = ['tbb', 'interfaces', 'open']
+__all__ = ['tbb', 'interfaces', 'open', 'beam']
 
 import os
-
 import tbb
+import beam
 import pyfits
 import pycrtools as cr
 import __builtin__ # Needed because from io import * will cause overloading
@@ -23,6 +23,7 @@ def open(filename, *args, **kwargs):
     h5                 LOFAR TBB file
     event              LOPES file (**not functioning**)
     fits               FITS file
+    beam               Beam data (tasks/beamformer.py output)
     *other*            Open with regular python :func:`open` function.
     ================== ==================================================
 
@@ -39,6 +40,9 @@ def open(filename, *args, **kwargs):
     elif ext == "event":
         # Open LOPES Event file with pyfits
         return cr.crfile(filename, *args, **kwargs)
+    elif ext == "beam":
+        # Open file with beam data
+        return beam.open(filename, *args, **kwargs)
     elif ext == "fits":
         # Open FITS file with pyfits
         return pyfits.open(filename, *args, **kwargs)
