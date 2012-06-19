@@ -53,8 +53,8 @@
 #define FRAT_TRIGGER_PORT_0 (0x7BA0)
 #define FRAT_TRIGGER_PORT_1 (31661)
 #define DM_CONSTANT (4.148808e-3)
-//#define FRAT_HOSTNAME ("127.0.0.1")
-#define FRAT_HOSTNAME ("10.135.252.101")
+#define FRAT_HOSTNAME ("127.0.0.1")
+//#define FRAT_HOSTNAME ("10.135.252.101")
 
 using namespace std;
 
@@ -243,7 +243,7 @@ namespace FRAT {
 			  //SubbandTrigger();
 			  ~SubbandTrigger();
 			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool doSend=false, int obsID=0, int beam=0);
-              SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool noSend=false, int obsID=0, int beam=0);
+              SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock=0, int IntegrationLength=1, int nrblocks=0, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool noSend=false, int obsID=0, int beam=0);
 			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
               bool processData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  int CalculateBufferSize();
@@ -290,6 +290,9 @@ namespace FRAT {
 			  bool UseSamplesOr2;
 			  float itsSBaverage;
 			  float itsSBstdev;
+              vector <float> itsSBaverageVector;
+              vector <float> itsSBstdevVector;
+              int itsNrblocks;
 			  int itsTotalValidSamples;
 			  float itsTriggerThreshold; //value to trigger on
 			  float itsPrevTriggerLevel; //value to trigger on
@@ -298,7 +301,7 @@ namespace FRAT {
 			  struct triggerEvent trigger;
 			  int itsStreamID;
 			  int sock;
-			  struct sockaddr_in server_addr;
+              struct sockaddr_in server_addr;
 			  struct hostent *host;
 			  //char send_data[1024];
 			  const char* send_data;
@@ -316,20 +319,20 @@ namespace FRAT {
               int channelindex;
                */
               // Used in processData
-              /*
+              
               float value;
               unsigned long int totaltime;
               int rest;
               
+              float blocksum;
               int validsamples;
               int zerocounter;
-              itsBlockNumber++;
               float SBaverage;
               float SBstdev;
               int SBsumsamples;
               int channeltimeindex;
               int channelindex;
-              */
+              
 			  		  
 		  }; //SubbandTrigger
 

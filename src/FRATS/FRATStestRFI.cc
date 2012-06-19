@@ -750,19 +750,23 @@ int main (int argc,
 	ofstream pulselogfile;
 	int pulsenr=1;
 	bool foundpulse;
-	ofstream datamonitor[nstreams][nDMs];
-	stringstream datamonitorfilename;//[nstreams][nDMs];
-	string datamonitorfilen;
-	for(int sc=0;sc < nstreams; sc++){
-		for(int DMcounter=0; DMcounter<nDMs; DMcounter++){
-			stringstream datamonitorfilename;//[nstreams][nDMs];
-			string datamonitorfilen;
-			datamonitorfilename << pulsedir << "/monitor_DM_" << DMvalues[DMcounter] << "_s_" << sc <<".log";
-			datamonitorfilename >> datamonitorfilen;
-			datamonitor[sc][DMcounter].open(datamonitorfilen.c_str());
-		}
-	}
-            
+    int mynDMs=nDMs;
+    if(nstreams*nDMs > 50){
+        int mynDMs=1;
+    } 
+
+    ofstream datamonitor[nstreams][mynDMs];
+    stringstream datamonitorfilename;//[nstreams][mynDMs];
+    string datamonitorfilen;
+    for(int sc=0;sc < nstreams; sc++){
+        for(int DMcounter=0; DMcounter<mynDMs; DMcounter++){
+            stringstream datamonitorfilename;//[nstreams][mynDMs];
+            string datamonitorfilen;
+            datamonitorfilename << pulsedir << "/monitor_DM_" << DMvalues[DMcounter] << "_s_" << sc <<".log";
+            datamonitorfilename >> datamonitorfilen;
+            datamonitor[sc][DMcounter].open(datamonitorfilen.c_str());
+        }
+    }
     // Create log files        
 	string alltriggerlogfilename;
 	alltriggerlogfilename=pulsedir+"/found_triggers.log";
@@ -974,7 +978,9 @@ if(doFlagging){
 				cout << "Processing " << sc << " " << DMcounter << endl;
 				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 cout << "f" <<  foundpulse << endl;
-				datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
+                if(DMcounter<mynDMs){
+                    datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
+                }
 				if(foundpulse){ 
                     cout << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
 					//triggerlogfile << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();

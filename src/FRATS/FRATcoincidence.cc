@@ -239,7 +239,7 @@ namespace FRAT {
 		}
         
         
-        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
+        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock, int IntegrationLength, int nrblocks, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
 		{
 			noSend=noSend;
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
@@ -250,6 +250,7 @@ namespace FRAT {
             itsChannelsPerSubband=ChannelsPerSubband;
 			itsNrSamples = NrSamples;
             itsFREQvalues = FREQvalues;
+            itsNrblocks= nrblocks;
 			if(UseSamplesOr2){
 				itsNrSamplesOr2 = NrSamples|2;
 			} else {
@@ -282,6 +283,8 @@ namespace FRAT {
 		    std::cout << "Resizing sum Buffer "  << std::endl;	
 			SumDeDispersed.resize(itsBufferLength, 0.0);
 			hostname=FRAT_HOSTNAME;
+            itsSBaverageVector.reserve(nrblocks);
+            itsSBstdevVector.reserve(nrblocks);
 
             if(!noSend){
                 send_data = new char[sizeof(struct triggerEvent)];
@@ -377,7 +380,7 @@ namespace FRAT {
 		}
 		
         
-
+/*
         bool SubbandTrigger::processData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
 			bool pulsefound=false;
 			if( ++itsSequenceNumber!=sequenceNumber && false) { 
@@ -567,7 +570,7 @@ namespace FRAT {
 			
 			return pulsefound;
 		}
-
+*/
         
 		bool SubbandTrigger::processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
 			bool pulsefound=false;
@@ -576,8 +579,11 @@ namespace FRAT {
 			    return false; 
 			} else {
 				itsFoundTriggers="";
+				itsBlockNumber++;
 				
 				std::cout << "Processing block " << sequenceNumber << std::endl;
+                // Declaration moved to general level
+                /*
 				float value;
 				unsigned long int totaltime;
 				int rest;
@@ -586,12 +592,23 @@ namespace FRAT {
 				
                 int validsamples=0;
 				int zerocounter=0;
-				itsBlockNumber++;
 				float SBaverage=0;
 				float SBstdev=0;
 				int SBsumsamples=0;
                 int channeltimeindex=-itsTotNrChannels;
                 int channelindex;
+                */
+
+                blocksum =0.0;
+                validsamples=0;
+				zerocounter=0;
+				SBaverage=0;
+				SBstdev=0;
+				SBsumsamples=0;
+                channeltimeindex=-itsTotNrChannels;
+
+
+
 				for(int time=0; time<itsNrSamples; time++){
 					//std::cout << std::endl << " time " << time ;
 					totaltime=itsSequenceNumber*itsNrSamples+time;
@@ -601,23 +618,6 @@ namespace FRAT {
                     
 					for(int channel=itsNrChannels-1; channel>0; channel--){
                         channelindex--;
-						//value = data[channel*(itsNrSamplesOr2)+time];
-
-                        
-                        
-						//value = data[time*itsTotNrChannels+itsStartChannel+channel];
-						//value =data[channelindex];
- 						
-                        //if(DoPadding){value = FloatSwap(value);} //outside BG/P
-						//if( !isnan( value ) && value!=0 ) {
-							//value = 0;
-						//	validsamples++;
-							// blockvalidsamples[fc]++;
-					    //}
-					    //else { value = 0; }
-						//if(value == 0 && channel % itsNrChannels ==1) { zerocounter++; std::cout << 0;}
-					    
-						
 						
 						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
 					    
@@ -629,24 +629,8 @@ namespace FRAT {
                     
                     channelindex--;
                     
-                    
-                    //value = data[channel*(itsNrSamplesOr2)+time];
-                    //value = data[time*itsTotNrChannels+itsStartChannel];
                     value = data[channelindex];
-                    //if(DoPadding){value = FloatSwap(value);} //outside BG/P
-                    //if( !isnan( value ) && value!=0 ) {
-                        //value = 0;
-                    //    validsamples++;
-                        // blockvalidsamples[fc]++;
-                    //}
-                    //else { value = 0; }
-                    //if(value == 0 && channel % itsNrChannels ==1) { zerocounter++; std::cout << 0;}
                         
-                            
-                            
-                            
-                            
-                            
                     DeDispersedBuffer[rest]+=value;
                     blocksum+=DeDispersedBuffer[rest];
                     SumDeDispersed[rest]=DeDispersedBuffer[rest];
@@ -672,7 +656,6 @@ namespace FRAT {
                         if(totaltime+itsReferenceTime-trigger.time>5){
                             //new trigger
                             //trigger.average[fc]/=triggerlength[fc];
-                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
                             
                             trigger.sum=subsum;
@@ -692,19 +675,25 @@ namespace FRAT {
                         }
                     } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
                         //trigger.utc_second=10000;
-                        unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
-                        unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                            unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
                             std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
                             trigger.utc_second=itsStarttime_utc_sec+utc_second;
                             trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
-                            SendTriggerMessage(trigger);
+                            // Change trigger max to value in standard deviations.
+                            trigger.max=(trigger.max-itsSBaverage)/itsSBstdev;
+                            //if(!nosend){
+                                SendTriggerMessage(trigger);
+                            //}
+
                             
                             int latestindex = cc->add2buffer(trigger);
+                            
                             
                             if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
                                 
                                 
-                                float triggerstrength = (trigger.max-itsSBaverage)/itsSBstdev;
+                                float triggerstrength = trigger.max;//(trigger.max-itsSBaverage)/itsSBstdev;
                                 char output2[400];
                                 //std::string output;
                                 
@@ -720,19 +709,9 @@ namespace FRAT {
 								
 								
 								
-							}
-							DeDispersedBuffer[rest]=0;
+                        }
+                        DeDispersedBuffer[rest]=0;
 
-                    
-						
-						
-						
-						
-					 
-					
-					
-					
-					
 				} // for time
 				
 				
@@ -765,6 +744,8 @@ namespace FRAT {
 				
 				itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
 				itsTriggerThreshold = itsSBaverage+itsTriggerLevel*itsSBstdev;
+                itsSBaverageVector.push_back(itsSBaverage);
+                itsSBstdevVector.push_back(itsSBstdev);
 			}
 			
 			
@@ -903,6 +884,11 @@ bool SubbandTrigger::makeplotDedispBlock(std::string pulselogfilename){
 			return std::string(output);
 		}
 		
+        
+
+
+
+
 		std::string SubbandTrigger::FoundTriggers(){
 			return itsFoundTriggers;
 		}
@@ -916,7 +902,8 @@ bool SubbandTrigger::makeplotDedispBlock(std::string pulselogfilename){
 		    }
 			return true;
 	    }
-		/*			
+
+        /*			
 		 SubbandTrigger::setNrChannels(int NrChannels){ itsNrChannels = NrChannels; }
 		 SubbandTrigger::setNrSamples(int NrSamples){ itsNrSamples = NrSamples; }
 		 //inline void setDM( float DM ){ itsDM = DM; }
