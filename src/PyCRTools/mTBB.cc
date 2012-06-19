@@ -342,8 +342,6 @@ uint TBBData::python_maximum_read_length(int refAntenna)
 
   uint maxLength = 0;
 
-  cout << "max_readout length for refAntenna "<< refAntenna << endl;
-
   // Find inner leftmost samples
   int sample_left = 0;
   for ( uint i = 0; i < length.size(); ++i ) {
