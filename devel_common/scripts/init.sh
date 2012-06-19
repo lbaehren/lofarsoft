@@ -112,11 +112,17 @@ if test ! -z "$PRESTO" -a  "$PRESTO" != "${LOFARSOFT}/release/share/pulsar" ; th
 fi
 export PRESTO=${LOFARSOFT}/release/share/pulsar
 
-if test  ! -z "$TEMPO2"  -a  "$TEMPO2" != "${LOFARSOFT}/release/share/pulsar/bin" ; then
+if test  ! -z "$TEMPO2"  -a  "$TEMPO2" != "${LOFARSOFT}/release/share/pulsar" ; then
   echo "-- Warning, resetting your TEMPO2 environment variable from:"
-  echo "           $TEMPO2 to ${LOFARSOFT}/release/share/pulsar/bin"
+  echo "           $TEMPO2 to ${LOFARSOFT}/release/share/pulsar"
 fi
-export TEMPO2=${LOFARSOFT}/release/share/pulsar/bin
+export TEMPO2=${LOFARSOFT}/release/share/pulsar
+
+if test  ! -z "$PSRCAT_FILE"  -a  "$PSRCAT_FILE" != "${LOFARSOFT}/release/share/pulsar/data/psrcat.db" ; then
+  echo "-- Warning, resetting your PSRCAT_FILE environment variable from:"
+  echo "           $PSRCAT_FILE to ${LOFARSOFT}/release/share/pulsar/data/psrcat.db"
+fi
+export PSRCAT_FILE=${LOFARSOFT}/release/share/pulsar/data/psrcat.db
 
 #############################################################################
 #                    Finished configuration                                 #  

@@ -149,7 +149,6 @@ if (${?PRESTO}) then
     endif
   endif
 endif
-
 setenv PRESTO ${LOFARSOFT}/release/share/pulsar
 
 if (${?TEMPO2}) then 
@@ -160,8 +159,18 @@ if (${?TEMPO2}) then
     endif
   endif
 endif
-
 setenv TEMPO2 ${LOFARSOFT}/release/share/pulsar
+
+
+if (${?PSRCAT_FILE}) then 
+  if (${PSRCAT_FILE} != "${LOFARSOFT}/release/share/pulsar/data/psrcat.db") then
+    if ( $?prompt ) then
+      echo "-- Warning, resetting your PSRCAT_FILE environment variable from:"
+      echo "           $PSRCAT_FILE to ${LOFARSOFT}/release/share/pulsar/data/psrcat.db"
+    endif
+  endif
+endif
+setenv PSRCAT_FILE ${LOFARSOFT}/release/share/pulsar/data/psrcat.db
 
 #############################################################################
 #                    Finished configuration                                 #  
