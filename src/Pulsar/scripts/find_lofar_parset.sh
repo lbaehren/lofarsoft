@@ -14,6 +14,7 @@
 # (1) OLD parset was here: /globalhome/lofarsystem/log/${OBSID}/RTCP.parset.0
 # (2) NEW parset as of May 10, 2010 is here: /globalhome/lofarsystem/log/L2010-MM-DD-DATE/RTCP-ID.parset
 # (3) 2nd transpose parset as of Aug 20, 2010 is here: /globalhome/lofarsystem/production/lofar-trunk/bgfen/log/L2010-MM-DD-DATE/RTCP-ID.parset
+# (4) new location June 2012: /globalhome/lofarsystem/log/OBSID.parset
 
 OBSID=""
 OBSID=$1
@@ -34,6 +35,11 @@ then
 else
     short_id=`echo $OBSID | sed 's/L//g'`
     PARSET=/globalhome/lofarsystem/log/${OBSID}/${OBSID}.parset
+
+    if [ ! -f $PARSET ] 
+    then
+       PARSET=/globalhome/lofarsystem/log/${OBSID}.parset
+    fi
 fi
 
 
