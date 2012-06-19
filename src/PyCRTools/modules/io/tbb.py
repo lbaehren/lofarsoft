@@ -558,9 +558,12 @@ class TBBData(IOInterface):
         =============== =================================================
 
         """    
+        if sample_offset > self.__keyworddict["MAXIMUM_READ_LENGTH"] :
+            raise ValueError('Sample offset > MAXIMUM_READ_LENGTH !!')
 
         self._TBBData__alignment_offset[...] += sample_offset
-        self.__keyworddict["MAXIMUM_READ_LENGTH"] = self.__file.maximum_read_length(self.__refAntenna) - sample_offset
+        self.__keyworddict["MAXIMUM_READ_LENGTH"] -= sample_offset
+        
 
     def getFFTData(self, data, block=-1, hanning=True):
         """Writes FFT data for selected antennas to data array.

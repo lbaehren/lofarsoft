@@ -567,7 +567,7 @@ class BeamFormer(tasks.Task):
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
         self.updateHeader(self.beams,BEAM_NSPECTRAADDED="nspectraadded",BEAM_FILENAMES="filenames",BEAM_ANTENNAS_USED="antennas_used",BEAM_NCHUNKS="nchunks",BEAM_FREQUENCIES="frequencies",FREQUENCY_INTERVAL="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",BEAM_FILENAME="spectrum_file")
 
-        if sample_offset: self.datafile.shiftTimeseriesData(sample_offset=sample_offset)
+        if self.sample_offset: self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)
         
         dataok=True
         clearfile=True
