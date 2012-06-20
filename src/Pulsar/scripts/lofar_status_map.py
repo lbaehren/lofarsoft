@@ -41,11 +41,11 @@ continents_color='lightgreen'
 # dictionary of X-, Y- offsets of the stations thumnail plots left-bottom corners
 # relative to the position of the station
 # offsets are in fraction of the width and height of the plot in pixel
-# (in fraction od imw and imh)
+# (in fraction of imw and imh)
 # if 3rd element = 1, then X-, Y- are actual coordinates, rather then offsets
 offsets={'FR606': (-1, 0.1, 0), 'UK608': (-1, 0.1, 0), 'SE607': (0, 0.1, 0),
          'DE601': (-1, -1.2, 0), 'DE602': (0.1, -1.1, 0), 'DE603': (-1, 0.1, 0), 'DE604': (0, 0.1, 0), 'DE605': (-1, 0.1, 0),
-	 'RS104': (-1, 0.1, 0), 'RS106': (0, 0.1, 0), 
+	 'RS305': (-1, 0.1, 0), 'RS106': (0, 0.1, 0), 
 	 'RS205': (0.3, -1, 0), 'RS208': (0, -1.2, 0), 'RS210': (-1, 0.1, 0), 
 	 'RS306': (10, 530, 1), 'RS307': (-1, -1.3, 0), 'RS310': (-1, 0.1, 0), 
 	 'RS404': (-1, 0.1, 0), 'RS406': (-1.0, 0.1, 0), 'RS407': (-1, 0.1, 0), 'RS409': (-1, 0.1, 0), 'RS410': (-1, 0.1, 0), 
@@ -62,7 +62,7 @@ offsets={'FR606': (-1, 0.1, 0), 'UK608': (-1, 0.1, 0), 'SE607': (0, 0.1, 0),
 text_offsets={'FR606': (-40000, 0, 'right'), 'UK608': (-40000, 0, 'right'), 'SE607': (40000, 0, 'left'),
               'DE601': (-40000, 0, 'right'), 'DE602': (-40000, 0, 'right'), 'DE603': (-40000, 0, 'right'), 
 	      'DE604': (40000, 0, 'left'), 'DE605': (-40000, 0, 'right'),
-	      'RS104': (2500, 2500, 'right'), 'RS106': (-2000, 0, 'right'), 
+	      'RS305': (2500, 2500, 'right'), 'RS106': (-2000, 0, 'right'), 
 	      'RS205': (-2000, 0, 'right'), 'RS208': (-2000, 0, 'right'), 'RS210': (-2000, 0, 'right'), 
 	      'RS306': (2000, 200, 'left'), 'RS307': (-2000, 0, 'right'), 'RS310': (-2000, 0, 'right'), 
 	      'RS404': (200, 2500, 'right'), 'RS406': (-2000, 0, 'right'), 'RS407': (2000, 0, 'left'),
