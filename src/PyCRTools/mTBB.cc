@@ -341,15 +341,14 @@ uint TBBData::python_maximum_read_length(int refAntenna)
   std::vector<int> offset = sample_offset(refAntenna);
 
   uint maxLength = UINT_MAX;
-  uint antenna_maxLength = 0;
+  uint antenna_maxSample = 0;
 
   for (uint i = 0; i < length.size(); ++i) {
-    antenna_maxLength = (uint)(length[i] - offset[i]);
-    if (antenna_maxLength < maxLength)
-      maxLength = antenna_maxLength;
+    antenna_maxSample = (uint)(length[i] + offset[i]);
+    if (antenna_maxSample < maxLength) {
+      maxLength = antenna_maxSample;
+    }
   }
-
-  if (maxLength < 0) maxLength = 0;
 
   return maxLength;
 }
