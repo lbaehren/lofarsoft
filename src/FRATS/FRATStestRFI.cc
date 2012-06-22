@@ -1,5 +1,5 @@
  /*-------------------------------------------------------------------------*
- | $Id:: TransientTriggerV7.cc                                           $ |
+ | $Id:: FRATStestRFI.cc                                           $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2009                                                    *
@@ -639,7 +639,7 @@ int main (int argc,
 	//CoinCheck cc[nDMs];
 	
 	
-	
+    UDPsend* UDPtransmitter=new UDPsend();
 	int StreamCounter=0;
     int SB=firstSB;
     std::string temp;
@@ -652,14 +652,14 @@ int main (int argc,
 			cout << "StreamNr " << StreamCounter << " DMcounter " << DMcounter << " DM " << DMval << endl;
 			float SBFreq = SubbandToFreq(SB+startsubbandnumber,HBAmode);
             if(nFreqs<1) {
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns, startpos, integrationlength, DoPadding, DoPadding, verbose);
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength, DoPadding, DoPadding, verbose);
             } else {
                 StartChannel=stream*NrChannels;
                 // start channel of this stream
                 // total number of channels in this stream
                 printf("Channel, %i, Integration, %i ",channels,timeintegration);
                 //if(stream==1 && DMcounter==0)
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, startpos, integrationlength, DoPadding, DoPadding, verbose); // Add obsid and beam    
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose); // Add obsid and beam    
                 
                 //}
             }
@@ -754,7 +754,7 @@ int main (int argc,
     if(nstreams*nDMs > 50){
         int mynDMs=1;
     } 
-
+/*
     ofstream datamonitor[nstreams][mynDMs];
     stringstream datamonitorfilename;//[nstreams][mynDMs];
     string datamonitorfilen;
@@ -767,12 +767,15 @@ int main (int argc,
             datamonitor[sc][DMcounter].open(datamonitorfilen.c_str());
         }
     }
+    */
     // Create log files        
 	string alltriggerlogfilename;
 	alltriggerlogfilename=pulsedir+"/found_triggers.log";
 	string flaggedchansfilename=pulsedir+"/flaggedchans.log";
 	string flaggedsamplesfilename=pulsedir+"/flaggedsamples.log";
 	string baselinefilename=pulsedir+"/baseline.log";
+	string avfilename=pulsedir+"/average.log";
+	string stdfilename=pulsedir+"/stddev.log";
     
     ofstream * fcfile = new ofstream;
     fcfile->open(flaggedchansfilename.c_str(), ios::binary  | ios::out);
@@ -780,6 +783,10 @@ int main (int argc,
     fsfile->open(flaggedsamplesfilename.c_str(), ios::binary  | ios::out);
     ofstream * basefile = new ofstream;
     basefile->open(baselinefilename.c_str(), ios::binary |  ios::out);
+    ofstream * avfile = new ofstream;
+    avfile->open(avfilename.c_str(), ios::binary  | ios::out);
+    ofstream * stdfile = new ofstream;
+    stdfile->open(stdfilename.c_str(), ios::binary  | ios::out);
 	ofstream triggerlogfile;
 	ofstream alltriggerlogfile;
 	//logfile.open(logfilename.c_str());
@@ -978,9 +985,9 @@ if(doFlagging){
 				cout << "Processing " << sc << " " << DMcounter << endl;
 				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 cout << "f" <<  foundpulse << endl;
-                if(DMcounter<mynDMs){
+              /*  if(DMcounter<mynDMs){
                     datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
-                }
+                } */
 				if(foundpulse){ 
                     cout << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
 					//triggerlogfile << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
@@ -1016,8 +1023,19 @@ if(doFlagging){
         usleep(sleeptime);
 
 	}
+
+    
+    for(int DMcounter=0; DMcounter<nDMs; DMcounter++){
+        for(int fc2=0;fc2<nstreams;fc2++){
+            	SBTs[fc2][DMcounter]->writeAverage(avfile);
+            	SBTs[fc2][DMcounter]->writeStdDev(avfile);
+        }
+    }
+
     fcfile->close();
     fsfile->close();
+    avfile->close();
+    stdfile->close();
     triggerlogfile.close();
     alltriggerlogfile.close();
     //fclose(pFileOut); 

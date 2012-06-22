@@ -236,14 +236,29 @@ namespace FRAT {
     };
   };
 	namespace analysis {
-	  
+	 
+      class UDPsend
+         {
+            public:
+              ~UDPsend();
+              UDPsend();
+			  bool SendTriggerMessage(struct triggerEvent trigger);
+            private:
+              const char* send_data;
+              struct sockaddr_in server_addr;
+			  struct hostent *host;
+			  const char* hostname;
+              int sock;
+         };
+
+
 	  class SubbandTrigger 
 		  {
 		  public:	  
 			  //SubbandTrigger();
 			  ~SubbandTrigger();
 			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool doSend=false, int obsID=0, int beam=0);
-              SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock=0, int IntegrationLength=1, int nrblocks=0, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool noSend=false, int obsID=0, int beam=0);
+              SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock=0, int IntegrationLength=1, int nrblocks=0, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool noSend=false, int obsID=0, int beam=0);
 			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
               bool processData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  int CalculateBufferSize();
@@ -255,11 +270,15 @@ namespace FRAT {
 			  std::string blockAnalysisSummary();
 			  std::string FoundTriggers();
 			  bool SendTriggerMessage(struct triggerEvent trigger);
+              bool writeStdDev(ofstream * fsfile);
+              bool writeAverage(ofstream * fsfile);
+
               float itsDM;
 			  
 		  private:
 
               
+              FRAT::analysis::UDPsend* UDPtransmitter;
               
               bool noSend; 
 			  int itsNrChannels;
@@ -285,6 +304,7 @@ namespace FRAT {
 			  std::vector<float> DeDispersedBuffer;
 			  std::vector<int> dedispersionoffset;
 			  std::vector <float> SumDeDispersed;
+              std::vector <struct triggerEvent> triggerMessages;
 			  int itsBufferLength;
 			  bool DoPadding;
 			  bool UseSamplesOr2;
