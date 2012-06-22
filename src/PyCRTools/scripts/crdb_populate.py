@@ -140,7 +140,17 @@ class DataExtractor(object):
 
 
 def populate(db_filename, data_filename):
-    # TEST: populate() - Add implementation
+    """Populate database with information from the specified datafile.
+
+    **Properties**
+
+    ===============  ====================================
+    Parameter        Description
+    ===============  ====================================
+    *db_filename*    Filename of the database.
+    *data_filename*  Filename of the data file.
+    ===============  ====================================
+    """
 
     # Attribute validation
     if "" == db_filename:
@@ -186,14 +196,7 @@ def populate(db_filename, data_filename):
         e.addDatafile(d)
 
         # Add LORA data to event parameters
-        lora_data = lora.loraInfo(e.timestamp, dbManager.settings.lorapath)
-        if lora_data:
-            for key in lora_data.keys():
-                lora_key = "lora_" + key
-                e[lora_key] = lora_data[key]
-                e.write(recursive=False, parameters=True)
-        else:
-            print("Empty lora_data set...")
+        process_lora_data(e, dbManager.settings.lorapath)
     else:
         # Return if datafile information is already available
         return
@@ -233,8 +236,16 @@ def populate(db_filename, data_filename):
 
 
 def update(db_filename):
-    # TEST: update() - Add implementation
+    """Update the database.
 
+    **Properties**
+
+    ===============  ====================================
+    Parameter        Description
+    ===============  ====================================
+    *db_filename*    Filename of the database.
+    ===============  ====================================
+    """
     # Attribute validation
     if "" == db_filename:
         raise ValueError("No database filename provided.")
@@ -270,12 +281,29 @@ def update(db_filename):
                         print("Results file {0} does not exist...".format(results_filename))
 
     # Add LORA data to event parameters
-    lora_data = lora.loraInfo(e.timestamp, dbManager.settings.lorapath)
+    process_lora_data(e, dbManager.settings.lorapath)
+
+
+def process_lora_data(event, lorapath):
+    """Add LORA specific information to the event information in the database.
+
+    **Properties**
+
+    ============  =======================================================
+    Parameter     Description
+    ============  =======================================================
+    *event*       event object in which to store the LORA information.
+    *lorapath*    Path where the LORA information files are found.
+    ============  =======================================================
+    """
+
+    print "Adding LORA parameters..."
+    lora_data = lora.loraInfo(event.timestamp, lorapath)
     if lora_data:
         for key in lora_data.keys():
             lora_key = "lora_" + key
-            e[lora_key] = lora_data[key]
-            e.write(recursive=False, parameters=True)
+            event[lora_key] = lora_data[key]
+        event.write(recursive=False, parameters=True)
     else:
         print("Empty lora_data set...")
 
