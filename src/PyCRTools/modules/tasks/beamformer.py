@@ -41,7 +41,7 @@ Example::
 
 # KNOWN BUGS (EE):
 # 
-#   1) The modified tparameters are not saved after exiting python. (antennaIDs,cal_delays,..)
+#   1) The modified tparameters are not saved after exiting python. (antennaIDs,cal_delays,..) .... the saved parameters are not read back when opening beamforming iteractibly.
 #
 
 
@@ -51,6 +51,7 @@ from pycrtools import tasks
 from pycrtools import qualitycheck
 import time; import pytmf; import math
 import os; import sys; import numpy as np
+from pycrtools import metadata as md
 
 import pdb;# pdb.set_trace()
 
@@ -604,7 +605,11 @@ class BeamFormer(tasks.Task):
                 antennaID=self.antennaIDs[iantenna]
                 self.datafile["SELECTED_DIPOLES"]=[antennaID]
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):" 
-                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
+##                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
+#                self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
+#                self.antpos.reshape([len(self.antpos)/3,3])
+#                md.convertITRFToLocal(self.antpos)
+                self.antpos=self.datafile["ANTENNA_POSITIONS"];
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                     
                 #Calculate the geometrical delays needed for beamforming
@@ -856,7 +861,7 @@ class BeamFormer(tasks.Task):
             tpar blocklen=2**10
             tpar maxchunklen=2**16*5
             dynspec=Task.dyncalc()
-            Task.dynplot(beams=dyspec,dmin=-10e1,dmax=10e2)
+            Task.dynplot(dynspec=dyspec,dmin=-10e1,dmax=10e2)
             
         """
 
