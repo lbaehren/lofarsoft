@@ -24,21 +24,25 @@ def strdate2jd(strdate):
     return utc
 
 pulsar = 1
-altair = 0 #If you are running this program in altair.
+altair = 1 #If you are running this program in altair.
 
 if pulsar:
     cr.tload('BeamFormer')  #Using this since it seems the program runs faster when the task is preloaded (if other task is "loaded" then it runs slower).
     cr.treset()
 
     if altair:
-        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
-        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
-#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5')
-#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5'
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+##        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5')
+##        filefilter = '/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5'
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5'
-#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
-#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'        
+##        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
+##        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'  
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5'  
+        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
+        filefilter = '/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
         output_dir= '/Users/eenriquez/RESEARCH/Pulsars/Results/'
         f2=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
 
@@ -109,7 +113,7 @@ filenames = [filefilter]
 nantennas_start = 1
 nantennas_stride = 2
 maxnantennas = f1['NOF_DIPOLE_DATASETS']
-detail_name = '.pol1.TAB'
+detail_name = '.pol1'
 
 #------------------------------
 #Additional calibration values.
@@ -136,8 +140,9 @@ sample_offset = int((t0-t1)/f1['SAMPLE_INTERVAL'][0])
 
 
 #----------------------------------
-bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,antenna_positions=antenna_positions,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,sample_offset=sample_offset)
+bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,sample_offset=sample_offset)
 
+#antenna_positions=antenna_positions
 #-------------------------------------------------------------------------------------
 
 #Run for Beamformer Pulsar case
