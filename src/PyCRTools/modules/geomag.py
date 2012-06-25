@@ -18,7 +18,7 @@
 import numpy as np
 import math, os, unittest
 from datetime import date
-from pytmf import deg2rad, rad2deg
+from pytmf import deg2rad, rad2deg, angular_separation
 
 class GeoMag:
 
@@ -307,18 +307,6 @@ class GeoMagTest(unittest.TestCase):
             calcval=gm.GeoMag(values[2], values[3], values[1], values[0])
             self.assertAlmostEqual(values[4], calcval.dec, 2, 'Expected %s, result %s' % (values[4], calcval.dec))
 
-def angular_separation(lat0, lon0, lat1, lon1):
-    """Calculates angular separation using Vincenty equation.
-    """
-
-    dl = lon1 - lon0
-
-    a = (np.cos(lat1) * np.sin(dl))**2
-    b = (np.cos(lat0) * np.sin(lat1) - np.sin(lat0) * np.cos(lat1) * np.cos(dl))**2
-    c = (np.sin(lat0) * np.sin(lat1) + np.cos(lat0) * np.cos(lat1) * np.cos(dl))
-
-    return np.arctan2(a + b, c)
-
 def geomagneticAngle(az, el, time, lon = 6.869837540, lat = 52.915122495, height = 5.0, filename=None):
     """Calculates the geomagnetic angle (alpha) between the shower and the earth magnetic field.
 
@@ -349,8 +337,24 @@ def geomagneticAngle(az, el, time, lon = 6.869837540, lat = 52.915122495, height
     # Calculate declination and inclination (dip) of Earth magnetic field
     mag = gm.GeoMag(lat, lon, height / 1000., time)
 
+    phi = np.deg2rad(az)
+    theta = np.deg2rad(90 - el)
+
+    a = np.zeros(3)
+    a[0] = np.sin(theta) * np.cos(phi)
+    a[1] = np.sin(theta) * np.sin(phi)
+    a[2] = np.cos(theta)
+
+    phi = np.deg2rad(mag.dec)
+    theta = np.deg2rad(90 + mag.dip)
+
+    b = np.zeros(3)
+    b[0] = np.sin(theta) * np.cos(phi)
+    b[1] = np.sin(theta) * np.sin(phi)
+    b[2] = np.cos(theta)
+
     # Calculate and return the geomagnetic angle alpha
-    return rad2deg(angular_separation(deg2rad(el), deg2rad(az), deg2rad(0 - mag.dip), deg2rad(mag.dec)))
+    return rad2deg(np.arccos(np.dot(a,b)))
 
 if __name__ == '__main__':
     unittest.main()
