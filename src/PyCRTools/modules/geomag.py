@@ -15,9 +15,10 @@
 # -6.1335150785195536
 # >>>
 
+import numpy as np
 import math, os, unittest
 from datetime import date
-from pytmf import deg2rad, rad2deg, angular_separation
+from pytmf import deg2rad, rad2deg
 
 class GeoMag:
 
@@ -305,6 +306,12 @@ class GeoMagTest(unittest.TestCase):
         for values in self.test_values:
             calcval=gm.GeoMag(values[2], values[3], values[1], values[0])
             self.assertAlmostEqual(values[4], calcval.dec, 2, 'Expected %s, result %s' % (values[4], calcval.dec))
+
+def angular_separation(lat0, lon0, lat1, lon1):
+    dl = lon1 - lon0
+
+    a = (np.cos(lat1) * np.sin(dl))**2    b = (np.cos(lat0) * np.sin(lat1) - np.sin(lat0) * np.cos(lat1) * np.cos(dl))**2    c = (np.sin(lat0) * np.sin(lat1) + np.cos(lat0) * np.cos(lat1) * np.cos(dl))
+    return np.arctan2(a + b, c)
 
 def geomagneticAngle(az, el, time, lon = 6.869837540, lat = 52.915122495, height = 5.0, filename=None):
     """Calculates the geomagnetic angle (alpha) between the shower and the earth magnetic field.
