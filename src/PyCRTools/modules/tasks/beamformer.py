@@ -833,7 +833,7 @@ class BeamFormer(tasks.Task):
             self.tbeams.par.xvalues.setUnit("mu","")
         return self.tbeams
 
-    def dynplot(self,dynspec=None,cleandynspec=None,plot_cleanspec=False,dmin=None,dmax=None,cmin=None,cmax=None,from_file=False):
+    def dynplot(self,dynspec=None,cleandynspec=None,plot_cleanspec=False,dmin=None,dmax=None,cmin=None,cmax=None,from_file=False,filename=None):
         """
         Plot the dynamic beamformed spectrum. Provide the dynamic spectrum of the beamformed.
 
@@ -846,6 +846,7 @@ class BeamFormer(tasks.Task):
         *cmin*                 Minimum z-value (intensity) in clean dynamic spectrum to plot
         *cmax*                 Maximum z-value (intensity) in clean dynamic spectrum to plot
         *from_file*      False Read from file.
+        *filename*       None  Filename of the beam.
         ================ ===== ===================================================================
 
         Example::
@@ -865,6 +866,10 @@ class BeamFormer(tasks.Task):
             
         """
 
+
+        if filename:
+            self.spectrum_file = filename
+        
         if not dynspec:
             if from_file:
                 self.spectrum_file_bin=os.path.join(self.spectrum_file,"dynspec")
