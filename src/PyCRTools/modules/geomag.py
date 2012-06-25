@@ -308,9 +308,15 @@ class GeoMagTest(unittest.TestCase):
             self.assertAlmostEqual(values[4], calcval.dec, 2, 'Expected %s, result %s' % (values[4], calcval.dec))
 
 def angular_separation(lat0, lon0, lat1, lon1):
+    """Calculates angular separation using Vincenty equation.
+    """
+
     dl = lon1 - lon0
 
-    a = (np.cos(lat1) * np.sin(dl))**2    b = (np.cos(lat0) * np.sin(lat1) - np.sin(lat0) * np.cos(lat1) * np.cos(dl))**2    c = (np.sin(lat0) * np.sin(lat1) + np.cos(lat0) * np.cos(lat1) * np.cos(dl))
+    a = (np.cos(lat1) * np.sin(dl))**2
+    b = (np.cos(lat0) * np.sin(lat1) - np.sin(lat0) * np.cos(lat1) * np.cos(dl))**2
+    c = (np.sin(lat0) * np.sin(lat1) + np.cos(lat0) * np.cos(lat1) * np.cos(dl))
+
     return np.arctan2(a + b, c)
 
 def geomagneticAngle(az, el, time, lon = 6.869837540, lat = 52.915122495, height = 5.0, filename=None):
@@ -344,7 +350,7 @@ def geomagneticAngle(az, el, time, lon = 6.869837540, lat = 52.915122495, height
     mag = gm.GeoMag(lat, lon, height / 1000., time)
 
     # Calculate and return the geomagnetic angle alpha
-    return rad2deg(angular_separation(deg2rad(az), deg2rad(el), deg2rad(mag.dec), deg2rad(mag.dip)))
+    return rad2deg(angular_separation(deg2rad(el), deg2rad(az), deg2rad(0 - mag.dip), deg2rad(mag.dec)))
 
 if __name__ == '__main__':
     unittest.main()
