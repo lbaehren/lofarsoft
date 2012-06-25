@@ -334,7 +334,7 @@ def geomagneticAngle(az, el, time, lon = 6.869837540, lat = 52.915122495, height
     gm = GeoMag(filename)
 
     # Calculate declination and inclination (dip) of Earth magnetic field
-    mag = gm.GeoMag(lon, lat, height / 1000., time)
+    mag = gm.GeoMag(lat, lon, height / 1000., time)
 
     # Calculate and return the geomagnetic angle alpha
     return rad2deg(angular_separation(deg2rad(az), deg2rad(el), deg2rad(mag.dec), deg2rad(mag.dip)))
