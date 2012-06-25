@@ -407,6 +407,9 @@ class BeamFormer(tasks.Task):
         sample_offset = dict(default = 0,
                         doc="Sample offset applied to time series. (ie. to set different stations to a common time.)",
                         unit="Sample"),
+                        
+        single_station = dict(default = True,
+                        doc="if True using the 'ANTEANNA_POSITONS', otherwise 'ANTENNA_POSITION', info elsewere on their meanings."),
 #------------------------------------------------------------------------
 # Derived parameters
 
@@ -606,10 +609,12 @@ class BeamFormer(tasks.Task):
                 self.datafile["SELECTED_DIPOLES"]=[antennaID]
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):" 
 ##                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
-#                self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
-#                self.antpos.reshape([len(self.antpos)/3,3])
-#                md.convertITRFToLocal(self.antpos)
-                self.antpos=self.datafile["ANTENNA_POSITIONS"];
+                if self.single_station:
+                    self.antpos=self.datafile["ANTENNA_POSITIONS"];
+                else:                
+                    self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
+                    self.antpos.reshape([len(self.antpos)/3,3])
+                    md.convertITRFToLocal(self.antpos)
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                     
                 #Calculate the geometrical delays needed for beamforming
