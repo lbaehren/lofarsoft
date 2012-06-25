@@ -11,7 +11,7 @@ import pycrtools as cr
     
     
 lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
-ITRFCS002=cr.hArray([3826577.109500000,461022.916000,5064892.758])
+ITRFCS002=cr.hArray([3826577.109500000, 461022.900196000, 5064892.758])
 
 def mapAntennasetKeyword(antennaset):
     """Ugly fix to map correct antenna names in input to wrong antenna names
@@ -1207,24 +1207,24 @@ def convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002):
     from numpy import sin
     from numpy import cos
 
-    lon=reflonlat[0]
-    lat=reflonlat[1]
-    Arg0=cr.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
-    Arg1=cr.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
-    Arg2=cr.hArray([0.0,cos(lat),sin(lat)])
-    
-    #Arg0=cr.hArray([-0.1195950000,  -0.7919540000,   0.5987530000]) 
-    #Arg1=cr.hArray([0.9928230000,  -0.0954190000,   0.0720990000]) 
-    #Arg2=cr.hArray([0.0000330000,   0.6030780000,   0.7976820000])
-
-
-    itrfpos.sub(refpos)
+    if reflonlat:
+        lon=reflonlat[0]
+        lat=reflonlat[1]
+        Arg0=cr.hArray([-sin(lon),-sin(lat)*cos(lon),cos(lat)*cos(lon)])
+        Arg1=cr.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
+        Arg2=cr.hArray([0.0,cos(lat),sin(lat)])
+    else:
+        Arg0=cr.hArray([-0.119595,-0.791954, 0.598753]) 
+        Arg1=cr.hArray([0.992823,-0.095419, 0.072099]) 
+        Arg2=cr.hArray([0.000033, 0.603078, 0.797682])
 
     returnpos=cr.hArray(float,itrfpos.shape())
+    itrfpos_dump=cr.hArray(float,itrfpos,itrfpos)  #Used for avoiding unwanted modification of itrfpos. 
+    itrfpos_dump.sub(refpos)
 
-    returnpos[...].muladd(Arg0,itrfpos[...,0])
-    returnpos[...].muladd(Arg1,itrfpos[...,1])
-    returnpos[...].muladd(Arg2,itrfpos[...,2])
+    returnpos[...].muladd(Arg0,itrfpos_dump[...,0])
+    returnpos[...].muladd(Arg1,itrfpos_dump[...,1])
+    returnpos[...].muladd(Arg2,itrfpos_dump[...,2])
 
     return returnpos
 
