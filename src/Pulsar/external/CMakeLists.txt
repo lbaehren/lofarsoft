@@ -72,9 +72,10 @@ set (tempo2_archive   "${tempo2_directory}.tar.gz"      )
 add_custom_target (tempo2_unpack
   COMMAND rm -rf ${PULSAR_BINARY_DIR}/apps/${tempo2_name}
   COMMAND ${TAR_EXECUTABLE} -xvzf ${CMAKE_CURRENT_SOURCE_DIR}/${tempo2_archive}
-  COMMAND echo lofar " t LF" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/aliases
-  COMMAND echo "" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
-  COMMAND echo " 3826937.853   460938.478       5064630.667      LOFAR               t" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
+# Don't need this anymore, as we have proper coordinates and aliases already in the Tempo2 tarball - Vlad, 26.06.2012
+#  COMMAND echo lofar " t LF" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/aliases
+#  COMMAND echo "" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
+#  COMMAND echo " 3826937.853   460938.478       5064630.667      LOFAR               t" >> ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/observatory/observatories.dat
   COMMAND cp -r ${PULSAR_BINARY_DIR}/apps/${tempo2_name}/T2runtime/* ${CMAKE_INSTALL_PREFIX}/
   WORKING_DIRECTORY ${PULSAR_BINARY_DIR}/apps
   COMMENT "Unpacking tar archive of Tempo2 from ${PULSAR_SOURCE_DIR}/external/${tempo2_archive} to ${PULSAR_BINARY_DIR}/apps..."
