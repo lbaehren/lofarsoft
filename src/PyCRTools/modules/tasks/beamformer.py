@@ -614,7 +614,7 @@ class BeamFormer(tasks.Task):
                 else:                
                     self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
                     self.antpos.reshape([len(self.antpos)/3,3])
-                    md.convertITRFToLocal(self.antpos)
+                    md.convertITRFToLocal(self.antpos,self.datafile['ANTENNA_SET'])
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                     
                 #Calculate the geometrical delays needed for beamforming
