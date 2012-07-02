@@ -9,11 +9,9 @@ import struct
 import os
 import pycrtools as cr
     
-lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344
-ITRFCS002=cr.hArray([3826577.109500000, 461022.900196000, 5064892.758])
     
-lonlatCS002_new=cr.hArray([6.8693028*np.pi/180.,52.9148347*np.pi/180.]) # 55.90   (.../StaticMetaData/Stationinfo.dat)
-ITRFCS002_HBA=cr.hArray([3826583.321007708, 460955.708196125, 5064894.169]) # (.../StaticMetaData/AntennaFields/CS002-AntennaField.conf)
+lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344  #($LOFARSOFT/data/lofar/StaticMetaData/AntennaArrays/CS002-AntennaArrays.conf
+ITRFCS002=cr.hArray([3826577.109500000, 461022.900196000, 5064892.758])   #($LOFARSOFT/data/lofar/StaticMetaData/AntennaFields/CS002-AntennaField.conf)
 
 def mapAntennasetKeyword(antennaset):
     """Ugly fix to map correct antenna names in input to wrong antenna names
@@ -1202,18 +1200,12 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
 
     return stationpos
 
-def convertITRFToLocal(itrfpos,antennaset,refpos=None,reflonlat=lonlatCS002):
+def convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=None):
     """.. todo:: Document :func:`~metadata.convertITRFToLocal`.
     """
 
     from numpy import sin
     from numpy import cos
-
-    if "LBA" in antennaset:
-        refpos=ITRFCS002
-    elif "HBA" in antennaset:
-        refpos=ITRFCS002_HBA
-#        if reflonlat: reflonlat=lonlatCS002_new
 
     if reflonlat:
         lon=reflonlat[0]
@@ -1222,7 +1214,7 @@ def convertITRFToLocal(itrfpos,antennaset,refpos=None,reflonlat=lonlatCS002):
         Arg1=cr.hArray([cos(lon),-sin(lat)*sin(lon),cos(lat)*sin(lon)])
         Arg2=cr.hArray([0.0,cos(lat),sin(lat)])
     else:
-        Arg0=cr.hArray([-0.119595,-0.791954, 0.598753]) 
+        Arg0=cr.hArray([-0.119595,-0.791954, 0.598753])  #($LOFARSOFT/data/lofar/StaticMetaData/AntennaFields/CS002-AntennaField.conf)
         Arg1=cr.hArray([0.992823,-0.095419, 0.072099]) 
         Arg2=cr.hArray([0.000033, 0.603078, 0.797682])
 
