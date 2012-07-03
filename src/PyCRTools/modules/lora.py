@@ -179,6 +179,7 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
     allowed and no TBB data was obtained.
 
     Input parameters:
+
     ===================  =====
     *logfile*            location of LORAreceived file
     *days_to_average*    plot histogram averaged of these many days (<1 allowed)
@@ -187,6 +188,7 @@ def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived",days_to_a
     *plotNotAllowed*     plot triggers that were not allowed to obtain TBB data
     *plotNoObservation*  plot triggers during a time when no observation was running
     *stacked*            stack the triggers together
+    ===================  =====
 
     """
     import matplotlib.pyplot as plt
