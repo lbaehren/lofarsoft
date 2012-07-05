@@ -460,7 +460,7 @@ class Observation:
 
 		# at ~05.07.2012 the logic in the Parset files has changed, and the flag Output_CoherentStokes.enabled = True
 		# ONLY for CS data and not for CV data.  For CV data one needs to check Output_Beamformed.enabled flag
-		if self.IS = False and self.CS = False:
+		if self.IS == False and self.CS == False:
 			# checking the Output_Beamformed flag
         		cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
 			status=os.popen(cmd).readlines()
