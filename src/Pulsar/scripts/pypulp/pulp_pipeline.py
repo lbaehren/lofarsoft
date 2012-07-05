@@ -59,15 +59,15 @@ class Pipeline:
 				elif obs.CV:
 					unit = CVUnit(obs, cep2, cmdline, tab, log)
 				else:
-					log.error("Can't initialize processing pipeline unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
+					log.error("Can't initialize processing pipeline unit for SAP=%d TAB=%d" % (sapid, tabid))
 					quit(1)
 			if tab.is_coherent and tab.specificationType == "flyseye":
-				if obs.CS:
+				if obs.stokesCS[0] == "I":  # for I and IQUV
 					unit = FE_CSUnit(obs, cep2, cmdline, tab, log)
-				elif obs.CV:
+				elif obs.stokesCS[0] == "X": # for XY (old format) or XXYY
 					unit = FE_CVUnit(obs, cep2, cmdline, tab, log)
 				else:
-					log.error("Can't initialize processing pipeline FE unit for SAP=%d TAB=%d" % (sap.sapid, tab.tabid))
+					log.error("Can't initialize processing pipeline FE unit for SAP=%d TAB=%d" % (sapid, tabid))
 					quit(1)
 
 			# adding unit to the list

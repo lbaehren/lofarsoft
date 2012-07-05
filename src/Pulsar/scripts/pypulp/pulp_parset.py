@@ -639,7 +639,11 @@ class Observation:
 				(self.startdate, self.starttime, self.duration>=3600. and "%.1fh" % \
 				(float(self.duration/3600.)) or "%.1fm" % (float(self.duration/60.))))
 			mode=""
-			if self.FE: mode+="FE "
+			if self.FE: 
+				if not self.CS and not self.CV:
+					mode+="FE (" + self.stokesCS + ") "
+				else:
+					mode+="FE "
 			if self.IM: mode+="Im "
 			if self.IS: mode+="IS (" + self.stokesIS + ") "
 			if self.CS: mode+="CS (" + self.stokesCS + ") "
