@@ -570,8 +570,6 @@ class BeamFormer(tasks.Task):
 #        self.beams.par.tbeam_incoherent=self.tbeam_incoherent
         self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
         self.updateHeader(self.beams,BEAM_NSPECTRAADDED="nspectraadded",BEAM_FILENAMES="filenames",BEAM_ANTENNAS_USED="antennas_used",BEAM_NCHUNKS="nchunks",BEAM_FREQUENCIES="frequencies",FREQUENCY_INTERVAL="delta_nu_used",FFTSIZE="speclen",BLOCKSIZE="blocklen",BEAM_FILENAME="spectrum_file")
-
-        if self.sample_offset: self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)
         
         dataok=True
         clearfile=True
@@ -607,6 +605,8 @@ class BeamFormer(tasks.Task):
                 self.antennaIDs=list(cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]))
                 antennaID=self.antennaIDs[iantenna]
                 self.datafile["SELECTED_DIPOLES"]=[antennaID]
+                if self.sample_offset: self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  #Need to calculate this each time after having a new antenna selection.
+                pdb.set_trace()
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):" 
 ##                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
                 if self.single_station:
