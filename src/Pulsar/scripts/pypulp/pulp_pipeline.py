@@ -1686,7 +1686,7 @@ class FE_CSUnit(PipeUnit):
 			self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
 			self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
 
-class FE_CVUnit(PipeUnit):
+class FE_CVUnit(CVUnit):
 	def __init__(self, obs, cep2, cmdline, tab, log):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CV"
