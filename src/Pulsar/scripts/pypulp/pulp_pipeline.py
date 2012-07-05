@@ -1691,14 +1691,19 @@ class FE_CVUnit(PipeUnit):
 		PipeUnit.__init__(self, obs, cep2, cmdline, tab, log)
 		self.code = "CV"
 		self.stokes = obs.stokesCS
-		self.beams_root_dir = ""
+		self.beams_root_dir = "rawvoltages"
 		self.raw2fits_extra_options=""
 		self.nrChanPerSub = obs.nrChanPerSubCS
 		self.sampling = obs.samplingCS
-		self.summary_node = ""
-		self.summary_node_dir_suffix = ""
-		self.archive_suffix = ""
-		self.outdir_suffix = ""
+		self.summary_node = "locus093"
+		self.summary_node_dir_suffix = "_CVplots" # "_CVplots"
+		self.archive_suffix = "_plotsCV.tar.gz"
+		self.outdir_suffix = "_red" # "_red"
+		# re-assigning procdir from BEAMN to station name
+		if obs.FE and self.tab.stationList[0] != "": 
+			self.procdir = self.tab.stationList[0]
+		# setting outdir and curdir directories
+		self.set_outdir(obs, cep2, cmdline)
 		# re-assigning procdir from BEAMN to station name
 		if obs.FE and self.tab.stationList[0] != "": 
 			self.procdir = self.tab.stationList[0]
@@ -1706,6 +1711,8 @@ class FE_CVUnit(PipeUnit):
 		self.set_outdir(obs, cep2, cmdline)
 
 	def run(self, obs, cep2, cmdline, log):
+		CVUnit.run(self, obs, cep2, cmdline, log)
+		"""
 		self.log = log
 		self.start_time=time.time()	
 
@@ -1717,3 +1724,4 @@ class FE_CVUnit(PipeUnit):
 		self.total_time= self.end_time- self.start_time
 		self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
 		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
+		"""
