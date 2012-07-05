@@ -201,7 +201,7 @@ class BeamFormer(tasks.Task):
 #------------------------------------------------------------------------
 #Some standard parameters
 #------------------------------------------------------------------------
-        filefilter = sc.p_("",
+        filefilter = sc.p_("$LOFARSOFT/data/lofar/VHECR_example_short.h5",
                         "Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
 
         file_start_number = dict(default=0,
@@ -614,7 +614,7 @@ class BeamFormer(tasks.Task):
                 else:                
                     self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
                     self.antpos.reshape([len(self.antpos)/3,3])
-                    self.antpos = md.convertITRFToLocal(self.antpos,self.datafile['ANTENNA_SET'])
+                    self.antpos = md.convertITRFToLocal(self.antpos)
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                     
                 #Calculate the geometrical delays needed for beamforming
@@ -874,6 +874,9 @@ class BeamFormer(tasks.Task):
 
         if filename:
             self.spectrum_file = filename
+        
+        if cleandynspec:
+            plot_cleanspec=True
         
         if not dynspec:
             if from_file:
@@ -1210,6 +1213,132 @@ class BeamFormer(tasks.Task):
                 print 'Saving binary in %s' %os.path.join(self.spectrum_file,"clean_dynspec"+self.file_ext)
 
         print "Finished - total time used:",time.clock()-t0,"s."
+
+        self.dynspec = dynspec
+        if clean:  
+            self.cleandynspec = cleandynspec
+            return self.dynspec, self.cleandynspec
+        else:
+            return self.dynspec
+
+    def addBeams(self,beams=None,nbeam=0,save_file=False,fraction=None,tbin=1,clean=False):
+        '''
+        Calculates the dynamic spectrum.
+                
+        =============== ===== ===================================================================
+        *beams*         None  Input array. Take self.beams from task, if None.
+        *nbeam*         0     Beam to work with, if (self.)beams has stored multiple ones.
+        *save_file*     False Saves a file in hArray format with additional information besides the array values.
+        *fraction*      None  If not None, then a list of the form [x,y] such that extracting the fraction x/y of the data. with x>-1, and y>=x. 
+        *tbin*          1     If >1 integrates over this number of blocks. Or time binning.
+        *clean*         False If True it calculates the cleaned spectrum.
+        =============== ===== ===================================================================
+
+        Example::
+         
+            tpar filenames = ['File_path/File_name_tbb.h5']
+            tpar blocklen = 2**10
+            tpar maxchunklen = 2**16*5
+            dynspec = Task.dyncalc()
+        
+        or::
+        
+            dynspec,cleandynspec = Task.dyncalc(tbin=16,clean=True,save_file=True)
+
+        The regular and clean dynamic spectra (all blocks) are returned and stored in ``Task.dynspec`` and ``Task.cleandynspec`` respectively.
+        '''
+
+        t0=time.time()
+        tp0=time.clock()
+        
+        if beams!=None:
+            self.beams = beams 
+
+        nbeams = len(self.spectrum_file)
+
+        self.spectrum_file_bin=self.spectrum_file
+        for i,name in enumerate(self.spectrum_file):
+            self.spectrum_file_bin[i] = os.path.join(name,"data.bin")
+ 
+        if not fraction:
+            fraction=[1]
+            chunk_fraction=self.nchunks
+        else:
+            if type(fraction) != type([]) or len(fraction)!=2 or fraction[0] > fraction[1] or fraction[0]<0 or fraction[1]<0:
+                raise ValueError('Need a list of lenght 2, with first element "<" or "=" second element. Both elements positive.')
+            if fraction[0]==0: fraction[0]=1
+            chunk_fraction=int(self.nchunks/fraction[1])
+            self.start_time=(fraction[0]-1)*(self.sectduration*self.nchunks)/fraction[1]
+            self.end_time=fraction[0]*(self.sectduration*self.nchunks)/fraction[1]
+
+        dynspec = cr.hArray(float,[self.nblocks*chunk_fraction,self.speclen])
+        chunk_range=range((fraction[0]-1)*chunk_fraction,(fraction[0])*chunk_fraction) 
+        bm = cr.hArray(float,self.beams,self.beams)
+
+        #Reading beams.        
+        if not beams:
+            print 'Calculating the Dynamic Spectrum from the following beams: '
+            for file in self.spectrum_file_bin:
+                print file
+            for chunk in chunk_range:
+                print ' Calculation at {0:.2%}  \r'.format(float(chunk)/len(chunk_range)),
+                sys.stdout.flush()
+                for nb in range(nbeams):
+#                    print self.spectrum_file_bin[nb]
+                    bm.readfilebinary(self.spectrum_file_bin[nb],chunk*self.speclen*self.nbeams*self.nblocks)
+                    bm/=float(nb+1.)
+                    if nb>1:
+                        self.beams*=(nb)/(nb+1.)
+                    self.beams+=bm
+                    bm*=0
+                for block in range(self.nblocks):
+                    dynspec[(chunk-chunk_range[0])*self.nblocks+block].spectralpower2(self.beams[block,nbeam])
+                self.beams*=0
+                    
+        #Time integration.
+        if tbin>1:
+            dynspec = cr.hArray_toNumpy(dynspec)
+            dynspec = dynspec.reshape((dynspec.shape[0]/tbin,tbin,dynspec.shape[1]))
+            dynspec = np.sum(dynspec,axis=1)
+            dynspec = cr.hArray(dynspec)
+
+        #Cleaning dynamic spectrum.
+        if clean:  
+            avspec=cr.hArray(float,self.speclen,fill=0.0)
+            dynspec[...].addto(avspec)
+            cleandynspec = dynspec/avspec
+
+        #Transposing arrays.
+        dynspec = dynspec.Transpose()
+        if clean:  
+            cleandynspec = cleandynspec.Transpose()
+        
+        #Create a frequency vector
+        self.frequencies.fillrange((self.start_frequency),self.delta_frequency)
+        
+        #Create a time vector
+        self.times = cr.hArray(float,int(round((self.end_time-self.start_time)/(self.block_duration*tbin))),name="Time",units=("","s"))
+        self.times.fillrange(self.start_time,self.block_duration*tbin)
+
+        #Adding parameters
+        dynspec.par.yvalues= self.frequencies
+        dynspec.par.xvalues= self.times
+        dynspec.par.tbin = tbin
+        if clean:  
+            cleandynspec.par.yvalues= self.frequencies
+            cleandynspec.par.xvalues= self.times            
+            cleandynspec.par.tbin = tbin
+        
+        #Saving file(s).
+        if save_file:
+            dynspec.write(os.path.join(self.spectrum_file,"dynspec"),nblocks=1,block=0,clearfile=True,ext=self.file_ext)
+            print 'Saving binary in %s' %os.path.join(self.spectrum_file,"dynspec"+self.file_ext)
+            if clean:  
+                cleandynspec.write(os.path.join(self.spectrum_file,"clean_dynspec"),nblocks=1,block=0,clearfile=True,ext=self.file_ext)
+                print 'Saving binary in %s' %os.path.join(self.spectrum_file,"clean_dynspec"+self.file_ext)
+
+        print "Finished - total processor time used:",time.clock()-tp0,"s."
+        print "Finished - total time used:",time.time()-t0,"s."
 
         self.dynspec = dynspec
         if clean:  
