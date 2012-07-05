@@ -626,6 +626,23 @@ class obsinfo:
 						# getting Stokes string
 						self.stokes=status[0][:-1].split(" = ")[-1]
 
+                # at ~05.07.2012 the logic in the Parset files has changed, and the flag Output_CoherentStokes.enabled = True
+                # ONLY for CS data and not for CV data.  For CV data one needs to check Output_Beamformed.enabled flag
+                if self.IS != "+" and self.CS != "+":
+                        # checking the Output_Beamformed flag
+                        cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
+                        status=os.popen(cmd).readlines()
+                        if np.size(status) > 0:
+                                # this info exists in parset file
+                                if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
+                                        self.BF = "+"
+					if self.stokes == "?":
+						cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
+                                		status=os.popen(cmd).readlines()
+                        		        if np.size(status) > 0:
+                                        		# getting Stokes string
+                                        		self.stokes=status[0][:-1].split(" = ")[-1]
+
 	        # check if data are imaging
         	cmd="grep Output_Correlated.enabled %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
