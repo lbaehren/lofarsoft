@@ -606,7 +606,6 @@ class BeamFormer(tasks.Task):
                 antennaID=self.antennaIDs[iantenna]
                 self.datafile["SELECTED_DIPOLES"]=[antennaID]
                 if self.sample_offset: self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  #Need to calculate this each time after having a new antenna selection.
-                pdb.set_trace()
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):" 
 ##                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
                 if self.single_station:
