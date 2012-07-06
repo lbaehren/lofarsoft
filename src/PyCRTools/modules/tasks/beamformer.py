@@ -580,7 +580,12 @@ class BeamFormer(tasks.Task):
             cr.plt.ioff()
             if self.newfigure and not self.figure:
                 self.figure=cr.plt.figure()
- 
+        
+        #Quick.n.dirty code here, need to be able to automatically update parameters.
+        if self.sample_offset: self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  #This resets some parameters, used for now for recalculating self.nchunks 
+        self.filesize = self.datafile["MAXIMUM_READ_LENGTH"]
+        self.nchunks = int(math.floor(self.filesize/self.sectlen))        
+        
         original_file_start_number=self.file_start_number
         self.beams.fill(0)
 #        self.avspec.fill(0)
@@ -626,6 +631,8 @@ class BeamFormer(tasks.Task):
                 self.phases.delaytophase(self.frequencies,self.delays)
                 self.weights.phasetocomplex(self.phases)
                 for nchunk in range(self.nchunks):
+                    print ' Working on chunk {0} out of {1} \r'.format(nchunk,self.nchunks  ),          #Prints the progress.
+                    sys.stdout.flush()
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
                     for block in blocks:
                         self.data[block-self.nblocks*nchunk].read(self.datafile,"TIMESERIES_DATA",[block])
