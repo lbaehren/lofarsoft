@@ -1881,10 +1881,10 @@ do
 	        
 	        ##################################################
 	        # Check stations are set and create the XML stations list
-		    found_stations=`echo $STATIONS | egrep -i "CS|RS"`
+		    found_stations=`echo $STATIONS | egrep -i "CS|RS|UK|FR|SE|DE|PL"`
 		    if [[ $found_stations == "" ]]
 		    then
-		       echo "WARNING: STATION list ($STATIONS) seems invalid, does not contain CS or RS characters."
+		       echo "WARNING: STATION list ($STATIONS) seems invalid, does not contain CS, RS, UK, FR, SE, DE, PL characters."
 		       echo "WARNING: skipping OBJECT $OBJECT from template creation."
 		       continue
 		    fi
