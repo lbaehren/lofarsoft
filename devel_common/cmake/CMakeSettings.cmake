@@ -179,7 +179,6 @@ if (NOT USG_CMAKE_CONFIG)
   include (ExternalProject)
   include (MD5Checksum)
   include (AddPythonModule)
-  include (OptimizeForArchitecture)
 
   ## ============================================================================
   ##
