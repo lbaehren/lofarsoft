@@ -229,8 +229,8 @@ endif (IS_DIRECTORY ${PULSAR_SOURCE_DIR})
 ##__________________________________________________________
 ##                                      Package dependencies
 
-#add_dependencies (pulsar cfitsio wcstools swig dal)
-add_dependencies (pulsar cfitsio wcstools swig)
+add_dependencies (pulsar cfitsio wcstools swig dal)
+#add_dependencies (pulsar cfitsio wcstools swig)
 
 ## ==============================================================================
 ##
