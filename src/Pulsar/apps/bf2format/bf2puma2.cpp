@@ -1496,31 +1496,31 @@ void writer::writeHeader(unsigned int &isub, unsigned int &ichan)
 	headerfile.open(_hdrFilename);
 
 
+/*
+   if (CHANNELS > 1) {
+      subintdata.freq_cent = 100 + (subbandFirst - (0.5/CHANNELS) - 0.5) * CLOCKRES
+   } else {  // bypass 2PPF, freq_cent calculation changes
+      subintdata.freq_cent = 100 + (subbandFirst - (0.5/CHANNELS)) * CLOCKRES 
+   }
+*/
+
+
+
 	while (1)
 	{
 		getline(headerfile, line, '\n');
 
 		if (line.substr(0, 4) == "FREQ")
 		{
-			if (ANTENNA == "HBA")
-				the_freq
-						<< setprecision(20)
-						<< 100.0
-								+ (SUBBLIST[isub]
-										+ float(ichan) / float(NCHANNELS) - 0.5)
-										* CLOCKRES;
-			else if (ANTENNA == "LBA")
-				the_freq
-						<< setprecision(20)
-						<< (SUBBLIST[isub] + float(ichan) / float(NCHANNELS)
-								- 0.5) * CLOCKRES;
-			else
-				the_freq
-						<< setprecision(20)
-						<< 100.0
-								+ (SUBBLIST[isub]
-										+ float(ichan) / float(NCHANNELS) - 0.5)
-										* CLOCKRES;
+			/* Only correct for 200MHz clock... Vlad, Jul 12, 2012 */
+			float extra_half;
+			if (NCHANNELS > 1) extra_half = 0.5; else extra_half = 0.0;
+			if (ANTENNA == "HBA") the_freq << setprecision(20) 
+				<< 100.0 + (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - 0.5/float(NCHANNELS) - extra_half) * CLOCKRES;
+			else if (ANTENNA == "LBA") the_freq << setprecision(20)
+					<< (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - 0.5/float(NCHANNELS) - extra_half) * CLOCKRES;
+			else the_freq << setprecision(20)
+					<< 100.0 + (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - 0.5/float(NCHANNELS) - extra_half) * CLOCKRES;
 
 			line = "FREQ " + the_freq.str();
 		}
