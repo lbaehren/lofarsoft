@@ -103,7 +103,14 @@ else
   else
    # pattern allows both RSP* and BEAM* directories to be looked at
    prepfold_png=`find $procdir/stokes -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
-   echo $prepfold_png
+   is_prepfold_png=`ls -1 $prepfold_png 2>/dev/null | grep -v such`
+   if [[ $is_prepfold_png == "" ]]; then
+    # prepfold plot _with_ mask does not exist, so look for the plot without mask
+    prepfold_png=`find $procdir/stokes -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | head -n 1`
+    echo $prepfold_png
+   else
+    echo $prepfold_png   # prepfold plot_with_ mask exists
+   fi 
   fi
   exit 0
  fi # $mode == "CS"
@@ -144,7 +151,14 @@ else
   else
    # pattern allows both RSP* and BEAM* directories to be looked at
    prepfold_png=`find $procdir/rawvoltages -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
-   echo $prepfold_png
+   is_prepfold_png=`ls -1 $prepfold_png 2>/dev/null | grep -v such`
+   if [[ $is_prepfold_png == "" ]]; then
+    # prepfold plot _with_ mask does not exist, so look for the plot without mask
+    prepfold_png=`find $procdir/rawvoltages -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | head -n 1`
+    echo $prepfold_png
+   else
+    echo $prepfold_png   # prepfold plot_with_ mask exists
+   fi 
   fi
   exit 0
  fi # $mode == "CV"
@@ -192,6 +206,11 @@ else
    if [[ $isRSPA == "" ]]; then
     # pattern allows both RSP* and BEAM* directories to be looked at
     prepfold_png=`find $procdir/incoherentstokes -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | grep -v _nomask_PSR_ | head -n 1`
+    is_prepfold_png=`ls -1 $prepfold_png 2>/dev/null | grep -v such`
+    if [[ $is_prepfold_png == "" ]]; then
+     # prepfold plot _with_ mask does not exist, so look for the plot without mask
+     prepfold_png=`find $procdir/incoherentstokes -name "*.pfd.png" -print 2>/dev/null | grep -v such | grep _PSR_ | head -n 1`
+    fi 
     # if this is FE observation, then we have to check beam_N subdirectories...
    else
     prepfold_png=`ls -1 $procdir/incoherentstokes/RSPA/*.pfd.png 2>/dev/null | grep -v such | grep RSPA_PSR | head -n 1`
