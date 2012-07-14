@@ -272,11 +272,9 @@ class rfilines(tasks.Task):
             phaseAvg[i, bestchannel] += calphases[i]
         
         cr.hPhaseWrap(phaseAvg, phaseAvg)
-        #phaseAvg[0, bestchannel] = 0.0
-        # why is this reference channel not 0.0 for phase???????????????
         print '---'
 #        print phaseAvg
-        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
         
         allpositions = f["ANTENNA_POSITIONS"].toNumpy()
         positions = allpositions.ravel() # only pol 'polarisation'
@@ -285,7 +283,7 @@ class rfilines(tasks.Task):
         azSteps = int(360 / self.direction_resolution[0])
         elSteps = int(90 / self.direction_resolution[1])
         averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
-        (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, showImage = self.doplot, verbose = True)
+        (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = self.doplot, verbose = True)
 
         print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
         print 'Phase error = %f' % minPhaseError
