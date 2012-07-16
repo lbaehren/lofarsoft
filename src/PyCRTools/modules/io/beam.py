@@ -220,22 +220,6 @@ class BeamData(IOInterface):
         
         return self['BEAM_FREQUENCIES']
 
-    def empty(self, key):
-        """Return empty array for keyword data.
-        Known keywords are: "TIMESERIES_DATA", "TIME_DATA", "FREQUENCY_DATA", "FFT_DATA".
-        """
-
-        if key == "TIMESERIES_DATA":
-            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize),name="E-Field(t)",units=("","Counts"))
-        elif key == "TIME_DATA":
-            return cr.hArray(float, self["BLOCKSIZE"],name="Time",units=("","s"))
-        elif key == "FREQUENCY_DATA":
-            return cr.hArray(float, self.__blocksize/2+1,name="Frequency",units=("","Hz"))
-        elif key == "FFT_DATA":
-            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1),name="fft(E-Field)",xvalues=self["FREQUENCY_DATA"],logplot="y")
-        else:
-            raise KeyError("Unknown key: " + str(key))
-
     def getNchunks(self):
         """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbbs.
         """
@@ -286,27 +270,6 @@ class BeamData(IOInterface):
         
         return st_pos
         
-    def getTimeData(self,data=None,chunk=-1):
-        """Calculate time axis depending on sample frequency and
-        number of blocks in a chunk. Create a new array, if
-        none is provided, otherwise put data into array.
-        """
-        raise NotImplementedError
-
-        if not data:
-            data = cr.hArray(float,self['BEAM_NBLOCKS'])
-
-        chunk=cr.asval(chunk)
-
-        if chunk<0:
-            chunk=self.__chunk
-        else:
-            self.__chunk=chunk
-
-        data.fillrange(self['CHUNK']*self['BEAM_BLOCKLEN']*self['BEAM_NBLOCKS']*cr.asval(self["TBB_SAMPLE_INTERVAL"]),self['BEAM_BLOCKLEN']*cr.asval(self["TBB_SAMPLE_INTERVAL"]))
-
-        return data
-
     def getFFTData(self, data, block):
 
         """Writes FFT data for selected stations to data array.
@@ -401,7 +364,7 @@ class BeamData(IOInterface):
         elif key == "FREQUENCY_DATA":
             return cr.hArray(float, self['BEAM_SPECLEN'],name="Frequency",units=("","Hz"))
         elif key == "FFT_DATA":
-            return cr.hArray(complex, dimensions=(self['NOF_BEAM_DATASETS'], self['BEAM_SPECLEN']),name="fft(E-Field)",xvalues=self.getFrequency(),logplot="y")
+            return cr.hArray(complex, dimensions=(self['NOF_BEAM_DATASETS'], self['BEAM_SPECLEN']),name="fft(E-Field)",xvalues=self.getFrequencies(),logplot="y")
         else:
             raise KeyError("Unknown key: " + str(key))
 
