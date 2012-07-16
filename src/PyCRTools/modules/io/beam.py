@@ -264,9 +264,10 @@ class BeamData(IOInterface):
         pos=[]
         
         for file in self.__files:
-            pos+=list(file.par.hdr['BeamFormer']['stationpos'])
+            pos+=list(file.par.hdr["ITRFANTENNA_POSITIONS"][0])
+#            pos+=list(file.par.hdr['BeamFormer']['stationpos'])
         
-        st_pos = cr.hArray(float,[self['NOF_BEAM_DATASETS'],3],pos)        
+        st_pos = cr.hArray(float,[self['NOF_BEAM_DATASETS'],3], pos)
         
         return st_pos
         
