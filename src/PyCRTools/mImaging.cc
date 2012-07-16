@@ -1282,12 +1282,14 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+#ifdef PYCRTOOLS_WITH_NUMPY
+
 //$DOCSTRING: Beamform image
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBeamformImageAndIntegrate
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(image)()("Array to store resulting image. Stored as ``[I(x_0, y_0), I(x_0, y_0), ... I(x_nx, y_ny)]``, e.g. the rightmost index runs fastest. This array may contain an existing image.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (ndarray)(image)()("Array to store resulting image. Stored as ``[I(x_0, y_0), I(x_0, y_0), ... I(x_nx, y_ny)]``, e.g. the rightmost index runs fastest. This array may contain an existing image.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as ``[f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)]`` e.g. ``f(i,j)`` where ``i`` is the antenna number and ``j`` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies [Hz] stored as ``[f_0, f_1, ..., f_n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HNumber)(delays)()("Array containing the delays [s] for all antennas and positions (antenna index runs fastest: ``(ant1, pos1), (ant2, pos1), ...``) - length of vector has to be number of antennas times positions as calculated by :func:`hGeometricDelays`.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -1298,14 +1300,19 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 */
 
 template <class CIter, class Iter>
-void HFPP_FUNC_NAME (const Iter image, const Iter image_end,
+void HFPP_FUNC_NAME (ndarray image,
     const CIter fftdata, const CIter fftdata_end,
     const Iter frequencies, const Iter frequencies_end,
     const Iter delays, const Iter delays_end
     )
 {
+  // Get pointers to memory of numpy array
+  double* it_im = numpyBeginPtr<double>(image);
+  double* it_im_begin = numpyBeginPtr<double>(image);
+  double* it_im_end = numpyEndPtr<double>(image);
+
   // Inspect length of input arrays
-  const int Nimage = std::distance(image, image_end);
+  const int Nimage = std::distance(it_im, it_im_end);
   const int Nfftdata = std::distance(fftdata, fftdata_end);
   const int Nfrequencies = std::distance(frequencies, frequencies_end);
   const int Ndelays = std::distance(delays, delays_end);
@@ -1334,7 +1341,6 @@ void HFPP_FUNC_NAME (const Iter image, const Iter image_end,
   }
 
   // Get iterators
-  Iter it_im = image;
   CIter it_fft = fftdata;
   Iter it_freq = frequencies;
   Iter it_delays = delays;
@@ -1349,7 +1355,7 @@ void HFPP_FUNC_NAME (const Iter image, const Iter image_end,
   for (i=0; i<Nimage; ++i)
   {
     // Image iterator to start position
-    it_im = image + i;
+    it_im = it_im_begin + i;
 
     // Delay iterator to start position
     it_delays = delays + (i * Nantennas);
@@ -1366,7 +1372,7 @@ void HFPP_FUNC_NAME (const Iter image, const Iter image_end,
       {
         // Multiply by geometric weight and add absolute value squared to image
         tmp = (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * (*it_delays)));
-        *it_im += real(tmp * conj(tmp));
+        *it_im += static_cast<double>(real(tmp * conj(tmp)));
         ++it_fft;
         ++it_freq;
       }
@@ -1377,6 +1383,8 @@ void HFPP_FUNC_NAME (const Iter image, const Iter image_end,
   }
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+#endif /* PYCRTOOLS_WITH_NUMPY */
 
 //$DOCSTRING: Generate shifts for dedispersion
 //$COPY_TO HFILE START --------------------------------------------------
