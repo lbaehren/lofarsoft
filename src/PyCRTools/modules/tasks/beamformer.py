@@ -216,14 +216,6 @@ class BeamFormer(tasks.Task):
 
         dohanning = dict(default = False,
                       doc="Apply a hanning filter to the time series data before ffting, to avoid spectral leakage."),
-
-        newfigure = sc.p_(True,"Create a new figure for plotting for each new instance of the task."),
-
-        figure = sc.p_(None,"The matplotlib figure containing the plot",output=True),
-
-        plotspec = dict(default = True,
-                        doc="If **True** plot the beamformed average spectrum at the end, otherwise the time series."),
-
         plotlen = dict(default = 2**12,
                        doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
 
@@ -275,7 +267,7 @@ class BeamFormer(tasks.Task):
         detail_name = dict(default = '',
                           doc="Name extension to descrive a particular analysis (e.g., used if ``stride > 1``.)"),
 
-        output_filename = dict(default = lambda self:(os.path.split(self.filenames[0])[1] if len(self.filenames)>0 else "unknown")+self.detail_name+self.file_ext,
+        output_filename = dict(default = lambda self:(os.path.split(self.filenames[0])[1].stip('.h5') if len(self.filenames)>0 else "unknown")+self.detail_name+self.file_ext,
                                doc="Filename (without directory, see ``output_dir``) to store the final spectrum."),
 
         spectrum_file = dict(default = lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
@@ -352,15 +344,8 @@ class BeamFormer(tasks.Task):
         peak_rmsfactor = dict(default = 5,
                               doc="At how many sigmas above the mean will a peak be randomized."),
 
-        nantennas = dict(default=lambda self:len(self.antennas),
-                         doc="The actual number of antennas available for calculation in the file (``< maxnantennas``)."),
-
         nantennas_start = dict(default = 0,
                                doc="Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."),
-
-        antenna_list = dict(default = {},
-                            doc="List of antenna indices used as input from each filename.",
-                            output=True),
 
         nantennas_stride = dict(default = 1,
                                 doc="Take only every *n*-th antenna from antennas list (see also ``nantennas_start``). Use 2 to select odd/even."),
@@ -373,15 +358,9 @@ class BeamFormer(tasks.Task):
                              "Number of spectra flagged per chunk.",
                              output=True),
 
-        antennas = sc.p_(lambda self:cr.hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"],self.maxnantennas))),
-                      "Antennas from which to select initially for the current file."),
-
         antennas_used = sc.p_(lambda self:set(),
                            "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
                            output=True),
-
-        antennaIDs = sc.p_(lambda self:cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
-                        "Antenna IDs to be selected from for current file."),
 
         nantennas_total = sc.p_(0,
                              "Total number of antennas that were processed (flagged or not) in this run.",
@@ -408,8 +387,6 @@ class BeamFormer(tasks.Task):
                         doc="Sample offset applied to time series. (ie. to set different stations to a common time.)",
                         unit="Sample"),
                         
-        single_station = dict(default = True,
-                        doc="if True using the 'ANTEANNA_POSITONS', otherwise 'ANTENNA_POSITION', info elsewere on their meanings."),
 #------------------------------------------------------------------------
 # Derived parameters
 
@@ -419,6 +396,14 @@ class BeamFormer(tasks.Task):
         phase_center_array = dict(default=lambda self:cr.hArray(list(self.phase_center), name="Phase Center", units=("","m")),
                                   doc="List or vector containing the *x*, *y*, *z* positions of the phase center of the array.",
                                   unit="m"),
+
+        antpos = dict(default=lambda self:cr.hArray(float,[3],units=("","m")),
+                      doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
+                      unit="m"),
+
+        stationpos = dict(default=lambda self:cr.hArray(float,[3],units=("","m")),
+                      doc="Coordinates of the current station.",
+                      unit="m"),
 
         block_duration = dict(default=lambda self:self.sample_interval*self.blocklen,
                               doc="The length of a block in time units.",
@@ -530,18 +515,49 @@ class BeamFormer(tasks.Task):
                       doc="Contains the geometric delays for the current antenna for each beam.",
                       default=lambda self:cr.hArray(float,[self.nbeams],name="Delays",header=self.header)),
 
-        antpos = dict(workarray=True,
-                      doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
-                      default=lambda self:cr.hArray(float,[3],name="Delays",header=self.header,units=("","m")),
-                      unit="m"),
-
         frequencies = dict(workarray=True,
                            doc="Frequency axis for the final power spectrum.",
                            default=lambda self:cr.hArray(float,[self.speclen],name="Frequency",units=("","Hz"),header=self.header)),
 
         times = dict(workarray=True,
                      doc="Time axis for the final dynamic spectrum.",
-                     default=lambda self:cr.hArray(float,[self.sectduration*self.nchunks/self.block_duration],name="Time",units=("","s"),header=self.header))
+                     default=lambda self:cr.hArray(float,[self.sectduration*self.nchunks/self.block_duration],name="Time",units=("","s"),header=self.header)),
+
+
+        nantennas = dict(workarray=True,
+                        default=lambda self:len(self.antennas),
+                         doc="The actual number of antennas available for calculation in the file (``< maxnantennas``)."),
+
+        antenna_list = dict(workarray=True,
+                            default = {},
+                            doc="List of antenna indices used as input from each filename.",
+                            output=True),
+
+        antennas = dict(workarray=True,
+                        default = lambda self:cr.hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"],self.maxnantennas))),
+                        doc = "Antennas from which to select initially for the current file."),
+
+        antennaIDs = dict(workarray=True,
+                        default = lambda self:cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
+                        doc = "Antenna IDs to be selected from for current file."),                        
+
+        newfigure = dict(workarray=True,
+                        default = True,
+                        doc = "Create a new figure for plotting for each new instance of the task."),
+
+        figure = dict(workarray=True,
+                        default = None,
+                        doc = "The matplotlib figure containing the plot",
+                        output=True),
+
+        plotspec = dict(workarray=True,
+                        default = True,
+                        doc = "If **True** plot the beamformed average spectrum at the end, otherwise the time series."),
+
+        single_station = dict(workarray=True,
+                        default = True,
+                        doc = "if True using the 'ANTEANNA_POSITONS', otherwise 'ANTENNA_POSITION', info elsewere on their meanings.")
+
     )
 
     def run(self):
@@ -573,7 +589,7 @@ class BeamFormer(tasks.Task):
         
         dataok=True
         clearfile=True
-        self.t0=time.clock() #; print "Reading in data and doing a double FFT."
+        t0=time.clock() #; print "Reading in data and doing a double FFT."
         fftplan = cr.FFTWPlanManyDftR2c(self.blocklen, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         if self.doplot:
@@ -615,10 +631,12 @@ class BeamFormer(tasks.Task):
 ##                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
                 if self.single_station:
                     self.antpos=self.datafile["ANTENNA_POSITIONS"];
+                    self.stationpos =  cr.hArray(float,[3],antpos-f1['ANTENNA_POSITIONS'])
                 else:                
                     self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
                     self.antpos.reshape([len(self.antpos)/3,3])
                     self.antpos = md.convertITRFToLocal(self.antpos)
+                    self.stationpos = md.ITRFCS002
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                     
                 #Calculate the geometrical delays needed for beamforming
@@ -677,14 +695,14 @@ class BeamFormer(tasks.Task):
                         if self.test_beam_per_antenna:
                             test_beam[count]= self.beams[7] # 7 since was checking in CR file.
                             count+=1
-                        #print "#  Time:",time.clock()-self.t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
+                        #print "#  Time:",time.clock()-t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
 #                        if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
 #                            self.avspec[...,self.plot_start:self.plot_end].plot()
 #                            print "RMS of plotted spectra=",self.avspec[...,self.plot_start:self.plot_end].stddev()
 #                        if self.doplot>1:
 #                            self.avspec[...,0,:].plot();self.plotpause()
                      #End for nchunk
-                print "# End   antenna =",antenna," Time =",time.clock()-self.t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
+                print "# End   antenna =",antenna," Time =",time.clock()-t0,"s  nspectraadded =",self.nspectraadded.sum(),"nspectraflagged =",self.nspectraflagged.sum()
                 if self.qualitycheck:
                     mean/=self.nchunks
                     rms/=self.nchunks
@@ -721,7 +739,7 @@ class BeamFormer(tasks.Task):
             print "RMS values for all antennas: Task.rms =",self.rms,"+/-",self.rms_rms,"(Task.rms_rms)"
             print "NPeaks values for all antennas: Task.npeaks =",self.npeaks,"+/-",self.npeaks_rms,"(Task.npeaks_rms)"
             print "Quality factor =",self.homogeneity_factor * 100,"%"
-        print "Finished - total time used:",time.clock()-self.t0,"s."
+        print "Finished - total time used:",time.clock()-t0,"s."
         print "To inspect flagged blocks, used 'Task.qplot(Nchunk)', where Nchunk is the first number in e.g. '184 - Mean=  3.98, RMS=...'"
         print "To read back the beam formed data type: bm=cr.hArrayRead('"+self.spectrum_file+',ext='+self.file_ext+"')"
         print "To calculate or plot the invFFTed times series of one block, use 'Task.tcalc(bm)' or 'Task.tplot(bm)'."
