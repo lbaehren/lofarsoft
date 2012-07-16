@@ -300,17 +300,8 @@ class BeamData(IOInterface):
         else:
             self.__block=block
 
-        dat = []
-        
-        for file in self.__filename:
-            beam = cr.hArray(complex,self['BEAM_SPECLEN'])            
-            beam.readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN']*self['BEAM_NBLOCKS']*self[ 'BEAM_NBEAMS'])
-            dat+=list(cr.hArray(complex,beam,beam))
-
-        data = cr.hArray(complex,[self['NOF_BEAM_DATASETS'],self['BEAM_SPECLEN']],dat)
-        print 'data',data
-
-        return data
+        for i, file in enumerate(self.__filename):
+            data[i].readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN'])
 
     def getTimeseriesData(self, data=None, chunk=-1):
         """Returns timeseries data for selected antennas.
