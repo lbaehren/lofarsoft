@@ -1282,6 +1282,102 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Beamform image
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBeamformImageAndIntegrate
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(image)()("Array to store resulting image. Stored as ``[I(x_0, y_0), I(x_0, y_0), ... I(x_nx, y_ny)]``, e.g. the rightmost index runs fastest. This array may contain an existing image.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as ``[f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)]`` e.g. ``f(i,j)`` where ``i`` is the antenna number and ``j`` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies [Hz] stored as ``[f_0, f_1, ..., f_n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(delays)()("Array containing the delays [s] for all antennas and positions (antenna index runs fastest: ``(ant1, pos1), (ant2, pos1), ...``) - length of vector has to be number of antennas times positions as calculated by :func:`hGeometricDelays`.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class Iter>
+void HFPP_FUNC_NAME (const Iter image, const Iter image_end,
+    const CIter fftdata, const CIter fftdata_end,
+    const Iter frequencies, const Iter frequencies_end,
+    const Iter delays, const Iter delays_end
+    )
+{
+  // Inspect length of input arrays
+  const int Nimage = std::distance(image, image_end);
+  const int Nfftdata = std::distance(fftdata, fftdata_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
+  const int Ndelays = std::distance(delays, delays_end);
+
+  // Get relevant numbers
+  const int Nantennas = Ndelays / Nimage;
+
+  // Indices
+  int i, j, k;
+
+  // Temporary variables
+  HComplex tmp;
+
+  // Sanity checks
+  if (Ndelays != Nantennas * Nimage)
+  {
+    char error_message[256];
+    sprintf(error_message, "Delays array has wrong size: Ndelays[=%d] != Nantennas[=%d] * Nimage[=%d]", Ndelays, Nantennas, Nimage);
+    throw PyCR::ValueError(error_message);
+  }
+  if (Nfftdata != Nfrequencies * Nantennas)
+  {
+    char error_message[256];
+    sprintf(error_message,"FFT data array has wrong size: Nfftdata[=%d] != Nfrequencies[=%d] * Nantennas[=%d]", Nfftdata, Nfrequencies, Nantennas);
+    throw PyCR::ValueError(error_message);
+  }
+
+  // Get iterators
+  Iter it_im = image;
+  CIter it_fft = fftdata;
+  Iter it_freq = frequencies;
+  Iter it_delays = delays;
+
+  // Loop over pixels (parallel on multi core systems if supported)
+#ifdef _OPENMP
+  std::cout<<"Running in parallel mode"<<std::endl;
+  #pragma omp parallel for private(it_im, it_fft, it_freq, it_delays, j, k, tmp)
+#else
+  std::cout<<"Running in serial mode"<<std::endl;
+#endif // _OPENMP
+  for (i=0; i<Nimage; ++i)
+  {
+    // Image iterator to start position
+    it_im = image + i;
+
+    // Delay iterator to start position
+    it_delays = delays + (i * Nantennas);
+
+    // Loop over antennas
+    it_fft = fftdata;
+
+    for (j=Nantennas; j!=0; --j)
+    {
+      // Loop over frequencies
+      it_freq = frequencies;
+
+      for (k=Nfrequencies; k!=0; --k)
+      {
+        // Multiply by geometric weight and add absolute value squared to image
+        tmp = (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * (*it_delays)));
+        *it_im += real(tmp * conj(tmp));
+        ++it_fft;
+        ++it_freq;
+      }
+
+      // Next antenna
+      ++it_delays;
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Generate shifts for dedispersion
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDedispersionShifts

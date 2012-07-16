@@ -180,7 +180,8 @@ class Imager(Task):
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
         self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+        if not self.intgrfreq:
+            self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
         # Create image array if none is given as input
         if self.image==None:
@@ -216,18 +217,21 @@ class Imager(Task):
                 self.t_image.fill(0.)
 
                 print "beamforming started"
-                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
-#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian)
-#                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.antpos, self.grid.cartesian, self.step)
-                print "beamforming done"
 
-                if self.DM:
+                if self.intgrfreq:
+                    cr.hBeamformImageAndIntegrate(self.image[tstep], self.fftdata, self.frequencies, self.delays)
+                elif self.DM:
+                    cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hShiftedAbsSquareAdd(self.image, self.t_image, self.dispersion_shifts + tstep)
                 elif self.inversefft:
+                    cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
                     cr.hSquareAddTransposed(self.image[tstep], self.t_image2, self.blocksize)
                 else:
+                    cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hAbsSquareAdd(self.image[tstep], self.t_image)
+
+                print "beamforming done"
 
             self.startblock += self.nblocks
 
