@@ -21,7 +21,7 @@ class BeamData(IOInterface):
     """This class provides an interface to single file beamformed data.
     """
 
-    def __init__(self, filename, chunk=0):
+    def __init__(self, filename, chunk=0, block=0):
         """Constructor.
         """
         # Useful to do unit conversion
@@ -29,6 +29,9 @@ class BeamData(IOInterface):
         
         # Current chunk number
         self.__chunk = chunk
+
+        # Current block number
+        self.__block = block
 
         # How many beams are there
         self.__nofBeamDataSets = len(filename)
@@ -49,6 +52,7 @@ class BeamData(IOInterface):
         self.__keyworddict={
             # NON-ICD KEYWORDS
             "CHUNK":lambda: self.__chunk,
+            "BLOCK":lambda: self.__block,
             "NOF_BEAM_DATASETS": lambda: self.__nofBeamDataSets
             }
 
@@ -56,15 +60,23 @@ class BeamData(IOInterface):
             if par2=='BeamFormer':        
                 for par2 in self.__files[0].par.hdr['BeamFormer'].keys():
                     self.__keyworddict['BEAM_'+par2.upper()] = self.__files[0].par.hdr['BeamFormer'][par2]
+            elif 'BEAM_' in par2:
+                self.__keyworddict[par2.upper()] = self.__files[0].par.hdr[par2]             
             else:
                 self.__keyworddict['TBB_'+par2.upper()] = self.__files[0].par.hdr[par2]
 
         self.__keyworddict['NCHUNKS'] = self.getNchunks()
         self.__keyworddict['FILENAMES'] = self.__filename
         self.__keyworddict['STATION_NAME'] = lambda: [self.__files[i].par.hdr['STATION_NAME'][0] for i in range(self.__nofBeamDataSets)]
-        self.__keyworddict['BEAM_DATA'] = self.getFFTData()
+        self.__keyworddict['MAXIMUM_READ_LENGTH'] = self['NCHUNKS']*self['BEAM_BLOCKLEN']*self['BEAM_NBLOCKS']
+        self.__keyworddict['BLOCKSIZE'] = lambda: self['BEAM_BLOCKLEN']
+        self.__keyworddict['TIME'] = self['TBB_TIME']
+        self.__keyworddict['FREQUENCY_INTERVAL'] = [self['TBB_FREQUENCY_INTERVAL']]
+        self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
+
+#        'BEAM_STATIONPOS'  add this here for all.
     
-    setable_keywords=set(["CHUNK"])
+    setable_keywords=set(["CHUNK","BLOCK"])
     
     def __setitem__(self, key, value):
         """Set values to keywords if allowed. 
@@ -73,6 +85,8 @@ class BeamData(IOInterface):
             raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))        
         elif key is "CHUNK":
             self.__chunk = value
+        elif key is "BLOCK":
+            self.__block = value
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
@@ -204,7 +218,7 @@ class BeamData(IOInterface):
            This method returns a FloatVector with the selected frequencies in Hz.
         """
         
-        return self.__files[0].par.xvalues
+        return self['BEAM_FREQUENCIES']
 
     def getNchunks(self):
         """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbbs.
@@ -219,11 +233,49 @@ class BeamData(IOInterface):
 
         return nblocks
 
+    def getITRFAntennaPositions(self):
+        """Returns ITRF Station positions.
+
+        Output:
+        a one dimensional array containing the Cartesian position of
+        each antenna in meters in IRTF coordinates from a predefined
+        center.
+        So that if `a` is the returned array `a[i]` is an array of
+        length 3 with positions (x,y,z) of antenna i.
+        """
+
+#        return self['BEAM_STATIONPOS']
+
+        raise NotImplementedError
+
+
+    def getRelativeAntennaPositions(self):
+        """Returns relative Station positions.
+
+        Output:
+        a two dimensional array containing the Cartesian position of
+        each antenna in meters in local coordinates from a predefined
+        center.
+        So that if `a` is the returned array `a[i]` is an array of
+        length 3 with positions (x,y,z) of antenna i.
+        """
+        
+
+        pos=[]
+        
+        for file in self.__files:
+            pos+=list(file.par.hdr['BeamFormer']['stationpos'])
+        
+        st_pos = cr.hArray(float,[self['NOF_BEAM_DATASETS'],3],pos)        
+        
+        return st_pos
+        
     def getTimeData(self,data=None,chunk=-1):
         """Calculate time axis depending on sample frequency and
         number of blocks in a chunk. Create a new array, if
         none is provided, otherwise put data into array.
         """
+        raise NotImplementedError
 
         if not data:
             data = cr.hArray(float,self['BEAM_NBLOCKS'])
@@ -239,8 +291,9 @@ class BeamData(IOInterface):
 
         return data
 
-    def getFFTData(self, data=[], chunk=-1):
-        """Writes FFT data for selected antennas to data array.
+    def getFFTData(self, data, block):
+
+        """Writes FFT data for selected stations to data array.
 
         Required Arguments:
 
@@ -248,31 +301,36 @@ class BeamData(IOInterface):
         Parameter     Description
         ============= =================================================
         *data*        data array to write FFT data to.
-        *chunk*       index of chunk to return data from.
+        *block*       index of bock to return data from.
         ============= =================================================
 
         Output:
         a two dimensional array containing the FFT data of the
-        specified chunk for each of the selected antennae and
-        for the selected frequencies.
+        specified block for each of the selected stations and
+        for the selected frequencies (all freqs and stations for now).
+        
         So that if `a` is the returned array `a[i]` is an array of
         length (number of frequencies) of antenna i.
 
         """
 
-        data=[]
-        chunk=cr.asval(chunk)
+        block=cr.asval(block)
 
-        if chunk<0:
-            chunk=self.__chunk
+        if block<0:
+            block=self.block
         else:
-            self.__chunk=chunk
+            self.__block=block
 
+        dat = []
+        
         for file in self.__filename:
-            beam = cr.hArray(complex,[self['BEAM_NBLOCKS'],self['BEAM_SPECLEN']])
-            beam.readfilebinary(os.path.join(file,"data.bin"),self['CHUNK']*self['BEAM_SPECLEN']*self['BEAM_NBLOCKS']*self[ 'BEAM_NBEAMS'])
-            data.append(cr.hArray(complex,beam,beam))
-            
+            beam = cr.hArray(complex,self['BEAM_SPECLEN'])            
+            beam.readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN']*self['BEAM_NBLOCKS']*self[ 'BEAM_NBEAMS'])
+            dat+=list(cr.hArray(complex,beam,beam))
+
+        data = cr.hArray(complex,[self['NOF_BEAM_DATASETS'],self['BEAM_SPECLEN']],dat)
+        print 'data',data
+
         return data
 
     def getTimeseriesData(self, data=None, chunk=-1):
@@ -295,6 +353,8 @@ class BeamData(IOInterface):
 
         """
 
+        raise NotImplementedError
+
         chunk=cr.asval(chunk)
 
         if chunk<0:
@@ -312,6 +372,22 @@ class BeamData(IOInterface):
             time_series_list.append(time_series)
 
         return time_series_list
+
+    def empty(self, key):
+        """Return empty array for keyword data.
+        Known keywords are: "TIMESERIES_DATA", "TIME_DATA", "FREQUENCY_DATA", "FFT_DATA".
+        """
+
+        if key == "TIMESERIES_DATA":
+            return cr.hArray(float, dimensions=(self['NOF_BEAM_DATASETS'], self['BEAM_BLOCKLEN']),name="E-Field(t)",units=("","Counts"))
+        elif key == "TIME_DATA":
+            return cr.hArray(float, self["BLOCKSIZE"],name="Time",units=("","s"))
+        elif key == "FREQUENCY_DATA":
+            return cr.hArray(float, self['BEAM_SPECLEN'],name="Frequency",units=("","Hz"))
+        elif key == "FFT_DATA":
+            return cr.hArray(complex, dimensions=(self['NOF_BEAM_DATASETS'], self['BEAM_SPECLEN']),name="fft(E-Field)",xvalues=self.getFrequency(),logplot="y")
+        else:
+            raise KeyError("Unknown key: " + str(key))
 
     def close(self):
         """Closes file and sets the data attribute `.closed` to
