@@ -214,20 +214,21 @@ class Imager(Task):
 
                 print "reading done"
 
-                self.t_image.fill(0.)
-
                 print "beamforming started"
 
                 if self.intgrfreq:
                     cr.hBeamformImageAndIntegrate(self.image[tstep], self.fftdata, self.frequencies, self.delays)
                 elif self.DM:
+                    self.t_image.fill(0.)
                     cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hShiftedAbsSquareAdd(self.image, self.t_image, self.dispersion_shifts + tstep)
                 elif self.inversefft:
+                    self.t_image.fill(0.)
                     cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
                     cr.hSquareAddTransposed(self.image[tstep], self.t_image2, self.blocksize)
                 else:
+                    self.t_image.fill(0.)
                     cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hAbsSquareAdd(self.image[tstep], self.t_image)
 
