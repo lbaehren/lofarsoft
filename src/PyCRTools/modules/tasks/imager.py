@@ -201,7 +201,7 @@ class Imager(Task):
         for tstep in range(self.ntimesteps):
             for block in range(self.startblock, self.startblock+self.nblocks):
 
-                print "processing block:", block
+                print "processing block: %d / %d" % (block, self.nblocks)
 
                 if self.frequency_slice != None:
                     self.data.getFFTData(self.scratchfft, block)
