@@ -5,7 +5,6 @@ It contains one function `open` that is used to open a binary file containing co
 
 .. moduleauthor:: Emilio Enriquez <E.Enriquez@astro.ru.nl>
 
-
 """
 
 import os
@@ -22,22 +21,20 @@ class BeamData(IOInterface):
     """This class provides an interface to single file beamformed data.
     """
 
-    def __init__(self, filename, block=0, nblocks=1):
+    def __init__(self, filename, chunk=0):
         """Constructor.
         """
         # Useful to do unit conversion
         self.__conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
         
-        # Current block number
-        self.__block = block
+        # Current chunk number
+        self.__chunk = chunk
 
-        # Current number of blocks (in a chunk).
-        self.__nblocks = nblocks
+        # How many beams are there
+        self.__nofBeamDataSets = len(filename)
 
         # Open files
- #       self.__files, self.__filenames ,self.__Stations  = open_all(filename)
-        
-#        self.file. cr.hArrayRead(filename,block=0)
+        self.__files = [cr.hArrayRead(file,block=0,ext='beam') for file in filename]
         
         self.__filename = filename
         
@@ -49,35 +46,33 @@ class BeamData(IOInterface):
 
     def __setKeywordDict(self):
 
-        self.__keyworddict={}
-        
-        for par in self.__files[0].par.hdr.keys():
-            self.__keyworddict[par] = self.__files[0].par.hdr[par]
-            
-        self.__keyworddict.update({
-            #OTHER KEYWORDS
-            "STATIONS":self.__Stations,
-            "FILENAME":self.__filename,
-            # DERIVED KEYWORDS
-            "NBLOCKS":lambda: self.__nblocks,  #NOTE: the value used in beamformer is .... self.__files.par.hdr['BeamFormer']['nblocks'] .... NBLOCKS = number of blocks per chunk (more info in beamformer.py)
-            "BLOCK":lambda: self.__block,
-#            "FFT_DATA":lambda:(lambda x:x if self.getFFTData(x) else x)(self.empty("FFT_DATA")), 
-            "TIME_DATA":self.getTimeData,
-            "FREQUENCY_DATA":self.getFrequencies(),
-            
-            
-            "erase":"yup"
-            })
+        self.__keyworddict={
+            # NON-ICD KEYWORDS
+            "CHUNK":lambda: self.__chunk,
+            "NOF_BEAM_DATASETS": lambda: self.__nofBeamDataSets
+            }
 
-    setable_keywords=set(["BLOCK","NBLOCKS"])
+        for par2 in self.__files[0].par.hdr.keys():
+            if par2=='BeamFormer':        
+                for par2 in self.__files[0].par.hdr['BeamFormer'].keys():
+                    self.__keyworddict['BEAM_'+par2.upper()] = self.__files[0].par.hdr['BeamFormer'][par2]
+            else:
+                self.__keyworddict['TBB_'+par2.upper()] = self.__files[0].par.hdr[par2]
+
+        self.__keyworddict['NCHUNKS'] = self.getNchunks()
+        self.__keyworddict['FILENAMES'] = self.__filename
+        self.__keyworddict['STATION_NAME'] = lambda: [self.__files[i].par.hdr['STATION_NAME'][0] for i in range(self.__nofBeamDataSets)]
+        self.__keyworddict['BEAM_DATA'] = self.getFFTData()
+    
+    setable_keywords=set(["CHUNK"])
     
     def __setitem__(self, key, value):
+        """Set values to keywords if allowed. 
+        """
         if key not in self.setable_keywords:
             raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))        
-        elif key is "BLOCK":
-            self.__block = value
-        elif key is "NBLOCKS":
-            self.__nblocks = value            
+        elif key is "CHUNK":
+            self.__chunk = value
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
@@ -118,9 +113,9 @@ class BeamData(IOInterface):
             key = [k for k in key if 'EMPTY' not in k]
             key.sort()
         else:
-            key=['FILENAME','STATIONS']
+             key=['FILENAMES','TBB_TIME_HR','DATA_LENGTH','DATA_LENGTH_TIME','STATION_NAME','NOF_BEAM_DATASETS']
 
-        output ='[Beamformed Data Object] Summary of object properties' 
+        output ='[Beam Data] Summary of object properties' 
         if show: print output.strip()
 
         #For the print out format.
@@ -133,24 +128,20 @@ class BeamData(IOInterface):
         #Loop over the selected keys.
         for k in key:
             s = ""
+            
             if k == 'DATA_LENGTH_TIME' and not(verbose): 
-                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'               
+                s =  k+' '*(stringlength-len(k))+' : '+str(self['BEAM_BLOCKLEN']*self['NCHUNKS']*self['BEAM_NBLOCKS']*cr.asval(self["TBB_SAMPLE_INTERVAL"]))+' s'               
                 if show: print s
                 output += '\n'+s 
                 continue
         
-            ss = k +' '*(stringlength-len(k))+' : '
-            
             if k == 'DATA_LENGTH' and not(verbose): 
-                s =  ss+str(self[k][0])+' Samples ( '+str(self[k][0]/self['BLOCKSIZE'])+' BLOCKS, each of '+str(self['BLOCKSIZE'])+' Samples) '    
+                s =  k+' '*(stringlength-len(k))+' : '+str(self['NCHUNKS']*self['BEAM_NBLOCKS'])+' Blocks ( '+str(self['NCHUNKS'])+' Chunks, each of '+str(self['BEAM_NBLOCKS'])+' Blocks, each of '+str(self['BEAM_BLOCKLEN'])+' Samples) '
                 if show: print s
                 output += '\n'+s 
                 continue
-            if k == 'NOF_DIPOLE_DATASETS' and not(verbose):
-                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '               
-                if show: print s
-                output += '\n'+s 
-                continue
+                     
+            ss = k +' '*(stringlength-len(k))+' : '
             
             try:
                 if type(self[k])==type([0,0]) and len(self[k])>7 :
@@ -175,7 +166,6 @@ class BeamData(IOInterface):
                 
             except IOError:
                 pass
-
         if len(und) > 0:
             s = 'These keywords are UNDEFINED : ['+str(und)+']'
             if show: print s
@@ -188,7 +178,7 @@ class BeamData(IOInterface):
         """Returns list of valid keywords.
         """
         return [k for k in self.__keyworddict.keys() if not k[-5:]=="_DATA"] if excludedata else self.__keyworddict.keys()
-        
+
     def items(self,excludedata=False):
         """Return list of keyword/content tuples of all header variables
         """
@@ -202,59 +192,54 @@ class BeamData(IOInterface):
                 pass
 
         return lst
-
+        
     def getHeader(self):
         """Return a dict with keyword/content pairs for all header variables."""
         return dict(self.items(excludedata=True))
-
-    def getRelativeAntennaPositions(self):
-        """Returns relative antenna positions for selected antennas, or all
-        antennas if no selection was applied.
-
-        Output:
-        a two dimensional array containing the Cartesian position of
-        each antenna in meters in local coordinates from a predefined
-        center.
-        So that if `a` is the returned array `a[i]` is an array of
-        length 3 with positions (x,y,z) of antenna i.
-        """
-                
-    def getClockOffset(self):
-        """Return clock offset.
-        """
-
-#        return [md.getClockCorrection(s) for s in self["STATION_NAME"]]
-                
+        
     def getFrequencies(self):
         """Returns the frequencies that are applicable to the FFT data
 
         Output:
-        This method returns a FloatVector with the selected frequencies
-        in Hz.
+           This method returns a FloatVector with the selected frequencies in Hz.
         """
         
         return self.__files[0].par.xvalues
+
+    def getNchunks(self):
+        """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbbs.
+        """
         
-    def getTimeData(self,data=None,block=-1):
+        all_nblocks = []
+        
+        for nbeam in range(self.__nofBeamDataSets):
+            all_nblocks.append(self.__files[nbeam].par.nblocks)
+        
+        nblocks = min(all_nblocks)
+
+        return nblocks
+
+    def getTimeData(self,data=None,chunk=-1):
         """Calculate time axis depending on sample frequency and
-        blocksize (and later also time offset). Create a new array, if
+        number of blocks in a chunk. Create a new array, if
         none is provided, otherwise put data into array.
         """
 
-#        if not data:
-#            data = self.empty("TIME_DATA")
+        if not data:
+            data = cr.hArray(float,self['BEAM_NBLOCKS'])
 
-        block=cr.asval(block)
+        chunk=cr.asval(chunk)
 
-        if block<0:
-            block=self.__block
+        if chunk<0:
+            chunk=self.__chunk
         else:
-            self.__block=block
+            self.__chunk=chunk
 
-#        data.fillrange(self["BLOCK"]*self["BLOCKSIZE"]*cr.asval(self["SAMPLE_INTERVAL"]),cr.asval(self["SAMPLE_INTERVAL"]))
-#        return data
-        
-    def getFFTData(self, data, block):
+        data.fillrange(self['CHUNK']*self['BEAM_BLOCKLEN']*self['BEAM_NBLOCKS']*cr.asval(self["TBB_SAMPLE_INTERVAL"]),self['BEAM_BLOCKLEN']*cr.asval(self["TBB_SAMPLE_INTERVAL"]))
+
+        return data
+
+    def getFFTData(self, data=[], chunk=-1):
         """Writes FFT data for selected antennas to data array.
 
         Required Arguments:
@@ -263,43 +248,71 @@ class BeamData(IOInterface):
         Parameter     Description
         ============= =================================================
         *data*        data array to write FFT data to.
-        *block*       index of block to return data from.
+        *chunk*       index of chunk to return data from.
         ============= =================================================
 
         Output:
         a two dimensional array containing the FFT data of the
-        specified block for each of the selected antennae and
+        specified chunk for each of the selected antennae and
         for the selected frequencies.
         So that if `a` is the returned array `a[i]` is an array of
         length (number of frequencies) of antenna i.
 
-        """  
-        block=cr.asval(block)
+        """
 
-        if block<0:
-            block=self.__block
+        data=[]
+        chunk=cr.asval(chunk)
+
+        if chunk<0:
+            chunk=self.__chunk
         else:
-            self.__block=block
+            self.__chunk=chunk
 
-#        data.readfilebinary(os.path.join(self["BEAM_FILENAME"],"data.bin"),block* self["SPECLEN"]*self["NBLOCKS"])   #NOTE : Will need to edit this to be able to open several blocks at a time.
-        data.readfilebinary(os.path.join(self["BEAM_FILENAME"],"data.bin"),block*self["FFTSIZE"])
+        for file in self.__filename:
+            beam = cr.hArray(complex,[self['BEAM_NBLOCKS'],self['BEAM_SPECLEN']])
+            beam.readfilebinary(os.path.join(file,"data.bin"),self['CHUNK']*self['BEAM_SPECLEN']*self['BEAM_NBLOCKS']*self[ 'BEAM_NBEAMS'])
+            data.append(cr.hArray(complex,beam,beam))
+            
+        return data
 
-    def getReferencePosition(self):
-        """Returns reference position used for antenna position
-        coordinate system.
+    def getTimeseriesData(self, data=None, chunk=-1):
+        """Returns timeseries data for selected antennas.
+
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *data*        data array to write timeseries data to.
+        *chunk*       index of chunk to return data from.
+        ============= =================================================
 
         Output:
-        a FloatVector with (lon,lat,height) in (rad,rad,m) of the WGS84
-        position of the center used for the antenna position coordinate
-        system.
+        a two dimensional array containing the timeseries data of the
+        specified chunk for each of the selected antennae.
+        So that if `a` is the returned array `a[i]` is an array of
+        length blocksize of antenna i.
+
         """
-        
-        if self.__files.par.hdr['BeamFormer']['phase_center'] == self.__files.par.hdr['ANTENNA_POSITIONS'][0]:
-            pass
+
+        chunk=cr.asval(chunk)
+
+        if chunk<0:
+            chunk = self.__chunk
         else:
-            return self.__files.par.hdr['BeamFormer']['phase_center']
+            self.__chunk = chunk
+            
+        data = self.getFFTData(chunk=chunk)
         
-               
+        time_series_list = [ ]
+
+        for i in range(self['NOF_BEAM_DATASETS']):
+            time_series = cr.hArray(float,[self['BEAM_NBLOCKS'],self['BEAM_BLOCKLEN']])
+            cr.hInvFFTw(time_series[...],data[i][...])
+            time_series_list.append(time_series)
+
+        return time_series_list
+
     def close(self):
         """Closes file and sets the data attribute `.closed` to
         True. A closed object can no longer be used for I/O operations.
@@ -311,43 +324,16 @@ class BeamData(IOInterface):
 
         self.closed = True
 
-
 def open(filename, *args, **kwargs):
     """Open file(s) with beamformed data.
     """
 
-    if not os.path.isdir(filename):
-        raise IOError("No such directory: "+filename)
-    else:
-        return BeamData(filename, *args, **kwargs)
-
-def open_all(filename,polarization='pol0', *args, **kwargs):
-    """This function opens multiple files.
-
-        TO ADD:
-         - A selection of stations/polarizations. 
-         - (Maybe) aligns stations by setting the shift argument correctly
-    """
-
-    Stations = os.listdir(filename)
-
-    mask = np.ones(len(Stations),dtype=bool)
-    for i,Station in enumerate(Stations):
-        if not os.path.isdir(Station) or len(Station)!=5:
-            mask[i] = False
-
-    Stations = [ item for item, flag in zip( Stations, mask ) if flag == 1 ]
+    if not isinstance(filename, list):
+        filename = [filename]
     
-    filenames = Stations
-    for i,filenaam in enumerate(filenames):
-        filenames[i] = os.path.join(filename,filenaam,polarization)
-    
-    files=[]
-    for filename in filenames:
-        if os.path.isfile(filename):
-            files.append(cr.hArrayRead(filename,block=0))
-        else:
-            print "File",filename,"could not be opened. Trying next file ..."
-    
-    return files,filenames,Stations
+    for file in filename:
+        if not os.path.isdir(file):
+            raise IOError("No such directory: "+file)
+
+    return BeamData(filename, *args, **kwargs)
 
