@@ -241,7 +241,7 @@ class Imager(Task):
 
         # Save image to disk
 
-        if self.inversefft
+        if self.inversefft:
             self.image = self.image.reshape((self.ntimesteps * self.blocksize, self.NAXIS1, self.NAXIS2))
             self.image = np.rollaxis(self.image, 0, 3)
         elif self.intgrfreq:
