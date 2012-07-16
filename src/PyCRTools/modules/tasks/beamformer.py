@@ -1227,9 +1227,9 @@ class BeamFormer(tasks.Task):
         else:
             return self.dynspec
 
-    def addBeams(self,beams=None,nbeam=0,save_file=False,fraction=None,tbin=1,clean=False):
+    def dyncalc_multi_Beam(self,beams=None,nbeam=0,save_file=False,fraction=None,tbin=1,clean=False):
         '''
-        Calculates the dynamic spectrum.
+        Add beams toguether. Calculates the dynamic spectrum.
                 
         =============== ===== ===================================================================
         *beams*         None  Input array. Take self.beams from task, if None.
@@ -1245,11 +1245,11 @@ class BeamFormer(tasks.Task):
             tpar filenames = ['File_path/File_name_tbb.h5']
             tpar blocklen = 2**10
             tpar maxchunklen = 2**16*5
-            dynspec = Task.dyncalc()
+            dynspec = Task.dyncalc_multi_Beam()
         
         or::
         
-            dynspec,cleandynspec = Task.dyncalc(tbin=16,clean=True,save_file=True)
+            TAB,TAB_Clean=Task.dyncalc_multi_Beam(tbin=16,clean=True)
 
         The regular and clean dynamic spectra (all blocks) are returned and stored in ``Task.dynspec`` and ``Task.cleandynspec`` respectively.
         '''
@@ -1261,6 +1261,7 @@ class BeamFormer(tasks.Task):
             self.beams = beams 
 
         nbeams = len(self.spectrum_file)
+        print 'WARNING: The results obtained from this program will be off, if the beams are not the same size. A fix may not be supported here in the future, but new code is beeing added to Beam_Tools.py'
 
         self.spectrum_file_bin=self.spectrum_file
         for i,name in enumerate(self.spectrum_file):
@@ -1279,7 +1280,7 @@ class BeamFormer(tasks.Task):
 
         dynspec = cr.hArray(float,[self.nblocks*chunk_fraction,self.speclen])
         chunk_range=range((fraction[0]-1)*chunk_fraction,(fraction[0])*chunk_fraction) 
-        bm = cr.hArray(float,self.beams,self.beams)
+        bm = cr.hArray(complex,self.beams,self.beams)
 
         #Reading beams.        
         if not beams:
