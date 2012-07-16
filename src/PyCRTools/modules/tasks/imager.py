@@ -275,6 +275,32 @@ class Imager(Task):
                         PC001002=self.PC001002,
                         PC002002=self.PC002002)
 
+        elif self.intgrfreq:
+            savefits(self.output, self.image,
+                        OBSLON=self.OBSLON,
+                        OBSLAT=self.OBSLAT,
+                        CTYPE1=self.CTYPE1,
+                        CTYPE2=self.CTYPE2,
+                        CTYPE3="TIME",
+                        LONPOLE=self.LONPOLE,
+                        LATPOLE=self.LATPOLE,
+                        CRVAL1=self.CRVAL1,
+                        CRVAL2=self.CRVAL2,
+                        CRVAL3=0.,
+                        CRPIX1=self.CRPIX1,
+                        CRPIX2=self.CRPIX2,
+                        CRPIX3=0.,
+                        CDELT1=self.CDELT1,
+                        CDELT2=self.CDELT2,
+                        CDELT3=self.CDELT4,
+                        CUNIT1=self.CUNIT1,
+                        CUNIT2=self.CUNIT2,
+                        CUNIT3="s",
+                        PC001001=self.PC001001,
+                        PC002001=self.PC002001,
+                        PC001002=self.PC001002,
+                        PC002002=self.PC002002)
+
         else:
             savefits(self.output, self.image,
                         OBSLON=self.OBSLON,
