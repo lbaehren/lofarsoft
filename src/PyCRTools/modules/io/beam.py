@@ -261,16 +261,13 @@ class BeamData(IOInterface):
         """
         
 
-        pos=[]
+        pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
         
-        for file in self.__files:
-            pos+=list(file.par.hdr["ITRFANTENNA_POSITIONS"][0])
-#            pos+=list(file.par.hdr['BeamFormer']['stationpos'])
-        
-        st_pos = cr.hArray(float,[self['NOF_BEAM_DATASETS'],3], pos)
-        
-        return st_pos
-        
+        for i, file in enumerate(self.__files):
+            pos[i] = file.par.hdr["ITRFANTENNA_POSITIONS"][0]
+
+        return pos
+
     def getFFTData(self, data, block):
 
         """Writes FFT data for selected stations to data array.
