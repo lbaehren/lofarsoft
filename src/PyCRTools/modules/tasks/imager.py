@@ -199,7 +199,7 @@ class Imager(Task):
 
         start = time.time()
         for tstep in range(self.ntimesteps):
-            print "processing timestep: %d/%d" % (block, self.ntimesteps)
+            print "processing timestep: %d/%d" % (tstep, self.ntimesteps)
 
             for block in range(self.startblock, self.startblock+self.nblocks):
 
