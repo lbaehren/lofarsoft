@@ -220,6 +220,22 @@ class BeamData(IOInterface):
         
         return self['BEAM_FREQUENCIES']
 
+    def empty(self, key):
+        """Return empty array for keyword data.
+        Known keywords are: "TIMESERIES_DATA", "TIME_DATA", "FREQUENCY_DATA", "FFT_DATA".
+        """
+
+        if key == "TIMESERIES_DATA":
+            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize),name="E-Field(t)",units=("","Counts"))
+        elif key == "TIME_DATA":
+            return cr.hArray(float, self["BLOCKSIZE"],name="Time",units=("","s"))
+        elif key == "FREQUENCY_DATA":
+            return cr.hArray(float, self.__blocksize/2+1,name="Frequency",units=("","Hz"))
+        elif key == "FFT_DATA":
+            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1),name="fft(E-Field)",xvalues=self["FREQUENCY_DATA"],logplot="y")
+        else:
+            raise KeyError("Unknown key: " + str(key))
+
     def getNchunks(self):
         """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbbs.
         """
