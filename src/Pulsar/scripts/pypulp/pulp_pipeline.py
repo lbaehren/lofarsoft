@@ -449,7 +449,12 @@ class Pipeline:
                 	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
      	       	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
 			if len(psr_bestprofs) > 0:
-                       		for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
+				# check first if all available *bestprof files are those created without mask. If so, then allow to make
+				# a diagnostic combined plot using prepfold plots without a mask
+				good_bestprofs=[file for file in psr_bestprofs if re.search("_nomask_", file) is None]
+				if len(good_bestprofs) == 0:
+					good_bestprofs=[file for file in psr_bestprofs]
+                       		for bp in good_bestprofs:
                	               		psr=bp.split("/")[-1].split("_")[0]
                 	        	thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
 					# we need it for combined.pdf
@@ -830,7 +835,8 @@ class PipeUnit:
 				run_units = [u.pid for u in popen_list if u.poll() is None]
 				finished_units = [u for u in popen_list if u.poll() is not None]
 				for fu in finished_units:
-					if fu.returncode != 0: raise Exception
+					if fu.returncode != 0:
+						self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
 				if len(run_units) > 0: self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
 			job_end = time.time()
 			job_total_time = job_end - job_start
@@ -838,8 +844,7 @@ class PipeUnit:
 				(prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
 			self.log.info("")
 		except Exception:
-			fu = [u for u in popen_list if u.poll() is not None][0]
-			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
+			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join([fu.pid for fu in popen_list if fu.poll() is not None])))
 			raise Exception
 
 	def lcd(self, low, high):
@@ -1084,7 +1089,10 @@ class PipeUnit:
 							pdmp_popens.append(pdmp_popen)
 		
 				# waiting for prepfold to finish
-				if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_prepfold: self.waiting_list("prepfold", prepfold_popens)
+				try:
+					if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_prepfold: self.waiting_list("prepfold", prepfold_popens)
+				# we let PULP to continue if prepfold has crashed, as dspsr can run ok, or other instances of prepfold could finish ok as well
+				except: pass
 
 			# running convert on prepfold ps to pdf and png
 			if not cmdline.opts.is_nofold:
@@ -1108,7 +1116,12 @@ class PipeUnit:
 					montage_cmd="montage -background none -pointsize 10.2 "
 					chif=open("%s/%s_sap%03d_tab%04d_chi-squared.txt" % (self.outdir, obs.id, self.sapid, self.tabid), 'w')
 					thumbs=[] # list of thumbnail files
-					for bp in [file for file in psr_bestprofs if re.search("_nomask_", file) is None]:
+					# check first if all available *bestprof files are those created without mask. If so, then allow to make
+					# a diagnostic combined plot using prepfold plots without a mask
+					good_bestprofs=[file for file in psr_bestprofs if re.search("_nomask_", file) is None]
+					if len(good_bestprofs) == 0:
+						good_bestprofs=[file for file in psr_bestprofs]
+					for bp in good_bestprofs:
 						psr=bp.split("/")[-1].split("_")[0]
 						thumbfile=bp.split(self.outdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
 						thumbs.append(thumbfile)
@@ -1134,7 +1147,7 @@ class PipeUnit:
 					# the same node, that bestprof files do exist, but thumbnails were not created yet at the time when chi-squared.txt is
 					# getting created for another beam. And this will cause "montage" command to fail
 					# At the end combined plot will eventually be created for this node during the procesing of the last beam of this node
-					if len([ff for ff in thumbs if os.path.exists(ff)]) == len(thumbs):
+					if len(thumbs) > 0 and len([ff for ff in thumbs if os.path.exists(ff)]) == len(thumbs):
 						# creating combined plots
 						self.log.info("Combining all pfd.th.png files in a single combined plot...")
 						montage_cmd += "combined.png"

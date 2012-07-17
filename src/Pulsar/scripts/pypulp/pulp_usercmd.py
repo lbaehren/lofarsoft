@@ -476,7 +476,7 @@ class CMDLine:
 					if obs.CV: log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = %g MB)" % (self.opts.maxram)))
 					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
-					log.info("Subdyn.py = %s" % (self.opts.is_skip_subdyn and "no" or "yes"))
+					log.info("Subdyn.py = %s" % ((self.opts.is_skip_subdyn == False and self.opts.is_norfi == False) and "yes" or "no"))
 					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
