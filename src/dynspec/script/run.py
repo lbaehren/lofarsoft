@@ -106,8 +106,25 @@ def dataImport(parameter_list):
 
 def data_convert(parameter_list):
 
-	cmd="""(cd %s;LD_LIBRARY_PATH=/opt/cep/dal/current/lib /home/vilchez/lus/lofarsoft/src/dynspec/dynspec/Dynspec %s"""%(parameter_list[1],parameter_list[1])+"/"+""" %s %s %s)"""%(parameter_list[0],parameter_list[1]+"/"+parameter_list[0]+".h5",parameter_list[2])
+	print ""
+	print " ICD3 -> ICD6 data conversion begin"
+	print ""
+
+	cmd="""(cd %s;LD_LIBRARY_PATH=/opt/cep/dal/current/lib /home/vilchez/ICD6-pipeline/dynspec_src/Dynspec %s"""%(parameter_list[1],parameter_list[1])+"/"+""" %s %s %s)"""%(parameter_list[0],parameter_list[1]+"/"+parameter_list[0]+".h5",parameter_list[2])
 	print commands.getoutput(cmd)
+	
+	print ""
+	print "Conversion finished -> Start cleaning output directoy"
+	print ""
+	
+	cmd="""rm -rf %s"""%(parameter_list[1])+"""/*bf*"""
+	print commands.getoutput(cmd)
+	
+	print ""
+	print "Cleaning output directoy finished"
+	
+###############################################################################	print ""
+
 
 
 ###  M A I N ###

@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
       if (obsNofTiledDynspec==1){methodFlag=1;} 
 	  
     } 
-  
+/*  
   cout <<  obsNofSAP << endl;
   cout <<  obsNofBeam << endl;
   cout <<  obsNofStockes << endl;
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
   cout << methodFlag  << endl;
   cout <<  methodFlagObsNofFrequencyBand << endl;
   
-  
+*/  
     /////////	END OF INTERNAL PARAMETERS DETERMINATION	//////////////////////// 
 /*    
     List of useful parameter before ICD6 processing ! 
