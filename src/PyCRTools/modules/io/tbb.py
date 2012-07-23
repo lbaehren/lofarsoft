@@ -716,12 +716,92 @@ class TBBData(IOInterface):
 
         self.closed = True
 
+class MultiTBBData(IOInterface):
+    """This class provides an interface to single file Transient Buffer
+    Board data.
+    """
+
+    def __init__(self, filenames, blocksize=1024, block=0):
+        """Constructor.
+        """
+
+        self.__files = [TBBData(fname, blocksize, block) for fname in filenames]
+        self.__blocksize = blocksize
+        self.__block = block
+
+    def __getitem__(self, key):
+        """Implements keyword access.
+        """
+
+        if key == "DIPOLE_NAMES":
+            ret = []
+            for f in self.__files:
+                ret.extend(f["DIPOLE_NAMES"])
+            return ret
+        elif key == "SAMPLE_NUMBER":
+            ret = []
+            for f in self.__files:
+                ret.extend(f["SAMPLE_NUMBER"])
+            return ret
+        elif key == "DATA_LENGTH":
+            ret = []
+            for f in self.__files:
+                ret.extend(f["DATA_LENGTH"])
+            return ret
+        elif key == "TIME":
+            ret = []
+            for f in self.__files:
+                ret.extend(f["TIME"])
+            return ret
+        elif key == "ANTENNA_POSITIONS":
+            ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
+            for f in self.__files[1:]:
+                ret = np.vstack((ret, f["ANTENNA_POSITIONS"].toNumpy()))
+            return cr.hArray(ret)
+        else:
+            raise KeyError("Unsupported key "+key)
+
+    def getTimeseriesData(self, data, block=-1):
+        """Returns timeseries data for selected antennas.
+
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *data*        data array to write timeseries data to.
+        *block*       index of block to return data from. Use last set
+                      block if not provided or None
+        ============= =================================================
+
+        Output:
+        a two dimensional array containing the timeseries data of the
+        specified block for each of the selected antennae.
+        So that if `a` is the returned array `a[i]` is an array of
+        length blocksize of antenna i.
+
+        """
+
+        nof = [f["NOF_SELECTED_DATASETS"] for f in self.__files]
+
+        start = 0
+        end = 0
+        for i, f in enumerate(self.__files):
+            end = end + nof[i]
+
+            cr.hReadTimeseriesData(data[start:end], f._TBBData__alignment_offset+block*self.__blocksize, self.__blocksize, f)
+
+            start = end
+
 def open(filename, *args, **kwargs):
     """Open file with LOFAR TBB data.
     """
 
-    if not os.path.isfile(filename):
-        raise IOError("No such file or directory: "+filename)
+    if isinstance(filename, list):
+        return MultiTBBData(filename, *args, **kwargs)
     else:
-        return TBBData(filename, *args, **kwargs)
+        if not os.path.isfile(filename):
+            raise IOError("No such file or directory: "+filename)
+        else:
+            return TBBData(filename, *args, **kwargs)
 

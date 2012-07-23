@@ -384,6 +384,58 @@ void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_e
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Read a section (block) of a single vector from a file which was dumped in (machine-dependent) binary format.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hReadFileBinaryOffset
+//-----------------------------------------------------------------------
+#define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Input data vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HString)(filename)()("Filename (including path if necessary) to read data from. The vector needs to have the length corresponding to the file size.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(start)()("Start reading at element 'start' (zero-based index), the data block length to read is determined by the vector length.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+template <class Iter, class IIter>
+void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, const IIter start, const IIter start_end) {
+
+  HInteger N = std::distance(vec, vec_end);
+
+  if (N != std::distance(start, start_end))
+  {
+    throw PyCR::IOError("hReadFileBinaryOffset: Offset array has wrong size.");
+  }
+
+  IIter si = start;
+
+  char * v = NULL;
+
+  HInteger size = reinterpret_cast<char*>(&(*(vec+1))) - reinterpret_cast<char*>(&(*vec));
+
+  ifstream outfile(filename.c_str(), ios::in | ios::binary);
+
+  if (outfile){
+
+    for (int i=0; i<N; i++)
+    {
+      outfile.seekg(size * *si++);
+
+      v = reinterpret_cast<char*>(&(*(vec+i)));
+
+      outfile.read(v, size);
+    }
+
+//    if (start>0) outfile.seekg(((HInteger) (v2-v1))*start);
+//    outfile.read(v1, (HInteger)(vend-v1));
+//    outfile.close();
+  } else throw PyCR::IOError("hReadFileBinaryOffset: Unable to open file "+filename+".");
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Read a single vector from a file which was dumped in (machine-dependent) binary format
@@ -1407,3 +1459,4 @@ void HFPP_FUNC_NAME (AERA::Datareader& dr)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 #endif /* PYCRTOOLS_WITH_AERA */
+
