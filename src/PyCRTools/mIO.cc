@@ -385,9 +385,9 @@ void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_e
 
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Read a section (block) of a single vector from a file which was dumped in (machine-dependent) binary format.
+//$DOCSTRING: Read a section (block) of a single vector from a file which was dumped in (machine-dependent) binary format with offsets.
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hReadFileBinaryOffset
+#define HFPP_FUNC_NAME hOffsetReadFileBinary
 //-----------------------------------------------------------------------
 #define HFPP_WRAPPER_TYPES HFPP_ALL_PYTHONTYPES
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -399,6 +399,17 @@ void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_e
   \brief $DOCSTRING
   $PARDOCSTRING
 
+  Example:
+  >>> v=hArray(range(100))
+  >>> hWriteFileBinary(v, \"test.dat\")
+  >>> n=hArray(int, 10)
+  >>> i=hArray(range(0,20,2))
+  >>> n
+  hArray(int, [10L], fill=[0,0,0,0,0,0,0,0,0,0]) # len=10 slice=[0:10])
+  >>> hOffsetReadFileBinary(n, \"test.dat\", i)
+  >>> n
+  hArray(int, [10L], fill=[0,2,4,6,8,10,12,14,16,18]) # len=10 slice=[0:10])
+
 */
 template <class Iter, class IIter>
 void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, const IIter start, const IIter start_end) {
@@ -407,7 +418,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, cons
 
   if (N != std::distance(start, start_end))
   {
-    throw PyCR::IOError("hReadFileBinaryOffset: Offset array has wrong size.");
+    throw PyCR::IOError("hOffsetReadFileBinary: Offset array has wrong size.");
   }
 
   IIter si = start;
@@ -429,10 +440,7 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, cons
       outfile.read(v, size);
     }
 
-//    if (start>0) outfile.seekg(((HInteger) (v2-v1))*start);
-//    outfile.read(v1, (HInteger)(vend-v1));
-//    outfile.close();
-  } else throw PyCR::IOError("hReadFileBinaryOffset: Unable to open file "+filename+".");
+  } else throw PyCR::IOError("hOffsetReadFileBinary: Unable to open file "+filename+".");
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
