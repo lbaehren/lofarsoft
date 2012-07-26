@@ -412,7 +412,8 @@ void HFPP_FUNC_NAME(const std::_Bit_iterator vec, const std::_Bit_iterator vec_e
 
 */
 template <class Iter, class IIter>
-void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, const IIter start, const IIter start_end) {
+void HFPP_FUNC_NAME(const Iter vec, const Iter vec_end, HString filename, const IIter start, const IIter start_end)
+{
 
   HInteger N = std::distance(vec, vec_end);
 
@@ -423,21 +424,20 @@ void HFPP_FUNC_NAME(const Iter vec,   const Iter vec_end, HString filename, cons
 
   IIter si = start;
 
-  char * v = NULL;
-
-  HInteger size = reinterpret_cast<char*>(&(*(vec+1))) - reinterpret_cast<char*>(&(*vec));
+  IterValueType temp = 0;
 
   ifstream outfile(filename.c_str(), ios::in | ios::binary);
 
-  if (outfile){
+  if (outfile)
+  {
 
     for (int i=0; i<N; i++)
     {
-      outfile.seekg(size * *si++);
+      outfile.seekg(sizeof(IterValueType) * *si++);
 
-      v = reinterpret_cast<char*>(&(*(vec+i)));
+      outfile.read((char*) &temp, sizeof(IterValueType));
 
-      outfile.read(v, size);
+      *(vec+i) = temp;
     }
 
   } else throw PyCR::IOError("hOffsetReadFileBinary: Unable to open file "+filename+".");
