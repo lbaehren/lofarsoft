@@ -964,6 +964,7 @@ class PipeUnit:
 						self.log.info("%s  - %s" % (key, " ".join(self.tab.rawfiles[cep2.current_node])))
 					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
 #					input_file=glob.glob("%s/%s/%s_SAP%03d_B%03d_S*_bf.raw" % (cep2.rawdir, obs.id, obs.id, self.sapid, self.tabid))[0]
+
 				self.log.info("Input data: %s" % (input_file))
 
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
@@ -1336,9 +1337,9 @@ class CVUnit(PipeUnit):
 						input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
 						input_files.extend(input_file)
 				else:
-					self.log.error("Complex voltage data should be on more than 1 locus nodes. Exiting...")
-					self.kill()
-					sys.exit(1)
+					for key in self.tab.location:
+						self.log.info("%s  - %s" % (key, " ".join(self.tab.rawfiles[cep2.current_node])))
+					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
 
@@ -1504,9 +1505,9 @@ class CVUnit(PipeUnit):
 						input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 						input_files.extend(input_file)
 				else:
-					self.log.error("Complex voltage data should be on more than 1 locus nodes. Exiting...")
-					self.kill()
-					sys.exit(1)
+					for key in self.tab.location:
+						self.log.info("%s  - %s" % (key, " ".join(self.tab.rawfiles[cep2.current_node])))
+					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
 

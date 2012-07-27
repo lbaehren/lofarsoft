@@ -238,8 +238,18 @@ class TABeam:
 				if re.match("^-----", cexec_output[l]) is not None:
 					loc=cexec_output[l].split(" ")[1]
 				else:
-					if loc in self.rawfiles: self.rawfiles[loc].append(cexec_output[l])
-					else: self.rawfiles[loc]=[cexec_output[l]]	
+					# first we are checking that this file (exactly the same with full path) DO NOT already present
+					# in the current dictionary self.rawfiles. This is to deal with the case when rawdata are in /home area
+					# that is visible from all locus nodes
+					rawfile_exist=False
+					for cloc in self.rawfiles:
+						if cexec_output[l] in self.rawfiles[cloc]:
+							rawfile_exist=True
+							break
+					# adding the file if it's not already added
+					if not rawfile_exist:
+						if loc in self.rawfiles: self.rawfiles[loc].append(cexec_output[l])
+						else: self.rawfiles[loc]=[cexec_output[l]]	
 			# list of all nodes
 			self.location=self.rawfiles.keys()
 			if len(self.location) == 0:
