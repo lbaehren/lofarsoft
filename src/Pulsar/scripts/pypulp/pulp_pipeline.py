@@ -960,8 +960,6 @@ class PipeUnit:
 						input_files.extend(input_file)
 					input_file=" ".join(input_files)
 				else:
-					for key in self.tab.location:
-						self.log.info("%s  - %s" % (key, " ".join(self.tab.rawfiles[cep2.current_node])))
 					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
 #					input_file=glob.glob("%s/%s/%s_SAP%03d_B%03d_S*_bf.raw" % (cep2.rawdir, obs.id, obs.id, self.sapid, self.tabid))[0]
 
@@ -1337,9 +1335,7 @@ class CVUnit(PipeUnit):
 						input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
 						input_files.extend(input_file)
 				else:
-					for key in self.tab.location:
-						self.log.info("%s  - %s" % (key, " ".join(self.tab.rawfiles[cep2.current_node])))
-					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
+					input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
 
@@ -1505,9 +1501,7 @@ class CVUnit(PipeUnit):
 						input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 						input_files.extend(input_file)
 				else:
-					for key in self.tab.location:
-						self.log.info("%s  - %s" % (key, " ".join(self.tab.rawfiles[cep2.current_node])))
-					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
+					input_files=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[cep2.current_node]]
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
 
