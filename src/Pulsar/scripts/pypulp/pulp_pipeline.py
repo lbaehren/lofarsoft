@@ -1318,7 +1318,8 @@ class CVUnit(PipeUnit):
 					input_files=[]
 					for loc in self.tab.location:
 						# first "mounting" corresponding locus node
-						input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, obs.id)
+						uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
+						input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
 						process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
 						process.communicate()
 						# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
