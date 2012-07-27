@@ -1335,6 +1335,15 @@ class CVUnit(PipeUnit):
 						input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
 						input_files.extend(input_file)
 				else:
+					# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
+					self.log.info("Making links to input files in the current directory...")
+					for f in self.tab.rawfiles[cep2.current_node]:
+						# links to the *.raw files
+						cmd="ln -sf %s ." % (f)
+						self.execute(cmd, workdir=self.curdir)
+						# links to the *.h5 files
+						cmd="ln -sf %s.h5 ." % (f.split(".raw")[0])
+						self.execute(cmd, workdir=self.curdir)
 					input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
@@ -1501,6 +1510,12 @@ class CVUnit(PipeUnit):
 						input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 						input_files.extend(input_file)
 				else:
+					# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
+					self.log.info("Making links to input files in the current directory...")
+					for f in self.tab.rawfiles[cep2.current_node]:
+						# links to the *.raw files
+						cmd="ln -sf %s ." % (f)
+						self.execute(cmd, workdir=self.curdir)
 					input_files=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[cep2.current_node]]
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
