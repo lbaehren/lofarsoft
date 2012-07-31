@@ -267,7 +267,7 @@ class BeamFormer(tasks.Task):
         detail_name = dict(default = '',
                           doc="Name extension to descrive a particular analysis (e.g., used if ``stride > 1``.)"),
 
-        output_filename = dict(default = lambda self:(os.path.split(self.filenames[0])[1].stip('.h5') if len(self.filenames)>0 else "unknown")+self.detail_name+self.file_ext,
+        output_filename = dict(default = lambda self:(os.path.split(self.filenames[0])[1].strip('.h5') if len(self.filenames)>0 else "unknown")+self.detail_name+self.file_ext,
                                doc="Filename (without directory, see ``output_dir``) to store the final spectrum."),
 
         spectrum_file = dict(default = lambda self:os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)),self.output_filename),
@@ -401,8 +401,8 @@ class BeamFormer(tasks.Task):
                       doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
                       unit="m"),
 
-        stationpos = dict(default=lambda self:cr.hArray(float,[3],units=("","m")),
-                      doc="Coordinates of the current station.",
+        stationpos = dict(default=lambda self:(md.getStationPositions(self.datafile['STATION_NAME'][0],self.datafile['ANTENNA_SET'],True,coordinatesystem='ITRF') if self.single_station else md.ITRFCS002),
+                      doc="ITRF coordinates of the phace center (ussually center of current station).",
                       unit="m"),
 
         block_duration = dict(default=lambda self:self.sample_interval*self.blocklen,
@@ -628,15 +628,10 @@ class BeamFormer(tasks.Task):
                 self.datafile["SELECTED_DIPOLES"]=[antennaID]
                 if self.sample_offset: self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  #Need to calculate this each time after having a new antenna selection.
                 print "# Start antenna =",antenna,"(ID=",str(antennaID)+"):" 
-##                self.antpos=cr.ashArray(self.datafile["ANTENNA_POSITION_ITRF"]); #print "Antenna position =",self.antpos
                 if self.single_station:
-                    self.antpos=self.datafile["ANTENNA_POSITIONS"];
-                    self.stationpos =  cr.hArray(float,[3],antpos-f1['ANTENNA_POSITIONS'])
+                    self.antpos = self.datafile["ANTENNA_POSITIONS"]
                 else:                
-                    self.antpos = cr.hArray(self.datafile['ANTENNA_POSITION'])
-                    self.antpos.reshape([len(self.antpos)/3,3])
-                    self.antpos = md.convertITRFToLocal(self.antpos)
-                    self.stationpos = md.ITRFCS002
+                    self.antpos = md.convertITRFToLocal(self.datafile['ITRFANTENNA_POSITIONS'])
                 self.antpos -= self.phase_center_array; #print "Relative antenna position =",self.antpos
                     
                 #Calculate the geometrical delays needed for beamforming
