@@ -8,6 +8,7 @@ import numpy as np
 import struct
 import os
 import pycrtools as cr
+import pdb;# pdb.set_trace()
     
     
 lonlatCS002=cr.hArray([6.869837540*np.pi/180.,52.91512249*np.pi/180.]) # 49.344  #($LOFARSOFT/data/lofar/StaticMetaData/AntennaArrays/CS002-AntennaArrays.conf
@@ -784,7 +785,7 @@ def getRelativeAntennaPositions(station,antennaset,return_as_hArray=False):
     f = open(filename, 'r')
 
     if station[0:2] != "CS":
-        if antennaset is "HBA_0" or antennaset is "HBA_1":
+        if "HBA" in antennaset:
             antennaset = "HBA"
 
     # Find position of antennaset in file
@@ -907,7 +908,7 @@ def getAbsoluteAntennaPositions(station,antennaset,return_as_hArray=False):
     f = open(filename, 'r')
 
     if station[0:2] != "CS":
-        if antennaset is "HBA_0" or antennaset is "HBA_1":
+        if "HBA" in antennaset:
             antennaset = "HBA"
 
     # Find position of antennaset in file
@@ -1111,7 +1112,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
                        * HBA_1
                        * HBA
 
-    *coordinatesystem* Currently only WGS84. in the future also ITRF
+    *coordinatesystem* Currently WGS84 and ITRF.
     ================== ==============================================
 
     Optional arguments
@@ -1151,25 +1152,34 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     """
 
     # Known antennasets
-    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA']
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA0', 'HBA1', 'HBA','HBA_DUAL']
 
     # Check if requested antennaset is known
     assert antennaset in names
-    assert coordinatesystem in ["WGS84"]
+    assert coordinatesystem in ["WGS84",'ITRF']
     # Check station id type
     if isinstance(station, int):
         # Convert a station id to a station name
         station=idToStationName(station)
 
     # Obtain filename of antenna positions
-    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'
-    filename=LOFARSOFT+"data/lofar/StaticMetaData/AntennaArrays/"+station+"-AntennaArrays.conf"
-
+    LOFARSOFT=os.environ["LOFARSOFT"].rstrip('/')+'/'    
+    if 'WGS84' in coordinatesystem:
+        filename=LOFARSOFT+"data/lofar/StaticMetaData/AntennaArrays/"+station+"-AntennaArrays.conf"
+    else:
+        filename=LOFARSOFT+"data/lofar/StaticMetaData/AntennaFields/"+station+"-AntennaField.conf"
+    
     # Open file
     f = open(filename, 'r')
 
+    if antennaset is 'HBA_DUAL':
+            antennaset = "HBA"
+
+    if "LBA" in antennaset:
+        antennaset = "LBA"
+
     if station[0:2] != "CS":
-        if antennaset is "HBA_0" or antennaset is "HBA_1":
+        if "HBA" in antennaset:
             antennaset = "HBA"
 
     # Find position of antennaset in file
@@ -1180,7 +1190,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
             #end of file reached, no data available
             print "Antenna set not found in calibration file",filename
             return "None"
-
+    
     # Skip name and station reference position
     str_line = f.readline()
 
@@ -1200,7 +1210,7 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
 
     return stationpos
 
-def convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=None):
+def convertITRFToLocal(itrfpos,refpos=ITRFCS002,reflonlat=lonlatCS002):
     """.. todo:: Document :func:`~metadata.convertITRFToLocal`.
     """
 
