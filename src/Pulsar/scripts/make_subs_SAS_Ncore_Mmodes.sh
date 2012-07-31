@@ -438,7 +438,7 @@ then
 	      #unsetenv PYTHONPATH
 	      export PYTHONPATH=""
 	      echo "python $LOFARSOFT/release/share/pulsar/bin/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset" >> $log 
-	      python /home/alexov/LOFAR/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
+	      python $LOFARSOFT/release/share/pulsar/bin/RTCP2/Run/src/LOFAR/Parset.py $PARSET > ${location}/${OBSID}.parset
 	      PARSET=${location}/${OBSID}.parset
 	      #setenv PYTHONPATH $hold_pythonpath
 	      export PYTHONPATH="$hold_pythonpath"
