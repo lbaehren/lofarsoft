@@ -33,22 +33,24 @@ if pulsar:
     if altair:
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
-##        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5')
-##        filefilter = '/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5'
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5'
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5'
-##        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
-##        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'  
-#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
-#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5'  
-        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
-        filefilter = '/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
+#        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'  
+        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
+        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5'  
         output_dir= '/Users/eenriquez/RESEARCH/Pulsars/Results/'
         f2=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
 
     else:    
-        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
-        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+#        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
+#        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
+        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
         output_dir= '~/RESEARCH/Pulsars/Results/'
         f2=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
 
@@ -87,6 +89,8 @@ if pulsar:
 else:
     f1=cr.open('~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5')
     filefilter = '~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5'   
+#    f1=cr.open('~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5')
+#    filefilter = '~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5'   
     output_dir= '~/RESEARCH/VHECR/Results/'
 
 #    azel_CR =[-46.9,45.4]
@@ -100,10 +104,9 @@ else:
     blocklen = 2**10
     dohanning =False
 
-
-
 #------------------------------
 #Set basic beamformer parameters.
+maxnchunks = 50
 randomize_peaks = False
 FarField = True
 qualitycheck = False
@@ -113,36 +116,39 @@ filenames = [filefilter]
 nantennas_start = 1
 nantennas_stride = 2
 maxnantennas = f1['NOF_DIPOLE_DATASETS']
-detail_name = '.pol1'
+detail_name = '.pol1.multi_station'
+single_station = True
 
 #------------------------------
 #Additional calibration values.
 
 cal_delays=dict(zip(f1["DIPOLE_NAMES"],f1["DIPOLE_CALIBRATION_DELAY"]))
 
-antenna_positions= cr.hArray(float,[96,3],f2['ANTENNA_POSITION_ITRF'])
+if pulsar:
+    antenna_positions= cr.hArray(float,[96,3],f2['ANTENNA_POSITION_ITRF'])
 antenna_set = f1['ANTENNA_SET']
 channel = f1["CHANNEL_ID"]
 sample_interval = f1["SAMPLE_INTERVAL"][0]
 
-phase_center = cr.hArray(antenna_positions[nantennas_start].vec())
+if pulsar:
+    phase_center = cr.hArray(antenna_positions[nantennas_start].vec())
 
+    antenna_positions= dict(zip(f1["DIPOLE_NAMES"],antenna_positions))
 #tpar antenna_positions= dict(zip(f1["CHANNEL_ID"],f1.getITRFAntennaPositions()))
-antenna_positions= dict(zip(f1["DIPOLE_NAMES"],antenna_positions))
 #clock_delay = metadata.getClockCorrection(f2['STATION_NAME'][0],f2['ANTENNA_SET']
 
 #Multi station starting times.
-t0 = max(f2['SAMPLE_NUMBER'])*f2['SAMPLE_INTERVAL'][0]+f2['CLOCK_OFFSET'][0]
-t1 = max(f1['SAMPLE_NUMBER'])*f1['SAMPLE_INTERVAL'][0]+f1['CLOCK_OFFSET'][0]
+if pulsar:
+    t0 = max(f2['SAMPLE_NUMBER'])*f2['SAMPLE_INTERVAL'][0]+f2['CLOCK_OFFSET'][0]
+    t1 = max(f1['SAMPLE_NUMBER'])*f1['SAMPLE_INTERVAL'][0]+f1['CLOCK_OFFSET'][0]
 
 #calculate delta samples, t0-f1[0][0]
-sample_offset = int((t0-t1)/f1['SAMPLE_INTERVAL'][0])
-
+    sample_offset = int((t0-t1)/f1['SAMPLE_INTERVAL'][0])
 
 #----------------------------------
-bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,phase_center=phase_center,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,sample_offset=sample_offset)
+bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,single_station=single_station,maxnchunks=maxnchunks)
 
-#antenna_positions=antenna_positions
+#antenna_positions=antenna_positions ,,phase_center=phase_center,,sample_offset=sample_offset
 #-------------------------------------------------------------------------------------
 
 #Run for Beamformer Pulsar case
@@ -158,6 +164,7 @@ tpar NyquistZone=2
 bm=hArrayRead('L43784_D20120125T211154.887Z_CS002_R000_tbb.h5.beams.pcr')
 dmin=10e2;dmax=10e4
 dynspec=Task.dyncalc(tbin=16*4)
+Task.dynplot(plot_cleanspec=True,dmin=4,dmax=6,cmin=-.001,cmax=.007,from_file=True)
 cr.plt.clf(); cr.plt.imshow(np.transpose(np.log(cleandynspec)),origin='lower',aspect='auto',vmin=-8,vmax=-2,extent=[0,1.024,100,200])
 '''
 
