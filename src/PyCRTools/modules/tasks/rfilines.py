@@ -19,6 +19,31 @@ def getLines(dirtychannels, blocksize_wanted, blocksize_used):
     ch /= float(blocksize_used / blocksize_wanted)
     ch = round(ch)
 
+def dirtyChannelsFromPhaseSpreads(spreads, verbose=False):
+    length = len(spreads)
+    sorted = np.sort(spreads)
+    # Sorted plot will have many entries below the uniform-random value of 1.81. 
+    # They correspond to the RFI lines. Circumvent taking standard-deviation and peak-detection
+    # by estimating the (noise) spread using the higher half of the data
+    # then have a criterion of > 3x noise to make an RF-line detection.
+    medianSpread = np.median(spreads)
+    noise = sorted[length * 0.95] - sorted[length / 2] # value at 95 percentile minus median
+    
+    dirtyChannels = np.where(spreads < medianSpread - 3*noise)[0]
+    if verbose:
+        print 'Median spread = %f' % medianSpread
+        print 'Noise = %f' % noise
+        print 'There are %d dirty channels' % len(dirtyChannels)
+        
+        plt.figure()
+        plt.plot(sorted)
+        plt.axvline(x = len(dirtyChannels), ymin = 0, ymax = 1.83)
+        plt.title("Sorted phase spread values. Vertical line = cutoff for 'dirty channels'")
+        plt.ylabel("Spread value [rad]")
+        plt.xlabel("index")
+        
+    return dirtyChannels
+
 class rfilines(tasks.Task):
     """
     **Description:**
@@ -43,13 +68,17 @@ class rfilines(tasks.Task):
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
         maxlines = {default: 1, doc: "Max number of RF lines to consider"},
         lines = {default: None, doc: "(List of) RF line(s) to use, by frequency channel index"},
-        dirtychannels = {default: None, doc: "List of 'dirty channels' as from cr_event pipeline. One radio transmitter line can be resolved into many 'dirty channels' if spectral resolution is high enough. The line has to be identified from this afterwards."},
+
         minSNR = {default: 50, doc: "Minimum required SNR of the line"},
         blocksize = {default: 8192, doc: "Blocksize of timeseries data, for FFTs"},
+        nofblocks = {default:100, doc: "Max. number of blocks to process (memory use grows with nof blocks!)"},
         smooth_width = {default: 16, doc: "Smoothing window for FFT, for determining base level (cheap way of doing what AverageSpectrum class does)"},
         direction_resolution = {default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
          
-        nofchannels = {default:96, doc: "nof channels (make ouput param!)"},
+        nofchannels = {default: -1, doc: "nof channels (make ouput param!)", output:True},
+        medians = {default: None, doc: "Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1.", output: True},
+        dirtychannels = {default: None, doc: "Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.", output:True},
+        
         results=p_(lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc="Results dict containing cabledelays_database, antenna positions and names"),
         positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
         antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
@@ -73,7 +102,7 @@ class rfilines(tasks.Task):
         
         # Fool the OS's disk cache by reading the entire file as binary
         # Hopefully reducing the long I/O processing time (?)
-        bytes_read = open(self.event, "rb").read()
+#        bytes_read = open(self.event, "rb").read()
         
         f = cr.open(self.event)
         #f = open('/Users/acorstanje/triggering/CR/L29590_D20110714T174749.986Z_CS005_R000_tbb.h5')
@@ -103,7 +132,9 @@ class rfilines(tasks.Task):
             plt.xlabel('Antenna number (RCU/2)')
             plt.ylabel('Phase [rad]')
         nblocks = min(f["DATA_LENGTH"]) / self.blocksize # Why is this not working?
-        nblocks -= 10 # HACK
+        nblocks -= 5 # HACK -- why needed?
+
+        nblocks = min(self.nofblocks, nblocks) # limit to # blocks given in params
         
         print 'Processing %d blocks of length %d' % (nblocks, self.blocksize)
         averagePhasePerAntenna = np.zeros(self.nofchannels / 2) # do one polarisation; officially: look them up in channel ids!
@@ -195,26 +226,12 @@ class rfilines(tasks.Task):
         phaseAvg += phizero
         cr.hPhaseWrap(phaseAvg, phaseAvg)
         
-        # test against one block at one line, make figure
-        linephase_avg = hArray(float, dimensions=[48])
-        linephase = hArray(float, dimensions = [48])
-        
-        for i in range(48):
-            linephase_avg[i] = phaseAvg[i, 1111]
-            linephase[i] = phaseblocks[0][i, 1111]
-        
         #linephase_avg.copy(phaseAvg[..., 1111])
         #linephase.copy(phaseblocks[0][..., 1111]) doesnt work!
         
         #HACK 
 #        phaseAvg = phaseblocks[10]
-        
-#        import pdb; pdb.set_trace()
-        
-        plt.figure()
-        plt.plot(linephase.toNumpy())
-        plt.plot(linephase_avg.toNumpy(), c='r')
-        
+
         # now do RMS. Sum (phi - mu)^2 where phi - mu is wrapped first
         n = 0
         for phases in phaseblocks:
@@ -238,19 +255,60 @@ class rfilines(tasks.Task):
         medians[1] = 1.8 # first two channels have been zero'd out; set to 'flat' value to avoid them when taking minimum.
         print ' There are %d medians' % len(medians)
    
-        bestchannel = medians.argmin()
-        bestchannel = int(bestchannel) # ! Needed for use in hArray slicing etc. Type numpy.int64 not recognized otherwise
+        if not self.lines: # if no value given, take the one with best phase stability
+            bestchannel = medians.argmin()
+            bestchannel = int(bestchannel) # ! Needed for use in hArray slicing etc. Type numpy.int64 not recognized otherwise
+        elif type(self.lines) == type([]):
+            bestchannel = self.lines[0] # known strong transmitter channel for this event (may vary +/- 5 channels?)
+        else: # either list or number assumed
+            bestchannel = self.lines
 
         print ' Median phase-sigma is lowest (i.e. best phase stability) at channel %d, value = %f' % (bestchannel, medians[bestchannel])
         y = avgspectrum.toNumpy()[0]
         print ' Spectrum is highest at channel %d, log-value = %f' % (y.argmax(), np.log(y.max()))
-        
+
         plt.figure()
-        plt.plot(np.log(y), c='b')
+
+        # test against one block at one line, make figure
+        linephase_avg = hArray(float, dimensions=[48])
+        linephase = hArray(float, dimensions = [48])
+        
+        for i in range(48):
+            linephase_avg[i] = phaseAvg[i, bestchannel]
+        plt.plot(linephase_avg.toNumpy(), c='r')
+            
+        for block in phaseblocks:
+            for j in range(48):
+                linephase[j] = block[j, bestchannel]
+            plt.plot(linephase.toNumpy())
+
+
+        # test phase of one antenna in consecutive data blocks, show in plot versus block nr.
+        plt.figure()
+        x = []
+        for block in phaseblocks:
+            x.append(block[2, bestchannel])
+        x = np.array(x)
+        plt.plot(x)
+        plt.title('Phase of one antenna for freq channel %d in consecutive data blocks' % bestchannel)        
+
+        # Get 'dirty channels' and show in plot
+        self.dirtychannels = dirtyChannelsFromPhaseSpreads(medians, verbose=True)
+
+        # Plot average spectrum for one antenna, and median-RMS phase stability.
+        logspectrum = np.log(y)
+        plt.figure()
+        plt.plot(logspectrum, c='b')
         plt.plot(medians, c='r')
         plt.title('Average spectrum of one antenna versus median-RMS phase stability')
         plt.xlabel('Frequency channel')
         plt.ylabel('Blue: log-spectral power [adc units]\nRed: RMS phase stability [rad]')
+        
+        # plot into spectrum plot, in red
+        dirtyspectrum = np.zeros(len(logspectrum))
+        dirtyspectrum += min(logspectrum)
+        dirtyspectrum[self.dirtychannels] = logspectrum[self.dirtychannels]
+        plt.plot(dirtyspectrum, 'x', c = 'r', markersize=8)
         
         # diagnostic test, plot avg phase, also plot all / many individual measured phases
         # at the frequency that gives the best phase stability
@@ -298,9 +356,10 @@ class rfilines(tasks.Task):
         plt.legend()
 
         phaseDiff = averagePhasePerAntenna - modelphases
-
+        
         plt.figure()
         plt.plot(sf.phaseWrap(phaseDiff), label='Measured - expected phase')
+
 
         #plt.figure()
         rms_phase = phaseRMS.toNumpy()[:, bestchannel]
