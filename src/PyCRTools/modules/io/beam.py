@@ -234,7 +234,7 @@ class BeamData(IOInterface):
         return nblocks
 
     def getITRFAntennaPositions(self):
-        """Returns ITRF Station positions.
+        """Returns ITRF Station positions. The positions are of the center of the station (which depend on the ANTENNA_SET used).
 
         Output:
         a one dimensional array containing the Cartesian position of
@@ -244,13 +244,16 @@ class BeamData(IOInterface):
         length 3 with positions (x,y,z) of antenna i.
         """
 
-#        return self['BEAM_STATIONPOS']
-
-        raise NotImplementedError
+        pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
+        
+        for i, file in enumerate(self.__files):
+            pos[i] = file.par.hdr['BeamFormer']['stationpos']
+        
+        return pos
 
 
     def getRelativeAntennaPositions(self):
-        """Returns relative Station positions.
+        """Returns relative Station positions. The positions are of the center of the station (which depend on the ANTENNA_SET used).
 
         Output:
         a two dimensional array containing the Cartesian position of
@@ -260,12 +263,13 @@ class BeamData(IOInterface):
         length 3 with positions (x,y,z) of antenna i.
         """
         
-
         pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
         
         for i, file in enumerate(self.__files):
-            pos[i] = file.par.hdr["ITRFANTENNA_POSITIONS"][0]
-
+            pos[i] = file.par.hdr['BeamFormer']['stationpos']
+        
+        pos = md.convertITRFToLocal(pos)
+        
         return pos
 
     def getFFTData(self, data, block):
