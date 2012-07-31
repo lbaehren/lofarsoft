@@ -9,7 +9,7 @@ add_custom_target (scripts_install
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/GRID/* ${PULSAR_SOURCE_DIR}/scripts/*.py ${PULSAR_SOURCE_DIR}/scripts/*.sh ${PULSAR_SOURCE_DIR}/scripts/*.pl ${PULSAR_SOURCE_DIR}/scripts/*.csh ${CMAKE_INSTALL_PREFIX}/bin/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/pypulp/*.py ${CMAKE_INSTALL_PREFIX}/lib/python/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/pypulp/pulp.py ${CMAKE_INSTALL_PREFIX}/bin/
-  COMMAND cp -r ${PULSAR_SOURCE_DIR}/scripts/RTCP ${CMAKE_INSTALL_PREFIX}/bin/
+  COMMAND cp -r ${PULSAR_SOURCE_DIR}/scripts/RTCP2 ${CMAKE_INSTALL_PREFIX}/bin/
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/Pulsar_Search_LOFAR-v1.txt ${CMAKE_INSTALL_PREFIX}/doc/
   COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/bin/pulp.sh
   COMMAND ln -s ${CMAKE_INSTALL_PREFIX}/bin/make_subs_SAS_Ncore_Mmodes.sh ${CMAKE_INSTALL_PREFIX}/bin/pulp.sh
