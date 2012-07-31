@@ -136,7 +136,7 @@ class IOInterface(object):
         antennas if no selection was applied.
 
         Output:
-        a two dimensional array containing the Cartesian position of
+        a two dimensional array containing the ITRF position of
         each antenna in meters in local coordinates from a predefined
         center.
         So that if `a` is the returned array `a[i]` is an array of
