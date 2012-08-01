@@ -266,9 +266,9 @@ class TABeam:
 class Observation:
 	# si - system info
 	# log - logger class
-	def __init__(self, id, si, cmdline, log=None, parset=""):
+	def __init__(self, id, si, cmdline, log=None):
 		self.id = id
-		self.parset = parset
+		self.parset = cmdline.opts.parset
 		self.parset_dir = si.parset_dir
 
 		self.project = "" # the name of the campaign
@@ -321,7 +321,7 @@ class Observation:
 		else:   # checking old parset location
 			self.parset = "%s/%s/%s.parset" % (self.parset_dir, self.id, self.id)
 			if os.path.exists(self.parset):	return True
-			else:
+			else:   # checking new parset location
 				self.parset = "%s/%s.parset" % (self.parset_dir, self.id)
 				if os.path.exists(self.parset):	return True
 				else: return False
