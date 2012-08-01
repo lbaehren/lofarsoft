@@ -1172,12 +1172,8 @@ def getStationPositions(station,antennaset,return_as_hArray=False,coordinatesyst
     # Open file
     f = open(filename, 'r')
 
-    pdb.set_trace()
-
     if 'HBA_DUAL' in antennaset:
             antennaset = "HBA"
-
-    pdb.set_trace()
 
     if "LBA" in antennaset:
         antennaset = "LBA"
