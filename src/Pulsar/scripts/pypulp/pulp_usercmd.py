@@ -103,7 +103,7 @@ class CMDLine:
         	self.cmd.add_option('--nthreads', dest='nthreads', metavar='#THREADS',
                            help="number of threads for all dspsr calls. Default: %default", default=2, type='int')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
-                           help="optional for testing: turns on debug level logging in Python", default=False)
+                           help="optional for testing: turns on debug level logging in Python and intermediate data files are not deleted", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',
                            help="optional parameter to turn off user's warnings and waiting time of 10 seconds in the beginning", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',

@@ -896,7 +896,9 @@ class PipeUnit:
 			(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
 		output_archive="%s/%s" % (output_dir, tarname)
 		self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
-		cmd="rsync -avxP %s %s:%s" % (tarname, self.summary_node, output_archive)
+		verbose=""
+		if cmdline.opts.is_debug: verbose="-v"
+		cmd="rsync %s -axP %s %s:%s" % (verbose, tarname, self.summary_node, output_archive)
 		self.execute(cmd, workdir=self.outdir)
 
 		# finish
@@ -910,7 +912,7 @@ class PipeUnit:
 		if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
 		else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 		os.system(cmd)
-		cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), self.summary_node, output_dir)
+		cmd="rsync %s -axP %s %s:%s" % (verbose, cep2.get_logfile(), self.summary_node, output_dir)
 		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
 		proc.communicate()
 
@@ -973,7 +975,9 @@ class PipeUnit:
 
 				# running data conversion (2bf2fits)
 				if not cmdline.opts.is_nodecode:
-					cmd="2bf2fits %s -parset %s -append -nbits 8 -A 100 -sigma 3 -v -nsubs %d -o %s %s" % (self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.output_prefix, input_file)
+					verbose=""
+					if cmdline.opts.is_debug: verbose="-v"
+					cmd="2bf2fits %s %s -parset %s -append -nbits 8 -A 100 -sigma 3 -nsubs %d -o %s %s" % (verbose, self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.output_prefix, input_file)
 					self.execute(cmd, workdir=self.curdir)
 
 				# running RFI excision, checking
@@ -1390,16 +1394,18 @@ class CVUnit(PipeUnit):
 							self.execute(cmd, workdir=self.curdir)
 
 						# removing ar-files from dspsr for every frequency split
-						remove_list=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
-						cmd="rm -f %s" % (" ".join(remove_list))
-						self.execute(cmd, workdir=self.curdir)
+						if not cmdline.opts.is_debug:
+							remove_list=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
+							cmd="rm -f %s" % (" ".join(remove_list))
+							self.execute(cmd, workdir=self.curdir)
 
 					# removing links for input h5 files
-					cmd="rm -f %s" % (" ".join(input_files))
-					self.execute(cmd, workdir=self.curdir)
-					# removing links for input .raw files
-					cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
-					self.execute(cmd, workdir=self.curdir)
+					if not cmdline.opts.is_debug:
+						cmd="rm -f %s" % (" ".join(input_files))
+						self.execute(cmd, workdir=self.curdir)
+						# removing links for input .raw files
+						cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
+						self.execute(cmd, workdir=self.curdir)
 
 					# scrunching in freq
 					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (self.tab.nrSubbands))
@@ -1546,8 +1552,9 @@ class CVUnit(PipeUnit):
 						self.execute(cmd, workdir=self.curdir)
 
 				# removing links for input files
-				cmd="rm -f %s" % (" ".join(input_files))
-				self.execute(cmd, workdir=self.curdir)
+				if not cmdline.opts.is_debug:
+					cmd="rm -f %s" % (" ".join(input_files))
+					self.execute(cmd, workdir=self.curdir)
 
 				if not cmdline.opts.is_nofold:
 					# getting the MJD of the observation
@@ -1603,14 +1610,16 @@ class CVUnit(PipeUnit):
 							self.execute(cmd, workdir=self.curdir)
 
 						# removing files created by dspsr for each freq channel
-						remove_list=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
-						cmd="rm -f %s" % (" ".join(remove_list))
-						self.execute(cmd, workdir=self.curdir)
+						if not cmdline.opts.is_debug:
+							remove_list=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
+							cmd="rm -f %s" % (" ".join(remove_list))
+							self.execute(cmd, workdir=self.curdir)
 
 					# removing files created by bf2puma2 for each freq channel
-					remove_list=glob.glob("%s/%s_SB*_CH*" % (self.curdir, input_prefix))
-					cmd="rm -f %s" % (" ".join(remove_list))
-					self.execute(cmd, workdir=self.curdir)
+					if not cmdline.opts.is_debug:
+						remove_list=glob.glob("%s/%s_SB*_CH*" % (self.curdir, input_prefix))
+						cmd="rm -f %s" % (" ".join(remove_list))
+						self.execute(cmd, workdir=self.curdir)
 
 					# scrunching in freq
 					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (self.tab.nrSubbands))
