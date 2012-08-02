@@ -226,8 +226,9 @@ public:
 	void filesInit();
 	void filesClose();
 	void writePuMa2Block(const float global_minmax,
-			const float * const restrict Xsamp,
-			const float * const restrict Ysamp);
+		const float * const restrict ReXsamp, const float * const restrict ImXsamp, const 
+		float * const restrict ReYsamp, const float * const restrict ImYsamp);
+		
 	void readParset();
 
 	void passFilenames(const char* &, char* &, char* &);
@@ -481,12 +482,16 @@ int main(int argc, char** argv)
 	size_t Jnumber_char = sizeof(float) * Jnumber_floats_read;
 
 	// One-dimensional arrays for temporary storage
-	float * restrict XJV;
-	XJV = reinterpret_cast<float*restrict>(malloc(Jnumber_char));
-	float * restrict YJV;
-	YJV = reinterpret_cast<float*restrict>(malloc(Jnumber_char));
+	float * restrict ReXJV;
+	ReXJV = reinterpret_cast<float*restrict>(malloc(Jnumber_char));
+	float * restrict ImXJV;
+	ImXJV = reinterpret_cast<float*restrict>(malloc(Jnumber_char));
+	float * restrict ReYJV;
+	ReYJV = reinterpret_cast<float*restrict>(malloc(Jnumber_char));
+	float * restrict ImYJV;
+	ImYJV = reinterpret_cast<float*restrict>(malloc(Jnumber_char));
 
-	if (XJV == 0 || YJV == 0)
+	if (ReXJV == 0 || ReYJV == 0 || ImXJV == 0 || ImYJV == 0 )
 	{
 		fputs("Memory fail", stderr);
 		exit(1);
@@ -534,12 +539,12 @@ int main(int argc, char** argv)
 
 			// Read Re(X) data:
 
-			num = fread(XJV, Jnumber_char, 1, pfileX0);
+			num = fread(ReXJV, Jnumber_char, 1, pfileX0);
 			if (num != 1)
 				goto end_of_minmax_loop;
 
 			minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					XJV);
+					ReXJV);
 
 			if(fabs(minmax)<1e-10) zrx=1;
 
@@ -548,12 +553,12 @@ int main(int argc, char** argv)
 
 			// Read Im(X) data:
 
-			num = fread(XJV, Jnumber_char, 1, pfileX1);
+			num = fread(ImXJV, Jnumber_char, 1, pfileX1);
 			if (num != 1)
 				goto end_of_minmax_loop;
 
 			minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					XJV);
+					ImXJV);
 
 			if(fabs(minmax)<1e-10) zix=1;
 
@@ -562,12 +567,12 @@ int main(int argc, char** argv)
 
 			// Read Y data:
 
-			num = fread(YJV, Jnumber_char, 1, pfileY0);
+			num = fread(ReYJV, Jnumber_char, 1, pfileY0);
 			if (num != 1)
 				goto end_of_minmax_loop;
 
 			minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					YJV);
+					ReYJV);
 
 			if(fabs(minmax)<1e-10) zry=1;
 
@@ -576,12 +581,12 @@ int main(int argc, char** argv)
 
 			// Read Y data:
 
-			num = fread(YJV, Jnumber_char, 1, pfileY1);
+			num = fread(ImYJV, Jnumber_char, 1, pfileY1);
 			if (num != 1)
 				goto end_of_minmax_loop;
 
 			minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					YJV);
+					ImYJV);
 
 			if(fabs(minmax)<1e-10) ziy=1;
 
@@ -637,43 +642,49 @@ int main(int argc, char** argv)
 					goto end_of_histogram_N;
 
 				// Read Re(X) data:
-				num = fread(XJV, Jnumber_char, 1, pfileX0);
+				num = fread(ReXJV, Jnumber_char, 1, pfileX0);
 				if (num != 1)
 					goto end_of_histogram_N;
 #if(NEED_TO_BYTESWAP)
-				byteswap_32_bit_float_array(Jnumber_floats, XJV);
+				byteswap_32_bit_float_array(Jnumber_floats, ReXJV);
 #endif
+
+				add_buffer_hist(Jnumber_floats, ReXJV);
 
 				// Read Im(X) data:
-				num = fread(XJV, Jnumber_char, 1, pfileX1);
+				num = fread(ImXJV, Jnumber_char, 1, pfileX1);
 				if (num != 1)
 					goto end_of_histogram_N;
 #if(NEED_TO_BYTESWAP)
-				byteswap_32_bit_float_array(Jnumber_floats, XJV);
+				byteswap_32_bit_float_array(Jnumber_floats, ImXJV);
 #endif
+
+				add_buffer_hist(Jnumber_floats, ImXJV);
 
 				// Read Re(Y) data:
-				num = fread(YJV, Jnumber_char, 1, pfileY0);
+				num = fread(ReYJV, Jnumber_char, 1, pfileY0);
 				if (num != 1)
 					goto end_of_histogram_N;
 #if(NEED_TO_BYTESWAP)
-				byteswap_32_bit_float_array(Jnumber_floats, YJV);
+				byteswap_32_bit_float_array(Jnumber_floats, ReYJV);
 #endif
 
+				add_buffer_hist(Jnumber_floats, ReYJV);
+
 				// Read Im(Y) data:
-				num = fread(YJV, Jnumber_char, 1, pfileY1);
+				num = fread(ImYJV, Jnumber_char, 1, pfileY1);
 				if (num != 1)
 					goto end_of_histogram_N;
 #if(NEED_TO_BYTESWAP)
-				byteswap_32_bit_float_array(Jnumber_floats, YJV);
+				byteswap_32_bit_float_array(Jnumber_floats, ImYJV);
 #endif
+
+				add_buffer_hist(Jnumber_floats, ImYJV);
 
 				if (verb)
 					cout << setw(10) << "IBLOCK = " << setw(10) << iblock
 							<< setw(10) << endl;
 
-				add_buffer_hist(Jnumber_floats, XJV);
-				add_buffer_hist(Jnumber_floats, YJV);
 				iblock++;
 			} // End of while(1) loop
 			end_of_histogram_N: if (verb)
@@ -812,35 +823,35 @@ int main(int argc, char** argv)
 				goto end_of_fulldata;
 
 			// Read Re(X) data:
-			num = fread(XJV, Jnumber_char, 1, pfileX0);
+			num = fread(ReXJV, Jnumber_char, 1, pfileX0);
 			if (num != 1)
 				goto end_of_fulldata;
 #if(NEED_TO_BYTESWAP)
-			byteswap_32_bit_float_array(Jnumber_floats, XJV);
+			byteswap_32_bit_float_array(Jnumber_floats, ReXJV);
 #endif
 
 			// Read Im(X) data:
-			num = fread(XJV, Jnumber_char, 1, pfileX1);
+			num = fread(ImXJV, Jnumber_char, 1, pfileX1);
 			if (num != 1)
 				goto end_of_fulldata;
 #if(NEED_TO_BYTESWAP)
-			byteswap_32_bit_float_array(Jnumber_floats, XJV);
+			byteswap_32_bit_float_array(Jnumber_floats, ImXJV);
 #endif
 
 			// Read Re(Y) data:
-			num = fread(YJV, Jnumber_char, 1, pfileY0);
+			num = fread(ReYJV, Jnumber_char, 1, pfileY0);
 			if (num != 1)
 				goto end_of_fulldata;
 #if(NEED_TO_BYTESWAP)
-			byteswap_32_bit_float_array(Jnumber_floats, YJV);
+			byteswap_32_bit_float_array(Jnumber_floats, ReYJV);
 #endif
 
 			// Read Im(Y) data:
-			num = fread(YJV, Jnumber_char, 1, pfileY1);
+			num = fread(ImYJV, Jnumber_char, 1, pfileY1);
 			if (num != 1)
 				goto end_of_fulldata;
 #if(NEED_TO_BYTESWAP)
-			byteswap_32_bit_float_array(Jnumber_floats, YJV);
+			byteswap_32_bit_float_array(Jnumber_floats, ImYJV);
 #endif
 
 			if (verb)
@@ -857,7 +868,7 @@ int main(int argc, char** argv)
 				{
 					puma2data.passChan(ichan);
 
-					puma2data.writePuMa2Block(global_minmax, XJV, YJV);
+					puma2data.writePuMa2Block(global_minmax, ReXJV, ImXJV, ReYJV, ImYJV);
 				} // End of loop over channels
 
 			} // End of loop over subbands
@@ -899,36 +910,36 @@ int main(int argc, char** argv)
 				goto end_of_data;
 
 			// Read Re(X) data:
-			num = fread(XJV, Jnumber_char, 1, pfileX0);
+			num = fread(ReXJV, Jnumber_char, 1, pfileX0);
 			if (num != 1)
 				goto end_of_data;
 
 			X0minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					XJV);
+					ReXJV);
 
 			// Read Im(X) data:
-			num = fread(XJV, Jnumber_char, 1, pfileX1);
+			num = fread(ImXJV, Jnumber_char, 1, pfileX1);
 			if (num != 1)
 				goto end_of_data;
 
 			X1minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					XJV);
+					ImXJV);
 
 			// Read Re(Y) data:
-			num = fread(YJV, Jnumber_char, 1, pfileY0);
+			num = fread(ReYJV, Jnumber_char, 1, pfileY0);
 			if (num != 1)
 				goto end_of_data;
 
 			Y0minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					YJV);
+					ReYJV);
 
 			// Read Im(Y) data:
-			num = fread(YJV, Jnumber_char, 1, pfileY1);
+			num = fread(ImYJV, Jnumber_char, 1, pfileY1);
 			if (num != 1)
 				goto end_of_data;
 
 			Y1minmax = byteswap_32_bit_float_array_and_find_max(Jnumber_floats,
-					YJV);
+					ImYJV);
 
 			if (verb)
 				cout << setw(10) << "IBLOCK = " << setw(10) << iblock
@@ -972,8 +983,10 @@ int main(int argc, char** argv)
 					cout << "hist bottom top " << bottom << " " << top << endl;
 				flush_histogram();
 				calculate_hist_constants(bottom, top);
-				add_buffer_hist(Jnumber_floats, XJV);
-				add_buffer_hist(Jnumber_floats, YJV);
+				add_buffer_hist(Jnumber_floats, ReXJV);
+				add_buffer_hist(Jnumber_floats, ImXJV);
+				add_buffer_hist(Jnumber_floats, ReYJV);
+				add_buffer_hist(Jnumber_floats, ImYJV);
 
 				if (verb)
 					cout << "Evaluating results for histogram "
@@ -1094,7 +1107,7 @@ int main(int argc, char** argv)
 				{
 					puma2data.passChan(ichan);
 
-					puma2data.writePuMa2Block(Xminmax, XJV, YJV);
+					puma2data.writePuMa2Block(Xminmax, ReXJV, ImXJV, ReYJV, ImYJV);
 				} // End of loop over channels
 
 			} // End of loop over subbands
@@ -1388,7 +1401,7 @@ void writer::filesClose()
 }
 
 void writer::writePuMa2Block(const float global_minmax,
-		const float * const restrict Xsamp, const float * const restrict Ysamp) restrict
+		const float * const restrict ReXsamp, const float * const restrict ImXsamp, const float * const restrict ReYsamp, const float * const restrict ImYsamp) restrict
 {
 
 // to convert from float value f to int8_t value i, we want to do
@@ -1421,10 +1434,10 @@ void writer::writePuMa2Block(const float global_minmax,
 	for (uint_fast32_t isamp = 0; isamp < SAMPLES; isamp++, offset +=
 			sample_block_offset)
 	{
-		float reX = Xsamp[start + offset];
-		float imX = Xsamp[start + offset + 1];
-		float reY = Ysamp[start + offset];
-		float imY = Ysamp[start + offset + 1];
+		float reX = ReXsamp[start + offset];
+		float imX = ImXsamp[start + offset];
+		float reY = ReYsamp[start + offset];
+		float imY = ImYsamp[start + offset];
 
 		int_fast32_t reXl = lrintf(reX * multiplier);
 		int_fast32_t imXl = lrintf(imX * multiplier);
@@ -1443,6 +1456,8 @@ void writer::writePuMa2Block(const float global_minmax,
 		blocksamples[isamp].Yi =
 				(!((imYl + int8_offset) & int8_out_of_range)) ?
 						int8_t(imYl) : flag_value;
+
+//		cout <<setw(22)<<reX<<setw(22)<<imX<<setw(22)<<reY<<setw(22)<<imY<<" *"<<setw(12)<<reXl<<setw(22)<<imXl<<setw(22)<<reYl<<setw(22)<<imYl<<endl; 
 
 		if (realv)
 		{
