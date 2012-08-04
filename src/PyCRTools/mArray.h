@@ -85,16 +85,6 @@ template <class T>
     std::vector<HInteger> & getDimensions();
     std::vector<HInteger> & getSizes();
     void setDimensions(boost::python::list dims);
-//    void setDimensions1(HInteger dim0);
-//    void setDimensions2(HInteger dim0, HInteger dim1);
-//    void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
-//    void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
-//    void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
-//    void setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5);
-//    void setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6);
-//    void setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7);
-//    void setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8);
-//    void setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9);
     HInteger getNumberOfDimensions();
     hArray<T> & setSlice(HInteger beg, HInteger end=-1);
     hArray<T> & setSliceVector(std::vector<HInteger> & index_vector);
