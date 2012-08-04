@@ -45,7 +45,6 @@ template <class T>
   struct storage_container {
     HInteger refcount;
     HInteger *ndims_p;
-    HInteger *size_p;
     std::vector<HInteger> * dimensions_p;
     std::vector<HInteger> * slice_sizes_p;
     std::vector<T>* vec_p;

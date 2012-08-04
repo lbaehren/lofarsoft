@@ -117,7 +117,6 @@ template <class T> void hArray<T>::new_storage(){
   storage_p=new storage_container;
   storage_p->refcount=1;
   storage_p->ndims_p=new HInteger;
-  storage_p->size_p=new HInteger;
   storage_p->dimensions_p=new std::vector<HInteger>;
   storage_p->dimensions_p->reserve(2);
   storage_p->slice_sizes_p=new std::vector<HInteger>;
@@ -191,7 +190,6 @@ template <class T> hArray<T>::~hArray(){
     if (storage_p->refcount == 1)
     {
       delete storage_p->ndims_p;
-      delete storage_p->size_p;
       delete storage_p->dimensions_p;
       delete storage_p->slice_sizes_p;
       delete storage_p;
@@ -216,11 +214,10 @@ this class!!
 */
 template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
   storage_p->vec_p=&vec;
-  (*storage_p->size_p)=vec.size();
   (*storage_p->ndims_p)=1;
   (*storage_p->dimensions_p).resize(1);
   (*storage_p->dimensions_p)[0]=vec.size();
-  setSlice(0,(*storage_p->size_p));
+  setSlice(0,(*storage_p->vec_p).size());
   calcSizes();
   return *this;
 }
@@ -267,7 +264,7 @@ template <class T> void hArray<T>::setDimensions(boost::python::list dims)
     size *= boost::python::extract<HInteger>(dims[i]);
   }
 
-  if (size == (*storage_p->size_p))
+  if (size == (*storage_p->vec_p).size())
   {
     (*storage_p->dimensions_p).resize(ndims);
     (*storage_p->ndims_p) = ndims;
@@ -282,7 +279,7 @@ template <class T> void hArray<T>::setDimensions(boost::python::list dims)
     throw PyCR::ValueError("Total size of new array must not be changed.");
   }
 
-  setSlice(0,(*storage_p->size_p));
+  setSlice(0,(*storage_p->vec_p).size());
   calcSizes();
 }
 
@@ -293,8 +290,8 @@ template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   slice_begin=hfmax(beg,0);
   if (end==-1) end=storage_p->vec_p->size();
-  if (end>=0) slice_end=std::min(end,(*storage_p->size_p));
-  else slice_end=(*storage_p->size_p);
+  if (end>=0) slice_end=std::min(end,(*storage_p->vec_p).size());
+  else slice_end=(*storage_p->vec_p).size();
   slice_size=slice_end-slice_begin;
   return *this;
 }
@@ -422,7 +419,6 @@ template <class T> hArray<T> & hArray<T>::resize(HInteger newsize){
   }
   if (newsize==(HInteger)storage_p->vec_p->size()) return *this;
   storage_p->vec_p->resize(newsize);
-  *storage_p->size_p=newsize;
   storage_p->dimensions_p->resize(1);
   storage_p->dimensions_p->at(0)=newsize;
   setSlice(0,newsize);
