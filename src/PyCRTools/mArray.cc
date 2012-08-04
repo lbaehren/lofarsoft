@@ -150,13 +150,11 @@ template <class T> void hArray<T>::new_storage(){
 }
 
 template <class T> hArray<T>::hArray(){
-  std::cout<<"calling constructor"<<std::endl;
   init();
   new_storage();
 }
 
 template <class T> hArray<T>::hArray(std::vector<T> & vec){
-  std::cout<<"Calling unexpected constructor"<<std::endl;
   init();
   new_storage();
   setVector(vec);
@@ -168,13 +166,10 @@ template <class T> hArray<T>::hArray(std::vector<T> & vec){
 */
 
 template <class T> hArray<T>::hArray(storage_container * sptr){
-  std::cout<<"calling shared constructor"<<std::endl;
   if (sptr==NULL) return;
   init();
   storage_p=sptr;
-  std::cout<<"refcount was "<<storage_p->refcount;
   storage_p->refcount = storage_p->refcount + 1;
-  std::cout<<" now is "<<storage_p->refcount<<std::endl;
   setSlice(0,storage_p->vec_p->size());
 }
 
@@ -195,7 +190,6 @@ template <class T> hArray<T>::~hArray(){
   {
     if (storage_p->refcount == 1)
     {
-      std::cout<<"refcount is "<<storage_p->refcount<<" deleting storage"<<std::endl;
       delete storage_p->ndims_p;
       delete storage_p->size_p;
       delete storage_p->dimensions_p;
@@ -204,9 +198,7 @@ template <class T> hArray<T>::~hArray(){
     }
     else
     {
-      std::cout<<"refcount was "<<storage_p->refcount;
       storage_p->refcount = storage_p->refcount - 1;
-      std::cout<<" now is "<<storage_p->refcount<<std::endl;
     }
   }
   else
@@ -223,7 +215,6 @@ this class!!
 
 */
 template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
-  std::cout<<"calling setVector"<<std::endl;
   storage_p->vec_p=&vec;
   (*storage_p->size_p)=vec.size();
   (*storage_p->ndims_p)=1;
@@ -636,7 +627,6 @@ new size differs, then the vector will be resized and slices and
 dimensions be reset to a flat (one dimensional) vector array.
  */
 template <class T> hArray<T> & hArray<T>::resize(HInteger newsize){
-  std::cout<<"calling resize"<<std::endl;
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (newsize==(HInteger)storage_p->vec_p->size()) return *this;
   storage_p->vec_p->resize(newsize);
