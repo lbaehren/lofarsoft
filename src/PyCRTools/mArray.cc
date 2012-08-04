@@ -116,7 +116,6 @@ extern bool hArray_trackHistory_value;
 template <class T> void hArray<T>::new_storage(){
   storage_p=new storage_container;
   storage_p->refcount=1;
-  storage_p->ndims_p=new HInteger;
   storage_p->dimensions_p=new std::vector<HInteger>;
   storage_p->dimensions_p->reserve(2);
   storage_p->slice_sizes_p=new std::vector<HInteger>;
@@ -169,7 +168,7 @@ template <class T> hArray<T>::hArray(storage_container * sptr){
   init();
   storage_p=sptr;
   storage_p->refcount = storage_p->refcount + 1;
-  setSlice(0,storage_p->vec_p->size());
+  setSlice(0,(HInteger)storage_p->vec_p->size());
 }
 
 /*! \brief Returns a new hArray object, which shares the same vector and storage description (i.e. dimensions).
@@ -189,7 +188,6 @@ template <class T> hArray<T>::~hArray(){
   {
     if (storage_p->refcount == 1)
     {
-      delete storage_p->ndims_p;
       delete storage_p->dimensions_p;
       delete storage_p->slice_sizes_p;
       delete storage_p;
@@ -214,7 +212,6 @@ this class!!
 */
 template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
   storage_p->vec_p=&vec;
-  (*storage_p->ndims_p)=1;
   (*storage_p->dimensions_p).resize(1);
   (*storage_p->dimensions_p)[0]=vec.size();
   setSlice(0,(*storage_p->vec_p).size());
@@ -264,10 +261,9 @@ template <class T> void hArray<T>::setDimensions(boost::python::list dims)
     size *= boost::python::extract<HInteger>(dims[i]);
   }
 
-  if (size == (*storage_p->vec_p).size())
+  if (size == (HInteger)(*storage_p->vec_p).size())
   {
     (*storage_p->dimensions_p).resize(ndims);
-    (*storage_p->ndims_p) = ndims;
 
     for (int i=0; i<ndims; i++)
     {
@@ -290,7 +286,7 @@ template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   slice_begin=hfmax(beg,0);
   if (end==-1) end=storage_p->vec_p->size();
-  if (end>=0) slice_end=std::min(end,(*storage_p->vec_p).size());
+  if (end>=0) slice_end=std::min(end,(HInteger)(*storage_p->vec_p).size());
   else slice_end=(*storage_p->vec_p).size();
   slice_size=slice_end-slice_begin;
   return *this;
@@ -306,7 +302,7 @@ dimensions, this will provide a slice over the remanining dimensions
 template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & index_vector){
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=index_vector.size();
-  if ((level > *storage_p->ndims_p) || (level < 0)) {ERROR("setSliceVector: Dimension wrong"); return *this;};
+  if ((level > (HInteger)(*storage_p->dimensions_p).size()) || (level < 0)) {ERROR("setSliceVector: Dimension wrong"); return *this;};
   if (subslice_level==-1) subslice_level=level;
   slice_begin=hfmax(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+getSubSliceStart(),(HInteger)storage_p->vec_p->size()));
   slice_end=hfmax(0,std::min(hMulSum(index_vector,*storage_p->slice_sizes_p)+getSubSliceEnd(),(HInteger)storage_p->vec_p->size()));
@@ -359,7 +355,7 @@ template <class T> hArray<T> &  hArray<T>::setSubSliceVec(vector<HInteger> & sta
 \brief Returns the number of dimensions that have been associated with the current array
  */
 template <class T> HInteger hArray<T>::getNumberOfDimensions(){
-  return (*storage_p->ndims_p);
+  return (HInteger)(*storage_p->dimensions_p).size();
 }
 
 /*!
@@ -552,11 +548,11 @@ index.
 template <class T> HInteger hArray<T>::setLoopSlice(vector<HInteger> & start_element_index){
   if (storage_p->vec_p==NULL) return -1; //Check if vector was deleted elsewhere
   HInteger level=start_element_index.size();
-  if (level >= *storage_p->ndims_p)  {ERROR("setLoopSlice: dimensions are wrong!"); return -1;};
+  if (level >= (HInteger)(*storage_p->dimensions_p).size())  {ERROR("setLoopSlice: dimensions are wrong!"); return -1;};
   loop_maxn = storage_p->dimensions_p->at(level);
   loop_slice_begin=hMulSum(start_element_index,*storage_p->slice_sizes_p); // multiplies the start element indices with the (cummulaitve) sizes of slices per dimension - giving the total offset
   loop_slice_size=storage_p->slice_sizes_p->at(level);
-  if (level+1 >= *storage_p->ndims_p) loop_lower_level_size=0;
+  if (level+1 >= (HInteger)(*storage_p->dimensions_p).size()) loop_lower_level_size=0;
   else loop_lower_level_size=storage_p->slice_sizes_p->at(level+1);
   loop_slice_end=loop_slice_begin+loop_slice_size*loop_maxn;
   return level;
