@@ -761,7 +761,9 @@ def hArray_setstate(self, state):
     size = 1
     for d in state[1]:
         size *= d
-    self.resize(size)
+
+    self.__stored_vector=Vector(eval(state[0]), size)
+    self.setVector(self.__stored_vector)
     self.reshape(state[1])
     self.readRaw(state[2])
 

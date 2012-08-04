@@ -270,6 +270,7 @@ template <class T> void hArray<T>::setDimensions(boost::python::list dims)
   if (size == (*storage_p->size_p))
   {
     (*storage_p->dimensions_p).resize(ndims);
+    (*storage_p->ndims_p) = ndims;
 
     for (int i=0; i<ndims; i++)
     {
@@ -415,7 +416,10 @@ new size differs, then the vector will be resized and slices and
 dimensions be reset to a flat (one dimensional) vector array.
  */
 template <class T> hArray<T> & hArray<T>::resize(HInteger newsize){
-  if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
+  if (storage_p->vec_p==NULL)
+  {
+    throw PyCR::ValueError("Attempting to resize no existing vector.");
+  }
   if (newsize==(HInteger)storage_p->vec_p->size()) return *this;
   storage_p->vec_p->resize(newsize);
   *storage_p->size_p=newsize;
