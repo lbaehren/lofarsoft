@@ -131,9 +131,7 @@ if __name__ == '__main__':
 	ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
 
 	# write the linear scale output file
-	file = open(options.outlinscale,"w")
-	plt.savefig(file)
-	file.close()
+	plt.savefig(options.outlinscale)
 
 	#### LOG plot ####
 
@@ -174,8 +172,6 @@ if __name__ == '__main__':
 	#plt.show()
 
 	# write the log scale output file
-	file = open(options.outlogscale,"w")
-	plt.savefig(file)
-	file.close()
+	plt.savefig(options.outlogscale)
 
 	print "Writing output plots: " + str(options.outlogscale) + " " + str(options.outlinscale)
