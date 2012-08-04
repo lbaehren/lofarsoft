@@ -211,6 +211,10 @@ template <class T> hArray<T>::~hArray(){
       std::cout<<" now is "<<storage_p->refcount<<std::endl;
     }
   }
+  else
+  {
+    throw PyCR::MemoryError("hArray has no storage this can never happen!");
+  }
 }
 
 /*!
@@ -233,7 +237,6 @@ template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
 \brief Retrieve the stored vector (returned as reference, hence no copy is made).
  */
 template <class T> std::vector<T> & hArray<T>::getVector(){
-  if (storage_p==NULL) { static vector<T> v; return v;} //Check if vector was deleted elsewhere
   return *(storage_p->vec_p);
 }
 
@@ -241,7 +244,6 @@ template <class T> std::vector<T> & hArray<T>::getVector(){
 \brief Retrieve the dimensions of the array (returned as reference, hence no copy is made).
  */
 template <class T> std::vector<HInteger> & hArray<T>::getDimensions(){
-  if (storage_p==NULL) {static vector<HInteger> v; return v;} //Check if vector was deleted elsewhere
   return *(storage_p->dimensions_p);
 }
 
@@ -249,7 +251,6 @@ template <class T> std::vector<HInteger> & hArray<T>::getDimensions(){
 \brief Calculate the size of one slice in each dimension, will be called whenever dimensions change.
  */
 template <class T> void hArray<T>::calcSizes(){
-  if (storage_p==NULL) return; //Check if vector was deleted elsewhere
   (*storage_p->slice_sizes_p).resize((*storage_p->dimensions_p).size());
   (*storage_p->slice_sizes_p)[(*storage_p->dimensions_p).size()-1]=1;
   for (int i=(*storage_p->dimensions_p).size()-1; i>0; --i) (*storage_p->slice_sizes_p)[i-1]=(*storage_p->slice_sizes_p)[i]*(*storage_p->dimensions_p)[i];
@@ -261,7 +262,6 @@ template <class T> void hArray<T>::calcSizes(){
 \brief Calculate the size of one slice in each dimension, will be called whenever dimensions change.
  */
 template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
-  if (storage_p==NULL) {static vector<HInteger> v; return v;} //Check if vector was deleted elsewhere
   return *(storage_p->slice_sizes_p);
 }
 
@@ -269,7 +269,6 @@ template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+"]");
   (*storage_p->ndims_p)=1;
@@ -286,7 +285,6 @@ template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+"]");
   (*storage_p->ndims_p)=2;
@@ -304,7 +302,6 @@ template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1)
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=3;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+"]");
@@ -323,7 +320,6 @@ template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=4;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+"]");
@@ -343,7 +339,6 @@ template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=5;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+"]");
@@ -364,7 +359,6 @@ template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=6;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+"]");
@@ -386,7 +380,6 @@ template <class T> void  hArray<T>::setDimensions6(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4,HInteger dim5, HInteger dim6){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=7;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+"]");
@@ -409,7 +402,6 @@ template <class T> void  hArray<T>::setDimensions7(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=8;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+"]");
@@ -433,7 +425,6 @@ template <class T> void  hArray<T>::setDimensions8(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=9;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+","+hf2string(dim8)+"]");
@@ -457,7 +448,6 @@ template <class T> void  hArray<T>::setDimensions9(HInteger dim0, HInteger dim1,
 \brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
  */
 template <class T> void  hArray<T>::setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4,HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9){
-  if (storage_p==NULL) return ; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
   (*storage_p->ndims_p)=10;
   addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+","+hf2string(dim8)+","+hf2string(dim9)+"]");
@@ -483,7 +473,6 @@ template <class T> void  hArray<T>::setDimensions10(HInteger dim0, HInteger dim1
 \brief Sets begin and end the currently active slice using integer offsets from the begin of the stored vector. Use (0,size(vector)) to get the full vector
  */
 template <class T> hArray<T> &  hArray<T>::setSlice(HInteger beg, HInteger end){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   slice_begin=hfmax(beg,0);
   if (end==-1) end=storage_p->vec_p->size();
@@ -501,7 +490,6 @@ dimensions, this will provide a slice over the remanining dimensions
 
  */
 template <class T> hArray<T> &  hArray<T>::setSliceVector(vector<HInteger> & index_vector){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=index_vector.size();
   if ((level > *storage_p->ndims_p) || (level < 0)) {ERROR("setSliceVector: Dimension wrong"); return *this;};
@@ -565,7 +553,6 @@ template <class T> hArray<T> &  hArray<T>::setSubSliceVec(vector<HInteger> & sta
 \brief Returns the number of dimensions that have been associated with the current array
  */
 template <class T> HInteger hArray<T>::getNumberOfDimensions(){
-  if (storage_p==NULL) return 0; //Check if vector was deleted elsewhere
   return (*storage_p->ndims_p);
 }
 
@@ -610,7 +597,6 @@ template <class T> HInteger hArray<T>::getSize(){
 \brief Returns the length of the underlying vector
  */
 template <class T> HInteger hArray<T>::length(){
-  if (storage_p==NULL) return 0; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return 0; //Check if vector was deleted elsewhere
   return storage_p->vec_p->size();
 }
@@ -621,8 +607,7 @@ new size differs, then the vector will be resized and slices and
 dimensions be reset to a flat (one dimensional) vector array.
  */
 template <class T> hArray<T> & hArray<T>::resize(HInteger newsize){
-  std::cout<<"calling resize"<<std::endl
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
+  std::cout<<"calling resize"<<std::endl;
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (newsize==(HInteger)storage_p->vec_p->size()) return *this;
   storage_p->vec_p->resize(newsize);
@@ -700,7 +685,6 @@ many slices the iteration should proceed.
 
  */
 template <class T> hArray<T> &   hArray<T>::loop(vector<HInteger> & start_element_index, HInteger start, HInteger end, HInteger increment){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
   if ( level <= -1 )  {ERROR("loop: dimensions are wrong!"); return *this;};
@@ -724,7 +708,6 @@ over which slices to loop.
 
  */
 template <class T> hArray<T> & hArray<T>::loopVector(vector<HInteger> & start_element_index, vector<HInteger> & vec){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   HInteger level=setLoopSlice(start_element_index);
   if ( level <= -1 ) {ERROR("loopVector: dimensions are wrong!"); return *this;};
@@ -760,7 +743,6 @@ index.
 
  */
 template <class T> HInteger hArray<T>::setLoopSlice(vector<HInteger> & start_element_index){
-  if (storage_p==NULL) return -1; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return -1; //Check if vector was deleted elsewhere
   HInteger level=start_element_index.size();
   if (level >= *storage_p->ndims_p)  {ERROR("setLoopSlice: dimensions are wrong!"); return -1;};
@@ -806,7 +788,6 @@ template <class T> hArray<T> &  hArray<T>::next(){
 \brief Get the unit name and prefix of the data array
  */
 template <class T> HString hArray<T>::getUnit(){
-  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
   return storage_p->unit.prefix + storage_p->unit.name;
 };
@@ -815,7 +796,6 @@ template <class T> HString hArray<T>::getUnit(){
 \brief Get the unit name of the data array
  */
 template <class T> HString hArray<T>::getUnitName(){
-  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
   return storage_p->unit.name;
 };
@@ -824,7 +804,6 @@ template <class T> HString hArray<T>::getUnitName(){
 \brief Get the unit prefix of the data array
  */
 template <class T> HString hArray<T>::getUnitPrefix(){
-  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return ""; //Check if vector was deleted elsewhere
   return storage_p->unit.prefix;
 };
@@ -833,7 +812,6 @@ template <class T> HString hArray<T>::getUnitPrefix(){
 \brief Take out the unit information
  */
 template <class T> hArray<T> &  hArray<T>::clearUnit(){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   setUnit("","");
   storage_p->unit.name="";
@@ -851,7 +829,6 @@ convention, the contents should be formatted as python input style.
 
  */
 template <class T> hArray<T> &  hArray<T>::setKey(HString key, HString contents){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   storage_p->keywords[key]=contents;
   addHistory("setKey",key + " = " + contents);
   return *this;
@@ -866,7 +843,6 @@ convention, the contents should be formatted as python input style.
 
  */
 template <class T> HString hArray<T>::getKey(HString key){
-  if (storage_p==NULL) return ""; //Check if vector was deleted elsewhere
   map<HString,HString>::iterator it=storage_p->keywords.find(key);
   if (it!=storage_p->keywords.end()) return it->second;
   return "";
@@ -878,7 +854,6 @@ template <class T> HString hArray<T>::getKey(HString key){
 
 
 template <class T> hArray<T> &  hArray<T>::setKeyPy(HString key, HPyObjectPtr pyobj){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   storage_p->keywords_py[key]=pyobj;
   addHistory("setKey",key + " = ..." );
   return *this;
@@ -890,7 +865,6 @@ template <class T> hArray<T> &  hArray<T>::setKeyPy(HString key, HPyObjectPtr py
 \brief Set the value of a particular key word from a python object.
 
 template <class T> HPyObject & hArray<T>::getKeyPy(HString key){
-  if (storage_p==NULL) return HPyObject(false); //Check if vector was deleted elsewhere
   map<HString,HPyObjectPtr>::iterator it=storage_p->keywords_py.find(key);
   if (it!=storage_p->keywords_py.end()) return *(it->second);
   return HPyObject(false);
@@ -903,7 +877,6 @@ template <class T> HPyObject & hArray<T>::getKeyPy(HString key){
 apropriate scale factor. Prefix is the
  */
 template <class T> hArray<T> &  hArray<T>::setUnit(HString prefix, HString name){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   map<HString,HNumber>::iterator factor_p=storage_p->unit.prefix_to_factor.find(prefix);
   if (factor_p==storage_p->unit.prefix_to_factor.end()) {
@@ -942,7 +915,6 @@ template <class T> HString hArray<T>::writeRaw()
   int raw_size = 0;
   char* raw_ptr = NULL;
 
-  if (storage_p==NULL) return "x1";
   if (storage_p->vec_p==NULL) return "x2";
 
   vector_size = storage_p->vec_p->size();
@@ -962,7 +934,6 @@ template <> HString hArray<bool>::writeRaw()
 {
   HString raw = "";
 
-  if (storage_p == NULL) return raw;
   if (storage_p->vec_p == NULL) return raw;
 
   std::vector<bool>::iterator it = storage_p->vec_p->begin();
@@ -990,7 +961,6 @@ template <class T> void hArray<T>::readRaw(HString raw)
   unsigned int raw_size = 0;
   char* raw_ptr = NULL;
 
-  if (storage_p==NULL) return;
   if (storage_p->vec_p==NULL) return;
 
   vector_size = storage_p->vec_p->size();
@@ -1008,7 +978,6 @@ template <class T> void hArray<T>::readRaw(HString raw)
 template <> void hArray<bool>::readRaw(HString raw)
 {
   // Sanity check
-  if (storage_p == NULL) return;
   if (storage_p->vec_p == NULL) return;
 
   int vec_len = storage_p->vec_p->size();
@@ -1036,7 +1005,6 @@ template <> void hArray<bool>::readRaw(HString raw)
 \brief Add a line of history information to the history vector
  */
 template <class T> hArray<T> & hArray<T>::addHistory(HString name, HString text){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (!storage_p->trackHistory) return *this;
   time_t rawtime;
@@ -1057,7 +1025,6 @@ template <class T> hArray<T> & hArray<T>::addHistory(HString name, HString text)
 \brief Return the history information
  */
 template <class T> vector<HString> & hArray<T>::getHistory(){
-  if (storage_p==NULL) {static vector<HString> h; return h;}; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) {static vector<HString> h; return h;}; //Check if vector was deleted elsewhere
   if (!storage_p->trackHistory) {static vector<HString> h; return h;};
   return storage_p->history;
@@ -1067,7 +1034,6 @@ template <class T> vector<HString> & hArray<T>::getHistory(){
 \brief Print the history information
  */
 template <class T> void hArray<T>::printHistory(){
-  if (storage_p==NULL)  return; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL)  return; //Check if vector was deleted elsewhere
   if (!storage_p->trackHistory) return;
   vector<HString>::iterator it=storage_p->history.begin();
@@ -1082,7 +1048,6 @@ template <class T> void hArray<T>::printHistory(){
 \brief Clear the history information
  */
 template <class T> hArray<T> &  hArray<T>::clearHistory(){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   storage_p->history.clear();
   return *this;
@@ -1092,7 +1057,6 @@ template <class T> hArray<T> &  hArray<T>::clearHistory(){
 \brief Set history tracking on or off
  */
 template <class T> hArray<T> &  hArray<T>::setHistory(bool on_or_off){
-  if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (!on_or_off) addHistory((HString)"setHistory",(HString)"History tracking switched off.");
   storage_p->trackHistory=on_or_off;
@@ -1105,7 +1069,6 @@ template <class T> hArray<T> &  hArray<T>::setHistory(bool on_or_off){
 \brief Check if history tracking is on or off
  */
 template <class T> bool hArray<T>::isTrackingHistory(){
-  if (storage_p==NULL) return false; //Check if vector was deleted elsewhere
   return(storage_p->trackHistory);
 }
 
