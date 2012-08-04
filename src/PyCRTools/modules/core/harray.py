@@ -129,8 +129,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
     if Type==None: Type=float
     if isVector(Type):  #Make a new array with reference to the input vector
         ary=type2array(basetype(Type))
-        ary.stored_vector=Type
-        ary.setVector(ary.stored_vector)
+        ary.__stored_vector=Type
+        ary.setVector(ary.__stored_vector)
     elif ishArray(Type):  # Just make a copy with reference to same vector
         ary=Type.newreference()
     else: # Create a new vector
@@ -146,8 +146,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
             size=-1
         vec=Vector(Type=Type, size=size)
         ary=type2array(basetype(vec))
-        ary.stored_vector=vec
-        ary.setVector(ary.stored_vector)
+        ary.__stored_vector=vec
+        ary.setVector(ary.__stored_vector)
     if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
     if not hasattr(ary.par,"hdr"): setattr(ary.par,"hdr",{})
     if type(dimensions) in [int,long]: ary.reshape([dimensions])
@@ -202,8 +202,6 @@ def hArray_repr(self, maxlen=100):
         name=', name="'+name+'"'
 
     # Compose string
-#    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+name+" # len="+str(len(self))+", slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+", vec -> "+VecToString(self.getVector()[self.getBegin():self.getEnd()],maxlen)+")"
-#    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),self.getBegin(),self.getEnd(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
     s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
 
     return s
@@ -226,6 +224,7 @@ def hArray_newreference(self):
     still access the same underlying vector in memory.
     """
     ary=self.shared_copy()
+    ary.__stored_vector = self.__stored_vector
     if hasattr(self,"par"): ary.par=self.par
     return ary
 
@@ -322,12 +321,11 @@ def hArray_vec(self):
     Retrieve the currently selected slice from the stored vector. If
     the entire vector is to be returned a reference to the internal
     data vector is returned. Otherwise, if a slice is active, a copy
-    of that slice is returned. Use getVector() to ensure you always
-    get only a reference.
+    of that slice is returned.
     """
     beg=self.getBegin(); end=self.getEnd()
-    if ((beg==0 )& (end==len(self))): return self.getVector()
-    else: return self.getVector()[beg:end]
+    if ((beg==0 )& (end==len(self))): return self.__stored_vector
+    else: return self.__stored_vector[beg:end]
 
 def hArray_array(self):
     """
@@ -337,8 +335,7 @@ def hArray_array(self):
     array. If the entire array is to be returned a new hArray with
     reference to the internal data vector is returned. Otherwise, if a
     slice is active, an hArray with a copy of that slice is
-    returned. Use hArray(getVector(),...) to ensure you always get
-    only a reference to the vector.
+    returned.
 
     NOTE: right now the dimensions for sliced arrays are not preserved
     properly. Needs more work!
@@ -357,9 +354,9 @@ def hArray_array(self):
         else:
             newdim=dim[len(self.__slice__):]
         beg=self.getBegin(); end=self.getEnd()
-        return hArray(self.getVector()[beg:end],dimensions=newdim,properties=self)
+        return hArray(self.__stored_vector[beg:end],dimensions=newdim,properties=self)
     else:
-        return hArray(self.getVector(),properties=self)
+        return hArray(self.__stored_vector,properties=self)
 
 def hArray_list(self):
     """
@@ -368,7 +365,7 @@ def hArray_list(self):
     Retrieve the currently selected slice from the stored vector as a
     python list.
     """
-    return list(self.getVector()[self.getBegin():self.getEnd()])
+    return list(self.__stored_vector[self.getBegin():self.getEnd()])
 
 def hArray_new(self):
     """

@@ -116,13 +116,14 @@ extern bool hArray_trackHistory_value;
 
 template <class T> void hArray<T>::new_storage(){
   storage_p=new storage_container;
-  storage_p->parent=this;
-  storage_p->ndims_p=NULL;
-  storage_p->size_p=NULL;
-  storage_p->dimensions_p=NULL;
-  storage_p->slice_sizes_p=NULL;
+  storage_p->refcount=1;
+  storage_p->ndims_p=new HInteger;
+  storage_p->size_p=new HInteger;
+  storage_p->dimensions_p=new std::vector<HInteger>;
+  storage_p->dimensions_p->reserve(2);
+  storage_p->slice_sizes_p=new std::vector<HInteger>;
+  storage_p->slice_sizes_p->reserve(2);
   storage_p->vec_p=NULL;
-  storage_p->vector_is_shared=false;
   storage_p->unit.prefix_to_factor["f"]=1e-15;
   storage_p->unit.prefix_to_factor["p"]=1e-12;
   storage_p->unit.prefix_to_factor["n"]=1e-9;
@@ -149,50 +150,17 @@ template <class T> void hArray<T>::new_storage(){
   storage_p->trackHistory=hArray_trackHistory_value;
 }
 
-template <class T> void hArray<T>::initialize_storage(){
-  if (storage_p==NULL) new_storage();
-  if (storage_p->ndims_p==NULL) storage_p->ndims_p=new HInteger;
-  if (storage_p->size_p==NULL) storage_p->size_p=new HInteger;
-  if (storage_p->dimensions_p==NULL) {
-    storage_p->dimensions_p=new std::vector<HInteger>;
-    storage_p->dimensions_p->reserve(2);
-  };
-  if (storage_p->slice_sizes_p==NULL) {
-    storage_p->slice_sizes_p=new std::vector<HInteger>;
-    storage_p->slice_sizes_p->reserve(2);
-  };
-  if (storage_p->vec_p==NULL) {
-    storage_p->vec_p=new std::vector<T>;
-    storage_p->vec_p->reserve(1);
-    addHistory((HString)"initialize_storage",(HString)"Vector of type "+typeid(*storage_p->vec_p).name()+" created.");
-  };
-}
-
-template <class T> void hArray<T>::delete_storage(){
-  if (!array_is_shared) {
-    if (storage_p->ndims_p!=NULL) {delete storage_p->ndims_p; storage_p->ndims_p=NULL;}
-    if (storage_p->size_p!=NULL) {delete storage_p->size_p; storage_p->size_p=NULL;}
-    if (storage_p->dimensions_p!=NULL) {delete storage_p->dimensions_p; storage_p->dimensions_p=NULL;}
-    if (storage_p->slice_sizes_p!=NULL) {delete storage_p->slice_sizes_p; storage_p->slice_sizes_p=NULL;}
-    delVector();
-    delete storage_p;
-  }
-  storage_p=NULL;
-}
-
 template <class T> hArray<T>::hArray(){
-  copycount=0;
+  std::cout<<"calling constructor"<<std::endl;
   init();
-  initialize_storage();
+  new_storage();
 }
 
 template <class T> hArray<T>::hArray(std::vector<T> & vec){
-  copycount=0;
+  std::cout<<"Calling unexpected constructor"<<std::endl;
   init();
-  storage_p=new storage_container;
+  new_storage();
   setVector(vec);
-  storage_p->vector_is_shared=true;
-  initialize_storage();
 }
 
 /*!
@@ -201,12 +169,14 @@ template <class T> hArray<T>::hArray(std::vector<T> & vec){
 */
 
 template <class T> hArray<T>::hArray(storage_container * sptr){
+  std::cout<<"calling shared constructor"<<std::endl;
   if (sptr==NULL) return;
-  copycount=sptr->parent->copycount+1;
   init();
   storage_p=sptr;
+  std::cout<<"refcount was "<<storage_p->refcount;
+  storage_p->refcount = storage_p->refcount + 1;
+  std::cout<<" now is "<<storage_p->refcount<<std::endl;
   array_is_shared=true;
-  initialize_storage();
   setSlice(0,storage_p->vec_p->size());
 }
 
@@ -222,19 +192,25 @@ template <class T> hArray<T> & hArray<T>::shared_copy(){
   return *ary_p;
 }
 
-template <class T> void hArray<T>::delVector(){
-  if (storage_p==NULL) return; //Check if vector was deleted elsewhere
-  if ((storage_p->vec_p != NULL) && !storage_p->vector_is_shared) {
-    addHistory((HString)"delVector",(HString)"Vector of type"+typeid(*storage_p->vec_p).name()+" and size="+hf2string((HInteger)storage_p->vec_p->size())+" deleted.");
-    delete storage_p->vec_p;
-  }
-  storage_p->vec_p=NULL;
-  addHistory((HString)"delVector",(HString)"Reference to Vector of type"+typeid(*storage_p->vec_p).name()+" deleted.");
-}
-
 template <class T> hArray<T>::~hArray(){
-  //  cout << "Deleting hArray ptr=" << reinterpret_cast<void*>(this) << endl;
-  delete_storage();
+  if (storage_p != NULL)
+  {
+    if (storage_p->refcount == 1)
+    {
+      std::cout<<"refcount is "<<storage_p->refcount<<" deleting storage"<<std::endl;
+      delete storage_p->ndims_p;
+      delete storage_p->size_p;
+      delete storage_p->dimensions_p;
+      delete storage_p->slice_sizes_p;
+      delete storage_p;
+    }
+    else
+    {
+      std::cout<<"refcount was "<<storage_p->refcount;
+      storage_p->refcount = storage_p->refcount - 1;
+      std::cout<<" now is "<<storage_p->refcount<<std::endl;
+    }
+  }
 }
 
 /*!
@@ -245,13 +221,11 @@ this class!!
 
 */
 template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
-  initialize_storage();
-  delVector();
+  std::cout<<"calling setVector"<<std::endl;
   storage_p->vec_p=&vec;
   (*storage_p->size_p)=vec.size();
   setDimensions1((*storage_p->size_p));
   setSlice(0,(*storage_p->size_p));
-  storage_p->vector_is_shared=true;
   return *this;
 }
 
@@ -647,6 +621,7 @@ new size differs, then the vector will be resized and slices and
 dimensions be reset to a flat (one dimensional) vector array.
  */
 template <class T> hArray<T> & hArray<T>::resize(HInteger newsize){
+  std::cout<<"calling resize"<<std::endl
   if (storage_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (storage_p->vec_p==NULL) return *this; //Check if vector was deleted elsewhere
   if (newsize==(HInteger)storage_p->vec_p->size()) return *this;
@@ -1155,12 +1130,10 @@ void hArray_trackHistory(HBool on){
     hArray<TYPE> ary1; _H_NL_\
     hArray<TYPE> ary(vec); _H_NL_\
     pretty_vec(ary,0);	\
-    ary.delVector();_H_NL_\
     ary.shared_copy();_H_NL_\
     ary.setVector(vec);		_H_NL_\
     ary.getVector();		_H_NL_\
     ary.getDimensions();		_H_NL_\
-    ary.calcSizes();		_H_NL_\
     ary.getSizes();		_H_NL_\
     ary.setDimensions1(0);		_H_NL_\
     ary.setDimensions2(0,0);		_H_NL_\

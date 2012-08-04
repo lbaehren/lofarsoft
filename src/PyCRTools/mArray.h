@@ -33,7 +33,7 @@
 template <class T>
   class hArray {
 
-  public:
+  private:
 
   struct unit_container {
     HNumber scale_factor;
@@ -43,13 +43,12 @@ template <class T>
   };
 
   struct storage_container {
+    HInteger refcount;
     HInteger *ndims_p;
     HInteger *size_p;
     std::vector<HInteger> * dimensions_p;
     std::vector<HInteger> * slice_sizes_p;
     std::vector<T>* vec_p;
-    hArray* parent;
-    bool vector_is_shared;
     unit_container unit;
     bool trackHistory;
     std::vector<HString> history;
@@ -57,22 +56,36 @@ template <class T>
     std::map<HString,HPyObjectPtr> keywords_py;
   };
 
+    storage_container * storage_p;
+    bool array_is_shared;
+    HInteger copycount;
+    HInteger slice_begin, slice_end, slice_size;
+    HInteger loop_slice_begin, loop_slice_end, loop_slice_size, loop_lower_level_size;
+    HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
+    HInteger subslice_level,subslice_start,subslice_end;
+    std::vector<HInteger> subslice_vec_start,subslice_vec_end;
+    std::vector<HInteger>::iterator subslice_start_it,subslice_end_it;
+    std::vector<HInteger> index_vector;
+    bool loop_over_indexvector;
+    bool loop_next;
+    bool doiterate;
+
+    hArray(storage_container * sptr);
     void init();
-    void initialize_storage();
+    void new_storage();
+    void calcSizes();
+
+  public:
+
     hArray();
     hArray(std::vector<T> & vec);
-    hArray(storage_container * sptr);
     ~hArray();
-    void delVector();
-    void delete_storage();
-    void new_storage();
     hArray<T> & shared_copy();
     hArray<T> & resize(HInteger newsize);
     hArray<T> & setVector(std::vector<T> & vec);
     std::vector<T> & getVector();
     std::vector<HInteger> & getDimensions();
     std::vector<HInteger> & getSizes();
-    void calcSizes();
     void setDimensions1(HInteger dim0);
     void setDimensions2(HInteger dim0, HInteger dim1);
     void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
@@ -128,28 +141,7 @@ template <class T>
     hArray<T> & setKey(HString key, HString contents);
     HString writeRaw();
     void readRaw(HString raw);
-    //hArray<T> & setKeyPy(HString key, HPyObjectPtr pyobj);
-    //HPyObject & getKeyPy(HString key);
 
-    //These are the basic parameters describing the data
-    //structure. They can be shared
-
-    storage_container * storage_p;
-    bool array_is_shared;
-
-    HInteger copycount;
-
-  private:
-    HInteger slice_begin, slice_end, slice_size;
-    HInteger loop_slice_begin, loop_slice_end, loop_slice_size, loop_lower_level_size;
-    HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
-    HInteger subslice_level,subslice_start,subslice_end;
-    std::vector<HInteger> subslice_vec_start,subslice_vec_end;
-    std::vector<HInteger>::iterator subslice_start_it,subslice_end_it;
-    std::vector<HInteger> index_vector;
-    bool loop_over_indexvector;
-    bool loop_next;
-    bool doiterate;
   };
 
 // ========================================================================
