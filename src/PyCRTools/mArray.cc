@@ -101,7 +101,6 @@ template <class T> void hArray<T>::init(){
   slice_begin=0;
   slice_end=0;
   slice_size=0;
-  array_is_shared=false;
   doiterate=false;
   loop_slice_begin=0; loop_slice_end=0; loop_slice_size=0; loop_lower_level_size=0;
   loop_slice_start_offset=0; loop_slice_end_offset=-1;
@@ -176,7 +175,6 @@ template <class T> hArray<T>::hArray(storage_container * sptr){
   std::cout<<"refcount was "<<storage_p->refcount;
   storage_p->refcount = storage_p->refcount + 1;
   std::cout<<" now is "<<storage_p->refcount<<std::endl;
-  array_is_shared=true;
   setSlice(0,storage_p->vec_p->size());
 }
 
@@ -213,7 +211,7 @@ template <class T> hArray<T>::~hArray(){
   }
   else
   {
-    throw PyCR::MemoryError("hArray has no storage this can never happen!");
+    throw PyCR::MemoryError("hArray has no storage when calling destructor this can never happen!");
   }
 }
 
@@ -228,8 +226,11 @@ template <class T> hArray<T> &   hArray<T>::setVector(std::vector<T> & vec){
   std::cout<<"calling setVector"<<std::endl;
   storage_p->vec_p=&vec;
   (*storage_p->size_p)=vec.size();
-  setDimensions1((*storage_p->size_p));
+  (*storage_p->ndims_p)=1;
+  (*storage_p->dimensions_p).resize(1);
+  (*storage_p->dimensions_p)[0]=vec.size();
   setSlice(0,(*storage_p->size_p));
+  calcSizes();
   return *this;
 }
 
@@ -265,209 +266,237 @@ template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
   return *(storage_p->slice_sizes_p);
 }
 
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+"]");
-  (*storage_p->ndims_p)=1;
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if (storage_p->vec_p->size() != (uint)(*storage_p->size_p)) storage_p->vec_p->resize((*storage_p->size_p));
+template <class T> void hArray<T>::setDimensions(boost::python::list dims)
+{
+  const int ndims = boost::python::extract<int>(dims.attr("__len__")());
+
+  HInteger size = 1;
+  for (int i=0; i<ndims; i++)
+  {
+    size *= boost::python::extract<HInteger>(dims[i]);
+  }
+
+  if (size == (*storage_p->size_p))
+  {
+    (*storage_p->dimensions_p).resize(ndims);
+
+    for (int i=0; i<ndims; i++)
+    {
+      (*storage_p->dimensions_p)[i] = boost::python::extract<HInteger>(dims[i]);
+    }
+  }
+  else
+  {
+    throw PyCR::ValueError("Total size of new array must not be changed.");
+  }
+
   setSlice(0,(*storage_p->size_p));
   calcSizes();
-  return ;
 }
 
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+"]");
-  (*storage_p->ndims_p)=2;
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=3;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=4;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=5;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=6;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->dimensions_p)[5]=dim5;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4,HInteger dim5, HInteger dim6){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=7;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->dimensions_p)[5]=dim5;
-  (*storage_p->dimensions_p)[6]=dim6;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=8;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->dimensions_p)[5]=dim5;
-  (*storage_p->dimensions_p)[6]=dim6;
-  (*storage_p->dimensions_p)[7]=dim7;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=9;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+","+hf2string(dim8)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->dimensions_p)[5]=dim5;
-  (*storage_p->dimensions_p)[6]=dim6;
-  (*storage_p->dimensions_p)[7]=dim7;
-  (*storage_p->dimensions_p)[8]=dim8;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
-/*!
-\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
- */
-template <class T> void  hArray<T>::setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4,HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9){
-  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
-  (*storage_p->ndims_p)=10;
-  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+","+hf2string(dim8)+","+hf2string(dim9)+"]");
-  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
-  (*storage_p->dimensions_p)[0]=dim0;
-  (*storage_p->dimensions_p)[1]=dim1;
-  (*storage_p->dimensions_p)[2]=dim2;
-  (*storage_p->dimensions_p)[3]=dim3;
-  (*storage_p->dimensions_p)[4]=dim4;
-  (*storage_p->dimensions_p)[5]=dim5;
-  (*storage_p->dimensions_p)[6]=dim6;
-  (*storage_p->dimensions_p)[7]=dim7;
-  (*storage_p->dimensions_p)[8]=dim8;
-  (*storage_p->dimensions_p)[9]=dim9;
-  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
-  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
-  setSlice(0,(*storage_p->size_p));
-  calcSizes();
-  return ;
-}
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions1(HInteger dim0){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+"]");
+//  (*storage_p->ndims_p)=1;
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if (storage_p->vec_p->size() != (uint)(*storage_p->size_p)) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions2(HInteger dim0, HInteger dim1){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+"]");
+//  (*storage_p->ndims_p)=2;
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=3;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=4;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=5;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->dimensions_p)[4]=dim4;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=6;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->dimensions_p)[4]=dim4;
+//  (*storage_p->dimensions_p)[5]=dim5;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4,HInteger dim5, HInteger dim6){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=7;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->dimensions_p)[4]=dim4;
+//  (*storage_p->dimensions_p)[5]=dim5;
+//  (*storage_p->dimensions_p)[6]=dim6;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=8;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->dimensions_p)[4]=dim4;
+//  (*storage_p->dimensions_p)[5]=dim5;
+//  (*storage_p->dimensions_p)[6]=dim6;
+//  (*storage_p->dimensions_p)[7]=dim7;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+//
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=9;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+","+hf2string(dim8)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->dimensions_p)[4]=dim4;
+//  (*storage_p->dimensions_p)[5]=dim5;
+//  (*storage_p->dimensions_p)[6]=dim6;
+//  (*storage_p->dimensions_p)[7]=dim7;
+//  (*storage_p->dimensions_p)[8]=dim8;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
+///*!
+//\brief Sets the dimensions of the array. Last index runs fastest, i.e., from left to right one goes from large to small chunks in memory.
+// */
+//template <class T> void  hArray<T>::setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4,HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9){
+//  if (storage_p->vec_p==NULL) return ; //Check if vector was deleted elsewhere
+//  (*storage_p->ndims_p)=10;
+//  addHistory((HString)"setDimension",(HString)"Dimensions set to ["+hf2string(dim0)+","+hf2string(dim1)+","+hf2string(dim2)+","+hf2string(dim3)+","+hf2string(dim4)+","+hf2string(dim5)+","+hf2string(dim6)+","+hf2string(dim7)+","+hf2string(dim8)+","+hf2string(dim9)+"]");
+//  if ((*storage_p->dimensions_p).size()!=(uint)(*storage_p->ndims_p)) (*storage_p->dimensions_p).resize((*storage_p->ndims_p));
+//  (*storage_p->dimensions_p)[0]=dim0;
+//  (*storage_p->dimensions_p)[1]=dim1;
+//  (*storage_p->dimensions_p)[2]=dim2;
+//  (*storage_p->dimensions_p)[3]=dim3;
+//  (*storage_p->dimensions_p)[4]=dim4;
+//  (*storage_p->dimensions_p)[5]=dim5;
+//  (*storage_p->dimensions_p)[6]=dim6;
+//  (*storage_p->dimensions_p)[7]=dim7;
+//  (*storage_p->dimensions_p)[8]=dim8;
+//  (*storage_p->dimensions_p)[9]=dim9;
+//  (*storage_p->size_p)=hProduct<HInteger>((*storage_p->dimensions_p));
+//  if ((uint)(*storage_p->size_p) != storage_p->vec_p->size()) storage_p->vec_p->resize((*storage_p->size_p));
+//  setSlice(0,(*storage_p->size_p));
+//  calcSizes();
+//  return ;
+//}
 
 /*!
 \brief Sets begin and end the currently active slice using integer offsets from the begin of the stored vector. Use (0,size(vector)) to get the full vector
@@ -1089,6 +1118,7 @@ void hArray_trackHistory(HBool on){
 #define HFPP_DUMMYCALL_MACRO(R,DATA,TYPE) void BOOST_PP_CAT(dummycall,TYPE) (){ _H_NL_\
     std::vector<TYPE> vec;	   _H_NL_\
     std::vector<HInteger> ivec;	   _H_NL_\
+    boost::python::list list;	   _H_NL_\
     hArray<TYPE> ary0(); _H_NL_\
     hArray<TYPE> ary1; _H_NL_\
     hArray<TYPE> ary(vec); _H_NL_\
@@ -1098,16 +1128,7 @@ void hArray_trackHistory(HBool on){
     ary.getVector();		_H_NL_\
     ary.getDimensions();		_H_NL_\
     ary.getSizes();		_H_NL_\
-    ary.setDimensions1(0);		_H_NL_\
-    ary.setDimensions2(0,0);		_H_NL_\
-    ary.setDimensions3(0,0,0);		_H_NL_\
-    ary.setDimensions4(0,0,0,0);		_H_NL_\
-    ary.setDimensions5(0,0,0,0,0);		_H_NL_\
-    ary.setDimensions6(0,0,0,0,0,0);		_H_NL_\
-    ary.setDimensions7(0,0,0,0,0,0,0);		_H_NL_\
-    ary.setDimensions8(0,0,0,0,0,0,0,0);		_H_NL_\
-    ary.setDimensions9(0,0,0,0,0,0,0,0,0);		_H_NL_\
-    ary.setDimensions10(0,0,0,0,0,0,0,0,0,0);		_H_NL_\
+    ary.setDimensions(list);		_H_NL_\
     ary.setSlice(0,0);				_H_NL_\
     ary.setSliceVector(ivec);			_H_NL_\
     ary.getSubSliceStart();			_H_NL_\

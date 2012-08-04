@@ -57,8 +57,6 @@ template <class T>
   };
 
     storage_container * storage_p;
-    bool array_is_shared;
-    HInteger copycount;
     HInteger slice_begin, slice_end, slice_size;
     HInteger loop_slice_begin, loop_slice_end, loop_slice_size, loop_lower_level_size;
     HInteger loop_start, loop_end, loop_increment, loop_i, loop_nslice, loop_maxn;
@@ -86,16 +84,17 @@ template <class T>
     std::vector<T> & getVector();
     std::vector<HInteger> & getDimensions();
     std::vector<HInteger> & getSizes();
-    void setDimensions1(HInteger dim0);
-    void setDimensions2(HInteger dim0, HInteger dim1);
-    void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
-    void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
-    void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
-    void setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5);
-    void setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6);
-    void setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7);
-    void setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8);
-    void setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9);
+    void setDimensions(boost::python::list dims);
+//    void setDimensions1(HInteger dim0);
+//    void setDimensions2(HInteger dim0, HInteger dim1);
+//    void setDimensions3(HInteger dim0, HInteger dim1, HInteger dim2);
+//    void setDimensions4(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3);
+//    void setDimensions5(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4);
+//    void setDimensions6(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5);
+//    void setDimensions7(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6);
+//    void setDimensions8(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7);
+//    void setDimensions9(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8);
+//    void setDimensions10(HInteger dim0, HInteger dim1, HInteger dim2, HInteger dim3, HInteger dim4, HInteger dim5, HInteger dim6, HInteger dim7, HInteger dim8, HInteger dim9);
     HInteger getNumberOfDimensions();
     hArray<T> & setSlice(HInteger beg, HInteger end=-1);
     hArray<T> & setSliceVector(std::vector<HInteger> & index_vector);
@@ -158,16 +157,7 @@ template <class T>
     .def("getDimensions",&hArray<TYPE>::getDimensions,return_internal_reference<>()) \
     .def("getSizes",&hArray<TYPE>::getSizes,return_internal_reference<>()) \
     .def("setVector",&hArray<TYPE>::setVector,return_internal_reference<>())\
-    .def("setDimensions",&hArray<TYPE>::setDimensions1)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions2)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions3)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions4)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions5)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions6)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions7)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions8)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions9)			\
-    .def("setDimensions",&hArray<TYPE>::setDimensions10)			\
+    .def("setDimensions",&hArray<TYPE>::setDimensions)			\
     .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>())				\
     .def("setSliceVector",&hArray<TYPE>::setSliceVector,return_internal_reference<>())				\
     .def("setSubSlice",&hArray<TYPE>::setSubSlice,return_internal_reference<>())				\

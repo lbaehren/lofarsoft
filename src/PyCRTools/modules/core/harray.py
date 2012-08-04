@@ -243,14 +243,7 @@ def hArray_reshape(self, dimensions):
     """Reshape array to new dimensions if total number of elements is left
     unchanged.
     """
-    apply(self.setDimensions,dimensions)
-
-#   Raise ValueError otherwise. No, it is perfectly legal to rechange the vector if you want to ...
-#
-#    if reduce(lambda x, y : x*y, dimensions) == self.getSize():
-#
-#    else:
-#        raise ValueError("Total size of new array must not be changed.")
+    self.setDimensions(list(dimensions))
 
 def hArray_return_slice_start(val):
     """ Reduces a slice to its start value"""
