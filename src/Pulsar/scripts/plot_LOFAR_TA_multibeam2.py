@@ -2,8 +2,9 @@
 #
 import matplotlib
 matplotlib.use('Agg') 
+import matplotlib.pyplot as plt
+import matplotlib.pylab as plb
 import matplotlib.ticker as ticker
-from pylab import *
 import numpy as np
 import sys
 from operator import indexOf
@@ -103,22 +104,23 @@ if __name__ == '__main__':
 	#c = c**0.25/max(c**0.25)
 	#c = np.log(c)
 
-	ax = subplot(111)
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
 	#add the beam numbers per beam onto the plot as text
-	scatter(x,y,s=s, marker='o', c=c, hold='on')
+	plt.scatter(x,y,s=s, marker='o', c=c, hold='on')
 	for i in np.arange(np.size(x)):
-		text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
+		plt.text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
 
 	#axis("equal")
-	xlim(xmin, xmax)
-	ylim(ymin, ymax)
+	plt.xlim(xmin, xmax)
+	plt.ylim(ymin, ymax)
 
-	xlabel("Right Ascension Offset [deg]\nOBSID=" + str(obsid), fontsize=12)
-	ylabel("Declination Offset [deg]", fontsize=12)
+	plt.xlabel("Right Ascension Offset [deg]\nOBSID=" + str(obsid), fontsize=12)
+	plt.ylabel("Declination Offset [deg]", fontsize=12)
 
 	# label the plot
-	suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + "\n Simultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
-	cb = colorbar()
+	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(c)) + "\n Simultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
+	cb = plb.colorbar()
 	cb.ax.set_ylabel("Cumulative S/N", fontsize=14)
 	# rotating labels on colorbar 90 deg
 	#for label in cb.ax.get_yticklabels():
@@ -130,34 +132,35 @@ if __name__ == '__main__':
 
 	# write the linear scale output file
 	file = open(options.outlinscale,"w")
-	savefig(file)
+	plt.savefig(file)
 	file.close()
 
 	#### LOG plot ####
 
 	# clear the plotting and now set up the log plot
-	clf()
+	plt.clf()
 
 	# log of the chi-sq values for the lot plot
 	c = Chisqs[:,1]
 	c = np.log(c)
 
-	ax = subplot(111)
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
 	#add the beam numbers per beam onto the plot as text
-	scatter(x,y,s=s, marker='o', c=c, hold='on')
+	plt.scatter(x,y,s=s, marker='o', c=c, hold='on')
 	for i in np.arange(np.size(x)):
-		text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
+		plt.text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
 
 	#axis("equal")
-	xlim(xmin, xmax)
-	ylim(ymin, ymax)
+	plt.xlim(xmin, xmax)
+	plt.ylim(ymin, ymax)
 
-	xlabel("Right Ascension Offset [deg]\nOBSID=" + str(obsid), fontsize=12)
-	ylabel("Declination Offset [deg]", fontsize=12)
+	plt.xlabel("Right Ascension Offset [deg]\nOBSID=" + str(obsid), fontsize=12)
+	plt.ylabel("Declination Offset [deg]", fontsize=12)
 
 	# label the plot
-	suptitle("Cumulative S/N of PSR " + options.target + " in " + str(size(c)) + "\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
-	cb = colorbar()
+	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(c)) + "\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
+	cb = plb.colorbar()
 	cb.ax.set_ylabel("Cumulative S/N", fontsize=14)
 	# rotating labels on colorbar 90 deg
 	#for label in cb.ax.get_yticklabels():
@@ -168,11 +171,11 @@ if __name__ == '__main__':
 	ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
 
 	#use this to send plot to stdout
-	#show()
+	#plt.show()
 
 	# write the log scale output file
 	file = open(options.outlogscale,"w")
-	savefig(file)
+	plt.savefig(file)
 	file.close()
 
 	print "Writing output plots: " + str(options.outlogscale) + " " + str(options.outlinscale)
