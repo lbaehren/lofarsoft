@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 import matplotlib
-matplotlib.use('TkAgg') 
+matplotlib.use('Agg') 
 import matplotlib.ticker as ticker
 from pylab import *
 import numpy as np
