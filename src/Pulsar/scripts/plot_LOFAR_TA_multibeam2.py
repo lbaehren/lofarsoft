@@ -38,15 +38,22 @@ if __name__ == '__main__':
 
 	#Grab the RAs and DECs ;  note these are NOT in numerical order of beam number
 	#Observation.Beam[0].TiedArrayBeam[139].angle1 = 0.00755693767342
+	# also checking for IS beams
+	nisbeams = 0
 	file = open(options.parset,"r")
 	for line in file.readlines():
 		if line.find("Observation.Beam[%s].Tied" % (options.sap)) >= 0 and line.find("angle1") >= 0:
 			RAs.append([int(line.split("TiedArrayBeam[")[1].split("]")[0]),float(line.split()[-1])])
 		if line.find("Observation.Beam[%s].Tied" % (options.sap)) >= 0 and line.find("angle2") >= 0:
 			DECs.append([int(line.split("TiedArrayBeam[")[1].split("]")[0]),float(line.split()[-1])])
+		# check "coherent" attribute of the beam
+		if line.find("Observation.Beam[%s].Tied" % (options.sap)) >= 0 and line.find("coherent") >= 0:
+			beamtype = line.split()[-1].lower()[:1]
+			if beamtype == 'f': nisbeams += 1
 	file.close()
 	RAs = np.array(RAs)
 	DECs = np.array(DECs)
+	nbeams = len(RAs) - nisbeams
 
 	line=options.parset
 	obsid=str(line.split(".")[0])
@@ -119,7 +126,7 @@ if __name__ == '__main__':
 	plt.ylabel("Declination Offset [deg]", fontsize=12)
 
 	# label the plot
-	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(c)) + "\n Simultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
+	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(x)) + " (out of " + str(nbeams) + ")\nSimultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
 	cb = plb.colorbar()
 	cb.ax.set_ylabel("Cumulative S/N", fontsize=14)
 	# rotating labels on colorbar 90 deg
@@ -157,7 +164,7 @@ if __name__ == '__main__':
 	plt.ylabel("Declination Offset [deg]", fontsize=12)
 
 	# label the plot
-	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(c)) + "\n Simultaneous Tied-Array Beams [Log Scale]", fontsize=14)
+	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(x)) + " (out of " + str(nbeams) + ")\nSimultaneous Tied-Array Beams [Log Scale]", fontsize=14)
 	cb = plb.colorbar()
 	cb.ax.set_ylabel("Cumulative S/N", fontsize=14)
 	# rotating labels on colorbar 90 deg
