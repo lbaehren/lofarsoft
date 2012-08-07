@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 #include "fitsio.h"
 #include "patricklib.h"
 #include "patricklib_lofar.c"
@@ -18,6 +19,7 @@
 be "floatswapped" (line 119). Same applies for convert_collapse() too.*/
 
 char OUTNAME[248] = "PULSAR_OBS";
+char gainsfile[248] = "";
 int BEAMS = 1;
 int SUBBANDS = 1;
 int CHANNELS = 1;
@@ -54,6 +56,70 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose);
 /* separator is "=" for presto and ":" for sigproc */
 char *get_ptr_entry(char *str, char **txt, int nrlines, char *separator);
 
+// function to create gains table
+double *create_gains_table(double *gains, char *gainsfile, long nchan, double fres, double lowfreq) {
+
+ double **amp;
+ struct stat info;
+ int status, in, ii, kk, jj, jj_start=0;
+ int size;
+ double freq;
+
+ status = stat(gainsfile, &info);
+ if (status != 0) {
+   fprintf (stderr, "2f2fits: Can't get stat info!\n");
+   return 0;
+ }
+ size = info.st_size / 8;
+ amp = malloc(2 * sizeof (double *));
+ for (ii=0; ii<2; ii++) amp[ii] = malloc(size/2 * sizeof(double));
+
+ in = open(gainsfile, O_RDONLY);
+ if (in == -1) {
+  fprintf (stderr, "2bf2fits: Can't open file '%s' with gains!\n", gainsfile);
+  return 0;
+ }
+ lseek(in, 0, SEEK_SET);
+ for (ii=0;ii<size/2;ii++) {
+  read(in, &amp[0][ii], 8);
+  read(in, &amp[1][ii], 8);
+ }
+ close(in);
+
+ // determine the closest lowest freq
+ if (lowfreq < amp[0][0]) {
+  for (jj=0; jj<size/2; jj++) {
+   if (lowfreq >= amp[0][jj]) {
+    jj_start = jj;
+    break;
+   }
+  }
+ } else {
+  for (jj=0; jj<size/2; jj++) {
+   if (lowfreq < amp[0][jj]) {
+    jj_start = jj - 1;
+    break;
+   }
+  }
+ }
+
+ // calculating the gain
+ for (kk=0; kk<nchan; kk++) {
+  freq=lowfreq+kk*fres;
+  for (jj=jj_start; jj<size/2; jj++) {
+   if (freq > amp[0][jj]) continue;
+   gains[kk] = amp[1][jj-1] + (amp[1][jj] - amp[1][jj-1])*((freq-amp[0][jj-1])/(amp[0][jj]-amp[0][jj-1]));
+   break;
+  }
+   // then assigning the gain from the last available frequency
+   if (freq > amp[0][size/2-1]) gains[kk] = amp[1][size/2-1];
+ }
+
+ for (ii=0; ii<2; ii++) free (amp[ii]);
+ free(amp);
+ return gains;
+}
+
 void usage(){
   //  puts("Just wanted to make sure the new version is picked up.");
   puts("Syntax: 2bf2fits [options] SB*.MS");
@@ -73,6 +139,7 @@ void usage(){
   puts("-trunc\t\tTruncate output after this number of blocks. Only works with -CS option.");
   puts("-noZap0\t\tDo NOT zap the first frequency channel in each subband");
   puts("-nsubs\t\tThe number of subbands in the input file.");
+  puts("-gains\t\tSpecify the file with the gains");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -422,7 +489,7 @@ void *stokesdata_h5_ptr = NULL;
 
 /* Returns 1 if successful, 0 on error */
 /* Only for H5 data */
-int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks, long truncNrBlocks)
+int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks, long truncNrBlocks, double *gains)
 {
 
   /* Used to be SAMPLES|2, but that is apparently no longer the case
@@ -506,6 +573,14 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
    subbandnr_end = SUBBANDS-1;
  }
 
+
+/*
+ float *spectrum;
+ spectrum = (float *)malloc((subbandnr_end - subbandnr_start + 1)*CHANNELS*sizeof(float));
+ if (!spectrum) { printf("not enough memory!\n"); exit(1); }
+ memset(spectrum, 0, (subbandnr_end - subbandnr_start + 1)*CHANNELS*sizeof(float));
+*/
+
  x = 0;
  currentblock = 0;
  fseek( input, 0, SEEK_SET );
@@ -531,10 +606,28 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	       stokesdata_h5[i].samples[b][t][nsub][c][s] = 0.0;
 	     }
 	   }
+//           if (isfinite(stokesdata_h5[i].samples[beamnr][t][nsub][c][0]))
+//            spectrum[(nsub-subbandnr_start)*CHANNELS+c] += (float)stokesdata_h5[i].samples[beamnr][t][nsub][c][0] / gains[(nsub-subbandnr_start)*CHANNELS+c];
 	 }
        }
      }
    }
+
+
+/*
+  int oo;
+  oo = open("spectrum-selfgains.dat", O_CREAT | O_RDWR | O_TRUNC, 0644);
+  lseek(oo, 0, SEEK_SET);
+//  for (i=0; i<(subbandnr_end-subbandnr_start); i++)
+//    spectrum[i] /= gains[i*CHANNELS];
+//   printf("%f\n", spectrum[i]);
+  write(oo, spectrum, (subbandnr_end - subbandnr_start + 1)*CHANNELS*sizeof(float));
+  close(oo);
+
+  free (spectrum);
+  exit (0);
+*/
+
    
    /* If no more data, sto while loop */
    if( !num ) {
@@ -574,7 +667,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	   float value;
 	   float mtemp;
-	   value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	   value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
 	   // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
 
 	   // Try median
@@ -644,7 +737,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	   for( i = 0; i < num; i++ ) {
 	     for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	       float value;
-	       value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	       value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
 	       // if (nsub == 237 && c == 1) printf("BWS AVG timeT %d num %d channel %d nsub %ld value %f sum %f %f %f\n",timeT,i,c,nsub,value,sum,average[nsub*CHANNELS+c],rms[nsub*CHANNELS+c]);
 	       if(is_append) {
 		 if (!isnan( value ) && value > average[nsub*CHANNELS+c] - 3.0 * rms[nsub*CHANNELS+c] && value < average[nsub*CHANNELS+c] + 3.0 *rms[nsub*CHANNELS+c]) 
@@ -734,7 +827,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
          float sum;
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
-	 sum = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	 sum = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
 	 if(is_append) {
 	   sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[nsub*CHANNELS+c] : sum;
 	 }else {
@@ -806,6 +899,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        } // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
      }
      }
+
    
      /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
      if(verbose) {
@@ -872,7 +966,7 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
 /* Returns 1 if successful, 0 on error */
 /* Only for CS data */
-int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, long skipNrBlocks, long truncNrBlocks)
+int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, long skipNrBlocks, long truncNrBlocks, double *gains)
 {
   typedef struct {
     unsigned	sequence_number;
@@ -1041,11 +1135,11 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
      float ms = 0.0f;
      int N = 0;
      unsigned validsamples = 0;
-     float prev = stokesdata[0].samples[0][s][c];
+     float prev = stokesdata[0].samples[0][s][c] / gains[s*CHANNELS+c];
      /* compute average */
      for( i = 0; i < num; i++ ) {
        for( timeT = 0; timeT < SAMPLES; timeT++ ) {
-         const float value = stokesdata[i].samples[timeT][s][c];
+         const float value = stokesdata[i].samples[timeT][s][c] / gains[s*CHANNELS+c];
 	 if(prev < 1){
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
@@ -1145,7 +1239,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
        ac=s*CHANNELS+c;
        for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
-         sum = stokesdata[i].samples[timeT][s][c];
+         sum = stokesdata[i].samples[timeT][s][c] / gains[s*CHANNELS+c];
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[ac] : sum;
@@ -1247,7 +1341,7 @@ int convert_nocollapse_CS(datafile_definition fout, FILE *input, int beamnr, dat
 
 /* Returns 1 if successful, 0 on error */
 /* Only for IS data in appending mode*/
-int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_definition *subintdata, int *seqseek, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, char **isfiles)
+int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_definition *subintdata, int *seqseek, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, char **isfiles, double *gains)
 {
   typedef struct {
     unsigned	sequence_number;
@@ -1467,11 +1561,11 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
      float ms = 0.0f;
      int N = 0;
      unsigned validsamples = 0;
-     float prev = stokesdata[ss][0].samples[beamnr][STOKES_SWITCH][c][0];
+     float prev = stokesdata[ss][0].samples[beamnr][STOKES_SWITCH][c][0] / gains[ss*CHANNELS+c];
      /* compute average */
      for( i = 0; i < num; i++ ) {
        for( timeT = 0; timeT < SAMPLES; timeT++ ) {
-         const float value = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][timeT];
+         const float value = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][timeT] / gains[ss*CHANNELS+c];
 	 if(prev < 1){
 	   prev = value;
 	 } else if( !isnan( value ) && value > 0.5*prev && value < 2*prev ) {
@@ -1578,7 +1672,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
        for( timeT = 0; timeT < SAMPLES; timeT++ ) {
          float sum;
          ac = ss * CHANNELS + c;
-         sum = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][timeT] ;
+         sum = stokesdata[ss][i].samples[beamnr][STOKES_SWITCH][c][timeT] / gains[ss*CHANNELS+c];
 	 
 	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
 	 sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[ac] : sum;
@@ -1691,6 +1785,7 @@ int main( int argc, char **argv )
   int is_CS = 0; // if 1 then input file is CS data
   int is_H5 = 0; // if 1 then input file is H5 data
   int is_append = 0;  // if 1 then the single fits-file will be written for IS data
+  int is_gains = 0;   // if 1 then raw data will be bandpass corrected
   char buf[1024], *filename, *dummy_ptr;
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
@@ -1706,6 +1801,7 @@ int main( int argc, char **argv )
   long skipNrBlocks, truncNrBlocks;
   int  is_IS2 = 0; // 0 for old/orginal names ; 1 = Incoherentstokes 2nd transpose parset names 
   char IncoherentStokesAreTransposed[6]="";  // exists and True for Incoherentstokes 2nd transpose parset names
+  double *gains;   // array with gains, if gains are not given then has all ones...
 
   //  char header_txt[parsetmaxnrlines][1001], *txt[parsetmaxnrlines],;
   char *header_txt[parsetmaxnrlines];
@@ -1795,6 +1891,14 @@ int main( int argc, char **argv )
 	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
 	}
+        i++;
+      }else if(strcmp(argv[i], "-gains") == 0) {
+	j = sscanf(argv[i+1], "%s", gainsfile);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        is_gains = 1;
         i++;
       }else if(strcmp(argv[i], "-nsubs") == 0) {
 	j = sscanf(argv[i+1], "%d", &SUBBANDS);
@@ -2175,6 +2279,18 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
     fprintf(stderr, "2bf2fits: Cannot allocate memory\n");
     return 0;
   }
+ 
+  // initializing gains array
+  gains = (double *)malloc(subintdata.nrFreqChan * sizeof(double));
+  if (gains == NULL) {
+   fprintf (stderr, "2bf2fits: Cannot allocate memory\n");
+   return 0;
+  }
+  if (is_gains == 1) {
+   gains = create_gains_table(gains, gainsfile, subintdata.nrFreqChan, subintdata.channelbw, lofreq);
+  } else {
+   for (j=0; j<subintdata.nrFreqChan; j++) gains[j] = 1.0;
+  }
 
   /* make beam dirs */ 
   if( BEAMS > 1 ) {
@@ -2224,7 +2340,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
    sprintf(buf, "%s.fits", OUTNAME);
    printf("Output file \"%s\" at center frequency %f MHz\n", buf, subintdata.freq_cent);
 
-   if (convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
+   if (convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, isfiles, gains) == 0)
     return 0;
 
    if(application.verbose) printf("  File contains sequence numbers %d - %d\n", firstseq, lastseq);
@@ -2246,7 +2362,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
    if(!openPSRData(&fout, buf, FITS_format, 1, 0, application.verbose)) return 0;
    if(!writePSRFITSHeader(&fout, application.verbose)) return 0;
 
-   if(convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, isfiles) == 0)
+   if(convert_nocollapse_ISappend(fout, b, &subintdata, seqseek, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, isfiles, gains) == 0)
     return 0;
 
    closePSRData(&fout);
@@ -2324,10 +2440,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
         if(is_H5) {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks, truncNrBlocks) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks, truncNrBlocks, gains) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks, truncNrBlocks) == 0)
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 1, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks, truncNrBlocks, gains) == 0)
 	    return 0;
 	}
       }
@@ -2380,10 +2496,10 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
       }
       if (is_CS == 1) {
 	if(is_H5 == 0) {
-	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks, truncNrBlocks) == 0)
+	  if(convert_nocollapse_CS(fout, fin, b, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, skipNrBlocks, truncNrBlocks, gains) == 0)
 	    return 0;
 	}else {
-	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks, truncNrBlocks) == 0)
+	  if(convert_nocollapse_H5(fout, fin, b, subbandnr_h5, &subintdata, &firstseq, &lastseq, 0, sigma_limit, clipav, application.verbose, debugpacking, is_append, skipNrBlocks, truncNrBlocks, gains) == 0)
 	    return 0;
 	}
       }
@@ -2396,6 +2512,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   } // if (is_append == 0)
 
   closePSRData(&subintdata);
+  free (gains);
 
   return 0;
 }
