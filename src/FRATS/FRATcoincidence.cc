@@ -72,29 +72,37 @@ namespace FRAT {
 				reftime=trigBuffer[startindex].Time-timeWindow; //earliest time for coincidence events
 				nfound=1;
 				foundSBs[0]=trigBuffer[startindex].SBnr;
-				while ((runindex < FRAT_TASK_BUFFER_LENGTH) && (trigBuffer[runindex].Time>= reftime)){
+				while ((runindex < FRAT_TASK_BUFFER_LENGTH) && (trigBuffer[runindex].Time>= reftime))
+                {
 					//check if current time is higher than the reftime. Stop if that is not the case
-					if(trigBuffer[runindex].Time!=0){  
-						for (i=0; i<nfound; i++){ 
-							if (foundSBs[i] == trigBuffer[runindex].SBnr) {
+					if(trigBuffer[runindex].Time!=0)
+                    {  
+						for (i=0; i<nfound; i++)
+                        { 
+							if (foundSBs[i] == trigBuffer[runindex].SBnr) 
+                            {
 								//i; //prevents i to be nfound so you would trigger on one less.
 								//if(i==nfound-1){i++;};
 								//std::cout << "i = " << i << std::endl;
 								break; //break the for-loop;
 							};
 						};
-						if (i == nfound) { 
-							if (nfound+2 > nChannles) { 
+						if (i == nfound) 
+                        { 
+							if (nfound+2 > nChannles)
+                            { 
 								std::cout << "Subbands found:" ;
-								for (i=0; i<nfound; i++){
+								for (i=0; i<nfound; i++)
+                                {
 									std::cout << " " << foundSBs[i];
 								}
 								std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
 								return true; 
-							}; //startindex; };
+							}; //startindex; 
 							foundSBs[nfound] = trigBuffer[runindex].SBnr;
 							std::cout << "Subbands found:" ;
-							for (i=0; i<nfound; i++){
+							for (i=0; i<nfound; i++)
+                            {
 								std::cout << " " << foundSBs[i];
 							}
 							std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
@@ -109,7 +117,6 @@ namespace FRAT {
 			//return -1;
 			return false;
 		};
-		
 		// Add a trigger message to the buffer. 
 		unsigned int CoinCheck::add2buffer(const triggerEvent& trigger){
 			// double date;
@@ -269,7 +276,7 @@ namespace FRAT {
             trigger.utc_second=5000;
             trigger.utc_nanosecond=10000;
 			
-		}
+    }
         
         
         SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, int IntegrationLength, int nrblocks, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
@@ -709,7 +716,7 @@ namespace FRAT {
             fsfile->write((const char*)&itsSBstdevVector[0], size2 * sizeof(itsSBstdevVector[0]));
         }
 
-        bool SubbandTrigger::makeplotDedispBlock(std::string pulselogfilename){
+        bool SubbandTrigger::makeplotDedispBlock(string pulselogfilename){
             std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out | std::ios::app | std::ios::binary);
             if(itsBlockNumber<1){
                 std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out |  std::ios::binary);
@@ -729,7 +736,35 @@ namespace FRAT {
                 pulselogfile.write((char*) &SumDeDispersed[buflen-offset], offset*sizeof(float));
                 pulselogfile.write((char*) &SumDeDispersed[0], intstart*sizeof(float));
             }
-			pulselogfile.close();
+	    	pulselogfile.close();
+			
+			return true;
+		
+		
+		
+		}
+
+        bool SubbandTrigger::makeplotDedispBlock(ofstream *pulselogfile){
+            //std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out | std::ios::app | std::ios::binary);
+            //if(itsBlockNumber<1){
+            //    std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out |  std::ios::binary);
+            //}
+			int totaltime=(itsSequenceNumber+1)*itsNrSamples;
+			int intstart=(itsSequenceNumber+1)*itsNrSamples%itsBufferLength;
+
+			//pulselogfile.open;
+			int buflen=SumDeDispersed.size();
+			//pulselogfile.width(11);
+            //printf("SeqNr, NrSam, BufLen, SumDeDispSize %i %i %i %i ",itsSequenceNumber, itsNrSamples, itsBufferLength, buflen);
+            //pulselogfile.precision(10);
+            if(intstart>itsNrSamples){
+                pulselogfile->write((char*) &SumDeDispersed[intstart-itsNrSamples], itsNrSamples*sizeof(float));
+            } else {
+                int offset=itsNrSamples-intstart;
+                pulselogfile->write((char*) &SumDeDispersed[buflen-offset], offset*sizeof(float));
+                pulselogfile->write((char*) &SumDeDispersed[0], intstart*sizeof(float));
+            }
+	    	//pulselogfile.close();
 			
 			return true;
 		
@@ -765,6 +800,114 @@ namespace FRAT {
 			return true;
 	    }
 
+
+		bool SubbandTrigger::dedisperseData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+            // Mostly the same as process data, but now without triggering
+			bool pulsefound=false;
+			if( ++itsSequenceNumber!=sequenceNumber && false) { 
+				std::cerr << "discontinous data" << std::endl; 
+			    return false; 
+			} else {
+				itsFoundTriggers="";
+				itsBlockNumber++;
+				
+				std::cout << "Processing block " << sequenceNumber << std::endl;
+
+                blocksum =0.0;
+                validsamples=0;
+				zerocounter=0;
+				SBaverage=0;
+				SBstdev=0;
+				SBsumsamples=0;
+                channeltimeindex=-itsTotNrChannels;
+
+
+
+				for(int time=0; time<itsNrSamples; time++){
+					//std::cout << std::endl << " time " << time ;
+					totaltime=itsSequenceNumber*itsNrSamples+time;
+					rest=totaltime%itsBufferLength;
+                    channeltimeindex+=itsTotNrChannels;
+                    channelindex=channeltimeindex+itsStartChannel+itsNrChannels;
+                    
+					for(int channel=itsNrChannels-1; channel>0; channel--){
+                        channelindex--;
+						
+						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
+					    
+						
+                        
+                    
+                    } // for channel
+                    //***  channel=0; *******
+                    
+                    channelindex--;
+                    
+                    value = data[channelindex];
+                        
+                    DeDispersedBuffer[rest]+=value;
+                    blocksum+=DeDispersedBuffer[rest];
+                    SumDeDispersed[rest]=DeDispersedBuffer[rest];
+                    float subsum=0;
+                    if(rest >= itsIntegrationLength){
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                    } else {
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){
+                            if(it>=0){
+                                subsum+=SumDeDispersed[it];
+                            }
+                            else {
+                                subsum+=SumDeDispersed[it+itsBufferLength];
+                            }
+                        }
+                        
+                    }
+                    SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
+                    SBsumsamples++;
+                    SBaverage+=subsum;
+                    DeDispersedBuffer[rest]=0;
+
+				} // for time
+				
+				
+				
+				
+				
+				// Update class parameters;
+				//itsSBstdev = SBstdev;
+				
+				if(SBsumsamples>0){
+					itsSBaverage = SBaverage/SBsumsamples;
+				    //itsSBaverage=blocksum/SBsumsamples;
+					SBstdev/=SBsumsamples;
+					
+				}
+				itsSBstdev=sqrt(SBstdev);
+				itsTotalZeros += zerocounter;
+				float SBaverageAlt = blocksum/SBsumsamples;
+				//for(int it=rest;it>rest-SBsumsamples;it--){
+				//	SBaverageAlt += SumDeDispersed[rest];
+				//}
+				//SBaverageAlt*=itsIntegrationLength;
+				//SBaverageAlt/=SBsumsamples;
+				if(verbose){
+                    
+					std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
+				}
+				char output[200];
+				//std::string output;
+				
+				itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
+				itsTriggerThreshold = itsSBaverage+itsTriggerLevel*itsSBstdev;
+                itsSBaverageVector.push_back(itsSBaverage);
+                itsSBstdevVector.push_back(itsSBstdev);
+        	}
+			
+            return pulsefound;
+	    }		
+			
+         
+    
         /*			
 		 SubbandTrigger::setNrChannels(int NrChannels){ itsNrChannels = NrChannels; }
 		 SubbandTrigger::setNrSamples(int NrSamples){ itsNrSamples = NrSamples; }
