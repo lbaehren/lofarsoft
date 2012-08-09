@@ -149,7 +149,11 @@ class rfilines(tasks.Task):
 
         #measuredphases = np.zeros((nblocks, self.nofchannels))
         phaseblocks = [] # list of arrays of phases (over N freq channels) per antenna
-        avgspectrum = hArray(float, dimensions = f["FFT_DATA"])
+        
+        incphasemean = hArray(complex, dimensions = f["FFT_DATA"])
+        incphase = hArray(complex, dimensions = incphasemean)
+        
+        avgspectrum = hfile://localhost/Users/acorstanje/usg/src/PyCRTools/modules/calibration.pyArray(float, dimensions = f["FFT_DATA"])
         spectrum = hArray(complex, dimensions = f["FFT_DATA"])
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
@@ -166,7 +170,18 @@ class rfilines(tasks.Task):
             magspectrum[..., 0] = 0.0
             magspectrum[..., 1] = 0.0
             spectrum.copy(magspectrum)
+
             magspectrum.abs()
+            magspectrum += 1e-9
+
+            incphase.copy(spectrum)
+            incphase /= magspectrum # divide magnitude out to get exp(i phi)
+
+            incphaseRef = hArray(incphase[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
+            incphase /= incphaseRef
+
+            incphasemean += incphase
+
             magspectrum.square()
             avgspectrum += magspectrum
 
@@ -248,6 +263,20 @@ class rfilines(tasks.Task):
         # to numpy for transpose, then take median RMS over antennas
         # Median is resistant to outliers and gives a good indication of the line phase quality over all antennas
         # that's all we need from it.
+        
+        # HACK
+        incPhaseRMS = hArray(float, dimensions = incphasemean)
+        incPhaseAvg = hArray(float, dimensions = incphasemean)
+        
+        cr.hComplexToPhase(incPhaseAvg, incphasemean)
+        incphasemean.abs()
+        incPhaseRMS.copy(incphasemean) 
+        incPhaseRMS *= -1 / float(nblocks)
+        incPhaseRMS += 1
+        # HACK2
+        import pdb; pdb.set_trace()
+        phaseAvg = incPhaseAvg
+        phaseRMS = incPhaseRMS
         
         x = phaseRMS.toNumpy()
         medians = np.median(x, axis=0)
