@@ -5961,3 +5961,31 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Calculate modulus of vector
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hModulus
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(m)()("Vector.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter vec, const NIter vec_end,
+                     const HInteger m)
+{
+  // Get iterator
+  NIter vec_it = vec;
+
+  while (vec_it != vec_end)
+  {
+    *vec_it = *vec_it % m;
+    vec_it++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
