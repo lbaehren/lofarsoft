@@ -251,7 +251,6 @@ class BeamData(IOInterface):
         
         return pos
 
-
     def getRelativeAntennaPositions(self):
         """Returns relative Station positions. The positions are of the center of the station (which depend on the ANTENNA_SET used).
 
@@ -304,6 +303,56 @@ class BeamData(IOInterface):
 
         for i, file in enumerate(self.__filename):
             data[i].readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN'])
+
+    def getOffsetFFTData(self, data, block,offset=None):
+
+        """Writes FFT data for selected stations to data array.
+
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *data*        data array to write FFT data to.
+        *block*       index of bock to return data from.
+        *offset*      vector with offset index
+        ============= =================================================
+
+        Output:
+        a two dimensional array containing the FFT data of the
+        specified block (offseted) for each of the selected stations and
+        for the selected frequencies (all freqs and stations for now).
+        
+        So that if `a` is the returned array `a[i]` is an array of
+        length (number of frequencies) of station i.
+        """
+
+        block=cr.asval(block)
+        spec_len = self['BEAM_SPECLEN']
+
+        if block<0:
+            block=self.block
+        else:
+            self.__block=block
+
+        if not offset:
+            offset = cr.hArray(int,[spec_len])
+            
+        if len(offset)!= spec_len:
+            raise ValueError('Variable offset need correct lenght.')
+        
+#        frequency_range = range(int(self['BLOCK']*self['BEAM_SPECLEN']),int((self['BLOCK']+1)*self['BEAM_SPECLEN']))
+        frequency_range = range(spec_len)
+
+        real_offset = cr.hArray(int,len(offset),offset*0)
+    
+        modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']
+
+        for fr in frequency_range:
+           real_offset[fr] =  fr + ((block+offset[fr])%modulus)*spec_len
+
+        for i, file in enumerate(self.__filename):
+            cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
 
     def getTimeseriesData(self, data=None, chunk=-1):
         """Returns timeseries data for selected antennas.
@@ -361,6 +410,27 @@ class BeamData(IOInterface):
         else:
             raise KeyError("Unknown key: " + str(key))
 
+    def calcDedispersionIndex(self,DM,Ref_Freq=None):
+        ''' It calculates the indices for a given DM. 
+        '''
+
+        DM=cr.asval(DM)
+        dt = self['BEAM_BLOCKLEN']*cr.asval(self["TBB_SAMPLE_INTERVAL"])      
+        frequencies = self.getFrequencies()
+        if not Ref_Freq:
+            Ref_Freq = frequencies[0]
+
+#        hDedispersionShifts(shifts, frequencies, reference, dm, dt)
+
+        #Calculate the relative shifts in samples per frequency channels
+        #Constant value comes from "Handbook of Pulsar Astronomy - by Duncan Ross Lorimer , Section 4.1.1, pagina 86 (in google books)"
+        shifts = ( 4.148808e-3*DM/dt) * 1e9**2 * (Ref_Freq**-2 - frequencies**-2)
+                
+        #Integer offsets to reference frequency (shift to center)
+        offsets = cr.Vector(int,frequencies,fill=shifts)
+        
+        return offsets
+        
     def close(self):
         """Closes file and sets the data attribute `.closed` to
         True. A closed object can no longer be used for I/O operations.
