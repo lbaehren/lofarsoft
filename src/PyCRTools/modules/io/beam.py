@@ -345,7 +345,7 @@ class BeamData(IOInterface):
         frequency_range = range(spec_len)
         modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']
 
-        real_offset = cr.hArray(int,len(offset))
+        real_offset = cr.hArray(int,len(offset),offset)
 
         cr.hAdd(real_offset,block)
         cr.hModulus(real_offset,modulus)
