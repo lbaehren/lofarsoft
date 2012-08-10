@@ -328,7 +328,6 @@ class BeamData(IOInterface):
         """
 
         block=cr.asval(block)
-        spec_len = self['BEAM_SPECLEN']
 
         if block<0:
             block=self.block
@@ -338,18 +337,22 @@ class BeamData(IOInterface):
         if not offset:
             offset = cr.hArray(int,[spec_len])
             
+        spec_len = len(data.vec())
+
         if len(offset)!= spec_len:
             raise ValueError('Variable offset need correct lenght.')
         
-#        frequency_range = range(int(self['BLOCK']*self['BEAM_SPECLEN']),int((self['BLOCK']+1)*self['BEAM_SPECLEN']))
         frequency_range = range(spec_len)
-
-        real_offset = cr.hArray(int,len(offset),offset*0)
-    
         modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']
 
-        for fr in frequency_range:
-           real_offset[fr] =  fr + ((block+offset[fr])%modulus)*spec_len
+        real_offset = cr.hArray(int,len(offset))
+
+        cr.hAdd(real_offset,block)
+        cr.hModulus(real_offset,modulus)
+        cr.hAdd(real_offset,modulus)    # To remove negative indices.
+        cr.hModulus(real_offset,modulus)
+        cr.hMul(real_offset,spec_len)
+        cr.hAdd(real_offset,cr.hArray(int,spec_len,frequency_range))
 
         for i, file in enumerate(self.__filename):
             cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
